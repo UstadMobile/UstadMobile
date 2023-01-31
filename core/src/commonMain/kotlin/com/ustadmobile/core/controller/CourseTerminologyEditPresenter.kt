@@ -18,9 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
-import org.kodein.di.instance
 
 
 class CourseTerminologyEditPresenter(
@@ -51,7 +49,7 @@ class CourseTerminologyEditPresenter(
     }
 
     private fun makeTermList(terminology: CourseTerminology){
-        val termMap = terminology.toTermMap(json, systemImpl, context)
+        val termMap = terminology.toTermMap(json, systemImpl)
         val termList = TerminologyKeys.TERMINOLOGY_ENTRY_MESSAGE_ID.entries.map {
             TerminologyEntry(it.key,it.value, termMap[it.key])
         }.sortedBy { it.id }

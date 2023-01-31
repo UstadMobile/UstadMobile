@@ -1,218 +1,407 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Message
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
-import androidx.paging.DataSource
-import androidx.paging.PagedList
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.FragmentPersonDetailBinding
-import com.toughra.ustadmobile.databinding.ItemClazzEnrolmentWithClazzDetailBinding
-import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.controller.PersonDetailPresenter
-import com.ustadmobile.core.controller.UstadDetailPresenter
+import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.ext.toNullableStringMap
-import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.PersonDetailView
-import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
+import com.ustadmobile.core.viewmodel.PersonDetailUiState
+import com.ustadmobile.core.viewmodel.PersonDetailViewModel
+import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
+import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
+import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
+import com.ustadmobile.port.android.util.compose.messageIdMapResource
+import com.ustadmobile.port.android.view.composable.UstadDetailField
+import com.ustadmobile.port.android.view.composable.UstadQuickActionButton
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
+import java.util.*
 
-class PersonDetailFragment: UstadDetailFragment<PersonWithPersonParentJoin>(), PersonDetailView{
+class PersonDetailFragment : UstadBaseMvvmFragment(){
 
-    private var mBinding: FragmentPersonDetailBinding? = null
-
-    private var mPresenter: PersonDetailPresenter? = null
-
-    override val detailPresenter: UstadDetailPresenter<*, *>?
-        get() = mPresenter
-
-    var dbRepo: UmAppDatabase? = null
-
-    class ClazzEnrolmentWithClazzRecyclerAdapter(var presenter: PersonDetailPresenter?)
-        : ListAdapter<ClazzEnrolmentWithClazzAndAttendance,
-                ClazzEnrolmentWithClazzRecyclerAdapter.ClazzEnrolmentWithClazzViewHolder>(
-                    DIFFUTIL_CLAZZMEMBERWITHCLAZZ) {
-
-            class ClazzEnrolmentWithClazzViewHolder(val binding: ItemClazzEnrolmentWithClazzDetailBinding)
-                    : RecyclerView.ViewHolder(binding.root)
-
-            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
-                    : ClazzEnrolmentWithClazzViewHolder {
-
-                return ClazzEnrolmentWithClazzViewHolder(ItemClazzEnrolmentWithClazzDetailBinding.inflate(
-                        LayoutInflater.from(parent.context), parent, false).apply {
-                    mPresenter = presenter
-                })
-            }
-
-            override fun onBindViewHolder(holder: ClazzEnrolmentWithClazzViewHolder, position: Int) {
-                holder.binding.clazzEnrolmentWithClazz = getItem(position)
-            }
-        }
-
-    override var clazzes: DataSource.Factory<Int, ClazzEnrolmentWithClazzAndAttendance>? = null
-        get() = field
-        set(value) {
-            clazzesLiveData?.removeObserver(clazzMemberWithClazzObserver)
-            field = value
-            val clazzMemberDao = dbRepo?.clazzEnrolmentDao ?: return
-            clazzesLiveData = value?.asRepositoryLiveData(clazzMemberDao)
-            clazzesLiveData?.observe(viewLifecycleOwner, clazzMemberWithClazzObserver)
-        }
-
-    override var changePasswordVisible: Boolean = false
-        set(value) {
-            field = value
-            mBinding?.changePasswordVisibility = if(value) View.VISIBLE else View.GONE
-        }
-
-    override var chatVisibility: Boolean = false
-        set(value) {
-            field = value
-            mBinding?.chatVisibility = if(value) View.VISIBLE else View.GONE
-        }
-
-    override var showCreateAccountVisible: Boolean = false
-        set(value) {
-            field = value
-            mBinding?.createAccountVisibility = if(value) View.VISIBLE else View.GONE
-        }
-
-    private var clazzesLiveData: LiveData<PagedList<ClazzEnrolmentWithClazzAndAttendance>>? = null
-
-    private var clazzEnrolmentWithClazzRecyclerAdapter: ClazzEnrolmentWithClazzRecyclerAdapter? = null
-
-    private val clazzMemberWithClazzObserver = Observer<PagedList<ClazzEnrolmentWithClazzAndAttendance>?> {
-        t -> clazzEnrolmentWithClazzRecyclerAdapter?.submitList(t)
+    private val viewModel: PersonDetailViewModel by viewModels {
+        UstadViewModelProviderFactory(di, this, requireArguments())
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View {
-        val rootView: View
-        clazzEnrolmentWithClazzRecyclerAdapter = ClazzEnrolmentWithClazzRecyclerAdapter(
-            null)
-        mBinding = FragmentPersonDetailBinding.inflate(inflater, container, false).also {
-            rootView = it.root
-            it.createAccountVisibility = View.GONE
-            it.changePasswordVisibility = View.GONE
-            it.chatVisibility = View.GONE
-            it.classesRecyclerview.layoutManager = LinearLayoutManager(requireContext())
-            it.classesRecyclerview.adapter = clazzEnrolmentWithClazzRecyclerAdapter
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+
+        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
+        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
+
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+            )
+
+            setContent {
+                MdcTheme {
+                    PersonDetailScreen(viewModel)
+                }
+            }
         }
-
-        val accountManager: UstadAccountManager by instance()
-        dbRepo = on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
-
-        return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mPresenter = PersonDetailPresenter(requireContext(), arguments.toStringMap(), this,
-            di, viewLifecycleOwner).withViewLifecycle()
-        clazzEnrolmentWithClazzRecyclerAdapter?.presenter = mPresenter
-        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
-        mBinding?.presenter = mPresenter
+        return
     }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        mBinding?.classesRecyclerview?.adapter = null
-        clazzEnrolmentWithClazzRecyclerAdapter = null
-        dbRepo = null
-        mBinding = null
-        mPresenter = null
-        entity = null
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        if(mBinding?.person != null) {
-            (activity as? AppCompatActivity)?.supportActionBar?.title =
-                    mBinding?.person?.firstNames + " " + mBinding?.person?.lastName
-        }
-    }
-
-    override var entity: PersonWithPersonParentJoin? = null
-        get() = field
-        set(value) {
-            field = value
-            mBinding?.person = value
-            ustadFragmentTitle = value?.fullName()
-            mBinding?.dateTimeMode = MODE_START_OF_DAY
-            mBinding?.timeZoneId = "UTC"
-        }
-
 
     companion object {
-
-        val DIFFUTIL_CLAZZMEMBERWITHCLAZZ =
-                object: DiffUtil.ItemCallback<ClazzEnrolmentWithClazzAndAttendance>() {
-            override fun areItemsTheSame(oldItem: ClazzEnrolmentWithClazzAndAttendance,
-                                         newItem: ClazzEnrolmentWithClazzAndAttendance): Boolean {
-                return oldItem.clazzEnrolmentUid == newItem.clazzEnrolmentUid
-            }
-
-            override fun areContentsTheSame(oldItem: ClazzEnrolmentWithClazzAndAttendance,
-                                            newItem: ClazzEnrolmentWithClazzAndAttendance): Boolean {
-                return oldItem == newItem
-            }
-        }
-
         @JvmStatic
         val FOREIGNKEYADAPTER_PERSON = object: ForeignKeyAttachmentUriAdapter {
             override suspend fun getAttachmentUri(foreignKey: Long, dbToUse: UmAppDatabase): String? {
                 return dbToUse.personPictureDao.findByPersonUidAsync(foreignKey)?.personPictureUri
             }
         }
-
-        @JvmField
-        val FIELD_ICON_ID_MAP : Map<Int, Int> =
-            mapOf(CustomField.ICON_PHONE to R.drawable.ic_phone_black_24dp,
-                    CustomField.ICON_PERSON to R.drawable.ic_person_black_24dp,
-                    CustomField.ICON_CALENDAR to R.drawable.ic_event_black_24dp,
-                    CustomField.ICON_EMAIL to R.drawable.ic_email_black_24dp,
-                    CustomField.ICON_ADDRESS to R.drawable.ic_location_pin_24dp)
-
     }
 
 }
+
+@Composable
+private fun PersonDetailScreen(
+    uiState: PersonDetailUiState = PersonDetailUiState(),
+    onClickDial: () -> Unit = {},
+    onClickSms: () -> Unit = {},
+    onClickEmail: () -> Unit = {},
+    onClickCreateAccount: () -> Unit = {},
+    onClickChangePassword: () -> Unit = {},
+    onClickManageParentalConsent: () -> Unit = {},
+    onClickChat: () -> Unit = {},
+    onClickClazz: (ClazzEnrolmentWithClazzAndAttendance) -> Unit = {}
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    )  {
+
+        Image(
+            painter = painterResource(id = R.drawable.ic_person_black_24dp),
+            contentDescription = null,
+            modifier = Modifier
+                .height(256.dp)
+                .fillMaxWidth())
+
+        QuickActionBar(
+            uiState,
+            onClickDial,
+            onClickSms,
+            onClickEmail,
+            onClickCreateAccount,
+            onClickChangePassword,
+            onClickManageParentalConsent,
+            onClickChat)
+
+        Divider(thickness = 1.dp)
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(stringResource(R.string.basic_details),
+            style = Typography.h4,
+            modifier = Modifier.padding(8.dp))
+
+        DetailFields(uiState)
+
+        Divider(thickness = 1.dp)
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(stringResource(R.string.contact_details),
+            style = Typography.h4,
+            modifier = Modifier.padding(8.dp))
+
+        ContactDetails(uiState,
+            onClickDial,
+            onClickSms,
+            onClickEmail)
+
+        Divider(thickness = 1.dp)
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(stringResource(R.string.classes),
+            style = Typography.h4,
+            modifier = Modifier.padding(8.dp))
+
+        Classes(uiState.clazzes, onClickClazz)
+    }
+}
+
+@Composable
+private fun QuickActionBar(
+    uiState: PersonDetailUiState,
+    onClickDial: () -> Unit = {},
+    onClickSms: () -> Unit = {},
+    onClickEmail: () -> Unit = {},
+    onClickCreateAccount: () -> Unit = {},
+    onClickChangePassword: () -> Unit = {},
+    onClickManageParentalConsent: () -> Unit = {},
+    onClickChat: () -> Unit = {},
+) {
+    Row(
+        modifier = Modifier.horizontalScroll(rememberScrollState())
+    ) {
+
+        if (uiState.phoneNumVisible){
+
+            UstadQuickActionButton(
+                labelText = stringResource(R.string.call),
+                imageId = R.drawable.ic_call_bcd4_24dp,
+                onClick = onClickDial
+            )
+
+            UstadQuickActionButton(
+                labelText = stringResource(R.string.text),
+                imageId = R.drawable.ic_baseline_sms_24,
+                onClick = onClickSms
+            )
+        }
+
+        if (uiState.emailVisible){
+            UstadQuickActionButton(
+                labelText = stringResource(R.string.email),
+                imageId = R.drawable.ic_email_black_24dp,
+                onClick = onClickEmail
+            )
+        }
+
+        if(uiState.showCreateAccountVisible){
+            UstadQuickActionButton(
+                labelText = stringResource(R.string.create_account),
+                imageId = R.drawable.ic_person_black_24dp,
+                onClick = onClickCreateAccount
+            )
+        }
+
+        if(uiState.changePasswordVisible){
+            UstadQuickActionButton(
+                labelText = stringResource(R.string.change_password),
+                imageId = R.drawable.person_with_key,
+                onClick = onClickChangePassword
+            )
+        }
+
+        if (uiState.manageParentalConsentVisible){
+            UstadQuickActionButton(
+                labelText = stringResource(R.string.manage_parental_consent),
+                imageId = R.drawable.ic_baseline_supervised_user_circle_24,
+                onClick = onClickManageParentalConsent
+            )
+        }
+
+        if (uiState.chatVisible){
+            UstadQuickActionButton(
+                labelText = stringResource(R.string.chat),
+                imageId = R.drawable.ic_baseline_chat_24,
+                onClick = onClickChat
+            )
+        }
+    }
+}
+
+@Composable
+private fun DetailFields(uiState: PersonDetailUiState){
+    val context = LocalContext.current
+    Column(
+        modifier = Modifier.padding(8.dp)
+    ){
+
+        val gender = messageIdMapResource(
+            map = PersonConstants.GENDER_MESSAGE_ID_MAP,
+            key = uiState.person?.gender ?: 1)
+
+        val dateOfBirth = remember { DateFormat.getDateFormat(context)
+            .format(Date(uiState.person?.dateOfBirth ?: 0)).toString() }
+
+        if (uiState.dateOfBirthVisible){
+            UstadDetailField(
+                imageId = R.drawable.ic_date_range_black_24dp,
+                valueText = dateOfBirth,
+                labelText = stringResource(R.string.birthday))
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        if (uiState.personGenderVisible){
+            UstadDetailField(
+                valueText = gender,
+                labelText = stringResource(R.string.gender_literal))
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        if (uiState.personOrgIdVisible){
+            UstadDetailField(
+                imageId = R.drawable.ic_badge_24dp,
+                valueText = uiState.person?.personOrgId ?: "",
+                labelText = stringResource(R.string.organization_id))
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        if (uiState.personUsernameVisible){
+            UstadDetailField(
+                imageId = R.drawable.ic_account_circle_black_24dp,
+                valueText = uiState.person?.username ?: "",
+                labelText = stringResource(R.string.username))
+        }
+    }
+}
+
+@Composable
+private fun ContactDetails(
+    uiState: PersonDetailUiState,
+    onClickDial: () -> Unit = {},
+    onClickSms: () -> Unit = {},
+    onClickEmail: () -> Unit = {},
+){
+    Column(
+        modifier = Modifier.padding(8.dp)
+    ) {
+
+        if (uiState.phoneNumVisible){
+            UstadDetailField(
+                valueText = uiState.person?.phoneNum ?: "",
+                labelText = stringResource(R.string.phone),
+                imageId = R.drawable.ic_phone_black_24dp,
+                onClick = onClickDial,
+                secondaryActionContent = {
+                    IconButton(
+                        onClick = onClickSms,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Message,
+                            contentDescription = stringResource(id = R.string.message),
+                        )
+                    }
+                }
+            )
+        }
+
+        if (uiState.emailVisible){
+            UstadDetailField(
+                imageId = R.drawable.ic_email_black_24dp,
+                valueText = uiState.person?.emailAddr ?: "",
+                labelText = stringResource(R.string.email),
+                onClick = onClickEmail)
+        }
+
+        if (uiState.personAddressVisible){
+            UstadDetailField(
+                imageId = R.drawable.ic_location_pin_24dp,
+                valueText = uiState.person?.personAddress ?: "",
+                labelText = stringResource(R.string.address))
+        }
+    }
+}
+
+@Composable
+private fun Classes(
+    clazzes: List<ClazzEnrolmentWithClazzAndAttendance> = emptyList(),
+    onClickClazz: (ClazzEnrolmentWithClazzAndAttendance) -> Unit = {}
+){
+
+    clazzes.forEach { clazz ->
+        TextButton(
+            onClick = { onClickClazz(clazz) }
+        ) {
+            ClassItem(clazz)
+        }
+    }
+}
+
+@Composable
+private fun ClassItem(clazz: ClazzEnrolmentWithClazzAndAttendance){
+    Row(
+        modifier = Modifier.padding(8.dp).
+        fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ){
+        Image(
+            painter = painterResource(id = R.drawable.ic_group_black_24dp),
+            contentDescription = null,
+            modifier = Modifier
+                .width(35.dp))
+
+        Text(text = clazz.clazz?.clazzName ?: "")
+    }
+}
+
+@Composable
+private fun PersonDetailScreen(viewModel: PersonDetailViewModel) {
+    val uiState: PersonDetailUiState by viewModel.uiState.collectAsState(PersonDetailUiState())
+    PersonDetailScreen(
+        uiState = uiState,
+        onClickCreateAccount = viewModel::onClickCreateAccount,
+        onClickChangePassword = viewModel::onClickChangePassword,
+        onClickChat = viewModel::onClickChat,
+        onClickManageParentalConsent = viewModel::onClickManageParentalConsent,
+        onClickClazz = viewModel::onClickClazz,
+    )
+}
+
+@Composable
+@Preview
+fun PersonDetailScreenPreview() {
+    val uiState = PersonDetailUiState(
+        person = PersonWithPersonParentJoin().apply {
+            firstNames = "Bob Jones"
+            phoneNum = "0799999"
+            emailAddr = "Bob@gmail.com"
+            gender = 2
+            username = "Bob12"
+            dateOfBirth = 1352958816
+            personOrgId = "123"
+            personAddress = "Herat"
+        },
+        chatVisible = true,
+        clazzes = listOf(
+            ClazzEnrolmentWithClazzAndAttendance().apply {
+                clazz = Clazz().apply {
+                    clazzName = "Jetpack Compose Class"
+                }
+            },
+            ClazzEnrolmentWithClazzAndAttendance().apply {
+                clazz = Clazz().apply {
+                    clazzName = "React Class"
+                }
+            },
+        )
+    )
+    MdcTheme{
+        PersonDetailScreen(uiState)
+    }
+}
+

@@ -63,6 +63,7 @@ import java.io.File
 import java.net.URI
 import java.util.concurrent.Executors
 import com.ustadmobile.core.db.dao.commitLiveConnectivityStatus
+import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
 
 open class UstadApp : Application(), DIAware {
 
@@ -265,6 +266,10 @@ open class UstadApp : Application(), DIAware {
 
         bind<AuthManager>() with scoped(EndpointScope.Default).singleton {
             AuthManager(context, di)
+        }
+
+        bind<NavCommandExecutionTracker>() with singleton {
+            NavCommandExecutionTracker()
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

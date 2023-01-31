@@ -31,9 +31,12 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 
-class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2View,
-                      di: DI)
-    : UstadBaseController<Login2View>(context, arguments, view, di, activeSessionRequired = false) {
+class Login2Presenter(
+    context: Any,
+    arguments: Map<String, String>,
+    view: Login2View,
+    di: DI
+): UstadBaseController<Login2View>(context, arguments, view, di, activeSessionRequired = false) {
 
     private  lateinit var nextDestination: String
 
@@ -53,7 +56,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        nextDestination = arguments[ARG_NEXT] ?: impl.getAppConfigDefaultFirstDest(context)
+        nextDestination = arguments[ARG_NEXT] ?: impl.getAppConfigDefaultFirstDest()
 
         serverUrl = if (arguments.containsKey(ARG_SERVER_URL)) {
             arguments.getValue(ARG_SERVER_URL)

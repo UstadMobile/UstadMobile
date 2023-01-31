@@ -1,5 +1,6 @@
 package com.ustadmobile.mui.components
 
+import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.mui.common.Area
 import csstype.integer
 import mui.material.AppBar
@@ -9,17 +10,17 @@ import mui.material.Typography
 import mui.system.sx
 import react.FC
 import react.Props
-import react.dom.html.InputType
 import react.useContext
 import csstype.number
 import mui.material.styles.TypographyVariant.h6
 import react.dom.html.ReactHTML.div
 
+external interface HeaderProps: Props {
+    var appUiState: AppUiState
+}
 
-
-val Header = FC<Props> {
+val Header = FC<HeaderProps> { props ->
     var theme by useContext(ThemeContext)
-
 
     AppBar {
         position = AppBarPosition.fixed
@@ -35,7 +36,7 @@ val Header = FC<Props> {
                 noWrap = true
                 component = div
 
-                + "Ustad Mobile"
+                + (props.appUiState.title ?: "Ustad Mobile")
             }
         }
     }
