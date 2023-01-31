@@ -7,6 +7,7 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.AccountListUiState
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UserSession
+import com.ustadmobile.mui.components.UstadAddListItem
 import csstype.px
 import mui.icons.material.*
 import mui.material.*
@@ -26,7 +27,7 @@ external interface AccountListProps: Props {
     var onLogoutClick: () -> Unit
 }
 
-interface ItemContentProps: Props{
+interface AccountListItemContentProps: Props{
     var account: UserSessionWithPersonAndEndpoint?
     var onDeleteListItemClick: ((UserSessionWithPersonAndEndpoint?) -> Unit)?
 }
@@ -37,13 +38,13 @@ interface AccountListItemProps: Props {
     var onDeleteListItemClick: ((UserSessionWithPersonAndEndpoint?) -> Unit)?
 }
 
-val ItemContent = FC<ItemContentProps> {    props ->
+private val AccountListItemContent = FC<AccountListItemContentProps> { props ->
 
     if (props.onDeleteListItemClick != null){
         ListItemSecondaryAction{
             IconButton{
                 onClick = {
-                    props?.onDeleteListItemClick?.invoke(props.account)
+                    props.onDeleteListItemClick?.invoke(props.account)
                 }
                 Delete()
             }
@@ -126,7 +127,7 @@ val AccountListItem = FC<AccountListItemProps> {    props ->
             disablePadding = true
 
             ListItemButton{
-                ItemContent{
+                AccountListItemContent{
                     account = props.account
                     onDeleteListItemClick = props.onDeleteListItemClick
                 }
@@ -135,7 +136,7 @@ val AccountListItem = FC<AccountListItemProps> {    props ->
     }else{
         ListItem{
 
-            ItemContent{
+            AccountListItemContent{
                 account = props.account
             }
         }
@@ -144,7 +145,7 @@ val AccountListItem = FC<AccountListItemProps> {    props ->
 
 val AccountListComponent2 = FC<AccountListProps> {  props ->
 
-    var strings = useStringsXml()
+    val strings = useStringsXml()
 
     Container{
         maxWidth = "lg"
@@ -184,36 +185,25 @@ val AccountListComponent2 = FC<AccountListProps> {  props ->
                 }
             }
 
-            props.uiState.accountsList.forEach { thisAccount ->
-                AccountListItem{
-                    onListItemClick = {
-                        props.onAccountListItemClick(props.uiState.activeAccount)
+            mui.material.List {
+                props.uiState.accountsList.forEach { thisAccount ->
+                    AccountListItem{
+                        onListItemClick = {
+                            props.onAccountListItemClick(props.uiState.activeAccount)
+                        }
+                        account = thisAccount
+                        onDeleteListItemClick = {
+                            props.onDeleteListItemClick(thisAccount)
+                        }
                     }
-                    account = thisAccount
-                    onDeleteListItemClick = {
-                        props.onDeleteListItemClick(thisAccount)
-                    }
+                }
+
+                UstadAddListItem {
+                    text = strings[MessageID.add_another_account]
+                    onClickAdd = props.onAddItem
                 }
             }
 
-            ListItem{
-                disablePadding = true
-
-                ListItemButton{
-
-                    onClick = {
-                        props.onAddItem()
-                    }
-
-                    ListItemIcon {
-                        Add()
-                    }
-
-                    ListItemText{
-                        primary = ReactNode(strings[MessageID.add_another_account])
-                    }
-                }
-            }
 
             Divider{}
 

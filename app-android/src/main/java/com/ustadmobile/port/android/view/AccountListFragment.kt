@@ -17,9 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.modifier.modifierLocalConsumer
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,8 +40,8 @@ import com.ustadmobile.core.viewmodel.AccountListUiState
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UserSession
-import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
-import com.ustadmobile.port.android.view.composable.UstadQuickActionButton
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
+import com.ustadmobile.port.android.view.composable.UstadAddListItem
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 import org.kodein.di.instance
@@ -338,7 +335,7 @@ fun AccountListScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .defaultScreenPadding()
     ){
 
         item {
@@ -401,20 +398,9 @@ fun AccountListScreen(
         }
 
         item {
-            ListItem(
-                modifier = Modifier
-                    .clickable {
-                        onAddItem()
-                    },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = stringResource(id = R.string.add)
-                    )
-                },
-                text = {
-                    Text(text = stringResource(id = R.string.add_another_account))
-                }
+            UstadAddListItem(
+                text = stringResource(id = R.string.add_another_account),
+                onClickAdd = onAddItem,
             )
         }
 
