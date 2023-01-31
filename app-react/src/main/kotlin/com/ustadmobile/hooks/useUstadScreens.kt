@@ -101,6 +101,11 @@ fun useUstadScreens(): UstadScreens {
                 JoinWithCodeScreenPreview),
             UstadScreen(ClazzLogListAttendanceView.VIEW_NAME, "ClazzLogListAttendance Preview",
                 ClazzLogListAttendanceScreenPreview),
+            UstadScreen(ContentEntryList2View.VIEW_NAME, "ContentEntryList Preview",
+                ContentEntryListScreenPreview),
+            UstadScreen(AccountListView.VIEW_NAME, "AccountList Preview", AccountListScreenPreview),
+            UstadScreen(ClazzMemberListView.VIEW_NAME, "ClazzMemberList Preview",
+                ClazzMemberListScreenPreview),
             UstadScreen(ClazzList2View.VIEW_NAME, "Clazz List Preview",
                 ClazzListScreenPreview
             ),

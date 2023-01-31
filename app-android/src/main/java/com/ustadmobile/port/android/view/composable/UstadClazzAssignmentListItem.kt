@@ -30,8 +30,6 @@ fun UstadClazzAssignmentListItem(
 
     modifier: Modifier = Modifier,
 
-    assignment: ClazzAssignmentWithMetrics,
-
     courseBlock: CourseBlockWithCompleteEntity,
 
     onClickAssignment: (ClazzAssignmentWithMetrics?) -> Unit = {}
@@ -40,7 +38,9 @@ fun UstadClazzAssignmentListItem(
 
     val blockUiState = courseBlock.listItemUiState
 
-    val assignmentUiState = assignment.listItemUiState
+    val assignment = courseBlock.assignment
+
+    val assignmentUiState = assignment?.listItemUiState
 
     ListItem(
         modifier = modifier
@@ -55,22 +55,19 @@ fun UstadClazzAssignmentListItem(
                 modifier = Modifier.size(40.dp)
             )
         },
-        text = { Text(assignment.caTitle ?: "") },
+        text = { Text(assignment?.caTitle ?: "") },
         secondaryText = {
             Column{
                 if (blockUiState.cbDescriptionVisible){
                     Text(text = courseBlock.cbDescription ?: "")
                 }
 
-                DateAndPointRow(
-                    courseBlock = courseBlock,
-                    assignment = assignment
-                )
+                DateAndPointRow(courseBlock = courseBlock)
 
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(2.dp)
                 ){
-                    if (assignmentUiState.submissionStatusIconVisible){
+                    if (assignmentUiState?.submissionStatusIconVisible == true){
                         Icon(
                             painter = painterResource(
                                 id = ASSIGNMENT_STATUS_MAP[assignment.fileSubmissionStatus]
@@ -78,7 +75,7 @@ fun UstadClazzAssignmentListItem(
                             contentDescription = "")
                     }
 
-                    if (assignmentUiState.submissionStatusVisible){
+                    if (assignmentUiState?.submissionStatusVisible == true){
                         Text(text = messageIdMapResource(
                             map = SubmissionConstants.STATUS_MAP,
                             key = assignment.fileSubmissionStatus)
@@ -86,7 +83,7 @@ fun UstadClazzAssignmentListItem(
                     }
                 }
                 
-                if (assignmentUiState.progressTextVisible){
+                if (assignmentUiState?.progressTextVisible == true){
                     Text(text = stringResource(
                         id = R.string.three_num_items_with_name_with_comma,
 
@@ -108,13 +105,14 @@ fun UstadClazzAssignmentListItem(
 
 @Composable
 private fun DateAndPointRow(
-    courseBlock: CourseBlockWithCompleteEntity,
-    assignment: ClazzAssignmentWithMetrics,
+    courseBlock: CourseBlockWithCompleteEntity
 ){
 
     val blockUiState = courseBlock.listItemUiState
 
-    val assignmentUiState = assignment.listItemUiState
+    val assignment = courseBlock.assignment
+
+    val assignmentUiState = assignment?.listItemUiState
 
     val dateTime = rememberFormattedDateTime(
         timeInMillis = courseBlock.cbDeadlineDate,
@@ -134,7 +132,7 @@ private fun DateAndPointRow(
 
         Spacer(modifier = Modifier.width(10.dp))
 
-        if (assignmentUiState.assignmentMarkVisible){
+        if (assignmentUiState?.assignmentMarkVisible == true){
             Text("${assignment.mark?.camMark ?: 0}/" +
                     "${courseBlock.cbMaxPoints} " +
                     stringResource(id = R.string.points))
@@ -146,27 +144,25 @@ private fun DateAndPointRow(
 @Preview
 private fun UstadClazzAssignmentListItemPreview() {
 
-    val assignment = ClazzAssignmentWithMetrics().apply {
-        caTitle = "Module"
-        mark = CourseAssignmentMark().apply {
-            camPenalty = 20
-            camMark = 20F
-        }
-        progressSummary = AssignmentProgressSummary().apply {
-            hasMetricsPermission = false
-        }
-        fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
-    }
-
     val block = CourseBlockWithCompleteEntity().apply {
         cbDescription = "Description"
         cbDeadlineDate = 1672707505000
         cbMaxPoints = 100
         cbIndentLevel = 1
+        assignment = ClazzAssignmentWithMetrics().apply {
+            caTitle = "Module"
+            mark = CourseAssignmentMark().apply {
+                camPenalty = 20
+                camMark = 20F
+            }
+            progressSummary = AssignmentProgressSummary().apply {
+                hasMetricsPermission = false
+            }
+            fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
+        }
     }
 
     UstadClazzAssignmentListItem(
-        assignment = assignment,
         courseBlock = block
     )
 }
