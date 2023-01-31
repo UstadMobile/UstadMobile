@@ -19,7 +19,6 @@ fun UstadListFilterChipsHeader(
     modifier: Modifier = Modifier,
     filterOptions: List<MessageIdOption2>,
     selectedChipId: Int,
-    modifier: Modifier = Modifier,
     enabled: Boolean = true,
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
 ){
