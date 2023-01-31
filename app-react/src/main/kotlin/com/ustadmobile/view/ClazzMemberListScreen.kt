@@ -72,21 +72,12 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
                 }
 
                 if (props.uiState.addTeacherVisible){
-                    UstadAddListItem(
-
-                    )
-                    ListItem {
-                        ListItemButton {
-                            onClick = { props.onClickAddNewTeacher }
-
-                            ListItemIcon {
-                                + PersonAdd.create()
-                            }
-
-                            ListItemText {
-                                + strings[MessageID.add_a_teacher]
-                            }
-                        }
+                    UstadAddListItem {
+                        text = props.uiState.terminologyStrings?.get(MessageID.add_a_teacher)
+                            ?: strings[MessageID.add_a_teacher]
+                        enabled = props.uiState.fieldsEnabled
+                        icon = PersonAdd.create()
+                        onClickAdd = { props.onClickAddNewTeacher }
                     }
                 }
 
@@ -112,24 +103,18 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
 
                 ListItem {
                     ListItemText {
-                        + strings[MessageID.students]
+                        + (props.uiState.terminologyStrings?.get(MessageID.students)
+                            ?: strings[MessageID.students])
                     }
                 }
 
                 if (props.uiState.addStudentVisible){
-                    ListItem {
-                        ListItemButton {
-
-                            onClick = { props.onClickAddNewStudent }
-
-                            ListItemIcon {
-                                + PersonAdd.create()
-                            }
-
-                            ListItemText {
-                                + strings[MessageID.add_a_student]
-                            }
-                        }
+                    UstadAddListItem {
+                        text = props.uiState.terminologyStrings?.get(MessageID.add_a_student)
+                            ?: strings[MessageID.add_a_student]
+                        enabled = props.uiState.fieldsEnabled
+                        icon = PersonAdd.create()
+                        onClickAdd = { props.onClickAddNewStudent }
                     }
                 }
 
