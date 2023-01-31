@@ -1,15 +1,31 @@
 package com.ustadmobile.core.test.viewmodeltest
 
 import com.ustadmobile.core.viewmodel.ViewModel
+import io.github.aakira.napier.Napier
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 
+data class TestRepoConfig(
+    val useDbAsRepo: Boolean = true
+)
+
+@ViewModelDslMarker
 fun <T: ViewModel> testViewModel(
-    makeViewModel: ViewModelFactoryParams.() -> T,
-    block: ViewModelTestBuilder<T>.() -> Unit
+    timeOut: Long = 5000,
+    repoConfig: TestRepoConfig = TestRepoConfig(),
+    block: suspend ViewModelTestBuilder<T>.() -> Unit
 ) {
-    val viewModelTestBuilder = ViewModelTestBuilder(makeViewModel)
+    val viewModelTestBuilder = ViewModelTestBuilder<T>(repoConfig)
     try {
-        block(viewModelTestBuilder)
+        runBlocking {
+            withTimeout(timeOut) {
+                block(viewModelTestBuilder)
+            }
+        }
+    }catch(e: Exception) {
+        Napier.e("Exception running test: $e", e)
+        throw e
     }finally {
-        viewModelTestBuilder.viewModel.close()
+        viewModelTestBuilder.cleanup()
     }
 }

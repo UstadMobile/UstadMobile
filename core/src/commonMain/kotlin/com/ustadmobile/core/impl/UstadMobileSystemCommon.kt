@@ -51,10 +51,14 @@ abstract class UstadMobileSystemCommon {
              */
             val popUpToInclusive: Boolean = false,
 
+            val clearStack: Boolean = false,
+
             /**
              * Serialization strategy, i.e On JS there is no way to serialize without a strategy
              */
-            val serializer: KSerializer<*>? = null) {
+            val serializer: KSerializer<*>? = null,
+
+            ) {
 
         companion object {
             val Default = UstadGoOptions(null, false)
@@ -100,7 +104,7 @@ abstract class UstadMobileSystemCommon {
      * Get the default first destination that the user should be taken to after logging in or
      * selecting to continue as a guest.
      */
-    fun getAppConfigDefaultFirstDest(context: Any): String {
+    fun getAppConfigDefaultFirstDest(): String {
         return getAppConfigString(AppConfig.KEY_FIRST_DEST, null)
             ?: ClazzList2View.VIEW_NAME_HOME
     }
