@@ -27,7 +27,6 @@ object RouteManager {
         UstadDestination(view = ContentEntryDetailOverviewView.VIEW_NAME, component = ContentEntryDetailOverviewComponent::class),
         UstadDestination(view = ContentEntryDetailAttemptsListView.VIEW_NAME, component = ContentEntryDetailAttemptsListComponent::class, showSearch = true),
         UstadDestination(view = EpubContentView.VIEW_NAME, component = EpubContentComponent::class),
-        UstadDestination(view = PersonDetailView.VIEW_NAME, component = PersonDetailComponent::class),
         UstadDestination(view = PersonAccountEditView.VIEW_NAME, component = PersonAccountEditComponent::class),
         UstadDestination(view = PersonEditView.VIEW_NAME, component = PersonEditComponent::class),
         UstadDestination(view = PersonEditView.VIEW_NAME_REGISTER, component = PersonEditComponent::class, showNavigation = false),

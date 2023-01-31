@@ -72,7 +72,7 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
             accountListMediator.postValue(newList)
         }
 
-        nextDest = arguments[ARG_NEXT] ?: impl.getAppConfigDefaultFirstDest(context)
+        nextDest = arguments[ARG_NEXT] ?: impl.getAppConfigDefaultFirstDest()
         view.intentMessage = arguments[ARG_INTENT_MESSAGE]
         view.title = arguments[ARG_TITLE] ?: impl.getString(MessageID.accounts, context)
     }
