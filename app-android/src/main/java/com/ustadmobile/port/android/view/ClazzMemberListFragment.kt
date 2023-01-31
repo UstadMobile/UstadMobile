@@ -48,7 +48,7 @@ import com.ustadmobile.port.android.view.composable.UstadAddListItem
 import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
 import com.ustadmobile.port.android.view.composable.UstadListSortHeader
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
-import com.ustadmobile.port.android.view.util.ColorForAttendanceStatus
+import com.ustadmobile.port.android.view.util.colorForAttendanceStatus
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -429,8 +429,8 @@ private fun ClazzMemberListScreen(
                  Icon(
                      Icons.Filled.Lens,
                      contentDescription = "",
-                     tint = colorResource(id = ColorForAttendanceStatus(person.attendance)),
-                     modifier = Modifier.size(15.dp)
+                     tint = colorResource(id = colorForAttendanceStatus(person.attendance)),
+                     modifier = Modifier.size(16.dp)
                  )
                  Text(stringResource(id = R.string.x_percent_attended, person.attendance))
              }

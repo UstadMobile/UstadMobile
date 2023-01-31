@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 import com.ustadmobile.mui.components.UstadAddListItem
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.mui.components.UstadListSortHeader
-import com.ustadmobile.util.ColorForAttendanceStatus
+import com.ustadmobile.util.colorForAttendanceStatus
 import com.ustadmobile.util.ext.format
 import csstype.Padding
 import csstype.px
@@ -186,7 +186,7 @@ private val StudentListItem = FC<StudentListItemProps> { props ->
                                 left = 5.px
                             )
                         }
-                        color = ColorForAttendanceStatus(props.person.attendance)
+                        color = colorForAttendanceStatus(props.person.attendance)
                     }
 
                     Typography {
