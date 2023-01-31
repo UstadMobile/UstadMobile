@@ -26,7 +26,6 @@ import com.ustadmobile.lib.util.getDefaultTimeZoneId
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -512,7 +511,7 @@ class ClazzEdit2Presenter(
 
                 if((arguments[UstadView.ARG_ENTITY_UID]?.toLongOrNull() ?: 0L) == 0L) {
                     val termMap = db.courseTerminologyDao.findByUidAsync(entity.clazzTerminologyUid)
-                        .toTermMap(json, systemImpl, context)
+                        .toTermMap(json, systemImpl)
                     txDb.createNewClazzAndGroups(entity, systemImpl, termMap, context)
                 }else {
                     txDb.clazzDao.updateAsync(entity)
