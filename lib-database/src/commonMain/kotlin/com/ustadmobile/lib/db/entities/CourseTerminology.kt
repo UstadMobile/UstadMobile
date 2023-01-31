@@ -31,6 +31,11 @@ open class CourseTerminology {
 
     var ctTitle: String? = null
 
+    /**
+     * A json map of keys as per TerminologyKeys to the terminology to use for this course.
+     *
+     * see CourseTerminologyStrings (in core)
+     */
     var ctTerminology: String? = null
 
     @LastChangedTime
