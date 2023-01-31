@@ -47,7 +47,11 @@ env:
 - tapOn: "courses"
 - tapOn: "Course view Test"
 - tapOn: "SEMESTER 1"
+- assertNotVisible:
+       text: "PRIMARY COLOURS"
 - takeScreenshot: "${TESTRESULTSDIR}/able_to_collapse_module"
 #--- expand the Module ---#
 - tapOn: "SEMESTER 1"
+- assertVisible:
+    text: "PRIMARY COLOURS"
 - takeScreenshot: "${TESTRESULTSDIR}/able_to_expand_module"

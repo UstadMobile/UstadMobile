@@ -22,12 +22,72 @@ env:
     file: "../common/add_course.yaml"
     env:
      TESTCOURSENAME: "Test Course Block Test"
-#--- add module and text block, test actions-hide/unhide/indent/unindent/delete ----#
+# edit the course to add blocks
+- tapOn: "Edit"
+- swipe:
+    start: 100,400
+    end: 100,100
+# add module ------ 1
 - runFlow:
-    file: "../common/block_indent_hide_delete.yaml"
+    file: "../common/add_module_block.yaml"
     env:
       MODULETITLE: "SEMESTER 1"
+#add text block ------ 1
+- runFlow:
+    file: "../common/add_text_block.yaml"
+    env:
       TEXTTITLE: "PRIMARY COLOURS"
       TEXT: "RED,BLUE,GREEN"
-
-
+# hide the block- module
+- tapOn:
+    text: "Edit"
+    index: 0
+- tapOn: "Hide"
+- tapOn: "SAVE"
+- assertNotVisible:
+    text: "SEMESTER 1"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/module_block_is_hidden"
+- tapOn: "Edit"
+#  swipe down to  view  added  bloc ks
+- swipe:
+    start: 100,400
+    end: 100,100
+# unhide the module
+- tapOn:
+    text: "Edit"
+    index: 0
+- tapOn: "Unhide"
+- assertVisible:
+    text: "SEMESTER 1"
+# indent the text block ----- 1
+- tapOn:
+    text: "Edit"
+    index: 1
+- tapOn: "Indent"
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/module_block_unhide"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/text_block_indented"
+# unindent text block ----- 1
+- tapOn: "Edit"
+- swipe:
+    start: 100,400
+    end: 100,100
+- tapOn:
+    text: "Edit"
+    index: 1
+- tapOn: "Unindent"
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/text_block_unindented"
+# Delete text block --- 1
+- tapOn: "Edit"
+- swipe:
+    start: 100,400
+    end: 100,100
+- tapOn:
+    text: "Edit"
+    index: 1
+- tapOn: "Delete"
+- tapOn: "SAVE"
+- assertNotVisible:
+    text: "PRIMARY COLOURS"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/text_block_deleted"

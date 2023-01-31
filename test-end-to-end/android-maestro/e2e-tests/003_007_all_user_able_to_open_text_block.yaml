@@ -46,10 +46,13 @@ env:
       MODULETITLE: "SEMESTER 1"
       TEXTTITLE: "PRIMARY COLOURS"
       TEXT: "RED,BLUE,GREEN"
-- tapOn: "PRIMARY COLOURS"
+- tapOn:
+    text: ${TEXTTITLE}
 - extendedWaitUntil:
     visible: ${TEXTTITLE}
     timeout: 1000
+- assertVisible:
+          text: "RED,BLUE,GREEN"
 - takeScreenshot: "${TESTRESULTSDIR}/text_block_admin_view"
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
