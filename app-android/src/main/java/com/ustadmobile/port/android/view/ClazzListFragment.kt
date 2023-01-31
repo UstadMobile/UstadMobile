@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.*
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Lens
@@ -179,9 +180,10 @@ private fun ClazzListScreen(
         modifier = Modifier.fillMaxSize(),
 
         // 600 width of the smallest iPad,
-        // subtracted 20 = horizontal padding & space between cards,
-        // half of 580 is 290
-        columns = GridCells.Adaptive(290.dp)
+        // subtracted 16 = horizontal padding & space between cards,
+        // half of 584 is 292
+        // card width = 292dp.
+        columns = GridCells.Adaptive(292.dp)
     ) {
 
         item(span = { GridItemSpan(maxLineSpan) }) {
@@ -204,7 +206,8 @@ private fun ClazzListScreen(
         }
 
         items(
-            uiState.clazzList.size
+            uiState.clazzList.size,
+            key = { index -> uiState.clazzList[index].clazzUid }
         ) { index ->
             ClazzListItem(
                 clazz = uiState.clazzList[index],
@@ -230,10 +233,10 @@ fun ClazzListItem(
             .clickable {
                 onClickClazz(clazz)
             },
-        elevation = 10.dp
+        elevation = 8.dp
     ) {
         Column(
-            modifier = Modifier.padding(5.dp)
+            modifier = Modifier.padding(8.dp)
         ){
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -245,7 +248,7 @@ fun ClazzListItem(
                 }
 
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
@@ -262,7 +265,7 @@ fun ClazzListItem(
                 Icon(
                     imageVector = Icons.Filled.Lens,
                     contentDescription = "",
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(16.dp)
                 )
                 Text(
                     text = stringResource(
@@ -271,7 +274,7 @@ fun ClazzListItem(
                     )
                 )
 
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(8.dp))
 
                 Icon(
                     imageVector = Icons.Filled.People,
