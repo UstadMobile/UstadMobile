@@ -1,9 +1,0 @@
-appId: com.toughra.ustadmobile
----
-#this flow add blocks-MODULE, Text and performs actions like : indent, unindent,hide unhide and delete
-# test data required :
-# 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
-# 2) MODULETITLE: provide module name of string type
-# 3) TEXTTITLE: provide text title of string type
-# 4) TEXT: provide text to enter inside text box of string type
-
