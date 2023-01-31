@@ -42,10 +42,12 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.viewmodel.ClazzMemberListUiState
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
 import com.ustadmobile.port.android.view.composable.UstadListSortHeader
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
+import com.ustadmobile.port.android.view.util.ColorForAttendanceStatus
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -307,6 +309,7 @@ private fun ClazzMemberListScreen(
 
         item {
             UstadListSortHeader(
+                modifier = Modifier.defaultItemPadding(),
                 activeSortOrderOption = uiState.activeSortOrderOption,
                 enabled = uiState.fieldsEnabled,
                 onClickSort = onClickSort
@@ -418,15 +421,6 @@ fun AddListItem(
      onClick: (PersonWithClazzEnrolmentDetails) -> Unit,
  ){
 
-     val statusColor = if ((person.attendance/100) >=
-         ClazzLogAttendanceRecord.ATTENDANCE_THRESHOLD_GOOD)
-         R.color.successColor
-     else if ((person.attendance/100)
-         >= ClazzLogAttendanceRecord.ATTENDANCE_THRESHOLD_WARNING)
-         R.color.secondaryColor
-     else
-         R.color.errorColor
-
      ListItem (
          modifier = Modifier.clickable {
              onClick(person)
@@ -442,7 +436,7 @@ fun AddListItem(
                  Icon(
                      Icons.Filled.Lens,
                      contentDescription = "",
-                     tint = colorResource(id = statusColor),
+                     tint = colorResource(id = ColorForAttendanceStatus(person.attendance)),
                      modifier = Modifier.size(15.dp)
                  )
                  Text(stringResource(id = R.string.x_percent_attended, person.attendance))
