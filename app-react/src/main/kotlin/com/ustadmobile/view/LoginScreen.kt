@@ -1,8 +1,14 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useViewModel
+import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.viewmodel.LoginUiState
+import com.ustadmobile.core.viewmodel.LoginViewModel
+import com.ustadmobile.core.viewmodel.SiteEnterLinkUiState
+import com.ustadmobile.core.viewmodel.SiteEnterLinkViewModel
 import mui.material.ButtonVariant.*
 import com.ustadmobile.mui.components.UstadTextEditField
 import csstype.px
@@ -27,6 +33,26 @@ external interface LoginProps : Props {
 val LoginPreview = FC<Props> {
     LoginComponent2 {
         uiState = LoginUiState()
+    }
+}
+
+val LoginScreen = FC<UstadScreenProps> { props ->
+    val viewModel = useViewModel(
+        onAppUiStateChange = props.onAppUiStateChanged
+    ) { di, savedSateHandle ->
+        console.log("Creating LoginViewModel")
+        LoginViewModel(di, savedSateHandle)
+    }
+
+    val uiState by viewModel.uiState.collectAsState(LoginUiState())
+
+    LoginComponent2 {
+        this.uiState = uiState
+        onClickLogin = viewModel::onClickLogin
+        onClickCreateAccount = viewModel::onClickCreateAccount
+        onClickConnectAsGuest = viewModel::handleConnectAsGuest
+        onUsernameValueChange = viewModel::onUsernameChanged
+        onPasswordValueChange = viewModel::onPasswordChanged
     }
 }
 
@@ -79,7 +105,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
             }
 
             Button {
-                onClick = { props.onClickLogin }
+                onClick = { props.onClickLogin() }
                 variant = contained
                 + strings[MessageID.login].uppercase()
             }
@@ -91,7 +117,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
             }
 
             Button {
-                onClick = { props.onClickCreateAccount }
+                onClick = { props.onClickCreateAccount() }
                 variant = outlined
                 + strings[MessageID.create_account].uppercase()
             }
@@ -103,7 +129,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
             }
 
             Button {
-                onClick = { props.onClickConnectAsGuest }
+                onClick = { props.onClickConnectAsGuest() }
                 variant = outlined
                 + strings[MessageID.connect_as_guest].uppercase()
             }

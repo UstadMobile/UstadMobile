@@ -1,7 +1,8 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.core.components.NavHost
+import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.mui.common.Area
-import com.ustadmobile.view.UstadScreensContext
 import csstype.px
 import mui.material.Typography
 import mui.system.Box
@@ -17,7 +18,13 @@ import react.useContext
 
 private val DEFAULT_PADDING = 30.px
 
-val Content = FC<Props> {
+external interface UstadScreenProps: Props {
+
+    var onAppUiStateChanged: (AppUiState) -> Unit
+
+}
+
+val Content = FC<UstadScreenProps> { props ->
     val showcases = useContext(UstadScreensContext)
 
     Routes {
@@ -30,14 +37,18 @@ val Content = FC<Props> {
                     padding = DEFAULT_PADDING
                 }
 
-                Outlet()
+                NavHost {
+                    Outlet()
+                }
             }
 
             showcases.forEachIndexed { i, (key, _, Component) ->
                 Route {
                     index = i == 0
                     path = key
-                    element = Component.create()
+                    element = Component.create {
+                        asDynamic().onAppUiStateChanged = props.onAppUiStateChanged
+                    }
                 }
             }
 

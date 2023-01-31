@@ -205,11 +205,26 @@ expect abstract class PersonDao : BaseDao<Person> {
                                                  accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): DataSourceFactory<Int, PersonWithDisplayDetails>
 
     @Query(SQL_SELECT_LIST_WITH_PERMISSION)
-    abstract fun findPersonsWithPermissionAsList(timestamp: Long, excludeClazz: Long,
-                                           excludeSchool: Long, excludeSelected: List<Long>,
-                                           accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): List<Person>
+    abstract fun findPersonsWithPermissionAsList(
+        timestamp: Long,
+        excludeClazz: Long,
+        excludeSchool: Long,
+        excludeSelected: List<Long>,
+        accountPersonUid: Long,
+        sortOrder: Int,
+        searchText: String? = "%"
+    ): List<Person>
 
-
+    @Query(SQL_SELECT_LIST_WITH_PERMISSION)
+    abstract fun findPersonsWithPermissionAsFlow(
+        timestamp: Long,
+        excludeClazz: Long,
+        excludeSchool: Long,
+        excludeSelected: List<Long>,
+        accountPersonUid: Long,
+        sortOrder: Int,
+        searchText: String? = "%"
+    ): Flow<List<Person>>
 
     @Query("""
         SELECT Person.*, PersonParentJoin.* 

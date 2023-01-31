@@ -2,7 +2,7 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 's:u:p:e:t:a:c:r' --long 'serial1:,username:,password:,endpoint:,test:,apk:,console-output:,result:' -n 'run-maestro-tests.sh' -- "$@")
+TEMP=$(getopt -o 's:u:p:e:t:a:cr' --long 'serial1:,username:,password:,endpoint:,test:,apk:,console-output,result:' -n 'run-maestro-tests.sh' -- "$@")
 
 
 eval set -- "$TEMP"
@@ -14,7 +14,7 @@ WORKDIR=$(pwd)
 TEST=""
 SCRIPTDIR=$(realpath $(dirname $0))
 TESTAPK=$SCRIPTDIR/../../app-android-launcher/build/outputs/apk/release/app-android-launcher-release.apk
-TESTRESULTSDIR=$SCRIPTDIR/build/results
+TESTRESULTSDIR=""
 CONTROLSERVER=""
 USECONSOLEOUTPUT=0
 echo $SCRIPTDIR
@@ -73,6 +73,11 @@ while true; do
 	esac
 done
 
+if [ "$TESTSERIAL" == "" ]; then
+  echo "Please specify adb device serial usign --serial1 param"
+  exit 1
+fi
+
 IPADDR=$(ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | head -n 1)
 if [ "$ENDPOINT" = "" ]; then
     ENDPOINT="http://$IPADDR:8087/"
@@ -82,21 +87,29 @@ if [ "$CONTROLSERVER" = "" ]; then
   CONTROLSERVER="http://localhost:8075/"
 fi
 
-if [ -e $SCRIPTDIR/results/report.xml ]; then
-  echo "Delete previous report.xml"
-  rm $SCRIPTDIR/results/report.xml
+if [ "$TESTRESULTSDIR" == "" ]; then
+  TESTRESULTSDIR="$SCRIPTDIR/build/results/$TESTSERIAL"
 fi
 
-if [ ! -e $SCRIPTDIR/results ]; then
-  mkdir $SCRIPTDIR/results
+if [ ! -e $TESTRESULTSDIR ]; then
+  mkdir -p $TESTRESULTSDIR
 fi
 
-if [ ! -e $SCRIPTDIR/build/results ]; then
-  mkdir $SCRIPTDIR/build/results
+# Create a copy of common scripts that will work on the second app id (used to test interactions
+# between users)
+if [ ! -e $SCRIPTDIR/build/common-app2 ]; then
+  mkdir -p $SCRIPTDIR/build/common-app2
 fi
+
+for COMMONFLOWFILE in $(ls $SCRIPTDIR/common); do
+    FILEBASENAME=$(basename $COMMONFLOWFILE)
+    sed 's/com.toughra.ustadmobile/com.toughra.ustadmobile2/g' $SCRIPTDIR/common/$FILEBASENAME > \
+      $SCRIPTDIR/build/common-app2/$FILEBASENAME
+
+done
 
 # Start control server
-$SCRIPTDIR/../../testserver-controller/start.sh
+$SCRIPTDIR/../../testserver-controller/start.sh $TESTRESULTSDIR
 
 export ANDROID_SERIAL=$TESTSERIAL
 adb reverse tcp:8075 tcp:8075
@@ -113,16 +126,18 @@ else
   TESTARG="$SCRIPTDIR/e2e-tests"
 fi
 
-OUTPUTARGS=" --format junit --output $SCRIPTDIR/results/report.xml "
+OUTPUTARGS=" --format junit --output $TESTRESULTSDIR/report.xml "
 if [ "$USECONSOLEOUTPUT" == "1" ]; then
   OUTPUTARGS=""
 fi
 
-maestro test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
+maestro --device=$TESTSERIAL test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
          -e TESTSERIAL=$TESTSERIAL $OUTPUTARGS \
          $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR
 
+TESTSTATUS=$?
+
 $SCRIPTDIR/../../testserver-controller/stop.sh
 
-
+exit $TESTSTATUS
