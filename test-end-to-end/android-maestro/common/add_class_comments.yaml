@@ -3,7 +3,7 @@ appId: com.toughra.ustadmobile
 # Test parameters needs to provide for this test :
 # 1) TESTCOURSENAME: provide course name of string type
 # 2) CLASSCOMMENT: provide class comment that need to add of string type
-
+# 3) ASSIGNMENTNAME: provide assignment name of string type
 
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}

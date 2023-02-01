@@ -1,6 +1,6 @@
 appId: com.toughra.ustadmobile
 ---
-# this test add an assignment block on a course
+# this test add an assignment block on a course with deadline and grace period
 # Test parameters needs to provide for this test :
 # 1) TESTCOURSENAME: provide course name of string type
 # 2) ASSIGNMENTNAME: provide assignment name of string type

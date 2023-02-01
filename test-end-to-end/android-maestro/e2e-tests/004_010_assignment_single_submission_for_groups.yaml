@@ -1,0 +1,109 @@
+appId: com.toughra.ustadmobile
+tags:
+  - checklist4
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_010_assignment_single_submission_for_groups"
+  TESTNAME: 004_010_assignment_single_submission_for_groups
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+# admin able to add a course and edit that course
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+- runFlow:
+    file: "../common/create_course_with_members.yaml"
+    env:
+      TESTCOURSENAME: Group Assignment test
+
+#teacherLogin
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: Anu
+      PASSWORD: test
+- runFlow:
+    file:  "../common/add_assignment_block_with_group.yaml"
+    env:
+      TESTCOURSENAME: Group Assignment test
+      ASSIGNMENTNAME: Test Assignment
+      GROUPTITLE: Private comment Group
+#-------------------------------------------------------------------------student submit assignment
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+    env:
+      USERNAME: Justin
+      PASSWORD: test
+- runFlow:
+     file: "../build/common-app2/student_submit_assignment_block.yaml"
+     env:
+       TESTCOURSENAME: Group Assignment test
+       ASSIGNMENTNAME: Test Assignment
+       TESTFILENAME: H5p_Content.h5p
+       CONTROLSERVER: ${CONTROLSERVER}
+       TESTSERIAL: ${TESTSERIAL}
+- assertNotVisible:
+      text: "Add Text"
+- assertNotVisible:
+    text: "Add File"
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+    env:
+      USERNAME: Caroline
+      PASSWORD: test
+- tapOn: "Courses"
+- tapOn: "Group Assignment test"
+- tapOn: "Test Assignment"
+- assertNotVisible:
+    text: "Add Text"
+- assertNotVisible:
+    text: "Add File"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/single_submission_assignment_same_group"
+#-------------------------------------------------------------------------student submit assignment
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+    env:
+      USERNAME: Sruthy
+      PASSWORD: test
+- runFlow:
+    file: "../build/common-app2/student_submit_assignment_block.yaml"
+    env:
+      TESTCOURSENAME: Group Assignment test
+      ASSIGNMENTNAME: Test Assignment
+      TESTFILENAME: H5p_Content.h5p
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+- assertNotVisible:
+    text: "Add Text"
+- assertNotVisible:
+    text: "Add File"
+#--------------------------------------------------------------------------teacher grade the assignment
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: Anu
+      PASSWORD: test
+- runFlow:
+    file: "../common/add_assignment_grade_for_group.yaml"
+    env:
+      TESTCOURSENAME: Group Assignment test
+      ASSIGNMENTNAME: Test Assignment
+      POINT1: 8
+      POINT2: 7
+

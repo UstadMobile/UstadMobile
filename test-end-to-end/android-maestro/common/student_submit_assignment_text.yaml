@@ -1,6 +1,9 @@
 appId: com.toughra.ustadmobile
 ---
-
+# Test parameters needs to provide for this test :
+# 1) TEXT : provide the TEXT to submit assignmentof string type
+# 2) TESTCOURSENAME : provide the course title, it should be a string
+# 3) ASSIGNMENTNAME: Provide assignment name of string type
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: ${ASSIGNMENTNAME}

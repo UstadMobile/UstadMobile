@@ -1,5 +1,11 @@
 appId: com.toughra.ustadmobile
 ---
+# test data required :
+# 1)  FIRSTNAME: provide person's first name of string type
+# 2) LASTNAME: provide person's last name of string type
+# 3) GENDER: provide STUDENT's gender of string type
+# 4) PASSWORD: provide STUDENT's account password of string type
+
 - tapOn: "People"
 - tapOn: "PERSON"
 - tapOn: "First names"

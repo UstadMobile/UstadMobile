@@ -15,54 +15,35 @@ env:
 # admin able to add a course and edit that course
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
 - runFlow: "../build/common-app2/select_site.yaml"
-#-------------------------------------------------------------------------------------admin login
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
 - runFlow:
-    file: "../build/common-app2/add_course.yaml"
+    file: "../build/common-app2/create_course_with_1teacher_1student.yaml"
     env:
-      TESTCOURSENAME: Assignment block test
-#------------------------------------------------------------------------------admin add new teacher
-- runFlow:
-    file: "../build/common-app2/add_new_teacher_inside_course.yaml"
-    env:
-      TESTCOURSENAME: Assignment block test
-      TEACHERFIRSTNAME: Mary
-      TEACHERLASTNAME: Jacob
-      GENDER: Female
-      PASSWORD: test
-- runFlow:
-    file: "../build/common-app2/add_new_student_inside_course.yaml"
-    env:
-      TESTCOURSENAME: Assignment block test
-      STUDENTFIRSTNAME: Ajay
-      STUDENTLASTNAME: Dev
-      GENDER: Male
-      PASSWORD: test
-
+      TESTCOURSENAME: Assignment test
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 #teacher login
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: Mary
+      USERNAME: Anu
       PASSWORD: test
 - runFlow:
     file: "../common/add_assignment_after_grace_period.yaml"
     env:
       ASSIGNMENTNAME: Test Assignment
-      TESTCOURSENAME: Assignment block test
+      TESTCOURSENAME: Assignment test
 #-------------------------------------------------------------------------student submit assignment
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
 - runFlow: "../build/common-app2/select_site.yaml"
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: Ajay
+      USERNAME: Justin
       PASSWORD: test
 - tapOn: "Courses"
-- tapOn: "Assignment block test"
+- tapOn: "Assignment test"
 - tapOn: "Test Assignment"
 - assertNotVisible: "SUBMIT"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/submit_button_not_visible_after_deadline"

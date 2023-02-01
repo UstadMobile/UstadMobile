@@ -1,6 +1,6 @@
 appId: com.toughra.ustadmobile
 ---
-# this test add an assignment block on a course
+# this test flow add an assignment block on a course with grace period and penalty
 # Test parameters needs to provide for this test :
 # 1) TESTCOURSENAME: provide course name of string type
 # 2) ASSIGNMENTNAME: provide assignment name of string type
@@ -44,6 +44,7 @@ appId: com.toughra.ustadmobile
 - tapOn: "OK"
 - tapOn:
     id: "com.toughra.ustadmobile:id/ca_edit_penalty"
+- eraseText
 - inputText: "10"
 - tapOn: "DONE"
 - tapOn: "SAVE"

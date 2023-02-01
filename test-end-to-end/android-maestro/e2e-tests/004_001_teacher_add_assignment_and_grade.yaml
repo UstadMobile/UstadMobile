@@ -17,48 +17,23 @@ env:
 - runFlow: "../build/common-app2/select_site.yaml"
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
-- runFlow:
-    file: "../build/common-app2/add_course.yaml"
-    env:
-      TESTCOURSENAME: Assignment block test
 #admin add new teacher
 - runFlow:
-    file: "../build/common-app2/add_new_teacher_inside_course.yaml"
+    file: "../build/common-app2/create_course_with_1teacher_2students.yaml"
     env:
-      TESTCOURSENAME: Assignment block test
-      TEACHERFIRSTNAME: Mary
-      TEACHERLASTNAME: Jacob
-      GENDER: Female
-      PASSWORD: test
-#admin add new student to new course
-- runFlow:
-    file: "../build/common-app2/add_new_student_inside_course.yaml"
-    env:
-      TESTCOURSENAME: Assignment block test
-      STUDENTFIRSTNAME: Ajay
-      STUDENTLASTNAME: Dev
-      GENDER: Male
-      PASSWORD: test
-- runFlow:
-    file: "../build/common-app2/add_new_student_inside_course.yaml"
-    env:
-      TESTCOURSENAME: Assignment block test
-      STUDENTFIRSTNAME: Sam
-      STUDENTLASTNAME: Antony
-      GENDER: Male
-      PASSWORD: test
+      TESTCOURSENAME: Assignment test
 #teacherLogin
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: Mary
+      USERNAME: Anu
       PASSWORD: test
 - runFlow:
      file:  "../common/add_assignment_Block.yaml"
      env:
-       TESTCOURSENAME: Assignment block test
+       TESTCOURSENAME: Assignment test
        ASSIGNMENTNAME: Test Assignment
 #-------------------------------------------------------------------------student submit assignment
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
@@ -66,56 +41,53 @@ env:
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: Ajay
+      USERNAME: Justin
       PASSWORD: test
 - runFlow:
      file: "../build/common-app2/student_submit_assignment_block.yaml"
      env:
-       TESTCOURSENAME: Assignment block test
+       TESTCOURSENAME: Assignment test
        ASSIGNMENTNAME: Test Assignment
        TESTFILENAME: H5p_Content.h5p
        CONTROLSERVER: ${CONTROLSERVER}
        TESTSERIAL: ${TESTSERIAL}
-#-------------one submission per student as per default- After submitting their work, the submit button is no longer visible----#
+#-------------one submission per student as per default- After submitting their work, the Add text/ add file button is no longer visible----#
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
 - runFlow: "../build/common-app2/select_site.yaml"
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: Sam
+      USERNAME: Caroline
       PASSWORD: test
 - runFlow:
      file: "../build/common-app2/student_submit_assignment_text.yaml"
      env:
-       TESTCOURSENAME: Assignment block test
+       TESTCOURSENAME: Assignment test
        ASSIGNMENTNAME: Test Assignment
        TEXT: Numbers - 1,2,3,4,5,6,7,8,9,10
-
-- extendedWaitUntil:
-    notVisible: "SUBMIT"
-    timeout: 10000
-- assertNotVisible: "SUBMIT"
-#--------------------------------------------------------------------------teacher grade the assignment
+- assertNotVisible: "Add Text"
+- assertNotVisible: "Add File"
+#-------------teacher grade the assignment
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: Mary
+      USERNAME: Anu
       PASSWORD: test
 - runFlow:
     file: "../common/add_assignment_grade.yaml"
     env:
-      TESTCOURSENAME: Assignment block test
+      TESTCOURSENAME: Assignment test
       ASSIGNMENTNAME: Test Assignment
-      STUDENTNAME: Ajay Dev
+      STUDENTNAME: Justin Joe
       POINT: 8
 - runFlow:
     file: "../common/add_assignment_grade.yaml"
     env:
-      TESTCOURSENAME: Assignment block test
+      TESTCOURSENAME: Assignment test
       ASSIGNMENTNAME: Test Assignment
-      STUDENTNAME: Sam Antony
+      STUDENTNAME: Caroline Jacob
       POINT: 7
 #----------------------------------------------student view assignment grade ------------#
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
@@ -123,11 +95,11 @@ env:
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: Ajay
+      USERNAME: Justin
       PASSWORD: test
 
 - tapOn: "Courses"
-- tapOn: "Assignment block test"
+- tapOn: "Assignment test"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_grade_on_overviewPage_studentView1"
 - tapOn: "Test Assignment"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_grade_on_assignmentPage_studentView1"
@@ -137,10 +109,10 @@ env:
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: Sam
+      USERNAME: Caroline
       PASSWORD: test
 - tapOn: "Courses"
-- tapOn: "Assignment block test"
+- tapOn: "Assignment test"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_grade_on_overviewPage_studentView2"
 - tapOn: "Test Assignment"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/single_submission_assignment_grade_studentView2"

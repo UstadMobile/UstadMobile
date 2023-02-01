@@ -1,5 +1,11 @@
 appId: com.toughra.ustadmobile
 ---
+# Test parameters needs to provide for this test :
+# 1) TESTCOURSENAME: provide course name of string type
+# 2) ASSIGNMENTNAME: provide assignment name of string type
+# 3) STUDENTNAME : provide the student first name& lastname of string type
+# 4) PRIVATECOMMENT: Provide the comment to add as private on assignment to specific student, this is of string type
+# 5) TESTRESULTSDIR: ${TESTRESULTSDIR} : provides the path to store test results
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: ${ASSIGNMENTNAME}

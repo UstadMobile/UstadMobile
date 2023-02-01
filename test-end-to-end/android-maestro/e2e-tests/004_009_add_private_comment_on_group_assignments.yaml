@@ -6,7 +6,7 @@ env:
   TESTNAME: 004_009_add_private_comment_on_group_assignments
 ---
 #--------------------------------------------------APP 2--------------------------------------#
-- clearState: com.toughra.ustadmobile2
+- clearState: com.toughra.ustadmobile
 - runFlow:
      file: "../common/startserver.yaml"
      env:
@@ -21,7 +21,6 @@ env:
     file: "../common/create_course_with_members.yaml"
     env:
       TESTCOURSENAME: Group Private comment test
-#---------------------------------------------------APP 1 -teacher add class comment--------------------#
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 #teacher login
@@ -33,17 +32,9 @@ env:
 - runFlow:
     file:  "../common/add_assignment_block_with_group.yaml"
     env:
-      ASSIGNMENTNAME: Test Assignment
       TESTCOURSENAME: Group Private comment test
+      ASSIGNMENTNAME: Test Assignment
       GROUPTITLE: Private comment Group
-- swipe:
-    direction: LEFT
-- swipe:
-    direction: LEFT
-- tapOn: "Groups"
-- tapOn:
-    id: "com.toughra.ustadmobile:id/line1_text"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/group_list"
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
 - runFlow: "../build/common-app2/select_site.yaml"
 - runFlow:
@@ -54,8 +45,8 @@ env:
 - runFlow:
     file: "../build/common-app2/add_private_comments.yaml"
     env:
-      ASSIGNMENTNAME: Test Assignment
       TESTCOURSENAME: Group Private comment test
+      ASSIGNMENTNAME: Test Assignment
       PRIVATECOMMENT: Hi Mam
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
@@ -76,13 +67,13 @@ env:
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: Santhosh
+      USERNAME: Sruthy
       PASSWORD: test
 - runFlow:
     file: "../build/common-app2/add_private_comments.yaml"
     env:
-      ASSIGNMENTNAME: Test Assignment
       TESTCOURSENAME: Group Private comment test
+      ASSIGNMENTNAME: Test Assignment
       PRIVATECOMMENT: Ok Mam
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/ameGroup_privatecomment visible"
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
