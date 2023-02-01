@@ -134,75 +134,84 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
         onClick = { props.onClickClazz(props.clazzItem) }
         sx {
             margin = 10.px
-            padding = 15.px
         }
 
-        Stack {
-            direction = responsive(StackDirection.column)
+        CardActionArea {
+            sx {
+                padding = 15.px
+            }
 
             Stack {
-                direction = responsive(StackDirection.row)
-                justifyContent = JustifyContent.spaceBetween
+                direction = responsive(StackDirection.column)
 
                 Stack {
-                    direction = responsive(StackDirection.column)
+                    direction = responsive(StackDirection.row)
+                    justifyContent = JustifyContent.spaceBetween
 
-                    Typography {
-                        + (props.clazzItem.clazzName ?: "")
+                    Stack {
+                        direction = responsive(StackDirection.column)
+
+                        Typography {
+                            + (props.clazzItem.clazzName ?: "")
+                        }
+
+                        Typography {
+                            + (props.clazzItem.clazzDesc ?: "")
+                        }
                     }
 
-                    Typography {
-                        + (props.clazzItem.clazzDesc ?: "")
+                    Stack {
+                        direction = responsive(StackDirection.row)
+
+                        + mui.icons.material.Badge.create()
+
+                        + strings[role]
                     }
+
                 }
 
                 Stack {
                     direction = responsive(StackDirection.row)
 
-                    + mui.icons.material.Badge.create()
+                    LensRounded {
+                        color = colorForAttendanceStatus(props.clazzItem.attendanceAverage)
+                        sx {
+                            width = 15.px
+                            height = 15.px
 
-                    + strings[role]
-                }
-
-            }
-
-            Stack {
-                direction = responsive(StackDirection.row)
-
-                LensRounded {
-                    color = colorForAttendanceStatus(props.clazzItem.attendanceAverage)
-                    sx {
-                        width = 15.px
-                        height = 15.px
-
-                        // To align with List Item Button
-                        padding = Padding(
-                            top = 5.px,
-                            bottom = 0.px,
-                            right = 0.px,
-                            left = 0.px,
-                        )
+                            // To align with List Item Button
+                            padding = Padding(
+                                top = 5.px,
+                                bottom = 0.px,
+                                right = 0.px,
+                                left = 0.px,
+                            )
+                        }
                     }
+
+                    Typography {
+                        + strings[MessageID.x_percent_attended].replace("%1.0f%",
+                            round(props.clazzItem.attendanceAverage * 100).toString())
+                    }
+
+                    Box{
+                        sx { width = 10.px }
+                    }
+
+                    + People.create()
+
+                    Typography {
+                        + strings[MessageID.x_teachers_y_students]
+                            .replace("%1\$d", props.clazzItem.numTeachers.toString())
+                            .replace("%2\$d", props.clazzItem.numStudents.toString())
+                    }
+
                 }
-
-                Typography {
-                    + strings[MessageID.x_percent_attended].replace("%1.0f%",
-                        round(props.clazzItem.attendanceAverage * 100).toString())
-                }
-
-                Box{
-                    sx { width = 10.px }
-                }
-
-                + People.create()
-
-                Typography {
-                    + strings[MessageID.x_teachers_y_students]
-                        .replace("%1\$d", props.clazzItem.numTeachers.toString())
-                        .replace("%2\$d", props.clazzItem.numStudents.toString())
-                }
-
             }
         }
+
+
+
+
     }
 }
