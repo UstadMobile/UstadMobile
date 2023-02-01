@@ -14,7 +14,6 @@ import com.ustadmobile.mui.common.xs
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.mui.components.UstadListSortHeader
 import com.ustadmobile.util.colorForAttendanceStatus
-import com.ustadmobile.util.ext.format
 import csstype.*
 import mui.icons.material.LensRounded
 import mui.icons.material.People
@@ -24,6 +23,7 @@ import mui.system.sx
 import react.FC
 import react.Props
 import react.create
+import kotlin.math.round
 
 external interface ClazzListScreenProps : Props {
 
@@ -186,9 +186,8 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
                 }
 
                 Typography {
-                    + (props.clazzItem.attendanceAverage * 100)
-                        .toString()
-                        .format(strings[MessageID.x_percent_attended])
+                    + strings[MessageID.x_percent_attended].replace("%1.0f%",
+                        round(props.clazzItem.attendanceAverage * 100).toString())
                 }
 
                 Box{
