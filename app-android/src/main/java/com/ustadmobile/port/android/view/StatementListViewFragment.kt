@@ -2,19 +2,43 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material.icons.outlined.Timer
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemStatementSessionDetailListBinding
 import com.ustadmobile.core.controller.StatementListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
+import com.ustadmobile.core.util.ext.editIconId
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.StatementListView
+import com.ustadmobile.core.viewmodel.StatementListUiState
+import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.lib.db.entities.StatementWithSessionDetailDisplay
 import com.ustadmobile.lib.db.entities.VerbEntity
+import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
+import com.ustadmobile.port.android.view.StatementListViewFragment.Companion.VERB_ICON_MAP
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import java.util.*
 
 
 class StatementListViewFragment(): UstadListViewFragment<StatementWithSessionDetailDisplay, StatementWithSessionDetailDisplay>(),
@@ -112,4 +136,108 @@ class StatementListViewFragment(): UstadListViewFragment<StatementWithSessionDet
         }
     }
 
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun StatementListScreen(
+    uiState: StatementListUiState = StatementListUiState(),
+    onClickStatement: (StatementWithSessionDetailDisplay) -> Unit = {},
+) {
+    LazyColumn (
+       modifier = Modifier
+           .fillMaxSize()
+           .defaultScreenPadding()
+    ){
+
+        items(
+            items = uiState.statementList,
+            key = { statement -> statement.statementUid }
+        ){ statement ->
+
+            val  statementUiState = statement.listItemUiState
+
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickStatement(statement)
+                },
+                text = {
+                    Text(statementUiState.personVerbTitleText ?: "",
+                        textAlign = TextAlign.End)
+                },
+                secondaryText = {
+                    SecondaryTextContent(statement)
+                },
+                trailing = {
+                    Icon(
+                        painterResource(
+                            id = VERB_ICON_MAP[statement.statementVerbUid.toInt()]
+                                ?: R.drawable.verb_interactive),
+                        contentDescription = null
+                    )
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun SecondaryTextContent(
+    statement: StatementWithSessionDetailDisplay
+){
+
+    val  statementUiState = statement.listItemUiState
+    val  dateTimeFormatter = rememberFormattedDateTime(
+        timeInMillis = statement.timestamp,
+        timeZoneId = TimeZone.getDefault().id
+    )
+
+    Column {
+        if (statementUiState.descriptionVisible){
+            Text(statement.objectDisplay ?: "")
+        }
+
+        if (statementUiState.questionAnswerVisible){
+            Text(statement.objectDisplay ?: "")
+        }
+
+        Row {
+            Text("1 hour 30 mins")
+            Icon(Icons.Outlined.Timer, contentDescription = "")
+
+            Box(modifier = Modifier.width(8.dp))
+
+            Text(dateTimeFormatter)
+            Icon(Icons.Outlined.CalendarToday, contentDescription = "")
+        }
+
+        if (statementUiState.resultScoreMaxVisible){
+            Text(statementUiState.scoreResultsText)
+            Text(stringResource(id = R.string.percentage_score,
+                (statement.resultScoreScaled * 100))
+            )
+            Icon(Icons.Default.Check, contentDescription = "")
+        }
+    }
+}
+
+@Composable
+@Preview
+fun StatementListScreenPreview() {
+
+    val uiState = StatementListUiState(
+        statementList = listOf(
+            StatementWithSessionDetailDisplay().apply {
+                statementVerbUid = VerbEntity.VERB_COMPLETED_UID
+                verbDisplay = "Answered"
+                objectDisplay = "object Display"
+                resultScoreMax = 90
+                resultScoreScaled = 100F
+                resultScoreRaw = 70
+            }
+        )
+    )
+    MdcTheme {
+        StatementListScreen(uiState)
+    }
 }
