@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -33,6 +34,7 @@ import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.lib.db.entities.StatementWithSessionDetailDisplay
 import com.ustadmobile.lib.db.entities.VerbEntity
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.StatementListViewFragment.Companion.VERB_ICON_MAP
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -201,7 +203,12 @@ fun SecondaryTextContent(
             Text(statement.objectDisplay ?: "")
         }
 
-        Row {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .defaultItemPadding(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text("1 hour 30 mins")
             Icon(Icons.Outlined.Timer, contentDescription = "")
 
@@ -212,11 +219,18 @@ fun SecondaryTextContent(
         }
 
         if (statementUiState.resultScoreMaxVisible){
-            Text(statementUiState.scoreResultsText)
-            Text(stringResource(id = R.string.percentage_score,
-                (statement.resultScoreScaled * 100))
-            )
-            Icon(Icons.Default.Check, contentDescription = "")
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .defaultItemPadding(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(statementUiState.scoreResultsText)
+                Text(stringResource(id = R.string.percentage_score,
+                    (statement.resultScoreScaled * 100))
+                )
+                Icon(Icons.Default.Check, contentDescription = "")
+            }
         }
     }
 }
@@ -232,7 +246,7 @@ fun StatementListScreenPreview() {
                 verbDisplay = "Answered"
                 objectDisplay = "object Display"
                 resultScoreMax = 90
-                resultScoreScaled = 100F
+                resultScoreScaled = 10F
                 resultScoreRaw = 70
             }
         )
