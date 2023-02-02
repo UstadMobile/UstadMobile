@@ -128,7 +128,7 @@ if [ "$(adb shell pm list packages com.toughra.ustadmobile2)" != "" ]; then
   adb shell pm uninstall com.toughra.ustadmobile2
 fi
 
-build-extra-app-copy
+$SCRIPTDIR/build-extra-app-copy.sh
 adb install $TESTAPK1
 adb install $TESTAPK2
 
