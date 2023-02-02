@@ -1,15 +1,19 @@
 package com.ustadmobile.core.viewmodel
 
+import com.soywiz.klock.DateTime
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.schedule.age
 import com.ustadmobile.core.util.ext.hasFlag
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.util.ext.validEmail
 import com.ustadmobile.core.view.*
@@ -17,6 +21,8 @@ import com.ustadmobile.core.view.PersonEditView.Companion.REGISTER_MODE_MINOR
 import kotlinx.coroutines.flow.*
 import org.kodein.di.DI
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
+import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_UNSET
 import kotlinx.coroutines.launch
@@ -241,7 +247,43 @@ class PersonEditViewModel(
                     _uiState.update { prev -> prev.copy(fieldsEnabled = true) }
                 }
             }else {
+                activeDb.withDoorTransactionAsync {
+                    if(savePerson.personUid == 0L) {
+                        val personWithGroup = activeDb.insertPersonAndGroup(savePerson)
+                        savePerson.personGroupUid = personWithGroup.personGroupUid
+                        savePerson.personUid = personWithGroup.personUid
+                    }else {
+                        activeDb.personDao.updateAsync(savePerson)
+                    }
 
+                    val dateBirthDateTime = DateTime(savePerson.dateOfBirth)
+
+                    if(dateBirthDateTime.age() < UstadMobileConstants.MINOR_AGE_THRESHOLD) {
+                        //Mark this as approved by the current user
+                        val approved = activeDb.personParentJoinDao.isMinorApproved(
+                            savePerson.personUid)
+
+                        if(!approved) {
+                            activeDb.personParentJoinDao.insertAsync(PersonParentJoin().apply {
+                                ppjMinorPersonUid = savePerson.personUid
+                                ppjParentPersonUid = accountManager.activeAccount.personUid
+                                ppjStatus = PersonParentJoin.STATUS_APPROVED
+                                ppjApprovalTiemstamp = systemTimeInMillis()
+                            })
+                        }
+                    }
+                }
+
+                val personPictureVal = _uiState.value.personPicture
+                if(personPictureVal != null) {
+                    personPictureVal.personPicturePersonUid = savePerson.personUid
+
+                    if(personPictureVal.personPictureUid == 0L) {
+                        activeDb.personPictureDao.insertAsync(personPictureVal)
+                    }else {
+                        activeDb.personPictureDao.updateAsync(personPictureVal)
+                    }
+                }
             }
         }
 

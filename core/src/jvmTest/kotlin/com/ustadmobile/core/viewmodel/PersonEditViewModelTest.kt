@@ -1,42 +1,40 @@
 package com.ustadmobile.core.viewmodel
 
-import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
+import com.ustadmobile.core.util.ext.awaitItemWhere
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.PersonEditView.Companion.ARG_REGISTRATION_MODE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.flow.doorFlow
+import com.ustadmobile.door.room.InvalidationTrackerObserver
+import com.ustadmobile.door.room.RoomDatabase
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import org.kodein.di.bind
-import kotlin.test.Test
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.singleton
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import org.kodein.di.*
 import org.mockito.kotlin.*
+import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
+@Suppress("RemoveExplicitTypeArguments") // This is incorrect for using testViewModel
 class PersonEditViewModelTest {
 
-    suspend fun <T> ReceiveTurbine<T>.awaitItemWhere(
-        block: (T) -> Boolean
-    ): T {
-        while(true) {
-            val item = awaitItem()
-            if(block(item))
-                return item
-        }
-    }
-
+    @Suppress("SameParameterValue")
     private fun createMockAccountManager(serverUrl: String) : UstadAccountManager {
         return mock {
             on { activeEndpoint }.thenReturn(Endpoint(serverUrl))
@@ -85,7 +83,7 @@ class PersonEditViewModelTest {
                 PersonEditViewModel(di, savedStateHandle)
             }
 
-            viewModel.uiState.assertItemReceived { it.fieldsEnabled && it.person != null }
+            viewModel.uiState.assertItemReceived(timeout = 5.seconds) { it.fieldsEnabled && it.person != null }
 
             viewModel.uiState.test {
                 val state = awaitItem()
@@ -112,7 +110,7 @@ class PersonEditViewModelTest {
 
     @Test
     fun givenPresenterCreatedInRegistrationMode_whenFormFilledAndClickSave_shouldRegisterAPerson() {
-        testViewModel<PersonEditViewModel>(timeOut = 500000) {
+        testViewModel<PersonEditViewModel>() {
             val serverUrl = "http://test.com/"
             val accountManager = createMockAccountManager(serverUrl)
 
@@ -128,7 +126,7 @@ class PersonEditViewModelTest {
                 PersonEditViewModel(di, savedStateHandle)
             }
 
-            viewModel.uiState.test(timeout = 5.minutes) {
+            viewModel.uiState.test(timeout = 5.seconds) {
                 val initState = awaitItemWhere { it.fieldsEnabled && it.person != null }
                 viewModel.onEntityChanged(initState.person?.shallowCopy {
                     firstNames = "Test"
@@ -150,5 +148,37 @@ class PersonEditViewModelTest {
             }
         }
     }
+
+    @Test
+    fun givenPresenterCreatedInNonRegistrationMode_whenFormFilledAndClickSave_shouldSaveAPersonInDb() {
+        Napier.base(DebugAntilog())
+        testViewModel<PersonEditViewModel>() {
+            viewModelFactory {
+                PersonEditViewModel(di, savedStateHandle)
+            }
+
+            viewModel.uiState.test(timeout = 5.seconds) {
+                val initState = awaitItemWhere { it.fieldsEnabled && it.person != null }
+                viewModel.onEntityChanged(initState.person?.shallowCopy {
+                    firstNames = "bob"
+                    lastName = "newtestuser"
+                    gender = Person.GENDER_MALE
+                })
+
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            viewModel.onClickSave()
+
+            val db = di.direct.on(activeEndpoint).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+
+            db.doorFlow(arrayOf("Person")) {
+                db.personDao.getAllPerson()
+            }.assertItemReceived(timeout = 5.seconds) { list ->
+                list.any { it.lastName == "newtestuser" }
+            }
+        }
+    }
+
 
 }

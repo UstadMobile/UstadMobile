@@ -73,6 +73,12 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         MockWebServer()
     }
 
+    /**
+     * Shorthand to get the active endpoint
+     */
+    val activeEndpoint: Endpoint
+        get() = di.direct.instance<UstadAccountManager>().activeEndpoint
+
     private var diVar = DI {
         import(CommonJvmDiModule)
 

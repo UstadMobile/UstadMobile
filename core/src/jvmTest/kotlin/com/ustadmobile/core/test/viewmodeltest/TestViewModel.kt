@@ -11,16 +11,13 @@ data class TestRepoConfig(
 
 @ViewModelDslMarker
 fun <T: ViewModel> testViewModel(
-    timeOut: Long = 5000,
     repoConfig: TestRepoConfig = TestRepoConfig(),
     block: suspend ViewModelTestBuilder<T>.() -> Unit
 ) {
     val viewModelTestBuilder = ViewModelTestBuilder<T>(repoConfig)
     try {
         runBlocking {
-            withTimeout(timeOut) {
-                block(viewModelTestBuilder)
-            }
+            block(viewModelTestBuilder)
         }
     }catch(e: Exception) {
         Napier.e("Exception running test: $e", e)

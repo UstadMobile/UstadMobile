@@ -18,7 +18,6 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.junit.Assert
 import org.junit.Test
 import org.kodein.di.bind
 import org.kodein.di.direct
@@ -29,6 +28,7 @@ import java.io.IOException
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 @Suppress("RemoveExplicitTypeArguments")
 class LoginViewModelTest {
@@ -94,8 +94,8 @@ class LoginViewModelTest {
 
                 val stateFlow = stateInViewModelScope(viewModel.uiState)
                 stateFlow.filter { it.connectAsGuestVisible == testGuestAllowed }.test {
-                    Assert.assertEquals("guest connection visibility matches",
-                        testGuestAllowed, awaitItem().connectAsGuestVisible)
+                    assertEquals(testGuestAllowed, awaitItem().connectAsGuestVisible,
+                        "guest connection visibility matches")
                 }
             }
         }
@@ -103,7 +103,7 @@ class LoginViewModelTest {
 
     @Test
     fun givenCreateAccountVisible_whenClickCreateAccount_thenShouldNavigateToAgeRedirect() {
-        testViewModel<LoginViewModel>(timeOut = 5000 * 1000) {
+        testViewModel<LoginViewModel> {
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_SERVER_URL] = "http://localhost:8087/"
                 savedStateHandle[UstadView.ARG_SITE] = json.encodeToString(Site().apply {
@@ -131,7 +131,7 @@ class LoginViewModelTest {
         val nextDestination = "nextDummyDestination"
         val mockAccountManager = mockAccountManager()
 
-        testViewModel<LoginViewModel>(timeOut = 500000) {
+        testViewModel<LoginViewModel>() {
             extendDi {
                 bind<UstadAccountManager>(overrides = true) with singleton {
                     mockAccountManager
@@ -211,9 +211,9 @@ class LoginViewModelTest {
                 name = "wait for expected error message"
             ) {
                 val state = awaitItem()
-                Assert.assertEquals("Got expected error message",
-                    expectedErrMsg, state.errorMessage)
-                Assert.assertTrue("Fields are re-enabled", state.fieldsEnabled)
+                assertEquals(expectedErrMsg, state.errorMessage,
+                    "Got expected error message",)
+                assertTrue(state.fieldsEnabled, "Fields are re-enabled", )
             }
         }
     }
