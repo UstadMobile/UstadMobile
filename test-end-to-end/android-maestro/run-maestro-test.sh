@@ -127,6 +127,8 @@ fi
 if [ "$(adb shell pm list packages com.toughra.ustadmobile2)" != "" ]; then
   adb shell pm uninstall com.toughra.ustadmobile2
 fi
+
+build-extra-app-copy
 adb install $TESTAPK1
 adb install $TESTAPK2
 
@@ -145,7 +147,8 @@ fi
 maestro --device=$TESTSERIAL test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
          -e TESTSERIAL=$TESTSERIAL $OUTPUTARGS \
-         $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR --include-tags=checklist4
+         $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR
+        # --include-tags=checklist4
 
 TESTSTATUS=$?
 
