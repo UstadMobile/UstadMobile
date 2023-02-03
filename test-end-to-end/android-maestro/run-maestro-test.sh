@@ -121,6 +121,7 @@ $SCRIPTDIR/../../testserver-controller/start.sh $TESTRESULTSDIR
 export ANDROID_SERIAL=$TESTSERIAL
 adb reverse tcp:8075 tcp:8075
 
+
 if [ "$(adb shell pm list packages com.toughra.ustadmobile)" != "" ]; then
   adb shell pm uninstall com.toughra.ustadmobile
 fi

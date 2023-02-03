@@ -1,0 +1,27 @@
+appId: com.toughra.ustadmobile
+tags:
+  - checklist6
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/006_001_admin_can_enable_or_disable_registration"
+  TESTNAME: 006_001_admin_can_enable_or_disable_registration
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+# admin enable user registration button
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+- runFlow:
+    file: "../build/common-app2/enable_or_disable_user_registration.yaml"
+# test registration button is visible
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- assertVisible: "Create Account"
+- runFlow:
+    file: "../common/user_registration_13_above.yaml"

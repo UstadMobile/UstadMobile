@@ -1,0 +1,34 @@
+appId: com.toughra.ustadmobile
+---
+# test data required :
+- tapOn: "Create Account"
+- longPressOn: "2023"
+- inputText: "1994"
+- tapOn:
+    id: "com.google.android.inputmethod.latin:id/icon"
+    index: 2
+- tapOn: "NEXT"
+- tapOn: "ACCEPT"
+- tapOn: "First names"
+- inputText: "Abi"
+- tapOn: "Last name"
+- inputText: "Patel"
+- tapOn: "Gender"
+- tapOn: "Male"
+- tapOn: "Phone number"
+- inputText: "8547212258"
+- swipe:
+    start: "100,400"
+    end: "100,100"
+- tapOn: "Email"
+- inputText: "abhi@gmail.com"
+- tapOn: "Username"
+- inputText: "abhi"
+- tapOn: "Password"
+- inputText: "test"
+- swipe:
+    start: "100,400"
+    end: "100,100"
+- tapOn: "Confirm password"
+- inputText: "test"
+- tapOn: "SAVE"
