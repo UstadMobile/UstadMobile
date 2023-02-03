@@ -44,6 +44,8 @@ env:
       PASSWORD: "test"
 - tapOn: "courses"
 - tapOn: "Course view Test"
+
+# Collapse the module by tapping it
 - tapOn: "SEMESTER 1"
 - assertNotVisible:
        text: "PRIMARY COLOURS"
