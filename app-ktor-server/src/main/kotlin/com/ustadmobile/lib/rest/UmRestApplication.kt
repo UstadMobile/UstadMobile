@@ -63,9 +63,7 @@ import io.ktor.websocket.*
 import org.kodein.di.ktor.di
 import java.util.*
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
-import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.rest.logging.LogbackAntiLog
-import com.ustadmobile.lib.util.randomString
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -340,7 +338,6 @@ fun Application.umRestApplication(
             AuthManager(context, di).also { authManager ->
                 val repo: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_REPO)
                 runBlocking {
-                    //THIS IS A RACE CONDITION!!
                     repo.initAdminUser(context, authManager, di,
                         appConfig.propertyOrNull("ktor.ustad.adminpass")?.getString())
                 }

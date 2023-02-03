@@ -614,20 +614,18 @@ suspend fun UmAppDatabase.grantScopedPermission(toPerson: Person, permissions: L
 suspend fun UmAppDatabase.insertPersonAuthCredentials2(
     personUid: Long,
     password: String,
-    pbkdf2Params: Pbkdf2Params,
-    site: Site? = null
+    pbkdf2Params: Pbkdf2Params
 ) {
-    val db = (this as DoorDatabaseRepository).db as UmAppDatabase
-    val effectiveSite = site ?: db.siteDao.getSite()
-    val authSalt = effectiveSite?.authSalt ?: throw IllegalStateException("insertAuthCredentials: No auth salt!")
-    val lastChangedBy = db.syncNodeDao.getLocalNodeClientId()
-
-    personAuth2Dao.insertAsync(PersonAuth2().apply {
-        pauthUid = personUid
-        pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
-        pauthAuth = password.doublePbkdf2Hash(authSalt, pbkdf2Params).encodeBase64()
-        pauthLcb = lastChangedBy
-    })
+    val db = (this as? DoorDatabaseRepository)?.db as? UmAppDatabase ?: this
+    db.withDoorTransactionAsync {
+        val authSalt = db.siteDao.getSiteAuthSaltAsync()
+            ?: throw IllegalStateException("insertAuthCredentials: No auth salt!")
+        db.personAuth2Dao.insertAsync(PersonAuth2().apply {
+            pauthUid = personUid
+            pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
+            pauthAuth = password.doublePbkdf2Hash(authSalt, pbkdf2Params).encodeBase64()
+        })
+    }
 }
 
 /**
