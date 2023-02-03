@@ -9,6 +9,7 @@ SCRIPTDIR=$(realpath $(dirname $0))
 WORKDIR=$(pwd)
 
 mkdir -p $SCRIPTDIR/build/apks
+./gradlew app-android-launcher:assembleRelease
 cp $SCRIPTDIR/../../app-android-launcher/build/outputs/apk/release/app-android-launcher-release.apk \
    $SCRIPTDIR/build/apks/app-android-launcher-release.apk
 cd $SCRIPTDIR/../..
