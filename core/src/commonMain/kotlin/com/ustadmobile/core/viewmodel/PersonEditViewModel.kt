@@ -9,7 +9,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
-import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavResult
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.schedule.age
@@ -110,9 +109,17 @@ class PersonEditViewModel(
                     it.dateOfBirth = savedStateHandle[PersonEditView.ARG_DATE_OF_BIRTH]?.toLong() ?: 0L
                 }
             }
+
+            val personParentJoin = if(registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)) {
+                PersonParentJoin()
+            }else {
+                null
+            }
+
             _uiState.update { prev ->
                 prev.copy(
                     person = person,
+                    approvalPersonParentJoin = personParentJoin,
                     fieldsEnabled = true,
                 )
             }
@@ -124,6 +131,12 @@ class PersonEditViewModel(
     fun onEntityChanged(entity: PersonWithAccount?) {
         _uiState.update { prev ->
             prev.copy(person = entity)
+        }
+    }
+
+    fun onApprovalPersonParentJoinChanged(personParentJoin: PersonParentJoin?) {
+        _uiState.update {prev ->
+            prev.copy(approvalPersonParentJoin = personParentJoin)
         }
     }
 
@@ -288,6 +301,8 @@ class PersonEditViewModel(
             }
         }
 
+        //Handle the following scenario: ClazzMemberList (user selects to add a student to enrol),
+        // PersonList, PersonEdit, EnrolmentEdit
         val goToOnComplete = savedStateHandle[UstadView.ARG_GO_TO_COMPLETE]
         if(goToOnComplete != null) {
             navController.navigate(goToOnComplete, mutableMapOf<String, String>().apply {
@@ -295,11 +310,8 @@ class PersonEditViewModel(
                 put(UstadView.ARG_PERSON_UID, savePerson.personUid.toString())
             }.toMap())
         }else {
-            onEditFinish(PersonDetailView.VIEW_NAME, savePerson.personUid, NavResult())
+            finishWithResult(PersonDetailView.VIEW_NAME, savePerson.personUid, savePerson)
         }
-
-
-
     }
 
     companion object {

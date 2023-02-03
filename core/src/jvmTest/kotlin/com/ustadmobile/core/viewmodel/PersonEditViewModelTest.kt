@@ -1,16 +1,23 @@
 package com.ustadmobile.core.viewmodel
 
 import app.cash.turbine.test
+import com.soywiz.klock.DateTime
+import com.soywiz.klock.years
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
 import com.ustadmobile.core.view.PersonEditView
+import com.ustadmobile.core.view.PersonEditView.Companion.ARG_DATE_OF_BIRTH
 import com.ustadmobile.core.view.PersonEditView.Companion.ARG_REGISTRATION_MODE
+import com.ustadmobile.core.view.RegisterMinorWaitForParentView
+import com.ustadmobile.core.view.RegisterMinorWaitForParentView.Companion.ARG_PARENT_CONTACT
+import com.ustadmobile.core.view.RegisterMinorWaitForParentView.Companion.ARG_USERNAME
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.flow.doorFlow
@@ -29,6 +36,7 @@ import org.kodein.di.*
 import org.mockito.kotlin.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
 @Suppress("RemoveExplicitTypeArguments") // This is incorrect for using testViewModel
@@ -179,6 +187,159 @@ class PersonEditViewModelTest {
             }
         }
     }
+
+    @Test
+    fun givenPresenterCreatedInRegisterMinorMode_whenFormFilledAndClickSave_thenShouldGoToWaitForParentScreen() {
+        val minorDateOfBirth = (DateTime.now() - 10.years).unixMillisLong
+
+        testViewModel<PersonEditViewModel> {
+            val accountManager = createMockAccountManager(activeEndpoint.url)
+
+            extendDi {
+                bind<UstadAccountManager>(overrides = true) with singleton {
+                    accountManager
+                }
+            }
+
+            viewModelFactory {
+                savedStateHandle[ARG_REGISTRATION_MODE] =
+                    (PersonEditView.REGISTER_MODE_ENABLED or PersonEditView.REGISTER_MODE_MINOR).toString()
+                savedStateHandle[ARG_SERVER_URL] = activeEndpoint.url
+                savedStateHandle[ARG_DATE_OF_BIRTH] = minorDateOfBirth.toString()
+                PersonEditViewModel(di, savedStateHandle)
+            }
+
+            viewModel.uiState.test(timeout = 5000.seconds) {
+                val readyState = awaitItemWhere {
+                    it.approvalPersonParentJoin != null && it.person != null && it.fieldsEnabled
+                }
+                viewModel.onApprovalPersonParentJoinChanged(
+                    readyState.approvalPersonParentJoin?.shallowCopy {
+                        ppjEmail = "parent@somewhere.com"
+                    }
+                )
+                viewModel.onEntityChanged(readyState.person?.shallowCopy {
+                    firstNames = "Jane"
+                    lastName = "Doe"
+                    username = "janedoe"
+                    newPassword = "secret"
+                    confirmedPassword = "secret"
+                    gender = Person.GENDER_FEMALE
+                })
+
+                viewModel.onClickSave()
+                cancelAndIgnoreRemainingEvents()
+            }
+
+
+            val serverUrl = activeEndpoint.url
+            verifyBlocking(accountManager, timeout(5000)) {
+                register(
+                    argWhere { it.username == "janedoe" },
+                    eq(serverUrl),
+                    argWhere { it.parentJoin?.ppjEmail == "parent@somewhere.com" }
+                )
+            }
+
+            viewModel.navCommandFlow.test(timeout = 5.seconds) {
+                val navCommand = awaitItem() as NavigateNavCommand
+                assertEquals(RegisterMinorWaitForParentView.VIEW_NAME, navCommand.viewName,
+                    "Navigated to wait for parent screen")
+                assertEquals("janedoe", navCommand.args[ARG_USERNAME],
+                    "Username argument provided")
+                assertEquals("parent@somewhere.com", navCommand.args[ARG_PARENT_CONTACT],
+                    "Arg for parent contact provided")
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+    }
+
+
+    @Test
+    fun givenPresenterCreatedInRegisterMinorMode_whenNoParentEmailGiven_thenShouldShowFieldRequiredError() {
+        val minorDateOfBirth = (DateTime.now() - 10.years).unixMillisLong
+
+        testViewModel<PersonEditViewModel> {
+            val accountManager = createMockAccountManager(activeEndpoint.url)
+
+            extendDi {
+                bind<UstadAccountManager>(overrides = true) with singleton {
+                    accountManager
+                }
+            }
+
+            viewModelFactory {
+                savedStateHandle[ARG_REGISTRATION_MODE] =
+                    (PersonEditView.REGISTER_MODE_ENABLED or PersonEditView.REGISTER_MODE_MINOR).toString()
+                savedStateHandle[ARG_SERVER_URL] = activeEndpoint.url
+                savedStateHandle[ARG_DATE_OF_BIRTH] = minorDateOfBirth.toString()
+                PersonEditViewModel(di, savedStateHandle)
+            }
+
+            val systemImpl = di.direct.instance<UstadMobileSystemImpl>()
+
+            viewModel.uiState.test {
+                val readyState = awaitItemWhere {
+                    it.approvalPersonParentJoin != null && it.person != null && it.fieldsEnabled
+                }
+
+                viewModel.onApprovalPersonParentJoinChanged(
+                    readyState.approvalPersonParentJoin?.shallowCopy {
+                        ppjEmail = ""
+                    }
+                )
+                viewModel.onEntityChanged(readyState.person?.shallowCopy {
+                    firstNames = "Jane"
+                    lastName = "Doe"
+                    username = "janedoe"
+                    newPassword = "secret"
+                    confirmedPassword = "secret"
+                    gender = Person.GENDER_FEMALE
+                })
+
+                viewModel.onClickSave()
+
+                val fieldRequiredErr = systemImpl.getString(MessageID.field_required_prompt)
+                val stateWithError = awaitItemWhere { it.fieldsEnabled && it.parentContactError != null }
+                assertEquals(fieldRequiredErr, stateWithError.parentContactError,
+                    "When registering as a minor and contact field is blank, then field" +
+                        " required error is shown ")
+
+                cancelAndIgnoreRemainingEvents()
+
+            }
+        }
+    }
+
+    @Test
+    fun givenPresenterCreatedInNonRegistrationMode_whenDateOfBirthIndicatesMinor_shouldSaveAPersonInDbAndRecordConsent() {
+        testViewModel<PersonEditViewModel> {
+            viewModelFactory {
+                PersonEditViewModel(di, savedStateHandle)
+            }
+
+            viewModel.uiState.test(timeout = 5.seconds) {
+                val readyState = awaitItemWhere { it.fieldsEnabled && it.person != null }
+                viewModel.onEntityChanged(readyState.person?.shallowCopy {
+                    username = "newstudent"
+                    firstNames = "Jane"
+                    lastName = "Doe"
+                    dateOfBirth = systemTimeInMillis() - (365 * 24 * 60 * 60 * 1000L)
+                    gender = Person.GENDER_FEMALE
+                })
+                viewModel.onClickSave()
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            val db: UmAppDatabase = di.on(activeEndpoint).direct.instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+            val personSavedInDb = db.personDao.findByUsername("newstudent")
+            assertTrue(
+                db.personParentJoinDao.isMinorApproved(personSavedInDb?.personUid ?: 0L),
+                "When a new minor user is created manually, they are marked as approved")
+        }
+    }
+
+
 
 
 }
