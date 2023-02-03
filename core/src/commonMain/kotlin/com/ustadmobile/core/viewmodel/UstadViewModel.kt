@@ -8,15 +8,16 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.*
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
+import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.coroutines.flow.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.instance
-import org.kodein.di.on
+import org.kodein.di.*
 
 abstract class UstadViewModel(
     override val di: DI,
@@ -45,6 +46,8 @@ abstract class UstadViewModel(
     protected val json: Json by instance()
 
     protected val snackDispatcher: SnackBarDispatcher by instance()
+
+    protected val resultReturner: NavResultReturner by instance()
 
     private val navResultTimestampsCollected: MutableSet<Long> by lazy {
         savedStateHandle[KEY_COLLECTED_TIMESTAMPS]?.split(",")
@@ -120,6 +123,18 @@ abstract class UstadViewModel(
 
         navigate(viewName, args, goOptions)
 
+    }
+
+    protected fun finishWithResult(result: Any?) {
+        val popUpToViewName = savedStateHandle[ARG_RESULT_DEST_VIEWNAME]
+        val saveToKey = savedStateHandle[ARG_RESULT_DEST_KEY]
+
+        if(popUpToViewName != null && saveToKey != null) {
+            navResultReturner.sendResult(NavResult(saveToKey, systemTimeInMillis(), result))
+            navController.popBackStack(popUpToViewName, false)
+        }else {
+            navController.popBackStack(UstadView.CURRENT_DEST, true)
+        }
     }
 
     companion object {

@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
+import com.ustadmobile.core.impl.nav.NavResult
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.schedule.age
 import com.ustadmobile.core.util.ext.hasFlag
@@ -73,7 +74,7 @@ data class PersonEditUiState(
 class PersonEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
-): DetailViewModel<Person>(di, savedStateHandle) {
+): UstadEditViewModel(di, savedStateHandle) {
 
     private val systemImpl: UstadMobileSystemImpl by instance()
 
@@ -287,8 +288,27 @@ class PersonEditViewModel(
             }
         }
 
+        val goToOnComplete = savedStateHandle[UstadView.ARG_GO_TO_COMPLETE]
+        if(goToOnComplete != null) {
+            navController.navigate(goToOnComplete, mutableMapOf<String, String>().apply {
+                putFromSavedStateIfPresent(savedStateHandle, ON_COMPLETE_PASS_ARGS)
+                put(UstadView.ARG_PERSON_UID, savePerson.personUid.toString())
+            }.toMap())
+        }else {
+            onEditFinish(PersonDetailView.VIEW_NAME, savePerson.personUid, NavResult())
+        }
 
 
+
+    }
+
+    companion object {
+
+        val ON_COMPLETE_PASS_ARGS = listOf(
+            UstadView.ARG_CLAZZUID,
+            UstadView.ARG_FILTER_BY_ENROLMENT_ROLE,
+            UstadView.ARG_POPUPTO_ON_FINISH,
+        )
 
     }
 

@@ -6,4 +6,6 @@ interface NavResultReturner {
 
     fun resultFlowForKey(key: String): Flow<NavResult>
 
+    fun sendResult(result: NavResult)
+
 }

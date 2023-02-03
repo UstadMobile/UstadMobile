@@ -63,6 +63,20 @@ fun MutableMap<String, String>.putFromSavedStateIfPresent(
 }
 
 /**
+ * Put a value in teh receiver map for a list of keys if they are present in the given saved state
+ * handle. This can be useful to selectively copy keys from a savedstatehandle to a map for
+ * navigation.
+ */
+fun MutableMap<String, String>.putFromSavedStateIfPresent(
+    savedState: UstadSavedStateHandle,
+    keys: Iterable<String>,
+) {
+    keys.forEach { key ->
+        savedState[key]?.also { put(key, it) }
+    }
+}
+
+/**
  * No overwrite put
  */
 fun <K, V> MutableMap<K, V>.putIfNotAlreadySet(key: K, keyVal: V) {
