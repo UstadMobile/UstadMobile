@@ -10,7 +10,7 @@ appId: com.toughra.ustadmobile
 - tapOn: "Name"
 - inputText: ${TESTCOURSENAME}
 - tapOn: "Description (Optional)"
-- inputText: "Test"
+- inputText: "Test edit"
 - hideKeyboard
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/add_course"

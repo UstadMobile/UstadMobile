@@ -4,6 +4,7 @@ appId: com.toughra.ustadmobile
 # Test parameters needs to provide for this test :
 # 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
 # 2) TESTCOURSENAME: provide course name of string type
+
 -  tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: "MEMBERS"
