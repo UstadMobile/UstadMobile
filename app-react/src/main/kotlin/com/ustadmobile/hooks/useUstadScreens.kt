@@ -95,6 +95,20 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen(NAVHOST_CLEARSTACK_VIEWNAME, "Clear Stack", NavHostClearStackPlaceholder),
             UstadScreen("UstadAddListItem", "UstadAddListItem Preview",
                 UstadAddListItemPreview),
+            UstadScreen(ClazzLogEditAttendanceView.VIEW_NAME, name = "ClazzLogEditAttendance Preview",
+                ClazzLogEditAttendanceScreenPreview),
+            UstadScreen(JoinWithCodeView.VIEW_NAME, "JoinWithCode Preview",
+                JoinWithCodeScreenPreview),
+            UstadScreen(ClazzLogListAttendanceView.VIEW_NAME, "ClazzLogListAttendance Preview",
+                ClazzLogListAttendanceScreenPreview),
+            UstadScreen(ContentEntryList2View.VIEW_NAME, "ContentEntryList Preview",
+                ContentEntryListScreenPreview),
+            UstadScreen(AccountListView.VIEW_NAME, "AccountList Preview", AccountListScreenPreview),
+            UstadScreen(ClazzMemberListView.VIEW_NAME, "ClazzMemberList Preview",
+                ClazzMemberListScreenPreview),
+            UstadScreen(ClazzList2View.VIEW_NAME, "Clazz List Preview",
+                ClazzListScreenPreview
+            ),
         )
     }
 }

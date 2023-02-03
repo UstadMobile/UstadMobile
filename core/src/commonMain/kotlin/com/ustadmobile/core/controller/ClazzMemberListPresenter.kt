@@ -1,7 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ClazzEnrolmentDao
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
@@ -17,9 +15,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
-import org.kodein.di.instance
 
 class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, view: ClazzMemberListView,
                                di: DI, lifecycleOwner: LifecycleOwner)
@@ -56,7 +52,7 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
                 filterByClazzUid, Role.PERMISSION_CLAZZ_ADD_STUDENT)
 
         val terminology = db.courseTerminologyDao.getTerminologyForClazz(filterByClazzUid)
-        view.termMap = terminology.toTermMap(json, systemImpl, context)
+        view.termMap = terminology.toTermMap(json, systemImpl)
 
         selectedSortOption = SORT_OPTIONS[0]
         view.listFilterOptionChips = FILTER_OPTIONS.toListFilterOptions(context, di)
