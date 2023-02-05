@@ -17,6 +17,7 @@ import react.useState
 external interface LeavingReasonEditScreenProps: Props {
     var uiState : LeavingReasonEditUiState
     var onLeavingReasonChange: (LeavingReason?)->Unit
+
 }
 
 val LeavingReasonEditScreen = FC<LeavingReasonEditScreenProps> { props ->
