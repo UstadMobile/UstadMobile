@@ -52,6 +52,7 @@ android {
             consumerProguardFiles 'proguard-rules.pro'
         }
     }
+    namespace 'com.ustadmobile.core.db'
 }
 
 

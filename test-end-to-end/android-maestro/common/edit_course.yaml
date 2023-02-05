@@ -1,0 +1,11 @@
+appId: com.toughra.ustadmobile
+---
+# this test edit a course on the courses page
+# test data required :
+     # 1) TESTCOURSENAME: provide course name of string type
+
+- tapOn: "COURSES"
+- tapOn: ${TESTCOURSENAME}
+- assertVisible: "EDIT"
+- tapOn: "Edit"
+

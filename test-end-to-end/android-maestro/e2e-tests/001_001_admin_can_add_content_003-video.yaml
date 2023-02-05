@@ -4,15 +4,12 @@ env:
   TESTNAME: "001_001_admin_can_add_content_003-video"
 ---
 - clearState: com.toughra.ustadmobile
-#---------Start test-controller-server ---------#
 - runFlow:
     file: "../common/startserver.yaml"
     env:
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
-
-#---------add content to library ---------#
 - runFlow:
     file: "../common/add_content.yaml"
     env:
@@ -20,7 +17,6 @@ env:
       TESTCONTENTNAME: AddContentVideoTest
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
-#---------download and open content in library ---------#
 - runFlow:
     file: "../common/login_download_and_open_content.yaml"
     env:
