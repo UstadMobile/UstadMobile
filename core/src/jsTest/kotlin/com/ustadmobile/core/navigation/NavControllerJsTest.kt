@@ -76,7 +76,7 @@ class NavControllerJsTest {
             window.history.go(-1)
         }
 
-        val answer = navControllerJs.currentBackStackEntry!!.savedStateHandle.get<String>("answer")
+        val answer = navControllerJs.currentBackStackEntry!!.savedStateHandle.get("answer")
         assertEquals("42", answer, "Value saved is retrieved")
 
         navControllerJs.unplug()
@@ -96,7 +96,7 @@ class NavControllerJsTest {
             navControllerJs.navigate("ViewName4", mapOf())
         }
 
-        val answer = navControllerJs.currentBackStackEntry!!.savedStateHandle.get<String>("answer")
+        val answer = navControllerJs.currentBackStackEntry!!.savedStateHandle.get("answer")
         assertNull(answer, "Value saved in previous stack entry is not in the current entry after navigation")
 
         navControllerJs.unplug()
@@ -327,7 +327,7 @@ class NavControllerJsTest {
             window.history.go(-1)
         }
 
-        val answer = navControllerJs2.currentBackStackEntry!!.savedStateHandle.get<String>("answer")
+        val answer = navControllerJs2.currentBackStackEntry!!.savedStateHandle.get("answer")
         assertEquals("42", answer, "Value saved is retrieved")
 
         navControllerJs2.unplug()

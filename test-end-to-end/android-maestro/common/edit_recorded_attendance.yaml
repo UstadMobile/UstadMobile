@@ -1,0 +1,23 @@
+appId: com.toughra.ustadmobile
+---
+# this test edit already record attendance of students
+# this record 2nd and 5th student in list as absent, 3rd student as late and others as present
+# test parameters needs to provide for this test :
+# 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+- tapOn: "Courses"
+- tapOn: ${TESTCOURSENAME}
+- tapOn: "ATTENDANCE"
+- tapOn:
+      id: "com.toughra.ustadmobile:id/mtrl_calendar_day_selector_frame"
+- tapOn: "Mark all present"
+- tapOn:
+        text: "Absent"
+        index: 1
+- tapOn:
+    text: "Partial"
+    index: 2
+- tapOn:
+    text: "Absent"
+    index: 4
+- takeScreenshot: "${TESTRESULTSDIR}/edited_attendance"
+- tapOn: "Save"

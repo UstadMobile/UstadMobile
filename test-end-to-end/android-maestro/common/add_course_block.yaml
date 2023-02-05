@@ -1,0 +1,20 @@
+appId: com.toughra.ustadmobile
+---
+- tapOn: "GET STARTED"
+- inputText: ${ENDPOINT}
+- hideKeyboard
+- tapOn: "NEXT"
+- tapOn: "Username"
+- inputText: ${USERNAME}
+- tapOn: "Password"
+- inputText: ${PASSWORD}
+- hideKeyboard
+- tapOn: "LOGIN"
+- tapOn: "COURSE"
+- tapOn: "Add a new course"
+- tapOn: "Name"
+- inputText: ${TESTCOURSENAME}
+- hideKeyboard
+- tapOn: "SAVE"
+
+

@@ -1,0 +1,18 @@
+appId: com.toughra.ustadmobile
+---
+# this test add member to course
+  # person account is already existing / created in app
+# Test parameters needs to provide for this test :
+ # 1) MEMBER : student / teacher
+ # 2) FIRSTNAME : FIRSTNAME of member
+ # 3) LASTNAME : LASTNAME of member
+ # 4) TESTRESULTSDIR : provides the path to store test results
+
+- tapOn: "Courses"
+- tapOn: ${TESTCOURSENAME}
+- tapOn: "MEMBERS"
+- tapOn: "Add a ${MEMBER}"
+- scroll
+- tapOn: "${FIRSTNAME} ${LASTNAME}"
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/added-${MEMBER}-${FIRSTNAME} ${LASTNAME}"

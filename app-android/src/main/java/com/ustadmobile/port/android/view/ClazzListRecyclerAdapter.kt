@@ -38,7 +38,7 @@ class ClazzListRecyclerAdapter(var itemListener: ClazzListItemListener?, di: DI)
         holder.itemView.tag = holder.itemBinding.clazz?.clazzUid
         holder.itemBinding.itemListener = itemListener
 
-        val termMap = clazz?.terminology.toTermMap(json, systemImpl, holder.itemView.context)
+        val termMap = clazz?.terminology.toTermMap(json, systemImpl)
         holder.itemBinding.teacherStudentCount = """${clazz?.numTeachers ?: 0} ${termMap[TerminologyKeys.TEACHERS_KEY]}, ${clazz?.numStudents ?: 0} ${termMap[TerminologyKeys.STUDENTS_KEY]}"""
     }
 

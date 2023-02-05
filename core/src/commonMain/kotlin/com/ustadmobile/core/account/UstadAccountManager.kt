@@ -9,8 +9,8 @@ import com.ustadmobile.core.util.ext.toUmAccount
 import com.ustadmobile.core.util.ext.withEndpoint
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeParseList
-import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.door.*
+import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.*
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.lifecycle.MutableLiveData
@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 import org.kodein.di.DI
 import org.kodein.di.direct
@@ -87,6 +88,8 @@ class UstadAccountManager(
     private val httpClient: HttpClient by di.instance()
 
     private val endpointsWithActiveSessions = concurrentSafeListOf<Endpoint>()
+
+    private val json: Json by di.instance()
 
     init {
         val activeUserSessionFromJson = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY)?.let {
@@ -151,7 +154,11 @@ class UstadAccountManager(
             _activeUserSessionLive.postValue(value)
 
             val activeAccountJson = value?.let {
-                safeStringify(di, UserSessionWithPersonAndEndpoint.serializer(), value)
+                json.encodeToString(it)
+            }
+
+            if(value != null){
+                _activeEndpoint.value = value.endpoint
             }
 
             systemImpl.setAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, activeAccountJson)
@@ -210,7 +217,11 @@ class UstadAccountManager(
         }
     }
 
-    suspend fun addSession(person: Person, endpointUrl: String, password: String?) : UserSessionWithPersonAndEndpoint{
+    suspend fun addSession(
+        person: Person,
+        endpointUrl: String,
+        password: String?
+    ) : UserSessionWithPersonAndEndpoint {
         val endpoint = Endpoint(endpointUrl)
         val endpointRepo: UmAppDatabase = di.on(endpoint).direct
             .instance(tag = DoorTag.TAG_REPO)
@@ -222,19 +233,21 @@ class UstadAccountManager(
 
         val pbkdf2Params: Pbkdf2Params = di.direct.instance()
 
-        val authSalt = endpointRepo.onRepoWithFallbackToDb(2000) {
-            it.siteDao.getSiteAsync()?.authSalt
-        } ?: throw IllegalStateException("addSession: No auth salt!")
+        val userSession = endpointRepo.withDoorTransactionAsync {
+            val authSalt = endpointRepo.onRepoWithFallbackToDb(2000) {
+                it.siteDao.getSiteAsync()?.authSalt
+            } ?: throw IllegalStateException("addSession: No auth salt!")
 
-
-        val userSession = UserSession().apply {
-            usClientNodeId = (endpointRepo as DoorDatabaseRepository).config.nodeId.toLong()
-            usPersonUid = person.personUid
-            usStartTime = systemTimeInMillis()
-            usSessionType = UserSession.TYPE_STANDARD
-            usStatus = UserSession.STATUS_ACTIVE
-            usAuth = password?.encryptWithPbkdf2(authSalt, pbkdf2Params)?.toHexString()
-            usUid = endpointRepo.userSessionDao.insertSession(this)
+            val nodeId = di.on(endpoint).direct.instance<NodeIdAndAuth>().nodeId
+            UserSession().apply {
+                usClientNodeId = nodeId
+                usPersonUid = person.personUid
+                usStartTime = systemTimeInMillis()
+                usSessionType = UserSession.TYPE_STANDARD
+                usStatus = UserSession.STATUS_ACTIVE
+                usAuth = password?.encryptWithPbkdf2(authSalt, pbkdf2Params)?.toHexString()
+                usUid = endpointRepo.userSessionDao.insertSession(this)
+            }
         }
 
         return UserSessionWithPersonAndEndpoint(userSession, person, endpoint)

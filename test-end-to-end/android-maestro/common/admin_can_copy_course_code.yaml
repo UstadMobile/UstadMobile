@@ -1,0 +1,8 @@
+appId: com.toughra.ustadmobile
+---
+# admin copy the course code
+- launchApp
+-  tapOn: "Courses"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- tapOn: "Course code"

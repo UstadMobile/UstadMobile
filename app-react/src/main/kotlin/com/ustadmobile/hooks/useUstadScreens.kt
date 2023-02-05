@@ -83,8 +83,6 @@ fun useUstadScreens(): UstadScreens {
                 ClazzLogEditScreenPreview),
             UstadScreen(CourseGroupSetEditView.VIEW_NAME, "CourseGroupSetEdit Preview",
                 CourseGroupSetEditScreenPreview),
-            UstadScreen(LeavingReasonEditView.VIEW_NAME,"LeavingReasonEditPreview",
-                LeavingReasonEditScreenPreview),
         )
     }
 }

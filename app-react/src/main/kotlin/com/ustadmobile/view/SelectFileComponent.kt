@@ -139,6 +139,7 @@ class SelectFileComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
                                     visibility = Visibility.hidden
                                 }
                                 attrs.type = InputType.file
+                                attrs.id = "um-file-select"
                                 attrs.accept = acceptedMimeTypes.joinToString(",")
                             }
                         }

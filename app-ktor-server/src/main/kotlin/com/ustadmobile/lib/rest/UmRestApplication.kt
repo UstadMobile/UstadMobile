@@ -2,10 +2,7 @@ package com.ustadmobile.lib.rest
 
 import com.google.gson.Gson
 import com.ustadmobile.core.account.*
-import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
-import com.ustadmobile.core.catalog.contenttype.H5PTypePluginCommonJvm
-import com.ustadmobile.core.catalog.contenttype.VideoTypePluginJvm
-import com.ustadmobile.core.catalog.contenttype.XapiTypePluginCommonJvm
+import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentJobManagerJvm
 import com.ustadmobile.core.contentjob.ContentPluginManager
@@ -21,7 +18,6 @@ import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.*
-import com.ustadmobile.core.catalog.contenttype.ApacheIndexerPlugin
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.io.UploadSessionManager
@@ -54,7 +50,7 @@ import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.db.ext.preload
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
-import com.ustadmobile.core.util.SysPathUtil
+import com.ustadmobile.lib.util.SysPathUtil
 import io.ktor.client.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.server.http.content.*
@@ -67,7 +63,9 @@ import io.ktor.websocket.*
 import org.kodein.di.ktor.di
 import java.util.*
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
+import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.rest.logging.LogbackAntiLog
+import com.ustadmobile.lib.util.randomString
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -88,7 +86,7 @@ val REQUIRED_EXTERNAL_COMMANDS = listOf("ffmpeg", "ffprobe")
  */
 val KTOR_SERVER_ROUTES = listOf("/UmAppDatabase", "/ConcatenatedContainerFiles2",
     "/ContainerEntryList", "/ContainerEntryFile", "/auth", "/ContainerMount",
-    "/ContainerUpload2", "/Site", "/import", "/contentupload", "/websocket")
+    "/ContainerUpload2", "/Site", "/import", "/contentupload", "/websocket", "/pdf")
 
 
 /**
@@ -232,12 +230,14 @@ fun Application.umRestApplication(
                     attachmentDir = attachmentsDir)
                 .addSyncCallback(nodeIdAndAuth)
                 .addCallback(ContentJobItemTriggersCallback())
+                .addCallback(InsertDefaultSiteCallback())
                 .addMigrations(*migrationList().toTypedArray())
                 .build()
 
             if(appConfig.propertyOrNull("ktor.database.cleardb")?.getString()?.toBoolean() == true) {
                 Napier.i("Clearing database ${db} as ktor.database.cleardb is set")
-                    db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
+                db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
+                db.insertDefaultSite()
             }
 
             db.addIncomingReplicationListener(PermissionManagementIncomingReplicationListener(db))
@@ -268,6 +268,9 @@ fun Application.umRestApplication(
         bind<VideoTypePluginJvm>() with scoped(EndpointScope.Default).singleton{
             VideoTypePluginJvm(Any(), context, di, DummyContentPluginUploader())
         }
+        bind<PDFTypePlugin>() with scoped(EndpointScope.Default).singleton{
+            PDFTypePluginJvm(Any(), context, di, DummyContentPluginUploader())
+        }
         bind<ApacheIndexerPlugin>() with scoped(EndpointScope.Default).singleton{
             ApacheIndexerPlugin(Any(), context, di)
         }
@@ -278,6 +281,7 @@ fun Application.umRestApplication(
                     di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
                     di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
                     di.on(context).direct.instance<VideoTypePluginJvm>(),
+                    di.on(context).direct.instance<PDFTypePlugin>(),
                     di.on(context).direct.instance<ApacheIndexerPlugin>()))
         }
 
@@ -336,6 +340,7 @@ fun Application.umRestApplication(
             AuthManager(context, di).also { authManager ->
                 val repo: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_REPO)
                 runBlocking {
+                    //THIS IS A RACE CONDITION!!
                     repo.initAdminUser(context, authManager, di,
                         appConfig.propertyOrNull("ktor.ustad.adminpass")?.getString())
                 }

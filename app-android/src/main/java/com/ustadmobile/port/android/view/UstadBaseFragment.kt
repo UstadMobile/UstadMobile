@@ -86,7 +86,7 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
-        searchView = menu.findItem(R.id.menu_search).actionView as SearchView
+        searchView = menu.findItem(R.id.menu_search)?.actionView as? SearchView
         searchManager?.searchView = searchView
     }
 

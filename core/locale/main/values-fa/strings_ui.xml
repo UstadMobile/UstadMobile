@@ -112,7 +112,6 @@
     <string name="insufficient_space">فضای ذخیره سازی کافی نیست</string>
     <string name="download_cancel_label">لغو دانلود</string>
     <string name="download_storage_option_device">%1$s استفاده شده - %2$s خالی</string>
-    <string name="download_storage_permission_message">این اپلیکیشن به اجازه روی کارت حافظه نیاز دارد تا محتویات دانلود و ذخیره گردد</string>
     <string name="download_locally_availability">در نزدیکی‌تان موجود است</string>
     <string name="download_cloud_availability">موجود بروی ابر</string>
     <string name="xapi_day" value="300">روز</string>
@@ -120,42 +119,18 @@
     <string name="get_app">اپلیکیشن را بدست بیاورید</string>
     <string name="no_app_found">هیچ اپلیکشن دریافت نگردید تا پرونده باز گردد</string>
     <string name="entry_details_author">نویسنده</string>
-    <string name="library_reading_level">سطح خواندن</string>
     <string name="file_not_found">پرونده یافت نشد</string>
     <string name="multiple_choice">چند گزینه‌ای</string>
-    <string name="content_type_link">پیوند</string>
-    <string name="content_format_paragraph">پاراگراف</string>
-    <string name="content_direction_rtl">از راست به چپ</string>
-    <string name="content_font_10">اندازه متن 10</string>
-    <string name="content_font_14">اندازه متن 14</string>
     <string name="confirm">تأیید کردن</string>
-    <string name="field_password_min">حد اقل پنج حرف</string>
     <string name="entry_details_license">مجوز:</string>
-    <string name="content_insert_options">درج کردن</string>
-    <string name="content_choose_file">فایل را انتخاب کنید</string>
     <string name="video">ویدیو</string>
-    <string name="content_blank_doc_click_label">کلیک</string>
-    <string name="content_option_page">صفحه جدید</string>
-    <string name="content_add_page">صفحه علاوه کنید</string>
-    <string name="content_update_document_title">بهنگام سازی مدرک</string>
-    <string name="content_editor_menu_undo">ناکرده ساختن</string>
-    <string name="content_editor_menu_indent">فاصله در شروع متن</string>
-    <string name="content_editor_menu_orderd_list">لست منظم</string>
     <string name="content_editor_menu_italic">کج</string>
-    <string name="content_editor_menu_fontsize">اندازه خط</string>
-    <string name="content_editor_menu_align_right">راست</string>
-    <string name="content_editor_link_text">پیوند متن</string>
-    <string name="content_editor_link_insert">پیوند را درج نمائید</string>
-    <string name="permission_camera_title">اجازه کامره و فایل لازمی است</string>
-    <string name="content_editor_create_new_import_link">وارد ساختن پیوند</string>
-    <string name="content_editor_create_new_title">علاوه ساختن محتوا</string>
     <string name="content_from_file">از پرونده</string>
     <string name="licence">مجوز</string>
     <string name="content_creation_storage_option_title">گزینۀ ذخیره‌گاه</string>
     <string name="file_required_prompt">پرونده که باید وارد گردد انتخاب نشده است، دوباره کوشش نمائید</string>
     <string name="content_creation_folder_new_message">دوسیۀ جدید مؤفقانه اضافه گردید</string>
     <string name="content_creation_folder_update_message">دوسیه مؤفقانه بروزرسانی شد</string>
-    <string name="empty_state_downloaded">هیچ دانلود دریافت نگردید</string>
     <string name="error_message_update_document">بروزرسانی مدرک نامؤفق بود</string>
     <string name="content_editor_save_error">خطا در هنگام ذخیره‌سازی، دوباره کوشش کنید</string>
     <string name="export">صادر کردن</string>
@@ -164,16 +139,12 @@
     <string name="enter_register_code">کود ثبت‌نام را وارد نمائید</string>
     <string name="bar_chart" value="100">نمودار میله‌ای</string>
     <string name="score" value="200">نمرۀ اوسط</string>
-    <string name="average_duration" value="202">اوسط مدت زمان</string>
     <string name="xapi_week" value="301">هفته</string>
     <string name="xapi_month" value="302">ماه</string>
     <string name="xapi_custom_date" value="303">تاریخ دلخواه</string>
     <string name="xapi_content_entry" value="304">داخل ساختن محتوا</string>
-    <string name="xapi_gender" value="306">جنسیت</string>
     <string name="xapi_clear">پاک کردن</string>
     <string name="from">از</string>
-    <string name="date_range">محدوده تاریخ</string>
-    <string name="select_entries">انتخاب ورودی ها</string>
     <string name="xapi_options_general">عمومی</string>
     <string name="xapi_options_report_title">عنوان گزارش</string>
     <string name="xapi_options_visual_type">نوع تجسم</string>
@@ -186,7 +157,6 @@
     <string name="xapi_options_did">انجام داد</string>
     <string name="xapi_options_what">چی</string>
     <string name="xapi_options_where">کجا</string>
-    <string name="add_to_dashboard">علاوه ساختن در صفحه گزارشات</string>
     <string name="activity_import_link">وارد نمودن پیوند</string>
     <string name="xapi_hours">ساعات</string>
     <string name="xapi_minutes">دقایق</string>
@@ -200,7 +170,6 @@
     <string name="import_link_content_not_supported">از محتوی پشتیبانی نمی‌شود</string>
     <string name="import_link_big_size">اندازه فایل بسیار زیاد است</string>
     <string name="import_link_error">اشتباه در وارد ساختن</string>
-    <string name="error_not_found_tag">ببخشید، صفحۀ که شما در جستجوی آن هستید، دریافت شده نمیتواند.</string>
     <string name="offline_sharing_enable_bluetooth_prompt">شریک سازی آفلاین به بلوتوت نیاز دارد</string>
     <string name="offline_sharing_enable_wifi_promot">برای شریک سازی آفلاین نیاز است تا وای‌فای روشن گردد</string>
     <string name="enable">فعال کردن</string>
@@ -212,18 +181,8 @@
     <string name="publicly_accessible">در دسترس عمومی</string>
     <string name="error_message_load_page">بارگذاری صفحه نامؤفق بود</string>
     <string name="xapi_options_when">چه وقت</string>
-    <string name="content_preview_title">پیش دید...</string>
-    <string name="content_action_page_remove">دور ساختن صفحه</string>
-    <string name="content_editor_menu_text_formatting">قالب سازی متن</string>
-    <string name="content_editor_menu_align_center">مرکز</string>
-    <string name="content_editor_edit_category">ویرایش</string>
     <string name="content_from_link">از پیوند</string>
     <string name="supported_files">پرونده‌های مورد پشتیبانی: <b> ویدیو، صوت، EPUB، زاپی، فشرده شده، H5P </b></string>
-    <string name="content_media_message">چه نوع رسانه را میخواهید بگیرید؟</string>
-    <string name="content_editor_menu_redo">انجام مجدد</string>
-    <string name="content_editor_menu_subscript">متن فرعی</string>
-    <string name="content_editor_create_new_import">وارد ساختن فایل</string>
-    <string name="content_update_massage">به روز رسانی مؤفقانه صورت گرفت</string>
     <string name="done">تمام</string>
     <string name="content_editor_create_new_category">دوسیه جدید</string>
     <string name="dropdown">کشویی</string>
@@ -234,12 +193,8 @@
     <string name="locations">موقعیت ها</string>
     <string name="locations_setting_desc">مدیریت موقعیت ها</string>
     <string name="add_group">اضافه کردن گروه</string>
-    <string name="add_people">اضافه کردن مردم</string>
-    <string name="add_location">اضافه کردن موقعیت</string>
-    <string name="parent_location">موقعیت اصلی</string>
     <string name="custom_field">ساحه دلخواه</string>
     <string name="custom_fields_desc">اضافه، حذف و تنظیم مجدد ساحات دلخواه</string>
-    <string name="entity">نهاد</string>
     <string name="field_type">نوع ساحه</string>
     <string name="text">متن</string>
     <string name="options">گزینه‌ها</string>
@@ -256,7 +211,6 @@
     <string name="first_names">نامهای اول</string>
     <string name="permission_person_insert">اضافه کردن مردم</string>
     <string name="custom_fields">ساحات دلخواه</string>
-    <string name="sub_locations">موقعیتهای فرعی</string>
     <string name="group_activity">گروپ 
 \nفعالیت</string>
     <string name="select_group_members">انتخاب اعضای جدید گروپ</string>
