@@ -2,7 +2,7 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 's:u:p:e:t:a1:a2:c:r' --long 'serial1:,username:,password:,endpoint:,test:,apk1:,apk2:,console-output:,result:' -n 'run-maestro-tests.sh' -- "$@")
+TEMP=$(getopt -o 's:u:p:e:t:a1:a2:cr:n' --long 'serial1:,username:,password:,endpoint:,test:,apk1:,apk2:,console-output,result:,nobuild' -n 'run-maestro-tests.sh' -- "$@")
 
 
 eval set -- "$TEMP"
@@ -18,6 +18,7 @@ TESTAPK2=$SCRIPTDIR/build/apks/app-android-launcher-release-2.apk
 TESTRESULTSDIR=""
 CONTROLSERVER=""
 USECONSOLEOUTPUT=0
+NOUBUILD=0
 echo $SCRIPTDIR
 while true; do
         case "$1" in
@@ -70,6 +71,12 @@ while true; do
                     TESTRESULTSDIR=$2
                     shift 2
                     continue
+                ;;
+                  '-n'|'--nobuild')
+                       echo "no build"
+                      NOUBUILD=1
+                       shift 1
+                       continue
                 ;;
                 '--')
 
@@ -128,7 +135,10 @@ if [ "$(adb shell pm list packages com.toughra.ustadmobile2)" != "" ]; then
   adb shell pm uninstall com.toughra.ustadmobile2
 fi
 
-$SCRIPTDIR/build-extra-app-copy.sh
+if [ "$NOBUILD" != "1" ]; then
+ $SCRIPTDIR/build-extra-app-copy.sh
+fi
+
 adb install $TESTAPK1
 adb install $TESTAPK2
 
@@ -143,6 +153,8 @@ OUTPUTARGS=" --format junit --output $TESTRESULTSDIR/report.xml "
 if [ "$USECONSOLEOUTPUT" == "1" ]; then
   OUTPUTARGS=""
 fi
+
+
 
 maestro  --device=$TESTSERIAL  test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
