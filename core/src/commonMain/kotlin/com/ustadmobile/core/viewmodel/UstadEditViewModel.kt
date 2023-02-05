@@ -113,6 +113,9 @@ abstract class UstadEditViewModel(
      * entity just created. The current (edit) view will be popped off the stack, so if the user
      * goes back, they will not go back to the edit screen.
      *
+     * If the user is editing an existing entity, or there is currently a return result expected,
+     * then we will "return" the result using finishWithResult
+     *
      * @param detailViewName the detail view name to navigate to
      * @param entityUid the entity uid of the entity just saved
      * @param result the actual entity just created

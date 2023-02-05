@@ -125,6 +125,12 @@ abstract class UstadViewModel(
 
     }
 
+    /**
+     * Return a result to the screen that is expecting it, if any. See CODING-STYLE.md README for an
+     * overview of how this works.
+     *
+     * @param result: the result that is being provided (e.g. selected Person etc)
+     */
     protected fun finishWithResult(result: Any?) {
         val popUpToViewName = savedStateHandle[ARG_RESULT_DEST_VIEWNAME]
         val saveToKey = savedStateHandle[ARG_RESULT_DEST_KEY]
