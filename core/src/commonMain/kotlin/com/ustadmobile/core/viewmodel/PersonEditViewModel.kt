@@ -9,23 +9,23 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
-import com.ustadmobile.core.impl.nav.NavResult
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.schedule.age
-import com.ustadmobile.core.util.ext.hasFlag
-import com.ustadmobile.core.util.ext.insertPersonAndGroup
-import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
-import com.ustadmobile.core.util.ext.validEmail
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonEditView.Companion.REGISTER_MODE_MINOR
-import kotlinx.coroutines.flow.*
-import org.kodein.di.DI
-import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_UNSET
+import com.ustadmobile.lib.db.entities.PersonParentJoin
+import com.ustadmobile.lib.db.entities.PersonPicture
+import com.ustadmobile.lib.db.entities.PersonWithAccount
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
 import org.kodein.di.instance
 
 data class PersonEditUiState(
@@ -102,13 +102,17 @@ class PersonEditViewModel(
         loadingState = LoadingUiState.INDETERMINATE
 
         viewModelScope.launch {
-            val person: PersonWithAccount = savedStateHandle.getOrPutJson(KEY_ENTITY_STATE) {
-                activeRepo.onDbThenRepoWithTimeout(5000) { db, _ ->
-                    db.personDao.findPersonAccountByUid(entityUid)
-                } ?: PersonWithAccount().also {
-                    it.dateOfBirth = savedStateHandle[PersonEditView.ARG_DATE_OF_BIRTH]?.toLong() ?: 0L
+            loadEntity(
+                onLoadFromDb = { it.personDao.findPersonAccountByUid(entityUid) },
+                makeDefault = {
+                    PersonWithAccount().also {
+                        it.dateOfBirth = savedStateHandle[PersonEditView.ARG_DATE_OF_BIRTH]?.toLong() ?: 0L
+                    }
+                },
+                uiUpdate = { entityToDisplay ->
+                    _uiState.update { it.copy(person = entityToDisplay) }
                 }
-            }
+            )
 
             val personParentJoin = if(registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)) {
                 PersonParentJoin()
@@ -118,7 +122,6 @@ class PersonEditViewModel(
 
             _uiState.update { prev ->
                 prev.copy(
-                    person = person,
                     approvalPersonParentJoin = personParentJoin,
                     fieldsEnabled = true,
                 )
@@ -127,11 +130,12 @@ class PersonEditViewModel(
         }
     }
 
-
     fun onEntityChanged(entity: PersonWithAccount?) {
         _uiState.update { prev ->
             prev.copy(person = entity)
         }
+
+        scheduleEntityCommitToSavedState(entity)
     }
 
     fun onApprovalPersonParentJoinChanged(personParentJoin: PersonParentJoin?) {
