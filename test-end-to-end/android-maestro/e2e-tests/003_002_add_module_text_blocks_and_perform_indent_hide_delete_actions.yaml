@@ -22,9 +22,6 @@ env:
      TESTCOURSENAME: "Test Course Block Test"
 # edit the course to add blocks
 - tapOn: "Edit"
-- swipe:
-    start: 100,400
-    end: 100,100
 # add module ------ 1
 - runFlow:
     file: "../common/add_module_block.yaml"
@@ -47,9 +44,13 @@ env:
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/module_block_is_hidden"
 - tapOn: "Edit"
 #  swipe down to  view  added  bloc ks
-- swipe:
-    start: 100,400
-    end: 100,100
+- repeat:
+    while:
+      notVisible: "Edit"
+    commands:
+      - swipe:
+          start: 100,400
+          end: 100,100
 # unhide the module
 - tapOn:
     text: "Edit"
@@ -67,9 +68,13 @@ env:
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/text_block_indented"
 # unindent text block ----- 1
 - tapOn: "Edit"
-- swipe:
-    start: 100,400
-    end: 100,100
+- repeat:
+    while:
+      notVisible: "Edit"
+    commands:
+      - swipe:
+          start: 100,400
+          end: 100,100
 - tapOn:
     text: "Edit"
     index: 1
@@ -79,8 +84,8 @@ env:
 # Delete text block --- 1
 - tapOn: "Edit"
 - swipe:
-    start: 100,400
-    end: 100,100
+     start: 100,400
+     end: 100,100
 - tapOn:
     text: "Edit"
     index: 1
