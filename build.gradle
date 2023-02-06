@@ -15,8 +15,8 @@ buildscript {
 }
 
 plugins {
-    id 'com.android.application' version '7.3.1' apply false
-    id 'com.android.library' version '7.3.1' apply false
+    id 'com.android.application' version '7.4.0' apply false
+    id 'com.android.library' version '7.4.0' apply false
     id 'org.jetbrains.kotlin.android' version "$version_kotlin" apply false
     id 'org.jetbrains.kotlin.plugin.serialization' version "$version_kotlin" apply false
     id 'org.jetbrains.kotlin.plugin.atomicfu' version "$version_kotlin" apply false
@@ -71,7 +71,7 @@ ext {
     ustadVersion = project.version
     ustadVersionCode = 232
 
-    version_door = "0.0.63l"
+    version_door = "0.0.63m"
     version_retriever = "0.0.1e"
     version_xmlpullparserkmp = '0.0.20'
 

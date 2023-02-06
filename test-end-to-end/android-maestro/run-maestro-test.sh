@@ -131,13 +131,16 @@ if [ "$USECONSOLEOUTPUT" == "1" ]; then
   OUTPUTARGS=""
 fi
 
-maestro --device=$TESTSERIAL test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
+maestro  --device=$TESTSERIAL  test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
-         -e TESTSERIAL=$TESTSERIAL $OUTPUTARGS \
+         -e TESTSERIAL=$TESTSERIAL $OUTPUTARGS\
          $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR
 
 TESTSTATUS=$?
 
 $SCRIPTDIR/../../testserver-controller/stop.sh
+
+#Uninstall when finished
+adb shell pm uninstall com.toughra.ustadmobile
 
 exit $TESTSTATUS

@@ -1,0 +1,51 @@
+appId: com.toughra.ustadmobile
+---
+# in this test admin create a course and add members to the course -2 teachers and 6 students
+  # Member list
+  # -----name - username/password
+
+  # teachers :
+  # --0-- Anu Madhav - Anu/test
+   # student :
+  # --0-- Justin Joe      - Justin/test
+  # --1-- Caroline Jacob  - Caroline/test
+
+# test parameters needs to provide for this test :
+# 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+
+
+# add new course
+- runFlow:
+    file: "./add_course.yaml"
+    env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
+# add new teacher using flow - add_new_teacher_inside_course ----------- Anu Madhav - Anu/test
+- runFlow:
+    file: "./add_new_teacher_inside_course.yaml"
+    env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
+      TEACHERFIRSTNAME: "Anu"
+      TEACHERLASTNAME: "Madhav"
+      GENDER: "Female"
+      PASSWORD: "test"
+
+# add new student using flow - add_new_student_inside_course ----------- Justin Joe  - Justin/test
+- runFlow:
+    file: "./add_new_student_inside_course.yaml"
+    env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
+      STUDENTFIRSTNAME: "Justin"
+      STUDENTLASTNAME: "Joe"
+      GENDER: "Male"
+      PASSWORD: "test"
+# add new student using flow - add_new_student_inside_course --------- Caroline Jacob  - Caroline/test
+- runFlow:
+    file: "./add_new_student_inside_course.yaml"
+    env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
+      STUDENTFIRSTNAME: "Caroline"
+      STUDENTLASTNAME: "Jacob"
+      GENDER: "Female"
+      PASSWORD: "test"
+
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/member_list_of_new_test_course"

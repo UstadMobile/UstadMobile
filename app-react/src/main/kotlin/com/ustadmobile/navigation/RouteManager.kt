@@ -28,8 +28,6 @@ object RouteManager {
         UstadDestination(view = ContentEntryDetailAttemptsListView.VIEW_NAME, component = ContentEntryDetailAttemptsListComponent::class, showSearch = true),
         UstadDestination(view = EpubContentView.VIEW_NAME, component = EpubContentComponent::class),
         UstadDestination(view = PersonAccountEditView.VIEW_NAME, component = PersonAccountEditComponent::class),
-        UstadDestination(view = PersonEditView.VIEW_NAME, component = PersonEditComponent::class),
-        UstadDestination(view = PersonEditView.VIEW_NAME_REGISTER, component = PersonEditComponent::class, showNavigation = false),
         UstadDestination(view = XapiPackageContentView.VIEW_NAME, component = XapiPackageContentComponent::class),
         UstadDestination(view = VideoContentView.VIEW_NAME, component = VideoContentComponent::class),
         UstadDestination(view = PDFContentView.VIEW_NAME, component = PDFContentComponent::class),

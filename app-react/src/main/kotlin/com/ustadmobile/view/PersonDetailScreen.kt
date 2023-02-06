@@ -29,7 +29,8 @@ import csstype.px
 
 val PersonDetailScreen = FC<UstadScreenProps>() { props ->
     val viewModel = useViewModel(
-        onAppUiStateChange = props.onAppUiStateChanged
+        onAppUiStateChange = props.onAppUiStateChanged,
+        onShowSnack = props.onShowSnackBar,
     ) { di, savedStateHandle ->
         PersonDetailViewModel(di, savedStateHandle)
     }
@@ -65,7 +66,7 @@ val PersonDetailPreview = FC<Props> {
                 phoneNum = "0799999"
                 emailAddr = "Bob@gmail.com"
                 gender = 1
-                username = "Bob12"
+                username = "bob12"
                 dateOfBirth = 12
                 personOrgId = "123"
                 personAddress = "Herat"

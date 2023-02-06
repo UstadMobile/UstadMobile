@@ -2,17 +2,14 @@ appId: com.toughra.ustadmobile
 env:
   TESTNAME: "001_001_admin_can_add_content_001-h5p"
   TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_001-h5p"
-
 ---
 - clearState: com.toughra.ustadmobile
-
 - runFlow:
     file: "../common/startserver.yaml"
     env:
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
-
 - runFlow:
     file: "../common/add_content.yaml"
     env:
@@ -20,7 +17,6 @@ env:
       TESTCONTENTNAME: "AddContentH5pTest"
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
-
 - runFlow:
     file: "../common/login_download_and_open_content.yaml"
     env:

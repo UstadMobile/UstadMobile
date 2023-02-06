@@ -2,12 +2,16 @@ package com.ustadmobile.core.hooks
 
 import com.ustadmobile.core.components.DIContext
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.navigation.SavedStateHandle2
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.ViewModel
 import kotlinx.browser.window
 import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.singleton
 import react.*
 import react.router.dom.useSearchParams
 
@@ -17,9 +21,23 @@ import react.router.dom.useSearchParams
  */
 fun <T:ViewModel> useViewModel(
     onAppUiStateChange: ((AppUiState) -> Unit)? = null,
+    onShowSnack: ((Snack) -> Unit)? = null,
     block: (di: DI, savedStateHandle: UstadSavedStateHandle) -> T
 ): T {
-    val di = useContext(DIContext)
+    val contextDi = useContext(DIContext)
+
+    val di = useMemo(dependencies = emptyArray()) {
+        DI {
+            extend(contextDi)
+            if(onShowSnack != null){
+                bind<SnackBarDispatcher>() with singleton {
+                    SnackBarDispatcher {
+                        onShowSnack(it)
+                    }
+                }
+            }
+        }
+    }
 
     var firstRun by useState { true }
 
