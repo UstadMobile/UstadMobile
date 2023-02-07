@@ -22,9 +22,6 @@ env:
      TESTCOURSENAME: "Test Course Block Test"
 # edit the course to add blocks
 - tapOn: "Edit"
-- swipe:
-    start: 100,400
-    end: 100,100
 # add module ------ 1
 - runFlow:
     file: "../common/add_module_block.yaml"
@@ -37,6 +34,9 @@ env:
       TEXTTITLE: "PRIMARY COLOURS"
       TEXT: "RED,BLUE,GREEN"
 # hide the block- module
+- swipe:
+    start: 100,400
+    end: 100,100
 - tapOn:
     text: "Edit"
     index: 0
@@ -50,6 +50,7 @@ env:
 - swipe:
     start: 100,400
     end: 100,100
+
 # unhide the module
 - tapOn:
     text: "Edit"
@@ -79,8 +80,8 @@ env:
 # Delete text block --- 1
 - tapOn: "Edit"
 - swipe:
-    start: 100,400
-    end: 100,100
+     start: 100,400
+     end: 100,100
 - tapOn:
     text: "Edit"
     index: 1
