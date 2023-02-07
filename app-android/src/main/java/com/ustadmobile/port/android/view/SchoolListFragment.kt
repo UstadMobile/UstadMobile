@@ -2,14 +2,23 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemSchoolListItemBinding
 import com.ustadmobile.core.controller.SchoolListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.SchoolListView
+import com.ustadmobile.core.viewmodel.SchoolListUiState
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -148,5 +157,46 @@ class SchoolListFragment : UstadListViewFragment<School, SchoolWithMemberCountAn
             NEW_SCHOOL -> mPresenter?.handleClickCreateNewFab()
             JOIN_SCHOOL -> mPresenter?.handleClickJoinSchool()
         }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun SchoolListScreen(
+    uiState: SchoolListUiState = SchoolListUiState(),
+    onClickSchool: (SchoolWithMemberCountAndLocation) -> Unit = {},
+) {
+
+    LazyColumn {
+
+        items(
+            items = uiState.schoolList,
+            key = { school -> school.schoolUid }
+        ){ school ->
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickSchool(school)
+                },
+                text = { Text(school.schoolName ?: "") },
+                secondaryText = { Text(school.schoolAddress ?: "") }
+            )
+        }
+    }
+
+}
+
+@Composable
+@Preview
+fun SchoolListScreenPreview() {
+    val uiState = SchoolListUiState(
+        schoolList = listOf(
+            SchoolWithMemberCountAndLocation().apply {
+                schoolName = "School A"
+                schoolAddress = "Nairobi, Kenya"
+            }
+        )
+    )
+    MdcTheme {
+        SchoolListScreen()
     }
 }
