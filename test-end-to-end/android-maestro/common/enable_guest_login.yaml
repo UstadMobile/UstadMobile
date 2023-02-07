@@ -8,6 +8,6 @@ appId: com.toughra.ustadmobile
 - tapOn: "Edit"
 - tapOn: "Guest login enabled"
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/guest_login_enabled"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/guest_login_enabled"
 
 
