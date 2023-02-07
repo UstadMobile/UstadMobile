@@ -34,6 +34,9 @@ env:
       TEXTTITLE: "PRIMARY COLOURS"
       TEXT: "RED,BLUE,GREEN"
 # hide the block- module
+- swipe:
+    start: 100,400
+    end: 100,100
 - tapOn:
     text: "Edit"
     index: 0
@@ -44,13 +47,10 @@ env:
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/module_block_is_hidden"
 - tapOn: "Edit"
 #  swipe down to  view  added  bloc ks
-- repeat:
-    while:
-      notVisible: "Edit"
-    commands:
-      - swipe:
-          start: 100,400
-          end: 100,100
+- swipe:
+    start: 100,400
+    end: 100,100
+
 # unhide the module
 - tapOn:
     text: "Edit"
@@ -68,13 +68,9 @@ env:
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/text_block_indented"
 # unindent text block ----- 1
 - tapOn: "Edit"
-- repeat:
-    while:
-      notVisible: "Edit"
-    commands:
-      - swipe:
-          start: 100,400
-          end: 100,100
+- swipe:
+    start: 100,400
+    end: 100,100
 - tapOn:
     text: "Edit"
     index: 1
