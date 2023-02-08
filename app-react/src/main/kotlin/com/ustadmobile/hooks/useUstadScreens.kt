@@ -109,6 +109,9 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen(ClazzList2View.VIEW_NAME, "Clazz List Preview",
                 ClazzListScreenPreview
             ),
+            UstadScreen(SchoolListView.VIEW_NAME, "School List Preview",
+                SchoolListScreenPreview
+            ),
         )
     }
 }
