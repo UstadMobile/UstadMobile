@@ -19,10 +19,13 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 @Composable
 fun UstadCourseBlockEdit(
     uiState: CourseBlockEditUiState,
+    modifier: Modifier = Modifier,
     onCourseBlockChange: (CourseBlock?) -> Unit = {}
 ){
 
-    Column{
+    Column(
+        modifier = modifier
+    ){
 
         UstadDateTimeEditTextField(
             value = uiState.courseBlock?.cbHideUntilDate ?: 0,

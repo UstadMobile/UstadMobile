@@ -1,6 +1,17 @@
 package com.ustadmobile.core.hooks
 
+import com.ustadmobile.core.components.DIContext
+import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.navigation.SavedStateHandle2
+import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.ViewModel
+import kotlinx.browser.window
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.singleton
 import react.*
 import react.router.dom.useSearchParams
 
@@ -9,20 +20,37 @@ import react.router.dom.useSearchParams
  * unmounted. It will be recreated if the search param arguments change.
  */
 fun <T:ViewModel> useViewModel(
-    block: () -> T
+    onAppUiStateChange: ((AppUiState) -> Unit)? = null,
+    onShowSnack: ((Snack) -> Unit)? = null,
+    block: (di: DI, savedStateHandle: UstadSavedStateHandle) -> T
 ): T {
-    var firstRun by useState { true }
+    val contextDi = useContext(DIContext)
 
-    var viewModel: T by useState {
-        console.log("Creating ViewModel")
-        block()
+    val di = useMemo(dependencies = emptyArray()) {
+        DI {
+            extend(contextDi)
+            if(onShowSnack != null){
+                bind<SnackBarDispatcher>() with singleton {
+                    SnackBarDispatcher {
+                        onShowSnack(it)
+                    }
+                }
+            }
+        }
     }
+
+    var firstRun by useState { true }
 
     val searchParams by useSearchParams()
 
+    var viewModel: T by useState {
+        console.log("Creating ViewModel")
+        block(di, SavedStateHandle2(window.history))
+    }
+
     useEffect(dependencies = arrayOf(searchParams)){
         if(!firstRun) {
-            viewModel = block()
+            viewModel = block(di, SavedStateHandle2(window.history))
             console.log("Recreating ViewModel")
         }
 
@@ -34,5 +62,9 @@ fun <T:ViewModel> useViewModel(
         }
     }
 
+    useViewModelAppUiStateEffect(viewModel, onAppUiStateChange)
+    useNavControllerEffect((viewModel as? UstadViewModel)?.navCommandFlow)
+
     return viewModel
 }
+

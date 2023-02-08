@@ -5,7 +5,10 @@ import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
 import com.ustadmobile.core.components.DIContext
 import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useViewModel
+import com.ustadmobile.core.viewmodel.PersonDetailViewModel
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.mui.components.UstadDetailField
@@ -24,18 +27,24 @@ import react.*
 import kotlin.js.Date
 import csstype.px
 
-val PersonDetailScreen = FC<Props>() {
-    val di = useContext(DIContext)
+val PersonDetailScreen = FC<UstadScreenProps>() { props ->
+    val viewModel = useViewModel(
+        onAppUiStateChange = props.onAppUiStateChanged,
+        onShowSnack = props.onShowSnackBar,
+    ) { di, savedStateHandle ->
+        PersonDetailViewModel(di, savedStateHandle)
+    }
 
-    //val viewModel = useViewModel { DummyViewModel() }
-//
-//    val dummyUiState: DummyUiState by viewModel.uiState.collectAsState(DummyUiState())
-//
-//    val statePerson: Person? by dummyUiState.personState.collectAsState(null)
-//
-//    PersonDetailComponent2 {
-//        person = statePerson
-//    }
+    val uiState by viewModel.uiState.collectAsState(PersonDetailUiState())
+
+    PersonDetailComponent2 {
+        this.uiState = uiState
+        onClickChat = viewModel::onClickChat
+        onClickChangePassword = viewModel::onClickChangePassword
+        onClickCreateAccount = viewModel::onClickCreateAccount
+        onClickManageParentalConsent = viewModel::onClickManageParentalConsent
+    }
+
 }
 
 external interface PersonDetailProps : Props {
@@ -57,25 +66,28 @@ val PersonDetailPreview = FC<Props> {
                 phoneNum = "0799999"
                 emailAddr = "Bob@gmail.com"
                 gender = 1
-                username = "Bob12"
+                username = "bob12"
                 dateOfBirth = 12
                 personOrgId = "123"
                 personAddress = "Herat"
             },
-            showCreateAccountVisible = true,
-            changePasswordVisible = true,
             chatVisible = true,
             clazzes = listOf(
-                Clazz().apply {
-                    clazzName = "Jetpack Compose Class"
+                ClazzEnrolmentWithClazzAndAttendance().apply {
+                    clazz = Clazz().apply {
+                        clazzName = "Jetpack Compose Class"
+                    }
                 },
-                Clazz().apply {
-                    clazzName = "React Class"
+                ClazzEnrolmentWithClazzAndAttendance().apply {
+                    clazz = Clazz().apply {
+                        clazzName = "React Class"
+                    }
                 },
             )
         )
     }
 }
+
 
 val PersonDetailComponent2 = FC<PersonDetailProps> { props ->
 
@@ -279,7 +291,7 @@ private val Classes = FC<PersonDetailProps> { props ->
 
                     Typography {
                         align = TypographyAlign.center
-                        + (it.clazzName ?: "")
+                        + (it.clazz?.clazzName ?: "")
                     }
                 }
             }

@@ -1,24 +1,57 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.core.components.NavHost
+import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.mui.common.Area
-import com.ustadmobile.view.UstadScreensContext
 import csstype.px
+import mui.material.Snackbar
 import mui.material.Typography
 import mui.system.Box
 import mui.system.sx
-import react.FC
-import react.Props
-import react.create
+import react.*
 import react.dom.html.ReactHTML.main
 import react.router.Outlet
 import react.router.Route
 import react.router.Routes
-import react.useContext
 
 private val DEFAULT_PADDING = 30.px
 
-val Content = FC<Props> {
+typealias ShowSnackFunction = (Snack) -> Unit
+
+external interface UstadScreenProps: Props {
+
+    var onAppUiStateChanged: (AppUiState) -> Unit
+
+    var onShowSnackBar: ShowSnackFunction?
+
+}
+
+external interface ContentProps: Props {
+
+    var onAppUiStateChanged: (AppUiState) -> Unit
+
+}
+
+val Content = FC<ContentProps> { props ->
     val showcases = useContext(UstadScreensContext)
+
+    var snack: Snack? by useState { null }
+
+    val showSnackFunction: ShowSnackFunction = {
+        snack = it
+    }
+
+    Snackbar {
+        open = snack != null
+        onClose = { evt, closeReason ->
+            snack = null
+        }
+
+        Typography {
+            + (snack?.message ?: "")
+        }
+    }
 
     Routes {
         Route {
@@ -30,14 +63,19 @@ val Content = FC<Props> {
                     padding = DEFAULT_PADDING
                 }
 
-                Outlet()
+                NavHost {
+                    Outlet()
+                }
             }
 
             showcases.forEachIndexed { i, (key, _, Component) ->
                 Route {
                     index = i == 0
                     path = key
-                    element = Component.create()
+                    element = Component.create {
+                        asDynamic().onAppUiStateChanged = props.onAppUiStateChanged
+                        asDynamic().onShowSnackBar = showSnackFunction
+                    }
                 }
             }
 

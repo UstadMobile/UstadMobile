@@ -1543,7 +1543,10 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     -->
     <string name="more_options">More options</string>
 
-
+    <!--
+    Lists number of holidays in a HolidayCalendar. $1%s will be replaced with the number of holidays
+    in a given calendar -->
+    <string name="num_holidays">%1$s holidays</string>
 
     <string name="hide_app">Hide app</string>
 
@@ -1558,4 +1561,8 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     the name of the app e.g. Ustad Mobile. %2$s will be replaced with the unhide code.
     -->
     <string name="hide_app_explanation">Unhide code: %2$s\nIf hide app is enabled, then %1$s will be hidden and replaced with a fake notepad app when the panic button is triggered. You will need to type unhide code above ( %2$s ) into the fake notepad app to unhide %1$s.</string>
+
+    <string name="my_profile">My profile</string>
+
+    <string name="add_another_account">Add another account</string>
 </resources>

@@ -228,12 +228,14 @@ fun Application.umRestApplication(
                     attachmentDir = attachmentsDir)
                 .addSyncCallback(nodeIdAndAuth)
                 .addCallback(ContentJobItemTriggersCallback())
+                .addCallback(InsertDefaultSiteCallback())
                 .addMigrations(*migrationList().toTypedArray())
                 .build()
 
             if(appConfig.propertyOrNull("ktor.database.cleardb")?.getString()?.toBoolean() == true) {
                 Napier.i("Clearing database ${db} as ktor.database.cleardb is set")
-                    db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
+                db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
+                db.insertDefaultSite()
             }
 
             db.addIncomingReplicationListener(PermissionManagementIncomingReplicationListener(db))
