@@ -197,6 +197,6 @@ fun SchoolListScreenPreview() {
         )
     )
     MdcTheme {
-        SchoolListScreen()
+        SchoolListScreen(uiState)
     }
 }
