@@ -6,6 +6,7 @@ env:
   TESTNAME: "004_004_multiple_submission_assignment"
 ---
 - clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2
 - runFlow:
     file: "../common/startserver.yaml"
     env:

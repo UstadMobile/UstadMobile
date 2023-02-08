@@ -6,6 +6,7 @@ env:
   TESTNAME: "004_003_add_private_comment_on_assignments"
 ---
 - clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2
 - runFlow:
     file: "../common/startserver.yaml"
     env:

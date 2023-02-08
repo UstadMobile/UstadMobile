@@ -6,6 +6,7 @@ env:
   TESTNAME: "004_005_assignment_point_with_penalty"
 ---
 - clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2
 - runFlow:
     file: "../common/startserver.yaml"
     env:
