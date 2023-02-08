@@ -2,10 +2,11 @@ appId: com.toughra.ustadmobile
 tags:
   - checklist4
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_010_assignment_single_submission_for_groups"
-  TESTNAME: 004_010_assignment_single_submission_for_groups
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_011_assignment_multiple_submission_for_groups"
+  TESTNAME: 004_011_assignment_multiple_submission_for_groups
 ---
 - clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2
 - runFlow:
     file: "../common/startserver.yaml"
     env:

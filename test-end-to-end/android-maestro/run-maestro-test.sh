@@ -88,7 +88,7 @@ while true; do
 done
 
 if [ "$TESTSERIAL" == "" ]; then
-  echo "Please specify adb device serial usign --serial1 param"
+  echo "Please specify adb device serial using--serial1 param"
   exit 1
 fi
 
@@ -135,9 +135,9 @@ if [ "$(adb shell pm list packages com.toughra.ustadmobile2)" != "" ]; then
   adb shell pm uninstall com.toughra.ustadmobile2
 fi
 
-if [ "$NOBUILD" != "1" ]; then
- $SCRIPTDIR/build-extra-app-copy.sh
-fi
+# if [ "$NOBUILD" != "1" ]; then
+# $SCRIPTDIR/build-extra-app-copy.sh
+#fi
 
 adb install $TESTAPK1
 adb install $TESTAPK2
@@ -159,11 +159,15 @@ fi
 maestro  --device=$TESTSERIAL  test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
          -e TESTSERIAL=$TESTSERIAL $OUTPUTARGS\
-         $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR
-        # --include-tags=checklist4
+         $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR \
+         --include-tags=checklist4
 
 TESTSTATUS=$?
 
 $SCRIPTDIR/../../testserver-controller/stop.sh
+
+#uninstall apps
+ adb shell pm uninstall com.toughra.ustadmobile
+ adb shell pm uninstall com.toughra.ustadmobile2
 
 exit $TESTSTATUS

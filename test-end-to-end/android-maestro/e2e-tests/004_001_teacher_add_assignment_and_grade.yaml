@@ -6,6 +6,7 @@ env:
   TESTNAME: 004_001_teacher_add_assignment_and_grade
 ---
 - clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2
 - runFlow:
     file: "../common/startserver.yaml"
     env:
