@@ -7,6 +7,13 @@ appId: com.toughra.ustadmobile
   # 3) TEXT: provide text to enter inside text box of string type
 
 # add module
+- repeat:
+      while:
+          notVisible: "Add block"
+      commands:
+          - swipe:
+                start: 100,400
+                end: 100,100
 - tapOn: "Add block"
 - tapOn: "Text"
 - tapOn: "Title"
