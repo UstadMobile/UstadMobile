@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.People
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -27,6 +28,7 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.SchoolListView
 import com.ustadmobile.core.viewmodel.SchoolListUiState
+import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -175,7 +177,9 @@ private fun SchoolListScreen(
     onClickSchool: (SchoolWithMemberCountAndLocation) -> Unit = {},
 ) {
 
-    LazyColumn {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ) {
 
         items(
             items = uiState.schoolList,
@@ -195,7 +199,7 @@ private fun SchoolListScreen(
                 trailing = {
                     Icon(Icons.Default.AccountBalance,
                         contentDescription = "",
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(80.dp)
                     )
                 }
             )
@@ -207,10 +211,22 @@ private fun SchoolListScreen(
 private fun ListItemSecondaryContent(
     school: SchoolWithMemberCountAndLocation
 ){
-    Column() {
-        TextIconRow(school.schoolAddress ?: "", Icons.Default.LocationOn)
 
-        TextIconRow(school.schoolAddress ?: "", Icons.Default.People)
+    val schoolUiState = school.listItemUiState
+    val memberCount = stringResource(id = R.string.num_items_with_name_with_comma,
+        school.numStudents,
+        stringResource(R.string.students),
+        school.numTeachers,
+        stringResource(R.string.teachers_literal)
+    )
+
+    Column {
+
+        if (schoolUiState.schoolAddressVisible) {
+            TextIconRow(school.schoolAddress ?: "", Icons.Default.LocationOn)
+        }
+
+        TextIconRow(memberCount, Icons.Default.People)
     }
 }
 
@@ -241,6 +257,8 @@ fun SchoolListScreenPreview() {
             SchoolWithMemberCountAndLocation().apply {
                 schoolName = "School A"
                 schoolAddress = "Nairobi, Kenya"
+                numStudents = 460
+                numTeachers = 30
             }
         )
     )
