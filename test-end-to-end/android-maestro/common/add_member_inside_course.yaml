@@ -15,4 +15,4 @@ appId: com.toughra.ustadmobile
 - scroll
 - tapOn: "${FIRSTNAME} ${LASTNAME}"
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/added-${MEMBER}-${FIRSTNAME} ${LASTNAME}"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added-${MEMBER}-${FIRSTNAME} ${LASTNAME}"

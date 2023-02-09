@@ -4,21 +4,17 @@ env:
   TESTNAME: "001_002_admin_can_hide_content"
 ---
 - clearState: com.toughra.ustadmobile
-#---------Start test-controller-server ---------#
 - runFlow:
     file: "../common/startserver.yaml"
     env:
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
-
-#---------add content to library ---------#
 - runFlow:
     file: "../common/add_content.yaml"
     env:
       TESTFILENAME: "Epub_Content.epub"
       TESTCONTENTNAME: "HideContentTest"
-#---------hide content in library ---------#
 - runFlow:
     file: "../common/hide_content.yaml"
     env:

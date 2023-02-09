@@ -9,6 +9,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.isLazyInitialized
@@ -35,6 +36,7 @@ import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.util.randomString
+import org.mockito.kotlin.mock
 
 
 typealias TestViewModelFactory<T> = ViewModelTestBuilder<T>.() -> T
@@ -70,6 +72,12 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
     val mockWebServer: MockWebServer by lazy {
         MockWebServer()
     }
+
+    /**
+     * Shorthand to get the active endpoint
+     */
+    val activeEndpoint: Endpoint
+        get() = di.direct.instance<UstadAccountManager>().activeEndpoint
 
     private var diVar = DI {
         import(CommonJvmDiModule)
@@ -124,6 +132,10 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
                 instance(tag = DoorTag.TAG_DB)
             }
         }
+
+        bind<SnackBarDispatcher>() with singleton {
+            mock { }
+        }
     }
 
     init {
@@ -144,7 +156,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
     val di: DI
         get() = diVar
 
-    val viewModel: T by lazy {
+    val viewModel: T by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         viewModelFactoryVar()
     }
 
@@ -185,8 +197,10 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
 
 
     internal fun cleanup() {
-        if(::viewModelFactoryVar.isInitialized) {
+        try {
             viewModel.viewModelScope.cancel()
+        }catch(e: Exception) {
+            e.printStackTrace()
         }
 
         if(this::tempDir.isLazyInitialized) {

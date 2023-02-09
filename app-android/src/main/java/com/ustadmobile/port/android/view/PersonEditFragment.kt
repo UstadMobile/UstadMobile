@@ -49,33 +49,12 @@ import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 import org.kodein.di.android.x.closestDI
 
-interface PersonEditFragmentEventHandler {
-
-    fun onClickNewRoleAndAssignment()
-    
-}
-
 class PersonEditFragment: Fragment() {
 
     val di: DI by closestDI()
 
     private val viewModel: PersonEditViewModel by viewModels {
-        PersonEditFragment.provideFactory(di, this, requireArguments())
-    }
-
-
-    fun navigateToNextDestination(account: UmAccount?, nextDestination: String) {
-        val navController = findNavController()
-        val destinationProvider: DestinationProvider = di.direct.instance()
-
-        val umNextDestination = destinationProvider.lookupDestinationName(nextDestination)
-        navController.currentBackStackEntry?.savedStateHandle?.set(UstadView.ARG_SNACK_MESSAGE,
-                String.format(getString(R.string.logged_in_as),account?.username,account?.endpointUrl))
-        if(umNextDestination != null){
-            val navOptions = NavOptions.Builder().setPopUpTo(umNextDestination.destinationId,
-                    true).build()
-            navController.navigate(umNextDestination.destinationId,null, navOptions)
-        }
+        UstadViewModelProviderFactory(di, this, arguments)
     }
 
     override fun onCreateView(
@@ -97,22 +76,6 @@ class PersonEditFragment: Fragment() {
     }
 
 
-    companion object {
-
-        fun provideFactory(
-            di: DI,
-            owner: SavedStateRegistryOwner,
-            defaultArgs: Bundle? = null,
-        ): AbstractSavedStateViewModelFactory = object: AbstractSavedStateViewModelFactory(owner, defaultArgs) {
-            override fun <T : ViewModel?> create(
-                key: String,
-                modelClass: Class<T>,
-                handle: SavedStateHandle
-            ): T {
-                return PersonEditViewModel(di, SavedStateHandleAdapter(handle)) as T
-            }
-        }
-    }
 }
 
 @Composable
@@ -282,9 +245,8 @@ private fun PersonEditScreen(viewModel: PersonEditViewModel) {
     val uiState: PersonEditUiState by viewModel.uiState.collectAsState(PersonEditUiState())
     PersonEditScreen(
         uiState,
-        onPersonChanged = {
-            viewModel.onEntityChanged(it)
-        }
+        onPersonChanged = viewModel::onEntityChanged,
+        onApprovalPersonParentJoinChanged = viewModel::onApprovalPersonParentJoinChanged,
     )
 }
 

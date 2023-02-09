@@ -9,12 +9,6 @@
         <variable name="clazzEnrolmentWithClazz"
             type="com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazz" />
 
-        <variable name="mPresenter"
-            type="com.ustadmobile.core.controller.PersonEditPresenter" />
-
-        <variable name="mFragment"
-            type="com.ustadmobile.port.android.view.PersonEditFragmentEventHandler" />
-
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

@@ -9,7 +9,11 @@ import com.ustadmobile.port.android.util.ext.MS_PER_MIN
 import java.util.*
 
 /**
- * timeInMs should be the hours, minutes, and seconds multiplied out into MS. It should not include
+ * timeInMs should be the hours, minutes, and seconds multiplied out into milliseconds.
+ *
+ * This will return a string that uses the locale's time formatter. This might be a 24hour clock,
+ * or am/pm depending on the locale.
+ *
  */
 @Composable
 fun rememberFormattedTime(timeInMs: Int): String {
