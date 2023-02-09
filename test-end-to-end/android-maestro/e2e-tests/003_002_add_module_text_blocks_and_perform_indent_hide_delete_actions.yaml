@@ -34,11 +34,17 @@ env:
       TEXTTITLE: "PRIMARY COLOURS"
       TEXT: "RED,BLUE,GREEN"
 # hide the block- module
-- swipe:
-    start: 100,400
-    end: 100,100
+- repeat:
+    while:
+      notVisible:
+        id: "com.toughra.ustadmobile:id/item_course_block_more_option"
+        index: 0
+    commands:
+      - swipe:
+          start: 100,400
+          end: 100,100
 - tapOn:
-    text: "Edit"
+    id: "com.toughra.ustadmobile:id/item_course_block_more_option"
     index: 0
 - tapOn: "Hide"
 - tapOn: "SAVE"
@@ -47,20 +53,26 @@ env:
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/module_block_is_hidden"
 - tapOn: "Edit"
 #  swipe down to  view  added  bloc ks
-- swipe:
-    start: 100,400
-    end: 100,100
+- repeat:
+    while:
+      notVisible:
+        id: "com.toughra.ustadmobile:id/item_course_block_more_option"
+        index: 0
+    commands:
+      - swipe:
+          start: 100,400
+          end: 100,100
 
 # unhide the module
 - tapOn:
-    text: "Edit"
+    id: "com.toughra.ustadmobile:id/item_course_block_more_option"
     index: 0
 - tapOn: "Unhide"
 - assertVisible:
     text: "SEMESTER 1"
 # indent the text block ----- 1
 - tapOn:
-    text: "Edit"
+    id: "com.toughra.ustadmobile:id/item_course_block_more_option"
     index: 1
 - tapOn: "Indent"
 - tapOn: "SAVE"
@@ -68,22 +80,35 @@ env:
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/text_block_indented"
 # unindent text block ----- 1
 - tapOn: "Edit"
-- swipe:
-    start: 100,400
-    end: 100,100
+- repeat:
+    while:
+      notVisible:
+        id: "com.toughra.ustadmobile:id/item_course_block_more_option"
+        index: 1
+    commands:
+      - swipe:
+          start: 100,400
+          end: 100,100
 - tapOn:
-    text: "Edit"
+    id: "com.toughra.ustadmobile:id/item_course_block_more_option"
     index: 1
 - tapOn: "Unindent"
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/text_block_unindented"
 # Delete text block --- 1
 - tapOn: "Edit"
-- swipe:
-     start: 100,400
-     end: 100,100
+- repeat:
+    while:
+      notVisible:
+        id: "com.toughra.ustadmobile:id/item_course_block_more_option"
+        index: 1
+    commands:
+      - swipe:
+          start: 100,400
+          end: 100,100
+
 - tapOn:
-    text: "Edit"
+    id: "com.toughra.ustadmobile:id/item_course_block_more_option"
     index: 1
 - tapOn: "Delete"
 - tapOn: "SAVE"
