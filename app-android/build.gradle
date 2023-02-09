@@ -263,6 +263,8 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
     implementation "commons-io:commons-io:$version_commons_io"
 
+    implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
+
     //ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$version_androidx_lifecycle"

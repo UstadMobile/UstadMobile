@@ -2,10 +2,19 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentListBinding
 import com.toughra.ustadmobile.databinding.ItemTimeZoneBinding
@@ -14,10 +23,12 @@ import com.ustadmobile.core.controller.TimeZoneListPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.TimeZoneListView
+import com.ustadmobile.core.viewmodel.TimeZoneListUiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.TimeZone
 import java.util.*
 
 class TimeZoneListFragment : UstadBaseFragment() , TimeZoneListView, OnSearchSubmitted{
@@ -112,5 +123,43 @@ class TimeZoneListFragment : UstadBaseFragment() , TimeZoneListView, OnSearchSub
 
 
 
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun TimeZoneListScreen(
+    uiState: TimeZoneListUiState = TimeZoneListUiState(),
+    onClickTimezone: (TimeZone) -> Unit = {},
+) {
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ) {
+
+        items(
+            items = uiState.timeZoneList,
+            key = { timezone -> timezone.id }
+        ){ timezone ->
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickTimezone(timezone)
+                },
+                text = { Text("") },
+                secondaryText = { Text("") }
+            )
+        }
+    }
+}
+
+
+@Composable
+@Preview
+fun TimeZoneListScreenPreview() {
+    val uiState = TimeZoneListUiState(
+
+    )
+    MdcTheme{
+        TimeZoneListScreen(uiState)
     }
 }
