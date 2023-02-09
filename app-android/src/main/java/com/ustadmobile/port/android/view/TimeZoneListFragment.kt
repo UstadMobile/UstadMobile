@@ -28,7 +28,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.TimeZone
+import kotlinx.datetime.*
+import java.util.TimeZone
 import java.util.*
 
 class TimeZoneListFragment : UstadBaseFragment() , TimeZoneListView, OnSearchSubmitted{
@@ -130,7 +131,7 @@ class TimeZoneListFragment : UstadBaseFragment() , TimeZoneListView, OnSearchSub
 @Composable
 private fun TimeZoneListScreen(
     uiState: TimeZoneListUiState = TimeZoneListUiState(),
-    onClickTimezone: (TimeZone) -> Unit = {},
+    onClickTimezone: (kotlinx.datetime.TimeZone) -> Unit = {},
 ) {
 
     LazyColumn(
@@ -145,7 +146,9 @@ private fun TimeZoneListScreen(
                 modifier = Modifier.clickable {
                     onClickTimezone(timezone)
                 },
-                text = { Text("") },
+                text = { Text(
+                    timezone.toString()
+                ) },
                 secondaryText = { Text("") }
             )
         }
@@ -157,7 +160,12 @@ private fun TimeZoneListScreen(
 @Preview
 fun TimeZoneListScreenPreview() {
     val uiState = TimeZoneListUiState(
-
+        timeZoneList = listOf(
+            kotlinx.datetime.TimeZone.of("Pacific/Apia"),
+            kotlinx.datetime.TimeZone.of("Pacific/Midway"),
+            kotlinx.datetime.TimeZone.of("Pacific/Niue"),
+            kotlinx.datetime.TimeZone.of("Pacific/Samoa"),
+        )
     )
     MdcTheme{
         TimeZoneListScreen(uiState)
