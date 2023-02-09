@@ -14,7 +14,7 @@ suspend fun <R> RoomDatabase.waitUntil2(tableNames: Set<String>, timeout: Long,
     val changeChannel = Channel<Boolean>(UNLIMITED)
 
     val invalidationObserver: InvalidationTracker.Observer = object: InvalidationTracker.Observer(tableNames.toTypedArray()) {
-        override fun onInvalidated(tables: MutableSet<String>) {
+        override fun onInvalidated(tables: Set<String>) {
             changeChannel.trySend(true)
         }
     }

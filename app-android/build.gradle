@@ -138,8 +138,11 @@ android {
         abortOnError false
     }
     namespace 'com.toughra.ustadmobile'
+
+    //See  Compose to Kotlin Compatibility Map
+    // https://developer.android.com/jetpack/androidx/releases/compose-kotlin
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.3.2"
+        kotlinCompilerExtensionVersion = "1.4.2"
     }
     packagingOptions {
         resources {
@@ -303,11 +306,16 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:$version_androidx_recyclerview"
 
     //Compose
-    implementation "androidx.compose.material:material:$version_compose_material"
-    implementation "androidx.compose.ui:ui-tooling-preview:$version_compose_material"
-    debugImplementation "androidx.compose.ui:ui-tooling:$version_compose_material"
-    implementation "androidx.activity:activity-compose:$version_compose_material"
-    implementation "androidx.compose.material:material-icons-extended:$version_compose_material"
+
+    def composeBom = platform("androidx.compose:compose-bom:$version_compose_bom")
+    implementation composeBom
+    androidTestImplementation composeBom
+
+    implementation "androidx.compose.material:material"
+    implementation "androidx.compose.ui:ui-tooling-preview"
+    debugImplementation "androidx.compose.ui:ui-tooling"
+    implementation "androidx.activity:activity-compose:$version_activity_compose"
+    implementation "androidx.compose.material:material-icons-extended"
     implementation "com.google.android.material:compose-theme-adapter:$version_compose_theme_adapter"
     implementation "com.google.accompanist:accompanist-pager:$version_compose_accompanist"
     implementation "com.google.accompanist:accompanist-pager-indicators:$version_compose_accompanist"

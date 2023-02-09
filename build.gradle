@@ -140,7 +140,10 @@ ext {
 
     version_android_material = "1.8.0"
     version_androidx_appcompat = "1.6.1"
-    version_compose_material = "1.4.2"
+
+    version_compose_bom = "2022.12.00"
+    version_activity_compose = "1.5.1"
+
     version_compose_accompanist = "0.28.0"
 
     //As per https://github.com/material-components/material-components-android-compose-theme-adapter/releases
