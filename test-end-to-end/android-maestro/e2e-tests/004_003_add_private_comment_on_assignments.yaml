@@ -71,3 +71,5 @@ env:
     start: 100,400
     end: 100,100
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_private_comments_2student_notVisible"
+- clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2

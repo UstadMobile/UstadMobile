@@ -106,4 +106,5 @@ env:
       ASSIGNMENTNAME: Test Assignment
       POINT1: 8
       POINT2: 7
-
+- clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2

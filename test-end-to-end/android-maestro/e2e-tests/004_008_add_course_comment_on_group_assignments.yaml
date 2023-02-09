@@ -95,3 +95,5 @@ env:
       ASSIGNMENTNAME: Test Assignment
       CLASSCOMMENT: Group 1 completed assignment
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/group1_member_view"
+- clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2

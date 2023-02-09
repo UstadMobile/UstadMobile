@@ -80,3 +80,5 @@ env:
 - tapOn: "Test Assignment"
 - assertNotVisible: "8"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_grade_on_assignmentPage_studentView1"
+- clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2

@@ -118,3 +118,5 @@ env:
 - tapOn: "Test Assignment"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/single_submission_assignment_grade_studentView2"
 
+- clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2

@@ -83,3 +83,5 @@ env:
     start: 100,400
     end: 100,100
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_class_comments_studentView"
+- clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2

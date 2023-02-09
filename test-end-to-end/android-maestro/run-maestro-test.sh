@@ -160,7 +160,7 @@ maestro  --device=$TESTSERIAL  test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER 
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
          -e TESTSERIAL=$TESTSERIAL $OUTPUTARGS\
          $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR \
-         --include-tags=checklist4
+         #--include-tags=checklist4
 
 TESTSTATUS=$?
 

@@ -91,3 +91,5 @@ env:
       TESTCOURSENAME: Group Private comment test
       PRIVATECOMMENT: Hello Mam
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/otherGroup_private comment_not_visible"
+- clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2
