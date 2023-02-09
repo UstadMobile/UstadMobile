@@ -175,7 +175,8 @@ private fun StatementListScreen(
                         painterResource(
                             id = VERB_ICON_MAP[statement.statementVerbUid.toInt()]
                                 ?: R.drawable.verb_interactive),
-                        contentDescription = null
+                        contentDescription = null,
+                        modifier = Modifier.size(40.dp)
                     )
                 }
             )
@@ -194,7 +195,9 @@ fun SecondaryTextContent(
         timeZoneId = TimeZone.getDefault().id
     )
 
-    Column {
+    Column (
+       horizontalAlignment = Alignment.End
+    ){
         if (statementUiState.descriptionVisible){
             Text(statement.objectDisplay ?: "")
         }
