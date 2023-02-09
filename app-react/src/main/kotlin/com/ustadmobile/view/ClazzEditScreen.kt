@@ -27,8 +27,8 @@ import com.ustadmobile.wrappers.reacteasysort.SortableList
 import csstype.number
 import csstype.pct
 import csstype.px
-import dom.html.HTMLDivElement
-import kotlinx.js.jso
+import web.html.HTMLDivElement
+import js.core.jso
 import mui.icons.material.*
 import mui.material.*
 import mui.material.List
@@ -39,7 +39,6 @@ import react.*
 import react.dom.aria.ariaLabel
 import react.dom.events.MouseEvent
 import react.dom.events.MouseEventHandler
-import react.dom.html.ReactHTML
 import react.dom.html.ReactHTML.div
 
 private val COURSE_BLOCK_DRAG_CLASS = "dragging_course_block"
@@ -421,7 +420,7 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
         point = null
     }
 
-    ReactHTML.div {
+    div {
 
         IconButton{
             disabled = !(props.fieldsEnabled)

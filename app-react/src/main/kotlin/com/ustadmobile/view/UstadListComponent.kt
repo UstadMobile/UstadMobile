@@ -47,14 +47,14 @@ import mui.material.styles.TypographyVariant
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-import org.w3c.dom.events.Event
+import web.events.Event
 import react.RBuilder
 import react.setState
 import styled.css
 import styled.styledDiv
 import styled.styledSpan
 
-abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<UmProps, UmState>(props),
+abstract class UstadListComponent<RT, DT: Any>(props: UmProps) : UstadBaseComponent<UmProps, UmState>(props),
     UstadListView<RT, DT>, OnSortOptionSelected {
 
     protected abstract val displayTypeRepo: Any?

@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Lens
 import androidx.compose.material.icons.filled.People
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
@@ -21,6 +22,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingSource
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.account.UstadAccountManager
@@ -51,6 +55,8 @@ import com.ustadmobile.port.android.view.util.colorForAttendanceStatus
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import androidx.paging.compose.collectAsLazyPagingItems
+
 
 class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDetails>(),
         ClazzList2View, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener,

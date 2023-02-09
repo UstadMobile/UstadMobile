@@ -6,7 +6,7 @@ import mui.material.ContainerProps
 import mui.material.ListItem
 import mui.material.ListItemAlignItems
 import mui.material.ListItemProps
-import org.w3c.dom.events.Event
+import web.events.Event
 import react.RBuilder
 import styled.StyledHandler
 

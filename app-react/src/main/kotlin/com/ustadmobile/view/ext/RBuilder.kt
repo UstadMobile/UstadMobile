@@ -64,8 +64,8 @@ import mui.material.*
 import mui.material.styles.TypographyVariant
 import org.kodein.di.DI
 import org.kodein.di.instance
-import dom.html.HTMLImageElement
-import org.w3c.dom.events.Event
+import web.html.HTMLImageElement
+import web.events.Event
 import react.*
 import react.dom.attrs
 import react.dom.html.ImgHTMLAttributes

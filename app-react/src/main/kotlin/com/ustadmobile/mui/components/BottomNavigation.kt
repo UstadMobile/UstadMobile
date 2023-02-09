@@ -5,11 +5,11 @@ import mui.material.BottomNavigation
 import mui.material.BottomNavigationAction
 import mui.material.BottomNavigationActionProps
 import mui.material.BottomNavigationProps
-import org.w3c.dom.events.Event
 import react.RBuilder
 import react.ReactNode
 import styled.StyledHandler
 import styled.StyledProps
+import web.events.Event
 
 external interface UMBottomNavigationActionProps: BottomNavigationActionProps, StyledProps
 

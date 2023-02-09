@@ -16,7 +16,7 @@ import mui.system.StackDirection
 import mui.system.responsive
 import react.FC
 import react.Props
-import react.dom.html.InputMode
+import web.html.InputMode
 
 external interface UstadCourseBlockEditProps: Props {
 

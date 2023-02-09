@@ -28,16 +28,13 @@ kotlin {
             }
 
             binaries.executable()
-            webpackTask {
-                cssSupport.enabled = true
-            }
-            runTask {
-                cssSupport.enabled = true
-            }
+
             testTask {
                 useKarma {
                     useChromeHeadless()
+                    /* Not supported from Kotlin 1.8
                     webpackConfig.cssSupport.enabled = true
+                     */
                 }
             }
         }
@@ -54,7 +51,7 @@ dependencies {
     implementation "org.jetbrains.kotlin-wrappers:kotlin-react"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-react-dom"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-styled"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom-legacy"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-history"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-redux"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-react-redux"

@@ -13,7 +13,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.view.ext.renderListItemWithPersonAttendanceAndPendingRequests
 import com.ustadmobile.view.ext.renderListSectionTitle
-import org.w3c.dom.events.Event
+import web.events.Event
 import react.RBuilder
 import react.setState
 

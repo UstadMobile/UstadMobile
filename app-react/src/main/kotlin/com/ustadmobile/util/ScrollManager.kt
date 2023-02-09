@@ -1,9 +1,10 @@
 package com.ustadmobile.util
 
-import kotlinx.browser.document
 import kotlinx.browser.window
-import org.w3c.dom.Element
-import org.w3c.dom.events.Event
+import web.dom.Element
+import web.dom.document
+import web.events.Event
+import web.events.EventType
 
 /**
  * Manages scroll behaviours with trigger events, currently is being used to mimic an endless
@@ -40,7 +41,7 @@ class  ScrollManager(
         set(value) {
             if(value != null){
                 scrollElement = document.getElementById(viewToObserve)
-                scrollElement?.addEventListener("scroll", scrollEventCallback)
+                scrollElement?.addEventListener(  EventType("scroll"), scrollEventCallback)
             }
             field = value
         }
@@ -56,7 +57,7 @@ class  ScrollManager(
     }
 
     fun onDestroy(){
-        scrollElement?.removeEventListener("scroll", scrollEventCallback)
+        scrollElement?.removeEventListener(EventType("scroll"), scrollEventCallback)
         scrollElement = null
         lastScrollPercentage = 0
         window.clearTimeout(scrollHandlerTimeOutId)

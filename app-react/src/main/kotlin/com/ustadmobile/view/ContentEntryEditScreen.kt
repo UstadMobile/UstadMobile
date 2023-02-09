@@ -16,7 +16,7 @@ import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.components.UstadSwitchField
 import csstype.AlignItems
 import csstype.px
-import dom.html.HTMLInputElement
+import web.html.HTMLInputElement
 import mui.material.*
 import mui.material.Stack
 import mui.material.Switch

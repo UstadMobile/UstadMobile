@@ -3,14 +3,14 @@ package com.ustadmobile.view
 import com.ustadmobile.core.viewmodel.SiteTermsDetailUiState
 import com.ustadmobile.lib.db.entities.SiteTerms
 import csstype.px
-import kotlinx.js.jso
+import js.core.jso
 import mui.material.Container
 import mui.system.Stack
 import mui.system.StackDirection
 import mui.system.responsive
 import react.FC
 import react.Props
-import react.dom.html.ReactHTML
+import react.dom.html.ReactHTML.div
 import react.useState
 
 external interface SiteTermsDetailScreenProps : Props {
@@ -26,7 +26,7 @@ val SiteTermsDetailScreenComponent2 = FC<SiteTermsDetailScreenProps> { props ->
             direction = responsive(StackDirection.column)
             spacing = responsive(10.px)
 
-            ReactHTML.div {
+            div {
                 dangerouslySetInnerHTML = jso {
                     __html = props.uiState.siteTerms?.termsHtml ?: ""
                 }

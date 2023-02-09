@@ -2,7 +2,7 @@ package com.ustadmobile.mui.theme
 
 //As per MUI showcase
 
-import kotlinx.js.jso
+import js.core.jso
 import mui.material.PaletteMode.dark
 import mui.material.PaletteMode.light
 import mui.material.styles.createTheme

@@ -281,6 +281,7 @@ dependencies {
 
     // Paging
     implementation "androidx.paging:paging-runtime:$version_androidx_paging"
+    implementation "androidx.paging:paging-compose:$version_androidx_paging_compose"
 
     //Work manager
     implementation "androidx.work:work-runtime:$version_android_workmanager"
@@ -385,7 +386,7 @@ dependencies {
 
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"
-    testImplementation "androidx.test:core:$version_android_junit_runner"
+    testImplementation "androidx.test:core:$version_androidx_test_core"
     testImplementation "androidx.test:runner:$version_android_junit_runner"
     testImplementation "androidx.test.ext:junit:$version_androidx_test_ext_junit"
     testImplementation "androidx.fragment:fragment-testing:$version_androidx_fragment"
@@ -402,20 +403,8 @@ dependencies {
     kaptTest "androidx.databinding:databinding-compiler:$version_androidx_databinding"
 
     androidTestImplementation project(":lib-test-common")
-    androidTestImplementation "androidx.test:core:$version_android_junit_runner"
-    androidTestImplementation "androidx.test:core-ktx:$version_android_junit_runner"
-
-    /*
-     * 15/Apr/2022
-     * If we do not exclude checkerframework there are duplicate class errors as per:
-     * https://github.com/android/android-test/issues/861
-     * See also:
-     * https://github.com/google/ExoPlayer/issues/10007
-     */
-    androidTestImplementation ("com.kaspersky.android-components:kaspresso:$version_kaspresso")  {
-        exclude group: "org.checkerframework", module: "checker"
-        exclude group: "org.checkerframework", module: "check-qual"
-    }
+    androidTestImplementation "androidx.test:core:$version_androidx_test_core"
+    androidTestImplementation "androidx.test:core-ktx:$version_androidx_test_core"
 
     androidTestImplementation "io.ktor:ktor-server-servlet:$version_ktor"
     androidTestImplementation "junit:junit:$version_junit"
@@ -423,8 +412,8 @@ dependencies {
 
     //As per: https://developer.android.com/topic/libraries/testing-support-library/packages.html#gradle-dependencies
     androidTestImplementation "androidx.test:runner:$version_android_junit_runner"
-    androidTestImplementation "androidx.test:rules:$version_android_junit_runner"
-    androidTestUtil "androidx.test:orchestrator:$version_android_junit_runner"
+    androidTestImplementation "androidx.test:rules:$version_androidx_test_rules"
+    androidTestUtil "androidx.test:orchestrator:$version_androidx_orchestrator"
 
     //As per
     androidTestImplementation ("androidx.test.espresso:espresso-core:$version_android_espresso")  {
@@ -446,9 +435,6 @@ dependencies {
     androidTestImplementation "androidx.fragment:fragment-testing:$version_androidx_fragment"
     androidTestImplementation "androidx.navigation:navigation-testing:$version_android_navigation"
     androidTestImplementation "androidx.test.ext:junit:$version_androidx_test_ext_junit"
-
-    //See https://github.com/xabaras/recyclerview-child-actions - used for Espresso tests to click / check items inside a recycler view
-    androidTestImplementation "it.xabaras.android.espresso:recyclerview-child-actions:$version_android_espresso_recyclerviewchildactions"
 
     androidTestImplementation "androidx.test.uiautomator:uiautomator:$version_android_uiautomator"
 

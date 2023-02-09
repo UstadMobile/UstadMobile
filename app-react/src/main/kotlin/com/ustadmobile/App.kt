@@ -28,7 +28,7 @@ import csstype.Display
 import csstype.GridTemplateAreas
 import csstype.array
 import io.github.aakira.napier.Napier
-import kotlinx.browser.document
+import web.dom.document
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlinx.coroutines.GlobalScope
@@ -44,6 +44,7 @@ import react.router.dom.HashRouter
 import react.useState
 import ustadJsDi
 import kotlin.random.Random
+import web.html.HTML.div
 
 fun main() {
     Napier.d("Index: Window.onLoad")
@@ -88,8 +89,11 @@ fun main() {
         val ustadDi = ustadJsDi(dbBuilt, dbNodeIdAndAuth, appConfigs, apiUrl, defaultStringsXmlStr,
             foreignStringXmlStr)
 
-        createRoot(document.createElement("div").also { document.body!!.appendChild(it) })
-            .render(App.create() { di = ustadDi })
+        val root = document.createElement(div).also {
+            document.body.appendChild(it)
+        }
+
+        createRoot(root).render(App.create { di = ustadDi })
     }
 
 }
