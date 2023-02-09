@@ -48,3 +48,5 @@ env:
 - tapOn: "Test Assignment"
 - assertNotVisible: "SUBMIT"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/submit_button_not_visible_after_deadline"
+- clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2

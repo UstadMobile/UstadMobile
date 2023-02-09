@@ -111,3 +111,5 @@ env:
 - tapOn: "Courses"
 - tapOn: "Multiple Assignment test"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_updated_grade_on_assignmentPage_studentView1"
+- clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2
