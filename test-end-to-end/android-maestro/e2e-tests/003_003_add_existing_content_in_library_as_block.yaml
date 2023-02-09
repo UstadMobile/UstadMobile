@@ -41,8 +41,11 @@ env:
       GENDER: "Female"
       PASSWORD: "test"
 #--- add epub content already added by admin in library to course block----#
-- back
-- back
+- repeat:
+    while:
+      notVisible: "OVERVIEW"
+    commands:
+      - back
 - tapOn: "OVERVIEW"
 - runFlow:
     file: "../common/add_existing_content_block_to_course.yaml"
