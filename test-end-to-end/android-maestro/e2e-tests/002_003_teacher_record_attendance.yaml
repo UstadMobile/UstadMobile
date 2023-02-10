@@ -35,3 +35,4 @@ env:
     file: "../common/edit_recorded_attendance.yaml"
     env:
       TESTCOURSENAME: "Attendance Test"
+- clearState: com.toughra.ustadmobile

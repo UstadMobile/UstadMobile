@@ -23,3 +23,4 @@ env:
     file: "../common/login_download_and_open_content.yaml"
     env:
       TESTCONTENTNAME: "AddContentH5pTest"
+- clearState: com.toughra.ustadmobile

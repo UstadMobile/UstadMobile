@@ -55,3 +55,4 @@ env:
       TESTCONTENTNAME: EpubContent
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
+- clearState: com.toughra.ustadmobile
