@@ -41,16 +41,6 @@ afterEvaluate {
     }
 }
 
-//Start the test server that Espresso tests can use when we need to test communicating with a real server
-/* Disabled 10/Mar/22 as this is not in use, but will be restored in the near future
-tasks.whenTaskAdded { task ->
-    if (task.name.toLowerCase().startsWith("connected") && task.name.toLowerCase().endsWith("androidtest")) {
-        task.dependsOn(":lib-http-testserver:startServer")
-        task.finalizedBy(":lib-http-testserver:stopServer")
-    }
-}
-*/
-
 android {
     buildFeatures {
         dataBinding true
@@ -58,7 +48,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.3.2"
+        kotlinCompilerExtensionVersion = "1.4.2"
     }
 
     kotlinOptions {
@@ -285,6 +275,8 @@ dependencies {
     // Paging
     implementation "androidx.paging:paging-runtime:$version_androidx_paging"
     implementation "androidx.paging:paging-compose:$version_androidx_paging_compose"
+
+    implementation "androidx.annotation:annotation:$version_androidx_annotation"
 
     //Work manager
     implementation "androidx.work:work-runtime:$version_android_workmanager"
