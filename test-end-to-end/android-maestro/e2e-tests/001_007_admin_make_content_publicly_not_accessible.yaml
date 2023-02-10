@@ -36,3 +36,4 @@ env:
     file: "../common/guest_login.yaml"
 - tapOn: "Library"
 - takeScreenshot: "${TESTRESULTSDIR}/guest_view"
+- clearState: com.toughra.ustadmobile

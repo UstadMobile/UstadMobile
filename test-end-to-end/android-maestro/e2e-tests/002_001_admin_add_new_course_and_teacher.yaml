@@ -28,3 +28,4 @@ env:
       USERNAME: "Anu"
       PASSWORD: "test"
 - tapOn: "courses"
+- clearState: com.toughra.ustadmobile
