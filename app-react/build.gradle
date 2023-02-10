@@ -58,6 +58,10 @@ dependencies {
     implementation "org.jetbrains.kotlin-wrappers:kotlin-mui"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-mui-icons"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-emotion"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-query-core"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-react-query"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-virtual-core"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-react-virtual"
     implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
     implementation npm("@js-joda/timezone", "$version_npm_joda_timezone")
 

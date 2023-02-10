@@ -4,7 +4,10 @@ import com.ustadmobile.core.components.NavHost
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.mui.common.Area
+import csstype.Overflow
+import csstype.pct
 import csstype.px
+import csstype.vh
 import mui.material.Snackbar
 import mui.material.Typography
 import mui.system.Box
@@ -14,6 +17,7 @@ import react.dom.html.ReactHTML.main
 import react.router.Outlet
 import react.router.Route
 import react.router.Routes
+import web.html.HTMLElement
 
 private val DEFAULT_PADDING = 30.px
 
@@ -25,6 +29,8 @@ external interface UstadScreenProps: Props {
 
     var onShowSnackBar: ShowSnackFunction?
 
+    var parentRef: RefObject<HTMLElement>
+
 }
 
 external interface ContentProps: Props {
@@ -34,6 +40,9 @@ external interface ContentProps: Props {
 }
 
 val Content = FC<ContentProps> { props ->
+
+    val contentParentRef = useRef<HTMLElement>(null)
+
     val showcases = useContext(UstadScreensContext)
 
     var snack: Snack? by useState { null }
@@ -57,6 +66,8 @@ val Content = FC<ContentProps> { props ->
         Route {
             path = "/"
             element = Box.create {
+                ref = contentParentRef
+
                 component = main
                 sx {
                     gridArea = Area.Content
@@ -75,6 +86,7 @@ val Content = FC<ContentProps> { props ->
                     element = Component.create {
                         asDynamic().onAppUiStateChanged = props.onAppUiStateChanged
                         asDynamic().onShowSnackBar = showSnackFunction
+                        asDynamic().parentRef = contentParentRef
                     }
                 }
             }

@@ -44,21 +44,6 @@ class EmptyPagingSource<Key: Any, Value: Any>(): PagingSource<Key, Value>() {
     }
 }
 
-class ListPagingSource<Value: Any>(
-    private val list: List<Value>,
-): PagingSource<Int, Value>() {
-    override fun getRefreshKey(state: PagingState<Int, Value>): Int? {
-        return state.anchorPosition
-    }
-
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Value> {
-        return DoorLoadResult.Page<Int, Value>(
-            data = list,
-            prevKey = null,
-            nextKey = null,
-        ).toLoadResult()
-    }
-}
 
 
 
