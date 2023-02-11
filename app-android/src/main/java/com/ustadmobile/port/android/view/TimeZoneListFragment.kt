@@ -20,6 +20,7 @@ import com.toughra.ustadmobile.databinding.FragmentListBinding
 import com.toughra.ustadmobile.databinding.ItemTimeZoneBinding
 import com.ustadmobile.core.controller.OnSearchSubmitted
 import com.ustadmobile.core.controller.TimeZoneListPresenter
+import com.ustadmobile.core.util.ext.setTimeZoneText
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.TimeZoneListView
@@ -149,7 +150,7 @@ private fun TimeZoneListScreen(
                 text = { Text(
                     timezone.toString()
                 ) },
-                secondaryText = { Text("") }
+                secondaryText = { Text(timezone.setTimeZoneText()) }
             )
         }
     }
