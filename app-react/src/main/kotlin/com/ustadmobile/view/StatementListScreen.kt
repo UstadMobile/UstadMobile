@@ -5,9 +5,10 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.StatementListUiState
 import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.hooks.useFormattedDateAndTime
+import com.ustadmobile.hooks.useFormattedDuration
 import com.ustadmobile.lib.db.entities.StatementWithSessionDetailDisplay
 import com.ustadmobile.lib.db.entities.VerbEntity
-import csstype.px
+import csstype.*
 import kotlinx.datetime.TimeZone
 import mui.icons.material.CalendarToday
 import mui.icons.material.Check
@@ -26,12 +27,20 @@ external interface StatementListScreenProps : Props {
 
 }
 
+val VERB_ICON_MAP = mapOf(
+    VerbEntity.VERB_COMPLETED_UID.toInt() to Folder,
+    VerbEntity.VERB_PROGRESSED_UID.toInt() to Folder,
+    VerbEntity.VERB_ATTEMPTED_UID.toInt() to Folder,
+    VerbEntity.VERB_INTERACTED_UID.toInt() to Folder,
+    VerbEntity.VERB_ANSWERED_UID.toInt() to Folder,
+    VerbEntity.VERB_SATISFIED_UID.toInt() to Folder,
+    VerbEntity.VERB_PASSED_UID.toInt() to Folder,
+    VerbEntity.VERB_FAILED_UID.toInt() to Folder
+)
+
 val StatementListScreenComponent2 = FC<StatementListScreenProps> { props ->
 
-    val strings = useStringsXml()
-
     Container {
-
         List{
             props.uiState.statementList
                 .forEach { statementItem ->
@@ -40,6 +49,10 @@ val StatementListScreenComponent2 = FC<StatementListScreenProps> { props ->
 
                     ListItem{
                         ListItemButton {
+                            sx {
+                                textAlign = TextAlign.end
+                            }
+
                             onClick = {
                                 props.onClickStatement(statementItem)
                             }
@@ -55,8 +68,12 @@ val StatementListScreenComponent2 = FC<StatementListScreenProps> { props ->
                             }
                         }
 
-                        secondaryAction = Icon.create{
-                            + Folder.create()
+                        secondaryAction = VERB_ICON_MAP[
+                                statementItem.statementVerbUid.toInt()]?.create(){
+                            sx{
+                                width = 40.px
+                                height = 40.px
+                            }
                         }
                     }
                 }
@@ -79,48 +96,48 @@ val SecondaryTextContent = FC<SecondaryTextContentProps> { props ->
         timeInMillis = props.statement.timestamp,
         timezoneId = TimeZone.currentSystemDefault().id
     )
+    val  duration = useFormattedDuration(timeInMillis = props.statement.resultDuration)
 
     Stack {
         if (statementUiState.descriptionVisible){
             Typography {
+                sx {
+                    textAlign = TextAlign.start
+                }
                 + (props.statement.objectDisplay ?: "")
             }
         }
 
-        if (statementUiState.questionAnswerVisible){
-            Typography {
-                + (props.statement.objectDisplay ?: "")
-            }
-        }
+//        Typography {
+//            + (props.statement.fullStatement ?: "")
+//        }
 
         Stack{
             direction = responsive(StackDirection.row)
-
-
-            Typography {
-                + "1 hour 30 mins"
+            sx {
+                justifyContent = JustifyContent.end
             }
 
-            Icon {
-                + Timer.create()
+            if (statementUiState.resultDurationVisible){
+
+                Typography { + duration }
+
+                Icon { + Timer.create() }
+
+                Box{ sx { width = 8.px } }
             }
 
-            Box{
-                sx { width = 8.px }
-            }
+            Typography { + dateTimeFormatter }
 
-            Typography {
-                + dateTimeFormatter
-            }
-
-            Icon{
-                + CalendarToday.create()
-            }
+            Icon{ + CalendarToday.create() }
         }
 
         if (statementUiState.resultScoreMaxVisible){
             Stack {
                 direction = responsive(StackDirection.row)
+                sx {
+                    justifyContent = JustifyContent.end
+                }
 
                 Typography {
                     + statementUiState.scoreResultsText
@@ -147,7 +164,19 @@ val StatementListScreenPreview = FC<Props> {
         StatementListUiState(
             statementList = listOf(
                 StatementWithSessionDetailDisplay().apply {
+                    statementUid = 1
                     statementVerbUid = VerbEntity.VERB_COMPLETED_UID
+                    verbDisplay = "Answered"
+                    objectDisplay = "object Display"
+                    resultScoreMax = 90
+                    resultScoreScaled = 10F
+                    resultScoreRaw = 70
+                    timestamp = 10000
+                    resultDuration = 10009
+                },
+                StatementWithSessionDetailDisplay().apply {
+                    statementUid = 2
+                    statementVerbUid = VerbEntity.VERB_INTERACTED_UID
                     verbDisplay = "Answered"
                     objectDisplay = "object Display"
                     resultScoreMax = 90
