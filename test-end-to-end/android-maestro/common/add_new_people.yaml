@@ -3,8 +3,9 @@ appId: com.toughra.ustadmobile
 # test data required :
 # 1)  FIRSTNAME: provide person's first name of string type
 # 2) LASTNAME: provide person's last name of string type
-# 3) GENDER: provide STUDENT's gender of string type
-# 4) PASSWORD: provide STUDENT's account password of string type
+# 3) GENDER: provide gender of string type
+# 4) PASSWORD: provide account password of string type
+# 5) USERNAME: provide USERNAME of string type and lower case
 
 - tapOn: "People"
 - tapOn: "PERSON"
@@ -18,7 +19,7 @@ appId: com.toughra.ustadmobile
 - tapOn: "${FIRSTNAME} ${LASTNAME}"
 - tapOn: "CREATE ACCOUNT"
 - tapOn: "Username"
-- inputText: ${FIRSTNAME}
+- inputText: ${USERNAME}
 - tapOn: "New password"
 - inputText: ${PASSWORD}
 - tapOn: "Confirm password"

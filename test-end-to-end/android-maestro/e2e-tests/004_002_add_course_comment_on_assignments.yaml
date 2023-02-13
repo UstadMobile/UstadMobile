@@ -30,7 +30,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: Anu
+      USERNAME: anu
       PASSWORD: test
 - runFlow:
     file:  "../common/add_assignment_Block.yaml"
@@ -49,7 +49,7 @@ env:
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: Justin
+      USERNAME: justin
       PASSWORD: test
 - runFlow:
      file: "../build/common-app2/student_submit_assignment_block.yaml"
@@ -74,7 +74,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: Caroline
+      USERNAME: caroline
       PASSWORD: test
 - tapOn: "Courses"
 - tapOn: "Course comment test"

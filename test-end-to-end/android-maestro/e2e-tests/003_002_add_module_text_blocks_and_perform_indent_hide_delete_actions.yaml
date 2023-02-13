@@ -115,4 +115,4 @@ env:
 - assertNotVisible:
     text: "PRIMARY COLOURS"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/text_block_deleted"
-- clearState: com.toughra.ustadmobile
+

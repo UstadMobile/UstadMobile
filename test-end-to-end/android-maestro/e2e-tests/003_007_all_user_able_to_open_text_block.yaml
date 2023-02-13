@@ -26,6 +26,7 @@ env:
       TEACHERFIRSTNAME: "Julie"
       TEACHERLASTNAME: "Susan"
       GENDER: "Female"
+      USERNAME: "julie"
       PASSWORD: "test"
 - runFlow:
     file: "../common/add_new_student_inside_course.yaml"
@@ -34,6 +35,7 @@ env:
       STUDENTFIRSTNAME: "Muhammed"
       STUDENTLASTNAME: "Khan"
       GENDER: "Male"
+      USERNAME: "muhammed"
       PASSWORD: "test"
 - repeat:
     while:
@@ -60,7 +62,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "Muhammed"
+      USERNAME: "muhammed"
       PASSWORD: "test"
 - tapOn: "courses"
 - tapOn: "Text Block Test"
@@ -76,7 +78,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "Julie"
+      USERNAME: "julie"
       PASSWORD: "test"
 - tapOn: "courses"
 - tapOn: "Text Block Test"
@@ -86,4 +88,3 @@ env:
     visible: ${TEXTTITLE}
     timeout: 1000
 - takeScreenshot: "${TESTRESULTSDIR}/text_block_teacher_view"
-- clearState: com.toughra.ustadmobile

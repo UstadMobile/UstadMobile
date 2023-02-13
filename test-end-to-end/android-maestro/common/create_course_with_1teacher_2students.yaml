@@ -5,10 +5,10 @@ appId: com.toughra.ustadmobile
   # -----name - username/password
 
   # teachers :
-  # --0-- Anu Madhav - Anu/test
+  # --0-- Anu Madhav - anu/test
    # student :
-  # --0-- Justin Joe      - Justin/test
-  # --1-- Caroline Jacob  - Caroline/test
+  # --0-- Justin Joe      - justin/test
+  # --1-- Caroline Jacob  - caroline/test
 
 # test parameters needs to provide for this test :
 # 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
@@ -27,6 +27,7 @@ appId: com.toughra.ustadmobile
       TEACHERFIRSTNAME: "Anu"
       TEACHERLASTNAME: "Madhav"
       GENDER: "Female"
+      USERNAME: "anu"
       PASSWORD: "test"
 
 # add new student using flow - add_new_student_inside_course ----------- Justin Joe  - Justin/test
@@ -37,6 +38,7 @@ appId: com.toughra.ustadmobile
       STUDENTFIRSTNAME: "Justin"
       STUDENTLASTNAME: "Joe"
       GENDER: "Male"
+      USERNAME: "justin"
       PASSWORD: "test"
 # add new student using flow - add_new_student_inside_course --------- Caroline Jacob  - Caroline/test
 - runFlow:
@@ -46,6 +48,7 @@ appId: com.toughra.ustadmobile
       STUDENTFIRSTNAME: "Caroline"
       STUDENTLASTNAME: "Jacob"
       GENDER: "Female"
+      USERNAME: "caroline"
       PASSWORD: "test"
 
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/member_list_of_new_test_course"

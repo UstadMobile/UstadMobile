@@ -25,6 +25,7 @@ env:
       TEACHERFIRSTNAME: "Julie"
       TEACHERLASTNAME: "Susan"
       GENDER: "Female"
+      USERNAME: "julie"
       PASSWORD: "test"
 - repeat:
     while:
@@ -44,7 +45,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "Julie"
+      USERNAME: "julie"
       PASSWORD: "test"
 - tapOn: "courses"
 - tapOn: "New Content Block Test"
@@ -55,4 +56,3 @@ env:
       TESTCONTENTNAME: EpubContent
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
-- clearState: com.toughra.ustadmobile

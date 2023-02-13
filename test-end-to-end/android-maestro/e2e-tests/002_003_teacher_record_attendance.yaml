@@ -25,7 +25,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "Anu"
+      USERNAME: "anu"
       PASSWORD: "test"
 - runFlow:
     file: "../common/record_attendance.yaml"
@@ -35,4 +35,4 @@ env:
     file: "../common/edit_recorded_attendance.yaml"
     env:
       TESTCOURSENAME: "Attendance Test"
-- clearState: com.toughra.ustadmobile
+

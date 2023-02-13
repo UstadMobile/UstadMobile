@@ -28,7 +28,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: Anu
+      USERNAME: anu
       PASSWORD: test
 - runFlow:
     file:  "../common/add_assignment_block_with_group.yaml"
@@ -41,7 +41,7 @@ env:
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: Sruthy
+      USERNAME: sruthy
       PASSWORD: test
 - runFlow:
     file: "../build/common-app2/add_private_comments.yaml"
@@ -54,7 +54,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: Anu
+      USERNAME: anu
       PASSWORD: test
 - runFlow:
     file: "../common/teacher_add_private_comment.yaml"
@@ -68,7 +68,7 @@ env:
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: Sruthy
+      USERNAME: sruthy
       PASSWORD: test
 - runFlow:
     file: "../build/common-app2/add_private_comments.yaml"
@@ -82,7 +82,7 @@ env:
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: Justin
+      USERNAME: justin
       PASSWORD: test
 - runFlow:
     file: "../build/common-app2/add_private_comments.yaml"

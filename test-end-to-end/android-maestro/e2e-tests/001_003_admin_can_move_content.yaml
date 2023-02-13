@@ -21,4 +21,3 @@ env:
     file: "../common/move_content_to_new_folder.yaml"
     env:
       TESTCONTENTNAME: "MoveContentTest"
-- clearState: com.toughra.ustadmobile

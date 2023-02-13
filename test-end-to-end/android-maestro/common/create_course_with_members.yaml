@@ -5,13 +5,13 @@ appId: com.toughra.ustadmobile
   # -----name - username/password
 
   # teachers :
-  # --0-- Anu Madhav - Anu/test
+  # --0-- Anu Madhav - anu/test
 
   # students :
-  # --0-- Justin Joe      - Justin/test
-  # --1-- Caroline Jacob  - Caroline/test
-  # --4-- Maria Jacob     - Maria/test
-  # --5-- Sruthy K        - Sruthy/test
+  # --0-- Justin Joe      - justin/test
+  # --1-- Caroline Jacob  - caroline/test
+  # --4-- Maria Jacob     - maria/test
+  # --5-- Sruthy K        - sruthy/test
 
 # test parameters needs to provide for this test :
 # 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
@@ -31,6 +31,7 @@ appId: com.toughra.ustadmobile
       TEACHERFIRSTNAME: "Anu"
       TEACHERLASTNAME: "Madhav"
       GENDER: "Female"
+      USERNAME: "anu"
       PASSWORD: "test"
 
 # add new student using flow - add_new_student_inside_course ----------- Justin Joe  - Justin/test
@@ -41,6 +42,7 @@ appId: com.toughra.ustadmobile
       STUDENTFIRSTNAME: "Justin"
       STUDENTLASTNAME: "Joe"
       GENDER: "Male"
+      USERNAME: "justin"
       PASSWORD: "test"
 # add new student using flow - add_new_student_inside_course --------- Caroline Jacob  - Caroline/test
 - runFlow:
@@ -50,6 +52,7 @@ appId: com.toughra.ustadmobile
       STUDENTFIRSTNAME: "Caroline"
       STUDENTLASTNAME: "Jacob"
       GENDER: "Female"
+      USERNAME: "caroline"
       PASSWORD: "test"
 # add new student  using flows - add_new_people & add_member_inside_course ------- Maria Jacob - Maria/test
 - runFlow:
@@ -59,6 +62,7 @@ appId: com.toughra.ustadmobile
       STUDENTFIRSTNAME: "Maria"
       STUDENTLASTNAME: "Jacob"
       GENDER: "Female"
+      USERNAME: "maria"
       PASSWORD: "test"
 
 # add new student  using flows - add_new_people & add_member_inside_course ------- Sruthy K - Sruthy/test
@@ -67,7 +71,8 @@ appId: com.toughra.ustadmobile
     env:
       TESTCOURSENAME: ${TESTCOURSENAME}
       STUDENTFIRSTNAME: "Sruthy"
-      STUDENTLASTNAME: "K"
+      STUDENTLASTNAME: "Pisharody"
       GENDER: "Female"
+      USERNAME: "sruthy"
       PASSWORD: "test"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/member_list_of_new_test_course"
