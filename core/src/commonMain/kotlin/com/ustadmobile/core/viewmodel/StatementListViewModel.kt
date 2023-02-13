@@ -30,6 +30,9 @@ value class StatementWithSessionDetailDisplayUiState(
     val questionAnswerVisible: Boolean
         get() = statement.statementVerbUid == VERB_ANSWERED_UID
 
+    val resultDurationVisible: Boolean
+        get() = statement.resultDuration > 1000
+
     val resultScoreMaxVisible: Boolean
         get() = statement.resultScoreMax > 0
 

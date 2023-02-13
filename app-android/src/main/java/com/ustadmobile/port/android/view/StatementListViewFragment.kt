@@ -26,7 +26,6 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemStatementSessionDetailListBinding
 import com.ustadmobile.core.controller.StatementListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
-import com.ustadmobile.core.util.ext.editIconId
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.StatementListView
 import com.ustadmobile.core.viewmodel.StatementListUiState
@@ -34,7 +33,7 @@ import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.lib.db.entities.StatementWithSessionDetailDisplay
 import com.ustadmobile.lib.db.entities.VerbEntity
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
-import com.ustadmobile.port.android.util.ext.defaultItemPadding
+import com.ustadmobile.port.android.util.compose.rememberFormattedDuration
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.StatementListViewFragment.Companion.VERB_ICON_MAP
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -195,27 +194,30 @@ fun SecondaryTextContent(
         timeZoneId = TimeZone.getDefault().id
     )
 
+    val  duration = rememberFormattedDuration(timeInMillis = statement.resultDuration)
+
     Column (
-       horizontalAlignment = Alignment.End
+       horizontalAlignment = Alignment.End,
     ){
         if (statementUiState.descriptionVisible){
             Text(statement.objectDisplay ?: "")
         }
 
-        if (statementUiState.questionAnswerVisible){
-            Text(statement.objectDisplay ?: "")
-        }
+//        Text(statement.fullStatement ?: "")
 
         Row(
-            modifier = Modifier.fillMaxWidth()
-                .defaultItemPadding(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("1 hour 30 mins")
-            Icon(Icons.Outlined.Timer, contentDescription = "")
 
-            Box(modifier = Modifier.width(8.dp))
+            if (statementUiState.resultDurationVisible){
+                Text(duration)
+                Icon(Icons.Outlined.Timer, contentDescription = "")
+
+                Box(modifier = Modifier.width(8.dp))
+            }
+
 
             Text(dateTimeFormatter)
             Icon(Icons.Outlined.CalendarToday, contentDescription = "")
@@ -223,8 +225,7 @@ fun SecondaryTextContent(
 
         if (statementUiState.resultScoreMaxVisible){
             Row(
-                modifier = Modifier.fillMaxWidth()
-                    .defaultItemPadding(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -245,7 +246,18 @@ fun StatementListScreenPreview() {
     val uiState = StatementListUiState(
         statementList = listOf(
             StatementWithSessionDetailDisplay().apply {
+                statementUid = 1
                 statementVerbUid = VerbEntity.VERB_COMPLETED_UID
+                verbDisplay = "Answered"
+                objectDisplay = "object Display"
+                resultScoreMax = 90
+                resultScoreScaled = 10F
+                resultScoreRaw = 70
+                resultDuration = 1009
+            },
+            StatementWithSessionDetailDisplay().apply {
+                statementUid = 2
+                statementVerbUid = VerbEntity.VERB_INTERACTED_UID
                 verbDisplay = "Answered"
                 objectDisplay = "object Display"
                 resultScoreMax = 90
