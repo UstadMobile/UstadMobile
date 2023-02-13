@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -21,11 +22,15 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemPersonSessionsListBinding
 import com.ustadmobile.core.controller.SessionListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
+import com.ustadmobile.core.util.ext.editIconId
+import com.ustadmobile.core.util.ext.setContentComplete
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.core.viewmodel.SessionListUiState
 import com.ustadmobile.core.viewmodel.listItemUiState
+import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.PersonWithSessionsDisplay
+import com.ustadmobile.lib.db.entities.StatementEntity
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -143,6 +148,13 @@ private fun SessionListScreen(
 
 }
 
+val CONTENT_COMPLETE_MAP = mapOf(
+    PersonWithSessionsDisplay.RESULT_SUCCESS to R.drawable.exo_ic_check,
+    PersonWithSessionsDisplay.RESULT_FAILURE to R.drawable.ic_close_black_24dp,
+    PersonWithSessionsDisplay.RESULT_UNSET to null,
+    PersonWithSessionsDisplay.RESULT_INCOMPLETE to null,
+)
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PersonListItem(
@@ -156,6 +168,8 @@ fun PersonListItem(
         timeInMillis = person.startDate,
         timeZoneId = TimeZone.getDefault().id
     )
+
+    val contentCompleteStatus = person.setContentComplete()
 
     ListItem (
         modifier = Modifier.clickable {
@@ -175,7 +189,8 @@ fun PersonListItem(
 
                         Icon(
                             imageVector = Icons.Filled.Check,
-                            contentDescription = null
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
                         )
 
                         Text(stringResource(id = R.string.percentage_score,
@@ -189,7 +204,9 @@ fun PersonListItem(
         },
         icon = {
             Icon(
-                imageVector = Icons.Filled.Check,
+                painterResource(
+                    id = CONTENT_COMPLETE_MAP[contentCompleteStatus]
+                        ?: R.drawable.exo_ic_check),
                 contentDescription = null
             )
         }
@@ -208,6 +225,8 @@ fun SessionListScreenPreview() {
                         resultScoreScaled = 4F
                         resultScore = 5
                         resultMax = 10
+                        resultComplete = true
+                        resultSuccess = StatementEntity.RESULT_FAILURE
                     },
                     PersonWithSessionsDisplay().apply {
                         startDate = 13
