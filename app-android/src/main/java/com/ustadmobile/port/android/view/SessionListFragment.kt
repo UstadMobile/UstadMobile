@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -32,6 +33,7 @@ import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.PersonWithSessionsDisplay
 import com.ustadmobile.lib.db.entities.StatementEntity
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import com.ustadmobile.port.android.util.compose.rememberFormattedDuration
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
@@ -169,6 +171,8 @@ fun PersonListItem(
         timeZoneId = TimeZone.getDefault().id
     )
 
+    val duration = rememberFormattedDuration(timeInMillis = person.duration)
+
     val contentCompleteStatus = person.setContentComplete()
 
     ListItem (
@@ -179,12 +183,21 @@ fun PersonListItem(
             Text(text = "Passed - ")
         },
         secondaryText = {
-            Column{
-                Text(dateTimeFormatted)
+            Column(
+                horizontalAlignment = Alignment.End
+            ){
+
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+
+                    Text(duration)
+                    Text(dateTimeFormatted)
+                }
 
                 if (uiState.scoreResultVisible){
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        horizontalArrangement = Arrangement.End,
                     ) {
 
                         Icon(
@@ -202,7 +215,7 @@ fun PersonListItem(
                 }
             }
         },
-        icon = {
+        trailing = {
             Icon(
                 painterResource(
                     id = CONTENT_COMPLETE_MAP[contentCompleteStatus]
@@ -225,6 +238,7 @@ fun SessionListScreenPreview() {
                         resultScoreScaled = 4F
                         resultScore = 5
                         resultMax = 10
+                        duration = 72784
                         resultComplete = true
                         resultSuccess = StatementEntity.RESULT_FAILURE
                     },
