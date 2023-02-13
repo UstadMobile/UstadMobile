@@ -21,4 +21,3 @@ env:
       file: "../common/delete_and_download_content.yaml"
       env:
           TESTCONTENTNAME: "ContentDeleteDownloadTest"
-- clearState: com.toughra.ustadmobile

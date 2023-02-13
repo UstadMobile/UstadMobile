@@ -6,8 +6,9 @@ appId: com.toughra.ustadmobile
 # 2) STUDENTFIRSTNAME: provide STUDENT's first name of string type
 # 3) STUDENTLASTNAME: provide STUDENT's last name of string type
 # 4) GENDER: provide STUDENT's gender of string type
-# 5) PASSWORD: provide STUDENT's account password of string type
-# 6) TESTRESULTSDIR : provides the path to store test results
+# 5) USERNAME: provide Student's USERNAME of string type and lower case
+# 6) PASSWORD: provide STUDENT's account password of string type
+# 7) TESTRESULTSDIR : provides the path to store test results
 
 - tapOn: "Courses"
 - repeat:
@@ -36,7 +37,7 @@ appId: com.toughra.ustadmobile
   # add account
 - tapOn: "CREATE ACCOUNT"
 - tapOn: "Username"
-- inputText: ${STUDENTFIRSTNAME}
+- inputText: ${USERNAME}
 - tapOn: "New password"
 - inputText: ${PASSWORD}
 - tapOn: "Confirm password"

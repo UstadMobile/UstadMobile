@@ -23,4 +23,3 @@ env:
     file: "../common/login_download_and_open_content.yaml"
     env:
        TESTCONTENTNAME: AddContentVideoTest
-- clearState: com.toughra.ustadmobile

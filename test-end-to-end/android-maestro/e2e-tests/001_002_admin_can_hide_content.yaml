@@ -21,4 +21,3 @@ env:
     file: "../common/hide_content.yaml"
     env:
        TESTCONTENTNAME: "HideContentTest"
-- clearState: com.toughra.ustadmobile

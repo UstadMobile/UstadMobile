@@ -27,7 +27,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: Anu
+      USERNAME: anu
       PASSWORD: test
 - runFlow:
     file: "../common/add_multiple_submission_assignment.yaml"
@@ -40,7 +40,7 @@ env:
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: Justin
+      USERNAME: justin
       PASSWORD: test
 - runFlow:
     file: "../build/common-app2/student_submit_assignment_text.yaml"
@@ -54,7 +54,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: Anu
+      USERNAME: anu
       PASSWORD: test
 - runFlow:
     file: "../common/add_assignment_grade.yaml"
@@ -69,7 +69,7 @@ env:
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: Justin
+      USERNAME: justin
       PASSWORD: test
 - tapOn: "Courses"
 - tapOn: "Multiple Assignment test"
@@ -91,7 +91,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: Anu
+      USERNAME: anu
       PASSWORD: test
 - runFlow:
     file: "../common/update_assignment_grade.yaml"
@@ -106,7 +106,7 @@ env:
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: Justin
+      USERNAME: justin
       PASSWORD: test
 - tapOn: "Courses"
 - tapOn: "Multiple Assignment test"
