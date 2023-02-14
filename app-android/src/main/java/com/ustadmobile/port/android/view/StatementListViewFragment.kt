@@ -247,22 +247,76 @@ fun StatementListScreenPreview() {
         statementList = listOf(
             StatementWithSessionDetailDisplay().apply {
                 statementUid = 1
-                statementVerbUid = VerbEntity.VERB_COMPLETED_UID
                 verbDisplay = "Answered"
                 objectDisplay = "object Display"
                 resultScoreMax = 90
                 resultScoreScaled = 10F
                 resultScoreRaw = 70
                 resultDuration = 1009
+                statementVerbUid = VerbEntity.VERB_COMPLETED_UID
             },
             StatementWithSessionDetailDisplay().apply {
                 statementUid = 2
-                statementVerbUid = VerbEntity.VERB_INTERACTED_UID
                 verbDisplay = "Answered"
                 objectDisplay = "object Display"
                 resultScoreMax = 90
                 resultScoreScaled = 10F
                 resultScoreRaw = 70
+                statementVerbUid = VerbEntity.VERB_PROGRESSED_UID
+            },
+            StatementWithSessionDetailDisplay().apply {
+                statementUid = 3
+                verbDisplay = "Answered"
+                objectDisplay = "object Display"
+                resultScoreMax = 90
+                resultScoreScaled = 10F
+                resultScoreRaw = 70
+                statementVerbUid = VerbEntity.VERB_ATTEMPTED_UID
+            },
+            StatementWithSessionDetailDisplay().apply {
+                statementUid = 4
+                verbDisplay = "Answered"
+                objectDisplay = "object Display"
+                resultScoreMax = 90
+                resultScoreScaled = 10F
+                resultScoreRaw = 70
+                statementVerbUid = VerbEntity.VERB_INTERACTED_UID
+            },
+            StatementWithSessionDetailDisplay().apply {
+                statementUid = 5
+                verbDisplay = "Answered"
+                objectDisplay = "object Display"
+                resultScoreMax = 90
+                resultScoreScaled = 10F
+                resultScoreRaw = 70
+                statementVerbUid = VerbEntity.VERB_ANSWERED_UID
+            },
+            StatementWithSessionDetailDisplay().apply {
+                statementUid = 6
+                verbDisplay = "Answered"
+                objectDisplay = "object Display"
+                resultScoreMax = 90
+                resultScoreScaled = 10F
+                resultScoreRaw = 70
+                statementVerbUid = VerbEntity.VERB_SATISFIED_UID
+            },
+            StatementWithSessionDetailDisplay().apply {
+                statementUid = 7
+                verbDisplay = "Answered"
+                objectDisplay = "object Display"
+                resultScoreMax = 90
+                resultScoreScaled = 10F
+                resultScoreRaw = 70
+                statementVerbUid = VerbEntity.VERB_PASSED_UID
+            },
+            StatementWithSessionDetailDisplay().apply {
+                statementUid = 8
+                verbDisplay = "Answered"
+                objectDisplay = "object Display"
+                resultScoreMax = 90
+                resultScoreScaled = 10F
+                resultScoreRaw = 70
+                statementVerbUid = VerbEntity.VERB_FAILED_UID
             }
         )
     )

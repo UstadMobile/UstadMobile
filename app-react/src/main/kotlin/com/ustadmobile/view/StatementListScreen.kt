@@ -31,10 +31,10 @@ val VERB_ICON_MAP = mapOf(
     VerbEntity.VERB_COMPLETED_UID.toInt() to "img/verb_complete.svg",
     VerbEntity.VERB_PROGRESSED_UID.toInt() to "img/verb_progress.svg",
     VerbEntity.VERB_ATTEMPTED_UID.toInt() to "img/verb_attempt.svg",
-    VerbEntity.VERB_INTERACTED_UID.toInt() to "img/verb_complete.svg",
+    VerbEntity.VERB_INTERACTED_UID.toInt() to "img/verb_interactive.svg",
     VerbEntity.VERB_ANSWERED_UID.toInt() to "img/verb_complete.svg",
-    VerbEntity.VERB_SATISFIED_UID.toInt() to "img/verb_complete.svg",
-    VerbEntity.VERB_PASSED_UID.toInt() to "img/verb_complete.svg",
+    VerbEntity.VERB_SATISFIED_UID.toInt() to "img/verb_passed.svg",
+    VerbEntity.VERB_PASSED_UID.toInt() to "img/verb_passed.svg",
     VerbEntity.VERB_FAILED_UID.toInt() to "img/verb_complete.svg"
 )
 
@@ -164,23 +164,76 @@ val StatementListScreenPreview = FC<Props> {
             statementList = listOf(
                 StatementWithSessionDetailDisplay().apply {
                     statementUid = 1
-                    statementVerbUid = VerbEntity.VERB_COMPLETED_UID
                     verbDisplay = "Answered"
                     objectDisplay = "object Display"
                     resultScoreMax = 90
                     resultScoreScaled = 10F
                     resultScoreRaw = 70
-                    timestamp = 10000
-                    resultDuration = 10009
+                    resultDuration = 1009
+                    statementVerbUid = VerbEntity.VERB_COMPLETED_UID
                 },
                 StatementWithSessionDetailDisplay().apply {
                     statementUid = 2
-                    statementVerbUid = VerbEntity.VERB_INTERACTED_UID
                     verbDisplay = "Answered"
                     objectDisplay = "object Display"
                     resultScoreMax = 90
                     resultScoreScaled = 10F
                     resultScoreRaw = 70
+                    statementVerbUid = VerbEntity.VERB_PROGRESSED_UID
+                },
+                StatementWithSessionDetailDisplay().apply {
+                    statementUid = 3
+                    verbDisplay = "Answered"
+                    objectDisplay = "object Display"
+                    resultScoreMax = 90
+                    resultScoreScaled = 10F
+                    resultScoreRaw = 70
+                    statementVerbUid = VerbEntity.VERB_ATTEMPTED_UID
+                },
+                StatementWithSessionDetailDisplay().apply {
+                    statementUid = 4
+                    verbDisplay = "Answered"
+                    objectDisplay = "object Display"
+                    resultScoreMax = 90
+                    resultScoreScaled = 10F
+                    resultScoreRaw = 70
+                    statementVerbUid = VerbEntity.VERB_INTERACTED_UID
+                },
+                StatementWithSessionDetailDisplay().apply {
+                    statementUid = 5
+                    verbDisplay = "Answered"
+                    objectDisplay = "object Display"
+                    resultScoreMax = 90
+                    resultScoreScaled = 10F
+                    resultScoreRaw = 70
+                    statementVerbUid = VerbEntity.VERB_ANSWERED_UID
+                },
+                StatementWithSessionDetailDisplay().apply {
+                    statementUid = 6
+                    verbDisplay = "Answered"
+                    objectDisplay = "object Display"
+                    resultScoreMax = 90
+                    resultScoreScaled = 10F
+                    resultScoreRaw = 70
+                    statementVerbUid = VerbEntity.VERB_SATISFIED_UID
+                },
+                StatementWithSessionDetailDisplay().apply {
+                    statementUid = 7
+                    verbDisplay = "Answered"
+                    objectDisplay = "object Display"
+                    resultScoreMax = 90
+                    resultScoreScaled = 10F
+                    resultScoreRaw = 70
+                    statementVerbUid = VerbEntity.VERB_PASSED_UID
+                },
+                StatementWithSessionDetailDisplay().apply {
+                    statementUid = 8
+                    verbDisplay = "Answered"
+                    objectDisplay = "object Display"
+                    resultScoreMax = 90
+                    resultScoreScaled = 10F
+                    resultScoreRaw = 70
+                    statementVerbUid = VerbEntity.VERB_FAILED_UID
                 }
             )
         )
