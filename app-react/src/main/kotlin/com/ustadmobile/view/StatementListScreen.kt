@@ -12,12 +12,12 @@ import csstype.*
 import kotlinx.datetime.TimeZone
 import mui.icons.material.CalendarToday
 import mui.icons.material.Check
-import mui.icons.material.Folder
 import mui.icons.material.Timer
 import mui.material.*
 import mui.system.responsive
 import mui.system.sx
 import react.*
+import react.dom.html.ReactHTML.img
 
 external interface StatementListScreenProps : Props {
 
@@ -28,14 +28,14 @@ external interface StatementListScreenProps : Props {
 }
 
 val VERB_ICON_MAP = mapOf(
-    VerbEntity.VERB_COMPLETED_UID.toInt() to Folder,
-    VerbEntity.VERB_PROGRESSED_UID.toInt() to Folder,
-    VerbEntity.VERB_ATTEMPTED_UID.toInt() to Folder,
-    VerbEntity.VERB_INTERACTED_UID.toInt() to Folder,
-    VerbEntity.VERB_ANSWERED_UID.toInt() to Folder,
-    VerbEntity.VERB_SATISFIED_UID.toInt() to Folder,
-    VerbEntity.VERB_PASSED_UID.toInt() to Folder,
-    VerbEntity.VERB_FAILED_UID.toInt() to Folder
+    VerbEntity.VERB_COMPLETED_UID.toInt() to "img/verb_complete.svg",
+    VerbEntity.VERB_PROGRESSED_UID.toInt() to "img/verb_progress.svg",
+    VerbEntity.VERB_ATTEMPTED_UID.toInt() to "img/verb_complete.svg",
+    VerbEntity.VERB_INTERACTED_UID.toInt() to "img/verb_complete.svg",
+    VerbEntity.VERB_ANSWERED_UID.toInt() to "img/verb_complete.svg",
+    VerbEntity.VERB_SATISFIED_UID.toInt() to "img/verb_complete.svg",
+    VerbEntity.VERB_PASSED_UID.toInt() to "img/verb_complete.svg",
+    VerbEntity.VERB_FAILED_UID.toInt() to "img/verb_complete.svg"
 )
 
 val StatementListScreenComponent2 = FC<StatementListScreenProps> { props ->
@@ -68,12 +68,11 @@ val StatementListScreenComponent2 = FC<StatementListScreenProps> { props ->
                             }
                         }
 
-                        secondaryAction = VERB_ICON_MAP[
-                                statementItem.statementVerbUid.toInt()]?.create(){
-                            sx{
-                                width = 40.px
-                                height = 40.px
-                            }
+                        secondaryAction = img.create {
+                            src = VERB_ICON_MAP[statementItem.statementVerbUid.toInt()]
+                            alt = ""
+                            height = 40.0
+                            width = 40.0
                         }
                     }
                 }
