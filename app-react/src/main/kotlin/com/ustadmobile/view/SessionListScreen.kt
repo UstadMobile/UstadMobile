@@ -2,9 +2,11 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.util.ext.contentCompleteStatus
 import com.ustadmobile.core.viewmodel.SessionListUiState
 import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.hooks.useFormattedDateAndTime
+import com.ustadmobile.hooks.useFormattedDuration
 import com.ustadmobile.lib.db.entities.PersonWithSessionsDisplay
 import csstype.px
 import kotlinx.datetime.TimeZone
@@ -54,6 +56,20 @@ external interface PersonListItemProps : Props {
 
 }
 
+val CONTENT_COMPLETE_MAP_IMAGE = mapOf(
+    PersonWithSessionsDisplay.RESULT_SUCCESS to Check,
+    PersonWithSessionsDisplay.RESULT_FAILURE to Close,
+    PersonWithSessionsDisplay.RESULT_UNSET to null,
+    PersonWithSessionsDisplay.RESULT_INCOMPLETE to null,
+)
+
+val CONTENT_COMPLETE_MAP_TEXT = mapOf(
+    PersonWithSessionsDisplay.RESULT_SUCCESS to MessageID.passed,
+    PersonWithSessionsDisplay.RESULT_FAILURE to MessageID.failed,
+    PersonWithSessionsDisplay.RESULT_UNSET to MessageID.completed,
+    PersonWithSessionsDisplay.RESULT_INCOMPLETE to MessageID.incomplete,
+)
+
 private val PersonListItem = FC<PersonListItemProps> { props ->
 
     val strings = useStringsXml()
@@ -65,6 +81,10 @@ private val PersonListItem = FC<PersonListItemProps> { props ->
 
     val uiState = props.person.listItemUiState
 
+    val duration = useFormattedDuration(timeInMillis = props.person.duration)
+
+    val contentCompleteStatus = props.person.contentCompleteStatus()
+
     ListItem{
         ListItemButton {
             onClick = {
@@ -72,7 +92,8 @@ private val PersonListItem = FC<PersonListItemProps> { props ->
             }
 
             ListItemIcon {
-                + Check.create()
+                + (CONTENT_COMPLETE_MAP_IMAGE[contentCompleteStatus]
+                    ?: Check).create()
             }
 
             ListItemText {
@@ -80,7 +101,8 @@ private val PersonListItem = FC<PersonListItemProps> { props ->
                     direction = responsive(StackDirection.row)
 
                     Typography {
-                        + ("Passed - ")
+                        + strings[CONTENT_COMPLETE_MAP_TEXT[contentCompleteStatus]
+                            ?: MessageID.passed]
                     }
 
                     Typography {
