@@ -32,3 +32,6 @@ appId: com.toughra.ustadmobile
     start: 100,400
     end: 100,100
 - tapOn: "SUBMIT"
+- extendedWaitUntil:
+      notVisible: "SUBMIT"
+      timeout: 10000

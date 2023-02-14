@@ -13,4 +13,7 @@ appId: com.toughra.ustadmobile
 - inputText: ${TEXT}
 - tapOn: "DONE"
 - tapOn: "SUBMIT"
+- extendedWaitUntil:
+      notVisible: "SUBMIT"
+      timeout: 10000
 

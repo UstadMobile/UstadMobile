@@ -23,3 +23,6 @@ appId: com.toughra.ustadmobile
     file: "./redirect_to_downloads.yaml"
 - tapOn: ${TESTFILENAME}
 - tapOn: "SUBMIT"
+- extendedWaitUntil:
+    notVisible: "SUBMIT"
+    timeout: 10000

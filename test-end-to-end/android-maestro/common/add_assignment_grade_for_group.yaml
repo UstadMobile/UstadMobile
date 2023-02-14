@@ -24,5 +24,12 @@ appId: com.toughra.ustadmobile
 - tapOn: "UPDATE GRADE AND MARK NEXT"
 - tapOn: "Points"
 - inputText: ${POINT2}
+- hideKeyboard
+- tapOn:
+    id: "com.google.android.inputmethod.latin:id/icon"
+    index: 2
 - tapOn: "SUBMIT GRADE"
+- extendedWaitUntil:
+      notVisible: "SUBMIT GRADE"
+      timeout: 10000
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_assignment_grade_teacherView"
