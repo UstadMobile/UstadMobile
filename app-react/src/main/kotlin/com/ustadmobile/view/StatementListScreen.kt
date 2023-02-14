@@ -30,7 +30,7 @@ external interface StatementListScreenProps : Props {
 val VERB_ICON_MAP = mapOf(
     VerbEntity.VERB_COMPLETED_UID.toInt() to "img/verb_complete.svg",
     VerbEntity.VERB_PROGRESSED_UID.toInt() to "img/verb_progress.svg",
-    VerbEntity.VERB_ATTEMPTED_UID.toInt() to "img/verb_complete.svg",
+    VerbEntity.VERB_ATTEMPTED_UID.toInt() to "img/verb_attempt.svg",
     VerbEntity.VERB_INTERACTED_UID.toInt() to "img/verb_complete.svg",
     VerbEntity.VERB_ANSWERED_UID.toInt() to "img/verb_complete.svg",
     VerbEntity.VERB_SATISFIED_UID.toInt() to "img/verb_complete.svg",
