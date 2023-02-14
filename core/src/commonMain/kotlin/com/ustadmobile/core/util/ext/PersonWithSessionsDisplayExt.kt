@@ -3,7 +3,7 @@ package com.ustadmobile.core.util.ext
 import com.ustadmobile.lib.db.entities.PersonWithSessionsDisplay
 import com.ustadmobile.lib.db.entities.StatementEntity
 
-fun PersonWithSessionsDisplay.setContentComplete(): Int {
+fun PersonWithSessionsDisplay.contentCompleteStatus(): Int {
     if(this.resultComplete){
         return when(this.resultSuccess){
             StatementEntity.RESULT_SUCCESS -> {

@@ -23,7 +23,7 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemPersonSessionsListBinding
 import com.ustadmobile.core.controller.SessionListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
-import com.ustadmobile.core.util.ext.setContentComplete
+import com.ustadmobile.core.util.ext.contentCompleteStatus
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.core.viewmodel.SessionListUiState
@@ -148,11 +148,18 @@ private fun SessionListScreen(
 
 }
 
-val CONTENT_COMPLETE_MAP = mapOf(
+val CONTENT_COMPLETE_MAP_IMAGE = mapOf(
     PersonWithSessionsDisplay.RESULT_SUCCESS to R.drawable.exo_ic_check,
     PersonWithSessionsDisplay.RESULT_FAILURE to R.drawable.ic_close_black_24dp,
     PersonWithSessionsDisplay.RESULT_UNSET to null,
     PersonWithSessionsDisplay.RESULT_INCOMPLETE to null,
+)
+
+val CONTENT_COMPLETE_MAP_TEXT = mapOf(
+    PersonWithSessionsDisplay.RESULT_SUCCESS to R.string.passed,
+    PersonWithSessionsDisplay.RESULT_FAILURE to R.string.failed,
+    PersonWithSessionsDisplay.RESULT_UNSET to R.string.completed,
+    PersonWithSessionsDisplay.RESULT_INCOMPLETE to R.string.incomplete,
 )
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -171,14 +178,16 @@ fun PersonListItem(
 
     val duration = rememberFormattedDuration(timeInMillis = person.duration)
 
-    val contentCompleteStatus = person.setContentComplete()
+    val contentCompleteStatus = person.contentCompleteStatus()
 
     ListItem (
         modifier = Modifier.clickable {
             onClick(person)
         },
         text = {
-            Text(text = "Passed - ")
+            Text(text = stringResource(
+                id = CONTENT_COMPLETE_MAP_TEXT[contentCompleteStatus]
+                    ?: R.string.passed))
         },
         secondaryText = {
             Column(
@@ -216,7 +225,7 @@ fun PersonListItem(
         trailing = {
             Icon(
                 painterResource(
-                    id = CONTENT_COMPLETE_MAP[contentCompleteStatus]
+                    id = CONTENT_COMPLETE_MAP_IMAGE[contentCompleteStatus]
                         ?: R.drawable.exo_ic_check),
                 contentDescription = null
             )
