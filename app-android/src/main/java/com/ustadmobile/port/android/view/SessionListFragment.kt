@@ -23,13 +23,11 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemPersonSessionsListBinding
 import com.ustadmobile.core.controller.SessionListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
-import com.ustadmobile.core.util.ext.editIconId
 import com.ustadmobile.core.util.ext.setContentComplete
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.core.viewmodel.SessionListUiState
 import com.ustadmobile.core.viewmodel.listItemUiState
-import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.PersonWithSessionsDisplay
 import com.ustadmobile.lib.db.entities.StatementEntity
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
