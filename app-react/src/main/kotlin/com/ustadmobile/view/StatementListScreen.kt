@@ -32,10 +32,10 @@ val VERB_ICON_MAP = mapOf(
     VerbEntity.VERB_PROGRESSED_UID.toInt() to "img/verb_progress.svg",
     VerbEntity.VERB_ATTEMPTED_UID.toInt() to "img/verb_attempt.svg",
     VerbEntity.VERB_INTERACTED_UID.toInt() to "img/verb_interactive.svg",
-    VerbEntity.VERB_ANSWERED_UID.toInt() to "img/verb_complete.svg",
+    VerbEntity.VERB_ANSWERED_UID.toInt() to "img/verb_answered.svg",
     VerbEntity.VERB_SATISFIED_UID.toInt() to "img/verb_passed.svg",
     VerbEntity.VERB_PASSED_UID.toInt() to "img/verb_passed.svg",
-    VerbEntity.VERB_FAILED_UID.toInt() to "img/verb_complete.svg"
+    VerbEntity.VERB_FAILED_UID.toInt() to "img/verb_failed.svg"
 )
 
 val StatementListScreenComponent2 = FC<StatementListScreenProps> { props ->
