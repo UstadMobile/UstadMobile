@@ -186,6 +186,8 @@ val StatementListScreenPreview = FC<Props> {
                     resultScoreMax = 90
                     resultScoreScaled = 10F
                     resultScoreRaw = 70
+                    resultDuration = 1676432503
+                    timestamp = 1676432354
                     statementVerbUid = VerbEntity.VERB_ATTEMPTED_UID
                 },
                 StatementWithSessionDetailDisplay().apply {
@@ -195,6 +197,8 @@ val StatementListScreenPreview = FC<Props> {
                     resultScoreMax = 90
                     resultScoreScaled = 10F
                     resultScoreRaw = 70
+                    resultDuration = 1676432503
+                    timestamp = 1676432354
                     statementVerbUid = VerbEntity.VERB_INTERACTED_UID
                 },
                 StatementWithSessionDetailDisplay().apply {
@@ -204,6 +208,8 @@ val StatementListScreenPreview = FC<Props> {
                     resultScoreMax = 90
                     resultScoreScaled = 10F
                     resultScoreRaw = 70
+                    resultDuration = 1676432503
+                    timestamp = 1676432354
                     statementVerbUid = VerbEntity.VERB_ANSWERED_UID
                 },
                 StatementWithSessionDetailDisplay().apply {
@@ -213,6 +219,8 @@ val StatementListScreenPreview = FC<Props> {
                     resultScoreMax = 90
                     resultScoreScaled = 10F
                     resultScoreRaw = 70
+                    resultDuration = 1676432503
+                    timestamp = 1676432354
                     statementVerbUid = VerbEntity.VERB_SATISFIED_UID
                 },
                 StatementWithSessionDetailDisplay().apply {
@@ -222,6 +230,8 @@ val StatementListScreenPreview = FC<Props> {
                     resultScoreMax = 90
                     resultScoreScaled = 10F
                     resultScoreRaw = 70
+                    resultDuration = 1676432503
+                    timestamp = 1676432354
                     statementVerbUid = VerbEntity.VERB_PASSED_UID
                 },
                 StatementWithSessionDetailDisplay().apply {
@@ -231,6 +241,8 @@ val StatementListScreenPreview = FC<Props> {
                     resultScoreMax = 90
                     resultScoreScaled = 10F
                     resultScoreRaw = 70
+                    resultDuration = 1676432503
+                    timestamp = 1676432354
                     statementVerbUid = VerbEntity.VERB_FAILED_UID
                 }
             )
