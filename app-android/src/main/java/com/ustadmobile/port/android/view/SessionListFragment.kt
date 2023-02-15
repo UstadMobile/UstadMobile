@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -137,7 +136,8 @@ private fun SessionListScreen(
     ) {
 
         items(
-            items = uiState.sessionsList
+            items = uiState.sessionsList,
+            key = { session -> session.contextRegistration ?: "" }
         ){ personItem ->
             PersonListItem(
                 person = personItem,
@@ -244,10 +244,12 @@ fun SessionListScreenPreview() {
                         resultScore = 5
                         resultMax = 10
                         resultComplete = true
+                        contextRegistration = "1"
                         resultSuccess = StatementEntity.RESULT_UNSET
                     },
                     PersonWithSessionsDisplay().apply {
                         startDate = 13
+                        contextRegistration = "2"
                         resultComplete = true
                     },
                     PersonWithSessionsDisplay().apply {
@@ -256,6 +258,7 @@ fun SessionListScreenPreview() {
                         resultScore = 5
                         resultMax = 10
                         resultComplete = true
+                        contextRegistration = "3"
                         resultSuccess = StatementEntity.RESULT_SUCCESS
                     },
                     PersonWithSessionsDisplay().apply {
@@ -264,6 +267,7 @@ fun SessionListScreenPreview() {
                         resultScore = 5
                         resultMax = 10
                         resultComplete = true
+                        contextRegistration = "4"
                         resultSuccess = StatementEntity.RESULT_UNSET
                     },
                     PersonWithSessionsDisplay().apply {
@@ -271,6 +275,7 @@ fun SessionListScreenPreview() {
                         resultScoreScaled = 3F
                         resultScore = 5
                         resultMax = 10
+                        contextRegistration = "5"
                         resultComplete = false
                     },
                     PersonWithSessionsDisplay().apply {
@@ -279,6 +284,7 @@ fun SessionListScreenPreview() {
                         resultScore = 5
                         resultMax = 10
                         resultComplete = true
+                        contextRegistration = "6"
                         resultSuccess = StatementEntity.RESULT_FAILURE
                     }
                 ),
