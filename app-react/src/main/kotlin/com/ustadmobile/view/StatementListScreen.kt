@@ -49,12 +49,18 @@ val StatementListScreenComponent2 = FC<StatementListScreenProps> { props ->
 
                     ListItem{
                         ListItemButton {
-                            sx {
-                                textAlign = TextAlign.end
-                            }
 
                             onClick = {
                                 props.onClickStatement(statementItem)
+                            }
+
+                            ListItemIcon {
+                                img {
+                                    src = VERB_ICON_MAP[statementItem.statementVerbUid.toInt()]
+                                    alt = ""
+                                    height = 40.0
+                                    width = 40.0
+                                }
                             }
 
                             ListItemText {
@@ -66,13 +72,6 @@ val StatementListScreenComponent2 = FC<StatementListScreenProps> { props ->
                                     statement = statementItem
                                 }
                             }
-                        }
-
-                        secondaryAction = img.create {
-                            src = VERB_ICON_MAP[statementItem.statementVerbUid.toInt()]
-                            alt = ""
-                            height = 40.0
-                            width = 40.0
                         }
                     }
                 }
@@ -113,9 +112,6 @@ val SecondaryTextContent = FC<SecondaryTextContentProps> { props ->
 
         Stack{
             direction = responsive(StackDirection.row)
-            sx {
-                justifyContent = JustifyContent.end
-            }
 
             if (statementUiState.resultDurationVisible){
 
@@ -134,9 +130,6 @@ val SecondaryTextContent = FC<SecondaryTextContentProps> { props ->
         if (statementUiState.resultScoreMaxVisible){
             Stack {
                 direction = responsive(StackDirection.row)
-                sx {
-                    justifyContent = JustifyContent.end
-                }
 
                 Typography {
                     + statementUiState.scoreResultsText

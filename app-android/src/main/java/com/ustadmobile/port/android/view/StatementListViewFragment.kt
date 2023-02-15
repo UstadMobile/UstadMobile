@@ -162,14 +162,7 @@ private fun StatementListScreen(
                 modifier = Modifier.clickable {
                     onClickStatement(statement)
                 },
-                text = {
-                    Text(statementUiState.personVerbTitleText ?: "",
-                        textAlign = TextAlign.End)
-                },
-                secondaryText = {
-                    SecondaryTextContent(statement)
-                },
-                trailing = {
+                icon = {
                     Icon(
                         painterResource(
                             id = VERB_ICON_MAP[statement.statementVerbUid.toInt()]
@@ -177,6 +170,12 @@ private fun StatementListScreen(
                         contentDescription = null,
                         modifier = Modifier.size(40.dp)
                     )
+                },
+                text = {
+                    Text(statementUiState.personVerbTitleText ?: "")
+                },
+                secondaryText = {
+                    SecondaryTextContent(statement)
                 }
             )
         }
