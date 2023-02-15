@@ -180,18 +180,20 @@ fun PersonListItem(
 
     val contentCompleteStatus = person.contentCompleteStatus()
 
+    val icon = CONTENT_COMPLETE_MAP_IMAGE[contentCompleteStatus]
+
     ListItem (
         modifier = Modifier.clickable {
             onClick(person)
         },
         icon = {
-            Icon(
-                painterResource(
-                    id = CONTENT_COMPLETE_MAP_IMAGE[contentCompleteStatus]
-                        ?: R.drawable.exo_ic_check),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp)
-            )
+            if (icon != null){
+                Icon(
+                    painterResource(id = icon),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         },
         text = {
             Row {

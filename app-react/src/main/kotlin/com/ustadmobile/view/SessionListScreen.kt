@@ -94,8 +94,7 @@ private val PersonListItem = FC<PersonListItemProps> { props ->
             }
 
             ListItemIcon {
-                + (CONTENT_COMPLETE_MAP_IMAGE[contentCompleteStatus]
-                    ?: Check).create()
+                + (CONTENT_COMPLETE_MAP_IMAGE[contentCompleteStatus])?.create()
             }
 
             ListItemText {
