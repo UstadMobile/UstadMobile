@@ -29,11 +29,13 @@ private fun GrantAppPermissionScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Image(
-            painter = painterResource(id = R.drawable.article_24px),
-            contentDescription = "",
-            modifier = Modifier.size(64.dp)
-        )
+        if (uiState.grantToIcon != null){
+            Image(
+                painter = painterResource(id = uiState.grantToIcon!!),
+                contentDescription = "",
+                modifier = Modifier.size(64.dp)
+            )
+        }
 
         Text(uiState.grantToAppName)
 
@@ -71,7 +73,8 @@ private fun GrantAppPermissionScreen(
 @Preview
 fun GrantAppPermissionPreview() {
     val uiStateVal = GrantAppPermissionUiState(
-        grantToAppName = "App Name"
+        grantToAppName = "App Name",
+        grantToIcon = R.drawable.article_24px
     )
 
     MdcTheme {
