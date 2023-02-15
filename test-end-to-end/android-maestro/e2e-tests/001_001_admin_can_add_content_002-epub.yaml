@@ -23,3 +23,10 @@ env:
     file: "../common/login_download_and_open_content.yaml"
     env:
       TESTCONTENTNAME: AddContentEpubTest
+- tapOn:
+    id: "com.toughra.ustadmobile:id/menu_epub_content_showtoc"
+- assertVisible: "Oliver Twist; or, The Parish Boy's Progress. Illustrated"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_download_and_open"
+- back
+- back
+- tapOn: "ATTEMPTS"
