@@ -29,9 +29,9 @@ private fun GrantAppPermissionScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        if (uiState.grantToIcon != null){
+        uiState.grantToIcon?.also { grantToIcon ->
             Image(
-                painter = painterResource(id = uiState.grantToIcon!!),
+                painter = painterResource(id = grantToIcon),
                 contentDescription = "",
                 modifier = Modifier.size(64.dp)
             )
