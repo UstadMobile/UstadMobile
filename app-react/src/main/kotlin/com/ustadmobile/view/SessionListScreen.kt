@@ -8,8 +8,10 @@ import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useFormattedDuration
 import com.ustadmobile.lib.db.entities.PersonWithSessionsDisplay
+import com.ustadmobile.lib.db.entities.StatementEntity
 import csstype.px
 import kotlinx.datetime.TimeZone
+import kotlinx.html.injector.injectTo
 import mui.icons.material.*
 import mui.material.*
 import mui.material.List
@@ -153,9 +155,35 @@ val SessionListScreenPreview = FC<Props> {
                     resultScoreScaled = 3F
                     resultScore = 5
                     resultMax = 10
+                    resultComplete = true
+                    resultSuccess = StatementEntity.RESULT_UNSET
                 },
                 PersonWithSessionsDisplay().apply {
                     startDate = 13
+                    resultComplete = true
+                },
+                PersonWithSessionsDisplay().apply {
+                    startDate = 13
+                    resultScoreScaled = 3F
+                    resultScore = 5
+                    resultMax = 10
+                    resultComplete = true
+                    resultSuccess = StatementEntity.RESULT_SUCCESS
+                },
+                PersonWithSessionsDisplay().apply {
+                    startDate = 13
+                    resultScoreScaled = 3F
+                    resultScore = 5
+                    resultMax = 10
+                    resultComplete = true
+                    resultSuccess = StatementEntity.RESULT_UNSET
+                },
+                PersonWithSessionsDisplay().apply {
+                    startDate = 13
+                    resultScoreScaled = 3F
+                    resultScore = 5
+                    resultMax = 10
+                    resultComplete = false
                 }
             ),
         )

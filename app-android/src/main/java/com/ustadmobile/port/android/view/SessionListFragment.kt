@@ -238,15 +238,38 @@ fun SessionListScreenPreview() {
                 sessionsList = listOf(
                     PersonWithSessionsDisplay().apply {
                         startDate = 13
-                        resultScoreScaled = 4F
+                        resultScoreScaled = 3F
                         resultScore = 5
                         resultMax = 10
-                        duration = 72784
                         resultComplete = true
-                        resultSuccess = StatementEntity.RESULT_FAILURE
+                        resultSuccess = StatementEntity.RESULT_UNSET
                     },
                     PersonWithSessionsDisplay().apply {
                         startDate = 13
+                        resultComplete = true
+                    },
+                    PersonWithSessionsDisplay().apply {
+                        startDate = 13
+                        resultScoreScaled = 3F
+                        resultScore = 5
+                        resultMax = 10
+                        resultComplete = true
+                        resultSuccess = StatementEntity.RESULT_SUCCESS
+                    },
+                    PersonWithSessionsDisplay().apply {
+                        startDate = 13
+                        resultScoreScaled = 3F
+                        resultScore = 5
+                        resultMax = 10
+                        resultComplete = true
+                        resultSuccess = StatementEntity.RESULT_UNSET
+                    },
+                    PersonWithSessionsDisplay().apply {
+                        startDate = 13
+                        resultScoreScaled = 3F
+                        resultScore = 5
+                        resultMax = 10
+                        resultComplete = false
                     }
                 ),
             )
