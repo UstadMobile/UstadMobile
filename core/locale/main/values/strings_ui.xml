@@ -1565,4 +1565,7 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <string name="my_profile">My profile</string>
 
     <string name="add_another_account">Add another account</string>
+
+    <string name="this_app_will_receive">This app will receive your profile information and information about your courses</string>
+
 </resources>
