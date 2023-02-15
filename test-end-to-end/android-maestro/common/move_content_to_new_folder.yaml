@@ -25,5 +25,6 @@ appId: com.toughra.ustadmobile
 - runFlow:
       file: "../common/user_login.yaml"
 - tapOn: "Library"
+- assertVisible: "New Test Folder"
 - tapOn: "New Test Folder"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/after_moving_content_to_new_folder_test"

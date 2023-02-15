@@ -35,4 +35,5 @@ env:
       notVisible: "Library"
     file: "../common/guest_login.yaml"
 - tapOn: "Library"
+- assertNotVisible: "PubliclyNotAccessibleContentTest"
 - takeScreenshot: "${TESTRESULTSDIR}/guest_view"
