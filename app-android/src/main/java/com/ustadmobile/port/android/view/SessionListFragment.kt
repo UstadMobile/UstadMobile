@@ -138,7 +138,7 @@ private fun SessionListScreen(
 
         items(
             items = uiState.sessionsList,
-            key = {session -> session.contextRegistration ?: "" }
+            key = { session -> session.contextRegistration ?: "" }
         ){ personItem ->
             PersonListItem(
                 person = personItem,
