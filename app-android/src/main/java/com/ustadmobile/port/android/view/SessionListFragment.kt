@@ -137,7 +137,8 @@ private fun SessionListScreen(
     ) {
 
         items(
-            items = uiState.sessionsList
+            items = uiState.sessionsList,
+            key = {session -> session.contextRegistration ?: "" }
         ){ personItem ->
             PersonListItem(
                 person = personItem,
@@ -239,6 +240,7 @@ fun SessionListScreenPreview() {
             uiState = SessionListUiState(
                 sessionsList = listOf(
                     PersonWithSessionsDisplay().apply {
+                        contextRegistration = "1"
                         startDate = 13
                         resultScoreScaled = 3F
                         resultScore = 5
@@ -247,10 +249,12 @@ fun SessionListScreenPreview() {
                         resultSuccess = StatementEntity.RESULT_UNSET
                     },
                     PersonWithSessionsDisplay().apply {
+                        contextRegistration = "2"
                         startDate = 13
                         resultComplete = true
                     },
                     PersonWithSessionsDisplay().apply {
+                        contextRegistration = "3"
                         startDate = 13
                         resultScoreScaled = 3F
                         resultScore = 5
@@ -259,6 +263,7 @@ fun SessionListScreenPreview() {
                         resultSuccess = StatementEntity.RESULT_SUCCESS
                     },
                     PersonWithSessionsDisplay().apply {
+                        contextRegistration = "4"
                         startDate = 13
                         resultScoreScaled = 3F
                         resultScore = 5
@@ -267,6 +272,7 @@ fun SessionListScreenPreview() {
                         resultSuccess = StatementEntity.RESULT_UNSET
                     },
                     PersonWithSessionsDisplay().apply {
+                        contextRegistration = "5"
                         startDate = 13
                         resultScoreScaled = 3F
                         resultScore = 5
@@ -274,6 +280,7 @@ fun SessionListScreenPreview() {
                         resultComplete = false
                     },
                     PersonWithSessionsDisplay().apply {
+                        contextRegistration = "6"
                         startDate = 13
                         resultScoreScaled = 3F
                         resultScore = 5
