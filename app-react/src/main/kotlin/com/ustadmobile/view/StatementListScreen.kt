@@ -114,13 +114,16 @@ val SecondaryTextContent = FC<SecondaryTextContentProps> { props ->
 
             Typography { + dateTimeFormatter }
 
+
             if (statementUiState.resultDurationVisible){
 
-                Typography { + duration }
+                Box { sx { width = 10.px } }
 
                 Icon { + Timer.create() }
 
-                Box{ sx { width = 8.px } }
+                Typography { + duration }
+
+
             }
         }
 
@@ -139,6 +142,8 @@ val SecondaryTextContent = FC<SecondaryTextContentProps> { props ->
 
                 }
 
+                Box { sx { width = 10.px } }
+
                 Typography {
                     + statementUiState.scoreResultsText
                 }
@@ -156,17 +161,18 @@ val StatementListScreenPreview = FC<Props> {
             statementList = listOf(
                 StatementWithSessionDetailDisplay().apply {
                     statementUid = 1
-                    verbDisplay = "Answered"
+                    verbDisplay = "Completed"
                     objectDisplay = "object Display"
                     resultScoreMax = 90
                     resultScoreScaled = 10F
                     resultScoreRaw = 70
-                    resultDuration = 1009
+                    resultDuration = 1676432503
+                    timestamp = 1676432354
                     statementVerbUid = VerbEntity.VERB_COMPLETED_UID
                 },
                 StatementWithSessionDetailDisplay().apply {
                     statementUid = 2
-                    verbDisplay = "Answered"
+                    verbDisplay = "Progressed"
                     objectDisplay = "object Display"
                     resultScoreMax = 90
                     resultScoreScaled = 10F
@@ -175,7 +181,7 @@ val StatementListScreenPreview = FC<Props> {
                 },
                 StatementWithSessionDetailDisplay().apply {
                     statementUid = 3
-                    verbDisplay = "Answered"
+                    verbDisplay = "Attempted"
                     objectDisplay = "object Display"
                     resultScoreMax = 90
                     resultScoreScaled = 10F
@@ -184,7 +190,7 @@ val StatementListScreenPreview = FC<Props> {
                 },
                 StatementWithSessionDetailDisplay().apply {
                     statementUid = 4
-                    verbDisplay = "Answered"
+                    verbDisplay = "Interacted"
                     objectDisplay = "object Display"
                     resultScoreMax = 90
                     resultScoreScaled = 10F
@@ -202,7 +208,7 @@ val StatementListScreenPreview = FC<Props> {
                 },
                 StatementWithSessionDetailDisplay().apply {
                     statementUid = 6
-                    verbDisplay = "Answered"
+                    verbDisplay = "Satisfied"
                     objectDisplay = "object Display"
                     resultScoreMax = 90
                     resultScoreScaled = 10F
@@ -211,7 +217,7 @@ val StatementListScreenPreview = FC<Props> {
                 },
                 StatementWithSessionDetailDisplay().apply {
                     statementUid = 7
-                    verbDisplay = "Answered"
+                    verbDisplay = "Passed"
                     objectDisplay = "object Display"
                     resultScoreMax = 90
                     resultScoreScaled = 10F
@@ -220,7 +226,7 @@ val StatementListScreenPreview = FC<Props> {
                 },
                 StatementWithSessionDetailDisplay().apply {
                     statementUid = 8
-                    verbDisplay = "Answered"
+                    verbDisplay = "Failed"
                     objectDisplay = "object Display"
                     resultScoreMax = 90
                     resultScoreScaled = 10F

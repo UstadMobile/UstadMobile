@@ -195,9 +195,8 @@ fun SecondaryTextContent(
 
     val  duration = rememberFormattedDuration(timeInMillis = statement.resultDuration)
 
-    Column (
-       horizontalAlignment = Alignment.End,
-    ){
+    Column {
+
         if (statementUiState.descriptionVisible){
             Text(statement.objectDisplay ?: "")
         }
@@ -206,7 +205,6 @@ fun SecondaryTextContent(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
 
@@ -225,7 +223,6 @@ fun SecondaryTextContent(
         if (statementUiState.resultScoreMaxVisible){
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(statementUiState.scoreResultsText)
@@ -246,17 +243,18 @@ fun StatementListScreenPreview() {
         statementList = listOf(
             StatementWithSessionDetailDisplay().apply {
                 statementUid = 1
-                verbDisplay = "Answered"
+                verbDisplay = "Completed"
                 objectDisplay = "object Display"
                 resultScoreMax = 90
                 resultScoreScaled = 10F
                 resultScoreRaw = 70
-                resultDuration = 1009
+                resultDuration = 1676432503
+                timestamp = 1676432354
                 statementVerbUid = VerbEntity.VERB_COMPLETED_UID
             },
             StatementWithSessionDetailDisplay().apply {
                 statementUid = 2
-                verbDisplay = "Answered"
+                verbDisplay = "Progressed"
                 objectDisplay = "object Display"
                 resultScoreMax = 90
                 resultScoreScaled = 10F
@@ -265,7 +263,7 @@ fun StatementListScreenPreview() {
             },
             StatementWithSessionDetailDisplay().apply {
                 statementUid = 3
-                verbDisplay = "Answered"
+                verbDisplay = "Attempted"
                 objectDisplay = "object Display"
                 resultScoreMax = 90
                 resultScoreScaled = 10F
@@ -274,7 +272,7 @@ fun StatementListScreenPreview() {
             },
             StatementWithSessionDetailDisplay().apply {
                 statementUid = 4
-                verbDisplay = "Answered"
+                verbDisplay = "Interacted"
                 objectDisplay = "object Display"
                 resultScoreMax = 90
                 resultScoreScaled = 10F
@@ -292,7 +290,7 @@ fun StatementListScreenPreview() {
             },
             StatementWithSessionDetailDisplay().apply {
                 statementUid = 6
-                verbDisplay = "Answered"
+                verbDisplay = "Satisfied"
                 objectDisplay = "object Display"
                 resultScoreMax = 90
                 resultScoreScaled = 10F
@@ -301,7 +299,7 @@ fun StatementListScreenPreview() {
             },
             StatementWithSessionDetailDisplay().apply {
                 statementUid = 7
-                verbDisplay = "Answered"
+                verbDisplay = "Passed"
                 objectDisplay = "object Display"
                 resultScoreMax = 90
                 resultScoreScaled = 10F
@@ -310,7 +308,7 @@ fun StatementListScreenPreview() {
             },
             StatementWithSessionDetailDisplay().apply {
                 statementUid = 8
-                verbDisplay = "Answered"
+                verbDisplay = "Failed"
                 objectDisplay = "object Display"
                 resultScoreMax = 90
                 resultScoreScaled = 10F
