@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.GrantAppPermissionUiState
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 
 @Composable
@@ -39,7 +40,8 @@ private fun GrantAppPermissionScreen(
 
         Text(uiState.grantToAppName)
 
-        Text("This app will receive your profile information and information about your courses")
+        Text(stringResource(id = R.string.this_app_will_receive),
+            modifier = Modifier.defaultItemPadding())
 
         Button(
             onClick = onClickGrant,
