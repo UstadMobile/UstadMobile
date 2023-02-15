@@ -99,9 +99,6 @@ val SecondaryTextContent = FC<SecondaryTextContentProps> { props ->
     Stack {
         if (statementUiState.descriptionVisible){
             Typography {
-                sx {
-                    textAlign = TextAlign.start
-                }
                 + (props.statement.objectDisplay ?: "")
             }
         }
@@ -113,6 +110,10 @@ val SecondaryTextContent = FC<SecondaryTextContentProps> { props ->
         Stack{
             direction = responsive(StackDirection.row)
 
+            Icon{ + CalendarToday.create() }
+
+            Typography { + dateTimeFormatter }
+
             if (statementUiState.resultDurationVisible){
 
                 Typography { + duration }
@@ -121,18 +122,14 @@ val SecondaryTextContent = FC<SecondaryTextContentProps> { props ->
 
                 Box{ sx { width = 8.px } }
             }
-
-            Typography { + dateTimeFormatter }
-
-            Icon{ + CalendarToday.create() }
         }
 
         if (statementUiState.resultScoreMaxVisible){
             Stack {
                 direction = responsive(StackDirection.row)
 
-                Typography {
-                    + statementUiState.scoreResultsText
+                Icon{
+                    + Check.create()
                 }
 
                 Typography {
@@ -141,9 +138,11 @@ val SecondaryTextContent = FC<SecondaryTextContentProps> { props ->
                             (props.statement.resultScoreScaled * 100).toString())
 
                 }
-                Icon{
-                    + Check.create()
+
+                Typography {
+                    + statementUiState.scoreResultsText
                 }
+
             }
         }
     }
