@@ -190,9 +190,7 @@ fun PersonListItem(
                     ?: R.string.passed))
         },
         secondaryText = {
-            Column(
-                horizontalAlignment = Alignment.End
-            ){
+            Column{
 
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -203,9 +201,7 @@ fun PersonListItem(
                 }
 
                 if (uiState.scoreResultVisible){
-                    Row(
-                        horizontalArrangement = Arrangement.End,
-                    ) {
+                    Row{
 
                         Icon(
                             imageVector = Icons.Filled.Check,

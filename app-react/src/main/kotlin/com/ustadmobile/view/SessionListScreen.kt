@@ -112,9 +112,19 @@ private val PersonListItem = FC<PersonListItemProps> { props ->
                 secondary = Stack.create {
                     direction = responsive(StackDirection.column)
 
-                    Typography {
-                        + dateTimeFormatted
+                    Stack {
+                        direction = responsive(StackDirection.row)
+                        spacing = responsive(10.px)
+
+                        Typography {
+                            + dateTimeFormatted
+                        }
+
+                        Typography {
+                            + duration
+                        }
                     }
+
 
                     if (uiState.scoreResultVisible){
                         Stack {
