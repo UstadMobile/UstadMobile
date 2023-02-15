@@ -137,7 +137,7 @@ private fun SessionListScreen(
     ) {
 
         items(
-            items = uiState.sessionsList,
+            items = uiState.sessionsList
         ){ personItem ->
             PersonListItem(
                 person = personItem,
@@ -185,20 +185,19 @@ fun PersonListItem(
             onClick(person)
         },
         text = {
-            Text(text = stringResource(
-                id = CONTENT_COMPLETE_MAP_TEXT[contentCompleteStatus]
-                    ?: R.string.passed))
+            Row {
+                Text(text = stringResource(
+                    id = CONTENT_COMPLETE_MAP_TEXT[contentCompleteStatus]
+                        ?: R.string.passed))
+
+                Text(" - $duration")
+            }
+
         },
         secondaryText = {
             Column{
 
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-
-                    Text(duration)
-                    Text(dateTimeFormatted)
-                }
+                Text(dateTimeFormatted)
 
                 if (uiState.scoreResultVisible){
                     Row{

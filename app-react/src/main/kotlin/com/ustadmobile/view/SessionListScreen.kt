@@ -106,23 +106,14 @@ private val PersonListItem = FC<PersonListItemProps> { props ->
                     }
 
                     Typography {
-                        props.person.duration
+                       + (" - $duration")
                     }
                 }
                 secondary = Stack.create {
                     direction = responsive(StackDirection.column)
 
-                    Stack {
-                        direction = responsive(StackDirection.row)
-                        spacing = responsive(10.px)
-
-                        Typography {
-                            + dateTimeFormatted
-                        }
-
-                        Typography {
-                            + duration
-                        }
+                    Typography {
+                        + dateTimeFormatted
                     }
 
 
