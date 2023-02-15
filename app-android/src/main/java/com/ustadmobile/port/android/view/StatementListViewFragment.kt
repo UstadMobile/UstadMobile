@@ -208,16 +208,19 @@ fun SecondaryTextContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            if (statementUiState.resultDurationVisible){
-                Text(duration)
-                Icon(Icons.Outlined.Timer, contentDescription = "")
-
-                Box(modifier = Modifier.width(8.dp))
-            }
-
+            Icon(Icons.Outlined.CalendarToday, contentDescription = "")
 
             Text(dateTimeFormatter)
-            Icon(Icons.Outlined.CalendarToday, contentDescription = "")
+
+            if (statementUiState.resultDurationVisible){
+
+                Box(modifier = Modifier.width(10.dp))
+
+                Icon(Icons.Outlined.Timer, contentDescription = "")
+
+                Text(duration)
+
+            }
         }
 
         if (statementUiState.resultScoreMaxVisible){
@@ -225,11 +228,17 @@ fun SecondaryTextContent(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(statementUiState.scoreResultsText)
+
+                Icon(Icons.Default.Check, contentDescription = "")
+
                 Text(stringResource(id = R.string.percentage_score,
                     (statement.resultScoreScaled * 100))
                 )
-                Icon(Icons.Default.Check, contentDescription = "")
+
+                Box(modifier = Modifier.width(10.dp))
+
+                Text(statementUiState.scoreResultsText)
+
             }
         }
     }
