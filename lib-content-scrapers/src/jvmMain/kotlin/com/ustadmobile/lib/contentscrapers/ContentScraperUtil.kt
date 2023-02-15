@@ -26,10 +26,11 @@ import com.ustadmobile.core.io.ext.addDirToContainer
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.ext.md5Sum
 import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.CK12_PASS
 
-import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang.exception.ExceptionUtils
@@ -921,14 +922,6 @@ object ContentScraperUtil {
         return container
     }
 
-    @Throws(IOException::class)
-    fun getMd5(ePubFile: File): String {
-        val fis = FileInputStream(ePubFile)
-        val md5EpubFile = DigestUtils.md5Hex(fis)
-        fis.close()
-
-        return md5EpubFile
-    }
 
 
     /**

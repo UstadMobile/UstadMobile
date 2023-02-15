@@ -100,10 +100,6 @@ class ContentJobRunnerWorker(
         }
     }
 
-    override fun isRunInForeground(): Boolean {
-        return true
-    }
-
     private fun createNotification(job: ContentJob): NotificationCompat.Builder {
 
         val intent = WorkManager.getInstance(applicationContext)

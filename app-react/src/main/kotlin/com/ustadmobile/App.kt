@@ -28,7 +28,7 @@ import csstype.Display
 import csstype.GridTemplateAreas
 import csstype.array
 import io.github.aakira.napier.Napier
-import kotlinx.browser.document
+import web.dom.document
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlinx.coroutines.GlobalScope
@@ -42,8 +42,11 @@ import react.create
 import react.dom.client.createRoot
 import react.router.dom.HashRouter
 import react.useState
+import tanstack.query.core.QueryClient
+import tanstack.react.query.QueryClientProvider
 import ustadJsDi
 import kotlin.random.Random
+import web.html.HTML.div
 
 fun main() {
     Napier.d("Index: Window.onLoad")
@@ -88,8 +91,11 @@ fun main() {
         val ustadDi = ustadJsDi(dbBuilt, dbNodeIdAndAuth, appConfigs, apiUrl, defaultStringsXmlStr,
             foreignStringXmlStr)
 
-        createRoot(document.createElement("div").also { document.body!!.appendChild(it) })
-            .render(App.create() { di = ustadDi })
+        val root = document.createElement(div).also {
+            document.body.appendChild(it)
+        }
+
+        createRoot(root).render(App.create { di = ustadDi })
     }
 
 }
@@ -98,6 +104,10 @@ external interface AppProps: Props {
     var di: DI
 }
 
+//TanStack Query Client as per
+// https://tanstack.com/query/latest/docs/react/quick-start
+private val tanstackQueryClient = QueryClient()
+
 private val App = FC<AppProps> { props ->
     val mobileMode = false//useMediaQuery("(max-width:960px)")
     var appUiState: AppUiState by useState { AppUiState() }
@@ -105,49 +115,56 @@ private val App = FC<AppProps> { props ->
     HashRouter {
         DIModule {
             di = props.di
-            UstadScreensModule {
-                ThemeModule {
-                    Box {
-                        sx {
-                            display = Display.grid
-                            gridTemplateRows = array(
-                                Sizes.Header.Height,
-                                auto,
-                            )
-                            gridTemplateColumns = array(
-                                Sizes.Sidebar.Width, auto,
-                            )
 
-                            //As per https://developer.mozilla.org/en-US/docs/Web/CSS/grid-template-areas
-                            gridTemplateAreas = GridTemplateAreas(
-                                arrayOf(Area.Header, Area.Header),
-                                if (mobileMode || !appUiState.navigationVisible)
-                                    arrayOf(Area.Content, Area.Content)
-                                else
-                                    arrayOf(Area.Sidebar, Area.Content),
-                            )
-                        }
+            QueryClientProvider {
+                client = tanstackQueryClient
 
-                        Header {
-                            this.appUiState = appUiState
-                        }
+                UstadScreensModule {
+                    ThemeModule {
+                        Box {
+                            sx {
+                                display = Display.grid
+                                gridTemplateRows = array(
+                                    Sizes.Header.Height,
+                                    auto,
+                                )
+                                gridTemplateColumns = array(
+                                    Sizes.Sidebar.Width, auto,
+                                )
 
-                        //if (mobileMode) Menu() else Sidebar()
-                        //Note: If we remove the component, instead of hiding using Display property,
-                        // then this seems to make react destroy the content component and create a
-                        // completely new one, which we definitely do not want
-                        Sidebar {
-                            visible = appUiState.navigationVisible
-                        }
+                                //As per https://developer.mozilla.org/en-US/docs/Web/CSS/grid-template-areas
+                                gridTemplateAreas = GridTemplateAreas(
+                                    arrayOf(Area.Header, Area.Header),
+                                    if (mobileMode || !appUiState.navigationVisible)
+                                        arrayOf(Area.Content, Area.Content)
+                                    else
+                                        arrayOf(Area.Sidebar, Area.Content),
+                                )
+                            }
 
-                        Content {
-                            onAppUiStateChanged = {
-                                appUiState = it
+                            Header {
+                                this.appUiState = appUiState
+                            }
+
+                            //if (mobileMode) Menu() else Sidebar()
+                            //Note: If we remove the component, instead of hiding using Display property,
+                            // then this seems to make react destroy the content component and create a
+                            // completely new one, which we definitely do not want
+                            Sidebar {
+                                visible = appUiState.navigationVisible
+                            }
+
+                            Content {
+                                onAppUiStateChanged = {
+                                    appUiState = it
+                                }
                             }
                         }
                     }
                 }
             }
+
+
         }
     }
 }

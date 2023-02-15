@@ -72,12 +72,6 @@ class PersonDetailFragment : UstadBaseMvvmFragment(){
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        return
-    }
-
     companion object {
         @JvmStatic
         val FOREIGNKEYADAPTER_PERSON = object: ForeignKeyAttachmentUriAdapter {

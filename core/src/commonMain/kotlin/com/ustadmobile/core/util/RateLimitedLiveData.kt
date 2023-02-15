@@ -60,12 +60,12 @@ class RateLimitedLiveData<T>(
 
     override fun onActive() {
         super.onActive()
-        db.getInvalidationTracker().addObserver(invalidationObserver)
+        db.invalidationTracker.addObserver(invalidationObserver)
         invalidate()
     }
 
     override fun onInactive() {
         super.onInactive()
-        db.getInvalidationTracker().removeObserver(invalidationObserver)
+        db.invalidationTracker.removeObserver(invalidationObserver)
     }
 }

@@ -26,7 +26,7 @@ import mui.material.ButtonColor
 import mui.material.ButtonVariant
 import mui.material.Size
 import mui.material.styles.TypographyVariant
-import org.w3c.dom.events.Event
+import web.events.Event
 import react.RBuilder
 import react.setState
 import styled.css

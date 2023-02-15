@@ -14,7 +14,7 @@ import com.ustadmobile.util.Util
 import com.ustadmobile.view.ext.renderCreateNewItemOnList
 import kotlinx.css.*
 import mui.material.ListItemAlignItems
-import org.w3c.dom.events.Event
+import web.events.Event
 import react.RBuilder
 import react.ReactElement
 import styled.css

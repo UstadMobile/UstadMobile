@@ -30,7 +30,7 @@ import mui.material.FormControlVariant
 import mui.material.InputLabelVariant
 import mui.material.styles.TypographyVariant
 import react.RBuilder
-import react.dom.html.InputType
+import web.html.InputType
 import react.setState
 import styled.css
 import styled.styledDiv

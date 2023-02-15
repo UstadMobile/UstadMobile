@@ -26,7 +26,7 @@ import com.ustadmobile.util.ext.formatDateRange
 import com.ustadmobile.view.components.AttachmentImageLookupAdapter
 import com.ustadmobile.view.ext.*
 import mui.material.styles.TypographyVariant
-import org.w3c.dom.events.Event
+import web.events.Event
 import react.RBuilder
 import react.setState
 import styled.css

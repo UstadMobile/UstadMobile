@@ -42,6 +42,11 @@
         android:required="false" />
 
     <!--
+    Aztec is used for HTML WYSIWYG editing. This is only be available on SDK24+
+    -->
+    <uses-sdk tools:overrideLibrary="org.wordpress.aztec"/>
+
+    <!--
     Required to find PanicKit responders.
     -->
     <queries>

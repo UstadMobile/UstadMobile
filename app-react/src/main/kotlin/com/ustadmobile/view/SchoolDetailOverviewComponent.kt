@@ -25,7 +25,7 @@ import kotlinx.css.paddingTop
 import kotlinx.css.px
 import mui.material.IconSize
 import mui.material.styles.TypographyVariant
-import org.w3c.dom.events.Event
+import web.events.Event
 import react.RBuilder
 import react.setState
 import styled.css
