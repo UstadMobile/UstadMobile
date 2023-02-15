@@ -218,7 +218,7 @@ fun PersonListItem(
                 }
             }
         },
-        trailing = {
+        icon = {
             Icon(
                 painterResource(
                     id = CONTENT_COMPLETE_MAP_IMAGE[contentCompleteStatus]
