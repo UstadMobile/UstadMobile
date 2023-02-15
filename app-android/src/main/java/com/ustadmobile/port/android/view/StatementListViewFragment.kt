@@ -257,7 +257,7 @@ fun StatementListScreenPreview() {
                 resultScoreMax = 90
                 resultScoreScaled = 10F
                 resultScoreRaw = 70
-                resultDuration = 1676432503
+                resultDuration = 400000L
                 timestamp = 1676432354
                 statementVerbUid = VerbEntity.VERB_COMPLETED_UID
             },
