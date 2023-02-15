@@ -183,6 +183,14 @@ val SessionListScreenPreview = FC<Props> {
                     resultScore = 5
                     resultMax = 10
                     resultComplete = false
+                },
+                PersonWithSessionsDisplay().apply {
+                    startDate = 13
+                    resultScoreScaled = 3F
+                    resultScore = 5
+                    resultMax = 10
+                    resultComplete = true
+                    resultSuccess = StatementEntity.RESULT_FAILURE
                 }
             ),
         )
