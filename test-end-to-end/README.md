@@ -77,3 +77,26 @@ adding from device, test downloading from another device.
 
 4.11 If assignment is set to allow multiple submissions, student can make another submission after the first submission. Teacher can see the revised submission and give a new grade. The student can see the updated grade (including as another member of the group).
 
+### 5	Discussion board
+5.1	Teacher can add discussion board and topics to course
+
+5.2	Teacher can edit discussion board and topics
+
+5.3	All users on course can post on discussion board, see posts from other users. Each topic and post shows last active date and number of replies.
+
+5.4	Users can include a link from within the app (e.g. to a course or content piece) in their post. Clicking the link opens the item directly.
+
+5.5	Users can include external links to websites in their post. Clicking the link opens the browser (e.g. Chrome on Android, new tab in web) for the link
+	
+### 6	User accounts:
+6.1	Admin can enable/disable registration for users
+
+6.2	When registration is enabled: Users over 13 can register directly
+
+6.3	When registration is enabled: Users under 13 can register using parental approval link
+
+6.4 When registration is enabled: If a user does not specify their date of birth, an error message is displayed and they cannot proceed
+
+6.5	If a user under 13 is added by an adult (e.g. teacher/admin) approval is not required
+
+6.6	Admin can enable/disable guest login. If enabled, then users can connect as guest
