@@ -62,6 +62,9 @@ expect abstract class LeavingReasonDao : BaseDao<LeavingReason> {
     @Query("SELECT * FROM LeavingReason")
     abstract fun findAllReasonsLive(): List<LeavingReason>
 
+    @Query("SELECT * FROM LeavingReason")
+    abstract suspend fun findAllReasonsAsync(): List<LeavingReason>
+
     @JsName("findByUid")
     @Query("SELECT * FROM LeavingReason WHERE leavingReasonUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long): LeavingReason?
