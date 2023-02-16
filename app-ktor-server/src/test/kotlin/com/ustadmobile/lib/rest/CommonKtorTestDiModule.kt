@@ -17,6 +17,7 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
+import com.ustadmobile.lib.rest.ext.insertDefaultSite
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -35,6 +36,7 @@ fun commonTestKtorDiModule(
         DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite")
             .build().also { db ->
                 db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
+                db.insertDefaultSite()
                 runBlocking {
                     db.connectivityStatusDao.insertAsync(ConnectivityStatus().apply {
                         connectivityState = ConnectivityStatus.STATE_UNMETERED

@@ -106,11 +106,11 @@ android {
         abortOnError false
     }
 
-    aaptOptions {
-        ignoreAssetsPattern "!*LiberationSans-Regular.ttf"
-    }
 
     namespace 'com.toughra.ustadmobile.launcher'
+    androidResources {
+        ignoreAssetsPattern '!*LiberationSans-Regular.ttf'
+    }
 }
 
 configurations.all {
