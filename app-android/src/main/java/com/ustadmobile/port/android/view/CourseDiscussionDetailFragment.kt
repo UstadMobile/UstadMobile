@@ -44,15 +44,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import android.text.format.DateFormat
 import androidx.compose.foundation.*
 import androidx.compose.foundation.lazy.*
@@ -63,9 +57,10 @@ import androidx.compose.material.icons.filled.Person
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.ustadmobile.core.viewmodel.CourseDiscussionDetailUiState
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.CourseBlock
 
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
-import com.ustadmobile.port.android.view.composable.UstadMessageField
+import com.ustadmobile.port.android.util.compose.rememberFormattedDate
 import java.util.*
 
 
@@ -204,7 +199,7 @@ private fun CourseDiscussionDetailScreen(
         item{
 
             Text(
-                uiState.courseDiscussion?.courseDiscussionDesc?:"",
+                uiState.courseBlock?.cbDescription?:"",
                 style = Typography.body1,
                 modifier = Modifier.padding(8.dp)
             )
@@ -226,9 +221,8 @@ private fun CourseDiscussionDetailScreen(
             key = { post -> post.discussionPostUid }
         ){ post ->
 
-            val context = LocalContext.current
-            val datePosted = remember { DateFormat.getDateFormat(context)
-                .format(Date(post.discussionPostStartDate ?: 0)).toString() }
+            val datePosted = rememberFormattedDate( timeInMillis = post.discussionPostStartDate,
+                "UTC" )
 
             ListItem(
                 modifier = Modifier.clickable {
@@ -242,11 +236,12 @@ private fun CourseDiscussionDetailScreen(
                     )
                 },
                 text = {
-                    Text(post.discussionPostMessage ?: "" )
+                    Text(post.discussionPostTitle ?: "" )
                 },
+
                 secondaryText = {
                     Column {
-                        Text(post.discussionPostTitle?: "")
+                        //Text(post.discussionPostMessage?: "")
                         Text(post.postLatestMessage?: "")
                     }
                 },
@@ -268,12 +263,13 @@ private fun CourseDiscussionDetailScreen(
 @Preview
 fun CourseDiscussionDetailScreenPreview(){
     val uiState = CourseDiscussionDetailUiState(
-        courseDiscussion = CourseDiscussion().apply {
-            courseDiscussionTitle = "Discussions on Module 4: Statistics and Data Science"
-            courseDiscussionDesc = "Any discussion related to Module 4 of Data Science chapter goes here."
-            courseDiscussionActive = true
 
+        courseBlock = CourseBlock().apply{
+          cbTitle = "Discussions on Module 4: Statistics and Data Science"
+          cbDescription = "Here Any discussion related to Module 4 of Data Science chapter goes here."
         },
+
+
         posts = listOf(
             DiscussionPostWithDetails().apply {
                 discussionPostTitle = "Can I join after week 2?"

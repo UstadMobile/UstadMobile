@@ -14,10 +14,7 @@ import mui.material.List
 import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import mui.system.sx
-import react.FC
-import react.Props
-import react.create
-import react.useMemo
+import react.*
 import kotlin.js.Date
 
 external interface CourseDiscussionDetailProps: Props {
@@ -42,7 +39,7 @@ val CourseDiscussionDetailComponent2 = FC<CourseDiscussionDetailProps> { props -
         }
 
         Typography {
-            + props.uiState.courseDiscussion?.courseDiscussionDesc.toString()
+            + props.uiState.courseBlock?.cbDescription.toString()
         }
 
 
@@ -112,17 +109,27 @@ val CourseDiscussionDetailComponent2 = FC<CourseDiscussionDetailProps> { props -
                             Date(item.postLatestMessageTimestamp ?: 0L).toLocaleDateString()
                         }
 
-                        UstadMessageField{
+
+
+                        UstadDetailField{
                             icon = AccountCircle.create()
-                            thirdTextIcon = Message.create()
-                            secondText = item.discussionPostTitle?:""
-                            firstText = item.authorPersonFirstNames + " " + item.authorPersonLastName?: ""
-                            thirdText = item.postLatestMessage ?: ""
-                            fourthText = dateFormatted
-                            fifthText = item.postRepliesCount.toString() + " replies"
-                            secondaryActionContent = null
+                            valueText = item.authorPersonFirstNames + " " + item.authorPersonLastName?: ""
+                            labelText = item.discussionPostTitle?:""
+
 
                         }
+
+//                        UstadMessageField{
+//                            icon = AccountCircle.create()
+//                            thirdTextIcon = Message.create()
+//                            secondText = item.discussionPostTitle?:""
+//                            firstText = item.authorPersonFirstNames + " " + item.authorPersonLastName?: ""
+//                            thirdText = item.postLatestMessage ?: ""
+//                            fourthText = dateFormatted
+//                            fifthText = item.postRepliesCount.toString() + " replies"
+//                            secondaryActionContent = null
+//
+//                        }
 
                     }
                 }
@@ -135,11 +142,10 @@ val CourseDiscussionDetailPreview = FC<Props> {
     CourseDiscussionDetailComponent2 {
         uiState = CourseDiscussionDetailUiState(
 
-            courseDiscussion = CourseDiscussion().apply {
-                courseDiscussionTitle = "Sales and Marketting Discussion"
-                courseDiscussionDesc =
+            courseBlock = CourseBlock().apply {
+                cbTitle = "Sales and Marketting Discussion"
+                cbDescription =
                     "This discussion group is for conversations and posts about Sales and Marketting course"
-                courseDiscussionActive = true
 
             },
             posts = listOf(
