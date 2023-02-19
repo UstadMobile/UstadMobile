@@ -1,5 +1,6 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.MuiAppState
 import com.ustadmobile.core.components.NavHost
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.Snack
@@ -29,13 +30,15 @@ external interface UstadScreenProps: Props {
 
     var onShowSnackBar: ShowSnackFunction?
 
-    var parentRef: RefObject<HTMLElement>
+    var muiAppState: MuiAppState
 
 }
 
 external interface ContentProps: Props {
 
     var onAppUiStateChanged: (AppUiState) -> Unit
+
+    var muiAppState: MuiAppState
 
 }
 
@@ -71,7 +74,7 @@ val Content = FC<ContentProps> { props ->
                 component = main
                 sx {
                     gridArea = Area.Content
-                    padding = DEFAULT_PADDING
+                    padding = 0.px
                 }
 
                 NavHost {
@@ -86,7 +89,7 @@ val Content = FC<ContentProps> { props ->
                     element = Component.create {
                         asDynamic().onAppUiStateChanged = props.onAppUiStateChanged
                         asDynamic().onShowSnackBar = showSnackFunction
-                        asDynamic().parentRef = contentParentRef
+                        asDynamic().muiAppState = props.muiAppState
                     }
                 }
             }

@@ -17,6 +17,7 @@ import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
 import com.ustadmobile.core.components.DIModule
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.mui.components.DEFAULT_APPBAR_HEIGHT
 import com.ustadmobile.mui.components.Header
 import com.ustadmobile.mui.components.Sidebar
 import com.ustadmobile.mui.components.ThemeModule
@@ -108,9 +109,22 @@ external interface AppProps: Props {
 // https://tanstack.com/query/latest/docs/react/quick-start
 private val tanstackQueryClient = QueryClient()
 
+/**
+ * Represents MUI specific state e.g. height of appbar (which is required by some screens for height
+ * calculations)
+ */
+data class MuiAppState (
+    val appBarHeight: Int = DEFAULT_APPBAR_HEIGHT,
+)
+
 private val App = FC<AppProps> { props ->
     val mobileMode = false//useMediaQuery("(max-width:960px)")
     var appUiState: AppUiState by useState { AppUiState() }
+
+    /*
+     *
+     */
+    var muiAppState: MuiAppState by useState { MuiAppState() }
 
     HashRouter {
         DIModule {
@@ -144,6 +158,10 @@ private val App = FC<AppProps> { props ->
 
                             Header {
                                 this.appUiState = appUiState
+                                setAppBarHeight = {
+                                    if(muiAppState.appBarHeight != it)
+                                        muiAppState = muiAppState.copy( appBarHeight = it)
+                                }
                             }
 
                             //if (mobileMode) Menu() else Sidebar()
@@ -155,6 +173,7 @@ private val App = FC<AppProps> { props ->
                             }
 
                             Content {
+                                this.muiAppState = muiAppState
                                 onAppUiStateChanged = {
                                     appUiState = it
                                 }
