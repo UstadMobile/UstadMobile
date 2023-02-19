@@ -2,26 +2,37 @@ package com.ustadmobile.view.components.virtuallist
 
 import csstype.*
 import js.core.jso
-import mui.material.Container
 import react.*
 import react.dom.html.ReactHTML.div
+import tanstack.react.query.UseInfiniteQueryResult
 import tanstack.react.virtual.useVirtualizer
-import web.html.HTMLDivElement
 import web.html.HTMLElement
 
 
-external interface VirtualListProps: Props {
+external interface VirtualListProps: PropsWithChildren {
+    /**
+     * List of sections - should be created using virtualListContent { } block
+     */
     var content: List<VirtualListSection>
 
     var style: CSSProperties?
 }
 
-data class VirtualListContextData(
-    val parentRef: RefObject<HTMLElement>
-)
 
-val VirtualListContext = createContext<VirtualListContextData>()
-
+/**
+ * Create a Virtualized List using Tanstack's virtualizer. The content can be created using a simple
+ * builder to mix individual items, fixed size lists (e.g. plain list type), and InfiniteQuery
+ * based lists.
+ *
+ * VirtualList will generate the div that will control the scrolling of the virtual list. Normally
+ * this should fill the entire of the viewport (minus the appbar etc). Virtualization can only work
+ * when the height is limited, so the virtualizer can determine which items are visible.
+ *
+ * As per:
+ *  As per https://tanstack.com/virtual/v3/docs/examples/react/dynamic
+ *
+ * See VirtualListPreview for an example of this.
+ */
 val VirtualList = FC<VirtualListProps> {props ->
     val parentRef = useRef<HTMLElement>(null)
 
@@ -42,41 +53,17 @@ val VirtualList = FC<VirtualListProps> {props ->
             getItemKey = { index -> "$index" }
         })
 
-
-        Container {
-            div {
-                style = jso {
-                    height = virtualizer.getTotalSize().px
-                    width = 100.pct
-                    position = Position.relative
-                }
-
-
-                virtualizer.getVirtualItems().forEach { virtualRow ->
-                    div {
-                        key = "${virtualRow.index}"
-                        ref = virtualizer.measureElement.unsafeCast<Ref<HTMLDivElement>>()
-                        asDynamic()["data-index"] = virtualRow.index
-                        style = jso {
-                            position = Position.absolute
-                            top = 0.px
-                            left = 0.px
-                            width = 100.pct
-                            height = virtualRow.size.px
-                            transform = translatey(virtualRow.start.px)
-                        }
-
-                        + allRows[virtualRow.index].createNode()
-                    }
-                }
-            }
+        VirtualListContext(VirtualListContextData(virtualizer, allRows)) {
+            + props.children
         }
     }
 }
 
-
-
-class VirtualListContentScope {
+/**
+ * Scoped object used to create VirtualList content items from individual items, lists, and
+ * infinite queries.
+ */
+class VirtualListContentScope internal constructor() {
 
     internal val sections = mutableListOf<VirtualListSection>()
 
@@ -91,8 +78,19 @@ class VirtualListContentScope {
         sections += ItemListSection(list, createNode)
     }
 
+    fun <TItem, TData, TError> infiniteQueryItems(
+        infiniteQueryResult: UseInfiniteQueryResult<TData, TError>,
+        dataPageToItems: (TData) -> List<TItem?>,
+        itemToNode: (TItem?) -> ReactNode,
+    ) {
+        sections += InfiniteQueryResultSection(infiniteQueryResult, dataPageToItems, itemToNode)
+    }
+
 }
 
+/**
+ * Create a list of VirtualListSection .
+ */
 fun virtualListContent(
     block: VirtualListContentScope.() -> Unit
 ) : List<VirtualListSection> {

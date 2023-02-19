@@ -1,15 +1,36 @@
 package com.ustadmobile.view.components.virtuallist
 
+import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.door.paging.LoadResult
+import com.ustadmobile.hooks.usePagingSource
+import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.view.UstadScreenProps
 import csstype.*
 import js.core.jso
+import kotlinx.coroutines.GlobalScope
 import mui.material.Container
 import mui.material.ListItem
 import mui.material.ListItemText
 import mui.material.Typography
 import react.*
+import tanstack.query.core.QueryKey
+
+val demoPersonList = (0..100).map {
+    PersonWithDisplayDetails().apply {
+        firstNames = "Person"
+        lastName = "$it"
+        personUid = it.toLong()
+    }
+}
+
+val demoPagingSource = ListPagingSource(demoPersonList)
 
 val VirtualListPreview = FC<UstadScreenProps> {props ->
+
+    val infiniteQueryResult = usePagingSource(
+        demoPagingSource, QueryKey("PersonList"), GlobalScope, true, 50
+    )
+
     VirtualList {
         style = jso {
             height = "calc(100vh - ${props.muiAppState.appBarHeight}px)".unsafeCast<Height>()
@@ -17,7 +38,6 @@ val VirtualListPreview = FC<UstadScreenProps> {props ->
             contain = csstype.Contain.strict
             overflowY = csstype.Overflow.scroll
         }
-
 
         content = virtualListContent {
             item {
@@ -35,6 +55,21 @@ val VirtualListPreview = FC<UstadScreenProps> {props ->
                     }
                 }
             }
+
+            infiniteQueryItems(infiniteQueryResult, {
+                (it as? LoadResult.Page)?.data ?: listOf()
+            }) { person ->
+                ListItem.create {
+                    ListItemText {
+                        +person?.fullName()
+                    }
+                }
+            }
         }
+
+        Container {
+            VirtualListOutlet()
+        }
+
     }
 }
