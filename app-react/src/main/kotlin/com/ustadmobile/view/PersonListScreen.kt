@@ -55,7 +55,10 @@ val PersonListComponent2 = FC<PersonListProps> { props ->
                 }
             }
 
-            infiniteQueryPagingItems(infiniteQueryResult) { person ->
+            infiniteQueryPagingItems(
+                items = infiniteQueryResult,
+                key = { it?.personUid?.toString() ?: "" }
+            ) { person ->
                 ListItem.create {
                     ListItemButton{
                         onClick = {

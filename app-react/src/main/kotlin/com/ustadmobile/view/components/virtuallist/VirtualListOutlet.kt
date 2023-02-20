@@ -32,8 +32,9 @@ val VirtualListOutlet = FC<Props> { props ->
         }
 
         virtualizerContext.virtualizer.getVirtualItems().forEach { virtualRow ->
+            val virtualListElement = virtualizerContext.allRows[virtualRow.index]
             ReactHTML.div {
-                key = "${virtualRow.index}"
+                key = virtualListElement.key()
                 ref = virtualizerContext.virtualizer.measureElement.unsafeCast<Ref<HTMLDivElement>>()
                 asDynamic()["data-index"] = virtualRow.index
                 style = jso {
@@ -44,7 +45,7 @@ val VirtualListOutlet = FC<Props> { props ->
                     transform = translatey(virtualRow.start.px)
                 }
 
-                + virtualizerContext.allRows[virtualRow.index].createNode()
+                + virtualListElement.createNode()
             }
         }
     }

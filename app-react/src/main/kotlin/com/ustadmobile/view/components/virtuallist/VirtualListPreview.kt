@@ -47,7 +47,8 @@ val VirtualListPreview = FC<UstadScreenProps> {props ->
             }
 
             items(
-                list = (0..100).toList()
+                list = (0..100).toList(),
+                key = { "$it" }
             ) { number ->
                 ListItem.create {
                     ListItemText {
@@ -56,9 +57,13 @@ val VirtualListPreview = FC<UstadScreenProps> {props ->
                 }
             }
 
-            infiniteQueryItems(infiniteQueryResult, {
-                (it as? LoadResult.Page)?.data ?: listOf()
-            }) { person ->
+            infiniteQueryItems(
+                infiniteQueryResult = infiniteQueryResult,
+                dataPageToItems = {
+                    (it as? LoadResult.Page)?.data ?: listOf()
+                },
+                itemToKey = { "${it?.personUid}" }
+            ) { person ->
                 ListItem.create {
                     ListItemText {
                         +person?.fullName()

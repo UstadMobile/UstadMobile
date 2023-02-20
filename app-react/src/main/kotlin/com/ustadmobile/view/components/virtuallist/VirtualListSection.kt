@@ -17,23 +17,32 @@ sealed class VirtualListSection {
 
 class ItemListSection<T>(
     list: List<T>,
-    createNode: (T) -> ReactNode
+    createNode: (item: T, index: Int) -> ReactNode,
+    itemToKey: (item: T, index: Int) -> String,
 ): VirtualListSection() {
-    override val elements: List<VirtualListElement> = list.map {
-        VirtualListItemElement(it) { data -> createNode(data) }
+    override val elements: List<VirtualListElement> = list.mapIndexed { index, item ->
+        VirtualListItemElement(
+            item = item,
+            index = index,
+            itemToKey = itemToKey,
+            itemToNode = createNode,
+        )
     }
 }
 
 class SingleItemSection(
-    createNode: () -> ReactNode
+    createNode: () -> ReactNode,
+    key: String,
 ) : VirtualListSection() {
-    override val elements: List<VirtualListElement> = listOf(VirtualListSingleElement(createNode))
+    override val elements: List<VirtualListElement> = listOf(VirtualListSingleElement(createNode, key))
 }
 
 class InfiniteQueryResultSection<TItem, TData, TError>(
     private val infiniteQueryResult: UseInfiniteQueryResult<TData, TError>,
+    private val infiniteSectionIndex: Int,
     private val dataPageToItems: (TData) -> List<TItem?>,
-    private val createNode: (TItem?) -> ReactNode,
+    private val itemToKey: (item: TItem, index: Int) -> String,
+    private val createNode: (item: TItem?, index: Int) -> ReactNode,
 ): VirtualListSection() {
 
     override val elements: List<VirtualListElement>
@@ -43,14 +52,22 @@ class InfiniteQueryResultSection<TItem, TData, TError>(
             } ?: listOf()
 
             val queryResult = infiniteQueryResult
-            return resultRows.map {
-                VirtualListInfiniteQueryItemElement(it) { item ->
+            val itemToKeyFn = { keyItem: TItem?, keyIndex: Int ->
+                keyItem?.let { itemToKey(it, keyIndex) } ?: "placeholder_${infiniteSectionIndex}_$keyIndex"
+            }
+
+            return resultRows.mapIndexed { index, item ->
+                VirtualListInfiniteQueryItemElement(
+                    item = item,
+                    index = index,
+                    itemToKey = itemToKeyFn,
+                ) { nodeItem, _ ->
                     InfiniteQueryItemHolder.create {
                         this.infiniteQueryResult = queryResult
                         this.loadedItems = resultRows
-                        this.item = item
+                        this.item = nodeItem
 
-                        + createNode(item)
+                        + createNode(nodeItem, index)
                     }
                 }
             }

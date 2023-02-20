@@ -51,7 +51,7 @@ val VirtualList = FC<VirtualListProps> {props ->
             getScrollElement= { parentRef.current }
             estimateSize = { 45 }
             overscan = 5
-            getItemKey = { index -> "$index" }
+            getItemKey = { index -> allRows[index].key() }
         })
 
         VirtualListContext(VirtualListContextData(virtualizer, allRows)) {
@@ -68,33 +68,77 @@ class VirtualListContentScope internal constructor() {
 
     internal val sections = mutableListOf<VirtualListSection>()
 
-    fun item(block: () -> ReactNode) {
-        sections += SingleItemSection(block)
+    fun item(key: String? = null, block: () -> ReactNode) {
+        sections += SingleItemSection(
+            block, key ?: "item-${sections.count { it is SingleItemSection}}"
+        )
+    }
+
+    fun <T> itemsIndexed(
+        list: List<T>,
+        key: (item: T, index: Int) -> String,
+        createNode: (item: T, index: Int) -> ReactNode,
+    ) {
+        sections += ItemListSection(list, createNode, key)
     }
 
     fun <T> items(
         list: List<T>,
-        createNode: (T) -> ReactNode
+        key: (item: T) -> String,
+        createNode: (item: T) -> ReactNode,
     ) {
-        sections += ItemListSection(list, createNode)
+        itemsIndexed(list, {item, _ -> key(item)}) {item, _ -> createNode(item) }
+    }
+
+    fun <TItem, TData, TError> infiniteQueryItemsIndexed(
+        infiniteQueryResult: UseInfiniteQueryResult<TData, TError>,
+        dataPageToItems: (TData) -> List<TItem?>,
+        itemToKey: (item: TItem, index: Int) -> String,
+        itemToNode: (item: TItem?, index: Int) -> ReactNode,
+    ) {
+        sections += InfiniteQueryResultSection(infiniteQueryResult,
+            sections.count { it is InfiniteQueryResultSection<*, *, *> },
+            dataPageToItems, itemToKey, itemToNode
+        )
     }
 
     fun <TItem, TData, TError> infiniteQueryItems(
         infiniteQueryResult: UseInfiniteQueryResult<TData, TError>,
         dataPageToItems: (TData) -> List<TItem?>,
-        itemToNode: (TItem?) -> ReactNode,
+        itemToKey: (item: TItem) -> String,
+        itemToNode: (item: TItem?) -> ReactNode,
     ) {
-        sections += InfiniteQueryResultSection(infiniteQueryResult, dataPageToItems, itemToNode)
+        infiniteQueryItemsIndexed(
+            infiniteQueryResult = infiniteQueryResult,
+            dataPageToItems = dataPageToItems,
+            itemToKey = { item, _ -> itemToKey(item) },
+            itemToNode = { item, _ -> itemToNode(item) },
+        )
+    }
+
+    fun <T: Any> infiniteQueryPagingItemsIndexed(
+        items: UseInfiniteQueryResult<LoadResult<Int, T>, Throwable>,
+        key: (item: T, index: Int) -> String,
+        itemToNode: (item: T?, index: Int) -> ReactNode,
+    ) {
+        sections += InfiniteQueryResultSection(
+            infiniteQueryResult = items,
+            sections.count { it is InfiniteQueryResultSection<*, *, *> },
+            dataPageToItems = {(it as? LoadResult.Page)?.data ?: emptyList() },
+            itemToKey = key,
+            createNode = itemToNode
+        )
     }
 
     fun <T: Any> infiniteQueryPagingItems(
-        infiniteQueryResult: UseInfiniteQueryResult<LoadResult<Int, T>, Throwable>,
-        itemToNode: (T?) -> ReactNode,
+        items: UseInfiniteQueryResult<LoadResult<Int, T>, Throwable>,
+        key: (item: T) -> String,
+        itemToNode: (item: T?) -> ReactNode
     ) {
-        sections += InfiniteQueryResultSection(
-            infiniteQueryResult = infiniteQueryResult,
-            dataPageToItems = {(it as? LoadResult.Page)?.data ?: emptyList() },
-            createNode = itemToNode
+        infiniteQueryPagingItemsIndexed(
+            items = items,
+            key = { item, _ -> key(item) },
+            itemToNode = { item, _ -> itemToNode(item) }
         )
     }
 
