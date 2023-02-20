@@ -1,5 +1,6 @@
 package com.ustadmobile.view.components.virtuallist
 
+import com.ustadmobile.door.paging.LoadResult
 import csstype.*
 import js.core.jso
 import react.*
@@ -84,6 +85,17 @@ class VirtualListContentScope internal constructor() {
         itemToNode: (TItem?) -> ReactNode,
     ) {
         sections += InfiniteQueryResultSection(infiniteQueryResult, dataPageToItems, itemToNode)
+    }
+
+    fun <T: Any> infiniteQueryPagingItems(
+        infiniteQueryResult: UseInfiniteQueryResult<LoadResult<Int, T>, Throwable>,
+        itemToNode: (T?) -> ReactNode,
+    ) {
+        sections += InfiniteQueryResultSection(
+            infiniteQueryResult = infiniteQueryResult,
+            dataPageToItems = {(it as? LoadResult.Page)?.data ?: emptyList() },
+            createNode = itemToNode
+        )
     }
 
 }
