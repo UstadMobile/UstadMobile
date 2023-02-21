@@ -127,7 +127,7 @@ import com.ustadmobile.lib.db.entities.*
     DiscussionPostReplicate::class
 
 
-], version = 107)
+], version = 108)
 @MinReplicationVersion(60)
 expect abstract class UmAppDatabase : RoomDatabase {
 

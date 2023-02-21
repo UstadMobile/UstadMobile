@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 107,
-    "identityHash": "c4bdb0bd24b59faab1b3d90846470bdf",
+    "version": 108,
+    "identityHash": "cdea20f08325d5dda8d74a74974dfb2c",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5235,7 +5235,7 @@
       },
       {
         "tableName": "ClazzAssignment",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`caUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `caTitle` TEXT, `caDescription` TEXT, `caGroupUid` INTEGER NOT NULL DEFAULT 0, `caActive` INTEGER NOT NULL, `caClassCommentEnabled` INTEGER NOT NULL, `caPrivateCommentsEnabled` INTEGER NOT NULL DEFAULT 1, `caCompletionCriteria` INTEGER NOT NULL DEFAULT 100, `caRequireFileSubmission` INTEGER NOT NULL DEFAULT 1, `caFileType` INTEGER NOT NULL DEFAULT 0, `caSizeLimit` INTEGER NOT NULL DEFAULT 50, `caNumberOfFiles` INTEGER NOT NULL DEFAULT 1, `caSubmissionPolicy` INTEGER NOT NULL DEFAULT 1, `caMarkingType` INTEGER NOT NULL DEFAULT 1, `caRequireTextSubmission` INTEGER NOT NULL DEFAULT 1, `caTextLimitType` INTEGER NOT NULL DEFAULT 1, `caTextLimit` INTEGER NOT NULL DEFAULT 500, `caXObjectUid` INTEGER NOT NULL DEFAULT 0, `caClazzUid` INTEGER NOT NULL, `caLocalChangeSeqNum` INTEGER NOT NULL, `caMasterChangeSeqNum` INTEGER NOT NULL, `caLastChangedBy` INTEGER NOT NULL, `caLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`caUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `caTitle` TEXT, `caDescription` TEXT, `caGroupUid` INTEGER NOT NULL DEFAULT 0, `caActive` INTEGER NOT NULL, `caClassCommentEnabled` INTEGER NOT NULL, `caPrivateCommentsEnabled` INTEGER NOT NULL DEFAULT 1, `caCompletionCriteria` INTEGER NOT NULL DEFAULT 100, `caRequireFileSubmission` INTEGER NOT NULL DEFAULT 1, `caFileType` INTEGER NOT NULL DEFAULT 0, `caSizeLimit` INTEGER NOT NULL DEFAULT 50, `caNumberOfFiles` INTEGER NOT NULL DEFAULT 1, `caSubmissionPolicy` INTEGER NOT NULL DEFAULT 1, `caMarkingType` INTEGER NOT NULL DEFAULT 1, `caRequireTextSubmission` INTEGER NOT NULL DEFAULT 1, `caTextLimitType` INTEGER NOT NULL DEFAULT 1, `caTextLimit` INTEGER NOT NULL DEFAULT 500, `caXObjectUid` INTEGER NOT NULL DEFAULT 0, `caClazzUid` INTEGER NOT NULL, `caPeerReviewerCount` INTEGER NOT NULL DEFAULT 0, `caLocalChangeSeqNum` INTEGER NOT NULL, `caMasterChangeSeqNum` INTEGER NOT NULL, `caLastChangedBy` INTEGER NOT NULL, `caLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "caUid",
@@ -5363,6 +5363,13 @@
             "columnName": "caClazzUid",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "caPeerReviewerCount",
+            "columnName": "caPeerReviewerCount",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "caLocalChangeSeqNum",
@@ -5597,7 +5604,7 @@
       },
       {
         "tableName": "CourseAssignmentMark",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`camUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `camAssignmentUid` INTEGER NOT NULL, `camSubmitterUid` INTEGER NOT NULL, `camMark` REAL NOT NULL, `camPenalty` INTEGER NOT NULL, `camLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`camUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `camAssignmentUid` INTEGER NOT NULL, `camSubmitterUid` INTEGER NOT NULL, `camMarkerSubmitterUid` INTEGER NOT NULL DEFAULT 0, `camMarkerPersonUid` INTEGER NOT NULL DEFAULT 0, `camMarkerComment` TEXT, `camMark` REAL NOT NULL, `camPenalty` INTEGER NOT NULL, `camLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "camUid",
@@ -5616,6 +5623,26 @@
             "columnName": "camSubmitterUid",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "camMarkerSubmitterUid",
+            "columnName": "camMarkerSubmitterUid",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "camMarkerPersonUid",
+            "columnName": "camMarkerPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "camMarkerComment",
+            "columnName": "camMarkerComment",
+            "affinity": "TEXT",
+            "notNull": false
           },
           {
             "fieldPath": "camMark",
@@ -5639,6 +5666,56 @@
         "primaryKey": {
           "columnNames": [
             "camUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "PeerReviewerAllocation",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`praUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `praMarkerSubmitterUid` INTEGER NOT NULL, `praToMarkerSubmitterUid` INTEGER NOT NULL, `praAssignmentUid` INTEGER NOT NULL, `praActive` INTEGER NOT NULL, `praLct` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "praUid",
+            "columnName": "praUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "praMarkerSubmitterUid",
+            "columnName": "praMarkerSubmitterUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "praToMarkerSubmitterUid",
+            "columnName": "praToMarkerSubmitterUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "praAssignmentUid",
+            "columnName": "praAssignmentUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "praActive",
+            "columnName": "praActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "praLct",
+            "columnName": "praLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "praUid"
           ],
           "autoGenerate": true
         },
@@ -10200,6 +10277,69 @@
         "foreignKeys": []
       },
       {
+        "tableName": "PeerReviewerAllocationReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`prarPk` INTEGER NOT NULL, `prarVersionId` INTEGER NOT NULL DEFAULT 0, `prarDestination` INTEGER NOT NULL, `prarPending` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`prarPk`, `prarDestination`))",
+        "fields": [
+          {
+            "fieldPath": "prarPk",
+            "columnName": "prarPk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prarVersionId",
+            "columnName": "prarVersionId",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "prarDestination",
+            "columnName": "prarDestination",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prarPending",
+            "columnName": "prarPending",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "prarPk",
+            "prarDestination"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_PeerReviewerAllocationReplicate_prarPk_prarDestination_prarVersionId",
+            "unique": false,
+            "columnNames": [
+              "prarPk",
+              "prarDestination",
+              "prarVersionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PeerReviewerAllocationReplicate_prarPk_prarDestination_prarVersionId` ON `${TABLE_NAME}` (`prarPk`, `prarDestination`, `prarVersionId`)"
+          },
+          {
+            "name": "index_PeerReviewerAllocationReplicate_prarDestination_prarPending",
+            "unique": false,
+            "columnNames": [
+              "prarDestination",
+              "prarPending"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PeerReviewerAllocationReplicate_prarDestination_prarPending` ON `${TABLE_NAME}` (`prarDestination`, `prarPending`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
         "tableName": "Chat",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`chatUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `chatStartDate` INTEGER NOT NULL, `chatTitle` TEXT, `chatGroup` INTEGER NOT NULL, `chatLct` INTEGER NOT NULL)",
         "fields": [
@@ -11042,7 +11182,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c4bdb0bd24b59faab1b3d90846470bdf')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cdea20f08325d5dda8d74a74974dfb2c')"
     ]
   }
 }

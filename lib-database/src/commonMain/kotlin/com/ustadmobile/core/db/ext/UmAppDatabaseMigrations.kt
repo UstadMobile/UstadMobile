@@ -6,7 +6,6 @@ import com.ustadmobile.door.migration.DoorMigrationStatementList
 import com.ustadmobile.lib.util.ext.fixTincan
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.migration.DoorMigration
-import com.ustadmobile.door.migration.DoorMigrationSync
 
 val MIGRATION_92_93 = DoorMigrationStatementList(92, 93) { db ->
     if(db.dbType() == DoorDbType.SQLITE) {
@@ -1324,7 +1323,7 @@ val MIGRATION_106_107 = DoorMigrationStatementList(106, 107) {db ->
     }
 }
 
-val MIGRATION_PEER_MARKING = DoorMigrationStatementList(106, 107) { db ->
+val MIGRATION_107_108 = DoorMigrationStatementList(107, 108) { db ->
     val stmtList = mutableListOf<String>()
     stmtList += "ALTER TABLE CourseAssignmentMark ADD COLUMN camMarkerComment TEXT"
     stmtList += "ALTER TABLE ClazzAssignment ADD COLUMN caPeerReviewerCount  INTEGER  NOT NULL  DEFAULT 0"
@@ -1390,7 +1389,8 @@ fun migrationList() = listOf<DoorMigration>(
     UmAppDatabaseReplicationMigration91_92, MIGRATION_92_93, MIGRATION_93_94, MIGRATION_94_95,
     MIGRATION_95_96, MIGRATION_96_97, MIGRATION_97_98, MIGRATION_98_99,
     MIGRATION_99_100, MIGRATION_100_101, MIGRATION_101_102, MIGRATION_102_103,
-    MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107
+    MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
+    MIGRATION_107_108,
 )
 
 
