@@ -26,8 +26,11 @@ env:
       TEACHERLASTNAME: "Susan"
       GENDER: "Female"
       PASSWORD: "test"
-- back
-- back
+- repeat:
+    while:
+      notVisible: "OVERVIEW"
+    commands:
+      - back
 - tapOn: "OVERVIEW"
 - runFlow:
     file: "../common/add_new_content_block_to_course.yaml"

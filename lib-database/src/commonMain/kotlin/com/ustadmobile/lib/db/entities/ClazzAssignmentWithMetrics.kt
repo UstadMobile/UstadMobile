@@ -10,7 +10,7 @@ class ClazzAssignmentWithMetrics : ClazzAssignment() {
     var progressSummary: AssignmentProgressSummary? = null
 
     @Embedded
-    var mark: CourseAssignmentMark? = null
+    var mark: AverageCourseAssignmentMark? = null
 
     var fileSubmissionStatus: Int = 0
 

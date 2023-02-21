@@ -29,16 +29,25 @@ import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 
-fun CourseBlockWithEntityDb.asCourseBlockWithEntity(topicList: List<DiscussionTopic>):
+fun CourseBlockWithEntityDb.asCourseBlockWithEntity(
+    topicList: List<DiscussionTopic>,
+    assignmentPeerAllocations: List<PeerReviewerAllocation>
+):
         CourseBlockWithEntity {
     val relevantTopics: List<DiscussionTopic> = topicList.filter {
         it.discussionTopicCourseDiscussionUid == this.courseDiscussion?.courseDiscussionUid
     }.sortedBy { it.discussionTopicIndex }
 
+    val assignmentAllocations = assignmentPeerAllocations.filter {
+        it.praAssignmentUid == this.assignment?.caUid
+    }
+
     val courseBlockWithEntity = CourseBlockWithEntity()
     courseBlockWithEntity.createFromDb(this)
     courseBlockWithEntity.topics = relevantTopics
+    courseBlockWithEntity.assignmentPeerAllocations = assignmentAllocations
     courseBlockWithEntity.topicUidsToRemove = listOf()
+    courseBlockWithEntity.assignmentPeerAllocationsToRemove = listOf()
 
 
     return courseBlockWithEntity
@@ -79,6 +88,8 @@ class ClazzEdit2Presenter(
         ScheduleEditView.VIEW_NAME, Schedule.serializer())
 
     lateinit var topics: List<DiscussionTopic>
+
+    lateinit var assignmentPeerAllocations: List<PeerReviewerAllocation>
 
     private val courseBlockOneToManyJoinEditHelper
             = OneToManyJoinEditHelperMp(CourseBlockWithEntity::cbUid,
@@ -178,6 +189,8 @@ class ClazzEdit2Presenter(
                 cbMaxPoints = newAssignment.cbMaxPoints
 
                 assignment = newAssignment.assignment
+                assignmentPeerAllocations = newAssignment.assignmentPeerAllocations
+                assignmentPeerAllocationsToRemove = newAssignment.assignmentPeerAllocationsToRemove
             }
 
             foundBlock.assignment = newAssignment.assignment
@@ -189,6 +202,9 @@ class ClazzEdit2Presenter(
             foundBlock.cbCompletionCriteria = newAssignment.cbCompletionCriteria
             foundBlock.cbLateSubmissionPenalty = newAssignment.cbLateSubmissionPenalty
             foundBlock.cbMaxPoints = newAssignment.cbMaxPoints
+            foundBlock.assignmentPeerAllocations = newAssignment.assignmentPeerAllocations
+            foundBlock.assignmentPeerAllocationsToRemove = newAssignment.assignmentPeerAllocationsToRemove
+
 
             courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
 
@@ -379,8 +395,15 @@ class ClazzEdit2Presenter(
             it.discussionTopicDao.getTopicsByClazz(clazzUid)
         }
 
+        // get allocations from list of assignment uids
+        assignmentPeerAllocations = db.onRepoWithFallbackToDb(2000){
+            it.peerReviewerAllocationDao.getAllPeerReviewerAllocations(courseBlocksDb
+                .filter { block -> block.assignment != null }
+                .map { assignmentBlock -> assignmentBlock.assignment?.caUid ?: 0 })
+        }
+
         val courseBlocks: List<CourseBlockWithEntity> = courseBlocksDb.map {
-            it.asCourseBlockWithEntity(topics)
+            it.asCourseBlockWithEntity(topics, assignmentPeerAllocations)
         }
 
         courseBlockOneToManyJoinEditHelper.liveList.postValue(courseBlocks)
@@ -566,6 +589,19 @@ class ClazzEdit2Presenter(
                     .flatten()
 
                 txDb.discussionTopicDao.deactivateByUids(topicUidsToDelete, systemTimeInMillis())
+
+
+                val peerAllocations = courseBlockList.mapNotNull {
+                    it.assignmentPeerAllocations
+                }.flatten()
+
+                txDb.peerReviewerAllocationDao.replaceListAsync(peerAllocations)
+
+                val peerAllocationUidsToDelete: List<Long> = courseBlockList.mapNotNull{it.assignmentPeerAllocationsToRemove
+                }.flatten()
+
+                txDb.peerReviewerAllocationDao.deactivateByUids(
+                    peerAllocationUidsToDelete, systemTimeInMillis())
 
                 txDb.courseBlockDao.replaceListAsync(courseBlockList)
                 txDb.courseBlockDao.deactivateByUids(

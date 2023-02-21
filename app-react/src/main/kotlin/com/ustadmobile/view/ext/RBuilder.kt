@@ -11,6 +11,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.util.encodeURIComponent
+import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
 import com.ustadmobile.core.util.ext.isContentComplete
@@ -24,9 +25,8 @@ import com.ustadmobile.navigation.RouteManager.defaultDestination
 import com.ustadmobile.navigation.RouteManager.destinationList
 import com.ustadmobile.navigation.UstadDestination
 import com.ustadmobile.redux.ReduxAppState
+import com.ustadmobile.util.*
 import com.ustadmobile.util.DraftJsUtil.clean
-import com.ustadmobile.util.FieldLabel
-import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignCenterItems
 import com.ustadmobile.util.StyleManager.alignEndItems
 import com.ustadmobile.util.StyleManager.alignTextToStart
@@ -46,8 +46,6 @@ import com.ustadmobile.util.StyleManager.personListItemAvatar
 import com.ustadmobile.util.StyleManager.textGrayedOut
 import com.ustadmobile.util.StyleManager.theme
 import com.ustadmobile.util.StyleManager.toolbarTitle
-import com.ustadmobile.util.UmProps
-import com.ustadmobile.util.Util
 import com.ustadmobile.util.Util.ASSET_ACCOUNT
 import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.util.ext.*
@@ -371,6 +369,149 @@ fun RBuilder.setBitmaskListText(systemImpl: UstadMobileSystemImpl,textBitmaskVal
     return BitmaskEditPresenter.FLAGS_AVAILABLE.filter { (it.flagVal and (textBitmaskValue ?: -1)) == it.flagVal }
         .joinToString { systemImpl.getString(it.messageId, this) }
 }
+
+fun RBuilder.renderGradesHeaderWithChipsAndList(
+    systemImpl: UstadMobileSystemImpl,
+    gradeFilterChips: List<ListFilterIdOption>?,
+    selectedFilter: Int,
+    courseMarks: List<CourseAssignmentMarkWithPersonMarker>,
+    courseBlock: CourseBlock?,
+    onClick:((chip: ListFilterIdOption, Event) -> Unit)? = null
+) {
+    umSpacer(top = 2.spacingUnits)
+    renderListSectionTitle(systemImpl.getString(MessageID.grades_class_age, this))
+
+    umItem(flexDirection = FlexDirection.row) {
+        gradeFilterChips?.forEach { chip ->
+            val mColor = if (chip.optionId == selectedFilter)
+                if (ThemeManager.isDarkModeActive()) ChipColor.secondary
+                else ChipColor.primary
+            else ChipColor.default
+            umChip(
+                chip.description,
+                color = mColor
+            ) {
+                css {
+                    margin(1.spacingUnits)
+                }
+                attrs.onClick = {
+                    stopEventPropagation(it)
+                    onClick?.invoke(chip, it.nativeEvent)
+                }
+            }
+        }
+    }
+
+    courseMarks.forEach { markWithMarker ->
+
+        umListItem {
+            umGridContainer {
+                umItem(GridSize.cells2, GridSize.cells1) {
+                    umProfileAvatar(markWithMarker.camMarkerPersonUid, "person")
+                }
+
+
+                umItem(GridSize.cells8, GridSize.cells10) {
+                    umGridContainer {
+                        umItem(GridSize.cells12, flexDirection = FlexDirection.row) {
+                            styledSpan {
+                                css {
+                                    padding(right = 4.spacingUnits)
+                                }
+                                umTypography(
+                                    markWithMarker.marker?.fullName(),
+                                    variant = TypographyVariant.body1,
+                                    paragraph = true
+                                ) {
+                                    css(alignTextToStart)
+                                }
+                            }
+                            if (markWithMarker.isGroup && markWithMarker.camMarkerSubmitterUid != 0L) {
+                                styledSpan {
+                                    css {
+                                        padding(right = 4.spacingUnits)
+                                    }
+                                    umTypography(
+                                        "(${
+                                            systemImpl.getString(MessageID.group_number, this)
+                                                .format(markWithMarker.camMarkerSubmitterUid)
+                                        })",
+                                        variant = TypographyVariant.body1,
+                                        paragraph = true
+                                    ) {
+                                        css(alignTextToStart)
+                                    }
+                                }
+                            }
+
+                        }
+
+                        umItem(GridSize.cells12, flexDirection = FlexDirection.row) {
+                            styledSpan {
+                                css {
+                                    padding(right = 1.spacingUnits)
+                                }
+//                                umIcon("emoji_events", fontSize = IconFontSize.small) {
+//                                    css {
+//                                        marginTop = 1.px
+//                                    }
+//                                }
+                            }
+                            styledSpan {
+                                css {
+                                    padding(right = 4.spacingUnits)
+                                }
+                                umTypography(
+                                    "${markWithMarker.camMark} / ${courseBlock?.cbMaxPoints} ${
+                                        systemImpl.getString(
+                                            MessageID.points,
+                                            this
+                                        )
+                                    }",
+                                    variant = TypographyVariant.body2,
+                                ) {
+                                    css(alignTextToStart)
+                                }
+                            }
+
+                            if (markWithMarker.camPenalty != 0) {
+                                styledSpan {
+                                    css {
+                                        padding(right = 4.spacingUnits)
+                                    }
+
+                                    umTypography(
+                                        systemImpl.getString(MessageID.late_penalty, this)
+                                            .format(courseBlock?.cbLateSubmissionPenalty ?: 0),
+                                        variant = TypographyVariant.body1,
+                                        paragraph = true
+                                    ) {
+                                        css {
+                                            +alignTextToStart
+                                            color = Color.red
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        umItem(GridSize.cells12) {
+                            umTypography(
+                                markWithMarker.camMarkerComment,
+                                variant = TypographyVariant.body2,
+                            ) {
+                                css(alignTextToStart)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+
 
 fun RBuilder.renderListItemWithLeftIconTitleAndDescription(
     iconName: String,
@@ -705,7 +846,7 @@ fun RBuilder.renderPersonWithAttemptProgress(
 
 
 fun RBuilder.renderAssignmentSubmittedProgress(
-    item: PersonGroupAssignmentSummary,
+    item: AssignmentSubmitterSummary,
     systemImpl: UstadMobileSystemImpl,
     onMainList: Boolean = false){
     umGridContainer{
@@ -912,10 +1053,20 @@ fun RBuilder.renderCourseBlockAssignment(
 
                     if(item.assignment?.mark != null){
                         styledSpan {
+                            css {
+                                padding(right = 1.spacingUnits)
+                            }
+//                            umIcon("emoji_events", fontSize = IconFontSize.small) {
+//                                css {
+//                                    marginTop = 1.px
+//                                }
+//                            }
+                        }
+                        styledSpan {
                             css{
                                 padding(right = 4.spacingUnits)
                             }
-                            umTypography("${item.assignment?.mark?.camMark} / ${item.cbMaxPoints} ${systemImpl.getString(MessageID.points, this)}",
+                            umTypography("${item.assignment?.mark?.averageScore} / ${item.cbMaxPoints} ${systemImpl.getString(MessageID.points, this)}",
                                 variant = TypographyVariant.body1,
                                 paragraph = true){
                                 css(alignTextToStart)
@@ -924,7 +1075,7 @@ fun RBuilder.renderCourseBlockAssignment(
                     }
 
 
-                    if(item.assignment?.mark != null && item.assignment?.mark?.camPenalty != 0){
+                    if(item.assignment?.mark != null && item.assignment?.mark?.averagePenalty != 0){
                         styledSpan {
                             css {
                                 padding(right = 4.spacingUnits)
@@ -940,11 +1091,13 @@ fun RBuilder.renderCourseBlockAssignment(
                             }
                         }
                     }
+                }
 
-                    if(item.assignment?.progressSummary?.hasMetricsPermission == false){
+                if(item.assignment?.progressSummary?.hasMetricsPermission == false){
 
-                        if(item.assignment?.fileSubmissionStatus != 0) {
+                    if(item.assignment?.fileSubmissionStatus != 0) {
 
+                        umItem(GridSize.cells12, flexDirection = FlexDirection.row) {
                             styledSpan {
 
                                 css {
@@ -960,28 +1113,32 @@ fun RBuilder.renderCourseBlockAssignment(
                                     }
                                 }
                             }
-                        }
 
-                        umTypography(systemImpl.getString(
-                            STATUS_MAP[item.assignment?.fileSubmissionStatus ?: 0]?: 0, this),
-                            variant = TypographyVariant.body1,
-                            paragraph = true){
-                            css(alignTextToStart)
+                            umTypography(
+                                systemImpl.getString(
+                                    STATUS_MAP[item.assignment?.fileSubmissionStatus ?: 0] ?: 0,
+                                    this
+                                ),
+                                variant = TypographyVariant.body1,
+                                paragraph = true
+                            ) {
+                                css(alignTextToStart)
+                            }
                         }
                     }
+                }
 
-                    if(item.assignment?.progressSummary?.hasMetricsPermission == true){
-                        umTypography(systemImpl.getString(MessageID.three_num_items_with_name_with_comma,this)
-                            .format("${item.assignment?.progressSummary?.calculateNotSubmittedStudents()}",
-                                systemImpl.getString(MessageID.not_submitted_cap, this),
-                                "${item.assignment?.progressSummary?.submittedStudents}",
-                                systemImpl.getString(MessageID.submitted_cap,this),
-                                "${item.assignment?.progressSummary?.markedStudents}",
-                                systemImpl.getString(MessageID.marked, this)),
-                            variant = TypographyVariant.body1,
-                            paragraph = true){
-                            css(alignTextToStart)
-                        }
+                if(item.assignment?.progressSummary?.hasMetricsPermission == true || item.assignment?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS){
+                    umTypography(systemImpl.getString(MessageID.three_num_items_with_name_with_comma,this)
+                        .format("${item.assignment?.progressSummary?.calculateNotSubmittedStudents()}",
+                            systemImpl.getString(MessageID.not_submitted_cap, this),
+                            "${item.assignment?.progressSummary?.submittedStudents}",
+                            systemImpl.getString(MessageID.submitted_cap,this),
+                            "${item.assignment?.progressSummary?.markedStudents}",
+                            systemImpl.getString(MessageID.marked, this)),
+                        variant = TypographyVariant.body1,
+                        paragraph = true){
+                        css(alignTextToStart)
                     }
                 }
             }
@@ -1019,6 +1176,40 @@ fun RBuilder.renderListItemWithLeftIconTitleAndOptionOnRight(
                 error = fieldLabel.error,
                 values = options?.map {
                     Pair(it.optionId.toString(), it.toString())
+                }?.toList(),
+                onChange = {
+                    onChange(it)
+                }
+            )
+        }
+    }
+}
+
+fun RBuilder.renderListItemWithTitleAndOptionOnRight(
+    value: String?,
+    title: String?,
+    options: List<UidOption>?,
+    fieldLabel: FieldLabel?,
+    onChange: (String) -> Unit
+){
+    umGridContainer {
+        umItem(GridSize.cells8, GridSize.cells9) {
+            umTypography(title ?: "",
+                variant = TypographyVariant.h6) {
+                css {
+                    +alignTextToStart
+                    marginTop = 2.spacingUnits
+                }
+            }
+        }
+
+        umItem(GridSize.cells2) {
+            umTextFieldSelect(
+                "${fieldLabel?.text}", value,
+                fieldLabel?.errorText ?: "",
+                error = fieldLabel?.error ?: false,
+                values = options?.map {
+                    Pair(it.uidOption.toString(), it.toString())
                 }?.toList(),
                 onChange = {
                     onChange(it)

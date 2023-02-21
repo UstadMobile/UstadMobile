@@ -125,7 +125,20 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                  WHERE Clazz.clazzUid = :clazzUid
                    AND PrsGrpMbr.groupMemberPersonUid = :personUid)), 
                    
-        $SUBMITTER_LIST_IN_CLAZZ_CTE           
+        $SUBMITTER_LIST_IN_CLAZZ_CTE, 
+        
+        ScoreByMarker (score, penalty, assignmentUid, camSubmitterUid) AS (
+                 SELECT camMark, camPenalty, camAssignmentUid, camSubmitterUid
+                   FROM courseAssignmentMark
+                        JOIN ClazzAssignment
+                        ON ClazzAssignment.caUid = courseAssignmentMark.camAssignmentUid        
+                  WHERE camLct = (SELECT MAX(mark.camLct) 
+                                    FROM CourseAssignmentMark As mark
+                                    WHERE mark.camAssignmentUid = ClazzAssignment.caUid
+                                     AND (caMarkingType = 1
+                                       OR mark.camMarkerSubmitterUid = courseAssignmentMark.camMarkerSubmitterUid))
+                                                                                   
+                )     
                    
 
         SELECT CourseBlock.*, ClazzAssignment.*, ContentEntry.*, CourseDiscussion.*, ContentEntryParentChildJoin.*, 
@@ -155,9 +168,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
  
                0 AS notSubmittedStudents,
                
-               (CASE WHEN (SELECT hasPermission 
-                          FROM CtePermissionCheck)
-                     THEN (SELECT COUNT(DISTINCT CourseAssignmentSubmission.casSubmitterUid) 
+              (SELECT COUNT(DISTINCT CourseAssignmentSubmission.casSubmitterUid) 
                              FROM CourseAssignmentSubmission
                                    LEFT JOIN CourseAssignmentMark
                                    ON CourseAssignmentSubmission.casSubmitterUid = CourseAssignmentMark.camSubmitterUid
@@ -167,12 +178,10 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                               AND CourseAssignmentSubmission.casSubmitterUid IN 
                                                     (SELECT submitterId 
                                                       FROM SubmitterList
-                                                     WHERE SubmitterList.assignmentUid = ClazzAssignment.caUid))  
-                      ELSE 0 END) AS submittedStudents,         
+                                                     WHERE SubmitterList.assignmentUid = ClazzAssignment.caUid)
+                    ) AS submittedStudents,         
                
-                (CASE WHEN (SELECT hasPermission 
-                           FROM CtePermissionCheck)       
-                   THEN (SELECT COUNT(DISTINCT CourseAssignmentMark.camSubmitterUid) 
+                (SELECT COUNT(DISTINCT CourseAssignmentMark.camSubmitterUid) 
                            FROM CourseAssignmentMark
                             
                              JOIN CourseAssignmentSubmission
@@ -183,15 +192,45 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                             AND CourseAssignmentMark.camSubmitterUid IN (SELECT submitterId 
                                                                             FROM SubmitterList
                                                                            WHERE SubmitterList.assignmentUid = ClazzAssignment.caUid))
-                   ELSE 0 END) AS markedStudents,
+                   AS markedStudents,
                    
                    COALESCE((CASE WHEN CourseAssignmentMark.camUid IS NOT NULL 
                           THEN ${CourseAssignmentSubmission.MARKED} 
                           WHEN CourseAssignmentSubmission.casUid IS NOT NULL 
                           THEN ${CourseAssignmentSubmission.SUBMITTED} 
                           ELSE ${CourseAssignmentSubmission.NOT_SUBMITTED} END), 
-                               ${CourseAssignmentSubmission.NOT_SUBMITTED}) AS fileSubmissionStatus
-                
+                               ${CourseAssignmentSubmission.NOT_SUBMITTED}) AS fileSubmissionStatus,
+                               
+                  (SELECT AVG(score) 
+                     FROM ScoreByMarker 
+                    WHERE assignmentUid = ClazzAssignment.caUid 
+                      AND camSubmitterUid = (SELECT (CASE WHEN ref.caGroupUid = 0 
+                                                          THEN :personUid 
+                                                          WHEN CourseGroupMember.cgmUid IS NULL 
+                                                          THEN 0 
+                                                          ELSE CourseGroupMember.cgmGroupNumber 
+                                                           END) as submitterUid
+                                               FROM ClazzAssignment AS ref
+                                                     LEFT JOIN CourseGroupMember
+                                                     ON cgmSetUid = ClazzAssignment.caGroupUid
+                                                     AND cgmPersonUid = :personUid
+                                               WHERE ref.caUid = ClazzAssignment.caUid)) as averageScore,
+                                                            
+                 (SELECT AVG(penalty) 
+                     FROM ScoreByMarker 
+                    WHERE assignmentUid = ClazzAssignment.caUid 
+                      AND camSubmitterUid = (SELECT (CASE WHEN ref.caGroupUid = 0 
+                                                          THEN :personUid 
+                                                          WHEN CourseGroupMember.cgmUid IS NULL 
+                                                          THEN 0 
+                                                          ELSE CourseGroupMember.cgmGroupNumber 
+                                                           END) as submitterUid
+                                               FROM ClazzAssignment AS ref
+                                                     LEFT JOIN CourseGroupMember
+                                                     ON cgmSetUid = ClazzAssignment.caGroupUid
+                                                     AND cgmPersonUid = :personUid
+                                               WHERE ref.caUid = ClazzAssignment.caUid)) as averagePenalty                                             
+                                      
                 
           FROM CourseBlock 
           

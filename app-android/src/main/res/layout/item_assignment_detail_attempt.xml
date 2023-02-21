@@ -5,7 +5,7 @@
 
 
     <data>
-        <import type="com.ustadmobile.lib.db.entities.PersonGroupAssignmentSummary"/>
+        <import type="com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary"/>
         <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
         <import type="com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment"/>
@@ -16,7 +16,7 @@
 
         <variable
             name="person"
-            type="PersonGroupAssignmentSummary" />
+            type="AssignmentSubmitterSummary" />
 
         <variable
             name="listener"
