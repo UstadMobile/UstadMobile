@@ -1,0 +1,84 @@
+appId: com.toughra.ustadmobile
+tags:
+  - checklist1
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_003-video"
+  TESTNAME: "001_001_admin_can_add_content_003-video"
+  TESTFILENAME: Epub_Content.epub
+  TESTCONTENTNAME: AddContentEpubTest
+  CONTROLSERVER: ${CONTROLSERVER}
+  TESTSERIAL: ${TESTSERIAL}
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+
+# clear the app
+- clearState: com.toughra.ustadmobile
+# clear the downloads
+- evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
+# push the test file to the downloads
+- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
+# get started
+- launchApp
+- hideKeyboard
+- tapOn: "GET STARTED"
+# select site
+- runFlow: "../common/select_site.yaml"
+# admin login
+- runFlow:
+    file: "../common/user_login.yaml"
+# adding content to library
+- tapOn: "Library"
+- tapOn: "CONTENT"
+- tapOn: "Add using link"
+- tapOn:
+    text: "Enter Url"
+    index: 1
+- inputText: "http://192.168.0.168/"
+- tapOn: "NEXT"
+- tapOn: "TITLE"
+- inputText: "TestFolder"
+- tapOn: "SAVE"
+- tapOn: "TestFolder"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_content_entry_list"
+    index: 0
+- tapOn: "DOWNLOAD"
+- tapOn: "DOWNLOAD"
+- extendedWaitUntil:
+    visible: "Delete"
+    timeout: 600000
+- tapOn: "OPEN"
+- tapOn: "Leave"
+- assertVisible:
+    text: "The Project Gutenberg eBook of The Complete Works of William Shakespeare, by William Shakespeare"
+    index: 0
+- back
+- back
+- tapOn: "Library"
+- tapOn: "CONTENT"
+- tapOn: "Add using link"
+- tapOn:
+    text: "Enter Url"
+    index: 1
+- inputText: "http://192.168.0.168/Video_Content.mp4"
+- tapOn: "NEXT"
+- tapOn: "SAVE"
+- tapOn: "Video_Content.mp4"
+- tapOn: "DOWNLOAD"
+- tapOn: "DOWNLOAD"
+- extendedWaitUntil:
+    visible: "Delete"
+    timeout: 100000
+- tapOn: "OPEN"
+- scroll
+- runFlow:
+    when:
+      visible:
+        text: "Play"
+    file: "../common/play_video_content.yaml"

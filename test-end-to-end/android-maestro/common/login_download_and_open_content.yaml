@@ -22,7 +22,6 @@ appId: com.toughra.ustadmobile
     visible: "OPEN"
     timeout: 10000
 - tapOn: "OPEN"
-
 - scroll
 - runFlow:
       when:
