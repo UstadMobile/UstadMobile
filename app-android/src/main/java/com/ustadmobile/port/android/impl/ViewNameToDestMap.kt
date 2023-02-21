@@ -67,6 +67,8 @@ class ViewNameToDestMap: DestinationProvider {
             CourseTerminologyEditView.VIEW_NAME to UstadDestination(R.id.course_terminology_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
                     hideBottomNavigation = true),
+            PeerReviewerAllocationEditView.VIEW_NAME to UstadDestination(R.id.assignment_peer_allocation_edit_dest,
+                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             CourseGroupSetListView.VIEW_NAME to UstadDestination(R.id.course_group_set_list,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             CourseGroupSetEditView.VIEW_NAME to UstadDestination(R.id.course_group_set_edit,

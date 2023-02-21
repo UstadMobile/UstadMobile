@@ -8,20 +8,23 @@ import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewLis
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.lifecycle.LifecycleOwner
-import com.ustadmobile.lib.db.entities.PersonGroupAssignmentSummary
+import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
+
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, arguments: Map<String, String>,
                                                                 view: ClazzAssignmentDetailStudentProgressOverviewListView,
                                                                 di: DI, lifecycleOwner: LifecycleOwner)
     : UstadListPresenter<ClazzAssignmentDetailStudentProgressOverviewListView,
-        PersonGroupAssignmentSummary>(context, arguments, view, di, lifecycleOwner), SubmissionSummaryListener,
+        AssignmentSubmitterSummary>(context, arguments, view, di, lifecycleOwner), SubmissionSummaryListener,
         OnSortOptionSelected, OnSearchSubmitted{
 
     private var clazzUid: Long = -1
     private var clazzAssignmentUid: Long = -1
     var searchText: String? = null
+    private var submitterUid: Long = 0
 
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
@@ -32,7 +35,11 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
         clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: -1
         selectedSortOption = SORT_OPTIONS[0]
         mLoggedInPersonUid = accountManager.activeAccount.personUid
-        updateListOnView()
+        presenterScope.launch {
+            submitterUid = repo.clazzAssignmentDao.getSubmitterUid(clazzAssignmentUid, mLoggedInPersonUid)
+            updateListOnView()
+        }
+
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
@@ -40,14 +47,15 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
     }
 
     private fun updateListOnView() {
-        view.progressSummary = repo.clazzAssignmentDao.getProgressSummaryForAssignment(
-                clazzAssignmentUid, clazzUid, "")
+        presenterScope.launch {
+            view.progressSummary = repo.clazzAssignmentDao.getProgressSummaryForAssignment(
+                clazzAssignmentUid, clazzUid, "", submitterUid, mLoggedInPersonUid)
 
-        view.list = repo.clazzAssignmentDao.getSubmitterListForAssignment(
-            clazzAssignmentUid, clazzUid,
-            systemImpl.getString(MessageID.group_number, context).replace("%1\$s",""),
-            searchText.toQueryLikeParam())
-
+            view.list = repo.clazzAssignmentDao.getSubmitterListForAssignmentSummary(
+                clazzAssignmentUid, clazzUid,
+                systemImpl.getString(MessageID.group_number, context).replace("%1\$s",""),
+                searchText.toQueryLikeParam(), submitterUid, mLoggedInPersonUid)
+        }
     }
 
     override fun handleClickCreateNewFab() {}
@@ -64,7 +72,7 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
         updateListOnView()
     }
 
-    override fun onClickPerson(personWithAttemptsSummary: PersonGroupAssignmentSummary) {
+    override fun onClickPerson(personWithAttemptsSummary: AssignmentSubmitterSummary) {
         systemImpl.go(ClazzAssignmentDetailStudentProgressView.VIEW_NAME,
                 mapOf(UstadView.ARG_SUBMITER_UID to personWithAttemptsSummary.submitterUid.toString(),
                 UstadView.ARG_CLAZZ_ASSIGNMENT_UID to clazzAssignmentUid.toString(),
