@@ -14,7 +14,9 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.CourseGroupSetListView
+import com.ustadmobile.core.view.PeerReviewerAllocationEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.lifecycle.LifecycleOwner
@@ -28,6 +30,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
+import kotlin.math.abs
 
 
 class ClazzAssignmentEditPresenter(context: Any,
@@ -79,11 +82,8 @@ class ClazzAssignmentEditPresenter(context: Any,
     class  FileTypeOptionsMessageIdOption(day: FileTypeOptions, context: Any, di: DI)
         : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
-    private var clazzUid: Long = 0L
-
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON
-
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -101,13 +101,30 @@ class ClazzAssignmentEditPresenter(context: Any,
             val group = it.firstOrNull() ?: return@observeSavedStateResult
             presenterScope.launch(doorMainDispatcher()) {
                 onLoadJsonComplete.await()
-
                 entity?.assignment?.caGroupUid = group.cgsUid
-                view.groupSet = group
+
+                // invalid peer allocations after submissionType changes
+                entity?.assignmentPeerAllocationsToRemove = entity?.assignmentPeerAllocations?.map { peer -> peer.praUid }?.filter { it != 0L }
+                entity?.assignmentPeerAllocations = null
+
                 view.entity = entity
+                view.groupSet = group
                 requireSavedStateHandle()[SAVEDSTATE_KEY_SUBMISSION_TYPE] = null
             }
         }
+        observeSavedStateResult(ARG_SAVED_STATE_PEER_ALLOCATION,
+            ListSerializer(PeerReviewerAllocationList.serializer()), PeerReviewerAllocationList::class){
+            val allocations = it.firstOrNull() ?: return@observeSavedStateResult
+            presenterScope.launch(doorMainDispatcher()) {
+                onLoadJsonComplete.await()
+                entity?.assignmentPeerAllocations = allocations.allocations
+                view.entity = entity
+
+                requireSavedStateHandle()[ARG_SAVED_STATE_PEER_ALLOCATION] = null
+            }
+
+        }
+
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): CourseBlockWithEntity {
@@ -141,7 +158,13 @@ class ClazzAssignmentEditPresenter(context: Any,
                     view.groupSetEnabled = (it ?: true) == true
                 }
 
-            clazzUid = editEntity.assignment?.caClazzUid ?: arguments[ARG_CLAZZUID]?.toLong() ?: 0
+            repo.courseAssignmentMarkDao
+                .checkNoSubmissionsMarked(editEntity.assignment?.caUid ?: 0)
+                .observeWithLifecycleOwner(lifecycleOwner){
+                    view.markingTypeEnabled = (it ?: true) == true
+                }
+
+            val clazzUid = editEntity.assignment?.caClazzUid ?: arguments[ARG_CLAZZUID]?.toLong() ?: 0
             val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
                 it.clazzDao.getClazzWithSchool(clazzUid)
             } ?: ClazzWithSchool()
@@ -226,6 +249,7 @@ class ClazzAssignmentEditPresenter(context: Any,
     }
 
     fun handleSubmissionTypeClicked(){
+        val clazzUid = arguments[ARG_CLAZZUID]
         navigateForResult(
             NavigateForResultOptions(this,
                 null,
@@ -237,6 +261,37 @@ class ClazzAssignmentEditPresenter(context: Any,
                     ARG_CLAZZUID to clazzUid.toString(),
                     CourseGroupSetListView.ARG_SHOW_INDIVIDUAL to true.toString()))
         )
+    }
+
+    fun handleAssignReviewersClicked(){
+        val assignment = entity?.assignment ?: return
+        val reviewerCount = entity?.assignment?.caPeerReviewerCount ?: 0
+        presenterScope.launch(doorMainDispatcher()) {
+            val totalSubmitterSize = repo.clazzAssignmentDao.getSubmitterCountFromAssignment(
+                assignment.caGroupUid, assignment.caClazzUid, "")
+            if((reviewerCount) <= 0 || reviewerCount >= totalSubmitterSize){
+                // show error on view
+                view.reviewerCountError = " "
+                return@launch
+            }
+
+            navigateForResult(
+                NavigateForResultOptions(this@ClazzAssignmentEditPresenter,
+                    PeerReviewerAllocationList(entity?.assignmentPeerAllocations),
+                    PeerReviewerAllocationEditView.VIEW_NAME,
+                    PeerReviewerAllocationList::class,
+                    PeerReviewerAllocationList.serializer(),
+                    ARG_SAVED_STATE_PEER_ALLOCATION,
+                    arguments = mutableMapOf(
+                        ARG_CLAZZUID to entity?.cbClazzUid.toString(),
+                        PeerReviewerAllocationEditView.ARG_REVIEWERS_COUNT to
+                                entity?.assignment?.caPeerReviewerCount.toString(),
+                        UstadView.ARG_CLAZZ_ASSIGNMENT_UID to entity?.assignment?.caUid.toString(),
+                        PeerReviewerAllocationEditView.ARG_ASSIGNMENT_GROUP
+                                to entity?.assignment?.caGroupUid.toString())
+                ))
+        }
+
     }
 
 
@@ -285,6 +340,17 @@ class ClazzAssignmentEditPresenter(context: Any,
                 view.showSnackBar(systemImpl.getString(MessageID.text_file_submission_error, context))
             }
 
+            if(entity.assignment?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS){
+                val reviewerCount = entity.assignment?.caPeerReviewerCount ?: 0
+                val totalSubmitterSize = repo.clazzAssignmentDao.getSubmitterCountFromAssignment(
+                    entity.assignment?.caGroupUid ?: 0, entity.cbClazzUid, "")
+                if((reviewerCount) <= 0 || reviewerCount >= totalSubmitterSize){
+                    // show error on view
+                    view.reviewerCountError = " "
+                    foundError = true
+                }
+            }
+
             val dbGroupUid = repo.clazzAssignmentDao.getGroupUidFromAssignment(entity.assignment?.caUid?: 0L)
 
             // groups have changed
@@ -299,10 +365,81 @@ class ClazzAssignmentEditPresenter(context: Any,
                 }
             }
 
+            val markingTypeDb = repo.clazzAssignmentDao.getMarkingTypeFromAssignment(entity.assignment?.caUid ?: 0L)
+
+            if(markingTypeDb != -1 && markingTypeDb != entity.assignment?.caMarkingType){
+
+                val noSubmissionMarked = repo.courseAssignmentMarkDao
+                    .checkNoSubmissionsMarked(entity.assignment?.caUid ?: 0L).getFirstValue()
+
+                if(!noSubmissionMarked){
+                    foundError = true
+                    view.showSnackBar(systemImpl.getString(MessageID.error , context))
+                }
+            }
+
+
             if(foundError){
                 view.loading = false
                 view.fieldsEnabled = true
                 return@launch
+            }
+
+            if(entity.assignment?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS){
+
+                // get list of submitters
+                val submitters = repo.clazzAssignmentDao.getSubmitterListForAssignmentList(
+                    entity.assignment?.caGroupUid ?: 0, entity.cbClazzUid,
+                    systemImpl.getString(MessageID.group_number, context).replace("%1\$s",""))
+
+
+                val reviewerCount = entity.assignment?.caPeerReviewerCount ?: 0
+                val allocatedGroup = entity.assignmentPeerAllocations?.groupBy { it.praToMarkerSubmitterUid }
+                val allocatedCount = allocatedGroup?.values?.firstOrNull()?.size ?: 0
+                val remainingCount = reviewerCount - allocatedCount
+
+                val peerAllocations = mutableListOf<PeerReviewerAllocation>()
+                when{
+                    (remainingCount > 0) -> {
+                        // add any existing allocations
+                        entity.assignmentPeerAllocations?.let { peerAllocations.addAll(it) }
+
+                        // create toBucket for remaining to be allocated
+                        val toBucket = submitters.assignRandomly(remainingCount, entity.assignmentPeerAllocations)
+
+                        // for each submitter add more reviewers based on toBucket
+                        submitters.forEach { submitter ->
+                            val toList = toBucket[submitter.submitterUid] ?: listOf()
+                            toList.forEach {
+                                peerAllocations.add(PeerReviewerAllocation().apply {
+                                        praAssignmentUid = entity.assignment?.caUid ?: 0L
+                                        praMarkerSubmitterUid = it
+                                        praToMarkerSubmitterUid = submitter.submitterUid
+                                })
+                            }
+                        }
+                        entity.assignmentPeerAllocations = peerAllocations
+                    }
+                    remainingCount < 0 -> {
+                        // using the grouped allocations, remove from list and add to allocationsToRemove
+                        val allocationsToRemove = mutableListOf<PeerReviewerAllocation>()
+                        val removeCount = abs(remainingCount)
+                        allocatedGroup?.forEach { map ->
+                            val allocation = map.value.toMutableList()
+                            repeat(removeCount){
+                                allocationsToRemove.add(allocation.removeLast())
+                            }
+                        }
+                        entity.assignmentPeerAllocationsToRemove = allocationsToRemove.map { it.praUid }.filter { it != 0L }
+                        // remove from entity list
+                        val list = entity.assignmentPeerAllocations?.toMutableList()
+                        list?.removeAll(allocationsToRemove)
+                        entity.assignmentPeerAllocations = list
+                    }
+                }
+            }else{
+                entity.assignmentPeerAllocationsToRemove = entity.assignmentPeerAllocations?.map { it.praUid }?.filter { it != 0L }
+                entity.assignmentPeerAllocations = null
             }
 
             // if grace period is not set, set the date to equal the deadline
@@ -327,6 +464,8 @@ class ClazzAssignmentEditPresenter(context: Any,
         const val ARG_SAVEDSTATE_CONTENT = "contents"
 
         const val SAVEDSTATE_KEY_SUBMISSION_TYPE = "submissionType"
+
+        const val ARG_SAVED_STATE_PEER_ALLOCATION = "peerReviewerAllocation"
 
     }
 
