@@ -1,14 +1,12 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.*
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.door.DoorDbType
-import com.ustadmobile.door.ext.dbType
+import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContainerEntryFileUidAndPath
 
-@Dao
-abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
+@DoorDao
+expect abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
 
     @Insert
     abstract suspend fun insertListAsync(list: List<ContainerEntryFile>)
@@ -19,48 +17,6 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
     //language=RoomSql
     @Query("SELECT ContainerEntryFile.* FROM ContainerEntryFile WHERE cefMd5 IN (:md5Sums)")
     abstract suspend fun findEntriesByMd5SumsAsync(md5Sums: List<String>): List<ContainerEntryFile>
-
-    /**
-     * Whenever there is a possibility of a list parameter with more than 100 entries, this function
-     * should be used so the maximum size of a list parameter is not exceeded (which would result in
-     * a Room exception).
-     */
-    @Transaction
-    open fun findEntriesByMd5SumsSafe(md5Sums: List<String>, maxListParamSize: Int = 90) =
-            findEntriesByMd5SumsSafeInternal(md5Sums, maxListParamSize, this::findEntriesByMd5Sums)
-
-    @Transaction
-    open suspend fun findEntriesByMd5SumsSafeAsync(md5Sums: List<String>, maxListParamSize: Int) =
-            findEntriesByMd5SumsSafeInternal(md5Sums, maxListParamSize) { findEntriesByMd5SumsAsync(it) }
-
-    private inline fun findEntriesByMd5SumsSafeInternal(
-        md5Sums: List<String>,
-        maxListParamSize: Int,
-        queryFn: (List<String>) -> List<ContainerEntryFile>
-    ) : List<ContainerEntryFile>{
-        return if (maxListParamSize > 0) {
-            val chunkedList = md5Sums.chunked(maxListParamSize)
-            val mutableList = mutableListOf<ContainerEntryFile>()
-            chunkedList.forEach {
-                queryFn(it).map { entryFile -> mutableList.add(entryFile) }
-            }
-            mutableList.toList()
-        } else {
-            queryFn(md5Sums)
-        }
-    }
-
-    fun findEntriesByMd5SumsSafe(md5Sums: List<String>, db: UmAppDatabase) =
-            findEntriesByMd5SumsSafe(md5Sums, if(db.dbType() == DoorDbType.SQLITE) { 90 } else { -1 })
-
-    @Transaction
-    open suspend fun findExistingMd5SumsByMd5SumsSafe(md5Sums: List<String>, maxListParamSize: Int = 90): List<String?> {
-        return if(maxListParamSize > 0) {
-            md5Sums.chunked(maxListParamSize).flatMap { findExistingMd5SumsByMd5SumsAsync(it) }
-        }else {
-            findExistingMd5SumsByMd5SumsAsync(md5Sums)
-        }
-    }
 
     //language=RoomSql
     @Query("SELECT ContainerEntryFile.cefMd5 FROM ContainerEntryFile WHERE cefMd5 IN (:md5Sums)")
@@ -123,13 +79,5 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
 
     @Query("SELECT ContainerEntryFile.* FROM ContainerEntryFile WHERE cefMd5 = :md5Sum")
     abstract suspend fun findEntryByMd5Sum(md5Sum: String): ContainerEntryFile?
-
-    companion object {
-
-        const val ENDPOINT_CONCATENATEDFILES = "ConcatenatedContainerFiles"
-
-        const val ENDPOINT_CONCATENATEDFILES2 = "ConcatenatedContainerFiles2"
-
-    }
 
 }

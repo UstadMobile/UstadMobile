@@ -24,8 +24,8 @@ import com.ustadmobile.util.commontest.ext.mockResponseForConcatenatedFiles2Requ
 import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.json.*
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.*
@@ -36,6 +36,8 @@ import kotlin.random.Random
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.core.util.ext.getContentEntryJsonFilesFromDir
 import com.ustadmobile.core.util.ext.filterNotInDirectory
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.gson.*
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
 
@@ -85,7 +87,9 @@ class ContainerFetcherOkHttpTest {
         Napier.baseDebugIfNotEnabled()
         serverOkHttpClient = OkHttpClient()
         serverHttpClient = HttpClient(OkHttp) {
-            install(JsonFeature)
+            install(ContentNegotiation) {
+                gson()
+            }
             install(HttpTimeout)
             engine {
                 preconfigured = serverOkHttpClient
@@ -93,7 +97,8 @@ class ContainerFetcherOkHttpTest {
         }
 
         val serverNodeIdAndAuth = NodeIdAndAuth(Random.nextLong(), randomUuid().toString())
-        serverDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+        serverDb = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
+                "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite")
             .addSyncCallback(serverNodeIdAndAuth)
             .build()
             .clearAllTablesAndResetNodeId(serverNodeIdAndAuth.nodeId)
@@ -153,7 +158,7 @@ class ContainerFetcherOkHttpTest {
                     .instance(tag = DoorTag.TAG_DB)
                 val downloadedContainerFiles = downloadDestDir.getContentEntryJsonFilesFromDir(
                     clientDi.direct.instance())
-                clientDb.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                clientDb.withDoorTransactionAsync { txDb ->
                     txDb.containerEntryFileDao.insertListAsync(downloadedContainerFiles)
                     txDb.linkExistingContainerEntries(container.containerUid,
                         containerEntriesToDownload)
@@ -214,7 +219,7 @@ class ContainerFetcherOkHttpTest {
             val fileEntriesDownloaded = downloadDestDir.getContentEntryJsonFilesFromDir(
                 clientDi.direct.instance())
 
-            clientDb.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+            clientDb.withDoorTransactionAsync { txDb ->
                 txDb.containerEntryFileDao.insertListAsync(fileEntriesDownloaded)
                 txDb.linkExistingContainerEntries(container.containerUid,
                     allContainerEntryFilesToDownload)

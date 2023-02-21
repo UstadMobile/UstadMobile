@@ -4,13 +4,16 @@ import com.ustadmobile.core.controller.ChatDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ChatDetailView
 import com.ustadmobile.core.view.EditButtonMode
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.Chat
+import com.ustadmobile.lib.db.entities.MessageRead
 import com.ustadmobile.lib.db.entities.MessageWithPerson
-import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.spacingUnits
+import com.ustadmobile.mui.components.umFab
+import com.ustadmobile.mui.components.umInput
 import com.ustadmobile.mui.ext.targetInputValue
-import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.chatDetailNewMessage
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -24,6 +27,10 @@ import com.ustadmobile.view.ext.renderConversationListItem
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.css.*
+import mui.material.FabColor
+import mui.material.FabVariant
+import mui.material.Size
+import react.Key
 import react.Props
 import react.RBuilder
 import react.setState
@@ -51,7 +58,7 @@ class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
             ustadComponentTitle = value
         }
 
-    override var messageList: DoorDataSourceFactory<Int, MessageWithPerson>? = null
+    override var messageList: DataSourceFactory<Int, MessageWithPerson>? = null
         get() = field
         set(value) {
             field = value
@@ -96,12 +103,24 @@ class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
                 }
                 messages.forEach {
                     val fromMe = accountManager.activeAccount.personUid == it.messagePerson?.personUid
+                    //Update message read
+                    if(it.messageRead == null) {
+                        val messageRead = MessageRead(
+                            accountManager.activeAccount.personUid, it.messageUid,
+                            it.messageEntityUid ?: 0L
+                        )
+                        mPresenter?.updateMessageRead(messageRead)
+                        it.messageRead = messageRead
+                    }
                     renderConversationListItem(
                         !fromMe,
                         if(fromMe) getString(MessageID.you) else it.messagePerson?.fullName(),
                         it.messageText,
                         systemImpl,
-                        it.messageTimestamp
+                        accountManager,
+                        this,
+                        it.messageTimestamp,
+
                     )
                 }
             }
@@ -139,6 +158,7 @@ class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
                             fontSize = (1.3).em
                         }
                         attrs.asDynamic().inputProps = object: Props {
+                            override var key: Key?= "${StyleManager.name}-chatInputMessageClass"
                             val className = "${StyleManager.name}-chatInputMessageClass"
                         }
                     }
@@ -148,9 +168,9 @@ class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
                         css(messageSendButton)
                         umFab("send","",
                             id = "um-chat-send",
-                            variant = FabVariant.round,
-                            size = ButtonSize.large,
-                            color = UMColor.secondary,
+                            variant = FabVariant.circular,
+                            size = Size.large,
+                            color = FabColor.secondary,
                             onClick = {
                                 Util.stopEventPropagation(it)
                                 if(typedMessage.isNotEmpty()){

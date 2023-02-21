@@ -9,7 +9,7 @@ import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.PeerReviewerAllocationEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterWithAllocations
 import com.ustadmobile.lib.db.entities.PeerReviewerAllocation
@@ -21,7 +21,7 @@ import org.kodein.di.DI
 
 class PeerReviewerAllocationEditPresenter(context: Any,
         arguments: Map<String, String>, view: PeerReviewerAllocationEditView,
-        lifecycleOwner: DoorLifecycleOwner,
+        lifecycleOwner: LifecycleOwner,
         di: DI)
     : UstadEditPresenter<PeerReviewerAllocationEditView, PeerReviewerAllocationList>(context, arguments, view, di, lifecycleOwner) {
 
@@ -41,7 +41,7 @@ class PeerReviewerAllocationEditPresenter(context: Any,
         super.onCreate(savedState)
      }
 
-    override fun onLoadFromJson(bundle: Map<String, String>): PeerReviewerAllocationList? {
+    override fun onLoadFromJson(bundle: Map<String, String>): PeerReviewerAllocationList {
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
@@ -103,11 +103,12 @@ class PeerReviewerAllocationEditPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, PeerReviewerAllocationList.serializer(),
                 entityVal)
         val submitterWithAllocations = view.submitterListWithAllocations ?: listOf()
         savedState.putEntityAsJson(
             SAVED_STATE_SUBMITTER_WITH_ALLOCATIONS,
+            json,
             ListSerializer(AssignmentSubmitterWithAllocations.serializer()),
             submitterWithAllocations)
     }

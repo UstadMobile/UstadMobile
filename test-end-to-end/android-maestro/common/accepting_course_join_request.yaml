@@ -1,0 +1,17 @@
+appId: com.toughra.ustadmobile
+---
+# admin accepts the student's request to join an existing course using code
+# Test parameters needs to provide for this test :
+# 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+# 2) TESTCOURSENAME: provide course name of string type
+
+-  tapOn: "Courses"
+- tapOn: ${TESTCOURSENAME}
+- tapOn: "MEMBERS"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/accept_icon"
+- extendedWaitUntil:
+    notVisible:
+      id: "com.toughra.ustadmobile:id/accept_icon"
+    timeout: 10000
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_student_using _code"

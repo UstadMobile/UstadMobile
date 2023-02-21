@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.controller.TimeZoneListPresenter.Companion.RESULT_TIMEZONE_KEY
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.deactivateByUids
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
@@ -14,7 +15,7 @@ import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SCHOOL_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
@@ -59,12 +60,10 @@ class ClazzEdit2Presenter(
     arguments: Map<String, String>,
     view: ClazzEdit2View,
     di : DI,
-    lifecycleOwner: DoorLifecycleOwner
+    lifecycleOwner: LifecycleOwner
 ) : UstadEditPresenter<ClazzEdit2View, ClazzWithHolidayCalendarAndSchoolAndTerminology>(
     context, arguments, view, di, lifecycleOwner
 ), TreeOneToManyJoinEditListener<CourseBlockWithEntity>, ItemTouchHelperListener {
-
-    private val json: Json by di.instance()
 
     enum class EnrolmentPolicyOptions(val optionVal: Int, val messageId: Int) {
         OPEN(Clazz.CLAZZ_ENROLMENT_POLICY_OPEN,
@@ -386,7 +385,7 @@ class ClazzEdit2Presenter(
         val schedules = db.onRepoWithFallbackToDb(2000) {
             it.scheduleDao.takeIf { clazzUid != 0L }?.findAllSchedulesByClazzUidAsync(clazzUid)
         } ?: listOf()
-        scheduleOneToManyJoinEditHelper.liveList.sendValue(schedules)
+        scheduleOneToManyJoinEditHelper.liveList.postValue(schedules)
 
         val courseBlocksDb: List<CourseBlockWithEntityDb> = db.onRepoWithFallbackToDb(2000){
             it.courseBlockDao.takeIf { clazzUid != 0L }?.findAllCourseBlockByClazzUidAsync(clazzUid)
@@ -408,7 +407,7 @@ class ClazzEdit2Presenter(
             it.asCourseBlockWithEntity(topics, assignmentPeerAllocations)
         }
 
-        courseBlockOneToManyJoinEditHelper.liveList.sendValue(courseBlocks)
+        courseBlockOneToManyJoinEditHelper.liveList.postValue(courseBlocks)
 
         return clazz
     }
@@ -433,8 +432,10 @@ class ClazzEdit2Presenter(
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = view.entity ?: return
-        savedState.putEntityAsJson(SAVEDSTATE_KEY_COURSEPICTURE, null, view.coursePicture)
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
+        savedState.putEntityAsJson(SAVEDSTATE_KEY_COURSEPICTURE, json, CoursePicture.serializer(),
+            view.coursePicture)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json,
+            ClazzWithHolidayCalendarAndSchoolAndTerminology.serializer(), entityVal)
     }
 
     fun handleClickTimezone() {
@@ -509,6 +510,7 @@ class ClazzEdit2Presenter(
 
             view.loading = true
 
+            entity.clazzName = entity.clazzName?.trim()
             entity.clazzStartTime = DateTime(entity.clazzStartTime)
                     .toOffsetByTimezone(entity.effectiveTimeZone).localMidnight.utc.unixMillisLong
             if(entity.clazzEndTime != Long.MAX_VALUE){
@@ -526,10 +528,10 @@ class ClazzEdit2Presenter(
                     item.cbModuleParentBlockUid = currentParentBlock?.cbUid ?: 0L
                 }
             }
-            courseBlockOneToManyJoinEditHelper.liveList.sendValue(courseBlockList)
+            courseBlockOneToManyJoinEditHelper.liveList.postValue(courseBlockList)
 
 
-            repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+            repo.withDoorTransactionAsync { txDb ->
 
                 if((arguments[UstadView.ARG_ENTITY_UID]?.toLongOrNull() ?: 0L) == 0L) {
                     val termMap = db.courseTerminologyDao.findByUidAsync(entity.clazzTerminologyUid)
@@ -539,7 +541,9 @@ class ClazzEdit2Presenter(
                     txDb.clazzDao.updateAsync(entity)
                 }
 
-                scheduleOneToManyJoinEditHelper.commitToDatabase(txDb.scheduleDao) {
+                scheduleOneToManyJoinEditHelper.commitToDatabase(txDb.scheduleDao,
+                    { txDb.scheduleDao.deactivateByUids(it, systemTimeInMillis()) }
+                ) {
                     it.scheduleClazzUid = entity.clazzUid
                 }
 
@@ -856,7 +860,7 @@ class ClazzEdit2Presenter(
             foundBlock.cbModuleParentBlockUid = 0L
         }
         newList[foundBlock.cbIndex] = foundBlock
-        courseBlockOneToManyJoinEditHelper.liveList.sendValue(newList)
+        courseBlockOneToManyJoinEditHelper.liveList.postValue(newList)
         view.courseBlocks = courseBlockOneToManyJoinEditHelper.liveList
     }
 
@@ -875,7 +879,7 @@ class ClazzEdit2Presenter(
                     ?.cbHidden = foundBlock.cbHidden
             }
         }
-        courseBlockOneToManyJoinEditHelper.liveList.sendValue(newList)
+        courseBlockOneToManyJoinEditHelper.liveList.postValue(newList)
     }
 
 
@@ -913,7 +917,7 @@ class ClazzEdit2Presenter(
         // reject if moving a module, destination is a child block and not last in the block
         if(movingBlock.cbType == CourseBlock.BLOCK_MODULE_TYPE
             && isChildBlock && !lastBlockInModule) {
-            courseBlockOneToManyJoinEditHelper.liveList.sendValue(currentList.toList())
+            courseBlockOneToManyJoinEditHelper.liveList.postValue(currentList.toList())
             return false
         }
 
@@ -970,7 +974,7 @@ class ClazzEdit2Presenter(
         }
 
 
-        courseBlockOneToManyJoinEditHelper.liveList.sendValue(currentList.toList())
+        courseBlockOneToManyJoinEditHelper.liveList.postValue(currentList.toList())
         return true
     }
 

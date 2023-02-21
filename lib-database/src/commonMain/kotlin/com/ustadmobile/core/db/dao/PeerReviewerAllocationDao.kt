@@ -1,6 +1,5 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -10,9 +9,9 @@ import com.ustadmobile.lib.db.entities.PeerReviewerAllocation
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UserSession
 
-@Dao
+@DoorDao
 @Repository
-abstract class PeerReviewerAllocationDao : BaseDao<PeerReviewerAllocation>, OneToManyJoinDao<PeerReviewerAllocation>{
+expect abstract class PeerReviewerAllocationDao : BaseDao<PeerReviewerAllocation>, OneToManyJoinDao<PeerReviewerAllocation>{
 
     @Query("""
      REPLACE INTO PeerReviewerAllocationReplicate(prarPk, prarDestination)
@@ -91,12 +90,7 @@ abstract class PeerReviewerAllocationDao : BaseDao<PeerReviewerAllocation>, OneT
            SET praActive = :active, 
                praLct = :changeTime
          WHERE praUid = :cbUid""")
-    abstract fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
+    abstract suspend fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
 
-    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
-        uidList.forEach {
-            updateActiveByUid(it, false, changeTime)
-        }
-    }
 
 }

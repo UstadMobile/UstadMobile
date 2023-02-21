@@ -35,7 +35,8 @@ class ContentJobItemTriggerCallbackTest {
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE),
                 randomUuid().toString())
 
-        db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabaseTriggerTest")
+        db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
+                "jdbc:sqlite:build/tmp/UmAppDatabaseTriggerTest.sqlite")
                 .addSyncCallback(nodeIdAndAuth)
                 .addCallback(ContentJobItemTriggersCallback())
                 .build()

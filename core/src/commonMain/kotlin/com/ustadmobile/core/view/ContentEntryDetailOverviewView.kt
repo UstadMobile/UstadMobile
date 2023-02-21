@@ -1,12 +1,12 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.lib.db.entities.*
 
 
 interface ContentEntryDetailOverviewView: UstadDetailView<ContentEntryWithMostRecentContainer> {
 
-    var availableTranslationsList: DoorDataSourceFactory<Int, ContentEntryRelatedEntryJoinWithLanguage>?
+    var availableTranslationsList: DataSourceFactory<Int, ContentEntryRelatedEntryJoinWithLanguage>?
 
     /**
      * Show the download dialog. The platform should request permission before if required.

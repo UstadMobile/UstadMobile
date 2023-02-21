@@ -2,6 +2,7 @@ plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.multiplatform'
     id 'org.jetbrains.kotlin.plugin.serialization'
+    id 'maven-publish'
 }
 
 android {
@@ -20,12 +21,10 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion rootProject.ext.version_android_target_sdk
     }
     namespace 'com.ustadmobile.lib.test'
 }
-
-apply plugin: "maven-publish"
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
@@ -74,8 +73,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
                 implementation "io.github.aakira:napier:$version_napier"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
-                compileOnly project(":lib-database-entities")
-                compileOnly project(":lib-database")
+                implementation project(":lib-database")
                 compileOnly "com.github.UstadMobile.door:door-runtime:$version_door"
                 compileOnly project(":lib-util")
             }
@@ -85,10 +83,8 @@ kotlin {
             dependencies {
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
-                implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
 
-                compileOnly project(":lib-database-entities")
-                compileOnly project(":lib-database")
                 compileOnly "com.github.UstadMobile.door:door-runtime:$version_door"
                 compileOnly project(":lib-util")
             }
@@ -99,7 +95,7 @@ kotlin {
             dependencies {
                 implementation "io.ktor:ktor-server-servlet:$version_ktor"
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
-                implementation "io.ktor:ktor-gson:$version_ktor"
+                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
 
                 implementation "com.soywiz.korlibs.klock:klock-jvm:$version_klock"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
@@ -114,7 +110,6 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation "com.soywiz.korlibs.klock:klock-android:$version_klock"
-                implementation project(":lib-database-android")
                 implementation "androidx.room:room-runtime:$version_android_room"
             }
         }

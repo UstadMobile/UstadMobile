@@ -1,10 +1,11 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
+import kotlinx.css.Color
 import kotlinx.css.color
 import mui.material.Input
 import mui.material.InputProps
-import org.w3c.dom.HTMLDivElement
+import dom.html.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.events.Event
 import react.RBuilder
@@ -31,15 +32,15 @@ fun RBuilder.umInput(
     name: String? = null,
     multiline: Boolean = false,
     rows: Int? = null,
-    textColor: kotlinx.css.Color,
+    textColor: Color,
     rowsMax: Int? = null,
     onChange: ((Event) -> Unit)? = null,
     onInput: ((FormEvent<HTMLDivElement>) -> Unit)? = null,
     onKeyDown: ((KeyboardEvent<HTMLElement>) -> Unit)? = null,
     className: String? = null,
-    endAdornment: ReactElement? = null,
+    endAdornment: ReactElement<*>? = null,
     handler: StyledHandler<InputProps>? = null
-) = createStyledComponent(Input, className, handler) {
+) = convertFunctionalToClassElement(Input, className, handler) {
     autoFocus?.let{ attrs.autoFocus = it }
     defaultValue?.let { attrs.defaultValue = it }
     disabled?.let { attrs.disabled = it }
@@ -62,7 +63,6 @@ fun RBuilder.umInput(
     rows?.let { attrs.rows = it }
     rowsMax?.let { attrs.maxRows = it }
     attrs.type = type.toString()
-    attrs.color = "#fff"
     attrs.startAdornment = null
     value?.let { attrs.value = it }
     css {

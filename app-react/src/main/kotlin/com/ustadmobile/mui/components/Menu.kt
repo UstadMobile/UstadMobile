@@ -1,16 +1,13 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.Menu
 import mui.material.MenuProps
+import mui.material.MenuVariant
 import org.w3c.dom.Element
 import react.RBuilder
 import styled.StyledHandler
 import kotlin.js.json
-
-enum class MenuVariant{
-    menu, selectedMenu
-}
 
 fun RBuilder.umMenu(
     open: Boolean,
@@ -19,13 +16,13 @@ fun RBuilder.umMenu(
     className: String? = null,
     variant: MenuVariant = MenuVariant.menu,
     handler: StyledHandler<MenuProps>? = null
-) = createStyledComponent(Menu, className, handler){
+) = convertFunctionalToClassElement(Menu, className, handler){
     attrs.open = open
     attrs.onClose = {
         onClose?.invoke()
     }
-    attrs.asDynamic().MenuListProps = json("aria-labelledby" to "basic-button")
-    attrs.variant = variant.toString()
+    attrs.MenuListProps = json("aria-labelledby" to "basic-button").asDynamic()
+    attrs.variant = variant
     anchorElement?.let{
         attrs.asDynamic().anchorEl = it
     }

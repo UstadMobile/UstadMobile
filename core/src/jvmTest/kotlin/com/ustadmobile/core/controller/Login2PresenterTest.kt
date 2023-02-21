@@ -300,7 +300,7 @@ class Login2PresenterTest {
         val expectedErrorMsg = impl.getString(
                 MessageID.login_network_error, Any())
         verify(view, timeout(defaultTimeout)).errorMessage = expectedErrorMsg
-        verify(impl, timeout(defaultTimeout)).getString(MessageID.login_network_error, context)
+        verify(impl, timeout(defaultTimeout).atLeastOnce()).getString(MessageID.login_network_error, context)
     }
 
 

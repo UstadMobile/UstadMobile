@@ -15,18 +15,18 @@ import com.toughra.ustadmobile.databinding.FragmentDiscussionTopicDetailBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.DiscussionTopicDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.DiscussionTopicDetailView
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
 import com.ustadmobile.lib.db.entities.DiscussionTopic
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import com.ustadmobile.core.db.UmAppDatabase
 
 
 class DiscussionTopicDetailFragment: UstadDetailFragment<DiscussionTopic>(),
@@ -61,7 +61,7 @@ class DiscussionTopicDetailFragment: UstadDetailFragment<DiscussionTopic>(),
     }
 
 
-    override var posts: DoorDataSourceFactory<Int, DiscussionPostWithDetails>? = null
+    override var posts: DataSourceFactory<Int, DiscussionPostWithDetails>? = null
         set(value) {
 
             postsLiveData?.removeObserver(postsObserver)
@@ -92,7 +92,7 @@ class DiscussionTopicDetailFragment: UstadDetailFragment<DiscussionTopic>(),
 
 
         val accountManager: UstadAccountManager by instance()
-        repo = di.direct.on(accountManager.activeAccount).instance(tag = TAG_REPO)
+        repo = di.direct.on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
         mPresenter = DiscussionTopicDetailPresenter(requireContext(), arguments.toStringMap(),
             this, di, viewLifecycleOwner).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())

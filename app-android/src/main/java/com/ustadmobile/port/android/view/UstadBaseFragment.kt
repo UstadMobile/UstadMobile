@@ -18,7 +18,7 @@ import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SNACK_MESSAGE
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.*
 import kotlinx.coroutines.CoroutineScope
@@ -59,7 +59,7 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
             viewLifecycleOwner.lifecycleScope
         }
 
-        bind<DoorLifecycleOwner>() with provider {
+        bind<LifecycleOwner>() with provider {
             viewLifecycleOwner
         }
     }
@@ -86,7 +86,7 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
-        searchView = menu.findItem(R.id.menu_search).actionView as SearchView
+        searchView = menu.findItem(R.id.menu_search)?.actionView as? SearchView
         searchManager?.searchView = searchView
     }
 

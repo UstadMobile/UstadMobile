@@ -7,9 +7,9 @@ import org.junit.Test
 import com.ustadmobile.core.view.@BaseFileName@View
 import com.ustadmobile.core.view.@Entity@DetailView
 import org.mockito.kotlin.*
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.core.db.dao.@Entity@Dao
-import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.lifecycle.LifecycleObserver
 import com.ustadmobile.lib.db.entities.@Entity@
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -38,7 +38,7 @@ class @BaseFileName@PresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repo@Entity@DaoSpy: @Entity@Dao
 
@@ -48,7 +48,7 @@ class @BaseFileName@PresenterTest {
     fun setup() {
         mockView = mock { }
         mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
+            on { currentState }.thenReturn(LifecycleObserver.RESUMED)
         }
         context = Any()
 

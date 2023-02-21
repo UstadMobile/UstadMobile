@@ -1,15 +1,15 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ErrorReport
 import com.ustadmobile.lib.db.entities.UserSession
 
-@Dao
+@DoorDao
 @Repository
-abstract class ErrorReportDao {
+expect abstract class ErrorReportDao {
 
     @Query("""
  REPLACE INTO ErrorReportReplicate(erPk, erDestination)

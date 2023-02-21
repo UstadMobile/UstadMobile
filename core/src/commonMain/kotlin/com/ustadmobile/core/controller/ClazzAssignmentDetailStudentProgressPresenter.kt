@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.CourseAssignmentMarkDao
+import com.ustadmobile.core.db.dao.CourseAssignmentMarkDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -18,7 +19,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SUBMITER_UID
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.attachments.retrieveAttachment
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
@@ -34,7 +35,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(
     arguments: Map<String, String>,
     view: ClazzAssignmentDetailStudentProgressView,
     di: DI,
-    lifecycleOwner: DoorLifecycleOwner,
+    lifecycleOwner: LifecycleOwner,
     // to enter the private comment to student/group
     val newPrivateCommentListener: DefaultNewCommentItemListener =
         DefaultNewCommentItemListener(
@@ -72,7 +73,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(
 
     private var markerSubmitterUid: Long = 0
 
-    private var selectedFilter = CourseAssignmentMarkDao.ARG_FILTER_RECENT_SCORES
+    private var selectedFilter = CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES
 
     override fun onCreate(savedState: Map<String, String>?) {
         selectedSubmitterUid = arguments[ARG_SUBMITER_UID]?.toLong() ?: 0
@@ -209,7 +210,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(
         val assignment = view.entity ?: return false
         presenterScope.launch {
 
-            repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+            repo.withDoorTransactionAsync { txDb ->
                 val lastSubmission = txDb.courseAssignmentSubmissionDao.findLastSubmissionFromStudent(
                     selectedSubmitterUid, assignment.caUid) ?: return@withDoorTransactionAsync
 

@@ -4,7 +4,7 @@ import com.ustadmobile.core.controller.ClazzLogListAttendancePresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.mui.components.*
@@ -17,6 +17,9 @@ import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import com.ustadmobile.view.ext.umItemThumbnail
 import kotlinx.css.*
+import mui.material.AvatarVariant
+import mui.material.ChipColor
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import react.setState
 import styled.css
@@ -50,7 +53,7 @@ class ClazzLogListAttendanceComponent (mProps: UmProps) : UstadListComponent<Cla
 
     }
 
-    override var graphData: DoorMutableLiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>? =
+    override var graphData: MutableLiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>? =
         null
         set(value) {
             field?.removeObserver(graphDataObserver)
@@ -118,7 +121,7 @@ class ClazzLogListAttendanceComponent (mProps: UmProps) : UstadListComponent<Cla
             umItem(GridSize.cells3, GridSize.cells1) {
                 umItemThumbnail(
                     "calendar_today",
-                    avatarVariant = AvatarVariant.circle
+                    avatarVariant = AvatarVariant.circular
                 )
             }
 

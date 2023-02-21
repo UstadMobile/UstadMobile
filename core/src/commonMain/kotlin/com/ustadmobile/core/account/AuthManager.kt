@@ -2,7 +2,7 @@ package com.ustadmobile.core.account
 
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.PersonAuthDao
+import com.ustadmobile.core.db.dao.PersonAuthDaoCommon
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.schedule.age
 import com.ustadmobile.core.util.ext.base64StringToByteArray
@@ -34,18 +34,6 @@ class AuthManager(
 
     private val pbkdf2Params: Pbkdf2Params by instance()
 
-    private var site: Site? = null
-
-    private suspend fun getSite(): Site {
-        site?.also {
-            return it
-        }
-
-        val siteVal = repo.siteDao.getSiteAsync() ?: throw IllegalStateException("No site!")
-        site = siteVal
-        return siteVal
-    }
-
     suspend fun authenticate(
         username: String,
         password: String,
@@ -70,9 +58,9 @@ class AuthManager(
         if(authorizedPerson == null && fallbackToOldPersonAuth) {
             val person = db.personDao.findUidAndPasswordHashAsync(username)
             if(person != null
-                && ((person.passwordHash?.startsWith(PersonAuthDao.PLAIN_PASS_PREFIX) == true
+                && ((person.passwordHash?.startsWith(PersonAuthDaoCommon.PLAIN_PASS_PREFIX) == true
                         && person.passwordHash?.substring(2) == password)
-                        ||(person.passwordHash?.startsWith(PersonAuthDao.ENCRYPTED_PASS_PREFIX) == true &&
+                        ||(person.passwordHash?.startsWith(PersonAuthDaoCommon.ENCRYPTED_PASS_PREFIX) == true &&
                         authenticateEncryptedPassword(password, person.passwordHash?.substring(2) ?: "")))) {
                 authorizedPerson = db.personDao.findByUidAsync(person.personUid)
 
@@ -101,7 +89,7 @@ class AuthManager(
     }
 
     suspend fun setAuth(personUid: Long, password: String) {
-        repo.insertPersonAuthCredentials2(personUid, password, pbkdf2Params, getSite())
+        repo.insertPersonAuthCredentials2(personUid, password, pbkdf2Params)
     }
 
 

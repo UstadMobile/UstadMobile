@@ -1,7 +1,7 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.core.util.ListFilterIdOption
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.lib.db.entities.*
 
 
@@ -13,11 +13,11 @@ interface ClazzAssignmentDetailStudentProgressView: UstadDetailView<ClazzAssignm
 
     var gradeFilterChips: List<ListFilterIdOption>?
 
-    var clazzCourseAssignmentSubmissionAttachment: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>?
+    var clazzCourseAssignmentSubmissionAttachment: DataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>?
 
-    var markList: DoorDataSourceFactory<Int, CourseAssignmentMarkWithPersonMarker>?
+    var markList: DataSourceFactory<Int, CourseAssignmentMarkWithPersonMarker>?
 
-    var clazzAssignmentPrivateComments: DoorDataSourceFactory<Int, CommentsWithPerson>?
+    var clazzAssignmentPrivateComments: DataSourceFactory<Int, CommentsWithPerson>?
 
     var submissionScore: AverageCourseAssignmentMark?
 

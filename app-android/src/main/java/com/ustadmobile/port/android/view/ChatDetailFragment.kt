@@ -21,6 +21,7 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ChatDetailView
 import com.ustadmobile.core.view.EditButtonMode
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.Chat
 import com.ustadmobile.lib.db.entities.MessageWithPerson
@@ -63,7 +64,7 @@ class ChatDetailFragment: UstadBaseFragment(), ChatDetailView, ChatDetailFragmen
     : View {
         val rootView: View
 
-        dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
+        dbRepo = on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
 
         mPresenter = ChatDetailPresenter(
             requireContext(), arguments.toStringMap(), this,

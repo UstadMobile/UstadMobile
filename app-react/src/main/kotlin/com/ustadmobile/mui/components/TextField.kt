@@ -1,27 +1,23 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.defaultFullWidth
-import mui.material.BaseTextFieldProps
+import mui.material.FormControlMargin
+import mui.material.FormControlVariant
 import mui.material.TextField
 import mui.material.TextFieldProps
 import react.RBuilder
 import react.ReactNode
 import react.dom.html.InputType
+import react.dom.onChange
 import styled.StyledElementBuilder
 import styled.StyledHandler
 import styled.StyledProps
 import styled.css
 
+external interface UMTextFieldProps: TextFieldProps, StyledProps
 
-enum class FormControlVariant {
-    standard, outlined, filled
-}
-
-enum class FormControlMargin {
-    none, dense, normal
-}
 
 fun RBuilder.umTextField(
     label: String,
@@ -45,7 +41,7 @@ fun RBuilder.umTextField(
     allowCapitalLetters: Boolean = true,
     onClick: (() -> Unit)? = null,
     handler: StyledHandler<UMTextFieldProps>? = null
-) = createStyledComponent(TextField, className, handler) {
+) = convertFunctionalToClassElement(TextField, className, handler) {
     css(defaultFullWidth)
     setProps(
         this, autoComplete, autoFocus, disabled, error, fullWidth, helperText,
@@ -75,7 +71,7 @@ fun RBuilder.umTextFieldMultiLine(
     blockedValues: String? = null,
     allowCapitalLetters: Boolean = true,
     handler: StyledHandler<UMTextFieldProps>? = null
-) = createStyledComponent(TextField, className, handler) {
+) = convertFunctionalToClassElement(TextField, className, handler) {
     css(defaultFullWidth)
     setProps(this, null, autoFocus,
         disabled, error, fullWidth, helperText, id, label, margin, true, name, onChange,
@@ -83,8 +79,6 @@ fun RBuilder.umTextFieldMultiLine(
         blockedValues, allowCapitalLetters
     )
 }
-
-external interface UMTextFieldProps: TextFieldProps, StyledProps, BaseTextFieldProps
 
 fun RBuilder.umTextFieldSelect(
     label: String,
@@ -105,7 +99,7 @@ fun RBuilder.umTextFieldSelect(
     name: String? = null,
     className: String? = null,
     handler: StyledHandler<UMTextFieldProps>? = null
-) = createStyledComponent(TextField, className, handler) {
+) = convertFunctionalToClassElement(TextField, className, handler) {
     setProps(
         this, autoComplete, autoFocus, disabled, error, fullWidth, helperText,
         id, label, margin, false, name, onChange, placeholder, required, null,
@@ -159,7 +153,7 @@ private fun setProps(
     helperText?.let { textField.attrs.helperText = ReactNode(it) }
     id?.let { textField.attrs.id = it }
     textField.attrs.label = ReactNode(label)
-    textField.attrs.margin = margin.toString()
+    textField.attrs.margin = margin
     textField.attrs.multiline = multiline
     name?.let { textField.attrs.name = it }
     textField.attrs.onChange = {
@@ -179,7 +173,7 @@ private fun setProps(
     textField.attrs.onClick = {
         onClick?.invoke()
     }
-    textField.attrs.variant = variant.toString()
+    textField.attrs.variant = variant
     if(!allowCapitalLetters){
         textField.attrs.onInput = {
             val enteredValue = it.target.asDynamic().value
@@ -187,7 +181,7 @@ private fun setProps(
         }
     }
     if(!blockedCharacters.isNullOrEmpty()){
-        textField.attrs.onKeyPress = {
+        textField.attrs.onKeyDown = {
            if(blockedCharacters.contains(it.key)){
                it.preventDefault()
            }

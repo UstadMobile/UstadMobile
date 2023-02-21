@@ -1,10 +1,16 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.core.db.dao.ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED
+import com.ustadmobile.core.db.dao.ClazzDaoCommon.SELECT_ACTIVE_CLAZZES
+import com.ustadmobile.core.db.dao.ClazzDaoCommon.SORT_ATTENDANCE_ASC
+import com.ustadmobile.core.db.dao.ClazzDaoCommon.SORT_ATTENDANCE_DESC
+import com.ustadmobile.core.db.dao.ClazzDaoCommon.SORT_CLAZZNAME_ASC
+import com.ustadmobile.core.db.dao.ClazzDaoCommon.SORT_CLAZZNAME_DESC
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
@@ -16,8 +22,8 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_TEACHER
 import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
 
 @Repository
-@Dao
-abstract class ClazzDao : BaseDao<Clazz> {
+@DoorDao
+expect abstract class ClazzDao : BaseDao<Clazz> {
 
     @Query("""
      REPLACE INTO ClazzReplicate(clazzPk, clazzDestination)
@@ -76,7 +82,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
     abstract fun findByUid(uid: Long): Clazz?
 
     @Query("SELECT * From Clazz WHERE clazzUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<Clazz?>
+    abstract fun findByUidLive(uid: Long): LiveData<Clazz?>
 
     @Query("SELECT * FROM Clazz WHERE clazzCode = :code")
     abstract suspend fun findByClazzCode(code: String): Clazz?
@@ -87,7 +93,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
     abstract suspend fun findByClazzCodeFromWeb(code: String): Clazz?
 
     @Query(SELECT_ACTIVE_CLAZZES)
-    abstract fun findAllLive(): DoorLiveData<List<Clazz>>
+    abstract fun findAllLive(): LiveData<List<Clazz>>
 
     @Query(SELECT_ACTIVE_CLAZZES)
     abstract fun findAll(): List<Clazz>
@@ -123,7 +129,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
     @Query("SELECT * FROM Clazz WHERE clazzSchoolUid = :schoolUid " +
             "AND CAST(isClazzActive AS INTEGER) = 1 ")
     abstract fun findAllClazzesBySchoolLive(schoolUid: Long)
-            : DoorDataSourceFactory<Int,Clazz>
+            : DataSourceFactory<Int,Clazz>
 
 
     @Query("""
@@ -197,7 +203,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
         currentTime: Long,
         permission: Long,
         selectedSchool: Long
-    ) : DoorDataSourceFactory<Int, ClazzWithListDisplayDetails>
+    ) : DataSourceFactory<Int, ClazzWithListDisplayDetails>
 
 
     @Query("SELECT Clazz.clazzUid AS uid, Clazz.clazzName AS labelName From Clazz WHERE clazzUid IN (:ids)")
@@ -297,7 +303,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
               LEFT JOIN CourseTerminology
               ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
         WHERE Clazz.clazzUid = :clazzUid""")
-    abstract fun getClazzWithDisplayDetails(clazzUid: Long, currentTime: Long): DoorLiveData<ClazzWithDisplayDetails?>
+    abstract fun getClazzWithDisplayDetails(clazzUid: Long, currentTime: Long): LiveData<ClazzWithDisplayDetails?>
 
 
     /**
@@ -331,25 +337,5 @@ abstract class ClazzDao : BaseDao<Clazz> {
 
     @Query("SELECT Clazz.*, School.* FROM Clazz LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid WHERE clazz.clazzUid = :clazzUid")
     abstract suspend fun getClazzWithSchool(clazzUid: Long): ClazzWithSchool?
-
-    companion object {
-
-        const val SORT_CLAZZNAME_ASC = 1
-
-        const val SORT_CLAZZNAME_DESC = 2
-
-        const val SORT_ATTENDANCE_ASC = 3
-
-        const val SORT_ATTENDANCE_DESC = 4
-
-        const val FILTER_ACTIVE_ONLY = 1
-
-        const val FILTER_CURRENTLY_ENROLLED = 5
-
-        const val FILTER_PAST_ENROLLMENTS = 6
-
-        private const val SELECT_ACTIVE_CLAZZES = "SELECT * FROM Clazz WHERE CAST(isClazzActive AS INTEGER) = 1"
-    }
-
 
 }

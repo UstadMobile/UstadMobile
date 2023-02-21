@@ -5,9 +5,9 @@ import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UserSession
 
-@Dao
+@DoorDao
 @Repository
-abstract class SiteDao {
+expect abstract class SiteDao {
 
     @Query("SELECT * FROM Site LIMIT 1")
     abstract fun getSite(): Site?
@@ -15,6 +15,9 @@ abstract class SiteDao {
     @Query("SELECT * FROM Site LIMIT 1")
     @RepoHttpAccessible
     abstract suspend fun getSiteAsync(): Site?
+
+    @Query("SELECT authSalt FROM Site LIMIT 1")
+    abstract suspend fun getSiteAuthSaltAsync(): String?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun replaceAsync(site: Site): Long

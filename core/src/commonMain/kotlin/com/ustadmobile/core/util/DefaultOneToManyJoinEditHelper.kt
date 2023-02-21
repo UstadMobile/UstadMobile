@@ -1,22 +1,24 @@
 package com.ustadmobile.core.util
 
-import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.controller.UstadEditPresenterJsonLoader
 import com.ustadmobile.core.db.dao.OneToManyJoinDao
-import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.atomicfu.atomic
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
+import org.kodein.di.DI
 import kotlin.reflect.KClass
 
-open class DefaultOneToManyJoinEditHelper<T: Any>(pkGetter: (T) -> Long,
-                                             serializationKey: String,
-                                             serializationStrategy: SerializationStrategy<List<T>>,
-                                             deserializationStrategy: DeserializationStrategy<List<T>>,
-                                             editPresenter: UstadEditPresenter<*, *>,
-                                             entityClass: KClass<T>,
-                                             pkSetter: T.(Long) -> Unit)
-    : OneToManyJoinEditHelper<T, Long>(pkGetter, serializationKey, serializationStrategy,
-        deserializationStrategy, 0L, editPresenter, entityClass, pkSetter, {-1L}){
+open class DefaultOneToManyJoinEditHelper<T: Any>(
+    pkGetter: (T) -> Long,
+    serializationKey: String,
+    serializationStrategy: SerializationStrategy<List<T>>,
+    deserializationStrategy: DeserializationStrategy<List<T>>,
+    editPresenter: UstadEditPresenterJsonLoader,
+    di: DI,
+    entityClass: KClass<T>,
+    pkSetter: T.(Long) -> Unit
+) : OneToManyJoinEditHelper<T, Long>(pkGetter, serializationKey, serializationStrategy,
+        deserializationStrategy, 0L, editPresenter, di, entityClass, pkSetter, {-1L}){
 
     private val atomicLong = atomic(0L)
 
@@ -38,9 +40,14 @@ open class DefaultOneToManyJoinEditHelper<T: Any>(pkGetter: (T) -> Long,
     override val fakePkGenerator: () -> Long
         get() = { atomicLong.decrementAndGet() }
 
-    override suspend fun commitToDatabase(dao: OneToManyJoinDao<in T>, fkSetter: (T) -> Unit) {
+    @Suppress("DEPRECATION")
+    suspend fun commitToDatabase(
+        dao: OneToManyJoinDao<in T>,
+        deactivateFn: suspend (keysToDeactivate: List<Long>) -> Unit,
+        fkSetter: (T) -> Unit
+    ) {
         super.commitToDatabase(dao, fkSetter)
-        dao.deactivateByUids(primaryKeysToDeactivate, systemTimeInMillis())
+        deactivateFn(primaryKeysToDeactivate)
     }
 
     override fun doesNewEntityRequireFakePk(pk: Long) = (pk == 0L)

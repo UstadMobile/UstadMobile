@@ -10,6 +10,8 @@ interface SettingsView : UstadView {
 
     var langListVisible: Boolean
 
+    var displayLanguage: String?
+
     companion object {
         val VIEW_NAME = "SettingsFromToolbar"
     }

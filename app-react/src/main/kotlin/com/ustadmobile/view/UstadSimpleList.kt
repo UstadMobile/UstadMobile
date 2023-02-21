@@ -13,6 +13,7 @@ import com.ustadmobile.util.UmState
 import com.ustadmobile.util.Util
 import com.ustadmobile.view.ext.renderCreateNewItemOnList
 import kotlinx.css.*
+import mui.material.ListItemAlignItems
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.ReactElement
@@ -70,7 +71,7 @@ abstract class UstadSimpleList<P: SimpleListProps<*>>(mProps: P) : UstadBaseComp
 
     open fun RBuilder.renderMoreDialogOptions(){}
 
-    private fun RBuilder.renderItems(): ReactElement? {
+    private fun RBuilder.renderItems(): ReactElement<UmProps>? {
         if(props.createNewItem?.visible == true && !props.createNewItem?.text.isNullOrEmpty()){
             umListItem(button = true, alignItems = ListItemAlignItems.flexStart) {
                 css{

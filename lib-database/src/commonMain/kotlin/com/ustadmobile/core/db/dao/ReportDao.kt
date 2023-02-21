@@ -1,17 +1,19 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import androidx.room.*
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.core.db.dao.ReportDaoCommon.SORT_TITLE_ASC
+import com.ustadmobile.core.db.dao.ReportDaoCommon.SORT_TITLE_DESC
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.UserSession
 import kotlin.js.JsName
 
-@Dao
+@DoorDao
 @Repository
-abstract class ReportDao : BaseDao<Report> {
+expect abstract class ReportDao : BaseDao<Report> {
 
     @Query("""
      REPLACE INTO ReportReplicate(reportPk, reportDestination)
@@ -80,7 +82,7 @@ abstract class ReportDao : BaseDao<Report> {
             """)
     abstract fun findAllActiveReport(searchBit: String, personUid: Long, sortOrder: Int,
                                      isTemplate: Boolean)
-            : DoorDataSourceFactory<Int, Report>
+            : DataSourceFactory<Int, Report>
 
     @Query("SELECT * FROM Report WHERE reportUid = :entityUid")
     abstract suspend fun findByUid(entityUid: Long): Report?
@@ -89,14 +91,14 @@ abstract class ReportDao : BaseDao<Report> {
     abstract suspend fun updateAsync(entity: Report)
 
     @Query("SELECT * From Report WHERE  reportUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<Report?>
+    abstract fun findByUidLive(uid: Long): LiveData<Report?>
 
     @Query("""SELECT * FROM REPORT WHERE NOT reportInactive 
         AND isTemplate = :isTemplate
         ORDER BY priority ASC
             """)
     abstract fun findAllActiveReportLive(isTemplate: Boolean)
-            : DoorLiveData<List<Report>>
+            : LiveData<List<Report>>
 
     @Query("""SELECT * FROM REPORT WHERE NOT reportInactive 
         AND isTemplate = :isTemplate
@@ -126,18 +128,5 @@ abstract class ReportDao : BaseDao<Report> {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entityList: List<Report>)
 
-    fun initPreloadedTemplates() {
-        val uidsInserted = findByUidList(Report.FIXED_TEMPLATES.map { it.reportUid })
-        val templateListToInsert = Report.FIXED_TEMPLATES.filter { it.reportUid !in uidsInserted }
-        replaceList(templateListToInsert)
-    }
-
-    companion object{
-
-        const val SORT_TITLE_ASC = 1
-
-        const val SORT_TITLE_DESC = 2
-
-    }
 
 }

@@ -4,11 +4,10 @@ import com.ustadmobile.core.controller.SchoolEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.SchoolEditView
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.lib.db.entities.ScopedGrantAndName
-import com.ustadmobile.mui.components.FormControlVariant
 import com.ustadmobile.mui.components.GridSize
 import com.ustadmobile.mui.components.GridSpacing
 import com.ustadmobile.mui.components.umTextField
@@ -19,6 +18,7 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util.ASSET_ENTRY
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.view.ext.*
+import mui.material.FormControlVariant
 import react.RBuilder
 import react.dom.html.InputType
 import react.setState
@@ -56,7 +56,7 @@ class SchoolEditComponent (mProps: UmProps): UstadEditComponent<SchoolWithHolida
         }
     }
 
-    override var scopedGrants: DoorLiveData<List<ScopedGrantAndName>>? = null
+    override var scopedGrants: LiveData<List<ScopedGrantAndName>>? = null
         set(value) {
             field = value
             field?.removeObserver(scopedGrantListObserver)

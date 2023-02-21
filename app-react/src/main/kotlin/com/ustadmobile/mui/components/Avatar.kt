@@ -1,17 +1,13 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.Avatar
 import mui.material.AvatarProps
-import org.w3c.dom.HTMLImageElement
+import mui.material.AvatarVariant
+import dom.html.HTMLImageElement
 import react.RBuilder
 import react.dom.html.ImgHTMLAttributes
 import styled.StyledHandler
-
-@Suppress("EnumEntryName")
-enum class AvatarVariant {
-    rounded, square, circle, circular
-}
 
 fun RBuilder.umAvatar(
     src: String? = null,
@@ -22,11 +18,11 @@ fun RBuilder.umAvatar(
     sizes: String? = null,
     className: String? = null,
     handler: StyledHandler<AvatarProps>? = null
-) = createStyledComponent(Avatar, className, handler) {
+) = convertFunctionalToClassElement(Avatar, className, handler) {
     imgProps?.let {attrs.imgProps = imgProps }
     alt?.let { attrs.alt = alt }
     sizes?.let { attrs.sizes = sizes }
     src?.let { attrs.src = src }
     srcSet?.let { attrs.srcSet = srcSet }
-    attrs.variant = variant.toString()
+    attrs.variant = variant
 }

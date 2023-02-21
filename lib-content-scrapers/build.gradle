@@ -1,11 +1,10 @@
 
 plugins {
+    id 'org.jetbrains.kotlin.multiplatform'
+    id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.github.johnrengelman.shadow' version "$version_shadow"
 }
 
-apply plugin: "kotlin-multiplatform"
-apply plugin: 'kotlinx-serialization'
-apply plugin: "jacoco"
 
 
 kotlin {
@@ -38,8 +37,6 @@ kotlin {
             dependencies {
                 implementation project(":core")
                 implementation project(':lib-database')
-                implementation project(":lib-database-mpp")
-                implementation project(":lib-database-entities")
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation project(":sharedse")
                 implementation project(":lib-util")

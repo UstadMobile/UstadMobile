@@ -1,8 +1,8 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import androidx.room.*
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzLog
@@ -10,8 +10,8 @@ import com.ustadmobile.lib.db.entities.Role
 
 
 @Repository
-@Dao
-abstract class ClazzLogDao : BaseDao<ClazzLog> {
+@DoorDao
+expect abstract class ClazzLogDao : BaseDao<ClazzLog> {
 
     @Query("""
      REPLACE INTO ClazzLogReplicate(clPk, clDestination)
@@ -79,13 +79,13 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
     abstract suspend fun findByUidAsync(uid: Long): ClazzLog?
 
     @Query("SELECT * FROM ClazzLog WHERE clazzLogUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<ClazzLog?>
+    abstract fun findByUidLive(uid: Long): LiveData<ClazzLog?>
 
     @Query("""SELECT ClazzLog.* FROM ClazzLog 
         WHERE clazzLogClazzUid = :clazzUid
         AND clazzLog.clazzLogStatusFlag != :excludeStatus
         ORDER BY ClazzLog.logDate DESC""")
-    abstract fun findByClazzUidAsFactory(clazzUid: Long, excludeStatus: Int): DoorDataSourceFactory<Int, ClazzLog>
+    abstract fun findByClazzUidAsFactory(clazzUid: Long, excludeStatus: Int): DataSourceFactory<Int, ClazzLog>
 
 
     //Used by the attendance recording screen to allow the user to go next/prev between days.
@@ -125,14 +125,14 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
         AND (:statusFilter = 0 OR ClazzLog.clazzLogStatusFlag = :statusFilter)
         ORDER BY ClazzLog.logDate
     """)
-    abstract fun findByClazzUidWithinTimeRangeLive(clazzUid: Long, fromTime: Long, toTime: Long, statusFilter: Int): DoorLiveData<List<ClazzLog>>
+    abstract fun findByClazzUidWithinTimeRangeLive(clazzUid: Long, fromTime: Long, toTime: Long, statusFilter: Int): LiveData<List<ClazzLog>>
 
     @Query("""
         SELECT EXISTS(SELECT ClazzLog.clazzLogUid FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid 
         AND (:excludeStatusFilter = 0 OR ((ClazzLog.clazzLogStatusFlag & :excludeStatusFilter) = 0)))
     """)
     @QueryLiveTables(["ClazzLog"])
-    abstract fun clazzHasScheduleLive(clazzUid: Long, excludeStatusFilter: Int): DoorLiveData<Boolean>
+    abstract fun clazzHasScheduleLive(clazzUid: Long, excludeStatusFilter: Int): LiveData<Boolean>
 
 
     @Query("""UPDATE ClazzLog 

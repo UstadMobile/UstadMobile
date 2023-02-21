@@ -1,14 +1,19 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.components.umAppBar
+import com.ustadmobile.mui.components.umTab
+import com.ustadmobile.mui.components.umTabs
 import com.ustadmobile.navigation.RouteManager.lookupDestinationName
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.tabsContainer
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
-import kotlinext.js.jsObject
 import kotlinx.browser.window
 import kotlinx.css.*
+import kotlinx.js.jso
+import mui.material.AppBarPosition
+import mui.material.TabsScrollButtons
+import mui.material.TabsVariant
 import react.RBuilder
 import react.setState
 import styled.css
@@ -35,7 +40,7 @@ class TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,UmState>(mP
 
     private fun updateTabIndexState(selected: String) {
         val index = props.tabs.indexOfFirst { it.title == selected }
-        val state = window.history.state ?: jsObject()
+        val state = window.history.state ?: jso()
         state.asDynamic().tabIndex = index
         window.history.replaceState(state, "")
     }
@@ -63,8 +68,8 @@ class TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,UmState>(mP
                 display = displayProperty(props.showTabs)
             }
             umTabs(selectedTabTitle,
-                scrollButtons = TabScrollButtons.auto,
-                variant = TabVariant.scrollable,
+                scrollButtons = TabsScrollButtons.auto,
+                variant = TabsVariant.scrollable,
                 onChange = { _, value ->
                     tabChangeListener(value)
                 }) {

@@ -5,7 +5,7 @@
 //import com.ustadmobile.core.impl.UmAccountManager
 //import com.ustadmobile.core.impl.UstadMobileSystemImpl
 //import com.ustadmobile.core.view.AboutView
-//import com.ustadmobile.door.DoorLifecycleOwner
+//import com.ustadmobile.door.lifecycle.LifecycleOwner
 //import com.ustadmobile.util.test.AbstractSetup
 //import com.ustadmobile.util.test.checkJndiSetup
 //import org.junit.Before
@@ -48,7 +48,7 @@
 //                Unit
 //            }
 //        }
-//        val mockContext = mock<DoorLifecycleOwner> {}
+//        val mockContext = mock<LifecycleOwner> {}
 //        val presenter = AboutPresenter(mockContext,
 //                presenterArgs, mockView, systemImplSpy)
 //        return Pair(mockView, presenter)

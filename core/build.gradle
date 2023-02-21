@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 plugins {
     id 'org.jetbrains.kotlin.multiplatform'
-    id 'kotlinx-atomicfu'
+    id 'org.jetbrains.kotlin.plugin.atomicfu'
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.android.library'
     id 'maven-publish'
@@ -22,7 +22,7 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion rootProject.ext.version_android_target_sdk
     }
     packagingOptions {
         resources {
@@ -101,15 +101,15 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
+                implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
                 implementation "io.ktor:ktor-io:$version_ktor"
                 implementation "com.soywiz.korlibs.klock:klock:$version_klock"
                 implementation "io.github.aakira:napier:$version_napier"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
-                compileOnly project(':lib-database')
-                compileOnly project(':lib-database-entities')
-                compileOnly "com.github.UstadMobile.door:room-annotations:$version_door"
+                implementation project(':lib-database')
+                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation project(":lib-util")
                 implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
@@ -117,20 +117,20 @@ kotlin {
         }
 
         commonJvmMain {
+            dependsOn commonMain
+
             dependencies {
+
                 implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
-                implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 compileOnly "net.sf.kxml:kxml2:$version_kxml"
-                compileOnly project(':lib-database')
-                compileOnly project(':lib-database-entities')
             }
         }
 
@@ -146,6 +146,7 @@ kotlin {
             resources.srcDirs += ["locale/main", "src/main/assets"]
 
             dependencies {
+                implementation "org.apache.pdfbox:pdfbox:$version_pdfbox_apache"
                 implementation "org.jsoup:jsoup:$version_jsoup"
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
@@ -161,9 +162,6 @@ kotlin {
                 implementation "junit:junit:$version_junit"
 
                 implementation project(":sharedse")
-                implementation project(":lib-database-mpp")
-                implementation project(":lib-database-entities")
-                implementation project(":lib-database")
                 implementation project(":lib-test-common")
                 implementation project(":app-ktor-server")
 
@@ -177,10 +175,12 @@ kotlin {
 
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
-                implementation "io.ktor:ktor-gson:$version_ktor"
-                implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
+                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
 
                 implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
+
+                implementation "net.bytebuddy:byte-buddy:1.12.18"
             }
         }
 
@@ -188,6 +188,9 @@ kotlin {
             dependsOn commonJvmMain
 
             dependencies {
+
+                implementation "com.dmitryborodin:pdfview-android:$version_pdfview_android"
+
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
@@ -204,12 +207,11 @@ kotlin {
                 implementation "androidx.paging:paging-runtime:$version_androidx_paging"
                 implementation "androidx.work:work-runtime:$version_android_workmanager"
                 implementation "androidx.work:work-runtime-ktx:$version_android_workmanager"
-                implementation project(":lib-database-android")
                 implementation "org.jsoup:jsoup:$version_jsoup"
                 //Image loading library
                 implementation "com.squareup.picasso:picasso:$version_android_picasso"
                 implementation "io.ktor:ktor-client-android:$version_ktor"
-                implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
 
                 implementation "com.linkedin.android.litr:litr:$version_android_litr"
 
@@ -222,7 +224,12 @@ kotlin {
                 implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
 
                 implementation "com.google.android.material:material:$version_android_material"
+
+
+
             }
+
+
         }
 
         jsMain {

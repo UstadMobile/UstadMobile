@@ -298,6 +298,10 @@
         android:id="@+id/video_content"
         android:name="com.ustadmobile.port.android.view.VideoContentFragment"
         android:label="" />
+    <fragment
+        android:id="@+id/pdf_content"
+        android:name="com.ustadmobile.port.android.view.PDFContentFragment"
+        android:label="" />
 
     <fragment
         android:id="@+id/site_enterlink_dest"
@@ -447,6 +451,11 @@
     <fragment
         android:id="@+id/scoped_grant_detail_dest"
         android:name="com.ustadmobile.port.android.view.ScopedGrantDetailFragment"/>
+
+    <fragment
+        android:id="@+id/panic_button_settings_dest"
+        android:name="com.ustadmobile.port.android.view.PanicButtonSettingsFragment"
+        android:label="@string/settings"/>
 
 
 </navigation>

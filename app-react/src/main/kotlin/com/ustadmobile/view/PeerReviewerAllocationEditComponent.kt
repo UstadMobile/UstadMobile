@@ -9,7 +9,6 @@ import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterWithAllocations
 import com.ustadmobile.lib.db.entities.PeerReviewerAllocationList
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
@@ -74,20 +73,20 @@ class PeerReviewerAllocationEditComponent(mProps: UmProps): UstadEditComponent<P
             }
 
 
-            umItem(GridSize.cells12, GridSize.cells12) {
-                umButton(getString(MessageID.assign_random_reviewers),
-                    size = ButtonSize.large,
-                    color = UMColor.secondary,
-                    variant = ButtonVariant.contained,
-                    onClick = {
-                        mPresenter?.handleRandomAssign()
-                    }){
-                    css {
-                        +StyleManager.defaultFullWidth
-                        +StyleManager.defaultMarginTop
-                        height = 50.px
-                    }}
-            }
+//            umItem(GridSize.cells12, GridSize.cells12) {
+//                umButton(getString(MessageID.assign_random_reviewers),
+//                    size = ButtonSize.large,
+//                    color = UMColor.secondary,
+//                    variant = ButtonVariant.contained,
+//                    onClick = {
+//                        mPresenter?.handleRandomAssign()
+//                    }){
+//                    css {
+//                        +StyleManager.defaultFullWidth
+//                        +StyleManager.defaultMarginTop
+//                        height = 50.px
+//                    }}
+//            }
 
             umSpacer()
 
@@ -96,8 +95,8 @@ class PeerReviewerAllocationEditComponent(mProps: UmProps): UstadEditComponent<P
                     css(StyleManager.horizontalList)
                     submitterListWithAllocations?.forEachIndexed { index, submitter ->
 
-                        renderListSectionTitle(
-                            submitter.name ?: "", TypographyVariant.h6)
+//                        renderListSectionTitle(
+//                            submitter.name ?: "", TypographyVariant.h6)
 
 
                         val submitterList: MutableList<AssignmentSubmitterSummary> = submitterListWithAllocations?.toMutableList() ?: mutableListOf()

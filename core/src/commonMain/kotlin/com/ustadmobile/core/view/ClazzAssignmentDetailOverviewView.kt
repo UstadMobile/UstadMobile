@@ -1,15 +1,15 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.core.util.ListFilterIdOption
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.lib.db.entities.*
 
 
 interface ClazzAssignmentDetailOverviewView: UstadDetailView<ClazzAssignmentWithCourseBlock> {
 
-    var submittedCourseAssignmentSubmission: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>?
+    var submittedCourseAssignmentSubmission: DataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>?
 
-    var markList: DoorDataSourceFactory<Int, CourseAssignmentMarkWithPersonMarker>?
+    var markList: DataSourceFactory<Int, CourseAssignmentMarkWithPersonMarker>?
 
     var addedCourseAssignmentSubmission: List<CourseAssignmentSubmissionWithAttachment>?
 
@@ -17,8 +17,8 @@ interface ClazzAssignmentDetailOverviewView: UstadDetailView<ClazzAssignmentWith
 
     var timeZone: String?
 
-    var clazzAssignmentClazzComments: DoorDataSourceFactory<Int, CommentsWithPerson>?
-    var clazzAssignmentPrivateComments: DoorDataSourceFactory<Int, CommentsWithPerson>?
+    var clazzAssignmentClazzComments: DataSourceFactory<Int, CommentsWithPerson>?
+    var clazzAssignmentPrivateComments: DataSourceFactory<Int, CommentsWithPerson>?
 
     var showPrivateComments: Boolean
 

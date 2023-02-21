@@ -26,7 +26,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.door.DoorDatabaseRepository
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.*
@@ -43,7 +43,7 @@ class ContentEntryDetailOverviewPresenter(
     context: Any,
     arguments: Map<String, String>, view: ContentEntryDetailOverviewView,
     di: DI,
-    lifecycleOwner: DoorLifecycleOwner
+    lifecycleOwner: LifecycleOwner
 ) : UstadDetailPresenter<ContentEntryDetailOverviewView, ContentEntryWithMostRecentContainer>(
     context, arguments, view, di, lifecycleOwner
 ){
@@ -151,7 +151,8 @@ class ContentEntryDetailOverviewPresenter(
         presenterScope.launch(doorMainDispatcher()) {
             try {
                 entity?.contentEntryUid?.also {
-                    contentEntryOpener.openEntry(context, it, isPlatformDownloadEnabled, false,
+                    contentEntryOpener.openEntry(
+                        context, it, isPlatformDownloadEnabled, false,
                             arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false, clazzUid = clazzUid)
                 }
             } catch (e: Exception) {
@@ -179,7 +180,7 @@ class ContentEntryDetailOverviewPresenter(
 
     fun handleOnClickConfirmDelete() {
         presenterScope.launch {
-            val job = db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+            val job = db.withDoorTransactionAsync { txDb ->
                 val job = ContentJob().apply {
                     cjNotificationTitle = systemImpl.getString(MessageID.deleting_content, context)
                         .replace("%1\$s",entity?.title ?: "")

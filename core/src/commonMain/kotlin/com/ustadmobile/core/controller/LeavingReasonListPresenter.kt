@@ -6,7 +6,7 @@ import com.ustadmobile.core.view.LeavingReasonEditView
 import com.ustadmobile.core.view.LeavingReasonListView
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -16,7 +16,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class LeavingReasonListPresenter(context: Any, arguments: Map<String, String>, view: LeavingReasonListView,
-                                 di: DI, lifecycleOwner: DoorLifecycleOwner)
+                                 di: DI, lifecycleOwner: LifecycleOwner)
     : UstadListPresenter<LeavingReasonListView, LeavingReason>(context, arguments, view, di, lifecycleOwner) {
 
     override fun onCreate(savedState: Map<String, String>?) {

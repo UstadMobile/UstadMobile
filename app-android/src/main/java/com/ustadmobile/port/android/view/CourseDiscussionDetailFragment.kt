@@ -16,11 +16,11 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.CourseDiscussionDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.CourseDiscussionDetailView
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.CourseDiscussion
 import com.ustadmobile.lib.db.entities.DiscussionTopicListDetail
@@ -63,7 +63,7 @@ class CourseDiscussionDetailFragment: UstadDetailFragment<CourseDiscussion>(),
 
 
 
-    override var topics: DoorDataSourceFactory<Int, DiscussionTopicListDetail>? = null
+    override var topics: DataSourceFactory<Int, DiscussionTopicListDetail>? = null
         set(value) {
 
             topicsLiveData?.removeObserver(topicsObserver)
@@ -101,7 +101,7 @@ class CourseDiscussionDetailFragment: UstadDetailFragment<CourseDiscussion>(),
 
 
         val accountManager: UstadAccountManager by instance()
-        repo = di.direct.on(accountManager.activeAccount).instance(tag = TAG_REPO)
+        repo = di.direct.on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
         mPresenter = CourseDiscussionDetailPresenter(requireContext(), arguments.toStringMap(), this,
                  di, viewLifecycleOwner).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())

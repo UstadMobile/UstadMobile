@@ -5,6 +5,7 @@ import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.VideoContentView
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -22,7 +23,8 @@ actual class VideoContentPresenter actual constructor(context: Any, arguments: M
     actual override fun handleOnResume() {
         GlobalScope.launch {
             val baseMountUrl = mountHandler.mountContainer(accountManager.activeAccount.endpointUrl,containerUid)
-            val videoContent = httpClient.get<String>(UMFileUtil.joinPaths(baseMountUrl,"/videoParams"))
+            val videoContent: String = httpClient.get(
+                UMFileUtil.joinPaths(baseMountUrl,"/videoParams")).body()
             val params: VideoParams = JSON.parse(videoContent)
             val videoPath = UMFileUtil.joinPaths(baseMountUrl,params.videoPath?:"")
             var audioPath: ContainerEntryWithContainerEntryFile? = null

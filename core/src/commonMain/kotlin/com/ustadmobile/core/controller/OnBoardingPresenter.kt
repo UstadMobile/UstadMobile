@@ -16,12 +16,12 @@ class OnBoardingPresenter(context: Any, arguments: Map<String, String>, view: On
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        val selectedLocaleIndex = languageOptions.indexOfFirst { it.first == impl.getLocale(context) }
-        view.setLanguageOptions(languageOptions.map { it.second }, languageOptions[selectedLocaleIndex].second)
+        val selectedLocaleIndex = languageOptions.indexOfFirst { it.langCode == impl.getLocale(context) }
+        view.setLanguageOptions(languageOptions.map { it.langDisplay }, languageOptions[selectedLocaleIndex].langDisplay)
     }
 
     fun handleLanguageSelected(position: Int){
-        val newLocaleCode = languageOptions[position].first
+        val newLocaleCode = languageOptions[position].langCode
         val newLocaleToDisplay = if(newLocaleCode == LOCALE_USE_SYSTEM) {
             impl.getSystemLocale(context).substring(0, 2)
         }else {

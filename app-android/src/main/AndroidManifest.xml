@@ -42,6 +42,20 @@
         android:name="android.hardware.camera"
         android:required="false" />
 
+    <!--
+    Required to find PanicKit responders.
+    -->
+    <queries>
+        <intent>
+            <action android:name="info.guardianproject.panic.action.CONNECT"/>
+        </intent>
+
+        <intent>
+            <action android:name="info.guardianproject.panic.action.TRIGGER"/>
+        </intent>
+
+    </queries>
+
     <application
         android:supportsRtl="true"
         android:theme="@style/UmTheme.App"

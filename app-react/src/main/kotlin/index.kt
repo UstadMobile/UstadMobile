@@ -3,6 +3,7 @@ import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabaseJsImplementations
 import com.ustadmobile.core.db.ext.addSyncCallback
+import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileConstants
@@ -27,7 +28,6 @@ import com.ustadmobile.util.ThemeManager.createAppTheme
 import com.ustadmobile.view.renderExtraActiveTabWarningComponent
 import com.ustadmobile.view.renderMainComponent
 import com.ustadmobile.view.renderSplashComponent
-import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import kotlinx.browser.document
 import kotlinx.browser.localStorage
@@ -55,6 +55,7 @@ fun main() {
             ?: url.substringBefore(if(url.indexOf("umapp/") != -1) "umapp/" else "#/")
 
         val dbName = sanitizeDbNameFromUrl(window.location.origin)
+        val dbUrl = "sqlite:$dbName"
         val nodeId = localStorage.getOrPut("${dbName}_nodeId") {
             Random.nextLong(0, Long.MAX_VALUE).toString()
         }.toLong()
@@ -66,12 +67,12 @@ fun main() {
 
         val builderOptions = DatabaseBuilderOptions(
             UmAppDatabase::class,
-            UmAppDatabaseJsImplementations, dbName,"./worker.sql-wasm.js")
+            UmAppDatabaseJsImplementations, dbUrl = dbUrl, webWorkerPath = "./worker.sql-wasm.js")
 
         val dbBuilder =  DatabaseBuilder.databaseBuilder(builderOptions)
             .addCallback(ContentJobItemTriggersCallback())
             .addSyncCallback(dbNodeIdAndAuth)
-            .addMigrations(*UmAppDatabase.migrationList(dbNodeIdAndAuth.nodeId).toTypedArray())
+            .addMigrations(*migrationList().toTypedArray())
 
         val defaultAssetPath = "locales/en.xml"
 
@@ -82,22 +83,26 @@ fun main() {
 
             val appConfigs = Util.loadFileContentAsMap<HashMap<String, String>>("appconfig.json")
             Napier.d("Index: loaded appConfig")
+            val availableLanguages = appConfigs[AppConfig.KEY_SUPPORTED_LANGUAGES]?.split(",")
+                    ?.map { it.trim() } ?: listOf("en")
 
             val defaultStringsXmlStr = Util.loadAssetsAsText(defaultAssetPath)
-            val displayedLocale = UstadMobileSystemImpl.displayedLocale
+            val systemDisplayedLocale = UstadMobileSystemImpl.displayedLocale
+            val displayedLocale = availableLanguages.firstOrNull { it == systemDisplayedLocale }
+                ?: "en"
             val foreignStringXmlStr = if(displayedLocale != "en") {
                 Util.loadAssetsAsText("locales/$displayedLocale.xml")
             }else {
                 null
             }
 
-            val rootElement = document.getElementById("root")
+            val rootElement = document.getElementById("root")!!
             val rootDirectionAttrVal = if(displayedLocale in UstadMobileConstants.RTL_LANGUAGES) {
                 "rtl"
             }else {
                 "ltr"
             }
-            rootElement?.setAttribute("dir", rootDirectionAttrVal)
+            rootElement.setAttribute("dir", rootDirectionAttrVal)
 
             val di = ustadJsDi(dbBuilt, dbNodeIdAndAuth, appConfigs, apiUrl, defaultStringsXmlStr,
                 foreignStringXmlStr)

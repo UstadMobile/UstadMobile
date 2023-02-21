@@ -25,7 +25,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.*
 import io.ktor.client.*
-import io.ktor.client.features.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*

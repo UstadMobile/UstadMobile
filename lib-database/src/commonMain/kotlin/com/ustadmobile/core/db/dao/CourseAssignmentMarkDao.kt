@@ -1,15 +1,16 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.core.db.dao.CourseAssignmentMarkDaoCommon.ARG_FILTER_ALL_SCORES
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.door.paging.DataSourceFactory
 
-@Dao
+@DoorDao
 @Repository
-abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
+expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
 
 
     @Query("""
@@ -81,7 +82,7 @@ abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
                        WHERE CourseAssignmentMark.camAssignmentUid = :assignmentUid
                        LIMIT 1)
     """)
-    abstract fun checkNoSubmissionsMarked(assignmentUid: Long): DoorLiveData<Boolean>
+    abstract fun checkNoSubmissionsMarked(assignmentUid: Long): LiveData<Boolean>
 
     @Query("""
          WITH ScoreByMarker (averageScore, averagePenalty) AS (
@@ -105,7 +106,7 @@ abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
     abstract fun getMarkOfAssignmentForSubmitterLiveData(
         assignmentUid: Long,
         submitterUid: Long,
-    ): DoorLiveData<AverageCourseAssignmentMark?>
+    ): LiveData<AverageCourseAssignmentMark?>
 
     @Query("""
           WITH ScoreByMarker AS (
@@ -133,7 +134,7 @@ abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
         assignmentUid: Long,
         submitterUid: Long,
         filter: Int
-    ): DoorDataSourceFactory<Int, CourseAssignmentMarkWithPersonMarker>
+    ): DataSourceFactory<Int, CourseAssignmentMarkWithPersonMarker>
 
     @Query("""
         SELECT * 
@@ -176,11 +177,5 @@ abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
                                                               markerUid: Long): Long
 
 
-    companion object{
 
-        const val ARG_FILTER_RECENT_SCORES = 1
-
-        const val ARG_FILTER_ALL_SCORES = 0
-
-    }
 }

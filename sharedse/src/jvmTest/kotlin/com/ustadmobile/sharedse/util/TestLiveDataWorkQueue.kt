@@ -2,7 +2,7 @@ package com.ustadmobile.sharedse.util
 
 import org.mockito.kotlin.mock
 import com.ustadmobile.core.util.LiveDataWorkQueue
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -25,7 +25,7 @@ class TestLiveDataWorkQueue {
 
     @Test
     fun givenListOfWorkItems_whenOnChangeCalled_thenAllItemsRunOnce() {
-        var mockLiveData = mock<DoorLiveData<List<TestWorkItem>>> {}
+        var mockLiveData = mock<LiveData<List<TestWorkItem>>> {}
         runBlocking {
             val onStartCounter = AtomicInteger(0)
             val onStartFn: (TestWorkItem) -> Unit = { onStartCounter.incrementAndGet() }
@@ -58,7 +58,7 @@ class TestLiveDataWorkQueue {
 
     @Test
     fun givenWorkItemAlreadyRunning_whenOnChangeCalled_itemWillNotRunTwice() {
-        var mockLiveData = mock<DoorLiveData<List<TestWorkItem>>> {}
+        var mockLiveData = mock<LiveData<List<TestWorkItem>>> {}
         runBlocking {
             val queue = LiveDataWorkQueue<TestWorkItem>(mockLiveData, {item1, item2 ->  item1.uid == item2.uid}
                     ,numProcessors = 3) {
@@ -79,7 +79,7 @@ class TestLiveDataWorkQueue {
 
     @Test
     fun givenWorkItemFinished_whenONChangeCalled_itemWillRunAgain() {
-        var mockLiveData = mock<DoorLiveData<List<TestWorkItem>>> {}
+        var mockLiveData = mock<LiveData<List<TestWorkItem>>> {}
         runBlocking {
             val queue = LiveDataWorkQueue<TestWorkItem>(mockLiveData, {item1, item2 ->  item1.uid == item2.uid}
                     ,numProcessors = 3) {

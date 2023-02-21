@@ -1,15 +1,16 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.core.db.dao.UserSessionDaoCommon.FIND_LOCAL_SESSIONS_SQL
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 
-@Dao
+@DoorDao
 @Repository
-abstract class UserSessionDao {
+expect abstract class UserSessionDao {
 
     /*
      * Here UserSessionSubject represents the UserSession for which we are checking access permissions
@@ -107,7 +108,7 @@ abstract class UserSessionDao {
     abstract suspend fun findSessionsByPerson(personUid: Long): List<UserSession>
 
     @Query(FIND_LOCAL_SESSIONS_SQL)
-    abstract fun findAllLocalSessionsLive(): DoorLiveData<List<UserSessionAndPerson>>
+    abstract fun findAllLocalSessionsLive(): LiveData<List<UserSessionAndPerson>>
 
     @Query(FIND_LOCAL_SESSIONS_SQL)
     abstract suspend fun findAllLocalSessionsAsync(): List<UserSessionAndPerson>
@@ -152,7 +153,7 @@ abstract class UserSessionDao {
          WHERE UserSession.usUid = :sessionUid
          LIMIT 1
     """)
-    abstract fun findByUidLive(sessionUid: Long): DoorLiveData<UserSession?>
+    abstract fun findByUidLive(sessionUid: Long): LiveData<UserSession?>
 
 
     @Query("""
@@ -221,19 +222,5 @@ abstract class UserSessionDao {
            AND ScopedGrant.sgEntityUid IN (:schoolUids) 
     """)
     abstract suspend fun findAllActiveNodeIdsWithSchoolBasedPermission(schoolUids: List<Long>): List<Long>
-
-    companion object {
-        const val FIND_LOCAL_SESSIONS_SQL = """
-            SELECT UserSession.*, Person.*
-              FROM UserSession
-                   JOIN Person ON UserSession.usPersonUid = Person.personUid
-             WHERE UserSession.usClientNodeId = (
-                   SELECT COALESCE(
-                          (SELECT nodeClientId 
-                            FROM SyncNode
-                           LIMIT 1), 0))
-               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}        
-            """
-    }
 
 }

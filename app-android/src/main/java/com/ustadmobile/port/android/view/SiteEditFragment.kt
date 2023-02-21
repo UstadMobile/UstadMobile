@@ -15,7 +15,7 @@ import com.ustadmobile.core.controller.SiteEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SiteEditView
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 
@@ -46,7 +46,7 @@ class SiteEditFragment: UstadEditFragment<Site>(), SiteEditView {
             }
         }
 
-    override var siteTermsList: DoorLiveData<List<SiteTermsWithLanguage>>? = null
+    override var siteTermsList: LiveData<List<SiteTermsWithLanguage>>? = null
         get() = field
         set(value) {
             field?.removeObserver(workspaceTermsObserver)

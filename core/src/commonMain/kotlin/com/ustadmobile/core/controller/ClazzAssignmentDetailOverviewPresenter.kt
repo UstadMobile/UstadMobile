@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.CourseAssignmentMarkDao
+import com.ustadmobile.core.db.dao.CourseAssignmentMarkDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.NoAppFoundException
@@ -18,7 +19,7 @@ import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.TextAssignmentEditView.Companion.EDIT_ENABLED
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.attachments.retrieveAttachment
 import com.ustadmobile.door.doorMainDispatcher
@@ -40,7 +41,7 @@ class ClazzAssignmentDetailOverviewPresenter(
     context: Any,
     arguments: Map<String, String>,
     view: ClazzAssignmentDetailOverviewView,
-    lifecycleOwner: DoorLifecycleOwner,
+    lifecycleOwner: LifecycleOwner,
     di: DI
 ) : UstadDetailPresenter<ClazzAssignmentDetailOverviewView, ClazzAssignmentWithCourseBlock>(
     context,
@@ -109,7 +110,8 @@ class ClazzAssignmentDetailOverviewPresenter(
 
             checkCanAddFileOrText(clazzAssignment)
 
-            loadMarks(clazzAssignment.caUid, submitterUid, CourseAssignmentMarkDao.ARG_FILTER_RECENT_SCORES)
+            loadMarks(clazzAssignment.caUid, submitterUid,
+                CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES)
 
             view.gradeFilterChips = FILTER_OPTIONS.toListFilterOptions(context, di)
             // don't show private comments if unassigned in group
@@ -199,8 +201,9 @@ class ClazzAssignmentDetailOverviewPresenter(
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
-        savedState.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON, ClazzAssignment.serializer(), entity)
-        savedState.putEntityAsJson(SAVED_STATE_ADD_SUBMISSION_LIST,
+        savedState.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON, json,
+            ClazzAssignment.serializer(), entity)
+        savedState.putEntityAsJson(SAVED_STATE_ADD_SUBMISSION_LIST, json,
                 ListSerializer(CourseAssignmentSubmissionWithAttachment.serializer()),
                 submissionList)
     }
@@ -300,7 +303,7 @@ class ClazzAssignmentDetailOverviewPresenter(
     fun handleEditSubmission(courseSubmission: CourseAssignmentSubmissionWithAttachment){
         if(courseSubmission.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT){
             val args = mutableMapOf<String, String>()
-            args.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON,
+            args.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON, json,
                 CourseAssignmentSubmissionWithAttachment.serializer(), courseSubmission)
             args[EDIT_ENABLED] = true.toString()
 
@@ -378,7 +381,7 @@ class ClazzAssignmentDetailOverviewPresenter(
                     return@launch
                 }
             }
-            repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+            repo.withDoorTransactionAsync { txDb ->
                 txDb.courseAssignmentSubmissionDao.insertListAsync(submissionList)
                 txDb.courseAssignmentSubmissionAttachmentDao.insertListAsync(submissionList.mapNotNull { it.attachment })
 
@@ -465,8 +468,8 @@ class ClazzAssignmentDetailOverviewPresenter(
             ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED to MessageID.multiple_submission_allowed_submission_policy,
             ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE to MessageID.submit_all_at_once_submission_policy)
 
-        val FILTER_OPTIONS = listOf(MessageID.most_recent to CourseAssignmentMarkDao.ARG_FILTER_RECENT_SCORES,
-            MessageID.all to CourseAssignmentMarkDao.ARG_FILTER_ALL_SCORES)
+        val FILTER_OPTIONS = listOf(MessageID.most_recent to CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES,
+            MessageID.all to CourseAssignmentMarkDaoCommon.ARG_FILTER_ALL_SCORES)
 
         const val SAVED_STATE_KEY_URI = "URI"
 

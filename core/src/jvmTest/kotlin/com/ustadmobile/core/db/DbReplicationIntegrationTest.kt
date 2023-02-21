@@ -2,6 +2,7 @@ package com.ustadmobile.core.db
 
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.ext.addSyncCallback
+import com.ustadmobile.core.db.ext.preload
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -23,11 +24,13 @@ import com.ustadmobile.lib.rest.ext.ktorInitRepo
 import com.ustadmobile.lib.util.randomString
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
-import io.ktor.application.*
+import io.ktor.server.application.*
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.json.*
-import io.ktor.routing.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.json.*
+import io.ktor.serialization.gson.*
+import io.ktor.server.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.coroutines.runBlocking
@@ -41,11 +44,10 @@ import org.junit.Assert
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import org.junit.rules.TemporaryFolder
-import org.kodein.di.ktor.DIFeature
+import org.kodein.di.ktor.di
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.random.Random
-import javax.naming.InitialContext
 
 
 class DbReplicationIntegrationTest {
@@ -90,7 +92,7 @@ class DbReplicationIntegrationTest {
     //We can't use the normal UstadTestRule because we need multiple client databases for the same
     // endpoint.
     private fun DI.MainBuilder.bindDbAndRelated(
-        dbName: String,
+        dbUrl: String,
         //"Client" mode means use the replication subscription
         clientMode: Boolean
     ) {
@@ -114,12 +116,11 @@ class DbReplicationIntegrationTest {
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(remoteVirtualHostScope).singleton {
             if(dbCreated.get())
-                throw IllegalStateException("Attempted to create db again for $dbName !")
+                throw IllegalStateException("Attempted to create db again for $dbUrl !")
 
             dbCreated.set(true)
             val nodeIdAndAuth: NodeIdAndAuth = instance()
-            InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-            DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
+            DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl)
                 .addSyncCallback(nodeIdAndAuth)
                 .addCallback(ContentJobItemTriggersCallback())
                 .build().also { db ->
@@ -203,7 +204,9 @@ class DbReplicationIntegrationTest {
         okHttpClient = OkHttpClient.Builder().build()
 
         httpClient = HttpClient(OkHttp) {
-            install(JsonFeature)
+            install(ContentNegotiation) {
+                gson()
+            }
             engine {
                 preconfigured = okHttpClient
             }
@@ -212,7 +215,7 @@ class DbReplicationIntegrationTest {
         remoteVirtualHostScope = EndpointScope()
 
         remoteDi = DI {
-            bindDbAndRelated("UmAppDatabase_${dbTime}", false)
+            bindDbAndRelated("jdbc:sqlite:build/tmp/UmAppDatabase_${dbTime}.sqlite", false)
 
             registerContextTranslator { _: String -> Endpoint("localhost") }
             registerContextTranslator { _: ApplicationCall -> Endpoint("localhost") }
@@ -222,19 +225,20 @@ class DbReplicationIntegrationTest {
             .instance(tag = DoorTag.TAG_REPO)
         runBlocking { remoteRepo.preload() }
         remoteRepo.ktorInitRepo(remoteDi)
+        val authManager : AuthManager = remoteDi.direct.on(Endpoint("localhost")).instance()
         runBlocking {
-            remoteRepo.initAdminUser(remoteEndpoint, remoteDi)
+            remoteRepo.initAdminUser(remoteEndpoint, authManager, remoteDi)
         }
 
 
         localDi1 = DI {
-            bindDbAndRelated("local1_${dbTime}", true)
+            bindDbAndRelated("jdbc:sqlite:build/tmp/local1_${dbTime}.sqlite", true)
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
         }
 
         localDi2 = DI {
-            bindDbAndRelated("local2_${dbTime}", true)
+            bindDbAndRelated("jdbc:sqlite:build/tmp/local2_${dbTime}.sqlite", true)
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
         }
@@ -249,7 +253,7 @@ class DbReplicationIntegrationTest {
             requestReadTimeoutSeconds = 600
             responseWriteTimeoutSeconds = 600
         }) {
-            install(DIFeature){
+            di {
                 extend(remoteDi)
             }
 
