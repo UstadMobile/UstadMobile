@@ -28,7 +28,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "Anu"
+      USERNAME: "anu"
       PASSWORD: "test"
 - runFlow:
     file: "../common/edit_course.yaml"
@@ -41,7 +41,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "Justin"
+      USERNAME: "justin"
       PASSWORD: "test"
 - tapOn: "Courses"
 - tapOn: "Permission Test"

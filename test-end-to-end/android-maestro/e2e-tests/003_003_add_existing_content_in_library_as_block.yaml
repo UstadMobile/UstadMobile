@@ -36,8 +36,9 @@ env:
     file: "../common/add_new_teacher_inside_course.yaml"
     env:
       TESTCOURSENAME: "Existing Content Block Test"
-      TEACHERFIRSTNAME: "Anupama"
+      TEACHERFIRSTNAME: "Teacher"
       TEACHERLASTNAME: "Sebastian"
+      USERNAME: "sebastian"
       GENDER: "Female"
       PASSWORD: "test"
 #--- add epub content already added by admin in library to course block----#
@@ -59,7 +60,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "Anupama"
+      USERNAME: "sebastian"
       PASSWORD: "test"
 - tapOn: "courses"
 - tapOn: "Existing Content Block Test"

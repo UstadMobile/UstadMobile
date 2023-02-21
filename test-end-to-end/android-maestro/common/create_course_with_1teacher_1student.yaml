@@ -5,9 +5,9 @@ appId: com.toughra.ustadmobile
   # -----name - username/password
 
   # teachers :
-  # --0-- Anu Madhav - Anu/test
+  # --0-- Teacher Anu- anu/test
    # student :
-  # --0-- Justin Joe      - Justin/test
+  # --0-- Student Justin      - justin/test
 
 
 # test parameters needs to provide for this test :
@@ -24,8 +24,9 @@ appId: com.toughra.ustadmobile
     file: "./add_new_teacher_inside_course.yaml"
     env:
       TESTCOURSENAME: ${TESTCOURSENAME}
-      TEACHERFIRSTNAME: "Anu"
-      TEACHERLASTNAME: "Madhav"
+      TEACHERFIRSTNAME: "Teacher"
+      TEACHERLASTNAME: "Anu"
+      USERNAME: "anu"
       GENDER: "Female"
       PASSWORD: "test"
 
@@ -34,8 +35,9 @@ appId: com.toughra.ustadmobile
     file: "./add_new_student_inside_course.yaml"
     env:
       TESTCOURSENAME: ${TESTCOURSENAME}
-      STUDENTFIRSTNAME: "Justin"
-      STUDENTLASTNAME: "Joe"
+      STUDENTFIRSTNAME: "Student"
+      STUDENTLASTNAME: "Justin"
+      USERNAME: "justin"
       GENDER: "Male"
       PASSWORD: "test"
 
