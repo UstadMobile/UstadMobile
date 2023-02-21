@@ -131,12 +131,12 @@ private fun DateAndPointRow(
         }
 
         Spacer(modifier = Modifier.width(10.dp))
-
-        if (assignmentUiState?.assignmentMarkVisible == true){
-            Text("${assignment.mark?.camMark ?: 0}/" +
-                    "${courseBlock.cbMaxPoints} " +
-                    stringResource(id = R.string.points))
-        }
+//To be fixed as part of the assignment screens
+//        if (assignmentUiState?.assignmentMarkVisible == true){
+//            Text("${assignment.mark?.camMark ?: 0}/" +
+//                    "${courseBlock.cbMaxPoints} " +
+//                    stringResource(id = R.string.points))
+//        }
     }
 }
 
@@ -151,10 +151,11 @@ private fun UstadClazzAssignmentListItemPreview() {
         cbIndentLevel = 1
         assignment = ClazzAssignmentWithMetrics().apply {
             caTitle = "Module"
-            mark = CourseAssignmentMark().apply {
-                camPenalty = 20
-                camMark = 20F
-            }
+//To be fixed as part of the assignment screens
+//            mark = CourseAssignmentMark().apply {
+//                camPenalty = 20
+//                camMark = 20F
+//            }
             progressSummary = AssignmentProgressSummary().apply {
                 hasMetricsPermission = false
             }
