@@ -1,11 +1,14 @@
 package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.util.ListFilterIdOption
+import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.lib.db.entities.*
 
 
 data class ClazzAssignmentDetailOverviewUiState(
 
+
+    val clazzAssignment: ClazzAssignmentWithCourseBlock? = null,
 
     val submittedCourseAssignmentSubmission: List<CourseAssignmentSubmissionWithAttachment> =
         emptyList(),
@@ -34,4 +37,12 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val unassignedError: String? = null
 
-)
+) {
+
+    val caDescriptionVisible: Boolean
+        get() = !clazzAssignment?.caDescription.isNullOrBlank()
+
+    val cbDeadlineDateVisible: Boolean
+        get() = clazzAssignment?.block?.cbDeadlineDate.isDateSet()
+
+}

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
@@ -39,6 +40,16 @@ import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import androidx.compose.material.*
+import androidx.compose.ui.res.stringResource
+import com.ustadmobile.core.controller.PersonConstants
+import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
+import com.ustadmobile.port.android.util.compose.messageIdMapResource
+import com.ustadmobile.port.android.util.compose.messageIdResource
+import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment.Companion.SUBMISSION_POLICY_MAP
+import com.ustadmobile.port.android.view.composable.UstadDetailField
+import java.util.*
 
 
 interface ClazzAssignmentDetailOverviewFragmentEventHandler {
@@ -436,12 +447,49 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 fun ClazzAssignmentDetailOverviewScreen(
     uiState: ClazzAssignmentDetailOverviewUiState,
 ){
+
+    val formattedDateTime = rememberFormattedDateTime(
+        timeInMillis = uiState.clazzAssignment?.block?.cbDeadlineDate ?: 0,
+        timeZoneId = TimeZone.getDefault().id
+    )
+
+//    val caSubmissionPolicyText = messageIdResource(
+//        SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS[
+//                uiState.clazzAssignment?.caSubmissionPolicy ?:
+//                ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED].messageId)
+
     LazyColumn(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .defaultScreenPadding()
     ) {
 
+        if (uiState.caDescriptionVisible){
+            item {
+                Text(uiState.clazzAssignment?.caDescription ?: "")
+            }
+        }
+
+        if (uiState.cbDeadlineDateVisible){
+            item {
+                UstadDetailField(
+                    valueText = formattedDateTime,
+                    labelText = stringResource(id = R.string.deadline),
+                    imageId = R.drawable.ic_event_available_black_24dp,
+                    onClick = {  }
+                )
+            }
+        }
+
+        item {
+            UstadDetailField(
+                valueText = "caSubmissionPolicyText",
+                labelText = stringResource(id = R.string.submission_policy),
+                imageId = SUBMISSION_POLICY_MAP[uiState.clazzAssignment?.caSubmissionPolicy]
+                    ?: R.drawable.ic_baseline_task_alt_24,
+                onClick = {  }
+            )
+        }
 
     }
 }
@@ -451,7 +499,13 @@ fun ClazzAssignmentDetailOverviewScreen(
 fun ClazzAssignmentDetailOverviewScreenPreview(){
     ClazzAssignmentDetailOverviewScreen(
         uiState = ClazzAssignmentDetailOverviewUiState(
-
+            clazzAssignment = ClazzAssignmentWithCourseBlock().apply {
+                caDescription = "Read the stories and describe the main characters."
+                caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED
+                block = CourseBlock().apply {
+                    cbDeadlineDate = 1677063785
+                }
+            }
         )
     )
 }
