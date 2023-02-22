@@ -4,8 +4,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemMarkFileSubmissionBinding
+import com.ustadmobile.lib.db.entities.AverageCourseAssignmentMark
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
-import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
 class MarkFileSubmissionAdapter(val eventHandler: ClazzAssignmentDetailStudentProgressFragmentEventHandler): SingleItemRecyclerViewAdapter<
@@ -24,7 +24,7 @@ class MarkFileSubmissionAdapter(val eventHandler: ClazzAssignmentDetailStudentPr
             viewHolder?.itemBinding?.assignment = value
         }
 
-    var mark: CourseAssignmentMark? = null
+    var mark: AverageCourseAssignmentMark? = null
         set(value){
             if(field == value)
                 return
@@ -59,6 +59,9 @@ class MarkFileSubmissionAdapter(val eventHandler: ClazzAssignmentDetailStudentPr
 
     var grade: Float? = null
         get() = viewHolder?.itemBinding?.markFileSubmissionTextInput?.editText?.text.toString().toFloatOrNull()
+
+    var comment: String? = null
+        get() = viewHolder?.itemBinding?.markFileSubmissionCommentInput?.editText?.text?.toString()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MarkFileSubmissionViewHolder {
         viewHolder = MarkFileSubmissionViewHolder(
