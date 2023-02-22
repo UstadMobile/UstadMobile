@@ -16,22 +16,22 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val gradeFilterChips: List<ListFilterIdOption> = emptyList(),
 
-    var clazzAssignmentClazzComments: List<CommentsWithPerson> = emptyList(),
+    val clazzAssignmentClazzComments: List<CommentsWithPerson> = emptyList(),
 
-    var clazzAssignmentPrivateComments: List<CommentsWithPerson> = emptyList(),
+    val clazzAssignmentPrivateComments: List<CommentsWithPerson> = emptyList(),
 
-    var showPrivateComments: Boolean = true,
+    val showPrivateComments: Boolean = true,
 
-    var showSubmission: Boolean = true,
+    val showSubmission: Boolean = true,
 
-    var addTextSubmissionVisible: Boolean = true,
+    val addTextSubmissionVisible: Boolean = true,
 
-    var addFileSubmissionVisible: Boolean = true,
+    val addFileSubmissionVisible: Boolean = true,
 
-    var submissionMark: AverageCourseAssignmentMark? = null,
+    val submissionMark: AverageCourseAssignmentMark? = null,
 
-    var submissionStatus: Int? = null,
+    val submissionStatus: Int? = null,
 
-    var unassignedError: String? = null
+    val unassignedError: String? = null
 
 )
