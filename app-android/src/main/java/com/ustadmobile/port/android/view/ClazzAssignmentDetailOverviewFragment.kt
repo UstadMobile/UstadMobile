@@ -4,6 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -22,11 +27,13 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
+import com.ustadmobile.core.viewmodel.ClazzAssignmentDetailOverviewUiState
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import org.kodein.di.direct
@@ -423,4 +430,28 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
     }
 
+}
+
+@Composable
+fun ClazzAssignmentDetailOverviewScreen(
+    uiState: ClazzAssignmentDetailOverviewUiState,
+){
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .defaultScreenPadding()
+    ) {
+
+
+    }
+}
+
+@Composable
+@Preview
+fun ClazzAssignmentDetailOverviewScreenPreview(){
+    ClazzAssignmentDetailOverviewScreen(
+        uiState = ClazzAssignmentDetailOverviewUiState(
+
+        )
+    )
 }
