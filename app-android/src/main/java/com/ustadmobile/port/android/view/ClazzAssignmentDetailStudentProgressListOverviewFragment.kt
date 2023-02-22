@@ -2,10 +2,24 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Message
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemAssignmentDetailAttemptBinding
 import com.ustadmobile.core.controller.ClazzAssignmentDetailStudentProgressOverviewListPresenter
@@ -13,9 +27,13 @@ import com.ustadmobile.core.controller.SubmissionSummaryListener
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
+import com.ustadmobile.core.viewmodel.ClazzAssignmentDetailStudentProgressListOverviewUiState
+import com.ustadmobile.core.viewmodel.SchoolDetailOverviewUiState
 import com.ustadmobile.door.lifecycle.LiveData
-import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
-import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
+import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -133,4 +151,52 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
         }
     }
 
+}
+
+@Composable
+private fun ClazzAssignmentDetailStudentProgressListOverviewScreen(
+    uiState: ClazzAssignmentDetailStudentProgressListOverviewUiState =
+        ClazzAssignmentDetailStudentProgressListOverviewUiState(),
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+            .defaultScreenPadding()
+    ) {
+
+        item {
+            Row {
+                NumberRow(1, "")
+
+                Divider(
+                    color = contentColorFor(Color.Red),
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(1.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun NumberRow(
+    number: Int = 0,
+    text: String = ""
+){
+    Column {
+        Text(number.toString())
+        Text(text)
+    }
+}
+
+@Composable
+@Preview
+fun ClazzAssignmentDetailStudentProgressListOverviewScreenPreview() {
+    val uiStateVal = ClazzAssignmentDetailStudentProgressListOverviewUiState(
+
+    )
+
+    MdcTheme {
+        ClazzAssignmentDetailStudentProgressListOverviewScreen(uiStateVal)
+    }
 }
