@@ -14,7 +14,7 @@
 
         <variable
             name="mark"
-            type="com.ustadmobile.lib.db.entities.CourseAssignmentMark" />
+            type="com.ustadmobile.lib.db.entities.AverageCourseAssignmentMark" />
 
         <variable
             name="errorText"
@@ -43,6 +43,29 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_marginTop="@dimen/dimen_20dp"
+            android:id="@+id/mark_file_submission_comment_input"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:visibility="@{markStudentVisible ? View.VISIBLE : View.GONE}"
+            android:hint="@{@string/comment}"
+            app:hintEnabled="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                android:id="@+id/mark_file_submission_comment"
+                android:imeOptions="actionDone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_marginTop="@dimen/dimen_20dp"
             android:id="@+id/mark_file_submission_text_input"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
@@ -55,7 +78,7 @@
             app:hintEnabled="true"
             app:errorText="@{errorText}"
             app:errorEnabled="@{errorText != null}"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/mark_file_submission_comment_input"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
