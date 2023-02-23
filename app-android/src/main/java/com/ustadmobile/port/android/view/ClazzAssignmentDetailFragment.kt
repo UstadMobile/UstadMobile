@@ -4,7 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.fragment.app.Fragment
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.toughra.ustadmobile.R
@@ -16,7 +23,9 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
 import com.ustadmobile.core.view.ClazzAssignmentDetailView
-import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.core.viewmodel.ClazzAssignmentDetailUiState
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.ext.createTabLayoutStrategy
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 
@@ -121,4 +130,27 @@ class ClazzAssignmentDetailFragment: UstadDetailFragment<ClazzAssignment>(), Cla
 
     }
 
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ClazzAssignmentDetailScreen(
+    uiState: ClazzAssignmentDetailUiState = ClazzAssignmentDetailUiState(),
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+            .defaultScreenPadding()
+    ) {
+
+    }
+}
+
+@Composable
+@Preview
+fun ClazzAssignmentDetailScreenPreview() {
+    val uiStateVal = ClazzAssignmentDetailUiState()
+
+    MdcTheme {
+        ClazzAssignmentDetailScreen(uiStateVal)
+    }
 }
