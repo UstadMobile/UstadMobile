@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.recyclerview.widget.DiffUtil
@@ -162,14 +161,7 @@ private fun StatementListScreen(
                 modifier = Modifier.clickable {
                     onClickStatement(statement)
                 },
-                text = {
-                    Text(statementUiState.personVerbTitleText ?: "",
-                        textAlign = TextAlign.End)
-                },
-                secondaryText = {
-                    SecondaryTextContent(statement)
-                },
-                trailing = {
+                icon = {
                     Icon(
                         painterResource(
                             id = VERB_ICON_MAP[statement.statementVerbUid.toInt()]
@@ -177,6 +169,12 @@ private fun StatementListScreen(
                         contentDescription = null,
                         modifier = Modifier.size(40.dp)
                     )
+                },
+                text = {
+                    Text(statementUiState.personVerbTitleText ?: "")
+                },
+                secondaryText = {
+                    SecondaryTextContent(statement)
                 }
             )
         }
@@ -196,9 +194,8 @@ fun SecondaryTextContent(
 
     val  duration = rememberFormattedDuration(timeInMillis = statement.resultDuration)
 
-    Column (
-       horizontalAlignment = Alignment.End,
-    ){
+    Column {
+
         if (statementUiState.descriptionVisible){
             Text(statement.objectDisplay ?: "")
         }
@@ -207,33 +204,40 @@ fun SecondaryTextContent(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            if (statementUiState.resultDurationVisible){
-                Text(duration)
-                Icon(Icons.Outlined.Timer, contentDescription = "")
-
-                Box(modifier = Modifier.width(8.dp))
-            }
-
+            Icon(Icons.Outlined.CalendarToday, contentDescription = "")
 
             Text(dateTimeFormatter)
-            Icon(Icons.Outlined.CalendarToday, contentDescription = "")
+
+            if (statementUiState.resultDurationVisible){
+
+                Box(modifier = Modifier.width(10.dp))
+
+                Icon(Icons.Outlined.Timer, contentDescription = "")
+
+                Text(duration)
+
+            }
         }
 
         if (statementUiState.resultScoreMaxVisible){
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(statementUiState.scoreResultsText)
+
+                Icon(Icons.Default.Check, contentDescription = "")
+
                 Text(stringResource(id = R.string.percentage_score,
                     (statement.resultScoreScaled * 100))
                 )
-                Icon(Icons.Default.Check, contentDescription = "")
+
+                Box(modifier = Modifier.width(10.dp))
+
+                Text(statementUiState.scoreResultsText)
+
             }
         }
     }
@@ -247,17 +251,18 @@ fun StatementListScreenPreview() {
         statementList = listOf(
             StatementWithSessionDetailDisplay().apply {
                 statementUid = 1
-                verbDisplay = "Answered"
+                verbDisplay = "Completed"
                 objectDisplay = "object Display"
                 resultScoreMax = 90
                 resultScoreScaled = 10F
                 resultScoreRaw = 70
-                resultDuration = 1009
+                resultDuration = 400000L
+                timestamp = 1676432354
                 statementVerbUid = VerbEntity.VERB_COMPLETED_UID
             },
             StatementWithSessionDetailDisplay().apply {
                 statementUid = 2
-                verbDisplay = "Answered"
+                verbDisplay = "Progressed"
                 objectDisplay = "object Display"
                 resultScoreMax = 90
                 resultScoreScaled = 10F
@@ -266,7 +271,7 @@ fun StatementListScreenPreview() {
             },
             StatementWithSessionDetailDisplay().apply {
                 statementUid = 3
-                verbDisplay = "Answered"
+                verbDisplay = "Attempted"
                 objectDisplay = "object Display"
                 resultScoreMax = 90
                 resultScoreScaled = 10F
@@ -275,7 +280,7 @@ fun StatementListScreenPreview() {
             },
             StatementWithSessionDetailDisplay().apply {
                 statementUid = 4
-                verbDisplay = "Answered"
+                verbDisplay = "Interacted"
                 objectDisplay = "object Display"
                 resultScoreMax = 90
                 resultScoreScaled = 10F
@@ -293,7 +298,7 @@ fun StatementListScreenPreview() {
             },
             StatementWithSessionDetailDisplay().apply {
                 statementUid = 6
-                verbDisplay = "Answered"
+                verbDisplay = "Satisfied"
                 objectDisplay = "object Display"
                 resultScoreMax = 90
                 resultScoreScaled = 10F
@@ -302,7 +307,7 @@ fun StatementListScreenPreview() {
             },
             StatementWithSessionDetailDisplay().apply {
                 statementUid = 7
-                verbDisplay = "Answered"
+                verbDisplay = "Passed"
                 objectDisplay = "object Display"
                 resultScoreMax = 90
                 resultScoreScaled = 10F
@@ -311,7 +316,7 @@ fun StatementListScreenPreview() {
             },
             StatementWithSessionDetailDisplay().apply {
                 statementUid = 8
-                verbDisplay = "Answered"
+                verbDisplay = "Failed"
                 objectDisplay = "object Display"
                 resultScoreMax = 90
                 resultScoreScaled = 10F

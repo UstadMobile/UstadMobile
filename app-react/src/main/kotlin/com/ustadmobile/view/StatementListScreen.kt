@@ -49,12 +49,18 @@ val StatementListScreenComponent2 = FC<StatementListScreenProps> { props ->
 
                     ListItem{
                         ListItemButton {
-                            sx {
-                                textAlign = TextAlign.end
-                            }
 
                             onClick = {
                                 props.onClickStatement(statementItem)
+                            }
+
+                            ListItemIcon {
+                                img {
+                                    src = VERB_ICON_MAP[statementItem.statementVerbUid.toInt()]
+                                    alt = ""
+                                    height = 40.0
+                                    width = 40.0
+                                }
                             }
 
                             ListItemText {
@@ -66,13 +72,6 @@ val StatementListScreenComponent2 = FC<StatementListScreenProps> { props ->
                                     statement = statementItem
                                 }
                             }
-                        }
-
-                        secondaryAction = img.create {
-                            src = VERB_ICON_MAP[statementItem.statementVerbUid.toInt()]
-                            alt = ""
-                            height = 40.0
-                            width = 40.0
                         }
                     }
                 }
@@ -100,9 +99,6 @@ val SecondaryTextContent = FC<SecondaryTextContentProps> { props ->
     Stack {
         if (statementUiState.descriptionVisible){
             Typography {
-                sx {
-                    textAlign = TextAlign.start
-                }
                 + (props.statement.objectDisplay ?: "")
             }
         }
@@ -113,33 +109,30 @@ val SecondaryTextContent = FC<SecondaryTextContentProps> { props ->
 
         Stack{
             direction = responsive(StackDirection.row)
-            sx {
-                justifyContent = JustifyContent.end
-            }
 
-            if (statementUiState.resultDurationVisible){
-
-                Typography { + duration }
-
-                Icon { + Timer.create() }
-
-                Box{ sx { width = 8.px } }
-            }
+            Icon{ + CalendarToday.create() }
 
             Typography { + dateTimeFormatter }
 
-            Icon{ + CalendarToday.create() }
+
+            if (statementUiState.resultDurationVisible){
+
+                Box { sx { width = 10.px } }
+
+                Icon { + Timer.create() }
+
+                Typography { + duration }
+
+
+            }
         }
 
         if (statementUiState.resultScoreMaxVisible){
             Stack {
                 direction = responsive(StackDirection.row)
-                sx {
-                    justifyContent = JustifyContent.end
-                }
 
-                Typography {
-                    + statementUiState.scoreResultsText
+                Icon{
+                    + Check.create()
                 }
 
                 Typography {
@@ -148,9 +141,13 @@ val SecondaryTextContent = FC<SecondaryTextContentProps> { props ->
                             (props.statement.resultScoreScaled * 100).toString())
 
                 }
-                Icon{
-                    + Check.create()
+
+                Box { sx { width = 10.px } }
+
+                Typography {
+                    + statementUiState.scoreResultsText
                 }
+
             }
         }
     }
@@ -164,17 +161,18 @@ val StatementListScreenPreview = FC<Props> {
             statementList = listOf(
                 StatementWithSessionDetailDisplay().apply {
                     statementUid = 1
-                    verbDisplay = "Answered"
+                    verbDisplay = "Completed"
                     objectDisplay = "object Display"
                     resultScoreMax = 90
                     resultScoreScaled = 10F
                     resultScoreRaw = 70
-                    resultDuration = 1009
+                    resultDuration = 1676432503
+                    timestamp = 1676432354
                     statementVerbUid = VerbEntity.VERB_COMPLETED_UID
                 },
                 StatementWithSessionDetailDisplay().apply {
                     statementUid = 2
-                    verbDisplay = "Answered"
+                    verbDisplay = "Progressed"
                     objectDisplay = "object Display"
                     resultScoreMax = 90
                     resultScoreScaled = 10F
@@ -183,20 +181,24 @@ val StatementListScreenPreview = FC<Props> {
                 },
                 StatementWithSessionDetailDisplay().apply {
                     statementUid = 3
-                    verbDisplay = "Answered"
+                    verbDisplay = "Attempted"
                     objectDisplay = "object Display"
                     resultScoreMax = 90
                     resultScoreScaled = 10F
                     resultScoreRaw = 70
+                    resultDuration = 1676432503
+                    timestamp = 1676432354
                     statementVerbUid = VerbEntity.VERB_ATTEMPTED_UID
                 },
                 StatementWithSessionDetailDisplay().apply {
                     statementUid = 4
-                    verbDisplay = "Answered"
+                    verbDisplay = "Interacted"
                     objectDisplay = "object Display"
                     resultScoreMax = 90
                     resultScoreScaled = 10F
                     resultScoreRaw = 70
+                    resultDuration = 1676432503
+                    timestamp = 1676432354
                     statementVerbUid = VerbEntity.VERB_INTERACTED_UID
                 },
                 StatementWithSessionDetailDisplay().apply {
@@ -206,33 +208,41 @@ val StatementListScreenPreview = FC<Props> {
                     resultScoreMax = 90
                     resultScoreScaled = 10F
                     resultScoreRaw = 70
+                    resultDuration = 1676432503
+                    timestamp = 1676432354
                     statementVerbUid = VerbEntity.VERB_ANSWERED_UID
                 },
                 StatementWithSessionDetailDisplay().apply {
                     statementUid = 6
-                    verbDisplay = "Answered"
+                    verbDisplay = "Satisfied"
                     objectDisplay = "object Display"
                     resultScoreMax = 90
                     resultScoreScaled = 10F
                     resultScoreRaw = 70
+                    resultDuration = 1676432503
+                    timestamp = 1676432354
                     statementVerbUid = VerbEntity.VERB_SATISFIED_UID
                 },
                 StatementWithSessionDetailDisplay().apply {
                     statementUid = 7
-                    verbDisplay = "Answered"
+                    verbDisplay = "Passed"
                     objectDisplay = "object Display"
                     resultScoreMax = 90
                     resultScoreScaled = 10F
                     resultScoreRaw = 70
+                    resultDuration = 1676432503
+                    timestamp = 1676432354
                     statementVerbUid = VerbEntity.VERB_PASSED_UID
                 },
                 StatementWithSessionDetailDisplay().apply {
                     statementUid = 8
-                    verbDisplay = "Answered"
+                    verbDisplay = "Failed"
                     objectDisplay = "object Display"
                     resultScoreMax = 90
                     resultScoreScaled = 10F
                     resultScoreRaw = 70
+                    resultDuration = 1676432503
+                    timestamp = 1676432354
                     statementVerbUid = VerbEntity.VERB_FAILED_UID
                 }
             )
