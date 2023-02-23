@@ -169,15 +169,43 @@ private fun ClazzAssignmentDetailStudentProgressListOverviewScreen(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                NumberRow(1, "")
+                NumberRow(uiState.progressSummary?.calculateNotSubmittedStudents() ?: 0,
+                    stringResource(R.string.not_started)
+                )
 
                 Divider(
                     color = contentColorFor(
                         colorResource(id = R.color.grey)
                     ),
                     modifier = Modifier
-                        .fillMaxHeight()
-                        .width(2.dp)
+                        .height(45.dp)
+                        .width(1.dp)
+                )
+
+                NumberRow(uiState.progressSummary?.submittedStudents ?: 0,
+                stringResource(R.string.submitted_cap)
+                )
+
+                Divider(
+                    color = contentColorFor(
+                        colorResource(id = R.color.grey)
+                    ),
+                    modifier = Modifier
+                        .height(45.dp)
+                        .width(1.dp)
+                )
+
+                NumberRow(uiState.progressSummary?.markedStudents ?: 0,
+                stringResource(R.string.marked_cap)
+                )
+
+                Divider(
+                    color = contentColorFor(
+                        colorResource(id = R.color.grey)
+                    ),
+                    modifier = Modifier
+                        .height(45.dp)
+                        .width(1.dp)
                 )
             }
         }
@@ -189,7 +217,9 @@ private fun NumberRow(
     number: Int = 0,
     text: String = ""
 ){
-    Column {
+    Column(
+        modifier = Modifier.padding(20.dp)
+    ){
         Text(number.toString())
         Text(text)
     }
@@ -199,7 +229,11 @@ private fun NumberRow(
 @Preview
 fun ClazzAssignmentDetailStudentProgressListOverviewScreenPreview() {
     val uiStateVal = ClazzAssignmentDetailStudentProgressListOverviewUiState(
-
+        progressSummary = AssignmentProgressSummary().apply {
+            totalStudents = 10
+            submittedStudents = 2
+            markedStudents = 3
+        }
     )
 
     MdcTheme {
