@@ -101,11 +101,12 @@ private val DateAndPointRow = FC<UstadClazzAssignmentListItemProps> { props ->
 
         if (assignmentUiState?.assignmentMarkVisible == true){
             Stack {
-                Typography {
-                    + ("${assignment.mark?.camMark ?: 0}/" +
-                            "${props.courseBlock.cbMaxPoints} " +
-                            strings[MessageID.points])
-                }
+//To be fixed as part of the assignment screens
+//                Typography {
+//                    + ("${assignment.mark?.camMark ?: 0}/" +
+//                            "${props.courseBlock.cbMaxPoints} " +
+//                            strings[MessageID.points])
+//                }
             }
         }
     }
@@ -191,10 +192,11 @@ val UstadClazzAssignmentListItemPreview = FC<Props> {
                 cbIndentLevel = 1
                 assignment = ClazzAssignmentWithMetrics().apply {
                     caTitle = "Module"
-                    mark = CourseAssignmentMark().apply {
-                        camPenalty = 20
-                        camMark = 20F
-                    }
+//To be fixed as part of the assignment screens
+//                    mark = CourseAssignmentMark().apply {
+//                        camPenalty = 20
+//                        camMark = 20F
+//                    }
                     progressSummary = AssignmentProgressSummary().apply {
                         hasMetricsPermission = false
                     }

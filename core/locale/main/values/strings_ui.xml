@@ -1562,6 +1562,10 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     -->
     <string name="hide_app_explanation">Unhide code: %2$s\nIf hide app is enabled, then %1$s will be hidden and replaced with a fake notepad app when the panic button is triggered. You will need to type unhide code above ( %2$s ) into the fake notepad app to unhide %1$s.</string>
 
+    <string name="most_recent">Most Recent</string>
+
+    <string name="comment">Comment</string>
+
     <string name="my_profile">My profile</string>
 
     <string name="add_another_account">Add another account</string>

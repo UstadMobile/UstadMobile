@@ -4,7 +4,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.util.ext.toJsDateFromOtherTimeZoneToSystemTimeZone
 import com.ustadmobile.wrappers.intl.Intl
 import com.ustadmobile.wrappers.intl.IntlDateTimeStyleProp
-import kotlinx.js.jso
+import js.core.jso
 import react.useMemo
 
 /**

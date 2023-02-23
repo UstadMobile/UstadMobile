@@ -4,9 +4,13 @@ appId: com.toughra.ustadmobile
 # Test parameters needs to provide for this test :
 # 1) TESTRESULTSDIR : provide the test result location
 - tapOn: "EDIT"
-- swipe:
-      start: 100,400
-      end: 100,100
+- repeat:
+        while:
+              notVisible: "Publicly accessible"
+        commands:
+              - swipe:
+                      start: 100,400
+                      end: 100,100
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/Publiclyaccessible-on"
 - tapOn: "Publicly accessible"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/Publiclyaccessible-off"

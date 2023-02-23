@@ -25,7 +25,7 @@ import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import mui.material.FormControlVariant
 import react.RBuilder
-import react.dom.html.InputType
+import web.html.InputType
 import react.setState
 import styled.css
 

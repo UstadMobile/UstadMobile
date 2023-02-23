@@ -40,7 +40,7 @@ import kotlinx.browser.window
 import kotlinx.css.Display
 import kotlinx.css.display
 import kotlinx.css.padding
-import kotlinx.js.jso
+import js.core.jso
 import mui.material.*
 import react.RBuilder
 import react.setState

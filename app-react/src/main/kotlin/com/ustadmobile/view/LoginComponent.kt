@@ -21,7 +21,7 @@ import kotlinx.css.px
 import mui.material.*
 import mui.material.styles.TypographyVariant
 import react.RBuilder
-import react.dom.html.InputType
+import web.html.InputType
 import react.setState
 import styled.css
 

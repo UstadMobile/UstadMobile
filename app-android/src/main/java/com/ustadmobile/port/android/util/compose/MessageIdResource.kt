@@ -6,7 +6,9 @@ import com.ustadmobile.port.android.generated.MessageIDMap
 
 @Composable
 fun messageIdResource(id: Int): String {
-    return stringResource(id = MessageIDMap.ID_MAP[id] ?: throw IllegalArgumentException("Invalid messageId"))
+    return stringResource(id = MessageIDMap.ID_MAP[id]
+        ?: throw IllegalArgumentException("Invalid messageId: $id")
+    )
 }
 
 @Composable

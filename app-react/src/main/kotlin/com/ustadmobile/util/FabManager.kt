@@ -1,9 +1,10 @@
 package com.ustadmobile.util
 
-import kotlinx.browser.document
-import kotlinx.browser.window
-import org.w3c.dom.Element
-import org.w3c.dom.events.Event
+import web.dom.Element
+import web.dom.document
+import web.events.Event
+import web.uievents.CLICK
+import web.uievents.MouseEvent
 
 /**
  * Manages Floating action button functionality
@@ -20,7 +21,7 @@ class  FabManager(private val viewId: String = "um-fab", visible: Boolean = fals
 
     init {
         fabView = document.getElementById(viewId)
-        fabView?.addEventListener("click", clickEventHandler)
+        fabView?.addEventListener(MouseEvent.CLICK, clickEventHandler)
     }
 
     var onClickListener: (() -> Unit)? = null
@@ -60,8 +61,6 @@ class  FabManager(private val viewId: String = "um-fab", visible: Boolean = fals
     }
 
     fun onDestroy(){
-        window.removeEventListener("click",clickEventHandler)
-        window.clearTimeout(viewInitTimeoutId)
         onClickListener = null
         fabView = null
     }

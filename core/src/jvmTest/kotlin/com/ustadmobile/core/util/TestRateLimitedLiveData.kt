@@ -28,7 +28,7 @@ class TestRateLimitedLiveData {
         }
 
         val mockDb = mock<RoomDatabase> {
-            on { getInvalidationTracker() }.thenReturn(mockInvalidationTracker)
+            on { invalidationTracker }.thenReturn(mockInvalidationTracker)
         }
 
         val callTimes = concurrentSafeListOf<Long>()
