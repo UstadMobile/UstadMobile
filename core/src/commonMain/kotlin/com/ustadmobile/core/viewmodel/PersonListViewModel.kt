@@ -14,10 +14,8 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.util.getSystemTimeInMillis
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 data class PersonListUiState(
@@ -28,7 +26,8 @@ data class PersonListUiState(
         SortOrderOption(MessageID.last_name, PersonDaoCommon.SORT_LAST_NAME_ASC, true),
         SortOrderOption(MessageID.last_name, PersonDaoCommon.SORT_LAST_NAME_DESC, false)
     ),
-    val sortOption: SortOrderOption = sortOptions.first()
+    val sortOption: SortOrderOption = sortOptions.first(),
+    val showAddItem: Boolean = false,
 )
 
 class EmptyPagingSource<Key: Any, Value: Any>(): PagingSource<Key, Value>() {
@@ -50,7 +49,7 @@ class EmptyPagingSource<Key: Any, Value: Any>(): PagingSource<Key, Value>() {
 class PersonListViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
-): UstadListViewModel(di, savedStateHandle) {
+): UstadListViewModel<PersonListUiState>(di, savedStateHandle, PersonListUiState()) {
 
     val filterExcludeMembersOfClazz = savedStateHandle[ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ]?.toLong() ?: 0L
 
@@ -63,14 +62,14 @@ class PersonListViewModel(
     val filterByPermission = savedStateHandle[UstadView.ARG_FILTER_BY_PERMISSION]?.trim()?.toLong()
         ?: Role.PERMISSION_PERSON_SELECT
 
-    private val _uiState = MutableStateFlow(PersonListUiState())
-
-    val uiState: Flow<PersonListUiState> = _uiState.asStateFlow()
-
     private var searchText: String? = null
 
     init {
-        _uiState.update {prev ->
+        _appUiState.update { prev ->
+            prev.copy(navigationVisible = true)
+        }
+
+        _uiState.update { prev ->
             prev.copy(
                 personList = activeRepo.personDao.findPersonsWithPermissionAsPagingSource(
                     getSystemTimeInMillis(), filterExcludeMembersOfClazz,
@@ -80,9 +79,24 @@ class PersonListViewModel(
                 )
             )
         }
+
+        viewModelScope.launch {
+            collectHasPermissionFlowAndSetAddNewItemUiState(
+                hasPermissionFlow = {
+                    activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
+                        accountManager.activeAccount.personUid, Role.PERMISSION_PERSON_INSERT
+                    )
+                },
+                fabMessageId = MessageID.person,
+                onSetAddItemVisibility = { visible ->
+                    _uiState.update { prev -> prev.copy(showAddItem = visible) }
+                }
+            )
+        }
     }
 
-    fun onClickAddNewItem() {
+
+    override fun onClickAdd() {
 
     }
 

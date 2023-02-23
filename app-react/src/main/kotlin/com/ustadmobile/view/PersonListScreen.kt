@@ -1,11 +1,15 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.core.hooks.collectAsState
+import com.ustadmobile.core.hooks.useViewModel
+import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.PersonListUiState
-import com.ustadmobile.door.paging.LoadResult
+import com.ustadmobile.core.viewmodel.PersonListViewModel
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.mui.components.UstadListSortHeader
+import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
@@ -20,8 +24,6 @@ import mui.material.*
 import react.FC
 import react.ReactNode
 import react.create
-import tanstack.query.core.QueryKey
-import tanstack.react.query.UseInfiniteQueryResult
 
 
 external interface PersonListProps: UstadScreenProps {
@@ -32,8 +34,8 @@ external interface PersonListProps: UstadScreenProps {
 
 val PersonListComponent2 = FC<PersonListProps> { props ->
 
-    val infiniteQueryResult: UseInfiniteQueryResult<LoadResult<Int, PersonWithDisplayDetails>, Throwable> = usePagingSource(
-        props.uiState.personList, QueryKey("PersonList"), GlobalScope, true, 50
+    val infiniteQueryResult = usePagingSource(
+        props.uiState.personList, GlobalScope, true, 50
     )
 
     VirtualList {
@@ -57,7 +59,7 @@ val PersonListComponent2 = FC<PersonListProps> { props ->
 
             infiniteQueryPagingItems(
                 items = infiniteQueryResult,
-                key = { it?.personUid?.toString() ?: "" }
+                key = { it.personUid.toString() }
             ) { person ->
                 ListItem.create {
                     ListItemButton{
@@ -98,4 +100,28 @@ val PersonListScreenPreview = FC<UstadScreenProps> { props ->
             personList = ListPagingSource(demoPersonList)
         )
     }
+}
+
+val PersonListScreen = FC<UstadScreenProps> { props ->
+    val viewModel = useViewModel(
+        onAppUiStateChange = props.onAppUiStateChanged
+    ) { di, savedSateHandle ->
+        console.log("Creating PersonListviewModel")
+        PersonListViewModel(di, savedSateHandle)
+    }
+
+    val uiState: PersonListUiState by viewModel.uiState.collectAsState(PersonListUiState())
+    val appState by viewModel.appUiState.collectAsState(AppUiState())
+
+    UstadFab {
+        fabState = appState.fabState
+    }
+
+    PersonListComponent2 {
+        this.uiState = uiState
+        onListItemClick = viewModel::onClickEntry
+        + props
+    }
+
+
 }
