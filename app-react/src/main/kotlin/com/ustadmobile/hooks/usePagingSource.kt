@@ -1,27 +1,25 @@
 package com.ustadmobile.hooks
 
 import com.ustadmobile.door.paging.*
-import com.ustadmobile.lib.util.randomString
 import js.core.jso
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.promise
-import react.useMemo
+import react.useEffect
+import react.useState
 import tanstack.query.core.QueryKey
 import tanstack.react.query.UseInfiniteQueryResult
 import tanstack.react.query.useInfiniteQuery
 
 fun <Key: Any, Value: Any> usePagingSource(
     pagingSource: PagingSource<Key, Value>,
+    queryKey: QueryKey,
     coroutineScope: CoroutineScope,
     placeholdersEnabled: Boolean,
     loadSize: Int = 50,
 ) : UseInfiniteQueryResult<LoadResult<Key, Value>, Throwable> {
-    val instanceQueryKey: String = useMemo(pagingSource) {
-        randomString(12)
-    }
 
     val infiniteQueryResult: UseInfiniteQueryResult<LoadResult<Key, Value>, Throwable> = useInfiniteQuery(
-        queryKey = QueryKey(instanceQueryKey),
+        queryKey = queryKey,
         queryFn = { queryCtx ->
             coroutineScope.promise {
                 val loadParams = when(queryCtx.pageParam) {
@@ -47,6 +45,14 @@ fun <Key: Any, Value: Any> usePagingSource(
             }
         }
     )
+
+    var loadedPagingSource by useState { pagingSource }
+    useEffect(pagingSource) {
+        if(loadedPagingSource !== pagingSource) {
+            loadedPagingSource = pagingSource
+            infiniteQueryResult.refetch(jso {  })
+        }
+    }
 
     return infiniteQueryResult
 }

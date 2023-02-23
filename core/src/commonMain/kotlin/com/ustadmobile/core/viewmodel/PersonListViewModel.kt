@@ -5,10 +5,9 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
-import com.ustadmobile.core.view.PersonListView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.paging.*
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
@@ -62,21 +61,17 @@ class PersonListViewModel(
     val filterByPermission = savedStateHandle[UstadView.ARG_FILTER_BY_PERMISSION]?.trim()?.toLong()
         ?: Role.PERMISSION_PERSON_SELECT
 
-    private var searchText: String? = null
-
     init {
         _appUiState.update { prev ->
-            prev.copy(navigationVisible = true)
+            prev.copy(
+                navigationVisible = true,
+                searchState = createSearchEnabledState()
+            )
         }
 
         _uiState.update { prev ->
             prev.copy(
-                personList = activeRepo.personDao.findPersonsWithPermissionAsPagingSource(
-                    getSystemTimeInMillis(), filterExcludeMembersOfClazz,
-                    filterExcludeMemberOfSchool, filterAlreadySelectedList,
-                    accountManager.activeAccount.personUid, prev.sortOption.flag,
-                    searchText.toQueryLikeParam()
-                )
+                personList = createPagingSource(prev)
             )
         }
 
@@ -96,12 +91,37 @@ class PersonListViewModel(
     }
 
 
-    override fun onClickAdd() {
+    private fun createPagingSource(uiState: PersonListUiState): PagingSource<Int, PersonWithDisplayDetails> {
+        return activeRepo.personDao.findPersonsWithPermissionAsPagingSource(
+            getSystemTimeInMillis(), filterExcludeMembersOfClazz,
+            filterExcludeMemberOfSchool, filterAlreadySelectedList,
+            accountManager.activeAccount.personUid, uiState.sortOption.flag,
+            _appUiState.value.searchState.searchText.toQueryLikeParam()
+        )
+    }
 
+
+    override fun onUpdateSearchResult(searchText: String) {
+        _uiState.update { prev ->
+            prev.copy(personList = createPagingSource(prev))
+        }
+    }
+
+    fun onSortOrderChanged(sortOption: SortOrderOption) {
+        _uiState.update { prev ->
+            prev.copy(
+                personList = createPagingSource(prev.copy(sortOption = sortOption)),
+                sortOption = sortOption
+            )
+        }
+    }
+
+    override fun onClickAdd() {
+        navigateToCreateNew(PersonEditView.VIEW_NAME)
     }
 
     fun onClickEntry(entry: Person) {
-
+        navigateOnItemClicked(PersonDetailView.VIEW_NAME, entry.personUid, entry)
     }
 
 

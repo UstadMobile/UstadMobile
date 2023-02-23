@@ -31,6 +31,9 @@ val UstadFab = FC <UstadFabProps> { props ->
 
             color = FabColor.secondary
             variant = FabVariant.extended
+            onClick = {
+                props.fabState.onClick()
+            }
 
             + ICON_MAP[props.fabState.icon]?.create()
 

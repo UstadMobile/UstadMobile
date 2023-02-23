@@ -2,13 +2,9 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.mui.common.Area
-import csstype.integer
-import mui.material.AppBar
-import mui.material.AppBarPosition
-import mui.material.Toolbar
-import mui.material.Typography
+import csstype.*
 import mui.system.sx
-import csstype.number
+import mui.material.*
 import mui.material.styles.TypographyVariant.h6
 import react.*
 import react.dom.html.ReactHTML.div
@@ -50,6 +46,14 @@ val Header = FC<HeaderProps> { props ->
 
                 + (props.appUiState.title ?: "Ustad Mobile")
             }
+
+            if(props.appUiState.searchState.visible) {
+                AppBarSearch {
+                    onTextChanged = props.appUiState.searchState.onSearchTextChanged
+                    searchText = props.appUiState.searchState.searchText
+                }
+            }
+
         }
     }
 }

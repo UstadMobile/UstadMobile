@@ -61,7 +61,7 @@ class LoginViewModel(
     private var verifiedSite: Site? = null
 
     init {
-        nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: impl.getAppConfigDefaultFirstDest()
+        nextDestination = PersonListView.VIEW_NAME// savedStateHandle[UstadView.ARG_NEXT] ?: impl.getAppConfigDefaultFirstDest()
 
         serverUrl = savedStateHandle[UstadView.ARG_SERVER_URL] ?: impl.getAppConfigString(
             AppConfig.KEY_API_URL, "http://localhost"

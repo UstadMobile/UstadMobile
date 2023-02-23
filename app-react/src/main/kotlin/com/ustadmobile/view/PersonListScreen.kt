@@ -4,6 +4,7 @@ import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useViewModel
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.PersonListUiState
 import com.ustadmobile.core.viewmodel.PersonListViewModel
 import com.ustadmobile.hooks.usePagingSource
@@ -24,18 +25,19 @@ import mui.material.*
 import react.FC
 import react.ReactNode
 import react.create
+import tanstack.query.core.QueryKey
 
 
 external interface PersonListProps: UstadScreenProps {
     var uiState: PersonListUiState
-    var onClickSort: () -> Unit
+    var onSortOrderChanged: (SortOrderOption) -> Unit
     var onListItemClick: (PersonWithDisplayDetails) -> Unit
 }
 
 val PersonListComponent2 = FC<PersonListProps> { props ->
 
     val infiniteQueryResult = usePagingSource(
-        props.uiState.personList, GlobalScope, true, 50
+        props.uiState.personList, QueryKey("PersonList"), GlobalScope, true, 50
     )
 
     VirtualList {
@@ -50,9 +52,10 @@ val PersonListComponent2 = FC<PersonListProps> { props ->
             item {
                 UstadListSortHeader.create {
                     activeSortOrderOption = props.uiState.sortOption
+                    sortOptions = props.uiState.sortOptions
                     enabled = true
                     onClickSort = {
-                        props.onClickSort()
+                        props.onSortOrderChanged(it)
                     }
                 }
             }
@@ -120,6 +123,7 @@ val PersonListScreen = FC<UstadScreenProps> { props ->
     PersonListComponent2 {
         this.uiState = uiState
         onListItemClick = viewModel::onClickEntry
+        onSortOrderChanged = viewModel::onSortOrderChanged
         + props
     }
 

@@ -13,6 +13,7 @@ import mui.material.ListItem
 import mui.material.ListItemText
 import mui.material.Typography
 import react.*
+import tanstack.query.core.QueryKey
 
 val demoPersonList = (0..100).map {
     PersonWithDisplayDetails().apply {
@@ -27,7 +28,7 @@ val demoPagingSource = ListPagingSource(demoPersonList)
 val VirtualListPreview = FC<UstadScreenProps> {props ->
 
     val infiniteQueryResult = usePagingSource(
-        demoPagingSource, GlobalScope, true, 50
+        demoPagingSource, QueryKey("VirtualList"), GlobalScope,  true, 50
     )
 
     VirtualList {
