@@ -54,6 +54,19 @@ val Header = FC<HeaderProps> { props ->
                 }
             }
 
+            if(props.appUiState.actionBarButtonState.visible) {
+                Button {
+                    sx {
+                        color = theme.palette.common.white
+                    }
+                    id = "actionBarButton"
+                    onClick = {
+                        props.appUiState.actionBarButtonState.onClick()
+                    }
+                    + props.appUiState.actionBarButtonState.text
+                }
+            }
+
         }
     }
 }

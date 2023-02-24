@@ -1,25 +1,28 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants.GENDER_MESSAGE_IDS
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.hooks.useViewModel
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.locale.StringsXml
+import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants.GENDER_MESSAGE_IDS_AND_UNSET
+import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.PersonEditUiState
 import com.ustadmobile.core.viewmodel.PersonEditViewModel
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadDateEditField
-import com.ustadmobile.mui.components.UstadMessageIdDropDownField
 import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.view.components.UstadSelectField
 import mui.system.Container
 import mui.system.Stack
 import mui.system.responsive
 import react.FC
 import react.Props
+import react.ReactNode
 import react.useState
 
 external interface PersonEditScreenProps : Props{
@@ -64,15 +67,17 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                 }
             }
 
-            UstadMessageIdDropDownField {
-                value = props.uiState.person?.gender ?: 0
-                options = GENDER_MESSAGE_IDS
+            UstadSelectField<MessageIdOption2> {
+                value = props.uiState.person?.gender?.toString() ?: Person.GENDER_UNSET.toString()
+                options = GENDER_MESSAGE_IDS_AND_UNSET
                 label = strings[MessageID.gender_literal]
                 id = (props.uiState.person?.gender ?: 0).toString()
-                onChange = {
+                itemValue = { it.value.toString() }
+                itemLabel = { ReactNode(if(it.messageId == 0) " " else strings[it.messageId]) }
+                onChange = { messageIdOpt ->
                     props.onPersonChanged(
                         props.uiState.person?.shallowCopy {
-                            gender = it?.value ?: 0
+                            gender = messageIdOpt.value
                     })
                 }
             }
@@ -210,8 +215,10 @@ val PersonEditScreenPreview = FC<Props> {
     }
 }
 
-val PersonEditScreen = FC<UstadScreenProps> {
-    val viewModel = useViewModel { di, savedStateHandle ->
+val PersonEditScreen = FC<UstadScreenProps> { props ->
+    val viewModel = useViewModel(
+        onAppUiStateChange = props.onAppUiStateChanged
+    ) { di, savedStateHandle ->
         PersonEditViewModel(di, savedStateHandle)
     }
 

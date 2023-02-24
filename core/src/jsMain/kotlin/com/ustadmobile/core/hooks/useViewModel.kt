@@ -13,6 +13,7 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.singleton
 import react.*
+import react.router.dom.useSearchParams
 import react.router.useLocation
 
 /**
@@ -42,14 +43,16 @@ fun <T:ViewModel> useViewModel(
     var firstRun by useState { true }
     val searchStr = useLocation().search
 
+    val searchParams by useSearchParams()
+
     var viewModel: T by useState {
         console.log("Creating ViewModel")
-        block(di, SavedStateHandle2(window.history))
+        block(di, SavedStateHandle2(window.history, searchParams))
     }
 
     useEffect(searchStr){
         if(!firstRun) {
-            viewModel = block(di, SavedStateHandle2(window.history))
+            viewModel = block(di, SavedStateHandle2(window.history, searchParams))
             console.log("Recreating ViewModel")
         }
 

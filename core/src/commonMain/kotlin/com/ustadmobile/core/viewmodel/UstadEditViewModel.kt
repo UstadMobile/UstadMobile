@@ -3,12 +3,14 @@ package com.ustadmobile.core.viewmodel
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.util.ext.cancelPrevJobAndLaunchDelayed
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.serialization.SerializationStrategy
 import org.kodein.di.DI
 
 /**
@@ -98,10 +100,16 @@ abstract class UstadEditViewModel(
      */
     protected inline fun <reified T> scheduleEntityCommitToSavedState(
         entity: T?,
-        key: String = KEY_ENTITY_STATE
+        key: String = KEY_ENTITY_STATE,
+        serializer: SerializationStrategy<T>,
+        commitDelay: Long = COMMIT_DELAY,
     ) {
-        saveStateJob = viewModelScope.cancelPrevJobAndLaunchDelayed(saveStateJob, COMMIT_DELAY) {
-            commitEntityToSavedState(entity = entity, key = key)
+        saveStateJob?.cancel()
+        saveStateJob = viewModelScope.launch {
+            delay(commitDelay)
+            if(entity != null) {
+                savedStateHandle.setJson(key, serializer, entity)
+            }
         }
     }
 
@@ -128,12 +136,10 @@ abstract class UstadEditViewModel(
         val popUpToViewName = savedStateHandle[UstadView.ARG_RESULT_DEST_VIEWNAME]
         val saveToKey = savedStateHandle[UstadView.ARG_RESULT_DEST_KEY]
 
-        val createdNewEntity = savedStateHandle[ARG_ENTITY_UID] != null
+        val createdNewEntity = savedStateHandle[ARG_ENTITY_UID] == null
         val returnResultExpected = (popUpToViewName != null && saveToKey != null)
 
-        if(!createdNewEntity || returnResultExpected) {
-            finishWithResult(result)
-        }else {
+        if(createdNewEntity && !returnResultExpected) {
             navController.navigate(
                 viewName = detailViewName,
                 args = mapOf(ARG_ENTITY_UID to entityUid.toString()),
@@ -142,6 +148,8 @@ abstract class UstadEditViewModel(
                     popUpToInclusive = true
                 )
             )
+        }else {
+            finishWithResult(result)
         }
     }
 

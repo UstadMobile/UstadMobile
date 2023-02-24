@@ -11,5 +11,5 @@ data class AppUiState(
     val title: String? = null,
     val navigationVisible: Boolean = true,
     val searchState: AppBarSearchUiState = AppBarSearchUiState(),
-) {
-}
+    val actionBarButtonState: ActionBarButtonUiState = ActionBarButtonUiState(),
+)

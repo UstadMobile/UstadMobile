@@ -73,6 +73,8 @@ val AppBarSearch = FC<AppBarSearchProps> {props ->
                 searchWidth = 24
             }
 
+            id = "actionBarSearch"
+
             sx {
                 color = Globals.inherit
                 padding = theme.spacing(1, 1, 1, 1)

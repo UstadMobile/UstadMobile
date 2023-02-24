@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
@@ -68,8 +69,11 @@ data class PersonEditUiState(
 
     val passwordVisible: Boolean = false,
 
-    val parentalEmailVisible: Boolean = false,
-)
+) {
+
+    val parentalEmailVisible: Boolean
+        get() = approvalPersonParentJoin != null
+}
 
 class PersonEditViewModel(
     di: DI,
@@ -102,9 +106,15 @@ class PersonEditViewModel(
     init {
         loadingState = LoadingUiState.INDETERMINATE
 
+        val title = if(entityUid == 0L) systemImpl.getString(MessageID.add_a_new_person) else systemImpl.getString(MessageID.edit_person)
         _appUiState.update {
             AppUiState(
-                title = if(entityUid == 0L) systemImpl.getString(MessageID.add_a_new_person) else ""
+                title = title,
+                actionBarButtonState = ActionBarButtonUiState(
+                    visible = true,
+                    text = systemImpl.getString(MessageID.save),
+                    onClick = this::onClickSave
+                )
             )
         }
 
@@ -118,7 +128,6 @@ class PersonEditViewModel(
                 },
                 uiUpdate = { entityToDisplay ->
                     _uiState.update { it.copy(person = entityToDisplay) }
-                    title = entityToDisplay.personFullName()
                 }
             )
 
@@ -143,7 +152,8 @@ class PersonEditViewModel(
             prev.copy(person = entity)
         }
 
-        scheduleEntityCommitToSavedState(entity)
+        scheduleEntityCommitToSavedState(entity, serializer = PersonWithAccount.serializer(),
+            commitDelay = 200)
     }
 
     fun onApprovalPersonParentJoinChanged(personParentJoin: PersonParentJoin?) {
@@ -311,19 +321,21 @@ class PersonEditViewModel(
                     }
                 }
             }
+
+            //Handle the following scenario: ClazzMemberList (user selects to add a student to enrol),
+            // PersonList, PersonEdit, EnrolmentEdit
+            val goToOnComplete = savedStateHandle[UstadView.ARG_GO_TO_COMPLETE]
+            if(goToOnComplete != null) {
+                navController.navigate(goToOnComplete, mutableMapOf<String, String>().apply {
+                    putFromSavedStateIfPresent(savedStateHandle, ON_COMPLETE_PASS_ARGS)
+                    put(UstadView.ARG_PERSON_UID, savePerson.personUid.toString())
+                }.toMap())
+            }else {
+                finishWithResult(PersonDetailView.VIEW_NAME, savePerson.personUid, savePerson)
+            }
         }
 
-        //Handle the following scenario: ClazzMemberList (user selects to add a student to enrol),
-        // PersonList, PersonEdit, EnrolmentEdit
-        val goToOnComplete = savedStateHandle[UstadView.ARG_GO_TO_COMPLETE]
-        if(goToOnComplete != null) {
-            navController.navigate(goToOnComplete, mutableMapOf<String, String>().apply {
-                putFromSavedStateIfPresent(savedStateHandle, ON_COMPLETE_PASS_ARGS)
-                put(UstadView.ARG_PERSON_UID, savePerson.personUid.toString())
-            }.toMap())
-        }else {
-            finishWithResult(PersonDetailView.VIEW_NAME, savePerson.personUid, savePerson)
-        }
+
     }
 
     companion object {

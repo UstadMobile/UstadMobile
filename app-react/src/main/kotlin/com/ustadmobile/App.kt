@@ -17,6 +17,7 @@ import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
 import com.ustadmobile.core.components.DIModule
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.util.UstadAntilog
 import com.ustadmobile.mui.components.DEFAULT_APPBAR_HEIGHT
 import com.ustadmobile.mui.components.Header
 import com.ustadmobile.mui.components.Sidebar
@@ -50,6 +51,7 @@ import kotlin.random.Random
 import web.html.HTML.div
 
 fun main() {
+    Napier.base(UstadAntilog())
     Napier.d("Index: Window.onLoad")
     val url = window.location.href
     val apiUrl = URLSearchParams().get(AppConfig.KEY_API_URL)

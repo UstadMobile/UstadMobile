@@ -1,11 +1,9 @@
 package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.FabUiState
-import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.INDETERMINATE
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.NOT_LOADING
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -86,7 +84,7 @@ class PersonDetailViewModel(
 
         val currentUserUid = accountManager.activeSession?.userSession?.usPersonUid ?: 0
 
-        val entityUid: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
+        val entityUid: Long = savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0
 
         _appUiState.update { prev ->
             prev.copy(
@@ -121,6 +119,27 @@ class PersonDetailViewModel(
                         entityUid, Role.PERMISSION_RESET_PASSWORD
                     ).collect {
                         _uiState.update { prev -> prev.copy(hasChangePasswordPermission = it) }
+                    }
+                }
+
+                launch {
+                    activeDb.personDao.personHasPermissionFlow(currentUserUid, entityUid,
+                        Role.PERMISSION_PERSON_UPDATE
+                    ).collect { hasEditPermission ->
+                        _appUiState.update { prev ->
+                            prev.copy(
+                                fabState = if(hasEditPermission) {
+                                    FabUiState(
+                                        visible = true,
+                                        text = systemImpl.getString(MessageID.edit),
+                                        icon = FabUiState.FabIcon.EDIT,
+                                        onClick = this@PersonDetailViewModel::onClickEdit
+                                    )
+                                }else {
+                                    FabUiState()
+                                }
+                            )
+                        }
                     }
                 }
 
