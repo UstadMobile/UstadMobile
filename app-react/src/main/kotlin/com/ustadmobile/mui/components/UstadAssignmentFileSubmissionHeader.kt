@@ -22,7 +22,8 @@ external interface UstadAssignmentFileSubmissionHeaderProps: Props {
 
 }
 
-val UstadAssignmentFileSubmissionHeader = FC<UstadAssignmentFileSubmissionHeaderProps> { props ->
+val UstadAssignmentFileSubmissionHeader = FC<UstadAssignmentFileSubmissionHeaderProps> {
+        props ->
 
     val strings = useStringsXml()
 
