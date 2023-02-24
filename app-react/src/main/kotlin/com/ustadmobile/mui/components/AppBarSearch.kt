@@ -11,6 +11,7 @@ import react.FC
 import react.Props
 import react.dom.html.ReactHTML.div
 import react.useContext
+import react.useState
 import web.html.HTMLInputElement
 
 external interface AppBarSearchProps: Props {
@@ -35,6 +36,8 @@ external interface AppBarSearchProps: Props {
  */
 val AppBarSearch = FC<AppBarSearchProps> {props ->
     val theme by useContext(ThemeContext)
+
+    var searchWidth by useState { 24 }
 
     div {
         css {
@@ -63,6 +66,13 @@ val AppBarSearch = FC<AppBarSearchProps> {props ->
         InputBase {
             placeholder = "Search..."
             value = props.searchText
+            onFocus = {
+                searchWidth = 34
+            }
+            onBlur = {
+                searchWidth = 24
+            }
+
             sx {
                 color = Globals.inherit
                 padding = theme.spacing(1, 1, 1, 1)
@@ -71,10 +81,7 @@ val AppBarSearch = FC<AppBarSearchProps> {props ->
 
                 asDynamic()[theme.breakpoints.up(Breakpoint.sm)] =
                     jso<PropertiesBuilder> {
-                        width = 24.ch
-                        asDynamic()["&:focus"] = jso<PropertiesBuilder> {
-                            width = 38.ch
-                        }
+                        width = searchWidth.ch
                     }
             }
 

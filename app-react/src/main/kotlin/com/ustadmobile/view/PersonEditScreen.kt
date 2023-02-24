@@ -2,10 +2,13 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants.GENDER_MESSAGE_IDS
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useViewModel
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.PersonEditUiState
+import com.ustadmobile.core.viewmodel.PersonEditViewModel
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
@@ -204,5 +207,19 @@ val PersonEditScreenPreview = FC<Props> {
         onPersonChanged = {
             uiStateVar = uiStateVar.copy(person = it)
         }
+    }
+}
+
+val PersonEditScreen = FC<UstadScreenProps> {
+    val viewModel = useViewModel { di, savedStateHandle ->
+        PersonEditViewModel(di, savedStateHandle)
+    }
+
+    val uiStateVar by viewModel.uiState.collectAsState(PersonEditUiState())
+
+    PersonEditComponent2 {
+        uiState = uiStateVar
+        onPersonChanged = viewModel::onEntityChanged
+        onApprovalPersonParentJoinChanged = viewModel::onApprovalPersonParentJoinChanged
     }
 }

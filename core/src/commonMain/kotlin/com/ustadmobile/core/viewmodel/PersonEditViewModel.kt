@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -101,6 +102,12 @@ class PersonEditViewModel(
     init {
         loadingState = LoadingUiState.INDETERMINATE
 
+        _appUiState.update {
+            AppUiState(
+                title = if(entityUid == 0L) systemImpl.getString(MessageID.add_a_new_person) else ""
+            )
+        }
+
         viewModelScope.launch {
             loadEntity(
                 onLoadFromDb = { it.personDao.findPersonAccountByUid(entityUid) },
@@ -111,6 +118,7 @@ class PersonEditViewModel(
                 },
                 uiUpdate = { entityToDisplay ->
                     _uiState.update { it.copy(person = entityToDisplay) }
+                    title = entityToDisplay.personFullName()
                 }
             )
 
