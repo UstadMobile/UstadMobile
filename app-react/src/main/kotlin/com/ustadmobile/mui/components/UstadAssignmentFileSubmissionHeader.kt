@@ -46,6 +46,8 @@ val UstadAssignmentFileSubmissionHeader = FC<UstadAssignmentFileSubmissionHeader
                     "/${props.uiState.assignment?.block?.cbMaxPoints ?: 0}" +
                     strings[MessageID.points])
 
+            + " "
+
             if (props.uiState.latePenaltyVisible) {
                 span { style = jso {
                     color = rgba(255, 0,0, 1.0)
