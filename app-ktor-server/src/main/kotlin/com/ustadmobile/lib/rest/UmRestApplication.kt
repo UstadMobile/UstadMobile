@@ -99,6 +99,7 @@ private fun Endpoint.identifier(
     sanitizeDbNameFromUrl(url)
 }
 
+@Suppress("unused") // This is used as the KTOR server main module via application.conf
 fun Application.umRestApplication(
     dbModeOverride: String? = null,
     singletonDbName: String = "UmAppDatabase"

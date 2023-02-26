@@ -47,13 +47,8 @@ class SiteEnterLinkPresenterTest {
 
     @Before
     fun setUp(){
-        view = mock {
-            on { runOnUiThread(ArgumentMatchers.any()) }.doAnswer { invocation ->
-                Thread(invocation.getArgument<Any>(0) as Runnable).start()
-                Unit
-            }
-        }
-        impl = mock{}
+        view = mock { }
+        impl = mock{ }
         di = DI {
             bind<UstadMobileSystemImpl>() with singleton { impl }
             bind<HttpClient>() with singleton {

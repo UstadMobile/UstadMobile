@@ -21,7 +21,6 @@ import com.ustadmobile.util.*
 import io.github.aakira.napier.Napier
 import kotlinx.atomicfu.atomic
 import kotlinx.browser.window
-import kotlinx.coroutines.Runnable
 import org.kodein.di.*
 import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.events.Event
@@ -180,10 +179,6 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
         dispatch(ReduxSnackBarState(message, getString(actionMessageId), action))
-    }
-
-    override fun runOnUiThread(r: Runnable?) {
-        r?.run()
     }
 
     override val di: DI by DI.lazy {
