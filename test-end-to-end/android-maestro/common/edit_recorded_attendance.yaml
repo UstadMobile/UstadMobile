@@ -5,20 +5,20 @@ appId: com.toughra.ustadmobile
 # test parameters needs to provide for this test :
 # 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
 - tapOn: "Courses"
-- tapOn:
-      id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- tapOn: ${TESTCOURSENAME}
 - tapOn: "ATTENDANCE"
+- swipe:
+      start: 100,400
+      end: 100,100
+      # text available for this button keep on changing because it's - date and time so we are using id here
 - tapOn:
-      id: "com.toughra.ustadmobile:id/mtrl_calendar_day_selector_frame"
+    id: "com.toughra.ustadmobile:id/item_clazz_log_attendance_list"
 - tapOn: "Mark all present"
 - tapOn:
         text: "Absent"
-        index: 1
-- tapOn:
-    text: "Partial"
-    index: 2
+        index: 0
 - tapOn:
     text: "Absent"
-    index: 4
-- takeScreenshot: "${TESTRESULTSDIR}/edited_attendance"
+    index: 1
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/edited_attendance"
 - tapOn: "Save"

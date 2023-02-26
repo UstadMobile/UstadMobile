@@ -50,21 +50,65 @@ adding from device, test downloading from another device.
 
 ### 4: Assignments
 
-4.1 Teacher can create assignment, student can submit assignment (text and attachment), teacher can view submission and grade it. Student will see their mark when it is graded.
+4.1 Teacher can create assignment (set to allow one submission per student as per default), student 
+    can submit assignment (text and attachment), teacher can view submission and grade it. After 
+    submitting their work, the submit button is no longer visible. Student will see their mark when 
+    it is graded.
 
 4.2 Teachers and students can add course comments which are visible for all who can view the assignment.
 
 4.3 Teachers and students can submit and view private comments. Student can submit a private comment, teacher can see the private comment, and reply to it. 
 
-4.4 If assignment is set that only one submission is allowed, when the students make a submission, they will not be able to make any further submission.
+4.4 If assignment is set to allow multiple submissions, student can make another submission after the first submission. Teacher can see the revised submission and give a new grade. The student can see the updated grade.
 
-4.5 If assignment is set to allow multiple submissions, student can make another submission after the first submission. Teacher can see the revised submission and give a new grade. The student can see the updated grade.
+4.5 If assignment is submitted after the deadline but before the grace period, the submission should
+    be accepted. The specified late penalty should be applied to the mark given by the teacher.
 
-4.6 Teacher can create assignment as per 4.1 by groups. When another group member logs in, the group member will see the same submission and comments.
+4.6 If assignment submission page is open after the deadline the submit button should not be visible.
 
-4.7 Teacher and students can sumit and view private comments. Students who are in the same group see the same set of comments. Comments are private within the group.
+4.7 If assignment submission page is open before the deadline, and the deadline passes whilst the 
+    screen is open, the student should not be able to submit.
 
-4.8 If group assignment is set that only one submission is allowed, when the students make a submission, they will not be able to make any further submission (including as another member of the group)
+4.8 Teacher can create assignment as per 4.1 by groups. When another group member logs in, the group member will see the same submission and comments.
 
-4.9 If assignment is set to allow multiple submissions, student can make another submission after the first submission. Teacher can see the revised submission and give a new grade. The student can see the updated grade (including as another member of the group).
+4.9 Teacher and students can submit and view private comments. Students who are in the same group see the same set of comments. Comments are private within the group.
+
+4.10 If group assignment is set that only one submission is allowed, when the students make a submission, they will not be able to make any further submission (including as another member of the group)
+
+4.11 If assignment is set to allow multiple submissions, student can make another submission after the first submission. Teacher can see the revised submission and give a new grade. The student can see the updated grade (including as another member of the group).
+
+4.12 If assignment is set to be marked by peers, where each assignment is marked by two peers, students can see assignment submissions for those that they have been assigned to mark. Students can mark each others work according to the peer review allocation. Students will see the marks submitted by their peers.
+
+4.13 If assignment is set to be marked by peers and submitted by groups, where each assignment is marked by two peers, students can see assignment submissions for those that their group has been assigned to mark. Students can mark each others work according to the peer review allocation (as per group membership). Students will see the marks submitted by their peers (other groups).
+
+### 5	Discussion board
+5.1 Teacher can add discussion board and topics to course
+
+5.2 Teacher can edit discussion board and topics
+
+5.3 All users on course can post on discussion board, see posts from other users. Each topic and post shows last active date and number of replies.
+
+5.4 Users can include a link from within the app (e.g. to a course or content piece) in their post. Clicking the link opens the item directly.
+
+5.5 Users can include external links to websites in their post. Clicking the link opens the browser (e.g. Chrome on Android, new tab in web) for the link
+	
+### 6	User accounts:
+6.1 Admin can enable/disable registration for users
+
+6.2 When registration is enabled: Users over 13 can register directly
+
+6.3 When registration is enabled: Users under 13 can register using parental approval link
+
+6.4 When registration is enabled: If a user does not specify their date of birth, an error message is displayed and they cannot proceed
+
+6.5 If a user under 13 is added by an adult (e.g. teacher/admin) approval is not required
+
+6.6 Admin can enable/disable guest login. If enabled, then users can connect as guest
+
+### 7 App panic response (Android only)
+
+7.1 When a panic trigger app is installed and selected, when the app is set to delete all data on panic trigger and the panic app is triggered, then all local data is deleted and the user is logged out.
+
+7.2 When a panic trigger app is installed and selected, when the app is set to hide on panic trigger, the app launch disappears from the home screen. A notepad app is visible instead. The app is restored by entering the code into the notepad.
+
 

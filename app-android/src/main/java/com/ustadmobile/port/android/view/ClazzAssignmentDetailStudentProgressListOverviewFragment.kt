@@ -15,26 +15,26 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
-import com.ustadmobile.lib.db.entities.PersonGroupAssignmentSummary
+import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 
-class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewFragment<PersonGroupAssignmentSummary, PersonGroupAssignmentSummary>(),
+class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewFragment<AssignmentSubmitterSummary, AssignmentSubmitterSummary>(),
         ClazzAssignmentDetailStudentProgressOverviewListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener {
 
     private var progressSummaryAdapter: AssignmentProgressSummaryRecyclerAdapter? = null
     private var mPresenter: ClazzAssignmentDetailStudentProgressOverviewListPresenter? = null
 
-    override val listPresenter: UstadListPresenter<*, in PersonGroupAssignmentSummary>?
+    override val listPresenter: UstadListPresenter<*, in AssignmentSubmitterSummary>?
         get() = mPresenter
 
     override var autoMergeRecyclerViewAdapter: Boolean = false
 
 
     class PersonWithAssignmentStatementDisplayListRecyclerAdapter(var listener: SubmissionSummaryListener?):
-            SelectablePagedListAdapter<PersonGroupAssignmentSummary,
+            SelectablePagedListAdapter<AssignmentSubmitterSummary,
                     PersonWithAssignmentStatementDisplayListRecyclerAdapter
                     .PersonWithStatementDisplayListViewHolder>(DIFF_CALLBACK) {
 
@@ -117,15 +117,15 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
         }
 
     companion object {
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<PersonGroupAssignmentSummary> = object
-            : DiffUtil.ItemCallback<PersonGroupAssignmentSummary>() {
-            override fun areItemsTheSame(oldItem: PersonGroupAssignmentSummary,
-                                         newItem: PersonGroupAssignmentSummary): Boolean {
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<AssignmentSubmitterSummary> = object
+            : DiffUtil.ItemCallback<AssignmentSubmitterSummary>() {
+            override fun areItemsTheSame(oldItem: AssignmentSubmitterSummary,
+                                         newItem: AssignmentSubmitterSummary): Boolean {
                 return oldItem.submitterUid == newItem.submitterUid
             }
 
-            override fun areContentsTheSame(oldItem: PersonGroupAssignmentSummary,
-                                            newItem: PersonGroupAssignmentSummary): Boolean {
+            override fun areContentsTheSame(oldItem: AssignmentSubmitterSummary,
+                                            newItem: AssignmentSubmitterSummary): Boolean {
                 return oldItem.name == newItem.name
                         && oldItem.latestPrivateComment == newItem.latestPrivateComment
                         && oldItem.fileSubmissionStatus == newItem.fileSubmissionStatus

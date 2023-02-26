@@ -1,17 +1,19 @@
 package com.ustadmobile.core.view
 
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.door.paging.DataSourceFactory
-import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
-import com.ustadmobile.lib.db.entities.CommentsWithPerson
-import com.ustadmobile.lib.db.entities.CourseAssignmentMark
-import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionWithAttachment
+import com.ustadmobile.lib.db.entities.*
 
 
 interface ClazzAssignmentDetailOverviewView: UstadDetailView<ClazzAssignmentWithCourseBlock> {
 
     var submittedCourseAssignmentSubmission: DataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>?
 
+    var markList: DataSourceFactory<Int, CourseAssignmentMarkWithPersonMarker>?
+
     var addedCourseAssignmentSubmission: List<CourseAssignmentSubmissionWithAttachment>?
+
+    var gradeFilterChips: List<ListFilterIdOption>?
 
     var timeZone: String?
 
@@ -26,7 +28,7 @@ interface ClazzAssignmentDetailOverviewView: UstadDetailView<ClazzAssignmentWith
 
     var addFileSubmissionVisible: Boolean
 
-    var submissionMark: CourseAssignmentMark?
+    var submissionMark: AverageCourseAssignmentMark?
 
     var submissionStatus: Int
 

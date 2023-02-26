@@ -16,7 +16,7 @@ fun IdOptionAutoCompleteTextView.setMessageIdOptions(messageIdOptions: MutableLi
 
     this.takeIf { sortOptionsToUse != this.dropDownOptions}?.dropDownOptions = sortOptionsToUse
 
-    if(selectedMessageIdOption != null)
+    if(selectedMessageIdOption != null && selectedMessageIdOption.toLong() != this.selectedDropDownOptionId)
         this.selectedDropDownOptionId = selectedMessageIdOption.toLong()
 }
 
