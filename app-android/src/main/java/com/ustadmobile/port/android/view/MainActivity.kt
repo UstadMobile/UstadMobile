@@ -90,7 +90,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private lateinit var ustadNavController: UstadNavController
 
-
     private val userProfileDrawable: Drawable? by lazy(LazyThreadSafetyMode.NONE) {
         ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_24dp)?.also {
             it.setTint(ContextCompat.getColor(this, R.color.onPrimaryColor))

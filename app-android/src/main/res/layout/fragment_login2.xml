@@ -32,10 +32,6 @@
             name="intentMessage"
             type="String" />
 
-        <variable
-            name="droidAccountTester"
-            type="com.ustadmobile.port.android.view.DroidAccountTest" />
-
     </data>
 
     <androidx.core.widget.NestedScrollView

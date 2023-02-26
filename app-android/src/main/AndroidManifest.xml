@@ -38,10 +38,6 @@
         android:name="android.permission.GET_ACCOUNTS"
         tools:node="remove" />
 
-    <!-- Required to provide account management for single sign on etc -->
-    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
-
-
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />

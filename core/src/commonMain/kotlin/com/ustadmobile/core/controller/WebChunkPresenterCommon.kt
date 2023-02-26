@@ -79,10 +79,7 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
                 val result = repo.contentEntryDao.getContentByUuidAsync(entryUuid)
                 view.entry = result
             } catch (e: Exception) {
-                presenterScope.launch {
-                    view.showSnackBar(
-                        systemImpl.getString(MessageID.error_opening_file, context))
-                }
+                view.showSnackBar(systemImpl.getString(MessageID.error_opening_file, context))
             }
 
             handleMountChunk()
@@ -118,10 +115,6 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
             }
 
         }
-    }
-
-    fun handleUpNavigation() {
-        //This is now handled by jetpack navcontroller
     }
 
 }

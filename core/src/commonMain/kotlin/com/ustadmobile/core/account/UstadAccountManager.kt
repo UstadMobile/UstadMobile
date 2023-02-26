@@ -39,7 +39,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
-open class UstadAccountManager(
+class UstadAccountManager(
     private val systemImpl: UstadMobileSystemImpl,
     private val appContext: Any,
     val di: DI
@@ -223,7 +223,7 @@ open class UstadAccountManager(
         }
     }
 
-    open suspend fun addSession(
+    suspend fun addSession(
         person: Person,
         endpointUrl: String,
         password: String?
@@ -309,7 +309,7 @@ open class UstadAccountManager(
         }
     }
 
-    open suspend fun endSession(session: UserSessionWithPersonAndEndpoint,
+    suspend fun endSession(session: UserSessionWithPersonAndEndpoint,
                            endStatus: Int = UserSession.STATUS_LOGGED_OUT,
                            endReason: Int = UserSession.REASON_LOGGED_OUT
     ) {
