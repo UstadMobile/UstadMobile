@@ -112,6 +112,9 @@ fun useUstadScreens(): UstadScreens {
             ),
             UstadScreen("VirtualListPreview", "Virtual List Preview",
                 VirtualListPreview),
+            UstadScreen("UstadAssignmentFileSubmissionHeader",
+                "UstadAssignmentFileSubmissionHeader Preview",
+                UstadAssignmentFileSubmissionHeaderPreview),
         )
     }
 }
