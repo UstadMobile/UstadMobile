@@ -2,10 +2,13 @@ package com.ustadmobile.port.android.view
 
 import android.content.Context
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.DialogResultListener
 import com.ustadmobile.core.view.DismissableDialog
 import com.ustadmobile.core.view.UstadView
-import org.kodein.di.DIAware
+import kotlinx.coroutines.CoroutineScope
+import org.kodein.di.*
 import org.kodein.di.android.x.closestDI
 
 /**
@@ -14,7 +17,17 @@ import org.kodein.di.android.x.closestDI
 
 open class UstadDialogFragment : DialogFragment(), DismissableDialog, UstadView, DIAware {
 
-    override val di by closestDI()
+    /**
+     * Override and create a child DI to provide access to lifecycle scope
+     */
+    override val di by DI.lazy {
+        val closestDi: DI by closestDI()
+        extend(closestDi)
+
+        bind<CoroutineScope>(DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with provider {
+            lifecycleScope
+        }
+    }
 
     protected lateinit var mResultListener: DialogResultListener
 
