@@ -2,10 +2,10 @@ package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.db.dao.CourseAssignmentMarkDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.lib.db.entities.*
+import kotlin.jvm.JvmInline
 
 
 data class ClazzAssignmentDetailOverviewUiState(
@@ -19,8 +19,6 @@ data class ClazzAssignmentDetailOverviewUiState(
     val markList: List<CourseAssignmentMarkWithPersonMarker> = emptyList(),
 
     val addedCourseAssignmentSubmission: List<CourseAssignmentSubmissionWithAttachment> = emptyList(),
-
-    val gradeFilterChips: List<ListFilterIdOption> = emptyList(),
 
     val clazzAssignmentClazzComments: List<CommentsWithPerson> = emptyList(),
 
@@ -44,7 +42,7 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val selectedChipId: Int = CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES,
 
-    val filterOptions: List<MessageIdOption2> = listOf(
+    val gradeFilterChips: List<MessageIdOption2> = listOf(
         MessageIdOption2(MessageID.most_recent, CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES),
         MessageIdOption2(MessageID.all, CourseAssignmentMarkDaoCommon.ARG_FILTER_ALL_SCORES)
     ),
@@ -56,5 +54,18 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val cbDeadlineDateVisible: Boolean
         get() = clazzAssignment?.block?.cbDeadlineDate.isDateSet()
+
+}
+
+val CourseAssignmentMarkWithPersonMarker.listItemUiState
+    get() = CourseAssignmentMarkWithPersonMarkerUiState(this)
+
+@JvmInline
+value class CourseAssignmentMarkWithPersonMarkerUiState(
+    val mark: CourseAssignmentMarkWithPersonMarker,
+) {
+
+    val markerGroupNameVisible: Boolean
+        get() = mark.isGroup && mark.camMarkerSubmitterUid != 0L
 
 }

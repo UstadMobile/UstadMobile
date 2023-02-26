@@ -4,9 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,10 +44,15 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AssignmentTurnedIn
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
 import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
@@ -445,10 +453,12 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ClazzAssignmentDetailOverviewScreen(
     uiState: ClazzAssignmentDetailOverviewUiState,
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
+    onClickMark: (CourseAssignmentMarkWithPersonMarker) -> Unit = {},
 ){
 
     val formattedDateTime = rememberFormattedDateTime(
@@ -500,14 +510,50 @@ fun ClazzAssignmentDetailOverviewScreen(
 
         item {
             UstadListFilterChipsHeader(
-                filterOptions = uiState.filterOptions,
+                filterOptions = uiState.gradeFilterChips,
                 selectedChipId = uiState.selectedChipId,
                 enabled = uiState.fieldsEnabled,
                 onClickFilterChip = { onClickFilterChip(it) },
             )
         }
 
+        items(
+            items = uiState.markList,
+            key = { mark -> mark.camUid }
+        ){ mark ->
+            MarkListItem(mark, onClickMark)
+        }
     }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun MarkListItem(
+    mark: CourseAssignmentMarkWithPersonMarker,
+    onClickMark: (CourseAssignmentMarkWithPersonMarker) -> Unit = {},
+){
+
+    val markUiSate = mark.listItemUiState
+    var text = mark.marker?.fullName() ?: ""
+
+    if (markUiSate.markerGroupNameVisible){
+        text += "(${stringResource(R.string.group_number, mark.camMarkerSubmitterUid)})"
+    }
+
+    ListItem(
+        modifier = Modifier.clickable {
+            onClickMark(mark)
+        },
+        icon = {
+            Icon(
+                painter = painterResource(R.drawable.ic_person_black_24dp),
+                contentDescription = "",
+                modifier = Modifier.size(40.dp)
+            )
+        },
+        text = { Text(text) },
+        secondaryText = { Text("") }
+    )
 }
 
 @Composable
@@ -521,7 +567,10 @@ fun ClazzAssignmentDetailOverviewScreenPreview(){
                 block = CourseBlock().apply {
                     cbDeadlineDate = 1677063785
                 }
-            }
+            },
+            markList = listOf(
+
+            )
         )
     )
 }
