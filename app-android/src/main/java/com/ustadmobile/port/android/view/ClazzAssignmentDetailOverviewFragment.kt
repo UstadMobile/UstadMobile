@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -46,8 +47,13 @@ import org.kodein.di.on
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AssignmentTurnedIn
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
@@ -56,6 +62,7 @@ import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import com.ustadmobile.port.android.util.compose.rememberFormattedTime
 import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment.Companion.SUBMISSION_POLICY_MAP
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
@@ -453,7 +460,6 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ClazzAssignmentDetailOverviewScreen(
     uiState: ClazzAssignmentDetailOverviewUiState,
@@ -537,8 +543,10 @@ fun MarkListItem(
     var text = mark.marker?.fullName() ?: ""
 
     if (markUiSate.markerGroupNameVisible){
-        text += "(${stringResource(R.string.group_number, mark.camMarkerSubmitterUid)})"
+        text += "  (${stringResource(R.string.group_number, mark.camMarkerSubmitterUid)})"
     }
+
+    val formattedTime = rememberFormattedTime(mark.camLct.toInt())
 
     ListItem(
         modifier = Modifier.clickable {
@@ -552,7 +560,30 @@ fun MarkListItem(
             )
         },
         text = { Text(text) },
-        secondaryText = { Text("") }
+        secondaryText = {
+            Column {
+                Text(
+                    buildAnnotatedString {
+                        append("${uiState.assignmentMark?.averageScore ?: 0}" +
+                                "/${uiState.assignment?.block?.cbMaxPoints ?: 0}" +
+                                stringResource(R.string.points)
+                        )
+
+
+                        if (markUiSate.camPenaltyVisible){
+                            withStyle(style = SpanStyle(color = colorResource(R.color.errorColor))) {
+                                append(" "+stringResource(R.string.late_penalty,
+                                    mark.assignment?.block?.cbLateSubmissionPenalty ?: 0))
+                            }
+                        }
+                    }
+                )
+                Text(mark.camMarkerComment ?: "")
+            }
+        },
+        trailing = {
+            Text(formattedTime)
+        }
     )
 }
 
@@ -569,7 +600,15 @@ fun ClazzAssignmentDetailOverviewScreenPreview(){
                 }
             },
             markList = listOf(
-
+                CourseAssignmentMarkWithPersonMarker().apply {
+                    marker = Person().apply {
+                        firstNames = "John"
+                        lastName = "Smith"
+                        isGroup = true
+                        camMarkerSubmitterUid = 2
+                        camMarkerComment = "Comment"
+                    }
+                }
             )
         )
     )

@@ -68,4 +68,7 @@ value class CourseAssignmentMarkWithPersonMarkerUiState(
     val markerGroupNameVisible: Boolean
         get() = mark.isGroup && mark.camMarkerSubmitterUid != 0L
 
+    val camPenaltyVisible: Boolean
+        get() = mark.camPenalty != 0
+
 }
