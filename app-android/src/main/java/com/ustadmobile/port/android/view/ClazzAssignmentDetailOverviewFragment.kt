@@ -56,6 +56,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.controller.PersonConstants
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.listItemUiState
@@ -472,10 +473,10 @@ fun ClazzAssignmentDetailOverviewScreen(
         timeZoneId = TimeZone.getDefault().id
     )
 
-//    val caSubmissionPolicyText = messageIdResource(
-//        SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS[
-//                uiState.clazzAssignment?.caSubmissionPolicy ?:
-//                ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED].messageId)
+    val caSubmissionPolicyText = messageIdResource(
+        SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS[
+                uiState.clazzAssignment?.caSubmissionPolicy ?:
+                ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED].messageId)
 
     LazyColumn(
         modifier = Modifier
@@ -502,7 +503,7 @@ fun ClazzAssignmentDetailOverviewScreen(
 
         item {
             UstadDetailField(
-                valueText = "caSubmissionPolicyText",
+                valueText = caSubmissionPolicyText,
                 labelText = stringResource(id = R.string.submission_policy),
                 imageId = SUBMISSION_POLICY_MAP[uiState.clazzAssignment?.caSubmissionPolicy]
                     ?: R.drawable.ic_baseline_task_alt_24,
@@ -563,20 +564,21 @@ fun MarkListItem(
         secondaryText = {
             Column {
                 Text(
-                    buildAnnotatedString {
-                        append("${uiState.assignmentMark?.averageScore ?: 0}" +
-                                "/${uiState.assignment?.block?.cbMaxPoints ?: 0}" +
-                                stringResource(R.string.points)
-                        )
-
-
-                        if (markUiSate.camPenaltyVisible){
-                            withStyle(style = SpanStyle(color = colorResource(R.color.errorColor))) {
-                                append(" "+stringResource(R.string.late_penalty,
-                                    mark.assignment?.block?.cbLateSubmissionPenalty ?: 0))
-                            }
-                        }
-                    }
+                    ""
+//                    buildAnnotatedString {
+//                        append("${uiState.assignmentMark?.averageScore ?: 0}" +
+//                                "/${uiState.assignment?.block?.cbMaxPoints ?: 0}" +
+//                                stringResource(R.string.points)
+//                        )
+//
+//
+//                        if (markUiSate.camPenaltyVisible){
+//                            withStyle(style = SpanStyle(color = colorResource(R.color.errorColor))) {
+//                                append(" "+stringResource(R.string.late_penalty,
+//                                    mark.assignment?.block?.cbLateSubmissionPenalty ?: 0))
+//                            }
+//                        }
+//                    }
                 )
                 Text(mark.camMarkerComment ?: "")
             }
@@ -594,7 +596,7 @@ fun ClazzAssignmentDetailOverviewScreenPreview(){
         uiState = ClazzAssignmentDetailOverviewUiState(
             clazzAssignment = ClazzAssignmentWithCourseBlock().apply {
                 caDescription = "Read the stories and describe the main characters."
-                caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED
+                caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
                 block = CourseBlock().apply {
                     cbDeadlineDate = 1677063785
                 }
