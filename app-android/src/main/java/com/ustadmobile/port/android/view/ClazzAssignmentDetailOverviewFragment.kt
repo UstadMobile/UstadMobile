@@ -476,7 +476,7 @@ fun ClazzAssignmentDetailOverviewScreen(
     val caSubmissionPolicyText = messageIdResource(
         SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS[
                 uiState.clazzAssignment?.caSubmissionPolicy ?:
-                ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED].messageId)
+                ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE].messageId)
 
     LazyColumn(
         modifier = Modifier
@@ -493,7 +493,7 @@ fun ClazzAssignmentDetailOverviewScreen(
         if (uiState.cbDeadlineDateVisible){
             item {
                 UstadDetailField(
-                    valueText = formattedDateTime,
+                    valueText = "$formattedDateTime (${TimeZone.getDefault().id})",
                     labelText = stringResource(id = R.string.deadline),
                     imageId = R.drawable.ic_event_available_black_24dp,
                     onClick = {  }
