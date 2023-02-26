@@ -20,8 +20,6 @@ class AuthenticatorActivity: UstadBaseActivity(
 
 ), IAuthenticatorActivity {
 
-    private var mAccountAuthenticatorResponse: AccountAuthenticatorResponse? = null
-
     override var loading: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,22 +29,12 @@ class AuthenticatorActivity: UstadBaseActivity(
             R.layout.activity_with_navhost)
 
         setSupportActionBar(mBinding.mainCollapsingToolbar.toolbar)
-
-        val response: AccountAuthenticatorResponse? = intent.getParcelableExtra(
-            AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
-
-        if(response != null) {
-            response.onRequestContinued()
-            mAccountAuthenticatorResponse = response
-        }
     }
 
     override fun finishWithAccountAuthenticatorResult(
         resultCode: Int,
-        result: Bundle,
         resultData: Intent?,
     ) {
-        mAccountAuthenticatorResponse?.onResult(result)
         if(resultData == null) {
             setResult(resultCode)
         }else {

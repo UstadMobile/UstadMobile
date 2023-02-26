@@ -6,11 +6,23 @@ import com.ustadmobile.lib.db.entities.UserSession
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UserSessionWithPersonAndEndpoint (val userSession: UserSession,
-                                             val person: Person,
-                                             val endpoint: Endpoint
+data class UserSessionWithPersonAndEndpoint (
+    val userSession: UserSession,
+    val person: Person,
+    val endpoint: Endpoint,
 ) {
 
+    val displayName: String
+        get() {
+            val displayUrl = endpoint.url
+                .removePrefix("http://")
+                .removePrefix("https://")
+                .removeSuffix("/")
+            return "${person.username}@$displayUrl"
+        }
+
     fun toUmAccount() = person.toUmAccount(endpoint.url)
+
+
 
 }

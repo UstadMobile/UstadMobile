@@ -12,10 +12,10 @@ interface IAuthenticatorActivity {
      *  https://developer.android.com/reference/android/accounts/AbstractAccountAuthenticator
      *  "The activity needs to return the final result when it is complete so the Intent should
      *  contain the AccountAuthenticatorResponse as"...
+     *
      */
     fun finishWithAccountAuthenticatorResult(
         resultCode: Int,
-        result: Bundle,
         resultData: Intent? = null,
     )
 

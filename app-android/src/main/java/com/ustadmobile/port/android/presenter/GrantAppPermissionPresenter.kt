@@ -5,12 +5,14 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.core.os.bundleOf
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.account.UstadAccountManagerAndroid
+import com.ustadmobile.core.account.UstadAccountManager.Companion.KEY_PREFIX_EAPUID
 import com.ustadmobile.core.controller.UstadBaseController
-import com.ustadmobile.core.util.ext.toAndroidAccount
 import com.ustadmobile.core.view.GrantAppPermissionView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.port.android.util.ext.getActivityContext
@@ -23,12 +25,21 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ExternalAppPermission
 import com.ustadmobile.port.android.authenticator.IAuthenticatorActivity
-import com.ustadmobile.port.android.authenticator.UstadAccountAuthenticator.Companion.KEY_PREFIX_EAPUID
-import com.ustadmobile.port.android.authenticator.pendingRequestsDataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.decodeFromString
 import java.util.*
+
+
+/**
+ * Storage of pending requests for approval. This is where we have issued an intent for the user to
+ * approve or deny, but we don't (yet) have approval. In the case of using add account, we don't
+ * know what endpoint is being used, so we can't put in the database.
+ */
+internal val Context.pendingRequestsDataStore:
+    DataStore<Preferences> by preferencesDataStore(name = "authenticator_pending_requests")
+
+
 
 class GrantAppPermissionPresenter(
     context: Any,
@@ -91,7 +102,7 @@ class GrantAppPermissionPresenter(
 
             val authToken = extAccessPermission.eapAuthToken
             if(packageId != null && authToken != null) {
-                val activeAccountName = ustadAccountManager.activeSession?.toAndroidAccount()?.name ?: "ERR"
+                val activeAccountName = ustadAccountManager.activeSession?.displayName ?: "ERR"
                 extAccessPermission.eapPersonUid = ustadAccountManager.activeSession?.person?.personUid ?: 0
                 extAccessPermission.eapStartTime = systemTimeInMillis()
                 extAccessPermission.eapExpireTime = Long.MAX_VALUE
@@ -107,21 +118,15 @@ class GrantAppPermissionPresenter(
                 val resultDataIntent = if(returnAccountName) {
                     Intent().apply {
                         putExtra(AccountManager.KEY_ACCOUNT_NAME, activeAccountName)
-                        putExtra(AccountManager.KEY_ACCOUNT_TYPE,
-                            UstadAccountManagerAndroid.ACCOUNT_TYPE)
+                        putExtra(AccountManager.KEY_ACCOUNT_TYPE, UstadAccountManager.ACCOUNT_TYPE)
                         putExtra(AccountManager.KEY_AUTHTOKEN, authToken)
                     }
                 }else {
                     null
                 }
 
-                val resultBundle = bundleOf(
-                    AccountManager.KEY_ACCOUNT_TYPE to UstadAccountManagerAndroid.ACCOUNT_TYPE,
-                    AccountManager.KEY_ACCOUNT_NAME to activeAccountName,
-                )
-
                 authenticatorActivity.finishWithAccountAuthenticatorResult(
-                    Activity.RESULT_OK, resultBundle, resultDataIntent)
+                    Activity.RESULT_OK, resultDataIntent)
             }else {
                 view.showSnackBar("ERROR")
             }
@@ -129,8 +134,8 @@ class GrantAppPermissionPresenter(
     }
 
     fun onClickCancel() {
-        authenticatorActivity.finishWithAccountAuthenticatorResult(Activity.RESULT_CANCELED,
-            bundleOf())
+        authenticatorActivity.finishWithAccountAuthenticatorResult(Activity.RESULT_CANCELED
+        )
     }
 
 }

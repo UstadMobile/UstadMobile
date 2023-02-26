@@ -440,6 +440,21 @@ open class UstadAccountManager(
 
         const val MANIFEST_URL_FALLBACK = "http://localhost/"
 
+        /**
+         * Prefix for preference keys related to External Access Permission
+         */
+        const val KEY_PREFIX_EAPUID = "eap_"
+
+        /**
+         * The AccountType (if used)
+         */
+        const val ACCOUNT_TYPE = "com.ustadmobile"
+
+        /**
+         * Intent action indicating that the caller wants to get an authentication token
+         */
+        const val ACTION_GET_AUTH_TOKEN = "com.ustadmobile.AUTH_GET_TOKEN"
+
     }
 
 }

@@ -129,17 +129,7 @@
             </intent-filter>
 
         </activity>
-        
-        <service
-                android:name="com.ustadmobile.port.android.authenticator.UstadAuthenticatorService"
-                android:exported="true">
-            <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator" />
-            </intent-filter>
-            <meta-data android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/authenticator" />
-        </service>
-        
+
         <activity
             android:name="com.ustadmobile.port.android.authenticator.AuthenticatorActivity"
             android:exported="true">
