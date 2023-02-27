@@ -112,6 +112,9 @@ fun useUstadScreens(): UstadScreens {
             ),
             UstadScreen("VirtualListPreview", "Virtual List Preview",
                 VirtualListPreview),
+            UstadScreen(ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME,
+                "ClazzAssignmentDetailStudentProgressListOverview Preview",
+                ClazzAssignmentDetailStudentProgressListOverviewScreenPreview),
         )
     }
 }

@@ -7,12 +7,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Message
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -33,14 +30,11 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
 import com.ustadmobile.core.viewmodel.ClazzAssignmentDetailStudentProgressListOverviewUiState
-import com.ustadmobile.core.viewmodel.SchoolDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
-import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -164,7 +158,7 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
 private fun ClazzAssignmentDetailStudentProgressListOverviewScreen(
     uiState: ClazzAssignmentDetailStudentProgressListOverviewUiState =
         ClazzAssignmentDetailStudentProgressListOverviewUiState(),
-    onClickAssignment: (AssignmentSubmitterSummary) -> Unit = {},
+    onClickPerson: (AssignmentSubmitterSummary) -> Unit = {},
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -220,7 +214,7 @@ private fun ClazzAssignmentDetailStudentProgressListOverviewScreen(
             items = uiState.assignmentSubmitterList,
             key = { person -> person.submitterUid }
         ){ person ->
-            AssignmentDetailAttemptListItem(person, onClickAssignment)
+            AssignmentDetailAttemptListItem(person, onClickPerson)
         }
 
     }
@@ -262,7 +256,9 @@ fun AssignmentDetailAttemptListItem (
         text = { Text(person.name ?: "") },
         secondaryText = {
             if (personUiState.latestPrivateCommentVisible){
-                Row{
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ){
                     Icon(
                         painter = painterResource(R.drawable.ic_baseline_comment_24),
                         contentDescription = "",
