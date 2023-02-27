@@ -1,0 +1,103 @@
+package com.ustadmobile.port.android.view.composable
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.ListItem
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.toughra.ustadmobile.R
+import com.ustadmobile.core.db.dao.ClazzDaoCommon
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.viewmodel.UstadMarksPersonListItemUiState
+import com.ustadmobile.core.viewmodel.listItemUiState
+import com.ustadmobile.lib.db.entities.CourseAssignmentMarkWithPersonMarker
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.port.android.util.compose.rememberFormattedTime
+
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun UstadMarksPersonListItem(
+    uiState: UstadMarksPersonListItemUiState,
+    onClickMark: (CourseAssignmentMarkWithPersonMarker?) -> Unit = {},
+){
+
+    val markUiSate = uiState.mark.listItemUiState
+    var text = uiState.mark.marker?.fullName() ?: ""
+
+    if (markUiSate.markerGroupNameVisible){
+        text += "  (${stringResource(R.string.group_number, uiState.mark.camMarkerSubmitterUid)})"
+    }
+
+    val formattedTime = rememberFormattedTime(uiState.mark.camLct?.toInt() ?: 0)
+
+    ListItem(
+        modifier = Modifier.clickable {
+            onClickMark(uiState.mark)
+        },
+        icon = {
+            Icon(
+                painter = painterResource(R.drawable.ic_person_black_24dp),
+                contentDescription = "",
+                modifier = Modifier.size(40.dp)
+            )
+        },
+        text = { Text(text) },
+        secondaryText = {
+            Column {
+                Text(
+                    ""
+//                    buildAnnotatedString {
+//                        append("${uiState.assignmentMark?.averageScore ?: 0}" +
+//                                "/${uiState.assignment?.block?.cbMaxPoints ?: 0}" +
+//                                stringResource(R.string.points)
+//                        )
+//
+//
+//                        if (markUiSate.camPenaltyVisible){
+//                            withStyle(style = SpanStyle(color = colorResource(R.color.errorColor))) {
+//                                append(" "+stringResource(R.string.late_penalty,
+//                                    mark.assignment?.block?.cbLateSubmissionPenalty ?: 0))
+//                            }
+//                        }
+//                    }
+                )
+                Text(uiState.mark.camMarkerComment ?: "")
+            }
+        },
+        trailing = {
+            Text(formattedTime)
+        }
+    )
+}
+
+@Composable
+@Preview
+private fun UstadMarksPersonListItemPreview() {
+    UstadMarksPersonListItem(
+        uiState = UstadMarksPersonListItemUiState(
+            mark = CourseAssignmentMarkWithPersonMarker().apply {
+                marker = Person().apply {
+                    firstNames = "John"
+                    lastName = "Smith"
+                    isGroup = true
+                    camMarkerSubmitterUid = 2
+                    camMarkerComment = "Comment"
+                }
+            }
+        )
+    )
+}
+
