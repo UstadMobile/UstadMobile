@@ -468,6 +468,7 @@ fun ClazzAssignmentDetailOverviewScreen(
     uiState: ClazzAssignmentDetailOverviewUiState,
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
     onClickMark: (CourseAssignmentMarkWithPersonMarker) -> Unit = {},
+    onClickComment: (CommentsWithPerson) -> Unit = {},
 ){
 
     val formattedDateTime = rememberFormattedDateTime(
@@ -544,6 +545,13 @@ fun ClazzAssignmentDetailOverviewScreen(
         item {
             Text(stringResource(R.string.class_comments))
         }
+
+        items(
+            items = uiState.commentList,
+            key = { comment -> comment.commentsUid }
+        ){ comment ->
+            CommentListItem(comment, onClickComment)
+        }
     }
 }
 
@@ -603,6 +611,32 @@ fun MarkListItem(
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun CommentListItem(
+    comment: CommentsWithPerson,
+    onClickComment: (CommentsWithPerson) -> Unit = {},
+){
+
+    val formattedTime = rememberFormattedTime(comment.commentsDateTimeAdded.toInt())
+
+    ListItem(
+        modifier = Modifier.clickable {
+            onClickComment(comment)
+        },
+        icon = {
+            Icon(
+                painter = painterResource(R.drawable.ic_person_black_24dp),
+                contentDescription = "",
+                modifier = Modifier.size(40.dp)
+            )
+        },
+        text = { Text(comment.commentsPerson?.fullName() ?: "") },
+        secondaryText = { Text(comment.commentsText ?: "") },
+        trailing = { Text(formattedTime) }
+    )
+}
+
 @Composable
 @Preview
 fun ClazzAssignmentDetailOverviewScreenPreview(){
@@ -624,6 +658,16 @@ fun ClazzAssignmentDetailOverviewScreenPreview(){
                         camMarkerSubmitterUid = 2
                         camMarkerComment = "Comment"
                     }
+                }
+            ),
+            commentList = listOf(
+                CommentsWithPerson().apply {
+                    commentsUid = 1
+                    commentsPerson = Person().apply {
+                        firstNames = "Bob"
+                        lastName = "Dylan"
+                    }
+                    commentsText = "I like this activity. Shall we discuss this in our next meeting?"
                 }
             )
         )

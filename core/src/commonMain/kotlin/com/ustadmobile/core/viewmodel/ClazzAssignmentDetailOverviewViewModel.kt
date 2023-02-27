@@ -20,7 +20,7 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val addedCourseAssignmentSubmission: List<CourseAssignmentSubmissionWithAttachment> = emptyList(),
 
-    val clazzAssignmentClazzComments: List<CommentsWithPerson> = emptyList(),
+    val commentList: List<CommentsWithPerson> = emptyList(),
 
     val clazzAssignmentPrivateComments: List<CommentsWithPerson> = emptyList(),
 
