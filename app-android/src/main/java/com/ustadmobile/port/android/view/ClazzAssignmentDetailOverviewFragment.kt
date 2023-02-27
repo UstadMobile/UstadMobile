@@ -59,12 +59,14 @@ import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
 import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.viewmodel.UstadAssignmentFileSubmissionHeaderUiState
 import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import com.ustadmobile.port.android.util.compose.rememberFormattedTime
 import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment.Companion.SUBMISSION_POLICY_MAP
+import com.ustadmobile.port.android.view.composable.UstadAssignmentFileSubmissionHeader
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
 import java.util.*
@@ -512,6 +514,14 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         item {
+            UstadAssignmentFileSubmissionHeader(
+                uiState = UstadAssignmentFileSubmissionHeaderUiState(
+                    assignmentStatus = CourseAssignmentSubmission.NOT_SUBMITTED
+                )
+            )
+        }
+
+        item {
             Text(stringResource(R.string.grades_class_age))
         }
 
@@ -529,6 +539,10 @@ fun ClazzAssignmentDetailOverviewScreen(
             key = { mark -> mark.camUid }
         ){ mark ->
             MarkListItem(mark, onClickMark)
+        }
+
+        item {
+            Text(stringResource(R.string.class_comments))
         }
     }
 }
