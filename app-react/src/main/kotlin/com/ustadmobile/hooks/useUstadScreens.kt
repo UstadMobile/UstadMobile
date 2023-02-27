@@ -115,6 +115,9 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen("UstadAssignmentFileSubmissionHeader",
                 "UstadAssignmentFileSubmissionHeader Preview",
                 UstadAssignmentFileSubmissionHeaderPreview),
+            UstadScreen(ClazzAssignmentDetailOverviewView.VIEW_NAME,
+                "ClazzAssignmentDetailOverview Preview",
+                ClazzAssignmentDetailOverviewScreenPreview),
         )
     }
 }
