@@ -42,15 +42,8 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AssignmentTurnedIn
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.generated.locale.MessageID
@@ -521,6 +514,16 @@ fun ClazzAssignmentDetailOverviewScreen(
                     assignmentStatus = CourseAssignmentSubmission.NOT_SUBMITTED
                 )
             )
+        }
+
+        item {
+            Row {
+                Icon(
+                    painter = painterResource(R.drawable.book_24px),
+                    contentDescription = "",
+                    modifier = Modifier.size(70.dp)
+                )
+            }
         }
 
         item {
