@@ -29,6 +29,7 @@ import com.ustadmobile.port.android.util.compose.rememberFormattedTime
 @Composable
 fun UstadMarksPersonListItem(
     uiState: UstadMarksPersonListItemUiState,
+    modifier: Modifier = Modifier,
     onClickMark: (CourseAssignmentMarkWithPersonMarker?) -> Unit = {},
 ){
 
@@ -42,7 +43,7 @@ fun UstadMarksPersonListItem(
     val formattedTime = rememberFormattedTime(uiState.mark.camLct?.toInt() ?: 0)
 
     ListItem(
-        modifier = Modifier.clickable {
+        modifier = modifier.clickable {
             onClickMark(uiState.mark)
         },
         icon = {
