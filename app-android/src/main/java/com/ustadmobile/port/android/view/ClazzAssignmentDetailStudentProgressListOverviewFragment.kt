@@ -26,15 +26,19 @@ import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemAssignmentDetailAttemptBinding
 import com.ustadmobile.core.controller.ClazzAssignmentDetailStudentProgressOverviewListPresenter
+import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.controller.SubmissionSummaryListener
 import com.ustadmobile.core.controller.UstadListPresenter
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
 import com.ustadmobile.core.viewmodel.ClazzAssignmentDetailStudentProgressListOverviewUiState
 import com.ustadmobile.core.viewmodel.SchoolDetailOverviewUiState
+import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
+import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -222,27 +226,6 @@ private fun ClazzAssignmentDetailStudentProgressListOverviewScreen(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun AssignmentDetailAttemptListItem (
-    person: AssignmentSubmitterSummary,
-    onClick: (AssignmentSubmitterSummary) -> Unit = {},
-){
-    ListItem(
-        modifier = Modifier.clickable {
-            onClick(person)
-        },
-        icon = {
-            Icon(
-                painter = painterResource(R.drawable.ic_person_black_24dp),
-                contentDescription = "",
-                modifier = Modifier.size(40.dp)
-            )
-        },
-        text = { Text(person.name ?: "") }
-    )
-}
-
 @Composable
 private fun NumberRow(
     number: Int = 0,
@@ -254,6 +237,63 @@ private fun NumberRow(
         Text(number.toString())
         Text(text)
     }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun AssignmentDetailAttemptListItem (
+    person: AssignmentSubmitterSummary,
+    onClick: (AssignmentSubmitterSummary) -> Unit = {},
+){
+
+    val personUiState = person.listItemUiState
+
+    ListItem(
+        modifier = Modifier.clickable {
+            onClick(person)
+        },
+        icon = {
+            Icon(
+                painter = painterResource(R.drawable.ic_person_black_24dp),
+                contentDescription = "",
+                modifier = Modifier.size(40.dp)
+            )
+        },
+        text = { Text(person.name ?: "") },
+        secondaryText = {
+            if (personUiState.latestPrivateCommentVisible){
+                Row{
+                    Icon(
+                        painter = painterResource(R.drawable.ic_baseline_comment_24),
+                        contentDescription = "",
+                        modifier = Modifier.size(12.dp)
+                    )
+                    Text(person.latestPrivateComment ?: "")
+                }
+            }
+        },
+        trailing = {
+            Row{
+                if (personUiState.fileSubmissionStatusIconVisible){
+                    Icon(
+                        painter = painterResource(
+                            ClazzAssignmentDetailOverviewFragment.ASSIGNMENT_STATUS_MAP[
+                                    person.fileSubmissionStatus] ?: R.drawable.ic_done_white_24dp
+                        ),
+                        contentDescription = "",
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+                if (personUiState.fileSubmissionStatusTextVisible){
+                    Text(messageIdResource(
+                        SubmissionConstants.STATUS_MAP[person.fileSubmissionStatus]
+                            ?: MessageID.not_submitted_cap
+                    ))
+                }
+            }
+
+        }
+    )
 }
 
 @Composable
@@ -269,9 +309,9 @@ fun ClazzAssignmentDetailStudentProgressListOverviewScreenPreview() {
             AssignmentSubmitterSummary().apply {
                 submitterUid = 1
                 name = "Bob Dylan"
-
+                latestPrivateComment = "Here is private comment"
             }
-        )
+        ),
     )
 
     MdcTheme {
