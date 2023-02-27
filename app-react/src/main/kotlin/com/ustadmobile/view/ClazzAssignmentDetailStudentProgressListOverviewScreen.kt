@@ -50,24 +50,47 @@ val ClazzAssignmentDetailStudentProgressListOverviewScreenPreview = FC<Props> {
 private val ClazzAssignmentDetailStudentProgressListOverviewScreenComponent2 =
     FC<ClazzAssignmentDetailStudentProgressListOverviewScreenProps> { props ->
 
-    Container {
-        maxWidth = "lg"
+        val strings = useStringsXml()
 
-        Stack {
-            spacing = responsive(10.px)
+        Container {
+            maxWidth = "lg"
+
+            Stack {
+                spacing = responsive(10.px)
 
 
-            List{
+                Stack {
+                    direction = responsive(StackDirection.row)
 
-                props.uiState.assignmentSubmitterList.forEach { personItem ->
-                    AssignmentDetailAttemptListItem {
-                        person = personItem
-                        onClick = props.onClickPerson
+                    Stack {
+
+                        Typography {
+                            + (props.uiState.progressSummary?.calculateNotSubmittedStudents() ?: 0)
+                                .toString()
+                        }
+
+                        Typography {
+                            + (strings[MessageID.not_started])
+                        }
+                    }
+
+                    Divider {
+                        orientation = Orientation.vertical
+                    }
+                }
+
+                List{
+
+                    props.uiState.assignmentSubmitterList.forEach { personItem ->
+                        AssignmentDetailAttemptListItem {
+                            person = personItem
+                            onClick = props.onClickPerson
+                        }
                     }
                 }
             }
         }
-    }
+
 }
 
 
