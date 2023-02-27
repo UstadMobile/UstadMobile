@@ -20,9 +20,9 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val addedCourseAssignmentSubmission: List<CourseAssignmentSubmissionWithAttachment> = emptyList(),
 
-    val commentList: List<CommentsWithPerson> = emptyList(),
+    val publicCommentList: List<CommentsWithPerson> = emptyList(),
 
-    val clazzAssignmentPrivateComments: List<CommentsWithPerson> = emptyList(),
+    val privateCommentList: List<CommentsWithPerson> = emptyList(),
 
     val showPrivateComments: Boolean = true,
 

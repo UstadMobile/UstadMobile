@@ -5,10 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -61,6 +58,7 @@ import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstant
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.UstadAssignmentFileSubmissionHeaderUiState
 import com.ustadmobile.core.viewmodel.listItemUiState
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
@@ -69,6 +67,7 @@ import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment.C
 import com.ustadmobile.port.android.view.composable.UstadAssignmentFileSubmissionHeader
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
+import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import java.util.*
 
 
@@ -469,6 +468,8 @@ fun ClazzAssignmentDetailOverviewScreen(
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
     onClickMark: (CourseAssignmentMarkWithPersonMarker) -> Unit = {},
     onClickComment: (CommentsWithPerson) -> Unit = {},
+    onClickNewPublicComment: () -> Unit = {},
+    onClickNewPrivateComment: () -> Unit = {},
 ){
 
     val formattedDateTime = rememberFormattedDateTime(
@@ -546,9 +547,60 @@ fun ClazzAssignmentDetailOverviewScreen(
             Text(stringResource(R.string.class_comments))
         }
 
+        item {
+            Row{
+                Icon(
+                    painter = painterResource(R.drawable.ic_person_black_24dp),
+                    contentDescription = "",
+                    modifier = Modifier.size(40.dp)
+                )
+
+                UstadTextEditField(
+                    value = "",
+                    label = stringResource(id = R.string.add_class_comment),
+                    readOnly = true,
+                    enabled = uiState.fieldsEnabled,
+                    onValueChange = {
+                        onClickNewPublicComment()
+                    }
+                )
+            }
+        }
+
         items(
-            items = uiState.commentList,
-            key = { comment -> comment.commentsUid }
+            items = uiState.publicCommentList,
+            key = { Pair(1, it.commentsUid) }
+        ){ comment ->
+            CommentListItem(comment, onClickComment)
+        }
+
+        item {
+            Text(stringResource(R.string.private_comments))
+        }
+
+        item {
+            Row{
+                Icon(
+                    painter = painterResource(R.drawable.ic_person_black_24dp),
+                    contentDescription = "",
+                    modifier = Modifier.size(40.dp)
+                )
+
+                UstadTextEditField(
+                    value = "",
+                    label = stringResource(id = R.string.add_private_comment),
+                    readOnly = true,
+                    enabled = uiState.fieldsEnabled,
+                    onValueChange = {
+                        onClickNewPrivateComment()
+                    }
+                )
+            }
+        }
+
+        items(
+            items = uiState.privateCommentList,
+            key = { Pair(2, it.commentsUid) }
         ){ comment ->
             CommentListItem(comment, onClickComment)
         }
@@ -660,7 +712,17 @@ fun ClazzAssignmentDetailOverviewScreenPreview(){
                     }
                 }
             ),
-            commentList = listOf(
+            publicCommentList = listOf(
+                CommentsWithPerson().apply {
+                    commentsUid = 1
+                    commentsPerson = Person().apply {
+                        firstNames = "Bob"
+                        lastName = "Dylan"
+                    }
+                    commentsText = "I like this activity. Shall we discuss this in our next meeting?"
+                }
+            ),
+            privateCommentList = listOf(
                 CommentsWithPerson().apply {
                     commentsUid = 1
                     commentsPerson = Person().apply {
