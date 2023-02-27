@@ -7,13 +7,20 @@ import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.hooks.useFormattedTime
 import com.ustadmobile.lib.db.entities.CourseAssignmentMarkWithPersonMarker
 import com.ustadmobile.lib.db.entities.Person
+import csstype.px
+import csstype.rgba
+import js.core.jso
 import mui.icons.material.AccountCircle
+import mui.icons.material.EmojiEvents
+import mui.icons.material.Person2
 import mui.material.*
 import mui.system.responsive
+import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import react.dom.html.ReactHTML.span
 
 external interface UstadMarksPersonListItemProps : Props {
 
@@ -44,7 +51,12 @@ val UstadMarksPersonListItem = FC<UstadMarksPersonListItemProps> { props ->
             }
 
             ListItemIcon {
-                + AccountCircle.create()
+                + Person2.create {
+                    sx {
+                        width = 40.px
+                        height = 40.px
+                    }
+                }
             }
 
             ListItemText {
@@ -52,8 +64,37 @@ val UstadMarksPersonListItem = FC<UstadMarksPersonListItemProps> { props ->
                 secondary = Stack.create {
                     direction = responsive(StackDirection.column)
 
+                    Stack {
+                        direction = responsive(StackDirection.row)
+
+                        Icon {
+                            + EmojiEvents.create()
+                        }
+
+                        Typography {
+                            + ("${props.uiState.mark.camMark}/${props.uiState.block.cbMaxPoints}" +
+                                    " ${strings[MessageID.points]}")
+
+                            + " "
+
+                            if (markUiSate.camPenaltyVisible) {
+                                span { style = jso {
+                                    color = rgba(255, 0,0, 1.0)
+                                }
+                                    child(ReactNode(
+                                        strings[MessageID.late_penalty]
+                                            .replace("%1\$s", (
+                                                    props.uiState.block.cbLateSubmissionPenalty)
+                                                .toString())
+                                    ))
+                                }
+                            }
+                        }
+                    }
+
+
                     Typography {
-                        + ("")
+                        + (props.uiState.mark.camMarkerComment ?: "")
                     }
                 }
             }
