@@ -45,14 +45,10 @@ import androidx.compose.material.*
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ustadmobile.core.controller.PersonConstants
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.UstadAssignmentFileSubmissionHeaderUiState
 import com.ustadmobile.core.viewmodel.listItemUiState
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import com.ustadmobile.port.android.util.compose.rememberFormattedTime
