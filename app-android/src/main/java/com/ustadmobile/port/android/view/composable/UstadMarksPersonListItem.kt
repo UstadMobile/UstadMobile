@@ -7,25 +7,23 @@ import androidx.compose.material.Icon
 import androidx.compose.material.ListItem
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.db.dao.ClazzDaoCommon
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.UstadMarksPersonListItemUiState
 import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.lib.db.entities.CourseAssignmentMarkWithPersonMarker
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.util.compose.rememberFormattedTime
-
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -57,23 +55,28 @@ fun UstadMarksPersonListItem(
         text = { Text(text) },
         secondaryText = {
             Column {
-                Text(
-                    ""
-//                    buildAnnotatedString {
-//                        append("${uiState.assignmentMark?.averageScore ?: 0}" +
-//                                "/${uiState.assignment?.block?.cbMaxPoints ?: 0}" +
-//                                stringResource(R.string.points)
-//                        )
-//
-//
-//                        if (markUiSate.camPenaltyVisible){
-//                            withStyle(style = SpanStyle(color = colorResource(R.color.errorColor))) {
-//                                append(" "+stringResource(R.string.late_penalty,
-//                                    mark.assignment?.block?.cbLateSubmissionPenalty ?: 0))
-//                            }
-//                        }
-//                    }
-                )
+                Row {
+                    Icon(
+                        Icons.Filled.EmojiEvents,
+                        contentDescription = "",
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        buildAnnotatedString {
+                            append("${uiState.mark.camMark}/${uiState.block.cbMaxPoints}" +
+                                    " ${stringResource(R.string.points)}")
+
+
+                            if (markUiSate.camPenaltyVisible){
+                                withStyle(style = SpanStyle(color = colorResource(R.color.errorColor)))
+                                {
+                                    append("  "+stringResource(R.string.late_penalty,
+                                        uiState.block.cbLateSubmissionPenalty))
+                                }
+                            }
+                        }
+                    )
+                }
                 Text(uiState.mark.camMarkerComment ?: "")
             }
         },
@@ -95,6 +98,7 @@ private fun UstadMarksPersonListItemPreview() {
                     isGroup = true
                     camMarkerSubmitterUid = 2
                     camMarkerComment = "Comment"
+                    camPenalty = 3
                 }
             }
         )

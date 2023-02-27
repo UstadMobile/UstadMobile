@@ -1,12 +1,15 @@
 package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.lib.db.entities.CourseAssignmentMarkWithPersonMarker
+import com.ustadmobile.lib.db.entities.CourseBlock
 import kotlin.jvm.JvmInline
 
 
 data class UstadMarksPersonListItemUiState(
 
     val mark: CourseAssignmentMarkWithPersonMarker = CourseAssignmentMarkWithPersonMarker(),
+
+    val block: CourseBlock = CourseBlock()
 
 )
 
