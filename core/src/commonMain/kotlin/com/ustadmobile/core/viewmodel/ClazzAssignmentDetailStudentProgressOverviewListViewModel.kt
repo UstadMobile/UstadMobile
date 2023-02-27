@@ -28,6 +28,6 @@ value class AssignmentSubmitterSummaryUiState(
         get() = person.fileSubmissionStatus != 0
 
     val latestPrivateCommentVisible: Boolean
-        get() = person.latestPrivateComment.isNullOrBlank()
+        get() = !person.latestPrivateComment.isNullOrBlank()
 
 }

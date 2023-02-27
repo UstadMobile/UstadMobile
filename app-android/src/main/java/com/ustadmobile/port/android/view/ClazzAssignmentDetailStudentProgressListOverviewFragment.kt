@@ -310,6 +310,7 @@ fun ClazzAssignmentDetailStudentProgressListOverviewScreenPreview() {
                 submitterUid = 1
                 name = "Bob Dylan"
                 latestPrivateComment = "Here is private comment"
+                fileSubmissionStatus = CourseAssignmentSubmission.MARKED
             }
         ),
     )
