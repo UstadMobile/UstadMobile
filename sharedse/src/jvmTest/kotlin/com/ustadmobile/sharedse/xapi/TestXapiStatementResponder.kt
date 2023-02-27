@@ -53,7 +53,6 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import javax.naming.InitialContext
 import kotlin.random.Random
-import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import io.ktor.client.plugins.contentnegotiation.*
 import kotlinx.coroutines.runBlocking
 
