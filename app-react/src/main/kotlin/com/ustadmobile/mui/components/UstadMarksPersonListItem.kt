@@ -10,7 +10,6 @@ import com.ustadmobile.lib.db.entities.Person
 import csstype.px
 import csstype.rgba
 import js.core.jso
-import mui.icons.material.AccountCircle
 import mui.icons.material.EmojiEvents
 import mui.icons.material.Person2
 import mui.material.*
