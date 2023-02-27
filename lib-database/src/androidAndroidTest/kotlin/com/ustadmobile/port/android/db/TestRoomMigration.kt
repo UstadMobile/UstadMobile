@@ -221,6 +221,16 @@ class TestRoomMigration {
             MIGRATION_107_108.asRoomMigration())
     }
 
+    @Test
+    fun migrate108To109() {
+        helper.createDatabase(TEST_DB, 108).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 109, true,
+            MIGRATION_108_109.asRoomMigration())
+    }
+
 
     companion object {
         const val TEST_DB = "migration-test"

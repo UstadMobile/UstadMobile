@@ -124,13 +124,7 @@ class EpubContentPresenterTest {
                     ContainerAddOptions(containerDirTmp.toDoorUri()))
         }
 
-        mockEpubView = mock {
-
-            on { runOnUiThread(any()) }.doAnswer {invocation ->
-                Thread(invocation.getArgument<Any>(0) as Runnable).start()
-                Unit
-            }
-        }
+        mockEpubView = mock { }
 
 
         //opf var is used when running assertions

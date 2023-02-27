@@ -22,6 +22,9 @@ import kotlin.math.min
  * Handles all navigation within the web application and keeps the internal navigation stack in
  * sync with the history in the browser.
  *
+ * This might start using https://developer.chrome.com/docs/web-platform/navigation-api/ in the
+ * future.
+ *
  * @param ustadUrlDivider Normally the endpoint server and the viewname / args are separated by /#/
  * however on testing this might be different.
  */

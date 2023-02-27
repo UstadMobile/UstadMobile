@@ -184,6 +184,7 @@ class ViewNameToDestMap: DestinationProvider {
             ScopedGrantListView.VIEW_NAME to UstadDestination(R.id.scoped_grant_list_dest),
             ScopedGrantDetailView.VIEW_NAME to UstadDestination(R.id.scoped_grant_detail_dest),
             PanicButtonSettingsView.VIEW_NAME to UstadDestination(R.id.panic_button_settings_dest),
+            GrantAppPermissionView.VIEW_NAME to UstadDestination(R.id.grant_app_permission_dest),
     )
 
     override val navControllerViewId: Int
