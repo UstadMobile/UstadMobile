@@ -52,13 +52,15 @@ fun UstadAssignmentFileSubmissionListItem(
             }
         },
         trailing = {
-            IconButton(
-                onClick = { onClickDeleteSubmission(uiState.fileSubmission) }
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Delete,
-                    contentDescription = "",
-                )
+            if (!uiState.isSubmitted){
+                IconButton(
+                    onClick = { onClickDeleteSubmission(uiState.fileSubmission) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = "",
+                    )
+                }
             }
         }
     )
