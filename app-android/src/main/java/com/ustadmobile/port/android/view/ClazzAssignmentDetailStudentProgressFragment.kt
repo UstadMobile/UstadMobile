@@ -4,6 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -20,13 +29,17 @@ import com.ustadmobile.core.controller.FileSubmissionListItemListener
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ListFilterIdOption
+import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
+import com.ustadmobile.core.viewmodel.ClazzAssignmentDetailStudentProgressUiState
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
+import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import org.kodein.di.direct
@@ -298,4 +311,105 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         mPresenter?.onClickOpenSubmission(submissionCourse)
     }
 
+}
+
+@Composable
+fun ClazzAssignmentDetailStudentProgressScreen(
+    uiState: ClazzAssignmentDetailStudentProgressUiState,
+    onClickSubmitGrade: () -> Unit = {},
+    onClickSubmitGradeAndMarkNext: () -> Unit = {},
+    onAddComment: (String) -> Unit = {},
+    onAddMark: (String) -> Unit = {},
+){
+
+    val markFileSubmissionSubmitGradeAndNextText = if (uiState.submissionScore == null)
+        R.string.submit_grade_and_mark_next
+    else
+        R.string.update_grade_and_mark_next
+
+    val markFileSubmissionSubmitGradeText = if (uiState.submissionScore == null)
+        R.string.submit_grade
+    else
+        R.string.update_grade
+
+    LazyColumn (
+        modifier = Modifier
+            .defaultScreenPadding()
+            .fillMaxSize()
+    ){
+
+        item {
+            Text(text = stringResource(id = R.string.submissions))
+        }
+
+        if (uiState.markStudentVisible){
+            item {
+                UstadTextEditField(
+                    value = "",
+                    label = stringResource(id = R.string.comment),
+                    enabled = uiState.fieldsEnabled,
+                    onValueChange = { comment ->
+                        onAddComment(comment)
+                    }
+                )
+            }
+        }
+
+
+        item {
+            UstadTextEditField(
+                value = "",
+                label = stringResource(id = R.string.points).capitalizeFirstLetter(),
+                error = uiState.submitMarkError,
+                enabled = uiState.fieldsEnabled,
+                onValueChange = { mark ->
+                    onAddMark(mark)
+                }
+            )
+        }
+
+        if (uiState.markStudentVisible){
+            item {
+                Button(
+                    onClick = onClickSubmitGrade,
+                    enabled = uiState.markNextStudentVisible,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = colorResource(id = R.color.primaryColor)
+                    )
+                ) {
+                    Text(
+                        stringResource(markFileSubmissionSubmitGradeText).uppercase(),
+                        color = contentColorFor(
+                            colorResource(id = R.color.primaryColor)
+                        )
+                    )
+
+                }
+            }
+        }
+
+        if (uiState.markNextStudentVisible){
+            item {
+                OutlinedButton(
+                    onClick = onClickSubmitGradeAndMarkNext,
+                    enabled = uiState.markNextStudentVisible,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    Text(stringResource(markFileSubmissionSubmitGradeAndNextText).uppercase())
+                }
+            }
+        }
+
+    }
+}
+
+@Composable
+@Preview
+fun ClazzAssignmentDetailStudentProgressScreenPreview(){
+    ClazzAssignmentDetailStudentProgressScreen(
+        uiState = ClazzAssignmentDetailStudentProgressUiState()
+    )
 }
