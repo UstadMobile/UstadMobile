@@ -29,6 +29,7 @@ import com.ustadmobile.core.controller.FileSubmissionListItemListener
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ListFilterIdOption
+import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
@@ -39,6 +40,7 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
+import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
@@ -320,6 +322,7 @@ fun ClazzAssignmentDetailStudentProgressScreen(
     onClickSubmitGradeAndMarkNext: () -> Unit = {},
     onAddComment: (String) -> Unit = {},
     onAddMark: (String) -> Unit = {},
+    onClickGradeFilterChip: (MessageIdOption2) -> Unit = {},
 ){
 
     val markFileSubmissionSubmitGradeAndNextText = if (uiState.submissionScore == null)
@@ -338,6 +341,19 @@ fun ClazzAssignmentDetailStudentProgressScreen(
             .fillMaxSize()
     ){
 
+        item {
+            Text(text = stringResource(id = R.string.grades_class_age))
+        }
+
+        item {
+            UstadListFilterChipsHeader(
+                filterOptions = uiState.gradeFilterOptions,
+                selectedChipId = uiState.selectedChipId,
+                enabled = uiState.fieldsEnabled,
+                onClickFilterChip = onClickGradeFilterChip
+            )
+        }
+        
         item {
             Text(text = stringResource(id = R.string.submissions))
         }
