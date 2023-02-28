@@ -5,10 +5,10 @@ appId: com.toughra.ustadmobile
   # -----name - username/password
 
   # teachers :
-  # --0-- Teacher Anu - anu/test
+  # --0-- Teacher 1 - t1/test
    # student :
-  # --0-- Student Justin  - justin/test
-  # --1-- Student Caroline  - caroline/test
+  # --0-- Student 1  - s1/test
+  # --1-- Student 2  - s2/test
 
 # test parameters needs to provide for this test :
 # 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
@@ -25,8 +25,8 @@ appId: com.toughra.ustadmobile
     env:
       TESTCOURSENAME: ${TESTCOURSENAME}
       TEACHERFIRSTNAME: "Teacher"
-      TEACHERLASTNAME: "Anu"
-      USERNAME: "anu"
+      TEACHERLASTNAME: "1"
+      USERNAME: "t1"
       GENDER: "Female"
       PASSWORD: "test"
 
@@ -36,8 +36,8 @@ appId: com.toughra.ustadmobile
     env:
       TESTCOURSENAME: ${TESTCOURSENAME}
       STUDENTFIRSTNAME: "Student"
-      STUDENTLASTNAME: "Justin"
-      USERNAME: "justin"
+      STUDENTLASTNAME: "1"
+      USERNAME: "s1"
       GENDER: "Male"
       PASSWORD: "test"
 # add new student using flow - add_new_student_inside_course --------- Caroline Jacob  - Caroline/test
@@ -46,8 +46,8 @@ appId: com.toughra.ustadmobile
     env:
       TESTCOURSENAME: ${TESTCOURSENAME}
       STUDENTFIRSTNAME: "Student"
-      STUDENTLASTNAME: "Caroline"
-      USERNAME: "caroline"
+      STUDENTLASTNAME: "2"
+      USERNAME: "s2"
       GENDER: "Female"
       PASSWORD: "test"
 

@@ -5,9 +5,9 @@ appId: com.toughra.ustadmobile
   # -----name - username/password
 
   # teachers :
-  # --0-- Teacher Anu- anu/test
+  # --0-- Teacher 1- t1/test
    # student :
-  # --0-- Student Justin      - justin/test
+  # --0-- Student 2      - s2/test
 
 
 # test parameters needs to provide for this test :
@@ -25,8 +25,8 @@ appId: com.toughra.ustadmobile
     env:
       TESTCOURSENAME: ${TESTCOURSENAME}
       TEACHERFIRSTNAME: "Teacher"
-      TEACHERLASTNAME: "Anu"
-      USERNAME: "anu"
+      TEACHERLASTNAME: "1"
+      USERNAME: "t1"
       GENDER: "Female"
       PASSWORD: "test"
 
@@ -36,8 +36,8 @@ appId: com.toughra.ustadmobile
     env:
       TESTCOURSENAME: ${TESTCOURSENAME}
       STUDENTFIRSTNAME: "Student"
-      STUDENTLASTNAME: "Justin"
-      USERNAME: "justin"
+      STUDENTLASTNAME: "1"
+      USERNAME: "s1"
       GENDER: "Male"
       PASSWORD: "test"
 

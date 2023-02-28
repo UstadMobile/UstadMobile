@@ -23,8 +23,8 @@ env:
     env:
       TESTCOURSENAME: "Course view Test"
       STUDENTFIRSTNAME: "Student"
-      STUDENTLASTNAME: "Muhammed"
-      USERNAME:  "muhammed"
+      STUDENTLASTNAME: "1"
+      USERNAME:  "s1"
       GENDER: "Male"
       PASSWORD: "test"
 - repeat:
@@ -44,7 +44,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "muhammed"
+      USERNAME: "s1"
       PASSWORD: "test"
 - tapOn: "courses"
 - tapOn: "Course view Test"
