@@ -73,8 +73,7 @@ private fun UstadAssignmentFileSubmissionListItemPreview() {
 
     UstadAssignmentFileSubmissionListItem(
         uiState = UstadAssignmentFileSubmissionListItemUiState(
-            fileNameText = "Content Title",
-            isSubmitted = true
+            fileNameText = "Content Title"
         )
     )
 }

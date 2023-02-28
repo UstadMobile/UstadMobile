@@ -1,8 +1,8 @@
 package com.ustadmobile.core.viewmodel
 
+import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionWithAttachment
-
 
 data class UstadAssignmentFileSubmissionListItemUiState(
 
@@ -12,12 +12,10 @@ data class UstadAssignmentFileSubmissionListItemUiState(
 
     val assignment: ClazzAssignmentWithCourseBlock = ClazzAssignmentWithCourseBlock(),
 
-    val dateTimeMode: Int = 0,
-
-    val isSubmitted: Boolean = false,
-
     val fileNameText: String = "",
 
-//    val selectablePagedListAdapter: SubmissionAdapter = "",
+) {
 
-)
+    val isSubmitted: Boolean
+        get() = fileSubmission.casTimestamp != 0L
+}

@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.*
 import csstype.Padding
 import csstype.px
 import kotlinx.datetime.TimeZone
-import mui.icons.material.Book
+import mui.icons.material.BookOutlined
 import mui.icons.material.Delete
 import mui.material.*
 import mui.system.sx
@@ -48,7 +48,7 @@ val UstadAssignmentFileSubmissionListItem = FC<UstadAssignmentFileSubmissionList
             }
 
             ListItemIcon {
-                Book {
+                BookOutlined {
                     sx {
                         width = 70.px
                         height = 70.px
@@ -83,8 +83,7 @@ val UstadAssignmentFileSubmissionListItemPreview = FC<Props> {
 
     UstadAssignmentFileSubmissionListItem {
         uiState = UstadAssignmentFileSubmissionListItemUiState(
-            fileNameText = "Content Title",
-            isSubmitted = true
+            fileNameText = "Content Title"
         )
     }
 
