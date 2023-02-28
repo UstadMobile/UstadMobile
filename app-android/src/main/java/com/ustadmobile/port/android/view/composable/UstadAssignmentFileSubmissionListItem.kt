@@ -41,7 +41,7 @@ fun UstadAssignmentFileSubmissionListItem(
         icon = {
             Icon(
                 Icons.Outlined.Book,
-                contentDescription = "",
+                contentDescription = stringResource(R.string.delete),
                 modifier = Modifier.size(70.dp)
             )
         },
