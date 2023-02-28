@@ -1,7 +1,5 @@
 package com.ustadmobile.core.viewmodel
 
-package com.ustadmobile.core.viewmodel
-
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.lib.db.entities.*
 
