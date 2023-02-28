@@ -3,8 +3,10 @@ package com.ustadmobile.mui.components
 import com.ustadmobile.hooks.useFormattedTime
 import com.ustadmobile.lib.db.entities.CommentsWithPerson
 import com.ustadmobile.lib.db.entities.Person
-import mui.icons.material.AccountCircle
+import csstype.px
+import mui.icons.material.Person as PersonIcon
 import mui.material.*
+import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
@@ -13,7 +15,7 @@ import react.create
 
 external interface UstadCommentListItemProps : Props {
 
-    var commentwithperson: CommentsWithPerson
+    var commentWithPerson: CommentsWithPerson
 
     var onClickComment: (CommentsWithPerson) -> Unit
 
@@ -21,19 +23,24 @@ external interface UstadCommentListItemProps : Props {
 
 val UstadCommentListItem = FC<UstadCommentListItemProps> { props ->
 
-    val formattedTime = useFormattedTime(props.commentwithperson.commentsDateTimeAdded.toInt())
+    val formattedTime = useFormattedTime(props.commentWithPerson.commentsDateTimeAdded.toInt())
 
     ListItem {
         ListItemButton {
-            onClick = { props.onClickComment(props.commentwithperson) }
+            onClick = { props.onClickComment(props.commentWithPerson) }
 
             ListItemIcon {
-                + AccountCircle.create()
+                + PersonIcon.create {
+                    sx {
+                        width = 40.px
+                        height = 40.px
+                    }
+                }
             }
 
             ListItemText {
-                primary = ReactNode(props.commentwithperson.commentsPerson?.fullName() ?: "")
-                secondary = ReactNode(props.commentwithperson.commentsText ?: "")
+                primary = ReactNode(props.commentWithPerson.commentsPerson?.fullName() ?: "")
+                secondary = ReactNode(props.commentWithPerson.commentsText ?: "")
             }
         }
 
@@ -47,7 +54,7 @@ val UstadCommentListItem = FC<UstadCommentListItemProps> { props ->
 val UstadCommentListItemPreview = FC<Props> {
 
     UstadCommentListItem {
-        commentwithperson = CommentsWithPerson().apply {
+        commentWithPerson = CommentsWithPerson().apply {
             commentsUid = 1
             commentsPerson = Person().apply {
                 firstNames = "Bob"

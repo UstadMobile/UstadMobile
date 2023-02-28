@@ -20,16 +20,16 @@ import com.ustadmobile.port.android.util.compose.rememberFormattedTime
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun UstadCommentListItem(
-    commentwithperson: CommentsWithPerson,
+    commentWithPerson: CommentsWithPerson,
     modifier: Modifier = Modifier,
     onClickComment: (CommentsWithPerson) -> Unit = {},
 ){
 
-    val formattedTime = rememberFormattedTime(commentwithperson.commentsDateTimeAdded.toInt())
+    val formattedTime = rememberFormattedTime(commentWithPerson.commentsDateTimeAdded.toInt())
 
     ListItem(
         modifier = modifier.clickable {
-            onClickComment(commentwithperson)
+            onClickComment(commentWithPerson)
         },
         icon = {
             Icon(
@@ -38,8 +38,8 @@ fun UstadCommentListItem(
                 modifier = Modifier.size(40.dp)
             )
         },
-        text = { Text(commentwithperson.commentsPerson?.fullName() ?: "") },
-        secondaryText = { Text(commentwithperson.commentsText ?: "") },
+        text = { Text(commentWithPerson.commentsPerson?.fullName() ?: "") },
+        secondaryText = { Text(commentWithPerson.commentsText ?: "") },
         trailing = { Text(formattedTime) }
     )
 
@@ -49,7 +49,7 @@ fun UstadCommentListItem(
 @Preview
 private fun UstadCommentListItemPreview() {
     UstadCommentListItem(
-        commentwithperson = CommentsWithPerson().apply {
+        commentWithPerson = CommentsWithPerson().apply {
             commentsUid = 1
             commentsPerson = Person().apply {
                 firstNames = "Bob"
