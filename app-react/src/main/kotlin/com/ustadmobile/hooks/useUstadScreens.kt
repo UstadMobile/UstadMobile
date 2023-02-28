@@ -112,6 +112,8 @@ fun useUstadScreens(): UstadScreens {
             ),
             UstadScreen("VirtualListPreview", "Virtual List Preview",
                 VirtualListPreview),
+            UstadScreen("UstadCommentListItem", "UstadCommentListItem Preview",
+                UstadCommentListItemPreview),
         )
     }
 }
