@@ -36,7 +36,7 @@ fun UstadAddCommentListItem(
                 onClick = onClickAddComment,
                 modifier = Modifier.fillMaxWidth(),
                 border = BorderStroke(0.dp, Color.Transparent),
-                enabled = true,
+                enabled = enabled,
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = colorResource(id = R.color.grey_a_40),
                 )
