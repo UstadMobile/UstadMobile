@@ -7,8 +7,10 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.android.material.composethemeadapter.MdcTheme
@@ -32,7 +34,7 @@ fun UstadAddCommentListItem(
             )
         },
         text = {
-            OutlinedButton(
+            TextButton(
                 onClick = onClickAddComment,
                 modifier = Modifier.fillMaxWidth(),
                 border = BorderStroke(0.dp, Color.Transparent),
@@ -42,7 +44,9 @@ fun UstadAddCommentListItem(
                 )
             ) {
                 Text(
-                    text,
+                    text = text,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier.fillMaxWidth(),
                     color = contentColorFor(
                         colorResource(id = R.color.grey_a_40).copy(0.1F))
                 )
