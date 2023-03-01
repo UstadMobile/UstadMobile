@@ -42,28 +42,29 @@ val UstadAssignmentFileSubmissionHeader = FC<UstadAssignmentFileSubmissionHeader
             icon = imageId
         }
 
-        val pointsElement = Typography.create {
-            + ("${props.uiState.assignmentMark?.averageScore ?: 0}" +
-                    "/${props.uiState.assignment?.block?.cbMaxPoints ?: 0}" +
-                    strings[MessageID.points])
-
-            + " "
-
-            if (props.uiState.latePenaltyVisible) {
-                span { style = jso {
-                    color = rgba(255, 0,0, 1.0)
-                }
-                    child(ReactNode(
-                        strings[MessageID.late_penalty]
-                            .replace("%1\$s", (
-                                    props.uiState.assignment?.block?.cbLateSubmissionPenalty ?: 0)
-                                .toString())
-                    ))
-                }
-            }
-        }
 
         if (props.uiState.showPoints){
+            val pointsElement = Typography.create {
+                + ("${props.uiState.assignmentMark?.averageScore ?: 0}" +
+                        "/${props.uiState.assignment?.block?.cbMaxPoints ?: 0}" +
+                        strings[MessageID.points])
+
+                + " "
+
+                if (props.uiState.latePenaltyVisible) {
+                    span { style = jso {
+                        color = rgba(255, 0,0, 1.0)
+                    }
+                        child(ReactNode(
+                            strings[MessageID.late_penalty]
+                                .replace("%1\$s", (
+                                        props.uiState.assignment?.block?.cbLateSubmissionPenalty ?: 0)
+                                    .toString())
+                        ))
+                    }
+                }
+            }
+
             UstadDetailField{
                 valueText = pointsElement
                 labelText = strings[MessageID.xapi_result_header]

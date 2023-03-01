@@ -41,23 +41,22 @@ fun UstadAssignmentFileSubmissionHeader(
         )
 
 
-        val pointsString : AnnotatedString = buildAnnotatedString {
-            append("${uiState.assignmentMark?.averageScore ?: 0}" +
-                    "/${uiState.assignment?.block?.cbMaxPoints ?: 0}" +
-                    stringResource(R.string.points)
-            )
+        if (uiState.showPoints){
+            val pointsString : AnnotatedString = buildAnnotatedString {
+                append("${uiState.assignmentMark?.averageScore ?: 0}" +
+                        "/${uiState.assignment?.block?.cbMaxPoints ?: 0}" +
+                        stringResource(R.string.points)
+                )
 
 
-            if (uiState.latePenaltyVisible){
-                withStyle(style = SpanStyle(color = Color.Red)) {
-                    append(" "+stringResource(R.string.late_penalty,
-                        uiState.assignment?.block?.cbLateSubmissionPenalty ?: 0))
+                if (uiState.latePenaltyVisible){
+                    withStyle(style = SpanStyle(color = Color.Red)) {
+                        append(" "+stringResource(R.string.late_penalty,
+                            uiState.assignment?.block?.cbLateSubmissionPenalty ?: 0))
+                    }
                 }
             }
-        }
 
-
-        if (uiState.showPoints){
             UstadDetailField(
                 valueText = pointsString,
                 labelText = buildAnnotatedString {
