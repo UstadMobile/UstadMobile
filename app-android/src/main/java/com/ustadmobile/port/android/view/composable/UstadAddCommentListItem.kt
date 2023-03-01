@@ -7,7 +7,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
@@ -48,7 +47,7 @@ fun UstadAddCommentListItem(
                     textAlign = TextAlign.Start,
                     modifier = Modifier.fillMaxWidth(),
                     color = contentColorFor(
-                        colorResource(id = R.color.grey_a_40).copy(0.1F))
+                        colorResource(id = R.color.grey_a_40))
                 )
             }
         }

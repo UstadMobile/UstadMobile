@@ -2,9 +2,7 @@ package com.ustadmobile.mui.components
 
 import csstype.*
 import mui.icons.material.AccountCircle
-import mui.icons.material.Add
 import mui.material.*
-import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
