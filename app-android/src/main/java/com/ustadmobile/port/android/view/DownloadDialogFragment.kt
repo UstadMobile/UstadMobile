@@ -89,7 +89,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
 
 
         mPresenter = DownloadDialogPresenter(context as Context, bundleToMap(arguments),
-                this@DownloadDialogFragment, di, this).also {
+            this@DownloadDialogFragment, di, this).also {
             it.onCreate(null)
             GlobalScope.launch(Dispatchers.Main) {
                 showStorageOptions()

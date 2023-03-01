@@ -29,7 +29,7 @@ val HolidayCalendarDetailComponent2 = FC<HolidayCalendarDetailProps> { props ->
 
             UstadDetailField{
                 labelText = strings[MessageID.name]
-                valueText = props.uiState.holidayCalendar?.umCalendarName ?: ""
+                valueText = ReactNode(props.uiState.holidayCalendar?.umCalendarName ?: "")
                 icon = CalendarToday.create()
             }
 

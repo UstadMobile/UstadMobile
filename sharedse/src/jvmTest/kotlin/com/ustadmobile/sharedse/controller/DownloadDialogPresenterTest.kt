@@ -74,7 +74,7 @@ class DownloadDialogPresenterTest {
 
 
         systemImpl = mock {
-            on { getString(any(), any())}.thenAnswer {
+            on { getString(any<Int>(), any())}.thenAnswer {
                 "${it.arguments[0]}"
             }
         }
@@ -89,11 +89,7 @@ class DownloadDialogPresenterTest {
             }
         }
 
-        mockedDialogView = mock {
-            on { runOnUiThread(any()) } doAnswer {
-                Thread(it.getArgument(0) as Runnable).start()
-            }
-        }
+        mockedDialogView = mock { }
 
         val accountManager: UstadAccountManager by di.instance()
         db =  di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
