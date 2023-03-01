@@ -1,11 +1,11 @@
 package com.ustadmobile.mui.components
 
+import csstype.*
 import mui.icons.material.AccountCircle
 import mui.icons.material.Add
-import mui.material.ListItem
-import mui.material.ListItemButton
-import mui.material.ListItemIcon
-import mui.material.ListItemText
+import mui.material.*
+import mui.system.responsive
+import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
@@ -34,9 +34,15 @@ val UstadAddCommentListItem = FC<UstadAddCommentListItemProps> { props ->
         ListItemButton{
 
             disabled = !(props.enabled ?: true)
-
+            sx {
+                backgroundColor = rgba(0, 0,0, 0.11)
+                borderRadius = 8.px
+            }
             ListItemText{
                 primary = ReactNode(props.text)
+                sx {
+                    color = rgba(0, 0,0, 0.57)
+                }
             }
 
             onClick = {
