@@ -44,6 +44,11 @@ val UstadAddCommentListItem = FC<UstadAddCommentListItemProps> { props ->
         TextField {
             fullWidth = true
             id = props.id
+            onKeyUp = {
+                if(it.key == "Enter") {
+                    props.onClickSubmit()
+                }
+            }
             onChange = {
                 val currentVal = it.target.asDynamic().value
                 props.onChange(currentVal?.toString() ?: "")
