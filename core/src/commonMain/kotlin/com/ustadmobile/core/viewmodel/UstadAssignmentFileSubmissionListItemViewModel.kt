@@ -5,7 +5,7 @@ import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionWithAttachment
 
 data class UstadAssignmentFileSubmissionListItemUiState(
 
-    val fileSubmission: CourseAssignmentSubmissionWithAttachment = CourseAssignmentSubmissionWithAttachment(),
+    val submission: CourseAssignmentSubmissionWithAttachment = CourseAssignmentSubmissionWithAttachment(),
 
     val assignment: ClazzAssignmentWithCourseBlock = ClazzAssignmentWithCourseBlock(),
 
@@ -14,5 +14,5 @@ data class UstadAssignmentFileSubmissionListItemUiState(
 ) {
 
     val isSubmitted: Boolean
-        get() = fileSubmission.casTimestamp != 0L
+        get() = submission.casTimestamp != 0L
 }

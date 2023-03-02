@@ -28,14 +28,14 @@ fun UstadAssignmentFileSubmissionListItem(
 ){
 
     val formattedDateTime = rememberFormattedDateTime(
-        uiState.fileSubmission.casTimestamp,
+        uiState.submission.casTimestamp,
         timeZoneId = TimeZone.getDefault().id
     )
 
     ListItem(
         modifier = modifier
             .clickable {
-                onClickOpenSubmission(uiState.fileSubmission)
+                onClickOpenSubmission(uiState.submission)
             },
 
         icon = {
@@ -54,7 +54,7 @@ fun UstadAssignmentFileSubmissionListItem(
         trailing = {
             if (!uiState.isSubmitted){
                 IconButton(
-                    onClick = { onClickDeleteSubmission(uiState.fileSubmission) }
+                    onClick = { onClickDeleteSubmission(uiState.submission) }
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Delete,

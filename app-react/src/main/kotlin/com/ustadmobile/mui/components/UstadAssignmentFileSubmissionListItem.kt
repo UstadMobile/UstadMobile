@@ -1,8 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.viewmodel.UstadAssignmentFileSubmissionListItemUiState
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.entities.*
 import csstype.Padding
@@ -19,13 +17,13 @@ import react.create
 
 external interface UstadAssignmentFileSubmissionListItemProps: Props {
 
-    var uiState: UstadAssignmentFileSubmissionListItemUiState
+    var submission: CourseAssignmentSubmissionWithAttachment
 
     var padding: Padding
 
     var onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit
 
-    var onClickDeleteSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit
+    var onClickDeleteSubmission: ((CourseAssignmentSubmissionWithAttachment) -> Unit)?
 
 }
 
@@ -33,7 +31,7 @@ val UstadAssignmentFileSubmissionListItem = FC<UstadAssignmentFileSubmissionList
         props ->
 
     val formattedDateTime = useFormattedDateAndTime(
-        timeInMillis = props.uiState.fileSubmission.casTimestamp,
+        timeInMillis = props.submission.casTimestamp,
         timezoneId = TimeZone.currentSystemDefault().id
     )
 
@@ -41,7 +39,7 @@ val UstadAssignmentFileSubmissionListItem = FC<UstadAssignmentFileSubmissionList
 
     ListItem{
         ListItemButton{
-            onClick = { props.onClickOpenSubmission(props.uiState.fileSubmission) }
+            onClick = { props.onClickOpenSubmission(props.submission) }
 
             sx {
                 padding = props.padding
@@ -58,20 +56,22 @@ val UstadAssignmentFileSubmissionListItem = FC<UstadAssignmentFileSubmissionList
             }
 
             ListItemText {
-                primary = ReactNode(props.uiState.fileNameText)
+                primary = ReactNode(props.fileNameText)
 
-                if (props.uiState.isSubmitted){
-
-                    secondary = ReactNode(
-                        "${strings[MessageID.submitted_cap]}:$formattedDateTime")
-
-                }
+//                if (props.isSubmitted){
+//
+//                    secondary = ReactNode(
+//                        "${strings[MessageID.submitted_cap]}:$formattedDateTime")
+//
+//                }
             }
         }
 
-        if (!props.uiState.isSubmitted) {
+        if (props.onClickDeleteSubmission != null) {
             secondaryAction = IconButton.create {
-                onClick = { props.onClickDeleteSubmission(props.uiState.fileSubmission) }
+                onClick = { props.onClickDeleteSubmission?.let {
+                        it1 -> it1(props.submission)
+                } }
                 Delete {}
             }
         }
@@ -82,9 +82,6 @@ val UstadAssignmentFileSubmissionListItem = FC<UstadAssignmentFileSubmissionList
 val UstadAssignmentFileSubmissionListItemPreview = FC<Props> {
 
     UstadAssignmentFileSubmissionListItem {
-        uiState = UstadAssignmentFileSubmissionListItemUiState(
-            fileNameText = "Content Title"
-        )
     }
 
 }
