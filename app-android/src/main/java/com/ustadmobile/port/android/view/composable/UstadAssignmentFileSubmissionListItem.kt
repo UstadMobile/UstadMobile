@@ -24,7 +24,7 @@ fun UstadAssignmentFileSubmissionListItem(
     modifier: Modifier = Modifier,
     submission: CourseAssignmentSubmissionWithAttachment,
     onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = {},
-    onClickDeleteSubmission: ((CourseAssignmentSubmissionWithAttachment) -> Unit)?
+    onClickDeleteSubmission: ((CourseAssignmentSubmissionWithAttachment) -> Unit)? = null
 ){
 
     val formattedDateTime = rememberFormattedDateTime(
