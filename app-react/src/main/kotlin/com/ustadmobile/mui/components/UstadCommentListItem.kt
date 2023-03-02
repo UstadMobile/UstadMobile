@@ -17,8 +17,6 @@ external interface UstadCommentListItemProps : Props {
 
     var commentWithPerson: CommentsWithPerson
 
-    var onClickComment: (CommentsWithPerson) -> Unit
-
 }
 
 val UstadCommentListItem = FC<UstadCommentListItemProps> { props ->
@@ -26,22 +24,19 @@ val UstadCommentListItem = FC<UstadCommentListItemProps> { props ->
     val formattedTime = useFormattedTime(props.commentWithPerson.commentsDateTimeAdded.toInt())
 
     ListItem {
-        ListItemButton {
-            onClick = { props.onClickComment(props.commentWithPerson) }
 
-            ListItemIcon {
-                + PersonIcon.create {
-                    sx {
-                        width = 40.px
-                        height = 40.px
-                    }
+        ListItemIcon {
+            + PersonIcon.create {
+                sx {
+                    width = 40.px
+                    height = 40.px
                 }
             }
+        }
 
-            ListItemText {
-                primary = ReactNode(props.commentWithPerson.commentsPerson?.fullName() ?: "")
-                secondary = ReactNode(props.commentWithPerson.commentsText ?: "")
-            }
+        ListItemText {
+            primary = ReactNode(props.commentWithPerson.commentsPerson?.fullName() ?: "")
+            secondary = ReactNode(props.commentWithPerson.commentsText ?: "")
         }
 
         secondaryAction = Typography.create {

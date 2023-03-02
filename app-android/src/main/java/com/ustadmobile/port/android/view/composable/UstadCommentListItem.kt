@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view.composable
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -22,15 +21,12 @@ import com.ustadmobile.port.android.util.compose.rememberFormattedTime
 fun UstadCommentListItem(
     commentWithPerson: CommentsWithPerson,
     modifier: Modifier = Modifier,
-    onClickComment: (CommentsWithPerson) -> Unit = {},
 ){
 
     val formattedTime = rememberFormattedTime(commentWithPerson.commentsDateTimeAdded.toInt())
 
     ListItem(
-        modifier = modifier.clickable {
-            onClickComment(commentWithPerson)
-        },
+        modifier = modifier,
         icon = {
             Icon(
                 painter = painterResource(R.drawable.ic_person_black_24dp),
