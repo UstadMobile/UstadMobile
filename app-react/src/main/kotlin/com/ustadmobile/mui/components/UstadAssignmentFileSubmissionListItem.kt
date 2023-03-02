@@ -1,5 +1,6 @@
 package com.ustadmobile.mui.components
 
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.entities.*
@@ -56,14 +57,14 @@ val UstadAssignmentFileSubmissionListItem = FC<UstadAssignmentFileSubmissionList
             }
 
             ListItemText {
-                primary = ReactNode(props.fileNameText)
+                primary = ReactNode(props.submission.displayTitle)
 
-//                if (props.isSubmitted){
-//
-//                    secondary = ReactNode(
-//                        "${strings[MessageID.submitted_cap]}:$formattedDateTime")
-//
-//                }
+                if (props.submission.casTimestamp.isSetDate()){
+
+                    secondary = ReactNode(
+                        "${strings[MessageID.submitted_cap]}:$formattedDateTime")
+
+                }
             }
         }
 
@@ -82,6 +83,9 @@ val UstadAssignmentFileSubmissionListItem = FC<UstadAssignmentFileSubmissionList
 val UstadAssignmentFileSubmissionListItemPreview = FC<Props> {
 
     UstadAssignmentFileSubmissionListItem {
+        submission = CourseAssignmentSubmissionWithAttachment().apply {
+
+        }
     }
 
 }
