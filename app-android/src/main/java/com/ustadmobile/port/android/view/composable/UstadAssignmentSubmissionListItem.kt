@@ -20,7 +20,7 @@ import java.util.*
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun UstadAssignmentFileSubmissionListItem(
+fun UstadAssignmentSubmissionListItem(
     modifier: Modifier = Modifier,
     submission: CourseAssignmentSubmissionWithAttachment,
     onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = {},
@@ -41,7 +41,7 @@ fun UstadAssignmentFileSubmissionListItem(
         icon = {
             Icon(
                 Icons.Outlined.Book,
-                contentDescription = stringResource(R.string.delete),
+                contentDescription = "",
                 modifier = Modifier.size(70.dp)
             )
         },
@@ -58,7 +58,7 @@ fun UstadAssignmentFileSubmissionListItem(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Delete,
-                        contentDescription = "",
+                        contentDescription = stringResource(R.string.delete),
                     )
                 }
             }
@@ -69,9 +69,9 @@ fun UstadAssignmentFileSubmissionListItem(
 
 @Composable
 @Preview
-private fun UstadAssignmentFileSubmissionListItemPreview() {
+private fun UstadAssignmentSubmissionListItemPreview() {
 
-    UstadAssignmentFileSubmissionListItem(
+    UstadAssignmentSubmissionListItem(
         submission = CourseAssignmentSubmissionWithAttachment().apply {
             casTimestamp = 1677744388299
             casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE

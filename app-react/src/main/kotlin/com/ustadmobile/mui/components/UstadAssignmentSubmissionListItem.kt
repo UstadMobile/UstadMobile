@@ -15,8 +15,9 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import react.dom.aria.ariaLabel
 
-external interface UstadAssignmentFileSubmissionListItemProps: Props {
+external interface UstadAssignmentSubmissionListItemProps: Props {
 
     var submission: CourseAssignmentSubmissionWithAttachment
 
@@ -28,7 +29,7 @@ external interface UstadAssignmentFileSubmissionListItemProps: Props {
 
 }
 
-val UstadAssignmentFileSubmissionListItem = FC<UstadAssignmentFileSubmissionListItemProps> {
+val UstadAssignmentSubmissionListItem = FC<UstadAssignmentSubmissionListItemProps> {
         props ->
 
     val formattedDateTime = useFormattedDateAndTime(
@@ -68,11 +69,13 @@ val UstadAssignmentFileSubmissionListItem = FC<UstadAssignmentFileSubmissionList
             }
         }
 
-        if (props.onClickDeleteSubmission != null) {
+        val onClickDeleteSubmission = props.onClickDeleteSubmission
+        if (onClickDeleteSubmission != null) {
             secondaryAction = IconButton.create {
-                onClick = { props.onClickDeleteSubmission?.let {
-                        it1 -> it1(props.submission)
-                } }
+                ariaLabel = strings[MessageID.delete]
+                onClick = {
+                    onClickDeleteSubmission(props.submission)
+                }
                 Delete {}
             }
         }
@@ -82,7 +85,7 @@ val UstadAssignmentFileSubmissionListItem = FC<UstadAssignmentFileSubmissionList
 
 val UstadAssignmentFileSubmissionListItemPreview = FC<Props> {
 
-    UstadAssignmentFileSubmissionListItem {
+    UstadAssignmentSubmissionListItem {
         submission = CourseAssignmentSubmissionWithAttachment().apply {
             casTimestamp = 1677744388299
             casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
