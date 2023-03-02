@@ -13,6 +13,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.viewmodel.UstadAssignmentFileSubmissionHeaderUiState
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.port.android.util.compose.messageIdResource
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment
 
 
@@ -34,6 +35,7 @@ fun UstadAssignmentFileSubmissionHeader(
 
 
         UstadDetailField(
+            modifier = Modifier.defaultItemPadding(),
             valueText = messageIdResource(SubmissionConstants.STATUS_MAP
                     [uiState.assignmentStatus] ?: MessageID.not_submitted_cap),
             labelText = stringResource(R.string.status),
@@ -41,24 +43,25 @@ fun UstadAssignmentFileSubmissionHeader(
         )
 
 
-        val pointsString : AnnotatedString = buildAnnotatedString {
-            append("${uiState.assignmentMark?.averageScore ?: 0}" +
-                    "/${uiState.assignment?.block?.cbMaxPoints ?: 0}" +
-                    stringResource(R.string.points)
-            )
+        if (uiState.showPoints){
+
+            val pointsString : AnnotatedString = buildAnnotatedString {
+                append("${uiState.assignmentMark?.averageScore ?: 0}" +
+                        "/${uiState.assignment?.block?.cbMaxPoints ?: 0}" +
+                        stringResource(R.string.points)
+                )
 
 
-            if (uiState.latePenaltyVisible){
-                withStyle(style = SpanStyle(color = Color.Red)) {
-                    append(" "+stringResource(R.string.late_penalty,
-                        uiState.assignment?.block?.cbLateSubmissionPenalty ?: 0))
+                if (uiState.latePenaltyVisible){
+                    withStyle(style = SpanStyle(color = Color.Red)) {
+                        append(" "+stringResource(R.string.late_penalty,
+                            uiState.assignment?.block?.cbLateSubmissionPenalty ?: 0))
+                    }
                 }
             }
-        }
 
-
-        if (uiState.showPoints){
             UstadDetailField(
+                modifier = Modifier.defaultItemPadding(),
                 valueText = pointsString,
                 labelText = buildAnnotatedString {
                     append(stringResource(R.string.xapi_result_header))
@@ -66,7 +69,6 @@ fun UstadAssignmentFileSubmissionHeader(
                 imageId = R.drawable.ic_baseline_emoji_events_24,
             )
         }
-
 
     }
 }
