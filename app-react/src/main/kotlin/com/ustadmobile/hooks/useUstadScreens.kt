@@ -112,6 +112,7 @@ fun useUstadScreens(): UstadScreens {
             ),
             UstadScreen("VirtualListPreview", "Virtual List Preview",
                 VirtualListPreview),
+            UstadScreen("PeerReviewerAllocationEditPreview", "PeerReviewerAllocationEdit Preview", PeerReviewerAllocationEditPreview)
         )
     }
 }

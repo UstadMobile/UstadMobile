@@ -4,6 +4,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Button
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ListItem
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -13,9 +27,14 @@ import com.ustadmobile.core.controller.PeerReviewerAllocationEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PeerReviewerAllocationEditView
+import com.ustadmobile.core.viewmodel.PeerReviewerAllocationEditUIState
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterWithAllocations
+import com.ustadmobile.lib.db.entities.PeerReviewerAllocation
 import com.ustadmobile.lib.db.entities.PeerReviewerAllocationList
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
+import com.ustadmobile.port.android.view.composable.UstadExposedDropDownMenuField
 
 
 interface PeerReviewerAllocationEditFragmentEventHandler {
@@ -119,4 +138,113 @@ class PeerReviewerAllocationEditFragment: UstadEditFragment<PeerReviewerAllocati
             super.fieldsEnabled = value
             field = value
         }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun PeerReviewerAllocationEditScreen(
+    uiState: PeerReviewerAllocationEditUIState,
+    onAssignRandomReviewerClick: () -> Unit = {},
+    onAllocationClick: (AssignmentSubmitterWithAllocations) -> Unit = {}
+){
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    ){
+        item {
+            Button(
+                onClick = onAssignRandomReviewerClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                Text(text = stringResource(id = R.string.assign_random_reviewers).uppercase())
+            }
+        }
+
+        items(
+            uiState.submitterListWithAllocations,
+            key = {it.submitterUid}
+        ){ submitter ->
+            val submitters = uiState.submitterListWithAllocations.filter { it.name != submitter.name }
+            Text(
+                text = submitter.name ?: "",
+                style = Typography.body1,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+            )
+            submitter.allocations?.forEachIndexed { index, allocation ->
+
+                ListItem(
+                    text = { Text(
+                        text = stringResource(id = R.string.reviewer, (index+1).toString()),
+                        style = Typography.body2
+                    )},
+                    trailing = {
+                        UstadExposedDropDownMenuField(
+                            value = submitters.first().name,
+                            label = "",
+                            options = submitters,
+                            onOptionSelected = {
+                                  onAllocationClick(submitter.shallowCopy{
+                                      name = it.toString()
+                                  })
+                            },
+                            itemText =  { "$it" },
+                            modifier = Modifier
+                                .width(120.dp)
+                        )
+                    }
+                )
+            }
+        }
+
+    }
+}
+
+@Composable
+@Preview
+fun PeerReviewerAllocationEditPreview(){
+    PeerReviewerAllocationEditScreen(
+        uiState = PeerReviewerAllocationEditUIState(
+            submitterListWithAllocations = listOf(
+                AssignmentSubmitterWithAllocations().apply {
+                    name = "Maryam"
+                    submitterUid = 3
+                    allocations = listOf(
+                        PeerReviewerAllocation().apply {
+                            praUid = 380
+                        },
+                        PeerReviewerAllocation().apply {
+                            praUid = 400
+                        }
+                    )
+                },
+                AssignmentSubmitterWithAllocations().apply {
+                    name = "Ahmad"
+                    submitterUid = 1
+                    allocations = listOf(
+                        PeerReviewerAllocation().apply {
+                            praUid = 38
+                        },
+                        PeerReviewerAllocation().apply {
+                            praUid = 40
+                        }
+                    )
+                },
+                AssignmentSubmitterWithAllocations().apply {
+                    name = "Intelligent Students"
+                    submitterUid = 2
+                    allocations = listOf(
+                        PeerReviewerAllocation().apply {
+                            praUid = 99
+                        },
+                        PeerReviewerAllocation().apply {
+                            praUid = 23
+                        }
+                    )
+                }
+            ),
+        )
+    )
 }
