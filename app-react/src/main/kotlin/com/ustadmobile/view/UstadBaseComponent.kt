@@ -184,10 +184,6 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
         dispatch(ReduxSnackBarState(message, getString(actionMessageId), action))
     }
 
-    override fun runOnUiThread(r: Runnable?) {
-        r?.run()
-    }
-
     override val di: DI by DI.lazy {
         extend(getCurrentState().di.instance)
     }

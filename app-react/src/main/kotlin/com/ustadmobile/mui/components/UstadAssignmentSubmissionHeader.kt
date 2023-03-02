@@ -3,7 +3,7 @@ package com.ustadmobile.mui.components
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.viewmodel.UstadAssignmentFileSubmissionHeaderUiState
+import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.view.ASSIGNMENT_STATUS_MAP
 import csstype.rgba
@@ -16,13 +16,13 @@ import mui.system.Stack
 import react.*
 import react.dom.html.ReactHTML.span
 
-external interface UstadAssignmentFileSubmissionHeaderProps: Props {
+external interface UstadAssignmentSubmissionHeaderProps: Props {
 
-    var uiState: UstadAssignmentFileSubmissionHeaderUiState
+    var uiState: UstadAssignmentSubmissionHeaderUiState
 
 }
 
-val UstadAssignmentFileSubmissionHeader = FC<UstadAssignmentFileSubmissionHeaderProps> {
+val UstadAssignmentSubmissionHeader = FC<UstadAssignmentSubmissionHeaderProps> {
         props ->
 
     val strings = useStringsXml()
@@ -45,10 +45,10 @@ val UstadAssignmentFileSubmissionHeader = FC<UstadAssignmentFileSubmissionHeader
 
         if (props.uiState.showPoints){
             val pointsElement = Typography.create {
-                + ("${props.uiState.assignmentMark?.averageScore ?: 0}" +
-                        "/${props.uiState.assignment?.block?.cbMaxPoints ?: 0}" +
-                        strings[MessageID.points])
-
+                + (props.uiState.assignmentMark?.averageScore?.toString() ?: "")
+                + "/"
+                + (props.uiState.block?.cbMaxPoints?.toString() ?: "")
+                + strings[MessageID.points]
                 + " "
 
                 if (props.uiState.latePenaltyVisible) {
@@ -58,7 +58,7 @@ val UstadAssignmentFileSubmissionHeader = FC<UstadAssignmentFileSubmissionHeader
                         child(ReactNode(
                             strings[MessageID.late_penalty]
                                 .replace("%1\$s", (
-                                        props.uiState.assignment?.block?.cbLateSubmissionPenalty ?: 0)
+                                        props.uiState.block?.cbLateSubmissionPenalty ?: 0)
                                     .toString())
                         ))
                     }
@@ -76,8 +76,8 @@ val UstadAssignmentFileSubmissionHeader = FC<UstadAssignmentFileSubmissionHeader
 }
 
 val UstadAssignmentFileSubmissionHeaderPreview = FC<Props> {
-    UstadAssignmentFileSubmissionHeader {
-        uiState = UstadAssignmentFileSubmissionHeaderUiState(
+    UstadAssignmentSubmissionHeader {
+        uiState = UstadAssignmentSubmissionHeaderUiState(
             assignmentStatus = CourseAssignmentSubmission.NOT_SUBMITTED
         )
     }

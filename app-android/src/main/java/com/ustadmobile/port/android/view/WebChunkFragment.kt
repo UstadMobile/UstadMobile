@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
+import androidx.lifecycle.lifecycleScope
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentWebChunkBinding
 import com.ustadmobile.core.account.UstadAccountManager
@@ -19,6 +20,7 @@ import com.ustadmobile.core.view.WebChunkView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.impl.WebChunkWebViewClient
+import kotlinx.coroutines.launch
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -78,7 +80,7 @@ class WebChunkFragment : UstadBaseFragment(), WebChunkView, FragmentBackHandler 
         get() = field
         set(value) {
             field = value
-            runOnUiThread{
+            viewLifecycleOwner.lifecycleScope.launch {
                 webView?.loadUrl(value)
             }
         }

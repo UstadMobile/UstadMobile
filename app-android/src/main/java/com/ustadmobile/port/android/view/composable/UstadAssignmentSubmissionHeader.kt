@@ -10,7 +10,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.viewmodel.UstadAssignmentFileSubmissionHeaderUiState
+import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
@@ -18,8 +18,8 @@ import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment
 
 
 @Composable
-fun UstadAssignmentFileSubmissionHeader(
-    uiState: UstadAssignmentFileSubmissionHeaderUiState,
+fun UstadAssignmentSubmissionHeader(
+    uiState: UstadAssignmentSubmissionHeaderUiState,
     modifier: Modifier = Modifier,
 ){
     Column(
@@ -46,8 +46,8 @@ fun UstadAssignmentFileSubmissionHeader(
         if (uiState.showPoints){
 
             val pointsString : AnnotatedString = buildAnnotatedString {
-                append("${uiState.assignmentMark?.averageScore ?: 0}" +
-                        "/${uiState.assignment?.block?.cbMaxPoints ?: 0}" +
+                append((uiState.assignmentMark?.averageScore?.toString() ?: "") +
+                        "/${uiState.block?.cbMaxPoints ?: 0}" +
                         stringResource(R.string.points)
                 )
 
@@ -55,7 +55,7 @@ fun UstadAssignmentFileSubmissionHeader(
                 if (uiState.latePenaltyVisible){
                     withStyle(style = SpanStyle(color = Color.Red)) {
                         append(" "+stringResource(R.string.late_penalty,
-                            uiState.assignment?.block?.cbLateSubmissionPenalty ?: 0))
+                            uiState.block?.cbLateSubmissionPenalty ?: 0))
                     }
                 }
             }
@@ -76,9 +76,9 @@ fun UstadAssignmentFileSubmissionHeader(
 
 @Composable
 @Preview
-private fun UstadAssignmentFileSubmissionHeaderPreview() {
-    UstadAssignmentFileSubmissionHeader(
-        uiState = UstadAssignmentFileSubmissionHeaderUiState(
+private fun UstadAssignmentSubmissionHeaderPreview() {
+    UstadAssignmentSubmissionHeader(
+        uiState = UstadAssignmentSubmissionHeaderUiState(
             assignmentStatus = CourseAssignmentSubmission.NOT_SUBMITTED
         )
     )
