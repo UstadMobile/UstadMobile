@@ -10,7 +10,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.viewmodel.UstadAssignmentFileSubmissionHeaderUiState
+import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
@@ -18,8 +18,8 @@ import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment
 
 
 @Composable
-fun UstadAssignmentFileSubmissionHeader(
-    uiState: UstadAssignmentFileSubmissionHeaderUiState,
+fun UstadAssignmentSubmissionHeader(
+    uiState: UstadAssignmentSubmissionHeaderUiState,
     modifier: Modifier = Modifier,
 ){
     Column(
@@ -76,9 +76,9 @@ fun UstadAssignmentFileSubmissionHeader(
 
 @Composable
 @Preview
-private fun UstadAssignmentFileSubmissionHeaderPreview() {
-    UstadAssignmentFileSubmissionHeader(
-        uiState = UstadAssignmentFileSubmissionHeaderUiState(
+private fun UstadAssignmentSubmissionHeaderPreview() {
+    UstadAssignmentSubmissionHeader(
+        uiState = UstadAssignmentSubmissionHeaderUiState(
             assignmentStatus = CourseAssignmentSubmission.NOT_SUBMITTED
         )
     )

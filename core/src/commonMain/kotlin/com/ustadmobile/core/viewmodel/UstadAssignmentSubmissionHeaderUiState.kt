@@ -4,7 +4,7 @@ import com.ustadmobile.lib.db.entities.AverageCourseAssignmentMark
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.lib.db.entities.CourseBlock
 
-data class UstadAssignmentFileSubmissionHeaderUiState(
+data class UstadAssignmentSubmissionHeaderUiState(
 
     val block: CourseBlock? = null,
 
