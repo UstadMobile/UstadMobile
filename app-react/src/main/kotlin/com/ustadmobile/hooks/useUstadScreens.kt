@@ -113,7 +113,7 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen("VirtualListPreview", "Virtual List Preview",
                 VirtualListPreview),
             UstadScreen("UstadMarksPersonListItem", "UstadMarksPersonListItem Preview",
-                UstadMarksPersonListItemPreview),
+                UstadCourseAssignmentMarkListItemPreview),
         )
     }
 }

@@ -102,7 +102,7 @@ val UstadCourseAssignmentMarkListItem = FC<UstadCourseAssignmentMarkListItemProp
     }
 }
 
-val UstadMarksPersonListItemPreview = FC<Props> {
+val UstadCourseAssignmentMarkListItemPreview = FC<Props> {
 
     UstadCourseAssignmentMarkListItem {
         uiState = UstadCourseAssignmentMarkListItem(
