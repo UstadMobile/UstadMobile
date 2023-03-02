@@ -12,7 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.viewmodel.UstadAssignmentFileSubmissionListItemUiState
+import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import java.util.*
@@ -22,20 +22,20 @@ import java.util.*
 @Composable
 fun UstadAssignmentFileSubmissionListItem(
     modifier: Modifier = Modifier,
-    uiState: UstadAssignmentFileSubmissionListItemUiState,
+    submission: CourseAssignmentSubmissionWithAttachment,
     onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = {},
-    onClickDeleteSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = {}
+    onClickDeleteSubmission: ((CourseAssignmentSubmissionWithAttachment) -> Unit)?
 ){
 
     val formattedDateTime = rememberFormattedDateTime(
-        uiState.submission.casTimestamp,
+        submission.casTimestamp,
         timeZoneId = TimeZone.getDefault().id
     )
 
     ListItem(
         modifier = modifier
             .clickable {
-                onClickOpenSubmission(uiState.submission)
+                onClickOpenSubmission(submission)
             },
 
         icon = {
@@ -45,16 +45,16 @@ fun UstadAssignmentFileSubmissionListItem(
                 modifier = Modifier.size(70.dp)
             )
         },
-        text = { Text(uiState.fileNameText) },
+        text = { Text(submission.displayTitle) },
         secondaryText = {
-            if (uiState.isSubmitted){
-               Text("${stringResource(R.string.submitted_cap)}:$formattedDateTime")
+            if (submission.casTimestamp.isDateSet()){
+                Text("${stringResource(R.string.submitted_cap)}: $formattedDateTime")
             }
         },
         trailing = {
-            if (!uiState.isSubmitted){
+            if (onClickDeleteSubmission != null) {
                 IconButton(
-                    onClick = { onClickDeleteSubmission(uiState.submission) }
+                    onClick = { onClickDeleteSubmission(submission) }
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Delete,
@@ -72,8 +72,12 @@ fun UstadAssignmentFileSubmissionListItem(
 private fun UstadAssignmentFileSubmissionListItemPreview() {
 
     UstadAssignmentFileSubmissionListItem(
-        uiState = UstadAssignmentFileSubmissionListItemUiState(
-            fileNameText = "Content Title"
-        )
+        submission = CourseAssignmentSubmissionWithAttachment().apply {
+            casTimestamp = 1677744388299
+            casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
+            attachment = CourseAssignmentSubmissionAttachment().apply {
+                casaFileName = "Content Title"
+            }
+        }
     )
 }
