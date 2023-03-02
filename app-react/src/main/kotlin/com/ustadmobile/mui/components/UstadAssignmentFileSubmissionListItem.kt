@@ -62,7 +62,7 @@ val UstadAssignmentFileSubmissionListItem = FC<UstadAssignmentFileSubmissionList
                 if (props.submission.casTimestamp.isSetDate()){
 
                     secondary = ReactNode(
-                        "${strings[MessageID.submitted_cap]}:$formattedDateTime")
+                        "${strings[MessageID.submitted_cap]}: $formattedDateTime")
 
                 }
             }
@@ -84,7 +84,11 @@ val UstadAssignmentFileSubmissionListItemPreview = FC<Props> {
 
     UstadAssignmentFileSubmissionListItem {
         submission = CourseAssignmentSubmissionWithAttachment().apply {
-
+            casTimestamp = 1677744388299
+            casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
+            attachment = CourseAssignmentSubmissionAttachment().apply {
+                casaFileName = "Content Title"
+            }
         }
     }
 
