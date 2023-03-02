@@ -2,8 +2,7 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.viewmodel.UstadMarksPersonListItemUiState
-import com.ustadmobile.core.viewmodel.listItemUiState
+import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItem
 import com.ustadmobile.hooks.useFormattedTime
 import com.ustadmobile.lib.db.entities.CourseAssignmentMarkWithPersonMarker
 import com.ustadmobile.lib.db.entities.Person
@@ -21,22 +20,21 @@ import react.ReactNode
 import react.create
 import react.dom.html.ReactHTML.span
 
-external interface UstadMarksPersonListItemProps : Props {
+external interface UstadCourseAssignmentMarkListItemProps : Props {
 
-    var uiState: UstadMarksPersonListItemUiState
+    var uiState: UstadCourseAssignmentMarkListItem
 
     var onClickMark: (CourseAssignmentMarkWithPersonMarker) -> Unit
 
 }
 
-val UstadMarksPersonListItem = FC<UstadMarksPersonListItemProps> { props ->
+val UstadCourseAssignmentMarkListItem = FC<UstadCourseAssignmentMarkListItemProps> { props ->
 
     val strings = useStringsXml()
 
-    val markUiSate = props.uiState.mark.listItemUiState
     var text = props.uiState.mark.marker?.fullName() ?: ""
 
-    if (markUiSate.markerGroupNameVisible){
+    if (props.uiState.markerGroupNameVisible){
         text += "  (${strings[MessageID.group_number]
             .replace("%1\$s", props.uiState.mark.camMarkerSubmitterUid.toString())})"
     }
@@ -76,7 +74,7 @@ val UstadMarksPersonListItem = FC<UstadMarksPersonListItemProps> { props ->
 
                             + " "
 
-                            if (markUiSate.camPenaltyVisible) {
+                            if (props.uiState.camPenaltyVisible) {
                                 span { style = jso {
                                     color = rgba(255, 0,0, 1.0)
                                 }
@@ -106,8 +104,8 @@ val UstadMarksPersonListItem = FC<UstadMarksPersonListItemProps> { props ->
 
 val UstadMarksPersonListItemPreview = FC<Props> {
 
-    UstadMarksPersonListItem {
-        uiState = UstadMarksPersonListItemUiState(
+    UstadCourseAssignmentMarkListItem {
+        uiState = UstadCourseAssignmentMarkListItem(
             mark = CourseAssignmentMarkWithPersonMarker().apply {
                 marker = Person().apply {
                     firstNames = "John"

@@ -19,28 +19,26 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.viewmodel.UstadMarksPersonListItemUiState
-import com.ustadmobile.core.viewmodel.listItemUiState
+import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItem
 import com.ustadmobile.lib.db.entities.CourseAssignmentMarkWithPersonMarker
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.util.compose.rememberFormattedTime
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun UstadMarksPersonListItem(
-    uiState: UstadMarksPersonListItemUiState,
+fun UstadCourseAssignmentMarkListItem(
+    uiState: UstadCourseAssignmentMarkListItem,
     modifier: Modifier = Modifier,
     onClickMark: (CourseAssignmentMarkWithPersonMarker?) -> Unit = {},
 ){
 
-    val markUiSate = uiState.mark.listItemUiState
     var text = uiState.mark.marker?.fullName() ?: ""
 
-    if (markUiSate.markerGroupNameVisible){
+    if (uiState.markerGroupNameVisible){
         text += "  (${stringResource(R.string.group_number, uiState.mark.camMarkerSubmitterUid)})"
     }
 
-    val formattedTime = rememberFormattedTime(uiState.mark.camLct?.toInt() ?: 0)
+    val formattedTime = rememberFormattedTime(uiState.mark.camLct.toInt())
 
     ListItem(
         modifier = modifier.clickable {
@@ -68,7 +66,7 @@ fun UstadMarksPersonListItem(
                                     " ${stringResource(R.string.points)}")
 
 
-                            if (markUiSate.camPenaltyVisible){
+                            if (uiState.camPenaltyVisible){
                                 withStyle(style = SpanStyle(color = colorResource(R.color.errorColor)))
                                 {
                                     append("  "+stringResource(R.string.late_penalty,
@@ -90,8 +88,8 @@ fun UstadMarksPersonListItem(
 @Composable
 @Preview
 private fun UstadMarksPersonListItemPreview() {
-    UstadMarksPersonListItem(
-        uiState = UstadMarksPersonListItemUiState(
+    UstadCourseAssignmentMarkListItem(
+        uiState = UstadCourseAssignmentMarkListItem(
             mark = CourseAssignmentMarkWithPersonMarker().apply {
                 marker = Person().apply {
                     firstNames = "John"
