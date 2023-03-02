@@ -62,6 +62,7 @@ val UstadAddCommentListItem = FC<UstadAddCommentListItemProps> { props ->
 
                         IconButton {
                             ariaLabel =  strings[MessageID.submit]
+                            id = "${props.id}_submit"
                             onClick = {
                                 props.onClickSubmit()
                             }
