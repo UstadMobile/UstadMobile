@@ -45,8 +45,8 @@ val UstadAssignmentFileSubmissionHeader = FC<UstadAssignmentFileSubmissionHeader
 
         if (props.uiState.showPoints){
             val pointsElement = Typography.create {
-                + ("${props.uiState.assignmentMark?.averageScore ?: 0}" +
-                        "/${props.uiState.assignment?.block?.cbMaxPoints ?: 0}" +
+                + ("${props.uiState.assignmentMark.averageScore}" +
+                        "/${props.uiState.block.cbMaxPoints}" +
                         strings[MessageID.points])
 
                 + " "
@@ -58,7 +58,7 @@ val UstadAssignmentFileSubmissionHeader = FC<UstadAssignmentFileSubmissionHeader
                         child(ReactNode(
                             strings[MessageID.late_penalty]
                                 .replace("%1\$s", (
-                                        props.uiState.assignment?.block?.cbLateSubmissionPenalty ?: 0)
+                                        props.uiState.block.cbLateSubmissionPenalty)
                                     .toString())
                         ))
                     }

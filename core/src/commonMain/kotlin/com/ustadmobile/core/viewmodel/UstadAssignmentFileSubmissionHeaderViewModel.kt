@@ -1,20 +1,20 @@
 package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.lib.db.entities.AverageCourseAssignmentMark
-import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
+import com.ustadmobile.lib.db.entities.CourseBlock
 
 data class UstadAssignmentFileSubmissionHeaderUiState(
 
-    val assignment: ClazzAssignmentWithCourseBlock? = null,
+    val block: CourseBlock = CourseBlock(),
 
-    val assignmentMark: AverageCourseAssignmentMark? = null,
+    val assignmentMark: AverageCourseAssignmentMark = AverageCourseAssignmentMark(),
 
     val assignmentStatus: Int? = null,
 
     val showPoints: Boolean = true,
 
-) {
+    ) {
 
     val submissionStatusIconVisible: Boolean
         get() = assignmentStatus != CourseAssignmentSubmission.NOT_SUBMITTED
@@ -22,7 +22,7 @@ data class UstadAssignmentFileSubmissionHeaderUiState(
 
     val latePenaltyVisible: Boolean
         get() = showPoints &&
-                assignmentMark?.averagePenalty != 0
+                assignmentMark.averagePenalty != 0
 
 
 }
