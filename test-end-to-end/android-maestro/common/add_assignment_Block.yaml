@@ -1,0 +1,24 @@
+appId: com.toughra.ustadmobile
+---
+# this test add an assignment block on a course
+# Test parameters needs to provide for this test :
+# 1) TESTCOURSENAME: provide course name of string type
+# 2) ASSIGNMENTNAME: provide assignment name of string type
+
+- tapOn: "Courses"
+- tapOn: ${TESTCOURSENAME}
+- tapOn: "Edit"
+- swipe:
+    start: 100,400
+    end: 100,100
+- tapOn: "Add block"
+- tapOn: "Assignments"
+- tapOn: "Title"
+- inputText: ${ASSIGNMENTNAME}
+- tapOn: "Description (Optional)"
+- inputText: "Test "
+- hideKeyboard
+- tapOn: "Completion criteria"
+- tapOn: "Submitted"
+- tapOn: "DONE"
+- tapOn: "SAVE"

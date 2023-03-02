@@ -1,0 +1,75 @@
+appId: com.toughra.ustadmobile
+tags:
+  - checklist4
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_003_add_private_comment_on_assignments"
+  TESTNAME: "004_003_add_private_comment_on_assignments"
+---
+- clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+- runFlow:
+    file: "../build/common-app2/create_course_with_1teacher_2students.yaml"
+    env:
+      TESTCOURSENAME: Test Course
+#------------------------- teacher add private comment---------------------#
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#teacher login
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: t1
+      PASSWORD: test
+- runFlow:
+    file:  "../common/add_assignment_Block.yaml"
+    env:
+      TESTCOURSENAME: Test Course
+      ASSIGNMENTNAME: Test Assignment
+- runFlow:
+    file: "../common/teacher_add_private_comment.yaml"
+    env:
+      ASSIGNMENTNAME: Test Assignment
+      TESTCOURSENAME: Test Course
+      STUDENTNAME: Student 1
+      PRIVATECOMMENT: Please comment here once you submit the assignment
+#---------------student reply to private comment--------#
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+    env:
+      USERNAME: s1
+      PASSWORD: test
+- runFlow:
+    file: "../build/common-app2/add_private_comments.yaml"
+    env:
+      ASSIGNMENTNAME: Test Assignment
+      TESTCOURSENAME: Test Course
+      PRIVATECOMMENT: Ok Mam, will complete before 4pm
+#---------------------------------------------------APP 1 ------student login - not able to view private comments test---------------#
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: s2
+      PASSWORD: test
+- tapOn: "Courses"
+- tapOn: "Test Course"
+- tapOn: "Test Assignment"
+- swipe:
+    start: 100,400
+    end: 100,100
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_private_comments_2student_notVisible"
+- clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2

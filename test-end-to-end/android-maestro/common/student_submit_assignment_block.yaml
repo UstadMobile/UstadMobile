@@ -1,0 +1,37 @@
+appId: com.toughra.ustadmobile
+---
+
+# Test parameters needs to provide for this test :
+# 1) TESTFILENAME : provide the content name inside the 'test-files/content' folder
+# 2) TESTCOURSENAME : provide the course title, it should be a string
+# 3) CONTROLSERVER: ${CONTROLSERVER} : provides the test-control-server address
+# 4) TESTSERIAL: ${TESTSERIAL} : provides the device serial number
+# 5) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+# 6) ASSIGNMENTNAME: Provide assignment name of string type
+
+# clear the downloads
+- evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
+# push the test file to the downloads
+- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
+
+- tapOn: "Courses"
+- tapOn: ${TESTCOURSENAME}
+- tapOn: ${ASSIGNMENTNAME}
+- tapOn: "ADD TEXT"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/text_editor"
+- inputText: "A B C D E F G H I J K L M N O P Q R S T U V W X Y Z"
+- tapOn: "DONE"
+- tapOn: "ADD FILE"
+- runFlow:
+    when:
+      notVisible: "Downloads"
+    file: "./redirect_to_downloads.yaml"
+- tapOn: ${TESTFILENAME}
+- swipe:
+    start: 100,400
+    end: 100,100
+- tapOn: "SUBMIT"
+- extendedWaitUntil:
+      notVisible: "SUBMIT"
+      timeout: 10000

@@ -1,0 +1,23 @@
+appId: com.toughra.ustadmobile
+---
+# this test flow add an assignment block on a course
+# Test parameters needs to provide for this test :
+# 1) TESTCOURSENAME: provide course name of string type
+# 2) STUDENTNAME: provide student full name of string type
+# 3) POINT: provide mark in string type
+# 4) TESTRESULTSDIR : provide location to store results
+# 5) ASSIGNMENTNAME: provide assignment name of string type
+
+- tapOn: "Courses"
+- tapOn: ${TESTCOURSENAME}
+- tapOn: ${ASSIGNMENTNAME}
+- tapOn: "SUBMISSIONS"
+- tapOn: ${STUDENTNAME}
+- tapOn: "Points"
+- inputText: ${POINT}
+- hideKeyboard
+- tapOn:
+    id: "com.google.android.inputmethod.latin:id/icon"
+    index: 2
+- tapOn: "SUBMIT GRADE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_assignment_grade_teacherView"

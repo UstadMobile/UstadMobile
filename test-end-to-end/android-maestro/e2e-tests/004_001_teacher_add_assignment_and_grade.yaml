@@ -1,0 +1,122 @@
+appId: com.toughra.ustadmobile
+tags:
+  - checklist4
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_001_teacher_add_assignment_and_grade"
+  TESTNAME: 004_001_teacher_add_assignment_and_grade
+---
+- clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+# admin able to add a course and edit that course
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+#admin add new teacher
+- runFlow:
+    file: "../build/common-app2/create_course_with_1teacher_2students.yaml"
+    env:
+      TESTCOURSENAME: Test Course
+#teacherLogin
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: t1
+      PASSWORD: test
+- runFlow:
+     file:  "../common/add_assignment_Block.yaml"
+     env:
+       TESTCOURSENAME: Test Course
+       ASSIGNMENTNAME: Test Assignment
+#-------------------------------------------------------------------------student submit assignment
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+    env:
+      USERNAME: s1
+      PASSWORD: test
+- runFlow:
+     file: "../build/common-app2/student_submit_assignment_block.yaml"
+     env:
+       TESTCOURSENAME: Test Course
+       ASSIGNMENTNAME: Test Assignment
+       TESTFILENAME: H5p_Content.h5p
+       CONTROLSERVER: ${CONTROLSERVER}
+       TESTSERIAL: ${TESTSERIAL}
+#-------------one submission per student as per default- After submitting their work, the Add text/ add file button is no longer visible----#
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+    env:
+      USERNAME: s2
+      PASSWORD: test
+- runFlow:
+     file: "../build/common-app2/student_submit_assignment_text.yaml"
+     env:
+       TESTCOURSENAME: Test Course
+       ASSIGNMENTNAME: Test Assignment
+       TEXT: Numbers - 1,2,3,4,5,6,7,8,9,10
+- assertNotVisible: "Add Text"
+- assertNotVisible: "Add File"
+#-------------teacher grade the assignment
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: t1
+      PASSWORD: test
+- runFlow:
+    file: "../common/add_assignment_grade.yaml"
+    env:
+      TESTCOURSENAME: Test Course
+      ASSIGNMENTNAME: Test Assignment
+      STUDENTNAME: Student 1
+      POINT: 8
+- runFlow:
+    file: "../common/add_assignment_grade.yaml"
+    env:
+      TESTCOURSENAME: Test Course
+      ASSIGNMENTNAME: Test Assignment
+      STUDENTNAME: Student 2
+      POINT: 7
+#----------------------------------------------student view assignment grade ------------#
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+    env:
+      USERNAME: s1
+      PASSWORD: test
+
+- tapOn: "Courses"
+- tapOn: "Test Course"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_grade_on_overviewPage_studentView1"
+- tapOn: "Test Assignment"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_grade_on_assignmentPage_studentView1"
+#----------------------------------------------------------------------
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+    env:
+      USERNAME: s2
+      PASSWORD: test
+- tapOn: "Courses"
+- tapOn: "Test Course"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_grade_on_overviewPage_studentView2"
+- tapOn: "Test Assignment"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/single_submission_assignment_grade_studentView2"
+
+- clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2

@@ -1,0 +1,52 @@
+appId: com.toughra.ustadmobile
+tags:
+  - checklist4
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_006_assignment_submission_after_graceperiod"
+  TESTNAME: "004_006_assignment_submission_after_graceperiod"
+---
+- clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+# admin able to add a course and edit that course
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+- runFlow:
+    file: "../build/common-app2/create_course_with_1teacher_1student.yaml"
+    env:
+      TESTCOURSENAME: Test Course
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#teacher login
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: t1
+      PASSWORD: test
+- runFlow:
+    file: "../common/add_assignment_after_grace_period.yaml"
+    env:
+      ASSIGNMENTNAME: Test Assignment
+      TESTCOURSENAME: Test Course
+#-------------------------------------------------------------------------student submit assignment
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+    env:
+      USERNAME: s1
+      PASSWORD: test
+- tapOn: "Courses"
+- tapOn: "Test Course"
+- tapOn: "Test Assignment"
+- assertNotVisible: "SUBMIT"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/submit_button_not_visible_after_deadline"
+- clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2

@@ -1,0 +1,21 @@
+appId: com.toughra.ustadmobile
+---
+# Test parameters needs to provide for this test :
+# 1) TESTCOURSENAME: provide course name of string type
+# 2) ASSIGNMENTNAME: provide assignment name of string type
+# 3) STUDENTNAME : provide the student first name& lastname of string type
+# 4) PRIVATECOMMENT: Provide the comment to add as private on assignment to specific student, this is of string type
+# 5) TESTRESULTSDIR: ${TESTRESULTSDIR} : provides the path to store test results
+- tapOn: "Courses"
+- tapOn: ${TESTCOURSENAME}
+- tapOn: ${ASSIGNMENTNAME}
+- tapOn: "SUBMISSIONS"
+- tapOn: ${STUDENTNAME}
+- swipe:
+    start: 100,400
+    end: 100,100
+- tapOn: "Add a private comment"
+- inputText: ${PRIVATECOMMENT}
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_comment_new_send_ib"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_private_comment-${PRIVATECOMMENT}"
