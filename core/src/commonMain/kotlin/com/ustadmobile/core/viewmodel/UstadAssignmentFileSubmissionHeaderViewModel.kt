@@ -6,23 +6,21 @@ import com.ustadmobile.lib.db.entities.CourseBlock
 
 data class UstadAssignmentFileSubmissionHeaderUiState(
 
-    val block: CourseBlock = CourseBlock(),
+    val block: CourseBlock? = null,
 
-    val assignmentMark: AverageCourseAssignmentMark = AverageCourseAssignmentMark(),
+    val assignmentMark: AverageCourseAssignmentMark? = null,
 
     val assignmentStatus: Int? = null,
+) {
 
-    val showPoints: Boolean = true,
-
-    ) {
+    val showPoints: Boolean
+        get() = assignmentMark != null
 
     val submissionStatusIconVisible: Boolean
         get() = assignmentStatus != CourseAssignmentSubmission.NOT_SUBMITTED
 
-
     val latePenaltyVisible: Boolean
-        get() = showPoints &&
-                assignmentMark.averagePenalty != 0
+        get() = showPoints && assignmentMark != null && assignmentMark.averagePenalty != 0
 
 
 }
