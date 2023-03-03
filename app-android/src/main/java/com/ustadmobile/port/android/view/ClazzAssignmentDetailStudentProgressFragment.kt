@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -34,14 +36,15 @@ import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.viewmodel.ClazzAssignmentDetailStudentProgressUiState
+import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
+import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
-import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
-import com.ustadmobile.port.android.view.composable.UstadTextEditField
+import com.ustadmobile.port.android.view.composable.*
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import org.kodein.di.direct
@@ -323,6 +326,7 @@ fun ClazzAssignmentDetailStudentProgressScreen(
     onAddComment: (String) -> Unit = {},
     onAddMark: (String) -> Unit = {},
     onClickGradeFilterChip: (MessageIdOption2) -> Unit = {},
+    onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = {},
 ){
 
     val markFileSubmissionSubmitGradeAndNextText = if (uiState.submissionScore == null)
@@ -341,6 +345,22 @@ fun ClazzAssignmentDetailStudentProgressScreen(
             .fillMaxSize()
     ){
 
+        items(
+            items = uiState.submissionList,
+            key = { submission -> submission.casUid }
+        ){ submission ->
+            UstadAssignmentSubmissionListItem(
+                submission = submission,
+                onClickOpenSubmission = onClickOpenSubmission
+            )
+        }
+
+        item {
+            UstadAssignmentSubmissionHeader(
+                uiState = uiState.submissionHeaderUiState
+            )
+        }
+
         item {
             Text(text = stringResource(id = R.string.grades_class_age))
         }
@@ -353,7 +373,19 @@ fun ClazzAssignmentDetailStudentProgressScreen(
                 onClickFilterChip = onClickGradeFilterChip
             )
         }
-        
+
+        // TODO add block
+        items(
+            items = uiState.markList,
+            key = { mark -> mark.camUid }
+        ){ mark ->
+            UstadCourseAssignmentMarkListItem(
+                uiState = UstadCourseAssignmentMarkListItemUiState(
+                    mark = mark,
+                )
+            )
+        }
+
         item {
             Text(text = stringResource(id = R.string.submissions))
         }
@@ -426,6 +458,28 @@ fun ClazzAssignmentDetailStudentProgressScreen(
 @Preview
 fun ClazzAssignmentDetailStudentProgressScreenPreview(){
     ClazzAssignmentDetailStudentProgressScreen(
-        uiState = ClazzAssignmentDetailStudentProgressUiState()
+        uiState = ClazzAssignmentDetailStudentProgressUiState(
+            submissionHeaderUiState = UstadAssignmentSubmissionHeaderUiState(
+                assignmentStatus = CourseAssignmentSubmission.NOT_SUBMITTED
+            ),
+            submissionList = listOf(
+                CourseAssignmentSubmissionWithAttachment().apply {
+                    casUid = 1
+                    casTimestamp = 1677744388299
+                    casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
+                    attachment = CourseAssignmentSubmissionAttachment().apply {
+                        casaFileName = "Content Title"
+                    }
+                },
+                CourseAssignmentSubmissionWithAttachment().apply {
+                    casUid = 2
+                    casTimestamp = 1677744388299
+                    casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
+                    attachment = CourseAssignmentSubmissionAttachment().apply {
+                        casaFileName = "Content Title"
+                    }
+                },
+            )
+        ),
     )
 }

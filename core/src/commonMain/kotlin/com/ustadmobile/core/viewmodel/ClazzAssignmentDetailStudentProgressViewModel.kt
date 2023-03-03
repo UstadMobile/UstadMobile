@@ -15,7 +15,7 @@ data class ClazzAssignmentDetailStudentProgressUiState(
 
     val gradeFilterChips: List<ListFilterIdOption> = emptyList(),
 
-    val clazzCourseAssignmentSubmissionAttachment: List<CourseAssignmentSubmissionWithAttachment> =
+    val submissionList: List<CourseAssignmentSubmissionWithAttachment> =
         emptyList(),
 
     val markList: List<CourseAssignmentMarkWithPersonMarker> = emptyList(),
@@ -32,6 +32,9 @@ data class ClazzAssignmentDetailStudentProgressUiState(
 
     val fieldsEnabled: Boolean = true,
 
+    val submissionHeaderUiState: UstadAssignmentSubmissionHeaderUiState =
+        UstadAssignmentSubmissionHeaderUiState(),
+
     val selectedChipId: Int = ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY,
 
     val gradeFilterOptions: List<MessageIdOption2> = listOf(
@@ -39,4 +42,4 @@ data class ClazzAssignmentDetailStudentProgressUiState(
         MessageIdOption2(MessageID.all, CourseAssignmentMarkDaoCommon.ARG_FILTER_ALL_SCORES)
     ),
 
-    )
+)
