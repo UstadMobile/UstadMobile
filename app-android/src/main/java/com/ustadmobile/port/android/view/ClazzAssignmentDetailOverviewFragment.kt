@@ -456,6 +456,8 @@ fun ClazzAssignmentDetailOverviewScreen(
     onClickMark: (CourseAssignmentMarkWithPersonMarker?) -> Unit = {},
     onClickNewPublicComment: () -> Unit = {},
     onClickNewPrivateComment: () -> Unit = {},
+    onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = {},
+    onClickDeleteSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = { }
 ){
 
     val formattedDateTime = rememberFormattedDateTime(
@@ -508,13 +510,28 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         item {
-            Row {
-                Icon(
-                    painter = painterResource(R.drawable.book_24px),
-                    contentDescription = "",
-                    modifier = Modifier.size(70.dp)
-                )
-            }
+            Text("")
+        }
+
+        items(
+            items = uiState.draftSubmissionList,
+            key = { Pair(1, it.casUid) }
+        ){ submission ->
+            UstadAssignmentSubmissionListItem(
+                submission = submission,
+                onClickOpenSubmission = onClickOpenSubmission,
+                onClickDeleteSubmission = onClickDeleteSubmission,
+            )
+        }
+
+        items(
+            items = uiState.submittedSubmissionList,
+            key = { Pair(2, it.casUid) }
+        ){ submission ->
+            UstadAssignmentSubmissionListItem(
+                submission = submission,
+                onClickOpenSubmission = onClickOpenSubmission,
+            )
         }
 
         item {
@@ -532,7 +549,7 @@ fun ClazzAssignmentDetailOverviewScreen(
 
         items(
             items = uiState.markList,
-            key = { mark -> mark.camUid }
+            key = { Pair(3, it.camUid) }
         ){ mark ->
             UstadCourseAssignmentMarkListItem(
                 onClickMark = onClickMark,
@@ -560,7 +577,7 @@ fun ClazzAssignmentDetailOverviewScreen(
 
         items(
             items = uiState.publicCommentList,
-            key = { Pair(1, it.commentsUid) }
+            key = { Pair(4, it.commentsUid) }
         ){ comment ->
 
             UstadCommentListItem(commentWithPerson = comment)
@@ -583,7 +600,7 @@ fun ClazzAssignmentDetailOverviewScreen(
 
         items(
             items = uiState.privateCommentList,
-            key = { Pair(2, it.commentsUid) }
+            key = { Pair(5, it.commentsUid) }
         ){ comment ->
             UstadCommentListItem(commentWithPerson = comment)
         }
@@ -638,6 +655,26 @@ fun ClazzAssignmentDetailOverviewScreenPreview(){
                 assignmentMark = AverageCourseAssignmentMark().apply {
                     averagePenalty = 12
                 }
+            ),
+            submittedSubmissionList = listOf(
+                CourseAssignmentSubmissionWithAttachment().apply {
+                    casUid = 1
+                    casTimestamp = 1677744388299
+                    casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
+                    attachment = CourseAssignmentSubmissionAttachment().apply {
+                        casaFileName = "Content Title"
+                    }
+                },
+            ),
+            draftSubmissionList = listOf(
+                CourseAssignmentSubmissionWithAttachment().apply {
+                    casUid = 1
+                    casTimestamp = 1677744388299
+                    casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
+                    attachment = CourseAssignmentSubmissionAttachment().apply {
+                        casaFileName = "Content Title"
+                    }
+                },
             )
         )
     )

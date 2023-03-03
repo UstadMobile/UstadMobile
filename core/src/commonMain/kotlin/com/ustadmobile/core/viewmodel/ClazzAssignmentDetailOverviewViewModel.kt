@@ -13,7 +13,10 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val clazzAssignment: ClazzAssignmentWithCourseBlock? = null,
 
-    val submittedCourseAssignmentSubmission: List<CourseAssignmentSubmissionWithAttachment> =
+    val draftSubmissionList: List<CourseAssignmentSubmissionWithAttachment> =
+        emptyList(),
+
+    val submittedSubmissionList: List<CourseAssignmentSubmissionWithAttachment> =
         emptyList(),
 
     val markList: List<CourseAssignmentMarkWithPersonMarker> = emptyList(),
