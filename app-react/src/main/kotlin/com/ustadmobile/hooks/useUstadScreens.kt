@@ -112,6 +112,18 @@ fun useUstadScreens(): UstadScreens {
             ),
             UstadScreen("VirtualListPreview", "Virtual List Preview",
                 VirtualListPreview),
+            UstadScreen("UstadAssignmentFileSubmissionHeader",
+                "UstadAssignmentFileSubmissionHeader Preview",
+                UstadAssignmentFileSubmissionHeaderPreview),
+            UstadScreen("UstadCourseAssignmentMarkListItem", "UstadCourseAssignmentMarkListItem Preview",
+                UstadCourseAssignmentMarkListItemPreview),
+            UstadScreen("UstadCommentListItem", "UstadCommentListItem Preview",
+                UstadCommentListItemPreview),
+            UstadScreen("UstadAddCommentListItem", "UstadAddCommentListItem Preview",
+                UstadAddCommentListItemPreview),
+            UstadScreen("UstadAssignmentFileSubmissionListItem",
+                "UstadAssignmentFileSubmissionListItem Preview",
+                UstadAssignmentFileSubmissionListItemPreview),
         )
     }
 }
