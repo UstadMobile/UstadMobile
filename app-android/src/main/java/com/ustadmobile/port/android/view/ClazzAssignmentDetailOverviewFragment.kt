@@ -454,7 +454,6 @@ fun ClazzAssignmentDetailOverviewScreen(
     uiState: ClazzAssignmentDetailOverviewUiState,
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
     onClickMark: (CourseAssignmentMarkWithPersonMarker?) -> Unit = {},
-    onClickComment: (CommentsWithPerson) -> Unit = {},
     onClickNewPublicComment: () -> Unit = {},
     onClickNewPrivateComment: () -> Unit = {},
 ){
@@ -504,7 +503,7 @@ fun ClazzAssignmentDetailOverviewScreen(
 
         item {
             UstadAssignmentSubmissionHeader(
-                uiState = uiState.submissionHeaderUiState
+                uiState = uiState.submissionHeaderUiState,
             )
         }
 
@@ -635,7 +634,10 @@ fun ClazzAssignmentDetailOverviewScreenPreview(){
                 }
             ),
             submissionHeaderUiState = UstadAssignmentSubmissionHeaderUiState(
-                assignmentStatus = CourseAssignmentSubmission.NOT_SUBMITTED
+                assignmentStatus = CourseAssignmentSubmission.MARKED,
+                assignmentMark = AverageCourseAssignmentMark().apply {
+                    averagePenalty = 12
+                }
             )
         )
     )
