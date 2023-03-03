@@ -448,6 +448,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ClazzAssignmentDetailOverviewScreen(
     uiState: ClazzAssignmentDetailOverviewUiState,
@@ -544,7 +545,9 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         item {
-            Text(stringResource(R.string.class_comments))
+            ListItem(
+                text = {Text(stringResource(R.string.class_comments))}
+            )
         }
 
         item {
@@ -565,7 +568,9 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         item {
-            Text(stringResource(R.string.private_comments))
+            ListItem(
+                text = {Text(stringResource(R.string.private_comments))}
+            )
         }
 
         item {
