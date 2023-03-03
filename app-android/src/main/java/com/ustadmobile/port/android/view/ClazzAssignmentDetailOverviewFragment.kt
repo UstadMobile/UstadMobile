@@ -548,23 +548,12 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         item {
-            Row{
-                Icon(
-                    painter = painterResource(R.drawable.ic_person_black_24dp),
-                    contentDescription = "",
-                    modifier = Modifier.size(40.dp)
-                )
-
-                UstadTextEditField(
-                    value = "",
-                    label = stringResource(id = R.string.add_class_comment),
-                    readOnly = true,
-                    enabled = uiState.fieldsEnabled,
-                    onValueChange = {
-                        onClickNewPublicComment()
-                    }
-                )
-            }
+            UstadAddCommentListItem(
+                text = stringResource(id = R.string.add_class_comment),
+                enabled = uiState.fieldsEnabled,
+                personUid = 0,
+                onClickAddComment = { onClickNewPublicComment() }
+            )
         }
 
         items(
@@ -580,23 +569,12 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         item {
-            Row{
-                Icon(
-                    painter = painterResource(R.drawable.ic_person_black_24dp),
-                    contentDescription = "",
-                    modifier = Modifier.size(40.dp)
-                )
-
-                UstadTextEditField(
-                    value = "",
-                    label = stringResource(id = R.string.add_private_comment),
-                    readOnly = true,
-                    enabled = uiState.fieldsEnabled,
-                    onValueChange = {
-                        onClickNewPrivateComment()
-                    }
-                )
-            }
+            UstadAddCommentListItem(
+                text = stringResource(id = R.string.add_private_comment),
+                enabled = uiState.fieldsEnabled,
+                personUid = 0,
+                onClickAddComment = { onClickNewPrivateComment() }
+            )
         }
 
         items(
