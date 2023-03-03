@@ -47,6 +47,9 @@ data class ClazzAssignmentDetailOverviewUiState(
         MessageIdOption2(MessageID.all, CourseAssignmentMarkDaoCommon.ARG_FILTER_ALL_SCORES)
     ),
 
+    val submissionHeaderUiState: UstadAssignmentSubmissionHeaderUiState =
+        UstadAssignmentSubmissionHeaderUiState(),
+
 ) {
 
     val caDescriptionVisible: Boolean

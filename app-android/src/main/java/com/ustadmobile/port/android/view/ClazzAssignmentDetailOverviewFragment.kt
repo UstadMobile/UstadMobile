@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.clickable
+import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItem as UstadCourseAssignmentMarkListItemUiState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -47,16 +47,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.viewmodel.UstadAssignmentFileSubmissionHeaderUiState
+import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import com.ustadmobile.port.android.util.compose.rememberFormattedTime
 import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment.Companion.SUBMISSION_POLICY_MAP
-import com.ustadmobile.port.android.view.composable.UstadAssignmentFileSubmissionHeader
-import com.ustadmobile.port.android.view.composable.UstadDetailField
-import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
-import com.ustadmobile.port.android.view.composable.UstadTextEditField
+import com.ustadmobile.port.android.view.composable.*
 import java.util.*
 
 
@@ -455,7 +452,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 fun ClazzAssignmentDetailOverviewScreen(
     uiState: ClazzAssignmentDetailOverviewUiState,
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
-    onClickMark: (CourseAssignmentMarkWithPersonMarker) -> Unit = {},
+    onClickMark: (CourseAssignmentMarkWithPersonMarker?) -> Unit = {},
     onClickComment: (CommentsWithPerson) -> Unit = {},
     onClickNewPublicComment: () -> Unit = {},
     onClickNewPrivateComment: () -> Unit = {},
@@ -505,10 +502,8 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         item {
-            UstadAssignmentFileSubmissionHeader(
-                uiState = UstadAssignmentFileSubmissionHeaderUiState(
-                    assignmentStatus = CourseAssignmentSubmission.NOT_SUBMITTED
-                )
+            UstadAssignmentSubmissionHeader(
+                uiState = uiState.submissionHeaderUiState
             )
         }
 
@@ -539,7 +534,13 @@ fun ClazzAssignmentDetailOverviewScreen(
             items = uiState.markList,
             key = { mark -> mark.camUid }
         ){ mark ->
-            MarkListItem(mark, onClickMark)
+            UstadCourseAssignmentMarkListItem(
+                onClickMark = onClickMark,
+                uiState = UstadCourseAssignmentMarkListItemUiState(
+                    mark = mark,
+                    block = uiState.clazzAssignment?.block ?: CourseBlock()
+                ),
+            )
         }
 
         item {
@@ -570,7 +571,8 @@ fun ClazzAssignmentDetailOverviewScreen(
             items = uiState.publicCommentList,
             key = { Pair(1, it.commentsUid) }
         ){ comment ->
-            CommentListItem(comment, onClickComment)
+
+            UstadCommentListItem(commentWithPerson = comment)
         }
 
         item {
@@ -601,91 +603,9 @@ fun ClazzAssignmentDetailOverviewScreen(
             items = uiState.privateCommentList,
             key = { Pair(2, it.commentsUid) }
         ){ comment ->
-            CommentListItem(comment, onClickComment)
+            UstadCommentListItem(commentWithPerson = comment)
         }
     }
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun MarkListItem(
-    mark: CourseAssignmentMarkWithPersonMarker,
-    onClickMark: (CourseAssignmentMarkWithPersonMarker) -> Unit = {},
-){
-
-    val markUiSate = mark.listItemUiState
-    var text = mark.marker?.fullName() ?: ""
-
-    if (markUiSate.markerGroupNameVisible){
-        text += "  (${stringResource(R.string.group_number, mark.camMarkerSubmitterUid)})"
-    }
-
-    val formattedTime = rememberFormattedTime(mark.camLct.toInt())
-
-    ListItem(
-        modifier = Modifier.clickable {
-            onClickMark(mark)
-        },
-        icon = {
-            Icon(
-                painter = painterResource(R.drawable.ic_person_black_24dp),
-                contentDescription = "",
-                modifier = Modifier.size(40.dp)
-            )
-        },
-        text = { Text(text) },
-        secondaryText = {
-            Column {
-                Text(
-                    ""
-//                    buildAnnotatedString {
-//                        append("${uiState.assignmentMark?.averageScore ?: 0}" +
-//                                "/${uiState.assignment?.block?.cbMaxPoints ?: 0}" +
-//                                stringResource(R.string.points)
-//                        )
-//
-//
-//                        if (markUiSate.camPenaltyVisible){
-//                            withStyle(style = SpanStyle(color = colorResource(R.color.errorColor))) {
-//                                append(" "+stringResource(R.string.late_penalty,
-//                                    mark.assignment?.block?.cbLateSubmissionPenalty ?: 0))
-//                            }
-//                        }
-//                    }
-                )
-                Text(mark.camMarkerComment ?: "")
-            }
-        },
-        trailing = {
-            Text(formattedTime)
-        }
-    )
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun CommentListItem(
-    comment: CommentsWithPerson,
-    onClickComment: (CommentsWithPerson) -> Unit = {},
-){
-
-    val formattedTime = rememberFormattedTime(comment.commentsDateTimeAdded.toInt())
-
-    ListItem(
-        modifier = Modifier.clickable {
-            onClickComment(comment)
-        },
-        icon = {
-            Icon(
-                painter = painterResource(R.drawable.ic_person_black_24dp),
-                contentDescription = "",
-                modifier = Modifier.size(40.dp)
-            )
-        },
-        text = { Text(comment.commentsPerson?.fullName() ?: "") },
-        secondaryText = { Text(comment.commentsText ?: "") },
-        trailing = { Text(formattedTime) }
-    )
 }
 
 @Composable
@@ -730,6 +650,9 @@ fun ClazzAssignmentDetailOverviewScreenPreview(){
                     }
                     commentsText = "I like this activity. Shall we discuss this in our next meeting?"
                 }
+            ),
+            submissionHeaderUiState = UstadAssignmentSubmissionHeaderUiState(
+                assignmentStatus = CourseAssignmentSubmission.NOT_SUBMITTED
             )
         )
     )
