@@ -42,6 +42,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import androidx.compose.material.*
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -457,7 +458,10 @@ fun ClazzAssignmentDetailOverviewScreen(
     onClickNewPublicComment: () -> Unit = {},
     onClickNewPrivateComment: () -> Unit = {},
     onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = {},
-    onClickDeleteSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = { }
+    onClickDeleteSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = { },
+    onClickAddTextSubmission: () -> Unit = { },
+    onClickAddFileSubmission: () -> Unit = { },
+    onClickSubmitSubmission: () -> Unit = { }
 ){
 
     val formattedDateTime = rememberFormattedDateTime(
@@ -522,6 +526,46 @@ fun ClazzAssignmentDetailOverviewScreen(
                 onClickOpenSubmission = onClickOpenSubmission,
                 onClickDeleteSubmission = onClickDeleteSubmission,
             )
+        }
+
+        item {
+            OutlinedButton(
+                onClick = onClickAddTextSubmission,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                enabled = uiState.fieldsEnabled,
+            ) {
+                Text(stringResource(R.string.add_text).uppercase())
+            }
+        }
+
+        item {
+            OutlinedButton(
+                onClick = onClickAddFileSubmission,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                enabled = uiState.fieldsEnabled,
+            ) {
+                Text(stringResource(R.string.add_file).uppercase())
+            }
+        }
+
+        item {
+            Button(
+                onClick = onClickSubmitSubmission,
+                enabled = uiState.fieldsEnabled,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = colorResource(id = R.color.secondaryColor)
+                )
+            ) {
+                Text(stringResource(R.string.submit).uppercase(),
+                    color = contentColorFor(
+                        colorResource(id = R.color.secondaryColor)
+                    )
+                )
+            }
         }
 
         items(
