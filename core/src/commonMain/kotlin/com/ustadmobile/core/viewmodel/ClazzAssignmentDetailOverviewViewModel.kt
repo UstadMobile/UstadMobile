@@ -39,8 +39,6 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val submissionStatus: Int? = null,
 
-    val unassignedError: String? = null,
-
     val fieldsEnabled: Boolean = true,
 
     val selectedChipId: Int = CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES,
@@ -53,6 +51,12 @@ data class ClazzAssignmentDetailOverviewUiState(
     val submissionHeaderUiState: UstadAssignmentSubmissionHeaderUiState =
         UstadAssignmentSubmissionHeaderUiState(),
 
+    val hasFilesToSubmit: Boolean = false,
+
+    val deadlinePassed: Boolean = false,
+
+    val unassignedError: String? = null
+
 ) {
 
     val caDescriptionVisible: Boolean
@@ -60,6 +64,9 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val cbDeadlineDateVisible: Boolean
         get() = clazzAssignment?.block?.cbDeadlineDate.isDateSet()
+
+    val submitSubmissionButtonVisible: Boolean
+        get() = hasFilesToSubmit && !deadlinePassed && unassignedError.isNullOrBlank()
 
 }
 
@@ -73,8 +80,5 @@ value class CourseAssignmentMarkWithPersonMarkerUiState(
 
     val markerGroupNameVisible: Boolean
         get() = mark.isGroup && mark.camMarkerSubmitterUid != 0L
-
-    val camPenaltyVisible: Boolean
-        get() = mark.camPenalty != 0
 
 }

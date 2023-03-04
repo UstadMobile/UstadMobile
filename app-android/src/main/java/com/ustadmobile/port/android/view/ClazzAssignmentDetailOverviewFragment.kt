@@ -53,6 +53,7 @@ import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import com.ustadmobile.port.android.util.compose.rememberFormattedTime
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment.Companion.SUBMISSION_POLICY_MAP
 import com.ustadmobile.port.android.view.composable.*
 import java.util.*
@@ -532,7 +533,8 @@ fun ClazzAssignmentDetailOverviewScreen(
             OutlinedButton(
                 onClick = onClickAddTextSubmission,
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .defaultItemPadding(),
                 enabled = uiState.fieldsEnabled,
             ) {
                 Text(stringResource(R.string.add_text).uppercase())
@@ -543,28 +545,32 @@ fun ClazzAssignmentDetailOverviewScreen(
             OutlinedButton(
                 onClick = onClickAddFileSubmission,
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .defaultItemPadding(),
                 enabled = uiState.fieldsEnabled,
             ) {
                 Text(stringResource(R.string.add_file).uppercase())
             }
         }
 
-        item {
-            Button(
-                onClick = onClickSubmitSubmission,
-                enabled = uiState.fieldsEnabled,
-                modifier = Modifier
-                    .fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = colorResource(id = R.color.secondaryColor)
-                )
-            ) {
-                Text(stringResource(R.string.submit).uppercase(),
-                    color = contentColorFor(
-                        colorResource(id = R.color.secondaryColor)
+        if (uiState.submitSubmissionButtonVisible){
+            item {
+                Button(
+                    onClick = onClickSubmitSubmission,
+                    enabled = uiState.fieldsEnabled,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultItemPadding(),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = colorResource(id = R.color.secondaryColor)
                     )
-                )
+                ) {
+                    Text(stringResource(R.string.submit).uppercase(),
+                        color = contentColorFor(
+                            colorResource(id = R.color.secondaryColor)
+                        )
+                    )
+                }
             }
         }
 
