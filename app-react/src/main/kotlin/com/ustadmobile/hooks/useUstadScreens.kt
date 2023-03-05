@@ -124,6 +124,9 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen("UstadAssignmentFileSubmissionListItem",
                 "UstadAssignmentFileSubmissionListItem Preview",
                 UstadAssignmentFileSubmissionListItemPreview),
+            UstadScreen(ClazzAssignmentDetailStudentProgressView.VIEW_NAME,
+                "ClazzAssignmentDetailStudentProgress Preview",
+                ClazzAssignmentDetailStudentProgressScreenPreview),
         )
     }
 }
