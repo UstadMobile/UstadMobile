@@ -46,6 +46,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
@@ -483,7 +484,10 @@ fun ClazzAssignmentDetailOverviewScreen(
 
         if (uiState.caDescriptionVisible){
             item {
-                Text(uiState.clazzAssignment?.caDescription ?: "")
+                Text (
+                    text =uiState.clazzAssignment?.caDescription ?: "",
+                    modifier = Modifier.defaultItemPadding()
+                )
             }
         }
 
@@ -529,27 +533,43 @@ fun ClazzAssignmentDetailOverviewScreen(
             )
         }
 
-        item {
-            OutlinedButton(
-                onClick = onClickAddTextSubmission,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .defaultItemPadding(),
-                enabled = uiState.fieldsEnabled,
-            ) {
-                Text(stringResource(R.string.add_text).uppercase())
+        if (uiState.addTextVisible){
+            item {
+                OutlinedButton(
+                    onClick = onClickAddTextSubmission,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultItemPadding(),
+                    enabled = uiState.fieldsEnabled,
+                ) {
+                    Text(stringResource(R.string.add_text).uppercase())
+                }
             }
         }
 
-        item {
-            OutlinedButton(
-                onClick = onClickAddFileSubmission,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .defaultItemPadding(),
-                enabled = uiState.fieldsEnabled,
-            ) {
-                Text(stringResource(R.string.add_file).uppercase())
+        if (uiState.addFileVisible){
+            item {
+                OutlinedButton(
+                    onClick = onClickAddFileSubmission,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultItemPadding(),
+                    enabled = uiState.fieldsEnabled,
+                ) {
+                    Text(stringResource(R.string.add_file).uppercase())
+                }
+            }
+        }
+
+        if (uiState.addFileVisible) {
+            item {
+                Row (
+                    modifier = Modifier.defaultItemPadding()
+                ){
+                    Text(stringResource(R.string.file_type_chosen))
+                    Text("${SubmissionConstants.FILE_TYPE_MAP[
+                            uiState.clazzAssignment?.caFileType]}")
+                }
             }
         }
 
@@ -662,9 +682,12 @@ fun ClazzAssignmentDetailOverviewScreen(
 fun ClazzAssignmentDetailOverviewScreenPreview(){
     ClazzAssignmentDetailOverviewScreen(
         uiState = ClazzAssignmentDetailOverviewUiState(
+            addFileVisible = true,
+            addTextVisible = true,
             clazzAssignment = ClazzAssignmentWithCourseBlock().apply {
                 caDescription = "Read the stories and describe the main characters."
                 caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
+                caFileType =  ClazzAssignment.FILE_TYPE_DOC
                 block = CourseBlock().apply {
                     cbDeadlineDate = 1677063785
                 }

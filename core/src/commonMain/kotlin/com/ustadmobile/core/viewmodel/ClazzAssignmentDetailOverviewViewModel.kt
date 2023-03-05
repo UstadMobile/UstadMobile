@@ -55,7 +55,11 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val deadlinePassed: Boolean = false,
 
-    val unassignedError: String? = null
+    val unassignedError: String? = null,
+
+    val addTextVisible: Boolean = false,
+
+    val addFileVisible: Boolean = false
 
 ) {
 
