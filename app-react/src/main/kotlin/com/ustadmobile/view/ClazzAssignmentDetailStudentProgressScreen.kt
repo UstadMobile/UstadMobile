@@ -1,31 +1,23 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.generated.locale.MessageID.type
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
-import com.ustadmobile.core.impl.locale.entityconstants.OutcomeConstants
-import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.viewmodel.ClazzAssignmentDetailStudentProgressUiState
-import com.ustadmobile.core.viewmodel.ClazzEnrolmentEditUiState
 import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.*
 import csstype.px
 import mui.material.*
 import mui.system.Stack
 import mui.system.StackDirection
 import mui.system.responsive
-import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
-import react.useState
-import web.html.InputType
 
 
 external interface ClazzAssignmentDetailStudentProgressScreenProps : Props {
@@ -88,7 +80,6 @@ val ClazzAssignmentDetailStudentProgressScreenComponent2 =
             Typography {
                 + strings[MessageID.grades_class_age]
             }
-
 
             UstadListFilterChipsHeader {
                 filterOptions = props.uiState.gradeFilterOptions
