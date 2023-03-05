@@ -48,6 +48,7 @@ import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.composable.*
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
@@ -323,6 +324,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
 
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ClazzAssignmentDetailStudentProgressScreen(
     uiState: ClazzAssignmentDetailStudentProgressUiState,
@@ -330,6 +332,8 @@ fun ClazzAssignmentDetailStudentProgressScreen(
     onClickSubmitGradeAndMarkNext: () -> Unit = {},
     onAddComment: (String) -> Unit = {},
     onAddMark: (String) -> Unit = {},
+    onClickNewPublicComment: () -> Unit = {},
+    onClickNewPrivateComment: () -> Unit = {},
     onClickGradeFilterChip: (MessageIdOption2) -> Unit = {},
     onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = {},
 ){
@@ -351,6 +355,13 @@ fun ClazzAssignmentDetailStudentProgressScreen(
     ){
 
         item {
+            Text(
+                text = stringResource(id = R.string.submissions),
+                modifier = Modifier.defaultItemPadding()
+            )
+        }
+
+        item {
             UstadAssignmentSubmissionHeader(
                 uiState = uiState.submissionHeaderUiState
             )
@@ -368,7 +379,10 @@ fun ClazzAssignmentDetailStudentProgressScreen(
 
 
         item {
-            Text(text = stringResource(id = R.string.grades_class_age))
+            Text(
+                text = stringResource(id = R.string.grades_class_age),
+                modifier = Modifier.defaultItemPadding()
+            )
         }
 
         item {
@@ -392,13 +406,10 @@ fun ClazzAssignmentDetailStudentProgressScreen(
             )
         }
 
-        item {
-            Text(text = stringResource(id = R.string.submissions))
-        }
-
         if (uiState.markStudentVisible){
             item {
                 UstadTextEditField(
+                    modifier = Modifier.defaultItemPadding(),
                     value = "",
                     label = stringResource(id = R.string.comment),
                     enabled = uiState.fieldsEnabled,
@@ -416,6 +427,7 @@ fun ClazzAssignmentDetailStudentProgressScreen(
         if (uiState.markStudentVisible){
             item {
                 UstadTextEditField(
+                    modifier = Modifier.defaultItemPadding(),
                     value = "",
                     label = stringResource(id = R.string.points).capitalizeFirstLetter()
                             + uiState.assignment?.block?.cbMaxPoints,
@@ -438,7 +450,8 @@ fun ClazzAssignmentDetailStudentProgressScreen(
                     onClick = onClickSubmitGrade,
                     enabled = uiState.markNextStudentVisible,
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .defaultItemPadding(),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = colorResource(id = R.color.primaryColor)
                     )
@@ -460,7 +473,8 @@ fun ClazzAssignmentDetailStudentProgressScreen(
                     onClick = onClickSubmitGradeAndMarkNext,
                     enabled = uiState.markNextStudentVisible,
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .defaultItemPadding(),
                 ) {
                     Text(stringResource(markFileSubmissionSubmitGradeAndNextText).uppercase())
                 }
@@ -471,6 +485,28 @@ fun ClazzAssignmentDetailStudentProgressScreen(
             UstadCourseAssignmentMarkListItem(
                 uiState = uiState.markListItemUiState
             )
+        }
+
+        item {
+            ListItem(
+                text = {Text(stringResource(R.string.private_comments))}
+            )
+        }
+
+        item {
+            UstadAddCommentListItem(
+                text = stringResource(id = R.string.add_private_comment),
+                enabled = uiState.fieldsEnabled,
+                personUid = 0,
+                onClickAddComment = { onClickNewPrivateComment() }
+            )
+        }
+
+        items(
+            items = uiState.privateCommentsList,
+            key = { Pair(5, it.commentsUid) }
+        ){ comment ->
+            UstadCommentListItem(commentWithPerson = comment)
         }
 
     }
@@ -496,14 +532,6 @@ fun ClazzAssignmentDetailStudentProgressScreenPreview(){
                     casaFileName = "Content Title"
                 }
             },
-            CourseAssignmentSubmissionWithAttachment().apply {
-                casUid = 2
-                casTimestamp = 1677744388299
-                casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
-                attachment = CourseAssignmentSubmissionAttachment().apply {
-                    casaFileName = "Content Title"
-                }
-            },
         ),
         markListItemUiState = UstadCourseAssignmentMarkListItemUiState(
             mark = CourseAssignmentMarkWithPersonMarker().apply {
@@ -516,7 +544,17 @@ fun ClazzAssignmentDetailStudentProgressScreenPreview(){
                     camPenalty = 3
                 }
             }
-        )
+        ),
+        privateCommentsList = listOf(
+            CommentsWithPerson().apply {
+                commentsUid = 1
+                commentsPerson = Person().apply {
+                    firstNames = "Bob"
+                    lastName = "Dylan"
+                }
+                commentsText = "I like this activity. Shall we discuss this in our next meeting?"
+            }
+        ),
     )
 
 
