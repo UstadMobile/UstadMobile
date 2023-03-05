@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -167,6 +168,7 @@ private fun ClazzAssignmentDetailStudentProgressListOverviewScreen(
 
         item {
             Row(
+                modifier = Modifier.requiredHeight(IntrinsicSize.Min),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 NumberRow(uiState.progressSummary?.calculateNotSubmittedStudents() ?: 0,
@@ -178,8 +180,8 @@ private fun ClazzAssignmentDetailStudentProgressListOverviewScreen(
                         colorResource(id = R.color.grey)
                     ),
                     modifier = Modifier
-                        .height(45.dp)
                         .width(1.dp)
+                        .fillMaxHeight()
                 )
 
                 NumberRow(uiState.progressSummary?.submittedStudents ?: 0,
