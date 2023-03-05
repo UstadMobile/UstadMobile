@@ -12,6 +12,7 @@ import mui.system.StackDirection
 import mui.system.responsive
 import react.FC
 import react.Props
+import react.ReactNode
 
 external interface LanguageDetailProps : Props {
     var uiState: LanguageDetailUiState
@@ -30,17 +31,17 @@ val LanguageDetailComponent2 = FC<LanguageDetailProps> { props ->
 
             UstadDetailField {
                 labelText = strings[MessageID.name]
-                valueText = props.uiState.language?.name.toString()
+                valueText = ReactNode(props.uiState.language?.name.toString())
             }
 
             UstadDetailField {
                 labelText = strings[MessageID.two_letter_code]
-                valueText = props.uiState.language?.iso_639_1_standard.toString()
+                valueText = ReactNode(props.uiState.language?.iso_639_1_standard.toString())
             }
 
             UstadDetailField {
                 labelText = strings[MessageID.three_letter_code]
-                valueText = props.uiState.language?.iso_639_2_standard.toString()
+                valueText = ReactNode(props.uiState.language?.iso_639_2_standard.toString())
             }
         }
     }

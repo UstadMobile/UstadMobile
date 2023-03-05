@@ -43,7 +43,7 @@ fun String.truncate(maxLength: Int = 24): String{
 /**
  * Check if the current string starts with https:// or http://
  */
-fun String.startsWithHttpProtocol(): Boolean = toLowerCase().let {
+fun String.startsWithHttpProtocol(): Boolean = lowercase().let {
     it.startsWith("http://") || it.startsWith("https://")
 }
 

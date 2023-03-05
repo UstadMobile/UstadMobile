@@ -64,11 +64,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
     @Before
     fun setup() {
-        mockView = mock {
-            on { runOnUiThread(any())}.doAnswer{
-                Thread(it.getArgument<Any>(0) as Runnable).start()
-            }
-        }
+        mockView = mock { }
         mockLifecycleOwner = mockLifecycleOwner(DoorState.RESUMED)
         context = Any()
 
