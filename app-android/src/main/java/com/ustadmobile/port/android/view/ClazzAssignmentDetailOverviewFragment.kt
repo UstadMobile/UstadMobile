@@ -51,6 +51,7 @@ import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstant
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.core.viewmodel.listItemUiState
+import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import com.ustadmobile.port.android.util.compose.rememberFormattedTime
@@ -476,6 +477,11 @@ fun ClazzAssignmentDetailOverviewScreen(
                 uiState.clazzAssignment?.caSubmissionPolicy ?:
                 ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE].messageId)
 
+    val caFileType = messageIdMapResource(
+        map = SubmissionConstants.FILE_TYPE_MAP,
+        key = uiState.clazzAssignment?.caFileType ?: ClazzAssignment.FILE_TYPE_DOC
+    )
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -567,8 +573,12 @@ fun ClazzAssignmentDetailOverviewScreen(
                     modifier = Modifier.defaultItemPadding()
                 ){
                     Text(stringResource(R.string.file_type_chosen))
-                    Text("${SubmissionConstants.FILE_TYPE_MAP[
-                            uiState.clazzAssignment?.caFileType]}")
+                    Text(caFileType)
+
+                    Box(modifier = Modifier.width(5.dp))
+
+                    Text(stringResource(R.string.max_number_of_files,
+                        uiState.clazzAssignment?.caNumberOfFiles ?: 0))
                 }
             }
         }
