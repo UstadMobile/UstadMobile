@@ -23,6 +23,7 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentDetailOverviewBinding
 import com.ustadmobile.core.account.UstadAccountManager
@@ -345,6 +346,12 @@ fun ClazzAssignmentDetailStudentProgressScreen(
             .fillMaxSize()
     ){
 
+        item {
+            UstadAssignmentSubmissionHeader(
+                uiState = uiState.submissionHeaderUiState
+            )
+        }
+
         items(
             items = uiState.submissionList,
             key = { submission -> submission.casUid }
@@ -355,11 +362,6 @@ fun ClazzAssignmentDetailStudentProgressScreen(
             )
         }
 
-        item {
-            UstadAssignmentSubmissionHeader(
-                uiState = uiState.submissionHeaderUiState
-            )
-        }
 
         item {
             Text(text = stringResource(id = R.string.grades_class_age))
@@ -451,35 +453,60 @@ fun ClazzAssignmentDetailStudentProgressScreen(
             }
         }
 
+        item {
+            UstadCourseAssignmentMarkListItem(
+                uiState = uiState.markListItemUiState
+            )
+        }
+
     }
 }
 
 @Composable
 @Preview
 fun ClazzAssignmentDetailStudentProgressScreenPreview(){
-    ClazzAssignmentDetailStudentProgressScreen(
-        uiState = ClazzAssignmentDetailStudentProgressUiState(
-            submissionHeaderUiState = UstadAssignmentSubmissionHeaderUiState(
-                assignmentStatus = CourseAssignmentSubmission.NOT_SUBMITTED
-            ),
-            submissionList = listOf(
-                CourseAssignmentSubmissionWithAttachment().apply {
-                    casUid = 1
-                    casTimestamp = 1677744388299
-                    casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
-                    attachment = CourseAssignmentSubmissionAttachment().apply {
-                        casaFileName = "Content Title"
-                    }
-                },
-                CourseAssignmentSubmissionWithAttachment().apply {
-                    casUid = 2
-                    casTimestamp = 1677744388299
-                    casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
-                    attachment = CourseAssignmentSubmissionAttachment().apply {
-                        casaFileName = "Content Title"
-                    }
-                },
-            )
+
+    val uiState = ClazzAssignmentDetailStudentProgressUiState(
+        submissionHeaderUiState = UstadAssignmentSubmissionHeaderUiState(
+            assignmentStatus = CourseAssignmentSubmission.MARKED,
+            assignmentMark = AverageCourseAssignmentMark().apply {
+                averagePenalty = 12
+            }
         ),
+        submissionList = listOf(
+            CourseAssignmentSubmissionWithAttachment().apply {
+                casUid = 1
+                casTimestamp = 1677744388299
+                casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
+                attachment = CourseAssignmentSubmissionAttachment().apply {
+                    casaFileName = "Content Title"
+                }
+            },
+            CourseAssignmentSubmissionWithAttachment().apply {
+                casUid = 2
+                casTimestamp = 1677744388299
+                casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
+                attachment = CourseAssignmentSubmissionAttachment().apply {
+                    casaFileName = "Content Title"
+                }
+            },
+        ),
+        markListItemUiState = UstadCourseAssignmentMarkListItemUiState(
+            mark = CourseAssignmentMarkWithPersonMarker().apply {
+                marker = Person().apply {
+                    firstNames = "John"
+                    lastName = "Smith"
+                    isGroup = true
+                    camMarkerSubmitterUid = 2
+                    camMarkerComment = "Comment"
+                    camPenalty = 3
+                }
+            }
+        )
     )
+
+
+    MdcTheme {
+        ClazzAssignmentDetailStudentProgressScreen(uiState)
+    }
 }
