@@ -4,12 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -332,7 +330,6 @@ fun ClazzAssignmentDetailStudentProgressScreen(
     onClickSubmitGradeAndMarkNext: () -> Unit = {},
     onAddComment: (String) -> Unit = {},
     onAddMark: (String) -> Unit = {},
-    onClickNewPublicComment: () -> Unit = {},
     onClickNewPrivateComment: () -> Unit = {},
     onClickGradeFilterChip: (MessageIdOption2) -> Unit = {},
     onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = {},
@@ -394,7 +391,6 @@ fun ClazzAssignmentDetailStudentProgressScreen(
             )
         }
 
-        // TODO add block
         items(
             items = uiState.markList,
             key = { mark -> mark.camUid }
@@ -402,6 +398,7 @@ fun ClazzAssignmentDetailStudentProgressScreen(
             UstadCourseAssignmentMarkListItem(
                 uiState = UstadCourseAssignmentMarkListItemUiState(
                     mark = mark,
+                    block = uiState.assignment?.block ?: CourseBlock()
                 )
             )
         }
