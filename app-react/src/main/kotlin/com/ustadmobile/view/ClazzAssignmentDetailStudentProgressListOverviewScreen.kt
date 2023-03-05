@@ -7,6 +7,7 @@ import com.ustadmobile.core.viewmodel.ClazzAssignmentDetailStudentProgressListOv
 import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.lib.db.entities.*
 import csstype.px
+import csstype.rgb
 import mui.icons.material.*
 import mui.material.*
 import mui.material.List
@@ -74,8 +75,11 @@ private val ClazzAssignmentDetailStudentProgressListOverviewScreenComponent2 =
                         }
                     }
 
-                    Divider {
-                        orientation = Orientation.vertical
+                    Box {
+                        sx {
+                            backgroundColor = rgb(211, 211, 211)
+                            width = 3.px
+                        }
                     }
                 }
 
