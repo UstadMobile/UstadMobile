@@ -9,11 +9,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -398,6 +402,9 @@ fun ClazzAssignmentDetailStudentProgressScreen(
                     value = "",
                     label = stringResource(id = R.string.comment),
                     enabled = uiState.fieldsEnabled,
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Done,
+                    ),
                     onValueChange = { comment ->
                         onAddComment(comment)
                     }
@@ -406,16 +413,23 @@ fun ClazzAssignmentDetailStudentProgressScreen(
         }
 
 
-        item {
-            UstadTextEditField(
-                value = "",
-                label = stringResource(id = R.string.points).capitalizeFirstLetter(),
-                error = uiState.submitMarkError,
-                enabled = uiState.fieldsEnabled,
-                onValueChange = { mark ->
-                    onAddMark(mark)
-                }
-            )
+        if (uiState.markStudentVisible){
+            item {
+                UstadTextEditField(
+                    value = "",
+                    label = stringResource(id = R.string.points).capitalizeFirstLetter()
+                            + uiState.assignment?.block?.cbMaxPoints,
+                    error = uiState.submitMarkError,
+                    enabled = uiState.fieldsEnabled,
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Done,
+                        keyboardType = KeyboardType.Number
+                    ),
+                    onValueChange = { mark ->
+                        onAddMark(mark)
+                    }
+                )
+            }
         }
 
         if (uiState.markStudentVisible){

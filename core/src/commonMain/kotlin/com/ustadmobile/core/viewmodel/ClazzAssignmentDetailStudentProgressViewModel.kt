@@ -30,6 +30,8 @@ data class ClazzAssignmentDetailStudentProgressUiState(
 
     val markStudentVisible: Boolean = true,
 
+    val assignment: ClazzAssignmentWithCourseBlock? = null,
+
     val fieldsEnabled: Boolean = true,
 
     val submissionHeaderUiState: UstadAssignmentSubmissionHeaderUiState =
