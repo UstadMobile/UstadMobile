@@ -9,7 +9,7 @@ class ClazzAssignmentDetailOverviewScreen {
 }
 
 val ASSIGNMENT_STATUS_MAP = mapOf(
-    CourseAssignmentSubmission.NOT_SUBMITTED to Done.create(),
-    CourseAssignmentSubmission.SUBMITTED to Done.create(),
-    CourseAssignmentSubmission.MARKED to DoneAll.create()
+    CourseAssignmentSubmission.NOT_SUBMITTED to Done,
+    CourseAssignmentSubmission.SUBMITTED to Done,
+    CourseAssignmentSubmission.MARKED to DoneAll
 )

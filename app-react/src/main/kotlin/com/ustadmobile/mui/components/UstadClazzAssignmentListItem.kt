@@ -138,7 +138,7 @@ private val SecondaryContent = FC<UstadClazzAssignmentListItemProps> { props ->
 
             if (assignmentUiState?.submissionStatusIconVisible == true){
                 Icon{
-                    + ASSIGNMENT_STATUS_MAP[assignment.fileSubmissionStatus]
+                    + ASSIGNMENT_STATUS_MAP[assignment.fileSubmissionStatus]?.create()
                 }
             }
 

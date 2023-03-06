@@ -31,7 +31,7 @@ val UstadAssignmentSubmissionHeader = FC<UstadAssignmentSubmissionHeaderProps> {
 
         var imageId: ReactElement<SvgIconProps>? = null
         if (props.uiState.submissionStatusIconVisible) {
-            imageId = (ASSIGNMENT_STATUS_MAP[props.uiState.assignmentStatus] ?: Done.create())
+            imageId = (ASSIGNMENT_STATUS_MAP[props.uiState.assignmentStatus] ?: Done).create()
         }
 
         UstadDetailField {

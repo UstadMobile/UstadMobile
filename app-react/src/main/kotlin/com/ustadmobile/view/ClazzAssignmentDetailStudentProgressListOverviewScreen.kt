@@ -114,7 +114,7 @@ private val AssignmentDetailAttemptListItem = FC<AssignmentDetailAttemptListItem
     val personUiState = props.person.listItemUiState
 
     val assignmentStatusIcon = ASSIGNMENT_STATUS_MAP[props.person.fileSubmissionStatus]
-        ?: Done.create()
+        ?: Done
 
     ListItem {
         ListItemButton {
@@ -135,8 +135,7 @@ private val AssignmentDetailAttemptListItem = FC<AssignmentDetailAttemptListItem
                    direction = responsive(StackDirection.row)
 
                     if (personUiState.fileSubmissionStatusIconVisible){
-                        Icon {
-                            + assignmentStatusIcon
+                        assignmentStatusIcon.create {
                             sx {
                                width = 16.px
                                height = 16.px
@@ -145,9 +144,9 @@ private val AssignmentDetailAttemptListItem = FC<AssignmentDetailAttemptListItem
                     }
                     if (personUiState.fileSubmissionStatusTextVisible){
                         Typography {
-                            strings[SubmissionConstants.STATUS_MAP[
+                            + (strings[SubmissionConstants.STATUS_MAP[
                                     props.person.fileSubmissionStatus]
-                                ?: MessageID.not_submitted_cap]
+                                ?: MessageID.not_submitted_cap])
                         }
                     }
                 }
