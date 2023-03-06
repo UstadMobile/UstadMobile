@@ -233,6 +233,7 @@ dependencies {
     implementation project(':sharedse')
 
     implementation "com.github.UstadMobile.door:door-runtime:$version_door"
+    implementation "com.github.UstadMobile.httpoveripc:core:$version_httpoveripc"
     implementation project(':lib-database')
     implementation project(':lib-util')
 

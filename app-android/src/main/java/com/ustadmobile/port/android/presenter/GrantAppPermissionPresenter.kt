@@ -120,6 +120,9 @@ class GrantAppPermissionPresenter(
                         putExtra(AccountManager.KEY_ACCOUNT_NAME, activeAccountName)
                         putExtra(AccountManager.KEY_ACCOUNT_TYPE, UstadAccountManager.ACCOUNT_TYPE)
                         putExtra(AccountManager.KEY_AUTHTOKEN, authToken)
+                        putExtra("endpointUrl", ustadAccountManager.activeEndpoint.url)
+                        putExtra("sourcedId",
+                            ustadAccountManager.activeSession?.person?.personUid?.toString())
                     }
                 }else {
                     null

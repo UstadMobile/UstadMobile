@@ -205,6 +205,30 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
         selectedSchool: Long
     ) : DataSourceFactory<Int, ClazzWithListDisplayDetails>
 
+    /**
+     *
+     * @param accountPersonUid the personuid for the auth token holder
+     * @param filterByEnrolledMemberPersonUid the sourcedid of the user
+     */
+    @Query("""
+        SELECT Clazz.*
+          FROM PersonGroupMember
+               ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_CLAZZ_SELECT}
+               ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
+         WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
+           AND PersonGroupMember.groupMemberActive
+           AND EXISTS 
+               (SELECT ClazzEnrolment.clazzEnrolmentUid
+                  FROM ClazzEnrolment
+                 WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :filterByEnrolledMemberPersonUid
+               )  
+    """)
+    abstract suspend fun findOneRosterUserClazzes(
+        accountPersonUid: Long,
+        filterByEnrolledMemberPersonUid: Long,
+    ): List<Clazz>
+
 
     @Query("SELECT Clazz.clazzUid AS uid, Clazz.clazzName AS labelName From Clazz WHERE clazzUid IN (:ids)")
     abstract suspend fun getClassNamesFromListOfIds(ids: List<Long>): List<UidAndLabel>

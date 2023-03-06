@@ -2,11 +2,13 @@ package com.ustadmobile.port.android.impl
 
 import android.app.Application
 import android.content.Context
+import android.os.Bundle
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import com.ustadmobile.core.account.*
+import com.ustadmobile.core.api.oneroster.OneRosterEndpoint
 import com.ustadmobile.core.assignment.ClazzAssignmentIncomingReplicationListener
 import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentformats.xapi.ContextActivity
@@ -66,7 +68,7 @@ import com.ustadmobile.core.db.dao.commitLiveConnectivityStatus
 
 open class UstadApp : Application(), DIAware {
 
-    val diModule = DI.Module("UstadApp-Android") {
+    private val diModule = DI.Module("UstadApp-Android") {
         import(commonJvmDiModule)
 
         bind<UstadMobileSystemImpl>() with singleton {
@@ -224,6 +226,13 @@ open class UstadApp : Application(), DIAware {
         }
         bind<XapiStateEndpoint>() with scoped(EndpointScope.Default).singleton {
             XapiStateEndpointImpl(endpoint = context, di = di)
+        }
+
+        bind<OneRosterEndpoint>() with singleton {
+            OneRosterEndpoint(
+                activeEndpointsGetter = { EndpointScope.Default.activeEndpointSet },
+                di = di,
+            )
         }
 
         bind<Int>(tag = TAG_LOCAL_HTTP_PORT) with singleton {

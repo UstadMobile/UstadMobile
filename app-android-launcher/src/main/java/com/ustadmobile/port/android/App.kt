@@ -28,10 +28,5 @@ class App : UstadApp() {
             }
         }
     }
-
-    companion object {
-
-        val ATTACHMENTS_DIR = "attachments"
-    }
 }
 

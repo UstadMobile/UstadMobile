@@ -11,6 +11,9 @@ class EndpointScope: Scope<Endpoint> {
     val activeEndpointUrls: Set<String>
         get() = activeEndpoints.keys
 
+    val activeEndpointSet: Set<Endpoint>
+        get() = activeEndpoints.keys.map { Endpoint(it) }.toSet()
+
     override fun getRegistry(context: Endpoint): ScopeRegistry = activeEndpoints.getOrPut(context.url) { StandardScopeRegistry() }
 
     companion object {

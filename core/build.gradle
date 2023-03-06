@@ -215,6 +215,10 @@ kotlin {
 
                 implementation "com.linkedin.android.litr:litr:$version_android_litr"
 
+                implementation "com.athaydes.rawhttp:rawhttp-core:$version_raw_http_core"
+                implementation "com.github.UstadMobile.httpoveripc:core:$version_httpoveripc"
+                implementation "com.github.UstadMobile.httpoveripc:server:$version_httpoveripc"
+
                 //dependency injection
                 implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
 
