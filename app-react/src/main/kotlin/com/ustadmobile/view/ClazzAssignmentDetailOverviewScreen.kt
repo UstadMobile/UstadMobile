@@ -7,12 +7,9 @@ import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstant
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.ClazzAssignmentDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
-import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.hooks.useFormattedDateAndTime
-import com.ustadmobile.hooks.useFormattedTime
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.util.ext.format
 import csstype.px
 import kotlinx.datetime.TimeZone
 import mui.icons.material.*
@@ -73,7 +70,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
 
         val caFileType = strings[
                 SubmissionConstants.FILE_TYPE_MAP[
-                   props.uiState.clazzAssignment?.caFileType ?: ClazzAssignment.FILE_TYPE_DOC
+                        props.uiState.clazzAssignment?.caFileType ?: ClazzAssignment.FILE_TYPE_DOC
                 ] ?: MessageID.message
         ]
 
@@ -136,7 +133,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                         variant = ButtonVariant.outlined
                         + strings[MessageID.add_text].uppercase()
                     }
-    }
+                }
 
                 if (props.uiState.addFileVisible) {
                     Button {
@@ -146,7 +143,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                         variant = ButtonVariant.outlined
                         + strings[MessageID.add_file].uppercase()
                     }
-    }
+                }
 
                 Stack {
                     direction = responsive(StackDirection.row)
@@ -161,18 +158,18 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                             + caFileType
                         }
 
-                Box{
-                    sx {
-                        width = 5.px
-                    }
-                }
+                        Box{
+                            sx {
+                                width = 5.px
+                            }
+                        }
 
                         Typography{
                             + strings[MessageID.max_number_of_files]
                                 .replace("%1\$s", (props.uiState.clazzAssignment?.caNumberOfFiles ?: 0).toString())
 
                         }
-    }
+                    }
                 }
 
                 if (props.uiState.unassignedErrorVisible) {
@@ -180,17 +177,17 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                         + (props.uiState.unassignedError ?: "")
 
                     }
-    }
+                }
 
-    if (props.uiState.submitSubmissionButtonVisible) {
-        Button {
-            onClick = { props.onClickSubmitSubmission() }
-            disabled = !props.uiState.fieldsEnabled
-            variant = ButtonVariant.contained
+                if (props.uiState.submitSubmissionButtonVisible) {
+                    Button {
+                        onClick = { props.onClickSubmitSubmission() }
+                        disabled = !props.uiState.fieldsEnabled
+                        variant = ButtonVariant.contained
 
-            + strings[MessageID.submit].uppercase()
-        }
-    }
+                        + strings[MessageID.submit].uppercase()
+                    }
+                }
 
                 List{
                     props.uiState.submittedSubmissionList.forEach { submissionItem ->
@@ -219,34 +216,8 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                             onClickMark = props.onClickMark
                             uiState = UstadCourseAssignmentMarkListItemUiState(
                                 mark = markItem,
-                block = props.uiState.clazzAssignment?.block ?: CourseBlock()
-            )
-                        }
-                    }
-                }
-
-                Typography {
-                    + strings[MessageID.class_comments]
-                }
-
-
-                Stack{
-                    direction = responsive(StackDirection.row)
-
-                    AccountCircle {
-                        sx {
-                            width = 40.px
-                            height = 40.px
-                        }
-                    }
-
-                    UstadTextEditField {
-                        value = ""
-                        label = strings[MessageID.add_class_comment]
-                        readOnly = true
-                        enabled = props.uiState.fieldsEnabled
-                        onChange = {
-                            props.onClickNewPublicComment()
+                                block = props.uiState.clazzAssignment?.block ?: CourseBlock()
+                            )
                         }
                     }
                 }
@@ -296,51 +267,82 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                 }
             }
         }
-}
+    }
 
 
 val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
 
-    ClazzAssignmentDetailOverviewScreenComponent2 {
-        uiState = ClazzAssignmentDetailOverviewUiState(
-            clazzAssignment = ClazzAssignmentWithCourseBlock().apply {
-                caDescription = "Read the stories and describe the main characters."
-                caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
-                block = CourseBlock().apply {
-                    cbDeadlineDate = 1677063785
+    val uiStateVal = ClazzAssignmentDetailOverviewUiState(
+        addFileVisible = true,
+        addTextVisible = true,
+        clazzAssignment = ClazzAssignmentWithCourseBlock().apply {
+            caDescription = "Read the stories and describe the main characters."
+            caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
+            caFileType =  ClazzAssignment.FILE_TYPE_DOC
+            block = CourseBlock().apply {
+                cbDeadlineDate = 1677063785
+            }
+        },
+        markList = listOf(
+            CourseAssignmentMarkWithPersonMarker().apply {
+                marker = Person().apply {
+                    firstNames = "John"
+                    lastName = "Smith"
+                    isGroup = true
+                    camMarkerSubmitterUid = 2
+                    camMarkerComment = "Comment"
+                }
+            }
+        ),
+        publicCommentList = listOf(
+            CommentsWithPerson().apply {
+                commentsUid = 1
+                commentsPerson = Person().apply {
+                    firstNames = "Bob"
+                    lastName = "Dylan"
+                }
+                commentsText = "I like this activity. Shall we discuss this in our next meeting?"
+            }
+        ),
+        privateCommentList = listOf(
+            CommentsWithPerson().apply {
+                commentsUid = 1
+                commentsPerson = Person().apply {
+                    firstNames = "Bob"
+                    lastName = "Dylan"
+                }
+                commentsText = "I like this activity. Shall we discuss this in our next meeting?"
+            }
+        ),
+        submissionHeaderUiState = UstadAssignmentSubmissionHeaderUiState(
+            assignmentStatus = CourseAssignmentSubmission.MARKED,
+            assignmentMark = AverageCourseAssignmentMark().apply {
+                averagePenalty = 12
+            }
+        ),
+        submittedSubmissionList = listOf(
+            CourseAssignmentSubmissionWithAttachment().apply {
+                casUid = 1
+                casTimestamp = 1677744388299
+                casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
+                attachment = CourseAssignmentSubmissionAttachment().apply {
+                    casaFileName = "Content Title"
                 }
             },
-            markList = listOf(
-                CourseAssignmentMarkWithPersonMarker().apply {
-                    marker = Person().apply {
-                        firstNames = "John"
-                        lastName = "Smith"
-                        isGroup = true
-                        camMarkerSubmitterUid = 2
-                        camMarkerComment = "Comment"
-                    }
+        ),
+        draftSubmissionList = listOf(
+            CourseAssignmentSubmissionWithAttachment().apply {
+                casUid = 1
+                casTimestamp = 1677744388299
+                casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
+                attachment = CourseAssignmentSubmissionAttachment().apply {
+                    casaFileName = "Content Title"
                 }
-            ),
-            publicCommentList = listOf(
-                CommentsWithPerson().apply {
-                    commentsUid = 1
-                    commentsPerson = Person().apply {
-                        firstNames = "Bob"
-                        lastName = "Dylan"
-                    }
-                    commentsText = "I like this activity. Shall we discuss this in our next meeting?"
-                }
-            ),
-            privateCommentList = listOf(
-                CommentsWithPerson().apply {
-                    commentsUid = 1
-                    commentsPerson = Person().apply {
-                        firstNames = "Bob"
-                        lastName = "Dylan"
-                    }
-                    commentsText = "I like this activity. Shall we discuss this in our next meeting?"
-                }
-            )
+            },
         )
+    )
+
+    ClazzAssignmentDetailOverviewScreenComponent2 {
+        uiState = uiStateVal
     }
 }
