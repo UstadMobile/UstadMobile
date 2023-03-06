@@ -44,8 +44,6 @@ data class ClazzAssignmentDetailStudentProgressUiState(
         MessageIdOption2(MessageID.all, CourseAssignmentMarkDaoCommon.ARG_FILTER_ALL_SCORES)
     ),
 
-    val markListItemUiState:UstadCourseAssignmentMarkListItemUiState = UstadCourseAssignmentMarkListItemUiState(),
-
     val privateCommentsList: List<CommentsWithPerson> = emptyList(),
 
 )

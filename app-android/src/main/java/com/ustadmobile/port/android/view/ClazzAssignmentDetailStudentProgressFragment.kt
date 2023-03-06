@@ -391,18 +391,6 @@ fun ClazzAssignmentDetailStudentProgressScreen(
             )
         }
 
-        items(
-            items = uiState.markList,
-            key = { mark -> mark.camUid }
-        ){ mark ->
-            UstadCourseAssignmentMarkListItem(
-                uiState = UstadCourseAssignmentMarkListItemUiState(
-                    mark = mark,
-                    block = uiState.assignment?.block ?: CourseBlock()
-                )
-            )
-        }
-
         if (uiState.markStudentVisible){
             item {
                 UstadTextEditField(
@@ -427,7 +415,7 @@ fun ClazzAssignmentDetailStudentProgressScreen(
                     modifier = Modifier.defaultItemPadding(),
                     value = "",
                     label = stringResource(id = R.string.points).capitalizeFirstLetter()
-                            + uiState.assignment?.block?.cbMaxPoints,
+                            + (uiState.assignment?.block?.cbMaxPoints ?: 0),
                     error = uiState.submitMarkError,
                     enabled = uiState.fieldsEnabled,
                     keyboardOptions = KeyboardOptions(
@@ -478,9 +466,15 @@ fun ClazzAssignmentDetailStudentProgressScreen(
             }
         }
 
-        item {
+        items(
+            items = uiState.markList,
+            key = { mark -> mark.camUid }
+        ){ mark ->
             UstadCourseAssignmentMarkListItem(
-                uiState = uiState.markListItemUiState
+                uiState = UstadCourseAssignmentMarkListItemUiState(
+                    mark = mark,
+                    block = uiState.assignment?.block ?: CourseBlock()
+                )
             )
         }
 
@@ -530,8 +524,8 @@ fun ClazzAssignmentDetailStudentProgressScreenPreview(){
                 }
             },
         ),
-        markListItemUiState = UstadCourseAssignmentMarkListItemUiState(
-            mark = CourseAssignmentMarkWithPersonMarker().apply {
+        markList = listOf(
+            CourseAssignmentMarkWithPersonMarker().apply {
                 marker = Person().apply {
                     firstNames = "John"
                     lastName = "Smith"

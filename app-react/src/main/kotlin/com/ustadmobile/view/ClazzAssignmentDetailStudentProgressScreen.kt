@@ -45,7 +45,7 @@ external interface ClazzAssignmentDetailStudentProgressScreenProps : Props {
 val ClazzAssignmentDetailStudentProgressScreenComponent2 =
     FC<ClazzAssignmentDetailStudentProgressScreenProps> { props ->
 
-    val strings: StringsXml = useStringsXml()
+        val strings: StringsXml = useStringsXml()
 
         val markFileSubmissionSubmitGradeAndNextText = if (props.uiState.submissionScore == null)
             MessageID.submit_grade_and_mark_next
@@ -57,134 +57,128 @@ val ClazzAssignmentDetailStudentProgressScreenComponent2 =
         else
             MessageID.update_grade
 
-    Container {
-        Stack {
-            direction = responsive(StackDirection.column)
-            spacing = responsive(20.px)
+        Container {
+            Stack {
+                direction = responsive(StackDirection.column)
+                spacing = responsive(10.px)
 
-            Typography {
-                + strings[MessageID.submissions]
-            }
-
-            UstadAssignmentSubmissionHeader{
-                uiState = props.uiState.submissionHeaderUiState
-            }
-
-            List{
-                props.uiState.submissionList.forEach { submissionItem ->
-                    UstadAssignmentSubmissionListItem {
-                        submission = submissionItem
-                        onClickOpenSubmission = props.onClickOpenSubmission
-                    }
+                Typography {
+                    + strings[MessageID.submissions]
                 }
-            }
 
-            Typography {
-                + strings[MessageID.grades_class_age]
-            }
-
-            UstadListFilterChipsHeader {
-                filterOptions = props.uiState.gradeFilterOptions
-                selectedChipId = props.uiState.selectedChipId
-                enabled = props.uiState.fieldsEnabled
-                onClickFilterChip = props.onClickGradeFilterChip
-            }
-
-            List{
-                props.uiState.markList.forEach { mark ->
-                    UstadCourseAssignmentMarkListItem {
-                        uiState = UstadCourseAssignmentMarkListItemUiState(
-                            mark = mark,
-                            block = props.uiState.assignment?.block ?: CourseBlock()
-                        )
-                    }
+                UstadAssignmentSubmissionHeader{
+                    uiState = props.uiState.submissionHeaderUiState
                 }
-            }
 
-
-            if (props.uiState.markStudentVisible){
-                TextField {
-                    label = ReactNode(strings[MessageID.comment])
-                    value = ""
-                    disabled = !(props.uiState.fieldsEnabled)
-                    error = props.uiState.submitMarkError != null
-                    helperText = props.uiState.submitMarkError?.let { ReactNode(it) }
-                    fullWidth = true
-                    type = InputType.number
-                    onChange = {
-                        val currentVal = it.target.asDynamic().value
-                        props.onAddComment(currentVal?.toString() ?: "")
-                    }
-                }
-            }
-
-
-            if (props.uiState.markStudentVisible){
-                TextField {
-                    label = ReactNode((strings[MessageID.points].capitalizeFirstLetter()
-                            + props.uiState.assignment?.block?.cbMaxPoints))
-                    value = ""
-                    disabled = !(props.uiState.fieldsEnabled)
-                    error = props.uiState.submitMarkError != null
-                    helperText = props.uiState.submitMarkError?.let { ReactNode(it) }
-                    fullWidth = true
-                    type = InputType.number
-                    onChange = {
-                        val currentVal = it.target.asDynamic().value
-                        props.onAddMark(currentVal?.toString() ?: "")
-                    }
-                }
-            }
-
-            if (props.uiState.markStudentVisible){
-                Button {
-                    onClick = { props.onClickSubmitGrade() }
-                    variant = ButtonVariant.contained
-                    disabled = !props.uiState.markNextStudentVisible
-
-                    + strings[markFileSubmissionSubmitGradeText].uppercase()
-                }
-            }
-
-            if (props.uiState.markNextStudentVisible){
-                Button {
-                    onClick = { props.onClickSubmitGradeAndMarkNext() }
-                    variant = ButtonVariant.outlined
-                    disabled = !props.uiState.markNextStudentVisible
-
-                    + strings[markFileSubmissionSubmitGradeAndNextText].uppercase()
-                }
-            }
-
-            UstadCourseAssignmentMarkListItem{
-                uiState = props.uiState.markListItemUiState
-            }
-
-
-            List{
-
-                ListItem {
-                    ListItemText {
-                        primary = ReactNode(strings[MessageID.private_comments])
+                List{
+                    props.uiState.submissionList.forEach { submissionItem ->
+                        UstadAssignmentSubmissionListItem {
+                            submission = submissionItem
+                            onClickOpenSubmission = props.onClickOpenSubmission
+                        }
                     }
                 }
 
-                UstadAddCommentListItem {
-                    text = strings[MessageID.add_private_comment]
+                Typography {
+                    + strings[MessageID.grades_class_age]
+                }
+
+                UstadListFilterChipsHeader {
+                    filterOptions = props.uiState.gradeFilterOptions
+                    selectedChipId = props.uiState.selectedChipId
                     enabled = props.uiState.fieldsEnabled
-                    personUid = 0
-                    onClickSubmit = { props.onClickNewPrivateComment }
+                    onClickFilterChip = props.onClickGradeFilterChip
                 }
 
-                props.uiState.privateCommentsList.forEach { comment ->
-                    UstadCommentListItem{
-                        commentWithPerson = comment
+                if (props.uiState.markStudentVisible){
+                    TextField {
+                        label = ReactNode(strings[MessageID.comment])
+                        value = ""
+                        disabled = !(props.uiState.fieldsEnabled)
+                        error = props.uiState.submitMarkError != null
+                        helperText = props.uiState.submitMarkError?.let { ReactNode(it) }
+                        fullWidth = true
+                        type = InputType.number
+                        onChange = {
+                            val currentVal = it.target.asDynamic().value
+                            props.onAddComment(currentVal?.toString() ?: "")
+                        }
                     }
                 }
-            }
 
+
+                if (props.uiState.markStudentVisible){
+                    TextField {
+                        label = ReactNode((strings[MessageID.points].capitalizeFirstLetter()
+                                + props.uiState.assignment?.block?.cbMaxPoints))
+                        value = ""
+                        disabled = !(props.uiState.fieldsEnabled)
+                        error = props.uiState.submitMarkError != null
+                        helperText = props.uiState.submitMarkError?.let { ReactNode(it) }
+                        fullWidth = true
+                        type = InputType.number
+                        onChange = {
+                            val currentVal = it.target.asDynamic().value
+                            props.onAddMark(currentVal?.toString() ?: "")
+                        }
+                    }
+                }
+
+                if (props.uiState.markStudentVisible){
+                    Button {
+                        onClick = { props.onClickSubmitGrade() }
+                        variant = ButtonVariant.contained
+                        disabled = !props.uiState.markNextStudentVisible
+
+                        + strings[markFileSubmissionSubmitGradeText].uppercase()
+                    }
+                }
+
+                if (props.uiState.markNextStudentVisible){
+                    Button {
+                        onClick = { props.onClickSubmitGradeAndMarkNext() }
+                        variant = ButtonVariant.outlined
+                        disabled = !props.uiState.markNextStudentVisible
+
+                        + strings[markFileSubmissionSubmitGradeAndNextText].uppercase()
+                    }
+                }
+
+                List{
+                    props.uiState.markList.forEach { mark ->
+                        UstadCourseAssignmentMarkListItem {
+                            uiState = UstadCourseAssignmentMarkListItemUiState(
+                                mark = mark,
+                                block = props.uiState.assignment?.block ?: CourseBlock()
+                            )
+                        }
+                    }
+                }
+
+                List{
+
+                    ListItem {
+                        ListItemText {
+                            primary = ReactNode(strings[MessageID.private_comments])
+                        }
+                    }
+
+                    UstadAddCommentListItem {
+                        text = strings[MessageID.add_private_comment]
+                        enabled = props.uiState.fieldsEnabled
+                        personUid = 0
+                        onClickSubmit = { props.onClickNewPrivateComment }
+                    }
+
+                    props.uiState.privateCommentsList.forEach { comment ->
+                        UstadCommentListItem{
+                            commentWithPerson = comment
+                        }
+                    }
+                }
+
+            }
         }
-    }
 }
 
 val ClazzAssignmentDetailStudentProgressScreenPreview = FC<Props> {
@@ -206,8 +200,8 @@ val ClazzAssignmentDetailStudentProgressScreenPreview = FC<Props> {
                 }
             },
         ),
-        markListItemUiState = UstadCourseAssignmentMarkListItemUiState(
-            mark = CourseAssignmentMarkWithPersonMarker().apply {
+        markList = listOf(
+            CourseAssignmentMarkWithPersonMarker().apply {
                 marker = Person().apply {
                     firstNames = "John"
                     lastName = "Smith"
