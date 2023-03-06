@@ -6,8 +6,7 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.ClazzAssignmentDetailStudentProgressListOverviewUiState
 import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.lib.db.entities.*
-import csstype.px
-import csstype.rgb
+import csstype.*
 import mui.icons.material.*
 import mui.material.*
 import mui.material.List
@@ -51,7 +50,11 @@ val ClazzAssignmentDetailStudentProgressListOverviewScreenPreview = FC<Props> {
 private val ClazzAssignmentDetailStudentProgressListOverviewScreenComponent2 =
     FC<ClazzAssignmentDetailStudentProgressListOverviewScreenProps> { props ->
 
-        val strings = useStringsXml()
+        val assignmentSummaryList = listOf (
+            Pair(props.uiState.progressSummary?.calculateNotSubmittedStudents(), MessageID.not_started),
+            Pair(props.uiState.progressSummary?.submittedStudents, MessageID.submitted_cap),
+            Pair(props.uiState.progressSummary?.markedStudents, MessageID.marked_cap)
+        )
 
         Container {
             maxWidth = "lg"
@@ -63,22 +66,20 @@ private val ClazzAssignmentDetailStudentProgressListOverviewScreenComponent2 =
                 Stack {
                     direction = responsive(StackDirection.row)
 
-                    Stack {
+                    assignmentSummaryList.forEachIndexed { index, summaryPair ->
 
-                        Typography {
-                            + (props.uiState.progressSummary?.calculateNotSubmittedStudents() ?: 0)
-                                .toString()
+                        ClazzAssignmentSummaryColumn {
+                            number = summaryPair.first
+                            messageID = summaryPair.second
                         }
 
-                        Typography {
-                            + (strings[MessageID.not_started])
-                        }
-                    }
-
-                    Box {
-                        sx {
-                            backgroundColor = rgb(211, 211, 211)
-                            width = 3.px
+                        if (index < 2){
+                            Box {
+                                sx {
+                                    backgroundColor = rgb(211, 211, 211)
+                                    width = 3.px
+                                }
+                            }
                         }
                     }
                 }
@@ -97,6 +98,30 @@ private val ClazzAssignmentDetailStudentProgressListOverviewScreenComponent2 =
 
 }
 
+external interface AClazzAssignmentSummaryColumnProps : Props {
+
+    var number: Int?
+
+    var messageID: Int
+
+}
+
+private val ClazzAssignmentSummaryColumn = FC<AClazzAssignmentSummaryColumnProps> { props ->
+
+    val strings = useStringsXml()
+
+    Stack {
+
+        Typography {
+            + (props.number).toString()
+        }
+
+        Typography {
+            + (strings[props.messageID])
+        }
+    }
+
+}
 
 
 external interface AssignmentDetailAttemptListItemProps : Props {
@@ -134,21 +159,40 @@ private val AssignmentDetailAttemptListItem = FC<AssignmentDetailAttemptListItem
                 secondary = Stack.create {
                    direction = responsive(StackDirection.row)
 
-                    if (personUiState.fileSubmissionStatusIconVisible){
-                        assignmentStatusIcon.create {
+                    if (personUiState.latestPrivateCommentVisible){
+                        Comment.create {
                             sx {
-                               width = 16.px
-                               height = 16.px
+                                width = 12.px
+                                height = 12.px
                             }
                         }
-                    }
-                    if (personUiState.fileSubmissionStatusTextVisible){
+
                         Typography {
-                            + (strings[SubmissionConstants.STATUS_MAP[
-                                    props.person.fileSubmissionStatus]
-                                ?: MessageID.not_submitted_cap])
+                            + props.person.latestPrivateComment
                         }
+
                     }
+                }
+            }
+
+        }
+
+        secondaryAction = Stack.create {
+            direction = responsive(StackDirection.row)
+
+            if (personUiState.fileSubmissionStatusIconVisible){
+                + assignmentStatusIcon.create {
+                    sx {
+                        width = 24.px
+                        height = 24.px
+                    }
+                }
+            }
+            if (personUiState.fileSubmissionStatusTextVisible){
+                Typography {
+                    + (" "+strings[SubmissionConstants.STATUS_MAP[
+                            props.person.fileSubmissionStatus]
+                        ?: MessageID.not_submitted_cap])
                 }
             }
         }

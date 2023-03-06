@@ -180,11 +180,11 @@ private fun ClazzAssignmentDetailStudentProgressListOverviewScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
-                assignmentSummaryPairList.forEachIndexed { index, pair ->
+                assignmentSummaryPairList.forEachIndexed { index, summaryPair ->
 
-                    ClazzAssignmentSummaryRow(
-                        pair.first,
-                        stringResource(pair.second)
+                    ClazzAssignmentSummaryColumn(
+                        summaryPair.first,
+                        stringResource(summaryPair.second)
                     )
 
                     if (index < 2){
@@ -213,7 +213,7 @@ private fun ClazzAssignmentDetailStudentProgressListOverviewScreen(
 }
 
 @Composable
-private fun ClazzAssignmentSummaryRow(
+private fun ClazzAssignmentSummaryColumn(
     number: Int = 0,
     text: String = ""
 ){
