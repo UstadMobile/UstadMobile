@@ -10,6 +10,7 @@ import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.view.ClazzAssignmentDetailOverviewComponent.Companion.SUBMISSION_POLICY_MAP
 import csstype.px
 import kotlinx.datetime.TimeZone
 import mui.icons.material.*
@@ -100,8 +101,8 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                 UstadDetailField {
                     valueText = ReactNode(caSubmissionPolicyText)
                     labelText = strings[MessageID.submission_policy]
-//                    icon = SUBMISSION_POLICY_MAP[uiState.clazzAssignment?.caSubmissionPolicy]
-//                        ?: R.drawable.ic_baseline_task_alt_24,
+                    icon = (ASSIGNMENT_STATUS_MAP[props.uiState.clazzAssignment?.caSubmissionPolicy]
+                        ?: Done.create())
                     onClick = {  }
                 }
 
@@ -207,7 +208,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                     filterOptions = props.uiState.gradeFilterChips
                     selectedChipId = props.uiState.selectedChipId
                     enabled = props.uiState.fieldsEnabled
-                    onClickFilterChip = { onClickFilterChip(it) }
+                    onClickFilterChip = { props.onClickFilterChip(it) }
                 }
 
                 List{
