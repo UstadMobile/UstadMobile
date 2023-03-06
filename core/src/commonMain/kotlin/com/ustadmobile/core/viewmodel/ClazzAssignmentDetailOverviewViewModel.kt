@@ -72,6 +72,9 @@ data class ClazzAssignmentDetailOverviewUiState(
     val submitSubmissionButtonVisible: Boolean
         get() = hasFilesToSubmit && !deadlinePassed && unassignedError.isNullOrBlank()
 
+    val unassignedErrorVisible: Boolean
+        get() = !unassignedError.isNullOrBlank()
+
 }
 
 val CourseAssignmentMarkWithPersonMarker.listItemUiState

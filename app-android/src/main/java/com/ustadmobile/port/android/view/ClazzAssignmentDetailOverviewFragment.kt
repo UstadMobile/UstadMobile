@@ -46,6 +46,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
 import com.ustadmobile.core.util.MessageIdOption2
@@ -525,7 +526,9 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         item {
-            Text("")
+            ListItem(
+              text = { Text(stringResource(R.string.submissions)) }
+            )
         }
 
         items(
@@ -581,6 +584,10 @@ fun ClazzAssignmentDetailOverviewScreen(
                         uiState.clazzAssignment?.caNumberOfFiles ?: 0))
                 }
             }
+        }
+
+        if (uiState.unassignedErrorVisible) {
+            Text(uiState.unassignedError ?: "")
         }
 
         if (uiState.submitSubmissionButtonVisible){
@@ -690,75 +697,78 @@ fun ClazzAssignmentDetailOverviewScreen(
 @Composable
 @Preview
 fun ClazzAssignmentDetailOverviewScreenPreview(){
-    ClazzAssignmentDetailOverviewScreen(
-        uiState = ClazzAssignmentDetailOverviewUiState(
-            addFileVisible = true,
-            addTextVisible = true,
-            clazzAssignment = ClazzAssignmentWithCourseBlock().apply {
-                caDescription = "Read the stories and describe the main characters."
-                caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
-                caFileType =  ClazzAssignment.FILE_TYPE_DOC
-                block = CourseBlock().apply {
-                    cbDeadlineDate = 1677063785
+
+    val uiState = ClazzAssignmentDetailOverviewUiState(
+        addFileVisible = true,
+        addTextVisible = true,
+        clazzAssignment = ClazzAssignmentWithCourseBlock().apply {
+            caDescription = "Read the stories and describe the main characters."
+            caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
+            caFileType =  ClazzAssignment.FILE_TYPE_DOC
+            block = CourseBlock().apply {
+                cbDeadlineDate = 1677063785
+            }
+        },
+        markList = listOf(
+            CourseAssignmentMarkWithPersonMarker().apply {
+                marker = Person().apply {
+                    firstNames = "John"
+                    lastName = "Smith"
+                    isGroup = true
+                    camMarkerSubmitterUid = 2
+                    camMarkerComment = "Comment"
+                }
+            }
+        ),
+        publicCommentList = listOf(
+            CommentsWithPerson().apply {
+                commentsUid = 1
+                commentsPerson = Person().apply {
+                    firstNames = "Bob"
+                    lastName = "Dylan"
+                }
+                commentsText = "I like this activity. Shall we discuss this in our next meeting?"
+            }
+        ),
+        privateCommentList = listOf(
+            CommentsWithPerson().apply {
+                commentsUid = 1
+                commentsPerson = Person().apply {
+                    firstNames = "Bob"
+                    lastName = "Dylan"
+                }
+                commentsText = "I like this activity. Shall we discuss this in our next meeting?"
+            }
+        ),
+        submissionHeaderUiState = UstadAssignmentSubmissionHeaderUiState(
+            assignmentStatus = CourseAssignmentSubmission.MARKED,
+            assignmentMark = AverageCourseAssignmentMark().apply {
+                averagePenalty = 12
+            }
+        ),
+        submittedSubmissionList = listOf(
+            CourseAssignmentSubmissionWithAttachment().apply {
+                casUid = 1
+                casTimestamp = 1677744388299
+                casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
+                attachment = CourseAssignmentSubmissionAttachment().apply {
+                    casaFileName = "Content Title"
                 }
             },
-            markList = listOf(
-                CourseAssignmentMarkWithPersonMarker().apply {
-                    marker = Person().apply {
-                        firstNames = "John"
-                        lastName = "Smith"
-                        isGroup = true
-                        camMarkerSubmitterUid = 2
-                        camMarkerComment = "Comment"
-                    }
+        ),
+        draftSubmissionList = listOf(
+            CourseAssignmentSubmissionWithAttachment().apply {
+                casUid = 1
+                casTimestamp = 1677744388299
+                casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
+                attachment = CourseAssignmentSubmissionAttachment().apply {
+                    casaFileName = "Content Title"
                 }
-            ),
-            publicCommentList = listOf(
-                CommentsWithPerson().apply {
-                    commentsUid = 1
-                    commentsPerson = Person().apply {
-                        firstNames = "Bob"
-                        lastName = "Dylan"
-                    }
-                    commentsText = "I like this activity. Shall we discuss this in our next meeting?"
-                }
-            ),
-            privateCommentList = listOf(
-                CommentsWithPerson().apply {
-                    commentsUid = 1
-                    commentsPerson = Person().apply {
-                        firstNames = "Bob"
-                        lastName = "Dylan"
-                    }
-                    commentsText = "I like this activity. Shall we discuss this in our next meeting?"
-                }
-            ),
-            submissionHeaderUiState = UstadAssignmentSubmissionHeaderUiState(
-                assignmentStatus = CourseAssignmentSubmission.MARKED,
-                assignmentMark = AverageCourseAssignmentMark().apply {
-                    averagePenalty = 12
-                }
-            ),
-            submittedSubmissionList = listOf(
-                CourseAssignmentSubmissionWithAttachment().apply {
-                    casUid = 1
-                    casTimestamp = 1677744388299
-                    casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
-                    attachment = CourseAssignmentSubmissionAttachment().apply {
-                        casaFileName = "Content Title"
-                    }
-                },
-            ),
-            draftSubmissionList = listOf(
-                CourseAssignmentSubmissionWithAttachment().apply {
-                    casUid = 1
-                    casTimestamp = 1677744388299
-                    casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
-                    attachment = CourseAssignmentSubmissionAttachment().apply {
-                        casaFileName = "Content Title"
-                    }
-                },
-            )
+            },
         )
     )
+
+    MdcTheme {
+        ClazzAssignmentDetailOverviewScreen(uiState)
+    }
 }

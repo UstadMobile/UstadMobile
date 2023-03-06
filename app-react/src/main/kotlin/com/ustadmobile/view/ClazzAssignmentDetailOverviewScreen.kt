@@ -5,17 +5,12 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.ClazzAssignmentDetailOverviewUiState
-import com.ustadmobile.core.viewmodel.ClazzMemberListUiState
-import com.ustadmobile.core.viewmodel.UstadAssignmentFileSubmissionHeaderUiState
+import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useFormattedTime
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.util.colorForAttendanceStatus
-import com.ustadmobile.util.ext.format
-import com.ustadmobile.view.ClazzAssignmentDetailOverviewComponent.Companion.SUBMISSION_POLICY_MAP
-import csstype.Padding
 import csstype.px
 import kotlinx.datetime.TimeZone
 import mui.icons.material.*
@@ -96,8 +91,8 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                     onClick = {  }
                 }
 
-                UstadAssignmentFileSubmissionHeader {
-                    uiState = UstadAssignmentFileSubmissionHeaderUiState(
+                UstadAssignmentSubmissionHeader {
+                    uiState = UstadAssignmentSubmissionHeaderUiState(
                         assignmentStatus = CourseAssignmentSubmission.NOT_SUBMITTED
                     )
                 }
