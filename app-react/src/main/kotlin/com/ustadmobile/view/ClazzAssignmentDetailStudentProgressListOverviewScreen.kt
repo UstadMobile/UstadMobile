@@ -121,7 +121,7 @@ private val AssignmentDetailAttemptListItem = FC<AssignmentDetailAttemptListItem
             onClick = { props.onClick(props.person) }
 
             ListItemIcon {
-                AccountCircle.create {
+                + AccountCircle.create {
                     sx {
                         width = 40.px
                         height = 40.px

@@ -2,7 +2,6 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,6 +33,7 @@ import com.ustadmobile.core.viewmodel.ClazzAssignmentDetailStudentProgressListOv
 import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -161,54 +161,44 @@ private fun ClazzAssignmentDetailStudentProgressListOverviewScreen(
         ClazzAssignmentDetailStudentProgressListOverviewUiState(),
     onClickPerson: (AssignmentSubmitterSummary) -> Unit = {},
 ) {
+
+    val assignmentSummaryPairList: List<Pair<Int, Int>> = listOf(
+        Pair(uiState.progressSummary?.calculateNotSubmittedStudents() ?: 0, R.string.not_started) ,
+        Pair(uiState.progressSummary?.submittedStudents ?: 0, R.string.submitted_cap) ,
+        Pair(uiState.progressSummary?.markedStudents ?: 0, R.string.marked_cap) ,
+    )
+
     LazyColumn(
         modifier = Modifier.fillMaxSize()
             .defaultScreenPadding()
     ) {
 
         item {
+
             Row(
                 modifier = Modifier.requiredHeight(IntrinsicSize.Min),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                NumberRow(uiState.progressSummary?.calculateNotSubmittedStudents() ?: 0,
-                    stringResource(R.string.not_started)
-                )
 
-                Divider(
-                    color = contentColorFor(
-                        colorResource(id = R.color.grey)
-                    ),
-                    modifier = Modifier
-                        .width(1.dp)
-                        .fillMaxHeight()
-                )
+                assignmentSummaryPairList.forEachIndexed { index, pair ->
 
-                NumberRow(uiState.progressSummary?.submittedStudents ?: 0,
-                stringResource(R.string.submitted_cap)
-                )
+                    ClazzAssignmentSummaryRow(
+                        pair.first,
+                        stringResource(pair.second)
+                    )
 
-                Divider(
-                    color = contentColorFor(
-                        colorResource(id = R.color.grey)
-                    ),
-                    modifier = Modifier
-                        .height(45.dp)
-                        .width(1.dp)
-                )
-
-                NumberRow(uiState.progressSummary?.markedStudents ?: 0,
-                stringResource(R.string.marked_cap)
-                )
-
-                Divider(
-                    color = contentColorFor(
-                        colorResource(id = R.color.grey)
-                    ),
-                    modifier = Modifier
-                        .height(45.dp)
-                        .width(1.dp)
-                )
+                    if (index < 2){
+                        Divider(
+                            color = contentColorFor(
+                                colorResource(id = R.color.grey_light)
+                            ),
+                            modifier = Modifier
+                                .width(1.dp)
+                                .fillMaxHeight()
+                                .padding(vertical = 20.dp)
+                        )
+                    }
+                }
             }
         }
 
@@ -223,14 +213,14 @@ private fun ClazzAssignmentDetailStudentProgressListOverviewScreen(
 }
 
 @Composable
-private fun NumberRow(
+private fun ClazzAssignmentSummaryRow(
     number: Int = 0,
     text: String = ""
 ){
     Column(
         modifier = Modifier.padding(20.dp)
     ){
-        Text(number.toString())
+        Text(number.toString(), style = Typography.h1)
         Text(text)
     }
 }
