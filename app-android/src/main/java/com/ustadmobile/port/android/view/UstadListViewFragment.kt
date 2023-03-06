@@ -39,7 +39,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
-abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
+abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
         UstadListView<RT, DT>, Observer<PagedList<DT>>, MessageIdSpinner.OnMessageIdOptionSelectedListener,
         OnSortOptionSelected, View.OnClickListener {
 
@@ -101,7 +101,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
     /**
      * This iscor a Contextual Action Mode Callback that handles showing list selection mode
      */
-    private class ListViewActionModeCallback<RT, DT>(var fragmentHost: UstadListViewFragment<RT, DT>?) : ActionMode.Callback {
+    private class ListViewActionModeCallback<RT, DT : Any>(var fragmentHost: UstadListViewFragment<RT, DT>?) : ActionMode.Callback {
 
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
             val selectedItemsList = fragmentHost?.mDataRecyclerViewAdapter?.selectedItemsLiveData?.value

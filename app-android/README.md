@@ -1,7 +1,8 @@
-# Ustad Mobile Android port
+# Ustad Mobile Android module
 
-This is a normal gradle build and should open fine with Android studio. It includes the core and
-sharedse modules.
+This provides the app for Android. Fragments, activities, services, etc. are here. This is then 
+used as the main dependency for app-android-launcher that provides the APK. It could in theory
+be used as a dependency in another app.
 
 ### To build
 
@@ -11,51 +12,57 @@ sharedse modules.
  $ ./gradlew ':app-android:assembleDebug'
 ```
 
-### To sign :
+# Android Offline API usage
 
-(run from root project directory):
+The Android offline API uses intents and a bound service to allow other apps to authenticate users,
+request an authentication token, and then access user data without requiring an Internet connection.
+The token generated can be verified online by backend servers after the client reconnects and syncs.
+
+## Authentication
+
+* The caller app sends an intent
+```
+val authIntent = Intent("com.ustadmobile.AUTH_GET_TOKEN", Uri.parse("local-auth://[server-url]")
+```
+server-url is optional. If server-url is omitted, then authenticator may prompt the user to select
+a server.
+
+* The Ustad app will allow the user to select an account, and will then ask the user if they wish
+  to grant permission to the caller app.
+
+* If the user accepts to grant permission to the caller app, the caller receives the result:
 
 ```
-$ cp keystore.properties.example keystore.properties  <br/>
-$ # Edit keystore.properties as required using text editor <br/>
-$./gradlew ':app-android:assembleRelease'
+val accountName = resultIntent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
+val accountType = resultIntent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE)
+val authToken = resultIntent.getStringExtra(AccountManager.KEY_AUTHTOKEN)
 ```
 
-
-### Build flavors
-
-There are three flavors in the project:
-
-* Vanilla: the base flavor. Supports SDK18+ and does not use multidex (the app on it's own does not
-exceed 64K methods).
-* DevMinApi21: SDK21+ only. This is recommended for development purposes - tests can be run without
-the need to multidex.
-* VanillaMultidex: SDK18+ and uses multidex. This is used to run tests on Android devices below SDK21.
-
-
-### Tests
-
- >$ ./gradlew connectedVanillamultidexDebugAndroidTest
- 
-Note: Espresso end-to-end tests are being updated. 
-
-### To use as a library in another app
-
-This is a work in progress and has not been tested recently. The consuming app can set a manifest
-preference "com.ustadmobile.core.appconfig" to set the path to the appconfig to override the
-defaults.
-
-Add Ustad Mobile's maven repo to your build.gradle file:
+This can be handled as an ActivityResultContract as follows:
 
 ```
-maven {
-    url "http://devserver2.ustadmobile.com/repo-mvn"
+data class GetTokenResult(
+    val resultCode: Int,
+    val accountName: String?,
+    val accountType: String?,
+    val authToken: String?
+)
+
+class GetOfflineAuthActivityResultContract: ActivityResultContract<String?, GetTokenResult>() {
+    /**
+     * @param input where the desired endpoint servername is known, it can provided.
+     */
+    override fun createIntent(context: Context, input: String?): Intent {
+        return Intent("com.ustadmobile.AUTH_GET_TOKEN",
+            Uri.parse("local-auth://${input ?: ""}"))
+    }
+
+    override fun parseResult(resultCode: Int, intent: Intent?): GetTokenResult {
+        val addedName = intent?.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
+        val addedType = intent?.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE)
+        val authToken = intent?.getStringExtra(AccountManager.KEY_AUTHTOKEN)
+
+        return GetTokenResult(resultCode, addedName, addedType, authToken)
+    }
 }
 ```
-
-Add the Ustad Mobile app library as a dependency to build.gradle:
-
-### Known issues
-
-* InputMethodManager memory leak on debug variant: known issue caused by pre-v10 Android
-  [as per this report](https://github.com/square/leakcanary/issues/256).

@@ -6,7 +6,7 @@ import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.wrappers.intl.Intl
 import com.ustadmobile.wrappers.intl.IntlDateTimeNumericProp
 import com.ustadmobile.util.ext.setHours
-import kotlinx.js.jso
+import js.core.jso
 import react.useMemo
 import kotlin.js.Date
 

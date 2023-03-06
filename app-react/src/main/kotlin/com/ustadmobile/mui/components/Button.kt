@@ -4,7 +4,7 @@ import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.Util
 import mui.material.*
-import org.w3c.dom.events.Event
+import web.events.Event
 import react.RBuilder
 import react.ReactNode
 import styled.StyledHandler

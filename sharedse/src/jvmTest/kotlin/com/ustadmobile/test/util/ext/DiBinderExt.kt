@@ -16,9 +16,7 @@ import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import org.kodein.di.*
-import javax.naming.InitialContext
 import kotlin.random.Random
-import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import kotlinx.coroutines.runBlocking
 
 fun DI.Builder.bindDbAndRepoWithEndpoint(endpointScope: EndpointScope, clientMode: Boolean = true) {
@@ -29,7 +27,6 @@ fun DI.Builder.bindDbAndRepoWithEndpoint(endpointScope: EndpointScope, clientMod
     bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
         val dbName = sanitizeDbNameFromUrl(context.url)
         val nodeIdAndAuth: NodeIdAndAuth = instance()
-        InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
         spy(DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite:build/tmp/$dbName.sqlite")
             .addSyncCallback(nodeIdAndAuth)
             .build()

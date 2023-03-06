@@ -6,6 +6,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -26,7 +27,6 @@ import com.ustadmobile.core.util.StringAndSerialNum
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDate
-import com.ustadmobile.port.android.util.ext.applyEditAutoPadding
 import com.ustadmobile.port.android.util.ext.getActivityContext
 import java.util.*
 
@@ -34,11 +34,10 @@ import java.util.*
 fun UstadEditField(
     modifier: Modifier = Modifier,
     error: String? = null,
-    autoPadding: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     Column(
-        modifier = modifier.applyEditAutoPadding(autoPadding)
+        modifier = modifier,
     ) {
         content()
 
@@ -74,7 +73,8 @@ fun UstadTextEditField(
     onValueChange: (String) -> Unit,
     password: Boolean = false,
     suffixText: String? = null,
-    autoPadding: Boolean = true,
+    singleLine: Boolean = true,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
     var errorText by remember(errorString) {
@@ -98,7 +98,6 @@ fun UstadTextEditField(
     UstadEditField(
         modifier = modifier,
         error = errorText,
-        autoPadding = autoPadding,
     ) {
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
@@ -112,11 +111,13 @@ fun UstadTextEditField(
             enabled = enabled,
             interactionSource = interactionSource,
             readOnly = readOnly,
+            keyboardActions = keyboardActions,
             visualTransformation = if (password && !passwordVisible) {
                 PasswordVisualTransformation()
             } else {
                 VisualTransformation.None
             },
+            singleLine = singleLine,
             trailingIcon = if(password) {
                 {
                     IconButton(
@@ -208,7 +209,6 @@ fun UstadDateEditTextField(
     enabled: Boolean = true,
     @Suppress("UNUSED_PARAMETER") //Reserved for future use
     error: String? = null,
-    autoVerticalPadding: Boolean = true,
     onValueChange: (Long) -> Unit = {},
 ) {
     var errorText by remember(error) {
@@ -229,7 +229,6 @@ fun UstadDateEditTextField(
         modifier = modifier,
         onValueChange = {},
         readOnly = true,
-        autoPadding = autoVerticalPadding,
         onClick = {
             val supportFragmentManager =
                 (context.getActivityContext() as AppCompatActivity)

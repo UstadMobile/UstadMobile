@@ -4,6 +4,7 @@ import com.ustadmobile.core.controller.ClazzAssignmentDetailOverviewPresenter
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
@@ -43,6 +44,15 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
 
     private var courseAssignmentSubmissions : List<CourseAssignmentSubmissionWithAttachment> = listOf()
 
+    private var courseMarks : List<CourseAssignmentMarkWithPersonMarker> = listOf()
+
+    var selectedFilter: Int? = null
+        set(value){
+            setState{
+                field = value
+            }
+        }
+
     private val classCommentsObserver = ObserverFnWrapper<List<CommentsWithPerson>>{
         if(it.isEmpty()) return@ObserverFnWrapper
         setState {
@@ -65,12 +75,37 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
         }
     }
 
+    private val courseMarkObserver = ObserverFnWrapper<List<CourseAssignmentMarkWithPersonMarker>>{
+        if(it.isEmpty()) return@ObserverFnWrapper
+        setState {
+            courseMarks = it
+        }
+    }
+
     override var submittedCourseAssignmentSubmission: DataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>? = null
         set(value) {
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)
             liveData?.removeObserver(assignmentSubmissionObserver)
             liveData?.observe(this, assignmentSubmissionObserver)
+        }
+
+    override var markList: DataSourceFactory<Int, CourseAssignmentMarkWithPersonMarker>? = null
+        set(value) {
+            field = value
+            val liveData = value?.getData(0,Int.MAX_VALUE)
+            liveData?.removeObserver(courseMarkObserver)
+            liveData?.observe(this, courseMarkObserver)
+        }
+
+    override var gradeFilterChips: List<ListFilterIdOption>? = null
+        set(value){
+            if(selectedFilter == null)
+                selectedFilter = value?.firstOrNull()?.optionId
+
+            setState{
+                field = value
+            }
         }
 
     override var addedCourseAssignmentSubmission: List<CourseAssignmentSubmissionWithAttachment>? = listOf()
@@ -134,7 +169,7 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
             }
         }
 
-    override var submissionMark: CourseAssignmentMark? = null
+    override var submissionMark: AverageCourseAssignmentMark? = null
         get() = field
         set(value) {
             setState {
@@ -222,9 +257,9 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
                     val mark = submissionMark
                     if(mark != null){
 
-                        val marks = "${mark.camMark} / ${entity?.block?.cbMaxPoints} ${getString(MessageID.points)}"
+                        val marks = "${mark.averageScore} / ${entity?.block?.cbMaxPoints} ${getString(MessageID.points)}"
 
-                        val penalty = if(mark.camPenalty != 0)
+                        val penalty = if(mark.averagePenalty != 0)
                             " ${getString(MessageID.late_penalty).format(entity?.block?.cbLateSubmissionPenalty ?: "")}"
                         else
                             ""
@@ -370,6 +405,16 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
                         }
                     }
                 }
+
+                if(!courseMarks.isNullOrEmpty()){
+
+                    renderGradesHeaderWithChipsAndList(systemImpl, gradeFilterChips,
+                        selectedFilter ?: 0, courseMarks, entity?.block){ chip, event ->
+                        selectedFilter = chip.optionId
+                        mPresenter?.onListFilterOptionSelected(chip)
+                    }
+                }
+
 
 
                 if(entity?.caClassCommentEnabled == true){

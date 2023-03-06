@@ -63,6 +63,7 @@ import java.io.File
 import java.net.URI
 import java.util.concurrent.Executors
 import com.ustadmobile.core.db.dao.commitLiveConnectivityStatus
+import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
 
 open class UstadApp : Application(), DIAware {
 
@@ -178,6 +179,10 @@ open class UstadApp : Application(), DIAware {
             VideoTypePluginAndroid(applicationContext, context, di)
         }
 
+        bind<PDFTypePlugin>() with scoped(EndpointScope.Default).singleton{
+            PDFPluginAndroid(applicationContext, context, di)
+        }
+
         bind<ContainerDownloadPlugin>() with scoped(EndpointScope.Default).singleton{
             ContainerDownloadPlugin(applicationContext, context, di)
         }
@@ -196,6 +201,7 @@ open class UstadApp : Application(), DIAware {
                     di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
                     di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
                     di.on(context).direct.instance<VideoTypePluginAndroid>(),
+                    di.on(context).direct.instance<PDFTypePlugin>(),
                     di.on(context).direct.instance<FolderIndexerPlugin>(),
                     di.on(context).direct.instance<ContainerDownloadPlugin>(),
                     di.on(context).direct.instance<DeleteContentEntryPlugin>(),
@@ -260,6 +266,10 @@ open class UstadApp : Application(), DIAware {
 
         bind<AuthManager>() with scoped(EndpointScope.Default).singleton {
             AuthManager(context, di)
+        }
+
+        bind<NavCommandExecutionTracker>() with singleton {
+            NavCommandExecutionTracker()
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

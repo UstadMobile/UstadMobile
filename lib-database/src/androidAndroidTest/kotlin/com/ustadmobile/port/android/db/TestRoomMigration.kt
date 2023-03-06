@@ -17,7 +17,7 @@ class TestRoomMigration {
 
     @Rule @JvmField
     var helper: MigrationTestHelper = MigrationTestHelper(InstrumentationRegistry.getInstrumentation(),
-            UmAppDatabase::class.java.canonicalName, FrameworkSQLiteOpenHelperFactory())
+            UmAppDatabase::class.java, listOf(), FrameworkSQLiteOpenHelperFactory())
 
 
     @Test
@@ -209,6 +209,26 @@ class TestRoomMigration {
 
         helper.runMigrationsAndValidate(TEST_DB, 107, true,
             MIGRATION_106_107.asRoomMigration())
+    }
+
+    @Test
+    fun migrate107To108() {
+        helper.createDatabase(TEST_DB, 107).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 108, true,
+            MIGRATION_107_108.asRoomMigration())
+    }
+
+    @Test
+    fun migrate108To109() {
+        helper.createDatabase(TEST_DB, 108).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 109, true,
+            MIGRATION_108_109.asRoomMigration())
     }
 
 

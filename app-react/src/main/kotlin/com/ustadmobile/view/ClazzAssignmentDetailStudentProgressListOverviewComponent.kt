@@ -7,7 +7,7 @@ import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewLis
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
-import com.ustadmobile.lib.db.entities.PersonGroupAssignmentSummary
+import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.mui.components.GridSize
 import com.ustadmobile.mui.components.GridSpacing
 import com.ustadmobile.mui.components.umDivider
@@ -22,7 +22,7 @@ import react.setState
 import styled.css
 
 class ClazzAssignmentDetailStudentProgressListOverviewComponent (props: UmProps):
-    UstadListComponent<PersonGroupAssignmentSummary, PersonGroupAssignmentSummary>(props),
+    UstadListComponent<AssignmentSubmitterSummary, AssignmentSubmitterSummary>(props),
     ClazzAssignmentDetailStudentProgressOverviewListView {
 
     private var mPresenter: ClazzAssignmentDetailStudentProgressOverviewListPresenter? = null
@@ -30,7 +30,7 @@ class ClazzAssignmentDetailStudentProgressListOverviewComponent (props: UmProps)
     override val displayTypeRepo: Any?
         get() = dbRepo?.clazzDao
 
-    override val listPresenter: UstadListPresenter<*, in PersonGroupAssignmentSummary>?
+    override val listPresenter: UstadListPresenter<*, in AssignmentSubmitterSummary>?
         get() = mPresenter
 
     private var summary: AssignmentProgressSummary? = null
@@ -74,11 +74,11 @@ class ClazzAssignmentDetailStudentProgressListOverviewComponent (props: UmProps)
         }
     }
 
-    override fun RBuilder.renderListItem(item: PersonGroupAssignmentSummary) {
+    override fun RBuilder.renderListItem(item: AssignmentSubmitterSummary) {
         renderAssignmentSubmittedProgress(item, systemImpl, false)
     }
 
-    override fun handleClickEntry(entry: PersonGroupAssignmentSummary) {
+    override fun handleClickEntry(entry: AssignmentSubmitterSummary) {
         mPresenter?.onClickPerson(entry)
     }
 

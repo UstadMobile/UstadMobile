@@ -2,9 +2,7 @@ package com.ustadmobile.lib.rest.ext
 
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.controller.CourseTerminologyEditPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DiTag
@@ -16,9 +14,8 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.requireDbAndRepo
 import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.util.encryptPassword
 import com.ustadmobile.lib.util.randomString
-import kotlinx.coroutines.runBlocking
+import io.github.aakira.napier.Napier
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -27,20 +24,15 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
-import io.github.aakira.napier.Napier
 
 internal fun UmAppDatabase.insertDefaultSite() {
-    val (db, repo) = requireDbAndRepo()
-    val site = db.siteDao.getSite()
-    if(site == null) {
-        repo.siteDao.insert(Site().apply {
-            siteUid = 1L
-            siteName = "My Site"
-            guestLogin = false
-            registrationAllowed = false
-            authSalt = randomString(20)
-        })
-    }
+    siteDao.insert(Site().apply {
+        siteUid = 1L
+        siteName = "My Site"
+        guestLogin = false
+        registrationAllowed = false
+        authSalt = randomString(20)
+    })
 }
 
 fun UmAppDatabase.insertCourseTerminology(di: DI){
@@ -60,11 +52,10 @@ fun UmAppDatabase.insertCourseTerminology(di: DI){
             terminologyList.add(CourseTerminology().apply {
                 ctUid = (pair.langCode[0].code shl(8)) + (pair.langDisplay[1].code).toLong()
                 ctTitle = impl.getString(pair.langCode,
-                    com.ustadmobile.core.generated.locale.MessageID.standard,
-                    Any()) + " - " + pair.langDisplay
+                    MessageID.standard, Any()) + " - " + pair.langDisplay
 
                 ctTerminology = json.encodeToString(
-                    MapSerializer(kotlin.String.serializer(), kotlin.String.serializer()),
+                    MapSerializer(String.serializer(), String.serializer()),
                     com.ustadmobile.core.controller.TerminologyKeys.TERMINOLOGY_ENTRY_MESSAGE_ID
                         .map { it.key to impl.getString(pair.langCode, it.value, Any()) }
                         .toMap()
@@ -125,6 +116,5 @@ suspend fun UmAppDatabase.initAdminUser(
 }
 
 fun UmAppDatabase.ktorInitRepo(di: DI) {
-    insertDefaultSite()
     insertCourseTerminology(di)
 }

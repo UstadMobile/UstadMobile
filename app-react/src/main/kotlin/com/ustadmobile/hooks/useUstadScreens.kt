@@ -1,14 +1,13 @@
 package com.ustadmobile.hooks
 
+import com.ustadmobile.core.components.NAVHOST_CLEARSTACK_VIEWNAME
+import com.ustadmobile.core.components.NavHostClearStackPlaceholder
 import com.ustadmobile.core.view.*
 import com.ustadmobile.entities.UstadScreen
 import com.ustadmobile.entities.UstadScreens
-import com.ustadmobile.mui.components.UstadCourseBlockEditPreview
-import com.ustadmobile.mui.components.UstadDetailFieldPreview
-import com.ustadmobile.mui.components.UstadEditFieldPreviews
-import com.ustadmobile.mui.components.UstadListFilterChipsHeaderPreview
-import com.ustadmobile.mui.components.UstadListSortHeaderPreview
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.*
+import com.ustadmobile.view.components.virtuallist.VirtualListPreview
 import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
 import react.useMemo
 
@@ -26,9 +25,9 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen(PersonAccountEditView.VIEW_NAME, "Person Account Edit Preview",
                 PersonAccountEditPreview),
             UstadScreen(Login2View.VIEW_NAME, "Login Preview",
-                LoginPreview),
+                LoginScreen),
             UstadScreen(SiteEnterLinkView.VIEW_NAME, "Site Enter Link Preview",
-                SiteEnterLinkScreenPreview),
+                SiteEnterLinkScreen),
             UstadScreen(ParentalConsentManagementView.VIEW_NAME, "Parental Consent Management Preview",
                 ParentalConsentManagementPreview),
             UstadScreen(SettingsView.VIEW_NAME, "Settings Preview",
@@ -86,6 +85,50 @@ fun useUstadScreens(): UstadScreens {
 
             UstadScreen(CourseDiscussionDetailView.VIEW_NAME, "Course Discussion Detail Preview",
                 CourseDiscussionDetailPreview),
+
+            UstadScreen("UstadContentEntryListItem", "UstadContentEntryListItem Preview",
+                UstadContentEntryListItemPreview),
+            UstadScreen(CourseGroupSetDetailView.VIEW_NAME, "CourseGroupSetDetail Preview",
+                CourseGroupSetDetailScreenPreview),
+            UstadScreen("UstadClazzAssignmentListItem", "UstadClazzAssignmentListItem Preview",
+                UstadClazzAssignmentListItemPreview),
+            UstadScreen(HolidayCalendarListView.VIEW_NAME, "HolidayCalendarList Preview",
+                HolidayCalendarListScreenPreview),
+            UstadScreen(LanguageListView.VIEW_NAME, "LanguageList Preview",
+                LanguageListScreenPreview),
+            UstadScreen(PersonListView.VIEW_NAME, "PersonList Preview", PersonListScreenPreview),
+            UstadScreen(NAVHOST_CLEARSTACK_VIEWNAME, "Clear Stack", NavHostClearStackPlaceholder),
+            UstadScreen("UstadAddListItem", "UstadAddListItem Preview",
+                UstadAddListItemPreview),
+            UstadScreen(ClazzLogEditAttendanceView.VIEW_NAME, name = "ClazzLogEditAttendance Preview",
+                ClazzLogEditAttendanceScreenPreview),
+            UstadScreen(JoinWithCodeView.VIEW_NAME, "JoinWithCode Preview",
+                JoinWithCodeScreenPreview),
+            UstadScreen(ClazzLogListAttendanceView.VIEW_NAME, "ClazzLogListAttendance Preview",
+                ClazzLogListAttendanceScreenPreview),
+            UstadScreen(ContentEntryList2View.VIEW_NAME, "ContentEntryList Preview",
+                ContentEntryListScreenPreview),
+            UstadScreen(AccountListView.VIEW_NAME, "AccountList Preview", AccountListScreenPreview),
+            UstadScreen(ClazzMemberListView.VIEW_NAME, "ClazzMemberList Preview",
+                ClazzMemberListScreenPreview),
+            UstadScreen(ClazzList2View.VIEW_NAME, "Clazz List Preview",
+                ClazzListScreenPreview
+            ),
+            UstadScreen("VirtualListPreview", "Virtual List Preview",
+                VirtualListPreview),
+            UstadScreen("UstadAssignmentFileSubmissionHeader",
+                "UstadAssignmentFileSubmissionHeader Preview",
+                UstadAssignmentFileSubmissionHeaderPreview),
+            UstadScreen("UstadCourseAssignmentMarkListItem", "UstadCourseAssignmentMarkListItem Preview",
+                UstadCourseAssignmentMarkListItemPreview),
+            UstadScreen("UstadCommentListItem", "UstadCommentListItem Preview",
+                UstadCommentListItemPreview),
+            UstadScreen("UstadAddCommentListItem", "UstadAddCommentListItem Preview",
+                UstadAddCommentListItemPreview),
+            UstadScreen("UstadAssignmentFileSubmissionListItem",
+                "UstadAssignmentFileSubmissionListItem Preview",
+                UstadAssignmentFileSubmissionListItemPreview),
+
         )
     }
 }

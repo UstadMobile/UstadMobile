@@ -2,8 +2,7 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.*
-import org.w3c.dom.HTMLDivElement
-import org.w3c.dom.events.Event
+import web.events.Event
 import react.ElementType
 import react.Props
 import react.RBuilder
@@ -11,6 +10,7 @@ import react.ReactNode
 import react.dom.html.HTMLAttributes
 import styled.StyledHandler
 import styled.StyledProps
+import web.html.HTMLDivElement
 
 external interface UMTabsProps: TabsProps, StyledProps {}
 

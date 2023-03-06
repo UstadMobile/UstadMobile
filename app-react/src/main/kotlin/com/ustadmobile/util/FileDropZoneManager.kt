@@ -2,11 +2,13 @@ package com.ustadmobile.util
 
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.util.Util.stopEventPropagation
-import kotlinx.browser.document
-import kotlinx.browser.window
-import org.w3c.dom.Element
-import org.w3c.dom.events.Event
+import web.events.Event
 import org.w3c.files.File
+import web.dom.Element
+import web.dom.document
+import web.events.EventType
+import web.timers.setTimeout
+import web.uievents.*
 
 interface OnFileAttached {
     fun onValidFileAttached(file: File)
@@ -55,7 +57,7 @@ class FileDropZoneManager(
     private var onFileBrowseHandler :(Event) -> Unit = {
         dropZoneElement?.classList?.add("${StyleManager.name}-dropZoneAreaActive")
         dropZoneInput?.asDynamic().click()
-        window.setTimeout({
+        setTimeout({
             stopEventPropagation(it)
         }, 2000)
     }
@@ -83,20 +85,20 @@ class FileDropZoneManager(
     init {
         dropZoneElement = document.getElementById(dropZoneId)
         dropZoneInput = dropZoneElement?.querySelector("input")
-        dropZoneElement?.addEventListener("click", onFileBrowseHandler)
-        dropZoneElement?.addEventListener("dragover", onFileDragOverHandler)
-        dropZoneElement?.addEventListener("dragleave", onFileDragLeaveHandler)
-        dropZoneElement?.addEventListener("drop", onFileDropHandler)
-        dropZoneInput?.addEventListener("change", onFileInputChangedHandler)
+        dropZoneElement?.addEventListener(MouseEvent.CLICK, onFileBrowseHandler)
+        dropZoneElement?.addEventListener(DragEvent.DRAG_OVER, onFileDragOverHandler)
+        dropZoneElement?.addEventListener(DragEvent.DRAG_LEAVE, onFileDragLeaveHandler)
+        dropZoneElement?.addEventListener(DragEvent.DROP, onFileDropHandler)
+        dropZoneInput?.addEventListener(EventType("change"), onFileInputChangedHandler)
     }
 
     fun onDestroy(){
         onFileAttached = null
-        dropZoneElement?.removeEventListener("click", onFileBrowseHandler)
-        dropZoneElement?.removeEventListener("dragover", onFileDragOverHandler)
-        dropZoneElement?.removeEventListener("dragleave", onFileDragLeaveHandler)
-        dropZoneElement?.removeEventListener("drop", onFileDropHandler)
-        dropZoneInput?.removeEventListener("change", onFileInputChangedHandler)
+        dropZoneElement?.removeEventListener(MouseEvent.CLICK, onFileBrowseHandler)
+        dropZoneElement?.removeEventListener(DragEvent.DRAG_OVER, onFileDragOverHandler)
+        dropZoneElement?.removeEventListener(DragEvent.DRAG_LEAVE, onFileDragLeaveHandler)
+        dropZoneElement?.removeEventListener(DragEvent.DROP, onFileDropHandler)
+        dropZoneInput?.removeEventListener(EventType("change"), onFileInputChangedHandler)
         dropZoneElement = null
         dropZoneInput = null
     }

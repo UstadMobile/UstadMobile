@@ -2,7 +2,8 @@ package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.impl.appstate.FabUiState
+import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.StringAndSerialNum
 import com.ustadmobile.core.util.ext.requireHttpPrefix
@@ -15,7 +16,6 @@ import io.ktor.client.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -38,18 +38,26 @@ class SiteEnterLinkViewModel(
 
     private val httpClient: HttpClient by instance()
 
-    private val navController: UstadNavController by instance()
-
-    private val json: Json by instance()
-
     private val impl: UstadMobileSystemImpl by instance()
 
     var counter = 0
+
+    init {
+        _appUiState.update { prev ->
+            prev.copy(
+                title = impl.getString(MessageID.enter_link),
+                navigationVisible = false,
+                fabState = FabUiState(visible = true, text = "Link", icon = FabUiState.FabIcon.ADD)
+            )
+        }
+    }
 
     fun onClickNext() {
         _uiState.update {
             it.copy(fieldsEnabled = false)
         }
+
+        loadingState = LoadingUiState.INDETERMINATE
 
         viewModelScope.launch {
             try {
@@ -61,18 +69,20 @@ class SiteEnterLinkViewModel(
                     ARG_SITE to json.encodeToString(site),
                 )
                 ARGS_TO_PASS_THROUGH.forEach { argName ->
-                    savedStateHandle.get<String>(argName)?.also { argValue ->
+                    savedStateHandle.get(argName)?.also { argValue ->
                         args[argName] = argValue
                     }
                 }
 
+                loadingState = LoadingUiState.NOT_LOADING
                 _uiState.update { previous ->
                     previous.copy(validLink =  true, linkError = null, fieldsEnabled = true)
                 }
 
                 navController.navigate(Login2View.VIEW_NAME, args)
-            }catch(e: Exception) {
+            }catch(e: Throwable) {
                 _uiState.update { previous ->
+                    loadingState = LoadingUiState.NOT_LOADING
                     previous.copy(
                         validLink = false,
                         fieldsEnabled = true,

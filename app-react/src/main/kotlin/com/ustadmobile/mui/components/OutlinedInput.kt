@@ -5,7 +5,7 @@ import mui.material.OutlinedInput
 import mui.material.OutlinedInputProps
 import react.RBuilder
 import react.ReactNode
-import react.dom.html.InputType
+import web.html.InputType
 import styled.StyledHandler
 
 fun RBuilder.umOutlinedInput(
