@@ -12,6 +12,7 @@ import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useFormattedTime
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.ext.format
 import csstype.px
 import kotlinx.datetime.TimeZone
 import mui.icons.material.*
@@ -23,6 +24,7 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItem as UstadCourseAssignmentMarkListItemUiState
 
 val ASSIGNMENT_STATUS_MAP = mapOf(
     CourseAssignmentSubmission.NOT_SUBMITTED to Done.create(),
@@ -38,14 +40,21 @@ external interface ClazzAssignmentDetailOverviewScreenProps : Props {
 
     var onClickMark: (CourseAssignmentMarkWithPersonMarker) -> Unit
 
-    var onClickComment: (CommentsWithPerson) -> Unit
-
     var onClickNewPublicComment: () -> Unit
 
     var onClickNewPrivateComment: () -> Unit
 
-}
+    var onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit
 
+    var onClickDeleteSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit
+
+    var onClickAddTextSubmission: () -> Unit
+
+    var onClickAddFileSubmission: () -> Unit
+
+    var onClickSubmitSubmission: () -> Unit
+
+}
 
 private val ClazzAssignmentDetailOverviewScreenComponent2 =
     FC<ClazzAssignmentDetailOverviewScreenProps> { props ->
@@ -105,13 +114,89 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                     )
                 }
 
+                Typography {
+                    + strings[MessageID.submissions]
+                }
+
+                List{
+                    props.uiState.draftSubmissionList.forEach { submissionItem ->
+                        UstadAssignmentSubmissionListItem {
+                            submission = submissionItem
+                            onClickOpenSubmission = props.onClickOpenSubmission
+                            onClickDeleteSubmission = props.onClickDeleteSubmission
+                        }
+                    }
+                }
+
+                if (props.uiState.addTextVisible) {
+                    Button {
+                        onClick = { props.onClickAddTextSubmission() }
+                        disabled = !props.uiState.fieldsEnabled
+
+                        variant = ButtonVariant.outlined
+                        + strings[MessageID.add_text].uppercase()
+                    }
+    }
+
+                if (props.uiState.addFileVisible) {
+                    Button {
+                        onClick = { props.onClickAddFileSubmission() }
+                        disabled = !props.uiState.fieldsEnabled
+
+                        variant = ButtonVariant.outlined
+                        + strings[MessageID.add_file].uppercase()
+                    }
+    }
+
                 Stack {
                     direction = responsive(StackDirection.row)
 
-                    Book {
-                        sx {
-                            width = 70.px
-                            height = 70.px
+
+                    if (props.uiState.addFileVisible) {
+                        Typography{
+                            + strings[MessageID.file_type_chosen]
+                        }
+
+                        Typography{
+                            + caFileType
+                        }
+
+                Box{
+                    sx {
+                        width = 5.px
+                    }
+                }
+
+                        Typography{
+                            + strings[MessageID.max_number_of_files]
+                                .replace("%1\$s", (props.uiState.clazzAssignment?.caNumberOfFiles ?: 0).toString())
+
+                        }
+    }
+                }
+
+                if (props.uiState.unassignedErrorVisible) {
+                    Typography{
+                        + (props.uiState.unassignedError ?: "")
+
+                    }
+    }
+
+    if (props.uiState.submitSubmissionButtonVisible) {
+        Button {
+            onClick = { props.onClickSubmitSubmission() }
+            disabled = !props.uiState.fieldsEnabled
+            variant = ButtonVariant.contained
+
+            + strings[MessageID.submit].uppercase()
+        }
+    }
+
+                List{
+                    props.uiState.submittedSubmissionList.forEach { submissionItem ->
+                        UstadAssignmentSubmissionListItem{
+                            submission = submissionItem
+                            onClickOpenSubmission = props.onClickOpenSubmission
                         }
                     }
                 }
@@ -130,9 +215,12 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
 
                 List{
                     props.uiState.markList.forEach { markItem ->
-                        MarkListItem {
-                            mark = markItem
-                            onClick = props.onClickMark
+                        UstadCourseAssignmentMarkListItem {
+                            onClickMark = props.onClickMark
+                            uiState = UstadCourseAssignmentMarkListItemUiState(
+                                mark = markItem,
+                block = props.uiState.clazzAssignment?.block ?: CourseBlock()
+            )
                         }
                     }
                 }
@@ -178,10 +266,9 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                         onClickSubmit = { props.onClickNewPublicComment() }
                     }
 
-                    props.uiState.publicCommentList.forEach { commentItem ->
-                        CommentListItem {
-                            comment = commentItem
-                            onClick = props.onClickComment
+                    props.uiState.publicCommentList.forEach { comment ->
+                        UstadCommentListItem {
+                            commentWithPerson = comment
                         }
                     }
                 }
@@ -201,99 +288,14 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                         onClickSubmit = { props.onClickNewPrivateComment() }
                     }
 
-                    props.uiState.privateCommentList.forEach { commentItem ->
-                        CommentListItem {
-                            comment = commentItem
-                            onClick = props.onClickComment
+                    props.uiState.privateCommentList.forEach { comment ->
+                        UstadCommentListItem {
+                            commentWithPerson = comment
                         }
                     }
                 }
             }
         }
-}
-
-
-external interface MarkListItemProps : Props {
-
-    var mark: CourseAssignmentMarkWithPersonMarker
-
-    var onClick: (CourseAssignmentMarkWithPersonMarker) -> Unit
-
-}
-
-private val MarkListItem = FC<MarkListItemProps> { props ->
-
-    val strings = useStringsXml()
-
-    val markUiSate = props.mark.listItemUiState
-    var text = props.mark.marker?.fullName() ?: ""
-
-    if (markUiSate.markerGroupNameVisible){
-        text += "  (${strings[MessageID.group_number]
-            .replace("%1\$s", props.mark.camMarkerSubmitterUid.toString())})"
-    }
-
-    val formattedTime = useFormattedTime(props.mark.camLct.toInt())
-
-    ListItem{
-        ListItemButton {
-            onClick = {
-                props.onClick(props.mark)
-            }
-
-            ListItemIcon {
-                + AccountCircle.create()
-            }
-
-            ListItemText {
-                primary = ReactNode(text)
-                secondary = Stack.create {
-                    direction = responsive(StackDirection.column)
-
-                    Typography {
-                        + ("")
-                    }
-                }
-            }
-        }
-        secondaryAction = Typography.create {
-            + formattedTime
-        }
-    }
-}
-
-
-
-external interface CommentListItemProps : Props {
-
-    var comment: CommentsWithPerson
-
-    var onClick: (CommentsWithPerson) -> Unit
-
-}
-
-private val CommentListItem = FC<CommentListItemProps> { props ->
-
-    val formattedTime = useFormattedTime(props.comment.commentsDateTimeAdded.toInt())
-
-    ListItem {
-        ListItemButton {
-            onClick = { props.onClick }
-
-            ListItemIcon {
-                + AccountCircle.create()
-            }
-
-            ListItemText {
-                primary = ReactNode(props.comment.commentsPerson?.fullName() ?: "")
-                secondary = ReactNode(props.comment.commentsText ?: "")
-            }
-        }
-
-        secondaryAction = Typography.create {
-            + formattedTime
-        }
-    }
 }
 
 
