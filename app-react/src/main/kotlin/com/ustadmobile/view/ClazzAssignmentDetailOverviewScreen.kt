@@ -1,5 +1,6 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
@@ -59,6 +60,13 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
         val caSubmissionPolicyText = strings[SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS[
                 props.uiState.clazzAssignment?.caSubmissionPolicy ?:
                 ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE].messageId]
+
+
+        val caFileType = strings[
+                SubmissionConstants.FILE_TYPE_MAP[
+                   props.uiState.clazzAssignment?.caFileType ?: ClazzAssignment.FILE_TYPE_DOC
+                ] ?: MessageID.message
+        ]
 
         Container {
             maxWidth = "lg"
@@ -156,6 +164,20 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                 }
 
                 List{
+
+                    ListItem {
+                        ListItemText {
+                            primary = ReactNode(strings[MessageID.class_comments])
+                        }
+                    }
+
+                    UstadAddCommentListItem {
+                        text = strings[MessageID.add_class_comment]
+                        enabled = props.uiState.fieldsEnabled
+                        personUid = 0
+                        onClickSubmit = { props.onClickNewPublicComment() }
+                    }
+
                     props.uiState.publicCommentList.forEach { commentItem ->
                         CommentListItem {
                             comment = commentItem
@@ -164,32 +186,21 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                     }
                 }
 
-                Typography {
-                    + strings[MessageID.private_comments]
-                }
-
-                Stack{
-                    direction = responsive(StackDirection.row)
-
-                    AccountCircle {
-                        sx {
-                            width = 40.px
-                            height = 40.px
-                        }
-                    }
-
-                    UstadTextEditField {
-                        value = ""
-                        label = strings[MessageID.add_private_comment]
-                        readOnly = true
-                        enabled = props.uiState.fieldsEnabled
-                        onChange = {
-                            props.onClickNewPrivateComment()
-                        }
-                    }
-                }
-
                 List{
+
+                    ListItem{
+                        ListItemText {
+                            primary = ReactNode(strings[MessageID.private_comments])
+                        }
+                    }
+
+                    UstadAddCommentListItem{
+                        text = strings[MessageID.add_private_comment]
+                        enabled = props.uiState.fieldsEnabled
+                        personUid = 0
+                        onClickSubmit = { props.onClickNewPrivateComment() }
+                    }
+
                     props.uiState.privateCommentList.forEach { commentItem ->
                         CommentListItem {
                             comment = commentItem

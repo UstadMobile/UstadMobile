@@ -587,7 +587,9 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         if (uiState.unassignedErrorVisible) {
-            Text(uiState.unassignedError ?: "")
+            item {
+                Text(uiState.unassignedError ?: "")
+            }
         }
 
         if (uiState.submitSubmissionButtonVisible){
