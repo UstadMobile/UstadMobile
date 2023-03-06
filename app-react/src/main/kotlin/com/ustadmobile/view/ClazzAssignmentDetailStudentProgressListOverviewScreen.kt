@@ -10,6 +10,7 @@ import csstype.*
 import mui.icons.material.*
 import mui.material.*
 import mui.material.List
+import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import mui.system.sx
 import react.FC
@@ -77,7 +78,8 @@ private val ClazzAssignmentDetailStudentProgressListOverviewScreenComponent2 =
                             Box {
                                 sx {
                                     backgroundColor = rgb(211, 211, 211)
-                                    width = 3.px
+                                    width = 1.5.px
+                                    margin = Margin(horizontal = 30.px, vertical = 5.px)
                                 }
                             }
                         }
@@ -113,6 +115,7 @@ private val ClazzAssignmentSummaryColumn = FC<AClazzAssignmentSummaryColumnProps
     Stack {
 
         Typography {
+            variant = TypographyVariant.h4
             + (props.number).toString()
         }
 
