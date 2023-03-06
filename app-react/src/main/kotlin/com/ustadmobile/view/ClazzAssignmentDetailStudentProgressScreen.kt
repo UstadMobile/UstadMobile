@@ -18,6 +18,8 @@ import mui.system.responsive
 import react.FC
 import react.Props
 import react.ReactNode
+import react.dom.onChange
+import web.html.InputType
 
 
 external interface ClazzAssignmentDetailStudentProgressScreenProps : Props {
@@ -101,27 +103,35 @@ val ClazzAssignmentDetailStudentProgressScreenComponent2 =
 
 
             if (props.uiState.markStudentVisible){
-                UstadTextEditField {
+                TextField {
+                    label = ReactNode(strings[MessageID.comment])
                     value = ""
-                    label = strings[MessageID.comment]
-                    enabled = props.uiState.fieldsEnabled
-                    onChange = { comment ->
-                        props.onAddComment(comment)
+                    disabled = !(props.uiState.fieldsEnabled)
+                    error = props.uiState.submitMarkError != null
+                    helperText = props.uiState.submitMarkError?.let { ReactNode(it) }
+                    fullWidth = true
+                    type = InputType.number
+                    onChange = {
+                        val currentVal = it.target.asDynamic().value
+                        props.onAddComment(currentVal?.toString() ?: "")
                     }
                 }
             }
 
 
             if (props.uiState.markStudentVisible){
-                UstadTextEditField {
+                TextField {
+                    label = ReactNode((strings[MessageID.points].capitalizeFirstLetter()
+                            + props.uiState.assignment?.block?.cbMaxPoints))
                     value = ""
-                    label = (strings[MessageID.points].capitalizeFirstLetter()
-                            + props.uiState.assignment?.block?.cbMaxPoints)
-                    error = props.uiState.submitMarkError
-                    enabled = props.uiState.fieldsEnabled
-//                    inputProps = InputType.number
-                    onChange = { mark ->
-                        props.onAddMark(mark)
+                    disabled = !(props.uiState.fieldsEnabled)
+                    error = props.uiState.submitMarkError != null
+                    helperText = props.uiState.submitMarkError?.let { ReactNode(it) }
+                    fullWidth = true
+                    type = InputType.number
+                    onChange = {
+                        val currentVal = it.target.asDynamic().value
+                        props.onAddMark(currentVal?.toString() ?: "")
                     }
                 }
             }
