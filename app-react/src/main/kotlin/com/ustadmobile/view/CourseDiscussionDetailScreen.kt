@@ -113,7 +113,7 @@ val CourseDiscussionDetailComponent2 = FC<CourseDiscussionDetailProps> { props -
 
                         UstadDetailField{
                             icon = AccountCircle.create()
-                            valueText = item.authorPersonFirstNames + " " + item.authorPersonLastName?: ""
+                            valueText = ReactNode(item.authorPersonFirstNames + " " + item.authorPersonLastName?: "")
                             labelText = item.discussionPostTitle?:""
 
 

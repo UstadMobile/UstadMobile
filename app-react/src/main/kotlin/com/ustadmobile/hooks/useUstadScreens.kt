@@ -85,6 +85,8 @@ fun useUstadScreens(): UstadScreens {
 
             UstadScreen(CourseDiscussionDetailView.VIEW_NAME, "Course Discussion Detail Preview",
                 CourseDiscussionDetailPreview),
+            UstadScreen(DiscussionPostDetailView.VIEW_NAME, name = "Course Discussion Post Detail",
+                DiscussionPostDetailPreview),
 
             UstadScreen("UstadContentEntryListItem", "UstadContentEntryListItem Preview",
                 UstadContentEntryListItemPreview),
