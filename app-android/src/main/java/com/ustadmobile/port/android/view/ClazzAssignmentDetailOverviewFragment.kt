@@ -620,9 +620,8 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         item {
-            Text(
-                stringResource(R.string.grades_class_age),
-                modifier = Modifier.defaultItemPadding()
+            ListItem(
+                text = { Text(stringResource(R.string.grades_class_age)) }
             )
         }
 
