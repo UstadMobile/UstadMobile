@@ -148,6 +148,63 @@ function PersonDetailScreenPreview(
 )
 ```
 
+### Returning values from one screen to another
+
+This can be done by adding arguments to the navigation that indicate what is being picked. Once the 
+pick is done, the selected value put on the NavResultReturner via context / navGraphViewModel and
+the stack is popped so the user returns to the start view. This works when the user navigates 
+directly from one sceren to another, or when the user goes via any number of other screens (e.g.
+start screen - pick from list - edit new entity - return to start screen). This is a little bit
+similar to startActivityForResult on Android.
+
+#### Scenario 1: User starts on a screen, navigates to pick a value, value is returned to start screen
+
+Sometimes users might navigate from one screen to another to pick an entity, for example:
+
+* Users creates a new course or edits an existing one in ClazzEdit screen
+* User clicks to select holiday calendar for course. User arrives at the HolidayCalendarList screen.
+* The user might select an existing holiday calendar, or they might create a new one.
+* User is returned to ClazzEdit. The selected or newly created HolidayCalendar is now selected for 
+  the course.
+
+This is achieved as follows:
+
+Two arguments are passed along as the user moves through screens:
+ARG_ON_NAV_RESULT_POP_UP_TO : When a result is 
+
+ARG_RESULT_DEST_VIEWNAME : The destination viewname to which a value will be returned
+ARG_RESULT_DEST_KEY : The key (string) that will be used so that the screen which requested a value 
+can recognise what kind of value is incoming.
+
+When the value is selected (e.g. at the list screen or in the edit screen if a new item is created):
+
+* The list screen or edit screen recognizes (via the presence of the ags) that a return result is
+  expected. It will call navResultReturner.sendResult
+* The list screen or edit screen will perform a navigation stack pop to return the user to the screen
+  which requested the value (e.g. ARG_RESULT_DEST_VIEWNAME )
+* The screen where the result was expected (e.g. the course edit in this case) will observe for values
+  via UstadViewModel.collectReturnedResults .
+
+#### Scenario 2: User starts on a screen, navigates to pick a value, value is provide as an argument to another screen, then user is returned to start screen
+
+For example:
+
+* User is viewing the list of students in ClazzDetail. Users selects to add another student
+* The user might pick a person from the list, or create a new person
+* The selected person uid is sent as an argument to ClazzEnrolmentEdit
+* The user saves the enrolment and is returned to ClazzDetail.
+
+The arguments set are as follows:
+
+PersonEditView.ARG_GO_TO_ON_PERSON_SELECT: the screen to which the user will be directed when they
+select a person (PersonEdit and PersonList recognise this, and it takes precedence over the presence
+of ARG_RESULT_DEST_VIEWNAME / ARG_RESULT_DEST_KEY)
+
+ARG_RESULT_DEST_VIEWNAME: the destination to which the final result (e.g. ClazzEnrolment) will be
+returned on completion
+
+ARG_RESULT_DEST_KEY: The key (string) that will be used so that the screen which requested a value
+can recognise what kind of value is incoming. In this case this would be the ClazzEnrolment
 
 ## Coding style
 

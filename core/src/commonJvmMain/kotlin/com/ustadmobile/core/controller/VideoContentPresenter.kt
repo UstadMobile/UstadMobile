@@ -68,10 +68,9 @@ actual class VideoContentPresenter actual constructor(context: Any, arguments: M
 
             }
 
-            view.runOnUiThread(kotlinx.coroutines.Runnable {
+            presenterScope.launch {
                 view.videoParams = VideoParams(videoPath, audioEntry, srtLangList, srtMap)
-            })
-
+            }
         }
 
     }

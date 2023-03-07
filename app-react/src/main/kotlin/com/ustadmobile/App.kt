@@ -16,6 +16,8 @@ import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
 import com.ustadmobile.core.components.DIModule
+import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.mui.components.DEFAULT_APPBAR_HEIGHT
 import com.ustadmobile.mui.components.Header
 import com.ustadmobile.mui.components.Sidebar
 import com.ustadmobile.mui.components.ThemeModule
@@ -27,7 +29,7 @@ import csstype.Display
 import csstype.GridTemplateAreas
 import csstype.array
 import io.github.aakira.napier.Napier
-import kotlinx.browser.document
+import web.dom.document
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlinx.coroutines.GlobalScope
@@ -40,11 +42,14 @@ import react.Props
 import react.create
 import react.dom.client.createRoot
 import react.router.dom.HashRouter
+import react.useState
+import tanstack.query.core.QueryClient
+import tanstack.react.query.QueryClientProvider
 import ustadJsDi
 import kotlin.random.Random
+import web.html.HTML.div
 
 fun main() {
-
     Napier.d("Index: Window.onLoad")
     val url = window.location.href
     val apiUrl = URLSearchParams().get(AppConfig.KEY_API_URL)
@@ -87,8 +92,11 @@ fun main() {
         val ustadDi = ustadJsDi(dbBuilt, dbNodeIdAndAuth, appConfigs, apiUrl, defaultStringsXmlStr,
             foreignStringXmlStr)
 
-        createRoot(document.createElement("div").also { document.body!!.appendChild(it) })
-            .render(App.create() { di = ustadDi })
+        val root = document.createElement(div).also {
+            document.body.appendChild(it)
+        }
+
+        createRoot(root).render(App.create { di = ustadDi })
     }
 
 }
@@ -97,40 +105,85 @@ external interface AppProps: Props {
     var di: DI
 }
 
+//TanStack Query Client as per
+// https://tanstack.com/query/latest/docs/react/quick-start
+private val tanstackQueryClient = QueryClient()
+
+/**
+ * Represents MUI specific state e.g. height of appbar (which is required by some screens for height
+ * calculations)
+ */
+data class MuiAppState (
+    val appBarHeight: Int = DEFAULT_APPBAR_HEIGHT,
+)
+
 private val App = FC<AppProps> { props ->
     val mobileMode = false//useMediaQuery("(max-width:960px)")
+    var appUiState: AppUiState by useState { AppUiState() }
+
+    /*
+     *
+     */
+    var muiAppState: MuiAppState by useState { MuiAppState() }
 
     HashRouter {
         DIModule {
             di = props.di
-            UstadScreensModule {
-                ThemeModule {
-                    Box {
-                        sx {
-                            display = Display.grid
-                            gridTemplateRows = array(
-                                Sizes.Header.Height,
-                                auto,
-                            )
-                            gridTemplateColumns = array(
-                                Sizes.Sidebar.Width, auto,
-                            )
-                            gridTemplateAreas = GridTemplateAreas(
-                                arrayOf(Area.Header, Area.Header),
-                                if (mobileMode)
-                                    arrayOf(Area.Content, Area.Content)
-                                else
-                                    arrayOf(Area.Sidebar, Area.Content),
-                            )
-                        }
 
-                        Header()
-                        //if (mobileMode) Menu() else Sidebar()
-                        Sidebar()
-                        Content()
+            QueryClientProvider {
+                client = tanstackQueryClient
+
+                UstadScreensModule {
+                    ThemeModule {
+                        Box {
+                            sx {
+                                display = Display.grid
+                                gridTemplateRows = array(
+                                    Sizes.Header.Height,
+                                    auto,
+                                )
+                                gridTemplateColumns = array(
+                                    Sizes.Sidebar.Width, auto,
+                                )
+
+                                //As per https://developer.mozilla.org/en-US/docs/Web/CSS/grid-template-areas
+                                gridTemplateAreas = GridTemplateAreas(
+                                    arrayOf(Area.Header, Area.Header),
+                                    if (mobileMode || !appUiState.navigationVisible)
+                                        arrayOf(Area.Content, Area.Content)
+                                    else
+                                        arrayOf(Area.Sidebar, Area.Content),
+                                )
+                            }
+
+                            Header {
+                                this.appUiState = appUiState
+                                setAppBarHeight = {
+                                    if(muiAppState.appBarHeight != it)
+                                        muiAppState = muiAppState.copy( appBarHeight = it)
+                                }
+                            }
+
+                            //if (mobileMode) Menu() else Sidebar()
+                            //Note: If we remove the component, instead of hiding using Display property,
+                            // then this seems to make react destroy the content component and create a
+                            // completely new one, which we definitely do not want
+                            Sidebar {
+                                visible = appUiState.navigationVisible
+                            }
+
+                            Content {
+                                this.muiAppState = muiAppState
+                                onAppUiStateChanged = {
+                                    appUiState = it
+                                }
+                            }
+                        }
                     }
                 }
             }
+
+
         }
     }
 }

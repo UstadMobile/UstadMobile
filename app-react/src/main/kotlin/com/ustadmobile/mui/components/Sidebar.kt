@@ -4,23 +4,33 @@ import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
 import com.ustadmobile.view.UstadScreensContext
 import csstype.Color
+import csstype.Display
 import csstype.None
 import mui.material.*
-import react.dom.html.ReactHTML.nav
 import mui.system.sx
 import react.FC
 import react.Props
 import react.router.dom.NavLink
 import emotion.react.css
 import react.ReactNode
+import react.dom.html.ReactHTML.nav
 import react.useContext
 
-val Sidebar = FC<Props> {
+external interface SidebarProps: Props {
+    var visible: Boolean
+}
+
+val Sidebar = FC<SidebarProps> { props ->
     val ustadScreens = useContext(UstadScreensContext)
     Box {
         component = nav
         sx {
             gridArea = Area.Sidebar
+            if(props.visible) {
+                display = Display.block
+            }else {
+                asDynamic().display = "none"
+            }
         }
 
         Drawer {

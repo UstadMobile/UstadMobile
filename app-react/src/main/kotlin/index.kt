@@ -86,9 +86,13 @@ fun main() {
 
             val appConfigs = Util.loadFileContentAsMap<HashMap<String, String>>("appconfig.json")
             Napier.d("Index: loaded appConfig")
+            val availableLanguages = appConfigs[AppConfig.KEY_SUPPORTED_LANGUAGES]?.split(",")
+                    ?.map { it.trim() } ?: listOf("en")
 
             val defaultStringsXmlStr = Util.loadAssetsAsText(defaultAssetPath)
-            val displayedLocale = UstadMobileSystemImpl.displayedLocale
+            val systemDisplayedLocale = UstadMobileSystemImpl.displayedLocale
+            val displayedLocale = availableLanguages.firstOrNull { it == systemDisplayedLocale }
+                ?: "en"
             val foreignStringXmlStr = if(displayedLocale != "en") {
                 Util.loadAssetsAsText("locales/$displayedLocale.xml")
             }else {

@@ -4,7 +4,7 @@ import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.Avatar
 import mui.material.AvatarProps
 import mui.material.AvatarVariant
-import dom.html.HTMLImageElement
+import web.html.HTMLImageElement
 import react.RBuilder
 import react.dom.html.ImgHTMLAttributes
 import styled.StyledHandler

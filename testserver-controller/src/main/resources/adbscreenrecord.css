@@ -1,0 +1,41 @@
+video {
+    max-width: 320px;
+    max-height: 320px;
+    border: 2px solid white;
+}
+
+.classdesc {
+   font: 18pt bold arial, sans-serif;
+}
+
+.classth {
+   background-color: lightgray;
+   text-align: left;
+   padding: 4px;
+}
+
+.methoddesc {
+   font: 12pt bold arial, sans-serif;
+}
+
+.testvideo {
+   padding: 10px;
+   text-align: center;
+}
+
+td.pass {
+   background-color: #4CAF50;
+}
+
+td.fail {
+   background-color: #FF5722;
+   padding: 10px;
+}
+
+.devicetd {
+   padding: 10px;
+}
+
+body {
+   font: 11pt arial, sans-serif;
+}

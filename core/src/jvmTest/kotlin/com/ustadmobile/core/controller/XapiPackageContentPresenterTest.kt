@@ -107,11 +107,7 @@ class XapiPackageContentPresenterTest {
                 ContainerAddOptions(temporaryFolder.newFolder().toDoorUri()))
         }
 
-        mockedView = mock{
-            on { runOnUiThread(any())}.doAnswer{
-                Thread(it.getArgument<Any>(0) as Runnable).start()
-            }
-        }
+        mockedView = mock{ }
 
         clazz = Clazz().apply {
             clazzName = "Test Clazz"

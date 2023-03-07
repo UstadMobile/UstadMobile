@@ -27,8 +27,8 @@ import com.ustadmobile.wrappers.reacteasysort.SortableList
 import csstype.number
 import csstype.pct
 import csstype.px
-import dom.html.HTMLDivElement
-import kotlinx.js.jso
+import web.html.HTMLDivElement
+import js.core.jso
 import mui.icons.material.*
 import mui.material.*
 import mui.material.List
@@ -39,7 +39,6 @@ import react.*
 import react.dom.aria.ariaLabel
 import react.dom.events.MouseEvent
 import react.dom.events.MouseEventHandler
-import react.dom.html.ReactHTML
 import react.dom.html.ReactHTML.div
 
 private val COURSE_BLOCK_DRAG_CLASS = "dragging_course_block"
@@ -296,16 +295,6 @@ val ClazzSchedulesList = FC<ClazzEditScreenProps> { props ->
     }
 }
 
-private val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
-    ContentEntry.TYPE_EBOOK to Book,
-    ContentEntry.TYPE_VIDEO to SmartDisplay,
-    ContentEntry.TYPE_DOCUMENT to TextSnippet,
-    ContentEntry.TYPE_ARTICLE to Article,
-    ContentEntry.TYPE_COLLECTION to Collections,
-    ContentEntry.TYPE_INTERACTIVE_EXERCISE to TouchApp,
-    ContentEntry.TYPE_AUDIO to Audiotrack,
-)
-
 private val CourseBlockList = FC<ClazzEditScreenProps> { props ->
     val strings = useStringsXml()
 
@@ -431,7 +420,7 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
         point = null
     }
 
-    ReactHTML.div {
+    div {
 
         IconButton{
             disabled = !(props.fieldsEnabled)

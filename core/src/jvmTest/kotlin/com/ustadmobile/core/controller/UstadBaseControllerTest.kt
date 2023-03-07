@@ -68,7 +68,7 @@ class UstadBaseControllerTest {
     @Before
     fun setup() {
         systemImpl = mock {
-            on { getAppConfigDefaultFirstDest(any()) }.thenReturn(ContentEntryList2View.VIEW_NAME)
+            on { getAppConfigDefaultFirstDest() }.thenReturn(ContentEntryList2View.VIEW_NAME)
 
             on{ getAppConfigBoolean(eq(AppConfig.KEY_ALLOW_SERVER_SELECTION), any()) }.thenReturn(true)
         }

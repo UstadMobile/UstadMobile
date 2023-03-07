@@ -1,0 +1,24 @@
+appId: com.toughra.ustadmobile
+---
+# this test edit already record attendance of students
+# this record 2nd and 5th student in list as absent, 3rd student as late and others as present
+# test parameters needs to provide for this test :
+# 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+- tapOn: "Courses"
+- tapOn: ${TESTCOURSENAME}
+- tapOn: "ATTENDANCE"
+- swipe:
+      start: 100,400
+      end: 100,100
+      # text available for this button keep on changing because it's - date and time so we are using id here
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_clazz_log_attendance_list"
+- tapOn: "Mark all present"
+- tapOn:
+        text: "Absent"
+        index: 0
+- tapOn:
+    text: "Absent"
+    index: 1
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/edited_attendance"
+- tapOn: "Save"

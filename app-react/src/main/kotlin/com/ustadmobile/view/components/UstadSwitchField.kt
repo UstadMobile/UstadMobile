@@ -1,7 +1,7 @@
 package com.ustadmobile.view.components
 
 import csstype.*
-import kotlinx.js.jso
+import js.core.jso
 import mui.material.*
 import react.FC
 import react.Props

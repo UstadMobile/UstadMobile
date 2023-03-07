@@ -43,9 +43,7 @@ import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.nio.file.Files
-import javax.naming.InitialContext
 import kotlin.random.Random
-import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.gson.*
 import kotlinx.coroutines.runBlocking
@@ -113,7 +111,6 @@ class UstadTestRule: TestWatcher() {
             bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope!!).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
-                InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
                 spy(DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite:build/tmp/$dbName.sqlite")
                     .addSyncCallback(nodeIdAndAuth)
                     .build()

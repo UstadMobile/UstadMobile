@@ -134,16 +134,16 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
 
     @Query("""
         SELECT Clazz.*, ClazzEnrolment.*,
-               (SELECT COUNT(*) 
+               (SELECT COUNT(DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid) 
                   FROM ClazzEnrolment 
                  WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
-                   AND clazzEnrolmentRole = ${ROLE_STUDENT} 
+                   AND clazzEnrolmentRole = $ROLE_STUDENT 
                    AND :currentTime BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
                        AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numStudents,
-               (SELECT COUNT(*) 
+               (SELECT COUNT(DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid) 
                   FROM ClazzEnrolment 
                  WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
-                   AND clazzEnrolmentRole = ${ROLE_TEACHER}
+                   AND clazzEnrolmentRole = $ROLE_TEACHER
                    AND :currentTime BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
                         AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numTeachers,
                '' AS teacherNames,
@@ -282,13 +282,13 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
         SELECT Clazz.*, 
                HolidayCalendar.*, 
                School.*,
-               (SELECT COUNT(*) 
+               (SELECT COUNT(DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid) 
                   FROM ClazzEnrolment 
                  WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
                    AND clazzEnrolmentRole = $ROLE_STUDENT 
                    AND :currentTime BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
                         AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numStudents,
-               (SELECT COUNT(*) 
+               (SELECT COUNT(DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid) 
                   FROM ClazzEnrolment 
                  WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
                    AND clazzEnrolmentRole = $ROLE_TEACHER 

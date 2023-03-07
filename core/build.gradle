@@ -85,7 +85,9 @@ kotlin {
             testTask {
                 useKarma {
                     useChromeHeadless() //change to useChrome to run the actual browser
+                    /* Not supported from Kotlin 1.8
                     webpackConfig.cssSupport.enabled = true
+                     */
                 }
             }
         }
@@ -121,6 +123,7 @@ kotlin {
             dependsOn commonMain
 
             dependencies {
+
                 implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
@@ -146,6 +149,7 @@ kotlin {
             resources.srcDirs += ["locale/main", "src/main/assets"]
 
             dependencies {
+                implementation "org.apache.pdfbox:pdfbox:$version_pdfbox_apache"
                 implementation "org.jsoup:jsoup:$version_jsoup"
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
@@ -180,6 +184,7 @@ kotlin {
                 implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
 
                 implementation "net.bytebuddy:byte-buddy:1.12.18"
+                implementation "app.cash.turbine:turbine:$version_turbine"
             }
         }
 
@@ -187,6 +192,9 @@ kotlin {
             dependsOn commonJvmMain
 
             dependencies {
+
+                implementation "com.dmitryborodin:pdfview-android:$version_pdfview_android"
+
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
@@ -221,7 +229,12 @@ kotlin {
                 implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
 
                 implementation "com.google.android.material:material:$version_android_material"
+
+
+
             }
+
+
         }
 
         jsMain {
@@ -229,9 +242,11 @@ kotlin {
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-json-js:$version_ktor"
                 implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-extensions:$version_kotlin_extensions"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-react:$version_kotlin_react"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom:$version_kotlin_react_router"
+
+                implementation enforcedPlatform("org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom:$kotlinWrappersVersion")
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-extensions"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-react"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom-legacy"
                 implementation npm("asmcrypto.js","$version_npm_asmcrypto")
                 implementation npm("buffer","$version_npm_buffer")
             }

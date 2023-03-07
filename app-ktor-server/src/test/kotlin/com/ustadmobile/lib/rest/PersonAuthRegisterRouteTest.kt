@@ -15,7 +15,6 @@ import org.kodein.di.*
 import com.ustadmobile.door.util.systemTimeInMillis
 import org.mockito.kotlin.*
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.rest.ext.insertDefaultSite
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import io.ktor.client.*
@@ -60,11 +59,6 @@ class PersonAuthRegisterRouteTest {
 
             bind<NotificationSender>() with singleton {
                 mockNotificationSender
-            }
-
-            onReady {
-                val repo: UmAppDatabase by di.on(Endpoint("localhost")).instance(tag = DoorTag.TAG_REPO)
-                repo.insertDefaultSite()
             }
 
             registerContextTranslator { _: ApplicationCall ->

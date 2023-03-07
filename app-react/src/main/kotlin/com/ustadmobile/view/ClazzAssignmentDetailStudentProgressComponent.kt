@@ -4,6 +4,7 @@ import com.ustadmobile.core.controller.ClazzAssignmentDetailStudentProgressPrese
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.paging.DataSourceFactory
@@ -30,7 +31,7 @@ import mui.material.FormControlVariant
 import mui.material.InputLabelVariant
 import mui.material.styles.TypographyVariant
 import react.RBuilder
-import react.dom.html.InputType
+import web.html.InputType
 import react.setState
 import styled.css
 import styled.styledDiv
@@ -45,13 +46,19 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
 
     private var markGrade = ""
 
-    private var markLabel = FieldLabel(text = getString(MessageID.points ))
+    private var comment: String? = null
+
+    private var markLabel = FieldLabel(text = getString(MessageID.points))
+
+    private var commentLabel = FieldLabel(text = getString(MessageID.comment))
 
     private var privateComments: List<CommentsWithPerson> = listOf()
 
     private var contents : List<ContentWithAttemptSummary> = listOf()
 
     private var submissions : List<CourseAssignmentSubmissionWithAttachment> = listOf()
+
+    private var courseMarks : List<CourseAssignmentMarkWithPersonMarker> = listOf()
 
     private val privateCommentsObserver = ObserverFnWrapper<List<CommentsWithPerson>>{
         if(it.isEmpty()) return@ObserverFnWrapper
@@ -73,6 +80,13 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
             submissions = it
         }
     }
+
+    private val courseMarkObserver = ObserverFnWrapper<List<CourseAssignmentMarkWithPersonMarker>>{
+        if(it.isEmpty()) return@ObserverFnWrapper
+        setState {
+            courseMarks = it
+        }
+    }
     override var submitMarkError: String? = null
         get() = field
         set(value) {
@@ -89,12 +103,38 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                 ustadComponentTitle = value
             }
         }
+
+    private var selectedFilter: Int? = null
+        set(value){
+            setState{
+                field = value
+            }
+        }
+
+    override var gradeFilterChips: List<ListFilterIdOption>?= null
+        set(value) {
+            if(selectedFilter == null)
+                selectedFilter = value?.firstOrNull()?.optionId
+
+            setState{
+                field = value
+            }
+
+        }
     override var clazzCourseAssignmentSubmissionAttachment: DataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>? = null
         set(value) {
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)
             liveData?.removeObserver(submissionsObserver)
             liveData?.observe(this, submissionsObserver)
+        }
+
+    override var markList: DataSourceFactory<Int, CourseAssignmentMarkWithPersonMarker>? = null
+        set(value) {
+            field = value
+            val liveData = value?.getData(0,Int.MAX_VALUE)
+            liveData?.removeObserver(courseMarkObserver)
+            liveData?.observe(this, courseMarkObserver)
         }
 
     override var clazzAssignmentPrivateComments: DataSourceFactory<Int, CommentsWithPerson>? = null
@@ -105,7 +145,7 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
             liveData?.observe(this, privateCommentsObserver)
         }
 
-    override var submissionScore: CourseAssignmentMark? = null
+    override var submissionScore: AverageCourseAssignmentMark? = null
         get() = field
         set(value) {
             setState {
@@ -178,9 +218,9 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                     val mark = submissionScore
                     if(mark != null){
 
-                        val marks = "${mark.camMark} / ${entity?.block?.cbMaxPoints} ${getString(MessageID.points)}"
+                        val marks = "${mark.averageScore} / ${entity?.block?.cbMaxPoints} ${getString(MessageID.points)}"
 
-                        val penalty = if(mark.camPenalty != 0)
+                        val penalty = if(mark.averagePenalty != 0)
                             " ${getString(MessageID.late_penalty).format(entity?.block?.cbLateSubmissionPenalty ?: "")}"
                         else
                             ""
@@ -223,7 +263,33 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                         umItem(GridSize.cells12, GridSize.cells4) {
                             umFormControl(variant = FormControlVariant.outlined) {
                                 css{
-                                    +StyleManager.defaultMarginTop
+                                    +defaultMarginTop
+                                }
+                                umInputLabel("${commentLabel.text}",
+                                    id = commentLabel.id,
+                                    error = commentLabel.error,
+                                    //variant = FormControlVariant.outlined,
+                                    htmlFor = commentLabel.id)
+                                umOutlinedInput(
+                                    id = commentLabel.id,
+                                    value = comment,
+                                    label = commentLabel.text,
+                                    error = commentLabel.error,
+                                    type =  InputType.text,
+                                    onChange = {
+                                        setState {
+                                            comment = it
+                                            submitMarkError = null
+                                        }
+                                    })
+                            }
+                        }
+
+
+                        umItem(GridSize.cells12, GridSize.cells4) {
+                            umFormControl(variant = FormControlVariant.outlined) {
+                                css{
+                                    +defaultMarginTop
                                 }
                                 umInputLabel("${markLabel.text}",
                                     id = markLabel.id,
@@ -261,7 +327,7 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                                 variant = ButtonVariant.contained,
                                 onClick = {
                                     if(markGrade.isNotEmpty()){
-                                        mPresenter?.onClickSubmitGrade(markGrade.toFloat())
+                                        mPresenter?.onClickSubmitGrade(markGrade.toFloat(), comment)
                                     }
                                 }){
                                 css {
@@ -282,7 +348,7 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                                 variant = ButtonVariant.contained,
                                 onClick = {
                                     if(markGrade.isNotEmpty()){
-                                        mPresenter?.onClickSubmitGradeAndMarkNext(markGrade.toFloat())
+                                        mPresenter?.onClickSubmitGradeAndMarkNext(markGrade.toFloat(), comment)
                                     }
                                 }){
                                 css {
@@ -293,6 +359,17 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                             }
                         }
                     }
+                }
+
+                if(!courseMarks.isNullOrEmpty()){
+
+                        renderGradesHeaderWithChipsAndList(
+                            systemImpl, gradeFilterChips,
+                            selectedFilter ?: 0, courseMarks, entity?.block
+                        ) { chip, event ->
+                            selectedFilter = chip.optionId
+                            mPresenter?.onListFilterOptionSelected(chip)
+                        }
                 }
 
                 if(entity?.caPrivateCommentsEnabled == true){

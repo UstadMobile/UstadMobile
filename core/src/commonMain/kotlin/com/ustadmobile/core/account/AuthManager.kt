@@ -2,7 +2,6 @@ package com.ustadmobile.core.account
 
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.core.db.dao.PersonAuthDaoCommon
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.schedule.age
@@ -34,18 +33,6 @@ class AuthManager(
     private val db: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_DB)
 
     private val pbkdf2Params: Pbkdf2Params by instance()
-
-    private var site: Site? = null
-
-    private suspend fun getSite(): Site {
-        site?.also {
-            return it
-        }
-
-        val siteVal = repo.siteDao.getSiteAsync() ?: throw IllegalStateException("No site!")
-        site = siteVal
-        return siteVal
-    }
 
     suspend fun authenticate(
         username: String,
@@ -102,7 +89,7 @@ class AuthManager(
     }
 
     suspend fun setAuth(personUid: Long, password: String) {
-        repo.insertPersonAuthCredentials2(personUid, password, pbkdf2Params, getSite())
+        repo.insertPersonAuthCredentials2(personUid, password, pbkdf2Params)
     }
 
 

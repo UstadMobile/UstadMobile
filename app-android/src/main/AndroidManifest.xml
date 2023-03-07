@@ -41,6 +41,25 @@
         android:name="android.hardware.camera"
         android:required="false" />
 
+    <!--
+    Aztec is used for HTML WYSIWYG editing. This is only be available on SDK24+
+    -->
+    <uses-sdk tools:overrideLibrary="org.wordpress.aztec"/>
+
+    <!--
+    Required to find PanicKit responders.
+    -->
+    <queries>
+        <intent>
+            <action android:name="info.guardianproject.panic.action.CONNECT"/>
+        </intent>
+
+        <intent>
+            <action android:name="info.guardianproject.panic.action.TRIGGER"/>
+        </intent>
+
+    </queries>
+
     <application
         android:supportsRtl="true"
         android:theme="@style/UmTheme.App"
@@ -108,6 +127,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="com.ustadmobile.port.android.authenticator.AuthenticatorActivity"
+            android:exported="true">
+
+            <intent-filter>
+                <data android:host="*" android:pathPattern=".*" android:scheme="local-auth" />
+                <action android:name="com.ustadmobile.AUTH_GET_TOKEN"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        
+        
     </application>
 
 </manifest>
