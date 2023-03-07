@@ -43,7 +43,6 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import androidx.compose.material.*
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.android.material.composethemeadapter.MdcTheme
@@ -51,11 +50,9 @@ import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
-import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
-import com.ustadmobile.port.android.util.compose.rememberFormattedTime
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment.Companion.SUBMISSION_POLICY_MAP
 import com.ustadmobile.port.android.view.composable.*
@@ -571,24 +568,23 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         if (uiState.addFileVisible) {
+
             item {
-                Row (
-                    modifier = Modifier.defaultItemPadding()
-                ){
-                    Text(stringResource(R.string.file_type_chosen))
-                    Text(caFileType)
+                Text("${stringResource(R.string.file_type_chosen)} $caFileType",
+                    modifier = Modifier.defaultItemPadding())
+            }
 
-                    Box(modifier = Modifier.width(5.dp))
-
-                    Text(stringResource(R.string.max_number_of_files,
-                        uiState.clazzAssignment?.caNumberOfFiles ?: 0))
-                }
+            item {
+                Text(stringResource(R.string.max_number_of_files,
+                    uiState.clazzAssignment?.caNumberOfFiles ?: 0),
+                    modifier = Modifier.defaultItemPadding())
             }
         }
 
         if (uiState.unassignedErrorVisible) {
             item {
-                Text(uiState.unassignedError ?: "")
+                Text(uiState.unassignedError ?: "",
+                    modifier = Modifier.defaultItemPadding())
             }
         }
 
@@ -624,7 +620,10 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         item {
-            Text(stringResource(R.string.grades_class_age))
+            Text(
+                stringResource(R.string.grades_class_age),
+                modifier = Modifier.defaultItemPadding()
+            )
         }
 
         item {
@@ -703,6 +702,8 @@ fun ClazzAssignmentDetailOverviewScreenPreview(){
     val uiState = ClazzAssignmentDetailOverviewUiState(
         addFileVisible = true,
         addTextVisible = true,
+        hasFilesToSubmit = true,
+        deadlinePassed = false,
         clazzAssignment = ClazzAssignmentWithCourseBlock().apply {
             caDescription = "Read the stories and describe the main characters."
             caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
@@ -754,7 +755,7 @@ fun ClazzAssignmentDetailOverviewScreenPreview(){
                 casTimestamp = 1677744388299
                 casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
                 attachment = CourseAssignmentSubmissionAttachment().apply {
-                    casaFileName = "Content Title"
+                    casaFileName = "Submitted Submission"
                 }
             },
         ),
@@ -764,7 +765,7 @@ fun ClazzAssignmentDetailOverviewScreenPreview(){
                 casTimestamp = 1677744388299
                 casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
                 attachment = CourseAssignmentSubmissionAttachment().apply {
-                    casaFileName = "Content Title"
+                    casaFileName = "Draft Submission"
                 }
             },
         )

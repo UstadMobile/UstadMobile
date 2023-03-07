@@ -11,6 +11,7 @@ import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.ClazzAssignmentDetailOverviewComponent.Companion.SUBMISSION_POLICY_MAP
+import csstype.JustifyContent
 import csstype.px
 import kotlinx.datetime.TimeZone
 import mui.icons.material.*
@@ -107,9 +108,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                 }
 
                 UstadAssignmentSubmissionHeader {
-                    uiState = UstadAssignmentSubmissionHeaderUiState(
-                        assignmentStatus = CourseAssignmentSubmission.NOT_SUBMITTED
-                    )
+                    uiState = props.uiState.submissionHeaderUiState
                 }
 
                 Typography {
@@ -148,21 +147,13 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
 
                 Stack {
                     direction = responsive(StackDirection.row)
-
+                    sx {
+                        justifyContent = JustifyContent.spaceBetween
+                    }
 
                     if (props.uiState.addFileVisible) {
                         Typography{
-                            + strings[MessageID.file_type_chosen]
-                        }
-
-                        Typography{
-                            + caFileType
-                        }
-
-                        Box{
-                            sx {
-                                width = 5.px
-                            }
+                            + ("${strings[MessageID.file_type_chosen]} $caFileType")
                         }
 
                         Typography{
@@ -276,6 +267,8 @@ val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
     val uiStateVal = ClazzAssignmentDetailOverviewUiState(
         addFileVisible = true,
         addTextVisible = true,
+        hasFilesToSubmit = true,
+        deadlinePassed = false,
         clazzAssignment = ClazzAssignmentWithCourseBlock().apply {
             caDescription = "Read the stories and describe the main characters."
             caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
@@ -327,7 +320,7 @@ val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
                 casTimestamp = 1677744388299
                 casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
                 attachment = CourseAssignmentSubmissionAttachment().apply {
-                    casaFileName = "Content Title"
+                    casaFileName = "Submitted Submission"
                 }
             },
         ),
@@ -337,7 +330,7 @@ val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
                 casTimestamp = 1677744388299
                 casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
                 attachment = CourseAssignmentSubmissionAttachment().apply {
-                    casaFileName = "Content Title"
+                    casaFileName = "Draft Submission"
                 }
             },
         )
@@ -345,5 +338,6 @@ val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
 
     ClazzAssignmentDetailOverviewScreenComponent2 {
         uiState = uiStateVal
+        onClickDeleteSubmission = {}
     }
 }
