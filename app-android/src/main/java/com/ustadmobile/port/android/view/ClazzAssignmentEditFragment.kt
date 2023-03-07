@@ -295,8 +295,6 @@ private fun ClazzAssignmentEditScreen(
             },
         )
 
-        Spacer(modifier = Modifier.height(15.dp))
-
         UstadTextEditField(
             value = uiState.entity?.assignment?.caDescription ?: "",
             label = stringResource(id = R.string.description).addOptionalSuffix(),
@@ -309,14 +307,10 @@ private fun ClazzAssignmentEditScreen(
             },
         )
 
-        Spacer(modifier = Modifier.height(15.dp))
-
         UstadCourseBlockEdit(
             uiState = uiState.courseBlockEditUiState,
             onCourseBlockChange = onChangeCourseBlock
         )
-
-        Spacer(modifier = Modifier.height(10.dp))
 
         UstadTextEditField(
             value = uiState.groupSet?.cgsName ?: "",
@@ -326,16 +320,12 @@ private fun ClazzAssignmentEditScreen(
             onClick = onClickSubmissionType,
         )
 
-        Spacer(modifier = Modifier.height(15.dp))
-
         UstadSwitchField(
             label = stringResource(id = R.string.require_file_submission),
             checked = uiState.entity?.assignment?.caRequireFileSubmission ?: false,
             onChange = { onChangedFileRequired(it) },
             enabled = uiState.fieldsEnabled
         )
-
-        Spacer(modifier = Modifier.height(15.dp))
 
         if (uiState.fileSubmissionVisible){
             UstadMessageIdOptionExposedDropDownMenuField(
@@ -351,8 +341,6 @@ private fun ClazzAssignmentEditScreen(
                 },
             )
 
-            Spacer(modifier = Modifier.height(15.dp))
-
             UstadTextEditField(
                 value = (uiState.entity?.assignment?.caSizeLimit ?: 0).toString(),
                 label = stringResource(id = R.string.size_limit),
@@ -364,8 +352,6 @@ private fun ClazzAssignmentEditScreen(
                         })
                 },
             )
-
-            Spacer(modifier = Modifier.height(15.dp))
 
             UstadTextEditField(
                 value = (uiState.entity?.assignment?.caNumberOfFiles ?: 0).toString(),
@@ -380,16 +366,12 @@ private fun ClazzAssignmentEditScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(15.dp))
-
         UstadSwitchField(
             label = stringResource(id = R.string.require_text_submission),
             checked = uiState.entity?.assignment?.caRequireTextSubmission ?: false,
             onChange = { onChangedTextRequired(it) },
             enabled = uiState.fieldsEnabled
         )
-
-        Spacer(modifier = Modifier.height(15.dp))
 
         if (uiState.textSubmissionVisible) {
             UstadMessageIdOptionExposedDropDownMenuField(
