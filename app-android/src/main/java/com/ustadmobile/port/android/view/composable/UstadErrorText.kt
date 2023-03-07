@@ -11,7 +11,7 @@ fun UstadErrorText(
     modifier: Modifier = Modifier,
     error: String,
 ){
-    Text(text = "$error!",
+    Text(text = error,
         style = MaterialTheme.typography.caption,
         color = MaterialTheme.colors.error,
         modifier = modifier,
