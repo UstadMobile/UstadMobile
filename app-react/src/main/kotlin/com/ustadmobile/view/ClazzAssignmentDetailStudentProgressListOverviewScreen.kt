@@ -42,6 +42,12 @@ val ClazzAssignmentDetailStudentProgressListOverviewScreenPreview = FC<Props> {
                     name = "Bob Dylan"
                     latestPrivateComment = "Here is private comment"
                     fileSubmissionStatus = CourseAssignmentSubmission.MARKED
+                },
+                AssignmentSubmitterSummary().apply {
+                    submitterUid = 2
+                    name = "Morris Rogers"
+                    latestPrivateComment = "Here is private comment"
+                    fileSubmissionStatus = CourseAssignmentSubmission.SUBMITTED
                 }
             ),
         )
@@ -108,7 +114,8 @@ external interface AClazzAssignmentSummaryColumnProps : Props {
 
 }
 
-private val ClazzAssignmentSummaryColumn = FC<AClazzAssignmentSummaryColumnProps> { props ->
+private val ClazzAssignmentSummaryColumn = FC<AClazzAssignmentSummaryColumnProps> {
+        props ->
 
     val strings = useStringsXml()
 

@@ -299,6 +299,12 @@ fun ClazzAssignmentDetailStudentProgressListOverviewScreenPreview() {
                 name = "Bob Dylan"
                 latestPrivateComment = "Here is private comment"
                 fileSubmissionStatus = CourseAssignmentSubmission.MARKED
+            },
+            AssignmentSubmitterSummary().apply {
+                submitterUid = 2
+                name = "Morris Rogers"
+                latestPrivateComment = "Here is private comment"
+                fileSubmissionStatus = CourseAssignmentSubmission.SUBMITTED
             }
         ),
     )
