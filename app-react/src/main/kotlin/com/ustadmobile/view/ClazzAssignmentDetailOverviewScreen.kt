@@ -10,7 +10,6 @@ import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.view.ClazzAssignmentDetailOverviewComponent.Companion.SUBMISSION_POLICY_MAP
 import csstype.JustifyContent
 import csstype.px
 import kotlinx.datetime.TimeZone
@@ -72,8 +71,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
 
         val caFileType = strings[
                 SubmissionConstants.FILE_TYPE_MAP[
-                        props.uiState.clazzAssignment?.caFileType ?: ClazzAssignment.FILE_TYPE_DOC
-                ] ?: MessageID.message
+                        props.uiState.clazzAssignment?.caFileType] ?: MessageID.document
         ]
 
         Container {
@@ -102,8 +100,8 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                 UstadDetailField {
                     valueText = ReactNode(caSubmissionPolicyText)
                     labelText = strings[MessageID.submission_policy]
-                    icon = (ASSIGNMENT_STATUS_MAP[props.uiState.clazzAssignment?.caSubmissionPolicy]
-                        ?: Done.create())
+                    icon = (ASSIGNMENT_STATUS_MAP[
+                            props.uiState.clazzAssignment?.caSubmissionPolicy] ?: Done.create())
                     onClick = {  }
                 }
 
@@ -111,11 +109,14 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                     uiState = props.uiState.submissionHeaderUiState
                 }
 
-                Typography {
-                    + strings[MessageID.submissions]
-                }
-
                 List{
+
+                    ListItem {
+                        ListItemText {
+                            primary = ReactNode(strings[MessageID.submissions])
+                        }
+                    }
+
                     props.uiState.draftSubmissionList.forEach { submissionItem ->
                         UstadAssignmentSubmissionListItem {
                             submission = submissionItem
@@ -158,8 +159,9 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
 
                         Typography{
                             + strings[MessageID.max_number_of_files]
-                                .replace("%1\$s", (props.uiState.clazzAssignment?.caNumberOfFiles ?: 0).toString())
-
+                                .replace("%1\$s",
+                                    (props.uiState.clazzAssignment?.caNumberOfFiles ?: 0)
+                                        .toString())
                         }
                     }
                 }
@@ -167,7 +169,6 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                 if (props.uiState.unassignedErrorVisible) {
                     Typography{
                         + (props.uiState.unassignedError ?: "")
-
                     }
                 }
 
@@ -190,19 +191,19 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                     }
                 }
 
-                Typography {
-                    + strings[MessageID.grades_class_age]
-                }
-
-
-                UstadListFilterChipsHeader{
-                    filterOptions = props.uiState.gradeFilterChips
-                    selectedChipId = props.uiState.selectedChipId
-                    enabled = props.uiState.fieldsEnabled
-                    onClickFilterChip = { props.onClickFilterChip(it) }
-                }
-
                 List{
+
+                    Typography {
+                        + strings[MessageID.grades_class_age]
+                    }
+
+                    UstadListFilterChipsHeader{
+                        filterOptions = props.uiState.gradeFilterChips
+                        selectedChipId = props.uiState.selectedChipId
+                        enabled = props.uiState.fieldsEnabled
+                        onClickFilterChip = { props.onClickFilterChip(it) }
+                    }
+
                     props.uiState.markList.forEach { markItem ->
                         UstadCourseAssignmentMarkListItem {
                             onClickMark = props.onClickMark
@@ -275,6 +276,7 @@ val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
             caFileType =  ClazzAssignment.FILE_TYPE_DOC
             block = CourseBlock().apply {
                 cbDeadlineDate = 1677063785
+                cbLateSubmissionPenalty = 12
             }
         },
         markList = listOf(
@@ -285,6 +287,7 @@ val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
                     isGroup = true
                     camMarkerSubmitterUid = 2
                     camMarkerComment = "Comment"
+
                 }
             }
         ),
