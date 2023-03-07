@@ -33,6 +33,7 @@ import com.ustadmobile.core.viewmodel.ClazzAssignmentEditUiState
 import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.CourseBlock
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyCourseBlockWithEntity
 import com.ustadmobile.port.android.view.binding.isSet
 import com.ustadmobile.port.android.view.composable.*
@@ -340,7 +341,9 @@ private fun ClazzAssignmentEditScreen(
             onValueChange = {
                 onChangeCourseBlockWithEntity(
                     uiState.entity?.shallowCopyCourseBlockWithEntity{
-                        assignment?.caDescription = it
+                        assignment = uiState.entity?.assignment?.shallowCopy {
+                            caDescription = it
+                        }
                     })
             },
         )
