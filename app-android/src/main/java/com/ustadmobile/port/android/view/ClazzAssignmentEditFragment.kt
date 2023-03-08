@@ -488,7 +488,7 @@ private fun ClazzAssignmentEditScreen(
             },
         )
 
-        UstadMessageIdOptionExposedDropDownMenuField(
+        UstadExposedDropDownMenuField(
             value = uiState.entity?.assignment?.caMarkingType ?: 0,
             label = stringResource(R.string.marked_by),
             options = MarkingTypeConstants.MARKING_TYPE_MESSAGE_IDS,
