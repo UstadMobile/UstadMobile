@@ -3,9 +3,7 @@ package com.ustadmobile.core.api.oneroster
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.api.DoorJsonRequest
 import com.ustadmobile.core.api.DoorJsonResponse
-import com.ustadmobile.core.api.oneroster.model.Clazz
-import com.ustadmobile.core.api.oneroster.model.toOneRosterClass
-import com.ustadmobile.core.api.oneroster.model.toOneRosterResult
+import com.ustadmobile.core.api.oneroster.model.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.door.ext.DoorTag
@@ -77,7 +75,7 @@ class OneRosterEndpoint(
 
             when {
                 accountPersonUid == 0L -> {
-                    DoorJsonResponse(403, "text/plain",
+                    DoorJsonResponse(401, "text/plain",
                         responseBody = "Invalid auth token")
                 }
 
@@ -118,6 +116,96 @@ class OneRosterEndpoint(
                         responseBody = json.encodeToString(ListSerializer(OneRosterResult.serializer()),
                             results)
                     )
+                }
+
+                //getLineItem
+                apiPathComponents[0] == "lineItems" &&
+                    apiPathComponents.size == 2 &&
+                    request.method == DoorJsonRequest.Method.GET
+                -> {
+                    val lineItemSourcedId = apiPathComponents[1]
+
+                    db.courseBlockDao.findBySourcedId(
+                        lineItemSourcedId, accountPersonUid
+                    )?.toOneRosterLineItem(endpoint)?.let {
+                        DoorJsonResponse(
+                            statusCode = 200,
+                            contentType = "application/json",
+                            responseBody = json.encodeToString(LineItem.serializer(), it)
+                        )
+                    } ?:DoorJsonResponse(
+                            statusCode = 404,
+                            contentType = "text/plain",
+                            responseBody = "Not found"
+                    )
+                }
+
+                //putLineItem
+                apiPathComponents[0] == "lineItems" &&
+                    apiPathComponents.size == 2 &&
+                    request.method == DoorJsonRequest.Method.PUT
+                -> {
+                    val lineItemSourcedId = apiPathComponents[1]
+                    val existingCourseBlock = db.courseBlockDao.findBySourcedId(
+                        lineItemSourcedId, accountPersonUid
+                    )
+
+                    val requestBody = request.requestBody
+                        ?: return@withDoorTransactionAsync DoorJsonResponse(400, "text/plain", responseBody = "No body")
+
+                    val lineItem = json.decodeFromString(LineItem.serializer(), requestBody)
+
+                    if(existingCourseBlock == null) {
+                        db.courseBlockDao.insertAsync(lineItem.toCourseBlock())
+                        DoorJsonResponse(201, "text/plain")
+                    }else {
+                        db.courseBlockDao.updateFromLineItem(
+                            cbUid = existingCourseBlock.cbUid,
+                            active = lineItem.status == Status.ACTIVE,
+                            dateLastModified = parse8601Timestamp(lineItem.dateLastModified),
+                            title = lineItem.description,
+                            description = lineItem.description,
+                            assignDate = parse8601Timestamp(lineItem.assignDate),
+                            dueDate = parse8601Timestamp(lineItem.dueDate),
+                            resultValueMin = lineItem.resultValueMin,
+                            resultValueMax = lineItem.resultValueMax
+                        )
+                        DoorJsonResponse(200, "text/plain")
+                    }
+                }
+
+                //putResult
+                apiPathComponents[0] == "results" &&
+                    apiPathComponents.size == 2 &&
+                    request.method == DoorJsonRequest.Method.PUT
+                -> {
+                    val sourcedId = apiPathComponents[1]
+                    val bodyStr = request.requestBody
+                        ?: return@withDoorTransactionAsync DoorJsonResponse(400,  "text/plain", responseBody = "No Body")
+                    val result = json.decodeFromString(OneRosterResult.serializer(), bodyStr)
+                    val studentResult = result.toStudentResult()
+
+                    if(db.studentResultDao.sourcedUidExists(sourcedId)) {
+                        DoorJsonResponse(
+                            statusCode = 500,
+                            contentType = "text/plain",
+                        )
+                    }else {
+                        val blockUidAndClazzUid = db.courseBlockDao.findCourseBlockUidAndClazzUidBySourcedId(
+                            result.lineItem.sourcedId, accountPersonUid
+                        )
+
+                        db.studentResultDao.insertListAsync(listOf(
+                            studentResult.copy(
+                                srCourseBlockUid = blockUidAndClazzUid?.cbUid ?: 0,
+                                srClazzUid = blockUidAndClazzUid?.cbClazzUid ?: 0,
+                            )
+                        ))
+                        DoorJsonResponse(
+                            statusCode = 201,
+                            contentType = "text/plain",
+                        )
+                    }
                 }
 
                 else -> DoorJsonResponse(404, "text/plain",

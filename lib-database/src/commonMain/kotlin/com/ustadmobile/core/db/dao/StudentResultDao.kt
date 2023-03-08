@@ -22,8 +22,8 @@ expect abstract class StudentResultDao {
                   ON StudentResult.srStudentPersonUid = Person.personUid
        WHERE UserSession.usClientNodeId = :newNodeId
          AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-         AND StudentResult.srScoreDate != COALESCE(
-             (SELECT srScoreDate
+         AND StudentResult.srLastModified != COALESCE(
+             (SELECT srVersionId
                 FROM StudentResultReplicate
                WHERE srPk = StudentResult.srUid
                  AND srDestination = :newNodeId), 0) 
@@ -52,7 +52,7 @@ expect abstract class StudentResultDao {
          SELECT nodeClientId 
            FROM SyncNode
           LIMIT 1)
-     AND StudentResult.srScoreDate != COALESCE(
+     AND StudentResult.srLastModified != COALESCE(
          (SELECT srVersionId
             FROM StudentResultReplicate
            WHERE srPk = StudentResult.srUid
@@ -100,6 +100,17 @@ expect abstract class StudentResultDao {
         accountPersonUid: Long
     ): List<StudentResultAndSourcedIds>
 
+
+    @Query("""
+        SELECT EXISTS(
+               SELECT srUid
+                 FROM StudentResult
+                WHERE srSourcedId = :sourcedId 
+               )
+    """)
+    abstract suspend fun sourcedUidExists(
+        sourcedId: String
+    ): Boolean
 
     @Insert
     abstract suspend fun insertListAsync(results: List<StudentResult>)

@@ -1,6 +1,10 @@
 package com.ustadmobile.core.api.oneroster.model
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.api.oneroster.format8601Timestamp
+import com.ustadmobile.core.api.oneroster.parse8601Timestamp
+import com.ustadmobile.core.util.parse8601Duration
+import com.ustadmobile.lib.db.entities.StudentResult
 import com.ustadmobile.lib.db.entities.StudentResultAndSourcedIds
 
 /**
@@ -28,7 +32,7 @@ fun StudentResultAndSourcedIds.toOneRosterResult(
     return Result(
         sourcedId = studentResult.srSourcedId,
         status = if(studentResult.srActive) Status.ACTIVE else Status.TOBEDELETED,
-        dateLastModified = "",
+        dateLastModified = format8601Timestamp(studentResult.srScoreDate),
         metaData = studentResult.srMetaData,
         lineItem = GUIDRef(
             href = "${endpoint.url}/orhref/lineitem/$courseBlockSourcedId/",
@@ -41,8 +45,23 @@ fun StudentResultAndSourcedIds.toOneRosterResult(
             type = GuidRefType.student,
         ),
         score = studentResult.srScore,
-        scoreDate = "",
+        scoreDate = format8601Timestamp(studentResult.srScoreDate),
         comment = studentResult.srComment
     )
+}
+
+fun Result.toStudentResult() : StudentResult{
+    return StudentResult(
+        srSourcedId = sourcedId,
+        srActive = status == Status.ACTIVE,
+        srLastModified = parse8601Timestamp(dateLastModified),
+        srMetaData = metaData,
+        srLineItemSourcedId = lineItem.sourcedId,
+        srStudentPersonUid = student.sourcedId.toLong(),
+        srScore = score,
+        srScoreDate = parse8601Timestamp(scoreDate),
+        srComment = comment
+    )
+
 }
 

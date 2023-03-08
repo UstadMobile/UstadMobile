@@ -1,5 +1,6 @@
 package com.ustadmobile.core.api.oneroster.model
 
+import com.ustadmobile.core.api.oneroster.format8601Timestamp
 import kotlinx.serialization.Serializable
 import com.ustadmobile.lib.db.entities.Clazz as ClazzEntity
 
@@ -22,6 +23,6 @@ data class Clazz(
 fun ClazzEntity.toOneRosterClass() = Clazz(
     this.clazzUid.toString(),
     Status.ACTIVE,
-    "",
+    format8601Timestamp(clazzLct),
     clazzName ?: ""
 )

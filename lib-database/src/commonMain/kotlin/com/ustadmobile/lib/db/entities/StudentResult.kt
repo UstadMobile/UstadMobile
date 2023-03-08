@@ -35,11 +35,11 @@ import kotlinx.serialization.Serializable
                     REPLACE INTO StudentResult(srUid, srSourcedId, srCourseBlockUid, srClazzUid, srAssignmentUid, 
                                         srLineItemSourcedId, srStatus, srMetaData, srStudentPersonUid,
                                         srStudentGroupId, srMarkerPersonUid, srMarkerGroupId,
-                                        srScoreStatus, srScore, srScoreDate, srComment, srAppId, srActive)
+                                        srScoreStatus, srScore, srScoreDate, srLastModified, srComment, srAppId, srActive)
                     VALUES(NEW.srUid, NEW.srSourcedId, NEW.srCourseBlockUid, NEW.srClazzUid, NEW.srAssignmentUid, 
                                         NEW.srLineItemSourcedId, NEW.srStatus, NEW.srMetaData, NEW.srStudentPersonUid,
                                         NEW.srStudentGroupId, NEW.srMarkerPersonUid, NEW.srMarkerGroupId,
-                                        NEW.srScoreStatus, NEW.srScore, NEW.srScoreDate, NEW.srComment, NEW.srAppId, NEW.srActive)
+                                        NEW.srScoreStatus, NEW.srScore, NEW.srScoreDate, NEW.srLastModified, NEW.srComment, NEW.srAppId, NEW.srActive)
                     /*psql
                     ON CONFLICT(srUid) DO UPDATE
                        SET srSourcedId = EXCLUDED.srSourcedId,
@@ -56,6 +56,7 @@ import kotlinx.serialization.Serializable
                            srScoreStatus = EXCLUDED.srScoreStatus,
                            srScore = EXCLUDED.srScore,
                            srScoreDate = EXCLUDED.srScoreDate,
+                           srLastModified = EXCLUDED.srLastModified,
                            srComment = EXCLUDED.srComment,
                            srAppId = EXCLUDED.srAppId,
                            srActive = EXCLUDED.srActive
@@ -135,9 +136,12 @@ data class StudentResult(
      */
     var srScore: Float  = 0.toFloat(),
 
+
+    var srScoreDate: Long = 0,
+
     @ReplicationVersionId
     @LastChangedTime
-    var srScoreDate: Long = 0,
+    var srLastModified: Long = 0,
 
     /**
      * Comment (if any) by the marker.

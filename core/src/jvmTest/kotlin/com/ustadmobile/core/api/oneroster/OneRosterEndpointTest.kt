@@ -5,7 +5,7 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.api.DoorJsonRequest
 import com.ustadmobile.core.api.oneroster.OneRosterEndpoint.Companion.HEADER_AUTH
-import com.ustadmobile.core.api.oneroster.model.Clazz
+import com.ustadmobile.core.api.oneroster.model.*
 import com.ustadmobile.core.controller.TerminologyKeys
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
@@ -31,9 +31,12 @@ import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import kotlinx.serialization.builtins.ListSerializer
 import kotlin.test.assertEquals
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT
 import io.ktor.http.*
+import org.junit.Assert
+import java.util.*
 import kotlin.test.assertTrue
 import com.ustadmobile.core.api.oneroster.model.Result as OneRosterResult
 
@@ -117,7 +120,7 @@ class OneRosterEndpointTest {
         suspend fun grantExternalAppPermission(token: String) {
             db.externalAppPermissionDao.insertAsync(ExternalAppPermission(
                 eapPersonUid = user.personUid,
-                eapAuthToken = "token",
+                eapAuthToken = token,
                 eapExpireTime = Long.MAX_VALUE
             ))
         }
@@ -134,6 +137,20 @@ class OneRosterEndpointTest {
             db.enrolPersonIntoClazzAtLocalTimezone(user, clazz.clazzUid, userRole)
 
             return clazz
+        }
+
+        suspend fun createCourseBlock(
+            clazzUid: Long,
+            sourcedId: String? = null,
+        ): CourseBlock {
+            return CourseBlock().apply {
+                cbClazzUid = clazzUid
+                cbType = CourseBlock.BLOCK_EXTERNAL_APP
+                cbSourcedId = sourcedId
+
+                cbUid = db.courseBlockDao.insertAsync(this)
+            }
+
         }
 
     }
@@ -231,6 +248,177 @@ class OneRosterEndpointTest {
         }
     }
 
+    @Test
+    fun givenLineItemExists_whenCallGetLineItemWithSourcedId_thenShouldReturn200() = withOneRosterTest {
+        val clazz = createClazzAndEnrolUser(ROLE_STUDENT)
+        val courseBlock = createCourseBlock(clazz.clazzUid, sourcedId = UUID.randomUUID().toString())
+        grantExternalAppPermission("token")
+
+        di.direct.on(Endpoint("http://localhost/")).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+
+        val oneRosterEndpoint = OneRosterEndpoint(
+            { dbTestBuilder.endpointScope.activeEndpointSet }, di
+        )
+
+        val response = oneRosterEndpoint.serve(
+            DoorJsonRequest(
+                method = DoorJsonRequest.Method.GET,
+                url = Url("http://localhost/api/oneroster/lineItems/${courseBlock.cbSourcedId}"),
+                headers = mapOf(
+                    HEADER_AUTH to "token"
+                )
+            )
+        )
+
+        assertEquals(200, response.statusCode)
+        val lineItem = json.decodeFromString(LineItem.serializer(), response.responseBody!!)
+        assertEquals(courseBlock.cbSourcedId, lineItem.sourcedId)
+    }
+
+    @Test
+    fun givenLineItemExists_whenCallGetLineItemWithCourseBlockUid_thenShouldReturn200() = withOneRosterTest {
+        val clazz = createClazzAndEnrolUser(ROLE_STUDENT)
+        val courseBlock = createCourseBlock(clazz.clazzUid, sourcedId = null)
+        grantExternalAppPermission("token")
+
+        di.direct.on(Endpoint("http://localhost/")).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+
+        val oneRosterEndpoint = OneRosterEndpoint(
+            { dbTestBuilder.endpointScope.activeEndpointSet }, di
+        )
+
+        val response = oneRosterEndpoint.serve(
+            DoorJsonRequest(
+                method = DoorJsonRequest.Method.GET,
+                url = Url("http://localhost/api/oneroster/lineItems/${courseBlock.cbUid}"),
+                headers = mapOf(
+                    HEADER_AUTH to "token"
+                )
+            )
+        )
+
+        assertEquals(200, response.statusCode)
+        val lineItem = json.decodeFromString(LineItem.serializer(), response.responseBody!!)
+        assertEquals(courseBlock.cbUid.toString(), lineItem.sourcedId)
+    }
+
+    @Test
+    fun givenLineItemDoesNotExist_whenCallGetLineItem_thenShouldReturn404() = withOneRosterTest {
+        val clazz = createClazzAndEnrolUser(ROLE_STUDENT)
+        val courseBlock = createCourseBlock(clazz.clazzUid, sourcedId = null)
+        grantExternalAppPermission("token")
+
+        di.direct.on(Endpoint("http://localhost/")).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+
+        val oneRosterEndpoint = OneRosterEndpoint(
+            { dbTestBuilder.endpointScope.activeEndpointSet }, di
+        )
+
+        val response = oneRosterEndpoint.serve(
+            DoorJsonRequest(
+                method = DoorJsonRequest.Method.GET,
+                url = Url("http://localhost/api/oneroster/lineItems/doesnotexist"),
+                headers = mapOf(
+                    HEADER_AUTH to "token"
+                )
+            )
+        )
+
+        assertEquals(404, response.statusCode)
+    }
+
+    @Test
+    fun givenValidLineItem_whenCallPutLineItem_thenShouldInsertAndReturn201() = withOneRosterTest {
+        val clazz = createClazzAndEnrolUser(ROLE_STUDENT)
+
+        grantExternalAppPermission("token")
+
+        di.direct.on(Endpoint("http://localhost/")).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+
+        val oneRosterEndpoint = OneRosterEndpoint(
+            { dbTestBuilder.endpointScope.activeEndpointSet }, di
+        )
+
+        val newLineItem = LineItem(
+            sourcedId = "${clazz.clazzUid}_lesson001",
+            status = Status.ACTIVE,
+            dateLastModified = format8601Timestamp(systemTimeInMillis()),
+            title = "Lesson 001",
+            description = "Lesson 001 result",
+            assignDate = format8601Timestamp(0),
+            dueDate = format8601Timestamp(systemTimeInMillis()),
+            `class` = GUIDRef(
+                href = "http://localhost/",
+                sourcedId = clazz.clazzUid.toString(),
+                type = GuidRefType.clazz
+            ),
+            resultValueMin = 0.toFloat(),
+            resultValueMax = 10.toFloat(),
+        )
+
+        val response = oneRosterEndpoint.serve(
+            DoorJsonRequest(
+                method = DoorJsonRequest.Method.PUT,
+                url = Url("http://localhost/api/oneroster/lineItems/${newLineItem.sourcedId}"),
+                headers = mapOf(HEADER_AUTH to "token"),
+                requestBody = json.encodeToString(LineItem.serializer(), newLineItem)
+            )
+        )
+
+        assertEquals(201, response.statusCode)
+        val courseBlockInDb = db.courseBlockDao.findBySourcedId(newLineItem.sourcedId, user.personUid)
+        assertEquals(newLineItem.sourcedId, courseBlockInDb?.cbSourcedId)
+        assertEquals(clazz.clazzUid, courseBlockInDb?.cbClazzUid ?: -1)
+    }
+
+    @Test
+    fun givenValidResult_whenCallPutResult_thenShouldInsertAndReturn201() = withOneRosterTest {
+        val clazz = createClazzAndEnrolUser(ROLE_STUDENT)
+        val lineItemSourcedId = "${clazz.clazzUid}-Lesson001"
+        val courseBlock = createCourseBlock(clazz.clazzUid, sourcedId = lineItemSourcedId)
+        val oneRosterResult = OneRosterResult(
+            sourcedId = UUID.randomUUID().toString(),
+            status = Status.ACTIVE,
+            dateLastModified = format8601Timestamp(systemTimeInMillis()),
+            metaData = null,
+            lineItem = GUIDRef(
+                sourcedId = "${clazz.clazzUid}-Lesson001",
+                href = "http://localhost",
+                type = GuidRefType.lineItem
+            ),
+            student = GUIDRef(
+                sourcedId = user.personUid.toString(),
+                href = "http://localhost/",
+                type = GuidRefType.student
+            ),
+            score = 5.toFloat(),
+            scoreDate = format8601Timestamp(systemTimeInMillis()),
+            comment = "OK, not great, not terrible"
+        )
+
+        grantExternalAppPermission("token")
+
+        di.direct.on(Endpoint("http://localhost/")).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+
+        val oneRosterEndpoint = OneRosterEndpoint(
+            { dbTestBuilder.endpointScope.activeEndpointSet }, di
+        )
+
+        val response = oneRosterEndpoint.serve(
+            DoorJsonRequest(
+                method = DoorJsonRequest.Method.PUT,
+                url = Url("http://localhost/api/oneroster/results/${oneRosterResult.sourcedId}"),
+                headers = mapOf(HEADER_AUTH to "token"),
+                requestBody = json.encodeToString(OneRosterResult.serializer(), oneRosterResult)
+            )
+        )
+
+        Assert.assertEquals(201, response.statusCode)
+
+        val resultInDb = db.studentResultDao.findByClazzAndStudent(
+            clazz.clazzUid, user.personUid, user.personUid)
+        assertEquals(oneRosterResult.score, resultInDb.first().studentResult.srScore)
+    }
 
     companion object {
 

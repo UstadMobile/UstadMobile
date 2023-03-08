@@ -19,12 +19,14 @@ enum class GuidRefType {
 
 object GuidRefTypeSerializer: KSerializer<GuidRefType> {
     override fun deserialize(decoder: Decoder): GuidRefType {
-        return GuidRefType.valueOf(decoder.decodeString())
+        val strValue = decoder.decodeString()
+        return GuidRefType.valueOf(if(strValue == "class") "clazz" else strValue)
     }
 
 
     override fun serialize(encoder: Encoder, value: GuidRefType) {
-        encoder.encodeString(value.toString())
+        val strValue = value.toString()
+        encoder.encodeString(if(strValue == "clazz") "class" else strValue)
     }
 
     override val descriptor: SerialDescriptor

@@ -7,7 +7,7 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 /**
- * Represents a CourseBlock. This also represents a LineItem as per the OneRoster spec.
+ * Represents a CourseBlock. This also used to represent a LineItem as per the OneRoster spec.
  */
 @Entity
 @ReplicateEntity(tableId = CourseBlock.TABLE_ID, tracker = CourseBlockReplicate::class)
