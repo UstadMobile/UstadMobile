@@ -35,6 +35,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyCourseBlockWithEntity
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.binding.isSet
 import com.ustadmobile.port.android.view.composable.*
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
@@ -316,7 +317,7 @@ private fun ClazzAssignmentEditScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .defaultScreenPadding()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
@@ -329,7 +330,9 @@ private fun ClazzAssignmentEditScreen(
             onValueChange = {
                 onChangeCourseBlockWithEntity(
                     uiState.entity?.shallowCopyCourseBlockWithEntity {
-                        assignment?.caTitle = it
+                        assignment = uiState.entity?.assignment?.shallowCopy {
+                            caTitle = it
+                        }
                     })
             },
         )
@@ -377,7 +380,9 @@ private fun ClazzAssignmentEditScreen(
                 onOptionSelected = {
                     onChangeCourseBlockWithEntity(
                         uiState.entity?.shallowCopyCourseBlockWithEntity{
-                            assignment?.caFileType = it.value
+                            assignment = uiState.entity?.assignment?.shallowCopy {
+                                caFileType = it.value
+                            }
                         })
                 },
             )
@@ -389,7 +394,9 @@ private fun ClazzAssignmentEditScreen(
                 onValueChange = { newString ->
                     onChangeCourseBlockWithEntity(
                         uiState.entity?.shallowCopyCourseBlockWithEntity{
-                            assignment?.caSizeLimit = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
+                            assignment = uiState.entity?.assignment?.shallowCopy {
+                                caSizeLimit = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
+                            }
                         })
                 },
             )
@@ -401,7 +408,11 @@ private fun ClazzAssignmentEditScreen(
                 onValueChange = { newString ->
                     onChangeCourseBlockWithEntity(
                         uiState.entity?.shallowCopyCourseBlockWithEntity{
-                            assignment?.caNumberOfFiles = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
+                            assignment = uiState.entity?.assignment?.shallowCopy {
+                                caNumberOfFiles = newString.filter {
+                                    it.isDigit()
+                                }.toIntOrNull() ?: 0
+                            }
                         })
                 },
             )
@@ -423,12 +434,12 @@ private fun ClazzAssignmentEditScreen(
                 onOptionSelected = {
                     onChangeCourseBlockWithEntity(
                         uiState.entity?.shallowCopyCourseBlockWithEntity{
-                            assignment?.caTextLimitType = it.value
+                            assignment = uiState.entity?.assignment?.shallowCopy {
+                                caTextLimitType = it.value
+                            }
                         })
                 },
             )
-
-            Spacer(modifier = Modifier.height(15.dp))
 
             UstadTextEditField(
                 value = (uiState.entity?.assignment?.caTextLimit ?: 0).toString(),
@@ -437,13 +448,13 @@ private fun ClazzAssignmentEditScreen(
                 onValueChange = { newString ->
                     onChangeCourseBlockWithEntity(
                         uiState.entity?.shallowCopyCourseBlockWithEntity{
-                            assignment?.caTextLimit = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
+                            assignment = uiState.entity?.assignment?.shallowCopy {
+                                caTextLimit = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
+                            }
                         })
                 },
             )
         }
-
-        Spacer(modifier = Modifier.height(15.dp))
 
         UstadMessageIdOptionExposedDropDownMenuField(
             value = uiState.entity?.assignment?.caSubmissionPolicy ?: 0,
@@ -453,12 +464,12 @@ private fun ClazzAssignmentEditScreen(
             onOptionSelected = {
                 onChangeCourseBlockWithEntity(
                     uiState.entity?.shallowCopyCourseBlockWithEntity{
-                        assignment?.caSubmissionPolicy = it.value
+                        assignment = uiState.entity?.assignment?.shallowCopy {
+                            caSubmissionPolicy = it.value
+                        }
                     })
             },
         )
-
-        Spacer(modifier = Modifier.height(15.dp))
 
         UstadMessageIdOptionExposedDropDownMenuField(
             value = uiState.entity?.assignment?.caMarkingType ?: 0,
@@ -468,12 +479,12 @@ private fun ClazzAssignmentEditScreen(
             onOptionSelected = {
                 onChangeCourseBlockWithEntity(
                     uiState.entity?.shallowCopyCourseBlockWithEntity{
-                        assignment?.caMarkingType = it.value
+                        assignment = uiState.entity?.assignment?.shallowCopy {
+                            caMarkingType = it.value
+                        }
                     })
             },
         )
-
-        Spacer(modifier = Modifier.height(15.dp))
 
         UstadSwitchField(
             label = stringResource(id = R.string.allow_class_comments),
@@ -481,8 +492,6 @@ private fun ClazzAssignmentEditScreen(
             onChange = { onChangedAllowClassComments(it) },
             enabled = uiState.fieldsEnabled
         )
-
-        Spacer(modifier = Modifier.height(15.dp))
 
         UstadSwitchField(
             label = stringResource(id = R.string.allow_private_comments_from_students),
