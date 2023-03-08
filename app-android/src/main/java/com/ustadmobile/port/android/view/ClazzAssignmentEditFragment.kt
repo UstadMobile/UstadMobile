@@ -336,6 +336,7 @@ private fun ClazzAssignmentEditScreen(
     )  {
 
         OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
             value = uiState.entity?.assignment?.caTitle ?: "",
             label = { Text(stringResource(id = R.string.title)) },
             isError = uiState.caTitleError != null,
@@ -371,6 +372,7 @@ private fun ClazzAssignmentEditScreen(
         )
 
         OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
             value = uiState.groupSet?.cgsName ?: "",
             label = { Text(stringResource(id = R.string.submission_type)) },
             enabled = uiState.groupSetEnabled,
