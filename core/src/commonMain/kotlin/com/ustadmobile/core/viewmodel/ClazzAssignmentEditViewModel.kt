@@ -1,6 +1,8 @@
 package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
+import com.ustadmobile.core.util.ext.isDateSet
+import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.CourseGroupSet
@@ -35,4 +37,9 @@ data class ClazzAssignmentEditUiState(
     val textSubmissionVisible: Boolean = false,
 
     val courseBlockEditUiState: CourseBlockEditUiState = CourseBlockEditUiState(),
-)
+) {
+
+    val peerMarkingVisible: Boolean
+        get() = entity?.assignment?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS
+
+}

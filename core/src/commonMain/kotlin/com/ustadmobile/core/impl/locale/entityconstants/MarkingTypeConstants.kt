@@ -7,7 +7,8 @@ import com.ustadmobile.lib.db.entities.ClazzAssignment
 object MarkingTypeConstants {
 
     val MARKING_TYPE_MESSAGE_IDS = listOf(
-        MessageIdOption2(MessageID.submit_all_at_once_submission_policy, ClazzAssignment.MARKED_BY_COURSE_LEADER),
-        MessageIdOption2(MessageID.multiple_submission_allowed_submission_policy, ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED)
+        MessageIdOption2(MessageID.teacher, ClazzAssignment.MARKED_BY_COURSE_LEADER),
+        MessageIdOption2(MessageID.peers, ClazzAssignment.MARKED_BY_PEERS)
     )
+
 }

@@ -502,6 +502,28 @@ private fun ClazzAssignmentEditScreen(
             },
         )
 
+        if (uiState.peerMarkingVisible) {
+            Row {
+                OutlinedTextField(
+                    value = (uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toString(),
+                    label = { Text(stringResource(id = R.string.reviews_per_user_group)) },
+                    enabled = uiState.fieldsEnabled,
+                    onValueChange = { newString ->
+                        onChangeCourseBlockWithEntity(
+                            uiState.entity?.shallowCopyCourseBlockWithEntity{
+                                assignment = uiState.entity?.assignment?.shallowCopy {
+                                    caPeerReviewerCount = newString.filter {
+                                        it.isDigit()
+                                    }.toIntOrNull() ?: 0
+                                }
+                            })
+                    },
+                )
+
+
+            }
+        }
+
         UstadSwitchField(
             label = stringResource(id = R.string.allow_class_comments),
             checked = uiState.entity?.assignment?.caClassCommentEnabled ?: false,
