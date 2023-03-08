@@ -10,7 +10,6 @@ import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.ext.shallowCopyCourseBlockWithEntity
 import com.ustadmobile.mui.components.UstadCourseBlockEdit
 import com.ustadmobile.mui.components.UstadMessageIdDropDownField
-import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.view.components.UstadSwitchField
 import csstype.px
@@ -18,6 +17,8 @@ import mui.material.*
 import mui.system.responsive
 import react.FC
 import react.Props
+import react.ReactNode
+import react.dom.onChange
 
 external interface ClazzAssignmentEditScreenProps : Props {
 
@@ -65,27 +66,30 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
         Stack {
             spacing = responsive(20.px)
 
-            UstadTextEditField{
+            TextField {
                 value = props.uiState.entity?.assignment?.caTitle ?: ""
-                label = strings[MessageID.title]
-                error = props.uiState.caTitleError
-                enabled = props.uiState.fieldsEnabled
+                label = ReactNode(strings[MessageID.title])
+                error = props.uiState.caTitleError != null
+                disabled = !props.uiState.fieldsEnabled
                 onChange = {
+                    val currentVal = it.target.asDynamic().value
+                    props.uiState.caTitleError = null
                     props.onChangeCourseBlockWithEntity(
                         props.uiState.entity?.shallowCopyCourseBlockWithEntity {
-                            assignment?.caTitle = it
+                            assignment?.caTitle = currentVal?.toString() ?: ""
                         })
                 }
             }
 
-            UstadTextEditField {
+            TextField {
                 value = props.uiState.entity?.assignment?.caDescription ?: ""
-                label = strings[MessageID.description].addOptionalSuffix(strings)
-                enabled = props.uiState.fieldsEnabled
+                label = ReactNode(strings[MessageID.description].addOptionalSuffix(strings))
+                disabled = !props.uiState.fieldsEnabled
                 onChange = {
+                    val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
                     props.onChangeCourseBlockWithEntity(
                         props.uiState.entity?.shallowCopyCourseBlockWithEntity {
-                            assignment?.caDescription = it
+                            assignment?.caDescription = currentVal
                         })
                 }
             }
@@ -95,12 +99,12 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 onCourseBlockChange = props.onChangeCourseBlock
             }
 
-            UstadTextEditField {
+            TextField {
                 value = props.uiState.groupSet?.cgsName ?: ""
-                label = strings[MessageID.submission_type]
-                enabled = props.uiState.groupSetEnabled
+                label = ReactNode(strings[MessageID.submission_type])
+                disabled = !props.uiState.groupSetEnabled
                 onChange = {}
-                onClick = props.onClickSubmissionType
+                onClick = { props.onClickSubmissionType }
             }
 
             UstadSwitchField {
@@ -124,28 +128,30 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     }
                 }
 
-                UstadTextEditField {
+                TextField {
                     value = (props.uiState.entity?.assignment?.caSizeLimit ?: 0).toString()
-                    label = strings[MessageID.size_limit]
-                    enabled = props.uiState.fieldsEnabled
-                    onChange = { newString ->
+                    label = ReactNode(strings[MessageID.size_limit])
+                    disabled = !props.uiState.fieldsEnabled
+                    onChange = {
+                        val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
                         props.onChangeCourseBlockWithEntity(
                             props.uiState.entity?.shallowCopyCourseBlockWithEntity {
                                 assignment?.caSizeLimit =
-                                    newString.filter { it.isDigit() }.toIntOrNull() ?: 0
+                                    currentVal.filter { it.isDigit() }.toIntOrNull() ?: 0
                             })
                     }
                 }
 
-                UstadTextEditField {
+                TextField {
                     value = (props.uiState.entity?.assignment?.caNumberOfFiles ?: 0).toString()
-                    label = strings[MessageID.number_of_files]
-                    enabled = props.uiState.fieldsEnabled
-                    onChange = { newString ->
+                    label = ReactNode(strings[MessageID.number_of_files])
+                    disabled = props.uiState.fieldsEnabled
+                    onChange = {
+                        val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
                         props.onChangeCourseBlockWithEntity(
                             props.uiState.entity?.shallowCopyCourseBlockWithEntity {
                                 assignment?.caNumberOfFiles =
-                                    newString.filter { it.isDigit() }.toIntOrNull() ?: 0
+                                    currentVal.filter { it.isDigit() }.toIntOrNull() ?: 0
                             })
                     }
                 }
@@ -172,15 +178,16 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     }
                 }
 
-                UstadTextEditField {
+                TextField {
                     value = (props.uiState.entity?.assignment?.caTextLimit ?: 0).toString()
-                    label = strings[MessageID.maximum]
-                    enabled = props.uiState.fieldsEnabled
-                    onChange = { newString ->
+                    label = ReactNode(strings[MessageID.maximum])
+                    disabled = !props.uiState.fieldsEnabled
+                    onChange = {
+                        val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
                         props.onChangeCourseBlockWithEntity(
                             props.uiState.entity?.shallowCopyCourseBlockWithEntity {
                                 assignment?.caTextLimit =
-                                    newString.filter { it.isDigit() }.toIntOrNull() ?: 0
+                                    currentVal.filter { it.isDigit() }.toIntOrNull() ?: 0
                             })
                     }
                 }
