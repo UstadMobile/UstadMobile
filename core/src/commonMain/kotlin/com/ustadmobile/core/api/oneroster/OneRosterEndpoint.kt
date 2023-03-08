@@ -5,6 +5,7 @@ import com.ustadmobile.core.api.DoorJsonRequest
 import com.ustadmobile.core.api.DoorJsonResponse
 import com.ustadmobile.core.api.oneroster.model.Clazz
 import com.ustadmobile.core.api.oneroster.model.toOneRosterClass
+import com.ustadmobile.core.api.oneroster.model.toOneRosterResult
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.door.ext.DoorTag
@@ -17,6 +18,7 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import com.ustadmobile.core.api.oneroster.model.Result as OneRosterResult
 
 /**
  * @param dbGetter function that will provide the database
@@ -79,6 +81,7 @@ class OneRosterEndpoint(
                         responseBody = "Invalid auth token")
                 }
 
+                //getClassesForUser
                 apiPathComponents[0] == "users" && apiPathComponents.last() == "classes" -> {
                     //list all classes for user
                     val classes = db.clazzDao.findOneRosterUserClazzes(
@@ -92,6 +95,28 @@ class OneRosterEndpoint(
                         statusCode = 200,
                         contentType = "application/json",
                         responseBody = json.encodeToString(ListSerializer(Clazz.serializer()), classes)
+                    )
+                }
+
+                //getResultsForStudentForClass
+                apiPathComponents[0] == "classes" &&
+                    apiPathComponents.getOrNull(2) == "students" &&
+                    apiPathComponents.getOrNull(4) == "results"
+                -> {
+                    val clazzUid = apiPathComponents[1].toLong()
+                    val studentPersonUid = apiPathComponents[3].toLong()
+
+                    val results = db.studentResultDao.findByClazzAndStudent(
+                        clazzUid, studentPersonUid, accountPersonUid
+                    ).map {
+                        it.toOneRosterResult(endpoint)
+                    }
+
+                    DoorJsonResponse(
+                        statusCode = 200,
+                        contentType = "application/json",
+                        responseBody = json.encodeToString(ListSerializer(OneRosterResult.serializer()),
+                            results)
                     )
                 }
 

@@ -18,8 +18,6 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.Clazz as ClazzEntity
-import com.ustadmobile.lib.db.entities.ExternalAppPermission
-import com.ustadmobile.lib.db.entities.Person
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
@@ -30,11 +28,14 @@ import java.io.File
 import java.nio.file.Files
 import kotlin.test.Test
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
-import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import kotlinx.serialization.builtins.ListSerializer
 import kotlin.test.assertEquals
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT
 import io.ktor.http.*
+import kotlin.test.assertTrue
+import com.ustadmobile.core.api.oneroster.model.Result as OneRosterResult
 
 class OneRosterEndpointTest {
 
@@ -42,7 +43,7 @@ class OneRosterEndpointTest {
     class DbTestBuilder(
         private val dbName: String = "dbtest"
     ) {
-        private val endpointScope = EndpointScope()
+        val endpointScope = EndpointScope()
 
         /**
          * Temporary directory that can be used by a test. It will be deleted when the test is finished
@@ -82,10 +83,11 @@ class OneRosterEndpointTest {
 
 
     class OneRosterTestBuilder(
-        private val dbTestBuilder: DbTestBuilder
+        val dbTestBuilder: DbTestBuilder
     ) {
         val db: UmAppDatabase = dbTestBuilder.db
 
+        //The user who is logged in (e.g. activesession)
         val user = runBlocking {
             db .insertPersonAndGroup (Person().apply {
                 firstNames = "Bob"
@@ -95,6 +97,13 @@ class OneRosterEndpointTest {
 
         val di = DI {
             extend(dbTestBuilder.di)
+
+            bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(dbTestBuilder.endpointScope).singleton {
+                db
+            }
+            bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(dbTestBuilder.endpointScope).singleton {
+                db
+            }
         }
 
         val json: Json by di.instance()
@@ -103,6 +112,28 @@ class OneRosterEndpointTest {
             on { getString(any<Int>(), any())}.thenAnswer {
                 it.arguments.first().toString()
             }
+        }
+
+        suspend fun grantExternalAppPermission(token: String) {
+            db.externalAppPermissionDao.insertAsync(ExternalAppPermission(
+                eapPersonUid = user.personUid,
+                eapAuthToken = "token",
+                eapExpireTime = Long.MAX_VALUE
+            ))
+        }
+
+        suspend fun createClazzAndEnrolUser(
+            userRole: Int
+        ) : ClazzEntity {
+            val clazz = ClazzEntity().apply {
+                clazzUid = 1001L //when creating a class in the app, this is generated using primary key manager
+                clazzName = "Test Course"
+            }
+
+            db.createNewClazzAndGroups(clazz, systemImpl, TERM_MAP, Any())
+            db.enrolPersonIntoClazzAtLocalTimezone(user, clazz.clazzUid, userRole)
+
+            return clazz
         }
 
     }
@@ -116,46 +147,22 @@ class OneRosterEndpointTest {
         }
     }
 
+
     /**
      *
      */
     @Test
     fun givenValidAuth_whenRequestClassesForUser_thenShouldReturnClassList() = withOneRosterTest {
-        val clazz = ClazzEntity().apply {
-            clazzUid = 1001L //when creating a class in the app, this is generated using primary key manager
-            clazzName = "Test Course"
-        }
-
-        db.createNewClazzAndGroups(clazz, systemImpl, TERM_MAP, Any())
-
-        db.enrolPersonIntoClazzAtLocalTimezone(user, clazz.clazzUid, ClazzEnrolment.ROLE_STUDENT)
-
-        db.externalAppPermissionDao.insertAsync(ExternalAppPermission(
-            eapPersonUid = user.personUid,
-            eapAuthToken = "token",
-            eapExpireTime = Long.MAX_VALUE
-        ))
-
-        val endpointScope  = EndpointScope()
-        val di = DI {
-            bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
-                db
-            }
-            bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
-                db
-            }
-            bind<Json>() with singleton {
-                json
-            }
-        }
+        createClazzAndEnrolUser(ROLE_STUDENT)
+        grantExternalAppPermission("token")
 
         di.direct.on(Endpoint("http://localhost/")).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
 
-        val endpoint = OneRosterEndpoint(
-            { endpointScope.activeEndpointSet }, di
+        val oneRosterEndpoint = OneRosterEndpoint(
+            { dbTestBuilder.endpointScope.activeEndpointSet }, di
         )
 
-        val response = endpoint.serve(
+        val response = oneRosterEndpoint.serve(
             DoorJsonRequest(
                 method = DoorJsonRequest.Method.GET,
                 url = Url("http://localhost/api/oneroster/users/${user.personUid}/classes"),
@@ -173,6 +180,57 @@ class OneRosterEndpointTest {
 
         assertEquals(1, clazzes?.size ?: 0, "Got clazz")
     }
+
+    @Test
+    fun givenValidAuth_whenRequestResultsForStudentClass_thenShouldReturnResults() = withOneRosterTest {
+        val clazz = createClazzAndEnrolUser(ROLE_STUDENT)
+        val courseBlock = CourseBlock().apply {
+            cbClazzUid = clazz.clazzUid
+            cbType = CourseBlock.BLOCK_EXTERNAL_APP
+
+            cbUid = db.courseBlockDao.insertAsync(this)
+        }
+
+        val studentResults = (0 .. 2).map { score ->
+            StudentResult(
+                srStudentPersonUid = user.personUid,
+                srClazzUid = clazz.clazzUid,
+                srCourseBlockUid =  courseBlock.cbUid,
+                srScore = score.toFloat()
+            )
+        }
+        db.studentResultDao.insertListAsync(studentResults)
+        grantExternalAppPermission("token")
+
+        di.direct.on(Endpoint("http://localhost/")).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+
+        val oneRosterEndpoint = OneRosterEndpoint(
+            { dbTestBuilder.endpointScope.activeEndpointSet }, di
+        )
+
+        val response = oneRosterEndpoint.serve(
+            DoorJsonRequest(
+                method = DoorJsonRequest.Method.GET,
+                url = Url("http://localhost/api/oneroster/classes/${clazz.clazzUid}/students/${user.personUid}/results"),
+                headers = mapOf(
+                    HEADER_AUTH to "token"
+                )
+            )
+        )
+
+        assertEquals(200, response.statusCode)
+
+        val responseResults = response.responseBody?.let {
+            json.decodeFromString(ListSerializer(OneRosterResult.serializer()), it)
+        }
+
+
+        assertEquals(studentResults.size, responseResults?.size)
+        studentResults.forEach {studentResult ->
+            assertTrue(responseResults?.any { it.score == studentResult.srScore } == true)
+        }
+    }
+
 
     companion object {
 

@@ -126,9 +126,10 @@ import com.ustadmobile.lib.db.entities.*
     DiscussionPost::class,
     DiscussionPostReplicate::class,
     ExternalAppPermission::class,
+    StudentResult::class,
+    StudentResultReplicate::class,
 
-
-], version = 109)
+], version = 110)
 @MinReplicationVersion(60)
 expect abstract class UmAppDatabase : RoomDatabase {
 
@@ -305,5 +306,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val discussionPostDao: DiscussionPostDao
 
     abstract val externalAppPermissionDao: ExternalAppPermissionDao
+
+    abstract val studentResultDao: StudentResultDao
 
 }
