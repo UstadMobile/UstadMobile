@@ -317,6 +317,7 @@ private fun ClazzAssignmentEditScreen(
     onChangedTextRequired: (Boolean) -> Unit = {},
     onChangedAllowClassComments: (Boolean) -> Unit = {},
     onChangedAllowPrivateCommentsFromStudents: (Boolean) -> Unit = {},
+    onClickAssignReviewers: () -> Unit = {},
 ) {
 
     val submissionTypeSource: MutableInteractionSource = remember { MutableInteractionSource() }
@@ -520,7 +521,14 @@ private fun ClazzAssignmentEditScreen(
                     },
                 )
 
-
+                OutlinedButton(
+                    onClick = onClickAssignReviewers,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    enabled = uiState.fieldsEnabled,
+                ) {
+                    Text(stringResource(R.string.assign_reviewers))
+                }
             }
         }
 
