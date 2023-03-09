@@ -98,6 +98,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
             spacing = responsive(10.px)
 
             TextField {
+                variant = FormControlVariant.outlined
                 value = props.uiState.report?.reportTitle ?: ""
                 label = ReactNode(strings[MessageID.xapi_options_report_title])
                 disabled = !props.uiState.fieldsEnabled
@@ -113,6 +114,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
             }
 
             TextField {
+                variant = FormControlVariant.outlined
                 value = props.uiState.report?.reportDescription ?: ""
                 label = ReactNode(strings[MessageID.description])
                 disabled = !props.uiState.fieldsEnabled
@@ -198,6 +200,7 @@ private val ReportSeriesListItem = FC<ReportEditScreenProps> { props ->
             direction = responsive(StackDirection.row)
 
             TextField {
+                variant = FormControlVariant.outlined
                 value = props.reportSeries.reportSeriesName ?: ""
                 label = ReactNode(strings[MessageID.title])
                 disabled = !props.uiState.fieldsEnabled
