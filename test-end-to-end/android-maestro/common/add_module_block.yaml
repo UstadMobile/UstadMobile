@@ -1,0 +1,23 @@
+appId: com.toughra.ustadmobile
+---
+#this flow add MODULE block
+# test data required :
+  # 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+  # 2) MODULETITLE : provide the title for module block of String type
+
+# add module
+- repeat:
+    while:
+      notVisible: "Add block"
+    commands:
+      - swipe:
+          start: 100,400
+          end: 100,100
+- tapOn: "Add block"
+- tapOn: "Module"
+- tapOn: "Title"
+- inputText: ${MODULETITLE}
+- tapOn: "Don't show before (Optional)"
+- tapOn: "OK"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_module_${MODULETITLE}"
+- tapOn: "SAVE"

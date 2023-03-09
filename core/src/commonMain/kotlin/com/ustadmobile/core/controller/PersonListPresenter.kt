@@ -159,13 +159,13 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
                 }
             }
 
-            view.runOnUiThread(Runnable {
+            presenterScope.launch {
                 systemImpl.go(InviteViaLinkView.VIEW_NAME, mapOf(
                         UstadView.ARG_CODE_TABLE to tableId.toString(),
                         UstadView.ARG_CODE to code,
                         UstadView.ARG_ENTITY_NAME to entityName
                 ), context)
-            })
+            }
         }
 
     }

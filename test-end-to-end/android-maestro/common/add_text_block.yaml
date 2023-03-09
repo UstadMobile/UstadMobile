@@ -1,0 +1,28 @@
+appId: com.toughra.ustadmobile
+---
+#this flow add TEXT block
+# test data required :
+  # 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+  # 2) TEXTTITLE: provide text title of string type
+  # 3) TEXT: provide text to enter inside text box of string type
+
+# add module
+- repeat:
+      while:
+          notVisible: "Add block"
+      commands:
+          - swipe:
+                start: 100,400
+                end: 100,100
+- tapOn: "Add block"
+- tapOn: "Text"
+- tapOn: "Title"
+- inputText: ${TEXTTITLE}
+- tapOn: "Don't show before (Optional)"
+- tapOn: "OK"
+# editor space on text module does not have text field, so we used its id
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: ${TEXT}
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_text_${TEXTTITLE}"

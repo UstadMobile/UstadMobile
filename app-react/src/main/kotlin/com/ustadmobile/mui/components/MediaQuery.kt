@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import kotlinx.js.jso
+import js.core.jso
 import mui.system.Theme
 import org.w3c.dom.MediaQueryList
 

@@ -13,7 +13,7 @@ import kotlinx.css.color
 import kotlinx.css.marginTop
 import mui.material.ListItemProps
 import mui.material.styles.TypographyVariant
-import org.w3c.dom.events.Event
+import web.events.Event
 import react.ComponentType
 import react.RBuilder
 import react.RComponent

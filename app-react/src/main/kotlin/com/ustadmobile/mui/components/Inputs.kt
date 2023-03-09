@@ -5,16 +5,16 @@ import kotlinx.css.Color
 import kotlinx.css.color
 import mui.material.Input
 import mui.material.InputProps
-import dom.html.HTMLDivElement
-import org.w3c.dom.HTMLElement
-import org.w3c.dom.events.Event
+import web.html.HTMLDivElement
+import web.events.Event
 import react.RBuilder
 import react.ReactElement
 import react.dom.events.FormEvent
 import react.dom.events.KeyboardEvent
-import react.dom.html.InputType
+import web.html.InputType
 import styled.StyledHandler
 import styled.css
+import web.html.HTMLElement
 
 fun RBuilder.umInput(
     value: Any? = null,

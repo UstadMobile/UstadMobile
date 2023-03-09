@@ -145,7 +145,7 @@ fun LanguageListScreen(
 
         item {
             UstadListSortHeader(
-                uiState.sortOrder,
+                activeSortOrderOption = uiState.sortOrder,
                 onClickSort = onClickSort
             )
         }

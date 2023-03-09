@@ -16,6 +16,9 @@ expect abstract class SiteDao {
     @RepoHttpAccessible
     abstract suspend fun getSiteAsync(): Site?
 
+    @Query("SELECT authSalt FROM Site LIMIT 1")
+    abstract suspend fun getSiteAuthSaltAsync(): String?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun replaceAsync(site: Site): Long
 

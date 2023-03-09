@@ -55,9 +55,9 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
             try {
                 val result = dbRepo.contentEntryDao.getContentByUuidAsync(entryUuid)
                         ?: ContentEntry()
-                view.runOnUiThread(Runnable {
+                presenterScope.launch {
                     view.entry = result
-                })
+                }
 
                 harContainer = HarContainer(containerUid, result, accountManager.activeAccount, db,
                         context, localHttp, di.direct.instance()) {
@@ -68,10 +68,10 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
                 view.loadUrl(harContainer.startingUrl)
 
             } catch (e: Exception) {
-                view.runOnUiThread(Runnable {
+                presenterScope.launch {
                     view.showSnackBar(
                         systemImpl.getString(MessageID.error_opening_file, context))
-                })
+                }
             }
         }
     }

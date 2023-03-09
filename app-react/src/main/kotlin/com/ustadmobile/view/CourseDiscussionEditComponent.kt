@@ -21,7 +21,7 @@ import com.ustadmobile.view.ext.*
 import io.github.aakira.napier.Napier
 import mui.material.FormControlVariant
 import org.w3c.dom.Element
-import org.w3c.dom.events.Event
+import web.events.Event
 import react.RBuilder
 import react.setState
 import styled.css

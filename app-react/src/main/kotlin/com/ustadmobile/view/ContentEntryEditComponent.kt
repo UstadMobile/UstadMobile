@@ -594,7 +594,7 @@ fun RBuilder.createSwitchItem(label: String, enabled: Boolean, onClick: (MouseEv
         umItem(GridSize.cells1){
             umSwitch(enabled){
                 attrs.onClick = {
-                    onClick.invoke(it.nativeEvent)
+                    //onClick.invoke(it.nativeEvent)
                 }
             }
         }

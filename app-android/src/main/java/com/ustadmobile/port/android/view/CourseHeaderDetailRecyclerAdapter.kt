@@ -31,7 +31,7 @@ class CourseHeaderDetailRecyclerAdapter(val listener: ClazzDetailOverviewEventLi
                 return
             field = value
             viewHolder?.itemBinding?.clazz = value
-            val termMap = value?.terminology.toTermMap(json, systemImpl, context)
+            val termMap = value?.terminology.toTermMap(json, systemImpl)
             teacherStudentCount = """${clazz?.numTeachers ?: 0} ${termMap[TerminologyKeys.TEACHERS_KEY]}, ${clazz?.numStudents ?: 0} ${termMap[TerminologyKeys.STUDENTS_KEY]}"""
         }
 

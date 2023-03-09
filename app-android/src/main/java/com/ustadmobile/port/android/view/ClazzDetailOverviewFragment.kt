@@ -448,8 +448,8 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
                         val newMark = newAssignment?.mark
                         val oldMark = oldAssignment?.mark
                         isSame = isSame
-                                && newMark?.camPenalty == oldMark?.camPenalty
-                                && newMark?.camMark == oldMark?.camMark
+                                && newMark?.averagePenalty == oldMark?.averagePenalty
+                                && newMark?.averageScore == oldMark?.averageScore
                     }
 
                     CourseBlock.BLOCK_DISCUSSION_TYPE -> {

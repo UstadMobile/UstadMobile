@@ -178,8 +178,6 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
         return super.onOptionsItemSelected(item)
     }
 
-    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
-
     private inner class ContainerTocListAdapter(private val rootItem: EpubNavItem) : TocListView.TocListViewAdapter() {
 
         override val root: Any
