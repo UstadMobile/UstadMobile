@@ -403,6 +403,10 @@ private fun ReportEditScreen(
             )
         }
 
+        if (!uiState.titleError.isNullOrEmpty()){
+            Text(uiState.titleError ?: "")
+        }
+
         item {
             OutlinedTextField(
                 modifier = Modifier.defaultItemPadding(),
