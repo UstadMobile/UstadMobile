@@ -3,7 +3,9 @@ package com.ustadmobile.core.db.dao
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.ASSIGNMENT_PERMISSION
 import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SUBMITTER_LIST_CTE
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SUBMITTER_LIST_WITHOUT_ASSIGNMENT_CTE
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
@@ -87,7 +89,9 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
     abstract suspend fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
 
     @Query("""
-            $SUBMITTER_LIST_CTE
+           $ASSIGNMENT_PERMISSION,
+         
+           $SUBMITTER_LIST_CTE
             
             SELECT (SELECT COUNT(*) FROM SubmitterList) AS totalStudents,
             
@@ -125,10 +129,17 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
           AND caUid = :assignmentUid                  
     """)
     abstract fun getProgressSummaryForAssignment(
-        assignmentUid: Long, clazzUid: Long, group: String) : LiveData<AssignmentProgressSummary?>
+        assignmentUid: Long,
+        clazzUid: Long,
+        group: String,
+        submitterUid: Long,
+        loggedInPersonUid: Long
+    ) : LiveData<AssignmentProgressSummary?>
 
 
     @Query("""
+         $ASSIGNMENT_PERMISSION,
+         
          $SUBMITTER_LIST_CTE
         
          SELECT submitterId AS submitterUid,
@@ -182,12 +193,74 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
           WHERE name LIKE :searchText
        ORDER BY name 
     """)
-    abstract fun getSubmitterListForAssignment(
+    @QueryLiveTables(value = ["ClazzAssignment","CourseAssignmentMark","CourseAssignmentSubmission",
+    "Comments", "ClazzEnrolment", "Person","PersonGroupMember","ScopedGrant","Clazz","PeerReviewerAllocation",
+    "CourseGroupMember"])
+    abstract fun getSubmitterListForAssignmentSummary(
         assignmentUid: Long,
         clazzUid: Long,
         group: String,
-        searchText: String
-    ): DataSourceFactory<Int, PersonGroupAssignmentSummary>
+        searchText: String,
+        submitterUid: Long,
+        loggedInPersonUid: Long
+    ): DataSourceFactory<Int, AssignmentSubmitterSummary>
+
+    @Query("""
+         $SUBMITTER_LIST_WITHOUT_ASSIGNMENT_CTE
+        
+         SELECT submitterId AS submitterUid,
+                name, 
+                0 as fileSubmissionStatus,
+                (CASE WHEN :groupUid = 0 
+                 THEN 'TRUE' 
+                 ELSE 'FALSE' END) AS isGroupAssignment,
+                 
+                 '' as latestPrivateComment
+                 
+          FROM SubmitterList    
+      ORDER BY name         
+    """)
+    abstract suspend fun getSubmitterListForAssignmentList(
+        groupUid: Long,
+        clazzUid: Long,
+        group: String
+    ): List<AssignmentSubmitterSummary>
+
+
+    @Query("""
+        $ASSIGNMENT_PERMISSION
+        
+        SELECT (CASE WHEN caMarkingType = ${ClazzAssignment.MARKED_BY_COURSE_LEADER}
+                    THEN (SELECT hasPermission FROM AssignmentPermission)
+                    ELSE PeerReviewerAllocation.praUid IS NOT NULL END)
+          FROM ClazzAssignment
+              
+               LEFT JOIN PeerReviewerAllocation
+               ON PeerReviewerAllocation.praToMarkerSubmitterUid = :selectedPersonUid
+               AND PeerReviewerAllocation.praMarkerSubmitterUid = :submitterUid
+               AND praActive
+         WHERE caUid = :caUid 
+    """)
+    abstract suspend fun canMarkAssignment(
+        caUid: Long,
+        clazzUid: Long,
+        loggedInPersonUid: Long,
+        submitterUid: Long,
+        selectedPersonUid: Long): Boolean
+
+
+
+    @Query("""
+         $SUBMITTER_LIST_WITHOUT_ASSIGNMENT_CTE
+        
+         SELECT COUNT(*) 
+          FROM SubmitterList
+    """)
+    abstract suspend fun getSubmitterCountFromAssignment(
+        groupUid: Long,
+        clazzUid: Long,
+        group: String
+    ): Int
 
 
     @Query("""
@@ -222,6 +295,14 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
           WHERE caUid = :uid),-1)
     """)
     abstract suspend fun getGroupUidFromAssignment(uid: Long): Long
+
+    @Query("""
+          SELECT COALESCE((
+           SELECT caMarkingType
+           FROM ClazzAssignment
+          WHERE caUid = :uid),-1)
+    """)
+    abstract suspend fun getMarkingTypeFromAssignment(uid: Long): Int
 
     @Query("""
         SELECT * 

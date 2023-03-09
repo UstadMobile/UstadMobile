@@ -67,6 +67,8 @@ class ViewNameToDestMap: DestinationProvider {
             CourseTerminologyEditView.VIEW_NAME to UstadDestination(R.id.course_terminology_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
                     hideBottomNavigation = true),
+            PeerReviewerAllocationEditView.VIEW_NAME to UstadDestination(R.id.assignment_peer_allocation_edit_dest,
+                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             CourseGroupSetListView.VIEW_NAME to UstadDestination(R.id.course_group_set_list,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             CourseGroupSetEditView.VIEW_NAME to UstadDestination(R.id.course_group_set_edit,
@@ -182,6 +184,7 @@ class ViewNameToDestMap: DestinationProvider {
             ScopedGrantListView.VIEW_NAME to UstadDestination(R.id.scoped_grant_list_dest),
             ScopedGrantDetailView.VIEW_NAME to UstadDestination(R.id.scoped_grant_detail_dest),
             PanicButtonSettingsView.VIEW_NAME to UstadDestination(R.id.panic_button_settings_dest),
+            GrantAppPermissionView.VIEW_NAME to UstadDestination(R.id.grant_app_permission_dest),
     )
 
     override val navControllerViewId: Int

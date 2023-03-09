@@ -1562,6 +1562,24 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     -->
     <string name="hide_app_explanation">Unhide code: %2$s\nIf hide app is enabled, then %1$s will be hidden and replaced with a fake notepad app when the panic button is triggered. You will need to type unhide code above ( %2$s ) into the fake notepad app to unhide %1$s.</string>
 
+    <string name="most_recent">Most Recent</string>
+
+    <string name="comment">Comment</string>
+
+
+    <!--
+    Users can choose to grant permissions to other apps on their device (for example, to use one
+    account to access two apps etc).
+
+    %1$s will be replaced with the name of the app they are granting permission to
+
+    E.g. Grant other app permission.
+    -->
+    <string name="grant_app_permission">Grant %1$s permission</string>
+
+    <string name="this_app_will_receive">This app will receive your profile information and information about your courses</string>
+
+
     <string name="my_profile">My profile</string>
 
     <string name="add_another_account">Add another account</string>

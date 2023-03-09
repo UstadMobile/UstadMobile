@@ -8,22 +8,34 @@ import mui.material.AppBarPosition
 import mui.material.Toolbar
 import mui.material.Typography
 import mui.system.sx
-import react.FC
-import react.Props
-import react.useContext
 import csstype.number
 import mui.material.styles.TypographyVariant.h6
+import react.*
 import react.dom.html.ReactHTML.div
+import web.html.HTMLElement
+
+val DEFAULT_APPBAR_HEIGHT = 64
 
 external interface HeaderProps: Props {
     var appUiState: AppUiState
+
+    var setAppBarHeight: (Int) -> Unit
+
 }
 
 val Header = FC<HeaderProps> { props ->
     var theme by useContext(ThemeContext)
+    val appBarRef = useRef<HTMLElement>(null)
+
+    useEffect(appBarRef.current?.clientHeight){
+        appBarRef.current?.also {
+            props.setAppBarHeight(it.clientHeight)
+        }
+    }
 
     AppBar {
         position = AppBarPosition.fixed
+        ref = appBarRef
         sx {
             gridArea = Area.Header
             zIndex = integer(1_500)

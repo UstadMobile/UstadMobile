@@ -72,7 +72,7 @@ ext {
     ustadVersion = project.version
     ustadVersionCode = 232
 
-    version_door = "0.0.63n3"
+    version_door = "0.0.63n"
     version_retriever = "0.0.1e"
     version_xmlpullparserkmp = '0.0.20'
 
@@ -167,6 +167,7 @@ ext {
     version_android_workmanager = "2.8.0"
     version_androidx_paging = "3.1.1"
     version_androidx_paging_compose = "1.0.0-alpha18"
+    version_android_datastore = "1.0.0"
     version_android_constraint_layout = "2.1.4"
     version_android_flexbox = "3.0.0"
     version_android_espresso = "3.5.1"

@@ -26,8 +26,11 @@ env:
       STUDENTLASTNAME: "Khan"
       GENDER: "Male"
       PASSWORD: "test"
-- back
-- back
+- repeat:
+    while:
+      notVisible: "OVERVIEW"
+    commands:
+      - back
 - tapOn: "OVERVIEW"
 - runFlow:
     file: "../common/add_demo_block_structure.yaml"

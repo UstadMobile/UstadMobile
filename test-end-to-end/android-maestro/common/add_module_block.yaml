@@ -6,6 +6,13 @@ appId: com.toughra.ustadmobile
   # 2) MODULETITLE : provide the title for module block of String type
 
 # add module
+- repeat:
+    while:
+      notVisible: "Add block"
+    commands:
+      - swipe:
+          start: 100,400
+          end: 100,100
 - tapOn: "Add block"
 - tapOn: "Module"
 - tapOn: "Title"

@@ -7,6 +7,7 @@ import com.ustadmobile.mui.common.md
 import com.ustadmobile.mui.common.xs
 import com.ustadmobile.view.components.UstadBlankIcon
 import csstype.*
+import js.core.jso
 import mui.icons.material.AccountCircle
 import mui.icons.material.CalendarToday
 import mui.icons.material.Visibility
@@ -20,12 +21,13 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import react.dom.html.ReactHTML.span
 
 external interface UstadDetailFieldProps: Props {
     /**
      * The string for the value of the property itself
      */
-    var valueText: String
+    var valueText: ReactNode
 
     /**
      * The string for the label e.g. Phone number etc
@@ -145,7 +147,7 @@ val UstadDetailFieldPreview = FC<Props> {
             spacing = responsive(10.px)
 
             UstadDetailField {
-                valueText = currentDateTime
+                valueText = ReactNode(currentDateTime)
                 labelText = "With icon and secondary action"
                 icon = AccountCircle.create()
                 secondaryActionContent = IconButton.create {
@@ -157,26 +159,38 @@ val UstadDetailFieldPreview = FC<Props> {
             }
 
             UstadDetailField {
-                valueText = "Demo value"
+                valueText = ReactNode("Demo value")
                 labelText = "With icon and secondary action"
                 icon = AccountCircle.create()
             }
 
             UstadDetailField {
-                valueText = "Demo value"
+                valueText = ReactNode("Demo value")
                 labelText = "With no icon or secondary action"
             }
 
 
             UstadDetailField {
-                valueText = "Demo value"
+                valueText = ReactNode("Demo value")
                 labelText = "Clickable with icon and secondary action"
                 icon = AccountCircle.create()
                 onClick = {}
             }
 
             UstadDetailField {
-                valueText = useFormattedDate(systemTimeInMillis(), "Asia/Dubai")
+                valueText = span.create {
+                    style = jso {
+                        color = rgba(255, 0, 0, 1.0)
+                    }
+                    child(ReactNode("Span Text"))
+                }
+                labelText = "Simple Text"
+                icon = AccountCircle.create()
+                onClick = {}
+            }
+
+            UstadDetailField {
+                valueText = ReactNode(useFormattedDate(systemTimeInMillis(), "Asia/Dubai"))
                 labelText = "Date"
                 icon = CalendarToday.create()
             }

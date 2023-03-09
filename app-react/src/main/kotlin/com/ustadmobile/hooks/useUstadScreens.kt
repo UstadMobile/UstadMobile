@@ -7,6 +7,7 @@ import com.ustadmobile.entities.UstadScreen
 import com.ustadmobile.entities.UstadScreens
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.*
+import com.ustadmobile.view.components.virtuallist.VirtualListPreview
 import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
 import react.useMemo
 
@@ -109,6 +110,20 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen(ClazzList2View.VIEW_NAME, "Clazz List Preview",
                 ClazzListScreenPreview
             ),
+            UstadScreen("VirtualListPreview", "Virtual List Preview",
+                VirtualListPreview),
+            UstadScreen("UstadAssignmentFileSubmissionHeader",
+                "UstadAssignmentFileSubmissionHeader Preview",
+                UstadAssignmentFileSubmissionHeaderPreview),
+            UstadScreen("UstadCourseAssignmentMarkListItem", "UstadCourseAssignmentMarkListItem Preview",
+                UstadCourseAssignmentMarkListItemPreview),
+            UstadScreen("UstadCommentListItem", "UstadCommentListItem Preview",
+                UstadCommentListItemPreview),
+            UstadScreen("UstadAddCommentListItem", "UstadAddCommentListItem Preview",
+                UstadAddCommentListItemPreview),
+            UstadScreen("UstadAssignmentFileSubmissionListItem",
+                "UstadAssignmentFileSubmissionListItem Preview",
+                UstadAssignmentFileSubmissionListItemPreview),
             UstadScreen(SessionListView.VIEW_NAME, "SessionList Preview",
                 SessionListScreenPreview),
         )
