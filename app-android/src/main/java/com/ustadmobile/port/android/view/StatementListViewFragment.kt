@@ -2,19 +2,43 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material.icons.outlined.Timer
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemStatementSessionDetailListBinding
 import com.ustadmobile.core.controller.StatementListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.StatementListView
+import com.ustadmobile.core.viewmodel.StatementListUiState
+import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.lib.db.entities.StatementWithSessionDetailDisplay
 import com.ustadmobile.lib.db.entities.VerbEntity
+import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import com.ustadmobile.port.android.util.compose.rememberFormattedDuration
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
+import com.ustadmobile.port.android.view.StatementListViewFragment.Companion.VERB_ICON_MAP
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import java.util.*
 
 
 class StatementListViewFragment(): UstadListViewFragment<StatementWithSessionDetailDisplay, StatementWithSessionDetailDisplay>(),
@@ -112,4 +136,196 @@ class StatementListViewFragment(): UstadListViewFragment<StatementWithSessionDet
         }
     }
 
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun StatementListScreen(
+    uiState: StatementListUiState = StatementListUiState(),
+    onClickStatement: (StatementWithSessionDetailDisplay) -> Unit = {},
+) {
+    LazyColumn (
+       modifier = Modifier
+           .fillMaxSize()
+           .defaultScreenPadding()
+    ){
+
+        items(
+            items = uiState.statementList,
+            key = { statement -> statement.statementUid }
+        ){ statement ->
+
+            val  statementUiState = statement.listItemUiState
+
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickStatement(statement)
+                },
+                icon = {
+                    Icon(
+                        painterResource(
+                            id = VERB_ICON_MAP[statement.statementVerbUid.toInt()]
+                                ?: R.drawable.verb_interactive),
+                        contentDescription = null,
+                        modifier = Modifier.size(40.dp)
+                    )
+                },
+                text = {
+                    Text(statementUiState.personVerbTitleText ?: "")
+                },
+                secondaryText = {
+                    SecondaryTextContent(statement)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun SecondaryTextContent(
+    statement: StatementWithSessionDetailDisplay
+){
+
+    val  statementUiState = statement.listItemUiState
+    val  dateTimeFormatter = rememberFormattedDateTime(
+        timeInMillis = statement.timestamp,
+        timeZoneId = TimeZone.getDefault().id
+    )
+
+    val  duration = rememberFormattedDuration(timeInMillis = statement.resultDuration)
+
+    Column {
+
+        if (statementUiState.descriptionVisible){
+            Text(statement.objectDisplay ?: "")
+        }
+
+//        Text(statement.fullStatement ?: "")
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Icon(Icons.Outlined.CalendarToday, contentDescription = "")
+
+            Text(dateTimeFormatter)
+
+            if (statementUiState.resultDurationVisible){
+
+                Box(modifier = Modifier.width(10.dp))
+
+                Icon(Icons.Outlined.Timer, contentDescription = "")
+
+                Text(duration)
+
+            }
+        }
+
+        if (statementUiState.resultScoreMaxVisible){
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Icon(Icons.Default.Check, contentDescription = "")
+
+                Text(stringResource(id = R.string.percentage_score,
+                    (statement.resultScoreScaled * 100))
+                )
+
+                Box(modifier = Modifier.width(10.dp))
+
+                Text(statementUiState.scoreResultsText)
+
+            }
+        }
+    }
+}
+
+@Composable
+@Preview
+fun StatementListScreenPreview() {
+
+    val uiState = StatementListUiState(
+        statementList = listOf(
+            StatementWithSessionDetailDisplay().apply {
+                statementUid = 1
+                verbDisplay = "Completed"
+                objectDisplay = "object Display"
+                resultScoreMax = 90
+                resultScoreScaled = 10F
+                resultScoreRaw = 70
+                resultDuration = 400000L
+                timestamp = 1676432354
+                statementVerbUid = VerbEntity.VERB_COMPLETED_UID
+            },
+            StatementWithSessionDetailDisplay().apply {
+                statementUid = 2
+                verbDisplay = "Progressed"
+                objectDisplay = "object Display"
+                resultScoreMax = 90
+                resultScoreScaled = 10F
+                resultScoreRaw = 70
+                statementVerbUid = VerbEntity.VERB_PROGRESSED_UID
+            },
+            StatementWithSessionDetailDisplay().apply {
+                statementUid = 3
+                verbDisplay = "Attempted"
+                objectDisplay = "object Display"
+                resultScoreMax = 90
+                resultScoreScaled = 10F
+                resultScoreRaw = 70
+                statementVerbUid = VerbEntity.VERB_ATTEMPTED_UID
+            },
+            StatementWithSessionDetailDisplay().apply {
+                statementUid = 4
+                verbDisplay = "Interacted"
+                objectDisplay = "object Display"
+                resultScoreMax = 90
+                resultScoreScaled = 10F
+                resultScoreRaw = 70
+                statementVerbUid = VerbEntity.VERB_INTERACTED_UID
+            },
+            StatementWithSessionDetailDisplay().apply {
+                statementUid = 5
+                verbDisplay = "Answered"
+                objectDisplay = "object Display"
+                resultScoreMax = 90
+                resultScoreScaled = 10F
+                resultScoreRaw = 70
+                statementVerbUid = VerbEntity.VERB_ANSWERED_UID
+            },
+            StatementWithSessionDetailDisplay().apply {
+                statementUid = 6
+                verbDisplay = "Satisfied"
+                objectDisplay = "object Display"
+                resultScoreMax = 90
+                resultScoreScaled = 10F
+                resultScoreRaw = 70
+                statementVerbUid = VerbEntity.VERB_SATISFIED_UID
+            },
+            StatementWithSessionDetailDisplay().apply {
+                statementUid = 7
+                verbDisplay = "Passed"
+                objectDisplay = "object Display"
+                resultScoreMax = 90
+                resultScoreScaled = 10F
+                resultScoreRaw = 70
+                statementVerbUid = VerbEntity.VERB_PASSED_UID
+            },
+            StatementWithSessionDetailDisplay().apply {
+                statementUid = 8
+                verbDisplay = "Failed"
+                objectDisplay = "object Display"
+                resultScoreMax = 90
+                resultScoreScaled = 10F
+                resultScoreRaw = 70
+                statementVerbUid = VerbEntity.VERB_FAILED_UID
+            }
+        )
+    )
+    MdcTheme {
+        StatementListScreen(uiState)
+    }
 }
