@@ -210,7 +210,7 @@ class EpubContentPresenter(context: Any,
                 db.contentEntryDao.findTitleByUidAsync(contentEntryUid)
             }
 
-            epubContentView.runOnUiThread(Runnable {
+            presenterScope.launch {
                 epubContentView.containerTitle = containerTitle
                 epubContentView.spineUrls = linearSpineUrls.toList()
                 if (opfCoverImageItem != null) {
@@ -223,7 +223,7 @@ class EpubContentPresenter(context: Any,
                     epubContentView.authorName = authorNames
                 }
 
-            })
+            }
 
             val navXhtmlUrl = opf.navItem?.href?.let {
                 ocf?.rootFiles?.get(0)?.fullPath?.let { path -> UMFileUtil.joinPaths(mountedPath, path)
@@ -247,14 +247,14 @@ class EpubContentPresenter(context: Any,
                 val navParser = xppFactoryNsAware.newPullParser()
                 navParser.setInputString(navContent)
                 navDocument.load(navParser)
-                epubContentView.runOnUiThread(Runnable {
+                presenterScope.launch {
                     epubContentView.tableOfContents = navDocument.toc ?: navDocument.ncxNavMap
-                })
+                }
             }
 
-            view.runOnUiThread(Runnable {
+            presenterScope.launch {
                 view.progressVisible = false
-            })
+            }
         } catch (e: Exception) {
             if(e !is CancellationException) {
                 if(isStarted){
