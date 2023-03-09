@@ -62,7 +62,6 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.websocket.*
 import org.kodein.di.ktor.di
 import java.util.*
-import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.lib.rest.logging.LogbackAntiLog
 
 const val TAG_UPLOAD_DIR = 10
@@ -100,6 +99,7 @@ private fun Endpoint.identifier(
     sanitizeDbNameFromUrl(url)
 }
 
+@Suppress("unused") // This is used as the KTOR server main module via application.conf
 fun Application.umRestApplication(
     dbModeOverride: String? = null,
     singletonDbName: String = "UmAppDatabase"
@@ -231,12 +231,6 @@ fun Application.umRestApplication(
                 .addCallback(InsertDefaultSiteCallback())
                 .addMigrations(*migrationList().toTypedArray())
                 .build()
-
-            if(appConfig.propertyOrNull("ktor.database.cleardb")?.getString()?.toBoolean() == true) {
-                Napier.i("Clearing database ${db} as ktor.database.cleardb is set")
-                db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
-                db.insertDefaultSite()
-            }
 
             db.addIncomingReplicationListener(PermissionManagementIncomingReplicationListener(db))
 
@@ -468,10 +462,6 @@ fun Application.umRestApplication(
         ContentUploadRoute()
 
         GetAppRoute()
-
-        if (devMode) {
-            DevModeRoute()
-        }
 
         static("umapp") {
             resources("umapp")

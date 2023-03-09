@@ -11,6 +11,7 @@ import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.ext.captureLastEntityValue
+import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.util.mockLifecycleOwner
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
@@ -25,6 +26,7 @@ import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -65,12 +67,14 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
 
     private lateinit var accountManager: UstadAccountManager
 
+
+
+    val serverUrl = "https://dummysite.ustadmobile.app/"
+
     @Before
     fun setup() {
         mockView = mock { }
         mockLifecycleOwner = mockLifecycleOwner(DoorState.RESUMED)
-
-        val serverUrl = "https://dummysite.ustadmobile.app/"
 
         accountManager = mock{
             on { activeEndpoint }.thenReturn(Endpoint(serverUrl))
@@ -118,7 +122,13 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
             }
         }
 
-        createPersonAndSubmitStatement(true, loggedInPersonUid)
+        val person = createPersonAndSubmitStatement(true, loggedInPersonUid)
+
+        runBlocking {
+            repo.grantScopedPermission(person,
+                Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT,
+                Clazz.TABLE_ID, testClazz.clazzUid)
+        }
 
     }
 
@@ -147,7 +157,7 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
 
         val agent = AgentEntity().apply {
             agentPersonUid = studentId
-            agentHomePage = accountManager.activeAccount.endpointUrl
+            agentHomePage = serverUrl
             agentAccountName = "testuser"
             agentUid = repo.agentDao.insert(this)
         }
@@ -250,13 +260,13 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
 
         whenever(mockView.entity).thenReturn(entity)
 
-        presenter.onClickSubmitGrade(5f)
+        presenter.onClickSubmitGrade(5f, "")
 
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
         verify(mockView, timeout(1000).atLeastOnce()).submissionStatus = eq(CourseAssignmentSubmission.MARKED)
         verify(mockView, timeout(1000).atLeastOnce()).submissionScore = argThat {
-            this.camMark == 5f
+            this.averageScore == 5f
         }
 
         val mark = repo.courseAssignmentMarkDao.getMarkOfAssignmentForStudent(testEntity.caUid, 1)
@@ -300,13 +310,13 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
 
         whenever(mockView.entity).thenReturn(entity)
 
-        presenter.onClickSubmitGrade(5f)
+        presenter.onClickSubmitGrade(5f, "")
 
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
         verify(mockView, timeout(1000).atLeastOnce()).submissionStatus = eq(CourseAssignmentSubmission.MARKED)
         verify(mockView, timeout(1000).atLeastOnce()).submissionScore = argThat {
-            this.camMark == 4f
+            this.averageScore == 4f
         }
 
         val mark = repo.courseAssignmentMarkDao.getMarkOfAssignmentForStudent(testEntity.caUid, 1)
@@ -346,7 +356,7 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
         verify(mockView, timeout(1000).times(2)).submissionScore = eq(null)
         verify(mockView, timeout(1000).times(2)).submissionStatus = eq(CourseAssignmentSubmission.SUBMITTED)
 
-        presenter.onClickSubmitGrade(-1f)
+        presenter.onClickSubmitGrade(-1f, "")
 
         val systemImpl: UstadMobileSystemImpl by di.instance()
         verify(mockView, timeout(1000)).submitMarkError = eq(
@@ -386,11 +396,11 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
         val noMark = repo.courseAssignmentMarkDao.getMarkOfAssignmentForStudent(testEntity.caUid, 1)
         assertNull(noMark)
 
-        presenter.onClickSubmitGradeAndMarkNext(5f)
+        presenter.onClickSubmitGradeAndMarkNext(5f,"")
 
         verify(mockView, timeout(1000).atLeastOnce()).submissionStatus = eq(CourseAssignmentSubmission.MARKED)
         verify(mockView, timeout(1000).atLeastOnce()).submissionScore = argThat {
-            this.camMark == 5f
+            this.averageScore == 5f
         }
 
         val mark = repo.courseAssignmentMarkDao.getMarkOfAssignmentForStudent(testEntity.caUid, 1)
@@ -493,6 +503,178 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
            any(),
             eq("video/mp4"),
             anyOrNull(),
+        )
+
+    }
+
+    @Test
+    fun givenAssignmentWithPeerMarkingSelected_whenLoggedInAsTeacher_thenDontShowSubmitButton(){
+        testEntity.caMarkingType = ClazzAssignment.MARKED_BY_PEERS
+        repo.clazzAssignmentDao.update(testEntity)
+
+        val student = createPersonAndSubmitStatement(false , 1)
+
+        val presenterArgs = mapOf(
+            UstadView.ARG_SUBMITER_UID to 1.toString(),
+            ARG_CLAZZ_ASSIGNMENT_UID to testEntity.caUid.toString(),
+            UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString()
+        )
+
+        val presenter = ClazzAssignmentDetailStudentProgressPresenter(context, presenterArgs, mockView,
+            di, mockLifecycleOwner)
+
+        presenter.onCreate(null)
+
+        val entity = mockView.captureLastEntityValue()
+
+        verify(mockView, timeout(1000).times(2)).markNextStudentVisible = eq(false)
+        verify(mockView, timeout(1000).times(2)).submitButtonVisible = eq(false)
+        verify(mockView, timeout(1000).times(2)).submissionScore = eq(null)
+        verify(mockView, timeout(1000).times(2)).submissionStatus = eq(CourseAssignmentSubmission.SUBMITTED)
+
+
+    }
+
+    @Test
+    fun givenAssignmentWithPeerMarkingSelected_whenLoggedInAsStudentWithoutPeerAllocation_thenDontShowSubmitButton(){
+
+        whenever(accountManager.activeAccount).thenReturn(UmAccount(100, "", "", serverUrl))
+
+        testEntity.caMarkingType = ClazzAssignment.MARKED_BY_PEERS
+        repo.clazzAssignmentDao.update(testEntity)
+
+        val student = createPersonAndSubmitStatement(false , 1)
+
+        val presenterArgs = mapOf(
+            UstadView.ARG_SUBMITER_UID to 1.toString(),
+            ARG_CLAZZ_ASSIGNMENT_UID to testEntity.caUid.toString(),
+            UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString()
+        )
+
+        val presenter = ClazzAssignmentDetailStudentProgressPresenter(context, presenterArgs, mockView,
+            di, mockLifecycleOwner)
+
+        presenter.onCreate(null)
+
+        val entity = mockView.captureLastEntityValue()
+
+        verify(mockView, timeout(1000).times(2)).markNextStudentVisible = eq(false)
+        verify(mockView, timeout(1000).times(2)).submitButtonVisible = eq(false)
+        verify(mockView, timeout(1000).times(2)).submissionScore = eq(null)
+        verify(mockView, timeout(1000).times(2)).submissionStatus = eq(CourseAssignmentSubmission.SUBMITTED)
+
+    }
+
+    @Test
+    fun givenAssignmentWithPeerMarkingSelected_whenLoggedInAsStudentWithPeerAllocation_thenShowSubmitButton(){
+        whenever(accountManager.activeAccount).thenReturn(UmAccount(100, "", "", serverUrl))
+
+        testEntity.caMarkingType = ClazzAssignment.MARKED_BY_PEERS
+        repo.clazzAssignmentDao.update(testEntity)
+
+        val student = createPersonAndSubmitStatement(false , 1)
+
+        PeerReviewerAllocation().apply {
+            praAssignmentUid = testEntity.caUid
+            praMarkerSubmitterUid = 100
+            praToMarkerSubmitterUid = student.personUid
+            praUid = repo.peerReviewerAllocationDao.insert(this)
+        }
+
+        val presenterArgs = mapOf(
+            UstadView.ARG_SUBMITER_UID to 1.toString(),
+            ARG_CLAZZ_ASSIGNMENT_UID to testEntity.caUid.toString(),
+            UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString()
+        )
+
+        val presenter = ClazzAssignmentDetailStudentProgressPresenter(context, presenterArgs, mockView,
+            di, mockLifecycleOwner)
+
+        presenter.onCreate(null)
+
+        val entity = mockView.captureLastEntityValue()
+
+        verify(mockView, timeout(1000).times(2)).markNextStudentVisible = eq(false)
+        verify(mockView, timeout(1000).times(2)).submitButtonVisible = eq(true)
+        verify(mockView, timeout(1000).times(2)).submissionScore = eq(null)
+        verify(mockView, timeout(1000).times(2)).submissionStatus = eq(CourseAssignmentSubmission.SUBMITTED)
+
+    }
+
+
+    @Test
+    fun givenAssignmentWithPeerMarkingAndSubmissionFromStudentWithOtherStudentsToMark_whenPointsSubmittedWithinRange_thenCreateStatementAndMoveToNextStudent(){
+        val student = createPersonAndSubmitStatement(false , 1)
+        val marker = createPersonAndSubmitStatement(false, 2)
+        val nextStudent = createPersonAndSubmitStatement(false, 3)
+
+        whenever(accountManager.activeAccount).thenReturn(UmAccount(marker.personUid, "", "", serverUrl))
+
+        PeerReviewerAllocation().apply {
+            praAssignmentUid = testEntity.caUid
+            praToMarkerSubmitterUid = student.personUid
+            praMarkerSubmitterUid = marker.personUid
+            praUid = repo.peerReviewerAllocationDao.insert(this)
+        }
+
+        PeerReviewerAllocation().apply {
+            praAssignmentUid = testEntity.caUid
+            praToMarkerSubmitterUid = nextStudent.personUid
+            praMarkerSubmitterUid = marker.personUid
+            praUid = repo.peerReviewerAllocationDao.insert(this)
+        }
+
+        testEntity.caMarkingType = ClazzAssignment.MARKED_BY_PEERS
+        repo.clazzAssignmentDao.update(testEntity)
+
+
+        val presenterArgs = mapOf(
+            UstadView.ARG_SUBMITER_UID to student.personUid.toString(),
+            ARG_CLAZZ_ASSIGNMENT_UID to testEntity.caUid.toString(),
+            UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString()
+        )
+
+        val presenter = ClazzAssignmentDetailStudentProgressPresenter(context, presenterArgs, mockView,
+            di, mockLifecycleOwner)
+
+        presenter.onCreate(null)
+
+        val entity = mockView.captureLastEntityValue()
+
+        val systemImpl: UstadMobileSystemImpl by di.instance()
+
+        verify(mockView, timeout(1000).times(2)).markNextStudentVisible = eq(true)
+        verify(mockView, timeout(1000).times(2)).submitButtonVisible = eq(true)
+        verify(mockView, timeout(1000).times(2)).submissionScore = eq(null)
+        verify(mockView, timeout(1000).times(2)).submissionStatus = eq(CourseAssignmentSubmission.SUBMITTED)
+
+        whenever(mockView.entity).thenReturn(entity)
+
+        val noMark = repo.courseAssignmentMarkDao.getMarkOfAssignmentForStudent(testEntity.caUid, student.personUid)
+        assertNull(noMark)
+
+        presenter.onClickSubmitGradeAndMarkNext(5f,"")
+
+        verify(mockView, timeout(1000).atLeastOnce()).submissionStatus = eq(CourseAssignmentSubmission.MARKED)
+        verify(mockView, timeout(1000).atLeastOnce()).submissionScore = argThat {
+            this.averageScore == 5f
+        }
+
+        val mark = repo.courseAssignmentMarkDao.getMarkOfAssignmentForStudent(testEntity.caUid, student.personUid)
+        assertNotNull(mark)
+        assertEquals(5f, mark.camMark, "Mark matches")
+
+        /*val scoreStatement = repo.statementDao.findScoreStatementForStudent(1)
+        assertNotNull(scoreStatement)
+        assertEquals(5L, scoreStatement.resultScoreRaw, "score statement matches mark")
+*/
+
+        verify(mockView, timeout(1000)).showSnackBar(eq(systemImpl.getString(MessageID.saved, context)), any(), any())
+        verify(systemImpl, timeout(1000)).go(eq(ClazzAssignmentDetailStudentProgressView.VIEW_NAME),
+            eq(mapOf(ARG_SUBMITER_UID to nextStudent.personUid.toString(),
+                ARG_CLAZZ_ASSIGNMENT_UID to testEntity.caUid.toString(),
+                UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString())), eq(context),
+            any()
         )
 
     }

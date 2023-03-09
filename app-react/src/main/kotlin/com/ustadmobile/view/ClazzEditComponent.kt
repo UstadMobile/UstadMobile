@@ -26,7 +26,7 @@ import io.github.aakira.napier.Napier
 import kotlinx.browser.document
 import mui.material.FormControlVariant
 import org.w3c.dom.Element
-import org.w3c.dom.events.Event
+import web.events.Event
 import react.RBuilder
 import react.setState
 import styled.css

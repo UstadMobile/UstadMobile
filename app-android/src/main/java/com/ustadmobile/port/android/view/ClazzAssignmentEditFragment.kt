@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.CompoundButton
 import androidx.core.widget.doAfterTextChanged
 import com.toughra.ustadmobile.R
@@ -13,12 +14,14 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentEditView
+import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.port.android.view.binding.isSet
 
 
-class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), ClazzAssignmentEditView {
+class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), ClazzAssignmentEditView,
+    DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption>  {
 
     private var mBinding: FragmentClazzAssignmentEditBinding? = null
 
@@ -46,8 +49,14 @@ class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), C
             rootView = it.root
             it.fileRequiredListener = onFileRequiredChanged
             it.textRequiredListener = onTextRequiredChanged
+            it.markingTypeSelectionListener = this
             it.groupSetEnabled = true
+            it.markingTypeEnabled = true
             it.caEditCommonFields.caDeadlineDateTextinput.setEndIconOnClickListener(clearDeadlineListener)
+            // onClick on viewBinding caused problems so set here on the fragment
+            it.caEditAssignReviewersButton.setOnClickListener {
+                mPresenter?.handleAssignReviewersClicked()
+            }
             it.caEditCommonFields.caDeadlineDate.doAfterTextChanged{ editable ->
                 if(editable.isNullOrEmpty()){
                     return@doAfterTextChanged
@@ -90,15 +99,17 @@ class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), C
         set(value) {
             field = value
             mBinding?.blockWithAssignment = value
-            mBinding?.gracePeriodVisibility = if(deadlineDate.isSet){
-                View.VISIBLE
-            }else{
-                View.GONE
-            }
+
+            mBinding?.gracePeriodVisibility = if(deadlineDate.isSet)
+                View.VISIBLE else View.GONE
+
             mBinding?.fileSubmissionVisibility = if(value?.assignment?.caRequireFileSubmission == true)
                 View.VISIBLE else View.GONE
 
             mBinding?.textSubmissionVisibility = if(value?.assignment?.caRequireTextSubmission == true)
+                View.VISIBLE else View.GONE
+
+            mBinding?.peersVisibility = if(value?.assignment?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS)
                 View.VISIBLE else View.GONE
         }
 
@@ -190,6 +201,12 @@ class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), C
             mBinding?.groupSet = value
         }
 
+    override var reviewerCountError: String? = null
+        set(value) {
+            field = value
+            mBinding?.reviewerCountError = value
+        }
+
     override var submissionPolicyOptions: List<ClazzAssignmentEditPresenter.SubmissionPolicyOptionsMessageIdOption>? = null
         get() = field
         set(value) {
@@ -235,12 +252,31 @@ class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), C
             mBinding?.groupSetEnabled = value
         }
 
+    override var markingTypeEnabled: Boolean = true
+        get() = field
+        set(value) {
+            if(field == value){
+                return
+            }
+            field = value
+            mBinding?.markingTypeEnabled = value
+        }
+
     private val onFileRequiredChanged: CompoundButton.OnCheckedChangeListener = CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
         mBinding?.fileSubmissionVisibility = if(isChecked) View.VISIBLE else View.GONE
     }
 
     private val onTextRequiredChanged: CompoundButton.OnCheckedChangeListener = CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
         mBinding?.textSubmissionVisibility = if(isChecked) View.VISIBLE else View.GONE
+    }
+
+    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
+        mBinding?.peersVisibility = if(selectedOption.optionId == ClazzAssignment.MARKED_BY_PEERS)
+            View.VISIBLE else View.GONE
+    }
+
+    override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
+        
     }
 
 }

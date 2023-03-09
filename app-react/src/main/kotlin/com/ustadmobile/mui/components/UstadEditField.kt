@@ -11,7 +11,7 @@ import com.ustadmobile.mui.common.*
 import com.ustadmobile.util.ext.toMillisInOtherTimeZone
 import com.ustadmobile.view.components.UstadSwitchField
 import kotlinx.datetime.TimeZone
-import kotlinx.js.jso
+import js.core.jso
 import mui.icons.material.Visibility
 import mui.icons.material.VisibilityOff
 import mui.material.*
@@ -19,8 +19,8 @@ import mui.system.responsive
 import muix.pickers.*
 import react.*
 import react.dom.aria.ariaLabel
-import react.dom.html.InputMode
-import react.dom.html.InputType
+import web.html.InputMode
+import web.html.InputType
 import react.dom.onChange
 
 external interface UstadEditFieldProps: PropsWithChildren {

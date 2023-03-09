@@ -27,6 +27,8 @@ interface ClazzAssignmentEditView: UstadEditView<CourseBlockWithEntity> {
 
     var groupSet: CourseGroupSet?
 
+    var reviewerCountError: String?
+
     var submissionPolicyOptions: List<ClazzAssignmentEditPresenter.SubmissionPolicyOptionsMessageIdOption>?
 
     var fileTypeOptions: List<ClazzAssignmentEditPresenter.FileTypeOptionsMessageIdOption>?
@@ -38,6 +40,8 @@ interface ClazzAssignmentEditView: UstadEditView<CourseBlockWithEntity> {
     var markingTypeOptions: List<IdOption>?
 
     var groupSetEnabled: Boolean
+
+    var markingTypeEnabled: Boolean
 
     companion object {
 

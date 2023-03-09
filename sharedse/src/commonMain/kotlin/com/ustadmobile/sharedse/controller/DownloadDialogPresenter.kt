@@ -94,11 +94,11 @@ class DownloadDialogPresenter(
             val wifiOnly = !appDatabase.contentEntryDao.isMeteredAllowedForEntry(contentEntryUid)
             view.setDownloadOverWifiOnly(wifiOnly)
 
-            view.runOnUiThread(Runnable {
+            presenterScope.launch {
                 // atomic doesn't like globalScope
                 wifiOnlyChecked.value = wifiOnly
                 contentJobItemStatusLiveData.observe(lifecycleOwner, this@DownloadDialogPresenter)
-            })
+            }
 
             updateWarningMessage(status)
         }
@@ -156,13 +156,13 @@ class DownloadDialogPresenter(
                     jobSizeTotals.value = sizeTotals
                     updateStatusMessage(sizeTotals)
                 }catch(e: Exception) {
-                    view.runOnUiThread(Runnable {
+                    presenterScope.launch {
                         view.setCalculatingViewVisible(false)
                         view.setWarningTextVisible(true)
                         view.setWifiOnlyOptionVisible(false)
                         view.setWarningText(impl.getString(MessageID.repo_loading_status_failed_noconnection,
                                 context))
-                    })
+                    }
 
                 }finally {
                     jobSizeLoading.value = false
@@ -177,12 +177,12 @@ class DownloadDialogPresenter(
     private fun updateStatusMessage(downloadTotals: DownloadJobSizeInfo?) {
         val currentStatuMessage = statusMessage
         if(downloadTotals != null && currentStatuMessage != null){
-            view.runOnUiThread(Runnable {
+            presenterScope.launch {
                 updateWarningMessage(contentJobItemStatusLiveData.getValue() ?: 0)
                 view.setCalculatingViewVisible(false)
                 view.setStatusText(currentStatuMessage,
                     downloadTotals.numEntries, UMFileUtil.formatFileSize(downloadTotals.totalSize))
-            })
+            }
         }
     }
 
@@ -309,7 +309,9 @@ class DownloadDialogPresenter(
     }
 
     private fun dismissDialog() {
-        view.runOnUiThread(Runnable { view.dismissDialog() })
+        presenterScope.launch {
+            view.dismissDialog()
+        }
     }
 
     fun handleClickWiFiOnlyOption(wifiOnly: Boolean) {

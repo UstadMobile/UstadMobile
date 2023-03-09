@@ -13,7 +13,7 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.singleton
 import react.*
-import react.router.dom.useSearchParams
+import react.router.useLocation
 
 /**
  * Use a ViewModel via useEffect and useState. The ViewModel will be cleared when the component is
@@ -40,15 +40,14 @@ fun <T:ViewModel> useViewModel(
     }
 
     var firstRun by useState { true }
-
-    val searchParams by useSearchParams()
+    val searchStr = useLocation().search
 
     var viewModel: T by useState {
         console.log("Creating ViewModel")
         block(di, SavedStateHandle2(window.history))
     }
 
-    useEffect(dependencies = arrayOf(searchParams)){
+    useEffect(searchStr){
         if(!firstRun) {
             viewModel = block(di, SavedStateHandle2(window.history))
             console.log("Recreating ViewModel")

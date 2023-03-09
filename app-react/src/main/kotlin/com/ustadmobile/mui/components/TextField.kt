@@ -9,7 +9,7 @@ import mui.material.TextField
 import mui.material.TextFieldProps
 import react.RBuilder
 import react.ReactNode
-import react.dom.html.InputType
+import web.html.InputType
 import react.dom.onChange
 import styled.StyledElementBuilder
 import styled.StyledHandler

@@ -3,7 +3,7 @@ package com.ustadmobile.mui.components
 import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.*
 import mui.material.styles.TypographyVariant
-import org.w3c.dom.events.Event
+import web.events.Event
 import react.RBuilder
 import styled.StyledHandler
 

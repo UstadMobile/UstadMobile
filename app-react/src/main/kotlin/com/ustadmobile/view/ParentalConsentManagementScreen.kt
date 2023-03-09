@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadMessageIdDropDownField
 import csstype.px
-import kotlinx.js.jso
+import js.core.jso
 import mui.material.*
 import mui.material.styles.TypographyVariant
 import mui.system.Stack

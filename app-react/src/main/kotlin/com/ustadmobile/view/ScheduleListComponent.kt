@@ -8,7 +8,7 @@ import com.ustadmobile.util.Util
 import com.ustadmobile.util.ext.formattedInHoursAndMinutes
 import com.ustadmobile.view.ext.renderListItemWithTitleDescriptionAndRightAction
 import com.ustadmobile.view.ext.umGridContainer
-import org.w3c.dom.events.Event
+import web.events.Event
 import react.RBuilder
 import kotlin.js.Date
 

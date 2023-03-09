@@ -22,7 +22,7 @@ import react.Props
 import react.ReactNode
 import react.create
 import react.dom.aria.ariaLabel
-import react.dom.html.InputMode
+import web.html.InputMode
 
 external interface ReportFilterEditScreenProps : Props {
 
