@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.ScopedGrantAndName
 import com.ustadmobile.view.ext.renderItemWithLeftIconTitleDescriptionAndIconBtnOnRight
 import com.ustadmobile.view.ext.renderListItemWithLeftIconTitleAndDescription
 import com.ustadmobile.view.ext.umGridContainer
-import org.w3c.dom.events.Event
+import web.events.Event
 import react.RBuilder
 
 

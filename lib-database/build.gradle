@@ -52,6 +52,7 @@ android {
             consumerProguardFiles 'proguard-rules.pro'
         }
     }
+    namespace 'com.ustadmobile.core.db'
 }
 
 
@@ -77,7 +78,6 @@ kotlin {
             testTask {
                 useKarma {
                     useChromeHeadless() //change to useChrome to run the actual browser
-                    webpackConfig.cssSupport.enabled = true
                 }
             }
         }
@@ -112,6 +112,7 @@ kotlin {
 
             dependencies {
                 implementation "androidx.room:room-runtime:$version_android_room"
+                implementation "androidx.room:room-paging:$version_android_room"
                 implementation "androidx.room:room-ktx:$version_android_room"
                 implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
                 implementation "androidx.paging:paging-runtime:$version_androidx_paging"

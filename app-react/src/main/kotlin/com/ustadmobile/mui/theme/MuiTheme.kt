@@ -2,7 +2,7 @@ package com.ustadmobile.mui.theme
 
 import Breakpoints
 import csstype.ZIndex
-import kotlinx.js.jso
+import js.core.jso
 import react.Props
 
 external interface ShapeOptions {

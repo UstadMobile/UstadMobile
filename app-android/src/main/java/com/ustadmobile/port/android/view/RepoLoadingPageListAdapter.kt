@@ -12,7 +12,7 @@ interface FistItemLoadedListener{
     fun onFirstItemLoaded()
 }
 
-abstract class RepoLoadingPageListAdapter<T, VH : RecyclerView.ViewHolder>(itemCallback: DiffUtil.ItemCallback<T>): PagedListAdapter<T, VH>(itemCallback){
+abstract class RepoLoadingPageListAdapter<T : Any, VH : RecyclerView.ViewHolder>(itemCallback: DiffUtil.ItemCallback<T>): PagedListAdapter<T, VH>(itemCallback){
 
     var firstItemLoaded: Boolean = false
 

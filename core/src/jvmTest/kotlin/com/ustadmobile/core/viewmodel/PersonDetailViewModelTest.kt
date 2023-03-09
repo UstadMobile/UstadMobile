@@ -29,7 +29,7 @@ class PersonDetailViewModelTest {
 
     @Test
     fun givenPersonDetails_whenPersonUsernameIsNullAndCantManageAccount_thenCreateAccountShouldBeHidden() {
-        testViewModel<PersonDetailViewModel>(timeOut = 5000000) {
+        testViewModel<PersonDetailViewModel>() {
             setActiveUser(endpoint)
             val db: UmAppDatabase = di.direct.on(endpoint).instance(tag = DoorTag.TAG_DB)
 

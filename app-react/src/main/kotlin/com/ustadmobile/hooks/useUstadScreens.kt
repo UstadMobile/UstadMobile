@@ -7,6 +7,7 @@ import com.ustadmobile.entities.UstadScreen
 import com.ustadmobile.entities.UstadScreens
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.*
+import com.ustadmobile.view.components.virtuallist.VirtualListPreview
 import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
 import react.useMemo
 
@@ -101,6 +102,28 @@ fun useUstadScreens(): UstadScreens {
                 JoinWithCodeScreenPreview),
             UstadScreen(ClazzLogListAttendanceView.VIEW_NAME, "ClazzLogListAttendance Preview",
                 ClazzLogListAttendanceScreenPreview),
+            UstadScreen(ContentEntryList2View.VIEW_NAME, "ContentEntryList Preview",
+                ContentEntryListScreenPreview),
+            UstadScreen(AccountListView.VIEW_NAME, "AccountList Preview", AccountListScreenPreview),
+            UstadScreen(ClazzMemberListView.VIEW_NAME, "ClazzMemberList Preview",
+                ClazzMemberListScreenPreview),
+            UstadScreen(ClazzList2View.VIEW_NAME, "Clazz List Preview",
+                ClazzListScreenPreview
+            ),
+            UstadScreen("VirtualListPreview", "Virtual List Preview",
+                VirtualListPreview),
+            UstadScreen("UstadAssignmentFileSubmissionHeader",
+                "UstadAssignmentFileSubmissionHeader Preview",
+                UstadAssignmentFileSubmissionHeaderPreview),
+            UstadScreen("UstadCourseAssignmentMarkListItem", "UstadCourseAssignmentMarkListItem Preview",
+                UstadCourseAssignmentMarkListItemPreview),
+            UstadScreen("UstadCommentListItem", "UstadCommentListItem Preview",
+                UstadCommentListItemPreview),
+            UstadScreen("UstadAddCommentListItem", "UstadAddCommentListItem Preview",
+                UstadAddCommentListItemPreview),
+            UstadScreen("UstadAssignmentFileSubmissionListItem",
+                "UstadAssignmentFileSubmissionListItem Preview",
+                UstadAssignmentFileSubmissionListItemPreview),
             UstadScreen(ReportEditView.VIEW_NAME,
                 "Report Edit Preview",
                 ReportEditScreenPreview),

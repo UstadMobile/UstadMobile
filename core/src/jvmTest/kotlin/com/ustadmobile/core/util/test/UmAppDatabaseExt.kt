@@ -13,14 +13,14 @@ suspend fun UmAppDatabase.waitUntil(timeout: Long, tableNames: List<String>, che
             completableDeferred.complete(true)
         }
     }
-    getInvalidationTracker().addObserver(invalidationObserver)
+    invalidationTracker.addObserver(invalidationObserver)
     if(checker())
         completableDeferred.complete(true)
 
     try {
         withTimeout(timeout) { completableDeferred.await() }
     }finally {
-        getInvalidationTracker().removeObserver(invalidationObserver)
+        invalidationTracker.removeObserver(invalidationObserver)
     }
 
 }
@@ -37,7 +37,7 @@ private suspend fun UmAppDatabase.waitUntilWithWaitFn(
             completableDeferred.complete(true)
         }
     }
-    getInvalidationTracker().addObserver(invalidationObserver)
+    invalidationTracker.addObserver(invalidationObserver)
 
     if(checker())
         completableDeferred.complete(true)
@@ -47,7 +47,7 @@ private suspend fun UmAppDatabase.waitUntilWithWaitFn(
             completableDeferred.await()
         }
     }finally {
-        getInvalidationTracker().removeObserver(invalidationObserver)
+        invalidationTracker.removeObserver(invalidationObserver)
     }
 }
 suspend fun UmAppDatabase.waitUntilAsyncOrTimeout(

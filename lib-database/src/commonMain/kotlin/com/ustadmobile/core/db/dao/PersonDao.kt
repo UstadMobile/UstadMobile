@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.dao.PersonDaoCommon.SQL_SELECT_LIST_WITH_PERMISSI
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Person.Companion.FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
 import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
@@ -165,6 +166,9 @@ expect abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT Person.* FROM PERSON Where Person.username = :username")
     abstract fun findByUsername(username: String?): Person?
 
+    @Query("SELECT Person.* FROM PERSON Where Person.username = :username")
+    abstract suspend fun findByUsernameAsync(username: String): Person?
+
     @Query("""
         SELECT Person.*
           FROM Person
@@ -216,7 +220,7 @@ expect abstract class PersonDao : BaseDao<Person> {
     ): List<Person>
 
     @Query(SQL_SELECT_LIST_WITH_PERMISSION)
-    abstract fun findPersonsWithPermissionAsFlow(
+    abstract fun findPersonsWithPermissionAsPagingSource(
         timestamp: Long,
         excludeClazz: Long,
         excludeSchool: Long,
@@ -224,7 +228,7 @@ expect abstract class PersonDao : BaseDao<Person> {
         accountPersonUid: Long,
         sortOrder: Int,
         searchText: String? = "%"
-    ): Flow<List<Person>>
+    ): PagingSource<Int, PersonWithDisplayDetails>
 
     @Query("""
         SELECT Person.*, PersonParentJoin.* 

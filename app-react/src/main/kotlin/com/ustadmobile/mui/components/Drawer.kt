@@ -3,7 +3,7 @@ package com.ustadmobile.mui.components
 import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import csstype.TransitionDuration
 import mui.material.*
-import org.w3c.dom.events.Event
+import web.events.Event
 import react.RBuilder
 import styled.StyledHandler
 

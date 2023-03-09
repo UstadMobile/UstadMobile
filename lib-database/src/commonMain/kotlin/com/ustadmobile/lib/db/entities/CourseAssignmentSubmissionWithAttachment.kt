@@ -10,3 +10,12 @@ class CourseAssignmentSubmissionWithAttachment : CourseAssignmentSubmission() {
     var attachment: CourseAssignmentSubmissionAttachment? = null
 
 }
+
+val CourseAssignmentSubmissionWithAttachment.displayTitle: String
+    get() {
+        if(casType == CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT) {
+            return casText ?: ""
+        }else {
+            return attachment?.casaFileName ?: ""
+        }
+    }

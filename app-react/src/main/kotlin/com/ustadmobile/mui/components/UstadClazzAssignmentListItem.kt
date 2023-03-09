@@ -22,8 +22,6 @@ import react.create
 
 external interface UstadClazzAssignmentListItemProps: Props {
 
-    var assignment: ClazzAssignmentWithMetrics
-
     var courseBlock: CourseBlockWithCompleteEntity
 
     var onClickAssignment: (ClazzAssignmentWithMetrics?) -> Unit
@@ -33,9 +31,11 @@ external interface UstadClazzAssignmentListItemProps: Props {
 
 val UstadClazzAssignmentListItem = FC<UstadClazzAssignmentListItemProps> { props ->
 
+    val assignment = props.courseBlock.assignment
+
     ListItem{
         ListItemButton{
-            onClick = { props.onClickAssignment(props.assignment) }
+            onClick = { props.onClickAssignment(assignment) }
 
             sx {
                 padding = props.padding
@@ -55,9 +55,8 @@ val UstadClazzAssignmentListItem = FC<UstadClazzAssignmentListItemProps> { props
             }
 
             ListItemText {
-                primary = ReactNode(props.assignment.caTitle ?: "")
+                primary = ReactNode(assignment?.caTitle ?: "")
                 secondary = SecondaryContent.create{
-                    assignment = props.assignment
                     courseBlock = props.courseBlock
                 }
             }
@@ -75,7 +74,9 @@ private val DateAndPointRow = FC<UstadClazzAssignmentListItemProps> { props ->
 
     val courseBlockUiState = props.courseBlock.listItemUiState
 
-    val assignmentUiState = props.assignment.listItemUiState
+    val assignment = props.courseBlock.assignment
+
+    val assignmentUiState = assignment?.listItemUiState
 
     Stack {
         direction = responsive(StackDirection.row)
@@ -98,13 +99,14 @@ private val DateAndPointRow = FC<UstadClazzAssignmentListItemProps> { props ->
             sx{ width = 15.px }
         }
 
-        if (assignmentUiState.assignmentMarkVisible){
+        if (assignmentUiState?.assignmentMarkVisible == true){
             Stack {
-                Typography {
-                    + ("${props.assignment.mark?.camMark ?: 0}/" +
-                            "${props.courseBlock.cbMaxPoints} " +
-                            strings[MessageID.points])
-                }
+//To be fixed as part of the assignment screens
+//                Typography {
+//                    + ("${assignment.mark?.camMark ?: 0}/" +
+//                            "${props.courseBlock.cbMaxPoints} " +
+//                            strings[MessageID.points])
+//                }
             }
         }
     }
@@ -117,7 +119,9 @@ private val SecondaryContent = FC<UstadClazzAssignmentListItemProps> { props ->
 
     val courseBlockUiState = props.courseBlock.listItemUiState
 
-    val assignmentUiState = props.assignment.listItemUiState
+    val assignment = props.courseBlock.assignment
+
+    val assignmentUiState = assignment?.listItemUiState
 
     Stack {
         if (courseBlockUiState.cbDescriptionVisible){
@@ -126,51 +130,46 @@ private val SecondaryContent = FC<UstadClazzAssignmentListItemProps> { props ->
             }
         }
 
-        DateAndPointRow {
-            assignment = props.assignment
-            courseBlock = props.courseBlock
-        }
+        DateAndPointRow { courseBlock = props.courseBlock }
 
         Stack {
             direction = responsive(StackDirection.row)
             spacing = responsive(10.px)
 
-            if (assignmentUiState.submissionStatusIconVisible){
+            if (assignmentUiState?.submissionStatusIconVisible == true){
                 Icon{
-                    + ASSIGNMENT_STATUS_MAP[
-                            props.assignment.fileSubmissionStatus
-                    ]
+                    + ASSIGNMENT_STATUS_MAP[assignment.fileSubmissionStatus]
                 }
             }
 
-            if (assignmentUiState.submissionStatusVisible){
+            if (assignmentUiState?.submissionStatusVisible == true){
                 Typography {
                     + (strings.mapLookup(
-                        props.assignment.fileSubmissionStatus,
+                        assignment.fileSubmissionStatus,
                         SubmissionConstants.STATUS_MAP
                     ) ?: "")
                 }
             }
         }
 
-        if (assignmentUiState.progressTextVisible){
+        if (assignmentUiState?.progressTextVisible == true){
             Typography {
                 + (strings[MessageID.three_num_items_with_name_with_comma]
 
                     .replace("%1\$d",
-                        (props.assignment.progressSummary
+                        (assignment.progressSummary
                             ?.calculateNotSubmittedStudents() ?: 0).toString())
 
                     .replace("%2\$s", strings[MessageID.not_submitted_cap])
 
                     .replace("%3\$d",
-                        (props.assignment.progressSummary
+                        (assignment.progressSummary
                             ?.submittedStudents ?: 0).toString())
 
                     .replace("%4\$s", strings[MessageID.submitted_cap])
 
                     .replace("%5\$d",
-                        (props.assignment.progressSummary
+                        (assignment.progressSummary
                             ?.markedStudents ?: 0).toString())
 
                     .replace("%6\$s", strings[MessageID.marked]))
@@ -186,23 +185,23 @@ val UstadClazzAssignmentListItemPreview = FC<Props> {
 
         UstadClazzAssignmentListItem {
 
-            assignment = ClazzAssignmentWithMetrics().apply {
-                caTitle = "Module"
-                mark = CourseAssignmentMark().apply {
-                    camPenalty = 20
-                    camMark = 20F
-                }
-                progressSummary = AssignmentProgressSummary().apply {
-                    hasMetricsPermission = false
-                }
-                fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
-            }
-
             courseBlock = CourseBlockWithCompleteEntity().apply {
                 cbDescription = "Description"
                 cbDeadlineDate = 1672707505000
                 cbMaxPoints = 100
                 cbIndentLevel = 1
+                assignment = ClazzAssignmentWithMetrics().apply {
+                    caTitle = "Module"
+//To be fixed as part of the assignment screens
+//                    mark = CourseAssignmentMark().apply {
+//                        camPenalty = 20
+//                        camMark = 20F
+//                    }
+                    progressSummary = AssignmentProgressSummary().apply {
+                        hasMetricsPermission = false
+                    }
+                    fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
+                }
             }
 
             padding = paddingCourseBlockIndent(6)
