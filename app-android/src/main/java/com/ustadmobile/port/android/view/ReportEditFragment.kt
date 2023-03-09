@@ -51,6 +51,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyReportWithSeriesWithFilters
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
+import com.ustadmobile.port.android.view.composable.UstadErrorText
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 
 interface ReportEditFragmentEventHandler {
@@ -404,7 +405,9 @@ private fun ReportEditScreen(
         }
 
         if (!uiState.titleError.isNullOrEmpty()){
-            Text(uiState.titleError ?: "")
+            item {
+                UstadErrorText(error = uiState.titleError ?: "")
+            }
         }
 
         item {

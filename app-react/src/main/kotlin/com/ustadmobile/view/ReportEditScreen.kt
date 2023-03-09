@@ -12,7 +12,6 @@ import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyReportWithSeriesWithFilters
 import com.ustadmobile.mui.components.UstadMessageIdDropDownField
-import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.view.components.UstadBlankIcon
 import csstype.Margin
 import csstype.Padding
@@ -27,6 +26,7 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import react.dom.onChange
 
 external interface ReportEditScreenProps : Props {
 
@@ -97,27 +97,30 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
             direction = responsive(StackDirection.column)
             spacing = responsive(10.px)
 
-            UstadTextEditField {
+            TextField {
                 value = props.uiState.report?.reportTitle ?: ""
-                label = strings[MessageID.xapi_options_report_title]
-                enabled = props.uiState.fieldsEnabled
-                error = props.uiState.titleError
+                label = ReactNode(strings[MessageID.xapi_options_report_title])
+                disabled = !props.uiState.fieldsEnabled
+                error = props.uiState.titleError != null
+                helperText = props.uiState.titleError?.let { ReactNode(it) }
                 onChange = {
+                    val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
                     props.onReportChanged(
                         props.uiState.report?.shallowCopyReportWithSeriesWithFilters {
-                            reportTitle = it
+                            reportTitle = currentVal
                         })
                 }
             }
 
-            UstadTextEditField {
+            TextField {
                 value = props.uiState.report?.reportDescription ?: ""
-                label = strings[MessageID.description]
-                enabled = props.uiState.fieldsEnabled
+                label = ReactNode(strings[MessageID.description])
+                disabled = !props.uiState.fieldsEnabled
                 onChange = {
+                    val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
                     props.onReportChanged(
                         props.uiState.report?.shallowCopyReportWithSeriesWithFilters {
-                            reportDescription = it
+                            reportDescription = currentVal
                         })
                 }
             }
@@ -194,15 +197,16 @@ private val ReportSeriesListItem = FC<ReportEditScreenProps> { props ->
         Stack {
             direction = responsive(StackDirection.row)
 
-            UstadTextEditField {
+            TextField {
                 value = props.reportSeries.reportSeriesName ?: ""
-                label = strings[MessageID.title]
-                enabled = props.uiState.fieldsEnabled
+                label = ReactNode(strings[MessageID.title])
+                disabled = !props.uiState.fieldsEnabled
                 fullWidth = true
                 onChange = {
+                    val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
                     props.onChangedReportSeries(
                         props.reportSeries.shallowCopy {
-                            reportSeriesName = it
+                            reportSeriesName = currentVal
                         })
                 }
             }
