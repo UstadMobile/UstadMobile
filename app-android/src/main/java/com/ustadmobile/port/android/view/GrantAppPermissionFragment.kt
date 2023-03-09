@@ -9,6 +9,22 @@ import com.toughra.ustadmobile.databinding.FragmentGrantAppPermissionBinding
 import com.ustadmobile.port.android.presenter.GrantAppPermissionPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.GrantAppPermissionView
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.google.android.material.composethemeadapter.MdcTheme
+import com.toughra.ustadmobile.R
+import com.ustadmobile.core.viewmodel.GrantAppPermissionUiState
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 
 class GrantAppPermissionFragment: UstadBaseFragment(), GrantAppPermissionView {
 
@@ -34,8 +50,10 @@ class GrantAppPermissionFragment: UstadBaseFragment(), GrantAppPermissionView {
         savedInstanceState: Bundle?
     ): View {
         val rootView: View
-        mPresenter = GrantAppPermissionPresenter(requireContext(), requireArguments().toStringMap(),
-            this, di).withViewLifecycle()
+        mPresenter = GrantAppPermissionPresenter(
+            requireContext(), requireArguments().toStringMap(),
+            this, di
+        ).withViewLifecycle()
         mBinding = FragmentGrantAppPermissionBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.grantButton.setOnClickListener {
@@ -59,23 +77,7 @@ class GrantAppPermissionFragment: UstadBaseFragment(), GrantAppPermissionView {
         mPresenter = null
         super.onDestroyView()
     }
-
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import com.google.android.material.composethemeadapter.MdcTheme
-import com.toughra.ustadmobile.R
-import com.ustadmobile.core.viewmodel.GrantAppPermissionUiState
-import com.ustadmobile.port.android.util.ext.defaultItemPadding
-import com.ustadmobile.port.android.util.ext.defaultScreenPadding
+}
 
 @Composable
 private fun GrantAppPermissionScreen(
