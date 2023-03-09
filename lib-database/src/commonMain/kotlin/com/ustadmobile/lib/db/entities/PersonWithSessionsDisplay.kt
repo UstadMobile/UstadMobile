@@ -21,4 +21,15 @@ class PersonWithSessionsDisplay {
 
     var resultScore: Int = 0
 
+    companion object {
+
+        const val RESULT_SUCCESS = 1
+
+        const val RESULT_FAILURE = 2
+
+        const val RESULT_UNSET = 3
+
+        const val RESULT_INCOMPLETE = 5
+
+    }
 }

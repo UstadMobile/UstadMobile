@@ -124,6 +124,8 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen("UstadAssignmentFileSubmissionListItem",
                 "UstadAssignmentFileSubmissionListItem Preview",
                 UstadAssignmentFileSubmissionListItemPreview),
+            UstadScreen(SessionListView.VIEW_NAME, "SessionList Preview",
+                SessionListScreenPreview),
         )
     }
 }
