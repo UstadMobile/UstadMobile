@@ -331,7 +331,7 @@ private fun ClazzAssignmentEditScreen(
         }
     }
 
-    val terminologyEntries = rememberCourseTerminologyEntries(uiState.entity?.assignment?.caMarkingType)
+    val terminologyEntries = rememberCourseTerminologyEntries(uiState.courseTerminology)
 
     Column(
         modifier = Modifier

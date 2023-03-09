@@ -8,7 +8,7 @@ object MarkingTypeConstants {
 
     val MARKING_TYPE_MESSAGE_IDS = listOf(
         MessageIdOption2(MessageID.teacher, ClazzAssignment.MARKED_BY_COURSE_LEADER),
-        MessageIdOption2(MessageID.peers, ClazzAssignment.MARKED_BY_PEERS)
+        MessageIdOption2(MessageID.students, ClazzAssignment.MARKED_BY_PEERS)
     )
 
 }
