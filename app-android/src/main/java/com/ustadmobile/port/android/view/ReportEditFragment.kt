@@ -402,11 +402,9 @@ private fun ReportEditScreen(
                     })
                 },
             )
-        }
 
-        if (!uiState.titleError.isNullOrEmpty()){
-            item {
-                UstadErrorText(error = uiState.titleError ?: "")
+            uiState.titleError?.also {
+                UstadErrorText(error = it)
             }
         }
 
