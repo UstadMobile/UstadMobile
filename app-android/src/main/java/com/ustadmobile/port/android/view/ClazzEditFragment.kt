@@ -506,9 +506,9 @@ private fun ClazzEditScreen(
         }
 
         item {
-            UstadTextEditField(
+            UstadClickableTextField(
                 value = uiState.entity?.holidayCalendar?.umCalendarName ?: "",
-                label = stringResource(id = R.string.holiday_calendar),
+                label = { Text(stringResource(id = R.string.holiday_calendar)) },
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {},
                 onClick = onClickHolidayCalendar
@@ -547,9 +547,9 @@ private fun ClazzEditScreen(
         }
 
         item {
-            UstadTextEditField(
+            UstadClickableTextField(
                 value = uiState.entity?.terminology?.ctTitle ?: "",
-                label = stringResource(id = R.string.terminology),
+                label = { Text(stringResource(id = R.string.terminology)) },
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {},
                 onClick = onClickTerminology,
@@ -571,10 +571,10 @@ private fun ClazzEditBasicDetails(
     ) {
         UstadEditHeader(text = stringResource(id = R.string.basic_details))
 
-        UstadTextEditField(
-            modifier = Modifier.defaultItemPadding(),
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
             value = uiState.entity?.clazzName ?: "",
-            label = stringResource(id = R.string.name),
+            label = { Text(stringResource( R.string.name )) },
             enabled = uiState.fieldsEnabled,
             onValueChange = {
                 onClazzChanged(
@@ -585,11 +585,10 @@ private fun ClazzEditBasicDetails(
             }
         )
 
-
-        UstadTextEditField(
-            modifier = Modifier.defaultItemPadding(),
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
             value = uiState.entity?.clazzDesc ?: "",
-            label = stringResource(id = R.string.description).addOptionalSuffix(),
+            label = { Text(stringResource(id = R.string.description).addOptionalSuffix()) },
             enabled = uiState.fieldsEnabled,
             onValueChange = {
                 onClazzChanged(
@@ -600,10 +599,10 @@ private fun ClazzEditBasicDetails(
             }
         )
 
-        UstadTextEditField(
-            modifier = Modifier.defaultItemPadding(),
+        UstadClickableTextField(
+            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
             value = uiState.entity?.school?.schoolName ?: "",
-            label = stringResource(id = R.string.institution),
+            label = { Text(stringResource(id = R.string.institution)) },
             enabled = uiState.fieldsEnabled,
             onClick = onClickSchool,
             onValueChange = {}
@@ -648,15 +647,14 @@ private fun ClazzEditBasicDetails(
             )
         }
 
-        UstadTextEditField(
-            modifier = Modifier.defaultItemPadding(),
+        UstadClickableTextField(
+            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            label = { Text(stringResource(id = R.string.timezone)) },
             value = uiState.entity?.clazzTimeZone ?: "",
-            label = stringResource(id = R.string.timezone),
+            onClick = onClickTimezone,
             enabled = uiState.fieldsEnabled,
-            onClick = { onClickTimezone() },
-            onValueChange = {}
+            onValueChange = { }
         )
-
     }
 }
 
