@@ -239,52 +239,52 @@ fun SessionListScreenPreview() {
             uiState = SessionListUiState(
                 sessionsList = listOf(
                     PersonWithSessionsDisplay().apply {
+                        contextRegistration = "1"
                         startDate = 13
                         resultScoreScaled = 3F
                         resultScore = 5
                         resultMax = 10
                         resultComplete = true
-                        contextRegistration = "1"
                         resultSuccess = StatementEntity.RESULT_UNSET
                     },
                     PersonWithSessionsDisplay().apply {
-                        startDate = 13
                         contextRegistration = "2"
+                        startDate = 13
                         resultComplete = true
                     },
                     PersonWithSessionsDisplay().apply {
+                        contextRegistration = "3"
                         startDate = 13
                         resultScoreScaled = 3F
                         resultScore = 5
                         resultMax = 10
                         resultComplete = true
-                        contextRegistration = "3"
                         resultSuccess = StatementEntity.RESULT_SUCCESS
                     },
                     PersonWithSessionsDisplay().apply {
+                        contextRegistration = "4"
                         startDate = 13
                         resultScoreScaled = 3F
                         resultScore = 5
                         resultMax = 10
                         resultComplete = true
-                        contextRegistration = "4"
                         resultSuccess = StatementEntity.RESULT_UNSET
                     },
                     PersonWithSessionsDisplay().apply {
+                        contextRegistration = "5"
                         startDate = 13
                         resultScoreScaled = 3F
                         resultScore = 5
                         resultMax = 10
-                        contextRegistration = "5"
                         resultComplete = false
                     },
                     PersonWithSessionsDisplay().apply {
+                        contextRegistration = "6"
                         startDate = 13
                         resultScoreScaled = 3F
                         resultScore = 5
                         resultMax = 10
                         resultComplete = true
-                        contextRegistration = "6"
                         resultSuccess = StatementEntity.RESULT_FAILURE
                     }
                 ),

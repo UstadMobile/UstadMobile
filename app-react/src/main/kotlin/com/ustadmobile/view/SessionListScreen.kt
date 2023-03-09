@@ -11,7 +11,6 @@ import com.ustadmobile.lib.db.entities.PersonWithSessionsDisplay
 import com.ustadmobile.lib.db.entities.StatementEntity
 import csstype.px
 import kotlinx.datetime.TimeZone
-import kotlinx.html.injector.injectTo
 import mui.icons.material.*
 import mui.material.*
 import mui.material.List
@@ -33,7 +32,7 @@ private val SessionListScreenComponent2 = FC<SessionListScreenProps> { props ->
         maxWidth = "lg"
 
         Stack {
-            spacing = responsive(20.px)
+            spacing = responsive(10.px)
 
             List{
 
