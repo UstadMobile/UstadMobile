@@ -5,7 +5,7 @@ import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import com.ustadmobile.util.Util
 import com.ustadmobile.view.ext.renderListItemWithTitleDescriptionAndRightAction
 import com.ustadmobile.view.ext.umGridContainer
-import org.w3c.dom.events.Event
+import web.events.Event
 import react.RBuilder
 
 interface SiteTermsListPropsProps: SimpleListProps<SiteTermsWithLanguage>{

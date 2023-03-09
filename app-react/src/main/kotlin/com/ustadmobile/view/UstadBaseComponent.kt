@@ -20,13 +20,15 @@ import com.ustadmobile.redux.ReduxToolbarState
 import com.ustadmobile.util.*
 import io.github.aakira.napier.Napier
 import kotlinx.atomicfu.atomic
-import kotlinx.browser.window
 import kotlinx.coroutines.Runnable
 import org.kodein.di.*
 import org.w3c.dom.HashChangeEvent
-import org.w3c.dom.events.Event
+import web.events.Event
 import react.RBuilder
 import react.RComponent
+import web.events.EventType
+import web.timers.setTimeout
+import web.window.window
 
 abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<P, S>(props),
     UstadView, DIAware, LifecycleOwner {
@@ -103,7 +105,7 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
     var ustadComponentTitle: String? = null
         set(value) {
             field = value
-            window.setTimeout({
+            setTimeout({
                dispatch(ReduxToolbarState(title = ustadComponentTitle))
             }, MIN_STATE_CHANGE_DELAY_TIME)
         }
@@ -129,7 +131,7 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
     open fun onDestroyView(){}
 
     override fun componentWillMount() {
-        window.addEventListener("hashchange",hashChangeListener)
+        window.addEventListener(EventType("hashchange"),hashChangeListener)
     }
 
     override fun componentDidMount() {
@@ -182,10 +184,6 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
         dispatch(ReduxSnackBarState(message, getString(actionMessageId), action))
     }
 
-    override fun runOnUiThread(r: Runnable?) {
-        r?.run()
-    }
-
     override val di: DI by DI.lazy {
         extend(getCurrentState().di.instance)
     }
@@ -210,7 +208,7 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
      * state when a component is still building
      */
     fun updateUiWithStateChangeDelay(timeOutInMills: Int = MIN_STATE_CHANGE_DELAY_TIME, block:() -> Unit){
-        window.setTimeout(block, timeOutInMills)
+        setTimeout(block, timeOutInMills)
     }
 
     override fun componentWillUnmount() {
@@ -218,7 +216,7 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
         compLifecycle.lifecycleObservers.mapNotNull { it as? DefaultLifecycleObserver }.forEach {
             it.onStop(this)
         }
-        window.removeEventListener("hashchange",hashChangeListener)
+        window.removeEventListener(EventType("hashchange"),hashChangeListener)
         progressBarManager.onDestroy()
         searchManager?.onDestroy()
         searchManager = null

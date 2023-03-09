@@ -62,10 +62,7 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.websocket.*
 import org.kodein.di.ktor.di
 import java.util.*
-import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
-import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.rest.logging.LogbackAntiLog
-import com.ustadmobile.lib.util.randomString
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -102,6 +99,7 @@ private fun Endpoint.identifier(
     sanitizeDbNameFromUrl(url)
 }
 
+@Suppress("unused") // This is used as the KTOR server main module via application.conf
 fun Application.umRestApplication(
     dbModeOverride: String? = null,
     singletonDbName: String = "UmAppDatabase"
@@ -234,12 +232,6 @@ fun Application.umRestApplication(
                 .addMigrations(*migrationList().toTypedArray())
                 .build()
 
-            if(appConfig.propertyOrNull("ktor.database.cleardb")?.getString()?.toBoolean() == true) {
-                Napier.i("Clearing database ${db} as ktor.database.cleardb is set")
-                db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
-                db.insertDefaultSite()
-            }
-
             db.addIncomingReplicationListener(PermissionManagementIncomingReplicationListener(db))
 
             //Add listener that will end sessions when authentication has been updated
@@ -340,7 +332,6 @@ fun Application.umRestApplication(
             AuthManager(context, di).also { authManager ->
                 val repo: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_REPO)
                 runBlocking {
-                    //THIS IS A RACE CONDITION!!
                     repo.initAdminUser(context, authManager, di,
                         appConfig.propertyOrNull("ktor.ustad.adminpass")?.getString())
                 }
@@ -471,10 +462,6 @@ fun Application.umRestApplication(
         ContentUploadRoute()
 
         GetAppRoute()
-
-        if (devMode) {
-            DevModeRoute()
-        }
 
         static("umapp") {
             resources("umapp")

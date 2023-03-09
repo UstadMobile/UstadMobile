@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
  * This basic extension of PagedListAdapter has a simple callback to tell listeners (e.g. components
  * that tell the user about loading status) when the first view has been bound.
  */
-abstract class RepoLoaderPagedListAdapter<T, VH : RecyclerView.ViewHolder>: PagedListAdapter<T, VH> {
+abstract class RepoLoaderPagedListAdapter<T: Any, VH : RecyclerView.ViewHolder>: PagedListAdapter<T, VH> {
 
     interface OnFirstViewBoundListener {
 

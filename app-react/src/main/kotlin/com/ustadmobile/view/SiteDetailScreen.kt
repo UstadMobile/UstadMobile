@@ -16,6 +16,7 @@ import react.FC
 import react.Props
 import react.create
 import mui.material.List
+import react.ReactNode
 
 
 external interface SiteDetailProps : Props {
@@ -37,19 +38,19 @@ val SiteDetailComponent2 = FC<SiteDetailProps> { props ->
             UstadDetailField {
                 icon = AccountBalanceRounded.create()
                 labelText = strings[MessageID.name]
-                valueText = props.uiState.site?.siteName.toString()
+                valueText = ReactNode(props.uiState.site?.siteName.toString())
             }
 
             UstadDetailField {
                 icon = ManageSearchOutlined.create()
                 labelText = strings[MessageID.guest_login_enabled]
-                valueText = props.uiState.site?.guestLogin.toString()
+                valueText = ReactNode(props.uiState.site?.guestLogin.toString())
             }
 
             UstadDetailField {
                 icon = HowToRegRounded.create()
                 labelText = strings[MessageID.registration_allowed]
-                valueText = props.uiState.site?.registrationAllowed.toString()
+                valueText = ReactNode(props.uiState.site?.registrationAllowed.toString())
             }
 
             Typography {

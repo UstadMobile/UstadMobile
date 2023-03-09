@@ -58,11 +58,7 @@ class VideoContentPresenterTest {
             }
         }
 
-        mockView = mock{
-            on { runOnUiThread(any())}.doAnswer{
-                Thread(it.getArgument<Any>(0) as Runnable).start()
-            }
-        }
+        mockView = mock{ }
 
 
         val repo: UmAppDatabase by di.activeRepoInstance()

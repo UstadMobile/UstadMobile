@@ -9,7 +9,7 @@ import com.ustadmobile.door.lifecycle.MutableLiveData
 /**
  * This PagedListAdapter helps manage selections.
  */
-abstract class SelectablePagedListAdapter<T, VH: RecyclerView.ViewHolder>(diffcallback: DiffUtil.ItemCallback<T>)
+abstract class SelectablePagedListAdapter<T: Any, VH: RecyclerView.ViewHolder>(diffcallback: DiffUtil.ItemCallback<T>)
     : PagedListAdapter<T, VH>(diffcallback), PagedItemSelectionListener<T>, SelectableViewHelper{
 
     protected val selectedItems = mutableListOf<T>()

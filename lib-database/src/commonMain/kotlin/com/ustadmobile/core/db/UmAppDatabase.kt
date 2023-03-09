@@ -38,6 +38,7 @@ import com.ustadmobile.lib.db.entities.*
     ErrorReport::class,
     ClazzAssignment::class, ClazzAssignmentContentJoin::class, CourseAssignmentSubmission::class,
     CourseAssignmentSubmissionAttachment::class, CourseAssignmentMark::class,
+    PeerReviewerAllocation::class,
     ClazzAssignmentRollUp::class,
     PersonAuth2::class,
     UserSession::class,
@@ -109,6 +110,7 @@ import com.ustadmobile.lib.db.entities.*
     CoursePictureReplicate::class,
     ContentEntryPicture::class,
     ContentEntryPictureReplicate::class,
+    PeerReviewerAllocationReplicate::class,
     Chat::class,
     ChatMember::class,
     Message::class,
@@ -122,10 +124,11 @@ import com.ustadmobile.lib.db.entities.*
     DiscussionTopic::class,
     DiscussionTopicReplicate::class,
     DiscussionPost::class,
-    DiscussionPostReplicate::class
+    DiscussionPostReplicate::class,
+    ExternalAppPermission::class,
 
 
-], version = 107)
+], version = 109)
 @MinReplicationVersion(60)
 expect abstract class UmAppDatabase : RoomDatabase {
 
@@ -295,22 +298,12 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract val courseDiscussionDao: CourseDiscussionDao
 
+    abstract val peerReviewerAllocationDao: PeerReviewerAllocationDao
+
     abstract val discussionTopicDao: DiscussionTopicDao
 
     abstract val discussionPostDao: DiscussionPostDao
 
-
-//    companion object {
-//
-//        const val TAG_DB = DoorTag.TAG_DB
-//
-//        const val TAG_REPO = DoorTag.TAG_REPO
-//
-//
-//
-//
-//
-//    }
-
+    abstract val externalAppPermissionDao: ExternalAppPermissionDao
 
 }

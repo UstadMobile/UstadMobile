@@ -85,7 +85,9 @@ kotlin {
             testTask {
                 useKarma {
                     useChromeHeadless() //change to useChrome to run the actual browser
+                    /* Not supported from Kotlin 1.8
                     webpackConfig.cssSupport.enabled = true
+                     */
                 }
             }
         }
@@ -240,9 +242,11 @@ kotlin {
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-json-js:$version_ktor"
                 implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-extensions:$version_kotlin_extensions"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-react:$version_kotlin_react"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom:$version_kotlin_react_router"
+
+                implementation enforcedPlatform("org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom:$kotlinWrappersVersion")
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-extensions"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-react"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom-legacy"
                 implementation npm("asmcrypto.js","$version_npm_asmcrypto")
                 implementation npm("buffer","$version_npm_buffer")
             }

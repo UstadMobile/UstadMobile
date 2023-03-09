@@ -1,5 +1,6 @@
 package com.ustadmobile.core.util
 
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import io.ktor.http.*
 
 /**
@@ -33,6 +34,10 @@ data class UstadUrlComponents(
         }else {
             "$viewName?$queryString"
         }
+    }
+
+    fun fullUrl(divider: String = UstadMobileSystemCommon.LINK_ENDPOINT_VIEWNAME_DIVIDER): String {
+        return UMFileUtil.joinPaths(endpoint, divider, viewUri)
     }
 
     companion object {

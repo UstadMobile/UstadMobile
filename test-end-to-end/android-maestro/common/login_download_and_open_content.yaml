@@ -28,7 +28,7 @@ appId: com.toughra.ustadmobile
           visible:
             text: "Play"
       file: play_video_content.yaml
-- takeScreenshot: "${TESTRESULTSDIR}/content_download_and_open"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_download_and_open"
 - back
 - tapOn: "ATTEMPTS"
 

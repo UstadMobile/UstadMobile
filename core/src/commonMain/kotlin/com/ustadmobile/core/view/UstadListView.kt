@@ -30,7 +30,7 @@ enum class SelectionOption(val messageId: Int, val commandId: Int) {
 /**
  *
  */
-interface UstadListView<RT, DT>: UstadView {
+interface UstadListView<RT, DT: Any>: UstadView {
 
     var addMode: ListViewAddMode
 

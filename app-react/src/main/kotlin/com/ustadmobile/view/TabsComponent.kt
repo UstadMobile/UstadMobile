@@ -10,7 +10,7 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import kotlinx.browser.window
 import kotlinx.css.*
-import kotlinx.js.jso
+import js.core.jso
 import mui.material.AppBarPosition
 import mui.material.TabsScrollButtons
 import mui.material.TabsVariant
