@@ -124,6 +124,8 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen("UstadAssignmentFileSubmissionListItem",
                 "UstadAssignmentFileSubmissionListItem Preview",
                 UstadAssignmentFileSubmissionListItemPreview),
+            UstadScreen(ScopedGrantListView.VIEW_NAME, "ScopedGrantList Preview",
+                ScopedGrantListScreenPreview),
         )
     }
 }
