@@ -507,6 +507,7 @@ private fun ClazzEditScreen(
 
         item {
             UstadClickableTextField(
+                modifier = Modifier.fillMaxWidth().defaultItemPadding(),
                 value = uiState.entity?.holidayCalendar?.umCalendarName ?: "",
                 label = { Text(stringResource(id = R.string.holiday_calendar)) },
                 enabled = uiState.fieldsEnabled,
@@ -553,7 +554,7 @@ private fun ClazzEditScreen(
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {},
                 onClick = onClickTerminology,
-                modifier = Modifier.defaultItemPadding(),
+                modifier = Modifier.fillMaxWidth().defaultItemPadding(),
             )
         }
     }
