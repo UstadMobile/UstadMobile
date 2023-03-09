@@ -27,6 +27,7 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentEditBinding
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.locale.entityconstants.*
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.toStringMap
@@ -493,6 +494,7 @@ private fun ClazzAssignmentEditScreen(
             label = stringResource(R.string.marked_by),
             options = MarkingTypeConstants.MARKING_TYPE_MESSAGE_IDS,
             enabled = uiState.fieldsEnabled,
+            itemText = { (it as ContainerStorageDir).name ?: "" },
             onOptionSelected = {
                 onChangeCourseBlockWithEntity(
                     uiState.entity?.shallowCopyCourseBlockWithEntity{
