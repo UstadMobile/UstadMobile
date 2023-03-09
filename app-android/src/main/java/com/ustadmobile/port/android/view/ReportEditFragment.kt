@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import androidx.compose.material.OutlinedTextField
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -51,7 +52,6 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopyReportWithSeriesWithFilter
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
-import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 interface ReportEditFragmentEventHandler {
     fun onClickNewFilter(series: ReportSeries)
@@ -389,12 +389,12 @@ private fun ReportEditScreen(
     )  {
 
         item {
-            UstadTextEditField(
+            OutlinedTextField(
                 modifier = Modifier.defaultItemPadding(),
                 value = uiState.report?.reportTitle ?: "",
-                label = stringResource(id = R.string.xapi_options_report_title),
+                label = { Text(stringResource(id = R.string.xapi_options_report_title)) },
                 enabled = uiState.fieldsEnabled,
-                error = uiState.titleError,
+                isError = uiState.titleError != null,
                 onValueChange = {
                     onReportChanged(uiState.report?.shallowCopyReportWithSeriesWithFilters{
                         reportTitle = it
@@ -404,10 +404,10 @@ private fun ReportEditScreen(
         }
 
         item {
-            UstadTextEditField(
+            OutlinedTextField(
                 modifier = Modifier.defaultItemPadding(),
                 value = uiState.report?.reportDescription ?: "",
-                label = stringResource(id = R.string.description),
+                label = { Text(stringResource(id = R.string.description)) },
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
                     onReportChanged(uiState.report?.shallowCopyReportWithSeriesWithFilters{
@@ -491,11 +491,11 @@ fun ReportSeriesListItem(
     Row(
         modifier = Modifier.padding(end = 10.dp)
     ){
-        UstadTextEditField(
+        OutlinedTextField(
             modifier = Modifier.weight(0.9F)
                 .defaultItemPadding(end = 8.dp),
             value = reportSeries.reportSeriesName ?: "",
-            label = stringResource(id = R.string.title),
+            label = { Text(stringResource(id = R.string.title)) },
             enabled = uiState.fieldsEnabled,
             onValueChange = {
                 onChangedReportSeries(reportSeries.shallowCopy{
