@@ -41,6 +41,8 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyCourseBlockWithEntity
+import com.ustadmobile.port.android.util.compose.courseTerminologyEntryResource
+import com.ustadmobile.port.android.util.compose.rememberCourseTerminologyEntries
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.binding.isSet
 import com.ustadmobile.port.android.view.composable.*
@@ -329,6 +331,8 @@ private fun ClazzAssignmentEditScreen(
         }
     }
 
+    val terminologyEntries = rememberCourseTerminologyEntries(uiState.entity?.assignment?.caMarkingType)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -492,14 +496,14 @@ private fun ClazzAssignmentEditScreen(
         UstadExposedDropDownMenuField(
             value = uiState.entity?.assignment?.caMarkingType ?: 0,
             label = stringResource(R.string.marked_by),
-            options = MarkingTypeConstants.MARKING_TYPE_MESSAGE_IDS,
+            options = uiState.markingTypeOptions,
             enabled = uiState.fieldsEnabled,
-            itemText = { (it as ContainerStorageDir).name ?: "" },
+            itemText = { courseTerminologyEntryResource(terminologyEntries, it) },
             onOptionSelected = {
                 onChangeCourseBlockWithEntity(
                     uiState.entity?.shallowCopyCourseBlockWithEntity{
                         assignment = uiState.entity?.assignment?.shallowCopy {
-                            caMarkingType = it.value
+                            caMarkingType = it
                         }
                     })
             },

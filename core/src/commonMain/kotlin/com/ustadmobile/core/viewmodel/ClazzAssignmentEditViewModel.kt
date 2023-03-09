@@ -36,6 +36,11 @@ data class ClazzAssignmentEditUiState(
 
     val textSubmissionVisible: Boolean = false,
 
+    val markingTypeOptions: List<Int> = listOf(
+        ClazzAssignment.MARKED_BY_COURSE_LEADER ,
+        ClazzAssignment.MARKED_BY_PEERS
+    ),
+
     val courseBlockEditUiState: CourseBlockEditUiState = CourseBlockEditUiState(),
 ) {
 
