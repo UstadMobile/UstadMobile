@@ -97,6 +97,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
             }
 
             TextField {
+                variant = FormControlVariant.outlined
                 value = props.uiState.entity?.assignment?.caDescription ?: ""
                 label = ReactNode(strings[MessageID.description].addOptionalSuffix(strings))
                 disabled = !props.uiState.fieldsEnabled
@@ -117,6 +118,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
             }
 
             TextField {
+                variant = FormControlVariant.outlined
                 value = props.uiState.groupSet?.cgsName ?: ""
                 label = ReactNode(strings[MessageID.submission_type])
                 disabled = !props.uiState.groupSetEnabled
@@ -148,6 +150,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 }
 
                 TextField {
+                    variant = FormControlVariant.outlined
                     value = (props.uiState.entity?.assignment?.caSizeLimit ?: 0).toString()
                     label = ReactNode(strings[MessageID.size_limit])
                     disabled = !props.uiState.fieldsEnabled
@@ -164,6 +167,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 }
 
                 TextField {
+                    variant = FormControlVariant.outlined
                     value = (props.uiState.entity?.assignment?.caNumberOfFiles ?: 0).toString()
                     label = ReactNode(strings[MessageID.number_of_files])
                     disabled = props.uiState.fieldsEnabled
@@ -205,6 +209,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 }
 
                 TextField {
+                    variant = FormControlVariant.outlined
                     value = (props.uiState.entity?.assignment?.caTextLimit ?: 0).toString()
                     label = ReactNode(strings[MessageID.maximum])
                     disabled = !props.uiState.fieldsEnabled
@@ -263,6 +268,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
 
                     Stack {
                         TextField {
+                            variant = FormControlVariant.outlined
                             value = (props.uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toString()
                             label = ReactNode(strings[MessageID.reviews_per_user_group])
                             disabled = !props.uiState.fieldsEnabled
