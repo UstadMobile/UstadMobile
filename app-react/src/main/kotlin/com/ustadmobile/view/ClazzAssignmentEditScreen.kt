@@ -2,7 +2,9 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.locale.entityconstants.*
+import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.ClazzAssignmentEditUiState
 import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.CourseBlock
@@ -10,6 +12,7 @@ import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyCourseBlockWithEntity
 import com.ustadmobile.mui.components.UstadCourseBlockEdit
+import com.ustadmobile.mui.components.UstadDropDownField
 import com.ustadmobile.mui.components.UstadMessageIdDropDownField
 import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.view.components.UstadSwitchField
@@ -20,6 +23,7 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.dom.onChange
+import web.html.InputType
 
 external interface ClazzAssignmentEditScreenProps : Props {
 
@@ -68,13 +72,14 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
             spacing = responsive(20.px)
 
             TextField {
+                variant = FormControlVariant.outlined
                 value = props.uiState.entity?.assignment?.caTitle ?: ""
                 label = ReactNode(strings[MessageID.title])
                 error = props.uiState.caTitleError != null
                 disabled = !props.uiState.fieldsEnabled
+                helperText = props.uiState.caTitleError?.let { ReactNode(it) }
                 onChange = {
                     val currentVal = it.target.asDynamic().value
-                    props.uiState.caTitleError = null
                     props.onChangeCourseBlockWithEntity(
                         props.uiState.entity?.shallowCopyCourseBlockWithEntity {
                             assignment = props.uiState.entity?.assignment?.shallowCopy {
@@ -139,6 +144,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     value = (props.uiState.entity?.assignment?.caSizeLimit ?: 0).toString()
                     label = ReactNode(strings[MessageID.size_limit])
                     disabled = !props.uiState.fieldsEnabled
+                    type = InputType.number
                     onChange = {
                         val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
                         props.onChangeCourseBlockWithEntity(
@@ -154,6 +160,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     value = (props.uiState.entity?.assignment?.caNumberOfFiles ?: 0).toString()
                     label = ReactNode(strings[MessageID.number_of_files])
                     disabled = props.uiState.fieldsEnabled
+                    type = InputType.number
                     onChange = {
                         val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
                         props.onChangeCourseBlockWithEntity(
@@ -194,6 +201,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     value = (props.uiState.entity?.assignment?.caTextLimit ?: 0).toString()
                     label = ReactNode(strings[MessageID.maximum])
                     disabled = !props.uiState.fieldsEnabled
+                    type = InputType.number
                     onChange = {
                         val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
                         props.onChangeCourseBlockWithEntity(
@@ -222,18 +230,54 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 }
             }
 
-            UstadMessageIdDropDownField {
+            UstadDropDownField {
                 value = props.uiState.entity?.assignment?.caMarkingType ?: 0
                 label = strings[MessageID.marked_by]
                 options = MarkingTypeConstants.MARKING_TYPE_MESSAGE_IDS
-                enabled = props.uiState.fieldsEnabled
+                enabled = props.uiState.markingTypeEnabled
+                itemLabel = { ReactNode(courseTerminologyEntryResource(
+                    terminologyEntries, (it as? MessageIdOption2)?.messageId) ?: "" }
+                itemValue = { (it as? MessageIdOption2)?.name ?: "" }
                 onChange = {
                     props.onChangeCourseBlockWithEntity(
                         props.uiState.entity?.shallowCopyCourseBlockWithEntity {
                             assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                caMarkingType = it?.value ?: 0
+                                caMarkingType = (it as? MessageIdOption2).value
                             }
                         })
+                }
+            }
+
+            if (props.uiState.peerMarkingVisible) {
+                Stack {
+                    direction = responsive(StackDirection.row)
+
+                    Stack {
+                        TextField {
+                            value = (props.uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toString()
+                            label = ReactNode(strings[MessageID.reviews_per_user_group])
+                            disabled = !props.uiState.fieldsEnabled
+                            error = props.uiState.reviewerCountError != null
+                            helperText = props.uiState.reviewerCountError?.let { ReactNode(it) }
+                            onChange = { newString ->
+                                props.onChangeCourseBlockWithEntity(
+                                    props.uiState.entity?.shallowCopyCourseBlockWithEntity{
+                                        assignment = props.uiState.entity?.assignment?.shallowCopy {
+                                            caPeerReviewerCount = newString.filter {
+                                                it.isDigit()
+                                            }.toIntOrNull() ?: 0
+                                        }
+                                    })
+                            }
+                        }
+                    }
+
+                    Button {
+                        onClick = { props.onClickAssignReviewers() }
+                        disabled = !props.uiState.fieldsEnabled
+                        variant = ButtonVariant.contained
+                        + strings[MessageID.assign_reviewers].uppercase()
+                    }
                 }
             }
 
