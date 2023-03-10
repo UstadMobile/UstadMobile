@@ -17,10 +17,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.TextField
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.widget.doAfterTextChanged
@@ -325,14 +327,6 @@ private fun ClazzAssignmentEditScreen(
     onClickAssignReviewers: () -> Unit = {},
 ) {
 
-    val submissionTypeSource: MutableInteractionSource = remember { MutableInteractionSource() }
-    val isSubmissionTypePressed = submissionTypeSource.collectIsPressedAsState().value
-    LaunchedEffect(isSubmissionTypePressed){
-        if(isSubmissionTypePressed) {
-            onClickSubmissionType()
-        }
-    }
-
     val terminologyEntries = rememberCourseTerminologyEntries(uiState.courseTerminology)
 
     Column(
@@ -383,13 +377,13 @@ private fun ClazzAssignmentEditScreen(
             onCourseBlockChange = onChangeCourseBlock
         )
 
-        OutlinedTextField(
+        UstadClickableTextField(
             modifier = Modifier.fillMaxWidth(),
             value = uiState.groupSet?.cgsName ?: "",
             label = { Text(stringResource(id = R.string.submission_type)) },
             enabled = uiState.groupSetEnabled,
-            onValueChange = {},
-            interactionSource = submissionTypeSource,
+            onClick = onClickSubmissionType,
+            onValueChange = {}
         )
 
         UstadSwitchField(
@@ -420,7 +414,7 @@ private fun ClazzAssignmentEditScreen(
                 label = { Text(stringResource(id = R.string.size_limit)) },
                 enabled = uiState.fieldsEnabled,
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number
+                    keyboardType = KeyboardType.Number,
                 ),
                 onValueChange = { newString ->
                     onChangeCourseBlockWithEntity(
