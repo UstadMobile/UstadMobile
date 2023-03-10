@@ -14,6 +14,8 @@ data class ClazzAssignmentEditUiState(
 
     val caTitleError: String? = null,
 
+    val reviewerCountError: String? = null,
+
     val groupSet: CourseGroupSet? = null,
 
     val timeZone: String? = null,

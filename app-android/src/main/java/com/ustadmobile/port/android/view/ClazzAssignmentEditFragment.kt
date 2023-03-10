@@ -526,21 +526,28 @@ private fun ClazzAssignmentEditScreen(
 
         if (uiState.peerMarkingVisible) {
             Row {
-                OutlinedTextField(
-                    value = (uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toString(),
-                    label = { Text(stringResource(id = R.string.reviews_per_user_group)) },
-                    enabled = uiState.fieldsEnabled,
-                    onValueChange = { newString ->
-                        onChangeCourseBlockWithEntity(
-                            uiState.entity?.shallowCopyCourseBlockWithEntity{
-                                assignment = uiState.entity?.assignment?.shallowCopy {
-                                    caPeerReviewerCount = newString.filter {
-                                        it.isDigit()
-                                    }.toIntOrNull() ?: 0
-                                }
-                            })
-                    },
-                )
+                Column {
+                    OutlinedTextField(
+                        value = (uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toString(),
+                        label = { Text(stringResource(id = R.string.reviews_per_user_group)) },
+                        enabled = uiState.fieldsEnabled,
+                        isError = uiState.reviewerCountError != null,
+                        onValueChange = { newString ->
+                            onChangeCourseBlockWithEntity(
+                                uiState.entity?.shallowCopyCourseBlockWithEntity{
+                                    assignment = uiState.entity?.assignment?.shallowCopy {
+                                        caPeerReviewerCount = newString.filter {
+                                            it.isDigit()
+                                        }.toIntOrNull() ?: 0
+                                    }
+                                })
+                        },
+                    )
+
+                    uiState.reviewerCountError?.also {
+                        UstadErrorText(error = it)
+                    }
+                }
 
                 OutlinedButton(
                     onClick = onClickAssignReviewers,
