@@ -7,6 +7,8 @@ import com.ustadmobile.core.impl.locale.entityconstants.*
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.ClazzAssignmentEditUiState
 import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
+import com.ustadmobile.hooks.courseTerminologyResource
+import com.ustadmobile.hooks.useCourseTerminologyEntries
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
@@ -16,6 +18,7 @@ import com.ustadmobile.mui.components.UstadDropDownField
 import com.ustadmobile.mui.components.UstadMessageIdDropDownField
 import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.view.components.UstadSwitchField
+import csstype.PropertyName
 import csstype.px
 import mui.material.*
 import mui.system.responsive
@@ -43,6 +46,8 @@ external interface ClazzAssignmentEditScreenProps : Props {
 
     var onChangedAllowPrivateCommentsFromStudents: (Boolean) -> Unit
 
+    var onClickAssignReviewers: () -> Unit
+
 }
 
 val ClazzAssignmentEditScreenPreview = FC<Props> {
@@ -64,6 +69,8 @@ val ClazzAssignmentEditScreenPreview = FC<Props> {
 private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenProps> { props ->
 
     val strings = useStringsXml()
+
+    val terminologyEntries = useCourseTerminologyEntries(props.uiState.courseTerminology)
 
     Container {
         maxWidth = "lg"
@@ -235,14 +242,16 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 label = strings[MessageID.marked_by]
                 options = MarkingTypeConstants.MARKING_TYPE_MESSAGE_IDS
                 enabled = props.uiState.markingTypeEnabled
-                itemLabel = { ReactNode(courseTerminologyEntryResource(
-                    terminologyEntries, (it as? MessageIdOption2)?.messageId) ?: "" }
-                itemValue = { (it as? MessageIdOption2)?.name ?: "" }
+                itemLabel = { ReactNode(courseTerminologyResource(
+                    terminologyEntries, strings, (it as? MessageIdOption2)?.messageId ?: 0))
+                }
+                itemValue = { courseTerminologyResource(
+                    terminologyEntries, strings, (it as? MessageIdOption2)?.messageId ?: 0) }
                 onChange = {
                     props.onChangeCourseBlockWithEntity(
                         props.uiState.entity?.shallowCopyCourseBlockWithEntity {
                             assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                caMarkingType = (it as? MessageIdOption2).value
+                                caMarkingType = (it as MessageIdOption2).value
                             }
                         })
                 }
@@ -259,11 +268,12 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                             disabled = !props.uiState.fieldsEnabled
                             error = props.uiState.reviewerCountError != null
                             helperText = props.uiState.reviewerCountError?.let { ReactNode(it) }
-                            onChange = { newString ->
+                            onChange = {
+                                val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
                                 props.onChangeCourseBlockWithEntity(
                                     props.uiState.entity?.shallowCopyCourseBlockWithEntity{
                                         assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                            caPeerReviewerCount = newString.filter {
+                                            caPeerReviewerCount = currentVal.filter {
                                                 it.isDigit()
                                             }.toIntOrNull() ?: 0
                                         }
