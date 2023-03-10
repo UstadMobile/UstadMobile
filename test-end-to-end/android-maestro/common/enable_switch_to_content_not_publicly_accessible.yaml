@@ -8,9 +8,7 @@ appId: com.toughra.ustadmobile
         while:
               notVisible: "Publicly accessible"
         commands:
-              - swipe:
-                      start: 100,400
-                      end: 100,100
+          - scroll
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/Publiclyaccessible-on"
 - tapOn: "Publicly accessible"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/Publiclyaccessible-off"

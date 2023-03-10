@@ -8,9 +8,7 @@ appId: com.toughra.ustadmobile
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: "Edit"
-- swipe:
-    start: 100,400
-    end: 100,100
+- scroll
 - tapOn: "Add block"
 - tapOn: "Assignments"
 - tapOn: "Title"
@@ -24,9 +22,7 @@ appId: com.toughra.ustadmobile
       while:
           notVisible: "Teacher"
       commands:
-          - swipe:
-                start: 100,400
-                end: 100,100
+          - scroll
 - tapOn: "Teacher"
 - tapOn: "Peers"
 - tapOn:
@@ -34,56 +30,65 @@ appId: com.toughra.ustadmobile
 - eraseText
 - inputText: 2
 - tapOn: "ASSIGN REVIEWERS"
+#--------------------- s1
 - tapOn:
-    id: "com.toughra.ustadmobile:id/item_group_member_text_input_text"
+    text: "Show dropdown menu"
     index: 0
-- tapOn:
-    id: "com.toughra.ustadmobile:id/line_item"
-    index: 2
-- tapOn:
-    id: "com.toughra.ustadmobile:id/item_group_member_text_input_text"
-    index: 1
 - tapOn:
     id: "com.toughra.ustadmobile:id/line_item"
     index: 1
 - tapOn:
-    id: "com.toughra.ustadmobile:id/item_group_member_text_input_text"
+    text: "Show dropdown menu"
+    index: 1
+- tapOn:
+    id: "com.toughra.ustadmobile:id/line_item"
+    index: 2
+#----s2
+- tapOn:
+    text: "Show dropdown menu"
     index: 2
 - tapOn:
     id: "com.toughra.ustadmobile:id/line_item"
     index: 0
 - tapOn:
-    id: "com.toughra.ustadmobile:id/item_group_member_text_input_text"
+    text: "Show dropdown menu"
     index: 3
 - tapOn:
     id: "com.toughra.ustadmobile:id/line_item"
     index: 1
-- "scroll"
-- "scroll"
+#---scroll
+- scroll
+- scroll
+#-----s3
 - tapOn:
-    id: "com.toughra.ustadmobile:id/item_group_member_text_input_text"
+    text: "Show dropdown menu"
     index: 1
-- tapOn:
-    id: "com.toughra.ustadmobile:id/line_item"
-    index: 2
-- tapOn:
-    id: "com.toughra.ustadmobile:id/item_group_member_text_input_text"
-    index: 2
 - tapOn:
     id: "com.toughra.ustadmobile:id/line_item"
     index: 1
 - tapOn:
-    id: "com.toughra.ustadmobile:id/item_group_member_text_input_text"
+    text: "Show dropdown menu"
+    index: 2
+- tapOn:
+    id: "com.toughra.ustadmobile:id/line_item"
+    index: 2
+#----s4
+- tapOn:
+    text: "Show dropdown menu"
     index: 3
 - tapOn:
     id: "com.toughra.ustadmobile:id/line_item"
     index: 0
 - tapOn:
-    id: "com.toughra.ustadmobile:id/item_group_member_text_input_text"
+    text: "Show dropdown menu"
     index: 4
 - tapOn:
     id: "com.toughra.ustadmobile:id/line_item"
     index: 1
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignedPeers"
 - tapOn: "DONE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/peersSelected_2nos"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/ca_edit_reviewers_number"
 - tapOn: "DONE"
 - tapOn: "SAVE"

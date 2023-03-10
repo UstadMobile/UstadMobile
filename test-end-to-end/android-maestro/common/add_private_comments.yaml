@@ -9,9 +9,7 @@ appId: com.toughra.ustadmobile
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: ${ASSIGNMENTNAME}
-- swipe:
-    start: 100,400
-    end: 100,100
+- scroll
 - tapOn: "Add a private comment"
 - inputText: ${PRIVATECOMMENT}
 - tapOn:

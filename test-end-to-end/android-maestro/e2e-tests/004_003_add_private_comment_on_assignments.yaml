@@ -67,9 +67,7 @@ env:
 - tapOn: "Courses"
 - tapOn: "Test Course"
 - tapOn: "Test Assignment"
-- swipe:
-    start: 100,400
-    end: 100,100
+- scroll
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_private_comments_2student_notVisible"
 - clearState: com.toughra.ustadmobile
 - clearState: com.toughra.ustadmobile2

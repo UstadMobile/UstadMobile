@@ -28,9 +28,7 @@ appId: com.toughra.ustadmobile
       notVisible: "Downloads"
     file: "./redirect_to_downloads.yaml"
 - tapOn: ${TESTFILENAME}
-- swipe:
-    start: 100,400
-    end: 100,100
+- scroll
 - tapOn: "SUBMIT"
 - extendedWaitUntil:
       notVisible: "SUBMIT"

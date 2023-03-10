@@ -40,9 +40,7 @@ env:
         id: "com.toughra.ustadmobile:id/item_course_block_more_option"
         index: 0
     commands:
-      - swipe:
-          start: 100,400
-          end: 100,100
+      - scroll
 - tapOn:
     id: "com.toughra.ustadmobile:id/item_course_block_more_option"
     index: 0
@@ -59,10 +57,7 @@ env:
         id: "com.toughra.ustadmobile:id/item_course_block_more_option"
         index: 0
     commands:
-      - swipe:
-          start: 100,400
-          end: 100,100
-
+      - scroll
 # unhide the module
 - tapOn:
     id: "com.toughra.ustadmobile:id/item_course_block_more_option"
@@ -86,9 +81,7 @@ env:
         id: "com.toughra.ustadmobile:id/item_course_block_more_option"
         index: 1
     commands:
-      - swipe:
-          start: 100,400
-          end: 100,100
+      - scroll
 - tapOn:
     id: "com.toughra.ustadmobile:id/item_course_block_more_option"
     index: 1
@@ -103,10 +96,7 @@ env:
         id: "com.toughra.ustadmobile:id/item_course_block_more_option"
         index: 1
     commands:
-      - swipe:
-          start: 100,400
-          end: 100,100
-
+      - scroll
 - tapOn:
     id: "com.toughra.ustadmobile:id/item_course_block_more_option"
     index: 1

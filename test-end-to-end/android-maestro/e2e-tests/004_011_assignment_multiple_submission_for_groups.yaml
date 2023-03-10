@@ -91,6 +91,7 @@ env:
       TESTSERIAL: ${TESTSERIAL}
 - assertVisible:
     text: "Add Text"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/text visible"
 #--------------------------------------------------------------------------teacher grade the assignment
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"

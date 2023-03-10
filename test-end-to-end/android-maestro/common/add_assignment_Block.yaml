@@ -8,9 +8,13 @@ appId: com.toughra.ustadmobile
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: "Edit"
-- swipe:
-    start: 100,400
-    end: 100,100
+- repeat:
+      while:
+        notVisible: "Add block"
+      commands:
+         - swipe:
+                start: 100,400
+                end: 100,100
 - tapOn: "Add block"
 - tapOn: "Assignments"
 - tapOn: "Title"

@@ -7,9 +7,11 @@ appId: com.toughra.ustadmobile
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: "Edit"
-- swipe:
-    start: 100,400
-    end: 100,100
+- repeat:
+    while:
+      notVisible: "Add block"
+    commands:
+      - scroll
 - tapOn: "Add block"
 - tapOn: "Assignments"
 - tapOn: "Title"
@@ -22,15 +24,14 @@ appId: com.toughra.ustadmobile
 - tapOn: "Deadline (Optional)"
 - tapOn: "OK"
 - tapOn:
-      text: "Time"
-      index: 1
+    text: "Time"
+    index: 1
 - tapOn: "OK"
-- swipe:
-    start: 100,400
-    end: 100,100
+- scroll
 - tapOn: "End of grace period"
 - tapOn: "OK"
-- tapOn: "Time"
+- tapOn:
+    text: "Time"
 - tapOn: "Switch to text input mode for the time input."
 - tapOn:
     id: "android:id/input_hour"

@@ -6,9 +6,7 @@ appId: com.toughra.ustadmobile
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: "Edit"
-- swipe:
-    start: 100,400
-    end: 100,100
+- scroll
 - tapOn: "Add block"
 - tapOn: "Assignments"
 - tapOn: "Title"
@@ -18,12 +16,11 @@ appId: com.toughra.ustadmobile
 - hideKeyboard
 - tapOn: "Completion criteria"
 - tapOn: "Submitted"
-- swipe:
-    start: 100,400
-    end: 100,100
-- swipe:
-    start: 100,400
-    end: 100,100
+- repeat:
+      while:
+          notVisible: "Must submit all at once"
+      commands:
+          - scroll
 - tapOn: "Must submit all at once"
 - tapOn: "Can make multiple submissions"
 - tapOn: "DONE"

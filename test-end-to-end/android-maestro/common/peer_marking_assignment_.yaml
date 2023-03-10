@@ -1,0 +1,22 @@
+appId: com.toughra.ustadmobile
+---
+# Test parameters needs to provide for this test :
+# 1) TEXT : provide the TEXT to submit assignmentof string type
+# 2) TESTCOURSENAME : provide the course title, it should be a string
+# 3) ASSIGNMENTNAME: Provide assignment name of string type
+- tapOn: "Courses"
+- tapOn: ${TESTCOURSENAME}
+- tapOn: ${ASSIGNMENTNAME}
+- tapOn: "SUBMISSIONS"
+- tapOn: ${STUDENTNAME}
+- tapOn: ${TEXT}
+- tapOn: "Navigate up"
+- tapOn: "Comment"
+- inputText: "Marked by- s4"
+- tapOn: "Points"
+- inputText: ${POINT}
+- tapOn: "SUBMIT GRADE"
+- extendedWaitUntil:
+      notVisible: "SUBMIT"
+      timeout: 10000
+

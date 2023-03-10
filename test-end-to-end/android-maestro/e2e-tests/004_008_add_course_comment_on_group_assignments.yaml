@@ -77,17 +77,7 @@ env:
     env:
       USERNAME: s2
       PASSWORD: test
-- runFlow:
-    file: "../common/student_submit_assignment_block.yaml"
-    env:
-      TESTCOURSENAME: Test Course
-      ASSIGNMENTNAME: Test Assignment
-      TESTFILENAME: H5p_Content.h5p
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-- swipe:
-    start: 100,100
-    end: 100,400
+- scroll
 - runFlow:
     file: "../common/add_class_comments.yaml"
     env:

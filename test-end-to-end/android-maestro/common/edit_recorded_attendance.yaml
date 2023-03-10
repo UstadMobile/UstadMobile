@@ -7,9 +7,7 @@ appId: com.toughra.ustadmobile
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: "ATTENDANCE"
-- swipe:
-      start: 100,400
-      end: 100,100
+- scroll
       # text available for this button keep on changing because it's - date and time so we are using id here
 - tapOn:
     id: "com.toughra.ustadmobile:id/item_clazz_log_attendance_list"

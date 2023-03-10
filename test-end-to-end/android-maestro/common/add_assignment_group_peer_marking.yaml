@@ -1,10 +1,10 @@
 appId: com.toughra.ustadmobile
 ---
-# this test add an assignment block on a course
+# this test add an assignment block on a course with group of 2
 # Test parameters needs to provide for this test :
 # 1) TESTCOURSENAME: provide course name of string type
 # 2) ASSIGNMENTNAME: provide assignment name of string type
-# 3) GROUPTITLE: provide Group title of string type
+# 3) GROUPTITLE: provide group title of string type
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: "Edit"
@@ -54,9 +54,36 @@ appId: com.toughra.ustadmobile
       id: "com.toughra.ustadmobile:id/line_item"
       index: 1
 - tapOn: "SAVE"
-- scroll
-- tapOn: "Must submit all at once"
-- tapOn: "Can make multiple submissions"
+- repeat:
+    while:
+      notVisible: "Teacher"
+    commands:
+      - scroll
+- tapOn: "Teacher"
+- tapOn: "Peers"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/ca_edit_reviewers_number"
+- eraseText
+- inputText: 1
+- tapOn:
+    id: "com.toughra.ustadmobile:id/ca_edit_reviewers_number"
+- eraseText
+- tapOn: "ASSIGN REVIEWERS"
+#---gp1
+- tapOn:
+    text: "Show dropdown menu"
+    index: 0
+- tapOn:
+    text: "Group  2"
+    index: 0
+#---gp2
+- tapOn:
+    text: "Show dropdown menu"
+    index: 1
+- tapOn:
+    text: "Group  1"
+    index: 1
+- tapOn: "DONE"
 - tapOn: "DONE"
 - tapOn: "SAVE"
 - swipe:
