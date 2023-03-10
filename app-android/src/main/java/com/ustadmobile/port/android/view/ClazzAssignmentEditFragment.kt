@@ -34,6 +34,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.locale.entityconstants.*
 import com.ustadmobile.core.util.IdOption
+import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.lib.db.entities.ClazzAssignment
@@ -505,14 +506,16 @@ private fun ClazzAssignmentEditScreen(
         UstadExposedDropDownMenuField(
             value = uiState.entity?.assignment?.caMarkingType ?: 0,
             label = stringResource(R.string.marked_by),
-            options = uiState.markingTypeOptions,
+            options = MarkingTypeConstants.MARKING_TYPE_MESSAGE_IDS,
             enabled = uiState.markingTypeEnabled,
-            itemText = { courseTerminologyEntryResource(terminologyEntries, it) },
+            itemText = {
+                courseTerminologyEntryResource(
+                    terminologyEntries, (it as MessageIdOption2).messageId) },
             onOptionSelected = {
                 onChangeCourseBlockWithEntity(
                     uiState.entity?.shallowCopyCourseBlockWithEntity{
                         assignment = uiState.entity?.assignment?.shallowCopy {
-                            caMarkingType = it
+                            caMarkingType = (it as MessageIdOption2).value
                         }
                     })
             },
