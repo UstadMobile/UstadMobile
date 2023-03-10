@@ -8,6 +8,8 @@ data class ClazzAssignmentEditUiState(
 
     val fieldsEnabled: Boolean = true,
 
+    val markingTypeEnabled: Boolean = true,
+
     val groupSetEnabled: Boolean = true,
 
     val caTitleError: String? = null,

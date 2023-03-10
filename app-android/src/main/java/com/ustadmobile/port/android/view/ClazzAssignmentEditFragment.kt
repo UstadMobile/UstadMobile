@@ -10,6 +10,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -19,6 +20,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.widget.doAfterTextChanged
@@ -357,6 +359,10 @@ private fun ClazzAssignmentEditScreen(
             },
         )
 
+        uiState.caTitleError?.also {
+            Text(it)
+        }
+
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = uiState.entity?.assignment?.caDescription ?: "",
@@ -413,6 +419,9 @@ private fun ClazzAssignmentEditScreen(
                 value = (uiState.entity?.assignment?.caSizeLimit ?: 0).toString(),
                 label = { Text(stringResource(id = R.string.size_limit)) },
                 enabled = uiState.fieldsEnabled,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                ),
                 onValueChange = { newString ->
                     onChangeCourseBlockWithEntity(
                         uiState.entity?.shallowCopyCourseBlockWithEntity{
@@ -427,6 +436,9 @@ private fun ClazzAssignmentEditScreen(
                 value = (uiState.entity?.assignment?.caNumberOfFiles ?: 0).toString(),
                 label = { Text(stringResource(id = R.string.number_of_files)) },
                 enabled = uiState.fieldsEnabled,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                ),
                 onValueChange = { newString ->
                     onChangeCourseBlockWithEntity(
                         uiState.entity?.shallowCopyCourseBlockWithEntity{
@@ -467,6 +479,9 @@ private fun ClazzAssignmentEditScreen(
                 value = (uiState.entity?.assignment?.caTextLimit ?: 0).toString(),
                 label = { Text(stringResource(id = R.string.maximum)) },
                 enabled = uiState.fieldsEnabled,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                ),
                 onValueChange = { newString ->
                     onChangeCourseBlockWithEntity(
                         uiState.entity?.shallowCopyCourseBlockWithEntity{
@@ -497,7 +512,7 @@ private fun ClazzAssignmentEditScreen(
             value = uiState.entity?.assignment?.caMarkingType ?: 0,
             label = stringResource(R.string.marked_by),
             options = uiState.markingTypeOptions,
-            enabled = uiState.fieldsEnabled,
+            enabled = uiState.markingTypeEnabled,
             itemText = { courseTerminologyEntryResource(terminologyEntries, it) },
             onOptionSelected = {
                 onChangeCourseBlockWithEntity(
