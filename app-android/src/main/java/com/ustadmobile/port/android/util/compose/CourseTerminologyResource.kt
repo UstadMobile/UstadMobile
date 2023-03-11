@@ -26,13 +26,26 @@ import org.kodein.di.instance
 fun rememberCourseTerminologyEntries(
     courseTerminology: CourseTerminology?
 ): List<TerminologyEntry> {
-    val di: DI by closestDI(LocalContext.current)
+    //Put inside a try catch, because we might be running in Compose preview
+    var di: DI? = null
+    val context = LocalContext.current
+    try {
+        val closestDI: DI by closestDI(context)
+        di = closestDI
+    }catch(e:Exception) {
+        //Do nothing
+    }
+
     val termJsonStr = courseTerminology?.ctTerminology
     return remember(termJsonStr) {
-        courseTerminology.toTerminologyEntries(
-            json = di.direct.instance(),
-            systemImpl = null,
-        )
+        if(di != null) {
+            courseTerminology.toTerminologyEntries(
+                json = di.direct.instance(),
+                systemImpl = null,
+            )
+        }else {
+            emptyList()
+        }
     }
 }
 
