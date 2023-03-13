@@ -30,7 +30,7 @@ fun StudentResultAndSourcedIds.toOneRosterResult(
 ): Result {
     val courseBlockSourcedId = cbSourcedId ?: studentResult.srCourseBlockUid.toString()
     return Result(
-        sourcedId = studentResult.srSourcedId,
+        sourcedId = studentResult.srSourcedId!!,
         status = if(studentResult.srActive) Status.ACTIVE else Status.TOBEDELETED,
         dateLastModified = format8601Timestamp(studentResult.srScoreDate),
         metaData = studentResult.srMetaData,

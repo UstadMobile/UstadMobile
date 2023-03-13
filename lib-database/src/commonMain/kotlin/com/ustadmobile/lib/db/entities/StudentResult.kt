@@ -71,7 +71,7 @@ data class StudentResult(
     var srUid: Long = 0,
 
     @ColumnInfo(index = true)
-    var srSourcedId: String = "",
+    var srSourcedId: String? = "",
 
     /**
      * The CourseBlock that this result is for (mandatory)
@@ -92,7 +92,7 @@ data class StudentResult(
     /**
      * The sourcedId of the related LineItem
      */
-    var srLineItemSourcedId: String = "",
+    var srLineItemSourcedId: String? = "",
 
     var srStatus: Int = 0,
 
