@@ -125,6 +125,7 @@
             app:layout_constraintTop_toTopOf="@+id/ca_start_date_textinput">
 
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/ca_start_time"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:cursorVisible="false"
@@ -271,6 +272,7 @@
             app:layout_constraintTop_toTopOf="@+id/ca_deadline_date_textinput">
 
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/ca_deadline_time"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:cursorVisible="false"
@@ -328,6 +330,7 @@
             app:layout_constraintTop_toTopOf="@+id/ca_grace_date_textinput">
 
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/ca_grace_time"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:cursorVisible="false"
