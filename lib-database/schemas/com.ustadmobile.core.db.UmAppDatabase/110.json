@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 110,
-    "identityHash": "a761c515c70debea87ec8d3229a31f66",
+    "identityHash": "5a081863fbd7d2236e982f59e9e82b6a",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -6220,7 +6220,7 @@
       },
       {
         "tableName": "CourseBlock",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cbUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cbType` INTEGER NOT NULL, `cbIndentLevel` INTEGER NOT NULL, `cbModuleParentBlockUid` INTEGER NOT NULL, `cbTitle` TEXT, `cbDescription` TEXT, `cbCompletionCriteria` INTEGER NOT NULL, `cbHideUntilDate` INTEGER NOT NULL, `cbDeadlineDate` INTEGER NOT NULL, `cbLateSubmissionPenalty` INTEGER NOT NULL, `cbGracePeriodDate` INTEGER NOT NULL, `cbMaxPoints` INTEGER NOT NULL, `cbMinPoints` INTEGER NOT NULL, `cbIndex` INTEGER NOT NULL, `cbClazzUid` INTEGER NOT NULL, `cbActive` INTEGER NOT NULL, `cbHidden` INTEGER NOT NULL, `cbEntityUid` INTEGER NOT NULL, `cbLct` INTEGER NOT NULL, `cbMetaData` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cbUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cbType` INTEGER NOT NULL, `cbIndentLevel` INTEGER NOT NULL, `cbModuleParentBlockUid` INTEGER NOT NULL, `cbTitle` TEXT, `cbDescription` TEXT, `cbCompletionCriteria` INTEGER NOT NULL, `cbHideUntilDate` INTEGER NOT NULL, `cbDeadlineDate` INTEGER NOT NULL, `cbLateSubmissionPenalty` INTEGER NOT NULL, `cbGracePeriodDate` INTEGER NOT NULL, `cbMaxPoints` INTEGER NOT NULL, `cbMinPoints` INTEGER NOT NULL, `cbIndex` INTEGER NOT NULL, `cbClazzUid` INTEGER NOT NULL, `cbActive` INTEGER NOT NULL, `cbHidden` INTEGER NOT NULL, `cbEntityUid` INTEGER NOT NULL, `cbLct` INTEGER NOT NULL, `cbMetaData` TEXT, `cbSourcedId` TEXT)",
         "fields": [
           {
             "fieldPath": "cbUid",
@@ -6339,6 +6339,12 @@
           {
             "fieldPath": "cbMetaData",
             "columnName": "cbMetaData",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cbSourcedId",
+            "columnName": "cbSourcedId",
             "affinity": "TEXT",
             "notNull": false
           }
@@ -11242,7 +11248,7 @@
       },
       {
         "tableName": "StudentResult",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`srUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `srSourcedId` TEXT NOT NULL, `srCourseBlockUid` INTEGER NOT NULL, `srClazzUid` INTEGER NOT NULL, `srAssignmentUid` INTEGER NOT NULL, `srLineItemSourcedId` TEXT NOT NULL, `srStatus` INTEGER NOT NULL, `srMetaData` TEXT, `srStudentPersonUid` INTEGER NOT NULL, `srStudentGroupId` INTEGER NOT NULL, `srMarkerPersonUid` INTEGER NOT NULL, `srMarkerGroupId` INTEGER NOT NULL, `srScoreStatus` INTEGER NOT NULL, `srScore` REAL NOT NULL, `srScoreDate` INTEGER NOT NULL, `srComment` TEXT, `srAppId` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`srUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `srSourcedId` TEXT NOT NULL, `srCourseBlockUid` INTEGER NOT NULL, `srClazzUid` INTEGER NOT NULL, `srAssignmentUid` INTEGER NOT NULL, `srLineItemSourcedId` TEXT NOT NULL, `srStatus` INTEGER NOT NULL, `srMetaData` TEXT, `srStudentPersonUid` INTEGER NOT NULL, `srStudentGroupId` INTEGER NOT NULL, `srMarkerPersonUid` INTEGER NOT NULL, `srMarkerGroupId` INTEGER NOT NULL, `srScoreStatus` INTEGER NOT NULL, `srScore` REAL NOT NULL, `srScoreDate` INTEGER NOT NULL, `srLastModified` INTEGER NOT NULL, `srComment` TEXT, `srAppId` TEXT, `srActive` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "srUid",
@@ -11335,6 +11341,12 @@
             "notNull": true
           },
           {
+            "fieldPath": "srLastModified",
+            "columnName": "srLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "srComment",
             "columnName": "srComment",
             "affinity": "TEXT",
@@ -11345,6 +11357,12 @@
             "columnName": "srAppId",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "srActive",
+            "columnName": "srActive",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -11433,7 +11451,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a761c515c70debea87ec8d3229a31f66')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5a081863fbd7d2236e982f59e9e82b6a')"
     ]
   }
 }
