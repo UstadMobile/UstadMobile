@@ -124,6 +124,11 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen("UstadAssignmentFileSubmissionListItem",
                 "UstadAssignmentFileSubmissionListItem Preview",
                 UstadAssignmentFileSubmissionListItemPreview),
+            UstadScreen("DiscussionPostEditPreview",
+                "DiscussionPostEditPreview Preview",
+                DiscussionPostEditPreview),
+
+
         )
     }
 }
