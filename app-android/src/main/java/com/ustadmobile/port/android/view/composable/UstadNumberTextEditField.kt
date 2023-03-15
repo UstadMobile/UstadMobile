@@ -26,10 +26,6 @@ fun UstadNumberTextEditField(
     onValueChange: (String) -> Unit,
 ) {
 
-    var valueRemember by remember {
-        mutableStateOf(value)
-    }
-
     var isError by remember {
         mutableStateOf(error != null)
     }
@@ -44,7 +40,6 @@ fun UstadNumberTextEditField(
             value = value,
             modifier = modifier,
             onValueChange = { newText ->
-                valueRemember = newText
                 isError = false
                 onValueChange(newText)
             },
@@ -88,13 +83,18 @@ private fun validateNumber(maxValue: Int?, minValue: Int?, inputText: String): B
 @Preview
 @Composable
 fun UstadNumberTextEditFieldPreview() {
+
+    var number: Int by remember { mutableStateOf(42) }
+
     UstadNumberTextEditField(
         modifier = Modifier.fillMaxWidth(),
         value = "45",
         label = "Phone Number",
         error = "Not Valid",
         enabled = true,
-        onValueChange = {},
+        onValueChange = { newString ->
+            number = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
+        },
         suffixText = "points"
     )
 }
