@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view.composable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.OutlinedTextField
@@ -35,13 +36,14 @@ fun UstadNumberTextEditField(
     }
 
     Column(
-        modifier = modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier,
+        horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Center
     ) {
 
         OutlinedTextField(
             value = value,
+            modifier = modifier,
             onValueChange = { newText ->
                 valueRemember = newText
                 isError = false
@@ -57,10 +59,8 @@ fun UstadNumberTextEditField(
             ),
             keyboardActions = KeyboardActions(
                 onDone = {
-                    if (maxValue != null || minValue != null){
-                        // validate here
-                        isError = validateNumber(maxValue, minValue, inputText = value)
-                    }
+                    // validate here
+                    isError = validateNumber(maxValue, minValue, inputText = value)
                 }
             )
         )
@@ -80,6 +80,7 @@ private fun validateNumber(maxValue: Int?, minValue: Int?, inputText: String): B
 @Composable
 fun UstadNumberTextEditFieldPreview() {
     UstadNumberTextEditField(
+        modifier = Modifier.fillMaxWidth(),
         value = "45",
         label = "Phone Number",
         error = "Not Valid",
