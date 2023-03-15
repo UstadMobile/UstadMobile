@@ -56,5 +56,8 @@ fun UstadNumberTextEditFieldPreview() {
         onValueChange = {
 
         },
+        trailingIcon = {
+            Text("points")
+        }
     )
 }
