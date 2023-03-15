@@ -60,6 +60,7 @@ fun UstadEditField(
  * user starts typing. This isn't strictly reactive to follow the viewmodel, but avoids the need to
  * add a lot of new viewmodel event functions
  */
+@Deprecated("This is trying to do too much and needs split up. Where possible, use the standard OutlinedTextField")
 @Composable
 fun UstadTextEditField(
     value: String,

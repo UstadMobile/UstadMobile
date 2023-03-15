@@ -10,10 +10,7 @@ import mui.material.Container
 import mui.system.Stack
 import mui.system.StackDirection
 import mui.system.responsive
-import react.FC
-import react.Props
-import react.create
-import react.useState
+import react.*
 
 external interface SettingsProps : Props {
 
@@ -65,7 +62,7 @@ val SettingsComponent2 = FC<SettingsProps> { props ->
             UstadDetailField {
                 icon = Language.create()
                 labelText = "English"
-                valueText = strings[MessageID.app_language]
+                valueText = ReactNode(strings[MessageID.app_language])
                 onClick = props.onClickAppLanguage
             }
 
@@ -73,7 +70,7 @@ val SettingsComponent2 = FC<SettingsProps> { props ->
                 UstadDetailField {
                     icon = CalendarMonth.create()
                     labelText = strings[MessageID.holiday_calendars_desc]
-                    valueText = strings[MessageID.holiday_calendars]
+                    valueText = ReactNode(strings[MessageID.holiday_calendars])
                     onClick = props.onClickGoToHolidayCalendarList
                 }
             }
@@ -82,7 +79,7 @@ val SettingsComponent2 = FC<SettingsProps> { props ->
                 UstadDetailField {
                     icon = AccountBalance.create()
                     labelText = strings[MessageID.manage_site_settings]
-                    valueText = strings[MessageID.site]
+                    valueText = ReactNode(strings[MessageID.site])
                     onClick = props.onClickWorkspace
                 }
             }
@@ -91,7 +88,7 @@ val SettingsComponent2 = FC<SettingsProps> { props ->
                 UstadDetailField {
                     icon = ExitToApp.create()
                     labelText = strings[MessageID.leaving_reason_manage]
-                    valueText = strings[MessageID.leaving_reason]
+                    valueText = ReactNode(strings[MessageID.leaving_reason])
                     onClick = props.onClickLeavingReason
                 }
             }
@@ -100,7 +97,7 @@ val SettingsComponent2 = FC<SettingsProps> { props ->
                 UstadDetailField {
                     icon = Language.create()
                     labelText = strings[MessageID.languages_description]
-                    valueText = strings[MessageID.languages]
+                    valueText = ReactNode(strings[MessageID.languages])
                     onClick = props.onClickLangList
                 }
             }

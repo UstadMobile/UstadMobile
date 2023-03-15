@@ -222,7 +222,7 @@ private val DetailFeilds = FC<PersonDetailProps> { props ->
         UstadDetailField {
             icon = CalendarToday.create()
             labelText = strings[MessageID.birthday]
-            valueText = birthdayFormatted
+            valueText = ReactNode(birthdayFormatted)
         }
     }
 
@@ -236,7 +236,7 @@ private val DetailFeilds = FC<PersonDetailProps> { props ->
         UstadDetailField {
             icon = null
             labelText = strings[MessageID.gender_literal]
-            valueText = gender ?: ""
+            valueText = ReactNode(gender ?: "")
         }
     }
 
@@ -244,7 +244,7 @@ private val DetailFeilds = FC<PersonDetailProps> { props ->
         UstadDetailField {
             icon = Badge.create()
             labelText = strings[MessageID.organization_id]
-            valueText = props.uiState.person?.personOrgId ?: ""
+            valueText = ReactNode(props.uiState.person?.personOrgId ?: "")
         }
     }
 
@@ -252,7 +252,7 @@ private val DetailFeilds = FC<PersonDetailProps> { props ->
         UstadDetailField {
             icon = AccountCircle.create()
             labelText = strings[MessageID.username]
-            valueText = props.uiState.person?.username ?: ""
+            valueText = ReactNode(props.uiState.person?.username ?: "")
         }
     }
 }
@@ -263,7 +263,7 @@ private val ContactDetails = FC<PersonDetailProps> { props ->
 
     if (props.uiState.phoneNumVisible){
         UstadDetailField{
-            valueText = props.uiState.person?.phoneNum ?: ""
+            valueText = ReactNode(props.uiState.person?.phoneNum ?: "")
             labelText = strings[MessageID.phone]
             icon = Call.create()
         }
@@ -273,7 +273,7 @@ private val ContactDetails = FC<PersonDetailProps> { props ->
         UstadDetailField {
             icon = Email.create()
             labelText = strings[MessageID.email]
-            valueText = props.uiState.person?.emailAddr ?: ""
+            valueText = ReactNode(props.uiState.person?.emailAddr ?: "")
         }
     }
 
@@ -281,7 +281,7 @@ private val ContactDetails = FC<PersonDetailProps> { props ->
         UstadDetailField {
             icon = LocationOn.create()
             labelText = strings[MessageID.address]
-            valueText = props.uiState.person?.personAddress ?: ""
+            valueText = ReactNode(props.uiState.person?.personAddress ?: "")
         }
     }
 }

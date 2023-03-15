@@ -44,6 +44,12 @@ class UstadAccountManager(
     val di: DI
 ) : IncomingReplicationListener {
 
+   fun interface EndpointFilter {
+
+       fun filterEndpoint(endpointUrl: String): Boolean
+
+   }
+
     data class ResponseWithAccount(val statusCode: Int, val umAccount: UmAccount?)
 
     private inner class UserSessionMediator: DoorMediatorLiveData<List<UserSessionWithPersonAndEndpoint>>() {
@@ -126,8 +132,10 @@ class UstadAccountManager(
     /**
      * Get a list of all accounts that are on the system across all endpoints
      */
-    suspend fun activeSessionsList(endpointFilter: (String) -> Boolean = { true }): List<UserSessionWithPersonAndEndpoint> {
-        return endpointsWithActiveSessions.filter { endpointFilter(it.url) }.flatMap { endpoint ->
+    suspend fun activeSessionsList(
+        endpointFilter: EndpointFilter = EndpointFilter { true }
+    ): List<UserSessionWithPersonAndEndpoint> {
+        return endpointsWithActiveSessions.filter { endpointFilter.filterEndpoint(it.url) }.flatMap { endpoint ->
             val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
             db.userSessionDao.findAllLocalSessionsAsync().map { userSession ->
                 userSession.withEndpoint(endpoint)
@@ -135,8 +143,11 @@ class UstadAccountManager(
         }
     }
 
-    suspend fun activeSessionCount(maxDateOfBirth: Long = 0, endpointFilter: (String) -> Boolean = {true}): Int {
-        return endpointsWithActiveSessions.filter{ endpointFilter(it.url) }.fold(0) { total, endpoint ->
+    suspend fun activeSessionCount(
+        maxDateOfBirth: Long = 0,
+        endpointFilter: EndpointFilter = EndpointFilter { true }
+    ): Int {
+        return endpointsWithActiveSessions.filter { endpointFilter.filterEndpoint(it.url) }.fold(0) { total, endpoint ->
             val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
             total + db.userSessionDao.countAllLocalSessionsAsync(maxDateOfBirth)
         }
@@ -221,7 +232,7 @@ class UstadAccountManager(
         person: Person,
         endpointUrl: String,
         password: String?
-    ) : UserSessionWithPersonAndEndpoint {
+    ) : UserSessionWithPersonAndEndpoint{
         val endpoint = Endpoint(endpointUrl)
         val endpointRepo: UmAppDatabase = di.on(endpoint).direct
             .instance(tag = DoorTag.TAG_REPO)
@@ -435,6 +446,21 @@ class UstadAccountManager(
         const val ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION = "accountmgr.endpointswithsessions"
 
         const val MANIFEST_URL_FALLBACK = "http://localhost/"
+
+        /**
+         * Prefix for preference keys related to External Access Permission
+         */
+        const val KEY_PREFIX_EAPUID = "eap_"
+
+        /**
+         * The AccountType (if used)
+         */
+        const val ACCOUNT_TYPE = "com.ustadmobile"
+
+        /**
+         * Intent action indicating that the caller wants to get an authentication token
+         */
+        const val ACTION_GET_AUTH_TOKEN = "com.ustadmobile.AUTH_GET_TOKEN"
 
     }
 
