@@ -9,9 +9,11 @@ appId: com.toughra.ustadmobile
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: ${ASSIGNMENTNAME}
+- swipe:
+    direction: UP
 - repeat:
       while:
-          notVisible: "${STUDENTFIRSTNAME} ${STUDENTLASTNAME}"
+          notVisible: "Add a private comment"
       commands:
               - scroll
 - tapOn: "Add a private comment"

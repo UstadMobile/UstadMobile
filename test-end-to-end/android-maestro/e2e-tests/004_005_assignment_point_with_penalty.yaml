@@ -56,7 +56,7 @@ env:
 - repeat:
     while:
       notVisible:
-        id: "com.toughra.ustadmobile:id/ca_grace_time"
+        id: "com.toughra.ustadmobile:id/ca_edit_penalty"
     commands:
       - scroll
 - tapOn: "End of grace period"

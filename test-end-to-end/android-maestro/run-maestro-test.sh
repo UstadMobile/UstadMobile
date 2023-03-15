@@ -164,10 +164,10 @@ maestro  --device=$TESTSERIAL  test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER 
 
 TESTSTATUS=$?
 
-#$SCRIPTDIR/../../testserver-controller/stop.sh
+$SCRIPTDIR/../../testserver-controller/stop.sh
 
-#Uninstall when finished
-#adb shell pm uninstall com.toughra.ustadmobile
-#adb shell pm uninstall com.toughra.ustadmobile2
+Uninstall when finished
+adb shell pm uninstall com.toughra.ustadmobile
+adb shell pm uninstall com.toughra.ustadmobile2
 
 exit $TESTSTATUS

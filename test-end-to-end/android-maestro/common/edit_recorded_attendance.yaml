@@ -7,10 +7,8 @@ appId: com.toughra.ustadmobile
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: "ATTENDANCE"
-- scroll
-      # text available for this button keep on changing because it's - date and time so we are using id here
 - tapOn:
-    id: "com.toughra.ustadmobile:id/item_clazz_log_attendance_list"
+      id: "com.toughra.ustadmobile:id/mtrl_calendar_day_selector_frame"
 - tapOn: "Mark all present"
 - tapOn:
         text: "Absent"

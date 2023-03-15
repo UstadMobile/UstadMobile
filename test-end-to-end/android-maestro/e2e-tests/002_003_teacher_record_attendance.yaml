@@ -15,7 +15,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
 - runFlow:
-    file: "../common/create_course_with_1teacher_2students.yaml"
+    file: "../common/create_course_with_1teacher_4students.yaml"
     env:
       TESTCOURSENAME: "Attendance Test"
 - runFlow: "../common/clear_state_and_get_started.yaml"

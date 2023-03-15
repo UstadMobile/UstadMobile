@@ -61,7 +61,7 @@ appId: com.toughra.ustadmobile
 - repeat:
     while:
       notVisible:
-        id: "com.toughra.ustadmobile:id/ca_grace_time"
+        id: "com.toughra.ustadmobile:id/ca_edit_penalty"
     commands:
 - tapOn: "End of grace period"
 - tapOn: "OK"
