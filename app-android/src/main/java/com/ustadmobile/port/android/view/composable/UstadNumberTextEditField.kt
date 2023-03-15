@@ -21,6 +21,8 @@ fun UstadNumberTextEditField(
     enabled: Boolean,
     modifier: Modifier = Modifier,
     error: String? = null,
+    maxValue: Int? = null,
+    minValue: Int? = null,
     onValueChange: (String) -> Unit,
 ) {
 
@@ -29,7 +31,7 @@ fun UstadNumberTextEditField(
     }
 
     var isError by remember {
-        mutableStateOf(false)
+        mutableStateOf(error != null)
     }
 
     Column(
@@ -47,7 +49,7 @@ fun UstadNumberTextEditField(
             },
             label = { Text(text = label) },
             placeholder = { Text(text = label) },
-            isError = error != null,
+            isError = isError,
             enabled = enabled,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
@@ -55,29 +57,32 @@ fun UstadNumberTextEditField(
             ),
             keyboardActions = KeyboardActions(
                 onDone = {
-                    // validate here
-                    isError = validateAge(inputText = value)
+                    if (maxValue != null || minValue != null){
+                        // validate here
+                        isError = validateNumber(maxValue, minValue, inputText = value)
+                    }
                 }
             )
         )
 
-        if (error != null) {
-            UstadErrorText(error = error)
+        if (isError) {
+            UstadErrorText(error = error ?: "")
         }
     }
 }
 
-private fun validateAge(inputText: String): Boolean {
-    return inputText.toInt() < 18
+private fun validateNumber(maxValue: Int?, minValue: Int?, inputText: String): Boolean {
+    return (inputText.toInt() < (maxValue ?: Int.MAX_VALUE)) &&
+            (inputText.toInt() > (minValue ?: Int.MIN_VALUE))
 }
 
 @Preview
 @Composable
 fun UstadNumberTextEditFieldPreview() {
     UstadNumberTextEditField(
-        value = "bob@email.com",
-        label = "Email",
-        error =null,
+        value = "45",
+        label = "Phone Number",
+        error = "Not Valid",
         enabled = true,
         onValueChange = {}
     )
