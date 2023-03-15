@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useViewModel
+import com.ustadmobile.core.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.SortOrderOption
@@ -35,7 +35,6 @@ external interface PersonListProps: UstadScreenProps {
 }
 
 val PersonListComponent2 = FC<PersonListProps> { props ->
-
     val infiniteQueryResult = usePagingSource(
         props.uiState.personList, QueryKey("PersonList"), GlobalScope, true, 50
     )
@@ -100,13 +99,13 @@ val PersonListScreenPreview = FC<UstadScreenProps> { props ->
     PersonListComponent2 {
         + props
         uiState = PersonListUiState(
-            personList = ListPagingSource(demoPersonList)
+            personList = { ListPagingSource(demoPersonList) }
         )
     }
 }
 
 val PersonListScreen = FC<UstadScreenProps> { props ->
-    val viewModel = useViewModel(
+    val viewModel = useUstadViewModel(
         onAppUiStateChange = props.onAppUiStateChanged
     ) { di, savedSateHandle ->
         console.log("Creating PersonListviewModel")

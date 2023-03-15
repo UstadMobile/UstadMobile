@@ -5,18 +5,23 @@ import js.core.jso
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.promise
 import react.useEffect
+import react.useMemo
 import react.useState
 import tanstack.query.core.QueryKey
 import tanstack.react.query.UseInfiniteQueryResult
 import tanstack.react.query.useInfiniteQuery
 
 fun <Key: Any, Value: Any> usePagingSource(
-    pagingSource: PagingSource<Key, Value>,
+    pagingSourceFactory: () -> PagingSource<Key, Value>,
     queryKey: QueryKey,
     coroutineScope: CoroutineScope,
     placeholdersEnabled: Boolean,
     loadSize: Int = 50,
 ) : UseInfiniteQueryResult<LoadResult<Key, Value>, Throwable> {
+
+    val pagingSource = useMemo(pagingSourceFactory) {
+        pagingSourceFactory()
+    }
 
     val infiniteQueryResult: UseInfiniteQueryResult<LoadResult<Key, Value>, Throwable> = useInfiniteQuery(
         queryKey = queryKey,
@@ -46,10 +51,10 @@ fun <Key: Any, Value: Any> usePagingSource(
         }
     )
 
-    var loadedPagingSource by useState { pagingSource }
-    useEffect(pagingSource) {
-        if(loadedPagingSource !== pagingSource) {
-            loadedPagingSource = pagingSource
+    var loadedPagingSource by useState { pagingSourceFactory }
+    useEffect(pagingSourceFactory) {
+        if(loadedPagingSource !== pagingSourceFactory) {
+            loadedPagingSource = pagingSourceFactory
             infiniteQueryResult.refetch(jso {  })
         }
     }

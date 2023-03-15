@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 data class PersonListUiState(
-    val personList: PagingSource<Int, PersonWithDisplayDetails> = EmptyPagingSource(),
+    val personList: () -> PagingSource<Int, PersonWithDisplayDetails> = { EmptyPagingSource() },
     val sortOptions: List<SortOrderOption> = listOf(
         SortOrderOption(MessageID.first_name, PersonDaoCommon.SORT_FIRST_NAME_ASC, true),
         SortOrderOption(MessageID.first_name, PersonDaoCommon.SORT_FIRST_NAME_DESC, false),
@@ -71,7 +71,7 @@ class PersonListViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                personList = createPagingSource(prev)
+                personList = { createPagingSource(prev) }
             )
         }
 
@@ -103,14 +103,14 @@ class PersonListViewModel(
 
     override fun onUpdateSearchResult(searchText: String) {
         _uiState.update { prev ->
-            prev.copy(personList = createPagingSource(prev))
+            prev.copy(personList = { createPagingSource(prev) })
         }
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {
         _uiState.update { prev ->
             prev.copy(
-                personList = createPagingSource(prev.copy(sortOption = sortOption)),
+                personList = { createPagingSource(prev.copy(sortOption = sortOption)) },
                 sortOption = sortOption
             )
         }

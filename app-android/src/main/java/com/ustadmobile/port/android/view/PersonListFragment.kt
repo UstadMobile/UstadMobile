@@ -84,10 +84,14 @@ fun PersonListScreen(
 
     // As per
     // https://developer.android.com/reference/kotlin/androidx/paging/compose/package-summary#collectaslazypagingitems
+    // Must provide a factory to pagingSourceFactory that will
+    // https://issuetracker.google.com/issues/241124061
+
     val pager = remember(uiState.personList) {
         Pager(
-            PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200)
-        ) { uiState.personList }
+            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
+            pagingSourceFactory = uiState.personList
+        )
     }
 
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
@@ -134,14 +138,16 @@ fun PersonListScreen(
 private fun PersonEditPreview() {
     PersonListScreen(
         uiState = PersonListUiState(
-            personList = ListPagingSource(listOf(
-                PersonWithDisplayDetails().apply {
-                    firstNames = "Ahmad"
-                    lastName = "Ahmadi"
-                    admin = true
-                    personUid = 3
-                }
-            ))
+            personList = {
+                ListPagingSource(listOf(
+                    PersonWithDisplayDetails().apply {
+                        firstNames = "Ahmad"
+                        lastName = "Ahmadi"
+                        admin = true
+                        personUid = 3
+                    }
+                ))
+            }
         )
     )
 }

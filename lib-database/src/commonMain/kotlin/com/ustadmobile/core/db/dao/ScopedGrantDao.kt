@@ -316,13 +316,12 @@ expect abstract class ScopedGrantDao {
     @Query(
         """
         SELECT EXISTS(
-                SELECT personUid
-                  FROM Person
-                       JOIN PersonGroupMember 
-                           ON PersonGroupMember.groupMemberPersonUid = Person.personUid
+                SELECT PersonGroupMember.groupMemberGroupUid
+                  FROM PersonGroupMember 
                        JOIN ScopedGrant
                            ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-                 WHERE (ScopedGrant.sgPermissions & :permission) > 0        
+                 WHERE PersonGroupMember.groupMemberPersonUid = :personUid
+                   AND (ScopedGrant.sgPermissions & :permission) > 0    
                )
         """
     )

@@ -6,7 +6,7 @@ import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.hooks.useViewModel
+import com.ustadmobile.core.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.viewmodel.PersonDetailViewModel
 import com.ustadmobile.lib.db.entities.Clazz
@@ -29,7 +29,7 @@ import kotlin.js.Date
 import csstype.px
 
 val PersonDetailScreen = FC<UstadScreenProps>() { props ->
-    val viewModel = useViewModel(
+    val viewModel = useUstadViewModel(
         onAppUiStateChange = props.onAppUiStateChanged,
         onShowSnack = props.onShowSnackBar,
     ) { di, savedStateHandle ->

@@ -23,7 +23,7 @@ val demoPersonList = (0..100).map {
     }
 }
 
-val demoPagingSource = ListPagingSource(demoPersonList)
+val demoPagingSource = { ListPagingSource(demoPersonList) }
 
 val VirtualListPreview = FC<UstadScreenProps> {props ->
 
