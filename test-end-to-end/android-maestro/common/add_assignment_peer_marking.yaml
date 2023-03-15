@@ -8,7 +8,11 @@ appId: com.toughra.ustadmobile
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: "Edit"
-- scroll
+- repeat:
+      while:
+          notVisible: "Add block"
+      commands:
+          - scroll
 - tapOn: "Add block"
 - tapOn: "Assignments"
 - tapOn: "Title"
@@ -56,9 +60,13 @@ appId: com.toughra.ustadmobile
 - tapOn:
     id: "com.toughra.ustadmobile:id/line_item"
     index: 1
-#---scroll
-- scroll
-- scroll
+- repeat:
+      while:
+          notVisible:
+              text: "Show dropdown menu"
+              index: 4
+      commands:
+          - scroll
 #-----s3
 - tapOn:
     text: "Show dropdown menu"

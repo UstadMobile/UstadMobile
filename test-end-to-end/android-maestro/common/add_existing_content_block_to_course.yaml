@@ -5,7 +5,11 @@ appId: com.toughra.ustadmobile
 # edit the course to add blocks
 - tapOn: "Edit"
 # Add block button will be only visible after scrolling to down
-- scroll
+- repeat:
+    while:
+      notVisible: "Add block"
+    commands:
+      - scroll
 # add existing content
 - tapOn: "Add block"
 - tapOn: "Content"

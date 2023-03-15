@@ -8,7 +8,11 @@ appId: com.toughra.ustadmobile
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: "Edit"
-- scroll
+- repeat:
+    while:
+      notVisible: "Add block"
+    commands:
+      - scroll
 - tapOn: "Add block"
 - tapOn: "Assignments"
 - tapOn: "Title"
@@ -54,7 +58,11 @@ appId: com.toughra.ustadmobile
       id: "com.toughra.ustadmobile:id/line_item"
       index: 1
 - tapOn: "SAVE"
-- scroll
+- repeat:
+    while:
+      notVisible: "Must submit all at once"
+    commands:
+      - scroll
 - tapOn: "Must submit all at once"
 - tapOn: "Can make multiple submissions"
 - tapOn: "DONE"

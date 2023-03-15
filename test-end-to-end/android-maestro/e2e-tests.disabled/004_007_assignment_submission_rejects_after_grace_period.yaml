@@ -29,11 +29,62 @@ env:
     env:
       USERNAME: t1
       PASSWORD: test
-- runFlow:
-    file: "../common/add_assignment_2min_after_grace_period.yaml"
-    env:
-      ASSIGNMENTNAME: Test Assignment
-      TESTCOURSENAME: Test Course
+appId: com.toughra.ustadmobile
+---
+# this test add an assignment block on a course with deadline and grace period
+# Test parameters needs to provide for this test :
+# 1) TESTCOURSENAME: provide course name of string type
+# 2) ASSIGNMENTNAME: provide assignment name of string type
+- tapOn: "Courses"
+- tapOn: "Test Course"
+- tapOn: "Edit"
+- repeat:
+    while:
+      notVisible: "Add block"
+    commands:
+      - scroll
+- tapOn: "Add block"
+- tapOn: "Assignments"
+- tapOn: "Title"
+- inputText: "Test Assignment"
+- tapOn: "Description (Optional)"
+- inputText: "Test "
+- hideKeyboard
+- tapOn: "Completion criteria"
+- tapOn: "Submitted"
+- tapOn: "Deadline (Optional)"
+- tapOn: "OK"
+- tapOn:
+    text: "Time"
+    index: 1
+- tapOn: "OK"
+- repeat:
+    while:
+      notVisible:
+        id: "com.toughra.ustadmobile:id/ca_grace_time"
+    commands:
+- tapOn: "End of grace period"
+- tapOn: "OK"
+- tapOn:
+    text: "Time"
+    index: 2
+- tapOn: "Switch to text input mode for the time input."
+- tapOn:
+    id: "android:id/input_hour"
+- runScript: settime_hr.js
+- inputText: ${output.settime_hr.result}
+- tapOn:
+    id: "android:id/input_minute"
+- runScript: settime_min.js
+- inputText: ${output.settime_min.result}
+- tapOn: "OK"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/ca_edit_penalty"
+- eraseText
+- inputText: "10"
+- tapOn: "DONE"
+- tapOn: "SAVE"
+
 #-------------------------------------------------------------------------student submit assignment
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
 - runFlow: "../build/common-app2/select_site.yaml"

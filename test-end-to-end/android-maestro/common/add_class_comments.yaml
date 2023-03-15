@@ -8,7 +8,11 @@ appId: com.toughra.ustadmobile
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: ${ASSIGNMENTNAME}
-- scroll
+- repeat:
+        while:
+            notVisible: "Add a class comment"
+        commands:
+              - scroll
 - tapOn: "Add a class comment"
 - inputText: ${CLASSCOMMENT}
 - tapOn:

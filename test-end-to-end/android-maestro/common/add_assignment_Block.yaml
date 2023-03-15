@@ -12,9 +12,7 @@ appId: com.toughra.ustadmobile
       while:
         notVisible: "Add block"
       commands:
-         - swipe:
-                start: 100,400
-                end: 100,100
+         - scroll
 - tapOn: "Add block"
 - tapOn: "Assignments"
 - tapOn: "Title"

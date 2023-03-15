@@ -18,7 +18,7 @@ TESTAPK2=$SCRIPTDIR/build/apks/app-android-launcher-release-2.apk
 TESTRESULTSDIR=""
 CONTROLSERVER=""
 USECONSOLEOUTPUT=0
-NOUBUILD=0
+NOBUILD=0
 echo $SCRIPTDIR
 while true; do
         case "$1" in
@@ -74,7 +74,7 @@ while true; do
                 ;;
                 '-n'|'--nobuild')
                     echo "no build"
-                    NOUBUILD=1
+                    NOBUILD=1
                     shift 1
                     continue
                ;;
@@ -137,6 +137,7 @@ if [ "$(adb shell pm list packages com.toughra.ustadmobile2)" != "" ]; then
 fi
 
 if [ "$NOBUILD" != "1" ]; then
+ echo "nobuild: $NOBUILD"
  $SCRIPTDIR/build-extra-app-copy.sh
 fi
 
@@ -163,10 +164,10 @@ maestro  --device=$TESTSERIAL  test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER 
 
 TESTSTATUS=$?
 
-$SCRIPTDIR/../../testserver-controller/stop.sh
+#$SCRIPTDIR/../../testserver-controller/stop.sh
 
 #Uninstall when finished
-adb shell pm uninstall com.toughra.ustadmobile
-adb shell pm uninstall com.toughra.ustadmobile2
+#adb shell pm uninstall com.toughra.ustadmobile
+#adb shell pm uninstall com.toughra.ustadmobile2
 
 exit $TESTSTATUS

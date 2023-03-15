@@ -8,7 +8,11 @@ appId: com.toughra.ustadmobile
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: "Edit"
-- scroll
+- repeat:
+    while:
+      notVisible: "Add block"
+    commands:
+      - scroll
 - tapOn: "Add block"
 - tapOn: "Assignments"
 - tapOn: "Title"
@@ -18,7 +22,11 @@ appId: com.toughra.ustadmobile
 - hideKeyboard
 - tapOn: "Completion criteria"
 - tapOn: "Submitted"
-- scroll
+- repeat:
+    while:
+      notVisible: "Individual Submission"
+    commands:
+      - scroll
 - tapOn: "Individual Submission"
 - tapOn: "New group set"
 - tapOn: "Title"

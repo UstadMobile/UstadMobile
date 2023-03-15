@@ -31,12 +31,55 @@ env:
     env:
       USERNAME: t1
       PASSWORD: test
-- runFlow:
-    file: "../common/add_assignment_with_grace_period.yaml"
-    env:
-      TESTCOURSENAME: Test Course
-      ASSIGNMENTNAME: Test Assignment
-
+- tapOn: "Courses"
+- tapOn: "Test Course"
+- tapOn: "Edit"
+- repeat:
+    while:
+      notVisible: "Add block"
+    commands:
+      - scroll
+- tapOn: "Add block"
+- tapOn: "Assignments"
+- tapOn: "Title"
+- inputText: "Test Assignment"
+- tapOn: "Description (Optional)"
+- inputText: "Test "
+- hideKeyboard
+- tapOn: "Completion criteria"
+- tapOn: "Submitted"
+- tapOn: "Deadline (Optional)"
+- tapOn: "OK"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/ca_deadline_time"
+- tapOn: "OK"
+- repeat:
+    while:
+      notVisible:
+        id: "com.toughra.ustadmobile:id/ca_grace_time"
+    commands:
+      - scroll
+- tapOn: "End of grace period"
+- tapOn: "OK"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/ca_grace_time"
+- tapOn: "Switch to text input mode for the time input."
+- tapOn:
+    id: "android:id/input_hour"
+- inputText: "11"
+- tapOn:
+    id: "android:id/input_minute"
+- inputText: "30"
+- tapOn:
+    id: "android:id/am_pm_spinner"
+- tapOn: "PM"
+- tapOn: "OK"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/ca_edit_penalty"
+- eraseText
+- inputText: "10"
+- tapOn: "DONE"
+- tapOn: "SAVE"
 #-------------------------------------------student submit assignment
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
 - runFlow: "../build/common-app2/select_site.yaml"
