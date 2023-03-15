@@ -1,19 +1,24 @@
 package com.ustadmobile.port.android.view.composable
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
+import androidx.compose.runtime.R
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun UstadNumberTextEditField(
@@ -24,6 +29,7 @@ fun UstadNumberTextEditField(
     error: String? = null,
     maxValue: Int? = null,
     minValue: Int? = null,
+    suffixText: String? = null,
     onValueChange: (String) -> Unit,
 ) {
 
@@ -53,6 +59,16 @@ fun UstadNumberTextEditField(
             placeholder = { Text(text = label) },
             isError = isError,
             enabled = enabled,
+            trailingIcon = if(suffixText != null) {
+                {
+                    Text(
+                        text = suffixText,
+                        modifier = Modifier.padding(end = 16.dp)
+                    )
+                }
+            }else {
+                null
+            },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Done
@@ -85,6 +101,7 @@ fun UstadNumberTextEditFieldPreview() {
         label = "Phone Number",
         error = "Not Valid",
         enabled = true,
-        onValueChange = {}
+        onValueChange = {},
+        suffixText = "points"
     )
 }
