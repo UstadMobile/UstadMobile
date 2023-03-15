@@ -16,7 +16,7 @@ fun UstadNumberTextEditField(
     enabled: Boolean,
     modifier: Modifier = Modifier,
     error: String? = null,
-    trailingIcon: (() -> Unit)? = null,
+    trailingIcon: (@Composable () -> Unit)? = null,
     onValueChange: (Int) -> Unit,
 ) {
 
