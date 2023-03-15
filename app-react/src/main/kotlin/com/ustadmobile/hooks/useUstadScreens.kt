@@ -124,6 +124,9 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen("UstadAssignmentFileSubmissionListItem",
                 "UstadAssignmentFileSubmissionListItem Preview",
                 UstadAssignmentFileSubmissionListItemPreview),
+            UstadScreen(ReportEditView.VIEW_NAME,
+                "Report Edit Preview",
+                ReportEditScreenPreview),
         )
     }
 }
