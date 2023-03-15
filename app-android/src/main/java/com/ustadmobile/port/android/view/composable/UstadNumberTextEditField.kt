@@ -9,37 +9,44 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 
+/**
+ * See
+ *  https://dev.to/pchmielowski/jetpack-compose-textfield-which-accepts-and-emits-value-other-than-string-1g3o
+ */
 @Composable
 fun UstadNumberTextEditField(
     value: Int,
-    label: String,
-    enabled: Boolean,
-    modifier: Modifier = Modifier,
-    error: String? = null,
-    trailingIcon: (@Composable () -> Unit)? = null,
     onValueChange: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    isError: Boolean = false,
+    label: (@Composable () -> Unit)? = null,
+    placeholder: (@Composable () -> Unit)? = null,
+    trailingIcon: (@Composable () -> Unit)? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(
+        keyboardType = KeyboardType.Number
+    )
 ) {
 
-    var strValue: String by remember {
+    var rawValue by remember(value) {
         mutableStateOf(if(value != 0) value.toString() else "")
     }
 
     OutlinedTextField(
-        value = strValue,
+        value = rawValue,
         modifier = modifier,
         onValueChange = { text ->
-            strValue = text
-            val intVal = text.filter { it.isDigit() }.toIntOrNull() ?: 0
+            val filteredText = text.filter { it.isDigit() }
+            rawValue = filteredText
+            val intVal = filteredText.toIntOrNull() ?: 0
             onValueChange(intVal)
         },
-        isError = error != null,
-        label = { Text(text = label) },
-        placeholder = { Text(text = label) },
+        isError = isError,
+        label = label,
+        placeholder = placeholder,
         enabled = enabled,
         trailingIcon = trailingIcon,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Number,
-        ),
+        keyboardOptions = keyboardOptions,
     )
 }
 
@@ -47,14 +54,17 @@ fun UstadNumberTextEditField(
 @Composable
 fun UstadNumberTextEditFieldPreview() {
 
+    var aNumber by remember {
+        mutableStateOf(0)
+    }
+
     UstadNumberTextEditField(
         modifier = Modifier.fillMaxWidth(),
-        value = 0,
-        label = "Phone Number",
-        error = "Not Valid",
+        value = aNumber,
+        label = { Text("Phone Number") },
         enabled = true,
         onValueChange = {
-
+            aNumber = it
         },
         trailingIcon = {
             Text("points")
