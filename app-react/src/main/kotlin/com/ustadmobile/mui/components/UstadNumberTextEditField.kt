@@ -13,7 +13,7 @@ external interface UstadNumberTextEditFieldProps : Props {
     /**
      * Text value in the field
      */
-    var value: Int?
+    var value: Int
 
     /**
      * Label to show the user
