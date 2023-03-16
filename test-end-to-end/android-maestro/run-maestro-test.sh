@@ -2,7 +2,7 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 's:u:p:e:t:a:cr:n' --long 'serial1:,username:,password:,endpoint:,test:,apk:,console-output,result:,nobuild' -n 'run-maestro-tests.sh' -- "$@")
+TEMP=$(getopt -o 's:u:p:e:t:a1:a2:cr:n' --long 'serial1:,username:,password:,endpoint:,test:,apk1:,apk2:,console-output,result:,nobuild' -n 'run-maestro-tests.sh' -- "$@")
 
 
 eval set -- "$TEMP"
@@ -67,17 +67,17 @@ while true; do
                      continue
                 ;;
                 '-r'|'--result')
-                    echo "result"
+                     echo "result"
                     TESTRESULTSDIR=$2
                     shift 2
                     continue
                 ;;
-                '-n'|'--nobuild')
-                    echo "no build"
-                    NOBUILD=1
-                    shift 1
-                    continue
-               ;;
+                  '-n'|'--nobuild')
+                       echo "no build"
+                      NOBUILD=1
+                       shift 1
+                       continue
+                ;;
                 '--')
 
                         shift
@@ -88,7 +88,7 @@ while true; do
 done
 
 if [ "$TESTSERIAL" == "" ]; then
-  echo "Please specify adb device serial usign --serial1 param"
+  echo "Please specify adb device serial using--serial1 param"
   exit 1
 fi
 
@@ -131,13 +131,11 @@ adb reverse tcp:8075 tcp:8075
 if [ "$(adb shell pm list packages com.toughra.ustadmobile)" != "" ]; then
   adb shell pm uninstall com.toughra.ustadmobile
 fi
-
 if [ "$(adb shell pm list packages com.toughra.ustadmobile2)" != "" ]; then
   adb shell pm uninstall com.toughra.ustadmobile2
 fi
 
 if [ "$NOBUILD" != "1" ]; then
- echo "nobuild: $NOBUILD"
  $SCRIPTDIR/build-extra-app-copy.sh
 fi
 
@@ -156,18 +154,20 @@ if [ "$USECONSOLEOUTPUT" == "1" ]; then
   OUTPUTARGS=""
 fi
 
+
+
 maestro  --device=$TESTSERIAL  test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
          -e TESTSERIAL=$TESTSERIAL $OUTPUTARGS\
          $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR \
-          #--include-tags=checklist4
+         #--include-tags=checklist4
 
 TESTSTATUS=$?
 
-$SCRIPTDIR/../../testserver-controller/stop.sh
+#$SCRIPTDIR/../../testserver-controller/stop.sh
 
-Uninstall when finished
-adb shell pm uninstall com.toughra.ustadmobile
-adb shell pm uninstall com.toughra.ustadmobile2
+#uninstall apps
+ #adb shell pm uninstall com.toughra.ustadmobile
+ #adb shell pm uninstall com.toughra.ustadmobile2
 
 exit $TESTSTATUS

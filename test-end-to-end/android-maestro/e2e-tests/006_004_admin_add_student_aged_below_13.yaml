@@ -1,0 +1,49 @@
+appId: com.toughra.ustadmobile
+tags:
+  - checklist6
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/006_005_admin_can_enable_or_disable_guest_login"
+  TESTNAME: 006_005_admin_can_enable_or_disable_guest_login.yaml
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+# admin enable user registration button
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+
+- tapOn: "People"
+- tapOn: "PERSON"
+- tapOn: "First names"
+- inputText: "Student"
+- tapOn: "Last name"
+- inputText: "1"
+- tapOn: "Gender"
+- tapOn: Female
+- tapOn: "Birthday"
+- tapOn: "OK"
+- tapOn: "Save"
+- inputText: "test"
+- tapOn: "CREATE ACCOUNT"
+- tapOn: "Username"
+- inputText: "s1"
+- tapOn: "New password"
+- inputText: "test"
+- tapOn: "Confirm password"
+- inputText: "test"
+- tapOn: "SAVE"
+
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+    env:
+      USERNAME: s1
+      PASSWORD: test
+
