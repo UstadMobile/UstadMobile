@@ -24,8 +24,6 @@ external interface UstadNumberTextEditFieldProps : Props {
     var placeholder: String?
 
 
-    var endAdornment: ReactNode?
-
     /**
      * Error text, if any. Default is null. Null indicates no error. If there is an error, the field
      * will be in error state (e.g. red) and the text will be shown underneath
@@ -39,6 +37,10 @@ external interface UstadNumberTextEditFieldProps : Props {
      * Enabled or disabled
      */
     var disabled: Boolean?
+
+
+    var asDynamic: InputBaseProps
+
 
     /**
      * onChange event handler
@@ -90,7 +92,12 @@ val UstadNumberTextEditFieldPreview = FC<Props> {
         label = ReactNode("Phone")
         placeholder = "Phone"
         disabled = false
-        endAdornment = ReactNode("points")
+        asDynamic().InputProps = jso<InputBaseProps> {
+            endAdornment = InputAdornment.create {
+                position = InputAdornmentPosition.end
+                + ("point")
+            }
+        }
         inputProps = jso {
             readOnly = true
             inputMode = InputMode.numeric
