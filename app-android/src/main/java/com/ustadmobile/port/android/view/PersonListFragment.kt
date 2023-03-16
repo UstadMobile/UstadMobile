@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -25,6 +26,9 @@ import androidx.paging.compose.items
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.*
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
+import com.ustadmobile.port.android.util.ext.getActivityContext
+import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
 
 interface InviteWithLinkHandler{
     fun handleClickInviteWithLink()
@@ -67,9 +71,19 @@ fun PersonListScreen(
 ) {
     val uiState: PersonListUiState by viewModel.uiState.collectAsState(PersonListUiState())
 
+    val context = LocalContext.current
+
     PersonListScreen(
         uiState = uiState,
-        onClickSort =  { },
+        onClickSort =  {
+            SortBottomSheetFragment(
+                sortOptions = uiState.sortOptions,
+                selectedSort = uiState.sortOption,
+                onSortOptionSelected = {
+                    viewModel.onSortOrderChanged(it)
+                }
+            ).show(context.getContextSupportFragmentManager(), "SortOptions")
+        },
         onListItemClick = viewModel::onClickEntry
     )
 }
@@ -104,6 +118,9 @@ fun PersonListScreen(
 
         item {
             UstadListSortHeader(
+                modifier = Modifier
+                    .defaultItemPadding()
+                    .fillMaxWidth(),
                 activeSortOrderOption = uiState.sortOption,
                 onClickSort = onClickSort
             )

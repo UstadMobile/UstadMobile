@@ -14,15 +14,22 @@ import com.toughra.ustadmobile.databinding.ItemSortOptionBinding
 import com.ustadmobile.core.controller.OnSortOptionSelected
 import com.ustadmobile.core.util.SortOrderOption
 
-class SortBottomSheetFragment(private val sortOptions: List<SortOrderOption>?, private var selectedSort: SortOrderOption? = sortOptions?.get(0), private var onSortOptionSelected: OnSortOptionSelected?) : BottomSheetDialogFragment(), OnSortOptionSelected {
+class SortBottomSheetFragment(
+    private val sortOptions: List<SortOrderOption>?,
+    private var selectedSort: SortOrderOption? = sortOptions?.get(0),
+    private var onSortOptionSelected: OnSortOptionSelected?,
+) : BottomSheetDialogFragment(), OnSortOptionSelected {
 
     private var mRecyclerViewAdapter: SortListRecyclerViewAdapter? = null
     private var mBinding: FragmentSortOptionListBinding? = null
 
     private var mRecyclerView: RecyclerView? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         val rootView: View
         mBinding = FragmentSortOptionListBinding.inflate(inflater, container, false).also {
             rootView = it.root
@@ -36,9 +43,22 @@ class SortBottomSheetFragment(private val sortOptions: List<SortOrderOption>?, p
         return rootView
     }
 
-    class SortListHolder(val itemBinding: ItemSortOptionBinding) : RecyclerView.ViewHolder(itemBinding.root)
+    override fun onDestroyView() {
+        super.onDestroyView()
+        onSortOptionSelected = null
+        mBinding = null
+        mRecyclerView = null
+        mRecyclerViewAdapter = null
+    }
 
-    class SortListRecyclerViewAdapter(private var selectedListener: OnSortOptionSelected, private var selectedSort: SortOrderOption?) : ListAdapter<SortOrderOption, SortListHolder>(DIFFUTIL_SORT) {
+    class SortListHolder(
+        val itemBinding: ItemSortOptionBinding
+    ) : RecyclerView.ViewHolder(itemBinding.root)
+
+    class SortListRecyclerViewAdapter(
+        private var selectedListener: OnSortOptionSelected,
+        private var selectedSort: SortOrderOption?
+    ) : ListAdapter<SortOrderOption, SortListHolder>(DIFFUTIL_SORT) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SortListHolder {
             return SortListHolder(ItemSortOptionBinding.inflate(LayoutInflater.from(parent.context),
@@ -72,19 +92,9 @@ class SortBottomSheetFragment(private val sortOptions: List<SortOrderOption>?, p
             }
 
             override fun areContentsTheSame(oldItem: SortOrderOption, newItem: SortOrderOption): Boolean {
-                return oldItem == newItem
+                return oldItem.fieldMessageId == newItem.fieldMessageId && oldItem.order == newItem.order
             }
         }
     }
-
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        onSortOptionSelected = null
-        mBinding = null
-        mRecyclerView = null
-        mRecyclerViewAdapter = null
-    }
-
 
 }

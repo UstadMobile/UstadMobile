@@ -132,7 +132,9 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
                         fab.setTag(R.id.tag_fab_uistate_icon, appUiState.fabState.icon)
                     }
 
-                    if(fab != null && fab.getTag(R.id.tag_fab_uistate_listener) != appUiState.fabState.onClick) {
+                    //If this is set by anything else, then the tag could be out of sync with the actual value,
+                    // so can't rely on tab until presenter based screens are removed.
+                    if(fab != null) {
                         fab.setOnClickListener {
                             appUiState.fabState.onClick()
                         }
