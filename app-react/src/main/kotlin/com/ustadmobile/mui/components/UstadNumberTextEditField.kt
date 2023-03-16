@@ -1,6 +1,5 @@
 package com.ustadmobile.mui.components
 
-import js.core.jso
 import mui.material.*
 import react.*
 import react.dom.onChange
@@ -36,7 +35,7 @@ external interface UstadNumberTextEditFieldProps : Props {
     /**
      * Enabled or disabled
      */
-    var enabled: Boolean?
+    var disabled: Boolean?
 
     /**
      * onChange event handler
@@ -46,7 +45,10 @@ external interface UstadNumberTextEditFieldProps : Props {
     /**
      * InputProps setter functions - can be used to add adornments, set the input type, etc.
      */
-    var inputProps: ((InputBaseProps) -> Unit)?
+    var inputProps: InputBaseComponentProps
+
+
+    var type: InputType?
 
 }
 
@@ -59,25 +61,12 @@ val UstadNumberTextEditField = FC<UstadNumberTextEditFieldProps> { props ->
     }
 
     TextField {
+
+        + props
+
         variant = FormControlVariant.outlined
-        label = props.label
         value = rawValue
-        disabled = !(props.enabled ?: true)
-        placeholder = props.placeholder
 
-        //As per MUI showcase
-        asDynamic().InputProps = jso<InputBaseProps> {
-            endAdornment = props.endAdornment
-
-            props.inputProps?.also { inputPropsFn ->
-                inputPropsFn(this)
-            }
-        }
-
-        error = errorText != null
-        helperText = errorText?.let { ReactNode(it) }
-        fullWidth = props.fullWidth
-        type = InputType.number
         onChange = {
             val text = (it.target.asDynamic().value)?.toString() ?: ""
             errorText = null
@@ -100,7 +89,7 @@ val UstadNumberTextEditFieldPreview = FC<Props> {
         value = aNumber
         label = ReactNode("Phone Number")
         placeholder = "Phone Number"
-        enabled = true
+        disabled = false
         endAdornment = InputAdornment.create {
             Typography {
                + "points"
