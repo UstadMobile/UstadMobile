@@ -57,8 +57,6 @@ external interface UstadNumberTextEditFieldProps : Props {
 
 val UstadNumberTextEditField = FC<UstadNumberTextEditFieldProps> { props ->
 
-    var errorText by useState { props.error }
-
     var rawValue by useState {
         if(props.value != 0) props.value.toString() else ""
     }
@@ -72,7 +70,6 @@ val UstadNumberTextEditField = FC<UstadNumberTextEditFieldProps> { props ->
 
         onChange = {
             val text = (it.target.asDynamic().value)?.toString() ?: ""
-            errorText = null
 
             val filteredText = text.filter { it.isDigit() }
             rawValue = filteredText
@@ -90,17 +87,13 @@ val UstadNumberTextEditFieldPreview = FC<Props> {
 
     UstadNumberTextEditField {
         value = aNumber
-        label = ReactNode("Phone Number")
-        placeholder = "Phone Number"
+        label = ReactNode("Phone")
+        placeholder = "Phone"
         disabled = false
+        endAdornment = ReactNode("points")
         inputProps = jso {
             readOnly = true
             inputMode = InputMode.numeric
-
-            //As per MUI showcase
-            asDynamic().InputProps = jso<InputBaseProps> {
-                endAdornment = ReactNode("points")
-            }
         }
 
         onChange = {
