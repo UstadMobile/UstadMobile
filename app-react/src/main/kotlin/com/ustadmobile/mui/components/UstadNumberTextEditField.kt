@@ -26,7 +26,7 @@ external interface UstadNumberTextEditFieldProps : Props {
     /**
      * Label to show the user
      */
-    var trailingIcon: ReactNode?
+    var endAdornment: ReactNode?
 
     /**
      * Error text, if any. Default is null. Null indicates no error. If there is an error, the field
@@ -69,7 +69,7 @@ val UstadNumberTextEditField = FC<UstadNumberTextEditFieldProps> { props ->
 
         //As per MUI showcase
         asDynamic().InputProps = jso<InputBaseProps> {
-            endAdornment = props.trailingIcon
+            endAdornment = props.endAdornment
 
             props.inputProps?.also { inputPropsFn ->
                 inputPropsFn(this)
@@ -102,7 +102,7 @@ val UstadNumberTextEditFieldPreview = FC<Props> {
         value = aNumber
         label = ReactNode("Phone Number")
         enabled = true
-        trailingIcon = InputAdornment.create {
+        endAdornment = InputAdornment.create {
             Typography {
                + "points"
             }
