@@ -18,13 +18,11 @@ external interface UstadNumberTextEditFieldProps : Props {
      */
     var label: ReactNode?
 
-    /**
-     * Label to show the user
-     */
+
     var placeholder: String?
 
     /**
-     * Label to show the user
+     * endAdornment to show the user
      */
     var endAdornment: ReactNode?
 
@@ -101,6 +99,7 @@ val UstadNumberTextEditFieldPreview = FC<Props> {
     UstadNumberTextEditField {
         value = aNumber
         label = ReactNode("Phone Number")
+        placeholder = "Phone Number"
         enabled = true
         endAdornment = InputAdornment.create {
             Typography {
