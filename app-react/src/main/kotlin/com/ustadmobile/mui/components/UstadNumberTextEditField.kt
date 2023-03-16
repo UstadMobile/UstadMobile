@@ -21,9 +21,7 @@ external interface UstadNumberTextEditFieldProps : Props {
 
     var placeholder: String?
 
-    /**
-     * endAdornment to show the user
-     */
+
     var endAdornment: ReactNode?
 
     /**
@@ -31,6 +29,7 @@ external interface UstadNumberTextEditFieldProps : Props {
      * will be in error state (e.g. red) and the text will be shown underneath
      */
     var error: String?
+
 
     var fullWidth: Boolean
 
