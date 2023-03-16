@@ -22,33 +22,76 @@ env:
 - runFlow:
     file: "../build/common-app2/create_course_with_1teacher_1student.yaml"
     env:
-      TESTCOURSENAME: Assignment penalty test
+      TESTCOURSENAME: Test Course
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 #teacher login
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: anu
+      USERNAME: t1
       PASSWORD: test
-- runFlow:
-    file: "../common/add_assignment_with_grace_period.yaml"
-    env:
-      TESTCOURSENAME: Assignment penalty test
-      ASSIGNMENTNAME: Test Assignment
-
+- tapOn: "Courses"
+- tapOn: "Test Course"
+- tapOn: "Edit"
+- repeat:
+    while:
+      notVisible: "Add block"
+    commands:
+      - scroll
+- tapOn: "Add block"
+- tapOn: "Assignments"
+- tapOn: "Title"
+- inputText: "Test Assignment"
+- tapOn: "Description (Optional)"
+- inputText: "Test "
+- hideKeyboard
+- tapOn: "Completion criteria"
+- tapOn: "Submitted"
+- tapOn: "Deadline (Optional)"
+- tapOn: "OK"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/ca_deadline_time"
+- tapOn: "OK"
+- repeat:
+    while:
+      notVisible:
+        id: "com.toughra.ustadmobile:id/ca_edit_penalty"
+    commands:
+      - scroll
+- tapOn: "End of grace period"
+- tapOn: "OK"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/ca_grace_time"
+- tapOn: "Switch to text input mode for the time input."
+- tapOn:
+    id: "android:id/input_hour"
+- inputText: "11"
+- tapOn:
+    id: "android:id/input_minute"
+- inputText: "30"
+- tapOn:
+    id: "android:id/am_pm_spinner"
+- tapOn: "PM"
+- tapOn: "OK"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/ca_edit_penalty"
+- eraseText
+- inputText: "10"
+- tapOn: "DONE"
+- tapOn: "SAVE"
 #-------------------------------------------student submit assignment
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
 - runFlow: "../build/common-app2/select_site.yaml"
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: justin
+      USERNAME: s1
       PASSWORD: test
 - runFlow:
     file: "../build/common-app2/student_submit_assignment_text.yaml"
     env:
-      TESTCOURSENAME: Assignment penalty test
+      TESTCOURSENAME: Test Course
       ASSIGNMENTNAME: Test Assignment
       TEXT: "Numbers - 1,2,3,4,5,6,7,8,9,10"
 #--------------------------------------------------------------------------teacher grade the assignment
@@ -57,14 +100,14 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: anu
+      USERNAME: t1
       PASSWORD: test
 - runFlow:
     file: "../common/add_assignment_grade.yaml"
     env:
-      TESTCOURSENAME: Assignment penalty test
+      TESTCOURSENAME: Test Course
       ASSIGNMENTNAME: Test Assignment
-      STUDENTNAME: Justin Joe
+      STUDENTNAME: Student 1
       POINT: 8
 #----------------------------------------------student view assignment grade ------------#
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
@@ -72,10 +115,10 @@ env:
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: justin
+      USERNAME: s1
       PASSWORD: test
 - tapOn: "Courses"
-- tapOn: "Assignment penalty test"
+- tapOn: "Test Course"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_grade_on_overviewPage_studentView1"
 - tapOn: "Test Assignment"
 - assertNotVisible: "8"

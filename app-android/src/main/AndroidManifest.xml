@@ -125,6 +125,19 @@
             </intent-filter>
 
         </activity>
+
+        <activity
+            android:name="com.ustadmobile.port.android.authenticator.AuthenticatorActivity"
+            android:exported="true">
+
+            <intent-filter>
+                <data android:host="*" android:pathPattern=".*" android:scheme="local-auth" />
+                <action android:name="com.ustadmobile.AUTH_GET_TOKEN"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        
+        
     </application>
 
 </manifest>

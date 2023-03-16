@@ -12,7 +12,11 @@ appId: com.toughra.ustadmobile
 - tapOn: ${TESTCOURSENAME}
 - tapOn: "MEMBERS"
 - tapOn: "Add a ${MEMBER}"
-- scroll
+- repeat:
+    while:
+      notVisible: "${FIRSTNAME} ${LASTNAME}"
+    commands:
+      - scroll
 - tapOn: "${FIRSTNAME} ${LASTNAME}"
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/added-${MEMBER}-${FIRSTNAME} ${LASTNAME}"

@@ -8,9 +8,11 @@ appId: com.toughra.ustadmobile
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: "Edit"
-- swipe:
-    start: 100,400
-    end: 100,100
+- repeat:
+    while:
+      notVisible: "Add block"
+    commands:
+      - scroll
 - tapOn: "Add block"
 - tapOn: "Assignments"
 - tapOn: "Title"
@@ -20,9 +22,7 @@ appId: com.toughra.ustadmobile
 - hideKeyboard
 - tapOn: "Completion criteria"
 - tapOn: "Submitted"
-- swipe:
-    start: 100,400
-    end: 100,100
+- scroll
 - tapOn: "Individual Submission"
 - tapOn: "New group set"
 - tapOn: "Title"
@@ -32,9 +32,7 @@ appId: com.toughra.ustadmobile
 - eraseText
 - inputText: "2"
 - hideKeyboard
-- swipe:
-    start: 100,400
-    end: 100,100
+- scroll
 - tapOn:
       text: "Group"
       index: 0
@@ -60,9 +58,11 @@ appId: com.toughra.ustadmobile
       id: "com.toughra.ustadmobile:id/line_item"
       index: 1
 - tapOn: "SAVE"
-- swipe:
-    start: 100,400
-    end: 100,100
+- repeat:
+    while:
+      notVisible: "Must submit all at once"
+    commands:
+      - scroll
 - tapOn: "Must submit all at once"
 - tapOn: "Can make multiple submissions"
 - tapOn: "DONE"

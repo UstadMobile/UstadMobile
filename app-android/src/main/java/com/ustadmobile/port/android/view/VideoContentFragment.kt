@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.lifecycleScope
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
@@ -226,10 +227,10 @@ class VideoContentFragment : UstadBaseFragment(), VideoContentView, VideoContent
 
                 val mergedSource = MergingMediaSource(mediaSource, subTitleSource)
 
-                runOnUiThread(Runnable {
+                viewLifecycleOwner.lifecycleScope.launch {
                     player?.setMediaSource(mergedSource)
                     player?.prepare()
-                })
+                }
             } catch (ignored: IOException) {
                 loading = false
             }

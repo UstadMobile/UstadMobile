@@ -9,8 +9,6 @@ appId: com.toughra.ustadmobile
     while:
       notVisible: "Connect as Guest"
     commands:
-      - swipe:
-          start: 100,400
-          end: 100,100
+      - scroll
 # press on guest login button
 - tapOn: "Connect as Guest"

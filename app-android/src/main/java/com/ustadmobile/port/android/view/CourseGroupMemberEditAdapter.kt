@@ -17,7 +17,7 @@ class CourseGroupMemberEditAdapter(val eventHandler: CourseGroupSetEditFragmentE
 
     var groupList: List<IdOption>? = null
         set(value){
-            if((value?.size == 0) || (value?.size ?: 0 == field?.size ?: 0))
+            if((value?.size == 0) || ((value?.size ?: 0) == (field?.size ?: 0)))
                 return
             field = value
             viewHolder?.itemBinding?.groupList = value

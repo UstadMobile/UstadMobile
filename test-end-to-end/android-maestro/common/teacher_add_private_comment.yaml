@@ -11,9 +11,11 @@ appId: com.toughra.ustadmobile
 - tapOn: ${ASSIGNMENTNAME}
 - tapOn: "SUBMISSIONS"
 - tapOn: ${STUDENTNAME}
-- swipe:
-    start: 100,400
-    end: 100,100
+- repeat:
+      while:
+          notVisible: "Add a private comment"
+      commands:
+          - scroll
 - tapOn: "Add a private comment"
 - inputText: ${PRIVATECOMMENT}
 - tapOn:

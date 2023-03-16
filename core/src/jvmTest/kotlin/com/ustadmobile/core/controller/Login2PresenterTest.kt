@@ -58,12 +58,7 @@ class Login2PresenterTest {
 
     @Before
     fun setUp(){
-        view = mock {
-            on { runOnUiThread(ArgumentMatchers.any()) }.doAnswer { invocation ->
-                Thread(invocation.getArgument<Any>(0) as Runnable).start()
-                Unit
-            }
-        }
+        view = mock { }
 
         impl = mock {
             on {getAppConfigDefaultFirstDest(any())}.thenReturn(ContentEntryList2View.VIEW_NAME)

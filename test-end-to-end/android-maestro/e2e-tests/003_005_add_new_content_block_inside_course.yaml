@@ -22,10 +22,10 @@ env:
     file: "../common/add_new_teacher_inside_course.yaml"
     env:
       TESTCOURSENAME: "New Content Block Test"
-      TEACHERFIRSTNAME: "Julie"
-      TEACHERLASTNAME: "Susan"
+      TEACHERFIRSTNAME: "Teacher"
+      TEACHERLASTNAME: "1"
+      USERNAME: "t1"
       GENDER: "Female"
-      USERNAME: "julie"
       PASSWORD: "test"
 - repeat:
     while:
@@ -45,7 +45,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "julie"
+      USERNAME: "t1"
       PASSWORD: "test"
 - tapOn: "courses"
 - tapOn: "New Content Block Test"

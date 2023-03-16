@@ -20,7 +20,7 @@ env:
 - runFlow:
     file: "../build/common-app2/create_course_with_1teacher_2students.yaml"
     env:
-      TESTCOURSENAME: Private comment test
+      TESTCOURSENAME: Test Course
 #------------------------- teacher add private comment---------------------#
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
@@ -28,19 +28,19 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: anu
+      USERNAME: t1
       PASSWORD: test
 - runFlow:
     file:  "../common/add_assignment_Block.yaml"
     env:
-      TESTCOURSENAME: Private comment test
+      TESTCOURSENAME: Test Course
       ASSIGNMENTNAME: Test Assignment
 - runFlow:
     file: "../common/teacher_add_private_comment.yaml"
     env:
       ASSIGNMENTNAME: Test Assignment
-      TESTCOURSENAME: Private comment test
-      STUDENTNAME: Justin Joe
+      TESTCOURSENAME: Test Course
+      STUDENTNAME: Student 1
       PRIVATECOMMENT: Please comment here once you submit the assignment
 #---------------student reply to private comment--------#
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
@@ -48,13 +48,13 @@ env:
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: justin
+      USERNAME: s1
       PASSWORD: test
 - runFlow:
     file: "../build/common-app2/add_private_comments.yaml"
     env:
       ASSIGNMENTNAME: Test Assignment
-      TESTCOURSENAME: Private comment test
+      TESTCOURSENAME: Test Course
       PRIVATECOMMENT: Ok Mam, will complete before 4pm
 #---------------------------------------------------APP 1 ------student login - not able to view private comments test---------------#
 - runFlow: "../common/clear_state_and_get_started.yaml"
@@ -62,14 +62,12 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: caroline
+      USERNAME: s2
       PASSWORD: test
 - tapOn: "Courses"
-- tapOn: "Private comment test"
+- tapOn: "Test Course"
 - tapOn: "Test Assignment"
-- swipe:
-    start: 100,400
-    end: 100,100
+#- scroll
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_private_comments_2student_notVisible"
 - clearState: com.toughra.ustadmobile
 - clearState: com.toughra.ustadmobile2

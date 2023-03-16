@@ -4,8 +4,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemAssignmentFileSubmissionHeaderBinding
+import com.ustadmobile.lib.db.entities.AverageCourseAssignmentMark
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
-import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
 class SubmissionStatusHeaderAdapter(): SingleItemRecyclerViewAdapter<
@@ -19,7 +19,7 @@ class SubmissionStatusHeaderAdapter(): SingleItemRecyclerViewAdapter<
             viewHolder?.itemBinding?.assignment = value
         }
 
-    var courseAssignmentMark: CourseAssignmentMark? = null
+    var courseAssignmentMark: AverageCourseAssignmentMark? = null
         set(value){
             if(field == value)
                 return

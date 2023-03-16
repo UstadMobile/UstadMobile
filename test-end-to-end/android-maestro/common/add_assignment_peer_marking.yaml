@@ -1,0 +1,102 @@
+appId: com.toughra.ustadmobile
+---
+# this test add an assignment block on a course
+# Test parameters needs to provide for this test :
+# 1) TESTCOURSENAME: provide course name of string type
+# 2) ASSIGNMENTNAME: provide assignment name of string type
+
+- tapOn: "Courses"
+- tapOn: ${TESTCOURSENAME}
+- tapOn: "Edit"
+- repeat:
+      while:
+          notVisible: "Add block"
+      commands:
+          - scroll
+- tapOn: "Add block"
+- tapOn: "Assignments"
+- tapOn: "Title"
+- inputText: ${ASSIGNMENTNAME}
+- tapOn: "Description (Optional)"
+- inputText: "Test "
+- hideKeyboard
+- tapOn: "Completion criteria"
+- tapOn: "Submitted"
+- repeat:
+      while:
+          notVisible: "Teacher"
+      commands:
+          - scroll
+- tapOn: "Teacher"
+- tapOn: "Peers"
+- tapOn:
+      id: "com.toughra.ustadmobile:id/ca_edit_reviewers_number"
+- eraseText
+- inputText: 2
+- tapOn: "ASSIGN REVIEWERS"
+#--------------------- s1
+- tapOn:
+    text: "Show dropdown menu"
+    index: 0
+- tapOn:
+    id: "com.toughra.ustadmobile:id/line_item"
+    index: 1
+- tapOn:
+    text: "Show dropdown menu"
+    index: 1
+- tapOn:
+    id: "com.toughra.ustadmobile:id/line_item"
+    index: 2
+#----s2
+- tapOn:
+    text: "Show dropdown menu"
+    index: 2
+- tapOn:
+    id: "com.toughra.ustadmobile:id/line_item"
+    index: 0
+- tapOn:
+    text: "Show dropdown menu"
+    index: 3
+- tapOn:
+    id: "com.toughra.ustadmobile:id/line_item"
+    index: 1
+- repeat:
+      while:
+          notVisible:
+              text: "Show dropdown menu"
+              index: 4
+      commands:
+          - scroll
+#-----s3
+- tapOn:
+    text: "Show dropdown menu"
+    index: 1
+- tapOn:
+    id: "com.toughra.ustadmobile:id/line_item"
+    index: 1
+- tapOn:
+    text: "Show dropdown menu"
+    index: 2
+- tapOn:
+    id: "com.toughra.ustadmobile:id/line_item"
+    index: 2
+#----s4
+- tapOn:
+    text: "Show dropdown menu"
+    index: 3
+- tapOn:
+    id: "com.toughra.ustadmobile:id/line_item"
+    index: 0
+- tapOn:
+    text: "Show dropdown menu"
+    index: 4
+- tapOn:
+    id: "com.toughra.ustadmobile:id/line_item"
+    index: 1
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignedPeers"
+- tapOn: "DONE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/peersSelected_2nos"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/ca_edit_reviewers_number"
+- tapOn: "DONE"
+- tapOn: "SAVE"

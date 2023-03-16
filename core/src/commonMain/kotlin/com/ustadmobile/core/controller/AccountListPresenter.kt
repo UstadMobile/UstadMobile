@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.appendQueryArgs
+import com.ustadmobile.core.util.ext.navigateToViewUri
 import com.ustadmobile.core.util.ext.putIfNotAlreadySet
 import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.view.*
@@ -128,6 +129,6 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
             .replace("%2\$s", session.endpoint.url)
         val dest = nextDest.appendQueryArgs(
             mapOf(UstadView.ARG_SNACK_MESSAGE to snackMsg).toQueryString())
-        impl.goToViewLink(dest, context, goOptions)
+        requireNavController().navigateToViewUri(dest, goOptions)
     }
 }

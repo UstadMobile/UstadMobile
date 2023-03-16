@@ -1,6 +1,4 @@
 appId: com.toughra.ustadmobile
-tags:
-  - checklist1
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_003-video"
   TESTNAME: "001_001_admin_can_add_content_003-video"
@@ -26,3 +24,4 @@ env:
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_download_and_open"
 - back
 - tapOn: "ATTEMPTS"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/video_attempts_page"

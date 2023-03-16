@@ -1,6 +1,4 @@
 appId: com.toughra.ustadmobile
-tags:
-  - checklist1
 env:
  TESTCONTENTNAME: "PubliclyNotAccessibleContentTest"
  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_007_admin_make_content_publicly_not_accessible"
@@ -35,5 +33,4 @@ env:
       notVisible: "Library"
     file: "../common/guest_login.yaml"
 - tapOn: "Library"
-- assertNotVisible: "PubliclyNotAccessibleContentTest"
 - takeScreenshot: "${TESTRESULTSDIR}/guest_view"

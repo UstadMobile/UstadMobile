@@ -14,6 +14,13 @@ appId: com.toughra.ustadmobile
 - tapOn: ${ASSIGNMENTNAME}
 - tapOn: "SUBMISSIONS"
 - tapOn: "Group  1"
+- swipe:
+    direction: UP
+- repeat:
+    while:
+      notVisible: "Points"
+    commands:
+      - scroll
 - tapOn: "Points"
 - inputText: ${POINT1}
 - hideKeyboard
@@ -22,6 +29,13 @@ appId: com.toughra.ustadmobile
     index: 2
 - tapOn: "SUBMIT GRADE"
 - tapOn: "UPDATE GRADE AND MARK NEXT"
+- swipe:
+    direction: UP
+- repeat:
+    while:
+      notVisible: "Points"
+    commands:
+      - scroll
 - tapOn: "Points"
 - inputText: ${POINT2}
 - hideKeyboard

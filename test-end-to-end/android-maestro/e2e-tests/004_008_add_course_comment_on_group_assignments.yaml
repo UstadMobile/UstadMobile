@@ -19,9 +19,9 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
 - runFlow:
-    file: "../common/create_course_with_members.yaml"
+    file: "../common/create_course_with_1teacher_4students.yaml"
     env:
-      TESTCOURSENAME: Course comment test
+      TESTCOURSENAME: Test Course
 #---------------------------------------------------APP 1 -teacher add class comment--------------------#
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
@@ -29,31 +29,31 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: anu
+      USERNAME: t1
       PASSWORD: test
 - runFlow:
     file:  "../common/add_assignment_block_with_group.yaml"
     env:
-      TESTCOURSENAME: Course comment test
+      TESTCOURSENAME: Test Course
       ASSIGNMENTNAME: Test Assignment
-      GROUPTITLE: Course comment Group
+      GROUPTITLE: Test Group
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
 - runFlow: "../build/common-app2/select_site.yaml"
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: sruthy
+      USERNAME: s4
       PASSWORD: test
 - runFlow:
     file: "../build/common-app2/student_submit_assignment_text.yaml"
     env:
       ASSIGNMENTNAME: Test Assignment
-      TESTCOURSENAME:  Course comment test
+      TESTCOURSENAME:  Test Course
       TEXT: Numbers - 1,2,3,4,5,6,7,8,9,10 Alphabets - A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
 - runFlow:
     file: "../build/common-app2/add_class_comments.yaml"
     env:
-      TESTCOURSENAME: Course comment test
+      TESTCOURSENAME: Test Course
       ASSIGNMENTNAME: Test Assignment
       CLASSCOMMENT: Group 2 -assignment completed
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
@@ -61,12 +61,12 @@ env:
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: maria
+      USERNAME: s1
       PASSWORD: test
 - runFlow:
     file: "../build/common-app2/add_class_comments.yaml"
     env:
-      TESTCOURSENAME: Course comment test
+      TESTCOURSENAME: Test Course
       ASSIGNMENTNAME: Test Assignment
       CLASSCOMMENT: Ok Thank you
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/group2_member_view"
@@ -75,23 +75,13 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: justin
+      USERNAME: s2
       PASSWORD: test
-- runFlow:
-    file: "../common/student_submit_assignment_block.yaml"
-    env:
-      TESTCOURSENAME: Course comment test
-      ASSIGNMENTNAME: Test Assignment
-      TESTFILENAME: H5p_Content.h5p
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-- swipe:
-    start: 100,100
-    end: 100,400
+- scroll
 - runFlow:
     file: "../common/add_class_comments.yaml"
     env:
-      TESTCOURSENAME: Course comment test
+      TESTCOURSENAME: Test Course
       ASSIGNMENTNAME: Test Assignment
       CLASSCOMMENT: Group 1 completed assignment
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/group1_member_view"

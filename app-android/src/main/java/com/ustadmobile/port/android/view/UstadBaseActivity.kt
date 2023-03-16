@@ -17,13 +17,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
-import com.google.android.play.core.appupdate.AppUpdateManager
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
-import com.google.android.play.core.install.InstallState
-import com.google.android.play.core.install.InstallStateUpdatedListener
-import com.google.android.play.core.install.model.AppUpdateType
-import com.google.android.play.core.install.model.InstallStatus
-import com.google.android.play.core.install.model.UpdateAvailability
 import com.squareup.seismic.ShakeDetector
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -31,7 +24,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.port.android.impl.UserFeedbackException
 import com.ustadmobile.port.android.util.ext.getUstadLocaleSetting
-import com.ustadmobile.sharedse.network.NetworkManagerBle
 import org.acra.ACRA
 import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
@@ -45,7 +37,7 @@ import java.util.*
  * Created by mike on 10/15/15.
  */
 abstract class UstadBaseActivity : AppCompatActivity(), UstadView, ShakeDetector.Listener,
-    BleNetworkManagerProvider, DIAware
+    DIAware
 {
 
     override val di by closestDI()
@@ -57,80 +49,18 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadView, ShakeDetector
      */
     protected lateinit var umToolbar: Toolbar
 
-    protected lateinit var baseProgressBar: ProgressBar
-
     private var localeOnCreate: String? = null
 
-    lateinit var appUpdateManager: AppUpdateManager
-
     private val systemImpl: UstadMobileSystemImpl by instance()
-
-    private val appUpdatedListener: InstallStateUpdatedListener by lazy {
-        object : InstallStateUpdatedListener {
-            override fun onStateUpdate(installState: InstallState) {
-                when {
-                    installState.installStatus() == InstallStatus.DOWNLOADED -> updateCompleted()
-                    installState.installStatus() == InstallStatus.INSTALLED -> appUpdateManager.unregisterListener(this)
-                    else -> print("InstallStateUpdatedListener: state: " + installState.installStatus())
-                }
-            }
-        }
-    }
-
-    private fun updateCompleted() {
-
-        Toast.makeText(
-                this,
-                getText(R.string.downloaded),
-                Toast.LENGTH_SHORT
-        ).show()
-    }
-
-
-    /**
-     * TODO: This should not be done on every onResume of every activity. It could go to HomeActivity
-     */
-    private fun checkForAppUpdate() {
-        appUpdateManager = AppUpdateManagerFactory.create(this)
-        // Returns an intent object that you use to check for an update.
-        val appUpdateInfoTask = appUpdateManager.appUpdateInfo
-
-        // Checks that the platform will allow the specified type of update.
-        appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
-            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
-                // Request the update.
-                try {
-                    val installType = when {
-                        appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE) -> AppUpdateType.FLEXIBLE
-                        appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE) -> AppUpdateType.IMMEDIATE
-                        else -> null
-                    }
-                    if (installType == AppUpdateType.FLEXIBLE) appUpdateManager.registerListener(appUpdatedListener)
-
-                    appUpdateManager.startUpdateFlowForResult(
-                            appUpdateInfo,
-                            installType!!,
-                            this,
-                            APP_UPDATE_REQUEST_CODE)
-                } catch (e: IntentSender.SendIntentException) {
-                    e.printStackTrace()
-                }
-            }
-        }
-    }
 
     private var shakeDetector: ShakeDetector? = null
     private var sensorManager: SensorManager? = null
     internal var feedbackDialogVisible = false
 
 
-    //The devMinApi21 flavor has SDK Min 21, but other flavors have a lower SDK
-    @SuppressLint("ObsoleteSdkInt")
     override fun onCreate(savedInstanceState: Bundle?) {
-        //enable webview debugging
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            WebView.setWebContentsDebuggingEnabled(true)
-        }
+        WebView.setWebContentsDebuggingEnabled(true)
+
         super.onCreate(savedInstanceState)
         localeOnCreate = systemImpl.getDisplayedLocale(this)
 
@@ -164,17 +94,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadView, ShakeDetector
         dialog.show()
 
     }
-
-
-
-    /**
-     * All activities descending from UstadBaseActivity bind to the network manager. This method
-     * can be overriden when presenters need to use a reference to the networkmanager.
-     *
-     * @param networkManagerBle
-     */
-    protected open fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {}
-
 
     override fun onResume() {
         super.onResume()
@@ -216,21 +135,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadView, ShakeDetector
         snackBar.show()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == APP_UPDATE_REQUEST_CODE) {
-            if (resultCode != RESULT_OK) {
-                Toast.makeText(this,
-                        "App Update failed, please try again on the next app launch.",
-                        Toast.LENGTH_SHORT)
-                        .show()
-            }
-        }
-
-    }
-
-
     override fun attachBaseContext(newBase: Context) {
         val res = newBase.resources
         val config = res.configuration
@@ -244,9 +148,4 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadView, ShakeDetector
         super.attachBaseContext(newBase.createConfigurationContext(config))
     }
 
-
-    companion object {
-
-        private const val APP_UPDATE_REQUEST_CODE = 113
-    }
 }

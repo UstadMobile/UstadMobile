@@ -5,9 +5,9 @@ appId: com.toughra.ustadmobile
   # -----name - username/password
 
   # teachers :
-  # --0-- Anu Madhav - anu/test
+  # --0-- Teacher 1- t1/test
    # student :
-  # --0-- Justin Joe      - justin/test
+  # --0-- Student 2      - s2/test
 
 
 # test parameters needs to provide for this test :
@@ -24,10 +24,10 @@ appId: com.toughra.ustadmobile
     file: "./add_new_teacher_inside_course.yaml"
     env:
       TESTCOURSENAME: ${TESTCOURSENAME}
-      TEACHERFIRSTNAME: "Anu"
-      TEACHERLASTNAME: "Madhav"
+      TEACHERFIRSTNAME: "Teacher"
+      TEACHERLASTNAME: "1"
+      USERNAME: "t1"
       GENDER: "Female"
-      USERNAME: "anu"
       PASSWORD: "test"
 
 # add new student using flow - add_new_student_inside_course ----------- Justin Joe  - Justin/test
@@ -35,10 +35,10 @@ appId: com.toughra.ustadmobile
     file: "./add_new_student_inside_course.yaml"
     env:
       TESTCOURSENAME: ${TESTCOURSENAME}
-      STUDENTFIRSTNAME: "Justin"
-      STUDENTLASTNAME: "Joe"
+      STUDENTFIRSTNAME: "Student"
+      STUDENTLASTNAME: "1"
+      USERNAME: "s1"
       GENDER: "Male"
-      USERNAME: "justin"
       PASSWORD: "test"
 
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/member_list_of_new_test_course"

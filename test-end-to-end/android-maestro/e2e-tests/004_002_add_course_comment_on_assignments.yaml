@@ -22,7 +22,7 @@ env:
 - runFlow:
     file: "../build/common-app2/create_course_with_1teacher_2students.yaml"
     env:
-      TESTCOURSENAME: Course comment test
+      TESTCOURSENAME: Test Course
 #---------teacher add class comment--------------------#
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
@@ -30,17 +30,17 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: anu
+      USERNAME: t1
       PASSWORD: test
 - runFlow:
     file:  "../common/add_assignment_Block.yaml"
     env:
-      TESTCOURSENAME: Course comment test
+      TESTCOURSENAME: Test Course
       ASSIGNMENTNAME: Test Assignment
 - runFlow:
     file: "../common/add_class_comments.yaml"
     env:
-      TESTCOURSENAME: Course comment test
+      TESTCOURSENAME: Test Course
       ASSIGNMENTNAME: Test Assignment
       CLASSCOMMENT: Please comment here once you submit the assignment
 #-------------------------------APP 2------student submit assignment and add class comment--------#
@@ -49,39 +49,26 @@ env:
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: justin
+      USERNAME: s1
       PASSWORD: test
-- runFlow:
-     file: "../build/common-app2/student_submit_assignment_block.yaml"
-     env:
-       TESTCOURSENAME: Course comment test
-       ASSIGNMENTNAME: Test Assignment
-       TESTFILENAME: H5p_Content.h5p
-       CONTROLSERVER: ${CONTROLSERVER}
-       TESTSERIAL: ${TESTSERIAL}
-- swipe:
-    start: 100,100
-    end: 100,400
 - runFlow:
     file: "../build/common-app2/add_class_comments.yaml"
     env:
-      TESTCOURSENAME: Course comment test
+      TESTCOURSENAME: Test Course
       ASSIGNMENTNAME: Test Assignment
-      CLASSCOMMENT: Completed Mam
+      CLASSCOMMENT: Ok Mam
 #---------------------------------------------------APP 1 ------student login to view class comments---------------#
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: caroline
+      USERNAME: s2
       PASSWORD: test
 - tapOn: "Courses"
-- tapOn: "Course comment test"
+- tapOn: "Test Course"
 - tapOn: "Test Assignment"
-- swipe:
-    start: 100,400
-    end: 100,100
+- scroll
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_class_comments_studentView"
 - clearState: com.toughra.ustadmobile
 - clearState: com.toughra.ustadmobile2

@@ -19,9 +19,9 @@ env:
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
 - runFlow:
-    file: "../common/create_course_with_members.yaml"
+    file: "../common/create_course_with_1teacher_4students.yaml"
     env:
-      TESTCOURSENAME: Group Assignment test
+      TESTCOURSENAME: Test Course
 
 #teacherLogin
 - runFlow: "../common/clear_state_and_get_started.yaml"
@@ -29,26 +29,26 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: anu
+      USERNAME: t1
       PASSWORD: test
 - runFlow:
     file:  "../common/add_assignment_block_with_group.yaml"
     env:
-      TESTCOURSENAME: Group Assignment test
+      TESTCOURSENAME: Test Course
       ASSIGNMENTNAME: Test Assignment
-      GROUPTITLE: Private comment Group
+      GROUPTITLE: Test Group
 #-------------------------------------------------------------------------student submit assignment
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
 - runFlow: "../build/common-app2/select_site.yaml"
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: justin
+      USERNAME: s1
       PASSWORD: test
 - runFlow:
      file: "../build/common-app2/student_submit_assignment_block.yaml"
      env:
-       TESTCOURSENAME: Group Assignment test
+       TESTCOURSENAME: Test Course
        ASSIGNMENTNAME: Test Assignment
        TESTFILENAME: H5p_Content.h5p
        CONTROLSERVER: ${CONTROLSERVER}
@@ -62,10 +62,10 @@ env:
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: caroline
+      USERNAME: s2
       PASSWORD: test
 - tapOn: "Courses"
-- tapOn: "Group Assignment test"
+- tapOn: "Test Course"
 - tapOn: "Test Assignment"
 - assertNotVisible:
     text: "Add Text"
@@ -78,12 +78,12 @@ env:
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
     env:
-      USERNAME: sruthy
+      USERNAME: s4
       PASSWORD: test
 - runFlow:
     file: "../build/common-app2/student_submit_assignment_block.yaml"
     env:
-      TESTCOURSENAME: Group Assignment test
+      TESTCOURSENAME: Test Course
       ASSIGNMENTNAME: Test Assignment
       TESTFILENAME: H5p_Content.h5p
       CONTROLSERVER: ${CONTROLSERVER}
@@ -98,12 +98,12 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: anu
+      USERNAME: t1
       PASSWORD: test
 - runFlow:
     file: "../common/add_assignment_grade_for_group.yaml"
     env:
-      TESTCOURSENAME: Group Assignment test
+      TESTCOURSENAME: Test Course
       ASSIGNMENTNAME: Test Assignment
       POINT1: 8
       POINT2: 7

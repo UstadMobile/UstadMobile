@@ -23,19 +23,19 @@ env:
     file: "../common/add_new_teacher_inside_course.yaml"
     env:
       TESTCOURSENAME: "Text Block Test"
-      TEACHERFIRSTNAME: "Julie"
-      TEACHERLASTNAME: "Susan"
+      TEACHERFIRSTNAME: "Teacher"
+      TEACHERLASTNAME: "1"
+      USERNAME: "t1"
       GENDER: "Female"
-      USERNAME: "julie"
       PASSWORD: "test"
 - runFlow:
     file: "../common/add_new_student_inside_course.yaml"
     env:
       TESTCOURSENAME: "Text Block Test"
-      STUDENTFIRSTNAME: "Muhammed"
-      STUDENTLASTNAME: "Khan"
+      STUDENTFIRSTNAME: "Student"
+      STUDENTLASTNAME: "1"
+      USERNAME: "s1"
       GENDER: "Male"
-      USERNAME: "muhammed"
       PASSWORD: "test"
 - repeat:
     while:
@@ -62,7 +62,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "muhammed"
+      USERNAME: "s1"
       PASSWORD: "test"
 - tapOn: "courses"
 - tapOn: "Text Block Test"
@@ -78,7 +78,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "julie"
+      USERNAME: "t1"
       PASSWORD: "test"
 - tapOn: "courses"
 - tapOn: "Text Block Test"

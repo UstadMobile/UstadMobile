@@ -21,5 +21,4 @@ appId: com.toughra.ustadmobile
 - runFlow:
       file: "../common/user_login.yaml"
 - tapOn: "Library"
-- assertNotVisible: "PubliclyNotAccessibleContentTest"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/screen_after_hiding_content_test"

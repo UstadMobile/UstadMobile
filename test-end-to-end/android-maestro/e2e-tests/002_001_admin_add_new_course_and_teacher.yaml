@@ -1,6 +1,4 @@
 appId: com.toughra.ustadmobile
-tags:
-  - checklist2
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/002_001_admin_add_new_course_and_teacher"
   TESTNAME: "002_001_admin_add_new_course_and_teacher"
@@ -25,6 +23,6 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "anu"
+      USERNAME: "t1"
       PASSWORD: "test"
 - tapOn: "courses"

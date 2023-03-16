@@ -1,6 +1,4 @@
 appId: com.toughra.ustadmobile
-tags:
-  - checklist1
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_002-epub"
   TESTNAME: "001_001_admin_can_add_content_002-epub"
@@ -30,3 +28,4 @@ env:
 - back
 - back
 - tapOn: "ATTEMPTS"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/epub_attempts_page"
