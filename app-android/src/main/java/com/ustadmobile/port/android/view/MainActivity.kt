@@ -1,12 +1,8 @@
 package com.ustadmobile.port.android.view
 
-import android.accounts.AccountAuthenticatorResponse
-import android.accounts.AccountManager
-import android.app.Activity
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -46,7 +42,6 @@ import com.ustadmobile.port.android.view.binding.imageForeignKeyPlaceholder
 import com.ustadmobile.port.android.view.binding.setImageForeignKey
 import com.ustadmobile.port.android.view.binding.setImageForeignKeyAdapter
 import com.ustadmobile.port.android.view.util.UstadActivityWithProgressBar
-import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.*
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -56,7 +51,7 @@ import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.view.*
 
 
-class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
+class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
         UstadActivityWithProgressBar,
         NavController.OnDestinationChangedListener,
         DIAware{

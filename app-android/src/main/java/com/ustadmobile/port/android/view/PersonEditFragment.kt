@@ -5,12 +5,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,36 +27,22 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.navigation.NavOptions
-import androidx.navigation.fragment.findNavController
-import androidx.savedstate.SavedStateRegistryOwner
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.composethemeadapter.MdcTheme
-import com.ustadmobile.core.impl.DestinationProvider
-import com.ustadmobile.core.view.UstadView
-import org.kodein.di.direct
-import org.kodein.di.instance
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants.GENDER_MESSAGE_IDS
-import com.ustadmobile.core.impl.nav.SavedStateHandleAdapter
-import org.kodein.di.DI
 import com.ustadmobile.core.viewmodel.PersonEditUiState
 import com.ustadmobile.core.viewmodel.PersonEditViewModel
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.PersonParentJoin
+import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.view.composable.UstadDateEditTextField
-import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
-import org.kodein.di.android.x.closestDI
+import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
-class PersonEditFragment: Fragment() {
-
-    val di: DI by closestDI()
+class PersonEditFragment: UstadBaseMvvmFragment() {
 
     private val viewModel: PersonEditViewModel by viewModels {
         UstadViewModelProviderFactory(di, this, arguments)
@@ -62,6 +53,10 @@ class PersonEditFragment: Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
+        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
+        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
+
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
                 ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)

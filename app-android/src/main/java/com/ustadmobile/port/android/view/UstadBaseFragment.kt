@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -24,7 +23,6 @@ import com.ustadmobile.port.android.view.util.*
 import kotlinx.coroutines.CoroutineScope
 import org.kodein.di.*
 import org.kodein.di.android.x.closestDI
-import java.util.*
 
 /**
  * Created by mike on 10/15/15.
@@ -108,7 +106,7 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
 
         if(fabManagementEnabled) {
             fabManager = FabManagerLifecycleObserver(
-                    (activity as? UstadListViewActivityWithFab)?.activityFloatingActionButton,
+                    (activity as? UstadActivityWithFab)?.activityFloatingActionButton,
                 false, 0, null).also {
                 viewLifecycleOwner.lifecycle.addObserver(it)
             }
