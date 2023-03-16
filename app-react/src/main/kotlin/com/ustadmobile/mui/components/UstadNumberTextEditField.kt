@@ -59,6 +59,7 @@ val UstadNumberTextEditField = FC<UstadNumberTextEditFieldProps> { props ->
     }
 
     TextField {
+        variant = FormControlVariant.outlined
         label = props.label
         value = rawValue
         disabled = !(props.enabled ?: true)
