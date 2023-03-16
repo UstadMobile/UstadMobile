@@ -1,11 +1,10 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.core.hooks.useStringsXml
 import js.core.jso
-import mui.icons.material.*
 import mui.material.*
 import react.*
 import react.dom.onChange
+import web.html.InputType
 
 external interface UstadNumberTextEditFieldProps : Props {
 
@@ -56,25 +55,39 @@ external interface UstadNumberTextEditFieldProps : Props {
 
 val UstadNumberTextEditField = FC<UstadNumberTextEditFieldProps> { props ->
 
-    val strings = useStringsXml()
+    var errorText by useState { props.error }
+
+    var rawValue by useState {
+        if(props.value != 0) props.value.toString() else ""
+    }
 
     TextField {
         label = props.label
-        value = props.value
+        value = rawValue
         disabled = !(props.enabled ?: true)
+        placeholder = props.placeholder
 
         //As per MUI showcase
         asDynamic().InputProps = jso<InputBaseProps> {
             endAdornment = props.trailingIcon
-        }
-//        error = errorText != null
-//        helperText = errorText?.let { ReactNode(it) }
-//        fullWidth = props.fullWidth
 
+            props.inputProps?.also { inputPropsFn ->
+                inputPropsFn(this)
+            }
+        }
+
+        error = errorText != null
+        helperText = errorText?.let { ReactNode(it) }
+        fullWidth = props.fullWidth
+        type = InputType.number
         onChange = {
-//            val currentVal = it.target.asDynamic().value
-//            errorText = null
-//            props.onChange(currentVal?.toString() ?: "")
+            val text = (it.target.asDynamic().value)?.toString() ?: ""
+            errorText = null
+
+            val filteredText = text.filter { it.isDigit() }
+            rawValue = filteredText
+            val intVal = filteredText.toIntOrNull() ?: 0
+            props.onChange(intVal)
         }
 
     }
@@ -90,16 +103,12 @@ val UstadNumberTextEditFieldPreview = FC<Props> {
         label = ReactNode("Phone Number")
         enabled = true
         trailingIcon = InputAdornment.create {
-            position = InputAdornmentPosition.end
-            Icon {
-                Numbers
+            Typography {
+               + "points"
             }
         }
         onChange = {
             aNumber = it
         }
-//        trailingIcon = {
-//            Text("points")
-//        }
     }
 }
