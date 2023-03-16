@@ -1,8 +1,11 @@
 package com.ustadmobile.mui.components
 
+import com.ustadmobile.mui.common.readOnly
+import js.core.jso
 import mui.material.*
 import react.*
 import react.dom.onChange
+import web.html.InputMode
 import web.html.InputType
 
 external interface UstadNumberTextEditFieldProps : Props {
@@ -45,7 +48,7 @@ external interface UstadNumberTextEditFieldProps : Props {
     /**
      * InputProps setter functions - can be used to add adornments, set the input type, etc.
      */
-    var inputProps: InputBaseComponentProps
+    var inputProps: InputBaseComponentProps?
 
 
     var type: InputType?
@@ -90,11 +93,16 @@ val UstadNumberTextEditFieldPreview = FC<Props> {
         label = ReactNode("Phone Number")
         placeholder = "Phone Number"
         disabled = false
-        endAdornment = InputAdornment.create {
-            Typography {
-               + "points"
+        inputProps = jso {
+            readOnly = true
+            inputMode = InputMode.numeric
+
+            //As per MUI showcase
+            asDynamic().InputProps = jso<InputBaseProps> {
+                endAdornment = ReactNode("points")
             }
         }
+
         onChange = {
             aNumber = it
         }
