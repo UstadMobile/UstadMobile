@@ -86,12 +86,18 @@ class SortBottomSheetFragment(
     }
 
     companion object {
-        val DIFFUTIL_SORT = object : DiffUtil.ItemCallback<SortOrderOption>() {
-            override fun areItemsTheSame(oldItem: SortOrderOption, newItem: SortOrderOption): Boolean {
+        private val DIFFUTIL_SORT = object : DiffUtil.ItemCallback<SortOrderOption>() {
+            override fun areItemsTheSame(
+                oldItem: SortOrderOption,
+                newItem: SortOrderOption
+            ): Boolean {
                 return oldItem.flag == newItem.flag
             }
 
-            override fun areContentsTheSame(oldItem: SortOrderOption, newItem: SortOrderOption): Boolean {
+            override fun areContentsTheSame(
+                oldItem: SortOrderOption,
+                newItem: SortOrderOption
+            ): Boolean {
                 return oldItem.fieldMessageId == newItem.fieldMessageId && oldItem.order == newItem.order
             }
         }
