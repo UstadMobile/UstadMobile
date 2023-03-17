@@ -420,6 +420,58 @@ class OneRosterEndpointTest {
         assertEquals(oneRosterResult.score, resultInDb.first().studentResult.srScore)
     }
 
+    @Test
+    fun givenValidRawOneRosterLineItem_whenCallPutLineItem_thenShouldRespond201() = withOneRosterTest {
+        val clazz = createClazzAndEnrolUser(ROLE_STUDENT)
+        val lineItemId = "puzzle0102-${clazz.clazzUid}"
+        val lineItemJson = """
+             {
+  "sourcedId": "$lineItemId",
+  "status": "active",
+  "dateLastModified": "2023-03-14T10:09:04.004Z",
+  "metadata": {},
+  "title": "puzzle0102",
+  "description": "puzzle0102",
+  "assignDate": "2023-03-14T10:09:04.004Z",
+  "dueDate": "2024-03-14T10:09:04.013Z",
+  "class": {
+    "href": "${clazz.clazzUid}",
+    "sourcedId": "${clazz.clazzUid}",
+    "type": "class"
+  },
+  "category": {
+    "href": "category",
+    "sourcedId": "category",
+    "type": "category"
+  },
+  "resultValueMin": 0,
+  "resultValueMax": 100
+}
+        """.trimIndent()
+
+        grantExternalAppPermission("token")
+
+        di.direct.on(Endpoint("http://localhost/")).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+
+        val oneRosterEndpoint = OneRosterEndpoint(
+            { dbTestBuilder.endpointScope.activeEndpointSet }, di
+        )
+
+        val response = oneRosterEndpoint.serve(
+            DoorJsonRequest(
+                method = DoorJsonRequest.Method.PUT,
+                url = Url("http://localhost/api/oneroster/lineItems/${lineItemId}"),
+                headers = mapOf(HEADER_AUTH to "token"),
+                requestBody = lineItemJson
+            )
+        )
+
+        println(response.responseBody)
+        Assert.assertEquals(201, response.statusCode)
+
+    }
+
+
     companion object {
 
         val TERM_MAP = mapOf(
