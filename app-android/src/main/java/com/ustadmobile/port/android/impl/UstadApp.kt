@@ -293,6 +293,7 @@ open class UstadApp : Application(), DIAware {
         bind<Json>() with singleton {
             Json {
                 encodeDefaults = true
+                ignoreUnknownKeys = true
             }
         }
     }

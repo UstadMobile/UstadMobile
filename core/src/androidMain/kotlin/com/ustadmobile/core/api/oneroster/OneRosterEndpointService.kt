@@ -13,6 +13,7 @@ import org.kodein.di.instance
 import rawhttp.core.RawHttp
 import rawhttp.core.RawHttpRequest
 import rawhttp.core.RawHttpResponse
+import rawhttp.core.body.StringBody
 
 class OneRosterEndpointService: AbstractHttpOverIpcServer() {
 
@@ -27,13 +28,20 @@ class OneRosterEndpointService: AbstractHttpOverIpcServer() {
         )
     }
 
-    private fun DoorJsonResponse.toSimpleTextResponse() : SimpleTextResponse {
-        return SimpleTextResponse(
-            statusCode = statusCode,
-            contentType = contentType,
-            headers = headers,
-            responseBody = responseBody,
-        )
+    private fun DoorJsonResponse.toRawResponse(rawHttp: RawHttp): RawHttpResponse<*> {
+        return rawHttp.parseResponse(
+            "HTTP/1.1 $statusCode ${SimpleTextResponse.STATUS_RESPONSES[statusCode] ?: ""}\n" +
+            "Content-Type: $contentType\n" +
+            headers.entries.joinToString(separator = "") {
+                "${it.key}: ${it.value}\n"
+            }
+        ).let {
+            if(responseBody != null){
+                it.withBody(StringBody(responseBody))
+            }else {
+                it
+            }
+        }
     }
 
     override fun handleRequest(request: RawHttpRequest): RawHttpResponse<*> {
@@ -45,6 +53,6 @@ class OneRosterEndpointService: AbstractHttpOverIpcServer() {
             oneRosterEndpoint.serve(simpleRequest.toDoorRequest())
         }
 
-        return response.toSimpleTextResponse().toRawResponse(rawHttp)
+        return response.toRawResponse(rawHttp)
     }
 }

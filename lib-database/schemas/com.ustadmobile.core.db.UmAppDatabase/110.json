@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 110,
-    "identityHash": "5a081863fbd7d2236e982f59e9e82b6a",
+    "identityHash": "ac3dfdab2b5d9777abfc8f554c03602b",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -11248,7 +11248,7 @@
       },
       {
         "tableName": "StudentResult",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`srUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `srSourcedId` TEXT NOT NULL, `srCourseBlockUid` INTEGER NOT NULL, `srClazzUid` INTEGER NOT NULL, `srAssignmentUid` INTEGER NOT NULL, `srLineItemSourcedId` TEXT NOT NULL, `srStatus` INTEGER NOT NULL, `srMetaData` TEXT, `srStudentPersonUid` INTEGER NOT NULL, `srStudentGroupId` INTEGER NOT NULL, `srMarkerPersonUid` INTEGER NOT NULL, `srMarkerGroupId` INTEGER NOT NULL, `srScoreStatus` INTEGER NOT NULL, `srScore` REAL NOT NULL, `srScoreDate` INTEGER NOT NULL, `srLastModified` INTEGER NOT NULL, `srComment` TEXT, `srAppId` TEXT, `srActive` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`srUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `srSourcedId` TEXT, `srCourseBlockUid` INTEGER NOT NULL, `srClazzUid` INTEGER NOT NULL, `srAssignmentUid` INTEGER NOT NULL, `srLineItemSourcedId` TEXT, `srStatus` INTEGER NOT NULL, `srMetaData` TEXT, `srStudentPersonUid` INTEGER NOT NULL, `srStudentGroupId` INTEGER NOT NULL, `srMarkerPersonUid` INTEGER NOT NULL, `srMarkerGroupId` INTEGER NOT NULL, `srScoreStatus` INTEGER NOT NULL, `srScore` REAL NOT NULL, `srScoreDate` INTEGER NOT NULL, `srLastModified` INTEGER NOT NULL, `srComment` TEXT, `srAppId` TEXT, `srActive` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "srUid",
@@ -11260,7 +11260,7 @@
             "fieldPath": "srSourcedId",
             "columnName": "srSourcedId",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "srCourseBlockUid",
@@ -11284,7 +11284,7 @@
             "fieldPath": "srLineItemSourcedId",
             "columnName": "srLineItemSourcedId",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "srStatus",
@@ -11451,7 +11451,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5a081863fbd7d2236e982f59e9e82b6a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ac3dfdab2b5d9777abfc8f554c03602b')"
     ]
   }
 }
