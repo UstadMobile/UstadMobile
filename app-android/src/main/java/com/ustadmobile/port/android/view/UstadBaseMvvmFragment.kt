@@ -28,6 +28,8 @@ import org.kodein.di.DIAware
 import org.kodein.di.android.x.closestDI
 import org.kodein.di.direct
 import org.kodein.di.instance
+import androidx.appcompat.widget.SearchView
+
 
 /**
  * This Fragment is designed to contain Jetpack compose content.
@@ -39,13 +41,36 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
     private val navCommandExecTracker: NavCommandExecutionTracker by instance()
 
     class AppUiStateMenuProvider(
-        var appUiState: AppUiState?
-    ): MenuProvider {
+        initAppUiState: AppUiState?
+    ): MenuProvider, SearchView.OnQueryTextListener, SearchView.OnCloseListener {
+
+        private var searchView: SearchView? = null
+
+        var appUiState: AppUiState? = initAppUiState
+            set(value) {
+                field = value
+
+                val searchViewVal = searchView ?: return
+                if(value != null && value.searchState.searchText != searchViewVal.query)
+                    searchViewVal.setQuery(value.searchState.searchText, false)
+            }
+
         override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
             menuInflater.inflate(R.menu.menu_done, menu)
             val buttonMenuItem = menu.findItem(R.id.menu_done)
-            buttonMenuItem.title = appUiState?.actionBarButtonState?.text ?: ""
-            buttonMenuItem.isVisible = appUiState?.actionBarButtonState?.visible ?: false
+            val appStateVal = appUiState ?: return
+
+            buttonMenuItem.title = appStateVal.actionBarButtonState.text ?: ""
+            buttonMenuItem.isVisible = appStateVal.actionBarButtonState.visible
+
+            val searchMenuItem = menu.findItem(R.id.menu_search)
+            searchMenuItem.isVisible = appStateVal.searchState.visible
+            searchView = (searchMenuItem?.actionView as SearchView).also {
+                it.setOnQueryTextListener(this)
+                it.setOnCloseListener(this)
+                it.setQuery(appStateVal.searchState.searchText, false)
+                it.isIconified = appStateVal.searchState.searchText == ""
+            }
         }
 
         override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -55,6 +80,26 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
             }
 
             return false
+        }
+
+        override fun onQueryTextSubmit(query: String?): Boolean {
+            appUiState?.searchState?.onSearchTextChanged?.invoke(query ?: "")
+            return false
+        }
+
+        override fun onQueryTextChange(newText: String?): Boolean {
+            appUiState?.searchState?.onSearchTextChanged?.invoke(newText ?: "")
+            return false
+        }
+
+        override fun onClose(): Boolean {
+            appUiState?.searchState?.onSearchTextChanged?.invoke("")
+            return false
+        }
+
+        fun detach() {
+            searchView?.setOnQueryTextListener(null)
+            searchView?.setOnCloseListener(null)
         }
     }
 
@@ -151,13 +196,18 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
 
 
                     val currentActionBarState = mMenuProvider?.appUiState?.actionBarButtonState
+                    val currentSearchBarState = mMenuProvider?.appUiState?.searchState
                     val newActionBarState = appUiState.actionBarButtonState
-                    if(newActionBarState != currentActionBarState) {
+                    val newSearchBarState = mMenuProvider?.appUiState?.searchState
+                    if(mMenuProvider?.appUiState != appUiState) {
                         mMenuProvider?.appUiState = appUiState
                         if(
-                            newActionBarState.visible != currentActionBarState?.visible ||
-                            newActionBarState.enabled != currentActionBarState?.enabled ||
-                            newActionBarState.text != currentActionBarState?.text
+                            currentActionBarState == null ||
+                            currentSearchBarState == null ||
+                            newActionBarState.visible != currentActionBarState.visible ||
+                            newActionBarState.enabled != currentActionBarState.enabled ||
+                            newActionBarState.text != currentActionBarState.text ||
+                            newSearchBarState?.visible != currentSearchBarState.visible
                         ) {
                             requireActivity().invalidateMenu()
                         }
@@ -165,6 +215,11 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mMenuProvider = null
     }
 
     companion object {

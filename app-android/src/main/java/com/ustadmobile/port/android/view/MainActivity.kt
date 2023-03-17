@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.Toast
@@ -171,6 +172,13 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
         } else {
             slideBottomNavigation(true)
             View.VISIBLE
+        }
+
+        //Hide the soft keyboard if showing when moving to the next screen
+        val currentFocusView = currentFocus
+        if(currentFocusView != null) {
+            ContextCompat.getSystemService(this, InputMethodManager::class.java)
+                ?.hideSoftInputFromWindow(currentFocusView.windowToken, 0)
         }
     }
 

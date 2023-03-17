@@ -27,7 +27,6 @@ import com.google.android.material.composethemeadapter.MdcTheme
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.*
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
-import com.ustadmobile.port.android.util.ext.getActivityContext
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
 
 interface InviteWithLinkHandler{
@@ -100,7 +99,6 @@ fun PersonListScreen(
     // https://developer.android.com/reference/kotlin/androidx/paging/compose/package-summary#collectaslazypagingitems
     // Must provide a factory to pagingSourceFactory that will
     // https://issuetracker.google.com/issues/241124061
-
     val pager = remember(uiState.personList) {
         Pager(
             config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
@@ -143,7 +141,7 @@ fun PersonListScreen(
                         imageVector = Icons.Filled.AccountCircle,
                         contentDescription = null
                     )
-                }
+                },
             )
         }
 

@@ -59,5 +59,10 @@ fun <Key: Any, Value: Any> usePagingSource(
         }
     }
 
+
+    useEffect(pagingSource) {
+        // add invalidation listener
+    }
+
     return infiniteQueryResult
 }

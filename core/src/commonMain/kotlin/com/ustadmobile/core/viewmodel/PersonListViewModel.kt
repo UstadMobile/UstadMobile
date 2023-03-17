@@ -61,6 +61,20 @@ class PersonListViewModel(
     val filterByPermission = savedStateHandle[UstadView.ARG_FILTER_BY_PERMISSION]?.trim()?.toLong()
         ?: Role.PERMISSION_PERSON_SELECT
 
+    private val pagingSourceFactory: () -> PagingSource<Int, PersonWithDisplayDetails> = {
+        activeRepo.personDao.findPersonsWithPermissionAsPagingSource(
+            getSystemTimeInMillis(), filterExcludeMembersOfClazz,
+            filterExcludeMemberOfSchool, filterAlreadySelectedList,
+            accountManager.activeAccount.personUid, _uiState.value.sortOption.flag,
+            _appUiState.value.searchState.searchText.toQueryLikeParam()
+        ).also {
+            lastPagingSource?.invalidate()
+            lastPagingSource = it
+        }
+    }
+
+    private var lastPagingSource: PagingSource<Int, PersonWithDisplayDetails>? = null
+
     init {
         _appUiState.update { prev ->
             prev.copy(
@@ -71,7 +85,7 @@ class PersonListViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                personList = { createPagingSource(prev) }
+                personList = pagingSourceFactory
             )
         }
 
@@ -102,18 +116,17 @@ class PersonListViewModel(
 
 
     override fun onUpdateSearchResult(searchText: String) {
-        _uiState.update { prev ->
-            prev.copy(personList = { createPagingSource(prev) })
-        }
+        //will use the searchText as per the appUiState
+        lastPagingSource?.invalidate()
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {
         _uiState.update { prev ->
             prev.copy(
-                personList = { createPagingSource(prev.copy(sortOption = sortOption)) },
                 sortOption = sortOption
             )
         }
+        lastPagingSource?.invalidate()
     }
 
     override fun onClickAdd() {
