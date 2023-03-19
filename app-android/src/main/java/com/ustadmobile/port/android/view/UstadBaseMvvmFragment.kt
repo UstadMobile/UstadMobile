@@ -106,7 +106,7 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
     private var mMenuProvider: AppUiStateMenuProvider? = null
 
     /**
-     *
+     * Collect and run navigation commands when this fragment is active.
      */
     fun CoroutineScope.launchNavigatorCollector(viewModel: UstadViewModel) {
         launch {
@@ -143,6 +143,8 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
     /**
      * Collect the AppUiState flow from the given ViewModel, then apply it as required to the AppBar,
      * floating action button, etc.
+     *
+     * The collection only runs when the fragment is in the resumed state.
      */
     fun CoroutineScope.launchAppUiStateCollector(viewModel: UstadViewModel) {
         mMenuProvider = AppUiStateMenuProvider(null).also {
