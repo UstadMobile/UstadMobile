@@ -39,6 +39,7 @@ import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.view.composable.UstadDateEditTextField
+import com.ustadmobile.port.android.view.composable.UstadImageSelectButton
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
@@ -78,6 +79,7 @@ fun PersonEditScreen(
     uiState: PersonEditUiState = PersonEditUiState(),
     onPersonChanged: (PersonWithAccount?) -> Unit = {},
     onApprovalPersonParentJoinChanged: (PersonParentJoin?) -> Unit = {},
+    onPersonPictureUriChanged: (String?) -> Unit = { }
 ){
     Column(
         modifier = Modifier
@@ -86,7 +88,11 @@ fun PersonEditScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        //SetUserImageButton(onSetUserImage)
+        UstadImageSelectButton(
+            imageUri = uiState.personPicture?.personPictureUri,
+            onImageUriChanged = onPersonPictureUriChanged,
+            modifier = Modifier.size(60.dp),
+        )
 
         UstadTextEditField(
             value = uiState.person?.firstNames ?: "",
@@ -216,24 +222,6 @@ fun PersonEditScreen(
 }
 
 
-@Composable
-private fun SetUserImageButton(onClick: () -> Unit){
-    Button(onClick = onClick,
-        shape = CircleShape,
-        modifier = Modifier
-            .size(60.dp),
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = colorResource(R.color.secondaryColor))
-    ){
-        Image(
-            painter = painterResource(id = R.drawable.ic_add_a_photo_24),
-            contentDescription = null,
-            colorFilter = ColorFilter.tint(color = Color.White),
-            modifier = Modifier
-                .size(60.dp))
-    }
-}
-
 
 @Composable
 private fun PersonEditScreen(viewModel: PersonEditViewModel) {
@@ -242,6 +230,7 @@ private fun PersonEditScreen(viewModel: PersonEditViewModel) {
         uiState,
         onPersonChanged = viewModel::onEntityChanged,
         onApprovalPersonParentJoinChanged = viewModel::onApprovalPersonParentJoinChanged,
+        onPersonPictureUriChanged = viewModel::onPersonPictureChanged,
     )
 }
 

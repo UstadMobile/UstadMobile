@@ -50,11 +50,14 @@ import java.io.*
 import com.ustadmobile.core.impl.BrowserLinkOpener
 import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.view.*
+import com.ustadmobile.port.android.impl.nav.NavHostTempFileRegistrar
+import com.ustadmobile.port.android.util.ext.registerDestinationTempFile
 
 
 class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
         UstadActivityWithProgressBar,
         NavController.OnDestinationChangedListener,
+        NavHostTempFileRegistrar,
         DIAware{
 
     private val browserLinkOpener = BrowserLinkOpener { url ->
@@ -180,6 +183,10 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
             ContextCompat.getSystemService(this, InputMethodManager::class.java)
                 ?.hideSoftInputFromWindow(currentFocusView.windowToken, 0)
         }
+    }
+
+    override fun registerNavDestinationTemporaryFile(file: File) {
+        navController.registerDestinationTempFile(this, file)
     }
 
     fun onAppBarExpand(expand: Boolean){
