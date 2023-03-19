@@ -7,13 +7,11 @@ import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.view.UstadScreenProps
 import csstype.*
 import js.core.jso
-import kotlinx.coroutines.GlobalScope
 import mui.material.Container
 import mui.material.ListItem
 import mui.material.ListItemText
 import mui.material.Typography
 import react.*
-import tanstack.query.core.QueryKey
 
 val demoPersonList = (0..100).map {
     PersonWithDisplayDetails().apply {
@@ -28,7 +26,7 @@ val demoPagingSource = { ListPagingSource(demoPersonList) }
 val VirtualListPreview = FC<UstadScreenProps> {props ->
 
     val infiniteQueryResult = usePagingSource(
-        demoPagingSource, QueryKey("VirtualList"), GlobalScope,  true, 50
+        demoPagingSource, true, 50
     )
 
     VirtualList {

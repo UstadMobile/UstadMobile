@@ -19,13 +19,11 @@ import csstype.Height
 import csstype.Overflow
 import csstype.pct
 import js.core.jso
-import kotlinx.coroutines.GlobalScope
 import mui.icons.material.AccountCircle
 import mui.material.*
 import react.FC
 import react.ReactNode
 import react.create
-import tanstack.query.core.QueryKey
 
 
 external interface PersonListProps: UstadScreenProps {
@@ -36,7 +34,7 @@ external interface PersonListProps: UstadScreenProps {
 
 val PersonListComponent2 = FC<PersonListProps> { props ->
     val infiniteQueryResult = usePagingSource(
-        props.uiState.personList, QueryKey("PersonList"), GlobalScope, true, 50
+        props.uiState.personList, true, 50
     )
 
     VirtualList {

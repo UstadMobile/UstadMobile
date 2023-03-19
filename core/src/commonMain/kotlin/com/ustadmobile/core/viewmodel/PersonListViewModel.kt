@@ -50,15 +50,15 @@ class PersonListViewModel(
     savedStateHandle: UstadSavedStateHandle
 ): UstadListViewModel<PersonListUiState>(di, savedStateHandle, PersonListUiState()) {
 
-    val filterExcludeMembersOfClazz = savedStateHandle[ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ]?.toLong() ?: 0L
+    private val filterExcludeMembersOfClazz = savedStateHandle[ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ]?.toLong() ?: 0L
 
-    val filterExcludeMemberOfSchool = savedStateHandle[ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
+    private val filterExcludeMemberOfSchool = savedStateHandle[ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
 
-    val filterAlreadySelectedList = savedStateHandle[PersonListView.ARG_EXCLUDE_PERSONUIDS_LIST]
+    private val filterAlreadySelectedList = savedStateHandle[PersonListView.ARG_EXCLUDE_PERSONUIDS_LIST]
         ?.split(",")?.filter { it.isNotEmpty() }?.map { it.trim().toLong() }
         ?: listOf()
 
-    val filterByPermission = savedStateHandle[UstadView.ARG_FILTER_BY_PERMISSION]?.trim()?.toLong()
+    private val filterByPermission = savedStateHandle[UstadView.ARG_FILTER_BY_PERMISSION]?.trim()?.toLong()
         ?: Role.PERMISSION_PERSON_SELECT
 
     private val pagingSourceFactory: () -> PagingSource<Int, PersonWithDisplayDetails> = {
@@ -102,16 +102,6 @@ class PersonListViewModel(
                 }
             )
         }
-    }
-
-
-    private fun createPagingSource(uiState: PersonListUiState): PagingSource<Int, PersonWithDisplayDetails> {
-        return activeRepo.personDao.findPersonsWithPermissionAsPagingSource(
-            getSystemTimeInMillis(), filterExcludeMembersOfClazz,
-            filterExcludeMemberOfSchool, filterAlreadySelectedList,
-            accountManager.activeAccount.personUid, uiState.sortOption.flag,
-            _appUiState.value.searchState.searchText.toQueryLikeParam()
-        )
     }
 
 
