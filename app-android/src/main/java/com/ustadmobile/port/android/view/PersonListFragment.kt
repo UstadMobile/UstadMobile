@@ -26,8 +26,10 @@ import androidx.paging.compose.items
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.*
+import com.ustadmobile.port.android.util.ext.defaultAvatarSize
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
+import com.ustadmobile.port.android.view.composable.UstadPersonAvatar
 
 interface InviteWithLinkHandler{
     fun handleClickInviteWithLink()
@@ -135,11 +137,9 @@ fun PersonListScreen(
                     },
                 text = { Text(text = "${person?.firstNames} ${person?.lastName}")},
                 icon = {
-                    Icon(
-                        modifier = Modifier
-                            .size(40.dp),
-                        imageVector = Icons.Filled.AccountCircle,
-                        contentDescription = null
+                    UstadPersonAvatar(
+                        person?.personUid ?: 0,
+                        modifier = Modifier.defaultAvatarSize(),
                     )
                 },
             )

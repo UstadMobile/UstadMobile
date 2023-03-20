@@ -33,17 +33,11 @@ import androidx.core.content.FileProvider
 import coil.compose.SubcomposeAsyncImage
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.resolveAttachmentAndroidUri
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.port.android.impl.nav.NavHostTempFileRegistrar
+import com.ustadmobile.port.android.util.compose.rememberActiveDatabase
 import com.ustadmobile.port.android.util.ext.getActivityContext
-import org.kodein.di.DIAware
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
 import java.io.File
 
 
@@ -60,8 +54,6 @@ fun UstadImageSelectButton(
     modifier: Modifier = Modifier,
 ){
     val context = LocalContext.current
-
-    val di = (context.applicationContext as? DIAware)?.di
 
     var cameraTempPath: String? by rememberSaveable {
         mutableStateOf(null)
@@ -141,15 +133,7 @@ fun UstadImageSelectButton(
                 },
             contentAlignment = Alignment.Center,
         ) {
-            val accountManager: UstadAccountManager? = remember(di)  {
-                di?.direct?.instance()
-            }
-
-            val db: UmAppDatabase? = remember(accountManager?.activeEndpoint) {
-                accountManager?.let {
-                    di?.direct?.on(accountManager.activeEndpoint)?.instance(tag = DoorTag.TAG_DB)
-                }
-            }
+            val db = rememberActiveDatabase()
 
             SubcomposeAsyncImage(
                 model = db?.resolveAttachmentAndroidUri(imageUri) ?: imageUri,
