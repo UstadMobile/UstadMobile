@@ -40,12 +40,11 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
-import com.ustadmobile.port.android.util.compose.collectDbAttachmentUriFlow
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
+import com.ustadmobile.port.android.util.compose.rememberResolvedAttachmentUri
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.composable.UstadQuickActionButton
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
-import kotlinx.coroutines.flow.map
 import java.util.*
 
 class PersonDetailFragment : UstadBaseMvvmFragment(){
@@ -104,19 +103,16 @@ private fun PersonDetailScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     )  {
-
-        val personPictureUri = collectDbAttachmentUriFlow(uiState.person?.personUid ?: 0) { db ->
-            db.personPictureDao.findByPersonUidAsFlow(uiState.person?.personUid ?: 0).map {
-                it?.personPictureUri
-            }
-        }
+        val personPictureUri = rememberResolvedAttachmentUri(uiState.personPicture?.personPictureUri)
 
         if(personPictureUri != null) {
             SubcomposeAsyncImage(
                 model = personPictureUri,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.height(256.dp).fillMaxWidth()
+                modifier = Modifier
+                    .height(256.dp)
+                    .fillMaxWidth()
             )
         }
 

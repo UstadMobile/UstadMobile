@@ -11,6 +11,7 @@ import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.mui.components.UstadListSortHeader
 import com.ustadmobile.view.components.UstadFab
+import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
@@ -68,7 +69,9 @@ val PersonListComponent2 = FC<PersonListProps> { props ->
                         }
 
                         ListItemIcon {
-                            AccountCircle()
+                            UstadPersonAvatar {
+                                personUid = person?.personUid ?: 0
+                            }
                         }
 
                         ListItemText {

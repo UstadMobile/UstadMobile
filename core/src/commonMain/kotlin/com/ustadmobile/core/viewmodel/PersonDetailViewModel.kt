@@ -25,6 +25,8 @@ data class PersonDetailUiState(
 
     val person: PersonWithPersonParentJoin? = null,
 
+    val personPicture: PersonPicture? = null,
+
     val chatVisible: Boolean = false,
 
     val clazzes: List<ClazzEnrolmentWithClazzAndAttendance> = emptyList(),
@@ -111,6 +113,14 @@ class PersonDetailViewModel(
                                 loadingState = if(person != null) { NOT_LOADING } else { INDETERMINATE }
                             )
                         }
+                    }
+                }
+
+                launch {
+                    activeDb.personPictureDao.findByPersonUidAsFlow(
+                        entityUid
+                    ).collect { personPicture ->
+                        _uiState.update { prev -> prev.copy(personPicture = personPicture) }
                     }
                 }
 

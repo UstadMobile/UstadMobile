@@ -16,6 +16,7 @@ import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadDateEditField
 import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.view.components.UstadImageSelectButton
 import com.ustadmobile.view.components.UstadSelectField
 import mui.system.Container
 import mui.system.Stack
@@ -31,6 +32,8 @@ external interface PersonEditScreenProps : Props{
     var onPersonChanged: (PersonWithAccount?) -> Unit
 
     var onApprovalPersonParentJoinChanged: (PersonParentJoin?) -> Unit
+
+    var onPersonPictureUriChanged: (String?) -> Unit
 }
 
 val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
@@ -40,6 +43,13 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
     Container {
         Stack {
             spacing = responsive(2)
+
+            UstadImageSelectButton {
+                imageUri = props.uiState.personPicture?.personPictureUri
+                onImageUriChanged = {
+                    props.onPersonPictureUriChanged(it)
+                }
+            }
 
             UstadTextEditField {
                 value = props.uiState.person?.firstNames ?: ""
@@ -228,5 +238,6 @@ val PersonEditScreen = FC<UstadScreenProps> { props ->
         uiState = uiStateVar
         onPersonChanged = viewModel::onEntityChanged
         onApprovalPersonParentJoinChanged = viewModel::onApprovalPersonParentJoinChanged
+        onPersonPictureUriChanged = viewModel::onPersonPictureChanged
     }
 }
