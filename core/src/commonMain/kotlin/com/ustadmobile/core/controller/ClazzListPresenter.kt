@@ -59,12 +59,12 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
     }
 
     private fun updateList() {
-        view.list = repo.clazzDao.findClazzesWithPermission(
-                searchText.toQueryLikeParam(),
-                loggedInPersonUid, filterAlreadySelectedList,
-                filterExcludeMembersOfSchool, selectedSortOption?.flag ?: 0,
-                view.checkedFilterOptionChip?.optionId ?: ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED,
-                systemTimeInMillis(), filterByPermission, 0)
+//        view.list = repo.clazzDao.findClazzesWithPermission(
+//                searchText.toQueryLikeParam(),
+//                loggedInPersonUid, filterAlreadySelectedList,
+//                filterExcludeMembersOfSchool, selectedSortOption?.flag ?: 0,
+//                view.checkedFilterOptionChip?.optionId ?: ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED,
+//                systemTimeInMillis(), filterByPermission, 0)
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {

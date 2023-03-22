@@ -57,8 +57,10 @@ val VirtualListPreview = FC<UstadScreenProps> {props ->
 
             infiniteQueryItems(
                 infiniteQueryResult = infiniteQueryResult,
-                dataPageToItems = {
-                    (it as? LoadResult.Page)?.data ?: listOf()
+                dataPagesToItems = { pages ->
+                    pages.mapNotNull { it as? LoadResult.Page<Int, PersonWithDisplayDetails> }.flatMap {
+                        it.data
+                    }
                 },
                 itemToKey = { "${it.personUid}" }
             ) { person ->
