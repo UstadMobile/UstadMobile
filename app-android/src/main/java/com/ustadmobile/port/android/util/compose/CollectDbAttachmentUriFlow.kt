@@ -11,6 +11,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
+val URI_NOT_READY : Uri by lazy(LazyThreadSafetyMode.NONE) {
+    Uri.parse("notready:///")
+}
+
 /**
  * Collect the uri of an attachment entity. This requires a flow of the entity, and an adapter
  * block that will get the Uri field of the entity with attachment. The flow will then be mapped
@@ -25,6 +29,7 @@ import kotlinx.coroutines.flow.map
 @Composable
 fun <T> Flow<T>?.collectAttachmentUri(
     db: UmAppDatabase?,
+    initial: Uri? = URI_NOT_READY,
     uriFieldBlock: (T) -> String?
 ): State<Uri?> {
     val uriFlow = remember(key1 = this) {
@@ -37,6 +42,7 @@ fun <T> Flow<T>?.collectAttachmentUri(
         }
     }
 
-    return uriFlow.collectAsState(initial = null)
+    return uriFlow.collectAsState(initial = initial)
 }
+
 

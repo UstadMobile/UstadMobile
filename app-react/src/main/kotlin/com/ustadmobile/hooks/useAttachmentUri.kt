@@ -8,6 +8,7 @@ import com.ustadmobile.door.ext.DoorTag
 import kotlinx.coroutines.launch
 import react.useEffect
 import react.useState
+import web.url.URL
 
 /**
  * Takes an attachment Uri (this can be attachemnt:/// or a file/other path when editing is in
@@ -27,17 +28,21 @@ fun useAttachmentUriSrc(
             return@useEffect
         }
 
+        var resolvedUrl: DoorUri? = null
+
         scope.launch {
-            attachmentSrc = if(attachmentUri.startsWith(DoorDatabaseRepository.DOOR_ATTACHMENT_URI_PREFIX)) {
+            resolvedUrl = if(attachmentUri.startsWith(DoorDatabaseRepository.DOOR_ATTACHMENT_URI_PREFIX)) {
                 db.retrieveAttachment(attachmentUri)
             }else {
                 DoorUri.parse(attachmentUri)
             }
+            attachmentSrc = resolvedUrl
         }
 
         cleanup {
-            if(revokeOnCleanup){
-                //TODO: revoke if this is a local url
+            val revokeUri = resolvedUrl
+            if(revokeOnCleanup && revokeUri != null && revokeUri.uri.protocol == "blob:"){
+                URL.revokeObjectURL(revokeUri.toString())
             }
         }
 

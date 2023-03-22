@@ -1,5 +1,6 @@
 package com.ustadmobile.view.components
 
+import com.ustadmobile.hooks.URI_NOT_READY
 import com.ustadmobile.hooks.collectAttachmentUriSrc
 import com.ustadmobile.hooks.useActiveDatabase
 import mui.material.Avatar
@@ -19,12 +20,22 @@ val UstadPersonAvatar = FC<UstadPersonAvatarProps> { props ->
         db.personPictureDao.findByPersonUidAsFlow(props.personUid)
     }
 
-    val personPictureUri = personFlow.collectAttachmentUriSrc {
+    val personPictureUri = personFlow.collectAttachmentUriSrc(
+        initialState = URI_NOT_READY,
+        revokeOnCleanup = true,
+    ) {
         it?.personPictureUri
     }
 
-    Avatar {
-        src = personPictureUri?.toString()
+    /**
+     * If there is an image already stored in the database, we want to avoid the flicker that would
+     * otherwise be caused by an initial null value in the flow. collectAttachmetnUriSrc will
+     * return URI_NOT_READY as a first value.
+     */
+    if(personPictureUri?.toString() != URI_NOT_READY.toString()) {
+        Avatar {
+            src = personPictureUri?.toString()
+        }
     }
 
 }
