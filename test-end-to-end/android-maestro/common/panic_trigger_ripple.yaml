@@ -1,0 +1,22 @@
+appId: info.guardianproject.ripple
+---
+- launchApp
+- tapOn: "Trigger!"
+
+- repeat:
+    while:
+      visible: "Swipe down to trigger"
+    commands:
+      - swipe:
+          from:
+            id: "info.guardianproject.ripple:id/panic_swipe_button"
+          direction: DOWN
+- extendedWaitUntil:
+    visible: "Done"
+    timeout: 10000
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/panic_triggered"
+- tapOn: "Done"
+
+
+
+

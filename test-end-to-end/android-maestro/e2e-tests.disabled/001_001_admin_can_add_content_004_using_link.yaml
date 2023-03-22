@@ -40,7 +40,7 @@ env:
 - tapOn:
     text: "Enter Url"
     index: 1
-- inputText: "http://192.168.0.168/"
+- inputText: "http://localhost:8075/test-files/content/"
 - tapOn: "NEXT"
 - tapOn: "TITLE"
 - inputText: "TestFolder"

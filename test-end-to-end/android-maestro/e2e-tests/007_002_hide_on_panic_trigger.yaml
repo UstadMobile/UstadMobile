@@ -1,0 +1,32 @@
+appId: com.toughra.ustadmobile
+tags:
+  - checklist7
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/007_002_hide_on_panic_trigger"
+  TESTNAME: 007_002_hide_on_panic_trigger
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+# admin enable user registration button
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+- tapOn: "Settings"
+- tapOn: "Panic button app"
+- tapOn: "Panic button app"
+- tapOn: "Ripple"
+- copyTextFrom:
+    point: "50%,74%"
+    leftOf: "Unhide code: "
+- tapOn: "Exit ap"
+- tapOn: "Hide app"
+- runFlow:
+    file: "../common/panic_trigger_ripple.yaml"
+- launchApp
+- pasteText

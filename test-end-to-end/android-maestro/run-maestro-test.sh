@@ -2,7 +2,7 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 's:u:p:e:t:a1:a2:cr:n' --long 'serial1:,username:,password:,endpoint:,test:,apk1:,apk2:,console-output,result:,nobuild' -n 'run-maestro-tests.sh' -- "$@")
+TEMP=$(getopt -o 's:u:p:e:t:a1:a2:a3:cr:n' --long 'serial1:,username:,password:,endpoint:,test:,apk1:,apk2:,apk3:,console-output,result:,nobuild' -n 'run-maestro-tests.sh' -- "$@")
 
 
 eval set -- "$TEMP"
@@ -15,6 +15,7 @@ TEST=""
 SCRIPTDIR=$(realpath $(dirname $0))
 TESTAPK1=$SCRIPTDIR/build/apks/app-android-launcher-release.apk
 TESTAPK2=$SCRIPTDIR/build/apks/app-android-launcher-release-2.apk
+RIPPLEAPK=$SCRIPTDIR/../test-files/apk/info.guardianproject.ripple_139.apk
 TESTRESULTSDIR=""
 CONTROLSERVER=""
 USECONSOLEOUTPUT=0
@@ -57,6 +58,12 @@ while true; do
                '-a2'|'--apk2')
                      echo "Set APK2 to $2"
                      TESTAPK2=$2
+                     shift 2
+                     continue
+                ;;
+              '-a3'|'--apk3')
+                     echo "Set APK3 to $2"
+                     RIPPLEAPK=$2
                      shift 2
                      continue
                ;;
@@ -134,6 +141,10 @@ fi
 if [ "$(adb shell pm list packages com.toughra.ustadmobile2)" != "" ]; then
   adb shell pm uninstall com.toughra.ustadmobile2
 fi
+if [ "$(adb shell pm list packages com.google.android.apps.nexuslauncher)" != "" ]; then
+  adb shell pm uninstall com.google.android.apps.nexuslauncher.auto_generated_rro_vendor__
+  adb shell pm uninstall com.google.android.apps.nexuslauncher
+fi
 
 if [ "$NOBUILD" != "1" ]; then
  $SCRIPTDIR/build-extra-app-copy.sh
@@ -141,6 +152,7 @@ fi
 
 adb install $TESTAPK1
 adb install $TESTAPK2
+adb install $RIPPLEAPK
 
 TESTARG=$TEST
 if [ "$TEST" != "" ]; then
@@ -158,16 +170,17 @@ fi
 
 maestro  --device=$TESTSERIAL  test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
-         -e TESTSERIAL=$TESTSERIAL $OUTPUTARGS\
+         -e TESTSERIAL=$TESTSERIAL $OUTPUTARGS \
          $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR \
-         #--include-tags=checklist4
+         --include-tags=checklist7
 
 TESTSTATUS=$?
-
 #$SCRIPTDIR/../../testserver-controller/stop.sh
 
-#uninstall apps
+uninstall apps
  #adb shell pm uninstall com.toughra.ustadmobile
  #adb shell pm uninstall com.toughra.ustadmobile2
+ adb shell pm uninstall com.google.android.apps.nexuslauncher.auto_generated_rro_vendor__
+ adb shell pm uninstall com.google.android.apps.nexuslauncher
 
 exit $TESTSTATUS
