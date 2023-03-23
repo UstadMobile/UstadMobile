@@ -1,5 +1,8 @@
 package com.ustadmobile.port.android.view
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -19,6 +22,8 @@ interface PanicButtonSettingsFragmentEventListener {
     fun onClickSelectPanicTriggerApp()
 
     fun onClickExplanation()
+
+    fun onClickUnhideCode()
 }
 
 
@@ -110,6 +115,13 @@ class PanicButtonSettingsFragment: UstadBaseFragment(), PanicButtonSettingsView,
         val intent = Intent(Intent.ACTION_VIEW)
         intent.setData(Uri.parse("https://play.google.com/store/apps/details?id=info.guardianproject.ripple"))
         startActivity(intent)
+    }
+
+    override fun onClickUnhideCode() {
+        val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE)
+            as? ClipboardManager
+        clipboard?.setPrimaryClip(ClipData(ClipData.newPlainText("text", unhideCode)))
+        showSnackBar(requireContext().getString(R.string.copied_to_clipboard))
     }
 
     companion object {

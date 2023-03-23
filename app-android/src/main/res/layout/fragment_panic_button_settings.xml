@@ -114,6 +114,7 @@
                 android:paddingVertical="@dimen/dimen_8dp"
                 android:paddingHorizontal="16dp"
                 android:text="@{@string/hide_app_explanation(@string/app_name, unlockCode)}"
+                android:onClick="@{() -> eventListener.onClickUnhideCode()}"
                 tools:text="@string/hide_app_explanation"
                 />
 
