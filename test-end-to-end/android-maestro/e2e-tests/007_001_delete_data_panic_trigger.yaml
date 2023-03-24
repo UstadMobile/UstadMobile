@@ -13,8 +13,6 @@ env:
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
 # admin enable user registration button
-- runFlow:
-    file: "../common/panic_trigger_ripple_test.yaml"
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:

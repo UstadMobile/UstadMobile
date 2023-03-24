@@ -21,10 +21,9 @@ env:
 - tapOn: "Panic button app"
 - tapOn: "Panic button app"
 - tapOn: "Ripple"
-- copyTextFrom:
+- tapOn:
     point: "50%,74%"
-    leftOf: "Unhide code: "
-- tapOn: "Exit ap"
+- tapOn: "Exit app"
 - tapOn: "Hide app"
 - runFlow:
     file: "../common/panic_trigger_ripple.yaml"

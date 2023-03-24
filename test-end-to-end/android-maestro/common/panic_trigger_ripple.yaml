@@ -2,7 +2,10 @@ appId: info.guardianproject.ripple
 ---
 - launchApp
 - tapOn: "Trigger!"
-
+- runFlow:
+    when:
+      visible: "Tap to trigger a ripple"
+    file: panic_trigger_start.yaml
 - repeat:
     while:
       visible: "Swipe down to trigger"

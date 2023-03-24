@@ -1,0 +1,9 @@
+appId: info.guardianproject.ripple
+---
+
+- repeat:
+    while:
+      visible: "Tap to trigger a ripple"
+    commands:
+      - tapOn:
+          id: "info.guardianproject.ripple:id/panic_button"
