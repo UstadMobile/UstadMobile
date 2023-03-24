@@ -109,6 +109,7 @@
                 android:text="@string/hide_app"/>
 
             <TextView
+                android:id="@+id/panic_button_settings_unhide_code"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingVertical="@dimen/dimen_8dp"
