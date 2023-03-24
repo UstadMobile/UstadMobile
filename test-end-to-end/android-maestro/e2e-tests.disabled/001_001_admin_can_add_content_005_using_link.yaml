@@ -2,8 +2,8 @@ appId: com.toughra.ustadmobile
 tags:
   - checklist1
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_003-video"
-  TESTNAME: "001_001_admin_can_add_content_003-video"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_005-using_link"
+  TESTNAME: "001_001_admin_can_add_content_005-using_link"
   TESTFILENAME: Epub_Content.epub
   TESTCONTENTNAME: AddContentEpubTest
   CONTROLSERVER: ${CONTROLSERVER}
@@ -40,12 +40,13 @@ env:
 - tapOn:
     text: "Enter Url"
     index: 1
-- inputText: "http://192.168.0.168/"
+- inputText: "http://localhost:8075/test-files/content/"
 - tapOn: "NEXT"
-- tapOn: "TITLE"
-- inputText: "TestFolder"
+- tapOn: "content"
+- eraseText
+- inputText: "LinkTestFolder"
 - tapOn: "SAVE"
-- tapOn: "TestFolder"
+- tapOn: "LinkTestFolder"
 - tapOn:
     id: "com.toughra.ustadmobile:id/item_content_entry_list"
     index: 0
@@ -55,10 +56,10 @@ env:
     visible: "Delete"
     timeout: 600000
 - tapOn: "OPEN"
-- tapOn: "Leave"
-- assertVisible:
-    text: "The Project Gutenberg eBook of The Complete Works of William Shakespeare, by William Shakespeare"
-    index: 0
+- tapOn:
+    id: "com.toughra.ustadmobile:id/menu_epub_content_showtoc"
+- assertVisible: "Oliver Twist; or, The Parish Boy's Progress. Illustrated"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_download_and_open"
 - back
 - back
 - tapOn: "Library"
@@ -67,7 +68,29 @@ env:
 - tapOn:
     text: "Enter Url"
     index: 1
-- inputText: "http://192.168.0.168/Video_Content.mp4"
+- inputText: "http://localhost:8075/test-files/content/H5p_Content.h5p"
+- tapOn: "NEXT"
+- tapOn: "SAVE"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_content_entry_list"
+    index: 1
+- tapOn: "DOWNLOAD"
+- tapOn: "DOWNLOAD"
+- extendedWaitUntil:
+    visible: "Delete"
+    timeout: 100000
+- tapOn: "OPEN"
+- assertVisible: "Check the answers. The responses will be marked as correct, incorrect, or unanswered."
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_download_and_open"
+- back
+- back
+- tapOn: "Library"
+- tapOn: "CONTENT"
+- tapOn: "Add using link"
+- tapOn:
+    text: "Enter Url"
+    index: 1
+- inputText: "http://localhost:8075/test-files/content/Video_Content.mp4"
 - tapOn: "NEXT"
 - tapOn: "SAVE"
 - tapOn: "Video_Content.mp4"
