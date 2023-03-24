@@ -27,5 +27,5 @@ cd $BASEDIR/..
 java -jar $BASEDIR/build/libs/testserver-controller-all.jar -P:resultDir=$TESTRESULTSDIR &
 TESTSERVERPID=$!
 echo $TESTSERVERPID > $BASEDIR/build/server.pid
-echo "Started testserver-controller and saved PID [ $TESTSERVERPID ]"
+echo "Started testserver-controller and saved PID [ $TESTSERVERPID ]. See ../log/testserver-controller.log for output."
 
