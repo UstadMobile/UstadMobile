@@ -30,7 +30,7 @@ class JvmVideoShrinkerTest {
 
 
         runBlocking {
-            videoShrinker.shrink(inTmpFile.toDoorUri(), outTmpFile.toDoorUri(), ShrinkConfig())
+            videoShrinker.shrink(inTmpFile.toDoorUri(), outTmpFile.toDoorUri(), ShrinkConfig(), null)
         }
 
         //Assert that theres a valid video file in outTmpFile

@@ -11,7 +11,7 @@ class VideoShrinkerJvm: Shrinker {
         srcUri: DoorUri,
         destinationUri: DoorUri,
         config: ShrinkConfig,
-        progressListener: ShrinkProgressListener? = null,
+        progressListener: ShrinkProgressListener?,
     ) {
         val srcFile = srcUri.toFile()
         val destFile = srcUri.toFile()
