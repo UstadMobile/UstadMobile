@@ -1,12 +1,16 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useUstadViewModel
+import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.ClazzListUiState
+import com.ustadmobile.core.viewmodel.ClazzListViewModel
 import com.ustadmobile.door.paging.LoadResult
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.entities.Clazz
@@ -16,14 +20,18 @@ import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.mui.components.UstadListSortHeader
 import com.ustadmobile.util.colorForAttendanceStatus
+import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import csstype.*
 import js.core.jso
+import mui.icons.material.Add
 import mui.icons.material.LensRounded
+import mui.icons.material.Login
 import mui.icons.material.People
 import mui.material.*
+import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import mui.system.sx
 import react.*
@@ -40,11 +48,11 @@ external interface ClazzListScreenProps : UstadScreenProps {
 
     var uiState: ClazzListUiState
 
-    var onClickClazz: (Clazz?) -> Unit
+    var onClickClazz: (Clazz) -> Unit
 
     var onClickSort: (SortOrderOption) -> Unit
 
-    var onClickFilterChip: (MessageIdOption2?) -> Unit
+    var onClickFilterChip: (MessageIdOption2) -> Unit
 
 }
 
@@ -172,6 +180,88 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
     }
 }
 
+val ClazzListScreen = FC<UstadScreenProps> { props ->
+    val strings = useStringsXml()
+    var addDialogVisible: Boolean by useState { false }
+
+
+    val viewModel = useUstadViewModel(
+        onAppUiStateChange = props.onAppUiStateChanged,
+    ) { di, savedStateHandle ->
+        ClazzListViewModel(di, savedStateHandle)
+    }
+
+    val uiState: ClazzListUiState by viewModel.uiState.collectAsState(ClazzListUiState())
+    val appState by viewModel.appUiState.collectAsState(AppUiState())
+
+
+    ClazzListScreenComponent2 {
+        + props
+        this.uiState = uiState
+        onClickClazz = viewModel::onClickEntry
+        onClickSort = viewModel::onSortOrderChanged
+        onClickFilterChip = viewModel::onClickFilterChip
+    }
+
+    UstadFab {
+        fabState = appState.fabState.copy(
+            onClick = {
+                addDialogVisible = true
+            }
+        )
+    }
+
+    Dialog {
+        open = addDialogVisible
+        onClose = { _, _ ->
+            addDialogVisible = false
+        }
+
+        List {
+            if(uiState.canAddNewCourse) {
+                ListItem {
+                    ListItemButton {
+                        onClick = {
+                            addDialogVisible = false
+                            viewModel.onClickAdd()
+                        }
+
+                        ListItemIcon {
+                            Add { }
+                        }
+
+                        ListItemText {
+                            primary = ReactNode(strings[MessageID.add_a_new_course])
+                        }
+
+
+                    }
+                }
+            }
+
+            ListItem {
+                ListItemButton {
+                    onClick = {
+                        addDialogVisible = false
+                        viewModel.onClickJoinExistingClazz()
+                    }
+
+                    ListItemIcon {
+                        Login { }
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(strings[MessageID.join_existing_class])
+                    }
+
+
+                }
+            }
+
+        }
+    }
+}
+
 
 
 external interface ClazzListItemProps : Props {
@@ -187,9 +277,9 @@ external interface ClazzListItemProps : Props {
 private val ClazzListItem = FC<ClazzListItemProps> { props ->
 
     val strings = useStringsXml()
-    val role = (RoleConstants.ROLE_MESSAGE_IDS.find {
+    val role = RoleConstants.ROLE_MESSAGE_IDS.find {
         it.value == props.clazzItem?.clazzActiveEnrolment?.clazzEnrolmentRole
-    }?.messageId ?: MessageID.student)
+    }?.messageId
 
     Card {
         key = props.clazzItem?.clazzUid?.toString()
@@ -218,6 +308,7 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
                         direction = responsive(StackDirection.column)
 
                         Typography {
+                            variant = TypographyVariant.h6
                             + (props.clazzItem?.clazzName ?: "")
                         }
 
@@ -226,14 +317,16 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
                         }
                     }
 
-                    Stack {
-                        direction = responsive(StackDirection.row)
 
-                        + mui.icons.material.Badge.create()
+                    if(role != null) {
+                        Stack {
+                            direction = responsive(StackDirection.row)
 
-                        + strings[role]
+                            + mui.icons.material.Badge.create()
+
+                            + strings[role]
+                        }
                     }
-
                 }
 
                 Stack {

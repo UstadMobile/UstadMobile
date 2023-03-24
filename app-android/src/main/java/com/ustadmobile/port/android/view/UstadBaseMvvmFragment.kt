@@ -29,6 +29,7 @@ import org.kodein.di.android.x.closestDI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import androidx.appcompat.widget.SearchView
+import kotlinx.coroutines.flow.map
 
 
 /**
@@ -146,14 +147,17 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
      *
      * The collection only runs when the fragment is in the resumed state.
      */
-    fun CoroutineScope.launchAppUiStateCollector(viewModel: UstadViewModel) {
+    fun CoroutineScope.launchAppUiStateCollector(
+        viewModel: UstadViewModel,
+        transform: (AppUiState) -> AppUiState = { it },
+    ) {
         mMenuProvider = AppUiStateMenuProvider(null).also {
             requireActivity().addMenuProvider(it, viewLifecycleOwner)
         }
 
         launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                viewModel.appUiState.collect { appUiState ->
+                viewModel.appUiState.map(transform).collect { appUiState ->
                     (activity as? AppCompatActivity)?.supportActionBar
                         ?.takeIf { it.title != appUiState.title }
                         ?.title = appUiState.title

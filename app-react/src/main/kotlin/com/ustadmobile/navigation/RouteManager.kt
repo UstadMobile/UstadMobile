@@ -11,7 +11,6 @@ import kotlin.reflect.KClass
 object RouteManager {
 
     val destinationList = listOf(
-        UstadDestination("school", MessageID.courses,ClazzList2View.VIEW_NAME, ClazzListComponent::class, showSearch = true),
         UstadDestination("library_books", MessageID.library, ContentEntryList2View.VIEW_NAME_HOME,
             ContentEntryListComponent::class, true),
         UstadDestination(view = ContentEntryList2View.VIEW_NAME,

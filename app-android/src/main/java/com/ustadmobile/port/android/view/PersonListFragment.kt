@@ -128,7 +128,7 @@ fun PersonListScreen(
         
         items(
             items = lazyPagingItems,
-            key = { it.personUid }
+            key = { it.personUid },
         ) {  person ->
             ListItem(
                 modifier = Modifier

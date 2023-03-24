@@ -3,6 +3,7 @@ package com.ustadmobile.core.hooks
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.ViewModel
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import react.useEffect
 

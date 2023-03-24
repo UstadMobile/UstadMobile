@@ -125,14 +125,15 @@ abstract class UstadListViewModel<S>(
      */
     protected fun createFabState(
         hasAddPermission: Boolean,
-        messageId: Int
+        messageId: Int,
+        onClick: () -> Unit = this::onClickAdd
     ) : FabUiState{
         return if(hasAddPermission && listMode == ListViewMode.BROWSER) {
             FabUiState(
                 visible = true,
                 text = systemImpl.getString(messageId),
                 icon = FabUiState.FabIcon.ADD,
-                onClick = this@UstadListViewModel::onClickAdd
+                onClick = onClick,
             )
         }else {
             FabUiState(visible = false)
@@ -181,6 +182,18 @@ abstract class UstadListViewModel<S>(
                 mapOf(UstadView.ARG_ENTITY_UID to entityUid.toString())
             )
         }
+    }
+
+    protected fun listTitle(
+        browseMessageId: Int, selectMessageId: Int
+    ): String {
+        return systemImpl.getString(
+            if(listMode == ListViewMode.BROWSER){
+                browseMessageId
+            }else {
+                selectMessageId
+            }
+        )
     }
 
 }
