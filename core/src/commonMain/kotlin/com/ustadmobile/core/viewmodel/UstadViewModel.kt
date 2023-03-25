@@ -3,6 +3,7 @@ package com.ustadmobile.core.viewmodel
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
@@ -49,6 +50,8 @@ abstract class UstadViewModel(
     protected val snackDispatcher: SnackBarDispatcher by instance()
 
     protected val resultReturner: NavResultReturner by instance()
+
+    protected val systemImpl: UstadMobileSystemImpl by instance()
 
     private val navResultTimestampsCollected: MutableSet<Long> by lazy {
         savedStateHandle[KEY_COLLECTED_TIMESTAMPS]?.split(",")

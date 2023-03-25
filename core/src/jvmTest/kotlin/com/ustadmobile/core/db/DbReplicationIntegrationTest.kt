@@ -493,7 +493,7 @@ class DbReplicationIntegrationTest {
         }
 
         runBlocking {
-            localDb1.createNewClazzAndGroups(newClazz, localDi1.direct.instance(), mapOf(), Any())
+            localDb1.createNewClazzAndGroups(newClazz, localDi1.direct.instance(), mapOf())
             localDb1.scopedGrantDao.insertAsync(ScopedGrant().apply {
                 sgFlags = ScopedGrant.FLAG_TEACHER_GROUP.or(ScopedGrant.FLAG_NO_DELETE)
                 sgPermissions = Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT
@@ -552,7 +552,7 @@ class DbReplicationIntegrationTest {
 
 
         runBlocking {
-            localDb1.createNewClazzAndGroups(newClazz, localDi1.direct.instance(), mapOf(), Any())
+            localDb1.createNewClazzAndGroups(newClazz, localDi1.direct.instance(), mapOf())
 
             //Create scopedgrants for groups (that would otherwisee be handled by clazzeditpresenter)
             localDb1.grantScopedPermission(newClazz.clazzTeachersPersonGroupUid,

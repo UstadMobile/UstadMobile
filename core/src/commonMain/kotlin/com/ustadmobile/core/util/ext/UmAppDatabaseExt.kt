@@ -37,7 +37,6 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(
     clazz: Clazz,
     impl: UstadMobileSystemImpl,
     termMap: Map<String, String>,
-    context: Any
 ) {
     clazz.clazzTeachersPersonGroupUid = personGroupDao.insertAsync(
             PersonGroup("${clazz.clazzName} - " + termMap[TerminologyKeys.TEACHER_KEY]))
@@ -46,10 +45,10 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(
             termMap[TerminologyKeys.STUDENTS_KEY]))
 
     clazz.clazzPendingStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
-            impl.getString(MessageID.pending_requests, context)))
+            impl.getString(MessageID.pending_requests)))
 
     clazz.clazzParentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
-            impl.getString(MessageID.parent, context)))
+            impl.getString(MessageID.parent)))
 
     clazz.takeIf { it.clazzCode == null }?.clazzCode = randomString(Clazz.CLAZZ_CODE_DEFAULT_LENGTH)
 

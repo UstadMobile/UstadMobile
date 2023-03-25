@@ -28,8 +28,6 @@ class OnBoardingViewModel(
     val uiState: Flow<OnboardingUiState>
         get() = _uiState.asStateFlow()
 
-    private val systemImpl: UstadMobileSystemImpl by instance()
-
     init {
         val allLanguages = systemImpl.getAllUiLanguagesList()
         val currentLocaleCode = systemImpl.getLocale()

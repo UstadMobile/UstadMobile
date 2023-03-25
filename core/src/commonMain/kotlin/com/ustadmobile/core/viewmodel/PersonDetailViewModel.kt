@@ -77,8 +77,6 @@ class PersonDetailViewModel(
 
     val uiState: Flow<PersonDetailUiState> = _uiState.asStateFlow()
 
-    private val systemImpl: UstadMobileSystemImpl by instance()
-
     private val personUid = savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0
 
     init {

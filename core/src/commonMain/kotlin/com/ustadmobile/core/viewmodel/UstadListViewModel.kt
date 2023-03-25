@@ -22,8 +22,6 @@ abstract class UstadListViewModel<S>(
     initialState: S,
 ) : UstadViewModel(di, savedStateHandle) {
 
-    protected val systemImpl: UstadMobileSystemImpl by instance()
-
     @Suppress("PropertyName")
     protected val _uiState = MutableStateFlow(initialState)
 

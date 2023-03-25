@@ -535,7 +535,7 @@ class ClazzEdit2Presenter(
                 if((arguments[UstadView.ARG_ENTITY_UID]?.toLongOrNull() ?: 0L) == 0L) {
                     val termMap = db.courseTerminologyDao.findByUidAsync(entity.clazzTerminologyUid)
                         .toTermMap(json, systemImpl)
-                    txDb.createNewClazzAndGroups(entity, systemImpl, termMap, context)
+                    txDb.createNewClazzAndGroups(entity, systemImpl, termMap)
                 }else {
                     txDb.clazzDao.updateAsync(entity)
                 }

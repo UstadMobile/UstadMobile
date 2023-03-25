@@ -82,8 +82,6 @@ class PersonEditViewModel(
     savedStateHandle: UstadSavedStateHandle
 ): UstadEditViewModel(di, savedStateHandle) {
 
-    private val systemImpl: UstadMobileSystemImpl by instance()
-
     private val _uiState: MutableStateFlow<PersonEditUiState> = MutableStateFlow(
         PersonEditUiState(
             fieldsEnabled = false,

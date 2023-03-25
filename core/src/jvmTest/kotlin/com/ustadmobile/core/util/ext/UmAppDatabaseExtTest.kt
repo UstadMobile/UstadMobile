@@ -80,7 +80,7 @@ class UmAppDatabaseExtTest {
     fun givenClazzDoesNotExist_whenCreateClazzAndGroupsCalled_thenClazzGroupsAndEntityRolesCreated() = runBlocking {
         val testClazz = Clazz("Test name")
 
-        repo.createNewClazzAndGroups(testClazz, mockSystemImpl, mapOf(), context)
+        repo.createNewClazzAndGroups(testClazz, mockSystemImpl, mapOf())
 
         val clazzInDb = db.clazzDao.findByUid(testClazz.clazzUid)!!
         Assert.assertEquals("Stored class has same name", testClazz.clazzName,
@@ -98,7 +98,7 @@ class UmAppDatabaseExtTest {
         val testClazz = Clazz("Test name")
         val testPerson = Person("teacher", "Teacher", "Test")
 
-        repo.createNewClazzAndGroups(testClazz, mockSystemImpl, mapOf(), context)
+        repo.createNewClazzAndGroups(testClazz, mockSystemImpl, mapOf())
         repo.personDao.insert(testPerson)
 
         repo.enrolPersonIntoClazzAtLocalTimezone(testPerson, testClazz.clazzUid, ClazzEnrolment.ROLE_TEACHER)
@@ -120,7 +120,7 @@ class UmAppDatabaseExtTest {
         val testStudent = Person("student", "Student", "Jones")
         val testParent = Person("parent", "Parent", "Jones")
 
-        repo.createNewClazzAndGroups(testClazz, mockSystemImpl, mapOf(), context)
+        repo.createNewClazzAndGroups(testClazz, mockSystemImpl, mapOf())
         testStudent.personUid = repo.personDao.insert(testStudent)
         testParent.personUid = repo.personDao.insert(testParent)
 

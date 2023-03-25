@@ -25,6 +25,10 @@ abstract class UstadEditViewModel(
 
     protected var saveStateJob: Job? = null
 
+    protected val entityUidArg: Long by lazy(LazyThreadSafetyMode.NONE) {
+        savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0
+    }
+
     /**
      * Load an entity for editing:
      *
@@ -153,12 +157,30 @@ abstract class UstadEditViewModel(
         }
     }
 
+    /**
+     * Simple function to get the title for an edit view where there is one message id for editing
+     * an existing entity and another message id for the title if creating a new entity.
+     */
+    protected fun createEditTitle(
+        newEntityMessageId: Int,
+        editEntityMessageId: Int,
+    ): String {
+        val entityUid = savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0L
+        return systemImpl.getString(
+            if(entityUid == 0L) {
+                newEntityMessageId
+            }else {
+                editEntityMessageId
+            }
+        )
+    }
+
     companion object {
 
         /**
          * The default delay between the user making a change and committing the entity value to
          * savedstate.
          */
-        const val COMMIT_DELAY = 100L
+        const val COMMIT_DELAY = 200L
     }
 }
