@@ -14,6 +14,7 @@ import mui.material.Typography
 import mui.system.Box
 import mui.system.sx
 import react.*
+import react.dom.html.ReactHTML
 import react.dom.html.ReactHTML.main
 import react.router.Outlet
 import react.router.Route
@@ -44,60 +45,70 @@ external interface ContentProps: Props {
 
 val Content = FC<ContentProps> { props ->
 
-    val contentParentRef = useRef<HTMLElement>(null)
+//    val contentParentRef = useRef<HTMLElement>(null)
 
-    val showcases = useContext(UstadScreensContext)
+    //val showcases = useContext(UstadScreensContext)
 
-    var snack: Snack? by useState { null }
-
-    val showSnackFunction: ShowSnackFunction = {
-        snack = it
-    }
-
-    Snackbar {
-        open = snack != null
-        onClose = { evt, closeReason ->
-            snack = null
+//    var snack: Snack? by useState { null }
+//
+//    val showSnackFunction: ShowSnackFunction = {
+//        snack = it
+//    }
+//
+//    Snackbar {
+//        open = snack != null
+//        onClose = { evt, closeReason ->
+//            snack = null
+//        }
+//
+//        Typography {
+//            + (snack?.message ?: "")
+//        }
+//    }
+//
+    Box {
+        component = ReactHTML.main
+        sx {
+            gridArea = Area.Content
+            padding = 0.px
         }
 
-        Typography {
-            + (snack?.message ?: "")
-        }
+        Outlet()
     }
 
-    Routes {
-        Route {
-            path = "/"
-            element = Box.create {
-                ref = contentParentRef
-
-                component = main
-                sx {
-                    gridArea = Area.Content
-                    padding = 0.px
-                }
-
-                NavHost {
-                    Outlet()
-                }
-            }
-
-            showcases.forEachIndexed { i, (key, _, Component) ->
-                Route {
-                    index = i == 0
-                    path = key
-                    element = Component.create {
-                        asDynamic().onAppUiStateChanged = props.onAppUiStateChanged
-                        asDynamic().onShowSnackBar = showSnackFunction
-                        asDynamic().muiAppState = props.muiAppState
-                    }
-                }
-            }
-
-            Route {
-                path = "*"
-                element = Typography.create { +"404 Page Not Found" }
-            }
-        }
-    }
+//    Routes {
+//        Route {
+//            path = "/"
+//            element = Box.create {
+//                ref = contentParentRef
+//
+//                component = main
+//                sx {
+//                    gridArea = Area.Content
+//                    padding = 0.px
+//                }
+//
+//                NavHost {
+//                    Outlet()
+//                }
+//            }
+//
+//            showcases.forEachIndexed { i, (key, _, Component) ->
+//                Route {
+//                    index = i == 0
+//                    path = key
+//                    element = Component.create {
+//                        asDynamic().onAppUiStateChanged = props.onAppUiStateChanged
+//                        asDynamic().onShowSnackBar = showSnackFunction
+//                        asDynamic().muiAppState = props.muiAppState
+//                    }
+//                }
+//            }
+//
+//            Route {
+//                path = "*"
+//                element = Typography.create { +"404 Page Not Found" }
+//            }
+//        }
+//    }
 }

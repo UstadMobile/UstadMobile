@@ -42,11 +42,33 @@ open class CourseTerminology {
     @ReplicationVersionId
     var ctLct: Long = 0
 
+
+
     companion object {
 
         const val TABLE_ID = 450
 
 
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is CourseTerminology) return false
+
+        if (ctUid != other.ctUid) return false
+        if (ctTitle != other.ctTitle) return false
+        if (ctTerminology != other.ctTerminology) return false
+        if (ctLct != other.ctLct) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = ctUid.hashCode()
+        result = 31 * result + (ctTitle?.hashCode() ?: 0)
+        result = 31 * result + (ctTerminology?.hashCode() ?: 0)
+        result = 31 * result + ctLct.hashCode()
+        return result
     }
 
 }

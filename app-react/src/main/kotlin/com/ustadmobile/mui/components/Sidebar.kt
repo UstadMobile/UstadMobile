@@ -1,12 +1,15 @@
 package com.ustadmobile.mui.components
 
+import com.ustadmobile.entities.USTAD_SCREENS
+import com.ustadmobile.entities.UstadScreens
 import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
-import com.ustadmobile.view.UstadScreensContext
+
 import csstype.Color
 import csstype.Display
 import csstype.None
 import mui.material.*
+import mui.system.Box
 import mui.system.sx
 import react.FC
 import react.Props
@@ -14,6 +17,7 @@ import react.router.dom.NavLink
 import emotion.react.css
 import react.ReactNode
 import react.dom.html.ReactHTML.nav
+import react.router.useLoaderData
 import react.useContext
 
 external interface SidebarProps: Props {
@@ -21,7 +25,8 @@ external interface SidebarProps: Props {
 }
 
 val Sidebar = FC<SidebarProps> { props ->
-    val ustadScreens = useContext(UstadScreensContext)
+    val ustadScreens = useLoaderData().unsafeCast<UstadScreens>()
+
     Box {
         component = nav
         sx {

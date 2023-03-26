@@ -35,7 +35,7 @@ external interface AppBarSearchProps: Props {
  * }
  */
 val AppBarSearch = FC<AppBarSearchProps> {props ->
-    val theme by useContext(ThemeContext)
+    val theme by useContext(ThemeContext) ?: throw IllegalStateException("No theme!")
 
     var searchWidth by useState { 24 }
 

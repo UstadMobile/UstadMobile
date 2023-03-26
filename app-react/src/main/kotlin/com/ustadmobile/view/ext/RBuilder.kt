@@ -150,20 +150,20 @@ fun RBuilder.renderRoutes(di: DI) {
     val systemImpl: UstadMobileSystemImpl by di.instance()
     val accountManager: UstadAccountManager by di.instance()
 
-    HashRouter{
-        Routes{
-            Route{
-                attrs.path = "/"
-                attrs.element = guardRoute(defaultDestination.component, accountManager, systemImpl)
-            }
-            destinationList.forEach {
-                Route{
-                    attrs.path = "/${it.view}"
-                    attrs.element = guardRoute(it.component, accountManager, systemImpl)
-                }
-            }
-        }
-    }
+//    HashRouter{
+//        Routes{
+//            Route{
+//                attrs.path = "/"
+//                attrs.element = guardRoute(defaultDestination.component, accountManager, systemImpl)
+//            }
+//            destinationList.forEach {
+//                Route{
+//                    attrs.path = "/${it.view}"
+//                    attrs.element = guardRoute(it.component, accountManager, systemImpl)
+//                }
+//            }
+//        }
+//    }
 }
 
 /**

@@ -78,6 +78,8 @@ kotlin {
     android()
 
     js(LEGACY) {
+        useCommonJs()
+
         browser {
             dceTask {
                 keep("kotlin.defineModule") //To avoid  e.defineModule is not a function error
@@ -246,7 +248,7 @@ kotlin {
                 implementation enforcedPlatform("org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom:$kotlinWrappersVersion")
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-extensions"
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-react"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom-legacy"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom"
                 implementation npm("asmcrypto.js","$version_npm_asmcrypto")
                 implementation npm("buffer","$version_npm_buffer")
             }

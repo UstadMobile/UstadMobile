@@ -60,10 +60,43 @@ open class HolidayCalendar() {
         this.umCalendarActive = true
     }
 
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is HolidayCalendar) return false
+
+        if (umCalendarUid != other.umCalendarUid) return false
+        if (umCalendarName != other.umCalendarName) return false
+        if (umCalendarCategory != other.umCalendarCategory) return false
+        if (umCalendarActive != other.umCalendarActive) return false
+        if (umCalendarMasterChangeSeqNum != other.umCalendarMasterChangeSeqNum) return false
+        if (umCalendarLocalChangeSeqNum != other.umCalendarLocalChangeSeqNum) return false
+        if (umCalendarLastChangedBy != other.umCalendarLastChangedBy) return false
+        if (umCalendarLct != other.umCalendarLct) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = umCalendarUid.hashCode()
+        result = 31 * result + (umCalendarName?.hashCode() ?: 0)
+        result = 31 * result + umCalendarCategory
+        result = 31 * result + umCalendarActive.hashCode()
+        result = 31 * result + umCalendarMasterChangeSeqNum.hashCode()
+        result = 31 * result + umCalendarLocalChangeSeqNum.hashCode()
+        result = 31 * result + umCalendarLastChangedBy
+        result = 31 * result + umCalendarLct.hashCode()
+        return result
+    }
+
+
+
+
     companion object {
 
         const val TABLE_ID = 28
 
         const val CATEGORY_HOLIDAY = 1
     }
+
 }

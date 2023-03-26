@@ -20,6 +20,8 @@ repositories {
 
 kotlin {
     js(LEGACY) {
+        useCommonJs()
+
         browser {
             //Specify distribution bundle output directory - this is used by app-ktor-server as a
             // resource directory
@@ -51,8 +53,8 @@ dependencies {
     implementation "org.jetbrains.kotlin-wrappers:kotlin-react"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-react-dom"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-styled"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom-legacy"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-history"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom"
+    //implementation "org.jetbrains.kotlin-wrappers:kotlin-history"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-redux"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-react-redux"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-mui"

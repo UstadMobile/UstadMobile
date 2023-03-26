@@ -2,6 +2,7 @@ package com.ustadmobile.view.components
 
 import com.ustadmobile.hooks.useAttachmentUriSrc
 import com.ustadmobile.mui.components.ThemeContext
+import com.ustadmobile.mui.components.ThemeState
 import csstype.*
 import emotion.react.css
 import js.core.get
@@ -28,7 +29,7 @@ val UstadImageSelectButton = FC<UstadImageSelectButtonProps> { props ->
 
     val imageHref = useAttachmentUriSrc(props.imageUri, false)?.toString()
 
-    val theme by useContext(ThemeContext)
+    val theme: ThemeState = useContext(ThemeContext) ?: throw IllegalStateException("UstadImageSelectButton: No theme!")
 
     Box {
         sx {
@@ -65,7 +66,7 @@ val UstadImageSelectButton = FC<UstadImageSelectButtonProps> { props ->
                     inputRef.current?.click()
                 }
                 sx {
-                    backgroundColor = theme.palette.secondary.main
+                    backgroundColor = theme.component1().palette.secondary.main
                     height = 24.px
                     width = 24.px
                     cursor = Cursor.pointer

@@ -20,7 +20,7 @@ fun <T: UstadViewModel> useUstadViewModel(
     onShowSnack: ((Snack) -> Unit)? = null,
     block: (di: DI, savedStateHandle: UstadSavedStateHandle) -> T
 ): T {
-    val contextDi = useContext(DIContext)
+    val contextDi = useContext(DIContext) ?: throw IllegalStateException("No DIContext!")
 
     val di = useMemo(dependencies = emptyArray()) {
         DI {

@@ -11,7 +11,7 @@ import react.useMemo
 
 fun useStringsXml(): StringsXml {
 
-    val di = useContext(DIContext)
+    val di = useContext(DIContext) ?: throw IllegalStateException("No DI Context!")
 
     val stringsXml = di.direct.instanceOrNull<StringsXml>(tag = JsStringXml.DISPLAY) ?:
         di.direct.instance<StringsXml>(tag = JsStringXml.DEFAULT)

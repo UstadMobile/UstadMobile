@@ -23,6 +23,7 @@ import web.html.HTMLDivElement
 val VirtualListOutlet = FC<Props> { props ->
     @Suppress("SpellCheckingInspection")
     val virtualizerContext = useContext(VirtualListContext)
+        ?: throw IllegalStateException("Outlet has no VirtualListContext: must be within VirtualList")
 
     ReactHTML.div {
         style = jso {

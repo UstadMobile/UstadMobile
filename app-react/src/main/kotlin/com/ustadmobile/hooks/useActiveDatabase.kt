@@ -14,7 +14,7 @@ import react.useMemo
  * Use the active database as per the accountmanager
  */
 fun useActiveDatabase(tag: Int = DoorTag.TAG_DB) : UmAppDatabase {
-    val di = useContext(DIContext)
+    val di = useContext(DIContext) ?: throw IllegalStateException("No DI!")
     val accountManager: UstadAccountManager = useMemo(dependencies = emptyArray()) {
         di.direct.instance()
     }

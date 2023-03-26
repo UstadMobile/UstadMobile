@@ -6,7 +6,7 @@ import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.toUrlQueryString
-import history.Location
+import remix.run.router.Location
 import io.github.aakira.napier.Napier
 import js.core.jso
 import kotlinx.browser.sessionStorage
@@ -160,7 +160,13 @@ val NavHost = FC<PropsWithChildren> { props ->
     val location = useLocation()
 
     val navHostFunction = useMemo(navigateFn, location) {
-        NavHostFunction(navigateFn, location) { showChildren = false }
+        NavHostFunction(
+            navigateFn = navigateFn,
+            location = location,
+            onHideChildren = {
+                showChildren = false
+            }
+        )
     }
 
     NavHostContext(navHostFunction) {

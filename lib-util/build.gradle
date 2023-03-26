@@ -66,6 +66,8 @@ kotlin {
     android()
 
     js(LEGACY) {
+        useCommonJs()
+
         browser {
             testTask {
                 useKarma {

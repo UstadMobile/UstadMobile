@@ -24,7 +24,7 @@ import react.useMemo
 fun useCourseTerminologyEntries(
     courseTerminology: CourseTerminology?
 ): List<TerminologyEntry> {
-    val di = useContext(DIContext)
+    val di = useContext(DIContext) ?: throw IllegalStateException("No DI!")
     val termJsonStr = courseTerminology?.ctTerminology
 
     return useMemo(termJsonStr) {
