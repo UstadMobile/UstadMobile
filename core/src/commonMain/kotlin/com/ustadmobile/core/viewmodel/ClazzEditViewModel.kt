@@ -19,6 +19,7 @@ import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.Clazz.Companion.CLAZZ_FEATURE_ATTENDANCE
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.util.getDefaultTimeZoneId
 import kotlinx.coroutines.async
@@ -87,7 +88,7 @@ class ClazzEditViewModel(
     savedStateHandle: UstadSavedStateHandle
 ): UstadEditViewModel(di, savedStateHandle) {
 
-    val _uiState = MutableStateFlow(ClazzEditUiState())
+    private val _uiState = MutableStateFlow(ClazzEditUiState())
 
     val uiState: Flow<ClazzEditUiState> = _uiState.asStateFlow()
 
@@ -157,7 +158,18 @@ class ClazzEditViewModel(
         scheduleEntityCommitToSavedState(
             entity = entity,
             serializer = ClazzWithHolidayCalendarAndSchoolAndTerminology.serializer(),
+            commitDelay = 200,
         )
+    }
+
+    fun onCheckedAttendanceChanged(checked: Boolean) {
+        onEntityChanged(_uiState.value.entity?.shallowCopy {
+            clazzFeatures = if(checked) {
+                CLAZZ_FEATURE_ATTENDANCE
+            }else {
+                0L
+            }
+        })
     }
 
     private fun ClazzEditUiState.hasErrors() : Boolean {

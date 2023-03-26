@@ -8,7 +8,7 @@ import com.ustadmobile.core.viewmodel.ScheduleEditUiState
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.common.justifyContent
-import com.ustadmobile.mui.components.UstadMessageIdDropDownField
+import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.mui.components.UstadTimeEditField
 import csstype.*
 import mui.material.*
@@ -34,7 +34,7 @@ val ScheduleEditComponent2 = FC <ScheduleEditScreenProps> { props ->
         Stack {
             spacing = responsive(2)
 
-            UstadMessageIdDropDownField {
+            UstadMessageIdSelectField {
                 value = props.uiState.entity?.scheduleDay ?: 0
                 options = ScheduleConstants.DAY_MESSAGE_IDS
                 label = strings[MessageID.day]
@@ -42,7 +42,7 @@ val ScheduleEditComponent2 = FC <ScheduleEditScreenProps> { props ->
                 onChange = {
                     props.onScheduleChanged(
                         props.uiState.entity?.shallowCopy {
-                            scheduleDay = it?.value ?: 0
+                            scheduleDay = it.value
                         })
                 }
             }

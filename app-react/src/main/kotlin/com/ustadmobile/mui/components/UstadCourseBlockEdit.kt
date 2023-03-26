@@ -9,6 +9,7 @@ import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.util.ext.format
+import com.ustadmobile.view.components.UstadMessageIdSelectField
 import csstype.px
 import mui.material.*
 import mui.system.Stack
@@ -53,14 +54,14 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             direction = responsive(StackDirection.row)
             spacing = responsive(15.px)
 
-            UstadMessageIdDropDownField {
+            UstadMessageIdSelectField {
                 value = props.uiState.courseBlock?.cbCompletionCriteria ?: 0
                 label = strings[MessageID.completion_criteria]
                 options = CompletionCriteriaConstants.COMPLETION_CRITERIA_MESSAGE_IDS
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
                     props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
-                        cbCompletionCriteria = it?.value ?: 0
+                        cbCompletionCriteria = it.value
                     })
                 }
             }

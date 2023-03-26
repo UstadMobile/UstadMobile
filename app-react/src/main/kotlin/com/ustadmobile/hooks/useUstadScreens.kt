@@ -8,6 +8,8 @@ import com.ustadmobile.entities.UstadScreens
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.*
 import com.ustadmobile.view.components.UstadImageSelectButtonPreview
+import com.ustadmobile.view.components.UstadMessageIdSelectFieldPreview
+import com.ustadmobile.view.components.UstadSelectFieldPreview
 import com.ustadmobile.view.components.virtuallist.VirtualListPreview
 import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
 import react.useMemo
@@ -54,8 +56,8 @@ fun useUstadScreens(): UstadScreens {
                 SchoolEditScreenPreview),
             UstadScreen(LanguageDetailView.VIEW_NAME, name = "LanguageDetail Preview",
                 LanguageDetailPreview),
-            UstadScreen(ClazzEdit2View.VIEW_NAME, "Clazz Edit Preview",
-                ClazzEditScreenPreview),
+            UstadScreen(ClazzEdit2View.VIEW_NAME, "Course Edit",
+                ClazzEditScreen),
             UstadScreen("EasySort", "Easy Sort", EasySortPreview),
             UstadScreen(ErrorReportView.VIEW_NAME, name = "ErrorReport Preview", ErrorReportPreview),
             UstadScreen(LanguageEditView.VIEW_NAME, "LanguageEdit Preview", LanguageEditPreview),
@@ -128,6 +130,10 @@ fun useUstadScreens(): UstadScreens {
                 UstadAssignmentFileSubmissionListItemPreview),
             UstadScreen("UstadImageSelectButtonPreview", "UstadImageSelectButtonPreview",
                 UstadImageSelectButtonPreview),
+            UstadScreen("UstadSelectFieldPreview", "UstadSelectFieldPreview",
+                UstadSelectFieldPreview),
+            UstadScreen("UstadMessageIdSelectFieldPreview", "UstadMessageIdSelectFieldPreview",
+                UstadMessageIdSelectFieldPreview)
         )
     }
 }

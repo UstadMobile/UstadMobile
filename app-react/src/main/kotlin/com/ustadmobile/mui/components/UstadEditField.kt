@@ -174,9 +174,8 @@ external interface UstadDateEditFieldProps : Props {
     var timeInMillis: Long
 
     /**
-     * Reserved for future usage: will be required
+     * Required: The timezone being used
      */
-    @Suppress("unused")
     var timeZoneId: String
 
     /**
@@ -246,45 +245,6 @@ val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
 }
 
 
-external interface MessageIDDropDownFieldProps: Props {
-    /**
-     * The currently selected value. If there is no such value in the list, the selection will be blank
-     */
-    var value: Int
-
-    /**
-     * A list of options to show.
-     * @see MessageIdOption2
-     */
-    var options: List<MessageIdOption2>
-
-    /**
-     * Field label
-     */
-    var label: String
-
-    /**
-     * Event handler
-     */
-    var onChange: (MessageIdOption2?) -> Unit
-
-    /**
-     * DOM element id
-     */
-    var id: String
-
-    /**
-     *
-     */
-    var enabled: Boolean?
-
-    /**
-     *
-     */
-    var error: String?
-
-    var fullWidth: Boolean
-}
 
 external interface UstadDropDownFieldProps: Props {
     /**
@@ -387,24 +347,6 @@ val UstadDropDownField = FC<UstadDropDownFieldProps> { props ->
     }
 }
 
-val UstadMessageIdDropDownField = FC<MessageIDDropDownFieldProps> { props ->
-    val strings = useStringsXml()
-
-    UstadSelectField<MessageIdOption2> {
-        value = props.value.toString()
-        label = props.label
-        options = props.options
-        fullWidth = props.fullWidth
-        itemLabel = { ReactNode(if(it.messageId == 0) "" else strings[it.messageId]) }
-        itemValue = { it.value.toString() }
-        onChange = {
-            props.onChange(it)
-        }
-        id = props.id
-        enabled = props.enabled
-        error = props.error
-    }
-}
 
 class DropDownOption(val label: String, val value: String) {
     override fun toString(): String {

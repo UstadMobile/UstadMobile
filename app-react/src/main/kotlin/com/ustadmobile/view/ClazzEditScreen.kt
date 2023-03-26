@@ -1,7 +1,9 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
 import com.ustadmobile.core.impl.locale.entityconstants.EnrolmentPolicyConstants
@@ -11,11 +13,12 @@ import com.ustadmobile.lib.db.entities.Schedule.Companion.DAY_MONDAY
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.core.viewmodel.ClazzEditUiState
+import com.ustadmobile.core.viewmodel.ClazzEditViewModel
 import com.ustadmobile.hooks.useFormattedTime
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadDateEditField
-import com.ustadmobile.mui.components.UstadMessageIdDropDownField
+import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.view.components.UstadBlankIcon
@@ -65,7 +68,7 @@ external interface ClazzEditScreenProps : Props {
 
     var onClickHolidayCalendar: () -> Unit
 
-    var onCheckedAttendance: (Boolean) -> Unit
+    var onCheckedAttendanceChanged: (Boolean) -> Unit
 
     var onClickTerminology: () -> Unit
 
@@ -138,6 +141,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
 
                 UstadDateEditField {
                     timeInMillis = props.uiState.entity?.clazzStartTime ?: 0
+                    timeZoneId = props.uiState.timeZone
                     label = strings[MessageID.start_date]
                     error = props.uiState.clazzStartDateError
                     enabled = props.uiState.fieldsEnabled
@@ -153,6 +157,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
 
                 UstadDateEditField {
                     timeInMillis = props.uiState.entity?.clazzEndTime ?: 0
+                    timeZoneId = props.uiState.timeZone
                     label = strings[MessageID.end_date].addOptionalSuffix(strings)
                     error = props.uiState.clazzEndDateError
                     enabled = props.uiState.fieldsEnabled
@@ -209,20 +214,22 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
             UstadSwitchField {
                 label = strings[MessageID.attendance]
                 checked = props.uiState.clazzEditAttendanceChecked
-                onChanged = { props.onCheckedAttendance(it) }
+                onChanged = props.onCheckedAttendanceChanged
                 enabled = props.uiState.fieldsEnabled
             }
 
-            UstadMessageIdDropDownField {
-                value = props.uiState.entity?.clazzEnrolmentPolicy ?: 0
+            UstadMessageIdSelectField {
+                value = props.uiState.entity?.clazzEnrolmentPolicy
+                    ?: EnrolmentPolicyConstants.ENROLMENT_POLICY_MESSAGE_IDS.first().value
                 options = EnrolmentPolicyConstants.ENROLMENT_POLICY_MESSAGE_IDS
                 label = strings[MessageID.enrolment_policy]
-                id = (props.uiState.entity?.clazzEnrolmentPolicy ?: 0).toString()
-                onChange = {
+                id = "clazzEnrolmentPolicy"
+                onChange = { option ->
                     props.onClazzChanged(
                         props.uiState.entity?.shallowCopy {
-                            clazzEnrolmentPolicy = it?.value ?: 0
-                        })
+                            clazzEnrolmentPolicy = option.value
+                        }
+                    )
                 }
             }
 
@@ -494,6 +501,27 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
         }
     }
 }
+
+val ClazzEditScreen = FC<UstadScreenProps> { props ->
+
+    val viewModel = useUstadViewModel(
+        onAppUiStateChange = props.onAppUiStateChanged
+    ) { di, savedStateHandle ->
+        ClazzEditViewModel(di, savedStateHandle)
+    }
+
+    val uiStateVar by viewModel.uiState.collectAsState(ClazzEditUiState())
+
+    ClazzEditScreenComponent2 {
+        uiState = uiStateVar
+        onClazzChanged = viewModel::onEntityChanged
+        onCheckedAttendanceChanged = viewModel::onCheckedAttendanceChanged
+        onCourseBlockMoved = { fromIndex, toIndex ->
+
+        }
+    }
+}
+
 
 val ClazzEditScreenPreview = FC<Props> {
 
