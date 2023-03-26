@@ -32,7 +32,6 @@ import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.composethemeadapter.MdcTheme
-import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzLogListAttendanceChartheaderBinding
 import com.toughra.ustadmobile.databinding.ItemClazzLogAttendanceListBinding
@@ -40,7 +39,6 @@ import com.ustadmobile.core.controller.ClazzLogListAttendancePresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.core.viewmodel.AttendanceGraphData
@@ -107,12 +105,13 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
         override fun onBindViewHolder(holder: ClazzLogListViewHolder, position: Int) {
             val item = getItem(position)
             holder.itemBinding.clazzLog = item
-            val timezoneVal = clazzTimeZone
-            if(timezoneVal != null){
-                holder.itemBinding.clazzLogLocalTime = DateTime.fromUnix(item?.logDate ?: 0L)
-                        .toOffsetByTimezone(timezoneVal)
-                holder.itemBinding.clazzLocalTimeZone = TimeZone.getTimeZone(timezoneVal)
-            }
+            //will not be used with MVVM
+//            val timezoneVal = clazzTimeZone
+//            if(timezoneVal != null){
+//                holder.itemBinding.clazzLogLocalTime = DateTime.fromUnix(item?.logDate ?: 0L)
+//                        .toOffsetByTimezone(timezoneVal)
+//                holder.itemBinding.clazzLocalTimeZone = TimeZone.getTimeZone(timezoneVal)
+//            }
 
             holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
         }

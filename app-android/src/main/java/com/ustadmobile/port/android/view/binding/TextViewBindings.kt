@@ -25,11 +25,14 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.VerbEntity.Companion.VERB_ANSWERED_UID
+import kotlinx.datetime.Instant
+import kotlinx.datetime.toLocalDateTime
 import me.saket.bettermovementmethod.BetterLinkMovementMethod
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
-import com.soywiz.klock.DateFormat as KlockDateFormat
-
+import kotlinx.datetime.TimeZone as KxTimeZone
 @BindingAdapter("textMessageId")
 fun TextView.setTextMessageId(messageId: Int) {
     text = systemImpl.getString(messageId, context)
@@ -233,11 +236,11 @@ fun TextView.setTextClazzLogStatus(clazzLog: ClazzLog) {
     }
 }
 
-private val klockDateFormat: KlockDateFormat by lazy { KlockDateFormat("EEE") }
 
 @BindingAdapter("textShortDayOfWeek")
+@Deprecated("This will be removed after switching to mvvm")
 fun TextView.setTextShortDayOfWeek(localTime: DateTimeTz) {
-    text = klockDateFormat.format(localTime)
+    //do nothing
 }
 
 @SuppressLint("SetTextI18n")
@@ -356,9 +359,11 @@ fun TextView.setStatementDate(statementStartDate: Long, statementEndDate: Long){
     var statementDate = dateFormatter.format(statementStartDate)
 
     if(statementEndDate != 0L && statementEndDate!= Long.MAX_VALUE){
-        val startDate = DateTime(statementStartDate)
-        val endDate = DateTime(statementEndDate)
-        if(startDate.dayOfYear != endDate.dayOfYear){
+        val startDate = Instant.fromEpochMilliseconds(statementStartDate)
+            .toLocalDateTime(KxTimeZone.currentSystemDefault())
+        val endDate = Instant.fromEpochMilliseconds(statementEndDate)
+            .toLocalDateTime(KxTimeZone.currentSystemDefault())
+        if(startDate.dayOfYear != endDate.dayOfYear) {
             statementDate += " - ${dateFormatter.format(statementEndDate)}"
         }
     }

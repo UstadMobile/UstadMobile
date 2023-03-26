@@ -206,7 +206,6 @@ kotlin {
                 implementation project(":lib-test-common")
 
                 implementation "io.github.aakira:napier:$version_napier"
-                implementation "com.soywiz.korlibs.klock:klock:$version_klock"
 
                 implementation "junit:junit:$version_junit"
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
@@ -214,8 +213,6 @@ kotlin {
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "io.github.aakira:napier-jvm:$version_napier"
                 implementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
-                implementation "com.soywiz.korlibs.klock:klock-jvm:$version_klock"
-
                 implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
                 implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"

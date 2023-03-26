@@ -1,17 +1,12 @@
 package com.ustadmobile.core.controller
 
 import org.mockito.kotlin.*
-import com.soywiz.klock.DateTime
-import com.soywiz.klock.hours
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzLogDao
 import com.ustadmobile.core.db.waitForLiveData
-import com.ustadmobile.core.schedule.localMidnight
-import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeRepoInstance
-import com.ustadmobile.core.util.ext.asPerson
 import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.mockLifecycleOwner
@@ -22,6 +17,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.test.ext.insertClazzLogs
 import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -110,7 +106,10 @@ class ClazzLogListAttendancePresenterTest {
         }
 
         val oneDayInMs = (1000 * 60 * 60 * 24)
-        val timeNow = DateTime.now().toOffsetByTimezone("Asia/Dubai").localMidnight.utc.unixMillisLong + 12.hours.millisecondsLong
+        val timeNow = Clock.System.now().toLocalDateTime(TimeZone.of("Asia/Dubai"))
+            .let { LocalDateTime(it.date, LocalTime(12, 0, 0)) }
+            .toInstant(TimeZone.of("Asia/Dubai"))
+            .toEpochMilliseconds()
         val timeRange = (timeNow - oneDayInMs * 6) to timeNow
 
         //make five ClazzLogs showing attendance

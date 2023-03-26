@@ -390,6 +390,8 @@ dependencies {
     implementation "io.coil-kt:coil:$version_android_coil"
     implementation "io.coil-kt:coil-compose:$version_android_coil"
 
+    implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
+
 
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"

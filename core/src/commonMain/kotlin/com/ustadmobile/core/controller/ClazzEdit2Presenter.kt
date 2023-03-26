@@ -1,15 +1,11 @@
 package com.ustadmobile.core.controller
 
-import com.soywiz.klock.DateTime
 import com.ustadmobile.core.controller.TimeZoneListPresenter.Companion.RESULT_TIMEZONE_KEY
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.deactivateByUids
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
-import com.ustadmobile.core.schedule.localEndOfDay
-import com.ustadmobile.core.schedule.localMidnight
-import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
@@ -24,6 +20,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getDefaultTimeZoneId
 import kotlinx.coroutines.launch
+import kotlinx.datetime.*
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
@@ -510,11 +507,13 @@ class ClazzEdit2Presenter(
             view.loading = true
 
             entity.clazzName = entity.clazzName?.trim()
-            entity.clazzStartTime = DateTime(entity.clazzStartTime)
-                    .toOffsetByTimezone(entity.effectiveTimeZone).localMidnight.utc.unixMillisLong
+            entity.clazzStartTime = Instant.fromEpochMilliseconds(entity.clazzStartTime)
+                .toLocalMidnight(TimeZone.of(entity.effectiveTimeZone))
+                .toEpochMilliseconds()
             if(entity.clazzEndTime != Long.MAX_VALUE){
-                entity.clazzEndTime = DateTime(entity.clazzEndTime)
-                        .toOffsetByTimezone(entity.effectiveTimeZone).localEndOfDay.utc.unixMillisLong
+                entity.clazzEndTime = Instant.fromEpochMilliseconds(entity.clazzEndTime)
+                    .toLocalEndOfDay(TimeZone.of(entity.effectiveTimeZone))
+                    .toEpochMilliseconds()
             }
 
             val courseBlockList = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.toList() ?: listOf()
@@ -620,11 +619,14 @@ class ClazzEdit2Presenter(
                 }
             }
 
-            val fromDateTime = DateTime.now().toOffsetByTimezone(entity.effectiveTimeZone).localMidnight
+            val fromDateTime = Clock.System.now().toLocalDateTime(TimeZone.of(entity.effectiveTimeZone))
+                .toLocalMidnight()
             val clazzLogCreatorManager: ClazzLogCreatorManager by di.instance()
             clazzLogCreatorManager.requestClazzLogCreation(entity.clazzUid,
                     accountManager.activeAccount.endpointUrl,
-                    fromDateTime.utc.unixMillisLong, fromDateTime.localEndOfDay.utc.unixMillisLong)
+                    fromDateTime.toInstant(TimeZone.of(entity.effectiveTimeZone)).toEpochMilliseconds(),
+                    fromDateTime.toLocalEndOfDay()
+                        .toInstant(TimeZone.of(entity.effectiveTimeZone)).toEpochMilliseconds())
             view.loading = false
 
             onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity,

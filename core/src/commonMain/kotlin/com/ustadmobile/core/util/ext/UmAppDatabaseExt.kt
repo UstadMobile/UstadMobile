@@ -1,6 +1,5 @@
 package com.ustadmobile.core.util.ext
 
-import com.soywiz.klock.DateTime
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.controller.ReportFilterEditPresenter.Companion.genderMap
 import com.ustadmobile.core.controller.TerminologyKeys
@@ -8,9 +7,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.findEntriesByMd5SumsSafeAsync
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.schedule.localEndOfDay
-import com.ustadmobile.core.schedule.localMidnight
-import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.graph.LabelValueFormatter
 import com.ustadmobile.core.util.graph.MessageIdFormatter
 import com.ustadmobile.core.util.graph.TimeFormatter
@@ -28,6 +24,8 @@ import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
 import com.ustadmobile.lib.util.randomString
 import kotlinx.coroutines.delay
 import com.ustadmobile.core.db.dao.getResults
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 
 /**
  * Insert a new class and
@@ -101,7 +99,8 @@ suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Per
     }
 
     val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
-    val joinTime = DateTime.now().toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
+    val joinTime = Clock.System.now().toLocalMidnight(clazzTimeZone).toEpochMilliseconds()
+
     val clazzEnrolment = ClazzEnrolment().apply {
         clazzEnrolmentPersonUid = personToEnrol.personUid
         clazzEnrolmentClazzUid = clazzUid
@@ -127,11 +126,12 @@ suspend fun UmAppDatabase.processEnrolmentIntoClass(
         ?: throw IllegalArgumentException("processEnrolmentIntoClass: Class does not exist")
     val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
 
-    enrolment.clazzEnrolmentDateJoined = DateTime(enrolment.clazzEnrolmentDateJoined)
-        .toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
+    enrolment.clazzEnrolmentDateJoined = Instant.fromEpochMilliseconds(enrolment.clazzEnrolmentDateJoined)
+        .toLocalMidnight(clazzTimeZone).toEpochMilliseconds()
+
     if(enrolment.clazzEnrolmentDateLeft != Long.MAX_VALUE){
-        enrolment.clazzEnrolmentDateLeft = DateTime(enrolment.clazzEnrolmentDateLeft)
-            .toOffsetByTimezone(clazzTimeZone).localEndOfDay.utc.unixMillisLong
+        enrolment.clazzEnrolmentDateLeft = Instant.fromEpochMilliseconds(enrolment.clazzEnrolmentDateLeft)
+            .toLocalEndOfDay(clazzTimeZone).toEpochMilliseconds()
     }
 
     enrolment.clazzEnrolmentUid = clazzEnrolmentDao.insertAsync(enrolment)
@@ -196,7 +196,7 @@ suspend fun UmAppDatabase.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol: Pe
         throw AlreadyEnroledInSchoolException(existingEnrolment.first())
 
     val schoolTimeZone = schoolVal.schoolTimeZone?: "UTC"
-    val joinTime = DateTime.now().toOffsetByTimezone(schoolTimeZone).localMidnight.utc.unixMillisLong
+    val joinTime = Clock.System.now().toLocalMidnight(schoolTimeZone).toEpochMilliseconds()
     val schoolMember = SchoolMemberWithPerson().apply {
         schoolMemberPersonUid = personToEnrol.personUid
         schoolMemberSchoolUid = schoolUid

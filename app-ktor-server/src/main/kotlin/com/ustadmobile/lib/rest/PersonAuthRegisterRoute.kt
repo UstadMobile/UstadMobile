@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.rest
 
-import com.soywiz.klock.DateTime
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.AuthResult
 import com.ustadmobile.core.account.Pbkdf2Params
@@ -10,7 +9,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.LINK_ENDPOINT_VIEWNAME_DIVIDER
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.schedule.age
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.door.ext.DoorTag
@@ -25,6 +23,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.pipeline.*
+import kotlinx.datetime.Instant
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.ktor.closestDI
@@ -80,13 +79,14 @@ fun Route.personAuthRegisterRoute() {
             val mParentContact = registerRequest.parent?.ppjEmail
 
             //Check to make sure if the person being registered is a minor that there is a parental contact
-            if(DateTime(mPerson.dateOfBirth).age() < UstadMobileConstants.MINOR_AGE_THRESHOLD
-                && (mParentContact == null)) {
+            if(
+                Instant.fromEpochMilliseconds(mPerson.dateOfBirth).ageInYears() < UstadMobileConstants.MINOR_AGE_THRESHOLD &&
+                mParentContact == null
+            ) {
                 call.respond(HttpStatusCode.BadRequest,
                     "Person registering is minor and no parental contact provided or no endpoint for link")
                 return@post
             }
-
 
             val existingPerson = if(mPerson.personUid != 0L) db.personDao.findByUid(mPerson.personUid)
             else db.personDao.findByUsername(mPerson.username)
@@ -105,7 +105,7 @@ fun Route.personAuthRegisterRoute() {
                 repo.personDao.update(mPerson)
             }
 
-            if(DateTime(mPerson.dateOfBirth).age() < UstadMobileConstants.MINOR_AGE_THRESHOLD) {
+            if(Instant.fromEpochMilliseconds(mPerson.dateOfBirth).ageInYears() < UstadMobileConstants.MINOR_AGE_THRESHOLD) {
                 val mParentJoinVal = registerRequest.parent ?: throw IllegalStateException("Minor without parent join!")
                 val mParentContactVal = mParentContact ?: throw IllegalStateException("Minor without parent contact")
 

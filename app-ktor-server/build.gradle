@@ -37,7 +37,6 @@ dependencies {
     implementation "io.ktor:ktor-serialization-kotlinx-json:$version_ktor"
     implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
     implementation "io.ktor:ktor-io:$version_ktor"
-    implementation "com.soywiz.korlibs.klock:klock:$version_klock"
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "io.ktor:ktor-server-netty:$version_ktor"
@@ -94,6 +93,8 @@ dependencies {
 
     implementation "com.sun.mail:jakarta.mail:$version_jakartamail"
     implementation "org.apache.commons:commons-compress:$version_apache_commons_compress"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
 
     //test
     testImplementation project(":lib-test-common")

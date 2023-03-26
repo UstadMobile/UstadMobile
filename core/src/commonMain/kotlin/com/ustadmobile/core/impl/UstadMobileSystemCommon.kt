@@ -1,7 +1,5 @@
 package com.ustadmobile.core.impl
 
-import com.soywiz.klock.DateTime
-import com.soywiz.klock.years
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
@@ -16,6 +14,10 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
 import kotlinx.serialization.KSerializer
 import kotlin.js.JsName
 
@@ -120,7 +122,9 @@ abstract class UstadMobileSystemCommon {
                 .replace("%1\$s", deepLink)
 
             val maxDateOfBirth = if(viewUri.startsWith(ParentalConsentManagementView.VIEW_NAME)) {
-                (DateTime.now() - UstadMobileConstants.ADULT_AGE_THRESHOLD.years).unixMillisLong
+                Clock.System.now()
+                    .minus(UstadMobileConstants.ADULT_AGE_THRESHOLD, DateTimeUnit.YEAR, TimeZone.UTC)
+                    .toEpochMilliseconds()
             }else {
                 0L
             }

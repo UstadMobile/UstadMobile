@@ -1,12 +1,12 @@
 package com.ustadmobile.core.schedule
 
-import com.soywiz.klock.*
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ext.toLocalEndOfDay
+import com.ustadmobile.core.util.ext.toLocalMidnight
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.Holiday
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.datetime.*
 
 /**
  * This method will create the ClazzLog records for each day. A ClazzLog is created for each day
@@ -22,20 +22,26 @@ import kotlinx.coroutines.launch
  * @param matchLocalFromDay : this can be used on the server to require that the class log being
  * generated must be for the same day according to the timezone of the
  */
-fun UmAppDatabase.createClazzLogs(fromTime: Long, toTime: Long, clazzFilter: Long = 0,
-                                  matchLocalFromDay: Boolean = false) {
+fun UmAppDatabase.createClazzLogs(
+    fromTime: Long,
+    toTime: Long,
+    clazzFilter: Long = 0,
+    matchLocalFromDay: Boolean = false
+) {
     val holidayCalendarHolidayLists = mutableMapOf<Long, List<Holiday>>()
-    val toDateTime = DateTime.fromUnix(toTime)
     clazzDao.findClazzesWithEffectiveHolidayCalendarAndFilter(clazzFilter).forEach { clazz ->
         val alreadyCreatedClazzLogs = clazzLogDao.findByClazzUidWithinTimeRange(clazz.clazzUid,
                 fromTime, toTime)
 
 
-        val effectiveTimeZone = clazz.clazzTimeZone ?: clazz.school?.schoolTimeZone ?: "UTC"
-        val startTimeOffset = getTimezoneOffset(effectiveTimeZone, fromTime)
-        val fromTimeLocal = DateTime.fromUnix(fromTime).toOffset(
-                TimezoneOffset(startTimeOffset.toDouble()))
-        val fromDayOfWeekLocal = fromTimeLocal.dayOfWeek
+        val effectiveTimeZoneId = clazz.clazzTimeZone ?: clazz.school?.schoolTimeZone ?: "UTC"
+        val effectiveTimeZone = TimeZone.of(effectiveTimeZoneId)
+
+        val fromLocalDateTime = Instant.fromEpochMilliseconds(fromTime)
+            .toLocalDateTime(effectiveTimeZone)
+
+
+        val fromDayOfWeekLocalX = fromLocalDateTime.dayOfWeek
 
         val holCalendarUid = clazz.holidayCalendar?.umCalendarUid ?: 0L
         val clazzHolidayList = holidayCalendarHolidayLists.getOrPut(holCalendarUid) {
@@ -43,29 +49,38 @@ fun UmAppDatabase.createClazzLogs(fromTime: Long, toTime: Long, clazzFilter: Lon
         }
 
         for (schedule in scheduleDao.findAllSchedulesByClazzUidAsList(clazz.clazzUid)) {
-            val scheduleNextInstance = schedule.nextOccurence(effectiveTimeZone, fromTime)
-            if (scheduleNextInstance >= toDateTime) {
+            val (scheduleNextStart, scheduleNextEnd) = schedule.nextOccurenceX(effectiveTimeZone,
+                Instant.fromEpochMilliseconds(fromTime).toLocalDateTime(effectiveTimeZone))
+            if (scheduleNextStart.toEpochMilliseconds() >= toTime) {
                 continue
             }
 
-            val scheduleNextInstanceDateTimeTz = scheduleNextInstance.from.toOffsetByTimezone(
-                    effectiveTimeZone)
-            if (matchLocalFromDay && scheduleNextInstanceDateTimeTz.dayOfWeek != fromDayOfWeekLocal) {
+            val scheduleNextLocalDateTime = scheduleNextStart.toLocalDateTime(effectiveTimeZone)
+
+            if (matchLocalFromDay && scheduleNextLocalDateTime.dayOfWeek != fromDayOfWeekLocalX) {
                 continue
             }
 
 
             val holidayAndDateTimeRange = clazzHolidayList.map {
-                val timezoneOffset = getTimezoneOffset(effectiveTimeZone, it.holStartTime)
-                Pair(it, DateTime.fromUnix(
-                        it.holStartTime - timezoneOffset) until
-                        DateTime.fromUnix(it.holEndTime - timezoneOffset))
+                val startInstant = Instant.fromEpochMilliseconds(it.holStartTime)
+                    .toLocalDateTime(TimeZone.UTC)
+                    .toLocalMidnight()
+                    .toInstant(effectiveTimeZone)
+                val endInstant = Instant.fromEpochMilliseconds(it.holEndTime)
+                    .toLocalDateTime(TimeZone.UTC)
+                    .toLocalEndOfDay()
+                    .toInstant(effectiveTimeZone)
+
+                Pair(it, Pair(startInstant, endInstant))
             }
 
-            val overlappingHolidays = holidayAndDateTimeRange
-                    .filter { it.second.contains(scheduleNextInstance) }
+            val overlappingHolidays = holidayAndDateTimeRange.filter {
+                val (holStart, holEnd) = it.second
+                holStart < scheduleNextStart && holEnd > scheduleNextEnd
+            }
 
-            val clazzLogDate = scheduleNextInstance.from.unixMillisLong
+            val clazzLogDate = scheduleNextStart.toEpochMilliseconds()
             val clazzLog = ClazzLog().apply {
                 logDate = clazzLogDate
                 clazzLogClazzUid = clazz.clazzUid

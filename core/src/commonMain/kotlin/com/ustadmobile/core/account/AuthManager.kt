@@ -1,19 +1,14 @@
 package com.ustadmobile.core.account
 
-import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDaoCommon
-import com.ustadmobile.core.impl.UstadMobileConstants
-import com.ustadmobile.core.schedule.age
-import com.ustadmobile.core.util.ext.base64StringToByteArray
-import com.ustadmobile.core.util.ext.doublePbkdf2Hash
-import com.ustadmobile.core.util.ext.encodeBase64
-import com.ustadmobile.core.util.ext.insertPersonAuthCredentials2
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.PersonAuth2
 import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.STATUS_APPROVED
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.util.authenticateEncryptedPassword
+import kotlinx.datetime.Instant
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -75,7 +70,8 @@ class AuthManager(
 
         //Check if this is an account for a minor which requires parental consent
         if(authorizedPerson != null &&
-            DateTime(authorizedPerson.dateOfBirth).age()  < UstadMobileConstants.MINOR_AGE_THRESHOLD) {
+            Instant.fromEpochMilliseconds(authorizedPerson.dateOfBirth).isDateOfBirthAMinor()
+        ) {
             val parentJoins = db.personParentJoinDao.findByMinorPersonUid(authorizedPerson.personUid)
 
             if(!parentJoins.any { it.ppjStatus == STATUS_APPROVED }) {

@@ -1,18 +1,12 @@
 package com.ustadmobile.core.viewmodel
 
-import com.soywiz.klock.DateTime
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
-import com.ustadmobile.core.schedule.localEndOfDay
-import com.ustadmobile.core.schedule.localMidnight
-import com.ustadmobile.core.schedule.toOffsetByTimezone
-import com.ustadmobile.core.util.ext.createNewClazzAndGroups
-import com.ustadmobile.core.util.ext.effectiveTimeZone
-import com.ustadmobile.core.util.ext.toTermMap
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -29,6 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.*
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -201,12 +196,12 @@ class ClazzEditViewModel(
         //Entity to save
         val entity = initEntity.shallowCopy {
             this.clazzName = clazzName?.trim()
-            clazzStartTime = DateTime(initEntity.clazzStartTime)
-                .toOffsetByTimezone(initEntity.effectiveTimeZone).localMidnight.utc.unixMillisLong
+            clazzStartTime = Instant.fromEpochMilliseconds(initEntity.clazzStartTime)
+                .toLocalMidnight(initEntity.effectiveTimeZone).toEpochMilliseconds()
 
             if(clazzEndTime != Long.MAX_VALUE){
-                clazzEndTime = DateTime(initEntity.clazzEndTime)
-                    .toOffsetByTimezone(initEntity.effectiveTimeZone).localEndOfDay.utc.unixMillisLong
+                clazzEndTime = Instant.fromEpochMilliseconds(initEntity.clazzEndTime)
+                    .toLocalEndOfDay(initEntity.effectiveTimeZone).toEpochMilliseconds()
             }
         }
 
@@ -223,11 +218,16 @@ class ClazzEditViewModel(
                 }
             }
 
-            val fromDateTime = DateTime.now().toOffsetByTimezone(entity.effectiveTimeZone).localMidnight
+            val entityTimeZone = TimeZone.of(entity.effectiveTimeZone)
+            val fromLocalDate = Clock.System.now().toLocalDateTime(entityTimeZone)
+                .toLocalMidnight()
             val clazzLogCreatorManager: ClazzLogCreatorManager by di.instance()
-            clazzLogCreatorManager.requestClazzLogCreation(entity.clazzUid,
+            clazzLogCreatorManager.requestClazzLogCreation(
+                entity.clazzUid,
                 accountManager.activeAccount.endpointUrl,
-                fromDateTime.utc.unixMillisLong, fromDateTime.localEndOfDay.utc.unixMillisLong)
+                fromLocalDate.toInstant(entityTimeZone).toEpochMilliseconds(),
+                fromLocalDate.toLocalEndOfDay().toInstant(entityTimeZone).toEpochMilliseconds()
+            )
             _uiState.update { prev ->
                 prev.copy(fieldsEnabled = true)
             }

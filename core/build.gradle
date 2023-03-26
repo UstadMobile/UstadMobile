@@ -105,7 +105,6 @@ kotlin {
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
                 implementation "io.ktor:ktor-io:$version_ktor"
-                implementation "com.soywiz.korlibs.klock:klock:$version_klock"
                 implementation "io.github.aakira:napier:$version_napier"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
@@ -162,6 +161,7 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-test:$version_kotlin"
                 implementation "org.jetbrains.kotlin:kotlin-test-junit:$version_kotlin"
                 implementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
+                implementation "com.soywiz.korlibs.klock:klock:$version_klock"
                 implementation "junit:junit:$version_junit"
 
                 implementation project(":sharedse")
