@@ -2,8 +2,8 @@ appId: com.toughra.ustadmobile
 tags:
   - checklist7
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/007_002_hide_on_panic_trigger"
-  TESTNAME: 007_002_hide_on_panic_trigger
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/007_002_panic_trigger_hide_app"
+  TESTNAME: 007_002_panic_trigger_hide_app
 ---
 - clearState: com.toughra.ustadmobile
 - runFlow:
@@ -12,7 +12,8 @@ env:
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
-# admin enable user registration button
+- runFlow:
+    file: "../common/panic_trigger_start.yaml"
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
@@ -22,10 +23,15 @@ env:
 - tapOn: "Panic button app"
 - tapOn: "Ripple"
 - tapOn:
-    point: "50%,74%"
+    id: "com.toughra.ustadmobile:id/panic_button_settings_unhide_code"
 - tapOn: "Exit app"
 - tapOn: "Hide app"
 - runFlow:
     file: "../common/panic_trigger_ripple.yaml"
+- launchApp # launch notepad
+- assertVisible: "What's on your mind?"
+- longPressOn:
+    id: "com.toughra.ustadmobile:id/activity_notepad_edittext"
+- tapOn: "Paste"
 - launchApp
-- pasteText
+- assertVisible: "Library"

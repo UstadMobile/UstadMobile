@@ -175,11 +175,11 @@ maestro  --device=$TESTSERIAL  test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER 
          --include-tags=checklist7
 
 TESTSTATUS=$?
-#$SCRIPTDIR/../../testserver-controller/stop.sh
+$SCRIPTDIR/../../testserver-controller/stop.sh
 
 uninstall apps
- #adb shell pm uninstall com.toughra.ustadmobile
- #adb shell pm uninstall com.toughra.ustadmobile2
+ adb shell pm uninstall com.toughra.ustadmobile
+ adb shell pm uninstall com.toughra.ustadmobile2
  adb shell pm uninstall com.google.android.apps.nexuslauncher.auto_generated_rro_vendor__
  adb shell pm uninstall com.google.android.apps.nexuslauncher
 
