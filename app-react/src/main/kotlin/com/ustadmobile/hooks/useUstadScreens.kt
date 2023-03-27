@@ -129,6 +129,8 @@ fun useUstadScreens(): UstadScreens {
                 UstadAssignmentFileSubmissionListItemPreview),
             UstadScreen("UstadImageSelectButtonPreview", "UstadImageSelectButtonPreview",
                 UstadImageSelectButtonPreview),
+            UstadScreen("CourseDetailProgress", "CourseDetailProgressScreenPreview",
+                CourseDetailProgressScreenPreview),
         )
     }
 }
