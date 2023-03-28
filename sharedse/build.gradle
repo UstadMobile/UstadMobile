@@ -112,7 +112,7 @@ kotlin {
 
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation project(':lib-database')
-                implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
+                implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
             }
         }
 
@@ -130,7 +130,7 @@ kotlin {
                 implementation "io.ktor:ktor-serialization-gson:$version_ktor"
                 implementation "io.ktor:ktor-io-jvm:$version_ktor"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
-                implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
+                implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
 
             }
         }

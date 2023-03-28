@@ -77,7 +77,7 @@ kotlin {
 
     android()
 
-    js(LEGACY) {
+    js(IR) {
         browser {
             dceTask {
                 keep("kotlin.defineModule") //To avoid  e.defineModule is not a function error
@@ -112,7 +112,7 @@ kotlin {
                 implementation project(':lib-database')
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation project(":lib-util")
-                implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
+                implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
                 implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
             }
