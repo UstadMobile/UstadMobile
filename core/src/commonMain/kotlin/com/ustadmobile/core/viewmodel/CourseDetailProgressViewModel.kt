@@ -1,4 +1,9 @@
 package com.ustadmobile.core.viewmodel
 
-class CourseDetailProgressViewModel {
-}
+import com.ustadmobile.lib.db.entities.Person
+
+data class CourseDetailProgressUiState(
+
+    val students: List<Person> = emptyList()
+
+)
