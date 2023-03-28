@@ -1,5 +1,7 @@
 package com.ustadmobile.port.android.view
 
+import android.view.LayoutInflater
+import android.widget.Button
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,9 +14,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import com.google.android.material.button.MaterialButtonToggleGroup
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.CourseDetailProgressUiState
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.defaultAvatarSize
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
@@ -63,10 +69,39 @@ private fun CourseDetailProgressScreen(
                     )
                 },
                 text = { Text(student.fullName()) },
+                trailing = {
+                    AndroidView(factory = {  context ->
+                        val view = LayoutInflater.from(context).inflate(
+                            R.layout.item_clazz_log_attendance_status_toggle_buttons,
+                            null, false
+                        )
+
+                        buttonsIdMap.forEach { (status, buttonId) ->
+                            val button = view.findViewById<Button>(buttonId)
+                            button.isEnabled = uiState.fieldsEnabled
+
+                            button.setOnClickListener {
+
+                            }
+                        }
+
+                        view
+                    },
+                        update = {
+
+                        }
+                    )
+                }
             )
         }
     }
 }
+
+private val buttonsIdMap = mapOf(
+    ClazzLogAttendanceRecord.STATUS_ATTENDED to R.id.present_button,
+    ClazzLogAttendanceRecord.STATUS_ABSENT to R.id.absent_button,
+    ClazzLogAttendanceRecord.STATUS_PARTIAL to R.id.late_button
+)
 
 @Composable
 private fun CheckBoxTitle(
