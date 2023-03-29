@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +30,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.defaultAvatarSize
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
+import com.ustadmobile.port.android.view.composable.UstadPersonAvatar
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -51,18 +54,11 @@ private fun CourseDetailProgressScreen(
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.End
             ) {
-                Text(
-                    modifier = Modifier.vertical().rotate(-90f),
-                    text = stringResource(id = R.string.discussion_board))
-                Text(
-                    modifier = Modifier.vertical().rotate(-90f),
-                    text = stringResource(id = R.string.module))
-                Text(
-                    modifier = Modifier.vertical().rotate(-90f),
-                    text = stringResource(id = R.string.video))
-                Text(
-                    modifier = Modifier.vertical().rotate(-90f),
-                    text = stringResource(id = R.string.clazz_assignment))
+                CheckBoxTitle(text = stringResource(id = R.string.discussion_board))
+                CheckBoxTitle(text = stringResource(id = R.string.module))
+                CheckBoxTitle(text = stringResource(id = R.string.video))
+                CheckBoxTitle(text = stringResource(id = R.string.clazz_assignment))
+                CheckBoxTitle(text = "")
             }
         }
 
@@ -75,46 +71,37 @@ private fun CourseDetailProgressScreen(
                     onClickStudent(student)
                 },
                 icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_person_black_24dp),
-                        contentDescription = "",
-                        modifier = Modifier.defaultAvatarSize()
-                    )
+                    UstadPersonAvatar(personUid = 0)
                 },
                 text = { Text(student.fullName()) },
                 trailing = {
-                    AndroidView(factory = {  context ->
-                        val view = LayoutInflater.from(context).inflate(
-                            R.layout.item_clazz_log_attendance_status_toggle_buttons,
-                            null, false
-                        )
+                    Row {
+                        (0..3).forEach { _ ->
 
-                        buttonsIdMap.forEach { (status, buttonId) ->
-                            val button = view.findViewById<Button>(buttonId)
-                            button.isEnabled = uiState.fieldsEnabled
-
-                            button.setOnClickListener {
-
-                            }
-                        }
-
-                        view
-                    },
-                        update = {
+                            Icon(
+                                Icons.Outlined.CheckBox,
+                                contentDescription = "",
+                                modifier = Modifier.defaultMinSize()
+                            )
 
                         }
-                    )
+                    }
                 }
             )
         }
     }
 }
 
-private val buttonsIdMap = mapOf(
-    ClazzLogAttendanceRecord.STATUS_ATTENDED to R.id.present_button,
-    ClazzLogAttendanceRecord.STATUS_ABSENT to R.id.absent_button,
-    ClazzLogAttendanceRecord.STATUS_PARTIAL to R.id.late_button
-)
+@Composable
+private fun CheckBoxTitle(
+    text: String
+){
+    Text(
+        modifier = Modifier.vertical()
+            .rotate(-90f)
+            .defaultMinSize(),
+        text = text)
+}
 
 private fun Modifier.vertical() = layout { measurable, constraints ->
     val placeable = measurable.measure(constraints)
