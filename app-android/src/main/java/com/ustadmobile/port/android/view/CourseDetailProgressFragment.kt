@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.view.LayoutInflater
 import android.widget.Button
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,6 +15,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -27,7 +29,7 @@ import com.ustadmobile.port.android.util.ext.defaultAvatarSize
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 private fun CourseDetailProgressScreen(
     uiState: CourseDetailProgressUiState = CourseDetailProgressUiState(),
@@ -40,7 +42,7 @@ private fun CourseDetailProgressScreen(
             .defaultScreenPadding(),
     ) {
 
-        item {
+        stickyHeader {
             Row (
                 modifier = Modifier
                     .defaultItemPadding()
@@ -147,6 +149,46 @@ fun CourseDetailProgressScreenPreview() {
             },
             Person().apply {
                 personUid = 4
+                firstNames = "Nelzon"
+                lastName = "Muntz"
+            },
+            Person().apply {
+                personUid = 5
+                firstNames = "Nelzon"
+                lastName = "Muntz"
+            },
+            Person().apply {
+                personUid = 6
+                firstNames = "Nelzon"
+                lastName = "Muntz"
+            },
+            Person().apply {
+                personUid = 7
+                firstNames = "Nelzon"
+                lastName = "Muntz"
+            },
+            Person().apply {
+                personUid = 8
+                firstNames = "Nelzon"
+                lastName = "Muntz"
+            },
+            Person().apply {
+                personUid = 9
+                firstNames = "Nelzon"
+                lastName = "Muntz"
+            },
+            Person().apply {
+                personUid = 10
+                firstNames = "Nelzon"
+                lastName = "Muntz"
+            },
+            Person().apply {
+                personUid = 11
+                firstNames = "Nelzon"
+                lastName = "Muntz"
+            },
+            Person().apply {
+                personUid = 12
                 firstNames = "Nelzon"
                 lastName = "Muntz"
             }
