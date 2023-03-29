@@ -49,54 +49,62 @@ private fun CourseDetailProgressScreen(
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.End
             ) {
-                CheckBoxTitle(text = stringResource(id = R.string.discussion_board))
-                CheckBoxTitle(text = stringResource(id = R.string.module))
-                CheckBoxTitle(text = stringResource(id = R.string.video))
-                CheckBoxTitle(text = stringResource(id = R.string.clazz_assignment))
+                Text(
+                    modifier = Modifier.vertical().rotate(-90f),
+                    text = stringResource(id = R.string.discussion_board))
+                Text(
+                    modifier = Modifier.vertical().rotate(-90f),
+                    text = stringResource(id = R.string.module))
+                Text(
+                    modifier = Modifier.vertical().rotate(-90f),
+                    text = stringResource(id = R.string.video))
+                Text(
+                    modifier = Modifier.vertical().rotate(-90f),
+                    text = stringResource(id = R.string.clazz_assignment))
             }
         }
 
-//        items(
-//            items = uiState.students,
-//            key = { student -> student.personUid }
-//        ){ student ->
-//            ListItem(
-//                modifier = Modifier.clickable {
-//                    onClickStudent(student)
-//                },
-//                icon = {
-//                    Icon(
-//                        painter = painterResource(R.drawable.ic_person_black_24dp),
-//                        contentDescription = "",
-//                        modifier = Modifier.defaultAvatarSize()
-//                    )
-//                },
-//                text = { Text(student.fullName()) },
-//                trailing = {
-//                    AndroidView(factory = {  context ->
-//                        val view = LayoutInflater.from(context).inflate(
-//                            R.layout.item_clazz_log_attendance_status_toggle_buttons,
-//                            null, false
-//                        )
-//
-//                        buttonsIdMap.forEach { (status, buttonId) ->
-//                            val button = view.findViewById<Button>(buttonId)
-//                            button.isEnabled = uiState.fieldsEnabled
-//
-//                            button.setOnClickListener {
-//
-//                            }
-//                        }
-//
-//                        view
-//                    },
-//                        update = {
-//
-//                        }
-//                    )
-//                }
-//            )
-//        }
+        items(
+            items = uiState.students,
+            key = { student -> student.personUid }
+        ){ student ->
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickStudent(student)
+                },
+                icon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_person_black_24dp),
+                        contentDescription = "",
+                        modifier = Modifier.defaultAvatarSize()
+                    )
+                },
+                text = { Text(student.fullName()) },
+                trailing = {
+                    AndroidView(factory = {  context ->
+                        val view = LayoutInflater.from(context).inflate(
+                            R.layout.item_clazz_log_attendance_status_toggle_buttons,
+                            null, false
+                        )
+
+                        buttonsIdMap.forEach { (status, buttonId) ->
+                            val button = view.findViewById<Button>(buttonId)
+                            button.isEnabled = uiState.fieldsEnabled
+
+                            button.setOnClickListener {
+
+                            }
+                        }
+
+                        view
+                    },
+                        update = {
+
+                        }
+                    )
+                }
+            )
+        }
     }
 }
 
@@ -106,22 +114,7 @@ private val buttonsIdMap = mapOf(
     ClazzLogAttendanceRecord.STATUS_PARTIAL to R.id.late_button
 )
 
-@Composable
-private fun CheckBoxTitle(
-    text: String
-){
-//    Box(
-//        modifier = Modifier
-//            .rotate(-90F)
-//            .width(IntrinsicSize.Min)
-//            .defaultItemPadding()
-//    ){
-        Text(text = text, modifier = Modifier.vertical().rotate(-90f))
-//    }
-
-}
-
-fun Modifier.vertical() = layout { measurable, constraints ->
+private fun Modifier.vertical() = layout { measurable, constraints ->
     val placeable = measurable.measure(constraints)
     layout(placeable.height, placeable.width) {
         placeable.place(
