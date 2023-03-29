@@ -6,23 +6,20 @@ import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.hooks.useTimeInOtherTimeZoneAsJsDate
 import com.ustadmobile.mui.common.*
-import com.ustadmobile.util.ext.toMillisInOtherTimeZone
-import com.ustadmobile.view.components.UstadSelectField
 import com.ustadmobile.view.components.UstadSwitchField
-import kotlinx.datetime.TimeZone
 import js.core.jso
+import kotlinx.datetime.*
 import mui.icons.material.Visibility
 import mui.icons.material.VisibilityOff
 import mui.material.*
 import mui.system.responsive
-import muix.pickers.*
 import react.*
 import react.dom.aria.ariaLabel
 import web.html.InputMode
 import web.html.InputType
 import react.dom.onChange
+import web.html.HTMLInputElement
 
 external interface UstadEditFieldProps: PropsWithChildren {
 
@@ -194,6 +191,13 @@ external interface UstadDateEditFieldProps : Props {
 
     var fullWidth: Boolean
 
+    /**
+     * We often use 0 and Long.MAX_VALUE as a placeholder for a default (e.g. unset) date. If this
+     * property is set, then this value will be emitted by the onChange function when the user deletes
+     * the date
+     */
+    var unsetDefault: Long?
+
 }
 
 /**
@@ -214,31 +218,48 @@ fun Long.isSetDate(): Boolean {
 }
 
 val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
-    val dateVal = useTimeInOtherTimeZoneAsJsDate(props.timeInMillis, props.timeZoneId)
 
-    LocalizationProvider {
-        dateAdapter = AdapterDateFns
+    fun Long.timeToIsoDateInputFieldString(): String {
+        return if(this != (props.unsetDefault ?: 0)) {
+            Instant.fromEpochMilliseconds(this)
+                .toLocalDateTime(TimeZone.of(props.timeZoneId))
+                .date.toString()
+        }else {
+            ""
+        }
+    }
 
-        DatePicker {
-            disabled = !(props.enabled ?: true)
-            label = ReactNode(props.label)
-            value = dateVal
+    var rawValue: String? by useState {
+        props.timeInMillis.timeToIsoDateInputFieldString()
+    }
 
-            onChange = {
-                props.onChange(it.toMillisInOtherTimeZone(props.timeZoneId))
-            }
+    useEffect(props.timeInMillis) {
+        rawValue = props.timeInMillis.timeToIsoDateInputFieldString()
+    }
 
-            renderInput = { params ->
-                TextField.create {
-                    +params
 
-                    fullWidth = props.fullWidth
+    TextField {
+        type = InputType.date
+        label = ReactNode(props.label)
+        value = rawValue
+        InputLabelProps = jso {
+            shrink = true
+        }
 
-                    if(props.error != null) {
-                        error = true
-                        helperText = props.error?.let { ReactNode(it) }
-                    }
-                }
+        onChange = {
+            val targetEl = it.target as HTMLInputElement
+            rawValue = targetEl.value
+            val valueAsDate = targetEl.valueAsDate
+            //Avoid triggering the a change when user has not finished filling in year
+            if(valueAsDate != null && valueAsDate.getFullYear() > 1000) {
+                //Add 1 to month number: Javascript starts at 0, Kotlin starts at 1
+                val localDateTime = LocalDateTime(valueAsDate.getFullYear(),
+                    valueAsDate.getMonth() + 1, valueAsDate.getDate(), 0, 0)
+                val instant = localDateTime.toInstant(TimeZone.of(props.timeZoneId))
+                props.onChange(instant.toEpochMilliseconds())
+            }else if(targetEl.value.isEmpty()) {
+                props.onChange(props.unsetDefault ?: 0)
+                console.log("date is now empty - setting fallback")
             }
         }
     }
