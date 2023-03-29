@@ -1,7 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.view.LayoutInflater
-import android.widget.Button
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,19 +13,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import com.google.android.material.button.MaterialButtonToggleGroup
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.CourseDetailProgressUiState
-import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.port.android.util.ext.defaultAvatarSize
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.composable.UstadPersonAvatar
@@ -48,6 +39,7 @@ private fun CourseDetailProgressScreen(
         stickyHeader {
             Row (
                 modifier = Modifier
+                    .defaultItemPadding()
                     .fillMaxHeight()
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.Bottom,
@@ -57,7 +49,6 @@ private fun CourseDetailProgressScreen(
                 CheckBoxTitle(text = stringResource(id = R.string.module))
                 CheckBoxTitle(text = stringResource(id = R.string.video))
                 CheckBoxTitle(text = stringResource(id = R.string.clazz_assignment))
-                CheckBoxTitle(text = "")
             }
         }
 
