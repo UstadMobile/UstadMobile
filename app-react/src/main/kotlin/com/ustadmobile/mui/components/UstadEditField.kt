@@ -198,6 +198,8 @@ external interface UstadDateEditFieldProps : Props {
      */
     var unsetDefault: Long?
 
+    var id: String?
+
 }
 
 /**
@@ -245,6 +247,7 @@ val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
         InputLabelProps = jso {
             shrink = true
         }
+        id = props.id
 
         onChange = {
             val targetEl = it.target as HTMLInputElement
@@ -259,7 +262,6 @@ val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
                 props.onChange(instant.toEpochMilliseconds())
             }else if(targetEl.value.isEmpty()) {
                 props.onChange(props.unsetDefault ?: 0)
-                console.log("date is now empty - setting fallback")
             }
         }
     }
