@@ -1,11 +1,8 @@
 # app-react
 
 This module contains the web client application built using Kotlin/JS using React and MUI
-via [kotlin-wrappers](https://github.com/JetBrains/kotlin-wrappers).
-
-## Prerequisites
-Install [Node 18x](https://nodejs.org/en/download/) on your machine since Kotlin/JS depends on it
-to build.
+via [kotlin-wrappers](https://github.com/JetBrains/kotlin-wrappers). The UI follows the patterns 
+found in [kotlin-mui-showcase](https://github.com/karakum-team/kotlin-mui-showcase).
 
 ## MUI React/JS UI Development
 

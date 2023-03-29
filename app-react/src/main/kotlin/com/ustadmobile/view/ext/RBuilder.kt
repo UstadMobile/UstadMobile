@@ -150,6 +150,8 @@ fun RBuilder.renderRoutes(di: DI) {
     val systemImpl: UstadMobileSystemImpl by di.instance()
     val accountManager: UstadAccountManager by di.instance()
 
+    /*
+     This will be deleted after switching to MVVM
     HashRouter{
         Routes{
             Route{
@@ -164,6 +166,7 @@ fun RBuilder.renderRoutes(di: DI) {
             }
         }
     }
+    */
 }
 
 /**

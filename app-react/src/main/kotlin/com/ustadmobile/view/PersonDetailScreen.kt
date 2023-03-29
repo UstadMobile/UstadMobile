@@ -6,7 +6,7 @@ import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.hooks.useUstadViewModel
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.viewmodel.PersonDetailViewModel
 import com.ustadmobile.hooks.useAttachmentUriSrc
@@ -31,11 +31,8 @@ import kotlin.js.Date
 import csstype.px
 import emotion.react.css
 
-val PersonDetailScreen = FC<UstadScreenProps>() { props ->
-    val viewModel = useUstadViewModel(
-        onAppUiStateChange = props.onAppUiStateChanged,
-        onShowSnack = props.onShowSnackBar,
-    ) { di, savedStateHandle ->
+val PersonDetailScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
         PersonDetailViewModel(di, savedStateHandle)
     }
 
@@ -245,7 +242,7 @@ private val DetailFeilds = FC<PersonDetailProps> { props ->
     if (props.uiState.personGenderVisible){
 
         val gender = strings.mapLookup(
-            props.uiState?.person?.gender ?: 1,
+            props.uiState.person?.gender ?: 1,
             PersonConstants.GENDER_MESSAGE_ID_MAP
         )
 

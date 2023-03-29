@@ -3,7 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.hooks.useUstadViewModel
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
 import com.ustadmobile.core.paging.ListPagingSource
@@ -12,6 +12,7 @@ import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.ClazzListUiState
 import com.ustadmobile.core.viewmodel.ClazzListViewModel
 import com.ustadmobile.door.paging.LoadResult
+import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
@@ -40,11 +41,10 @@ import web.events.Event
 import web.events.EventHandler
 import web.html.HTMLElement
 import web.window.RESIZE
-import web.window.WindowEventHandlers
 import web.window.window
 import kotlin.math.round
 
-external interface ClazzListScreenProps : UstadScreenProps {
+external interface ClazzListScreenProps : Props {
 
     var uiState: ClazzListUiState
 
@@ -54,27 +54,6 @@ external interface ClazzListScreenProps : UstadScreenProps {
 
     var onClickFilterChip: (MessageIdOption2) -> Unit
 
-}
-
-private val demoList = (0..100).map { index ->
-    ClazzWithListDisplayDetails().apply {
-        clazzUid = index.toLong()
-        clazzName = "Class $index"
-        clazzDesc = "Class Description $index"
-        attendanceAverage = 0.3F
-        numTeachers = 3
-        numStudents = 2
-    }
-}
-
-val ClazzListScreenPreview = FC<UstadScreenProps> { props ->
-
-    ClazzListScreenComponent2 {
-        + props
-        uiState = ClazzListUiState(
-            clazzList = { ListPagingSource(demoList) }
-        )
-    }
 }
 
 private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
@@ -120,9 +99,11 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
 
     val cardWidth = containerWidth / cardsPerRow
 
+    val muiAppState = useMuiAppState()
+
     VirtualList {
         style = jso {
-            height = "calc(100vh - ${props.muiAppState.appBarHeight}px)".unsafeCast<Height>()
+            height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
             width = 100.pct
             contain = Contain.strict
             overflowY = Overflow.scroll
@@ -180,14 +161,12 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
     }
 }
 
-val ClazzListScreen = FC<UstadScreenProps> { props ->
+val ClazzListScreen = FC<Props> { props ->
     val strings = useStringsXml()
     var addDialogVisible: Boolean by useState { false }
 
 
-    val viewModel = useUstadViewModel(
-        onAppUiStateChange = props.onAppUiStateChanged,
-    ) { di, savedStateHandle ->
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
         ClazzListViewModel(di, savedStateHandle)
     }
 

@@ -3,7 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.hooks.useUstadViewModel
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.SiteEnterLinkViewModel
@@ -28,12 +28,9 @@ external interface SiteEnterLinkProps : Props {
     var onEditTextValueChange: (String) -> Unit
 }
 
-val SiteEnterLinkScreen = FC<UstadScreenProps> { props ->
-    val viewModel = useUstadViewModel(
-        onAppUiStateChange = props.onAppUiStateChanged
-    ) { di, savedSateHandle ->
-        console.log("Creating SiteEnterLinkViewModel")
-        SiteEnterLinkViewModel(di, savedSateHandle)
+val SiteEnterLinkScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        SiteEnterLinkViewModel(di, savedStateHandle)
     }
 
     val uiState by viewModel.uiState.collectAsState(SiteEnterLinkUiState())

@@ -20,7 +20,7 @@ external interface HeaderProps: Props {
 }
 
 val Header = FC<HeaderProps> { props ->
-    var theme by useContext(ThemeContext)
+    val theme by useRequiredContext(ThemeContext)
     val appBarRef = useRef<HTMLElement>(null)
 
     useEffect(appBarRef.current?.clientHeight){

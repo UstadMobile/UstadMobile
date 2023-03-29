@@ -1,11 +1,10 @@
-package com.ustadmobile.core.hooks
+package com.ustadmobile.hooks
 
-import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.viewmodel.UstadViewModel
-import com.ustadmobile.core.viewmodel.ViewModel
-import kotlinx.coroutines.flow.map
+import com.ustadmobile.mui.components.UstadScreensContext
 import kotlinx.coroutines.launch
 import react.useEffect
+import react.useRequiredContext
 
 /**
  * When the created view model is an UstadViewModel and we have a function that handles emitted
@@ -14,12 +13,13 @@ import react.useEffect
  */
 fun useViewModelAppUiStateEffect(
     viewModel: UstadViewModel,
-    onAppUiStateChange: ((AppUiState) -> Unit),
 ) {
+    val ustadScreensContext = useRequiredContext(UstadScreensContext)
+
     useEffect(dependencies = arrayOf(viewModel)) {
         viewModel.viewModelScope.launch {
             viewModel.appUiState.collect {
-                onAppUiStateChange(it)
+                ustadScreensContext.onAppUiStateChanged(it)
             }
         }
     }

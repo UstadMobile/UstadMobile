@@ -3,7 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.hooks.useUstadViewModel
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.viewmodel.LoginUiState
 import com.ustadmobile.core.viewmodel.LoginViewModel
 import mui.material.ButtonVariant.*
@@ -26,18 +26,9 @@ external interface LoginProps : Props {
     var onPasswordValueChange: (String) -> Unit
 }
 
-val LoginPreview = FC<Props> {
-    LoginComponent2 {
-        uiState = LoginUiState()
-    }
-}
-
-val LoginScreen = FC<UstadScreenProps> { props ->
-    val viewModel = useUstadViewModel(
-        onAppUiStateChange = props.onAppUiStateChanged
-    ) { di, savedSateHandle ->
-        console.log("Creating LoginViewModel")
-        LoginViewModel(di, savedSateHandle)
+val LoginScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        LoginViewModel(di, savedStateHandle)
     }
 
     val uiState by viewModel.uiState.collectAsState(LoginUiState())

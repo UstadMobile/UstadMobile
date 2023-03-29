@@ -6,7 +6,7 @@ import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.toUrlQueryString
-import history.Location
+import remix.run.router.Location
 import io.github.aakira.napier.Napier
 import js.core.jso
 import kotlinx.browser.sessionStorage
