@@ -8,8 +8,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,65 +37,66 @@ private fun CourseDetailProgressScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .defaultScreenPadding()
+            .defaultScreenPadding(),
     ) {
 
         item {
             Row (
                 modifier = Modifier
                     .defaultItemPadding()
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Max),
+                    .fillMaxHeight()
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.End
             ) {
-                CheckBoxTitle(text = stringResource(id = R.string.discussion_board),)
+                CheckBoxTitle(text = stringResource(id = R.string.discussion_board))
                 CheckBoxTitle(text = stringResource(id = R.string.module))
                 CheckBoxTitle(text = stringResource(id = R.string.video))
                 CheckBoxTitle(text = stringResource(id = R.string.clazz_assignment))
             }
         }
 
-        items(
-            items = uiState.students,
-            key = { student -> student.personUid }
-        ){ student ->
-            ListItem(
-                modifier = Modifier.clickable {
-                    onClickStudent(student)
-                },
-                icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_person_black_24dp),
-                        contentDescription = "",
-                        modifier = Modifier.defaultAvatarSize()
-                    )
-                },
-                text = { Text(student.fullName()) },
-                trailing = {
-                    AndroidView(factory = {  context ->
-                        val view = LayoutInflater.from(context).inflate(
-                            R.layout.item_clazz_log_attendance_status_toggle_buttons,
-                            null, false
-                        )
-
-                        buttonsIdMap.forEach { (status, buttonId) ->
-                            val button = view.findViewById<Button>(buttonId)
-                            button.isEnabled = uiState.fieldsEnabled
-
-                            button.setOnClickListener {
-
-                            }
-                        }
-
-                        view
-                    },
-                        update = {
-
-                        }
-                    )
-                }
-            )
-        }
+//        items(
+//            items = uiState.students,
+//            key = { student -> student.personUid }
+//        ){ student ->
+//            ListItem(
+//                modifier = Modifier.clickable {
+//                    onClickStudent(student)
+//                },
+//                icon = {
+//                    Icon(
+//                        painter = painterResource(R.drawable.ic_person_black_24dp),
+//                        contentDescription = "",
+//                        modifier = Modifier.defaultAvatarSize()
+//                    )
+//                },
+//                text = { Text(student.fullName()) },
+//                trailing = {
+//                    AndroidView(factory = {  context ->
+//                        val view = LayoutInflater.from(context).inflate(
+//                            R.layout.item_clazz_log_attendance_status_toggle_buttons,
+//                            null, false
+//                        )
+//
+//                        buttonsIdMap.forEach { (status, buttonId) ->
+//                            val button = view.findViewById<Button>(buttonId)
+//                            button.isEnabled = uiState.fieldsEnabled
+//
+//                            button.setOnClickListener {
+//
+//                            }
+//                        }
+//
+//                        view
+//                    },
+//                        update = {
+//
+//                        }
+//                    )
+//                }
+//            )
+//        }
     }
 }
 
@@ -107,12 +110,25 @@ private val buttonsIdMap = mapOf(
 private fun CheckBoxTitle(
     text: String
 ){
-    Text(text = text,
-        modifier = Modifier
-            .rotate(-90F)
-            .height(IntrinsicSize.Max)
-            .width(45.dp)
-    )
+//    Box(
+//        modifier = Modifier
+//            .rotate(-90F)
+//            .width(IntrinsicSize.Min)
+//            .defaultItemPadding()
+//    ){
+        Text(text = text, modifier = Modifier.vertical().rotate(-90f))
+//    }
+
+}
+
+fun Modifier.vertical() = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    layout(placeable.height, placeable.width) {
+        placeable.place(
+            x = -(placeable.width / 2 - placeable.height / 2),
+            y = -(placeable.height / 2 - placeable.width / 2)
+        )
+    }
 }
 
 @Composable
