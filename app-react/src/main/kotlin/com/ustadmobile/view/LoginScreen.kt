@@ -93,7 +93,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
 
             Button {
                 onClick = { props.onClickLogin() }
-                variant = contained
+                variant = ButtonVariant.contained
                 + strings[MessageID.login].uppercase()
             }
 
@@ -105,7 +105,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
 
             Button {
                 onClick = { props.onClickCreateAccount() }
-                variant = outlined
+                variant = ButtonVariant.outlined
                 + strings[MessageID.create_account].uppercase()
             }
 
@@ -117,7 +117,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
 
             Button {
                 onClick = { props.onClickConnectAsGuest() }
-                variant = outlined
+                variant = ButtonVariant.outlined
                 + strings[MessageID.connect_as_guest].uppercase()
             }
 

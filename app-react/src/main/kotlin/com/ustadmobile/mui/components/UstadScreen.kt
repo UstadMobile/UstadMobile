@@ -7,7 +7,6 @@ import react.Props
 import react.router.useLoaderData
 import remix.run.router.LoaderFunction
 import kotlin.js.Promise.Companion.resolve
-import js.core.get
 
 val UstadScreen = FC<Props> {
     console.info("UstadScreen: render")

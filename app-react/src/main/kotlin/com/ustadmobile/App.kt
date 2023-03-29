@@ -1,5 +1,6 @@
 package com.ustadmobile
 
+import com.ustadmobile.mui.common.Sizes
 import com.ustadmobile.mui.components.*
 import js.core.jso
 import react.FC
@@ -27,10 +28,10 @@ fun main() {
 
 /**
  * Represents MUI specific state e.g. height of appbar (which is required by some screens for height
- * calculations)
+ * calculations).
  */
 data class MuiAppState (
-    val appBarHeight: Int = DEFAULT_APPBAR_HEIGHT,
+    val appBarHeight: Int = Sizes.Header.HeightInPx,
 )
 
 private val hashRouter = createHashRouter(

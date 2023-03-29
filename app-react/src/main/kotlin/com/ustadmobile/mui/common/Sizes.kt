@@ -4,7 +4,9 @@ import csstype.px
 
 object Sizes {
     object Header {
-        val Height = 64.px
+        const val HeightInPx = 64
+
+        val Height = HeightInPx.px
     }
 
     object Sidebar {

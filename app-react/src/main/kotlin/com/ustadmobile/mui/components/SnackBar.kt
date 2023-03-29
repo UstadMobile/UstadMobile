@@ -20,7 +20,7 @@ fun RBuilder.umSnackbar(
     handler: StyledHandler<SnackbarProps>? = null
 ) = convertFunctionalToClassElement(Snackbar, className, handler) {
     autoHideDuration?.let { attrs.autoHideDuration = it }
-    attrs.key = "horizontal+${horizontalAnchor.name}"
+    //attrs.key = "horizontal+${horizontalAnchor.name}"
     attrs.anchorOrigin?.horizontal = horizontalAnchor
     attrs.anchorOrigin?.vertical = verticalAnchor
     key?.let { attrs.key = it }
