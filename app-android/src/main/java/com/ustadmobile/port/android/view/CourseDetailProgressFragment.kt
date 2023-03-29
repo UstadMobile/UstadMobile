@@ -48,7 +48,6 @@ private fun CourseDetailProgressScreen(
         stickyHeader {
             Row (
                 modifier = Modifier
-                    .defaultItemPadding()
                     .fillMaxHeight()
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.Bottom,
@@ -99,7 +98,7 @@ private fun CheckBoxTitle(
     Text(
         modifier = Modifier.vertical()
             .rotate(-90f)
-            .defaultMinSize(),
+            .height(22.dp),
         text = text)
 }
 
