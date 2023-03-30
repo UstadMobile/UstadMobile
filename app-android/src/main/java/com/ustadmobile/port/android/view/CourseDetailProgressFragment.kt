@@ -55,6 +55,7 @@ private fun CourseDetailProgressScreen(
                 LazyRow(
                     modifier = Modifier
                         .width(120.dp),
+//                    state = stateRowX
                 ){
                     items(
                         items = uiState.results,
@@ -82,7 +83,7 @@ private fun CourseDetailProgressScreen(
 
                     LazyRow(
                         modifier = Modifier.width(120.dp),
-//                        state = stateRowX
+                        state = stateRowX
                     ){
                         items(
                             items = uiState.results,
