@@ -4,7 +4,9 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckBox
@@ -30,6 +32,8 @@ private fun CourseDetailProgressScreen(
     onClickStudent: (Person) -> Unit = {},
 ) {
 
+    val listState = rememberLazyListState()
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -37,18 +41,21 @@ private fun CourseDetailProgressScreen(
     ) {
 
         stickyHeader {
-            Row (
+            LazyRow(
                 modifier = Modifier
                     .defaultItemPadding()
                     .fillMaxHeight()
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.End,
+                state = listState
             ) {
-                CheckBoxTitle(text = stringResource(id = R.string.discussion_board))
-                CheckBoxTitle(text = stringResource(id = R.string.module))
-                CheckBoxTitle(text = stringResource(id = R.string.video))
-                CheckBoxTitle(text = stringResource(id = R.string.clazz_assignment))
+
+
+
+                item {
+                    CheckBoxTitle(text = stringResource(id = R.string.discussion_board))
+                }
             }
         }
 
@@ -65,17 +72,20 @@ private fun CourseDetailProgressScreen(
                 },
                 text = { Text(student.fullName()) },
                 trailing = {
-                    Row {
-                        (0..3).forEach { _ ->
 
+                    LazyRow(
+                        state = listState
+                    ) {
+
+                        item {
                             Icon(
                                 Icons.Outlined.CheckBox,
                                 contentDescription = "",
                                 modifier = Modifier.defaultMinSize()
                             )
-
                         }
                     }
+
                 }
             )
         }
