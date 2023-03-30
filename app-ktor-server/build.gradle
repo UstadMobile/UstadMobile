@@ -95,6 +95,8 @@ dependencies {
     implementation "com.sun.mail:jakarta.mail:$version_jakartamail"
     implementation "org.apache.commons:commons-compress:$version_apache_commons_compress"
 
+    implementation "net.sourceforge.argparse4j:argparse4j:$version_argparse4j"
+
     //test
     testImplementation project(":lib-test-common")
     testImplementation project(":sharedse")

@@ -76,9 +76,6 @@ suspend fun UmAppDatabase.initAdminUser(
     di: DI,
     defaultPassword: String? = null,
 ) {
-    if(this !is DoorDatabaseRepository)
-        throw IllegalStateException("initAdminUser must be called on repo!")
-
     val passwordFilePath = di.on(endpoint).direct
         .instance<File>(tag = DiTag.TAG_CONTEXT_DATA_ROOT).absolutePath
     val adminUser = personDao.findByUsername("admin")
