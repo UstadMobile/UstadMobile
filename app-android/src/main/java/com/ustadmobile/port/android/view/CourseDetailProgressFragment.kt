@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.graphics.Paint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.*
@@ -37,15 +38,6 @@ private fun CourseDetailProgressScreen(
 ) {
 
     val stateRowX = rememberLazyListState() // State for the first Row, X
-    val stateRowY = rememberLazyListState() // State for the second Row, Y
-    val scope = rememberCoroutineScope()
-    val scrollState = rememberScrollableState { delta ->
-        scope.launch {
-            stateRowX.scrollBy(-delta)
-            stateRowY.scrollBy(-delta)
-        }
-        delta
-    }
 
     LazyColumn(
         modifier = Modifier
@@ -53,21 +45,24 @@ private fun CourseDetailProgressScreen(
     ) {
 
         stickyHeader {
-            LazyRow(
-                modifier = Modifier
-                    .defaultItemPadding()
-                    .padding(start = 40.dp),
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.End,
-                state = stateRowX
-            ) {
-                items(
-                    items = uiState.results,
-                ){ result ->
-                    CheckBoxTitle(text = result)
+
+
+            Box(Modifier
+                .fillMaxWidth()
+                .defaultItemPadding(),
+                contentAlignment = Alignment.TopEnd
+            ){
+                LazyRow(
+                    modifier = Modifier
+                        .width(120.dp),
+                ){
+                    items(
+                        items = uiState.results,
+                    ){ result ->
+                        CheckBoxTitle(text = result)
+                    }
                 }
             }
-
         }
 
         items(
@@ -85,14 +80,9 @@ private fun CourseDetailProgressScreen(
                 text = { Text(student.fullName()) },
                 trailing = {
 
-//                    LazyRow(
-//                        state = stateRowY,
-//                    ) {
-//                        items(count = 120) { colIndex ->
-//                            Text(text = "          |$colIndex")
-//                        }
-//                    }
-                    LazyRow{
+                    LazyRow(
+                        state = stateRowX
+                    ){
                         items(
                             items = uiState.results,
                         ){ _ ->
