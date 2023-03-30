@@ -81,7 +81,8 @@ private fun CourseDetailProgressScreen(
                 trailing = {
 
                     LazyRow(
-                        state = stateRowX
+                        modifier = Modifier.width(120.dp),
+//                        state = stateRowX
                     ){
                         items(
                             items = uiState.results,
