@@ -6,6 +6,8 @@ data class CourseDetailProgressUiState(
 
     val students: List<Person> = emptyList(),
 
+    val results: List<String> = emptyList(),
+
     val fieldsEnabled: Boolean = true,
 
 )
