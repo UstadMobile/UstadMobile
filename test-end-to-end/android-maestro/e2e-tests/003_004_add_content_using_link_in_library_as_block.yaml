@@ -1,0 +1,80 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_004_add_content_using_link_in_library_as_block"
+  TESTNAME: "003_004_add_content_using_link_in_library_as_block"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+- runFlow:
+    file: "../common/add_course.yaml"
+    env:
+      TESTCOURSENAME: "New Content Block Test"
+- runFlow:
+    file: "../common/add_new_teacher_inside_course.yaml"
+    env:
+      TESTCOURSENAME: "New Content Block Test"
+      TEACHERFIRSTNAME: "Teacher"
+      TEACHERLASTNAME: "1"
+      USERNAME: "t1"
+      GENDER: "Female"
+      PASSWORD: "test"
+- repeat:
+    while:
+      notVisible: "OVERVIEW"
+    commands:
+      - back
+- tapOn: "OVERVIEW"
+- tapOn: "Edit"
+- scroll
+# add new content block inside course
+- tapOn: "Add block"
+- tapOn: "Content"
+- tapOn: "Add new content"
+- runFlow:
+    file: "../common/add_content_using_link.yaml"
+    env:
+        CONTENTNAME: H5p Content
+        CONTENTLINK: http://localhost:8075/test-files/content/H5p_Content.h5p
+
+- scroll
+- assertVisible: "Check the answers. The responses will be marked as correct, incorrect, or unanswered."
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/admin_added_content_via_link"
+- back
+- tapOn: "ATTEMPTS"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/h5p_attempts_page"
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: t1
+      PASSWORD: test
+- tapOn: "Courses"
+- tapOn: "New Content Block Test"
+- tapOn: "Edit"
+- scroll
+# add new content block inside course
+- tapOn: "Add block"
+- tapOn: "Content"
+- tapOn: "Add new content"
+- runFlow:
+    file: "../common/add_content_using_link.yaml"
+    env:
+        CONTENTNAME: Pdf Content
+        CONTENTLINK: http://localhost:8075/test-files/content/Pdf_Content.pdf
+- scroll
+- assertVisible:
+    id: "com.toughra.ustadmobile:id/fragment_pdf_content_pdfview"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/teacher_added_content_via_link"
+- back
+- tapOn: "ATTEMPTS"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/pdf_attempts_page"

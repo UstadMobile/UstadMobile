@@ -1,0 +1,39 @@
+appId: com.toughra.ustadmobile
+
+---
+# This test tests the Library page of app adding content using link
+# Test parameters needs to provide for this test :
+ # 1) TESTFILENAME : provide the content name inside the 'test-files/content' folder
+ # 2) TESTCONTENTNAME : provide the content title, it should be a string
+ # 3) CONTROLSERVER: ${CONTROLSERVER} : provides the test-control-server address
+ # 4) TESTSERIAL: ${TESTSERIAL} : provides the device serial number
+ # 5) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+
+- tapOn: "Add using link"
+- tapOn:
+    text: "Enter Url"
+    index: 1
+- inputText: ${CONTENTLINK}
+- tapOn: "NEXT"
+- longPressOn:
+    id: "com.toughra.ustadmobile:id/entry_title_text"
+- runFlow:
+    when:
+      visible: "Select all"
+    file: "../common/redirect_to_select.yaml"
+- runFlow:
+    when:
+      visible:
+        text: "More options"
+    file: "../common/moreOptions.yaml"
+- eraseText
+- inputText: ${CONTENTNAME}
+- tapOn: "SAVE"
+- tapOn: "SAVE"
+- tapOn: ${CONTENTNAME}
+- tapOn: "DOWNLOAD"
+- tapOn: "DOWNLOAD"
+- extendedWaitUntil:
+    visible: "Delete"
+    timeout: 100000
+- tapOn: "OPEN"

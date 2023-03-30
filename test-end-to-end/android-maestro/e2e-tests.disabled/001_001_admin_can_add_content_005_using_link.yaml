@@ -4,8 +4,6 @@ tags:
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_005-using_link"
   TESTNAME: "001_001_admin_can_add_content_005-using_link"
-  TESTFILENAME: Epub_Content.epub
-  TESTCONTENTNAME: AddContentEpubTest
   CONTROLSERVER: ${CONTROLSERVER}
   TESTSERIAL: ${TESTSERIAL}
 ---
@@ -16,17 +14,7 @@ env:
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
-
-# clear the app
-- clearState: com.toughra.ustadmobile
-# clear the downloads
-- evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
-# push the test file to the downloads
-- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
-# get started
-- launchApp
-- hideKeyboard
-- tapOn: "GET STARTED"
+- runFlow: "../common/clear_state_and_get_started.yaml"
 # select site
 - runFlow: "../common/select_site.yaml"
 # admin login

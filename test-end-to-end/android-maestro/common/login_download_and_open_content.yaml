@@ -20,7 +20,7 @@ appId: com.toughra.ustadmobile
 - tapOn: "Download"
 - extendedWaitUntil:
     visible: "OPEN"
-    timeout: 10000
+    timeout: 20000
 - tapOn: "OPEN"
 - scroll
 - runFlow:
