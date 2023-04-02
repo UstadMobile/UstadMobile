@@ -4,6 +4,7 @@ import android.graphics.Paint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.*
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -28,6 +29,7 @@ import com.ustadmobile.port.android.view.composable.UstadPersonAvatar
 import kotlinx.coroutines.launch
 
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.Alignment
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
@@ -37,7 +39,7 @@ private fun CourseDetailProgressScreen(
     onClickStudent: (Person) -> Unit = {},
 ) {
 
-    val stateRowX = rememberLazyListState() // State for the first Row, X
+    val scrollState = rememberScrollState()
 
     LazyColumn(
         modifier = Modifier
@@ -52,15 +54,14 @@ private fun CourseDetailProgressScreen(
                 .defaultItemPadding(),
                 contentAlignment = Alignment.TopEnd
             ){
-                LazyRow(
-                    modifier = Modifier
-                        .width(120.dp),
-//                    state = stateRowX
-                ){
-                    items(
-                        items = uiState.results,
-                    ){ result ->
-                        CheckBoxTitle(text = result)
+
+                Row(modifier = Modifier.horizontalScroll(scrollState)) {
+                    repeat(1000) { index ->
+                        Icon(
+                            Icons.Outlined.CheckBox,
+                            contentDescription = "",
+                            modifier = Modifier.defaultMinSize()
+                        )
                     }
                 }
             }
@@ -80,14 +81,10 @@ private fun CourseDetailProgressScreen(
                 },
                 text = { Text(student.fullName()) },
                 trailing = {
+                    Row(modifier = Modifier
+                        .horizontalScroll(scrollState)) {
 
-                    LazyRow(
-                        modifier = Modifier.width(120.dp),
-                        state = stateRowX
-                    ){
-                        items(
-                            items = uiState.results,
-                        ){ _ ->
+                        repeat(1000) { index ->
                             Icon(
                                 Icons.Outlined.CheckBox,
                                 contentDescription = "",
