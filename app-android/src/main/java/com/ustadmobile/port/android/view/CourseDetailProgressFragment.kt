@@ -51,12 +51,12 @@ private fun CourseDetailProgressScreen(
                     modifier = Modifier.width(120.dp)
                 ) {
                     Row(modifier = Modifier.horizontalScroll(scrollState)) {
-                        repeat(1000) { index ->
-                            Icon(
-                                Icons.Outlined.CheckBox,
-                                contentDescription = "",
-                                modifier = Modifier.defaultMinSize()
-                            )
+                        uiState.results.forEach { result ->
+                            Text(modifier = Modifier
+                                    .rotate(-90f)
+                                    .height(22.dp)
+                                .width(22.dp),
+                                text = result)
                         }
                     }
                 }
