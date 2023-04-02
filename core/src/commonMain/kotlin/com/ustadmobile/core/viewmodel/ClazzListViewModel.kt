@@ -61,7 +61,10 @@ data class ClazzListUiState(
 class ClazzListViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-): UstadListViewModel<ClazzListUiState>(di, savedStateHandle, ClazzListUiState()) {
+    destinationName: String = ClazzList2View.VIEW_NAME,
+): UstadListViewModel<ClazzListUiState>(
+    di, savedStateHandle, ClazzListUiState(), destinationName
+) {
 
     private val filterAlreadySelectedList = savedStateHandle[ClazzList2View.ARG_FILTER_EXCLUDE_SELECTED_CLASS_LIST]
         ?.split(",")?.filter { it.isNotEmpty() }?.map { it.trim().toLong() }

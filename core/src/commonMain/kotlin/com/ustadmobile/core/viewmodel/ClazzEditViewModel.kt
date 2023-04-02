@@ -7,8 +7,7 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.util.ext.*
-import com.ustadmobile.core.view.ClazzDetailView
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -24,9 +23,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.instance
 
+@Serializable
 data class ClazzEditUiState(
 
     val fieldsEnabled: Boolean = true,
@@ -80,8 +81,8 @@ data class ClazzEditUiState(
 
 class ClazzEditViewModel(
     di: DI,
-    savedStateHandle: UstadSavedStateHandle
-): UstadEditViewModel(di, savedStateHandle) {
+    savedStateHandle: UstadSavedStateHandle,
+): UstadEditViewModel(di, savedStateHandle, ClazzEdit2View.VIEW_NAME) {
 
     private val _uiState = MutableStateFlow(ClazzEditUiState())
 
@@ -108,7 +109,8 @@ class ClazzEditViewModel(
                 async {
                     loadEntity(
                         onLoadFromDb = {
-                            it.clazzDao.findByUidWithHolidayCalendarAsync(entityUidArg)
+                            it.clazzDao.takeIf { entityUidArg != 0L }
+                                ?.findByUidWithHolidayCalendarAsync(entityUidArg)
                         },
                         makeDefault = {
                             ClazzWithHolidayCalendarAndSchoolAndTerminology().apply {
@@ -136,9 +138,27 @@ class ClazzEditViewModel(
                 }
             )
 
+            //TODO here: save initial state
+
+            launch {
+                resultReturner.filteredResultFlowForKey(RESULT_KEY_SCHEDULE).collect {
+                    val returnedSchedule = it.result as? Schedule ?: return@collect
+                    _uiState.update { prev ->
+                        prev.copy(
+                            clazzSchedules = prev.clazzSchedules.replaceOrAppend(returnedSchedule) {
+                                it.scheduleUid == returnedSchedule.scheduleUid
+                            }
+                        )
+                    }
+                }
+            }
+
+
             _uiState.update { prev ->
                 prev.copy(fieldsEnabled = true)
             }
+
+            loadingState = LoadingUiState.NOT_LOADING
         }
 
     }
@@ -165,6 +185,28 @@ class ClazzEditViewModel(
                 0L
             }
         })
+    }
+
+    fun onClickAddSchedule(){
+        navigateForResult(ScheduleEditView.VIEW_NAME, "Schedule", currentValue = null,
+            serializer = Schedule.serializer())
+    }
+
+    fun onClickEditSchedule(schedule: Schedule) {
+        navigateForResult(
+            nextViewName = ScheduleEditView.VIEW_NAME,
+            key = RESULT_KEY_SCHEDULE,
+            currentValue = schedule,
+            serializer = Schedule.serializer()
+        )
+    }
+
+    fun onClickDeleteSchedule(schedule: Schedule) {
+        _uiState.update { prev ->
+            prev.copy(
+                clazzSchedules = prev.clazzSchedules.filter { it.scheduleUid != schedule.scheduleUid }
+            )
+        }
     }
 
     private fun ClazzEditUiState.hasErrors() : Boolean {
@@ -235,6 +277,12 @@ class ClazzEditViewModel(
 
             finishWithResult(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity)
         }
+    }
+
+    companion object {
+
+        const val RESULT_KEY_SCHEDULE = "Schedule"
+
     }
 
 }

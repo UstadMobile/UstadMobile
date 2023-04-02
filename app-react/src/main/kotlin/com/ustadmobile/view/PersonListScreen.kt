@@ -1,6 +1,7 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.hooks.collectAsState
+import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
@@ -26,6 +27,7 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import react.router.useLocation
 
 
 external interface PersonListProps: Props {
@@ -108,8 +110,9 @@ val PersonListScreenPreview = FC<Props> { props ->
 }
 
 val PersonListScreen = FC<Props> {
+    val location = useLocation()
     val viewModel = useUstadViewModel {di, savedStateHandle ->
-        PersonListViewModel(di, savedStateHandle)
+        PersonListViewModel(di, savedStateHandle, location.ustadViewName)
     }
 
     val uiState: PersonListUiState by viewModel.uiState.collectAsState(PersonListUiState())

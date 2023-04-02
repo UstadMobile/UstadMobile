@@ -37,9 +37,7 @@ interface InviteWithLinkHandler{
 
 class PersonListFragment() : UstadBaseMvvmFragment() {
 
-    private val viewModel: PersonListViewModel by viewModels {
-        UstadViewModelProviderFactory(di, this, arguments)
-    }
+    private val viewModel: PersonListViewModel by ustadViewModels(lookupDestinationName = true)
 
     override fun onCreateView(
         inflater: LayoutInflater,

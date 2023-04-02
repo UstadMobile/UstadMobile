@@ -71,7 +71,7 @@ data class PersonDetailUiState(
 class PersonDetailViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
-): DetailViewModel<Person>(di, savedStateHandle) {
+): DetailViewModel<Person>(di, savedStateHandle, PersonDetailView.VIEW_NAME) {
 
     private val _uiState = MutableStateFlow(PersonDetailUiState())
 

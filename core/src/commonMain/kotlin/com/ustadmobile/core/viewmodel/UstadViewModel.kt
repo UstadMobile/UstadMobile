@@ -9,6 +9,7 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.*
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
@@ -21,11 +22,19 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
 
+/**
+ * @param di the KodeIn DI
+ * @param savedStateHandle the SavedStateHandle
+ * @param destinationName The name of this destination as per the navigation view stack, normally as
+ * per the related VIEW_NAME. This might NOT be the VIEW_NAME that relates to this screen e.g. when
+ * this ViewModel is being used within a tab or other component that is not directly part of the
+ * navigation.
+ */
 abstract class UstadViewModel(
     override val di: DI,
     protected val savedStateHandle: UstadSavedStateHandle,
+    protected val destinationName: String,
 ): ViewModel(savedStateHandle), DIAware {
-
 
     protected val navController = CommandFlowUstadNavController()
 
@@ -53,10 +62,11 @@ abstract class UstadViewModel(
 
     protected val systemImpl: UstadMobileSystemImpl by instance()
 
-    private val navResultTimestampsCollected: MutableSet<Long> by lazy {
-        savedStateHandle[KEY_COLLECTED_TIMESTAMPS]?.split(",")
-            ?.map { it.trim().toLong() }?.toMutableSet() ?: mutableSetOf()
-    }
+    private var lastNavResultTimestampCollected: Long = savedStateHandle[KEY_LAST_COLLECTED_TS]?.toLong() ?: 0L
+        set(value) {
+            field = value
+            savedStateHandle[KEY_LAST_COLLECTED_TS] = value.toString()
+        }
 
     /**
      * If navigation for a result is in progress, this will be non-null
@@ -100,17 +110,15 @@ abstract class UstadViewModel(
     /**
      * When using
      */
-    suspend fun NavResultReturner.collectReturnedResults(
+    fun NavResultReturner.filteredResultFlowForKey(
         key: String,
-        collector: FlowCollector<NavResult>
-    ) {
+    ) : Flow<NavResult> {
         return resultFlowForKey(key).filter {
-            it.timestamp !in navResultTimestampsCollected
-        }.collect {
-            collector.emit(it)
-            navResultTimestampsCollected += it.timestamp
-            savedStateHandle[KEY_COLLECTED_TIMESTAMPS] = navResultTimestampsCollected
-                .joinToString(separator = ",")
+            val isNew = it.timestamp > lastNavResultTimestampCollected
+            if(isNew)
+                lastNavResultTimestampCollected = it.timestamp
+
+            isNew
         }
     }
 
@@ -177,6 +185,32 @@ abstract class UstadViewModel(
         }
     }
 
+
+    fun <T> navigateForResult(
+        nextViewName: String,
+        key: String,
+        currentValue: T?,
+        serializer: SerializationStrategy<T>,
+        args: Map<String, String> = emptyMap(),
+        goOptions: UstadMobileSystemCommon.UstadGoOptions = UstadMobileSystemCommon.UstadGoOptions.Default,
+        overwriteDestination: Boolean = (this is UstadEditViewModel),
+    ) {
+        val navArgs = args.toMutableMap()
+
+        if(!args.containsKey(UstadView.ARG_RESULT_DEST_KEY) || overwriteDestination)
+            navArgs[UstadView.ARG_RESULT_DEST_KEY] = key
+
+        if(!args.containsKey(UstadView.ARG_RESULT_DEST_VIEWNAME) || overwriteDestination)
+            navArgs[UstadView.ARG_RESULT_DEST_VIEWNAME] = destinationName
+
+        if(currentValue != null) {
+            navArgs[UstadEditView.ARG_ENTITY_JSON] = json.encodeToString(serializer, currentValue)
+        }
+
+        navController.navigate(nextViewName, navArgs.toMap(), goOptions)
+    }
+
+
     companion object {
         /**
          * Saved state key for the current value of the entity itself. This is different to
@@ -184,7 +218,7 @@ abstract class UstadViewModel(
          */
         const val KEY_ENTITY_STATE = "entityState"
 
-        const val KEY_COLLECTED_TIMESTAMPS = "collectedTs"
+        const val KEY_LAST_COLLECTED_TS = "collectedTs"
     }
 
 }

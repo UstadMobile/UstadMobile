@@ -76,8 +76,8 @@ data class PersonEditUiState(
 
 class PersonEditViewModel(
     di: DI,
-    savedStateHandle: UstadSavedStateHandle
-): UstadEditViewModel(di, savedStateHandle) {
+    savedStateHandle: UstadSavedStateHandle,
+): UstadEditViewModel(di, savedStateHandle, PersonEditView.VIEW_NAME) {
 
     private val _uiState: MutableStateFlow<PersonEditUiState> = MutableStateFlow(
         PersonEditUiState(

@@ -20,7 +20,8 @@ abstract class UstadListViewModel<S>(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
     initialState: S,
-) : UstadViewModel(di, savedStateHandle) {
+    destinationName: String,
+) : UstadViewModel(di, savedStateHandle, destinationName) {
 
     @Suppress("PropertyName")
     protected val _uiState = MutableStateFlow(initialState)

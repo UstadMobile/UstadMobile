@@ -21,7 +21,7 @@ data class OnboardingUiState(
 class OnBoardingViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
-): UstadViewModel(di, savedStateHandle) {
+): UstadViewModel(di, savedStateHandle, OnBoardingView.VIEW_NAME) {
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
 

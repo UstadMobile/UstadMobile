@@ -8,97 +8,51 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.FragmentScheduleEditBinding
-import com.ustadmobile.core.controller.ScheduleEditPresenter
-import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
-import com.ustadmobile.core.util.ext.toNullableStringMap
-import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ScheduleEditView
 import com.ustadmobile.core.viewmodel.ScheduleEditUiState
+import com.ustadmobile.core.viewmodel.ScheduleEditViewModel
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadTimeEditTextField
 
-class ScheduleEditFragment: UstadEditFragment<Schedule>(), ScheduleEditView {
+class ScheduleEditFragment: UstadBaseMvvmFragment() {
 
-    private var mBinding: FragmentScheduleEditBinding? = null
+    private val viewModel: ScheduleEditViewModel by ustadViewModels()
 
-    private var mPresenter: ScheduleEditPresenter? = null
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
+        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
 
-    override val mEditPresenter: UstadEditPresenter<*, Schedule>?
-        get() = mPresenter
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+            )
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val rootView: View
-        mBinding = FragmentScheduleEditBinding.inflate(inflater, container, false).also {
-            rootView = it.root
+            setContent {
+                MdcTheme {
+                    ScheduleEditScreen(viewModel)
+                }
+            }
         }
-
-        mPresenter = ScheduleEditPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner).withViewLifecycle()
-        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
-
-        return rootView
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        setEditFragmentTitle(R.string.add_a_schedule, R.string.edit_schedule)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        mBinding = null
-        mPresenter = null
-        entity = null
-    }
-
-    override var loading: Boolean = false
-
-    override var entity: Schedule? = null
-        get() = field
-        set(value) {
-            field = value
-            mBinding?.schedule = value
-        }
-
-    override var fieldsEnabled: Boolean = false
-        get() = field
-        set(value) {
-            super.fieldsEnabled = value
-            field = value
-            mBinding?.fieldsEnabled = value
-        }
-
-    override var dayOptions: List<ScheduleEditPresenter.DayMessageIdOption>? = null
-        get() = field
-        set(value) {
-            mBinding?.dayOptions = value
-            field = value
-        }
-
-
-    override var fromTimeError: String?
-        get() = mBinding?.fromTimeError
-        set(value) {
-            mBinding?.fromTimeError = value
-        }
-
-    override var toTimeError: String?
-        get() = mBinding?.toTimeError
-        set(value) {
-            mBinding?.toTimeError = value
-        }
 }
 
 @Composable
@@ -159,6 +113,18 @@ private fun ScheduleEditScreen(
             )
         }
     }
+}
+
+@Composable
+fun ScheduleEditScreen(
+    viewModel: ScheduleEditViewModel
+){
+    val uiState: ScheduleEditUiState by viewModel.uiState.collectAsState(initial = ScheduleEditUiState())
+
+    ScheduleEditScreen(
+        uiState = uiState,
+        onScheduleChanged = viewModel::onEntityChanged
+    )
 }
 
 @Composable

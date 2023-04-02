@@ -21,7 +21,8 @@ import org.kodein.di.DI
 abstract class UstadEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-) : UstadViewModel(di, savedStateHandle){
+    destinationName: String,
+) : UstadViewModel(di, savedStateHandle, destinationName){
 
     protected var saveStateJob: Job? = null
 
@@ -173,6 +174,24 @@ abstract class UstadEditViewModel(
                 editEntityMessageId
             }
         )
+    }
+
+    /**
+     * Shorthand to check if an error message state should be cleared. If there is no error message,
+     * return null. If the new value has changed, clear the error message. Otherwise leave the
+     * error message as is
+     */
+    protected fun updateErrorMessageOnChange(
+        prevFieldValue: Any?,
+        currentFieldValue: Any?,
+        currentErrorMessage: String?,
+    ): String? {
+        return if(currentErrorMessage == null)
+            null
+        else if(prevFieldValue != currentFieldValue)
+            null
+        else
+            currentErrorMessage
     }
 
     companion object {

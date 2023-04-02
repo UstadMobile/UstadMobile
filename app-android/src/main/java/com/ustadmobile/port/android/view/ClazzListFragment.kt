@@ -30,7 +30,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -58,9 +57,7 @@ import kotlinx.coroutines.launch
 
 class ClazzListFragment(): UstadBaseMvvmFragment() {
 
-    private val viewModel: ClazzListViewModel by viewModels {
-        UstadViewModelProviderFactory(di, this, arguments)
-    }
+    private val viewModel: ClazzListViewModel by ustadViewModels(lookupDestinationName = true)
 
     override fun onCreateView(
         inflater: LayoutInflater,

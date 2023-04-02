@@ -3,6 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
@@ -36,6 +37,7 @@ import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import mui.system.sx
 import react.*
+import react.router.useLocation
 import web.dom.css.getComputedStyle
 import web.events.Event
 import web.events.EventHandler
@@ -163,11 +165,12 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
 
 val ClazzListScreen = FC<Props> { props ->
     val strings = useStringsXml()
+    val location = useLocation()
     var addDialogVisible: Boolean by useState { false }
 
 
     val viewModel = useUstadViewModel { di, savedStateHandle ->
-        ClazzListViewModel(di, savedStateHandle)
+        ClazzListViewModel(di, savedStateHandle, location.ustadViewName)
     }
 
     val uiState: ClazzListUiState by viewModel.uiState.collectAsState(ClazzListUiState())

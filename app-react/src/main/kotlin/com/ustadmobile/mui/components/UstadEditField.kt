@@ -83,6 +83,11 @@ external interface UstadEditFieldProps: PropsWithChildren {
      * Fullwidth property: passed through to the TextField
      */
     var fullWidth: Boolean
+
+    /**
+     * DOM ID
+     */
+    var id: String?
 }
 
 /**
@@ -103,6 +108,7 @@ val UstadTextEditField = FC<UstadEditFieldProps> { props ->
         error = errorText != null
         helperText = errorText?.let { ReactNode(it) }
         fullWidth = props.fullWidth
+        id = props.id
 
         if(props.readOnly) {
             inputProps = jso {
@@ -248,6 +254,7 @@ val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
             shrink = true
         }
         id = props.id
+        fullWidth = props.fullWidth
 
         onChange = {
             val targetEl = it.target as HTMLInputElement

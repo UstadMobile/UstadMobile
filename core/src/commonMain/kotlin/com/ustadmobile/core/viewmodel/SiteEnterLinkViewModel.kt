@@ -10,6 +10,7 @@ import com.ustadmobile.core.util.ext.requireHttpPrefix
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
 import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.core.view.SiteEnterLinkView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
 import io.ktor.client.*
@@ -30,7 +31,7 @@ data class SiteEnterLinkUiState(
 class SiteEnterLinkViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
-): UstadViewModel(di, savedStateHandle) {
+): UstadViewModel(di, savedStateHandle, SiteEnterLinkView.VIEW_NAME) {
 
     private val _uiState = MutableStateFlow(SiteEnterLinkUiState())
 

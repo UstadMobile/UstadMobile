@@ -99,6 +99,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
             UstadTextEditField {
                 value = props.uiState.entity?.clazzName ?: ""
                 label = strings[MessageID.name]
+                id = "clazz_name"
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
                     props.onClazzChanged(
@@ -113,6 +114,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 value = props.uiState.entity?.clazzDesc ?: ""
                 label = strings[MessageID.description].addOptionalSuffix(strings)
                 enabled = props.uiState.fieldsEnabled
+                id = "clazz_desc"
                 onChange = {
                     props.onClazzChanged(
                         props.uiState.entity?.shallowCopy {
@@ -127,6 +129,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 label = strings[MessageID.institution]
                 enabled = props.uiState.fieldsEnabled
                 onClick = props.onClickSchool
+                id = "clazz_schoolname"
                 onChange = {}
             }
 
@@ -146,6 +149,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                     error = props.uiState.clazzStartDateError
                     enabled = props.uiState.fieldsEnabled
                     fullWidth = true
+                    id = "clazz_start_time"
                     onChange = {
                         props.onClazzChanged(
                             props.uiState.entity?.shallowCopy {
@@ -161,7 +165,9 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                     label = strings[MessageID.end_date].addOptionalSuffix(strings)
                     error = props.uiState.clazzEndDateError
                     enabled = props.uiState.fieldsEnabled
+                    unsetDefault = Long.MAX_VALUE
                     fullWidth = true
+                    id = "clazz_end_time"
                     onChange = {
                         props.onClazzChanged(
                             props.uiState.entity?.shallowCopy {
@@ -176,6 +182,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.entity?.clazzTimeZone ?: ""
+                id = "clazz_timezone"
                 label = strings[MessageID.timezone]
                 enabled = props.uiState.fieldsEnabled
                 onClick = { props.onClickTimezone() }
@@ -201,6 +208,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.entity?.holidayCalendar?.umCalendarName ?: ""
+                id = "clazz_calender_name"
                 label = strings[MessageID.holiday_calendar]
                 enabled = props.uiState.fieldsEnabled
                 onChange = {}
@@ -214,6 +222,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
             UstadSwitchField {
                 label = strings[MessageID.attendance]
                 checked = props.uiState.clazzEditAttendanceChecked
+                id = "clazz_attendance_switch"
                 onChanged = props.onCheckedAttendanceChanged
                 enabled = props.uiState.fieldsEnabled
             }
@@ -223,7 +232,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                     ?: EnrolmentPolicyConstants.ENROLMENT_POLICY_MESSAGE_IDS.first().value
                 options = EnrolmentPolicyConstants.ENROLMENT_POLICY_MESSAGE_IDS
                 label = strings[MessageID.enrolment_policy]
-                id = "clazzEnrolmentPolicy"
+                id = "clazz_enrolment_policy"
                 onChange = { option ->
                     props.onClazzChanged(
                         props.uiState.entity?.shallowCopy {
@@ -237,6 +246,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 value = props.uiState.entity?.terminology?.ctTitle ?: ""
                 label = strings[MessageID.terminology]
                 enabled = props.uiState.fieldsEnabled
+                id = "clazz_terminology"
                 onChange = {}
                 onClick = props.onClickTerminology
             }

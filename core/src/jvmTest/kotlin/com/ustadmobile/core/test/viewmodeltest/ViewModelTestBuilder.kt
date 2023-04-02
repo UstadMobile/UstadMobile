@@ -11,6 +11,7 @@ import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
+import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.isLazyInitialized
@@ -90,6 +91,12 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
     val activeRepo: UmAppDatabase
         get() = di.direct.on(activeEndpoint).instance(tag = DoorTag.TAG_REPO)
 
+    val systemImpl: UstadMobileSystemImpl
+        get() = di.direct.instance()
+
+    val navResultReturner: NavResultReturner
+        get() = di.direct.instance()
+
     private var diVar = DI {
         import(CommonJvmDiModule)
 
@@ -152,6 +159,10 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
 
         bind<UstadNavController>() with singleton {
             spy(TestUstadNavController())
+        }
+
+        bind<NavResultReturner>() with singleton {
+            mock { }
         }
     }
 
