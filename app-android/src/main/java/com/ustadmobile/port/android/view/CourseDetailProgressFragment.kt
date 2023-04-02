@@ -54,8 +54,8 @@ private fun CourseDetailProgressScreen(
                         uiState.results.forEach { result ->
                             Text(modifier = Modifier
                                     .rotate(-90f)
-                                    .height(22.dp)
-                                .width(22.dp),
+                                .height(IntrinsicSize.Max)
+                                .width(25.dp),
                                 text = result)
                         }
                     }
@@ -81,7 +81,7 @@ private fun CourseDetailProgressScreen(
                         Row(modifier = Modifier
                             .horizontalScroll(scrollState)) {
 
-                            repeat(1000) { index ->
+                            uiState.results.forEach { result ->
                                 Icon(
                                     Icons.Outlined.CheckBox,
                                     contentDescription = "",
