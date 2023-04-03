@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,7 +10,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.layout
@@ -20,8 +20,9 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.CourseDetailProgressUiState
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
-import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.composable.UstadPersonAvatar
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.Alignment
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -30,32 +31,43 @@ private fun CourseDetailProgressScreen(
     onClickStudent: (Person) -> Unit = {},
 ) {
 
+    val scrollState = rememberScrollState()
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .defaultScreenPadding(),
     ) {
 
         stickyHeader {
-            Row (
-                modifier = Modifier
-                    .defaultItemPadding()
-                    .fillMaxHeight()
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.End
-            ) {
-                CheckBoxTitle(text = stringResource(id = R.string.discussion_board))
-                CheckBoxTitle(text = stringResource(id = R.string.module))
-                CheckBoxTitle(text = stringResource(id = R.string.video))
-                CheckBoxTitle(text = stringResource(id = R.string.clazz_assignment))
+
+
+            Box(Modifier
+                .fillMaxWidth()
+                .defaultItemPadding(),
+                contentAlignment = Alignment.TopEnd
+            ){
+
+                Box(
+                    modifier = Modifier.width(120.dp)
+                ) {
+                    Row(modifier = Modifier.horizontalScroll(scrollState)) {
+                        uiState.results.forEach { result ->
+                            Text(modifier = Modifier
+                                    .rotate(-90f)
+                                .height(IntrinsicSize.Max)
+                                .width(25.dp),
+                                text = result)
+                        }
+                    }
+                }
             }
         }
 
         items(
             items = uiState.students,
             key = { student -> student.personUid }
-        ){ student ->
+        ) { student ->
+
             ListItem(
                 modifier = Modifier.clickable {
                     onClickStudent(student)
@@ -65,22 +77,96 @@ private fun CourseDetailProgressScreen(
                 },
                 text = { Text(student.fullName()) },
                 trailing = {
-                    Row {
-                        (0..3).forEach { _ ->
+                    Box(modifier = Modifier.width(120.dp)) {
+                        Row(modifier = Modifier
+                            .horizontalScroll(scrollState)) {
 
-                            Icon(
-                                Icons.Outlined.CheckBox,
-                                contentDescription = "",
-                                modifier = Modifier.defaultMinSize()
-                            )
-
+                            uiState.results.forEach { result ->
+                                Icon(
+                                    Icons.Outlined.CheckBox,
+                                    contentDescription = "",
+                                    modifier = Modifier.defaultMinSize()
+                                )
+                            }
                         }
                     }
                 }
             )
+
         }
+
+//        item {
+//            LazyRow(
+//                state = stateRowY,
+//                userScrollEnabled = false
+//            ) {
+//                items(LoremIpsum(10).values.toList()) {
+//                    Text(text = it)
+//                }
+//            }
+//        }
+
+
     }
 }
+
+//    LazyColumn(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .defaultScreenPadding(),
+//    ) {
+//
+//        stickyHeader {
+//
+////            LazyRow(
+////                modifier = Modifier
+////                    .defaultItemPadding()
+////                    .padding(start = 40.dp),
+////                state = stateRowX,
+////                userScrollEnabled = false
+////            ) {
+////                items(
+////                    items = uiState.results,
+////                ){ result ->
+////                    CheckBoxTitle(text = result)
+////                }
+////            }
+//
+//        }
+//
+//        items(
+//            items = uiState.students,
+//            key = { student -> student.personUid }
+//        ){ student ->
+//            ListItem(
+//                modifier = Modifier.clickable {
+//                    onClickStudent(student)
+//                },
+//                icon = {
+//                    UstadPersonAvatar(personUid = 0)
+//                },
+//                text = { Text(student.fullName()) },
+//                trailing = {
+//
+////                    LazyRow(
+////                        state = stateRowY,
+////                        userScrollEnabled = false
+////                    ) {
+////                        items(
+////                            items = uiState.results,
+////                        ){ _ ->
+////                            Icon(
+////                                Icons.Outlined.CheckBox,
+////                                contentDescription = "",
+////                                modifier = Modifier.defaultMinSize()
+////                            )
+////                        }
+////                    }
+//                }
+//            )
+//        }
+//    }
+//}
 
 @Composable
 private fun CheckBoxTitle(
@@ -169,6 +255,28 @@ fun CourseDetailProgressScreenPreview() {
                 firstNames = "Nelzon"
                 lastName = "Muntz"
             }
+        ),
+        results = listOf(
+            stringResource(R.string.discussion_board),
+            stringResource(R.string.dashboard),
+            stringResource(R.string.module),
+            stringResource(R.string.video),
+            stringResource(R.string.assignments),
+            stringResource(R.string.document),
+            stringResource(R.string.audio),
+            stringResource(R.string.phone),
+            stringResource(R.string.change_photo),
+            stringResource(R.string.ebook),
+            stringResource(R.string.discussion_board),
+            stringResource(R.string.dashboard),
+            stringResource(R.string.module),
+            stringResource(R.string.video),
+            stringResource(R.string.assignments),
+            stringResource(R.string.document),
+            stringResource(R.string.audio),
+            stringResource(R.string.phone),
+            stringResource(R.string.change_photo),
+            stringResource(R.string.ebook),
         )
     )
 
