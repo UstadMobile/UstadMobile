@@ -23,6 +23,7 @@ import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.view.composable.UstadPersonAvatar
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextOverflow
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -49,13 +50,18 @@ private fun CourseDetailProgressScreen(
 
                 Box(
                     modifier = Modifier.width(120.dp)
+                        .height(120.dp)
                 ) {
-                    Row(modifier = Modifier.horizontalScroll(scrollState)) {
+                    Row(modifier = Modifier.horizontalScroll(scrollState)
+                        .height(120.dp),
+                        verticalAlignment = Alignment.Bottom
+                    ) {
                         uiState.results.forEach { result ->
                             Text(modifier = Modifier
+                                .vertical()
                                     .rotate(-90f)
-                                .height(IntrinsicSize.Max)
-                                .width(25.dp),
+                                .height(25.dp),
+                                overflow = TextOverflow.Ellipsis,
                                 text = result)
                         }
                     }
