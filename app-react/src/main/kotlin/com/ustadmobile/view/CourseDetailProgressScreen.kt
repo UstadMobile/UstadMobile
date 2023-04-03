@@ -9,13 +9,16 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.mui.components.Header
 import csstype.*
 import mui.material.*
+import mui.material.List
 import mui.system.Stack
 import mui.system.StackDirection
 import mui.system.responsive
 import mui.system.sx
-import react.FC
-import react.Props
-import react.ReactNode
+import react.*
+import react.dom.aria.AriaOrientation
+import react.dom.aria.AriaRole
+import react.dom.aria.ariaOrientation
+import react.dom.html.ReactHTML.div
 
 external interface CourseDetailProgressProps : Props {
 
@@ -26,6 +29,9 @@ external interface CourseDetailProgressProps : Props {
 }
 
 val CourseDetailProgressScreenPreview = FC<Props> {
+
+    val strings = useStringsXml()
+
     CourseDetailProgressScreenComponent2 {
         uiState = CourseDetailProgressUiState(
             students = listOf(
@@ -114,6 +120,28 @@ val CourseDetailProgressScreenPreview = FC<Props> {
                     firstNames = "Nelzon"
                     lastName = "Muntz"
                 }
+            ),
+            results = listOf(
+                strings[MessageID.discussion_board],
+                strings[MessageID.dashboard],
+            strings[MessageID.module],
+//        strings[MessageID.video],
+//                strings[MessageID.assignments],
+//                strings[MessageID.document],
+//                strings[MessageID.audio],
+//                strings[MessageID.phone],
+//                strings[MessageID.change_photo],
+//                strings[MessageID.ebook],
+//                strings[MessageID.discussion_board],
+//                strings[MessageID.dashboard],
+//                strings[MessageID.module],
+//                strings[MessageID.video],
+//                strings[MessageID.assignments],
+//                strings[MessageID.document],
+//                strings[MessageID.audio],
+//                strings[MessageID.phone],
+                strings[MessageID.change_photo],
+                strings[MessageID.ebook],
             )
         )
     }
@@ -130,7 +158,12 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
             direction = responsive(StackDirection.column)
             spacing = responsive(10.px)
 
-            List{
+            Typography {
+                + "Text from top"
+            }
+
+            List {
+
                 ListSubheader {
                     sx {
                         position = Position.fixed
@@ -144,10 +177,8 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                     }
                 }
 
-                sx {
-                    overflowX = Overflow.scroll
-                }
                 props.uiState.students.forEach { student ->
+
                     ListItem{
                         ListItemButton {
                             onClick = {
@@ -156,6 +187,25 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 
                             ListItemText {
                                 primary = ReactNode(student.fullName())
+                            }
+                        }
+
+                        secondaryAction = Box.create {
+//                            sx {
+//                                width = 120.px
+//                            }
+
+                            List {
+                                ariaOrientation = AriaOrientation.horizontal
+
+                                props.uiState.results.forEach { result ->
+
+                                    ListItem{
+                                        ListItemText {
+                                            primary = ReactNode(result)
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
