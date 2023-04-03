@@ -7,11 +7,12 @@ import com.ustadmobile.core.viewmodel.SchoolDetailOverviewUiState
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.mui.components.Header
-import csstype.px
+import csstype.*
 import mui.material.*
 import mui.system.Stack
 import mui.system.StackDirection
 import mui.system.responsive
+import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
@@ -130,9 +131,14 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
             spacing = responsive(10.px)
 
 
-            Header {
+            Box {
+                sx {
+                    position = Position.fixed
+                    transform = rotate(90.deg)
+                }
 
                 Typography {
+
                     + strings[MessageID.discussion_board]
                 }
 
