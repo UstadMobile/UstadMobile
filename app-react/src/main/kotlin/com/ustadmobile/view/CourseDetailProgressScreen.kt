@@ -130,32 +130,23 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
             direction = responsive(StackDirection.column)
             spacing = responsive(10.px)
 
-
-            Box {
-                sx {
-                    position = Position.fixed
-                    transform = rotate(90.deg)
-                }
-
-                Typography {
-
-                    + strings[MessageID.discussion_board]
-                }
-
-                Typography {
-                    + strings[MessageID.module]
-                }
-
-                Typography {
-                    + strings[MessageID.video]
-                }
-
-                Typography {
-                    + strings[MessageID.clazz_assignment]
-                }
-            }
-
             List{
+                ListSubheader {
+                    sx {
+                        position = Position.fixed
+                        transform = rotate(270.deg)
+                        height = 180.px
+                    }
+                    ListItem{
+                        ListItemText {
+                            primary = ReactNode("student.fullName()")
+                        }
+                    }
+                }
+
+                sx {
+                    overflowX = Overflow.scroll
+                }
                 props.uiState.students.forEach { student ->
                     ListItem{
                         ListItemButton {
