@@ -124,22 +124,36 @@ val CourseDetailProgressScreenPreview = FC<Props> {
             results = listOf(
                 strings[MessageID.discussion_board],
                 strings[MessageID.dashboard],
-            strings[MessageID.module],
-//        strings[MessageID.video],
-//                strings[MessageID.assignments],
-//                strings[MessageID.document],
-//                strings[MessageID.audio],
-//                strings[MessageID.phone],
-//                strings[MessageID.change_photo],
-//                strings[MessageID.ebook],
-//                strings[MessageID.discussion_board],
-//                strings[MessageID.dashboard],
-//                strings[MessageID.module],
-//                strings[MessageID.video],
-//                strings[MessageID.assignments],
-//                strings[MessageID.document],
-//                strings[MessageID.audio],
-//                strings[MessageID.phone],
+                strings[MessageID.module],
+                strings[MessageID.video],
+                strings[MessageID.assignments],
+                strings[MessageID.document]+"6",
+                strings[MessageID.audio],
+                strings[MessageID.phone],
+                strings[MessageID.change_photo],
+                strings[MessageID.ebook],
+                strings[MessageID.discussion_board],
+                strings[MessageID.dashboard],
+                strings[MessageID.module],
+                strings[MessageID.video],
+                strings[MessageID.assignments],
+                strings[MessageID.document],
+                strings[MessageID.audio],
+                strings[MessageID.phone],
+                strings[MessageID.change_photo],
+                strings[MessageID.ebook],
+                strings[MessageID.video],
+                strings[MessageID.assignments],
+                strings[MessageID.document],
+                strings[MessageID.audio],
+                strings[MessageID.phone],
+                strings[MessageID.change_photo],
+                strings[MessageID.ebook],
+                strings[MessageID.video],
+                strings[MessageID.assignments],
+                strings[MessageID.document],
+                strings[MessageID.audio],
+                strings[MessageID.phone],
                 strings[MessageID.change_photo],
                 strings[MessageID.ebook],
             )
@@ -158,59 +172,131 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
             direction = responsive(StackDirection.column)
             spacing = responsive(10.px)
 
-            Typography {
-                + "Text from top"
-            }
+            val (selectedItems, setSelectedItems) = useState(setOf<Int>())
 
-            List {
-
-                ListSubheader {
+            ListSubheader {
+                List {
                     sx {
-                        position = Position.fixed
-                        transform = rotate(270.deg)
-                        height = 180.px
-                    }
-                    ListItem{
-                        ListItemText {
-                            primary = ReactNode("student.fullName()")
+                            display = Display.flex
+                            flexDirection = FlexDirection.row
                         }
-                    }
-                }
-
-                props.uiState.students.forEach { student ->
-
-                    ListItem{
-                        ListItemButton {
-                            onClick = {
-                                props.onClickStudent(student)
-                            }
-
-                            ListItemText {
-                                primary = ReactNode(student.fullName())
-                            }
-                        }
-
-                        secondaryAction = Box.create {
-//                            sx {
-//                                width = 120.px
-//                            }
-
-                            List {
-                                ariaOrientation = AriaOrientation.horizontal
-
-                                props.uiState.results.forEach { result ->
-
-                                    ListItem{
-                                        ListItemText {
-                                            primary = ReactNode(result)
-                                        }
+                    props.uiState.results.forEachIndexed { index, item ->
+                        ListItem {
+                            selected = selectedItems.contains(index)
+                            ListItemButton {
+                                onClick = {
+                                    if (selectedItems.contains(index)) {
+                                        setSelectedItems(selectedItems - index)
+                                    } else {
+                                        setSelectedItems(selectedItems + index)
                                     }
+                                }
+
+                                ListItemText {
+                                    primary = ReactNode(item)
                                 }
                             }
                         }
                     }
                 }
             }
+
+            List {
+                sx {
+                    display = Display.flex
+                    flexDirection = FlexDirection.row
+                }
+                props.uiState.results.forEachIndexed { index, item ->
+                    ListItem {
+                        selected = selectedItems.contains(index)
+                        ListItemButton {
+                            onClick = {
+                                if (selectedItems.contains(index)) {
+                                    setSelectedItems(selectedItems - index)
+                                } else {
+                                    setSelectedItems(selectedItems + index)
+                                }
+                            }
+
+                            ListItemText {
+                                primary = ReactNode(item)
+                            }
+                        }
+                    }
+                }
+            }
+
+//            List {
+//                ariaOrientation = AriaOrientation.horizontal
+//                ListSubheader {
+//                    sx {
+////                        position = Position.fixed
+////                        transform = rotate(270.deg)
+//                        width = 400.px
+//                            height = 120.px
+//                    }
+//
+//                    List {
+//
+//                        sx {
+//                            display = Display.flex
+//                            flexDirection = FlexDirection.row
+//                            width = 120.px
+//                            height = 120.px
+//                        }
+//                        props.uiState.results.forEachIndexed { index, result ->
+//
+//                            ListItem{
+//
+//                                autoFocus = index == 6
+//
+//                                ListItemText {
+//                                    primary = ReactNode(result+index)
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//
+////                props.uiState.students.forEach { student ->
+////
+////                    ListItem{
+////                        ListItemButton {
+////                            onClick = {
+////                                props.onClickStudent(student)
+////                            }
+////
+////                            ListItemText {
+////                                primary = ReactNode(student.fullName())
+////                            }
+////                        }
+////
+//////                        secondaryAction = Box.create {
+////////                            direction = responsive(StackDirection.row)
+////////                            sx {
+////////                            width = 120.px
+////////                        }
+//////
+////////                            List {
+////////
+////////                                sx {
+////////                                    display = Display.flex
+////////                                    flexDirection = FlexDirection.row
+////////                                }
+////////
+////////                                props.uiState.results.forEach { result ->
+////////
+////////                                    ListItem{
+////////                                        ListItemText {
+////////                                            primary = ReactNode(result)
+////////                                        }
+////////                                    }
+////////                                }
+////////                            }
+//////                        }
+////                    }
+////                }
+//            }
 
         }
     }
