@@ -2,12 +2,21 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.CourseDetailProgressUiState
 import com.ustadmobile.core.viewmodel.SchoolDetailOverviewUiState
+import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.mui.components.Header
+import com.ustadmobile.mui.components.UstadListSortHeader
+import com.ustadmobile.view.components.UstadPersonAvatar
+import com.ustadmobile.view.components.virtuallist.VirtualList
+import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
+import com.ustadmobile.view.components.virtuallist.virtualListContent
 import csstype.*
+import js.core.jso
 import mui.material.*
 import mui.material.List
 import mui.system.Stack
@@ -20,7 +29,7 @@ import react.dom.aria.AriaRole
 import react.dom.aria.ariaOrientation
 import react.dom.html.ReactHTML.div
 
-external interface CourseDetailProgressProps : Props {
+external interface CourseDetailProgressProps : UstadScreenProps {
 
     var uiState: CourseDetailProgressUiState
 
@@ -28,99 +37,24 @@ external interface CourseDetailProgressProps : Props {
 
 }
 
-val CourseDetailProgressScreenPreview = FC<Props> {
+private val personList = (0..150).map {
+    PersonWithDisplayDetails().apply {
+        firstNames = "Person"
+        lastName = "$it"
+        personUid = it.toLong()
+    }
+}
+
+val CourseDetailProgressScreenPreview = FC<UstadScreenProps> { props ->
 
     val strings = useStringsXml()
 
     CourseDetailProgressScreenComponent2 {
+
+        + props
+
         uiState = CourseDetailProgressUiState(
-            students = listOf(
-                Person().apply {
-                    personUid = 1
-                    firstNames = "Bart"
-                    lastName = "Simpson"
-                },
-                Person().apply {
-                    personUid = 2
-                    firstNames = "Shelly"
-                    lastName = "Mackleberry"
-                },
-                Person().apply {
-                    personUid = 3
-                    firstNames = "Tracy"
-                    lastName = "Mackleberry"
-                },
-                Person().apply {
-                    personUid = 4
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 5
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 6
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 7
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 8
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 9
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 10
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 11
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 12
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 8
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 9
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 10
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 11
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 12
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                }
-            ),
+            students = { ListPagingSource(personList) },
             results = listOf(
                 strings[MessageID.discussion_board],
                 strings[MessageID.dashboard],
@@ -161,36 +95,48 @@ val CourseDetailProgressScreenPreview = FC<Props> {
     }
 }
 
+
 val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props ->
 
     val strings = useStringsXml()
+    val infiniteQueryResult = usePagingSource(
+        props.uiState.students, true, 50
+    )
 
-    Container {
-        maxWidth = "lg"
+    val (selectedItems, setSelectedItems) = useState(setOf<Int>())
 
-        Stack {
-            direction = responsive(StackDirection.column)
-            spacing = responsive(10.px)
+    VirtualList {
+        style = jso {
+            height = "calc(100vh - ${props.muiAppState.appBarHeight}px)".unsafeCast<Height>()
+            width = 100.pct
+            contain = Contain.strict
+            overflowY = Overflow.scroll
+        }
 
-            val (selectedItems, setSelectedItems) = useState(setOf<Int>())
+        content = virtualListContent {
 
-            ListSubheader {
-                List {
+            item {
+                List.create {
                     sx {
-                            display = Display.flex
-                            flexDirection = FlexDirection.row
-                        }
+                        display = Display.flex
+                        flexDirection = FlexDirection.row
+                        overflowX = Overflow.scroll
+//                        position = Position.fixed
+////                    transform = rotate(270.deg)
+                    }
+
                     props.uiState.results.forEachIndexed { index, item ->
                         ListItem {
                             selected = selectedItems.contains(index)
-                            ListItemButton {
-                                onClick = {
-                                    if (selectedItems.contains(index)) {
-                                        setSelectedItems(selectedItems - index)
-                                    } else {
-                                        setSelectedItems(selectedItems + index)
-                                    }
+                            onClick = {
+                                if (selectedItems.contains(index)) {
+                                    setSelectedItems(selectedItems - index)
+                                } else {
+                                    setSelectedItems(selectedItems + index)
                                 }
+                            }
+                            ListItemButton {
+
 
                                 ListItemText {
                                     primary = ReactNode(item)
@@ -199,105 +145,126 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                         }
                     }
                 }
+
             }
 
-            List {
-                sx {
-                    display = Display.flex
-                    flexDirection = FlexDirection.row
-                }
-                props.uiState.results.forEachIndexed { index, item ->
-                    ListItem {
-                        selected = selectedItems.contains(index)
-                        ListItemButton {
-                            onClick = {
-                                if (selectedItems.contains(index)) {
-                                    setSelectedItems(selectedItems - index)
-                                } else {
-                                    setSelectedItems(selectedItems + index)
-                                }
-                            }
+            infiniteQueryPagingItems(
+                items = infiniteQueryResult,
+                key = { it.personUid.toString() }
+            ) { person ->
+                ListItem.create {
+                    ListItemButton{
+                        onClick = {
+                            person?.also { props.onClickStudent(it) }
+                        }
 
-                            ListItemText {
-                                primary = ReactNode(item)
+                        ListItemIcon {
+                            UstadPersonAvatar {
+                                personUid = person?.personUid ?: 0
+                            }
+                        }
+
+                        ListItemText {
+                            primary = ReactNode("${person?.fullName()}")
+                        }
+
+                    }
+
+                    secondaryAction = List.create {
+                        sx {
+                            display = Display.flex
+                            flexDirection = FlexDirection.row
+                            overflowX = Overflow.scroll
+                            width = 400.px
+                        }
+
+                        props.uiState.results.forEachIndexed { index, item ->
+                            ListItem {
+                                selected = selectedItems.contains(index)
+                                onClick = {
+                                    if (selectedItems.contains(index)) {
+                                        setSelectedItems(selectedItems - index)
+                                    } else {
+                                        setSelectedItems(selectedItems + index)
+                                    }
+                                }
+                                ListItemButton {
+
+
+                                    ListItemText {
+                                        primary = ReactNode(item)
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
+        }
 
-//            List {
-//                ariaOrientation = AriaOrientation.horizontal
-//                ListSubheader {
-//                    sx {
-////                        position = Position.fixed
-////                        transform = rotate(270.deg)
-//                        width = 400.px
-//                            height = 120.px
-//                    }
-//
-//                    List {
-//
-//                        sx {
-//                            display = Display.flex
-//                            flexDirection = FlexDirection.row
-//                            width = 120.px
-//                            height = 120.px
-//                        }
-//                        props.uiState.results.forEachIndexed { index, result ->
-//
-//                            ListItem{
-//
-//                                autoFocus = index == 6
-//
-//                                ListItemText {
-//                                    primary = ReactNode(result+index)
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//
-////                props.uiState.students.forEach { student ->
-////
-////                    ListItem{
-////                        ListItemButton {
-////                            onClick = {
-////                                props.onClickStudent(student)
-////                            }
-////
-////                            ListItemText {
-////                                primary = ReactNode(student.fullName())
-////                            }
-////                        }
-////
-//////                        secondaryAction = Box.create {
-////////                            direction = responsive(StackDirection.row)
-////////                            sx {
-////////                            width = 120.px
-////////                        }
-//////
-////////                            List {
-////////
-////////                                sx {
-////////                                    display = Display.flex
-////////                                    flexDirection = FlexDirection.row
-////////                                }
-////////
-////////                                props.uiState.results.forEach { result ->
-////////
-////////                                    ListItem{
-////////                                        ListItemText {
-////////                                            primary = ReactNode(result)
-////////                                        }
-////////                                    }
-////////                                }
-////////                            }
-//////                        }
-////                    }
-////                }
-//            }
-
+        Container {
+            VirtualListOutlet()
         }
     }
 }
+
+//Container {
+//    maxWidth = "lg"
+//
+//    mui.system.Stack {
+//        direction = responsive(StackDirection.column)
+//        spacing = responsive(10.px)
+//
+//
+//
+//        mui.material.List {
+//            mui.material.ListSubheader {
+//
+//                mui.material.Box {
+//                    sx {
+//                        display = Display.flex
+//                        flexDirection = FlexDirection.row
+////                    position = Position.fixed
+////                    transform = rotate(270.deg)
+////                        height = 120.px
+//                    }
+
+//                }
+//            }
+//        }
+//
+//
+//    }
+//}
+
+//                        secondaryAction = Box.create {
+//
+//                            sx {
+//                                width = 120.px
+//                            }
+//
+//                            Box {
+//                                sx {
+//                                    display = Display.flex
+//                                    flexDirection = FlexDirection.row
+//                                }
+//                                props.uiState.results.forEachIndexed { index, item ->
+//                                    ListItem {
+//                                        selected = selectedItems.contains(index)
+//                                        ListItemButton {
+//                                            onClick = {
+//                                                if (selectedItems.contains(index)) {
+//                                                    setSelectedItems(selectedItems - index)
+//                                                } else {
+//                                                    setSelectedItems(selectedItems + index)
+//                                                }
+//                                            }
+//
+//                                            ListItemText {
+//                                                primary = ReactNode(item)
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
