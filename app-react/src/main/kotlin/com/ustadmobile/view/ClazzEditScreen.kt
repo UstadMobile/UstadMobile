@@ -200,9 +200,34 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 + strings[MessageID.schedule]
             }
 
+            List{
 
-            ClazzSchedulesList {
-                +props
+                ListItem {
+                    key = "0"
+                    ListItemButton {
+                        onClick = {
+                            props.onClickAddSchedule()
+                        }
+
+                        ListItemIcon {
+                            + Add.create()
+                        }
+
+                        ListItemText {
+                            primary = ReactNode(strings[MessageID.add_a_schedule])
+                        }
+                    }
+
+                }
+
+                props.uiState.clazzSchedules.forEach { scheduleItem ->
+                    ScheduleListItem {
+                        schedule = scheduleItem
+                        key = "${scheduleItem.scheduleUid}"
+                        onClickEditSchedule = props.onClickEditSchedule
+                        onClickDeleteSchedule = props.onClickDeleteSchedule
+                    }
+                }
             }
 
 
@@ -254,59 +279,47 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
     }
 }
 
-val ClazzSchedulesList = FC<ClazzEditScreenProps> { props ->
+external interface ScheduleListItemProps : Props {
+    
+    var schedule: Schedule
+    
+    var onClickEditSchedule: (Schedule) -> Unit
+    
+    var onClickDeleteSchedule: (Schedule) -> Unit
+    
+}
+
+private val ScheduleListItem = FC<ScheduleListItemProps> { props ->
 
     val strings = useStringsXml()
 
-    List{
+    val fromTimeFormatted = useFormattedTime(
+        timeInMillisSinceMidnight = props.schedule.sceduleStartTime.toInt(),
+    )
 
-        ListItem {
-            ListItemButton {
-                onClick = {
-                    props.onClickAddSchedule()
-                }
+    val toTimeFormatted = useFormattedTime(
+        timeInMillisSinceMidnight = props.schedule.scheduleEndTime.toInt(),
+    )
 
-                ListItemIcon {
-                    + Add.create()
-                }
+    val text = "${strings[SCHEDULE_FREQUENCY_MESSAGE_ID_MAP[props.schedule.scheduleFrequency] ?: 0]} " +
+        " ${strings[ScheduleConstants.DAY_MESSAGE_ID_MAP[props.schedule.scheduleDay] ?: 0]  } " +
+        " $fromTimeFormatted - $toTimeFormatted "
 
-                ListItemText {
-                    primary = ReactNode(strings[MessageID.add_a_schedule])
-                }
-            }
-
+    ListItem{
+        secondaryAction = IconButton.create {
+            onClick = { props.onClickDeleteSchedule(props.schedule) }
+            ariaLabel = strings[MessageID.delete]
+            Delete { }
         }
 
-        props.uiState.clazzSchedules.forEach { schedule ->
-            val fromTimeFormatted = useFormattedTime(
-                timeInMillisSinceMidnight = schedule.sceduleStartTime.toInt(),
-            )
+        ListItemButton {
+            onClick = { props.onClickEditSchedule(props.schedule) }
+            ListItemIcon {
+                UstadBlankIcon { }
+            }
 
-            val toTimeFormatted = useFormattedTime(
-                timeInMillisSinceMidnight = schedule.scheduleEndTime.toInt(),
-            )
-
-            val text = "${strings[SCHEDULE_FREQUENCY_MESSAGE_ID_MAP[schedule.scheduleFrequency] ?: 0]} " +
-                    " ${strings[ScheduleConstants.DAY_MESSAGE_ID_MAP[schedule.scheduleDay] ?: 0]  } " +
-                    " $fromTimeFormatted - $toTimeFormatted "
-
-            ListItem{
-                secondaryAction = IconButton.create {
-                    onClick = { props.onClickDeleteSchedule(schedule) }
-                    ariaLabel = strings[MessageID.delete]
-                    Delete { }
-                }
-
-                ListItemButton {
-                    onClick = { props.onClickEditSchedule(schedule) }
-                    ListItemIcon {
-                        UstadBlankIcon { }
-                    }
-
-                    ListItemText{
-                        primary = ReactNode(text)
-                    }
-                }
+            ListItemText{
+                primary = ReactNode(text)
             }
         }
     }
@@ -524,6 +537,9 @@ val ClazzEditScreen = FC<Props> {
         uiState = uiStateVar
         onClazzChanged = viewModel::onEntityChanged
         onCheckedAttendanceChanged = viewModel::onCheckedAttendanceChanged
+        onClickAddSchedule = viewModel::onClickAddSchedule
+        onClickEditSchedule = viewModel::onClickEditSchedule
+        onClickDeleteSchedule = viewModel::onClickDeleteSchedule
         onCourseBlockMoved = { fromIndex, toIndex ->
 
         }

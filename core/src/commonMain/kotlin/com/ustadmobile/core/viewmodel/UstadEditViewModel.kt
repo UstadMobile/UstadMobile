@@ -10,6 +10,7 @@ import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationStrategy
 import org.kodein.di.DI
 
@@ -50,16 +51,17 @@ abstract class UstadEditViewModel(
      *        be displayed first (so the user sees this whilst the value is loading from the repo).
      * @param T the entity type
      */
-    protected inline fun <reified T> loadEntity(
+    protected suspend fun <T> loadEntity(
+        serializer: KSerializer<T>,
         loadFromStateKeys: List<String> = listOf(KEY_ENTITY_STATE, UstadEditView.ARG_ENTITY_JSON),
         savedStateKey: String = loadFromStateKeys.first(),
-        onLoadFromDb: (UmAppDatabase) -> T?,
-        makeDefault: () -> T,
-        uiUpdate: (T) -> Unit,
-    ) : T {
+        onLoadFromDb: suspend (UmAppDatabase) -> T?,
+        makeDefault: suspend () -> T?,
+        uiUpdate: (T?) -> Unit,
+    ) : T? {
 
         loadFromStateKeys.forEach { key ->
-            val savedVal: T? = savedStateHandle.getJson<T>(key)
+            val savedVal: T? = savedStateHandle.getJson(key, serializer)
             if(savedVal != null) {
                 uiUpdate(savedVal)
                 return savedVal
@@ -73,29 +75,16 @@ abstract class UstadEditViewModel(
 
         try {
             val repoVal = onLoadFromDb(activeRepo) ?: makeDefault()
-            savedStateHandle.setJson(savedStateKey, repoVal)
+            if(repoVal != null)
+                savedStateHandle.setJson(savedStateKey, serializer, repoVal)
             uiUpdate(repoVal)
             return repoVal
         }catch(e: Exception) {
             //could happen when connectivity is not so good
+            if(dbVal != null)
+                savedStateHandle.setJson(savedStateKey, serializer, dbVal)
 
-            savedStateHandle.setJson(savedStateKey, dbVal)
             return dbVal ?: makeDefault().also(uiUpdate)
-        }
-    }
-
-    /**
-     * Commit an entity to the savedStateHandle if the entity is not null.
-     *
-     * @param entity the entity to save
-     * @param key the key to use for the savedStateHandle
-     */
-    protected inline fun <reified T> commitEntityToSavedState(
-        entity: T?,
-        key: String = KEY_ENTITY_STATE,
-    ) {
-        if(entity != null) {
-            savedStateHandle.setJson(key, entity)
         }
     }
 

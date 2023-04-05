@@ -119,6 +119,7 @@ class PersonEditViewModel(
             awaitAll(
                 async {
                     loadEntity(
+                        serializer = PersonWithAccount.serializer(),
                         onLoadFromDb = { it.personDao.findPersonAccountByUid(entityUid) },
                         makeDefault = {
                             PersonWithAccount().also {
@@ -132,6 +133,7 @@ class PersonEditViewModel(
                 },
                 async {
                     loadEntity(
+                        serializer = PersonPicture.serializer(),
                         loadFromStateKeys =listOf(STATE_KEY_PICTURE),
                         onLoadFromDb = {
                             it.personPictureDao.findByPersonUidAsync(entityUid)

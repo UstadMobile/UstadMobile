@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -108,6 +109,7 @@ class ClazzEditViewModel(
             awaitAll(
                 async {
                     loadEntity(
+                        serializer = ClazzWithHolidayCalendarAndSchoolAndTerminology.serializer(),
                         onLoadFromDb = {
                             it.clazzDao.takeIf { entityUidArg != 0L }
                                 ?.findByUidWithHolidayCalendarAsync(entityUidArg)
@@ -135,24 +137,45 @@ class ClazzEditViewModel(
                             }
                         }
                     )
+                },
+                async {
+                    loadEntity(
+                        serializer = ListSerializer(Schedule.serializer()),
+                        loadFromStateKeys = listOf(STATE_KEY_SCHEDULES),
+                        onLoadFromDb = {
+                            it.scheduleDao.takeIf { entityUidArg != 0L }
+                                ?.findAllSchedulesByClazzUidAsync(entityUidArg)
+                        },
+                        makeDefault = {
+                            emptyList()
+                        },
+                        uiUpdate = {
+                            _uiState.update { prev ->
+                                prev.copy(clazzSchedules =  it ?: emptyList())
+                            }
+                        }
+                    )
                 }
             )
 
             //TODO here: save initial state
 
             launch {
-                resultReturner.filteredResultFlowForKey(RESULT_KEY_SCHEDULE).collect {
-                    val returnedSchedule = it.result as? Schedule ?: return@collect
+                resultReturner.filteredResultFlowForKey(RESULT_KEY_SCHEDULE).collect { result ->
+                    val returnedSchedule = result.result as? Schedule ?: return@collect
+                    val newSchedules = _uiState.value.clazzSchedules.replaceOrAppend(returnedSchedule) {
+                        it.scheduleUid == returnedSchedule.scheduleUid
+                    }
+
                     _uiState.update { prev ->
                         prev.copy(
-                            clazzSchedules = prev.clazzSchedules.replaceOrAppend(returnedSchedule) {
-                                it.scheduleUid == returnedSchedule.scheduleUid
-                            }
+                            clazzSchedules = newSchedules
                         )
                     }
+                    savedStateHandle[STATE_KEY_SCHEDULES] = json.encodeToString(
+                        ListSerializer(Schedule.serializer()), newSchedules)
                 }
             }
-
 
             _uiState.update { prev ->
                 prev.copy(fieldsEnabled = true)
@@ -202,9 +225,13 @@ class ClazzEditViewModel(
     }
 
     fun onClickDeleteSchedule(schedule: Schedule) {
+        val newSchedules = _uiState.value.clazzSchedules
+            .filter { it.scheduleUid != schedule.scheduleUid }
+        savedStateHandle[STATE_KEY_SCHEDULES] = json.encodeToString(
+            ListSerializer(Schedule.serializer()), newSchedules)
         _uiState.update { prev ->
             prev.copy(
-                clazzSchedules = prev.clazzSchedules.filter { it.scheduleUid != schedule.scheduleUid }
+                clazzSchedules = newSchedules
             )
         }
     }
@@ -282,6 +309,8 @@ class ClazzEditViewModel(
     companion object {
 
         const val RESULT_KEY_SCHEDULE = "Schedule"
+
+        const val STATE_KEY_SCHEDULES = "schedule"
 
     }
 

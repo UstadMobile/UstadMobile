@@ -16,6 +16,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.coroutines.flow.*
+import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -122,15 +123,11 @@ abstract class UstadViewModel(
         }
     }
 
-    protected inline fun <reified T> UstadSavedStateHandle.getJson(key: String): T? {
-        return get(key)?.let { json.decodeFromString<T>(it) }
-    }
-
-    protected inline fun <reified T> UstadSavedStateHandle.setJson(
+    protected fun <T> UstadSavedStateHandle.getJson(
         key: String,
-        value: T
-    ) {
-        set(key, json.encodeToString(value))
+        deserializer: DeserializationStrategy<T>
+    ): T? {
+        return get(key)?.let { json.decodeFromString(deserializer, it) }
     }
 
     protected fun <T> UstadSavedStateHandle.setJson(
@@ -139,15 +136,6 @@ abstract class UstadViewModel(
         value: T
     ) {
         set(key, json.encodeToString(serializer, value))
-    }
-
-    protected inline fun <reified T> UstadSavedStateHandle.getOrPutJson(
-        key: String,
-        makeBlock: () -> T,
-    ): T {
-        return getJson(key) ?: makeBlock().also {
-            setJson(key, it)
-        }
     }
 
     /**

@@ -9,14 +9,9 @@ import remix.run.router.LoaderFunction
 import kotlin.js.Promise.Companion.resolve
 
 val UstadScreen = FC<Props> {
-    console.info("UstadScreen: render")
-    val screen = useLoaderData().unsafeCast<UstadScreen>()
-    console.info("UstadScreen = $screen")
-
     useLoaderData().unsafeCast<UstadScreen>().component()
 }
 
 val ustadScreenLoader: LoaderFunction = { args ->
-    console.info("ustadScreenLoader: load ${args.params["ustadScreenName"]}")
     resolve(USTAD_SCREENS.single { it.key == args.params["ustadScreenName"] })
 }

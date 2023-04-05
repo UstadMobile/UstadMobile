@@ -239,7 +239,11 @@ val NavHost = FC<PropsWithChildren> { props ->
                 popupToTarget == location.ustadViewName || popUpToHitDestination -> {
                     sessionStorage.clearNavHostCommands()
                     if(navToAfterPop != null){
+                        //Popping is done, navigate to the final destination
                         navigateFn.invoke(navToAfterPop)
+                    }else {
+                        //There is no further navigation, so show the children
+                        showChildren = true
                     }
                 }
 

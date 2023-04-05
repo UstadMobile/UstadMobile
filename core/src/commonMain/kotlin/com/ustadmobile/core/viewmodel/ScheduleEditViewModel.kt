@@ -50,6 +50,7 @@ class ScheduleEditViewModel(
 
         viewModelScope.launch {
             loadEntity<Schedule>(
+                serializer = Schedule.serializer(),
                 makeDefault = {
                     Schedule().apply {
                         scheduleUid = activeDb.doorPrimaryKeyManager.nextIdAsync(Schedule.TABLE_ID)

@@ -2,6 +2,7 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.components.NavHost
 import com.ustadmobile.mui.common.Area
+import com.ustadmobile.mui.components.NavResultReturnerModule
 import csstype.px
 import mui.system.Box
 import mui.system.sx
@@ -18,8 +19,10 @@ val Content = FC<Props> {
             padding = 0.px
         }
 
-        NavHost {
-            Outlet()
+        NavResultReturnerModule {
+            NavHost {
+                Outlet()
+            }
         }
     }
 }
