@@ -13,10 +13,14 @@ import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import csstype.*
 import js.core.jso
+import kotlinx.browser.window
 import mui.material.*
 import mui.material.List
 import mui.system.sx
+import org.w3c.dom.ScrollToOptions
 import react.*
+import react.dom.onChange
+import tanstack.virtual.core.elementScroll
 
 external interface CourseDetailProgressProps : UstadScreenProps {
 
@@ -89,95 +93,129 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
         props.uiState.students, true, 50
     )
 
+    var headerIndex by useState { 0 }
+
     val (selectedItems, setSelectedItems) = useState(setOf<Int>())
 
-    List {
+    Box {
+
         sx {
-            display = Display.flex
-            flexDirection = FlexDirection.row
-            overflowX = Overflow.scroll
-//                        position = Position.fixed
-////                    transform = rotate(270.deg)
+            height = "calc(100vh - ${props.muiAppState.appBarHeight+100}px)".unsafeCast<Height>()
+            width = 100.pct
         }
 
-        props.uiState.results.forEachIndexed { index, item ->
-            ListItem {
-                selected = selectedItems.contains(index)
-                onClick = {
-                    if (selectedItems.contains(index)) {
-                        setSelectedItems(selectedItems - index)
-                    } else {
-                        setSelectedItems(selectedItems + index)
+        List {
+            sx {
+                display = Display.flex
+                flexDirection = FlexDirection.row
+                width = 100.pct
+                position = Position.absolute
+                marginLeft = 500.px
+                marginTop = 0.px
+////                    transform = rotate(270.deg)
+            }
+
+
+            props.uiState.results.forEachIndexed { index, item ->
+                ListItem {
+
+                    sx {
+                        if (headerIndex > index){
+                            position = Position.absolute
+                            marginLeft = -(90*index).px
+                        }
+                        width = 90.px
+                        transform = rotate(270.deg)
                     }
-                }
-                ListItemButton {
 
-
+                    onClick = {
+                        headerIndex = index
+                    }
                     ListItemText {
                         primary = ReactNode(item)
                     }
                 }
             }
         }
-    }
 
-    VirtualList {
-        style = jso {
-            height = "calc(100vh - ${props.muiAppState.appBarHeight+100}px)".unsafeCast<Height>()
-            width = 100.pct
-            contain = Contain.strict
-            overflowY = Overflow.scroll
-        }
+        VirtualList {
+            style = jso {
+                height = "calc(100vh - ${props.muiAppState.appBarHeight+100}px)".unsafeCast<Height>()
+                width = 100.pct
+                contain = Contain.strict
+                overflowY = Overflow.scroll
+                position = Position.absolute
+                marginLeft = 0.px
+                marginTop = 100.px
+            }
 
-        content = virtualListContent {
+            content = virtualListContent {
 
 
 
-            infiniteQueryPagingItems(
-                items = infiniteQueryResult,
-                key = { it.personUid.toString() }
-            ) { person ->
-                ListItem.create {
-                    ListItemButton{
-                        onClick = {
-                            person?.also { props.onClickStudent(it) }
-                        }
+                infiniteQueryPagingItems(
+                    items = infiniteQueryResult,
+                    key = { it.personUid.toString() }
+                ) { person ->
+                    ListItem.create {
 
-                        ListItemIcon {
-                            UstadPersonAvatar {
-                                personUid = person?.personUid ?: 0
+
+                        Box {
+
+//                            sx {
+//                                position = Position.absolute
+//                                marginLeft = 0.px
+//                                height = 190.px
+////                                marginTop = 0.px
+//                                width = 120.px
+////                                backgroundColor = Color("#FFFFFF")
+//                            }
+
+                            ListItemButton{
+                                onClick = {
+                                    person?.also { props.onClickStudent(it) }
+                                }
+
+                                ListItemIcon {
+                                    UstadPersonAvatar {
+                                        personUid = person?.personUid ?: 0
+                                    }
+                                }
+
+                                ListItemText {
+                                    primary = ReactNode("${person?.fullName()}")
+                                }
+
                             }
                         }
 
-                        ListItemText {
-                            primary = ReactNode("${person?.fullName()}")
-                        }
+                        secondaryAction = List.create {
+                            sx {
+                                display = Display.flex
+                                flexDirection = FlexDirection.row
+                                position = Position.absolute
+                                marginLeft = 50.px
+                            }
 
-                    }
+                            props.uiState.results.forEachIndexed { index, item ->
+                                ListItem {
 
-                    secondaryAction = List.create {
-                        sx {
-                            display = Display.flex
-                            flexDirection = FlexDirection.row
-//                            overflowX = Overflow.scroll
-                            width = 400.px
-                        }
-
-                        props.uiState.results.forEachIndexed { index, item ->
-                            ListItem {
-                                selected = selectedItems.contains(index)
-                                onClick = {
-                                    if (selectedItems.contains(index)) {
-                                        setSelectedItems(selectedItems - index)
-                                    } else {
-                                        setSelectedItems(selectedItems + index)
+                                    sx {
+                                        if (headerIndex > index){
+                                            position = Position.absolute
+                                            marginLeft = (120-90*index).px
+                                            color = Color("000000")
+                                        }
                                     }
-                                }
-                                ListItemButton {
+                                    onChange = {
+                                        headerIndex = index
+                                    }
+                                    ListItemButton {
 
 
-                                    ListItemText {
-                                        primary = ReactNode(item)
+                                        ListItemText {
+                                            primary = ReactNode(item)
+                                        }
                                     }
                                 }
                             }
@@ -185,10 +223,10 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                     }
                 }
             }
-        }
 
-        Container {
-            VirtualListOutlet()
+            Container {
+                VirtualListOutlet()
+            }
         }
     }
 }
