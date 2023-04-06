@@ -1,5 +1,6 @@
 package com.ustadmobile.core.viewmodel
 
+import com.ustadmobile.core.db.dao.deactivateByUids
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -15,16 +16,15 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Clazz.Companion.CLAZZ_FEATURE_ATTENDANCE
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.util.getDefaultTimeZoneId
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.datetime.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.encodeToString
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -158,11 +158,16 @@ class ClazzEditViewModel(
                 }
             )
 
-            //TODO here: save initial state
+            if(savedStateHandle[KEY_INIT_STATE] == null) {
+                savedStateHandle[KEY_INIT_STATE] = withContext(Dispatchers.Default) {
+                    json.encodeToString(_uiState.value)
+                }
+            }
 
             launch {
                 resultReturner.filteredResultFlowForKey(RESULT_KEY_SCHEDULE).collect { result ->
                     val returnedSchedule = result.result as? Schedule ?: return@collect
+                    returnedSchedule.scheduleClazzUid = _uiState.value.entity?.clazzUid ?: 0L
                     val newSchedules = _uiState.value.clazzSchedules.replaceOrAppend(returnedSchedule) {
                         it.scheduleUid == returnedSchedule.scheduleUid
                     }
@@ -277,6 +282,9 @@ class ClazzEditViewModel(
         _uiState.update { prev -> prev.copy(fieldsEnabled = false, entity = entity) }
 
         viewModelScope.launch {
+            val initState = savedStateHandle.getJson(KEY_INIT_STATE, ClazzEditUiState.serializer())
+                ?: return@launch
+
             activeDb.withDoorTransactionAsync {
                 if(entityUidArg == 0L) {
                     val termMap = activeDb.courseTerminologyDao.findByUidAsync(initEntity.clazzTerminologyUid)
@@ -285,6 +293,15 @@ class ClazzEditViewModel(
                 }else {
                     activeDb.clazzDao.updateAsync(initEntity)
                 }
+
+                activeDb.scheduleDao.upsertListAsync(_uiState.value.clazzSchedules)
+                activeDb.scheduleDao.deactivateByUids(
+                    initState.clazzSchedules.filterKeysNotInOtherList(
+                        _uiState.value.clazzSchedules
+                    ) {
+                        it.scheduleUid
+                    }, systemTimeInMillis()
+                )
             }
 
             val entityTimeZone = TimeZone.of(entity.effectiveTimeZone)

@@ -187,10 +187,12 @@ class PersonEditViewModel(
             )
         }
 
-        if(personPicture != null) {
-            savedStateHandle.setJson(STATE_KEY_PICTURE, PersonPicture.serializer(), personPicture)
-        }else {
-            savedStateHandle.set(STATE_KEY_PICTURE, null)
+        viewModelScope.launch {
+            if(personPicture != null) {
+                savedStateHandle.setJson(STATE_KEY_PICTURE, PersonPicture.serializer(), personPicture)
+            }else {
+                savedStateHandle[STATE_KEY_PICTURE] = null
+            }
         }
     }
 

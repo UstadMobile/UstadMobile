@@ -539,11 +539,13 @@ class ClazzEdit2Presenter(
                     txDb.clazzDao.updateAsync(entity)
                 }
 
+                /*  being removed
                 scheduleOneToManyJoinEditHelper.commitToDatabase(txDb.scheduleDao,
                     { txDb.scheduleDao.deactivateByUids(it, systemTimeInMillis()) }
                 ) {
                     it.scheduleClazzUid = entity.clazzUid
                 }
+                 */
 
                 val assignmentList = courseBlockOneToManyJoinEditHelper.entitiesToInsert.mapNotNull { it.assignment }
                 txDb.clazzAssignmentDao.insertListAsync(assignmentList)

@@ -11,13 +11,12 @@ class NavResultReturnerViewModelFactory(
     defaultArgs: Bundle? = null,
 ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
 
+    @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(
         key: String,
         modelClass: Class<T>,
         handle: SavedStateHandle
     ): T{
-        return modelClass.getConstructor(
-            UstadSavedStateHandle::class.java
-        ).newInstance(SavedStateHandleAdapter(handle))
+        return NavResultReturnerViewModel(SavedStateHandleAdapter(handle)) as T
     }
 }

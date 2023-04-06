@@ -15,11 +15,11 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
 
@@ -123,19 +123,29 @@ abstract class UstadViewModel(
         }
     }
 
-    protected fun <T> UstadSavedStateHandle.getJson(
+    protected suspend fun <T> UstadSavedStateHandle.getJson(
         key: String,
         deserializer: DeserializationStrategy<T>
     ): T? {
-        return get(key)?.let { json.decodeFromString(deserializer, it) }
+        val jsonStr = get(key)
+        return if(jsonStr != null) {
+            withContext(Dispatchers.Default) {
+                json.decodeFromString(deserializer, jsonStr)
+            }
+        }else {
+            null
+        }
     }
 
-    protected fun <T> UstadSavedStateHandle.setJson(
+    protected suspend fun <T> UstadSavedStateHandle.setJson(
         key: String,
         serializer: SerializationStrategy<T>,
         value: T
     ) {
-        set(key, json.encodeToString(serializer, value))
+        val jsonStr = withContext(Dispatchers.Default){
+            json.encodeToString(serializer, value)
+        }
+        set(key, jsonStr)
     }
 
     /**
@@ -207,6 +217,8 @@ abstract class UstadViewModel(
         const val KEY_ENTITY_STATE = "entityState"
 
         const val KEY_LAST_COLLECTED_TS = "collectedTs"
+
+        const val KEY_INIT_STATE = "initState"
     }
 
 }

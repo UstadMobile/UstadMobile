@@ -57,7 +57,6 @@ object RouteManager {
         UstadDestination(view = ModuleCourseBlockEditView.VIEW_NAME, component = ModuleCourseBlockEditComponent::class),
         UstadDestination(view = CourseTerminologyListView.VIEW_NAME, component = CourseTerminologyListComponent::class),
         UstadDestination(view = CourseTerminologyEditView.VIEW_NAME, component = CourseTerminologyEditComponent::class),
-        UstadDestination(view = ScheduleEditView.VIEW_NAME, component = ScheduleEditComponent::class),
         UstadDestination(view = JoinWithCodeView.VIEW_NAME, component = JoinWithCodeComponent::class),
         UstadDestination(view = SchoolEditView.VIEW_NAME, component = SchoolEditComponent::class),
         UstadDestination(view = ScopedGrantEditView.VIEW_NAME, component = ScopedGrantEditComponent::class),

@@ -18,3 +18,20 @@ fun <T> List<T>.replaceOrAppend(
     }
 }
 
+/**
+ * Shorthand to efficiently find a list of keys that were in a list before, but are not in
+ * the new list. This is commonly used in one-many join scenarios where we need to see which
+ * keys need deactivated
+ */
+fun <T, R> List<T>.filterKeysNotInOtherList(
+    otherList: List<T>,
+    key: (T) -> R,
+): List<R> {
+    val otherListKeys = otherList.map(key)
+    val thisListKeys = map(key)
+    return thisListKeys.filter {
+        it !in otherListKeys
+    }
+}
+
+
