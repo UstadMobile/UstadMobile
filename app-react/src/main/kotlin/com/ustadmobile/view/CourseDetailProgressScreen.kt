@@ -4,33 +4,19 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.CourseDetailProgressUiState
-import com.ustadmobile.core.viewmodel.SchoolDetailOverviewUiState
 import com.ustadmobile.hooks.usePagingSource
-import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
-import com.ustadmobile.mui.components.Header
-import com.ustadmobile.mui.components.UstadListSortHeader
 import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import csstype.*
 import js.core.jso
-import kotlinx.css.select
 import mui.material.*
 import mui.material.List
-import mui.system.Stack
-import mui.system.StackDirection
-import mui.system.responsive
 import mui.system.sx
 import react.*
-import react.dom.aria.AriaOrientation
-import react.dom.aria.AriaRole
-import react.dom.aria.ariaOrientation
-import react.dom.html.ReactHTML.div
-import react.dom.onChange
-import tanstack.virtual.core.windowScroll
 
 external interface CourseDetailProgressProps : UstadScreenProps {
 
