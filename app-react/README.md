@@ -8,6 +8,7 @@ Wrappers for other libraries (see package com.ustadmobile.wrappers ) created as 
 
 * [JS in Kotlin/JS](https://dev.to/mpetuska/js-in-kotlinjs-c4g)
 * [Kotlin for the JS Platform - Javascript Modules (official)](https://kotlinlang.org/docs/js-modules.html)
+* [Kotlin for the JS Platform - Use dependencies from npm (official)](https://kotlinlang.org/docs/using-packages-from-npm.html)
 
 ## MUI React/JS UI Development
 

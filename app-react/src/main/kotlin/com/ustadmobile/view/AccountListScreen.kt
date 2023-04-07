@@ -32,7 +32,7 @@ interface AccountListItemContentProps: Props{
     var onDeleteListItemClick: ((UserSessionWithPersonAndEndpoint?) -> Unit)?
 }
 
-interface AccountListItemProps: Props {
+external interface AccountListItemProps: Props {
     var onListItemClick: ((UserSessionWithPersonAndEndpoint) -> Unit)?
     var account: UserSessionWithPersonAndEndpoint?
     var onDeleteListItemClick: ((UserSessionWithPersonAndEndpoint?) -> Unit)?
