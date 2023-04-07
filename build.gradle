@@ -239,8 +239,6 @@ ext {
     version_npm_html_to_image = "^1.9.0"
     version_npm_date_fns = "2.29.1"
     version_npm_mime_matcher = "^1.0.5"
-    version_npm_draft_js = "^0.11.7"
-    version_npm_draft_wysiwyg = "^1.15.0"
     version_npm_react_quill = "2.0.0"
 
     version_npm_striptags = "^3.2.0"

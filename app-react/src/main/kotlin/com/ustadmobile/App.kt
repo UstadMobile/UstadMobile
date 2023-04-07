@@ -11,6 +11,8 @@ import react.router.RouterProvider
 import react.router.dom.createHashRouter
 import web.dom.document
 import web.html.HTML.div
+import kotlinext.js.require
+
 
 /**
  * This follows roughly the same design pattern as Kotlin MUI showcase
@@ -18,6 +20,8 @@ import web.html.HTML.div
  */
 
 fun main() {
+    //As per Quill wrapper (and demo). Css loader must be enabled.
+    require("react-quill/dist/quill.snow.css")
     val root = document.createElement(div)
         .also { document.body.appendChild(it) }
 

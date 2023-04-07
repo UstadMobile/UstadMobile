@@ -12,7 +12,6 @@ import com.ustadmobile.view.components.UstadMessageIdSelectFieldPreview
 import com.ustadmobile.view.components.UstadSelectFieldPreview
 import com.ustadmobile.view.components.virtuallist.VirtualListPreview
 import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
-import com.ustadmobile.wrappers.draftjs.EditorPreview
 import react.useMemo
 import react.Props
 import react.FC
@@ -144,7 +143,6 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         UstadSelectFieldPreview),
     UstadScreen("UstadMessageIdSelectFieldPreview", "UstadMessageIdSelectFieldPreview",
         UstadMessageIdSelectFieldPreview),
-    UstadScreen("DraftJS", "DraftJS", EditorPreview),
     UstadScreen("Quill", "Quill", QuillDemo)
 )
 
