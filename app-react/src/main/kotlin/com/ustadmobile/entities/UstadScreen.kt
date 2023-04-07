@@ -16,6 +16,7 @@ import com.ustadmobile.wrappers.draftjs.EditorPreview
 import react.useMemo
 import react.Props
 import react.FC
+import com.ustadmobile.wrappers.quill.QuillDemo
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -144,6 +145,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("UstadMessageIdSelectFieldPreview", "UstadMessageIdSelectFieldPreview",
         UstadMessageIdSelectFieldPreview),
     UstadScreen("DraftJS", "DraftJS", EditorPreview),
+    UstadScreen("Quill", "Quill", QuillDemo)
 )
 
 

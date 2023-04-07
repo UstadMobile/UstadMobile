@@ -215,8 +215,6 @@ ext {
     /*Kotlin react web app*/
     kotlinWrappersVersion = "1.0.0-pre.526"
 
-    version_npm_moment = "^2.29.4"
-    version_npm_moment_timezone = "^0.5.34"
     version_npm_mement_io = "^2.14.0"
     version_npm_mui_lab = "5.0.0-alpha.89"
 
@@ -232,15 +230,19 @@ ext {
 
     version_npm_timezones = "^1.6.1"
     version_npm_buffer = "^6.0.3"
-    version_npm_asmcrypto = "2.3.2"
+    version_npm_asmcrypto = "2.3.2" //required for client side one-way password encryption
+    version_crypto_browserify = "3.12.0" //required by asmcrypto
+    version_stream_browserify = "3.0.0" //required by cipher-base
+
     version_npm_emotion = "11.10.5"
     version_npm_google_charts = "^3.0.15"
     version_npm_html_to_image = "^1.9.0"
     version_npm_date_fns = "2.29.1"
     version_npm_mime_matcher = "^1.0.5"
-    version_npm_mui_rte = "^2.0.1"
     version_npm_draft_js = "^0.11.7"
-    version_npm_draft_js_html_export = "^1.4.1"
+    version_npm_draft_wysiwyg = "^1.15.0"
+    version_npm_react_quill = "2.0.0"
+
     version_npm_striptags = "^3.2.0"
     version_npm_react_easy_sort = "^1.5.1"
     version_react_linkify = "^1.0.0-alpha"

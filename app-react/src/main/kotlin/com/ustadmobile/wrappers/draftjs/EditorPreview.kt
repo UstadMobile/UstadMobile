@@ -4,13 +4,16 @@ import react.FC
 import react.Props
 import react.useState
 
+//Should use https://www.npmjs.com/package/react-draft-wysiwyg
 val EditorPreview = FC<Props> {
-    var editorState by useState { EditorState.createEmpty() }
+    var edState by useState { EditorState.createEmpty() }
 
+    println("Editor state = $edState")
     Editor {
-        state = editorState
+        editorState = edState
         onChange = {
-            editorState = it
+            println("Editor change")
+            edState = it
         }
     }
 

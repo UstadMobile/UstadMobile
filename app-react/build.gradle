@@ -22,17 +22,21 @@ kotlin {
                 directory = project.file("build/dist-web/umapp")
             }
 
-            binaries.executable()
+            webpackTask {
+                cssSupport {
+                    it.enabled.set(true)
+                }
+            }
+
 
             testTask {
                 useKarma {
                     useChromeHeadless()
-                    /* Not supported from Kotlin 1.8
-                    webpackConfig.cssSupport.enabled = true
-                     */
                 }
             }
         }
+
+        binaries.executable()
     }
 }
 
@@ -77,8 +81,9 @@ dependencies {
     implementation npm("timezones.json","$version_npm_timezones")
     implementation npm("striptags","$version_npm_striptags")
     implementation npm("mime-matcher","$version_npm_mime_matcher")
-    implementation npm("draft-js","$version_npm_draft_js")
-    implementation npm("draft-js-export-html","$version_npm_draft_js_html_export")
+    implementation npm("draft-js", "$version_npm_draft_js")
+    implementation npm("react-draft-wysiwyg","$version_npm_draft_wysiwyg")
+    implementation npm("react-quill", "$version_npm_react_quill")
     implementation npm("react-easy-sort","$version_npm_react_easy_sort")
     implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
     implementation "io.github.aakira:napier:$version_napier"

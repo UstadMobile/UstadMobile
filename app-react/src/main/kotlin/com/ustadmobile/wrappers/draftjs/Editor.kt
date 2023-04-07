@@ -1,4 +1,4 @@
-@file:JsModule("draft-js")
+@file:JsModule("react-draft-wysiwyg")
 
 package com.ustadmobile.wrappers.draftjs
 
@@ -7,7 +7,7 @@ import react.Props
 
 external interface EditorProps: Props {
 
-    var state: EditorState
+    var editorState: EditorState
 
     var onChange: (EditorState) -> Unit
 
