@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -41,6 +43,8 @@ import com.ustadmobile.port.android.view.ClazzEditFragment.Companion.BLOCK_AND_E
 import com.ustadmobile.port.android.view.composable.*
 import org.burnoutcrew.reorderable.*
 import java.util.*
+import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
+import com.ustadmobile.port.android.view.ClazzEditFragment.Companion.ADD_COURSE_BLOCK_OPTIONS
 
 class ClazzEditFragment : UstadBaseMvvmFragment() {
 
@@ -105,6 +109,31 @@ class ClazzEditFragment : UstadBaseMvvmFragment() {
 
         @JvmField
         val BLOCK_AND_ENTRY_ICON_MAP = BLOCK_ICON_MAP + ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_ICON_MAP
+
+        val ADD_COURSE_BLOCK_OPTIONS: (Context) ->  List<TitleDescBottomSheetOption> = { context ->
+            listOf(
+                TitleDescBottomSheetOption(
+                    context.getString(R.string.module),
+                    context.getString(R.string.course_module),
+                    CourseBlock.BLOCK_MODULE_TYPE),
+                TitleDescBottomSheetOption(
+                    context.getString(R.string.text),
+                    context.getString(R.string.formatted_text_to_show_to_course_participants),
+                    CourseBlock.BLOCK_TEXT_TYPE),
+                TitleDescBottomSheetOption(
+                    context.getString(R.string.content),
+                    context.getString(R.string.add_course_block_content_desc),
+                    CourseBlock.BLOCK_CONTENT_TYPE),
+                TitleDescBottomSheetOption(
+                    context.getString(R.string.assignments),
+                    context.getString(R.string.add_assignment_block_content_desc),
+                    CourseBlock.BLOCK_ASSIGNMENT_TYPE),
+                TitleDescBottomSheetOption(
+                    context.getString(R.string.discussion_board),
+                    context.getString(R.string.add_discussion_board_desc),
+                    CourseBlock.BLOCK_DISCUSSION_TYPE),
+            )
+        }
 
     }
 
@@ -527,6 +556,8 @@ fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
 
     val uiState: ClazzEditUiState by viewModel.uiState.collectAsState(initial = ClazzEditUiState())
 
+    val context = LocalContext.current
+
     ClazzEditScreen(
         uiState = uiState,
         onClazzChanged = viewModel::onEntityChanged,
@@ -534,6 +565,16 @@ fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
         onClickAddSchedule = viewModel::onClickAddSchedule,
         onClickEditSchedule = viewModel::onClickEditSchedule,
         onClickDeleteSchedule = viewModel::onClickDeleteSchedule,
+        onClickAddCourseBlock = {
+            val sheet = TitleDescBottomSheetOptionFragment(
+                optionsList = ADD_COURSE_BLOCK_OPTIONS(context),
+                onOptionSelected = { option ->
+                    viewModel.onAddCourseBlock(option.optionCode)
+                }
+            )
+
+            sheet.show(context.getContextSupportFragmentManager(), sheet.tag)
+        }
     )
 
 }

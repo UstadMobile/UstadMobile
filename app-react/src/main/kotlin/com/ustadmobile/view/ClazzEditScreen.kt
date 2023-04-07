@@ -19,7 +19,6 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadDateEditField
 import com.ustadmobile.view.components.UstadMessageIdSelectField
-import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.view.components.UstadBlankIcon
 import com.ustadmobile.view.components.UstadEditHeader
@@ -43,6 +42,7 @@ import react.dom.aria.ariaLabel
 import react.dom.events.MouseEvent
 import react.dom.events.MouseEventHandler
 import react.dom.html.ReactHTML.div
+import com.ustadmobile.util.ext.onTextChange
 
 private val COURSE_BLOCK_DRAG_CLASS = "dragging_course_block"
 
@@ -96,12 +96,12 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 + strings[MessageID.basic_details]
             }
 
-            UstadTextEditField {
+            TextField {
                 value = props.uiState.entity?.clazzName ?: ""
-                label = strings[MessageID.name]
+                label = ReactNode(strings[MessageID.name])
                 id = "clazz_name"
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
+                disabled = !props.uiState.fieldsEnabled
+                onTextChange = {
                     props.onClazzChanged(
                         props.uiState.entity?.shallowCopy {
                             clazzName = it
@@ -110,12 +110,12 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 }
             }
 
-            UstadTextEditField {
+            TextField {
                 value = props.uiState.entity?.clazzDesc ?: ""
-                label = strings[MessageID.description].addOptionalSuffix(strings)
-                enabled = props.uiState.fieldsEnabled
+                label = ReactNode(strings[MessageID.description].addOptionalSuffix(strings))
+                disabled = !props.uiState.fieldsEnabled
                 id = "clazz_desc"
-                onChange = {
+                onTextChange = {
                     props.onClazzChanged(
                         props.uiState.entity?.shallowCopy {
                             clazzDesc = it
@@ -124,13 +124,14 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 }
             }
 
-            UstadTextEditField {
+            TextField {
                 value = props.uiState.entity?.school?.schoolName ?: ""
-                label = strings[MessageID.institution]
-                enabled = props.uiState.fieldsEnabled
-                onClick = props.onClickSchool
+                label = ReactNode(strings[MessageID.institution])
+                disabled = !props.uiState.fieldsEnabled
+                onClick = {
+                    props.onClickSchool()
+                }
                 id = "clazz_schoolname"
-                onChange = {}
             }
 
 
@@ -180,11 +181,11 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
             }
 
 
-            UstadTextEditField {
+            TextField {
                 value = props.uiState.entity?.clazzTimeZone ?: ""
                 id = "clazz_timezone"
-                label = strings[MessageID.timezone]
-                enabled = props.uiState.fieldsEnabled
+                label = ReactNode(strings[MessageID.timezone])
+                disabled = !props.uiState.fieldsEnabled
                 onClick = { props.onClickTimezone() }
             }
 
@@ -205,6 +206,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 ListItem {
                     key = "0"
                     ListItemButton {
+                        id = "add_schedule_button"
                         onClick = {
                             props.onClickAddSchedule()
                         }
@@ -231,13 +233,14 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
             }
 
 
-            UstadTextEditField {
+            TextField {
                 value = props.uiState.entity?.holidayCalendar?.umCalendarName ?: ""
                 id = "clazz_calender_name"
-                label = strings[MessageID.holiday_calendar]
-                enabled = props.uiState.fieldsEnabled
-                onChange = {}
-                onClick = props.onClickHolidayCalendar
+                label = ReactNode(strings[MessageID.holiday_calendar])
+                disabled = !props.uiState.fieldsEnabled
+                onClick = {
+                    props.onClickHolidayCalendar()
+                }
             }
 
             UstadEditHeader {
@@ -267,13 +270,14 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 }
             }
 
-            UstadTextEditField {
+            TextField {
                 value = props.uiState.entity?.terminology?.ctTitle ?: ""
-                label = strings[MessageID.terminology]
-                enabled = props.uiState.fieldsEnabled
+                label = ReactNode(strings[MessageID.terminology])
+                disabled = !props.uiState.fieldsEnabled
                 id = "clazz_terminology"
-                onChange = {}
-                onClick = props.onClickTerminology
+                onClick = {
+                    props.onClickTerminology()
+                }
             }
         }
     }
@@ -332,7 +336,7 @@ private val CourseBlockList = FC<ClazzEditScreenProps> { props ->
 
         ListItem {
             ListItemButton {
-                onClick = { props.onClickAddCourseBlock }
+                onClick =  { props.onClickAddCourseBlock() }
                 ListItemIcon {
                     + Add.create()
                 }
@@ -525,6 +529,110 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
     }
 }
 
+external interface AddCourseDialogProps: Props {
+    var open: Boolean
+
+    var onClose: ((event: dynamic, reason: String) -> Unit)?
+
+    var onClickAddBlock: (Int) -> Unit
+}
+
+private val AddCourseBlockDialog = FC<AddCourseDialogProps> { props ->
+    val strings = useStringsXml()
+
+    Dialog {
+        open = props.open
+
+        onClose = props.onClose
+
+        List {
+            ListItem {
+                ListItemButton {
+                    onClick = {
+                        props.onClickAddBlock(CourseBlock.BLOCK_MODULE_TYPE)
+                    }
+                    ListItemIcon {
+                        Folder()
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(strings[MessageID.module])
+                        secondary = ReactNode(strings[MessageID.course_module])
+                    }
+                }
+            }
+
+            ListItem {
+                ListItemButton {
+                    onClick = {
+                        props.onClickAddBlock(CourseBlock.BLOCK_TEXT_TYPE)
+                    }
+                    ListItemIcon {
+                        Article()
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(strings[MessageID.text])
+                        secondary = ReactNode(strings[MessageID.formatted_text_to_show_to_course_participants])
+                    }
+                }
+            }
+
+
+
+            ListItem {
+                ListItemButton {
+                    onClick = {
+                        props.onClickAddBlock(CourseBlock.BLOCK_CONTENT_TYPE)
+                    }
+                    ListItemIcon {
+                        Collections()
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(strings[MessageID.content])
+                        secondary = ReactNode(strings[MessageID.add_course_block_content_desc])
+                    }
+                }
+            }
+
+            ListItem {
+                ListItemButton {
+                    onClick = {
+                        props.onClickAddBlock(CourseBlock.BLOCK_ASSIGNMENT_TYPE)
+                    }
+                    ListItemIcon {
+                        Assignment()
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(strings[MessageID.assignments])
+                        secondary = ReactNode(strings[MessageID.add_assignment_block_content_desc])
+                    }
+                }
+            }
+
+            ListItem {
+                ListItemButton {
+                    onClick = {
+                        props.onClickAddBlock(CourseBlock.BLOCK_DISCUSSION_TYPE)
+                    }
+                    ListItemIcon {
+                        Forum()
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(strings[MessageID.discussion_board])
+                        secondary = ReactNode(strings[MessageID.add_discussion_board_desc])
+                    }
+                }
+            }
+        }
+
+
+    }
+}
+
 val ClazzEditScreen = FC<Props> {
 
     val viewModel = useUstadViewModel { di, savedStateHandle ->
@@ -532,6 +640,8 @@ val ClazzEditScreen = FC<Props> {
     }
 
     val uiStateVar by viewModel.uiState.collectAsState(ClazzEditUiState())
+
+    var addCourseBlockDialogVisible by useState { false }
 
     ClazzEditScreenComponent2 {
         uiState = uiStateVar
@@ -543,7 +653,19 @@ val ClazzEditScreen = FC<Props> {
         onCourseBlockMoved = { fromIndex, toIndex ->
 
         }
+        onClickAddCourseBlock = {
+            addCourseBlockDialogVisible = true
+        }
     }
+
+    AddCourseBlockDialog {
+        open = addCourseBlockDialogVisible
+        onClose = { _, _ ->
+            addCourseBlockDialogVisible = false
+        }
+        onClickAddBlock = viewModel::onAddCourseBlock
+    }
+
 }
 
 

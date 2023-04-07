@@ -241,6 +241,22 @@ class ClazzEditViewModel(
         }
     }
 
+
+    fun onAddCourseBlock(blockType: Int) {
+        val (viewName, keyName) = when(blockType) {
+            CourseBlock.BLOCK_MODULE_TYPE ->
+                ModuleCourseBlockEditView.VIEW_NAME to RESULT_KEY_COURSEBLOCK_MODULE
+            else -> return
+        }
+
+        navigateForResult(
+            nextViewName = viewName,
+            key = keyName,
+            currentValue = null,
+            serializer = CourseBlockWithEntity.serializer(),
+        )
+    }
+
     private fun ClazzEditUiState.hasErrors() : Boolean {
         return clazzStartDateError != null || clazzEndDateError != null
     }
@@ -328,6 +344,8 @@ class ClazzEditViewModel(
         const val RESULT_KEY_SCHEDULE = "Schedule"
 
         const val STATE_KEY_SCHEDULES = "schedule"
+
+        const val RESULT_KEY_COURSEBLOCK_MODULE = "module"
 
     }
 
