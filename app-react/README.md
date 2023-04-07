@@ -4,6 +4,11 @@ This module contains the web client application built using Kotlin/JS using Reac
 via [kotlin-wrappers](https://github.com/JetBrains/kotlin-wrappers). The UI follows the patterns 
 found in [kotlin-mui-showcase](https://github.com/karakum-team/kotlin-mui-showcase).
 
+Wrappers for other libraries (see package com.ustadmobile.wrappers ) created as per: 
+
+* [JS in Kotlin/JS](https://dev.to/mpetuska/js-in-kotlinjs-c4g)
+* [Kotlin for the JS Platform - Javascript Modules (official)](https://kotlinlang.org/docs/js-modules.html)
+
 ## MUI React/JS UI Development
 
 Run the app-react module via Gradle:
