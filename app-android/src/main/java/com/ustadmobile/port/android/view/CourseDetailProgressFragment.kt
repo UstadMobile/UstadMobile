@@ -5,7 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.paging.compose.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckBox
@@ -22,8 +22,14 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.view.composable.UstadPersonAvatar
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -31,6 +37,19 @@ private fun CourseDetailProgressScreen(
     uiState: CourseDetailProgressUiState = CourseDetailProgressUiState(),
     onClickStudent: (Person) -> Unit = {},
 ) {
+
+    // As per
+    // https://developer.android.com/reference/kotlin/androidx/paging/compose/package-summary#collectaslazypagingitems
+    // Must provide a factory to pagingSourceFactory that will
+    // https://issuetracker.google.com/issues/241124061
+    val pager = remember(uiState.students) {
+        Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
+            pagingSourceFactory = uiState.students
+        )
+    }
+
+    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
     val scrollState = rememberScrollState()
 
@@ -70,18 +89,18 @@ private fun CourseDetailProgressScreen(
         }
 
         items(
-            items = uiState.students,
-            key = { student -> student.personUid }
+            items = lazyPagingItems,
+            key = { it.personUid }
         ) { student ->
 
             ListItem(
                 modifier = Modifier.clickable {
-                    onClickStudent(student)
+                    student?.also { onClickStudent(it) }
                 },
                 icon = {
                     UstadPersonAvatar(personUid = 0)
                 },
-                text = { Text(student.fullName()) },
+                text = { Text("${student?.fullName()}") },
                 trailing = {
                     Box(modifier = Modifier.width(120.dp)) {
                         Row(modifier = Modifier
@@ -100,18 +119,6 @@ private fun CourseDetailProgressScreen(
             )
 
         }
-
-//        item {
-//            LazyRow(
-//                state = stateRowY,
-//                userScrollEnabled = false
-//            ) {
-//                items(LoremIpsum(10).values.toList()) {
-//                    Text(text = it)
-//                }
-//            }
-//        }
-
 
     }
 }
@@ -200,68 +207,70 @@ private fun Modifier.vertical() = layout { measurable, constraints ->
 fun CourseDetailProgressScreenPreview() {
 
     val uiState = CourseDetailProgressUiState(
-        students = listOf(
-            Person().apply {
-                personUid = 1
-                firstNames = "Bart"
-                lastName = "Simpson"
-            },
-            Person().apply {
-                personUid = 2
-                firstNames = "Shelly"
-                lastName = "Mackleberry"
-            },
-            Person().apply {
-                personUid = 3
-                firstNames = "Tracy"
-                lastName = "Mackleberry"
-            },
-            Person().apply {
-                personUid = 4
-                firstNames = "Nelzon"
-                lastName = "Muntz"
-            },
-            Person().apply {
-                personUid = 5
-                firstNames = "Nelzon"
-                lastName = "Muntz"
-            },
-            Person().apply {
-                personUid = 6
-                firstNames = "Nelzon"
-                lastName = "Muntz"
-            },
-            Person().apply {
-                personUid = 7
-                firstNames = "Nelzon"
-                lastName = "Muntz"
-            },
-            Person().apply {
-                personUid = 8
-                firstNames = "Nelzon"
-                lastName = "Muntz"
-            },
-            Person().apply {
-                personUid = 9
-                firstNames = "Nelzon"
-                lastName = "Muntz"
-            },
-            Person().apply {
-                personUid = 10
-                firstNames = "Nelzon"
-                lastName = "Muntz"
-            },
-            Person().apply {
-                personUid = 11
-                firstNames = "Nelzon"
-                lastName = "Muntz"
-            },
-            Person().apply {
-                personUid = 12
-                firstNames = "Nelzon"
-                lastName = "Muntz"
-            }
-        ),
+        students = {
+            ListPagingSource(listOf(
+                Person().apply {
+                    personUid = 1
+                    firstNames = "Bart"
+                    lastName = "Simpson"
+                },
+                Person().apply {
+                    personUid = 2
+                    firstNames = "Shelly"
+                    lastName = "Mackleberry"
+                },
+                Person().apply {
+                    personUid = 3
+                    firstNames = "Tracy"
+                    lastName = "Mackleberry"
+                },
+                Person().apply {
+                    personUid = 4
+                    firstNames = "Nelzon"
+                    lastName = "Muntz"
+                },
+                Person().apply {
+                    personUid = 5
+                    firstNames = "Nelzon"
+                    lastName = "Muntz"
+                },
+                Person().apply {
+                    personUid = 6
+                    firstNames = "Nelzon"
+                    lastName = "Muntz"
+                },
+                Person().apply {
+                    personUid = 7
+                    firstNames = "Nelzon"
+                    lastName = "Muntz"
+                },
+                Person().apply {
+                    personUid = 8
+                    firstNames = "Nelzon"
+                    lastName = "Muntz"
+                },
+                Person().apply {
+                    personUid = 9
+                    firstNames = "Nelzon"
+                    lastName = "Muntz"
+                },
+                Person().apply {
+                    personUid = 10
+                    firstNames = "Nelzon"
+                    lastName = "Muntz"
+                },
+                Person().apply {
+                    personUid = 11
+                    firstNames = "Nelzon"
+                    lastName = "Muntz"
+                },
+                Person().apply {
+                    personUid = 12
+                    firstNames = "Nelzon"
+                    lastName = "Muntz"
+                }
+            ))
+        },
         results = listOf(
             stringResource(R.string.discussion_board),
             stringResource(R.string.dashboard),
