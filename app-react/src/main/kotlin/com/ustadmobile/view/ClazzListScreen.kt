@@ -4,6 +4,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
 import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.ClazzListUiState
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
@@ -31,7 +32,7 @@ external interface ClazzListScreenProps : Props {
 
     var onClickClazz: (Clazz?) -> Unit
 
-    var onClickSort: () -> Unit
+    var onClickSort: (SortOrderOption) -> Unit
 
     var onClickFilterChip: (MessageIdOption2?) -> Unit
 

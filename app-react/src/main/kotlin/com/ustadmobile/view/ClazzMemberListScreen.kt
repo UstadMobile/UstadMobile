@@ -3,6 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.ClazzMemberListUiState
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 import com.ustadmobile.mui.components.UstadAddListItem
@@ -34,7 +35,7 @@ external interface ClazzMemberListScreenProps : Props {
 
     var onClickAddNewStudent: () -> Unit
 
-    var onClickSort: () -> Unit
+    var onClickSort: (SortOrderOption) -> Unit
 
 }
 

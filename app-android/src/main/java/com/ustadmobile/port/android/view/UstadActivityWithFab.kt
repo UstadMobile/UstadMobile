@@ -6,7 +6,7 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
  * Interface that should be implemented by an activity which hosts a FAB to be controlled by a
  * fragment.
  */
-interface UstadListViewActivityWithFab {
+interface UstadActivityWithFab {
 
     val activityFloatingActionButton: ExtendedFloatingActionButton?
 

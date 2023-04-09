@@ -4,7 +4,7 @@ import android.os.Bundle
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.toughra.ustadmobile.R
 
-abstract class UstadListViewActivity() : UstadBaseActivity(), UstadListViewActivityWithFab {
+abstract class UstadListViewActivity() : UstadBaseActivity(), UstadActivityWithFab {
 
     override val activityFloatingActionButton: ExtendedFloatingActionButton?
         get() = findViewById(R.id.activity_listfragment_fab)
