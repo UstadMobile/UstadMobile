@@ -2,17 +2,20 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.viewmodel.PersonDetailUiState
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
-import com.ustadmobile.core.components.DIContext
 import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.hooks.useViewModel
+import com.ustadmobile.core.hooks.useUstadViewModel
+import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.viewmodel.PersonDetailViewModel
+import com.ustadmobile.hooks.useAttachmentUriSrc
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.mui.components.UstadQuickActionButton
+import com.ustadmobile.view.components.UstadFab
+import csstype.ObjectFit
 import mui.material.List
 import mui.icons.material.*
 import mui.material.*
@@ -26,9 +29,10 @@ import mui.system.StackDirection
 import react.*
 import kotlin.js.Date
 import csstype.px
+import emotion.react.css
 
 val PersonDetailScreen = FC<UstadScreenProps>() { props ->
-    val viewModel = useViewModel(
+    val viewModel = useUstadViewModel(
         onAppUiStateChange = props.onAppUiStateChanged,
         onShowSnack = props.onShowSnackBar,
     ) { di, savedStateHandle ->
@@ -36,6 +40,13 @@ val PersonDetailScreen = FC<UstadScreenProps>() { props ->
     }
 
     val uiState by viewModel.uiState.collectAsState(PersonDetailUiState())
+
+    val appState by viewModel.appUiState.collectAsState(AppUiState())
+
+    UstadFab {
+        fabState = appState.fabState
+    }
+
 
     PersonDetailComponent2 {
         this.uiState = uiState
@@ -100,10 +111,23 @@ val PersonDetailComponent2 = FC<PersonDetailProps> { props ->
             direction = responsive(StackDirection.column)
             spacing = responsive(10.px)
 
-            img {
-                src = "${""}?w=164&h=164&fit=crop&auto=format"
-                alt = "user image"
+            val personImgSrc = useAttachmentUriSrc(
+                attachmentUri = props.uiState.personPicture?.personPictureUri,
+                revokeOnCleanup = true,
+            )
+
+            if(personImgSrc != null) {
+                img {
+                    src = personImgSrc.toString()
+                    alt = "user image"
+                    css {
+                        maxHeight = 304.px
+                        objectFit = ObjectFit.contain
+                        asDynamic().objectPosition = "center"
+                    }
+                }
             }
+
 
             QuickActionBar{
                 uiState = props.uiState

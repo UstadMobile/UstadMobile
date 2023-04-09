@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.util.ext
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -22,3 +23,5 @@ fun Modifier.defaultItemPadding(
  * by components themselves.
  */
 fun Modifier.defaultScreenPadding() = padding(horizontal = 0.dp, vertical = 8.dp)
+
+fun Modifier.defaultAvatarSize() = size(40.dp)

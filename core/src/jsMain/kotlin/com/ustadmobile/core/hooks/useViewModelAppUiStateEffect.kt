@@ -12,15 +12,13 @@ import react.useEffect
  * to handle AppUiState change.
  */
 fun useViewModelAppUiStateEffect(
-    viewModel: ViewModel,
-    onAppUiStateChange: ((AppUiState) -> Unit)?,
+    viewModel: UstadViewModel,
+    onAppUiStateChange: ((AppUiState) -> Unit),
 ) {
     useEffect(dependencies = arrayOf(viewModel)) {
-        if(viewModel is UstadViewModel && onAppUiStateChange != null) {
-            viewModel.viewModelScope.launch {
-                viewModel.appUiState.collect {
-                    onAppUiStateChange(it)
-                }
+        viewModel.viewModelScope.launch {
+            viewModel.appUiState.collect {
+                onAppUiStateChange(it)
             }
         }
     }

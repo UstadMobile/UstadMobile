@@ -3,15 +3,12 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.hooks.useViewModel
-import com.ustadmobile.core.impl.appstate.AppUiState
-import com.ustadmobile.core.impl.appstate.FabUiState
+import com.ustadmobile.core.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.SiteEnterLinkViewModel
 import react.dom.html.ReactHTML.img
 import com.ustadmobile.mui.components.UstadTextEditField
-import com.ustadmobile.view.components.UstadFab
 import csstype.px
 import mui.icons.material.Add
 import mui.material.*
@@ -32,7 +29,7 @@ external interface SiteEnterLinkProps : Props {
 }
 
 val SiteEnterLinkScreen = FC<UstadScreenProps> { props ->
-    val viewModel = useViewModel(
+    val viewModel = useUstadViewModel(
         onAppUiStateChange = props.onAppUiStateChanged
     ) { di, savedSateHandle ->
         console.log("Creating SiteEnterLinkViewModel")
@@ -40,11 +37,6 @@ val SiteEnterLinkScreen = FC<UstadScreenProps> { props ->
     }
 
     val uiState by viewModel.uiState.collectAsState(SiteEnterLinkUiState())
-    val appState by viewModel.appUiState.collectAsState(AppUiState())
-
-    UstadFab {
-        fabState = appState.fabState
-    }
 
     SiteEnterLinkComponent2 {
         this.uiState = uiState

@@ -387,6 +387,10 @@ dependencies {
     //PanicKit (PanicButton) integration
     implementation "info.guardianproject.panic:panic:$version_android_panickit"
 
+    implementation "io.coil-kt:coil:$version_android_coil"
+    implementation "io.coil-kt:coil-compose:$version_android_coil"
+
+
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"
     testImplementation "androidx.test:core:$version_androidx_test_core"

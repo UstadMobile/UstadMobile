@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.coroutines.flow.*
+import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -54,6 +55,19 @@ abstract class UstadViewModel(
             ?.map { it.trim().toLong() }?.toMutableSet() ?: mutableSetOf()
     }
 
+    /**
+     * If navigation for a result is in progress, this will be non-null
+     */
+    protected val expectedResultDest: NavResultDest?
+        get()  {
+            val popUpToViewName = savedStateHandle[ARG_RESULT_DEST_VIEWNAME]
+            val saveToKey = savedStateHandle[ARG_RESULT_DEST_KEY]
+            return if(popUpToViewName != null && saveToKey != null) {
+                NavResultDest(popUpToViewName, saveToKey)
+            }else {
+                null
+            }
+        }
 
     init {
 
@@ -66,6 +80,17 @@ abstract class UstadViewModel(
         set(value) {
             _appUiState.update {
                 it.copy(loadingState = value)
+            }
+        }
+
+    /**
+     * Shorthand to set the title
+     */
+    protected var title: String?
+        get() = _appUiState.value.title
+        set(value) {
+            _appUiState.update {
+                it.copy(title = value)
             }
         }
 
@@ -95,6 +120,14 @@ abstract class UstadViewModel(
         value: T
     ) {
         set(key, json.encodeToString(value))
+    }
+
+    protected fun <T> UstadSavedStateHandle.setJson(
+        key: String,
+        serializer: SerializationStrategy<T>,
+        value: T
+    ) {
+        set(key, json.encodeToString(serializer, value))
     }
 
     protected inline fun <reified T> UstadSavedStateHandle.getOrPutJson(
@@ -132,12 +165,10 @@ abstract class UstadViewModel(
      * @param result: the result that is being provided (e.g. selected Person etc)
      */
     protected fun finishWithResult(result: Any?) {
-        val popUpToViewName = savedStateHandle[ARG_RESULT_DEST_VIEWNAME]
-        val saveToKey = savedStateHandle[ARG_RESULT_DEST_KEY]
-
-        if(popUpToViewName != null && saveToKey != null) {
-            navResultReturner.sendResult(NavResult(saveToKey, systemTimeInMillis(), result))
-            navController.popBackStack(popUpToViewName, false)
+        val resultDest = expectedResultDest
+        if(resultDest != null) {
+            navResultReturner.sendResult(NavResult(resultDest.key, systemTimeInMillis(), result))
+            navController.popBackStack(resultDest.viewName, false)
         }else {
             navController.popBackStack(UstadView.CURRENT_DEST, true)
         }

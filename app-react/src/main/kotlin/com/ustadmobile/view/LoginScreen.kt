@@ -3,16 +3,12 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.hooks.useViewModel
-import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.hooks.useUstadViewModel
 import com.ustadmobile.core.viewmodel.LoginUiState
 import com.ustadmobile.core.viewmodel.LoginViewModel
-import com.ustadmobile.core.viewmodel.SiteEnterLinkUiState
-import com.ustadmobile.core.viewmodel.SiteEnterLinkViewModel
 import mui.material.ButtonVariant.*
 import com.ustadmobile.mui.components.UstadTextEditField
 import csstype.px
-import mui.icons.material.*
 import mui.material.*
 import mui.material.styles.TypographyVariant
 import mui.system.Stack
@@ -37,7 +33,7 @@ val LoginPreview = FC<Props> {
 }
 
 val LoginScreen = FC<UstadScreenProps> { props ->
-    val viewModel = useViewModel(
+    val viewModel = useUstadViewModel(
         onAppUiStateChange = props.onAppUiStateChanged
     ) { di, savedSateHandle ->
         console.log("Creating LoginViewModel")
