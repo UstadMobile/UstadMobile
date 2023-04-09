@@ -50,7 +50,7 @@ private fun NetworkNodeListScreen(
 
         item {
             UstadDetailField(
-                valueText = "+12341231",
+                valueText = uiState.deviceNumber,
                 labelText = stringResource(R.string.device),
                 imageId = R.drawable.ic_phone_black_24dp,
             )
@@ -79,10 +79,7 @@ private fun NetworkNodeListScreen(
         }
 
         item {
-            Row {
-                Text(stringResource(R.string.download_wifi_only))
-                Text("LocalSpot1231")
-            }
+            Text("${stringResource(R.string.download_wifi_only)}: ${uiState.wifiName}")
         }
 
 
@@ -162,7 +159,9 @@ fun NetworkNodeListPreview() {
             DeviceSession().apply {
                 dsDeviceId = 1
             }
-        )
+        ),
+        deviceNumber = "+12341231",
+        wifiName = "LocalSpot1231"
     )
 
     MdcTheme {
