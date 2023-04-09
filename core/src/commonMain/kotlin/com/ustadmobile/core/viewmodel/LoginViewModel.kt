@@ -61,7 +61,7 @@ class LoginViewModel(
     private var verifiedSite: Site? = null
 
     init {
-        nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: impl.getAppConfigDefaultFirstDest()
+        nextDestination = PersonListView.VIEW_NAME// savedStateHandle[UstadView.ARG_NEXT] ?: impl.getAppConfigDefaultFirstDest()
 
         serverUrl = savedStateHandle[UstadView.ARG_SERVER_URL] ?: impl.getAppConfigString(
             AppConfig.KEY_API_URL, "http://localhost"
@@ -74,9 +74,15 @@ class LoginViewModel(
             )
         }
 
+        val baseAppUiState = AppUiState(
+            navigationVisible = false,
+            title = impl.getString(MessageID.login),
+        )
+
         serverUrl = serverUrl.requirePostfix("/")
         val siteJsonStr: String? = savedStateHandle[UstadView.ARG_SITE]
         if(siteJsonStr != null){
+            _appUiState.value = baseAppUiState
             onVerifySite(json.decodeFromString(siteJsonStr))
         }else{
             _uiState.update { prev ->
@@ -84,10 +90,8 @@ class LoginViewModel(
                     fieldsEnabled = false,
                 )
             }
-            _appUiState.value = AppUiState(
-                loadingState = LoadingUiState(LoadingUiState.State.INDETERMINATE),
-                navigationVisible = false,
-                title = impl.getString(MessageID.login)
+            _appUiState.value = baseAppUiState.copy(
+                loadingState = LoadingUiState.INDETERMINATE
             )
 
             viewModelScope.launch {
@@ -106,7 +110,6 @@ class LoginViewModel(
                     }
                 }
             }
-
         }
     }
 

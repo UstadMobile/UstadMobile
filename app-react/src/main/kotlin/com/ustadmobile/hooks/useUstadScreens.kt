@@ -7,6 +7,7 @@ import com.ustadmobile.entities.UstadScreen
 import com.ustadmobile.entities.UstadScreens
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.*
+import com.ustadmobile.view.components.UstadImageSelectButtonPreview
 import com.ustadmobile.view.components.virtuallist.VirtualListPreview
 import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
 import react.useMemo
@@ -20,8 +21,9 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen("UstadEditFields", "Edit Fields", UstadEditFieldPreviews),
             UstadScreen("UstadDetailFields", "Detail Fields", UstadDetailFieldPreview),
             UstadScreen("UstadCourseBlockEdit", "UstadCourseBlockEdit", UstadCourseBlockEditPreview),
-            UstadScreen(PersonEditView.VIEW_NAME, "Person Edit Preview",
+            UstadScreen("PersonEditPreview", "Person Edit Preview",
                 PersonEditScreenPreview),
+            UstadScreen(PersonEditView.VIEW_NAME, "PersonEdit", PersonEditScreen),
             UstadScreen(PersonAccountEditView.VIEW_NAME, "Person Account Edit Preview",
                 PersonAccountEditPreview),
             UstadScreen(Login2View.VIEW_NAME, "Login Preview",
@@ -92,7 +94,8 @@ fun useUstadScreens(): UstadScreens {
                 HolidayCalendarListScreenPreview),
             UstadScreen(LanguageListView.VIEW_NAME, "LanguageList Preview",
                 LanguageListScreenPreview),
-            UstadScreen(PersonListView.VIEW_NAME, "PersonList Preview", PersonListScreenPreview),
+            UstadScreen("PersonListPreview", "PersonList Preview", PersonListScreenPreview),
+            UstadScreen(PersonListView.VIEW_NAME, "PersonList", PersonListScreen),
             UstadScreen(NAVHOST_CLEARSTACK_VIEWNAME, "Clear Stack", NavHostClearStackPlaceholder),
             UstadScreen("UstadAddListItem", "UstadAddListItem Preview",
                 UstadAddListItemPreview),
@@ -128,7 +131,8 @@ fun useUstadScreens(): UstadScreens {
                 "DiscussionPostEditPreview Preview",
                 DiscussionPostEditPreview),
 
-
+            UstadScreen("UstadImageSelectButtonPreview", "UstadImageSelectButtonPreview",
+                UstadImageSelectButtonPreview),
         )
     }
 }

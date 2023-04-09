@@ -1,15 +1,12 @@
 package com.ustadmobile.port.android.view
 
-import android.accounts.AccountAuthenticatorResponse
-import android.accounts.AccountManager
-import android.app.Activity
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.Toast
@@ -46,7 +43,6 @@ import com.ustadmobile.port.android.view.binding.imageForeignKeyPlaceholder
 import com.ustadmobile.port.android.view.binding.setImageForeignKey
 import com.ustadmobile.port.android.view.binding.setImageForeignKeyAdapter
 import com.ustadmobile.port.android.view.util.UstadActivityWithProgressBar
-import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.*
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -54,11 +50,14 @@ import java.io.*
 import com.ustadmobile.core.impl.BrowserLinkOpener
 import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.view.*
+import com.ustadmobile.port.android.impl.nav.NavHostTempFileRegistrar
+import com.ustadmobile.port.android.util.ext.registerDestinationTempFile
 
 
-class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
+class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
         UstadActivityWithProgressBar,
         NavController.OnDestinationChangedListener,
+        NavHostTempFileRegistrar,
         DIAware{
 
     private val browserLinkOpener = BrowserLinkOpener { url ->
@@ -177,6 +176,17 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
             slideBottomNavigation(true)
             View.VISIBLE
         }
+
+        //Hide the soft keyboard if showing when moving to the next screen
+        val currentFocusView = currentFocus
+        if(currentFocusView != null) {
+            ContextCompat.getSystemService(this, InputMethodManager::class.java)
+                ?.hideSoftInputFromWindow(currentFocusView.windowToken, 0)
+        }
+    }
+
+    override fun registerNavDestinationTemporaryFile(file: File) {
+        navController.registerDestinationTempFile(this, file)
     }
 
     fun onAppBarExpand(expand: Boolean){
