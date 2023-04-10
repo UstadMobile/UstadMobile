@@ -87,6 +87,37 @@ val CourseDetailProgressScreenPreview = FC<UstadScreenProps> { props ->
                 strings[MessageID.phone],
                 strings[MessageID.change_photo],
                 strings[MessageID.ebook],
+                strings[MessageID.discussion_board],
+                strings[MessageID.dashboard],
+                strings[MessageID.module],
+                strings[MessageID.assignments],
+                strings[MessageID.document]+"6",
+                strings[MessageID.audio],
+                strings[MessageID.phone],
+                strings[MessageID.change_photo],
+                strings[MessageID.ebook],
+                strings[MessageID.discussion_board],
+                strings[MessageID.dashboard],
+                strings[MessageID.module],
+                strings[MessageID.assignments],
+                strings[MessageID.document],
+                strings[MessageID.audio],
+                strings[MessageID.phone],
+                strings[MessageID.change_photo],
+                strings[MessageID.ebook],
+                strings[MessageID.assignments],
+                strings[MessageID.document],
+                strings[MessageID.audio],
+                strings[MessageID.phone],
+                strings[MessageID.change_photo],
+                strings[MessageID.ebook],
+                strings[MessageID.video],
+                strings[MessageID.assignments],
+                strings[MessageID.document],
+                strings[MessageID.audio],
+                strings[MessageID.phone],
+                strings[MessageID.change_photo],
+                strings[MessageID.ebook],
             )
         )
     }
@@ -121,7 +152,7 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
             }
             onScroll= { event ->
 
-                headerIndex = event.target.unsafeCast<HTMLElement>().scrollLeft.toInt()
+//                headerIndex = event.target.unsafeCast<HTMLElement>().scrollLeft.toInt()
 //                sx {
 //                    position = Position.absolute
 //                    marginLeft = (120-90*headerIndex).px
