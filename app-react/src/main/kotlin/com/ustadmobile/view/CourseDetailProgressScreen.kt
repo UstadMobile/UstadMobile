@@ -112,41 +112,48 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 //        }
 
 
-        Box {
-            sx {
-                overflowX = Overflow.scroll
-//                width = 400.px
-                display = Display.flex
-                flexDirection = FlexDirection.row
-//                transform = rotate(270.deg)
-            }
-            onScroll= { event ->
+        Stack {
+            direction = responsive(StackDirection.row)
 
-                headerIndex = 20
+            sx {
+                justifyContent = JustifyContent.end
+            }
+            Box {
+                sx {
+                    overflowX = Overflow.scroll
+                    width = 300.px
+                    display = Display.flex
+                    flexDirection = FlexDirection.row
+//                transform = rotate(270.deg)
+                }
+                onScroll= { event ->
+
+                    headerIndex = event.currentTarget.scrollLeft.toInt()
 //                sx {
 //                    position = Position.absolute
 //                    marginLeft = (120-90*headerIndex).px
 //                    color = Color("ff0000")
 //                }
-            }
+                }
 
-            props.uiState.results.forEachIndexed { index, item ->
-                ListItem {
+                props.uiState.results.forEachIndexed { index, item ->
+                    ListItem {
 
-                    sx {
-                        if (headerIndex > index){
-                            position = Position.absolute
-                            marginLeft = -(90*index).px
+                        sx {
+                            if (headerIndex > index){
+                                position = Position.absolute
+                                marginLeft = -(90*index).px
+                            }
+                            width = 90.px
+                            transform = rotate(270.deg)
                         }
-                        width = 90.px
-                        transform = rotate(270.deg)
-                    }
 
-                    onClick = {
-                        headerIndex = index
-                    }
-                    ListItemText {
-                        primary = ReactNode(item)
+                        onClick = {
+                            headerIndex = index
+                        }
+                        ListItemText {
+                            primary = ReactNode(item)
+                        }
                     }
                 }
             }
@@ -159,7 +166,7 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
         VirtualList {
             style = jso {
                 height = "calc(100vh - ${props.muiAppState.appBarHeight+100}px)".unsafeCast<Height>()
-                width = 100.pct
+//                width = 100.pct
                 contain = Contain.strict
                 overflowY = Overflow.scroll
 //                position = Position.absolute
@@ -179,14 +186,10 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 
 
                         ListItemButton{
-                                sx {
-//                                position = Position.absolute
-//                                marginLeft = 0.px
-//                                height = 190.px
-//                                marginTop = 0.px
-                                    width = 120.px
-//                                backgroundColor = Color("#FFFFFF")
-                                }
+
+                            sx {
+                                background = Color("#ffffff")
+                            }
                             onClick = {
                                 person?.also { props.onClickStudent(it) }
                             }
@@ -203,14 +206,14 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 
                         }
 
-                        secondaryAction = List.create {
+                        secondaryAction = Box.create {
                             sx {
                                 display = Display.flex
                                 flexDirection = FlexDirection.row
                                 overflowX = Overflow.scroll
-                                position = Position.absolute
-//                                width = 320.px
-                                marginLeft = 120.px
+//                                position = Position.absolute
+                                width = 300.px
+//                                marginLeft = 120.px
                             }
 
                             onScroll = { event ->
