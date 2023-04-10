@@ -1,0 +1,16 @@
+appId: com.toughra.ustadmobile
+tags:
+  - checklist8
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/008_intropability_app_test"
+  TESTNAME: 008_intropability_app_test
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow:
+    file: "../common/intropability_app_test.yaml"

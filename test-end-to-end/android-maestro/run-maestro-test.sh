@@ -2,7 +2,7 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 's:u:p:e:t:a1:a2:a3:cr:n' --long 'serial1:,username:,password:,endpoint:,test:,apk1:,apk2:,apk3:,console-output,result:,nobuild' -n 'run-maestro-tests.sh' -- "$@")
+TEMP=$(getopt -o 's:u:p:e:t:a1:a2:a3:a4:cr:n' --long 'serial1:,username:,password:,endpoint:,test:,apk1:,apk2:,apk3:,apk4:,console-output,result:,nobuild' -n 'run-maestro-tests.sh' -- "$@")
 
 
 eval set -- "$TEMP"
@@ -16,6 +16,7 @@ SCRIPTDIR=$(realpath $(dirname $0))
 TESTAPK1=$SCRIPTDIR/build/apks/app-android-launcher-release.apk
 TESTAPK2=$SCRIPTDIR/build/apks/app-android-launcher-release-2.apk
 RIPPLEAPK=$SCRIPTDIR/../test-files/apk/info.guardianproject.ripple_139.apk
+USTADAPICONSUMERAPK=$SCRIPTDIR/../test-files/apk/app-debug.apk
 TESTRESULTSDIR=""
 CONTROLSERVER=""
 USECONSOLEOUTPUT=0
@@ -67,6 +68,12 @@ while true; do
                      shift 2
                      continue
                ;;
+              '-a4'|'--apk4')
+                     echo "Set APK4 to $2"
+                     USTADAPICONSUMERAPK=$2
+                     shift 2
+                     continue
+                ;;
                '-c'|'--console-output')
                      echo "Use console output"
                      USECONSOLEOUTPUT=1
@@ -141,9 +148,11 @@ fi
 if [ "$(adb shell pm list packages com.toughra.ustadmobile2)" != "" ]; then
   adb shell pm uninstall com.toughra.ustadmobile2
 fi
-if [ "$(adb shell pm list packages com.google.android.apps.nexuslauncher)" != "" ]; then
-  adb shell pm uninstall com.google.android.apps.nexuslauncher.auto_generated_rro_vendor__
-  adb shell pm uninstall com.google.android.apps.nexuslauncher
+if [ "$(adb shell pm list packages com.ustadmobile.ustadapiconsumer)" != "" ]; then
+  adb shell pm uninstall com.ustadmobile.ustadapiconsumer
+fi
+if [ "$(adb shell pm list packages info.guardianproject.ripple)" != "" ]; then
+  adb shell pm uninstall info.guardianproject.ripple
 fi
 
 if [ "$NOBUILD" != "1" ]; then
@@ -153,6 +162,7 @@ fi
 adb install $TESTAPK1
 adb install $TESTAPK2
 adb install $RIPPLEAPK
+adb install $USTADAPICONSUMERAPK
 
 TESTARG=$TEST
 if [ "$TEST" != "" ]; then
@@ -172,15 +182,14 @@ maestro  --device=$TESTSERIAL  test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER 
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
          -e TESTSERIAL=$TESTSERIAL $OUTPUTARGS \
          $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR \
-         --include-tags=checklist7
+         #--include-tags=checklist7
 
 TESTSTATUS=$?
-$SCRIPTDIR/../../testserver-controller/stop.sh
+#$SCRIPTDIR/../../testserver-controller/stop.sh
 
 uninstall apps
- adb shell pm uninstall com.toughra.ustadmobile
- adb shell pm uninstall com.toughra.ustadmobile2
- adb shell pm uninstall com.google.android.apps.nexuslauncher.auto_generated_rro_vendor__
- adb shell pm uninstall com.google.android.apps.nexuslauncher
-
+#adb shell pm uninstall com.toughra.ustadmobile
+#adb shell pm uninstall com.toughra.ustadmobile2
+#adb shell pm uninstall info.guardianproject.ripple
+#adb shell pm uninstall com.ustadmobile.ustadapiconsumer
 exit $TESTSTATUS
