@@ -103,18 +103,19 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 
     val (selectedItems, setSelectedItems) = useState(setOf<Int>())
 
-    Box {
+    Container {
+        maxWidth = "lg"
 
-        sx {
-            height = "calc(100vh - ${props.muiAppState.appBarHeight+100}px)".unsafeCast<Height>()
-            width = 100.pct
-        }
+//        sx {
+//            height = "calc(100vh - ${props.muiAppState.appBarHeight+100}px)".unsafeCast<Height>()
+//            width = 100.pct
+//        }
 
 
         Box {
             sx {
                 overflowX = Overflow.scroll
-                width = 400.px
+//                width = 400.px
                 display = Display.flex
                 flexDirection = FlexDirection.row
 //                transform = rotate(270.deg)
