@@ -122,13 +122,14 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                 sx {
                     overflowX = Overflow.scroll
                     width = 300.px
+                    marginRight = 30.px
                     display = Display.flex
                     flexDirection = FlexDirection.row
 //                transform = rotate(270.deg)
                 }
                 onScroll= { event ->
 
-                    headerIndex = event.currentTarget.scrollLeft.toInt()
+                    headerIndex += 1
 //                sx {
 //                    position = Position.absolute
 //                    marginLeft = (120-90*headerIndex).px
@@ -142,9 +143,9 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                         sx {
                             if (headerIndex > index){
                                 position = Position.absolute
-                                marginLeft = -(90*index).px
+                                marginLeft = -(44*index).px
                             }
-                            width = 90.px
+                            width = 44.px
                             transform = rotate(270.deg)
                         }
 
@@ -217,26 +218,24 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                             }
 
                             onScroll = { event ->
-                                headerIndex = event.currentTarget.scrollLeft.toInt()
+                                headerIndex += 1
                             }
 
                             props.uiState.results.forEachIndexed { index, item ->
                                 ListItem {
 
                                     sx {
+                                        width = 44.px
                                         if (headerIndex > index){
                                             position = Position.absolute
-                                            marginLeft = (120-90*index).px
+                                            marginLeft = -(44*index).px
                                             color = Color("000000")
                                         }
                                     }
 
-                                    ListItemButton {
+                                    ListItemIcon {
 
-
-                                        ListItemText {
-                                            primary = ReactNode(item)
-                                        }
+                                        + CheckBoxOutlined.create()
                                     }
                                 }
                             }
