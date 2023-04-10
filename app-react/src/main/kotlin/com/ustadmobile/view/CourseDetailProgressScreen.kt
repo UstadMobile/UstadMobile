@@ -22,6 +22,7 @@ import mui.material.styles.TypographyVariant
 import mui.material.StackDirection
 import mui.system.responsive
 import mui.system.sx
+import org.w3c.dom.HTMLElement
 import org.w3c.dom.ScrollToOptions
 import react.*
 import react.dom.onChange
@@ -103,150 +104,150 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 
     val (selectedItems, setSelectedItems) = useState(setOf<Int>())
 
-    Container {
-        maxWidth = "lg"
+    Stack {
+        direction = responsive(StackDirection.row)
 
-//        sx {
-//            height = "calc(100vh - ${props.muiAppState.appBarHeight+100}px)".unsafeCast<Height>()
-//            width = 100.pct
-//        }
-
-
-        Stack {
-            direction = responsive(StackDirection.row)
-
+        sx {
+            justifyContent = JustifyContent.end
+        }
+        Box {
             sx {
-                justifyContent = JustifyContent.end
-            }
-            Box {
-                sx {
-                    overflowX = Overflow.scroll
-                    width = 300.px
-                    marginRight = 30.px
-                    display = Display.flex
-                    flexDirection = FlexDirection.row
+//                overflowX = Overflow.scroll
+//                width = 300.px
+//                marginRight = 30.px
+                display = Display.flex
+                flexDirection = FlexDirection.row
 //                transform = rotate(270.deg)
-                }
-                onScroll= { event ->
+            }
+            onScroll= { event ->
 
-                    headerIndex += 1
+                headerIndex = event.target.unsafeCast<HTMLElement>().scrollLeft.toInt()
 //                sx {
 //                    position = Position.absolute
 //                    marginLeft = (120-90*headerIndex).px
 //                    color = Color("ff0000")
 //                }
-                }
+            }
 
-                props.uiState.results.forEachIndexed { index, item ->
-                    ListItem {
+            props.uiState.results.forEachIndexed { index, item ->
+                ListItem {
 
-                        sx {
-                            if (headerIndex > index){
-                                position = Position.absolute
-                                marginLeft = -(44*index).px
-                            }
-                            width = 44.px
-                            transform = rotate(270.deg)
+                    sx {
+                        if (headerIndex > index){
+                            position = Position.absolute
+                            marginLeft = -(44*index).px
                         }
+                        width = 44.px
+                        transform = rotate(270.deg)
+                    }
 
-                        onClick = {
-                            headerIndex = index
-                        }
-                        ListItemText {
-                            primary = ReactNode(item)
-                        }
+                    onClick = {
+                        headerIndex = index
+                    }
+                    ListItemText {
+                        primary = ReactNode(item)
                     }
                 }
             }
         }
+    }
 
-        Typography {
-            + "$headerIndex"
-        }
+    Typography {
+        + "$headerIndex"
+    }
 
-        VirtualList {
-            style = jso {
-                height = "calc(100vh - ${props.muiAppState.appBarHeight+100}px)".unsafeCast<Height>()
+    VirtualList {
+        style = jso {
+            height = "calc(100vh - ${props.muiAppState.appBarHeight+100}px)".unsafeCast<Height>()
 //                width = 100.pct
-                contain = Contain.strict
-                overflowY = Overflow.scroll
+            contain = Contain.strict
+            overflowY = Overflow.scroll
 //                position = Position.absolute
 //                marginLeft = 0.px
 //                marginTop = 100.px
-            }
+        }
 
-            content = virtualListContent {
-
-
-
-                infiniteQueryPagingItems(
-                    items = infiniteQueryResult,
-                    key = { it.personUid.toString() }
-                ) { person ->
-                    ListItem.create {
+        content = virtualListContent {
 
 
-                        ListItemButton{
 
-                            sx {
-                                background = Color("#ffffff")
-                            }
-                            onClick = {
-                                person?.also { props.onClickStudent(it) }
-                            }
+            infiniteQueryPagingItems(
+                items = infiniteQueryResult,
+                key = { it.personUid.toString() }
+            ) { person ->
+                ListItem.create {
 
-                            ListItemIcon {
-                                UstadPersonAvatar {
-                                    personUid = person?.personUid ?: 0
-                                }
-                            }
 
-                            ListItemText {
-                                primary = ReactNode("${person?.fullName()}")
-                            }
+                    ListItemButton{
 
+                        sx {
+                            background = Color("#ffffff")
+                        }
+                        onClick = {
+                            person?.also { props.onClickStudent(it) }
                         }
 
-                        secondaryAction = Box.create {
-                            sx {
-                                display = Display.flex
-                                flexDirection = FlexDirection.row
-                                overflowX = Overflow.scroll
+                        ListItemIcon {
+                            UstadPersonAvatar {
+                                personUid = person?.personUid ?: 0
+                            }
+                        }
+
+                        ListItemText {
+                            primary = ReactNode("${person?.fullName()}")
+                        }
+
+                    }
+
+                    secondaryAction = Box.create {
+                        sx {
+                            display = Display.flex
+                            flexDirection = FlexDirection.row
+//                            overflowX = Overflow.scroll
 //                                position = Position.absolute
-                                width = 300.px
+//                            width = 300.px
 //                                marginLeft = 120.px
-                            }
+                        }
 
-                            onScroll = { event ->
-                                headerIndex += 1
-                            }
 
-                            props.uiState.results.forEachIndexed { index, item ->
-                                ListItem {
 
-                                    sx {
-                                        width = 44.px
-                                        if (headerIndex > index){
-                                            position = Position.absolute
-                                            marginLeft = -(44*index).px
-                                            color = Color("000000")
-                                        }
+                        props.uiState.results.forEachIndexed { index, item ->
+                            ListItem {
+
+                                sx {
+                                    width = 44.px
+                                    if (headerIndex > index){
+                                        position = Position.absolute
+                                        marginLeft = -(44*index).px
+                                        color = Color("000000")
                                     }
+                                }
 
-                                    ListItemIcon {
+                                ListItemIcon {
 
-                                        + CheckBoxOutlined.create()
-                                    }
+                                    + CheckBoxOutlined.create()
                                 }
                             }
                         }
                     }
                 }
             }
+        }
 
-            Container {
-                VirtualListOutlet()
+
+        Container {
+
+            Box {
+                sx {
+                    width = 100.pct
+                    overflowX = Overflow.scroll
+                }
+                onScroll = { event ->
+                    headerIndex = event.target.unsafeCast<HTMLElement>().scrollLeft.toInt()
+                }
             }
+
+            VirtualListOutlet()
         }
     }
 }
