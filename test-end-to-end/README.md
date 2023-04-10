@@ -111,6 +111,10 @@ adding from device, test downloading from another device.
 
 6.7 Teacher (course leader) or admin can send an invitation to a list of users by providing phone numbers (SMS) or email addresses. User can open the invitation, create a new account if this is allowed by admin policy and they don't have an existing account, and join a course. 
 
+6.8 If a user is logged into the Ustad app, they can use an api consumer (e.g. UstadApiConsumerDemo), use the single sign-on, see a list of logged in accounts, select their account, click approve, and receive an auth token.
+
+6.9 If no user is logged into the Ustad app, they can use an api consumer (e.g. UstadApiConsumerDemo), use the single sign-on, enter the site link, login with their username/password, then click approve, and receive an auth token.
+
 ### 7 App panic response (Android only)
 
 7.1 When a panic trigger app is installed and selected, when the app is set to delete all data on panic trigger and the panic app is triggered, then all local data is deleted and the user is logged out.
