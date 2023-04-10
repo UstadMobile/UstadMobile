@@ -7,6 +7,7 @@ import com.ustadmobile.core.viewmodel.CourseDetailProgressUiState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
+import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -14,13 +15,18 @@ import com.ustadmobile.view.components.virtuallist.virtualListContent
 import csstype.*
 import js.core.jso
 import kotlinx.browser.window
+import mui.icons.material.*
 import mui.material.*
 import mui.material.List
+import mui.material.styles.TypographyVariant
+import mui.material.StackDirection
+import mui.system.responsive
 import mui.system.sx
 import org.w3c.dom.ScrollToOptions
 import react.*
 import react.dom.onChange
 import tanstack.virtual.core.elementScroll
+import tanstack.virtual.core.windowScroll
 
 external interface CourseDetailProgressProps : UstadScreenProps {
 
@@ -104,17 +110,24 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
             width = 100.pct
         }
 
-        List {
+
+        Box {
             sx {
+                overflowX = Overflow.scroll
+                width = 400.px
                 display = Display.flex
                 flexDirection = FlexDirection.row
-                width = 100.pct
-                position = Position.absolute
-                marginLeft = 500.px
-                marginTop = 0.px
-////                    transform = rotate(270.deg)
+//                transform = rotate(270.deg)
             }
+            onScroll= { event ->
 
+                headerIndex = 20
+//                sx {
+//                    position = Position.absolute
+//                    marginLeft = (120-90*headerIndex).px
+//                    color = Color("ff0000")
+//                }
+            }
 
             props.uiState.results.forEachIndexed { index, item ->
                 ListItem {
@@ -138,15 +151,19 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
             }
         }
 
+        Typography {
+            + "$headerIndex"
+        }
+
         VirtualList {
             style = jso {
                 height = "calc(100vh - ${props.muiAppState.appBarHeight+100}px)".unsafeCast<Height>()
                 width = 100.pct
                 contain = Contain.strict
                 overflowY = Overflow.scroll
-                position = Position.absolute
-                marginLeft = 0.px
-                marginTop = 100.px
+//                position = Position.absolute
+//                marginLeft = 0.px
+//                marginTop = 100.px
             }
 
             content = virtualListContent {
@@ -160,41 +177,43 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                     ListItem.create {
 
 
-                        Box {
-
-//                            sx {
+                        ListItemButton{
+                                sx {
 //                                position = Position.absolute
 //                                marginLeft = 0.px
 //                                height = 190.px
-////                                marginTop = 0.px
-//                                width = 120.px
-////                                backgroundColor = Color("#FFFFFF")
-//                            }
-
-                            ListItemButton{
-                                onClick = {
-                                    person?.also { props.onClickStudent(it) }
+//                                marginTop = 0.px
+                                    width = 120.px
+//                                backgroundColor = Color("#FFFFFF")
                                 }
-
-                                ListItemIcon {
-                                    UstadPersonAvatar {
-                                        personUid = person?.personUid ?: 0
-                                    }
-                                }
-
-                                ListItemText {
-                                    primary = ReactNode("${person?.fullName()}")
-                                }
-
+                            onClick = {
+                                person?.also { props.onClickStudent(it) }
                             }
+
+                            ListItemIcon {
+                                UstadPersonAvatar {
+                                    personUid = person?.personUid ?: 0
+                                }
+                            }
+
+                            ListItemText {
+                                primary = ReactNode("${person?.fullName()}")
+                            }
+
                         }
 
                         secondaryAction = List.create {
                             sx {
                                 display = Display.flex
                                 flexDirection = FlexDirection.row
+                                overflowX = Overflow.scroll
                                 position = Position.absolute
-                                marginLeft = 50.px
+//                                width = 320.px
+                                marginLeft = 120.px
+                            }
+
+                            onScroll = { event ->
+                                headerIndex = event.currentTarget.scrollLeft.toInt()
                             }
 
                             props.uiState.results.forEachIndexed { index, item ->
@@ -207,9 +226,7 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                                             color = Color("000000")
                                         }
                                     }
-                                    onChange = {
-                                        headerIndex = index
-                                    }
+
                                     ListItemButton {
 
 
