@@ -8,6 +8,7 @@ import com.ustadmobile.core.viewmodel.LoginUiState
 import com.ustadmobile.core.viewmodel.LoginViewModel
 import mui.material.ButtonVariant.*
 import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.util.ext.onTextChange
 import csstype.px
 import mui.material.*
 import mui.material.styles.TypographyVariant
@@ -59,17 +60,20 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                 + (props.uiState.loginIntentMessage ?: "")
             }
 
-            UstadTextEditField {
+            TextField {
+                id = "username"
                 value = props.uiState.username
-                label = strings[MessageID.username]
-                onChange = {
+                label = ReactNode(strings[MessageID.username])
+                onTextChange = {
                     props.onUsernameValueChange(it)
                 }
-                error = props.uiState.usernameError
-                enabled = props.uiState.fieldsEnabled
+                error = props.uiState.usernameError != null
+                helperText = props.uiState.usernameError?.let { ReactNode(it) }
+                disabled = !props.uiState.fieldsEnabled
             }
 
             UstadTextEditField {
+                id = "password"
                 value = props.uiState.password
                 label = strings[MessageID.password]
                 onChange = {
@@ -92,6 +96,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
             }
 
             Button {
+                id = "login_button"
                 onClick = { props.onClickLogin() }
                 variant = ButtonVariant.contained
                 + strings[MessageID.login].uppercase()
@@ -104,6 +109,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
             }
 
             Button {
+                id = "create_account_button"
                 onClick = { props.onClickCreateAccount() }
                 variant = ButtonVariant.outlined
                 + strings[MessageID.create_account].uppercase()
@@ -116,6 +122,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
             }
 
             Button {
+                id = "connect_as_guest_button"
                 onClick = { props.onClickConnectAsGuest() }
                 variant = ButtonVariant.outlined
                 + strings[MessageID.connect_as_guest].uppercase()

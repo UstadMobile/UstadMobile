@@ -84,7 +84,8 @@ abstract class UstadViewModel(
         }
 
     init {
-
+        if(lastNavResultTimestampCollected == 0L)
+            lastNavResultTimestampCollected = systemTimeInMillis()
     }
     /**
      * Shorthand to make it easier to update the loading state
@@ -109,7 +110,23 @@ abstract class UstadViewModel(
         }
 
     /**
-     * When using
+     * Shorthand to observe results. Avoids two edge cases:
+     *
+     * 1. "Replay" - when the ViewModel is recreated, if no other result has been returned in the
+     *    meantime, the last result would be collected again. The flow of NavResultReturner always
+     *    replays the most recent result returned (required to allow a collector which starts after
+     *    the result was sent to collect it).
+     *
+     *    This is avoided by tracking the timestamp of the last item collected.
+     *
+     * 2. Replay from previous viwemodel: when the user goes from screen A to screen B, then C,
+     *    returns a result to screen A, and then navigates forward to screen B again with new arguments.
+     *    The new instance of screen B does not remember receiving any results, so the result from
+     *    the old instance of screen C looks new.
+     *
+     *    This is avoided by setting the alstNavResultTimestampCollected to the first start time
+     *    on init.
+     *
      */
     fun NavResultReturner.filteredResultFlowForKey(
         key: String,
@@ -219,6 +236,11 @@ abstract class UstadViewModel(
         const val KEY_LAST_COLLECTED_TS = "collectedTs"
 
         const val KEY_INIT_STATE = "initState"
+
+        /**
+         * Used to store the time that the viwemodel has first initialized. This
+         */
+        const val KEY_FIRST_INIT_TIME = "firstInit"
     }
 
 }

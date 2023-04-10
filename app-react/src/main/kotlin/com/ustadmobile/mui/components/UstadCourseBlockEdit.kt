@@ -9,7 +9,10 @@ import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.util.ext.format
+import com.ustadmobile.util.ext.onTextChange
+import com.ustadmobile.view.components.UstadEditHeader
 import com.ustadmobile.view.components.UstadMessageIdSelectField
+import com.ustadmobile.wrappers.quill.ReactQuill
 import csstype.px
 import mui.material.*
 import mui.system.Stack
@@ -17,6 +20,7 @@ import mui.system.StackDirection
 import mui.system.responsive
 import react.FC
 import react.Props
+import react.ReactNode
 import web.html.InputMode
 
 external interface UstadCourseBlockEditProps: Props {
@@ -37,9 +41,35 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
     Stack{
         spacing = responsive(20.px)
 
+        TextField {
+            id = "title"
+            value = props.uiState.courseBlock?.cbTitle ?: ""
+            label = ReactNode(strings[MessageID.title])
+            fullWidth = true
+            onTextChange = {
+                props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
+                    cbTitle = it
+                })
+            }
+        }
+
+
+        ReactQuill {
+            value = props.uiState.courseBlock?.cbDescription ?: ""
+            id = "description_quill"
+            placeholder = strings[MessageID.description]
+            onChange = {
+                props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
+                    cbDescription = it
+                })
+            }
+        }
+
+
         UstadDateTimeEditField {
             timeInMillis = props.uiState.courseBlock?.cbHideUntilDate ?: 0
             label = strings[MessageID.dont_show_before].addOptionalSuffix(strings)
+            id = "hide_until_date"
             enabled = props.uiState.fieldsEnabled
             onChange = {
                 props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {

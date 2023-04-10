@@ -1,5 +1,6 @@
 package com.ustadmobile.core.viewmodel
 
+import com.ustadmobile.core.controller.asCourseBlockWithEntity
 import com.ustadmobile.core.db.dao.deactivateByUids
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
@@ -99,7 +100,8 @@ class ClazzEditViewModel(
                     text = systemImpl.getString(MessageID.save),
                     onClick = this::onClickSave
                 ),
-                loadingState = LoadingUiState.INDETERMINATE
+                loadingState = LoadingUiState.INDETERMINATE,
+                hideBottomNavigation = true,
             )
         }
 
@@ -155,6 +157,35 @@ class ClazzEditViewModel(
                             }
                         }
                     )
+                },
+                async {
+                    loadEntity(
+                        serializer = ListSerializer(CourseBlockWithEntity.serializer()),
+                        loadFromStateKeys = listOf(STATE_KEY_COURSEBLOCKS),
+                        onLoadFromDb = { db ->
+                            val courseBlocksDb = db.courseBlockDao.takeIf { entityUidArg != 0L }
+                                ?.findAllCourseBlockByClazzUidAsync(entityUidArg) ?: emptyList()
+
+                            val assignmentPeerAllocations = db.peerReviewerAllocationDao
+                                .takeIf { entityUidArg != 0L }?.getAllPeerReviewerAllocations(
+                                    courseBlocksDb
+                                        .filter { block -> block.assignment != null }
+                                        .map { assignmentBlock -> assignmentBlock.assignment?.caUid ?: 0 }
+                                ) ?: emptyList()
+
+                            courseBlocksDb.map {
+                                it.asCourseBlockWithEntity(emptyList(), assignmentPeerAllocations)
+                            }
+                        },
+                        makeDefault = {
+                            emptyList()
+                        },
+                        uiUpdate = {
+                            _uiState.update { prev ->
+                                prev.copy(courseBlockList = it ?: emptyList())
+                            }
+                        }
+                    )
                 }
             )
 
@@ -177,8 +208,33 @@ class ClazzEditViewModel(
                             clazzSchedules = newSchedules
                         )
                     }
-                    savedStateHandle[STATE_KEY_SCHEDULES] = json.encodeToString(
-                        ListSerializer(Schedule.serializer()), newSchedules)
+
+                    savedStateHandle[STATE_KEY_SCHEDULES] = withContext(Dispatchers.Default) {
+                        json.encodeToString(ListSerializer(Schedule.serializer()), newSchedules)
+                    }
+                }
+            }
+
+            launch {
+                resultReturner.filteredResultFlowForKey(RESULT_KEY_COURSEBLOCK).collect { result ->
+                    val courseBlock = result.result as? CourseBlock ?: return@collect
+                    val courseBlockWithEntity = courseBlock.asCourseBlockWithEntity()
+                    val newCourseBlockList = _uiState.value.courseBlockList.replaceOrAppend(
+                        courseBlockWithEntity
+                    ) {
+                        it.cbUid == courseBlock.cbUid
+                    }
+
+                    _uiState.update { prev ->
+                        prev.copy(
+                            courseBlockList = newCourseBlockList
+                        )
+                    }
+
+                    savedStateHandle[STATE_KEY_COURSEBLOCKS] = withContext(Dispatchers.Default) {
+                        json.encodeToString(ListSerializer(CourseBlockWithEntity.serializer()),
+                            newCourseBlockList)
+                    }
                 }
             }
 
@@ -244,8 +300,10 @@ class ClazzEditViewModel(
 
     fun onAddCourseBlock(blockType: Int) {
         val (viewName, keyName) = when(blockType) {
+            CourseBlock.BLOCK_DISCUSSION_TYPE,
+            CourseBlock.BLOCK_TEXT_TYPE,
             CourseBlock.BLOCK_MODULE_TYPE ->
-                ModuleCourseBlockEditView.VIEW_NAME to RESULT_KEY_COURSEBLOCK_MODULE
+                CourseBlockEditViewModel.DEST_NAME to RESULT_KEY_COURSEBLOCK
             else -> return
         }
 
@@ -253,6 +311,7 @@ class ClazzEditViewModel(
             nextViewName = viewName,
             key = keyName,
             currentValue = null,
+            args = mapOf(CourseBlockEditViewModel.ARG_BLOCK_TYPE to blockType.toString()),
             serializer = CourseBlockWithEntity.serializer(),
         )
     }
@@ -345,7 +404,9 @@ class ClazzEditViewModel(
 
         const val STATE_KEY_SCHEDULES = "schedule"
 
-        const val RESULT_KEY_COURSEBLOCK_MODULE = "module"
+        const val RESULT_KEY_COURSEBLOCK = "courseblock"
+
+        const val STATE_KEY_COURSEBLOCKS = "courseblocks"
 
     }
 

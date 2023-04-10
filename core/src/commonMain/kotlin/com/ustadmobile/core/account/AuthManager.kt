@@ -8,6 +8,7 @@ import com.ustadmobile.lib.db.entities.PersonAuth2
 import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.STATUS_APPROVED
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.util.authenticateEncryptedPassword
+import io.ktor.client.*
 import kotlinx.datetime.Instant
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -19,7 +20,7 @@ import org.kodein.di.on
  * etc. It caches the authentication salt and gets any needed password hashing params from the DI.
  */
 class AuthManager(
-    endpoint: Endpoint,
+    private val endpoint: Endpoint,
     override val di: DI
 ) : DIAware {
 
@@ -28,6 +29,8 @@ class AuthManager(
     private val db: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_DB)
 
     private val pbkdf2Params: Pbkdf2Params by instance()
+
+    private val httpClient: HttpClient by instance()
 
     suspend fun authenticate(
         username: String,
@@ -38,7 +41,8 @@ class AuthManager(
         val site: Site = repo.siteDao.getSiteAsync() ?: throw IllegalStateException("No site!")
         val authSalt = site.authSalt ?: throw IllegalStateException("No auth salt!")
 
-        val passwordDoubleHashed = password.doublePbkdf2Hash(authSalt, pbkdf2Params)
+        val passwordDoubleHashed = password.doublePbkdf2Hash(authSalt, pbkdf2Params,
+            endpoint, httpClient)
         val personAuth2 = repo.personAuth2Dao.findByUsername(username)
         val authMatch = personAuth2?.pauthAuth?.base64StringToByteArray()
             .contentEquals(passwordDoubleHashed)
@@ -63,7 +67,8 @@ class AuthManager(
                 repo.personAuth2Dao.insertAsync(PersonAuth2().apply {
                     pauthUid = person.personUid
                     pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
-                    pauthAuth = password.doublePbkdf2Hash(authSalt, pbkdf2Params).encodeBase64()
+                    pauthAuth = password.doublePbkdf2Hash(authSalt, pbkdf2Params, endpoint,
+                        httpClient).encodeBase64()
                 })
             }
         }
@@ -85,7 +90,7 @@ class AuthManager(
     }
 
     suspend fun setAuth(personUid: Long, password: String) {
-        repo.insertPersonAuthCredentials2(personUid, password, pbkdf2Params)
+        repo.insertPersonAuthCredentials2(personUid, password, pbkdf2Params, endpoint, httpClient)
     }
 
 

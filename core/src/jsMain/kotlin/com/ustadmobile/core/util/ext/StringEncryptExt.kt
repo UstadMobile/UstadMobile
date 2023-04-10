@@ -1,15 +1,37 @@
 package com.ustadmobile.core.util.ext
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.util.asmcrypto
+import io.ktor.client.*
+import io.ktor.client.plugins.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.util.*
+import js.buffer.ArrayBufferLike
+import js.core.ReadonlyArray
+import js.typedarrays.Uint8Array
 import kotlin.js.Date
+import kotlinext.js.require
 
-//secret is used by js code
-@Suppress("UNUSED_VARIABLE")
-actual fun String.encryptWithPbkdf2(salt: String, iterations: Int, keyLength: Int): ByteArray {
-    //For this to work on both platform  (i.e produce the same output on JVM and JS),
-    // keyLength has to be divided by 8 since In JVM it's specified in bits while in node is in bytes
-    val password = this
-    val uint8ArrayVal =  asmcrypto.Pbkdf2HmacSha1(js("new TextEncoder().encode(password)"), js("new TextEncoder().encode(salt)"), iterations, (keyLength/8))
-    val buffer = js("Buffer.from(new Uint8Array(uint8ArrayVal))")
-    return buffer
+//This should probably switch over to using the standard web crypto on the client - but in the
+// meantime this can be sent to the server.
+actual suspend fun String.encryptWithPbkdf2(
+    salt: String,
+    iterations: Int,
+    keyLength: Int,
+    endpoint: Endpoint,
+    httpClient: HttpClient,
+): ByteArray {
+    val response = httpClient.get("${endpoint.url}api/pbkdf2/encrypt") {
+        parameter("salt", salt)
+        parameter("iterations", iterations.toString())
+        parameter("keyLength", keyLength.toString())
+        parameter("secret", this)
+
+        retry {
+            maxRetries = 3
+        }
+    }.bodyAsText()
+
+    return response.decodeBase64Bytes()
 }

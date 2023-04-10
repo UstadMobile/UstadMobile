@@ -462,4 +462,12 @@
         android:id="@+id/grant_app_permission_dest"
         android:name="com.ustadmobile.port.android.view.GrantAppPermissionFragment"/>
 
+    <fragment
+        android:id="@+id/course_block_edit_dest"
+        android:name="com.ustadmobile.port.android.view.CourseBlockEditFragment"/>
+
+    <fragment
+        android:id="@+id/html_edit_dest"
+        android:name="com.ustadmobile.port.android.view.HtmlEditFragment"/>
+
 </navigation>

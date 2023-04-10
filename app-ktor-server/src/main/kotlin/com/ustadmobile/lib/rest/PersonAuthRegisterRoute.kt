@@ -18,6 +18,8 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.lib.rest.ext.callEndpoint
+import io.ktor.client.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -133,8 +135,10 @@ fun Route.personAuthRegisterRoute() {
             }
 
             val authParams: Pbkdf2Params = di.direct.instance()
+            val httpClient: HttpClient = di.direct.instance()
 
-            repo.insertPersonAuthCredentials2(mPerson.personUid, newPassword, authParams)
+            repo.insertPersonAuthCredentials2(mPerson.personUid, newPassword, authParams,
+                call.callEndpoint, httpClient)
 
             call.respond(HttpStatusCode.OK, mPerson)
         }
@@ -158,6 +162,8 @@ fun Route.personAuthRegisterRoute() {
         get("hash") {
             val di: DI by closestDI()
             val pbkdf2Params: Pbkdf2Params by di.instance()
+            val httpClient: HttpClient by di.instance()
+
             val db: UmAppDatabase by di.on(call).instance(tag = DoorTag.TAG_DB)
             val password = call.request.queryParameters["password"]
                 ?: throw IllegalArgumentException("No password to hash")
@@ -165,7 +171,8 @@ fun Route.personAuthRegisterRoute() {
             val site: Site = db.siteDao.getSiteAsync() ?: throw IllegalStateException("No site!")
             val authSalt = site.authSalt ?: throw IllegalStateException("No auth salt!")
 
-            val passwordDoubleHashed = password.doublePbkdf2Hash(authSalt, pbkdf2Params)
+            val passwordDoubleHashed = password.doublePbkdf2Hash(authSalt, pbkdf2Params,
+                    call.callEndpoint, httpClient)
                 .encodeBase64()
 
             call.respondText { "Hashed password = $passwordDoubleHashed" }

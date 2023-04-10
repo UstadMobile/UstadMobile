@@ -27,6 +27,7 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.navGraphViewModels
 import com.ustadmobile.core.impl.nav.*
 import com.ustadmobile.port.android.impl.ViewNameToDestMap
+import com.ustadmobile.port.android.view.util.UstadActivityWithBottomNavigation
 import kotlinx.coroutines.flow.map
 import org.kodein.di.*
 
@@ -235,6 +236,14 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
 
                     fab?.takeIf { it.visibility != fabVisibility }?.visibility = fabVisibility
 
+                    val bottomNavVisibility = if(appUiState.navigationVisible && !appUiState.hideBottomNavigation) {
+                        View.VISIBLE
+                    }else {
+                        View.GONE
+                    }
+
+                    val bottomNav = (activity as? UstadActivityWithBottomNavigation)?.bottomNavigationView
+                    bottomNav?.takeIf { it.visibility != bottomNavVisibility }?.visibility = bottomNavVisibility
 
                     val currentActionBarState = mMenuProvider?.appUiState?.actionBarButtonState
                     val currentSearchBarState = mMenuProvider?.appUiState?.searchState

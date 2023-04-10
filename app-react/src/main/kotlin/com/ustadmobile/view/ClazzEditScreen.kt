@@ -74,13 +74,15 @@ external interface ClazzEditScreenProps : Props {
 
     var onClickHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
 
+    var onClickUnHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+
     var onClickIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
 
     var onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
 
     var onClickDeleteBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
 
-    var onClickEditCourse: (CourseBlockWithEntity) -> Unit
+    var onClickEditCourseBlock: (CourseBlockWithEntity) -> Unit
 
 }
 
@@ -193,8 +195,42 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 + strings[MessageID.course_blocks]
             }
 
-            CourseBlockList {
-                +props
+            List {
+                ListItem {
+                    ListItemButton {
+                        onClick =  { props.onClickAddCourseBlock() }
+                        id = "add_course_block"
+                        ListItemText {
+                            + Add.create()
+                        }
+                        ListItemText {
+                            primary = ReactNode(strings[MessageID.add_block])
+                        }
+                    }
+                }
+
+                SortableList {
+                    draggedItemClassName = COURSE_BLOCK_DRAG_CLASS
+                    lockAxis = LockAxis.y
+
+                    onSortEnd = { oldIndex, newIndex ->
+                        props.onCourseBlockMoved(oldIndex, newIndex)
+                    }
+
+                    props.uiState.courseBlockList.forEach { courseBlockItem ->
+                        CourseBlockListItem {
+                            courseBlock = courseBlockItem
+                            fieldsEnabled = props.uiState.fieldsEnabled
+                            onClickEditCourseBlock = props.onClickEditCourseBlock
+                            onClickHideBlockPopupMenu = props.onClickHideBlockPopupMenu
+                            onClickUnHideBlockPopupMenu = props.onClickUnHideBlockPopupMenu
+                            onClickIndentBlockPopupMenu = props.onClickIndentBlockPopupMenu
+                            onClickUnIndentBlockPopupMenu = props.onClickUnIndentBlockPopupMenu
+                            onClickDeleteBlockPopupMenu = props.onClickDeleteBlockPopupMenu
+                            uiState = props.uiState.courseBlockStateFor(courseBlockItem)
+                        }
+                    }
+                }
             }
 
             UstadEditHeader {
@@ -329,80 +365,74 @@ private val ScheduleListItem = FC<ScheduleListItemProps> { props ->
     }
 }
 
-private val CourseBlockList = FC<ClazzEditScreenProps> { props ->
-    val strings = useStringsXml()
+external interface CourseBlockListItemProps : Props{
 
-    List {
+    var courseBlock: CourseBlockWithEntity
 
-        ListItem {
-            ListItemButton {
-                onClick =  { props.onClickAddCourseBlock() }
-                ListItemIcon {
-                    + Add.create()
-                }
-                ListItemText {
-                    primary = ReactNode(strings[MessageID.add_block])
-                }
-            }
-        }
+    var uiState: ClazzEditUiState.CourseBlockUiState
 
-        SortableList {
-            draggedItemClassName = COURSE_BLOCK_DRAG_CLASS
-            lockAxis = LockAxis.y
+    var onClickEditCourseBlock: (CourseBlockWithEntity) -> Unit
 
-            onSortEnd = { oldIndex, newIndex ->
-                props.onCourseBlockMoved(oldIndex, newIndex)
-            }
+    var fieldsEnabled: Boolean
 
-            props.uiState.courseBlockList.forEach { courseBlock ->
-                SortableItem {
-                    div {
-                        val divRef : MutableRefObject<HTMLDivElement> = useRef(null)
+    var onClickHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
 
-                        ListItem{
-                            val courseBlockEditAlpha: Double = if (courseBlock.cbHidden) 0.5 else 1.0
-                            val startPadding = (courseBlock.cbIndentLevel * 24).px
+    var onClickUnHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
 
-                            val image = if(courseBlock.cbType == CourseBlock.BLOCK_CONTENT_TYPE)
-                                courseBlock.entry?.contentTypeFlag
-                            else
-                                courseBlock.cbType
+    var onClickIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
 
-                            ListItemButton {
-                                sx {
-                                    opacity = number(courseBlockEditAlpha)
-                                }
+    var onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
 
-                                onClick = {
-                                    //Avoid triggering the onClick listener if the dragging is in process
-                                    //This might not be needed
-                                    if(divRef.current?.classList?.contains(COURSE_BLOCK_DRAG_CLASS) != true) {
-                                        props.onClickEditCourse(courseBlock)
-                                    }
-                                }
+    var onClickDeleteBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
 
-                                ListItemIcon {
-                                    sx {
-                                        paddingLeft = startPadding
-                                    }
-                                    + (CONTENT_ENTRY_TYPE_ICON_MAP[image]?.create() ?: TextSnippet.create())
-                                }
+}
 
-                                ListItemText {
-                                    primary = ReactNode(courseBlock.cbTitle ?: "")
-                                }
-                            }
+private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
+    SortableItem {
+        div {
+            val divRef : MutableRefObject<HTMLDivElement> = useRef(null)
 
-                            secondaryAction = PopUpMenu.create {
-                                fieldsEnabled = props.uiState.fieldsEnabled
-                                onClickHideBlockPopupMenu = props.onClickHideBlockPopupMenu
-                                onClickIndentBlockPopupMenu = props.onClickIndentBlockPopupMenu
-                                onClickUnIndentBlockPopupMenu = props.onClickUnIndentBlockPopupMenu
-                                onClickDeleteBlockPopupMenu = props.onClickDeleteBlockPopupMenu
-                                uiState = props.uiState.courseBlockStateFor(courseBlock)
-                            }
+            ListItem{
+                val courseBlockEditAlpha: Double = if (props.courseBlock.cbHidden) 0.5 else 1.0
+                val startPadding = (props.courseBlock.cbIndentLevel * 24).px
+
+                val image = if(props.courseBlock.cbType == CourseBlock.BLOCK_CONTENT_TYPE)
+                    props.courseBlock.entry?.contentTypeFlag
+                else
+                    props.courseBlock.cbType
+
+                ListItemButton {
+                    sx {
+                        opacity = number(courseBlockEditAlpha)
+                    }
+
+                    onClick = {
+                        //Avoid triggering the onClick listener if the dragging is in process
+                        //This might not be needed
+                        if(divRef.current?.classList?.contains(COURSE_BLOCK_DRAG_CLASS) != true) {
+                            props.onClickEditCourseBlock(props.courseBlock)
                         }
                     }
+
+                    ListItemIcon {
+                        sx {
+                            paddingLeft = startPadding
+                        }
+                        + (CONTENT_ENTRY_TYPE_ICON_MAP[image]?.create() ?: TextSnippet.create())
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(props.courseBlock.cbTitle ?: "")
+                    }
+                }
+
+                secondaryAction = PopUpMenu.create {
+                    fieldsEnabled = props.fieldsEnabled
+                    onClickHideBlockPopupMenu = props.onClickHideBlockPopupMenu
+                    onClickIndentBlockPopupMenu = props.onClickIndentBlockPopupMenu
+                    onClickUnIndentBlockPopupMenu = props.onClickUnIndentBlockPopupMenu
+                    onClickDeleteBlockPopupMenu = props.onClickDeleteBlockPopupMenu
+                    uiState = props.uiState
                 }
             }
         }

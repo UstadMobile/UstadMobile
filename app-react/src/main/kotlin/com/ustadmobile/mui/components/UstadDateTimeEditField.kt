@@ -42,6 +42,7 @@ external interface UstadDateTimeEditFieldProps: Props {
      */
     var enabled: Boolean?
 
+    var id: String?
 
 }
 
@@ -64,6 +65,8 @@ val UstadDateTimeEditField = FC<UstadDateTimeEditFieldProps> { props ->
             renderInput = { params ->
                 TextField.create {
                     +params
+
+                    id = props.id
 
                     if(props.error != null) {
                         error = true

@@ -3,6 +3,7 @@ package com.ustadmobile.entities
 import com.ustadmobile.core.components.NAVHOST_CLEARSTACK_VIEWNAME
 import com.ustadmobile.core.components.NavHostClearStackPlaceholder
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.viewmodel.CourseBlockEditViewModel
 import com.ustadmobile.entities.UstadScreen
 import com.ustadmobile.entities.UstadScreens
 import com.ustadmobile.mui.components.*
@@ -143,7 +144,9 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         UstadSelectFieldPreview),
     UstadScreen("UstadMessageIdSelectFieldPreview", "UstadMessageIdSelectFieldPreview",
         UstadMessageIdSelectFieldPreview),
-    UstadScreen("Quill", "Quill", QuillDemo)
+    UstadScreen("Quill", "Quill", QuillDemo),
+    UstadScreen("CourseBlockEdit", CourseBlockEditViewModel.DEST_NAME,
+        CourseBlockEditScreen),
 )
 
 

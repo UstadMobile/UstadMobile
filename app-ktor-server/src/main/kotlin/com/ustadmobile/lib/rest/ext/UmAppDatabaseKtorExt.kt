@@ -105,7 +105,10 @@ suspend fun UmAppDatabase.initAdminUser(
         val salt = repo.siteDao.getSiteAsync()!!.authSalt!!
 
         hexFile.writeText(
-            adminPass.doublePbkdf2Hash(salt, di.direct.instance()).toHexString())
+            adminPass.doublePbkdf2Hash(
+                salt, di.direct.instance(), Endpoint("localhost"), di.direct.instance()
+            ).toHexString()
+        )
 
         grantScopedPermission(adminPerson, Role.ALL_PERMISSIONS, ScopedGrant.ALL_TABLES,
                 ScopedGrant.ALL_ENTITIES)

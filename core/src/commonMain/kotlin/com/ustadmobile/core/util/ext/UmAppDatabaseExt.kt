@@ -1,5 +1,6 @@
 package com.ustadmobile.core.util.ext
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.controller.ReportFilterEditPresenter.Companion.genderMap
 import com.ustadmobile.core.controller.TerminologyKeys
@@ -24,6 +25,7 @@ import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
 import com.ustadmobile.lib.util.randomString
 import kotlinx.coroutines.delay
 import com.ustadmobile.core.db.dao.getResults
+import io.ktor.client.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
@@ -613,7 +615,9 @@ suspend fun UmAppDatabase.grantScopedPermission(toPerson: Person, permissions: L
 suspend fun UmAppDatabase.insertPersonAuthCredentials2(
     personUid: Long,
     password: String,
-    pbkdf2Params: Pbkdf2Params
+    pbkdf2Params: Pbkdf2Params,
+    endpoint: Endpoint,
+    httpClient: HttpClient,
 ) {
     val db = (this as? DoorDatabaseRepository)?.db as? UmAppDatabase ?: this
     db.withDoorTransactionAsync {
@@ -622,7 +626,8 @@ suspend fun UmAppDatabase.insertPersonAuthCredentials2(
         db.personAuth2Dao.insertAsync(PersonAuth2().apply {
             pauthUid = personUid
             pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
-            pauthAuth = password.doublePbkdf2Hash(authSalt, pbkdf2Params).encodeBase64()
+            pauthAuth = password.doublePbkdf2Hash(authSalt, pbkdf2Params,
+                endpoint, httpClient).encodeBase64()
         })
     }
 }

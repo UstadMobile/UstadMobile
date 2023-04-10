@@ -24,7 +24,7 @@ data class SiteEnterLinkUiState(
     val siteLink: String = "",
     val validLink: Boolean = false,
     val progressVisible: Boolean = false,
-    val linkError: StringAndSerialNum? = null,
+    val linkError: String? = null,
     val fieldsEnabled: Boolean = true,
 )
 
@@ -87,7 +87,7 @@ class SiteEnterLinkViewModel(
                     previous.copy(
                         validLink = false,
                         fieldsEnabled = true,
-                        linkError = StringAndSerialNum(impl.getString(MessageID.invalid_link))
+                        linkError = impl.getString(MessageID.invalid_link)
                     )
                 }
             }
