@@ -202,7 +202,7 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                 items = infiniteQueryResult,
                 key = { it.personUid.toString() }
             ) { person ->
-                ListItem.create {
+                Stack.create {
 //                    sx {
 //                        position = Position.absolute
 //                        marginLeft = 0.px
