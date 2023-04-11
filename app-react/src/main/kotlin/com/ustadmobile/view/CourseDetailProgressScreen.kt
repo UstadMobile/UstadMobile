@@ -45,9 +45,11 @@ private val personList = (0..150).map {
     }
 }
 
-val CourseDetailProgressScreenPreview = FC<UstadScreenProps> { props ->
+private val headerList = (0..50).map {
+    "Dashboard"
+}
 
-    val strings = useStringsXml()
+val CourseDetailProgressScreenPreview = FC<UstadScreenProps> { props ->
 
     CourseDetailProgressScreenComponent2 {
 
@@ -55,70 +57,7 @@ val CourseDetailProgressScreenPreview = FC<UstadScreenProps> { props ->
 
         uiState = CourseDetailProgressUiState(
             students = { ListPagingSource(personList) },
-            results = listOf(
-                strings[MessageID.discussion_board],
-                strings[MessageID.dashboard],
-                strings[MessageID.module],
-                strings[MessageID.assignments],
-                strings[MessageID.document]+"6",
-                strings[MessageID.audio],
-                strings[MessageID.phone],
-                strings[MessageID.change_photo],
-                strings[MessageID.ebook],
-                strings[MessageID.discussion_board],
-                strings[MessageID.dashboard],
-                strings[MessageID.module],
-                strings[MessageID.assignments],
-                strings[MessageID.document],
-                strings[MessageID.audio],
-                strings[MessageID.phone],
-                strings[MessageID.change_photo],
-                strings[MessageID.ebook],
-                strings[MessageID.assignments],
-                strings[MessageID.document],
-                strings[MessageID.audio],
-                strings[MessageID.phone],
-                strings[MessageID.change_photo],
-                strings[MessageID.ebook],
-                strings[MessageID.video],
-                strings[MessageID.assignments],
-                strings[MessageID.document],
-                strings[MessageID.audio],
-                strings[MessageID.phone],
-                strings[MessageID.change_photo],
-                strings[MessageID.ebook],
-                strings[MessageID.discussion_board],
-                strings[MessageID.dashboard],
-                strings[MessageID.module],
-                strings[MessageID.assignments],
-                strings[MessageID.document]+"6",
-                strings[MessageID.audio],
-                strings[MessageID.phone],
-                strings[MessageID.change_photo],
-                strings[MessageID.ebook],
-                strings[MessageID.discussion_board],
-                strings[MessageID.dashboard],
-                strings[MessageID.module],
-                strings[MessageID.assignments],
-                strings[MessageID.document],
-                strings[MessageID.audio],
-                strings[MessageID.phone],
-                strings[MessageID.change_photo],
-                strings[MessageID.ebook],
-                strings[MessageID.assignments],
-                strings[MessageID.document],
-                strings[MessageID.audio],
-                strings[MessageID.phone],
-                strings[MessageID.change_photo],
-                strings[MessageID.ebook],
-                strings[MessageID.video],
-                strings[MessageID.assignments],
-                strings[MessageID.document],
-                strings[MessageID.audio],
-                strings[MessageID.phone],
-                strings[MessageID.change_photo],
-                strings[MessageID.ebook],
-            )
+            results = headerList
         )
     }
 }
@@ -131,40 +70,23 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
         props.uiState.students, true, 50
     )
 
-    var headerIndex by useState { 0 }
+    var scrollX by useState { 0 }
 
     val (selectedItems, setSelectedItems) = useState(setOf<Int>())
 
-    Stack {
-        direction = responsive(StackDirection.row)
+    Container {
+        Stack {
+            direction = responsive(StackDirection.row)
 
-        sx {
-            justifyContent = JustifyContent.end
-        }
-        Box {
             sx {
-//                overflowX = Overflow.scroll
-//                width = 300.px
-//                marginRight = 30.px
-                display = Display.flex
-                flexDirection = FlexDirection.row
-//                transform = rotate(270.deg)
+                width = 100.pct
+                overflowX = Overflow.hidden
             }
-            onScroll= { event ->
-
-//                headerIndex = event.target.unsafeCast<HTMLElement>().scrollLeft.toInt()
-//                sx {
-//                    position = Position.absolute
-//                    marginLeft = (120-90*headerIndex).px
-//                    color = Color("ff0000")
-//                }
-            }
-
             props.uiState.results.forEachIndexed { index, item ->
                 ListItem {
 
                     sx {
-                        if (headerIndex > index){
+                        if (scrollX > index){
                             position = Position.absolute
                             marginLeft = -(44*index).px
                         }
@@ -172,9 +94,6 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                         transform = rotate(270.deg)
                     }
 
-                    onClick = {
-                        headerIndex = index
-                    }
                     ListItemText {
                         primary = ReactNode(item)
                     }
@@ -203,6 +122,7 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                 key = { it.personUid.toString() }
             ) { person ->
                 Stack.create {
+                    direction = responsive(StackDirection.row)
 //                    sx {
 //                        position = Position.absolute
 //                        marginLeft = 0.px
@@ -230,7 +150,7 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 
                     }
 
-                    secondaryAction = Box.create {
+                    Box {
                         sx {
                             display = Display.flex
                             flexDirection = FlexDirection.row
@@ -247,7 +167,7 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 
                                 sx {
                                     width = 44.px
-                                    if (headerIndex > index){
+                                    if (scrollX > index){
                                         position = Position.absolute
                                         marginLeft = -(44*index).px
                                         color = Color("000000")
@@ -274,7 +194,7 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                     overflowX = Overflow.scroll
                 }
                 onScroll = { event ->
-                    headerIndex = event.target.unsafeCast<HTMLElement>().scrollLeft.toInt()
+                    scrollX = event.target.unsafeCast<HTMLElement>().scrollLeft.toInt()
                 }
             }
 
