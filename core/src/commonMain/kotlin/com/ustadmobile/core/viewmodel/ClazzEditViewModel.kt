@@ -16,6 +16,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Clazz.Companion.CLAZZ_FEATURE_ATTENDANCE
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.lib.db.entities.ext.shallowCopyWithEntity
 import com.ustadmobile.lib.util.getDefaultTimeZoneId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
@@ -66,8 +67,8 @@ data class ClazzEditUiState(
 
 
     val clazzEditAttendanceChecked: Boolean
-        get() = entity?.clazzFeatures == Clazz.CLAZZ_FEATURE_ATTENDANCE
-                && Clazz.CLAZZ_FEATURE_ATTENDANCE == Clazz.CLAZZ_FEATURE_ATTENDANCE
+        get() = entity?.clazzFeatures == CLAZZ_FEATURE_ATTENDANCE
+                && CLAZZ_FEATURE_ATTENDANCE == CLAZZ_FEATURE_ATTENDANCE
 
     fun courseBlockStateFor(couresBlockWithEntity: CourseBlockWithEntity): CourseBlockUiState {
         return CourseBlockUiState(couresBlockWithEntity)
@@ -224,16 +225,7 @@ class ClazzEditViewModel(
                         it.cbUid == courseBlock.cbUid
                     }
 
-                    _uiState.update { prev ->
-                        prev.copy(
-                            courseBlockList = newCourseBlockList
-                        )
-                    }
-
-                    savedStateHandle[STATE_KEY_COURSEBLOCKS] = withContext(Dispatchers.Default) {
-                        json.encodeToString(ListSerializer(CourseBlockWithEntity.serializer()),
-                            newCourseBlockList)
-                    }
+                    updateCourseBlockList(newCourseBlockList)
                 }
             }
 
@@ -244,6 +236,21 @@ class ClazzEditViewModel(
             loadingState = LoadingUiState.NOT_LOADING
         }
 
+    }
+
+    private suspend fun updateCourseBlockList(
+        newCourseBlockList: List<CourseBlockWithEntity>
+    ) {
+        _uiState.update { prev ->
+            prev.copy(
+                courseBlockList = newCourseBlockList
+            )
+        }
+
+        savedStateHandle[STATE_KEY_COURSEBLOCKS] = withContext(Dispatchers.Default) {
+            json.encodeToString(ListSerializer(CourseBlockWithEntity.serializer()),
+                newCourseBlockList)
+        }
     }
 
     fun onEntityChanged(entity: ClazzWithHolidayCalendarAndSchoolAndTerminology?) {
@@ -381,9 +388,10 @@ class ClazzEditViewModel(
                     }, systemTimeInMillis()
                 )
 
-                val courseBlockModulesToCommit = _uiState.value.courseBlockList.map {
-                    it.shallowCopy {
+                val courseBlockModulesToCommit = _uiState.value.courseBlockList.mapIndexed {index, block ->
+                    block.shallowCopy {
                         cbClazzUid = clazzUid
+                        cbIndex = index
                     }
                 }
                 activeDb.courseBlockDao.upsertListAsync(courseBlockModulesToCommit)
@@ -410,6 +418,84 @@ class ClazzEditViewModel(
             loadingState = LoadingUiState.NOT_LOADING
 
             finishWithResult(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity)
+        }
+    }
+
+
+    fun onCourseBlockMoved(from: Int, to: Int) {
+        val newCourseBlockList = _uiState.value.courseBlockList.toMutableList().apply {
+            add(to, removeAt(from))
+        }.toList()
+
+        viewModelScope.launch {
+            updateCourseBlockList(newCourseBlockList)
+        }
+    }
+
+    fun onClickTimezone() {
+
+    }
+
+    fun onClickHolidayCalendar() {
+
+    }
+
+    fun onClickTerminology() {
+
+    }
+
+    private fun updateCourseBlock(updatedBlock: CourseBlockWithEntity){
+        viewModelScope.launch {
+            updateCourseBlockList(_uiState.value.courseBlockList.replace(updatedBlock) {
+                it.cbUid == updatedBlock.cbUid
+            })
+        }
+    }
+
+    fun onClickHideBlockPopupMenu(block: CourseBlockWithEntity) {
+        updateCourseBlock(block.shallowCopyWithEntity {
+            cbHidden = true
+        })
+    }
+
+    fun onClickUnHideBlockPopupMenu(block: CourseBlockWithEntity) {
+        updateCourseBlock(block.shallowCopyWithEntity {
+            cbHidden = false
+        })
+    }
+
+    fun onClickIndentBlockPopupMenu(block: CourseBlockWithEntity) {
+        updateCourseBlock(block.shallowCopyWithEntity {
+            cbIndentLevel = block.cbIndentLevel + 1
+        })
+    }
+
+    fun onClickUnIndentBlockPopupMenu(block: CourseBlockWithEntity) {
+        updateCourseBlock(block.shallowCopyWithEntity {
+            cbIndentLevel = block.cbIndentLevel - 1
+        })
+    }
+
+    fun onClickDeleteCourseBlock(block: CourseBlockWithEntity) {
+        viewModelScope.launch {
+            updateCourseBlockList(_uiState.value.courseBlockList.filter {
+                it.cbUid != block.cbUid
+            })
+        }
+    }
+
+    fun onClickEditCourseBlock(block: CourseBlockWithEntity) {
+        when(block.cbType) {
+            CourseBlock.BLOCK_DISCUSSION_TYPE,
+            CourseBlock.BLOCK_TEXT_TYPE,
+            CourseBlock.BLOCK_MODULE_TYPE -> {
+                navigateForResult(
+                    nextViewName = CourseBlockEditViewModel.DEST_NAME,
+                    key = RESULT_KEY_COURSEBLOCK,
+                    serializer = CourseBlock.serializer(),
+                    currentValue = block
+                )
+            }
         }
     }
 

@@ -42,15 +42,15 @@ external interface CourseBlockListItemProps : Props {
 
     var fieldsEnabled: Boolean
 
-    var onClickHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+    var onClickHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit
 
-    var onClickUnHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+    var onClickUnHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit
 
-    var onClickIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+    var onClickIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit
 
-    var onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+    var onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit
 
-    var onClickDeleteBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+    var onClickDeleteBlockPopupMenu: (CourseBlockWithEntity) -> Unit
 
 }
 
@@ -96,6 +96,7 @@ val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
                 secondaryAction = PopUpMenu.create {
                     fieldsEnabled = props.fieldsEnabled
                     onClickHideBlockPopupMenu = props.onClickHideBlockPopupMenu
+                    onClickUnHideBlockPopupMenu = props.onClickUnHideBlockPopupMenu
                     onClickIndentBlockPopupMenu = props.onClickIndentBlockPopupMenu
                     onClickUnIndentBlockPopupMenu = props.onClickUnIndentBlockPopupMenu
                     onClickDeleteBlockPopupMenu = props.onClickDeleteBlockPopupMenu

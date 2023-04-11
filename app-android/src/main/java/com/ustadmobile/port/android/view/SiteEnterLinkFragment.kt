@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -29,7 +30,7 @@ import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.SiteEnterLinkViewModel
-import com.ustadmobile.port.android.view.composable.UstadTextEditField
+import com.ustadmobile.port.android.view.composable.UstadErrorText
 
 class SiteEnterLinkFragment : UstadBaseMvvmFragment() {
 
@@ -77,11 +78,16 @@ private fun SiteEnterLinkScreen(
 
         Text(stringResource(R.string.please_enter_the_linK))
 
-        UstadTextEditField(
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("site_link_text"),
             value = uiState.siteLink,
-            label = stringResource(id = R.string.site_link),
-            onValueChange = onEditTextValueChange,
-            errorString = uiState.linkError,
+            label = { Text(stringResource(id = R.string.site_link)) },
+            onValueChange = {
+                onEditTextValueChange(it)
+            },
+            isError = uiState.linkError != null,
             enabled = uiState.fieldsEnabled,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
             keyboardActions = KeyboardActions(
@@ -91,12 +97,18 @@ private fun SiteEnterLinkScreen(
             )
         )
 
+        uiState.linkError?.also {
+            UstadErrorText(error = it)
+        }
+
+
         Spacer(modifier = Modifier.height(20.dp))
 
         Button(
             onClick = onClickNext,
             enabled = uiState.fieldsEnabled,
             modifier = Modifier
+                .testTag("next_button")
                 .fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = colorResource(id = R.color.secondaryColor)
@@ -116,6 +128,7 @@ private fun SiteEnterLinkScreen(
         Button(
             onClick = onClickNewLearningEnvironment,
             modifier = Modifier
+                .testTag("create_new_button")
                 .fillMaxWidth(),
             elevation = null,
             enabled = uiState.fieldsEnabled,

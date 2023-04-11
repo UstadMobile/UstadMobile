@@ -149,7 +149,7 @@ private fun ClazzEditScreen(
     onMoveCourseBlock: (from: ItemPosition, to: ItemPosition) -> Unit = {_, _ -> },
     onClickSchool: () -> Unit = {},
     onClickTimezone: () -> Unit = {},
-    onClickCourseBlock: (CourseBlock) -> Unit = {},
+    onClickEditCourseBlock: (CourseBlockWithEntity) -> Unit = {},
     onClickAddCourseBlock: () -> Unit = {},
     onClickAddSchedule: () -> Unit = {},
     onClickEditSchedule: (Schedule) -> Unit = {},
@@ -157,10 +157,11 @@ private fun ClazzEditScreen(
     onClickHolidayCalendar: () -> Unit = {},
     onCheckedAttendance: (Boolean) -> Unit = {},
     onClickTerminology: () -> Unit = {},
-    onClickHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit = {},
-    onClickIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit = {},
-    onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit = {},
-    onClickDeleteBlockPopupMenu: (CourseBlockWithEntity?) -> Unit = {},
+    onClickHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit = {},
+    onClickUnHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit = {},
+    onClickIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit = {},
+    onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit = {},
+    onClickDeleteBlockPopupMenu: (CourseBlockWithEntity) -> Unit = {},
 ) {
 
     val courseBlockKeys : List<Long> by remember(uiState.courseBlockList) {
@@ -233,7 +234,7 @@ private fun ClazzEditScreen(
                     modifier = Modifier
                         .clickable {
                             if (!dragging)
-                                onClickCourseBlock(courseBlock)
+                                onClickEditCourseBlock(courseBlock)
                         }
                         .alpha(courseBlockEditAlpha),
                     icon = {
@@ -259,6 +260,7 @@ private fun ClazzEditScreen(
                             enabled = uiState.fieldsEnabled,
                             uiState = uiState.courseBlockStateFor(courseBlock),
                             onClickHideBlockPopupMenu = onClickHideBlockPopupMenu,
+                            onClickUnHideBlockPopupMenu = onClickUnHideBlockPopupMenu,
                             onClickIndentBlockPopupMenu = onClickIndentBlockPopupMenu,
                             onClickUnIndentBlockPopupMenu = onClickUnIndentBlockPopupMenu,
                             onClickDeleteBlockPopupMenu = onClickDeleteBlockPopupMenu,
@@ -490,10 +492,11 @@ private fun ClazzEditBasicDetails(
 private fun PopUpMenu(
     enabled: Boolean,
     uiState: ClazzEditUiState.CourseBlockUiState,
-    onClickHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit,
-    onClickIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit,
-    onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit,
-    onClickDeleteBlockPopupMenu: (CourseBlockWithEntity?) -> Unit,
+    onClickHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit,
+    onClickUnHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit,
+    onClickIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit,
+    onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit,
+    onClickDeleteBlockPopupMenu: (CourseBlockWithEntity) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -520,7 +523,7 @@ private fun PopUpMenu(
 
             if(uiState.showUnhide) {
                 DropdownMenuItem(
-                    onClick = { onClickHideBlockPopupMenu(uiState.courseBlock) }
+                    onClick = { onClickUnHideBlockPopupMenu(uiState.courseBlock) }
                 ) {
                     Text(stringResource(id = R.string.unhide))
                 }
@@ -565,6 +568,15 @@ fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
         onClickAddSchedule = viewModel::onClickAddSchedule,
         onClickEditSchedule = viewModel::onClickEditSchedule,
         onClickDeleteSchedule = viewModel::onClickDeleteSchedule,
+        onClickEditCourseBlock = viewModel::onClickEditCourseBlock,
+        onClickHideBlockPopupMenu = viewModel::onClickHideBlockPopupMenu,
+        onClickUnHideBlockPopupMenu = viewModel::onClickUnHideBlockPopupMenu,
+        onClickIndentBlockPopupMenu = viewModel::onClickIndentBlockPopupMenu,
+        onClickUnIndentBlockPopupMenu = viewModel::onClickUnIndentBlockPopupMenu,
+        onClickDeleteBlockPopupMenu = viewModel::onClickDeleteCourseBlock,
+        onMoveCourseBlock = { from: ItemPosition, to: ItemPosition ->
+            viewModel.onCourseBlockMoved(from.index, to.index)
+        },
         onClickAddCourseBlock = {
             val sheet = TitleDescBottomSheetOptionFragment(
                 optionsList = ADD_COURSE_BLOCK_OPTIONS(context),

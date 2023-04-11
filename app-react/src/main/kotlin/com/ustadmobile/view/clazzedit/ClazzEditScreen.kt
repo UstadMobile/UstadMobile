@@ -58,15 +58,15 @@ external interface ClazzEditScreenProps : Props {
 
     var onClickTerminology: () -> Unit
 
-    var onClickHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+    var onClickHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit
 
-    var onClickUnHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+    var onClickUnHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit
 
-    var onClickIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+    var onClickIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit
 
-    var onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+    var onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit
 
-    var onClickDeleteBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+    var onClickDeleteBlockPopupMenu: (CourseBlockWithEntity) -> Unit
 
     var onClickEditCourseBlock: (CourseBlockWithEntity) -> Unit
 
@@ -157,15 +157,6 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
 
             }
 
-
-            TextField {
-                value = props.uiState.entity?.clazzTimeZone ?: ""
-                id = "clazz_timezone"
-                label = ReactNode(strings[MessageID.timezone])
-                disabled = !props.uiState.fieldsEnabled
-                onClick = { props.onClickTimezone() }
-            }
-
             UstadEditHeader {
                 + strings[MessageID.course_blocks]
             }
@@ -244,19 +235,16 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 }
             }
 
-
-            TextField {
-                value = props.uiState.entity?.holidayCalendar?.umCalendarName ?: ""
-                id = "clazz_calender_name"
-                label = ReactNode(strings[MessageID.holiday_calendar])
-                disabled = !props.uiState.fieldsEnabled
-                onClick = {
-                    props.onClickHolidayCalendar()
-                }
-            }
-
             UstadEditHeader {
                 + strings[MessageID.course_setup]
+            }
+
+            TextField {
+                value = props.uiState.entity?.clazzTimeZone ?: ""
+                id = "clazz_timezone"
+                label = ReactNode(strings[MessageID.timezone])
+                disabled = !props.uiState.fieldsEnabled
+                onClick = { props.onClickTimezone() }
             }
 
             UstadSwitchField {
@@ -265,21 +253,6 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 id = "clazz_attendance_switch"
                 onChanged = props.onCheckedAttendanceChanged
                 enabled = props.uiState.fieldsEnabled
-            }
-
-            UstadMessageIdSelectField {
-                value = props.uiState.entity?.clazzEnrolmentPolicy
-                    ?: EnrolmentPolicyConstants.ENROLMENT_POLICY_MESSAGE_IDS.first().value
-                options = EnrolmentPolicyConstants.ENROLMENT_POLICY_MESSAGE_IDS
-                label = strings[MessageID.enrolment_policy]
-                id = "clazz_enrolment_policy"
-                onChange = { option ->
-                    props.onClazzChanged(
-                        props.uiState.entity?.shallowCopy {
-                            clazzEnrolmentPolicy = option.value
-                        }
-                    )
-                }
             }
 
             TextField {
@@ -313,9 +286,16 @@ val ClazzEditScreen = FC<Props> {
         onClickAddSchedule = viewModel::onClickAddSchedule
         onClickEditSchedule = viewModel::onClickEditSchedule
         onClickDeleteSchedule = viewModel::onClickDeleteSchedule
-        onCourseBlockMoved = { fromIndex, toIndex ->
-
-        }
+        onCourseBlockMoved = viewModel::onCourseBlockMoved
+        onClickTimezone = viewModel::onClickTimezone
+        onClickHolidayCalendar = viewModel::onClickHolidayCalendar
+        onClickTerminology = viewModel::onClickTerminology
+        onClickHideBlockPopupMenu = viewModel::onClickHideBlockPopupMenu
+        onClickUnHideBlockPopupMenu = viewModel::onClickUnHideBlockPopupMenu
+        onClickIndentBlockPopupMenu = viewModel::onClickIndentBlockPopupMenu
+        onClickUnIndentBlockPopupMenu = viewModel::onClickUnIndentBlockPopupMenu
+        onClickEditCourseBlock = viewModel::onClickEditCourseBlock
+        onClickDeleteBlockPopupMenu = viewModel::onClickDeleteCourseBlock
         onClickAddCourseBlock = {
             addCourseBlockDialogVisible = true
         }

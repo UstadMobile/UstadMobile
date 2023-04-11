@@ -24,15 +24,15 @@ external interface PopUpMenuProps : Props {
 
     var fieldsEnabled: Boolean
 
-    var onClickHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+    var onClickHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit
 
-    var onClickUnHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+    var onClickUnHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit
 
-    var onClickIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+    var onClickIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit
 
-    var onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+    var onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit
 
-    var onClickDeleteBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+    var onClickDeleteBlockPopupMenu: (CourseBlockWithEntity) -> Unit
 
     var uiState: ClazzEditUiState.CourseBlockUiState
 
