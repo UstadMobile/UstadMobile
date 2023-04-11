@@ -9,6 +9,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.hooks.useTimeInOtherTimeZoneAsJsDate
 import com.ustadmobile.mui.common.*
 import com.ustadmobile.util.ext.toMillisInOtherTimeZone
+import com.ustadmobile.view.components.UstadSelectField
 import com.ustadmobile.view.components.UstadSwitchField
 import kotlinx.datetime.TimeZone
 import js.core.jso
@@ -270,7 +271,7 @@ external interface MessageIDDropDownFieldProps: Props {
     /**
      * DOM element id
      */
-    var id: String?
+    var id: String
 
     /**
      *
@@ -389,15 +390,15 @@ val UstadDropDownField = FC<UstadDropDownFieldProps> { props ->
 val UstadMessageIdDropDownField = FC<MessageIDDropDownFieldProps> { props ->
     val strings = useStringsXml()
 
-    UstadDropDownField {
-        value = props.options.firstOrNull { it.value == props.value }
+    UstadSelectField<MessageIdOption2> {
+        value = props.value.toString()
         label = props.label
         options = props.options
         fullWidth = props.fullWidth
-        itemLabel = { ReactNode(strings[(it as MessageIdOption2).messageId]) }
-        itemValue = { (it as MessageIdOption2).value.toString() }
+        itemLabel = { ReactNode(if(it.messageId == 0) "" else strings[it.messageId]) }
+        itemValue = { it.value.toString() }
         onChange = {
-            props.onChange(it as? MessageIdOption2)
+            props.onChange(it)
         }
         id = props.id
         enabled = props.enabled

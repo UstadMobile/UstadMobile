@@ -3,6 +3,8 @@ package com.ustadmobile.port.android.util.ext
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentManager
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.PREFKEY_LOCALE
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -13,6 +15,10 @@ fun Context.getActivityContext(): Activity = when (this) {
     is Activity -> this
     is ContextWrapper -> this.baseContext.getActivityContext()
     else -> throw IllegalArgumentException("Not an activity context")
+}
+
+fun Context.getContextSupportFragmentManager(): FragmentManager {
+    return (getActivityContext() as AppCompatActivity).supportFragmentManager
 }
 
 /**
