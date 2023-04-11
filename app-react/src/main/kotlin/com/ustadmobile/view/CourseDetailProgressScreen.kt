@@ -183,19 +183,15 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
         }
     }
 
-    Typography {
-        + "$headerIndex"
-    }
-
     VirtualList {
         style = jso {
             height = "calc(100vh - ${props.muiAppState.appBarHeight+100}px)".unsafeCast<Height>()
-//                width = 100.pct
+                width = 100.pct
             contain = Contain.strict
             overflowY = Overflow.scroll
-//                position = Position.absolute
-//                marginLeft = 0.px
-//                marginTop = 100.px
+                position = Position.absolute
+                marginLeft = 0.px
+                marginTop = 100.px
         }
 
         content = virtualListContent {
@@ -207,12 +203,16 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                 key = { it.personUid.toString() }
             ) { person ->
                 ListItem.create {
-
+//                    sx {
+//                        position = Position.absolute
+//                        marginLeft = 0.px
+//                    }
 
                     ListItemButton{
 
                         sx {
-                            background = Color("#ffffff")
+                            position = Position.sticky
+                            marginLeft = 0.px
                         }
                         onClick = {
                             person?.also { props.onClickStudent(it) }
