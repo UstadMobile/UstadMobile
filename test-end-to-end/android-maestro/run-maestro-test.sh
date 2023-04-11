@@ -189,7 +189,7 @@ TESTSTATUS=$?
 
 $SCRIPTDIR/../../testserver-controller/stop.sh
 
-Uninstall when finished
+#Uninstall when finished
  adb shell pm uninstall com.toughra.ustadmobile
  adb shell pm uninstall com.toughra.ustadmobile2
  adb shell pm uninstall info.guardianproject.ripple
