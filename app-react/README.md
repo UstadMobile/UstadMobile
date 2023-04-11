@@ -32,6 +32,9 @@ should contain the UiState class and all event handlers.
 3. Add the screen to useUstadScreens ( in com.ustadmobile.hooks ). This will add the screen to the
 navigation bar on the left. You can now view the screen in the browser.
 
+### Known Issues:
+
+1. Do not import mui.icons.material.* - this will make autocomplete/intellisense unusably slow in the IDE.
 
 ## Development
 

@@ -198,7 +198,6 @@ class ClazzEditViewModel(
             launch {
                 resultReturner.filteredResultFlowForKey(RESULT_KEY_SCHEDULE).collect { result ->
                     val returnedSchedule = result.result as? Schedule ?: return@collect
-                    returnedSchedule.scheduleClazzUid = _uiState.value.entity?.clazzUid ?: 0L
                     val newSchedules = _uiState.value.clazzSchedules.replaceOrAppend(returnedSchedule) {
                         it.scheduleUid == returnedSchedule.scheduleUid
                     }
@@ -369,12 +368,28 @@ class ClazzEditViewModel(
                     activeDb.clazzDao.updateAsync(initEntity)
                 }
 
-                activeDb.scheduleDao.upsertListAsync(_uiState.value.clazzSchedules)
+                val clazzUid = entity.clazzUid
+
+                val schedulesToCommit = _uiState.value.clazzSchedules.map {
+                    it.shallowCopy { scheduleClazzUid = clazzUid }
+                }
+
+                activeDb.scheduleDao.upsertListAsync(schedulesToCommit)
                 activeDb.scheduleDao.deactivateByUids(
-                    initState.clazzSchedules.filterKeysNotInOtherList(
-                        _uiState.value.clazzSchedules
-                    ) {
+                    initState.clazzSchedules.findKeysNotInOtherList(schedulesToCommit) {
                         it.scheduleUid
+                    }, systemTimeInMillis()
+                )
+
+                val courseBlockModulesToCommit = _uiState.value.courseBlockList.map {
+                    it.shallowCopy {
+                        cbClazzUid = clazzUid
+                    }
+                }
+                activeDb.courseBlockDao.upsertListAsync(courseBlockModulesToCommit)
+                activeDb.courseBlockDao.deactivateByUids(
+                    initState.courseBlockList.findKeysNotInOtherList(courseBlockModulesToCommit) {
+                        it.cbUid
                     }, systemTimeInMillis()
                 )
             }

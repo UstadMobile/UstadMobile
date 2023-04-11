@@ -6,7 +6,13 @@ import com.ustadmobile.core.viewmodel.SchoolDetailOverviewUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.UstadDetailField
 import csstype.px
-import mui.icons.material.*
+//WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
+import mui.icons.material.ExitToApp
+import mui.icons.material.LocationOn
+import mui.icons.material.Call
+import mui.icons.material.CalendarMonth
+import mui.icons.material.Email
+import mui.icons.material.Language
 import mui.material.*
 import mui.material.List
 import mui.material.styles.TypographyVariant
@@ -17,6 +23,8 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+
+
 
 external interface SchoolDetailOverviewProps : Props {
 

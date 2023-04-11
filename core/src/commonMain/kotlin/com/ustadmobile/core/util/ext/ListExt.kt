@@ -23,7 +23,7 @@ fun <T> List<T>.replaceOrAppend(
  * the new list. This is commonly used in one-many join scenarios where we need to see which
  * keys need deactivated
  */
-fun <T, R> List<T>.filterKeysNotInOtherList(
+fun <T, R> List<T>.findKeysNotInOtherList(
     otherList: List<T>,
     key: (T) -> R,
 ): List<R> {

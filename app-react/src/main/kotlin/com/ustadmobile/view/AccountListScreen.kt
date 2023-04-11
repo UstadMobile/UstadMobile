@@ -9,7 +9,11 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UserSession
 import com.ustadmobile.mui.components.UstadAddListItem
 import csstype.px
-import mui.icons.material.*
+//WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
+import mui.icons.material.Delete
+import mui.icons.material.AccountCircle
+import mui.icons.material.Person2
+import mui.icons.material.LinkOutlined
 import mui.material.*
 import mui.system.responsive
 import mui.system.sx

@@ -4,16 +4,14 @@ import com.ustadmobile.core.components.NAVHOST_CLEARSTACK_VIEWNAME
 import com.ustadmobile.core.components.NavHostClearStackPlaceholder
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.CourseBlockEditViewModel
-import com.ustadmobile.entities.UstadScreen
-import com.ustadmobile.entities.UstadScreens
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.*
+import com.ustadmobile.view.clazzedit.ClazzEditScreen
 import com.ustadmobile.view.components.UstadImageSelectButtonPreview
 import com.ustadmobile.view.components.UstadMessageIdSelectFieldPreview
 import com.ustadmobile.view.components.UstadSelectFieldPreview
 import com.ustadmobile.view.components.virtuallist.VirtualListPreview
 import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
-import react.useMemo
 import react.Props
 import react.FC
 import com.ustadmobile.wrappers.quill.QuillDemo
@@ -67,7 +65,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(LanguageDetailView.VIEW_NAME, name = "LanguageDetail Preview",
         LanguageDetailPreview),
     UstadScreen(ClazzEdit2View.VIEW_NAME, "Course Edit",
-        ClazzEditScreen),
+        ClazzEditScreen
+    ),
     UstadScreen("EasySort", "Easy Sort", EasySortPreview),
     UstadScreen(ErrorReportView.VIEW_NAME, name = "ErrorReport Preview", ErrorReportPreview),
     UstadScreen(LanguageEditView.VIEW_NAME, "LanguageEdit Preview", LanguageEditPreview),

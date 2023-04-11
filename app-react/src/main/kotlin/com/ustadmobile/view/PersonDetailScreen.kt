@@ -17,8 +17,18 @@ import com.ustadmobile.mui.components.UstadQuickActionButton
 import com.ustadmobile.view.components.UstadFab
 import csstype.ObjectFit
 import mui.material.List
-import mui.icons.material.*
+//WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
 import mui.material.*
+import mui.icons.material.Call
+import mui.icons.material.Email
+import mui.icons.material.Key
+import mui.icons.material.SupervisedUserCircle
+import mui.icons.material.Chat
+import mui.icons.material.CalendarToday
+import mui.icons.material.AccountCircle
+import mui.icons.material.LocationOn
+import mui.icons.material.Person
+import mui.icons.material.People
 import react.dom.html.ReactHTML.img
 import mui.icons.material.Badge
 import mui.material.Container

@@ -13,13 +13,21 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.common.xs
 import csstype.TextAlign
 import csstype.px
-import mui.icons.material.*
 import mui.material.*
 import mui.material.List
 import mui.material.StackDirection
 import mui.system.responsive
 import mui.system.sx
 import react.*
+
+//WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
+import mui.icons.material.LibraryAddCheckOutlined
+import mui.icons.material.CheckBoxOutlined
+import mui.icons.material.ArrowBack
+import mui.icons.material.ArrowForward
+import mui.icons.material.Done
+import mui.icons.material.Close
+import mui.icons.material.AccessTime
 
 external interface ClazzLogEditAttendanceScreenProps : Props {
 
