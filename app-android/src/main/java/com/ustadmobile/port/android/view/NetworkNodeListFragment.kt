@@ -41,7 +41,7 @@ private fun NetworkNodeListScreen(
             UstadDetailField(
                 valueText = uiState.deviceNumber,
                 labelText = stringResource(R.string.device),
-                imageId = R.drawable.ic_phone_black_24dp,
+                icon = { Icon(Icons.Default.Smartphone, contentDescription = "") },
             )
         }
 
