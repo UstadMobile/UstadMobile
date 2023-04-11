@@ -1,0 +1,30 @@
+appId: info.guardianproject.ripple
+---
+- clearState: info.guardianproject.ripple
+- launchApp
+- tapOn: "Trigger!"
+- repeat:
+    while:
+      visible: "Tap to trigger a ripple"
+    commands:
+      - tapOn:
+          id: "info.guardianproject.ripple:id/panic_button"
+- repeat:
+    while:
+      visible: "Swipe down to trigger"
+    commands:
+      - swipe:
+          from:
+            id: "info.guardianproject.ripple:id/panic_swipe_button"
+          direction: DOWN
+- extendedWaitUntil:
+    visible: "OK"
+    timeout: 10000
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/panic_triggered_test"
+- tapOn: "OK"
+
+
+
+
+
+

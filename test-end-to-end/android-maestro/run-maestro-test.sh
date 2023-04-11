@@ -2,7 +2,7 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 's:u:p:e:t:a:cr' --long 'serial1:,username:,password:,endpoint:,test:,apk:,console-output,result:' -n 'run-maestro-tests.sh' -- "$@")
+TEMP=$(getopt -o 's:u:p:e:t:a1:a2:a3:a4:cr:n' --long 'serial1:,username:,password:,endpoint:,test:,apk1:,apk2:,apk3:,apk4:,console-output,result:,nobuild' -n 'run-maestro-tests.sh' -- "$@")
 
 
 eval set -- "$TEMP"
@@ -13,10 +13,14 @@ TESTPASS="testpass"
 WORKDIR=$(pwd)
 TEST=""
 SCRIPTDIR=$(realpath $(dirname $0))
-TESTAPK=$SCRIPTDIR/../../app-android-launcher/build/outputs/apk/release/app-android-launcher-release.apk
+TESTAPK1=$SCRIPTDIR/build/apks/app-android-launcher-release.apk
+TESTAPK2=$SCRIPTDIR/build/apks/app-android-launcher-release-2.apk
+RIPPLEAPK=$SCRIPTDIR/../test-files/apk/info.guardianproject.ripple_139.apk
+USTADAPICONSUMERAPK=$SCRIPTDIR/../test-files/apk/app-debug.apk
 TESTRESULTSDIR=""
 CONTROLSERVER=""
 USECONSOLEOUTPUT=0
+NOBUILD=0
 echo $SCRIPTDIR
 while true; do
         case "$1" in
@@ -46,9 +50,27 @@ while true; do
                      shift 2
                      continue
                ;;
-               '-a'|'--apk')
-                     echo "Set APK to $2"
-                     TESTAPK=$2
+               '-a1'|'--apk1')
+                     echo "Set APK1 to $2"
+                     TESTAPK1=$2
+                     shift 2
+                     continue
+               ;;
+               '-a2'|'--apk2')
+                     echo "Set APK2 to $2"
+                     TESTAPK2=$2
+                     shift 2
+                     continue
+               ;;
+               '-a3'|'--apk3')
+                     echo "Set APK3 to $2"
+                     RIPPLEAPK=$2
+                     shift 2
+                     continue
+               ;;
+               '-a4'|'--apk4')
+                     echo "Set APK4 to $2"
+                     USTADAPICONSUMERAPK=$2
                      shift 2
                      continue
                ;;
@@ -59,9 +81,15 @@ while true; do
                      continue
                 ;;
                 '-r'|'--result')
-                     echo "result"
+                    echo "result"
                     TESTRESULTSDIR=$2
                     shift 2
+                    continue
+                ;;
+                '-n'|'--nobuild')
+                    echo "no build"
+                    NOBUILD=1
+                    shift 1
                     continue
                 ;;
                 '--')
@@ -122,7 +150,22 @@ if [ "$(adb shell pm list packages com.toughra.ustadmobile2)" != "" ]; then
   adb shell pm uninstall com.toughra.ustadmobile2
 fi
 
-adb install $TESTAPK
+if [ "$(adb shell pm list packages com.ustadmobile.ustadapiconsumer)" != "" ]; then
+  adb shell pm uninstall com.ustadmobile.ustadapiconsumer
+fi
+
+if [ "$(adb shell pm list packages info.guardianproject.ripple)" != "" ]; then
+  adb shell pm uninstall info.guardianproject.ripple
+fi
+
+if [ "$NOBUILD" != "1" ]; then
+ $SCRIPTDIR/build-extra-app-copy.sh
+fi
+
+adb install $TESTAPK1
+adb install $TESTAPK2
+adb install $RIPPLEAPK
+adb install $USTADAPICONSUMERAPK
 
 TESTARG=$TEST
 if [ "$TEST" != "" ]; then
@@ -140,13 +183,16 @@ maestro  --device=$TESTSERIAL  test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER 
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
          -e TESTSERIAL=$TESTSERIAL $OUTPUTARGS\
          $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR \
-          #--include-tags=checklist1
+         # --include-tags=checklist6
 
 TESTSTATUS=$?
 
 $SCRIPTDIR/../../testserver-controller/stop.sh
 
-#Uninstall when finished
-adb shell pm uninstall com.toughra.ustadmobile
+Uninstall when finished
+ adb shell pm uninstall com.toughra.ustadmobile
+ adb shell pm uninstall com.toughra.ustadmobile2
+ adb shell pm uninstall info.guardianproject.ripple
+ adb shell pm uninstall com.ustadmobile.ustadapiconsumer
 
 exit $TESTSTATUS

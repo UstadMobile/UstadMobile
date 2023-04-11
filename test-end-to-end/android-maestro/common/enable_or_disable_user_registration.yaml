@@ -1,0 +1,13 @@
+appId: com.toughra.ustadmobile
+---
+# admin enable user registration button using this flow
+ # Test parameters needs to provide for this test :
+  # 1) TESTRESULTSDIR : provide the path to store test results
+- tapOn: "Settings"
+- tapOn: "Site"
+- tapOn: "Edit"
+- tapOn: "Registration allowed"
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/user_registration_enabled"
+
+

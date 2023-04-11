@@ -1,0 +1,36 @@
+appId: com.toughra.ustadmobile
+tags:
+  - checklist6
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/008_intropability_app_test"
+  TESTNAME: 008_intropability_app_test
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+- runFlow:
+    file: "../common/create_course_with_1teacher_1student.yaml"
+    env:
+      TESTCOURSENAME: "Test Course"
+- tapOn: "Profile"
+- tapOn: "Add another account"
+- tapOn: "Site link"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: t1
+      PASSWORD: test
+- runFlow:
+     file: "../common/api_consumer_app_singlesignon_user_loggedin.yaml"
+- launchApp
+- tapOn: "Profile"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/single-sign-on-success"

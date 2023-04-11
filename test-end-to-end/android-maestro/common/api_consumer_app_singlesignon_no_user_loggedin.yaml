@@ -1,0 +1,12 @@
+appId: com.ustadmobile.ustadapiconsumer
+---
+- launchApp
+- tapOn: "Request Token"
+- tapOn:
+    text: "Ustad Mobile"
+    index: 0
+- tapOn: "Always"
+- runFlow: "select_site.yaml"
+- runFlow:
+      file: "user_login.yaml"
+- tapOn: "ACCEPT"

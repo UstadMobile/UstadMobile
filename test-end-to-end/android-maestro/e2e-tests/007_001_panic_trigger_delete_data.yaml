@@ -1,0 +1,31 @@
+appId: com.toughra.ustadmobile
+tags:
+  - checklist7
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/007_001_panic_trigger_delete_data"
+  TESTNAME: 007_001_panic_trigger_delete_data
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow:
+    file: "../common/panic_trigger_start.yaml"
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+- tapOn: "Settings"
+- tapOn: "Panic button app"
+- tapOn: "Panic button app"
+- tapOn: "Ripple"
+- tapOn: "Exit app"
+- tapOn: "Delete app data from device"
+- runFlow:
+    file: "../common/panic_trigger_ripple.yaml"
+- launchApp
+- tapOn: "Get Started"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/deleted_ustad_app_data"
