@@ -25,6 +25,25 @@ fun UstadDetailField(
     valueText: String,
     labelText: String,
     modifier: Modifier = Modifier,
+    icon: (@Composable () -> Unit)? = null,
+    onClick: (() -> Unit)? = null,
+    secondaryActionContent: (@Composable () -> Unit)? = null,
+) {
+    UstadDetailField(
+        valueText = AnnotatedString(valueText),
+        labelText = AnnotatedString(labelText),
+        modifier = modifier,
+        icon = icon,
+        onClick = onClick,
+        secondaryActionContent = secondaryActionContent,
+    )
+}
+
+@Composable
+fun UstadDetailField(
+    valueText: String,
+    labelText: String,
+    modifier: Modifier = Modifier,
     imageId: Int = 0,
     onClick: (() -> Unit)? = null,
     secondaryActionContent: (@Composable () -> Unit)? = null,
