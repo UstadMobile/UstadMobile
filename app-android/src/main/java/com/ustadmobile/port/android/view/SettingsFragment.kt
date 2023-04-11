@@ -155,7 +155,8 @@ private fun SettingsScreen(
             UstadDetailField(
                 valueText = stringResource(R.string.holiday_calendars),
                 labelText = stringResource(id = R.string.holiday_calendars_desc),
-                onClick = onClickGoToHolidayCalendarList
+                imageId = 0,
+                onClick = onClickGoToHolidayCalendarList,
             )
         }
 
