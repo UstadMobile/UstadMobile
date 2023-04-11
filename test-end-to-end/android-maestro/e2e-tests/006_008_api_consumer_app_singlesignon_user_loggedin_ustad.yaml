@@ -2,8 +2,8 @@ appId: com.toughra.ustadmobile
 tags:
   - checklist6
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/008_intropability_app_test"
-  TESTNAME: 008_intropability_app_test
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/006_008_api_consumer_app_singlesignon_user_loggedin_ustad"
+  TESTNAME: 006_008_api_consumer_app_singlesignon_user_loggedin_ustad
 ---
 - clearState: com.toughra.ustadmobile
 - runFlow:
