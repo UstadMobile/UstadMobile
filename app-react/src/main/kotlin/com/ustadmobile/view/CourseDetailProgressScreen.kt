@@ -80,42 +80,53 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 
             sx {
                 width = 100.pct
-                overflowX = Overflow.hidden
+//            overflowX = Overflow.hidden
+                marginLeft = -scrollX.px
+                display = Display.flex
+//                alignItems = AlignItems.flexStart
+//                justifyContent = JustifyContent.flexStart
             }
-            props.uiState.results.forEachIndexed { index, item ->
-                ListItem {
 
+            Box {
+                sx {
+                    width = 200.px
+                }
+            }
+
+            props.uiState.results.forEachIndexed { index, item ->
+
+                Typography {
                     sx {
+                        width = 44.px
+                        transform = rotate(270.deg)
                         if (scrollX > index){
                             position = Position.absolute
                             marginLeft = -(44*index).px
+                            color = Color("000000")
                         }
-                        width = 44.px
-                        transform = rotate(270.deg)
                     }
 
-                    ListItemText {
-                        primary = ReactNode(item)
-                    }
+                    + item
                 }
             }
         }
     }
 
+
     VirtualList {
         style = jso {
             height = "calc(100vh - ${props.muiAppState.appBarHeight+100}px)".unsafeCast<Height>()
-                width = 100.pct
+            width = 100.pct
             contain = Contain.strict
             overflowY = Overflow.scroll
-                position = Position.absolute
-                marginLeft = 0.px
-                marginTop = 100.px
+//                    display = Display.flex
+//                    alignItems = AlignItems.flexStart
+//            position = Position.absolute
+//            marginLeft = 0.px
+            marginTop = 100.px
         }
 
         content = virtualListContent {
-
-
 
             infiniteQueryPagingItems(
                 items = infiniteQueryResult,
@@ -123,12 +134,8 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
             ) { person ->
                 Stack.create {
                     direction = responsive(StackDirection.row)
-//                    sx {
-//                        position = Position.absolute
-//                        marginLeft = 0.px
-//                    }
 
-                    ListItemButton{
+                    Box{
 
                         sx {
                             position = Position.sticky
@@ -138,48 +145,41 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                             person?.also { props.onClickStudent(it) }
                         }
 
-                        ListItemIcon {
-                            UstadPersonAvatar {
-                                personUid = person?.personUid ?: 0
-                            }
+                        UstadPersonAvatar {
+                            personUid = person?.personUid ?: 0
                         }
 
-                        ListItemText {
-                            primary = ReactNode("${person?.fullName()}")
+                        Typography {
+                            + "${person?.fullName()}"
                         }
 
                     }
 
-                    Box {
-                        sx {
-                            display = Display.flex
-                            flexDirection = FlexDirection.row
-//                            overflowX = Overflow.scroll
-//                                position = Position.absolute
-//                            width = 300.px
-//                                marginLeft = 120.px
-                        }
-
-
-
-                        props.uiState.results.forEachIndexed { index, item ->
-                            ListItem {
-
-                                sx {
-                                    width = 44.px
-                                    if (scrollX > index){
-                                        position = Position.absolute
-                                        marginLeft = -(44*index).px
-                                        color = Color("000000")
-                                    }
-                                }
-
-                                ListItemIcon {
-
-                                    + CheckBoxOutlined.create()
-                                }
+                    (0..60).forEachIndexed { index, item ->
+                        Typography {
+                            sx {
+                                width = 60.px
+//                                if (scrollX > index){
+//                                    position = Position.absolute
+//                                    marginLeft = -(44*index).px
+//                                    color = Color("000000")
+//                                }
                             }
+                            + "Text $index"
                         }
+//                        Icon {
+//
+//                            sx {
+//                                width = 60.px
+//                                if (scrollX > index){
+//                                    position = Position.absolute
+//                                    marginLeft = -(44*index).px
+//                                    color = Color("000000")
+//                                }
+//                            }
+//
+//                            + CheckBoxOutlined.create()
+//                        }
                     }
                 }
             }
@@ -192,13 +192,15 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                 sx {
                     width = 100.pct
                     overflowX = Overflow.scroll
+//                    display =  Display.flex
+//                    alignItems = AlignItems.flexStart
                 }
                 onScroll = { event ->
                     scrollX = event.target.unsafeCast<HTMLElement>().scrollLeft.toInt()
                 }
-            }
 
-            VirtualListOutlet()
+                VirtualListOutlet()
+            }
         }
     }
 }
