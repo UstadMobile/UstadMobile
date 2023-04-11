@@ -1,0 +1,17 @@
+appId: com.toughra.ustadmobile
+tags:
+  - checklist6
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/006_009_api_consumer_app_singlesignon_no_user_loggedin_ustad"
+  TESTNAME: 006_009_api_consumer_app_singlesignon_no_user_loggedin_ustad
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow:
+    file: "../common/api_consumer_app_singlesignon_no_user_loggedin.yaml.yaml"
+- launchApp
