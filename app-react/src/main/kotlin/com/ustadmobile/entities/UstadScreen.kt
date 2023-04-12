@@ -91,7 +91,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ScopedGrantEditView.VIEW_NAME,
         "ScopedGrantEdit Preview", ScopedGrantEditScreenPreview),
     UstadScreen(CourseTerminologyEditView.VIEW_NAME,
-        "CourseTerminologyEdit Preview", CourseTerminologyEditScreenPreview),
+        "CourseTerminologyEdit Preview", CourseTerminologyEditScreen),
     UstadScreen("UstadListFilterChipsHeader",
         "UstadListFilterChipsHeaderPreview Preview", UstadListFilterChipsHeaderPreview),
     UstadScreen("UstadListSortHeader",

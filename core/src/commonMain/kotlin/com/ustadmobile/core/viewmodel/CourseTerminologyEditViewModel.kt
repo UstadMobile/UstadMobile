@@ -120,6 +120,9 @@ class CourseTerminologyEditViewModel(
         viewModelScope.launch {
             val terminology = _uiState.value.entity ?: return@launch
             activeDb.courseTerminologyDao.upsertAsync(terminology)
+
+            //There is no terminology detail view
+            finishWithResult(terminology)
         }
     }
 

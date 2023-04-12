@@ -63,12 +63,12 @@ val CourseTerminologyListComponent = FC<CourseTerminologyListProps> { props ->
                                 props.onClickAddNewItem()
                             }
 
-                            ListItemText {
-                                primary = ReactNode(strings[MessageID.add_new_terminology])
-                            }
-
                             ListItemIcon {
                                 Add()
+                            }
+
+                            ListItemText {
+                                primary = ReactNode(strings[MessageID.add_new_terminology])
                             }
                         }
                     }
