@@ -97,6 +97,9 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
     val navResultReturner: NavResultReturner
         get() = di.direct.instance()
 
+    val json: Json
+        get() = di.direct.instance()
+
     private var diVar = DI {
         import(CommonJvmDiModule)
 

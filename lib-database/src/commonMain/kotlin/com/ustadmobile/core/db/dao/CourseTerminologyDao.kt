@@ -1,5 +1,7 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
@@ -64,13 +66,6 @@ expect abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
          FROM CourseTerminology
      ORDER BY ctTitle   
     """)
-    abstract fun findAllCourseTerminology(): DataSourceFactory<Int, CourseTerminology>
-
-    @Query("""
-        SELECT *
-         FROM CourseTerminology
-     ORDER BY ctTitle   
-    """)
     abstract fun findAllCourseTerminologyPagingSource(): PagingSource<Int, CourseTerminology>
 
     @Query("""
@@ -101,5 +96,8 @@ expect abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
 
     @Update
     abstract suspend fun updateAsync(entity: CourseTerminology): Int
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertAsync(entity: CourseTerminology): Long
 
 }
