@@ -15,6 +15,8 @@ import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
 import react.Props
 import react.FC
 import com.ustadmobile.wrappers.quill.QuillDemo
+import com.ustadmobile.view.timezonelist.TimeZoneListScreen
+import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -146,6 +148,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("Quill", "Quill", QuillDemo),
     UstadScreen("CourseBlockEdit", CourseBlockEditViewModel.DEST_NAME,
         CourseBlockEditScreen),
+    UstadScreen(TimeZoneListViewModel.DEST_NAME, "Time Zone List", TimeZoneListScreen),
 )
 
 

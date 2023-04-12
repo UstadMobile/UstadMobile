@@ -229,6 +229,15 @@ class ClazzEditViewModel(
                 }
             }
 
+            launch {
+                resultReturner.filteredResultFlowForKey(RESULT_KEY_TIMEZONE).collect {result ->
+                    val timeZoneId = result.result as? String ?: return@collect
+                    onEntityChanged(_uiState.value.entity?.shallowCopy {
+                        clazzTimeZone = timeZoneId
+                    })
+                }
+            }
+
             _uiState.update { prev ->
                 prev.copy(fieldsEnabled = true)
             }
@@ -433,7 +442,13 @@ class ClazzEditViewModel(
     }
 
     fun onClickTimezone() {
-
+        navController.navigate(
+            viewName = TimeZoneListViewModel.DEST_NAME,
+            args = mapOf(
+                UstadView.ARG_RESULT_DEST_KEY to RESULT_KEY_TIMEZONE,
+                UstadView.ARG_RESULT_DEST_VIEWNAME to destinationName,
+            )
+        )
     }
 
     fun onClickHolidayCalendar() {
@@ -506,6 +521,8 @@ class ClazzEditViewModel(
         const val STATE_KEY_SCHEDULES = "schedule"
 
         const val RESULT_KEY_COURSEBLOCK = "courseblock"
+
+        const val RESULT_KEY_TIMEZONE = "timeZone"
 
         const val STATE_KEY_COURSEBLOCKS = "courseblocks"
 

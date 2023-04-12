@@ -14,6 +14,8 @@ import com.ustadmobile.core.viewmodel.ClazzEditUiState
 import com.ustadmobile.core.viewmodel.ClazzEditViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.mui.common.input
+import com.ustadmobile.mui.common.readOnly
 import com.ustadmobile.mui.components.UstadDateEditField
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.util.ext.addOptionalSuffix
@@ -29,6 +31,10 @@ import mui.system.responsive
 import mui.system.sx
 import react.*
 import com.ustadmobile.util.ext.onTextChange
+import csstype.Cursor
+import js.core.jso
+import kotlinx.css.input
+import kotlin.js.json
 
 const val COURSE_BLOCK_DRAG_CLASS = "dragging_course_block"
 
@@ -240,11 +246,19 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
             }
 
             TextField {
+                sx {
+                    input {
+                        cursor = Cursor.pointer
+                    }
+                }
                 value = props.uiState.entity?.clazzTimeZone ?: ""
                 id = "clazz_timezone"
                 label = ReactNode(strings[MessageID.timezone])
                 disabled = !props.uiState.fieldsEnabled
                 onClick = { props.onClickTimezone() }
+                inputProps = jso {
+                    readOnly = true
+                }
             }
 
             UstadSwitchField {
