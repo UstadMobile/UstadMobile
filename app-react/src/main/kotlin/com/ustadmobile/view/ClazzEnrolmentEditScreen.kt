@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadDateEditField
-import com.ustadmobile.mui.components.UstadMessageIdDropDownField
+import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.mui.components.UstadTextEditField
 import csstype.px
 import mui.material.Container
@@ -40,7 +40,7 @@ val ClazzEnrolmentEditScreenComponent2 = FC<ClazzEnrolmentEditScreenProps> { pro
             direction = responsive(StackDirection.column)
             spacing = responsive(20.px)
 
-            UstadMessageIdDropDownField {
+            UstadMessageIdSelectField {
                 value = props.uiState.clazzEnrolment?.clazzEnrolmentRole ?: 0
                 label = strings[MessageID.role]
                 options = RoleConstants.ROLE_MESSAGE_IDS
@@ -49,7 +49,7 @@ val ClazzEnrolmentEditScreenComponent2 = FC<ClazzEnrolmentEditScreenProps> { pro
                 onChange = {
                     props.onClazzEnrolmentChanged(
                         props.uiState.clazzEnrolment?.shallowCopy {
-                            clazzEnrolmentRole = it?.value ?: 0
+                            clazzEnrolmentRole = it.value
                     })
                 }
             }
@@ -82,7 +82,7 @@ val ClazzEnrolmentEditScreenComponent2 = FC<ClazzEnrolmentEditScreenProps> { pro
                 }
             }
 
-            UstadMessageIdDropDownField {
+            UstadMessageIdSelectField {
                 value = props.uiState.clazzEnrolment?.clazzEnrolmentOutcome ?: 0
                 label = strings[MessageID.outcome]
                 options = OutcomeConstants.OUTCOME_MESSAGE_IDS

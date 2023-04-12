@@ -2,18 +2,16 @@ package com.ustadmobile.view.components.virtuallist
 
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.door.paging.LoadResult
+import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
-import com.ustadmobile.view.UstadScreenProps
 import csstype.*
 import js.core.jso
-import kotlinx.coroutines.GlobalScope
 import mui.material.Container
 import mui.material.ListItem
 import mui.material.ListItemText
 import mui.material.Typography
 import react.*
-import tanstack.query.core.QueryKey
 
 val demoPersonList = (0..100).map {
     PersonWithDisplayDetails().apply {
@@ -23,17 +21,19 @@ val demoPersonList = (0..100).map {
     }
 }
 
-val demoPagingSource = ListPagingSource(demoPersonList)
+val demoPagingSource = { ListPagingSource(demoPersonList) }
 
-val VirtualListPreview = FC<UstadScreenProps> {props ->
+val VirtualListPreview = FC<Props> {
 
     val infiniteQueryResult = usePagingSource(
-        demoPagingSource, QueryKey("PersonList"), GlobalScope, true, 50
+        demoPagingSource, true, 50
     )
+
+    val muiAppState = useMuiAppState()
 
     VirtualList {
         style = jso {
-            height = "calc(100vh - ${props.muiAppState.appBarHeight}px)".unsafeCast<Height>()
+            height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
             width = 100.pct
             contain = csstype.Contain.strict
             overflowY = csstype.Overflow.scroll
@@ -59,10 +59,12 @@ val VirtualListPreview = FC<UstadScreenProps> {props ->
 
             infiniteQueryItems(
                 infiniteQueryResult = infiniteQueryResult,
-                dataPageToItems = {
-                    (it as? LoadResult.Page)?.data ?: listOf()
+                dataPagesToItems = { pages ->
+                    pages.mapNotNull { it as? LoadResult.Page<Int, PersonWithDisplayDetails> }.flatMap {
+                        it.data
+                    }
                 },
-                itemToKey = { "${it?.personUid}" }
+                itemToKey = { "${it.personUid}" }
             ) { person ->
                 ListItem.create {
                     ListItemText {

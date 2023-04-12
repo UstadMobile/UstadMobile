@@ -3,6 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.ClazzMemberListUiState
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 import com.ustadmobile.mui.components.UstadAddListItem
@@ -12,7 +13,12 @@ import com.ustadmobile.util.colorForAttendanceStatus
 import com.ustadmobile.util.ext.format
 import csstype.Padding
 import csstype.px
-import mui.icons.material.*
+//WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
+import mui.icons.material.PersonAdd
+import mui.icons.material.AccountCircle
+import mui.icons.material.LensRounded
+import mui.icons.material.Check
+import mui.icons.material.Close
 import mui.material.*
 import mui.material.List
 import mui.system.responsive
@@ -34,7 +40,7 @@ external interface ClazzMemberListScreenProps : Props {
 
     var onClickAddNewStudent: () -> Unit
 
-    var onClickSort: () -> Unit
+    var onClickSort: (SortOrderOption) -> Unit
 
 }
 

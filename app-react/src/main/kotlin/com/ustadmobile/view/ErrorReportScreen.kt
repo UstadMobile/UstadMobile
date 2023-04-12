@@ -5,25 +5,16 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.ErrorReportUiState
 import com.ustadmobile.lib.db.entities.ErrorReport
-import com.ustadmobile.mui.common.md
-import com.ustadmobile.mui.common.xs
-import com.ustadmobile.mui.components.UstadDetailField
-import com.ustadmobile.view.components.UstadBlankIcon
-import csstype.TextAlign
 import csstype.px
-import kotlinx.css.JustifyContent
-import kotlinx.css.span
-import mui.icons.material.*
+import mui.icons.material.CopyAll
+import mui.icons.material.Share
 import mui.material.*
 import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import mui.system.sx
-import org.w3c.dom.AddEventListenerOptions
 import react.FC
 import react.Props
-import react.create
 import react.dom.aria.ariaLabel
-import react.dom.aria.ariaValueText
 import react.dom.html.ReactHTML.img
 
 external interface ErrorReportProps: Props {

@@ -12,7 +12,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Repository
 @DoorDao
-expect abstract class ScheduleDao : BaseDao<Schedule>, OneToManyJoinDao<Schedule> {
+expect abstract class ScheduleDao : BaseDao<Schedule> {
 
     @Query("""
      REPLACE INTO ScheduleReplicate(schedulePk, scheduleDestination)
@@ -76,6 +76,10 @@ expect abstract class ScheduleDao : BaseDao<Schedule>, OneToManyJoinDao<Schedule
 
     @Update
     abstract suspend fun updateAsync(entity: Schedule) : Int
+
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertListAsync(entities: List<Schedule>)
 
 
     @Query("""

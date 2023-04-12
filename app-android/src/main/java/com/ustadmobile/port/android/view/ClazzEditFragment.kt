@@ -1,10 +1,10 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,224 +16,59 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
+import androidx.lifecycle.lifecycleScope
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.FragmentClazzEditBinding
-import com.toughra.ustadmobile.databinding.ItemScheduleBinding
-import com.ustadmobile.core.controller.BitmaskEditPresenter
-import com.ustadmobile.core.controller.ClazzEdit2Presenter
-import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.locale.entityconstants.EnrolmentPolicyConstants
-import com.ustadmobile.core.util.OneToManyJoinEditListener
+import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
 import com.ustadmobile.core.util.ext.editIconId
-import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.viewmodel.ClazzEditUiState
-import com.ustadmobile.door.lifecycle.MutableLiveData
+import com.ustadmobile.core.viewmodel.ClazzEditViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.compose.messageIdResource
+import com.ustadmobile.port.android.util.compose.messageIdOptionListResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedTime
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.ClazzEditFragment.Companion.BLOCK_AND_ENTRY_ICON_MAP
-import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
-import com.ustadmobile.port.android.view.binding.MODE_END_OF_DAY
-import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 import com.ustadmobile.port.android.view.composable.*
 import org.burnoutcrew.reorderable.*
 import java.util.*
+import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
+import com.ustadmobile.port.android.view.ClazzEditFragment.Companion.ADD_COURSE_BLOCK_OPTIONS
 
-interface ClazzEditFragmentEventHandler {
-
-    fun onAddCourseBlockClicked()
-
-    fun handleAttendanceClicked(isChecked: Boolean)
-}
-class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolAndTerminology>(),
-        ClazzEdit2View, ClazzEditFragmentEventHandler,
-        TitleDescBottomSheetOptionSelectedListener {
+class ClazzEditFragment : UstadBaseMvvmFragment() {
 
     private var bottomSheetOptionList: List<TitleDescBottomSheetOption> = listOf()
-    private var mDataBinding: FragmentClazzEditBinding? = null
 
-    private var mPresenter: ClazzEdit2Presenter? = null
-
-    override val mEditPresenter: UstadEditPresenter<*, ClazzWithHolidayCalendarAndSchoolAndTerminology>?
-        get() = mPresenter
-
-    private var scheduleRecyclerAdapter: ScheduleRecyclerAdapter? = null
-
-    private var scheduleRecyclerView: RecyclerView? = null
-
-    private var courseBlockRecyclerAdapter: CourseBlockRecyclerAdapter? = null
-
-    private var courseBlockRecyclerView: RecyclerView? = null
-
-    private val scheduleObserver = Observer<List<Schedule>?> {
-        t -> scheduleRecyclerAdapter?.submitList(t)
-    }
-
-    private val courseBlockObserver = Observer<List<CourseBlockWithEntity>?> {
-        t -> courseBlockRecyclerAdapter?.dataSet = t
-    }
-
-    override var clazzSchedules: MutableLiveData<List<Schedule>>? = null
-        set(value) {
-            field?.removeObserver(scheduleObserver)
-            field = value
-            value?.observe(this, scheduleObserver)
-        }
-
-
-    override var courseBlocks: MutableLiveData<List<CourseBlockWithEntity>>? = null
-        set(value) {
-            field?.removeObserver(courseBlockObserver)
-            field = value
-            value?.observe(this, courseBlockObserver)
-        }
-
-    override var clazzEndDateError: String? = null
-        get() = field
-        set(value) {
-            field = value
-            mDataBinding?.clazzEndDateError = value
-        }
-    override var clazzStartDateError: String? = null
-        get() = field
-        set(value) {
-            field = value
-            mDataBinding?.clazzStartDateError = value
-        }
-
-
-    override var enrolmentPolicyOptions: List<ClazzEdit2Presenter.EnrolmentPolicyOptionsMessageIdOption>? = null
-        set(value){
-            field = value
-            mDataBinding?.enrolmentPolicy = value
-        }
-
-    private var imageViewLifecycleObserver: ImageViewLifecycleObserver2? = null
-
-    override var coursePicture: CoursePicture?
-        get() = mDataBinding?.coursePicture
-        set(value) {
-            mDataBinding?.coursePicture = value
-        }
-
-    class ScheduleRecyclerAdapter(
-        var oneToManyEditListener: OneToManyJoinEditListener<Schedule>?,
-        var presenter: ClazzEdit2Presenter?
-    ): ListAdapter<Schedule, ScheduleRecyclerAdapter.ScheduleViewHolder>(DIFF_CALLBACK_SCHEDULE) {
-
-        class ScheduleViewHolder(val binding: ItemScheduleBinding): RecyclerView.ViewHolder(binding.root)
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScheduleViewHolder {
-            val viewHolder = ScheduleViewHolder(ItemScheduleBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false))
-            viewHolder.binding.mPresenter = presenter
-            viewHolder.binding.oneToManyJoinListener = oneToManyEditListener
-            return viewHolder
-        }
-
-        override fun onBindViewHolder(holder: ScheduleViewHolder, position: Int) {
-            holder.binding.schedule = getItem(position)
-        }
-
-        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-            super.onDetachedFromRecyclerView(recyclerView)
-
-            oneToManyEditListener = null
-            presenter = null
-        }
-    }
-
-
-
-    override var entity: ClazzWithHolidayCalendarAndSchoolAndTerminology? = null
-        get() = field
-        set(value) {
-            mDataBinding?.clazz = value
-            mDataBinding?.dateTimeMode = MODE_START_OF_DAY
-            mDataBinding?.dateTimeModeEnd = MODE_END_OF_DAY
-            mDataBinding?.timeZoneId = value?.clazzTimeZone?:value?.school?.schoolTimeZone?:"UTC"
-            field = value
-        }
-
-
-    override var fieldsEnabled: Boolean = true
-        set(value) {
-            super.fieldsEnabled = value
-            field = value
-            mDataBinding?.fieldsEnabled = value
-        }
-
+    private val viewModel: ClazzEditViewModel by ustadViewModels()
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val rootView: View
+        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
+        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+            )
 
-        mDataBinding = FragmentClazzEditBinding.inflate(inflater, container, false).also {
-            rootView = it.root
-            it.featuresBitmaskFlags = BitmaskEditPresenter.FLAGS_AVAILABLE
-            it.activityEventHandler = this
+            setContent {
+                MdcTheme {
+                    ClazzEditScreen(viewModel)
+                }
+            }
         }
-
-        scheduleRecyclerView = rootView.findViewById(R.id.activity_clazz_edit_schedule_recyclerview)
-        courseBlockRecyclerView = rootView.findViewById(R.id.activity_clazz_edit_course_block_recyclerview)
-
-        return rootView
-
-//        return ComposeView(requireContext()).apply {
-//            setViewCompositionStrategy(
-//                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
-//            )
-//
-//            setContent {
-//                MdcTheme {
-//                    ClazzEditScreenPreview()
-//                }
-//            }
-//        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.add_a_new_course, R.string.edit_course)
-
-
-        imageViewLifecycleObserver = ImageViewLifecycleObserver2(
-            requireActivity().activityResultRegistry,null, 1
-        ).also {
-            mDataBinding?.imageViewLifecycleObserver = it
-            viewLifecycleOwner.lifecycle.addObserver(it)
-        }
-
-        mPresenter = ClazzEdit2Presenter(requireContext(), arguments.toStringMap(), this@ClazzEditFragment,
-            di, viewLifecycleOwner).withViewLifecycle()
-
-        mDataBinding?.scheduleOneToManyListener = mPresenter?.scheduleOneToManyJoinListener
-        mDataBinding?.mPresenter = mPresenter
-        scheduleRecyclerAdapter = ScheduleRecyclerAdapter(
-            mPresenter?.scheduleOneToManyJoinListener, mPresenter)
-
-        scheduleRecyclerView?.adapter = scheduleRecyclerAdapter
-        scheduleRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
-
-
-        mDataBinding?.courseBlockOneToManyListener = mPresenter
-        courseBlockRecyclerAdapter = CourseBlockRecyclerAdapter(
-                mPresenter, mDataBinding?.activityClazzEditCourseBlockRecyclerview)
-
-        courseBlockRecyclerView?.adapter = courseBlockRecyclerAdapter
-        courseBlockRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         bottomSheetOptionList = listOf(
                 TitleDescBottomSheetOption(
@@ -258,44 +93,8 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
                         CourseBlock.BLOCK_DISCUSSION_TYPE),
         )
 
-        mPresenter?.onCreate(backStackSavedState)
-
     }
 
-    override fun onAddCourseBlockClicked() {
-        val sheet = TitleDescBottomSheetOptionFragment(bottomSheetOptionList, this)
-        sheet.show(childFragmentManager, sheet.tag)
-    }
-
-    override fun handleAttendanceClicked(isChecked: Boolean) {
-        val clazz = mDataBinding?.clazz
-        clazz?.clazzFeatures = if(isChecked) Clazz.CLAZZ_FEATURE_ATTENDANCE else 0
-        mDataBinding?.clazz = clazz
-    }
-
-    override fun onBottomSheetOptionSelected(optionSelected: TitleDescBottomSheetOption) {
-        when(optionSelected.optionCode) {
-            CourseBlock.BLOCK_ASSIGNMENT_TYPE -> mPresenter?.handleClickAddAssignment()
-            CourseBlock.BLOCK_MODULE_TYPE -> mPresenter?.handleClickAddModule()
-            CourseBlock.BLOCK_CONTENT_TYPE -> mPresenter?.handleClickAddContent()
-            CourseBlock.BLOCK_TEXT_TYPE -> mPresenter?.handleClickAddText()
-            CourseBlock.BLOCK_DISCUSSION_TYPE -> mPresenter?.handleClickAddDiscussion()
-        }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        mDataBinding?.activityClazzEditScheduleRecyclerview?.adapter = null
-        mDataBinding?.activityEventHandler = null
-        mDataBinding = null
-        scheduleRecyclerView = null
-        scheduleRecyclerAdapter = null
-        courseBlockRecyclerView = null
-        courseBlockRecyclerAdapter = null
-        courseBlocks = null
-        clazzSchedules = null
-        mPresenter = null
-    }
 
     companion object {
 
@@ -311,23 +110,38 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
         @JvmField
         val BLOCK_AND_ENTRY_ICON_MAP = BLOCK_ICON_MAP + ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_ICON_MAP
 
-
-        val DIFF_CALLBACK_SCHEDULE: DiffUtil.ItemCallback<Schedule> = object: DiffUtil.ItemCallback<Schedule>() {
-            override fun areItemsTheSame(oldItem: Schedule, newItem: Schedule): Boolean {
-                return oldItem.scheduleUid == newItem.scheduleUid
-            }
-
-            override fun areContentsTheSame(oldItem: Schedule, newItem: Schedule): Boolean {
-                return oldItem == newItem
-            }
+        val ADD_COURSE_BLOCK_OPTIONS: (Context) ->  List<TitleDescBottomSheetOption> = { context ->
+            listOf(
+                TitleDescBottomSheetOption(
+                    context.getString(R.string.module),
+                    context.getString(R.string.course_module),
+                    CourseBlock.BLOCK_MODULE_TYPE),
+                TitleDescBottomSheetOption(
+                    context.getString(R.string.text),
+                    context.getString(R.string.formatted_text_to_show_to_course_participants),
+                    CourseBlock.BLOCK_TEXT_TYPE),
+                TitleDescBottomSheetOption(
+                    context.getString(R.string.content),
+                    context.getString(R.string.add_course_block_content_desc),
+                    CourseBlock.BLOCK_CONTENT_TYPE),
+                TitleDescBottomSheetOption(
+                    context.getString(R.string.assignments),
+                    context.getString(R.string.add_assignment_block_content_desc),
+                    CourseBlock.BLOCK_ASSIGNMENT_TYPE),
+                TitleDescBottomSheetOption(
+                    context.getString(R.string.discussion_board),
+                    context.getString(R.string.add_discussion_board_desc),
+                    CourseBlock.BLOCK_DISCUSSION_TYPE),
+            )
         }
+
     }
 
 
 }
 
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ClazzEditScreen(
     uiState: ClazzEditUiState = ClazzEditUiState(),
@@ -335,7 +149,7 @@ private fun ClazzEditScreen(
     onMoveCourseBlock: (from: ItemPosition, to: ItemPosition) -> Unit = {_, _ -> },
     onClickSchool: () -> Unit = {},
     onClickTimezone: () -> Unit = {},
-    onClickCourseBlock: (CourseBlock) -> Unit = {},
+    onClickEditCourseBlock: (CourseBlockWithEntity) -> Unit = {},
     onClickAddCourseBlock: () -> Unit = {},
     onClickAddSchedule: () -> Unit = {},
     onClickEditSchedule: (Schedule) -> Unit = {},
@@ -343,10 +157,11 @@ private fun ClazzEditScreen(
     onClickHolidayCalendar: () -> Unit = {},
     onCheckedAttendance: (Boolean) -> Unit = {},
     onClickTerminology: () -> Unit = {},
-    onClickHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit = {},
-    onClickIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit = {},
-    onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit = {},
-    onClickDeleteBlockPopupMenu: (CourseBlockWithEntity?) -> Unit = {},
+    onClickHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit = {},
+    onClickUnHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit = {},
+    onClickIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit = {},
+    onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit = {},
+    onClickDeleteBlockPopupMenu: (CourseBlockWithEntity) -> Unit = {},
 ) {
 
     val courseBlockKeys : List<Long> by remember(uiState.courseBlockList) {
@@ -418,8 +233,8 @@ private fun ClazzEditScreen(
                 ListItem(
                     modifier = Modifier
                         .clickable {
-                            if(!dragging)
-                                onClickCourseBlock(courseBlock)
+                            if (!dragging)
+                                onClickEditCourseBlock(courseBlock)
                         }
                         .alpha(courseBlockEditAlpha),
                     icon = {
@@ -445,6 +260,7 @@ private fun ClazzEditScreen(
                             enabled = uiState.fieldsEnabled,
                             uiState = uiState.courseBlockStateFor(courseBlock),
                             onClickHideBlockPopupMenu = onClickHideBlockPopupMenu,
+                            onClickUnHideBlockPopupMenu = onClickUnHideBlockPopupMenu,
                             onClickIndentBlockPopupMenu = onClickIndentBlockPopupMenu,
                             onClickUnIndentBlockPopupMenu = onClickUnIndentBlockPopupMenu,
                             onClickDeleteBlockPopupMenu = onClickDeleteBlockPopupMenu,
@@ -480,8 +296,8 @@ private fun ClazzEditScreen(
 
             val fromTimeFormatted = rememberFormattedTime(timeInMs = schedule.sceduleStartTime.toInt())
             val toTimeFormatted = rememberFormattedTime(timeInMs = schedule.scheduleEndTime.toInt())
-            val text = "${messageIdResource(id = schedule.scheduleFrequency)} " +
-                    " ${messageIdResource(schedule.scheduleDay)} " +
+            val text = "${messageIdResource(id = MessageID.daily)} " +
+                    " ${messageIdOptionListResource(ScheduleConstants.DAY_MESSAGE_IDS, schedule.scheduleDay)} " +
                     " $fromTimeFormatted - $toTimeFormatted "
 
             ListItem(
@@ -507,7 +323,9 @@ private fun ClazzEditScreen(
 
         item {
             UstadClickableTextField(
-                modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultItemPadding(),
                 value = uiState.entity?.holidayCalendar?.umCalendarName ?: "",
                 label = { Text(stringResource(id = R.string.holiday_calendar)) },
                 enabled = uiState.fieldsEnabled,
@@ -554,7 +372,9 @@ private fun ClazzEditScreen(
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {},
                 onClick = onClickTerminology,
-                modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultItemPadding(),
             )
         }
     }
@@ -573,7 +393,9 @@ private fun ClazzEditBasicDetails(
         UstadEditHeader(text = stringResource(id = R.string.basic_details))
 
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultItemPadding(),
             value = uiState.entity?.clazzName ?: "",
             label = { Text(stringResource( R.string.name )) },
             enabled = uiState.fieldsEnabled,
@@ -587,7 +409,9 @@ private fun ClazzEditBasicDetails(
         )
 
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultItemPadding(),
             value = uiState.entity?.clazzDesc ?: "",
             label = { Text(stringResource(id = R.string.description).addOptionalSuffix()) },
             enabled = uiState.fieldsEnabled,
@@ -601,7 +425,9 @@ private fun ClazzEditBasicDetails(
         )
 
         UstadClickableTextField(
-            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultItemPadding(),
             value = uiState.entity?.school?.schoolName ?: "",
             label = { Text(stringResource(id = R.string.institution)) },
             enabled = uiState.fieldsEnabled,
@@ -649,7 +475,9 @@ private fun ClazzEditBasicDetails(
         }
 
         UstadClickableTextField(
-            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultItemPadding(),
             label = { Text(stringResource(id = R.string.timezone)) },
             value = uiState.entity?.clazzTimeZone ?: "",
             onClick = onClickTimezone,
@@ -664,15 +492,17 @@ private fun ClazzEditBasicDetails(
 private fun PopUpMenu(
     enabled: Boolean,
     uiState: ClazzEditUiState.CourseBlockUiState,
-    onClickHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit,
-    onClickIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit,
-    onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit,
-    onClickDeleteBlockPopupMenu: (CourseBlockWithEntity?) -> Unit,
+    onClickHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit,
+    onClickUnHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit,
+    onClickIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit,
+    onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit,
+    onClickDeleteBlockPopupMenu: (CourseBlockWithEntity) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier
-        .wrapContentSize(Alignment.TopStart)) {
+        .wrapContentSize(Alignment.TopStart)
+    ) {
         IconButton(
             onClick = { expanded = true },
             enabled = enabled
@@ -693,7 +523,7 @@ private fun PopUpMenu(
 
             if(uiState.showUnhide) {
                 DropdownMenuItem(
-                    onClick = { onClickHideBlockPopupMenu(uiState.courseBlock) }
+                    onClick = { onClickUnHideBlockPopupMenu(uiState.courseBlock) }
                 ) {
                     Text(stringResource(id = R.string.unhide))
                 }
@@ -722,6 +552,43 @@ private fun PopUpMenu(
             }
         }
     }
+}
+
+@Composable
+fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
+
+    val uiState: ClazzEditUiState by viewModel.uiState.collectAsState(initial = ClazzEditUiState())
+
+    val context = LocalContext.current
+
+    ClazzEditScreen(
+        uiState = uiState,
+        onClazzChanged = viewModel::onEntityChanged,
+        onCheckedAttendance = viewModel::onCheckedAttendanceChanged,
+        onClickAddSchedule = viewModel::onClickAddSchedule,
+        onClickEditSchedule = viewModel::onClickEditSchedule,
+        onClickDeleteSchedule = viewModel::onClickDeleteSchedule,
+        onClickEditCourseBlock = viewModel::onClickEditCourseBlock,
+        onClickHideBlockPopupMenu = viewModel::onClickHideBlockPopupMenu,
+        onClickUnHideBlockPopupMenu = viewModel::onClickUnHideBlockPopupMenu,
+        onClickIndentBlockPopupMenu = viewModel::onClickIndentBlockPopupMenu,
+        onClickUnIndentBlockPopupMenu = viewModel::onClickUnIndentBlockPopupMenu,
+        onClickDeleteBlockPopupMenu = viewModel::onClickDeleteCourseBlock,
+        onMoveCourseBlock = { from: ItemPosition, to: ItemPosition ->
+            viewModel.onCourseBlockMoved(from.index, to.index)
+        },
+        onClickAddCourseBlock = {
+            val sheet = TitleDescBottomSheetOptionFragment(
+                optionsList = ADD_COURSE_BLOCK_OPTIONS(context),
+                onOptionSelected = { option ->
+                    viewModel.onAddCourseBlock(option.optionCode)
+                }
+            )
+
+            sheet.show(context.getContextSupportFragmentManager(), sheet.tag)
+        }
+    )
+
 }
 
 @Composable

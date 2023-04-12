@@ -11,6 +11,8 @@ import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
+import com.ustadmobile.core.impl.nav.NavResultReturner
+import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.isLazyInitialized
 import com.ustadmobile.core.viewmodel.ViewModel
@@ -36,6 +38,7 @@ import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.util.randomString
+import com.ustadmobile.util.test.nav.TestUstadNavController
 import org.mockito.kotlin.mock
 
 
@@ -79,6 +82,21 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
     val activeEndpoint: Endpoint
         get() = di.direct.instance<UstadAccountManager>().activeEndpoint
 
+    val accountManager: UstadAccountManager
+        get() = di.direct.instance()
+
+    val activeDb: UmAppDatabase
+        get() = di.direct.on(activeEndpoint).instance(tag= DoorTag.TAG_DB)
+
+    val activeRepo: UmAppDatabase
+        get() = di.direct.on(activeEndpoint).instance(tag = DoorTag.TAG_REPO)
+
+    val systemImpl: UstadMobileSystemImpl
+        get() = di.direct.instance()
+
+    val navResultReturner: NavResultReturner
+        get() = di.direct.instance()
+
     private var diVar = DI {
         import(CommonJvmDiModule)
 
@@ -110,7 +128,8 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
             val dbUrl = "jdbc:sqlite:build/tmp/$sanitizedName.sqlite"
             val attachmentsDir = File(tempDir, "attachments-$testStartTime")
             val nodeIdAndAuth: NodeIdAndAuth = instance()
-            DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl,
+            spy(
+                DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl,
                     attachmentsDir.absolutePath)
                 .addSyncCallback(nodeIdAndAuth)
                 .addCallback(ContentJobItemTriggersCallback())
@@ -125,6 +144,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
                         authSalt = randomString(20)
                     })
                 }
+            )
         }
 
         if(repoConfig.useDbAsRepo) {
@@ -134,6 +154,14 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         }
 
         bind<SnackBarDispatcher>() with singleton {
+            mock { }
+        }
+
+        bind<UstadNavController>() with singleton {
+            spy(TestUstadNavController())
+        }
+
+        bind<NavResultReturner>() with singleton {
             mock { }
         }
     }

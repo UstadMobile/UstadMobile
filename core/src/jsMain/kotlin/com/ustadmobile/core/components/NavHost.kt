@@ -4,8 +4,10 @@ import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.core.impl.nav.NavCommand
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.impl.nav.PopNavCommand
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.toUrlQueryString
-import history.Location
+import remix.run.router.Location
+import io.github.aakira.napier.Napier
 import js.core.jso
 import kotlinx.browser.sessionStorage
 import kotlinx.coroutines.*
@@ -75,22 +77,42 @@ const val NAVHOST_CLEARSTACK_VIEWNAME = "ClearStack"
  */
 class NavHostFunction(
     private val navigateFn: NavigateFunction,
+    private val location: Location,
     private val onHideChildren: () -> Unit,
 )  {
 
     operator fun invoke(cmd: NavCommand) {
+        fun String.effectivePopUpTo(): String {
+            return if(this == UstadView.CURRENT_DEST) {
+                location.ustadViewName
+            }else {
+                this
+            }
+        }
+
         when(cmd) {
             is NavigateNavCommand -> {
-                val popUpToView = cmd.goOptions.popUpToViewName
+                val popUpToView = cmd.goOptions.popUpToViewName?.effectivePopUpTo()
 
-                if(popUpToView == null && !cmd.goOptions.clearStack) {
-                    console.log("useNavControllerEffect: go to /${cmd.viewName}?${cmd.args.toUrlQueryString()}")
-                    navigateFn.invoke("/${cmd.viewName}?${cmd.args.toUrlQueryString()}")
+                if((popUpToView == null || popUpToView == location.ustadViewName) &&
+                    !cmd.goOptions.clearStack
+                ) {
+                    /*
+                     * When there is no stack popping:
+                     * popUpToView == null
+                     * popUpToView is the current view, and popUpToInclusive = false (edge case)
+                     * AND clearStack is false in both cases
+                     */
+                    Napier.d("NavHostFunction: go to /${cmd.viewName}?${cmd.args.toUrlQueryString()}")
+                    navigateFn.invoke("/${cmd.viewName}?${cmd.args.toUrlQueryString()}", jso {
+                        replace = popUpToView == location.ustadViewName && cmd.goOptions.popUpToInclusive
+                    })
                 }else {
-                    console.log("useNavControllerEffect: pop, then go /${cmd.viewName}?${cmd.args.toUrlQueryString()}")
+                    Napier.d("NavHostFunction: pop, then go /${cmd.viewName}?${cmd.args.toUrlQueryString()}")
                     if(popUpToView != null) {
                         sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_PAGE] = popUpToView
                     }
+
                     sessionStorage[KEY_NAV_CONTROLLER_CLEAR_STACK] = cmd.goOptions.clearStack.toString()
                     sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_INCLUSIVE] = cmd.goOptions.popUpToInclusive.toString()
                     sessionStorage[KEY_NAV_CONTROLLER_NAVTO_AFTER_POP] = "/${cmd.viewName}?${cmd.args.toUrlQueryString()}"
@@ -99,12 +121,24 @@ class NavHostFunction(
                 }
             }
             is PopNavCommand -> {
-                sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_PAGE] = cmd.viewName
-                sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_INCLUSIVE] = cmd.inclusive.toString()
-                onHideChildren()
-                navigateFn.invoke(-1)
+                val popUpTo = cmd.viewName.effectivePopUpTo()
+
+                if(popUpTo == location.ustadViewName && cmd.inclusive) {
+                    Napier.d("NavHostFunction: pop to current viewname $popUpTo (inclusive) " +
+                            "e.g. go back one")
+                    navigateFn(-1)
+                }else if(popUpTo != location.ustadViewName) {
+                    Napier.d("NavHostFunction: pop to $popUpTo inclusive = ${cmd.inclusive}")
+                    sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_PAGE] = cmd.viewName
+                    sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_INCLUSIVE] = cmd.inclusive.toString()
+                    onHideChildren()
+                    navigateFn.invoke(-1)
+                }else {
+                    Napier.d("NavHostFunction: pop up to current viewname, inclusive = false?? Nothing to do.")
+                }
             }
             else -> {
+                Napier.d("NavHostFunction: command ignored: $cmd")
                 //do nothing
             }
         }
@@ -123,8 +157,10 @@ val NavHost = FC<PropsWithChildren> { props ->
 
     val navigateFn = useNavigate()
 
-    val navHostFunction = useMemo(dependencies = arrayOf(navigateFn)) {
-        NavHostFunction(navigateFn) { showChildren = false }
+    val location = useLocation()
+
+    val navHostFunction = useMemo(navigateFn, location) {
+        NavHostFunction(navigateFn, location) { showChildren = false }
     }
 
     NavHostContext(navHostFunction) {
@@ -149,7 +185,6 @@ val NavHost = FC<PropsWithChildren> { props ->
         }
 
 
-        val location = useLocation()
         val firstEntryKey = useMemo(dependencies = emptyArray()) {
             sessionStorage[KEY_HAVHOST_ROOT_KEY]
                 ?: location.key.also { sessionStorage[KEY_HAVHOST_ROOT_KEY] = it }
@@ -165,13 +200,21 @@ val NavHost = FC<PropsWithChildren> { props ->
 
         useEffect(dependencies = arrayOf(location.key)) {
             navTimeoutJob?.cancel()
-            console.log("NavHost: useEffect check: key = ${location.key}")
+
             val popupToTarget = sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_PAGE]
             val navToAfterPop = sessionStorage[KEY_NAV_CONTROLLER_NAVTO_AFTER_POP]
             val popUpToInclusive = sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_INCLUSIVE]?.toBoolean() ?: false
             val clearStack = sessionStorage[KEY_NAV_CONTROLLER_CLEAR_STACK]?.toBoolean() ?: false
             val clearStackHitPlaceholder  = sessionStorage[KEY_NAV_CONTROLLER_STACK_CLEARED]?.toBoolean() ?: false
             val popUpToHitDestination = sessionStorage[KEY_NAVCONTROLLER_HIT_POPUP_TO_TARGET]?.toBoolean() ?: false
+            Napier.d("NavHost: useEffect check: key = ${location.key} " +
+                    "current viewname = ${location.ustadViewName} " +
+                    "popUpToTarget = $popupToTarget " +
+                    "navtoAfterPop = $navToAfterPop " +
+                    "popUpToInclusive = $popUpToInclusive " +
+                    "clearStack = $clearStack " +
+                    "clearStackHitPlaceholder = $clearStackHitPlaceholder " +
+                    "popUpToHitDestination = $popUpToHitDestination")
 
             when {
                 //We don't have any other pop or stack operation pending, show NavHost children
@@ -196,7 +239,11 @@ val NavHost = FC<PropsWithChildren> { props ->
                 popupToTarget == location.ustadViewName || popUpToHitDestination -> {
                     sessionStorage.clearNavHostCommands()
                     if(navToAfterPop != null){
+                        //Popping is done, navigate to the final destination
                         navigateFn.invoke(navToAfterPop)
+                    }else {
+                        //There is no further navigation, so show the children
+                        showChildren = true
                     }
                 }
 

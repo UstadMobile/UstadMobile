@@ -1,11 +1,9 @@
 package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.FabUiState
-import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.INDETERMINATE
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.NOT_LOADING
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -26,6 +24,8 @@ import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 data class PersonDetailUiState(
 
     val person: PersonWithPersonParentJoin? = null,
+
+    val personPicture: PersonPicture? = null,
 
     val chatVisible: Boolean = false,
 
@@ -71,13 +71,11 @@ data class PersonDetailUiState(
 class PersonDetailViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
-): DetailViewModel<Person>(di, savedStateHandle) {
+): DetailViewModel<Person>(di, savedStateHandle, PersonDetailView.VIEW_NAME) {
 
     private val _uiState = MutableStateFlow(PersonDetailUiState())
 
     val uiState: Flow<PersonDetailUiState> = _uiState.asStateFlow()
-
-    private val systemImpl: UstadMobileSystemImpl by instance()
 
     private val personUid = savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0
 
@@ -86,7 +84,7 @@ class PersonDetailViewModel(
 
         val currentUserUid = accountManager.activeSession?.userSession?.usPersonUid ?: 0
 
-        val entityUid: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
+        val entityUid: Long = savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0
 
         _appUiState.update { prev ->
             prev.copy(
@@ -117,10 +115,39 @@ class PersonDetailViewModel(
                 }
 
                 launch {
+                    activeDb.personPictureDao.findByPersonUidAsFlow(
+                        entityUid
+                    ).collect { personPicture ->
+                        _uiState.update { prev -> prev.copy(personPicture = personPicture) }
+                    }
+                }
+
+                launch {
                     activeDb.personDao.personHasPermissionFlow(currentUserUid,
                         entityUid, Role.PERMISSION_RESET_PASSWORD
                     ).collect {
                         _uiState.update { prev -> prev.copy(hasChangePasswordPermission = it) }
+                    }
+                }
+
+                launch {
+                    activeDb.personDao.personHasPermissionFlow(currentUserUid, entityUid,
+                        Role.PERMISSION_PERSON_UPDATE
+                    ).collect { hasEditPermission ->
+                        _appUiState.update { prev ->
+                            prev.copy(
+                                fabState = if(hasEditPermission) {
+                                    FabUiState(
+                                        visible = true,
+                                        text = systemImpl.getString(MessageID.edit),
+                                        icon = FabUiState.FabIcon.EDIT,
+                                        onClick = this@PersonDetailViewModel::onClickEdit
+                                    )
+                                }else {
+                                    FabUiState()
+                                }
+                            )
+                        }
                     }
                 }
 

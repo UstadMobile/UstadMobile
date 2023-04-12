@@ -7,11 +7,8 @@ import csstype.pct
 import csstype.px
 import csstype.translatey
 import js.core.jso
-import react.FC
-import react.Props
-import react.Ref
+import react.*
 import react.dom.html.ReactHTML
-import react.useContext
 import web.html.HTMLDivElement
 
 /**
@@ -20,9 +17,9 @@ import web.html.HTMLDivElement
  *
  * As per https://tanstack.com/virtual/v3/docs/examples/react/dynamic
  */
-val VirtualListOutlet = FC<Props> { props ->
+val VirtualListOutlet = FC<Props> {
     @Suppress("SpellCheckingInspection")
-    val virtualizerContext = useContext(VirtualListContext)
+    val virtualizerContext = useRequiredContext(VirtualListContext)
 
     ReactHTML.div {
         style = jso {

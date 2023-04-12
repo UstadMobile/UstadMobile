@@ -2,7 +2,6 @@ package com.ustadmobile.util.ext
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.locale.StringsXml
-import com.ustadmobile.util.urlSearchParamsToMap
 
 /**
  * Format string as equivalent to String.format in android
@@ -42,13 +41,6 @@ fun String.wordBreakLimit(numOfWords: Int = 10): String{
     }
     return words.take(if(words.size < numOfWords) words.size else numOfWords)
         .joinToString(" ") + if(words.size > numOfWords) "..." else ""
-}
-
-/**
- * Convert query params string to argument map
- */
-fun String.toArgumentsMap(): Map<String, String>{
-    return urlSearchParamsToMap(this)
 }
 
 

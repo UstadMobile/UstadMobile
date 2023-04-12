@@ -22,7 +22,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
@@ -33,9 +32,7 @@ import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 class Login2Fragment : UstadBaseMvvmFragment() {
 
-    private val viewModel: LoginViewModel by viewModels {
-        UstadViewModelProviderFactory(di, this, arguments)
-    }
+    private val viewModel: LoginViewModel by ustadViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,

@@ -15,3 +15,26 @@ val CourseBlockWithEntity.editIconId: Int
         cbType
     }
 
+fun CourseBlock.asCourseBlockWithEntity(): CourseBlockWithEntity {
+    return CourseBlockWithEntity().also {
+        it.cbUid = cbUid
+        it.cbType = cbType
+        it.cbIndentLevel = cbIndentLevel
+        it.cbModuleParentBlockUid = cbModuleParentBlockUid
+        it.cbTitle = cbTitle
+        it.cbDescription = cbDescription
+        it.cbCompletionCriteria = cbCompletionCriteria
+        it.cbHideUntilDate = cbHideUntilDate
+        it.cbDeadlineDate = cbDeadlineDate
+        it.cbLateSubmissionPenalty = cbLateSubmissionPenalty
+        it.cbGracePeriodDate = cbGracePeriodDate
+        it.cbMaxPoints = cbMaxPoints
+        it.cbMinPoints = cbMinPoints
+        it.cbIndex = cbIndex
+        it.cbClazzUid = cbClazzUid
+        it.cbActive = cbActive
+        it.cbHidden = cbHidden
+        it.cbEntityUid = cbEntityUid
+        it.cbLct = cbLct
+    }
+}
