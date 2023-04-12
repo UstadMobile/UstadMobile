@@ -10,6 +10,7 @@ import com.ustadmobile.view.clazzedit.ClazzEditScreen
 import com.ustadmobile.view.components.UstadImageSelectButtonPreview
 import com.ustadmobile.view.components.UstadMessageIdSelectFieldPreview
 import com.ustadmobile.view.components.UstadSelectFieldPreview
+import com.ustadmobile.mui.components.UstadNumberTextFieldPreview
 import com.ustadmobile.view.components.virtuallist.VirtualListPreview
 import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
 import react.Props
@@ -148,8 +149,13 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("Quill", "Quill", QuillDemo),
     UstadScreen("CourseBlockEdit", CourseBlockEditViewModel.DEST_NAME,
         CourseBlockEditScreen),
+    UstadScreen("UstadNumberTextEditField", "UstadNumberTextEditField Preview",
+        UstadNumberTextFieldPreview),
     UstadScreen(TimeZoneListViewModel.DEST_NAME, "Time Zone List", TimeZoneListScreen),
+
 )
+
+
 
 
 typealias UstadScreens = Iterable<UstadScreen>
