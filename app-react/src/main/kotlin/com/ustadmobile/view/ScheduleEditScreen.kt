@@ -1,14 +1,17 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
 import com.ustadmobile.core.viewmodel.ScheduleEditUiState
+import com.ustadmobile.core.viewmodel.ScheduleEditViewModel
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.common.justifyContent
-import com.ustadmobile.mui.components.UstadMessageIdDropDownField
+import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.mui.components.UstadTimeEditField
 import csstype.*
 import mui.material.*
@@ -34,7 +37,7 @@ val ScheduleEditComponent2 = FC <ScheduleEditScreenProps> { props ->
         Stack {
             spacing = responsive(2)
 
-            UstadMessageIdDropDownField {
+            UstadMessageIdSelectField {
                 value = props.uiState.entity?.scheduleDay ?: 0
                 options = ScheduleConstants.DAY_MESSAGE_IDS
                 label = strings[MessageID.day]
@@ -42,7 +45,7 @@ val ScheduleEditComponent2 = FC <ScheduleEditScreenProps> { props ->
                 onChange = {
                     props.onScheduleChanged(
                         props.uiState.entity?.shallowCopy {
-                            scheduleDay = it?.value ?: 0
+                            scheduleDay = it.value
                         })
                 }
             }
@@ -102,5 +105,19 @@ val ScheduleEditScreenPreview = FC<Props> {
         onScheduleChanged = {
             uiStateVar = uiStateVar.copy(entity = it)
         }
+    }
+}
+
+
+val ScheduleEditScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        ScheduleEditViewModel(di, savedStateHandle)
+    }
+
+    val uiStateVar by viewModel.uiState.collectAsState(ScheduleEditUiState())
+
+    ScheduleEditComponent2 {
+        uiState = uiStateVar
+        onScheduleChanged = viewModel::onEntityChanged
     }
 }

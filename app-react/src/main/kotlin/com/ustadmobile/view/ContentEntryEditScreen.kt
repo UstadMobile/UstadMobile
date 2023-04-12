@@ -5,7 +5,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.locale.entityconstants.LicenceConstants
-import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.viewmodel.ContentEntryEditUiState
 import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
@@ -13,20 +12,15 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.view.components.UstadSwitchField
-import csstype.AlignItems
 import csstype.px
-import web.html.HTMLInputElement
 import mui.material.*
 import mui.material.Stack
-import mui.material.Switch
-import mui.material.StackDirection
 import mui.system.responsive
-import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
-import react.dom.events.ChangeEvent
 
 external interface ContentEntryEditScreenProps : Props {
 
@@ -177,7 +171,7 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
                 }
             }
 
-            UstadMessageIdDropDownField {
+            UstadMessageIdSelectField {
                 value = props.uiState.entity?.licenseType ?: 0
                 options = LicenceConstants.LICENSE_MESSAGE_IDS
                 label = strings[MessageID.licence]

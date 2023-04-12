@@ -1,7 +1,5 @@
 package com.ustadmobile.core.contentformats.opds
 
-import com.soywiz.klock.DateTime
-
 class OpdsEntry {
 
     lateinit var id: String
@@ -13,8 +11,6 @@ class OpdsEntry {
     var publisher: String? = null
 
     var license: String? = null
-
-    var updated: DateTime? = null
 
     var summary: String? = null
 

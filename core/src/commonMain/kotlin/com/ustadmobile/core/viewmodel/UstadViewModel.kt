@@ -3,28 +3,39 @@ package com.ustadmobile.core.viewmodel
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.*
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
 
+/**
+ * @param di the KodeIn DI
+ * @param savedStateHandle the SavedStateHandle
+ * @param destinationName The name of this destination as per the navigation view stack, normally as
+ * per the related VIEW_NAME. This might NOT be the VIEW_NAME that relates to this screen e.g. when
+ * this ViewModel is being used within a tab or other component that is not directly part of the
+ * navigation.
+ */
 abstract class UstadViewModel(
     override val di: DI,
     protected val savedStateHandle: UstadSavedStateHandle,
+    protected val destinationName: String,
 ): ViewModel(savedStateHandle), DIAware {
-
 
     protected val navController = CommandFlowUstadNavController()
 
@@ -50,10 +61,13 @@ abstract class UstadViewModel(
 
     protected val resultReturner: NavResultReturner by instance()
 
-    private val navResultTimestampsCollected: MutableSet<Long> by lazy {
-        savedStateHandle[KEY_COLLECTED_TIMESTAMPS]?.split(",")
-            ?.map { it.trim().toLong() }?.toMutableSet() ?: mutableSetOf()
-    }
+    protected val systemImpl: UstadMobileSystemImpl by instance()
+
+    private var lastNavResultTimestampCollected: Long = savedStateHandle[KEY_LAST_COLLECTED_TS]?.toLong() ?: 0L
+        set(value) {
+            field = value
+            savedStateHandle[KEY_LAST_COLLECTED_TS] = value.toString()
+        }
 
     /**
      * If navigation for a result is in progress, this will be non-null
@@ -70,7 +84,8 @@ abstract class UstadViewModel(
         }
 
     init {
-
+        if(lastNavResultTimestampCollected == 0L)
+            lastNavResultTimestampCollected = systemTimeInMillis()
     }
     /**
      * Shorthand to make it easier to update the loading state
@@ -95,48 +110,59 @@ abstract class UstadViewModel(
         }
 
     /**
-     * When using
+     * Shorthand to observe results. Avoids two edge cases:
+     *
+     * 1. "Replay" - when the ViewModel is recreated, if no other result has been returned in the
+     *    meantime, the last result would be collected again. The flow of NavResultReturner always
+     *    replays the most recent result returned (required to allow a collector which starts after
+     *    the result was sent to collect it).
+     *
+     *    This is avoided by tracking the timestamp of the last item collected.
+     *
+     * 2. Replay from previous viwemodel: when the user goes from screen A to screen B, then C,
+     *    returns a result to screen A, and then navigates forward to screen B again with new arguments.
+     *    The new instance of screen B does not remember receiving any results, so the result from
+     *    the old instance of screen C looks new.
+     *
+     *    This is avoided by setting the alstNavResultTimestampCollected to the first start time
+     *    on init.
+     *
      */
-    suspend fun NavResultReturner.collectReturnedResults(
+    fun NavResultReturner.filteredResultFlowForKey(
         key: String,
-        collector: FlowCollector<NavResult>
-    ) {
+    ) : Flow<NavResult> {
         return resultFlowForKey(key).filter {
-            it.timestamp !in navResultTimestampsCollected
-        }.collect {
-            collector.emit(it)
-            navResultTimestampsCollected += it.timestamp
-            savedStateHandle[KEY_COLLECTED_TIMESTAMPS] = navResultTimestampsCollected
-                .joinToString(separator = ",")
+            val isNew = it.timestamp > lastNavResultTimestampCollected
+            if(isNew)
+                lastNavResultTimestampCollected = it.timestamp
+
+            isNew
         }
     }
 
-    protected inline fun <reified T> UstadSavedStateHandle.getJson(key: String): T? {
-        return get(key)?.let { json.decodeFromString<T>(it) }
-    }
-
-    protected inline fun <reified T> UstadSavedStateHandle.setJson(
+    protected suspend fun <T> UstadSavedStateHandle.getJson(
         key: String,
-        value: T
-    ) {
-        set(key, json.encodeToString(value))
+        deserializer: DeserializationStrategy<T>
+    ): T? {
+        val jsonStr = get(key)
+        return if(jsonStr != null) {
+            withContext(Dispatchers.Default) {
+                json.decodeFromString(deserializer, jsonStr)
+            }
+        }else {
+            null
+        }
     }
 
-    protected fun <T> UstadSavedStateHandle.setJson(
+    protected suspend fun <T> UstadSavedStateHandle.setJson(
         key: String,
         serializer: SerializationStrategy<T>,
         value: T
     ) {
-        set(key, json.encodeToString(serializer, value))
-    }
-
-    protected inline fun <reified T> UstadSavedStateHandle.getOrPutJson(
-        key: String,
-        makeBlock: () -> T,
-    ): T {
-        return getJson(key) ?: makeBlock().also {
-            setJson(key, it)
+        val jsonStr = withContext(Dispatchers.Default){
+            json.encodeToString(serializer, value)
         }
+        set(key, jsonStr)
     }
 
     /**
@@ -174,6 +200,32 @@ abstract class UstadViewModel(
         }
     }
 
+
+    fun <T> navigateForResult(
+        nextViewName: String,
+        key: String,
+        currentValue: T?,
+        serializer: SerializationStrategy<T>,
+        args: Map<String, String> = emptyMap(),
+        goOptions: UstadMobileSystemCommon.UstadGoOptions = UstadMobileSystemCommon.UstadGoOptions.Default,
+        overwriteDestination: Boolean = (this is UstadEditViewModel),
+    ) {
+        val navArgs = args.toMutableMap()
+
+        if(!args.containsKey(UstadView.ARG_RESULT_DEST_KEY) || overwriteDestination)
+            navArgs[UstadView.ARG_RESULT_DEST_KEY] = key
+
+        if(!args.containsKey(UstadView.ARG_RESULT_DEST_VIEWNAME) || overwriteDestination)
+            navArgs[UstadView.ARG_RESULT_DEST_VIEWNAME] = destinationName
+
+        if(currentValue != null) {
+            navArgs[UstadEditView.ARG_ENTITY_JSON] = json.encodeToString(serializer, currentValue)
+        }
+
+        navController.navigate(nextViewName, navArgs.toMap(), goOptions)
+    }
+
+
     companion object {
         /**
          * Saved state key for the current value of the entity itself. This is different to
@@ -181,7 +233,14 @@ abstract class UstadViewModel(
          */
         const val KEY_ENTITY_STATE = "entityState"
 
-        const val KEY_COLLECTED_TIMESTAMPS = "collectedTs"
+        const val KEY_LAST_COLLECTED_TS = "collectedTs"
+
+        const val KEY_INIT_STATE = "initState"
+
+        /**
+         * Used to store the time that the viwemodel has first initialized. This
+         */
+        const val KEY_FIRST_INIT_TIME = "firstInit"
     }
 
 }

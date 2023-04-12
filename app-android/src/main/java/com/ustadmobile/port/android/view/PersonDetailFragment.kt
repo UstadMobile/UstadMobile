@@ -49,9 +49,7 @@ import java.util.*
 
 class PersonDetailFragment : UstadBaseMvvmFragment(){
 
-    private val viewModel: PersonDetailViewModel by viewModels {
-        UstadViewModelProviderFactory(di, this, requireArguments())
-    }
+    private val viewModel: PersonDetailViewModel by ustadViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,

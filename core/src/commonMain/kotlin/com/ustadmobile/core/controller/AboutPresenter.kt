@@ -1,8 +1,8 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.AboutView
+import kotlinx.datetime.Instant
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -18,7 +18,7 @@ class AboutPresenter(context: Any, args: Map<String, String>?, view: AboutView,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.setVersionInfo(impl.getVersion(context) + " - " +
-                UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(context)) + "\n")
+            Instant.fromEpochMilliseconds(impl.getBuildTimestamp(context)).toString())
     }
 
 }

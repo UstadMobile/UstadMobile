@@ -47,4 +47,7 @@
 
     <item name="tag_fab_uistate_listener" type="id"/>
 
+    <item name="tag_aztec" type="id"/>
+
+
 </resources>

@@ -37,7 +37,6 @@ dependencies {
     implementation "io.ktor:ktor-serialization-kotlinx-json:$version_ktor"
     implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
     implementation "io.ktor:ktor-io:$version_ktor"
-    implementation "com.soywiz.korlibs.klock:klock:$version_klock"
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "io.ktor:ktor-server-netty:$version_ktor"
@@ -73,7 +72,7 @@ dependencies {
 
     implementation "io.github.aakira:napier-jvm:$version_napier"
 
-    implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
+    implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
     implementation "net.sf.kxml:kxml2:$version_kxml"
 
     implementation "org.quartz-scheduler:quartz:$version_quartz_scheduler"
@@ -83,7 +82,7 @@ dependencies {
     implementation project(":core")
     implementation project(":sharedse")
     implementation project(":lib-database")
-    implementation "com.github.UstadMobile.door:door-annotations:$version_door"
+    implementation "com.github.UstadMobile.door:room-annotations:$version_door"
     implementation "com.github.UstadMobile.door:door-runtime:$version_door"
     implementation project(":lib-util")
     implementation project(":lib-content-scrapers")
@@ -94,6 +93,8 @@ dependencies {
 
     implementation "com.sun.mail:jakarta.mail:$version_jakartamail"
     implementation "org.apache.commons:commons-compress:$version_apache_commons_compress"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
 
     //test
     testImplementation project(":lib-test-common")
