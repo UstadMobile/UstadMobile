@@ -14,21 +14,21 @@ import kotlin.random.Random
  */
 external interface UstadNumberTextFieldProps : TextFieldProps {
 
-    override var value: Int
+    override var value: Float
 
-    var onChange: (Int) -> Unit
+    var onChange: (Float) -> Unit
 
 }
 
 val UstadNumberTextField = FC<UstadNumberTextFieldProps> { props ->
 
     var rawValue by useState {
-        if(props.value != 0) props.value.toString() else ""
+        if(props.value != 0.toFloat()) props.value.toString() else ""
     }
 
     //If props change to something other than what we have set, change rawValue
     useEffect(props.value) {
-        if(props.value != (rawValue.toIntOrNull() ?: 0)) {
+        if(props.value != (rawValue.toIntOrNull()?.toFloat() ?: 0)) {
             rawValue = props.value.toString()
         }
     }
@@ -51,8 +51,8 @@ val UstadNumberTextField = FC<UstadNumberTextFieldProps> { props ->
 
             val filteredText = text.filter { it.isDigit() }
             rawValue = filteredText
-            val intVal = filteredText.toIntOrNull() ?: 0
-            props.onChange(intVal)
+            val floatVal = filteredText.toFloatOrNull() ?: 0.toFloat()
+            props.onChange(floatVal)
         }
 
     }
@@ -61,7 +61,7 @@ val UstadNumberTextField = FC<UstadNumberTextFieldProps> { props ->
 
 val UstadNumberTextFieldPreview = FC<Props> {
 
-    var aNumber by useState { 0 }
+    var aNumber by useState { 0.toFloat() }
 
     Stack {
         spacing = responsive (3)
@@ -88,7 +88,7 @@ val UstadNumberTextFieldPreview = FC<Props> {
         Button {
             variant = ButtonVariant.outlined
             onClick = {
-                aNumber = Random.nextInt(1, 6)
+                aNumber = Random.nextInt(1, 6).toFloat()
             }
             + "Roll Dice"
         }
