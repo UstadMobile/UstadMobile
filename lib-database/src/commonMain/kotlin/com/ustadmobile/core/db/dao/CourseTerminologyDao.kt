@@ -5,6 +5,7 @@ import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.lib.db.entities.UserSession
 import kotlin.js.JsName
@@ -64,6 +65,13 @@ expect abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
      ORDER BY ctTitle   
     """)
     abstract fun findAllCourseTerminology(): DataSourceFactory<Int, CourseTerminology>
+
+    @Query("""
+        SELECT *
+         FROM CourseTerminology
+     ORDER BY ctTitle   
+    """)
+    abstract fun findAllCourseTerminologyPagingSource(): PagingSource<Int, CourseTerminology>
 
     @Query("""
         SELECT *

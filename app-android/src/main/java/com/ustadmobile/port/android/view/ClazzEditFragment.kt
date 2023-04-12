@@ -190,6 +190,7 @@ private fun ClazzEditScreen(
             ReorderableItem(reorderableState = reorderLazyListState, key = 1) {
                 ClazzEditBasicDetails(
                     uiState = uiState,
+                    reorderLazyListState = reorderLazyListState,
                     onClazzChanged= onClazzChanged,
                     onClickSchool = onClickSchool,
                     onClickTimezone = onClickTimezone,
@@ -372,6 +373,7 @@ private fun ClazzEditScreen(
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {},
                 onClick = onClickTerminology,
+                onClickEnabled = !reorderLazyListState.listState.isScrollInProgress,
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultItemPadding(),
@@ -383,6 +385,7 @@ private fun ClazzEditScreen(
 @Composable
 private fun ClazzEditBasicDetails(
     uiState: ClazzEditUiState,
+    reorderLazyListState: ReorderableLazyListState,
     onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit = {},
     onClickSchool: () -> Unit = {},
     onClickTimezone: () -> Unit = {},
@@ -481,6 +484,7 @@ private fun ClazzEditBasicDetails(
             label = { Text(stringResource(id = R.string.timezone)) },
             value = uiState.entity?.clazzTimeZone ?: "",
             onClick = onClickTimezone,
+            onClickEnabled = !reorderLazyListState.listState.isScrollInProgress,
             enabled = uiState.fieldsEnabled,
             onValueChange = { }
         )

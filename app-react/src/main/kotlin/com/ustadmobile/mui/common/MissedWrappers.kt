@@ -1,5 +1,6 @@
 package com.ustadmobile.mui.common
 
+import csstype.Cursor
 import csstype.JustifyContent
 import csstype.PropertiesBuilder
 import js.core.jso
@@ -172,3 +173,14 @@ inline fun PropertiesBuilder.input(
     asDynamic().input = jso(block)
 }
 
+inline var PropertiesBuilder.inputCursor: Cursor?
+    get() = asDynamic().input?.cursor
+    set(value) {
+        if(asDynamic().input != null) {
+            asDynamic().input.cursor = value
+        }else {
+            asDynamic().input = jso<PropertiesBuilder> {
+                cursor = value
+            }
+        }
+    }

@@ -100,7 +100,7 @@ class PersonListViewModel(
                     )
                 },
                 fabMessageId = MessageID.person,
-                onSetAddItemVisibility = { visible ->
+                onSetAddListItemVisibility = { visible ->
                     _uiState.update { prev -> prev.copy(showAddItem = visible) }
                 }
             )

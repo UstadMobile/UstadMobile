@@ -35,6 +35,7 @@ import csstype.Cursor
 import js.core.jso
 import kotlinx.css.input
 import kotlin.js.json
+import com.ustadmobile.mui.common.inputCursor
 
 const val COURSE_BLOCK_DRAG_CLASS = "dragging_course_block"
 
@@ -270,12 +271,18 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
             }
 
             TextField {
+                sx {
+                    inputCursor = Cursor.pointer
+                }
                 value = props.uiState.entity?.terminology?.ctTitle ?: ""
                 label = ReactNode(strings[MessageID.terminology])
                 disabled = !props.uiState.fieldsEnabled
                 id = "clazz_terminology"
                 onClick = {
                     props.onClickTerminology()
+                }
+                inputProps = jso {
+                    readOnly = true
                 }
             }
         }

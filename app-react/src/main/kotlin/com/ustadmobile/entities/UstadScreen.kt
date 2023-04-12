@@ -18,6 +18,8 @@ import react.FC
 import com.ustadmobile.wrappers.quill.QuillDemo
 import com.ustadmobile.view.timezonelist.TimeZoneListScreen
 import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
+import com.ustadmobile.core.viewmodel.CourseTerminologyListViewModel
+import com.ustadmobile.view.courseterminologylist.CourseTerminologyListScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -152,6 +154,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("UstadNumberTextEditField", "UstadNumberTextEditField Preview",
         UstadNumberTextFieldPreview),
     UstadScreen(TimeZoneListViewModel.DEST_NAME, "Time Zone List", TimeZoneListScreen),
+    UstadScreen(CourseTerminologyListViewModel.DEST_NAME, "Course Terminology List",
+        CourseTerminologyListScreen),
 
 )
 

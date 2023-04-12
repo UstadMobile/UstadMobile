@@ -238,6 +238,16 @@ class ClazzEditViewModel(
                 }
             }
 
+            launch {
+                resultReturner.filteredResultFlowForKey(RESULT_KEY_TERMINOLOGY).collect { result ->
+                    val newTerminology = result.result as? CourseTerminology ?: return@collect
+                    onEntityChanged(_uiState.value.entity?.shallowCopy {
+                        clazzTerminologyUid = newTerminology.ctUid
+                        terminology = newTerminology
+                    })
+                }
+            }
+
             _uiState.update { prev ->
                 prev.copy(fieldsEnabled = true)
             }
@@ -456,7 +466,12 @@ class ClazzEditViewModel(
     }
 
     fun onClickTerminology() {
-
+        navigateForResult(
+            nextViewName = CourseTerminologyListViewModel.DEST_NAME,
+            key = RESULT_KEY_TERMINOLOGY,
+            currentValue = null,
+            serializer = CourseTerminology.serializer(),
+        )
     }
 
     private fun updateCourseBlock(updatedBlock: CourseBlockWithEntity){
@@ -523,6 +538,8 @@ class ClazzEditViewModel(
         const val RESULT_KEY_COURSEBLOCK = "courseblock"
 
         const val RESULT_KEY_TIMEZONE = "timeZone"
+
+        const val RESULT_KEY_TERMINOLOGY = "terminology"
 
         const val STATE_KEY_COURSEBLOCKS = "courseblocks"
 

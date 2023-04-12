@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.controller.TimeZoneListPresenter.Companion.RESULT_TIMEZONE_KEY
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.deactivateByUids
 import com.ustadmobile.core.generated.locale.MessageID
@@ -112,12 +111,14 @@ class ClazzEdit2Presenter(
     override fun onLoadDataComplete() {
         super.onLoadDataComplete()
 
+        /* being removed
         requireSavedStateHandle().getLiveData<String?>(RESULT_TIMEZONE_KEY).observe(lifecycleOwner) {
             val timezone = it ?: return@observe
             entity?.clazzTimeZone = timezone
             view.entity = entity
             requireSavedStateHandle()[RESULT_TIMEZONE_KEY] = null
         }
+         */
 
         observeSavedStateResult(SAVEDSTATE_KEY_SCHOOL, ListSerializer(School.serializer()),
             School::class) {
@@ -147,14 +148,6 @@ class ClazzEdit2Presenter(
             requireSavedStateHandle()[SAVEDSTATE_KEY_TERMINOLOGY] = null
         }
 
-        observeSavedStateResult(
-            RESULT_TIMEZONE_KEY,
-            ListSerializer(String.serializer()), String::class) {
-            val timeZone = it.firstOrNull() ?: return@observeSavedStateResult
-            entity?.clazzTimeZone = timeZone
-            view.entity = entity
-            requireSavedStateHandle()[RESULT_TIMEZONE_KEY] = null
-        }
 
         observeSavedStateResult(SAVEDSTATE_KEY_FEATURES,
             ListSerializer(LongWrapper.serializer()), LongWrapper::class) {
@@ -435,13 +428,6 @@ class ClazzEdit2Presenter(
     }
 
     fun handleClickTimezone() {
-        navigateForResult(NavigateForResultOptions(
-            this,
-            entity?.clazzTimeZone,
-            TimeZoneListView.VIEW_NAME,
-            String::class,
-            String.serializer(),
-            RESULT_TIMEZONE_KEY))
     }
 
     fun handleHolidayCalendarClicked() {

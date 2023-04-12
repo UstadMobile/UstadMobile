@@ -1,6 +1,5 @@
 package com.ustadmobile.core.viewmodel
 
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.AppBarSearchUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -11,7 +10,6 @@ import com.ustadmobile.core.view.UstadView
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 import org.kodein.di.DI
-import org.kodein.di.instance
 
 /**
  * @param S the UI State type
@@ -111,11 +109,11 @@ abstract class UstadListViewModel<S>(
     suspend fun collectHasPermissionFlowAndSetAddNewItemUiState(
         hasPermissionFlow: () -> Flow<Boolean>,
         fabMessageId: Int,
-        onSetAddItemVisibility: (Boolean) -> Unit,
+        onSetAddListItemVisibility: (Boolean) -> Unit,
     ) {
         _uiState.whenSubscribed {
             hasPermissionFlow().distinctUntilChanged().collect { hasAddPermission ->
-                setAddNewItemUiState(hasAddPermission, fabMessageId, onSetAddItemVisibility)
+                setAddNewItemUiState(hasAddPermission, fabMessageId, onSetAddListItemVisibility)
             }
         }
     }
