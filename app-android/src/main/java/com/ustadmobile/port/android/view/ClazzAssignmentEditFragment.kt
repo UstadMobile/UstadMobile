@@ -6,8 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.CompoundButton
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,21 +15,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.TextField
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.core.widget.doAfterTextChanged
-import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentEditBinding
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.locale.entityconstants.*
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption2
@@ -42,10 +33,9 @@ import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.core.viewmodel.ClazzAssignmentEditUiState
 import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
-import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.lib.db.entities.ext.shallowCopyCourseBlockWithEntity
+import com.ustadmobile.lib.db.entities.ext.shallowCopyWithEntity
 import com.ustadmobile.port.android.util.compose.courseTerminologyEntryResource
 import com.ustadmobile.port.android.util.compose.rememberCourseTerminologyEntries
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
@@ -346,7 +336,7 @@ private fun ClazzAssignmentEditScreen(
             enabled = uiState.fieldsEnabled,
             onValueChange = {
                 onChangeCourseBlockWithEntity(
-                    uiState.entity?.shallowCopyCourseBlockWithEntity {
+                    uiState.entity?.shallowCopyWithEntity {
                         assignment = uiState.entity?.assignment?.shallowCopy {
                             caTitle = it
                         }
@@ -365,7 +355,7 @@ private fun ClazzAssignmentEditScreen(
             enabled = uiState.fieldsEnabled,
             onValueChange = {
                 onChangeCourseBlockWithEntity(
-                    uiState.entity?.shallowCopyCourseBlockWithEntity{
+                    uiState.entity?.shallowCopyWithEntity{
                         assignment = uiState.entity?.assignment?.shallowCopy {
                             caDescription = it
                         }
@@ -402,7 +392,7 @@ private fun ClazzAssignmentEditScreen(
                 enabled = uiState.fieldsEnabled,
                 onOptionSelected = {
                     onChangeCourseBlockWithEntity(
-                        uiState.entity?.shallowCopyCourseBlockWithEntity{
+                        uiState.entity?.shallowCopyWithEntity{
                             assignment = uiState.entity?.assignment?.shallowCopy {
                                 caFileType = it.value
                             }
@@ -419,7 +409,7 @@ private fun ClazzAssignmentEditScreen(
                 ),
                 onValueChange = { newString ->
                     onChangeCourseBlockWithEntity(
-                        uiState.entity?.shallowCopyCourseBlockWithEntity{
+                        uiState.entity?.shallowCopyWithEntity{
                             assignment = uiState.entity?.assignment?.shallowCopy {
                                 caSizeLimit = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
                             }
@@ -436,7 +426,7 @@ private fun ClazzAssignmentEditScreen(
                 ),
                 onValueChange = { newString ->
                     onChangeCourseBlockWithEntity(
-                        uiState.entity?.shallowCopyCourseBlockWithEntity{
+                        uiState.entity?.shallowCopyWithEntity{
                             assignment = uiState.entity?.assignment?.shallowCopy {
                                 caNumberOfFiles = newString.filter {
                                     it.isDigit()
@@ -462,7 +452,7 @@ private fun ClazzAssignmentEditScreen(
                 enabled = uiState.fieldsEnabled,
                 onOptionSelected = {
                     onChangeCourseBlockWithEntity(
-                        uiState.entity?.shallowCopyCourseBlockWithEntity{
+                        uiState.entity?.shallowCopyWithEntity{
                             assignment = uiState.entity?.assignment?.shallowCopy {
                                 caTextLimitType = it.value
                             }
@@ -479,7 +469,7 @@ private fun ClazzAssignmentEditScreen(
                 ),
                 onValueChange = { newString ->
                     onChangeCourseBlockWithEntity(
-                        uiState.entity?.shallowCopyCourseBlockWithEntity{
+                        uiState.entity?.shallowCopyWithEntity{
                             assignment = uiState.entity?.assignment?.shallowCopy {
                                 caTextLimit = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
                             }
@@ -495,7 +485,7 @@ private fun ClazzAssignmentEditScreen(
             enabled = uiState.fieldsEnabled,
             onOptionSelected = {
                 onChangeCourseBlockWithEntity(
-                    uiState.entity?.shallowCopyCourseBlockWithEntity{
+                    uiState.entity?.shallowCopyWithEntity{
                         assignment = uiState.entity?.assignment?.shallowCopy {
                             caSubmissionPolicy = it.value
                         }
@@ -513,7 +503,7 @@ private fun ClazzAssignmentEditScreen(
                     terminologyEntries, (it as MessageIdOption2).messageId) },
             onOptionSelected = {
                 onChangeCourseBlockWithEntity(
-                    uiState.entity?.shallowCopyCourseBlockWithEntity{
+                    uiState.entity?.shallowCopyWithEntity{
                         assignment = uiState.entity?.assignment?.shallowCopy {
                             caMarkingType = (it as MessageIdOption2).value
                         }
@@ -531,7 +521,7 @@ private fun ClazzAssignmentEditScreen(
                         isError = uiState.reviewerCountError != null,
                         onValueChange = { newString ->
                             onChangeCourseBlockWithEntity(
-                                uiState.entity?.shallowCopyCourseBlockWithEntity{
+                                uiState.entity?.shallowCopyWithEntity{
                                     assignment = uiState.entity?.assignment?.shallowCopy {
                                         caPeerReviewerCount = newString.filter {
                                             it.isDigit()

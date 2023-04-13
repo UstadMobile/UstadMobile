@@ -2,7 +2,6 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.locale.entityconstants.*
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.ClazzAssignmentEditUiState
@@ -12,13 +11,12 @@ import com.ustadmobile.hooks.useCourseTerminologyEntries
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.lib.db.entities.ext.shallowCopyCourseBlockWithEntity
+import com.ustadmobile.lib.db.entities.ext.shallowCopyWithEntity
 import com.ustadmobile.mui.components.UstadCourseBlockEdit
 import com.ustadmobile.mui.components.UstadDropDownField
 import com.ustadmobile.mui.components.UstadMessageIdDropDownField
 import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.view.components.UstadSwitchField
-import csstype.PropertyName
 import csstype.px
 import mui.material.*
 import mui.system.responsive
@@ -88,7 +86,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 onChange = {
                     val currentVal = it.target.asDynamic().value
                     props.onChangeCourseBlockWithEntity(
-                        props.uiState.entity?.shallowCopyCourseBlockWithEntity {
+                        props.uiState.entity?.shallowCopyWithEntity {
                             assignment = props.uiState.entity?.assignment?.shallowCopy {
                                 caTitle = currentVal?.toString() ?: ""
                             }
@@ -104,7 +102,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 onChange = {
                     val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
                     props.onChangeCourseBlockWithEntity(
-                        props.uiState.entity?.shallowCopyCourseBlockWithEntity {
+                        props.uiState.entity?.shallowCopyWithEntity {
                             assignment = props.uiState.entity?.assignment?.shallowCopy {
                                 caDescription = currentVal
                             }
@@ -141,7 +139,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     enabled = props.uiState.fieldsEnabled
                     onChange = {
                         props.onChangeCourseBlockWithEntity(
-                            props.uiState.entity?.shallowCopyCourseBlockWithEntity {
+                            props.uiState.entity?.shallowCopyWithEntity {
                                 assignment = props.uiState.entity?.assignment?.shallowCopy {
                                     caFileType = it?.value ?: 0
                                 }
@@ -158,7 +156,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     onChange = {
                         val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
                         props.onChangeCourseBlockWithEntity(
-                            props.uiState.entity?.shallowCopyCourseBlockWithEntity {
+                            props.uiState.entity?.shallowCopyWithEntity {
                                 assignment = props.uiState.entity?.assignment?.shallowCopy {
                                     caSizeLimit = currentVal.filter { it.isDigit() }.toIntOrNull() ?: 0
                                 }
@@ -175,7 +173,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     onChange = {
                         val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
                         props.onChangeCourseBlockWithEntity(
-                            props.uiState.entity?.shallowCopyCourseBlockWithEntity {
+                            props.uiState.entity?.shallowCopyWithEntity {
                                 assignment = props.uiState.entity?.assignment?.shallowCopy {
                                     caNumberOfFiles =
                                         currentVal.filter { it.isDigit() }.toIntOrNull() ?: 0
@@ -200,7 +198,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     enabled = props.uiState.fieldsEnabled
                     onChange = {
                         props.onChangeCourseBlockWithEntity(
-                            props.uiState.entity?.shallowCopyCourseBlockWithEntity {
+                            props.uiState.entity?.shallowCopyWithEntity {
                                 assignment = props.uiState.entity?.assignment?.shallowCopy {
                                     caTextLimitType = it?.value ?: 0
                                 }
@@ -217,7 +215,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     onChange = {
                         val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
                         props.onChangeCourseBlockWithEntity(
-                            props.uiState.entity?.shallowCopyCourseBlockWithEntity {
+                            props.uiState.entity?.shallowCopyWithEntity {
                                 assignment = props.uiState.entity?.assignment?.shallowCopy {
                                     caTextLimit =
                                         currentVal.filter { it.isDigit() }.toIntOrNull() ?: 0
@@ -234,7 +232,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
                     props.onChangeCourseBlockWithEntity(
-                        props.uiState.entity?.shallowCopyCourseBlockWithEntity {
+                        props.uiState.entity?.shallowCopyWithEntity {
                             assignment = props.uiState.entity?.assignment?.shallowCopy {
                                 caSubmissionPolicy = it?.value ?: 0
                             }
@@ -254,7 +252,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     terminologyEntries, strings, (it as? MessageIdOption2)?.messageId ?: 0) }
                 onChange = {
                     props.onChangeCourseBlockWithEntity(
-                        props.uiState.entity?.shallowCopyCourseBlockWithEntity {
+                        props.uiState.entity?.shallowCopyWithEntity {
                             assignment = props.uiState.entity?.assignment?.shallowCopy {
                                 caMarkingType = (it as MessageIdOption2).value
                             }
@@ -277,7 +275,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                             onChange = {
                                 val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
                                 props.onChangeCourseBlockWithEntity(
-                                    props.uiState.entity?.shallowCopyCourseBlockWithEntity{
+                                    props.uiState.entity?.shallowCopyWithEntity{
                                         assignment = props.uiState.entity?.assignment?.shallowCopy {
                                             caPeerReviewerCount = currentVal.filter {
                                                 it.isDigit()
