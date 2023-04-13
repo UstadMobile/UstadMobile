@@ -8,6 +8,7 @@ import com.ustadmobile.entities.UstadScreen
 import com.ustadmobile.entities.UstadScreens
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.*
+import com.ustadmobile.view.clazzedit.ClazzEditScreenPreview
 import com.ustadmobile.view.components.UstadImageSelectButtonPreview
 import com.ustadmobile.view.components.virtuallist.VirtualListPreview
 import com.ustadmobile.wrappers.reacteasysort.EasySortPreview

@@ -14,8 +14,8 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyWithEntity
 import com.ustadmobile.mui.components.UstadCourseBlockEdit
 import com.ustadmobile.mui.components.UstadDropDownField
-import com.ustadmobile.mui.components.UstadMessageIdDropDownField
 import com.ustadmobile.util.ext.addOptionalSuffix
+import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.view.components.UstadSwitchField
 import csstype.px
 import mui.material.*
@@ -49,7 +49,7 @@ external interface ClazzAssignmentEditScreenProps : Props {
 }
 
 val ClazzAssignmentEditScreenPreview = FC<Props> {
-    val strings = useStringsXml()
+
     ClazzAssignmentEditScreenComponent2 {
         uiState = ClazzAssignmentEditUiState(
             courseBlockEditUiState = CourseBlockEditUiState(
@@ -132,7 +132,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
             }
 
             if (props.uiState.fileSubmissionVisible){
-                UstadMessageIdDropDownField {
+                UstadMessageIdSelectField {
                     value = props.uiState.entity?.assignment?.caFileType ?: 0
                     label = strings[MessageID.file_type]
                     options = FileTypeConstants.FILE_TYPE_MESSAGE_IDS
@@ -191,7 +191,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
             }
 
             if (props.uiState.textSubmissionVisible) {
-                UstadMessageIdDropDownField {
+                UstadMessageIdSelectField {
                     value = props.uiState.entity?.assignment?.caTextLimitType ?: 0
                     label = strings[MessageID.limit]
                     options = TextLimitTypeConstants.TEXT_LIMIT_TYPE_MESSAGE_IDS
@@ -225,7 +225,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 }
             }
 
-            UstadMessageIdDropDownField {
+            UstadMessageIdSelectField {
                 value = props.uiState.entity?.assignment?.caSubmissionPolicy ?: 0
                 label = strings[MessageID.submission_policy]
                 options = SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS
