@@ -586,7 +586,6 @@ fun ClazzAssignmentEditScreenPreview() {
         ),
         minScoreVisible = true,
     )
-    MdcTheme {
-        ClazzAssignmentEditScreen(uiStateVal)
-    }
+
+    ClazzAssignmentEditScreen(uiStateVal)
 }
