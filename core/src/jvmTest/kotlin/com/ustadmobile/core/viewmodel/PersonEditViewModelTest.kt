@@ -147,7 +147,7 @@ class PersonEditViewModelTest {
 
                 viewModel.onClickSave()
 
-                verifyBlocking(accountManager, timeout(5000 * 1000)) {
+                verifyBlocking(accountManager, timeout(5000)) {
                     register(argWhere { it.firstNames == "Test" && it.username == "testuser"},
                         eq(serverUrl), argWhere { it.makeAccountActive })
                 }

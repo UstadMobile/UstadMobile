@@ -12,6 +12,7 @@ import com.ustadmobile.core.db.dao.ClazzDaoCommon.SORT_CLAZZNAME_DESC
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
 import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
@@ -203,7 +204,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
         currentTime: Long,
         permission: Long,
         selectedSchool: Long
-    ) : DataSourceFactory<Int, ClazzWithListDisplayDetails>
+    ) : PagingSource<Int, ClazzWithListDisplayDetails>
 
 
     @Query("SELECT Clazz.clazzUid AS uid, Clazz.clazzName AS labelName From Clazz WHERE clazzUid IN (:ids)")

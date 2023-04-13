@@ -47,8 +47,11 @@ class EmptyPagingSource<Key: Any, Value: Any>(): PagingSource<Key, Value>() {
 
 class PersonListViewModel(
     di: DI,
-    savedStateHandle: UstadSavedStateHandle
-): UstadListViewModel<PersonListUiState>(di, savedStateHandle, PersonListUiState()) {
+    savedStateHandle: UstadSavedStateHandle,
+    destinationName: String = PersonListView.VIEW_NAME,
+): UstadListViewModel<PersonListUiState>(
+    di, savedStateHandle, PersonListUiState(), destinationName
+) {
 
     private val filterExcludeMembersOfClazz = savedStateHandle[ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ]?.toLong() ?: 0L
 
@@ -97,7 +100,7 @@ class PersonListViewModel(
                     )
                 },
                 fabMessageId = MessageID.person,
-                onSetAddItemVisibility = { visible ->
+                onSetAddListItemVisibility = { visible ->
                     _uiState.update { prev -> prev.copy(showAddItem = visible) }
                 }
             )

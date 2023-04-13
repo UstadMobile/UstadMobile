@@ -3,7 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.hooks.useUstadViewModel
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants.GENDER_MESSAGE_IDS_AND_UNSET
@@ -225,10 +225,8 @@ val PersonEditScreenPreview = FC<Props> {
     }
 }
 
-val PersonEditScreen = FC<UstadScreenProps> { props ->
-    val viewModel = useUstadViewModel(
-        onAppUiStateChange = props.onAppUiStateChanged
-    ) { di, savedStateHandle ->
+val PersonEditScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
         PersonEditViewModel(di, savedStateHandle)
     }
 

@@ -1,12 +1,9 @@
 package com.ustadmobile.core.controller
 
-import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.schedule.localMidnight
-import com.ustadmobile.core.schedule.toLocalMidnight
-import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.ext.effectiveTimeZone
+import com.ustadmobile.core.util.ext.toLocalMidnight
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ModuleCourseBlockEditView
@@ -18,6 +15,8 @@ import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.ClazzWithSchool
 import com.ustadmobile.lib.db.entities.CourseBlock
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
@@ -48,15 +47,16 @@ class ModuleCourseBlockEditPresenter(context: Any, args: Map<String, String>, vi
         val timeZone = clazzWithSchool.effectiveTimeZone()
         view.timeZone = timeZone
 
-        if(entity.cbHideUntilDate != 0L){
-            val startDateTimeMidnight = DateTime(entity.cbHideUntilDate)
-                .toLocalMidnight(timeZone).unixMillisLong
-            view.startDate = startDateTimeMidnight
-            view.startTime = entity.cbHideUntilDate - startDateTimeMidnight
-        }else{
-            view.startDate = 0L
-        }
-
+        //Will not be needed with MVVM
+//        if(entity.cbHideUntilDate != 0L){
+//            val startDateTimeMidnight = DateTime(entity.cbHideUntilDate)
+//                .toLocalMidnight(timeZone).unixMillisLong
+//            view.startDate = startDateTimeMidnight
+//            view.startTime = entity.cbHideUntilDate - startDateTimeMidnight
+//        }else{
+//            view.startDate = 0L
+//        }
+//
 
         return entity
     }
@@ -79,14 +79,15 @@ class ModuleCourseBlockEditPresenter(context: Any, args: Map<String, String>, vi
             val timeZone = clazzWithSchool.effectiveTimeZone()
             view.timeZone = timeZone
 
-            if(entity.cbHideUntilDate != 0L){
-                val startDateTimeMidnight = DateTime(entity.cbHideUntilDate)
-                    .toLocalMidnight(timeZone).unixMillisLong
-                view.startDate = startDateTimeMidnight
-                view.startTime = entity.cbHideUntilDate - startDateTimeMidnight
-            }else{
-                view.startDate = 0L
-            }
+            //Not needed with MVVM
+//            if(entity.cbHideUntilDate != 0L){
+//                val startDateTimeMidnight = DateTime(entity.cbHideUntilDate)
+//                    .toLocalMidnight(timeZone).unixMillisLong
+//                view.startDate = startDateTimeMidnight
+//                view.startTime = entity.cbHideUntilDate - startDateTimeMidnight
+//            }else{
+//                view.startDate = 0L
+//            }
         }
 
         return entity
@@ -105,8 +106,10 @@ class ModuleCourseBlockEditPresenter(context: Any, args: Map<String, String>, vi
             }
 
             val timeZone = view.timeZone ?: "UTC"
-            entity.cbHideUntilDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
-                .localMidnight.utc.unixMillisLong + view.startTime
+
+            entity.cbHideUntilDate = Instant.fromEpochMilliseconds(view.startDate)
+                .toLocalMidnight(TimeZone.of(timeZone))
+                .toEpochMilliseconds() + view.startTime
 
             finishWithResult(safeStringify(di,
                     ListSerializer(CourseBlock.serializer()),

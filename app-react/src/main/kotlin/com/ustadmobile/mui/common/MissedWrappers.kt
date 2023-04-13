@@ -1,6 +1,9 @@
 package com.ustadmobile.mui.common
 
+import csstype.Cursor
 import csstype.JustifyContent
+import csstype.PropertiesBuilder
+import js.core.jso
 import mui.material.*
 import muix.pickers.*
 import react.ReactNode
@@ -162,4 +165,22 @@ inline var StackProps.justifyContent: JustifyContent
     get() = asDynamic().justifyContent
     set(value) {
         asDynamic().justifyContent = value
+    }
+
+inline fun PropertiesBuilder.input(
+    crossinline block: PropertiesBuilder.() -> Unit,
+) {
+    asDynamic().input = jso(block)
+}
+
+inline var PropertiesBuilder.inputCursor: Cursor?
+    get() = asDynamic().input?.cursor
+    set(value) {
+        if(asDynamic().input != null) {
+            asDynamic().input.cursor = value
+        }else {
+            asDynamic().input = jso<PropertiesBuilder> {
+                cursor = value
+            }
+        }
     }

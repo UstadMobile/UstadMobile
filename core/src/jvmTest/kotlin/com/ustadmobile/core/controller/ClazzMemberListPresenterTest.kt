@@ -137,8 +137,7 @@ class ClazzMemberListPresenterTest {
     @Test
     fun givenActiveAccountHasAddPermissions_whenPendingStudentApproved_thenShouldUpdate() {
         val testClazz = Clazz("Test clazz")
-        runBlocking { repo.createNewClazzAndGroups(testClazz, di.direct.instance(), mapOf(),
-            context) }
+        runBlocking { repo.createNewClazzAndGroups(testClazz, di.direct.instance(), mapOf()) }
 
         val activePerson = Person().apply {
             firstNames = "Test"

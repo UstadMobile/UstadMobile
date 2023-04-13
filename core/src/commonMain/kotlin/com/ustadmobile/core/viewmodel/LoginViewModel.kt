@@ -44,7 +44,7 @@ data class LoginUiState(
 class LoginViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-) : UstadViewModel(di, savedStateHandle){
+) : UstadViewModel(di, savedStateHandle, Login2View.VIEW_NAME){
 
     private val _uiState = MutableStateFlow(LoginUiState())
 

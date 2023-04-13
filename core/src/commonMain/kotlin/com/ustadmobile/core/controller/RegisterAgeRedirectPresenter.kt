@@ -1,13 +1,12 @@
 package com.ustadmobile.core.controller
 
-import com.soywiz.klock.DateTime
-import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.schedule.age
+import com.ustadmobile.core.util.ext.isDateOfBirthAMinor
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.RegisterAgeRedirectView
 import com.ustadmobile.core.view.SiteTermsDetailView
 import com.ustadmobile.door.util.systemTimeInMillis
+import kotlinx.datetime.Instant
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -27,14 +26,14 @@ class RegisterAgeRedirectPresenter(
     }
 
     fun handleClickNext() {
-        val ageDateTime = DateTime(view.dateOfBirth)
+        val ageDateTime = Instant.fromEpochMilliseconds(view.dateOfBirth)
 
         val args = arguments.toMutableMap()
         args[PersonEditView.ARG_DATE_OF_BIRTH] = view.dateOfBirth.toString()
 
         //If the person is a minor, they do not accept terms and conditions themselves. Their
         // account needs approval
-        val viewName =  if(ageDateTime.age() < UstadMobileConstants.MINOR_AGE_THRESHOLD) {
+        val viewName =  if(ageDateTime.isDateOfBirthAMinor()) {
             args[PersonEditView.ARG_REGISTRATION_MODE] =
                     (PersonEditView.REGISTER_MODE_ENABLED + PersonEditView.REGISTER_MODE_MINOR).toString()
             PersonEditView.VIEW_NAME_REGISTER

@@ -23,7 +23,7 @@ private data class ViewModelAndKey<T: ViewModel>(
 fun <T:ViewModel> useViewModel(
     viewModelFactory: (savedStateHandle: UstadSavedStateHandle) -> T
 ): T{
-    val searchParams by useSearchParams()
+    val (searchParams, _) = useSearchParams()
 
     val locationKey = useLocation().key
 

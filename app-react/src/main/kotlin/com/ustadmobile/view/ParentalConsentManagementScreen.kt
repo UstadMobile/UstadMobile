@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonParentJoinWithMinorPerson
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.UstadMessageIdDropDownField
+import com.ustadmobile.view.components.UstadMessageIdSelectField
 import csstype.px
 import js.core.jso
 import mui.material.*
@@ -51,14 +51,14 @@ val ParentalConsentManagementComponent2 = FC<ParentalConsentManagementScreenProp
 
             if (props.uiState.relationshipVisible){
 
-                UstadMessageIdDropDownField {
+                UstadMessageIdSelectField {
                     value = props.uiState.personParentJoin?.ppjRelationship ?: 0
                     options = PersonParentJoinConstants.RELATIONSHIP_MESSAGE_IDS
                     label = strings[MessageID.relationship]
                     onChange = {
                         props.onChangeRelation(
                             props.uiState.personParentJoin?.shallowCopy {
-                                ppjRelationship = it?.value ?: 0
+                                ppjRelationship = it.value
                             })
                     }
                 }
