@@ -248,6 +248,15 @@ class ClazzEditViewModel(
                 }
             }
 
+            launch {
+                resultReturner.filteredResultFlowForKey(RESULT_KEY_HTML_DESC).collect { result ->
+                    val newDescription = result.result as? String ?: return@collect
+                    onEntityChanged(_uiState.value.entity?.shallowCopy {
+                        clazzDesc = newDescription
+                    })
+                }
+            }
+
             _uiState.update { prev ->
                 prev.copy(fieldsEnabled = true)
             }
@@ -320,6 +329,13 @@ class ClazzEditViewModel(
                 clazzSchedules = newSchedules
             )
         }
+    }
+
+    fun onClickEditDescription() {
+        navigateToEditHtml(
+            currentValue = _uiState.value.entity?.clazzDesc,
+            resultKey = RESULT_KEY_HTML_DESC
+        )
     }
 
 

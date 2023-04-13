@@ -139,7 +139,8 @@ fun Application.umRestApplication(
         }
     }
 
-    install(CallLogging)
+    //Uncomment if needed -generates a lot of output
+    //install(CallLogging)
 
     Napier.takeLogarithm()
     Napier.base(LogbackAntiLog())

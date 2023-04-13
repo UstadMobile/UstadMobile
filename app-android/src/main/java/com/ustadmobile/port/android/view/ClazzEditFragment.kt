@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -148,6 +149,7 @@ private fun ClazzEditScreen(
     onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit = {},
     onMoveCourseBlock: (from: ItemPosition, to: ItemPosition) -> Unit = {_, _ -> },
     onClickSchool: () -> Unit = {},
+    onClickEditDescription: () -> Unit = {},
     onClickTimezone: () -> Unit = {},
     onClickEditCourseBlock: (CourseBlockWithEntity) -> Unit = {},
     onClickAddCourseBlock: () -> Unit = {},
@@ -194,6 +196,7 @@ private fun ClazzEditScreen(
                     onClazzChanged= onClazzChanged,
                     onClickSchool = onClickSchool,
                     onClickTimezone = onClickTimezone,
+                    onClickEditDescription = onClickEditDescription,
                 )
             }
         }
@@ -389,6 +392,7 @@ private fun ClazzEditBasicDetails(
     onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit = {},
     onClickSchool: () -> Unit = {},
     onClickTimezone: () -> Unit = {},
+    onClickEditDescription: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier.defaultScreenPadding()
@@ -411,20 +415,11 @@ private fun ClazzEditBasicDetails(
             }
         )
 
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultItemPadding(),
-            value = uiState.entity?.clazzDesc ?: "",
-            label = { Text(stringResource(id = R.string.description).addOptionalSuffix()) },
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onClazzChanged(
-                    uiState.entity?.shallowCopy {
-                        clazzDesc = it
-                    }
-                )
-            }
+        HtmlClickableTextField(
+            html = uiState.entity?.clazzDesc ?: "",
+            label = stringResource(R.string.description),
+            onClick = onClickEditDescription,
+            modifier = Modifier.fillMaxWidth().testTag("description")
         )
 
         UstadClickableTextField(
@@ -569,6 +564,7 @@ fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
         uiState = uiState,
         onClazzChanged = viewModel::onEntityChanged,
         onCheckedAttendance = viewModel::onCheckedAttendanceChanged,
+        onClickEditDescription = viewModel::onClickEditDescription,
         onClickAddSchedule = viewModel::onClickAddSchedule,
         onClickEditSchedule = viewModel::onClickEditSchedule,
         onClickDeleteSchedule = viewModel::onClickDeleteSchedule,

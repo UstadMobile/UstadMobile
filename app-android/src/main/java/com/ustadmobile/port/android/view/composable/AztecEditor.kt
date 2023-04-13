@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import org.wordpress.aztec.Aztec
 import org.wordpress.aztec.AztecText
 import org.wordpress.aztec.ITextFormat
+import org.wordpress.aztec.plugins.CssUnderlinePlugin
 import org.wordpress.aztec.toolbar.IAztecToolbarClickListener
 
 class DefaultToolbarListener(
@@ -125,7 +126,11 @@ fun AztecEditor(
                         }
                     }
                 )
-            )
+            ).also {
+                it.visualEditor.setCalypsoMode(false)
+                it.addPlugin(CssUnderlinePlugin())
+                it.initSourceEditorHistory()
+            }
             rootView.setTag(R.id.tag_aztec, aztecEditor)
             visualEditor.fromHtml(html)
 

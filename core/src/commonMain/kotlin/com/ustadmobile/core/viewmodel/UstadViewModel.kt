@@ -225,6 +225,20 @@ abstract class UstadViewModel(
         navController.navigate(nextViewName, navArgs.toMap(), goOptions)
     }
 
+    fun navigateToEditHtml(
+        currentValue: String?,
+        resultKey: String
+    ) {
+        navController.navigate(
+            viewName = HtmlEditViewModel.DEST_NAME,
+            args = mapOf(
+                HtmlEditViewModel.ARG_HTML to (currentValue ?: ""),
+                UstadView.ARG_RESULT_DEST_KEY to resultKey,
+                UstadView.ARG_RESULT_DEST_VIEWNAME to destinationName
+            )
+        )
+    }
+
 
     companion object {
         /**
@@ -241,6 +255,8 @@ abstract class UstadViewModel(
          * Used to store the time that the viwemodel has first initialized. This
          */
         const val KEY_FIRST_INIT_TIME = "firstInit"
+
+        const val RESULT_KEY_HTML_DESC = "description"
     }
 
 }

@@ -99,7 +99,7 @@ class CourseBlockEditViewModel(
             }
 
             launch {
-                resultReturner.filteredResultFlowForKey(KEY_HTML_DESC).collect {result ->
+                resultReturner.filteredResultFlowForKey(RESULT_KEY_HTML_DESC).collect {result ->
                     val descriptionHtml = result.result as? String ?: return@collect
                     onEntityChanged(_uiState.value.courseBlock?.shallowCopy {
                         cbDescription = descriptionHtml
@@ -123,13 +123,9 @@ class CourseBlockEditViewModel(
 
     //Take the user to a separate screen with rich text editor.
     fun onClickEditDescription() {
-        navController.navigate(
-            viewName = HtmlEditViewModel.DEST_NAME,
-            args = mapOf(
-                HtmlEditViewModel.ARG_HTML to (_uiState.value.courseBlock?.cbDescription ?: ""),
-                UstadView.ARG_RESULT_DEST_KEY to KEY_HTML_DESC,
-                UstadView.ARG_RESULT_DEST_VIEWNAME to destinationName
-            )
+        navigateToEditHtml(
+            currentValue = _uiState.value.courseBlock?.cbDescription,
+            resultKey = RESULT_KEY_HTML_DESC
         )
     }
 
@@ -144,7 +140,6 @@ class CourseBlockEditViewModel(
 
         const val ARG_BLOCK_TYPE = "blockType"
 
-        const val KEY_HTML_DESC = "description"
 
     }
 

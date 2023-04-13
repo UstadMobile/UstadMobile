@@ -30,10 +30,6 @@ fun UstadCourseBlockEdit(
     scrollState: ScrollState? = null,
 ){
 
-    val htmlStr = remember(uiState.courseBlock?.cbDescription) {
-        Html.fromHtml(uiState.courseBlock?.cbDescription ?: "").toString()
-    }
-
     Column(
         modifier = modifier
     ){
@@ -52,20 +48,11 @@ fun UstadCourseBlockEdit(
             label = { Text(stringResource(R.string.title)) }
         )
 
-        UstadClickableTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("description")
-                .defaultItemPadding(),
-            label = { Text(stringResource(R.string.description)) },
-            maxLines = 3,
-            value = htmlStr,
-            onClickEnabled = scrollState?.isScrollInProgress != true,
-            readOnly = true,
+        HtmlClickableTextField(
+            html = uiState.courseBlock?.cbDescription ?: "",
+            label = stringResource(R.string.description),
             onClick = onClickEditDescription,
-            onValueChange = {
-                //do nothing
-            }
+            modifier = Modifier.fillMaxWidth().testTag("description")
         )
 
         UstadDateTimeEditTextField(

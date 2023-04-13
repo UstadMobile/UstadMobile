@@ -36,6 +36,7 @@ import js.core.jso
 import kotlinx.css.input
 import kotlin.js.json
 import com.ustadmobile.mui.common.inputCursor
+import com.ustadmobile.wrappers.quill.ReactQuill
 
 const val COURSE_BLOCK_DRAG_CLASS = "dragging_course_block"
 
@@ -105,17 +106,14 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 }
             }
 
-            TextField {
+            ReactQuill {
                 value = props.uiState.entity?.clazzDesc ?: ""
-                label = ReactNode(strings[MessageID.description].addOptionalSuffix(strings))
-                disabled = !props.uiState.fieldsEnabled
                 id = "clazz_desc"
-                onTextChange = {
-                    props.onClazzChanged(
-                        props.uiState.entity?.shallowCopy {
-                            clazzDesc = it
-                        }
-                    )
+                placeholder = strings[MessageID.description]
+                onChange = {
+                    props.onClazzChanged(props.uiState.entity?.shallowCopy {
+                        clazzDesc = it
+                    })
                 }
             }
 
