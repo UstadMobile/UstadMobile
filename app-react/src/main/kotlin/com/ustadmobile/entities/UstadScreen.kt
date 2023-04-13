@@ -156,7 +156,10 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(TimeZoneListViewModel.DEST_NAME, "Time Zone List", TimeZoneListScreen),
     UstadScreen(CourseTerminologyListViewModel.DEST_NAME, "Course Terminology List",
         CourseTerminologyListScreen),
-
+    UstadScreen(
+        ClazzAssignmentEditView.VIEW_NAME,
+        "ClazzAssignmentEdit Preview",
+        ClazzAssignmentEditScreenPreview),
 )
 
 

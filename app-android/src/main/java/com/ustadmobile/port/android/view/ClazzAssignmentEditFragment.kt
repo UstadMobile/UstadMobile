@@ -461,21 +461,20 @@ private fun ClazzAssignmentEditScreen(
             )
 
             OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
                 value = (uiState.entity?.assignment?.caTextLimit ?: 0).toString(),
                 label = { Text(stringResource(id = R.string.maximum)) },
                 enabled = uiState.fieldsEnabled,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number
-                ),
-                onValueChange = { newString ->
+                onValueChange = { value ->
                     onChangeCourseBlockWithEntity(
                         uiState.entity?.shallowCopyWithEntity{
                             assignment = uiState.entity?.assignment?.shallowCopy {
-                                caTextLimit = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
+                                caTextLimit = value.filter { it.isDigit() }.toIntOrNull() ?: 0
                             }
                         })
                 },
             )
+
         }
 
         UstadMessageIdOptionExposedDropDownMenuField(

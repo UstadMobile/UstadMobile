@@ -8,21 +8,26 @@ import com.ustadmobile.core.viewmodel.ClazzAssignmentEditUiState
 import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
 import com.ustadmobile.hooks.courseTerminologyResource
 import com.ustadmobile.hooks.useCourseTerminologyEntries
+import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyWithEntity
 import com.ustadmobile.mui.components.UstadCourseBlockEdit
 import com.ustadmobile.mui.components.UstadDropDownField
+import com.ustadmobile.mui.components.UstadNumberTextField
 import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.view.components.UstadMessageIdSelectField
+import com.ustadmobile.view.components.UstadSelectField
 import com.ustadmobile.view.components.UstadSwitchField
 import csstype.px
+import js.core.jso
 import mui.material.*
 import mui.system.responsive
 import react.FC
 import react.Props
 import react.ReactNode
+import react.create
 import react.dom.onChange
 import web.html.InputType
 
@@ -141,7 +146,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                         props.onChangeCourseBlockWithEntity(
                             props.uiState.entity?.shallowCopyWithEntity {
                                 assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                    caFileType = it?.value ?: 0
+                                    caFileType = it.value
                                 }
                             })
                     }
@@ -200,25 +205,24 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                         props.onChangeCourseBlockWithEntity(
                             props.uiState.entity?.shallowCopyWithEntity {
                                 assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                    caTextLimitType = it?.value ?: 0
+                                    caTextLimitType = it.value
                                 }
                             })
                     }
                 }
 
-                TextField {
-                    variant = FormControlVariant.outlined
-                    value = (props.uiState.entity?.assignment?.caTextLimit ?: 0).toString()
+                UstadNumberTextField {
+                    id = "caTextLimit"
+                    value = (props.uiState.entity?.assignment?.caTextLimit ?: 0).toFloat()
                     label = ReactNode(strings[MessageID.maximum])
+                    placeholder = strings[MessageID.maximum]
                     disabled = !props.uiState.fieldsEnabled
-                    type = InputType.number
+
                     onChange = {
-                        val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
                         props.onChangeCourseBlockWithEntity(
                             props.uiState.entity?.shallowCopyWithEntity {
                                 assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                    caTextLimit =
-                                        currentVal.filter { it.isDigit() }.toIntOrNull() ?: 0
+                                    caTextLimit = it.toInt()
                                 }
                             })
                     }
@@ -234,27 +238,31 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     props.onChangeCourseBlockWithEntity(
                         props.uiState.entity?.shallowCopyWithEntity {
                             assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                caSubmissionPolicy = it?.value ?: 0
+                                caSubmissionPolicy = it.value
                             }
                         })
                 }
             }
 
-            UstadDropDownField {
-                value = props.uiState.entity?.assignment?.caMarkingType ?: 0
+            UstadSelectField<Int> {
+                value = (props.uiState.entity?.assignment?.caMarkingType
+                    ?: ClazzAssignment.MARKED_BY_COURSE_LEADER).toString()
                 label = strings[MessageID.marked_by]
-                options = MarkingTypeConstants.MARKING_TYPE_MESSAGE_IDS
+                options = listOf(ClazzAssignment.MARKED_BY_COURSE_LEADER, ClazzAssignment.MARKED_BY_PEERS)
                 enabled = props.uiState.markingTypeEnabled
-                itemLabel = { ReactNode(courseTerminologyResource(
-                    terminologyEntries, strings, (it as? MessageIdOption2)?.messageId ?: 0))
+                itemLabel = { markingType ->
+                    val messageId = MarkingTypeConstants.MARKING_TYPE_MESSAGE_IDS.first {
+                        it.value == markingType
+                    }.messageId
+                    ReactNode(courseTerminologyResource(
+                    terminologyEntries, strings, messageId))
                 }
-                itemValue = { courseTerminologyResource(
-                    terminologyEntries, strings, (it as? MessageIdOption2)?.messageId ?: 0) }
+                itemValue = { it.toString() }
                 onChange = {
                     props.onChangeCourseBlockWithEntity(
                         props.uiState.entity?.shallowCopyWithEntity {
                             assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                caMarkingType = (it as MessageIdOption2).value
+                                caMarkingType = it
                             }
                         })
                 }

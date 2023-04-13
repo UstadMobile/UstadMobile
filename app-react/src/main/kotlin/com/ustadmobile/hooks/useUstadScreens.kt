@@ -113,7 +113,7 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen(ClazzMemberListView.VIEW_NAME, "ClazzMemberList Preview",
                 ClazzMemberListScreenPreview),
             UstadScreen(ClazzList2View.VIEW_NAME, "Clazz List Preview",
-                ClazzListScreenPreview
+                ClazzListScreen
             ),
             UstadScreen("VirtualListPreview", "Virtual List Preview",
                 VirtualListPreview),
