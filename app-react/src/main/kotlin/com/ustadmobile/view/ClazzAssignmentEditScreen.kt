@@ -255,7 +255,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                         it.value == markingType
                     }.messageId
                     ReactNode(courseTerminologyResource(
-                    terminologyEntries, strings, messageId))
+                        terminologyEntries, strings, messageId))
                 }
                 itemValue = { it.toString() }
                 onChange = {

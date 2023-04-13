@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -329,7 +330,7 @@ private fun ClazzAssignmentEditScreen(
     )  {
 
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().testTag("caTitle"),
             value = uiState.entity?.assignment?.caTitle ?: "",
             label = { Text(stringResource(id = R.string.title)) },
             isError = uiState.caTitleError != null,
@@ -349,7 +350,7 @@ private fun ClazzAssignmentEditScreen(
         }
 
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().testTag(""),
             value = uiState.entity?.assignment?.caDescription ?: "",
             label = { Text(stringResource(id = R.string.description).addOptionalSuffix()) },
             enabled = uiState.fieldsEnabled,
@@ -478,6 +479,7 @@ private fun ClazzAssignmentEditScreen(
         }
 
         UstadMessageIdOptionExposedDropDownMenuField(
+            modifier = Modifier.testTag("caSubmissionPolicy"),
             value = uiState.entity?.assignment?.caSubmissionPolicy ?: 0,
             label = stringResource(R.string.submission_policy),
             options = SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS,
@@ -493,13 +495,18 @@ private fun ClazzAssignmentEditScreen(
         )
 
         UstadExposedDropDownMenuField(
-            value = uiState.entity?.assignment?.caMarkingType ?: 0,
+            modifier = Modifier.testTag("caMarkingType"),
+            value = uiState.entity?.assignment?.caMarkingType ?: ClazzAssignment.MARKED_BY_COURSE_LEADER,
             label = stringResource(R.string.marked_by),
             options = MarkingTypeConstants.MARKING_TYPE_MESSAGE_IDS,
             enabled = uiState.markingTypeEnabled,
-            itemText = {
+            itemText = { markingType ->
+//                val messageId = MarkingTypeConstants.MARKING_TYPE_MESSAGE_IDS.first {
+//                    it.value == markingType
+//                }.messageId
                 courseTerminologyEntryResource(
-                    terminologyEntries, (it as MessageIdOption2).messageId) },
+                    terminologyEntries, ClazzAssignment.MARKED_BY_COURSE_LEADER).toString()
+                       },
             onOptionSelected = {
                 onChangeCourseBlockWithEntity(
                     uiState.entity?.shallowCopyWithEntity{
@@ -547,6 +554,7 @@ private fun ClazzAssignmentEditScreen(
         }
 
         UstadSwitchField(
+            modifier = Modifier.testTag("caClassCommentEnabled"),
             label = stringResource(id = R.string.allow_class_comments),
             checked = uiState.entity?.assignment?.caClassCommentEnabled ?: false,
             onChange = { onChangedAllowClassComments(it) },
