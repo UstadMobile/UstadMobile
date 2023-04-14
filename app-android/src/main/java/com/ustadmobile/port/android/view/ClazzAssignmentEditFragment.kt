@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.widget.doAfterTextChanged
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentEditBinding
@@ -434,6 +435,7 @@ private fun ClazzAssignmentEditScreen(
             UstadMessageIdOptionExposedDropDownMenuField(
                 modifier = Modifier
                     .defaultItemPadding()
+                    .fillMaxWidth()
                     .testTag("caTextLimitType"),
                 value = uiState.entity?.assignment?.caTextLimitType ?: 0,
                 label = stringResource(R.string.limit),
@@ -514,9 +516,14 @@ private fun ClazzAssignmentEditScreen(
 
         if (uiState.peerMarkingVisible) {
             Row(
-                modifier = Modifier.defaultItemPadding()
+                modifier = Modifier.defaultItemPadding(),
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
+                Column(
+                    modifier = Modifier
+                        .weight(0.7F)
+                ) {
                     UstadNumberTextField(
                         modifier = Modifier
                             .testTag("caPeerReviewerCount"),
@@ -541,6 +548,7 @@ private fun ClazzAssignmentEditScreen(
 
                 OutlinedButton(
                     onClick = onClickAssignReviewers,
+                    modifier = Modifier.weight(0.3F),
                     enabled = uiState.fieldsEnabled,
                 ) {
                     Text(stringResource(R.string.assign_reviewers))
