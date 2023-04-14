@@ -81,40 +81,6 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
         Stack {
             spacing = responsive(20.px)
 
-            TextField {
-                variant = FormControlVariant.outlined
-                value = props.uiState.entity?.assignment?.caTitle ?: ""
-                label = ReactNode(strings[MessageID.title])
-                error = props.uiState.caTitleError != null
-                disabled = !props.uiState.fieldsEnabled
-                helperText = props.uiState.caTitleError?.let { ReactNode(it) }
-                onChange = {
-                    val currentVal = it.target.asDynamic().value
-                    props.onChangeCourseBlockWithEntity(
-                        props.uiState.entity?.shallowCopyWithEntity {
-                            assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                caTitle = currentVal?.toString() ?: ""
-                            }
-                        })
-                }
-            }
-
-            TextField {
-                variant = FormControlVariant.outlined
-                value = props.uiState.entity?.assignment?.caDescription ?: ""
-                label = ReactNode(strings[MessageID.description].addOptionalSuffix(strings))
-                disabled = !props.uiState.fieldsEnabled
-                onChange = {
-                    val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
-                    props.onChangeCourseBlockWithEntity(
-                        props.uiState.entity?.shallowCopyWithEntity {
-                            assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                caDescription = currentVal
-                            }
-                        })
-                }
-            }
-
             UstadCourseBlockEdit {
                 uiState = props.uiState.courseBlockEditUiState
                 onCourseBlockChange = props.onChangeCourseBlock
@@ -152,36 +118,31 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     }
                 }
 
-                TextField {
+                UstadNumberTextField {
                     variant = FormControlVariant.outlined
-                    value = (props.uiState.entity?.assignment?.caSizeLimit ?: 0).toString()
+                    value = (props.uiState.entity?.assignment?.caSizeLimit ?: 0).toFloat()
                     label = ReactNode(strings[MessageID.size_limit])
                     disabled = !props.uiState.fieldsEnabled
-                    type = InputType.number
                     onChange = {
-                        val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
                         props.onChangeCourseBlockWithEntity(
                             props.uiState.entity?.shallowCopyWithEntity {
                                 assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                    caSizeLimit = currentVal.filter { it.isDigit() }.toIntOrNull() ?: 0
+                                    caSizeLimit = it.toInt()
                                 }
                             })
                     }
                 }
 
-                TextField {
+                UstadNumberTextField {
                     variant = FormControlVariant.outlined
-                    value = (props.uiState.entity?.assignment?.caNumberOfFiles ?: 0).toString()
+                    value = (props.uiState.entity?.assignment?.caNumberOfFiles ?: 0).toFloat()
                     label = ReactNode(strings[MessageID.number_of_files])
                     disabled = props.uiState.fieldsEnabled
-                    type = InputType.number
                     onChange = {
-                        val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
                         props.onChangeCourseBlockWithEntity(
                             props.uiState.entity?.shallowCopyWithEntity {
                                 assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                    caNumberOfFiles =
-                                        currentVal.filter { it.isDigit() }.toIntOrNull() ?: 0
+                                    caNumberOfFiles = it.toInt()
                                 }
                             })
                     }
@@ -273,21 +234,18 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     direction = responsive(StackDirection.row)
 
                     Stack {
-                        TextField {
+                        UstadNumberTextField {
                             variant = FormControlVariant.outlined
-                            value = (props.uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toString()
+                            value = (props.uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toFloat()
                             label = ReactNode(strings[MessageID.reviews_per_user_group])
                             disabled = !props.uiState.fieldsEnabled
                             error = props.uiState.reviewerCountError != null
                             helperText = props.uiState.reviewerCountError?.let { ReactNode(it) }
                             onChange = {
-                                val currentVal = (it.target.asDynamic().value)?.toString() ?: ""
                                 props.onChangeCourseBlockWithEntity(
                                     props.uiState.entity?.shallowCopyWithEntity{
                                         assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                            caPeerReviewerCount = currentVal.filter {
-                                                it.isDigit()
-                                            }.toIntOrNull() ?: 0
+                                            caPeerReviewerCount = it.toInt()
                                         }
                                     })
                             }
@@ -298,7 +256,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                         onClick = { props.onClickAssignReviewers() }
                         disabled = !props.uiState.fieldsEnabled
                         variant = ButtonVariant.contained
-                        + strings[MessageID.assign_reviewers].uppercase()
+                        + strings[MessageID.assign_reviewers]
                     }
                 }
             }
