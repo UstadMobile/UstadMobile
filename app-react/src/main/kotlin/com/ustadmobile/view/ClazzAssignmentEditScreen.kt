@@ -12,11 +12,13 @@ import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyWithEntity
+import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.components.UstadCourseBlockEdit
 import com.ustadmobile.mui.components.UstadNumberTextField
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.view.components.UstadSelectField
 import com.ustadmobile.view.components.UstadSwitchField
+import csstype.JustifyContent
 import csstype.px
 import mui.material.*
 import mui.system.responsive
@@ -242,8 +244,11 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
             if (props.uiState.peerMarkingVisible) {
                 Stack {
                     direction = responsive(StackDirection.row)
+                    spacing = responsive(10.px)
 
                     Stack {
+                        justifyContent = JustifyContent.stretch
+
                         UstadNumberTextField {
                             id = "caPeerReviewerCount"
                             fullWidth = true
