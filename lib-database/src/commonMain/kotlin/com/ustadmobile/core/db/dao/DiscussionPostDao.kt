@@ -7,6 +7,7 @@ import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.flow.Flow
 
 @DoorDao
 @Repository
@@ -124,6 +125,13 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     abstract suspend fun getPostTitle(postUid: Long): String?
 
     @Query("""
+        SELECT DiscussionPost.discussionPostTitle 
+          FROM DiscussionPost 
+         WHERE DiscussionPost.discussionPostUid = :postUid
+    """)
+    abstract suspend fun getPostTitleAsFlow(postUid: Long): Flow<String?>
+
+    @Query("""
         SELECT * 
          FROM DiscussionPost
         WHERE DiscussionPost.discussionPostUid = :uid
@@ -145,6 +153,21 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
            
     """)
     abstract suspend fun findWithDetailsByUid(uid: Long): DiscussionPostWithDetails?
+
+    @Query("""
+        SELECT DiscussionPost.*,
+            Person.firstNames as authorPersonFirstNames,
+            Person.lastName as authorPersonLastName,
+            '' AS postLatestMessage,
+            0 AS postRepliesCount, 
+            DiscussionPost.discussionPostLct AS postLatestMessageTimestamp
+             
+          FROM DiscussionPost     
+          LEFT JOIN Person ON Person.personUid = DiscussionPost.discussionPostStartedPersonUid
+         WHERE DiscussionPost.discussionPostUid = :uid
+           
+    """)
+    abstract suspend fun findWithDetailsByUidAsFlow(uid: Long): Flow<DiscussionPostWithDetails?>
 
     @Query("""
         SELECT DiscussionPost.*,
