@@ -3,7 +3,6 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.*
-import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.ClazzAssignmentEditUiState
 import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
 import com.ustadmobile.hooks.courseTerminologyResource
@@ -14,22 +13,17 @@ import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyWithEntity
 import com.ustadmobile.mui.components.UstadCourseBlockEdit
-import com.ustadmobile.mui.components.UstadDropDownField
 import com.ustadmobile.mui.components.UstadNumberTextField
-import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.view.components.UstadSelectField
 import com.ustadmobile.view.components.UstadSwitchField
 import csstype.px
-import js.core.jso
 import mui.material.*
 import mui.system.responsive
 import react.FC
 import react.Props
 import react.ReactNode
-import react.create
 import react.dom.onChange
-import web.html.InputType
 
 external interface ClazzAssignmentEditScreenProps : Props {
 
@@ -252,6 +246,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     Stack {
                         UstadNumberTextField {
                             id = "caPeerReviewerCount"
+                            fullWidth = true
                             variant = FormControlVariant.outlined
                             value = (props.uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toFloat()
                             label = ReactNode(strings[MessageID.reviews_per_user_group])
@@ -270,6 +265,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     }
 
                     Button {
+                        fullWidth = true
                         onClick = { props.onClickAssignReviewers() }
                         disabled = !props.uiState.fieldsEnabled
                         variant = ButtonVariant.contained

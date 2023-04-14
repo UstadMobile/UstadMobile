@@ -14,7 +14,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -25,7 +24,6 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentEditBinding
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.locale.entityconstants.*
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption2
