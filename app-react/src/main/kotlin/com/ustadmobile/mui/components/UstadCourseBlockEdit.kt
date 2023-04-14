@@ -92,6 +92,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
 
 
             UstadMessageIdSelectField {
+                id = "cbCompletionCriteria"
                 value = props.uiState.courseBlock?.cbCompletionCriteria ?: 0
                 label = strings[MessageID.completion_criteria]
                 options = CompletionCriteriaConstants.COMPLETION_CRITERIA_MESSAGE_IDS
@@ -105,6 +106,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
 
             if (props.uiState.minScoreVisible){
                 UstadNumberTextField {
+                    id = "cbMinPoints"
                     value = (props.uiState.courseBlock?.cbMinPoints ?: 0).toFloat()
                     asDynamic().InputProps = jso<InputBaseProps> {
                         endAdornment = InputAdornment.create {
@@ -124,6 +126,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
         }
 
         UstadNumberTextField {
+            id = "cbMaxPoints"
             value = (props.uiState.courseBlock?.cbMaxPoints ?: 0).toFloat()
             label = ReactNode(strings[MessageID.maximum_points])
             error = (props.uiState.caMaxPointsError != null)
@@ -137,6 +140,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
         }
 
         UstadDateTimeEditField {
+            id = "cbDeadlineDate"
             timeInMillis = props.uiState.courseBlock?.cbDeadlineDate ?: 0
             label = strings[MessageID.deadline].addOptionalSuffix(strings)
             enabled = props.uiState.fieldsEnabled
@@ -152,6 +156,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
         if (props.uiState.gracePeriodVisible){
 
             UstadDateTimeEditField {
+                id = "cbGracePeriodDate"
                 timeInMillis = props.uiState.courseBlock?.cbGracePeriodDate ?: 0
                 label = strings[MessageID.end_of_grace_period]
                 enabled = props.uiState.fieldsEnabled
@@ -164,6 +169,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             }
 
             UstadNumberTextField {
+                id = "cbLateSubmissionPenalty"
                 value = (props.uiState.courseBlock?.cbLateSubmissionPenalty ?: 0).toFloat()
                 label = ReactNode(strings[MessageID.late_submission_penalty])
                 disabled = !props.uiState.fieldsEnabled
