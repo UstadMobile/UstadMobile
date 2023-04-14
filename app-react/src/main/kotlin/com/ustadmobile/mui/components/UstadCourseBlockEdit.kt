@@ -166,8 +166,6 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             UstadNumberTextField {
                 value = (props.uiState.courseBlock?.cbLateSubmissionPenalty ?: 0).toFloat()
                 label = ReactNode(strings[MessageID.late_submission_penalty])
-                error = (props.uiState.caStartDateError != null)
-                helperText = props.uiState.caStartDateError?.let { ReactNode(it) }
                 disabled = !props.uiState.fieldsEnabled
                 asDynamic().InputProps = jso<InputBaseProps> {
                     endAdornment = InputAdornment.create {

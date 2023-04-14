@@ -178,7 +178,6 @@ fun UstadCourseBlockEdit(
                 value = (uiState.courseBlock?.cbLateSubmissionPenalty ?: 0).toFloat(),
                 label = { Text(stringResource(id = R.string.late_submission_penalty)) },
                 keyboardOptions =  KeyboardOptions(keyboardType = KeyboardType.Number),
-                isError = uiState.caStartDateError != null,
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
                     onCourseBlockChange(uiState.courseBlock?.shallowCopy {
