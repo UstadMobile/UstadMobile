@@ -336,7 +336,7 @@ private fun ClazzAssignmentEditScreen(
         )
 
         UstadClickableTextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().testTag("cgsName"),
             value = uiState.groupSet?.cgsName ?: "",
             label = { Text(stringResource(id = R.string.submission_type)) },
             enabled = uiState.groupSetEnabled,
@@ -345,6 +345,7 @@ private fun ClazzAssignmentEditScreen(
         )
 
         UstadSwitchField(
+            modifier = Modifier.testTag("caRequireFileSubmission"),
             label = stringResource(id = R.string.require_file_submission),
             checked = uiState.entity?.assignment?.caRequireFileSubmission ?: false,
             onChange = { onChangedFileRequired(it) },
@@ -353,6 +354,7 @@ private fun ClazzAssignmentEditScreen(
 
         if (uiState.fileSubmissionVisible){
             UstadMessageIdOptionExposedDropDownMenuField(
+                modifier = Modifier.testTag("caFileType"),
                 value = uiState.entity?.assignment?.caFileType ?: 0,
                 label = stringResource(R.string.file_type),
                 options = FileTypeConstants.FILE_TYPE_MESSAGE_IDS,
@@ -368,6 +370,7 @@ private fun ClazzAssignmentEditScreen(
             )
 
             UstadNumberTextField(
+                modifier = Modifier.testTag("caSizeLimit"),
                 value = (uiState.entity?.assignment?.caSizeLimit ?: 0).toFloat(),
                 label = { Text(stringResource(id = R.string.size_limit)) },
                 enabled = uiState.fieldsEnabled,
@@ -385,6 +388,7 @@ private fun ClazzAssignmentEditScreen(
             )
 
             UstadNumberTextField(
+                modifier = Modifier.testTag("caNumberOfFiles"),
                 value = (uiState.entity?.assignment?.caNumberOfFiles ?: 0).toFloat(),
                 label = { Text(stringResource(id = R.string.number_of_files)) },
                 enabled = uiState.fieldsEnabled,
@@ -403,6 +407,7 @@ private fun ClazzAssignmentEditScreen(
         }
 
         UstadSwitchField(
+            modifier = Modifier.testTag("caRequireTextSubmission"),
             label = stringResource(id = R.string.require_text_submission),
             checked = uiState.entity?.assignment?.caRequireTextSubmission ?: false,
             onChange = { onChangedTextRequired(it) },
@@ -411,6 +416,7 @@ private fun ClazzAssignmentEditScreen(
 
         if (uiState.textSubmissionVisible) {
             UstadMessageIdOptionExposedDropDownMenuField(
+                modifier = Modifier.testTag("caTextLimitType"),
                 value = uiState.entity?.assignment?.caTextLimitType ?: 0,
                 label = stringResource(R.string.limit),
                 options = TextLimitTypeConstants.TEXT_LIMIT_TYPE_MESSAGE_IDS,
@@ -426,7 +432,7 @@ private fun ClazzAssignmentEditScreen(
             )
 
             UstadNumberTextField(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().testTag("caTextLimit"),
                 value = (uiState.entity?.assignment?.caTextLimit ?: 0).toFloat(),
                 label = { Text(stringResource(id = R.string.maximum)) },
                 enabled = uiState.fieldsEnabled,
@@ -485,6 +491,7 @@ private fun ClazzAssignmentEditScreen(
             Row {
                 Column {
                     UstadNumberTextField(
+                        modifier = Modifier.testTag("caPeerReviewerCount"),
                         value = (uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toFloat(),
                         label = { Text(stringResource(id = R.string.reviews_per_user_group)) },
                         enabled = uiState.fieldsEnabled,
@@ -524,6 +531,7 @@ private fun ClazzAssignmentEditScreen(
         )
 
         UstadSwitchField(
+            modifier = Modifier.testTag("caPrivateCommentsEnabled"),
             label = stringResource(id = R.string.allow_private_comments_from_students),
             checked = uiState.entity?.assignment?.caPrivateCommentsEnabled ?: false,
             onChange = { onChangedAllowPrivateCommentsFromStudents(it) },
