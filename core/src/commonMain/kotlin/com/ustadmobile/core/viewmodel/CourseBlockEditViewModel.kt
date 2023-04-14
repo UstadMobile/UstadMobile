@@ -25,6 +25,8 @@ data class CourseBlockEditUiState(
 
     val caStartDateError: String? = null,
 
+    val caTitleError: String? = null,
+
     val caDeadlineError: String? = null,
 
     val deadlineVisible: Boolean = false,

@@ -24,6 +24,7 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentEditBinding
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.locale.entityconstants.*
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption2
@@ -329,25 +330,6 @@ private fun ClazzAssignmentEditScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
 
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().testTag("caTitle"),
-            value = uiState.entity?.assignment?.caTitle ?: "",
-            label = { Text(stringResource(id = R.string.title)) },
-            isError = uiState.caTitleError != null,
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onChangeCourseBlockWithEntity(
-                    uiState.entity?.shallowCopyWithEntity {
-                        assignment = uiState.entity?.assignment?.shallowCopy {
-                            caTitle = it
-                        }
-                    })
-            },
-        )
-
-        uiState.caTitleError?.also {
-            Text(it)
-        }
 
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth().testTag(""),
@@ -501,12 +483,12 @@ private fun ClazzAssignmentEditScreen(
             options = MarkingTypeConstants.MARKING_TYPE_MESSAGE_IDS,
             enabled = uiState.markingTypeEnabled,
             itemText = { markingType ->
-//                val messageId = MarkingTypeConstants.MARKING_TYPE_MESSAGE_IDS.first {
-//                    it.value == markingType
-//                }.messageId
+                val messageId = MarkingTypeConstants.MARKING_TYPE_MESSAGE_IDS.first {
+                    it.value == markingType
+                }.messageId
                 courseTerminologyEntryResource(
-                    terminologyEntries, ClazzAssignment.MARKED_BY_COURSE_LEADER).toString()
-                       },
+                    terminologyEntries, messageId)
+            },
             onOptionSelected = {
                 onChangeCourseBlockWithEntity(
                     uiState.entity?.shallowCopyWithEntity{
