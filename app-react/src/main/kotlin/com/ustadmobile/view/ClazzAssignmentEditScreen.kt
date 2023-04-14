@@ -65,6 +65,13 @@ val ClazzAssignmentEditScreenPreview = FC<Props> {
                 gracePeriodVisible = true,
             ),
             minScoreVisible = true,
+            textSubmissionVisible = true,
+            fileSubmissionVisible = true,
+            entity = CourseBlockWithEntity().apply {
+                assignment = ClazzAssignment().apply {
+                    caMarkingType = ClazzAssignment.MARKED_BY_PEERS
+                }
+            }
         )
     }
 }

@@ -40,6 +40,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyWithEntity
 import com.ustadmobile.port.android.util.compose.courseTerminologyEntryResource
 import com.ustadmobile.port.android.util.compose.rememberCourseTerminologyEntries
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.binding.isSet
 import com.ustadmobile.port.android.view.composable.*
@@ -336,7 +337,10 @@ private fun ClazzAssignmentEditScreen(
         )
 
         UstadClickableTextField(
-            modifier = Modifier.fillMaxWidth().testTag("cgsName"),
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultItemPadding()
+                .testTag("cgsName"),
             value = uiState.groupSet?.cgsName ?: "",
             label = { Text(stringResource(id = R.string.submission_type)) },
             enabled = uiState.groupSetEnabled,
@@ -345,7 +349,9 @@ private fun ClazzAssignmentEditScreen(
         )
 
         UstadSwitchField(
-            modifier = Modifier.testTag("caRequireFileSubmission"),
+            modifier = Modifier
+                .defaultItemPadding()
+                .testTag("caRequireFileSubmission"),
             label = stringResource(id = R.string.require_file_submission),
             checked = uiState.entity?.assignment?.caRequireFileSubmission ?: false,
             onChange = { onChangedFileRequired(it) },
@@ -354,7 +360,9 @@ private fun ClazzAssignmentEditScreen(
 
         if (uiState.fileSubmissionVisible){
             UstadMessageIdOptionExposedDropDownMenuField(
-                modifier = Modifier.testTag("caFileType"),
+                modifier = Modifier
+                    .defaultItemPadding()
+                    .testTag("caFileType"),
                 value = uiState.entity?.assignment?.caFileType ?: 0,
                 label = stringResource(R.string.file_type),
                 options = FileTypeConstants.FILE_TYPE_MESSAGE_IDS,
@@ -370,7 +378,10 @@ private fun ClazzAssignmentEditScreen(
             )
 
             UstadNumberTextField(
-                modifier = Modifier.testTag("caSizeLimit"),
+                modifier = Modifier
+                    .defaultItemPadding()
+                    .fillMaxWidth()
+                    .testTag("caSizeLimit"),
                 value = (uiState.entity?.assignment?.caSizeLimit ?: 0).toFloat(),
                 label = { Text(stringResource(id = R.string.size_limit)) },
                 enabled = uiState.fieldsEnabled,
@@ -388,7 +399,10 @@ private fun ClazzAssignmentEditScreen(
             )
 
             UstadNumberTextField(
-                modifier = Modifier.testTag("caNumberOfFiles"),
+                modifier = Modifier
+                    .defaultItemPadding()
+                    .fillMaxWidth()
+                    .testTag("caNumberOfFiles"),
                 value = (uiState.entity?.assignment?.caNumberOfFiles ?: 0).toFloat(),
                 label = { Text(stringResource(id = R.string.number_of_files)) },
                 enabled = uiState.fieldsEnabled,
@@ -407,7 +421,9 @@ private fun ClazzAssignmentEditScreen(
         }
 
         UstadSwitchField(
-            modifier = Modifier.testTag("caRequireTextSubmission"),
+            modifier = Modifier
+                .defaultItemPadding()
+                .testTag("caRequireTextSubmission"),
             label = stringResource(id = R.string.require_text_submission),
             checked = uiState.entity?.assignment?.caRequireTextSubmission ?: false,
             onChange = { onChangedTextRequired(it) },
@@ -416,7 +432,9 @@ private fun ClazzAssignmentEditScreen(
 
         if (uiState.textSubmissionVisible) {
             UstadMessageIdOptionExposedDropDownMenuField(
-                modifier = Modifier.testTag("caTextLimitType"),
+                modifier = Modifier
+                    .defaultItemPadding()
+                    .testTag("caTextLimitType"),
                 value = uiState.entity?.assignment?.caTextLimitType ?: 0,
                 label = stringResource(R.string.limit),
                 options = TextLimitTypeConstants.TEXT_LIMIT_TYPE_MESSAGE_IDS,
@@ -432,7 +450,10 @@ private fun ClazzAssignmentEditScreen(
             )
 
             UstadNumberTextField(
-                modifier = Modifier.fillMaxWidth().testTag("caTextLimit"),
+                modifier = Modifier
+                    .defaultItemPadding()
+                    .fillMaxWidth()
+                    .testTag("caTextLimit"),
                 value = (uiState.entity?.assignment?.caTextLimit ?: 0).toFloat(),
                 label = { Text(stringResource(id = R.string.maximum)) },
                 enabled = uiState.fieldsEnabled,
@@ -449,7 +470,9 @@ private fun ClazzAssignmentEditScreen(
         }
 
         UstadMessageIdOptionExposedDropDownMenuField(
-            modifier = Modifier.testTag("caSubmissionPolicy"),
+            modifier = Modifier
+                .defaultItemPadding()
+                .testTag("caSubmissionPolicy"),
             value = uiState.entity?.assignment?.caSubmissionPolicy ?: 0,
             label = stringResource(R.string.submission_policy),
             options = SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS,
@@ -465,7 +488,9 @@ private fun ClazzAssignmentEditScreen(
         )
 
         UstadExposedDropDownMenuField(
-            modifier = Modifier.testTag("caMarkingType"),
+            modifier = Modifier
+                .defaultItemPadding()
+                .testTag("caMarkingType"),
             value = uiState.entity?.assignment?.caMarkingType ?: ClazzAssignment.MARKED_BY_COURSE_LEADER,
             label = stringResource(R.string.marked_by),
             options = MarkingTypeConstants.MARKING_TYPE_MESSAGE_IDS,
@@ -488,10 +513,13 @@ private fun ClazzAssignmentEditScreen(
         )
 
         if (uiState.peerMarkingVisible) {
-            Row {
+            Row(
+                modifier = Modifier.defaultItemPadding()
+            ) {
                 Column {
                     UstadNumberTextField(
-                        modifier = Modifier.testTag("caPeerReviewerCount"),
+                        modifier = Modifier
+                            .testTag("caPeerReviewerCount"),
                         value = (uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toFloat(),
                         label = { Text(stringResource(id = R.string.reviews_per_user_group)) },
                         enabled = uiState.fieldsEnabled,
@@ -513,8 +541,6 @@ private fun ClazzAssignmentEditScreen(
 
                 OutlinedButton(
                     onClick = onClickAssignReviewers,
-                    modifier = Modifier
-                        .fillMaxWidth(),
                     enabled = uiState.fieldsEnabled,
                 ) {
                     Text(stringResource(R.string.assign_reviewers))
@@ -523,7 +549,9 @@ private fun ClazzAssignmentEditScreen(
         }
 
         UstadSwitchField(
-            modifier = Modifier.testTag("caClassCommentEnabled"),
+            modifier = Modifier
+                .defaultItemPadding()
+                .testTag("caClassCommentEnabled"),
             label = stringResource(id = R.string.allow_class_comments),
             checked = uiState.entity?.assignment?.caClassCommentEnabled ?: false,
             onChange = { onChangedAllowClassComments(it) },
@@ -531,7 +559,9 @@ private fun ClazzAssignmentEditScreen(
         )
 
         UstadSwitchField(
-            modifier = Modifier.testTag("caPrivateCommentsEnabled"),
+            modifier = Modifier
+                .defaultItemPadding()
+                .testTag("caPrivateCommentsEnabled"),
             label = stringResource(id = R.string.allow_private_comments_from_students),
             checked = uiState.entity?.assignment?.caPrivateCommentsEnabled ?: false,
             onChange = { onChangedAllowPrivateCommentsFromStudents(it) },
@@ -552,6 +582,13 @@ fun ClazzAssignmentEditScreenPreview() {
             gracePeriodVisible = true,
         ),
         minScoreVisible = true,
+        textSubmissionVisible = true,
+        fileSubmissionVisible = true,
+        entity = CourseBlockWithEntity().apply {
+            assignment = ClazzAssignment().apply {
+                caMarkingType = ClazzAssignment.MARKED_BY_PEERS
+            }
+        }
     )
 
     ClazzAssignmentEditScreen(uiStateVal)

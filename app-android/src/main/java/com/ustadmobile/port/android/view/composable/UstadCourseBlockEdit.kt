@@ -93,7 +93,9 @@ fun UstadCourseBlockEdit(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Row() {
+        Row(
+            modifier = Modifier.defaultItemPadding(),
+        ) {
             UstadMessageIdOptionExposedDropDownMenuField(
                 modifier = Modifier.weight(0.5F).testTag("cbCompletionCriteria"),
                 value = uiState.courseBlock?.cbCompletionCriteria ?: 0,
@@ -132,6 +134,7 @@ fun UstadCourseBlockEdit(
         UstadNumberTextField(
             modifier = Modifier
                 .fillMaxWidth()
+                .defaultItemPadding()
                 .testTag("cbMaxPoints"),
             value = (uiState.courseBlock?.cbMaxPoints ?: 0).toFloat(),
             label = { Text(stringResource(id = R.string.maximum_points)) },
@@ -152,7 +155,7 @@ fun UstadCourseBlockEdit(
         Spacer(modifier = Modifier.height(10.dp))
 
         UstadDateTimeEditTextField(
-            modifier = Modifier.testTag("cbDeadlineDate"),
+            modifier = Modifier.defaultItemPadding().testTag("cbDeadlineDate"),
             value = uiState.courseBlock?.cbDeadlineDate ?: 0,
             dateLabel = stringResource(id = R.string.deadline).addOptionalSuffix(),
             timeLabel = stringResource(id = R.string.time),
@@ -164,7 +167,7 @@ fun UstadCourseBlockEdit(
 
         if (uiState.gracePeriodVisible){
             UstadDateTimeEditTextField(
-                modifier = Modifier.testTag("cbGracePeriodDate"),
+                modifier = Modifier.defaultItemPadding().testTag("cbGracePeriodDate"),
                 value = uiState.courseBlock?.cbGracePeriodDate ?: 0,
                 dateLabel = stringResource(id = R.string.end_of_grace_period),
                 timeLabel = stringResource(id = R.string.time),
@@ -174,7 +177,10 @@ fun UstadCourseBlockEdit(
             Spacer(modifier = Modifier.height(10.dp))
 
             UstadNumberTextField(
-                modifier = Modifier.fillMaxWidth().testTag("cbLateSubmissionPenalty"),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultItemPadding()
+                    .testTag("cbLateSubmissionPenalty"),
                 value = (uiState.courseBlock?.cbLateSubmissionPenalty ?: 0).toFloat(),
                 label = { Text(stringResource(id = R.string.late_submission_penalty)) },
                 keyboardOptions =  KeyboardOptions(keyboardType = KeyboardType.Number),
