@@ -55,7 +55,7 @@ fun UstadCourseBlockEdit(
         )
 
         uiState.caTitleError?.also {
-            Text(it)
+            UstadErrorText(error = it)
         }
 
         UstadClickableTextField(
@@ -146,7 +146,7 @@ fun UstadCourseBlockEdit(
         )
 
         uiState.caMaxPointsError?.also {
-            Text(it)
+            UstadErrorText(error = it)
         }
 
         Spacer(modifier = Modifier.height(10.dp))

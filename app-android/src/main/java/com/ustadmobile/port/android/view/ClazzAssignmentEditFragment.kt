@@ -330,22 +330,6 @@ private fun ClazzAssignmentEditScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
 
-
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().testTag(""),
-            value = uiState.entity?.assignment?.caDescription ?: "",
-            label = { Text(stringResource(id = R.string.description).addOptionalSuffix()) },
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onChangeCourseBlockWithEntity(
-                    uiState.entity?.shallowCopyWithEntity{
-                        assignment = uiState.entity?.assignment?.shallowCopy {
-                            caDescription = it
-                        }
-                    })
-            },
-        )
-
         UstadCourseBlockEdit(
             uiState = uiState.courseBlockEditUiState,
             onCourseBlockChange = onChangeCourseBlock
@@ -383,37 +367,35 @@ private fun ClazzAssignmentEditScreen(
                 },
             )
 
-            OutlinedTextField(
-                value = (uiState.entity?.assignment?.caSizeLimit ?: 0).toString(),
+            UstadNumberTextField(
+                value = (uiState.entity?.assignment?.caSizeLimit ?: 0).toFloat(),
                 label = { Text(stringResource(id = R.string.size_limit)) },
                 enabled = uiState.fieldsEnabled,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                 ),
-                onValueChange = { newString ->
+                onValueChange = {
                     onChangeCourseBlockWithEntity(
                         uiState.entity?.shallowCopyWithEntity{
                             assignment = uiState.entity?.assignment?.shallowCopy {
-                                caSizeLimit = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
+                                caSizeLimit = it.toInt()
                             }
                         })
                 },
             )
 
-            OutlinedTextField(
-                value = (uiState.entity?.assignment?.caNumberOfFiles ?: 0).toString(),
+            UstadNumberTextField(
+                value = (uiState.entity?.assignment?.caNumberOfFiles ?: 0).toFloat(),
                 label = { Text(stringResource(id = R.string.number_of_files)) },
                 enabled = uiState.fieldsEnabled,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number
                 ),
-                onValueChange = { newString ->
+                onValueChange = {
                     onChangeCourseBlockWithEntity(
                         uiState.entity?.shallowCopyWithEntity{
                             assignment = uiState.entity?.assignment?.shallowCopy {
-                                caNumberOfFiles = newString.filter {
-                                    it.isDigit()
-                                }.toIntOrNull() ?: 0
+                                caNumberOfFiles = it.toInt()
                             }
                         })
                 },
@@ -443,16 +425,16 @@ private fun ClazzAssignmentEditScreen(
                 },
             )
 
-            OutlinedTextField(
+            UstadNumberTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = (uiState.entity?.assignment?.caTextLimit ?: 0).toString(),
+                value = (uiState.entity?.assignment?.caTextLimit ?: 0).toFloat(),
                 label = { Text(stringResource(id = R.string.maximum)) },
                 enabled = uiState.fieldsEnabled,
-                onValueChange = { value ->
+                onValueChange = {
                     onChangeCourseBlockWithEntity(
                         uiState.entity?.shallowCopyWithEntity{
                             assignment = uiState.entity?.assignment?.shallowCopy {
-                                caTextLimit = value.filter { it.isDigit() }.toIntOrNull() ?: 0
+                                caTextLimit = it.toInt()
                             }
                         })
                 },
@@ -502,18 +484,16 @@ private fun ClazzAssignmentEditScreen(
         if (uiState.peerMarkingVisible) {
             Row {
                 Column {
-                    OutlinedTextField(
-                        value = (uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toString(),
+                    UstadNumberTextField(
+                        value = (uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toFloat(),
                         label = { Text(stringResource(id = R.string.reviews_per_user_group)) },
                         enabled = uiState.fieldsEnabled,
                         isError = uiState.reviewerCountError != null,
-                        onValueChange = { newString ->
+                        onValueChange = {
                             onChangeCourseBlockWithEntity(
                                 uiState.entity?.shallowCopyWithEntity{
                                     assignment = uiState.entity?.assignment?.shallowCopy {
-                                        caPeerReviewerCount = newString.filter {
-                                            it.isDigit()
-                                        }.toIntOrNull() ?: 0
+                                        caPeerReviewerCount = it.toInt()
                                     }
                                 })
                         },
