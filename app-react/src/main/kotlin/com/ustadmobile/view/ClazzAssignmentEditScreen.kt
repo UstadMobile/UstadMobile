@@ -246,26 +246,22 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     direction = responsive(StackDirection.row)
                     spacing = responsive(10.px)
 
-                    Stack {
-                        justifyContent = JustifyContent.stretch
-
-                        UstadNumberTextField {
-                            id = "caPeerReviewerCount"
-                            fullWidth = true
-                            variant = FormControlVariant.outlined
-                            value = (props.uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toFloat()
-                            label = ReactNode(strings[MessageID.reviews_per_user_group])
-                            disabled = !props.uiState.fieldsEnabled
-                            error = props.uiState.reviewerCountError != null
-                            helperText = props.uiState.reviewerCountError?.let { ReactNode(it) }
-                            onChange = {
-                                props.onChangeCourseBlockWithEntity(
-                                    props.uiState.entity?.shallowCopyWithEntity{
-                                        assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                            caPeerReviewerCount = it.toInt()
-                                        }
-                                    })
-                            }
+                    UstadNumberTextField {
+                        id = "caPeerReviewerCount"
+                        fullWidth = true
+                        variant = FormControlVariant.outlined
+                        value = (props.uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toFloat()
+                        label = ReactNode(strings[MessageID.reviews_per_user_group])
+                        disabled = !props.uiState.fieldsEnabled
+                        error = props.uiState.reviewerCountError != null
+                        helperText = props.uiState.reviewerCountError?.let { ReactNode(it) }
+                        onChange = {
+                            props.onChangeCourseBlockWithEntity(
+                                props.uiState.entity?.shallowCopyWithEntity{
+                                    assignment = props.uiState.entity?.assignment?.shallowCopy {
+                                        caPeerReviewerCount = it.toInt()
+                                    }
+                                })
                         }
                     }
 
