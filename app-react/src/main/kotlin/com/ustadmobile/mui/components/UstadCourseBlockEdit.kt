@@ -71,6 +71,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             label = strings[MessageID.dont_show_before].addOptionalSuffix(strings)
             id = "hide_until_date"
             enabled = props.uiState.fieldsEnabled
+            timeZoneId = props.uiState.timeZone
             onChange = {
                 props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
                     cbHideUntilDate = it
@@ -132,6 +133,8 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
 
         UstadDateTimeEditField {
             timeInMillis = props.uiState.courseBlock?.cbDeadlineDate ?: 0
+            timeZoneId = props.uiState.timeZone
+            unsetDefault = Long.MAX_VALUE
             label = strings[MessageID.deadline].addOptionalSuffix(strings)
             enabled = props.uiState.fieldsEnabled
             onChange = {
@@ -145,6 +148,8 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
 
             UstadDateTimeEditField {
                 timeInMillis = props.uiState.courseBlock?.cbGracePeriodDate ?: 0
+                timeZoneId = props.uiState.timeZone
+                unsetDefault = Long.MAX_VALUE
                 label = strings[MessageID.end_of_grace_period]
                 enabled = props.uiState.fieldsEnabled
                 onChange = {

@@ -169,111 +169,6 @@ val UstadTextEditField = FC<UstadEditFieldProps> { props ->
     }
 }
 
-external interface UstadDateEditFieldProps : Props {
-
-    /**
-     * The value as time in millis since 1970
-     */
-    var timeInMillis: Long
-
-    /**
-     * Required: The timezone being used
-     */
-    var timeZoneId: String
-
-    /**
-     * Field label
-     */
-    var label: String
-
-    /**
-     * onChange function. Will provide the selected time in milliseconds since 1970
-     */
-    var onChange: (Long) -> Unit
-
-    var error: String?
-
-    var enabled: Boolean?
-
-    var fullWidth: Boolean
-
-    /**
-     * We often use 0 and Long.MAX_VALUE as a placeholder for a default (e.g. unset) date. If this
-     * property is set, then this value will be emitted by the onChange function when the user deletes
-     * the date
-     */
-    var unsetDefault: Long?
-
-    var id: String?
-
-}
-
-/**
- * Max value for a Javascript date as per
- * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
- */
-val JS_DATE_MAX = 8640000000000000L
-
-/**
- * We often use 0 and Long.MAX_VALUE as placeholders for unset dates. This makes queries
- * straightforward e.g. if no end date is set by the user, the end date is stored as Long.MAX_VALUE,
- * and would appear in active courses if applicable etc.
- *
- * These unset dates should not (however) be displayed to the user.
- */
-fun Long.isSetDate(): Boolean {
-    return this > 0L && this < JS_DATE_MAX
-}
-
-val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
-
-    fun Long.timeToIsoDateInputFieldString(): String {
-        return if(this != (props.unsetDefault ?: 0)) {
-            Instant.fromEpochMilliseconds(this)
-                .toLocalDateTime(TimeZone.of(props.timeZoneId))
-                .date.toString()
-        }else {
-            ""
-        }
-    }
-
-    var rawValue: String? by useState {
-        props.timeInMillis.timeToIsoDateInputFieldString()
-    }
-
-    useEffect(props.timeInMillis) {
-        rawValue = props.timeInMillis.timeToIsoDateInputFieldString()
-    }
-
-
-    TextField {
-        type = InputType.date
-        label = ReactNode(props.label)
-        value = rawValue
-        InputLabelProps = jso {
-            shrink = true
-        }
-        id = props.id
-        fullWidth = props.fullWidth
-
-        onChange = {
-            val targetEl = it.target as HTMLInputElement
-            rawValue = targetEl.value
-            val valueAsDate = targetEl.valueAsDate
-            //Avoid triggering the a change when user has not finished filling in year
-            if(valueAsDate != null && valueAsDate.getFullYear() > 1000) {
-                //Add 1 to month number: Javascript starts at 0, Kotlin starts at 1
-                val localDateTime = LocalDateTime(valueAsDate.getFullYear(),
-                    valueAsDate.getMonth() + 1, valueAsDate.getDate(), 0, 0)
-                val instant = localDateTime.toInstant(TimeZone.of(props.timeZoneId))
-                props.onChange(instant.toEpochMilliseconds())
-            }else if(targetEl.value.isEmpty()) {
-                props.onChange(props.unsetDefault ?: 0)
-            }
-        }
-    }
-}
-
 
 
 external interface UstadDropDownFieldProps: Props {
@@ -410,16 +305,6 @@ val UstadEditFieldPreviews = FC<Props> {
             }
         }
 
-        var dateTime: Long by useState { systemTimeInMillis() }
-        UstadDateTimeEditField {
-            timeInMillis = dateTime
-            timeZoneId = TimeZone.currentSystemDefault().id
-            label = "Date and time"
-            onChange = {
-                dateTime = it
-            }
-            enabled = true
-        }
 
         var time: Int by useState { (14 * MS_PER_HOUR) + (30 * MS_PER_MIN) }
 

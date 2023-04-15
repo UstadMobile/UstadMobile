@@ -10,6 +10,7 @@ import com.ustadmobile.view.clazzedit.ClazzEditScreen
 import com.ustadmobile.view.components.UstadImageSelectButtonPreview
 import com.ustadmobile.view.components.UstadMessageIdSelectFieldPreview
 import com.ustadmobile.view.components.UstadSelectFieldPreview
+import com.ustadmobile.mui.components.DateTimeEditFieldPreview
 import com.ustadmobile.mui.components.UstadNumberTextFieldPreview
 import com.ustadmobile.view.components.virtuallist.VirtualListPreview
 import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
@@ -156,6 +157,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(TimeZoneListViewModel.DEST_NAME, "Time Zone List", TimeZoneListScreen),
     UstadScreen(CourseTerminologyListViewModel.DEST_NAME, "Course Terminology List",
         CourseTerminologyListScreen),
+    UstadScreen("DateTimeEdit", "Date Time Edit", DateTimeEditFieldPreview),
 
 )
 
