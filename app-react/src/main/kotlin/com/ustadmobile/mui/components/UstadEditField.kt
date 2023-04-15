@@ -4,7 +4,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.MS_PER_MIN
-import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.mui.common.*
 import com.ustadmobile.view.components.UstadSwitchField
@@ -19,7 +18,6 @@ import react.dom.aria.ariaLabel
 import web.html.InputMode
 import web.html.InputType
 import react.dom.onChange
-import web.html.HTMLInputElement
 
 external interface UstadEditFieldProps: PropsWithChildren {
 
@@ -286,6 +284,7 @@ val UstadEditFieldPreviews = FC<Props> {
         var date1 : Long by useState { systemTimeInMillis() }
         UstadDateEditField {
             timeInMillis = date1
+            id = "date_edit_field"
             timeZoneId = TimeZone.currentSystemDefault().id
             label = "Date"
             onChange = {
@@ -299,6 +298,7 @@ val UstadEditFieldPreviews = FC<Props> {
         UstadDateEditField {
             timeInMillis = unsetMinDate
             timeZoneId = TimeZone.currentSystemDefault().id
+            id = "date_edit_unset"
             label = "Unset min date"
             onChange = {
                 unsetMinDate = it
@@ -308,9 +308,10 @@ val UstadEditFieldPreviews = FC<Props> {
 
         var time: Int by useState { (14 * MS_PER_HOUR) + (30 * MS_PER_MIN) }
 
-        UstadTimeEditField {
+        UstadTimeField {
             timeInMillis = time
-            label = "Time"
+            id = "time_field"
+            label = ReactNode("Time")
             onChange = {
                 time = it
             }
@@ -319,6 +320,7 @@ val UstadEditFieldPreviews = FC<Props> {
         UstadTextEditField {
             label = "Read only field"
             value = "Cant change me"
+            id = "read_only_edit_field"
             onChange = { }
             readOnly = true
             onClick = {
@@ -331,6 +333,7 @@ val UstadEditFieldPreviews = FC<Props> {
         UstadDropDownField {
             value = selectedOption
             label = "Select options"
+            id = "select_field"
             options = listOf(DropDownOption("One", "1"),
                 DropDownOption("Two", "2"))
             itemLabel = { ReactNode((it as? DropDownOption)?.label ?: "") }
@@ -344,6 +347,7 @@ val UstadEditFieldPreviews = FC<Props> {
 
         UstadSwitchField {
             label = "Switch"
+            id = "switch_field"
             checked = switchChecked
             onChanged = {
                 switchChecked = it
@@ -353,6 +357,7 @@ val UstadEditFieldPreviews = FC<Props> {
         var maxScore by useState { 42 }
         UstadTextEditField {
             label = "Maximum score"
+            id = "maximum_score"
             value = maxScore.toString()
             onChange = { newString ->
                 maxScore = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
