@@ -280,7 +280,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                  WHERE Clazz.clazzUid = :clazzUid
                    AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid)
     """)
-    abstract suspend fun personHasPermissionWithClazzAsFlow(
+    abstract fun personHasPermissionWithClazzAsFlow(
         accountPersonUid: Long,
         clazzUid: Long,
         permission: Long
