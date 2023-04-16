@@ -5,7 +5,6 @@ import kotlinx.datetime.*
 import mui.material.TextField
 import react.*
 import react.dom.onChange
-import web.html.HTML
 import web.html.HTMLInputElement
 import web.html.InputType
 
@@ -83,7 +82,9 @@ val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
     }
 
     useEffect(props.timeInMillis) {
-        rawValue = props.timeInMillis.timeToIsoDateInputFieldString()
+        val strVal = props.timeInMillis.timeToIsoDateInputFieldString()
+        if(rawValue != strVal)
+            rawValue = strVal
     }
 
 
@@ -99,12 +100,15 @@ val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
 
         onChange = {
             val targetElValue = (it.target as HTMLInputElement).value
+            rawValue = targetElValue
             if(targetElValue.isNotEmpty()) {
                 val instant = LocalDateTime(LocalDate.parse(targetElValue),
                     LocalTime(0, 0 ))
                     .toInstant(TimeZone.of(props.timeZoneId))
+                console.log("onChange: $targetElValue")
                 props.onChange(instant.toEpochMilliseconds())
             }else {
+                console.log("onChange: unset")
                 props.onChange(props.unsetDefault ?: 0L)
             }
         }

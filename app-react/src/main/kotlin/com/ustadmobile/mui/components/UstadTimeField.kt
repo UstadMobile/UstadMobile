@@ -55,7 +55,10 @@ val UstadTimeField = FC<UstadTimeFieldProps> { props ->
     var rawValue: String by useState { props.timeInMillis.toTimeOfDayInputFieldString() }
 
     useEffect(props.timeInMillis) {
-        rawValue = props.timeInMillis.toTimeOfDayInputFieldString()
+        val strValue = props.timeInMillis.toTimeOfDayInputFieldString()
+        if(rawValue != strValue) {
+            rawValue = strValue
+        }
     }
 
     TextField {

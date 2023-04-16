@@ -88,7 +88,9 @@ val UstadDateTimeEditField = FC<UstadDateTimeEditFieldProps> { props ->
     }
 
     useEffect(props.timeInMillis){
-        rawValue = props.timeInMillis.timeToIsoDateTimeInputFieldString()
+        val strValue = props.timeInMillis.timeToIsoDateTimeInputFieldString()
+        if(rawValue != strValue)
+            rawValue = strValue
     }
 
     TextField {
@@ -103,6 +105,7 @@ val UstadDateTimeEditField = FC<UstadDateTimeEditFieldProps> { props ->
         sx = props.sx
         onChange = {
             val targetElValue = (it.target as HTMLInputElement).value
+            rawValue = targetElValue
             if(targetElValue.isNotBlank()) {
                 val localDateTime = LocalDateTime.parse(targetElValue)
                 val instant = localDateTime.toInstant(TimeZone.of(props.timeZoneId))
