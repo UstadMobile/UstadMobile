@@ -25,8 +25,45 @@ class ClazzDetailViewModel(
 
     val uiState: Flow<ClazzDetailUiState> = _uiState.asStateFlow()
 
+    private fun createTabList(showAttendance: Boolean): List<TabItem> {
+        val tabs = mutableListOf(
+            TabItem(
+                viewName = ClazzDetailOverviewView.VIEW_NAME,
+                args = mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString()),
+                label = systemImpl.getString(MessageID.course),
+            ),
+            TabItem(
+                viewName = ClazzMemberListView.VIEW_NAME,
+                args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
+                label = systemImpl.getString(MessageID.members),
+            )
+        )
+
+        if(showAttendance) {
+            tabs.add(
+                TabItem(
+                    viewName = ClazzLogListAttendanceView.VIEW_NAME,
+                    args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
+                    label = systemImpl.getString(MessageID.attendance),
+                )
+            )
+        }
+        tabs.add(
+            TabItem(
+                viewName = CourseGroupSetListView.VIEW_NAME,
+                args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
+                label = systemImpl.getString(MessageID.groups),
+            )
+        )
+
+        return tabs.toList()
+    }
+
     init {
         val accountPersonUid = accountManager.activeAccount.personUid
+        _uiState.update { prev ->
+            prev.copy(tabs = createTabList(false))
+        }
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
@@ -38,41 +75,12 @@ class ClazzDetailViewModel(
                             clazz to permission
                         }.collect {
                             val (clazz, hasAttendancePermission) = it
-                            val tabs = mutableListOf(
-                                TabItem(
-                                    viewName = ClazzDetailOverviewView.VIEW_NAME,
-                                    args = mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString()),
-                                    label = systemImpl.getString(MessageID.course),
-                                ),
-                                TabItem(
-                                    viewName = ClazzMemberListView.VIEW_NAME,
-                                    args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
-                                    label = systemImpl.getString(MessageID.members),
-                                )
-                            )
-
-                            if(
+                            val showAttendance =
                                 clazz?.clazzFeatures?.hasFlag(Clazz.CLAZZ_FEATURE_ATTENDANCE) == true &&
                                 hasAttendancePermission
-                            ) {
-                                tabs.add(
-                                    TabItem(
-                                        viewName = ClazzLogListAttendanceView.VIEW_NAME,
-                                        args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
-                                        label = systemImpl.getString(MessageID.attendance),
-                                    )
-                                )
-                            }
-                            tabs.add(
-                                TabItem(
-                                    viewName = CourseGroupSetListView.VIEW_NAME,
-                                    args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
-                                    label = systemImpl.getString(MessageID.groups),
-                                )
-                            )
 
                             _uiState.update { prev ->
-                                prev.copy(tabs = tabs.toList())
+                                prev.copy(tabs = createTabList(showAttendance))
                             }
                         }
                 }

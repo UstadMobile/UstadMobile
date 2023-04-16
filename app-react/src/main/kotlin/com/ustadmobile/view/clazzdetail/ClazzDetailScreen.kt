@@ -1,13 +1,26 @@
 package com.ustadmobile.view.clazzdetail
 
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.impl.appstate.TabItem
 import com.ustadmobile.core.view.ClazzDetailOverviewView
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.viewmodel.ClazzDetailUiState
+import com.ustadmobile.core.viewmodel.ClazzDetailViewModel
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.UstadScreenTabs
 import react.*
 
 val ClazzDetailScreen = FC<Props> {
+
+    val viewModel = useUstadViewModel(collectAppUiState = false) { di, savedStateHandle ->
+        ClazzDetailViewModel(di, savedStateHandle)
+    }
+
+    val uiStateVal: ClazzDetailUiState by viewModel.uiState.collectAsState(ClazzDetailUiState())
+
+    ClazzDetailComponent {
+        uiState = uiStateVal
+    }
 
 }
 
@@ -16,8 +29,10 @@ external interface ClazzDetailProps : Props{
 }
 
 val ClazzDetailComponent = FC<ClazzDetailProps> { props ->
-    UstadScreenTabs {
-        tabs = props.uiState.tabs
+    if(props.uiState.tabs.isNotEmpty()) {
+        UstadScreenTabs {
+            tabs = props.uiState.tabs
+        }
     }
 }
 
