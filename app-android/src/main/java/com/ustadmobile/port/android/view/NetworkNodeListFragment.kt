@@ -13,11 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.NetworkNodeListUiState
 import com.ustadmobile.lib.db.entities.DeviceSession
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.composable.*
 
@@ -39,7 +39,8 @@ private fun NetworkNodeListScreen(
 
         item {
             UstadDetailField(
-                valueText = uiState.deviceNumber,
+                modifier = Modifier.defaultItemPadding(),
+                valueText = uiState.deviceName,
                 labelText = stringResource(R.string.device),
                 icon = { Icon(Icons.Default.Smartphone, contentDescription = "") },
             )
@@ -47,8 +48,9 @@ private fun NetworkNodeListScreen(
 
         item {
             UstadSwitchField(
+                modifier = Modifier.defaultItemPadding(),
                 checked = uiState.fieldsEnabled,
-                label = stringResource(id = R.string.offline_sharing_enable_bluetooth_prompt),
+                label = stringResource(id = R.string.bluetooth_sharing),
                 enabled = uiState.fieldsEnabled,
                 onChange = {
                     onChangeBluetoothEnabled(it)
@@ -58,8 +60,9 @@ private fun NetworkNodeListScreen(
 
         item {
             UstadSwitchField(
+                modifier = Modifier.defaultItemPadding(),
                 checked = uiState.fieldsEnabled,
-                label = stringResource(id = R.string.offline_sharing_enable_wifi_promot),
+                label = stringResource(id = R.string.hotspot_sharing),
                 enabled = uiState.fieldsEnabled,
                 onChange = {
                     onChangeHotspotEnabled(it)
@@ -68,7 +71,8 @@ private fun NetworkNodeListScreen(
         }
 
         item {
-            Text("${stringResource(R.string.download_wifi_only)}: ${uiState.wifiName}")
+            Text(modifier = Modifier.defaultItemPadding(),
+                text = "${stringResource(R.string.wifi_ssid)}: ${uiState.wifiSSID}")
         }
 
 
@@ -119,15 +123,15 @@ private fun LeadingContent(
             contentDescription = "",
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .size(45.dp)
+                .size(35.dp)
                 .padding(4.dp),
         )
 
         Box(
             modifier = Modifier
                 .width(45.dp)
-                .height(15.dp)
-                .padding(end = 10.dp)
+                .height(5.dp)
+                .padding(end = 5.dp)
         ) {
             LinearProgressIndicator(
                 progress = (device.expires/100.0)
@@ -149,11 +153,9 @@ fun NetworkNodeListPreview() {
                 dsDeviceId = 1
             }
         ),
-        deviceNumber = "+12341231",
-        wifiName = "LocalSpot1231"
+        deviceName = "Phone Name",
+        wifiSSID = "LocalSpot1231"
     )
 
-    MdcTheme {
-        NetworkNodeListScreen(uiStateVal)
-    }
+    NetworkNodeListScreen(uiStateVal)
 }

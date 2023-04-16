@@ -14,9 +14,9 @@ data class NetworkNodeListUiState(
         MessageIdOption2(MessageID.all, 7),
     ),
 
-    val deviceNumber: String = "",
+    val deviceName: String = "",
 
-    val wifiName: String = "",
+    val wifiSSID: String = "",
 
     val devices: List<DeviceSession> = emptyList()
 
