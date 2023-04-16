@@ -8,6 +8,7 @@ import kotlinx.browser.window
 import react.*
 import react.router.dom.useSearchParams
 import react.router.useLocation
+import web.url.URLSearchParams
 
 private data class ViewModelAndKey<T: ViewModel>(
     val viewModel: T,
@@ -21,6 +22,7 @@ private data class ViewModelAndKey<T: ViewModel>(
  * @param viewModelFactory function that will create the viewmodel. SavedStateHandle will be given as argument
  */
 fun <T:ViewModel> useViewModel(
+    overrideSearchParams: URLSearchParams? = null,
     viewModelFactory: (savedStateHandle: UstadSavedStateHandle) -> T
 ): T{
     val (searchParams, _) = useSearchParams()
@@ -28,9 +30,10 @@ fun <T:ViewModel> useViewModel(
     val locationKey = useLocation().key
 
     var viewModelAndKey: ViewModelAndKey<T> by useState {
+        val savedStateHandle = SavedStateHandle2(window.history,
+            overrideSearchParams ?: searchParams)
         ViewModelAndKey(
-            viewModelFactory(SavedStateHandle2(window.history, searchParams)),
-            locationKey
+            viewModelFactory(savedStateHandle), locationKey
         ).also {
             Napier.d("Creating ViewModel: ${it.viewModel::class.simpleName}")
         }

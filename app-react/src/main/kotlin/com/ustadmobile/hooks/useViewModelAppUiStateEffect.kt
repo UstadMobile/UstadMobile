@@ -13,11 +13,12 @@ import react.useRequiredContext
  */
 fun useViewModelAppUiStateEffect(
     viewModel: UstadViewModel,
+    collectAppUiState: Boolean = true,
 ) {
     val ustadScreensContext = useRequiredContext(UstadScreensContext)
 
     useEffect(dependencies = arrayOf(viewModel)) {
-        viewModel.viewModelScope.launch {
+        viewModel.viewModelScope.takeIf { collectAppUiState }?.launch {
             viewModel.appUiState.collect {
                 ustadScreensContext.onAppUiStateChanged(it)
             }
