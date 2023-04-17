@@ -1,18 +1,23 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.util.ext.progressBadge
 import com.ustadmobile.core.viewmodel.NetworkNodeListUiState
 import com.ustadmobile.lib.db.entities.DeviceSession
+import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.view.components.UstadSwitchField
+import csstype.JustifyContent
 import csstype.px
 import mui.icons.material.Bluetooth
 import mui.icons.material.Smartphone
 import mui.material.*
 import mui.system.responsive
+import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
@@ -103,7 +108,26 @@ val NetworkNodeListScreenComponent2 = FC<NetworkNodeListScreenProps> { props ->
                             onClick = { props.onClickDevice(device) }
 
                             ListItemIcon {
-                                + Bluetooth.create()
+                                + Stack.create {
+                                    direction = responsive(StackDirection.column)
+                                    spacing = responsive(10.px)
+                                    justifyContent = JustifyContent.center
+
+                                    Bluetooth {
+                                        sx {
+                                            width = 35.px
+                                            height = 35.px
+                                        }
+                                    }
+
+                                    LinearProgress {
+                                        value = 5
+                                        variant = LinearProgressVariant.determinate
+                                        sx {
+                                            width = 45.px
+                                        }
+                                    }
+                                }
                             }
                             ListItemText {
                                 primary = ReactNode("Phone Number")
