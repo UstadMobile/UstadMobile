@@ -6,13 +6,15 @@ import com.ustadmobile.lib.db.entities.DeviceSession
 
 data class NetworkNodeListUiState(
 
-    val selectedChipId: Int = 7,
-
     val fieldsEnabled: Boolean = true,
 
+    val selectedChipId: Int = 0,
+
     val deviceFilterOptions: List<MessageIdOption2> = listOf(
-        MessageIdOption2(MessageID.all, 7),
-    ),
+        MessageIdOption2(MessageID.all, 0),
+        MessageIdOption2(MessageID.clients, 2),
+        MessageIdOption2(MessageID.server, 1),
+),
 
     val deviceName: String = "",
 

@@ -9,6 +9,7 @@ import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.view.components.UstadSwitchField
 import csstype.px
+import mui.icons.material.Bluetooth
 import mui.icons.material.Smartphone
 import mui.material.*
 import mui.system.responsive
@@ -31,8 +32,17 @@ external interface NetworkNodeListScreenProps : Props {
 }
 
 val NetworkNodeListScreenPreview = FC<Props> {
-    NetworkNodeListScreenComponent2 {
 
+    NetworkNodeListScreenComponent2 {
+        uiState = NetworkNodeListUiState(
+            devices = listOf(
+                DeviceSession().apply {
+                    dsDeviceId = 1
+                }
+            ),
+            deviceName = "Phone Name",
+            wifiSSID = "LocalSpot1231"
+        )
     }
 }
 
@@ -93,7 +103,7 @@ val NetworkNodeListScreenComponent2 = FC<NetworkNodeListScreenProps> { props ->
                             onClick = { props.onClickDevice(device) }
 
                             ListItemIcon {
-
+                                + Bluetooth.create()
                             }
                             ListItemText {
                                 primary = ReactNode("Phone Number")
