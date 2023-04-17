@@ -7,8 +7,8 @@ import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.lib.db.entities.TerminologyEntry
 import org.kodein.di.direct
 import org.kodein.di.instance
-import react.useContext
 import react.useMemo
+import react.useRequiredContext
 
 /**
  * Parse and remember the terminology entries. Same as rememberCourseTerminologyEntries on Jetpack.
@@ -24,7 +24,7 @@ import react.useMemo
 fun useCourseTerminologyEntries(
     courseTerminology: CourseTerminology?
 ): List<TerminologyEntry> {
-    val di = useContext(DIContext)
+    val di = useRequiredContext(DIContext)
     val termJsonStr = courseTerminology?.ctTerminology
 
     return useMemo(termJsonStr) {

@@ -7,12 +7,10 @@ import mui.icons.material.Search
 import mui.material.InputBase
 import mui.system.Breakpoint
 import mui.system.sx
-import react.FC
-import react.Props
 import react.dom.html.ReactHTML.div
-import react.useContext
-import react.useState
 import web.html.HTMLInputElement
+import react.*
+
 
 external interface AppBarSearchProps: Props {
     var searchText: String
@@ -35,7 +33,7 @@ external interface AppBarSearchProps: Props {
  * }
  */
 val AppBarSearch = FC<AppBarSearchProps> {props ->
-    val theme by useContext(ThemeContext)
+    val theme by useRequiredContext(ThemeContext)
 
     var searchWidth by useState { 24 }
 

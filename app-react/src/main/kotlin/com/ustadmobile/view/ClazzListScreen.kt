@@ -1,115 +1,245 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.ustadViewName
+import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
+import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.ClazzListUiState
+import com.ustadmobile.core.viewmodel.ClazzListViewModel
+import com.ustadmobile.door.paging.LoadResult
+import com.ustadmobile.hooks.useMuiAppState
+import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
+import com.ustadmobile.mui.common.Sizes
 import com.ustadmobile.mui.common.justifyContent
-import com.ustadmobile.mui.common.lg
-import com.ustadmobile.mui.common.md
-import com.ustadmobile.mui.common.xs
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.mui.components.UstadListSortHeader
 import com.ustadmobile.util.colorForAttendanceStatus
+import com.ustadmobile.view.components.UstadFab
+import com.ustadmobile.view.components.virtuallist.VirtualList
+import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
+import com.ustadmobile.view.components.virtuallist.virtualListContent
 import csstype.*
+import js.core.jso
+import mui.icons.material.Add
 import mui.icons.material.LensRounded
+import mui.icons.material.Login
 import mui.icons.material.People
 import mui.material.*
+import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import mui.system.sx
-import react.FC
-import react.Props
-import react.create
+import react.*
+import react.router.useLocation
+import web.dom.css.getComputedStyle
+import web.events.Event
+import web.events.EventHandler
+import web.html.HTMLElement
+import web.window.RESIZE
+import web.window.window
 import kotlin.math.round
 
 external interface ClazzListScreenProps : Props {
 
     var uiState: ClazzListUiState
 
-    var onClickClazz: (Clazz?) -> Unit
+    var onClickClazz: (Clazz) -> Unit
 
     var onClickSort: (SortOrderOption) -> Unit
 
-    var onClickFilterChip: (MessageIdOption2?) -> Unit
+    var onClickFilterChip: (MessageIdOption2) -> Unit
 
-}
-
-val ClazzListScreenPreview = FC<Props> {
-
-    ClazzListScreenComponent2 {
-        uiState = ClazzListUiState(
-            clazzList = listOf(
-                ClazzWithListDisplayDetails().apply {
-                    clazzUid = 1
-                    clazzName = "Class Name"
-                    clazzDesc = "Class Description"
-                    attendanceAverage = 0.3F
-                    numTeachers = 3
-                    numStudents = 2
-                },
-                ClazzWithListDisplayDetails().apply {
-                    clazzUid = 2
-                    clazzName = "Class Name"
-                    clazzDesc = "Class Description"
-                    attendanceAverage = 0.3F
-                    numTeachers = 3
-                    numStudents = 2
-                },
-                ClazzWithListDisplayDetails().apply {
-                    clazzUid = 3
-                    clazzName = "Class Name"
-                    clazzDesc = "Class Description"
-                    attendanceAverage = 0.3F
-                    numTeachers = 3
-                    numStudents = 2
-                }
-            )
-        )
-    }
 }
 
 private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
 
-    Container {
-        maxWidth = "lg"
+    val infiniteQueryResult = usePagingSource(
+        props.uiState.clazzList, true, 50
+    )
 
-        Stack {
-            spacing = responsive(10.px)
+    val containerRef = useRef<HTMLElement>(null)
+    val containerDefaultPadding = 48
+    //default container max width = 1200 pixels minus 48 px padding
+    var containerWidth: Int by useState {
+        kotlin.math.min(
+            window.innerWidth - Sizes.Sidebar.WidthInPx - 48,
+            1200 - containerDefaultPadding
+        )
+    }
+    val cardMinWidth = 320
 
-            UstadListSortHeader {
-                activeSortOrderOption = props.uiState.activeSortOrderOption
-                enabled = props.uiState.fieldsEnabled
-                onClickSort = props.onClickSort
+    useEffect(containerRef.current?.clientWidth) {
+        fun calcContainerWidth() {
+            val currentEl = containerRef.current
+            if(currentEl != null) {
+                val computedStyle = getComputedStyle(currentEl)
+                containerWidth = currentEl.clientWidth -
+                    computedStyle.paddingLeft.filter { it.isDigit() || it == '.' }.toInt() -
+                    computedStyle.paddingRight.filter { it.isDigit() }.toInt()
+            }
+        }
+
+        val eventListener :  EventHandler<Event> = {
+            calcContainerWidth()
+        }
+
+        window.addEventListener(Event.Companion.RESIZE, eventListener)
+
+        cleanup {
+            window.removeEventListener(Event.Companion.RESIZE, eventListener)
+        }
+    }
+
+    val cardsPerRow = kotlin.math.max(containerWidth / cardMinWidth, 1)
+
+    val cardWidth = containerWidth / cardsPerRow
+
+    val muiAppState = useMuiAppState()
+
+    VirtualList {
+        style = jso {
+            height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
+            width = 100.pct
+            contain = Contain.strict
+            overflowY = Overflow.scroll
+        }
+
+        content = virtualListContent {
+            item {
+                UstadListSortHeader.create {
+                    activeSortOrderOption = props.uiState.activeSortOrderOption
+                    enabled = props.uiState.fieldsEnabled
+                    onClickSort = props.onClickSort
+                    sortOptions = ClazzListUiState.DEFAULT_SORT_OTIONS
+                }
             }
 
-            UstadListFilterChipsHeader{
-                filterOptions = props.uiState.filterOptions
-                selectedChipId = props.uiState.selectedChipId
-                enabled = props.uiState.fieldsEnabled
-                onClickFilterChip = props.onClickFilterChip
+            item {
+                UstadListFilterChipsHeader.create {
+                    filterOptions = props.uiState.filterOptions
+                    selectedChipId = props.uiState.selectedChipId
+                    enabled = props.uiState.fieldsEnabled
+                    onClickFilterChip = props.onClickFilterChip
+                }
             }
 
-            Grid {
-                container = true
+            infiniteQueryItemsIndexed(
+                infiniteQueryResult = infiniteQueryResult,
+                itemToKey = { item, index ->
+                    index.toString()
+                },
+                dataPagesToItems = { pages ->
+                    pages.mapNotNull { it as? LoadResult.Page<Int, ClazzWithListDisplayDetails> }.flatMap {
+                        it.data
+                    }.chunked(cardsPerRow)
+                },
+            ) { rowClazzes, _ ->
 
-                props.uiState.clazzList.forEach { clazz ->
-                    Grid {
-                        item = true
-                        xs = 12
-                        md = 6
-                        lg = 4
-
+                Stack.create {
+                    direction = responsive(StackDirection.row)
+                    rowClazzes?.forEach { clazz ->
                         ClazzListItem {
+                            width = cardWidth
                             clazzItem = clazz
                             onClickClazz = props.onClickClazz
                         }
                     }
                 }
             }
+        }
+
+        Container {
+            ref = containerRef
+
+            VirtualListOutlet()
+        }
+    }
+}
+
+val ClazzListScreen = FC<Props> { props ->
+    val strings = useStringsXml()
+    val location = useLocation()
+    var addDialogVisible: Boolean by useState { false }
+
+
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        ClazzListViewModel(di, savedStateHandle, location.ustadViewName)
+    }
+
+    val uiState: ClazzListUiState by viewModel.uiState.collectAsState(ClazzListUiState())
+    val appState by viewModel.appUiState.collectAsState(AppUiState())
+
+
+    ClazzListScreenComponent2 {
+        + props
+        this.uiState = uiState
+        onClickClazz = viewModel::onClickEntry
+        onClickSort = viewModel::onSortOrderChanged
+        onClickFilterChip = viewModel::onClickFilterChip
+    }
+
+    UstadFab {
+        fabState = appState.fabState.copy(
+            onClick = {
+                addDialogVisible = true
+            }
+        )
+    }
+
+    Dialog {
+        open = addDialogVisible
+        onClose = { _, _ ->
+            addDialogVisible = false
+        }
+
+        List {
+            if(uiState.canAddNewCourse) {
+                ListItem {
+                    ListItemButton {
+                        onClick = {
+                            addDialogVisible = false
+                            viewModel.onClickAdd()
+                        }
+
+                        ListItemIcon {
+                            Add { }
+                        }
+
+                        ListItemText {
+                            primary = ReactNode(strings[MessageID.add_a_new_course])
+                        }
+
+
+                    }
+                }
+            }
+
+            ListItem {
+                ListItemButton {
+                    onClick = {
+                        addDialogVisible = false
+                        viewModel.onClickJoinExistingClazz()
+                    }
+
+                    ListItemIcon {
+                        Login { }
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(strings[MessageID.join_existing_class])
+                    }
+
+
+                }
+            }
+
         }
     }
 }
@@ -118,23 +248,30 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
 
 external interface ClazzListItemProps : Props {
 
-    var clazzItem: ClazzWithListDisplayDetails
+    var clazzItem: ClazzWithListDisplayDetails?
 
     var onClickClazz: (ClazzWithListDisplayDetails) -> Unit
+
+    var width: Int
 
 }
 
 private val ClazzListItem = FC<ClazzListItemProps> { props ->
 
     val strings = useStringsXml()
-    val role = (RoleConstants.ROLE_MESSAGE_IDS.find {
-        it.value == props.clazzItem.clazzActiveEnrolment?.clazzEnrolmentRole
-    }?.messageId ?: MessageID.student)
+    val role = RoleConstants.ROLE_MESSAGE_IDS.find {
+        it.value == props.clazzItem?.clazzActiveEnrolment?.clazzEnrolmentRole
+    }?.messageId
 
     Card {
-        onClick = { props.onClickClazz(props.clazzItem) }
+        key = props.clazzItem?.clazzUid?.toString()
+        onClick = {
+            props.clazzItem?.also { props.onClickClazz(it) }
+        }
         sx {
             margin = 10.px
+            width = (props.width - 20).px
+            display = Display.flex
         }
 
         CardActionArea {
@@ -153,29 +290,34 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
                         direction = responsive(StackDirection.column)
 
                         Typography {
-                            + (props.clazzItem.clazzName ?: "")
+                            variant = TypographyVariant.h6
+                            + (props.clazzItem?.clazzName ?: "")
                         }
 
                         Typography {
-                            + (props.clazzItem.clazzDesc ?: "")
+                            + (props.clazzItem?.clazzDesc ?: "")
                         }
                     }
 
-                    Stack {
-                        direction = responsive(StackDirection.row)
 
-                        + mui.icons.material.Badge.create()
+                    if(role != null) {
+                        Stack {
+                            direction = responsive(StackDirection.row)
 
-                        + strings[role]
+                            + mui.icons.material.Badge.create()
+
+                            + strings[role]
+                        }
                     }
-
                 }
 
                 Stack {
                     direction = responsive(StackDirection.row)
 
                     LensRounded {
-                        color = colorForAttendanceStatus(props.clazzItem.attendanceAverage)
+                        color = colorForAttendanceStatus(
+                            props.clazzItem?.attendanceAverage ?: 0.toFloat()
+                        )
                         sx {
                             width = 15.px
                             height = 15.px
@@ -192,7 +334,7 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
 
                     Typography {
                         + strings[MessageID.x_percent_attended].replace("%1.0f%",
-                            round(props.clazzItem.attendanceAverage * 100).toString())
+                            round((props.clazzItem?.attendanceAverage ?: 0.toFloat()) * 100).toString())
                     }
 
                     Box{
@@ -203,8 +345,8 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
 
                     Typography {
                         + strings[MessageID.x_teachers_y_students]
-                            .replace("%1\$d", props.clazzItem.numTeachers.toString())
-                            .replace("%2\$d", props.clazzItem.numStudents.toString())
+                            .replace("%1\$d", props.clazzItem?.numTeachers.toString())
+                            .replace("%2\$d", props.clazzItem?.numStudents.toString())
                     }
 
                 }

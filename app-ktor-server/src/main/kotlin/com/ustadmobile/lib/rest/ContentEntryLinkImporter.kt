@@ -16,7 +16,7 @@ import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
-import com.ustadmobile.lib.rest.ext.dbModeToEndpoint
+import com.ustadmobile.lib.rest.ext.callEndpoint
 import io.ktor.server.application.call
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.*
@@ -30,7 +30,6 @@ import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.on
 import java.io.File
-import java.net.URL
 
 
 private val IMPORT_LINK_TIMEOUT_DEFAULT = (30 * 1000).toLong()
@@ -92,7 +91,7 @@ fun Route.ContentEntryLinkImporter() {
                 val repo: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_REPO)
                 val containerFolder: File by closestDI().on(call).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
                 val entryFromDb = db.contentEntryDao.findByUid(contentEntry.contentEntryUid)
-                val endpoint = call.application.environment.config.dbModeToEndpoint(call = call)
+                val endpoint = call.callEndpoint
                 if (entryFromDb == null) {
                     Napier.i("not synced so using contentEntry from db")
                     repo.contentEntryDao.insertWithReplace(contentEntry)

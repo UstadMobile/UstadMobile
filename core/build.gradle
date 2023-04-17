@@ -77,7 +77,7 @@ kotlin {
 
     android()
 
-    js(LEGACY) {
+    js(IR) {
         browser {
             dceTask {
                 keep("kotlin.defineModule") //To avoid  e.defineModule is not a function error
@@ -85,9 +85,6 @@ kotlin {
             testTask {
                 useKarma {
                     useChromeHeadless() //change to useChrome to run the actual browser
-                    /* Not supported from Kotlin 1.8
-                    webpackConfig.cssSupport.enabled = true
-                     */
                 }
             }
         }
@@ -105,7 +102,6 @@ kotlin {
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
                 implementation "io.ktor:ktor-io:$version_ktor"
-                implementation "com.soywiz.korlibs.klock:klock:$version_klock"
                 implementation "io.github.aakira:napier:$version_napier"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
@@ -113,7 +109,7 @@ kotlin {
                 implementation project(':lib-database')
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation project(":lib-util")
-                implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
+                implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
                 implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
             }
@@ -162,6 +158,7 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-test:$version_kotlin"
                 implementation "org.jetbrains.kotlin:kotlin-test-junit:$version_kotlin"
                 implementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
+                implementation "com.soywiz.korlibs.klock:klock:$version_klock"
                 implementation "junit:junit:$version_junit"
 
                 implementation project(":sharedse")
@@ -246,8 +243,14 @@ kotlin {
                 implementation enforcedPlatform("org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom:$kotlinWrappersVersion")
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-extensions"
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-react"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom-legacy"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom"
+
+                //Required to do encryption for tokens etc.
                 implementation npm("asmcrypto.js","$version_npm_asmcrypto")
+                //required by asmcrypto - see webpack.confg.d
+                implementation npm("crypto-browserify", "$version_crypto_browserify")
+                //required by asmcrypto - see webpack.confg.d
+                implementation npm("stream-browserify", "$version_stream_browserify")
                 implementation npm("buffer","$version_npm_buffer")
             }
         }
@@ -255,8 +258,6 @@ kotlin {
         jsTest {
             dependencies {
                 implementation kotlin('test-js')
-                implementation npm("moment","$version_npm_moment")
-                implementation npm("moment-timezone","$version_npm_moment_timezone")
             }
         }
 

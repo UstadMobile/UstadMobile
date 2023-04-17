@@ -41,8 +41,11 @@ val VirtualList = FC<VirtualListProps> {props ->
         ref = parentRef
         style = props.style
 
-        val allRows = props.content.flatMap { section ->
-            section.elements
+
+        val allRows = useMemo(props.content) {
+            props.content.flatMap { section ->
+                section.elements
+            }
         }
 
         @Suppress("SpellCheckingInspection")
@@ -92,25 +95,28 @@ class VirtualListContentScope internal constructor() {
 
     fun <TItem, TData, TError> infiniteQueryItemsIndexed(
         infiniteQueryResult: UseInfiniteQueryResult<TData, TError>,
-        dataPageToItems: (TData) -> List<TItem?>,
+        dataPagesToItems: (Array<out TData>) -> List<TItem?>,
         itemToKey: (item: TItem, index: Int) -> String,
         itemToNode: (item: TItem?, index: Int) -> ReactNode,
     ) {
-        sections += InfiniteQueryResultSection(infiniteQueryResult,
-            sections.count { it is InfiniteQueryResultSection<*, *, *> },
-            dataPageToItems, itemToKey, itemToNode
+        sections += InfiniteQueryResultSection(
+            infiniteQueryResult = infiniteQueryResult,
+            infiniteSectionIndex = sections.count { it is InfiniteQueryResultSection<*, *, *> },
+            dataPagesToItems = dataPagesToItems,
+            itemToKey = itemToKey,
+            createNode = itemToNode,
         )
     }
 
     fun <TItem, TData, TError> infiniteQueryItems(
         infiniteQueryResult: UseInfiniteQueryResult<TData, TError>,
-        dataPageToItems: (TData) -> List<TItem?>,
+        dataPagesToItems: (Array<out TData>) -> List<TItem?>,
         itemToKey: (item: TItem) -> String,
         itemToNode: (item: TItem?) -> ReactNode,
     ) {
         infiniteQueryItemsIndexed(
             infiniteQueryResult = infiniteQueryResult,
-            dataPageToItems = dataPageToItems,
+            dataPagesToItems = dataPagesToItems,
             itemToKey = { item, _ -> itemToKey(item) },
             itemToNode = { item, _ -> itemToNode(item) },
         )
@@ -123,8 +129,13 @@ class VirtualListContentScope internal constructor() {
     ) {
         sections += InfiniteQueryResultSection(
             infiniteQueryResult = items,
-            sections.count { it is InfiniteQueryResultSection<*, *, *> },
-            dataPageToItems = {(it as? LoadResult.Page)?.data ?: emptyList() },
+            infiniteSectionIndex = sections.count { it is InfiniteQueryResultSection<*, *, *> },
+            dataPagesToItems = { pages ->
+                console.log("Mapping data pages to items")
+                pages.mapNotNull { it as? LoadResult.Page<Int, T> }.flatMap {
+                    it.data
+                }
+            },
             itemToKey = key,
             createNode = itemToNode
         )

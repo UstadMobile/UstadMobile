@@ -28,6 +28,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityMainBinding
@@ -52,10 +53,12 @@ import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.view.*
 import com.ustadmobile.port.android.impl.nav.NavHostTempFileRegistrar
 import com.ustadmobile.port.android.util.ext.registerDestinationTempFile
+import com.ustadmobile.port.android.view.util.UstadActivityWithBottomNavigation
 
 
 class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
         UstadActivityWithProgressBar,
+        UstadActivityWithBottomNavigation,
         NavController.OnDestinationChangedListener,
         NavHostTempFileRegistrar,
         DIAware{
@@ -75,6 +78,11 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
         //Note: do not use mBinding here because it might not be ready for the first fragment
         get() = findViewById(R.id.main_progress_bar)
 
+
+    override val bottomNavigationView: BottomNavigationView
+        get() = mBinding.bottomNavView
+
+
     private lateinit var mBinding: ActivityMainBinding
 
     private val impl : UstadMobileSystemImpl by instance()
@@ -88,6 +96,15 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
     private lateinit var navController: NavController
 
     private lateinit var ustadNavController: UstadNavController
+
+    private var mAccountIconVisible: Boolean? = null
+        set(value) {
+            if(field == value)
+                return
+
+            field = value
+            invalidateOptionsMenu()
+        }
 
     private val userProfileDrawable: Drawable? by lazy(LazyThreadSafetyMode.NONE) {
         ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_24dp)?.also {
@@ -169,14 +186,6 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
             (AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL)
         (mBinding.mainCollapsingToolbar.collapsingToolbar.layoutParams as? AppBarLayout.LayoutParams)?.scrollFlags = scrollFlags
 
-        val userHasBottomNav = !contentOnlyForNonAdmin || accountManager.activeAccount.admin
-        mBinding.bottomNavView.visibility = if(!userHasBottomNav || ustadDestination?.hideBottomNavigation == true) {
-            View.GONE
-        } else {
-            slideBottomNavigation(true)
-            View.VISIBLE
-        }
-
         //Hide the soft keyboard if showing when moving to the next screen
         val currentFocusView = currentFocus
         if(currentFocusView != null) {
@@ -218,7 +227,7 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
 
         //Should be hidden when they are on the accounts page (only)
         val currentDestination = destinationProvider.lookupDestinationById(currentFrag)
-        menu.findItem(R.id.menu_main_profile).isVisible = currentDestination?.hideAccountIcon != true
+        menu.findItem(R.id.menu_main_profile).isVisible = (mAccountIconVisible ?: false)
 
         searchView = menu.findItem(R.id.menu_search).actionView as SearchView
 
