@@ -17,6 +17,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.NetworkNodeListUiState
 import com.ustadmobile.lib.db.entities.DeviceSession
+import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.composable.*
@@ -29,7 +30,7 @@ private fun NetworkNodeListScreen(
     onChangeBluetoothEnabled: (Boolean) -> Unit = {},
     onChangeHotspotEnabled: (Boolean) -> Unit = {},
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
-    onClickDevice: (DeviceSession) -> Unit = {},
+    onClickDevice: (NetworkNode) -> Unit = {},
 ) {
     LazyColumn(
         modifier = Modifier
@@ -91,16 +92,16 @@ private fun NetworkNodeListScreen(
 
         items(
             items = uiState.devices,
-            key = { device -> device.dsDeviceId }
-        ){ device ->
+            key = { device -> device.nodeId }
+        ){ networkNode ->
             ListItem(
                 modifier = Modifier.clickable {
-                        onClickDevice(device)
+                        onClickDevice(networkNode)
                     },
 
                 text = { Text("Phone Number") },
                 icon = {
-                    LeadingContent(device = device)
+                    LeadingContent(networkNode = networkNode)
                 },
                 secondaryText = { Text("Server") }
             )
@@ -111,7 +112,7 @@ private fun NetworkNodeListScreen(
 
 @Composable
 private fun LeadingContent(
-    device: DeviceSession
+    networkNode: NetworkNode
 ){
 
     Column(
@@ -134,7 +135,7 @@ private fun LeadingContent(
                 .padding(end = 5.dp)
         ) {
             LinearProgressIndicator(
-                progress = (device.expires/100.0)
+                progress = (networkNode.wifiDirectDeviceStatus/100.0)
                     .toFloat(),
                 modifier = Modifier
                     .height(4.dp)
@@ -149,8 +150,9 @@ private fun LeadingContent(
 fun NetworkNodeListPreview() {
     val uiStateVal = NetworkNodeListUiState(
         devices = listOf(
-            DeviceSession().apply {
-                dsDeviceId = 1
+            NetworkNode().apply {
+                nodeId = 1
+
             }
         ),
         deviceName = "Phone Name",

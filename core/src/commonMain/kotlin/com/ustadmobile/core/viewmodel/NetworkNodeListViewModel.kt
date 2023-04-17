@@ -3,6 +3,7 @@ package com.ustadmobile.core.viewmodel
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.lib.db.entities.DeviceSession
+import com.ustadmobile.lib.db.entities.NetworkNode
 
 data class NetworkNodeListUiState(
 
@@ -20,6 +21,6 @@ data class NetworkNodeListUiState(
 
     val wifiSSID: String = "",
 
-    val devices: List<DeviceSession> = emptyList()
+    val devices: List<NetworkNode> = emptyList()
 
 )
