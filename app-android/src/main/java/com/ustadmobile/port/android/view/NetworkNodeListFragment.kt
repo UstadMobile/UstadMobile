@@ -16,12 +16,10 @@ import androidx.compose.ui.unit.dp
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.NetworkNodeListUiState
-import com.ustadmobile.lib.db.entities.DeviceSession
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.composable.*
-
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -30,7 +28,7 @@ private fun NetworkNodeListScreen(
     onChangeBluetoothEnabled: (Boolean) -> Unit = {},
     onChangeHotspotEnabled: (Boolean) -> Unit = {},
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
-    onClickDevice: (NetworkNode) -> Unit = {},
+    onClickNetworkNode: (NetworkNode) -> Unit = {},
 ) {
     LazyColumn(
         modifier = Modifier
@@ -91,13 +89,13 @@ private fun NetworkNodeListScreen(
         }
 
         items(
-            items = uiState.devices,
-            key = { device -> device.nodeId }
+            items = uiState.networkNodes,
+            key = { networkNode -> networkNode.nodeId }
         ){ networkNode ->
             ListItem(
                 modifier = Modifier.clickable {
-                        onClickDevice(networkNode)
-                    },
+                    onClickNetworkNode(networkNode)
+                },
 
                 text = { Text("Phone Number") },
                 icon = {
@@ -149,7 +147,7 @@ private fun LeadingContent(
 @Preview
 fun NetworkNodeListPreview() {
     val uiStateVal = NetworkNodeListUiState(
-        devices = listOf(
+        networkNodes = listOf(
             NetworkNode().apply {
                 nodeId = 1
 

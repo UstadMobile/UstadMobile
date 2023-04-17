@@ -1,12 +1,10 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.util.ext.progressBadge
 import com.ustadmobile.core.viewmodel.NetworkNodeListUiState
-import com.ustadmobile.lib.db.entities.DeviceSession
+import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
@@ -33,16 +31,16 @@ external interface NetworkNodeListScreenProps : Props {
 
     var onClickFilterChip: (MessageIdOption2) -> Unit
 
-    var onClickDevice: (DeviceSession) -> Unit
+    var onClickNetworkNode: (NetworkNode) -> Unit
 }
 
 val NetworkNodeListScreenPreview = FC<Props> {
 
     NetworkNodeListScreenComponent2 {
         uiState = NetworkNodeListUiState(
-            devices = listOf(
-                DeviceSession().apply {
-                    dsDeviceId = 1
+            networkNodes = listOf(
+                NetworkNode().apply {
+                    nodeId = 1
                 }
             ),
             deviceName = "Phone Name",
@@ -101,11 +99,11 @@ val NetworkNodeListScreenComponent2 = FC<NetworkNodeListScreenProps> { props ->
 
 
             List{
-                props.uiState.devices.forEach { device ->
+                props.uiState.networkNodes.forEach { networkNode ->
 
                     ListItem {
                         ListItemButton {
-                            onClick = { props.onClickDevice(device) }
+                            onClick = { props.onClickNetworkNode(networkNode) }
 
                             ListItemIcon {
                                 + Stack.create {
