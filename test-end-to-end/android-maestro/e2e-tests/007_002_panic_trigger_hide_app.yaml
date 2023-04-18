@@ -35,3 +35,5 @@ env:
 - tapOn: "Paste"
 - launchApp
 - assertVisible: "Library"
+- clearState: com.toughra.ustadmobile
+- clearState: info.guardianproject.ripple

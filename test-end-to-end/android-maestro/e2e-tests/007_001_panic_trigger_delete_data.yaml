@@ -29,3 +29,5 @@ env:
 - launchApp
 - tapOn: "Get Started"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/deleted_ustad_app_data"
+- clearState: com.toughra.ustadmobile
+- clearState: info.guardianproject.ripple

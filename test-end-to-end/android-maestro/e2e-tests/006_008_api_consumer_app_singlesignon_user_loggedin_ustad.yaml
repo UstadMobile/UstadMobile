@@ -34,3 +34,5 @@ env:
 - launchApp
 - tapOn: "Profile"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/single-sign-on-success"
+- clearState: com.toughra.ustadmobile
+- clearState: com.ustadmobile.ustadapiconsumer
