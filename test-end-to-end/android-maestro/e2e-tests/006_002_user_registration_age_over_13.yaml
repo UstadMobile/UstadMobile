@@ -2,8 +2,8 @@ appId: com.toughra.ustadmobile
 tags:
   - checklist6
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/006_001_admin_can_enable_or_disable_registration"
-  TESTNAME: 006_001_admin_can_enable_or_disable_registration
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/006_002_user_registration_age_over_13"
+  TESTNAME: 006_002_user_registration_age_over_13
 ---
 - clearState: com.toughra.ustadmobile
 - runFlow:

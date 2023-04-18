@@ -2,8 +2,8 @@ appId: com.toughra.ustadmobile
 tags:
   - checklist6
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/006_005_admin_can_enable_or_disable_guest_login"
-  TESTNAME: 006_005_admin_can_enable_or_disable_guest_login.yaml
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/006_004_admin_add_student_aged_below_13"
+  TESTNAME: 006_004_admin_add_student_aged_below_13
 ---
 - clearState: com.toughra.ustadmobile
 - runFlow:
