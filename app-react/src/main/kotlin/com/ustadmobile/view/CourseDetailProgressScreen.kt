@@ -81,8 +81,8 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
             sx {
                 width = 100.pct
 //            overflowX = Overflow.hidden
-                marginLeft = -scrollX.px
-                display = Display.flex
+//                marginLeft = -scrollX.px
+//                display = Display.flex
 //                alignItems = AlignItems.flexStart
 //                justifyContent = JustifyContent.flexStart
             }
@@ -114,17 +114,20 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 
 
     VirtualList {
+
         style = jso {
             height = "calc(100vh - ${props.muiAppState.appBarHeight+100}px)".unsafeCast<Height>()
             width = 100.pct
-            contain = Contain.strict
+//            contain = Contain.strict
             overflowY = Overflow.scroll
-//                    display = Display.flex
-//                    alignItems = AlignItems.flexStart
+//            display = Display.flex
+//            alignItems = AlignItems.flexStart
 //            position = Position.absolute
 //            marginLeft = 0.px
-            marginTop = 100.px
+//            marginTop = 100.px
         }
+
+
 
         content = virtualListContent {
 
@@ -132,14 +135,15 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                 items = infiniteQueryResult,
                 key = { it.personUid.toString() }
             ) { person ->
+
                 Stack.create {
                     direction = responsive(StackDirection.row)
 
                     Box{
 
                         sx {
-                            position = Position.sticky
-                            marginLeft = 0.px
+                            position = Position.absolute
+                            transform = translatex(scrollX.px)
                         }
                         onClick = {
                             person?.also { props.onClickStudent(it) }
@@ -187,17 +191,17 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 
 
         Container {
-
+            sx {
+                width = 100.pct
+                overflowX = Overflow.scroll
+                display =  Display.flex
+                alignItems = AlignItems.flexStart
+            }
+            onScroll = { event ->
+                scrollX = event.target.unsafeCast<HTMLElement>().scrollLeft.toInt()
+            }
             Box {
-                sx {
-                    width = 100.pct
-                    overflowX = Overflow.scroll
-//                    display =  Display.flex
-//                    alignItems = AlignItems.flexStart
-                }
-                onScroll = { event ->
-                    scrollX = event.target.unsafeCast<HTMLElement>().scrollLeft.toInt()
-                }
+
 
                 VirtualListOutlet()
             }
