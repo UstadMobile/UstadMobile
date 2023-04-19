@@ -75,7 +75,7 @@ interface ClazzDetailOverviewEventListener {
 }
 
 class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(),
-        ClazzDetailOverviewView, ClazzDetailFragmentEventHandler, Observer<PagedList<Schedule>>,
+        ClazzDetailOverviewView,  Observer<PagedList<Schedule>>,
         ClazzDetailOverviewEventListener {
 
 

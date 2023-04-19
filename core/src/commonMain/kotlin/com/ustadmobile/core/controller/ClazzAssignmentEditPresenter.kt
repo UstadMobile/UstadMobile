@@ -1,12 +1,8 @@
 package com.ustadmobile.core.controller
 
-import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.ext.getFirstValue
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
-import com.ustadmobile.core.schedule.localMidnight
-import com.ustadmobile.core.schedule.toLocalMidnight
-import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.*
@@ -195,55 +191,56 @@ class ClazzAssignmentEditPresenter(context: Any,
     }
 
     fun loadEntityIntoDateTime(entity: CourseBlockWithEntity){
-        val timeZone = view.timeZone ?: "UTC"
-
-
-        if(entity.cbHideUntilDate != 0L){
-            val startDateTimeMidnight = DateTime(entity.cbHideUntilDate)
-                    .toLocalMidnight(timeZone).unixMillisLong
-            view.startDate = startDateTimeMidnight
-            view.startTime = entity.cbHideUntilDate - startDateTimeMidnight
-        }else{
-            view.startDate = 0
-        }
-
-
-        if(entity.cbDeadlineDate != Long.MAX_VALUE){
-            val deadlineDateTimeMidnight = DateTime(entity.cbDeadlineDate)
-                    .toLocalMidnight(timeZone).unixMillisLong
-            view.deadlineDate = deadlineDateTimeMidnight
-            view.deadlineTime = entity.cbDeadlineDate - deadlineDateTimeMidnight
-        }else{
-            view.deadlineDate = Long.MAX_VALUE
-        }
-
-        if(entity.cbGracePeriodDate != Long.MAX_VALUE){
-            val gracePeriodDateTimeMidnight = DateTime(entity.cbGracePeriodDate)
-                    .toLocalMidnight(timeZone).unixMillisLong
-            view.gracePeriodDate = gracePeriodDateTimeMidnight
-            view.gracePeriodTime = entity.cbGracePeriodDate - gracePeriodDateTimeMidnight
-        }else{
-            view.gracePeriodDate = Long.MAX_VALUE
-        }
+        //NOTE: this will be handled with the MVVM conversion
+//        val timeZone = view.timeZone ?: "UTC"
+//
+//
+//        if(entity.cbHideUntilDate != 0L){
+//            val startDateTimeMidnight = DateTime(entity.cbHideUntilDate)
+//                    .toLocalMidnight(timeZone).unixMillisLong
+//            view.startDate = startDateTimeMidnight
+//            view.startTime = entity.cbHideUntilDate - startDateTimeMidnight
+//        }else{
+//            view.startDate = 0
+//        }
+//
+//
+//        if(entity.cbDeadlineDate != Long.MAX_VALUE){
+//            val deadlineDateTimeMidnight = DateTime(entity.cbDeadlineDate)
+//                    .toLocalMidnight(timeZone).unixMillisLong
+//            view.deadlineDate = deadlineDateTimeMidnight
+//            view.deadlineTime = entity.cbDeadlineDate - deadlineDateTimeMidnight
+//        }else{
+//            view.deadlineDate = Long.MAX_VALUE
+//        }
+//
+//        if(entity.cbGracePeriodDate != Long.MAX_VALUE){
+//            val gracePeriodDateTimeMidnight = DateTime(entity.cbGracePeriodDate)
+//                    .toLocalMidnight(timeZone).unixMillisLong
+//            view.gracePeriodDate = gracePeriodDateTimeMidnight
+//            view.gracePeriodTime = entity.cbGracePeriodDate - gracePeriodDateTimeMidnight
+//        }else{
+//            view.gracePeriodDate = Long.MAX_VALUE
+//        }
     }
 
     fun saveDateTimeIntoEntity(entity: CourseBlockWithEntity){
         val timeZone = view.timeZone ?: "UTC"
-
-        if(view.startDate != 0L){
-            entity.cbHideUntilDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
-                .localMidnight.utc.unixMillisLong + view.startTime
-        }
-
-        if(view.deadlineDate != Long.MAX_VALUE){
-            entity.cbDeadlineDate = DateTime(view.deadlineDate).toOffsetByTimezone(timeZone)
-                    .localMidnight.utc.unixMillisLong + view.deadlineTime
-        }
-
-        if(view.gracePeriodDate != Long.MAX_VALUE){
-            entity.cbGracePeriodDate = DateTime(view.gracePeriodDate).toOffsetByTimezone(timeZone)
-                    .localMidnight.utc.unixMillisLong + view.gracePeriodTime
-        }
+//NOTE: this will be handled with MVVM conversion
+//        if(view.startDate != 0L){
+//            entity.cbHideUntilDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
+//                .localMidnight.utc.unixMillisLong + view.startTime
+//        }
+//
+//        if(view.deadlineDate != Long.MAX_VALUE){
+//            entity.cbDeadlineDate = DateTime(view.deadlineDate).toOffsetByTimezone(timeZone)
+//                    .localMidnight.utc.unixMillisLong + view.deadlineTime
+//        }
+//
+//        if(view.gracePeriodDate != Long.MAX_VALUE){
+//            entity.cbGracePeriodDate = DateTime(view.gracePeriodDate).toOffsetByTimezone(timeZone)
+//                    .localMidnight.utc.unixMillisLong + view.gracePeriodTime
+//        }
     }
 
     fun handleSubmissionTypeClicked(){

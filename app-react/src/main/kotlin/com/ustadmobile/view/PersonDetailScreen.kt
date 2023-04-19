@@ -2,20 +2,33 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.viewmodel.PersonDetailUiState
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
-import com.ustadmobile.core.components.DIContext
 import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.hooks.useViewModel
+import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.viewmodel.PersonDetailViewModel
+import com.ustadmobile.hooks.useAttachmentUriSrc
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.mui.components.UstadQuickActionButton
+import com.ustadmobile.view.components.UstadFab
+import csstype.ObjectFit
 import mui.material.List
-import mui.icons.material.*
+//WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
 import mui.material.*
+import mui.icons.material.Call
+import mui.icons.material.Email
+import mui.icons.material.Key
+import mui.icons.material.SupervisedUserCircle
+import mui.icons.material.Chat
+import mui.icons.material.CalendarToday
+import mui.icons.material.AccountCircle
+import mui.icons.material.LocationOn
+import mui.icons.material.Person
+import mui.icons.material.People
 import react.dom.html.ReactHTML.img
 import mui.icons.material.Badge
 import mui.material.Container
@@ -26,16 +39,21 @@ import mui.system.StackDirection
 import react.*
 import kotlin.js.Date
 import csstype.px
+import emotion.react.css
 
-val PersonDetailScreen = FC<UstadScreenProps>() { props ->
-    val viewModel = useViewModel(
-        onAppUiStateChange = props.onAppUiStateChanged,
-        onShowSnack = props.onShowSnackBar,
-    ) { di, savedStateHandle ->
+val PersonDetailScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
         PersonDetailViewModel(di, savedStateHandle)
     }
 
     val uiState by viewModel.uiState.collectAsState(PersonDetailUiState())
+
+    val appState by viewModel.appUiState.collectAsState(AppUiState())
+
+    UstadFab {
+        fabState = appState.fabState
+    }
+
 
     PersonDetailComponent2 {
         this.uiState = uiState
@@ -100,10 +118,23 @@ val PersonDetailComponent2 = FC<PersonDetailProps> { props ->
             direction = responsive(StackDirection.column)
             spacing = responsive(10.px)
 
-            img {
-                src = "${""}?w=164&h=164&fit=crop&auto=format"
-                alt = "user image"
+            val personImgSrc = useAttachmentUriSrc(
+                attachmentUri = props.uiState.personPicture?.personPictureUri,
+                revokeOnCleanup = true,
+            )
+
+            if(personImgSrc != null) {
+                img {
+                    src = personImgSrc.toString()
+                    alt = "user image"
+                    css {
+                        maxHeight = 304.px
+                        objectFit = ObjectFit.contain
+                        asDynamic().objectPosition = "center"
+                    }
+                }
             }
+
 
             QuickActionBar{
                 uiState = props.uiState
@@ -221,7 +252,7 @@ private val DetailFeilds = FC<PersonDetailProps> { props ->
     if (props.uiState.personGenderVisible){
 
         val gender = strings.mapLookup(
-            props.uiState?.person?.gender ?: 1,
+            props.uiState.person?.gender ?: 1,
             PersonConstants.GENDER_MESSAGE_ID_MAP
         )
 

@@ -229,6 +229,11 @@ tasks.whenTaskAdded { task ->
 }
 
 configurations.all {
+    /**
+     * As per Door room-annotations module README: exclude the room-annotations module to avoid
+     * duplicate class error
+     */
+    exclude group: "com.github.UstadMobile.door", module: "room-annotations"
     resolutionStrategy {
         force "androidx.lifecycle:lifecycle-livedata-core:$version_androidx_lifecycle"
         force "androidx.lifecycle:lifecycle-runtime:$version_androidx_lifecycle"
@@ -386,6 +391,12 @@ dependencies {
 
     //PanicKit (PanicButton) integration
     implementation "info.guardianproject.panic:panic:$version_android_panickit"
+
+    implementation "io.coil-kt:coil:$version_android_coil"
+    implementation "io.coil-kt:coil-compose:$version_android_coil"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
+
 
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"

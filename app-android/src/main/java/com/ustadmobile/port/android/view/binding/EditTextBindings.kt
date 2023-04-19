@@ -4,21 +4,14 @@ import android.annotation.SuppressLint
 import android.text.InputFilter
 import android.text.Spanned
 import android.text.format.DateFormat
-import android.view.View
-import android.view.ViewConfiguration
-import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.TextView
-import androidx.core.view.marginBottom
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import com.google.android.material.textfield.TextInputEditText
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.NewCommentItemListener
-import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.util.ext.systemImpl
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.view.ReportTemplateListFragment
 import com.ustadmobile.port.android.view.ReportTemplateListFragment.Companion.REPORT_TITLE_TO_ID
 import java.text.MessageFormat
 import java.util.*
@@ -41,17 +34,8 @@ private fun scheduleTimeToDate(msSinceMidnight: Int) : Date{
 
 
 @BindingAdapter("scheduleText")
+@Deprecated("Will be removed once clazzeditpresenter/clazzdetailoverviewpresenter are removed")
 fun TextView.setScheduleText(schedule: Schedule) {
-    val frequencyMessageId = ScheduleEditPresenter.FrequencyOption.values()
-            .firstOrNull { it.optionVal == schedule.scheduleFrequency }?.messageId ?: 0
-    val dayMessageId = ScheduleEditPresenter.DayOptions.values()
-            .firstOrNull { it.optionVal == schedule.scheduleDay }?.messageId ?: 0
-
-    text = scheduleMessageFormat.format(arrayOf(systemImpl.getString(frequencyMessageId, context),
-            systemImpl.getString(dayMessageId, context),
-            scheduleTimeToDate(schedule.sceduleStartTime.toInt()),
-            scheduleTimeToDate(schedule.scheduleEndTime.toInt())
-    ))
 }
 
 private fun mkGmtOffsetString(rawOffset: Int): String {

@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -28,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import coil.compose.SubcomposeAsyncImage
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.PersonConstants
@@ -39,6 +41,7 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
+import com.ustadmobile.port.android.util.compose.rememberResolvedAttachmentUri
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.composable.UstadQuickActionButton
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
@@ -46,9 +49,7 @@ import java.util.*
 
 class PersonDetailFragment : UstadBaseMvvmFragment(){
 
-    private val viewModel: PersonDetailViewModel by viewModels {
-        UstadViewModelProviderFactory(di, this, requireArguments())
-    }
+    private val viewModel: PersonDetailViewModel by ustadViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -100,13 +101,19 @@ private fun PersonDetailScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     )  {
+        val personPictureUri = rememberResolvedAttachmentUri(uiState.personPicture?.personPictureUri)
 
-        Image(
-            painter = painterResource(id = R.drawable.ic_person_black_24dp),
-            contentDescription = null,
-            modifier = Modifier
-                .height(256.dp)
-                .fillMaxWidth())
+        if(personPictureUri != null) {
+            SubcomposeAsyncImage(
+                model = personPictureUri,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .height(256.dp)
+                    .fillMaxWidth()
+            )
+        }
+
 
         QuickActionBar(
             uiState,
@@ -251,7 +258,9 @@ private fun DetailFields(uiState: PersonDetailUiState){
         if (uiState.personGenderVisible){
             UstadDetailField(
                 valueText = gender,
-                labelText = stringResource(R.string.gender_literal))
+                labelText = stringResource(R.string.gender_literal),
+                imageId = 0,
+            )
         }
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -260,7 +269,8 @@ private fun DetailFields(uiState: PersonDetailUiState){
             UstadDetailField(
                 imageId = R.drawable.ic_badge_24dp,
                 valueText = uiState.person?.personOrgId ?: "",
-                labelText = stringResource(R.string.organization_id))
+                labelText = stringResource(R.string.organization_id)
+            )
         }
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -339,8 +349,9 @@ private fun Classes(
 @Composable
 private fun ClassItem(clazz: ClazzEnrolmentWithClazzAndAttendance){
     Row(
-        modifier = Modifier.padding(8.dp).
-        fillMaxWidth(),
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ){
         Image(

@@ -1,11 +1,14 @@
 # app-react
 
 This module contains the web client application built using Kotlin/JS using React and MUI
-via [kotlin-wrappers](https://github.com/JetBrains/kotlin-wrappers).
+via [kotlin-wrappers](https://github.com/JetBrains/kotlin-wrappers). The UI follows the patterns 
+found in [kotlin-mui-showcase](https://github.com/karakum-team/kotlin-mui-showcase).
 
-## Prerequisites
-Install [Node 18x](https://nodejs.org/en/download/) on your machine since Kotlin/JS depends on it
-to build.
+Wrappers for other libraries (see package com.ustadmobile.wrappers ) created as per: 
+
+* [JS in Kotlin/JS](https://dev.to/mpetuska/js-in-kotlinjs-c4g)
+* [Kotlin for the JS Platform - Javascript Modules (official)](https://kotlinlang.org/docs/js-modules.html)
+* [Kotlin for the JS Platform - Use dependencies from npm (official)](https://kotlinlang.org/docs/using-packages-from-npm.html)
 
 ## MUI React/JS UI Development
 
@@ -29,6 +32,9 @@ should contain the UiState class and all event handlers.
 3. Add the screen to useUstadScreens ( in com.ustadmobile.hooks ). This will add the screen to the
 navigation bar on the left. You can now view the screen in the browser.
 
+### Known Issues:
+
+1. Do not import mui.icons.material.* - this will make autocomplete/intellisense unusably slow in the IDE.
 
 ## Development
 

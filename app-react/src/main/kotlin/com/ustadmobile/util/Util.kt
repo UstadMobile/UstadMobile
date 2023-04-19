@@ -31,11 +31,6 @@ object Util {
     }
 
 
-    fun stopEventPropagation(event: dynamic){
-        event.preventDefault()
-        event.stopPropagation()
-    }
-
     fun copyToClipboard(text: String, copyHandler:()-> Unit){
         val secure = js("typeof(navigator.clipboard)!='undefined' " +
                 "&& window.isSecureContext").toString().toBoolean()

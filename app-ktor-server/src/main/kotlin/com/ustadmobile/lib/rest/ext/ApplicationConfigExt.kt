@@ -44,15 +44,6 @@ fun ApplicationConfig.databasePropertiesFromSection(
     }
 }
 
-fun ApplicationConfig.dbModeToEndpoint(call: ApplicationCall, dbModeOverride: String? = null): Endpoint{
-    val dbMode: String = dbModeOverride ?: propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
-    return if(dbMode == CONF_DBMODE_SINGLETON) {
-        Endpoint("localhost")
-    }else {
-        Endpoint(call.request.header("Host") ?: "localhost")
-    }
-}
-
 /**
  * Get a file for an external command e.g. ffmpeg etc specified in the paths section
  */

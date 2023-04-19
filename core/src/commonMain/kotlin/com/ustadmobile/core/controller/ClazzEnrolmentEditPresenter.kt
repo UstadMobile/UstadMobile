@@ -1,16 +1,13 @@
 package com.ustadmobile.core.controller
 
-import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
-import com.ustadmobile.core.schedule.localMidnight
-import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.processEnrolmentIntoClass
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.ext.toLocalMidnight
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
@@ -24,6 +21,8 @@ import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
@@ -73,7 +72,7 @@ class ClazzEnrolmentEditPresenter(context: Any,
         view.statusList = OutcomeOptions.values().map { OutcomeMessageIdOption(it, context, di) }
     }
 
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzEnrolmentWithLeavingReason? {
+    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzEnrolmentWithLeavingReason {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
         val clazzWithSchoolVal = repo.clazzDao.getClazzWithSchool(selectedClazz)
@@ -82,7 +81,7 @@ class ClazzEnrolmentEditPresenter(context: Any,
             it.takeIf { entityUid != 0L }?.clazzEnrolmentDao?.findEnrolmentWithLeavingReason(entityUid)
         } ?: ClazzEnrolmentWithLeavingReason().apply {
             val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
-            val joinTime = DateTime.now().toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
+            val joinTime = Clock.System.now().toLocalMidnight(TimeZone.of(clazzTimeZone)).toEpochMilliseconds()
             clazzEnrolmentDateJoined = joinTime
             clazzEnrolmentPersonUid = selectedPerson
             clazzEnrolmentClazzUid = selectedClazz

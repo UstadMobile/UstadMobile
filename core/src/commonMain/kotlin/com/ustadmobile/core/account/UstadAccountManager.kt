@@ -256,7 +256,9 @@ class UstadAccountManager(
                 usStartTime = systemTimeInMillis()
                 usSessionType = UserSession.TYPE_STANDARD
                 usStatus = UserSession.STATUS_ACTIVE
-                usAuth = password?.encryptWithPbkdf2(authSalt, pbkdf2Params)?.toHexString()
+                usAuth = password?.encryptWithPbkdf2(
+                    authSalt, pbkdf2Params, endpoint, httpClient
+                )?.toHexString()
                 usUid = endpointRepo.userSessionDao.insertSession(this)
             }
         }
