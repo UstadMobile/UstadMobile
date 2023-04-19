@@ -1583,4 +1583,10 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <string name="my_profile">My profile</string>
 
     <string name="add_another_account">Add another account</string>
+    <string name="bluetooth_sharing">Visible to others using Bluetooth</string>
+    <string name="hotspot_sharing">Fast local-only content sharing hotspot</string>
+    <string name="wifi_ssid">WiFi SSID</string>
+    <string name="clients">Clients</string>
+    <string name="server">Server</string>
+    <string name="internet_access">i: Clients will not be able to use the Internet access or mobile data of this device</string>
 </resources>

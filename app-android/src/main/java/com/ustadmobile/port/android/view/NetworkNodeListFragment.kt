@@ -1,0 +1,177 @@
+package com.ustadmobile.port.android.view
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.Icon
+import androidx.compose.material.Text
+import androidx.compose.material.Divider
+import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.ListItem
+import androidx.compose.material.icons.filled.Smartphone
+import androidx.compose.material.icons.filled.Bluetooth
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.toughra.ustadmobile.R
+import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.viewmodel.NetworkNodeListUiState
+import com.ustadmobile.lib.db.entities.NetworkNode
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
+import com.ustadmobile.port.android.view.composable.UstadDetailField
+import com.ustadmobile.port.android.view.composable.UstadSwitchField
+import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun NetworkNodeListScreen(
+    uiState: NetworkNodeListUiState = NetworkNodeListUiState(),
+    onChangeBluetoothEnabled: (Boolean) -> Unit = {},
+    onChangeHotspotEnabled: (Boolean) -> Unit = {},
+    onClickFilterChip: (MessageIdOption2) -> Unit = {},
+    onClickNetworkNode: (NetworkNode) -> Unit = {},
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .defaultScreenPadding()
+    ) {
+
+        item {
+            UstadDetailField(
+                modifier = Modifier.defaultItemPadding(),
+                valueText = uiState.deviceName,
+                labelText = stringResource(R.string.device),
+                icon = { Icon(Icons.Default.Smartphone, contentDescription = "") },
+            )
+        }
+
+        item {
+            UstadSwitchField(
+                modifier = Modifier.defaultItemPadding(),
+                checked = uiState.fieldsEnabled,
+                label = stringResource(id = R.string.bluetooth_sharing),
+                enabled = uiState.fieldsEnabled,
+                onChange = {
+                    onChangeBluetoothEnabled(it)
+                }
+            )
+        }
+
+        item {
+            UstadSwitchField(
+                modifier = Modifier.defaultItemPadding(),
+                checked = uiState.fieldsEnabled,
+                label = stringResource(id = R.string.hotspot_sharing),
+                enabled = uiState.fieldsEnabled,
+                onChange = {
+                    onChangeHotspotEnabled(it)
+                }
+            )
+        }
+
+        item {
+            Text(modifier = Modifier.defaultItemPadding(),
+                text = "${stringResource(R.string.wifi_ssid)}: ${uiState.wifiSSID}")
+        }
+
+        item {
+            Text(modifier = Modifier.defaultItemPadding(),
+                text = stringResource(id = R.string.internet_access))
+        }
+
+        item {
+            Divider()
+        }
+
+        item {
+            UstadListFilterChipsHeader(
+                filterOptions = uiState.deviceFilterOptions,
+                selectedChipId = uiState.selectedChipId,
+                enabled = uiState.fieldsEnabled,
+                onClickFilterChip = onClickFilterChip,
+            )
+        }
+
+        items(
+            items = uiState.networkNodes,
+            key = { networkNode -> networkNode.nodeId }
+        ){ networkNode ->
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickNetworkNode(networkNode)
+                },
+
+                text = { Text(networkNode.nsdServiceName ?: "") },
+                icon = {
+                    LeadingContent(networkNode = networkNode)
+                },
+                secondaryText = { Text(stringResource(id = R.string.server)) }
+            )
+        }
+
+    }
+}
+
+@Composable
+private fun LeadingContent(
+    networkNode: NetworkNode
+){
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(5.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
+        Icon(
+            Icons.Default.Bluetooth,
+            contentDescription = "",
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .size(24.dp),
+        )
+
+        LinearProgressIndicator(
+            progress = (networkNode.wifiDirectDeviceStatus/100.0)
+                .toFloat(),
+            modifier = Modifier
+                .height(4.dp)
+                .width(32.dp)
+        )
+
+    }
+}
+
+@Composable
+@Preview
+fun NetworkNodeListPreview() {
+    val uiStateVal = NetworkNodeListUiState(
+        networkNodes = listOf(
+            NetworkNode().apply {
+                nodeId = 1
+                wifiDirectDeviceStatus = 30
+                nsdServiceName = "John's Phone"
+            },
+            NetworkNode().apply {
+                nodeId = 2
+                wifiDirectDeviceStatus = 80
+                nsdServiceName = "Ali's Phone"
+            }
+        ),
+        deviceName = "Phone Name",
+        wifiSSID = "LocalSpot1231"
+    )
+
+    NetworkNodeListScreen(uiStateVal)
+}
