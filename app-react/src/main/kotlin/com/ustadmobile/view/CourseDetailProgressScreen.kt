@@ -17,6 +17,7 @@ import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import csstype.*
 import js.core.jso
+import mui.icons.material.CheckBoxOutlineBlank
 import mui.icons.material.CheckBoxOutlined
 import mui.icons.material.Message
 import mui.material.*
@@ -753,7 +754,10 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 
                     Stack {
                         direction = responsive(StackDirection.row)
-                        person?.results?.forEachIndexed { index, item ->
+                        props.uiState.courseBlocks.forEachIndexed { index, item ->
+
+                            val bool = person?.results?.first { it.courseBlockUid == item.cbUid}
+
                             Icon {
 
                                 sx {
@@ -764,8 +768,11 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                                         color = Color("#006400")
                                     }
                                 }
-
-                                + CheckBoxOutlined.create()
+//                                if (bool?.completed == true){
+                                    + CheckBoxOutlined.create()
+//                                } else {
+//                                    + CheckBoxOutlineBlank.create()
+//                                }
                             }
                         }
                     }
