@@ -108,8 +108,8 @@ private val LeadingContent = FC<LeadingContentProps> { props ->
 
         thumbnail {
             sx {
-                width = 55.px
-                height = 55.px
+                width = 40.px
+                height = 40.px
             }
         }
 

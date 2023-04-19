@@ -23,7 +23,7 @@ import com.toughra.ustadmobile.R
 @Composable
 fun UstadDetailField(
     valueText: String,
-    labelText: String,
+    labelText: String?,
     modifier: Modifier = Modifier,
     icon: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
@@ -31,7 +31,7 @@ fun UstadDetailField(
 ) {
     UstadDetailField(
         valueText = AnnotatedString(valueText),
-        labelText = AnnotatedString(labelText),
+        labelText = labelText?.let { AnnotatedString(it) },
         modifier = modifier,
         icon = icon,
         onClick = onClick,
@@ -42,7 +42,7 @@ fun UstadDetailField(
 @Composable
 fun UstadDetailField(
     valueText: String,
-    labelText: String,
+    labelText: String?,
     modifier: Modifier = Modifier,
     imageId: Int = 0,
     onClick: (() -> Unit)? = null,
@@ -50,7 +50,7 @@ fun UstadDetailField(
 ) {
     UstadDetailField(
         valueText = AnnotatedString(valueText),
-        labelText = AnnotatedString(labelText),
+        labelText = labelText?.let { AnnotatedString(it) },
         modifier = modifier,
         imageId = imageId,
         onClick = onClick,
@@ -61,7 +61,7 @@ fun UstadDetailField(
 @Composable
 fun UstadDetailField(
     valueText: AnnotatedString,
-    labelText: AnnotatedString,
+    labelText: AnnotatedString?,
     modifier: Modifier = Modifier,
     imageId: Int = 0,
     onClick: (() -> Unit)? = null,
@@ -91,7 +91,7 @@ fun UstadDetailField(
 @Composable
 fun UstadDetailField(
     valueText: AnnotatedString,
-    labelText: AnnotatedString,
+    labelText: AnnotatedString?,
     modifier: Modifier = Modifier,
     icon: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
@@ -126,7 +126,7 @@ private fun DetailFieldContent(
     modifier: Modifier = Modifier,
     icon: (@Composable () -> Unit)? = null,
     valueText: AnnotatedString,
-    labelText: AnnotatedString,
+    labelText: AnnotatedString?,
     secondaryActionContent: (@Composable () -> Unit)? = null,
 ) {
     Row(modifier){
@@ -147,11 +147,14 @@ private fun DetailFieldContent(
                 color = contentColorFor(backgroundColor = MaterialTheme.colors.background)
             )
 
-            Text(
-                text = labelText,
-                style = MaterialTheme.typography.subtitle1,
-                color = colorResource(id = R.color.list_subheader),
-            )
+            if(labelText != null) {
+                Text(
+                    text = labelText,
+                    style = MaterialTheme.typography.subtitle1,
+                    color = colorResource(R.color.list_subheader),
+                )
+            }
+
         }
 
         if(secondaryActionContent != null) {
