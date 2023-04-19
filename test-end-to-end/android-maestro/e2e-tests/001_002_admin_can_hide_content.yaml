@@ -19,3 +19,5 @@ env:
     file: "../common/hide_content.yaml"
     env:
        TESTCONTENTNAME: "HideContentTest"
+- runFlow:
+    file: "../common/tear_down.yaml"

@@ -32,5 +32,5 @@ env:
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
 - runFlow: "../build/common-app2/select_site.yaml"
 - assertNotVisible: "Create Account"
-- clearState: com.toughra.ustadmobile
-- clearState: com.ustadmobile.ustadapiconsumer
+- runFlow:
+    file: "../common/tear_down.yaml"

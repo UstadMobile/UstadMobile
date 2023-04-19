@@ -25,5 +25,5 @@ env:
 - assertVisible: "Create Account"
 - runFlow:
     file: "../common/user_registration_13_above.yaml"
-- clearState: com.toughra.ustadmobile
-- clearState: com.ustadmobile.ustadapiconsumer
+- runFlow:
+    file: "../common/tear_down.yaml"

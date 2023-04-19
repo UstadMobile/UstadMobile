@@ -115,3 +115,5 @@ env:
 - assertNotVisible:
     text: "PRIMARY COLOURS"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/text_block_deleted"
+- runFlow:
+    file: "../common/tear_down.yaml"

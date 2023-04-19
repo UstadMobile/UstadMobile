@@ -33,3 +33,5 @@ env:
     file: "../common/edit_recorded_attendance.yaml"
     env:
       TESTCOURSENAME: "Attendance Test"
+- runFlow:
+    file: "../common/tear_down.yaml"

@@ -58,3 +58,5 @@ env:
       TESTCONTENTNAME: EpubContent
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
+- runFlow:
+    file: "../common/tear_down.yaml"

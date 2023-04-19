@@ -59,3 +59,5 @@ env:
 - assertVisible:
     text: "PRIMARY COLOURS"
 - takeScreenshot: "${TESTRESULTSDIR}/able_to_expand_module"
+- runFlow:
+    file: "../common/tear_down.yaml"

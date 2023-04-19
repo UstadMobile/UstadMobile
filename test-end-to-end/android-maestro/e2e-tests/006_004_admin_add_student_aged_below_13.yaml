@@ -44,5 +44,5 @@ env:
     env:
       USERNAME: s1
       PASSWORD: test
-- clearState: com.toughra.ustadmobile
-- clearState: com.ustadmobile.ustadapiconsumer
+- runFlow:
+    file: "../common/tear_down.yaml"

@@ -29,3 +29,5 @@ env:
 - back
 - tapOn: "ATTEMPTS"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/epub_attempts_page"
+- runFlow:
+    file: "../common/tear_down.yaml"

@@ -88,3 +88,5 @@ env:
     visible: ${TEXTTITLE}
     timeout: 1000
 - takeScreenshot: "${TESTRESULTSDIR}/text_block_teacher_view"
+- runFlow:
+    file: "../common/tear_down.yaml"

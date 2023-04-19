@@ -1,0 +1,6 @@
+appId: com.toughra.ustadmobile
+---
+- clearState: com.toughra.ustadmobile
+- clearState: com.toughra.ustadmobile2
+- clearState: info.guardianproject.ripple
+- clearState: com.ustadmobile.ustadapiconsumer

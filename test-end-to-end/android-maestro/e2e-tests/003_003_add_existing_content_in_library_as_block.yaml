@@ -70,5 +70,6 @@ env:
 - tapOn: "SAVE"
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/able_to_add_existing_content_block_inside_course"
-
+- runFlow:
+    file: "../common/tear_down.yaml"
 

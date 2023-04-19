@@ -19,3 +19,5 @@ env:
     file: "../common/move_content_to_new_folder.yaml"
     env:
       TESTCONTENTNAME: "MoveContentTest"
+- runFlow:
+    file: "../common/tear_down.yaml"

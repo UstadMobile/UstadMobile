@@ -36,3 +36,5 @@ env:
     file: "../common/guest_login.yaml"
 - tapOn: "Library"
 - takeScreenshot: "${TESTRESULTSDIR}/guest_view"
+- runFlow:
+    file: "../common/tear_down.yaml"

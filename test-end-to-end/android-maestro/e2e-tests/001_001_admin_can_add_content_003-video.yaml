@@ -25,3 +25,5 @@ env:
 - back
 - tapOn: "ATTEMPTS"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/video_attempts_page"
+- runFlow:
+    file: "../common/tear_down.yaml"

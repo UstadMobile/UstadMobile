@@ -19,3 +19,5 @@ env:
       file: "../common/delete_and_download_content.yaml"
       env:
           TESTCONTENTNAME: "ContentDeleteDownloadTest"
+- runFlow:
+    file: "../common/tear_down.yaml"

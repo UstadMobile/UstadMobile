@@ -46,3 +46,5 @@ env:
 - tapOn: "Courses"
 - tapOn: "Permission Test"
 - assertNotVisible: "EDIT"
+- runFlow:
+    file: "../common/tear_down.yaml"

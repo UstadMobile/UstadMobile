@@ -35,5 +35,5 @@ env:
 - tapOn: "Paste"
 - launchApp
 - assertVisible: "Library"
-- clearState: com.toughra.ustadmobile
-- clearState: info.guardianproject.ripple
+- runFlow:
+    file: "../common/tear_down.yaml"

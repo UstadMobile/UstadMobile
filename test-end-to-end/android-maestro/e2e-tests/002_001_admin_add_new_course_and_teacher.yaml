@@ -26,3 +26,5 @@ env:
       USERNAME: "t1"
       PASSWORD: "test"
 - tapOn: "courses"
+- runFlow:
+    file: "../common/tear_down.yaml"
