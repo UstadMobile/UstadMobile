@@ -13,7 +13,18 @@ import csstype.JustifyContent
 import csstype.px
 import mui.icons.material.Bluetooth
 import mui.icons.material.Smartphone
-import mui.material.*
+import mui.material.Container
+import mui.material.List
+import mui.material.ListItem
+import mui.material.ListItemText
+import mui.material.ListItemButton
+import mui.material.ListItemIcon
+import mui.material.Divider
+import mui.material.LinearProgress
+import mui.material.LinearProgressVariant
+import mui.material.Stack
+import mui.material.StackDirection
+import mui.material.Typography
 import mui.system.responsive
 import mui.system.sx
 import react.FC
@@ -41,6 +52,13 @@ val NetworkNodeListScreenPreview = FC<Props> {
             networkNodes = listOf(
                 NetworkNode().apply {
                     nodeId = 1
+                    wifiDirectDeviceStatus = 30
+                    nsdServiceName = "John's Phone"
+                },
+                NetworkNode().apply {
+                    nodeId = 2
+                    wifiDirectDeviceStatus = 80
+                    nsdServiceName = "Ali's Phone"
                 }
             ),
             deviceName = "Phone Name",
@@ -85,10 +103,22 @@ val NetworkNodeListScreenComponent2 = FC<NetworkNodeListScreenProps> { props ->
             }
 
             Typography {
+                sx {
+                    paddingLeft = 16.px
+                    paddingTop = 10.px
+                }
                 + "${strings[MessageID.wifi_ssid]}: ${props.uiState.wifiSSID}"
             }
 
-            Divider()
+            Typography {
+                sx {
+                    paddingLeft = 16.px
+                    paddingTop = 10.px
+                }
+                + strings[MessageID.internet_access]
+            }
+
+            Divider { }
 
             UstadListFilterChipsHeader {
                 filterOptions = props.uiState.deviceFilterOptions
@@ -108,7 +138,7 @@ val NetworkNodeListScreenComponent2 = FC<NetworkNodeListScreenProps> { props ->
                             ListItemIcon {
                                 + Stack.create {
                                     direction = responsive(StackDirection.column)
-                                    spacing = responsive(10.px)
+                                    spacing = responsive(5.px)
                                     justifyContent = JustifyContent.center
 
                                     Bluetooth {
@@ -119,17 +149,17 @@ val NetworkNodeListScreenComponent2 = FC<NetworkNodeListScreenProps> { props ->
                                     }
 
                                     LinearProgress {
-                                        value = 5
+                                        value = networkNode.wifiDirectDeviceStatus
                                         variant = LinearProgressVariant.determinate
                                         sx {
-                                            width = 45.px
+                                            width = 35.px
                                         }
                                     }
                                 }
                             }
                             ListItemText {
-                                primary = ReactNode("Phone Number")
-                                secondary = ReactNode("Server")
+                                primary = ReactNode(networkNode.nsdServiceName)
+                                secondary = ReactNode(strings[MessageID.server])
                             }
                         }
                     }

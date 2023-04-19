@@ -1,12 +1,24 @@
 package com.ustadmobile.port.android.view
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.Icon
+import androidx.compose.material.Text
+import androidx.compose.material.Divider
+import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.ListItem
+import androidx.compose.material.icons.filled.Smartphone
+import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,7 +31,9 @@ import com.ustadmobile.core.viewmodel.NetworkNodeListUiState
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
-import com.ustadmobile.port.android.view.composable.*
+import com.ustadmobile.port.android.view.composable.UstadDetailField
+import com.ustadmobile.port.android.view.composable.UstadSwitchField
+import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -74,6 +88,10 @@ private fun NetworkNodeListScreen(
                 text = "${stringResource(R.string.wifi_ssid)}: ${uiState.wifiSSID}")
         }
 
+        item {
+            Text(modifier = Modifier.defaultItemPadding(),
+                text = stringResource(id = R.string.internet_access))
+        }
 
         item {
             Divider()
@@ -97,11 +115,11 @@ private fun NetworkNodeListScreen(
                     onClickNetworkNode(networkNode)
                 },
 
-                text = { Text("Phone Number") },
+                text = { Text(networkNode.nsdServiceName ?: "") },
                 icon = {
                     LeadingContent(networkNode = networkNode)
                 },
-                secondaryText = { Text("Server") }
+                secondaryText = { Text(stringResource(id = R.string.server)) }
             )
         }
 
@@ -114,23 +132,21 @@ private fun LeadingContent(
 ){
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        horizontalAlignment = Alignment.End
+        verticalArrangement = Arrangement.spacedBy(5.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ){
         Icon(
             Icons.Default.Bluetooth,
             contentDescription = "",
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .size(35.dp)
-                .padding(4.dp),
+                .size(24.dp),
         )
 
         Box(
             modifier = Modifier
-                .width(45.dp)
+                .width(32.dp)
                 .height(5.dp)
-                .padding(end = 5.dp)
         ) {
             LinearProgressIndicator(
                 progress = (networkNode.wifiDirectDeviceStatus/100.0)
@@ -150,7 +166,13 @@ fun NetworkNodeListPreview() {
         networkNodes = listOf(
             NetworkNode().apply {
                 nodeId = 1
-
+                wifiDirectDeviceStatus = 30
+                nsdServiceName = "John's Phone"
+            },
+            NetworkNode().apply {
+                nodeId = 2
+                wifiDirectDeviceStatus = 80
+                nsdServiceName = "Ali's Phone"
             }
         ),
         deviceName = "Phone Name",

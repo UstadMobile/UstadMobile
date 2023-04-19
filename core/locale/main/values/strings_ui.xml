@@ -1588,4 +1588,5 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <string name="wifi_ssid">WiFi SSID</string>
     <string name="clients">Clients</string>
     <string name="server">Server</string>
+    <string name="internet_access">i: Clients will not be able to use the Internet access or mobile data of this device</string>
 </resources>
