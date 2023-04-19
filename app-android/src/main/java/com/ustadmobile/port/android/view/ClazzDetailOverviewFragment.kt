@@ -13,11 +13,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.paging.compose.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -26,9 +28,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import androidx.paging.DataSource
-import androidx.paging.PagedList
-import androidx.paging.PagedListAdapter
+import androidx.paging.*
+import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -41,6 +42,7 @@ import com.ustadmobile.core.controller.ClazzDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.RateLimitedLiveData
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
@@ -482,6 +484,15 @@ private fun ClazzDetailOverviewScreen(
         ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
     ) -> Unit = {},
 ) {
+    val pager = remember(uiState.courseBlockList) {
+        Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
+            pagingSourceFactory = uiState.courseBlockList,
+        )
+    }
+
+    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+
     val numMembers = stringResource(R.string.x_teachers_y_students,
         uiState.clazz?.numTeachers ?: 0,
         uiState.clazz?.numStudents ?: 0)
@@ -591,7 +602,7 @@ private fun ClazzDetailOverviewScreen(
         }
 
         items(
-            items = uiState.courseBlockList,
+            items = lazyPagingItems,
             key = { Pair(2, it.cbUid) }
         ){ courseBlock ->
 
@@ -613,7 +624,7 @@ val ICON_SIZE = 40.dp
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CourseBlockListItem(
-    courseBlock: CourseBlockWithCompleteEntity,
+    courseBlock: CourseBlockWithCompleteEntity?,
     onClickCourseDiscussion: (CourseDiscussion?) -> Unit,
     onClickCourseExpandCollapse: (CourseBlockWithCompleteEntity) -> Unit,
     onClickTextBlock: (CourseBlockWithCompleteEntity) -> Unit,
@@ -626,20 +637,20 @@ fun CourseBlockListItem(
     ) -> Unit,
 ){
 
-    when(courseBlock.cbType){
+    when(courseBlock?.cbType ?: 0){
         CourseBlock.BLOCK_MODULE_TYPE  -> {
 
-            val trailingIcon = if(courseBlock.expanded)
+            val trailingIcon = if(courseBlock?.expanded != false)
                 Icons.Default.KeyboardArrowUp
             else
                 Icons.Default.KeyboardArrowDown
             ListItem(
-                modifier = Modifier.paddingCourseBlockIndent(courseBlock.cbIndentLevel)
+                modifier = Modifier.paddingCourseBlockIndent(courseBlock?.cbIndentLevel ?: 0)
                     .clickable {
-                        onClickCourseExpandCollapse(courseBlock)
+                        courseBlock?.also { onClickCourseExpandCollapse(it) }
                     },
-                text = { Text(courseBlock.cbTitle ?: "") },
-                secondaryText = { Text(courseBlock.cbDescription ?: "") },
+                text = { Text(courseBlock?.cbTitle ?: "") },
+                secondaryText = { Text(courseBlock?.cbDescription ?: "") },
                 icon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_folder_open_24),
@@ -653,12 +664,12 @@ fun CourseBlockListItem(
         }
         CourseBlock.BLOCK_DISCUSSION_TYPE -> {
             ListItem(
-                modifier = Modifier.paddingCourseBlockIndent(courseBlock.cbIndentLevel)
+                modifier = Modifier.paddingCourseBlockIndent(courseBlock?.cbIndentLevel ?: 0)
                     .clickable {
-                        onClickCourseDiscussion(courseBlock.courseDiscussion)
+                        courseBlock?.courseDiscussion?.also { onClickCourseDiscussion(it) }
                     },
-                text = { Text(courseBlock.cbTitle ?: "") },
-                secondaryText = { Text(courseBlock.cbDescription ?: "") },
+                text = { Text(courseBlock?.cbTitle ?: "") },
+                secondaryText = { Text(courseBlock?.cbDescription ?: "") },
                 icon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_forum_24),
@@ -674,11 +685,11 @@ fun CourseBlockListItem(
 //                SpannedString.valueOf("")
 
             ListItem(
-                modifier = Modifier.paddingCourseBlockIndent(courseBlock.cbIndentLevel)
+                modifier = Modifier.paddingCourseBlockIndent(courseBlock?.cbIndentLevel ?: 0)
                     .clickable {
-                    onClickTextBlock(courseBlock)
-                },
-                text = { Text(courseBlock.cbTitle ?: "") },
+                        courseBlock?.also { onClickTextBlock(it) }
+                    },
+                text = { Text(courseBlock?.cbTitle ?: "") },
                 secondaryText = {  },
                 icon = {
                     Icon(
@@ -689,7 +700,7 @@ fun CourseBlockListItem(
             )
         }
         CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
-            courseBlock.assignment?.also {
+            courseBlock?.assignment?.also {
                 UstadClazzAssignmentListItem(
                     courseBlock = courseBlock,
                     onClickAssignment = onClickAssignment
@@ -697,7 +708,7 @@ fun CourseBlockListItem(
             }
         }
         CourseBlock.BLOCK_CONTENT_TYPE -> {
-            courseBlock.entry?.also {
+            courseBlock?.entry?.also {
                 UstadContentEntryListItem(
                     contentEntry = it,
                     onClickContentEntry = onClickContentEntry,
@@ -741,52 +752,56 @@ fun ClazzDetailOverviewScreenPreview() {
                 scheduleDay = MessageID.sunday
             }
         ),
-        courseBlockList = listOf(
-            CourseBlockWithCompleteEntity().apply {
-                cbUid = 1
-                cbTitle = "Module"
-                cbDescription = "Description"
-                cbType = CourseBlock.BLOCK_MODULE_TYPE
-            },
-            CourseBlockWithCompleteEntity().apply {
-                cbUid = 2
-                cbTitle = "Main discussion board"
-                cbType = CourseBlock.BLOCK_DISCUSSION_TYPE
-            },
-            CourseBlockWithCompleteEntity().apply {
-                cbUid = 3
-                cbDescription = "Description"
-                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
-                assignment = ClazzAssignmentWithMetrics().apply {
-                    caTitle = "Assignment"
-                    fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
-                    progressSummary = AssignmentProgressSummary().apply {
-                        submittedStudents = 5
-                        markedStudents = 10
+        courseBlockList = {
+            ListPagingSource(
+                listOf(
+                    CourseBlockWithCompleteEntity().apply {
+                        cbUid = 1
+                        cbTitle = "Module"
+                        cbDescription = "Description"
+                        cbType = CourseBlock.BLOCK_MODULE_TYPE
+                    },
+                    CourseBlockWithCompleteEntity().apply {
+                        cbUid = 2
+                        cbTitle = "Main discussion board"
+                        cbType = CourseBlock.BLOCK_DISCUSSION_TYPE
+                    },
+                    CourseBlockWithCompleteEntity().apply {
+                        cbUid = 3
+                        cbDescription = "Description"
+                        cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                        assignment = ClazzAssignmentWithMetrics().apply {
+                            caTitle = "Assignment"
+                            fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
+                            progressSummary = AssignmentProgressSummary().apply {
+                                submittedStudents = 5
+                                markedStudents = 10
+                            }
+                        }
+                    },
+                    CourseBlockWithCompleteEntity().apply {
+                        cbUid = 4
+                        cbType = CourseBlock.BLOCK_CONTENT_TYPE
+                        entry = ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
+                            title = "Content Entry"
+                            scoreProgress = ContentEntryStatementScoreProgress().apply {
+                                success = StatementEntity.RESULT_SUCCESS
+                                progress = 70
+                            }
+                        }
+                    },
+                    CourseBlockWithCompleteEntity().apply {
+                        cbUid = 5
+                        cbTitle = "Text Block Module"
+                        cbDescription = "<pre>\n" +
+                            "            GeeksforGeeks\n" +
+                            "                         A Computer   Science Portal   For Geeks\n" +
+                            "        </pre>"
+                        cbType = CourseBlock.BLOCK_TEXT_TYPE
                     }
-                }
-            },
-            CourseBlockWithCompleteEntity().apply {
-                cbUid = 4
-                cbType = CourseBlock.BLOCK_CONTENT_TYPE
-                entry = ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
-                    title = "Content Entry"
-                    scoreProgress = ContentEntryStatementScoreProgress().apply {
-                        success = StatementEntity.RESULT_SUCCESS
-                        progress = 70
-                    }
-                }
-            },
-            CourseBlockWithCompleteEntity().apply {
-                cbUid = 5
-                cbTitle = "Text Block Module"
-                cbDescription = "<pre>\n" +
-                        "            GeeksforGeeks\n" +
-                        "                         A Computer   Science Portal   For Geeks\n" +
-                        "        </pre>"
-                cbType = CourseBlock.BLOCK_TEXT_TYPE
-            }
-        ),
+                )
+            )
+        },
         clazzCodeVisible = true
     )
     MdcTheme {

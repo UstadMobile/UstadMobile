@@ -2,13 +2,20 @@ package com.ustadmobile.view.clazzdetailoverview
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.core.viewmodel.ClazzDetailOverviewUiState
 import com.ustadmobile.hooks.useFormattedDateRange
+import com.ustadmobile.hooks.useMuiAppState
+import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.UstadDetailField
-import csstype.px
+import com.ustadmobile.view.components.virtuallist.VirtualList
+import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
+import com.ustadmobile.view.components.virtuallist.virtualListContent
+import csstype.*
+import js.core.jso
 import mui.material.*
 import mui.material.Stack
 import mui.material.List
@@ -57,81 +64,99 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
         props.uiState.clazz?.clazzTimeZone ?: "UTC"
     )
 
-    Container {
-        maxWidth = "lg"
+    val muiAppState = useMuiAppState()
 
-        Stack {
-            direction = responsive(StackDirection.column)
-            spacing = responsive(10.px)
+    val courseBlocksResult = usePagingSource(
+        props.uiState.courseBlockList, true, 50
+    )
 
-            Typography{
-                + (props.uiState.clazz?.clazzDesc ?: "")
-            }
 
-            UstadDetailField {
-                icon = Group.create()
-                valueText = ReactNode(numMembers)
-                labelText = strings[MessageID.members]
-            }
+    VirtualList{
+        style = jso {
+            height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
+            width = 100.pct
+            contain = Contain.strict
+            overflowY = Overflow.scroll
+        }
 
-            if (props.uiState.clazzCodeVisible) {
-                UstadDetailField {
-                    icon = Login.create()
-                    valueText = ReactNode(props.uiState.clazz?.clazzCode ?: "")
-                    labelText = strings[MessageID.class_code]
-                    onClick = {
-                        props.onClickClassCode(props.uiState.clazz?.clazzCode ?: "")
+        content = virtualListContent {
+            item {
+                Stack.create {
+                    direction = responsive(StackDirection.column)
+                    spacing = responsive(10.px)
+
+                    Typography{
+                        + (props.uiState.clazz?.clazzDesc ?: "")
+                    }
+
+                    UstadDetailField {
+                        icon = Group.create()
+                        valueText = ReactNode(numMembers)
+                        labelText = strings[MessageID.members]
+                    }
+
+                    if (props.uiState.clazzCodeVisible) {
+                        UstadDetailField {
+                            icon = Login.create()
+                            valueText = ReactNode(props.uiState.clazz?.clazzCode ?: "")
+                            labelText = strings[MessageID.class_code]
+                            onClick = {
+                                props.onClickClassCode(props.uiState.clazz?.clazzCode ?: "")
+                            }
+                        }
+                    }
+
+                    if (props.uiState.clazzSchoolUidVisible){
+                        UstadDetailField {
+                            icon = mui.icons.material.School.create()
+                            valueText = ReactNode(props.uiState.clazz?.clazzSchool?.schoolName ?: "")
+                        }
+                    }
+
+                    if (props.uiState.clazzDateVisible){
+                        UstadDetailField {
+                            icon = Event.create()
+                            valueText = ReactNode(clazzDateRangeFormatted)
+                        }
+                    }
+
+                    if (props.uiState.clazzHolidayCalendarVisible){
+                        UstadDetailField {
+                            icon = Event.create()
+                            valueText = ReactNode(props.uiState.clazz?.clazzHolidayCalendar?.umCalendarName ?: "")
+                        }
                     }
                 }
             }
 
-            if (props.uiState.clazzSchoolUidVisible){
-                UstadDetailField {
-                    icon = mui.icons.material.School.create()
-                    valueText = ReactNode(props.uiState.clazz?.clazzSchool?.schoolName ?: "")
+            items(
+                list = props.uiState.scheduleList,
+                key = { "sc${it.scheduleUid}" }
+            ) { scheduleItem ->
+                ClazzDetailOverviewScheduleListItem.create {
+                    schedule = scheduleItem
                 }
             }
 
-            if (props.uiState.clazzDateVisible){
-                UstadDetailField {
-                    icon = Event.create()
-                    valueText = ReactNode(clazzDateRangeFormatted)
+            infiniteQueryPagingItems(
+                items = courseBlocksResult,
+                key = { "cb${it.cbUid}" }
+            ) { courseBlockItem ->
+                ClazzDetailOverviewCourseBlockListItem.create {
+                    courseBlock = courseBlockItem
+                    onClickCourseDiscussion = props.onClickCourseDiscussion
+                    onClickCourseExpandCollapse = props.onClickCourseExpandCollapse
+                    onClickTextBlock = props.onClickTextBlock
+                    onClickAssignment = props.onClickAssignment
+                    onClickContentEntry = props.onClickContentEntry
+                    onClickDownloadContentEntry = props.onClickDownloadContentEntry
                 }
             }
+        }
 
-            if (props.uiState.clazzHolidayCalendarVisible){
-                UstadDetailField {
-                    icon = Event.create()
-                    valueText = ReactNode(props.uiState.clazz?.clazzHolidayCalendar?.umCalendarName ?: "")
-                }
-            }
-
+        Container {
             List {
-                Typography {
-                    + strings[MessageID.schedule]
-                }
-
-                props.uiState.scheduleList.forEach { scheduleItem ->
-                    ClazzDetailOverviewScheduleListItem {
-                        schedule = scheduleItem
-                    }
-                }
-            }
-
-            List {
-                props.uiState.courseBlockList.forEach { courseBlockItem ->
-
-                    ClazzDetailOverviewCourseBlockListItem {
-                        courseBlock = courseBlockItem
-                        onClickCourseDiscussion = props.onClickCourseDiscussion
-                        onClickCourseExpandCollapse = props.onClickCourseExpandCollapse
-                        onClickTextBlock = props.onClickTextBlock
-                        onClickAssignment = props.onClickAssignment
-                        onClickContentEntry = props.onClickContentEntry
-                        onClickDownloadContentEntry = props.onClickDownloadContentEntry
-                    }
-
-                }
+                VirtualListOutlet()
             }
         }
     }
@@ -159,61 +184,67 @@ val ClazzDetailOverviewScreenPreview = FC<Props> {
             },
             scheduleList = listOf(
                 Schedule().apply {
+                    scheduleUid = 1
                     sceduleStartTime = 0
                     scheduleEndTime = 0
                 },
                 Schedule().apply {
+                    scheduleUid = 2
                     sceduleStartTime = 0
                     scheduleEndTime = 0
                 }
             ),
-            courseBlockList = listOf(
-                CourseBlockWithCompleteEntity().apply {
-                    cbUid = 1
-                    cbTitle = "Module"
-                    cbDescription = "Description"
-                    cbType = CourseBlock.BLOCK_MODULE_TYPE
-                },
-                CourseBlockWithCompleteEntity().apply {
-                    cbUid = 2
-                    cbTitle = "Main discussion board"
-                    cbType = CourseBlock.BLOCK_DISCUSSION_TYPE
-                },
-                CourseBlockWithCompleteEntity().apply {
-                    cbUid = 3
-                    cbDescription = "Description"
-                    cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
-                    cbIndentLevel = 0
-                    assignment = ClazzAssignmentWithMetrics().apply {
-                        caTitle = "Assignment"
-                        fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
-                        progressSummary = AssignmentProgressSummary().apply {
-                            submittedStudents = 5
-                            markedStudents = 10
+            courseBlockList = {
+                ListPagingSource(
+                    listOf(
+                        CourseBlockWithCompleteEntity().apply {
+                            cbUid = 1
+                            cbTitle = "Module"
+                            cbDescription = "Description"
+                            cbType = CourseBlock.BLOCK_MODULE_TYPE
+                        },
+                        CourseBlockWithCompleteEntity().apply {
+                            cbUid = 2
+                            cbTitle = "Main discussion board"
+                            cbType = CourseBlock.BLOCK_DISCUSSION_TYPE
+                        },
+                        CourseBlockWithCompleteEntity().apply {
+                            cbUid = 3
+                            cbDescription = "Description"
+                            cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                            cbIndentLevel = 0
+                            assignment = ClazzAssignmentWithMetrics().apply {
+                                caTitle = "Assignment"
+                                fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
+                                progressSummary = AssignmentProgressSummary().apply {
+                                    submittedStudents = 5
+                                    markedStudents = 10
+                                }
+                            }
+                        },
+                        CourseBlockWithCompleteEntity().apply {
+                            cbUid = 4
+                            cbType = CourseBlock.BLOCK_CONTENT_TYPE
+                            entry = ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
+                                title = "Content Entry"
+                                scoreProgress = ContentEntryStatementScoreProgress().apply {
+                                    success = StatementEntity.RESULT_SUCCESS
+                                    progress = 70
+                                }
+                            }
+                        },
+                        CourseBlockWithCompleteEntity().apply {
+                            cbUid = 5
+                            cbTitle = "Text Block Module"
+                            cbDescription = "<pre>\n" +
+                                "            GeeksforGeeks\n" +
+                                "                         A Computer   Science Portal   For Geeks\n" +
+                                "        </pre>"
+                            cbType = CourseBlock.BLOCK_TEXT_TYPE
                         }
-                    }
-                },
-                CourseBlockWithCompleteEntity().apply {
-                    cbUid = 4
-                    cbType = CourseBlock.BLOCK_CONTENT_TYPE
-                    entry = ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
-                        title = "Content Entry"
-                        scoreProgress = ContentEntryStatementScoreProgress().apply {
-                            success = StatementEntity.RESULT_SUCCESS
-                            progress = 70
-                        }
-                    }
-                },
-                CourseBlockWithCompleteEntity().apply {
-                    cbUid = 5
-                    cbTitle = "Text Block Module"
-                    cbDescription = "<pre>\n" +
-                            "            GeeksforGeeks\n" +
-                            "                         A Computer   Science Portal   For Geeks\n" +
-                            "        </pre>"
-                    cbType = CourseBlock.BLOCK_TEXT_TYPE
-                }
-            ),
+                    )
+                )
+            },
             clazzCodeVisible = true
         )
     }
