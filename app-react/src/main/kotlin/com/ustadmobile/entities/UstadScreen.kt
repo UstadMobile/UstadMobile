@@ -24,6 +24,7 @@ import com.ustadmobile.view.courseterminologylist.CourseTerminologyListScreen
 import com.ustadmobile.view.clazzdetail.ClazzDetailScreen
 import com.ustadmobile.view.clazzdetailoverview.ClazzDetailOverviewScreen
 import com.ustadmobile.view.clazzgroupset.ClazzGroupSetDummy
+import com.ustadmobile.view.clazzdetailoverview.ClazzDetailOverviewScreenPreview
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -163,9 +164,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("DateTimeEdit", "Date Time Edit", DateTimeEditFieldPreview),
     UstadScreen(ClazzDetailView.VIEW_NAME, "Clazz Detail", ClazzDetailScreen),
     UstadScreen(ClazzDetailOverviewView.VIEW_NAME, "Clazz Detail Overview",
-        ClazzDetailOverviewScreen),
+        ClazzDetailOverviewScreenPreview),
     UstadScreen(CourseGroupSetListView.VIEW_NAME, "Clazz Groups",ClazzGroupSetDummy),
-
 )
 
 

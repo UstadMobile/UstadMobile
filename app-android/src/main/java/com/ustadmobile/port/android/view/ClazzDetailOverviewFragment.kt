@@ -528,27 +528,30 @@ private fun ClazzDetailOverviewScreen(
 
         item {
             if (uiState.clazzSchoolUidVisible){
-                TextImageRow(
+                UstadDetailField(
                     imageId = R.drawable.ic_school_black_24dp,
-                    text = uiState.clazz?.clazzSchool?.schoolName ?: ""
+                    valueText = uiState.clazz?.clazzSchool?.schoolName ?: "",
+                    labelText = null,
                 )
             }
         }
 
         item {
             if (uiState.clazzDateVisible){
-                TextImageRow(
+                UstadDetailField(
                     imageId = R.drawable.ic_event_black_24dp,
-                    text = "$clazzStartTime - $clazzEndTime"
+                    valueText = "$clazzStartTime - $clazzEndTime",
+                    labelText = null,
                 )
             }
         }
 
         item {
             if (uiState.clazzHolidayCalendarVisible){
-                TextImageRow(
+                UstadDetailField(
                     imageId = R.drawable.ic_event_black_24dp,
-                    text = uiState.clazz?.clazzHolidayCalendar?.umCalendarName ?: ""
+                    valueText = uiState.clazz?.clazzHolidayCalendar?.umCalendarName ?: "",
+                    labelText = null,
                 )
             }
         }
@@ -602,24 +605,6 @@ private fun ClazzDetailOverviewScreen(
                 onClickDownloadContentEntry = onClickDownloadContentEntry
             )
         }
-    }
-}
-
-@Composable
-fun TextImageRow(
-    imageId: Int,
-    text: String,
-){
-    Row(
-        modifier = Modifier.padding(vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-
-        Image(
-            painter = painterResource(id = imageId),
-            contentDescription = null)
-
-        Text(text)
     }
 }
 
@@ -704,16 +689,15 @@ fun CourseBlockListItem(
             )
         }
         CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
-            courseBlock.assignment?.let {
+            courseBlock.assignment?.also {
                 UstadClazzAssignmentListItem(
-                    assignment = it,
                     courseBlock = courseBlock,
                     onClickAssignment = onClickAssignment
                 )
             }
         }
         CourseBlock.BLOCK_CONTENT_TYPE -> {
-            courseBlock.entry?.let {
+            courseBlock.entry?.also {
                 UstadContentEntryListItem(
                     contentEntry = it,
                     onClickContentEntry = onClickContentEntry,
