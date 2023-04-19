@@ -26,6 +26,7 @@ import org.w3c.dom.HTMLElement
 import react.FC
 import react.Props
 import react.create
+import react.dom.html.ReactHTML.style
 import react.useState
 
 external interface CourseDetailProgressProps : Props {
@@ -44,6 +45,78 @@ val CourseDetailProgressScreenPreview = FC<Props> { props ->
             students = { ListPagingSource(listOf(
                 PersonWithResults(
                     results = listOf(
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = false
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = false
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = false
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
                         StudentResult(
                             personUid = 0,
                             courseBlockUid = 0,
@@ -93,13 +166,85 @@ val CourseDetailProgressScreenPreview = FC<Props> { props ->
                             personUid = 0,
                             courseBlockUid = 0,
                             clazzUid = 0,
-                            completed = false
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
                         ),
                         StudentResult(
                             personUid = 0,
                             courseBlockUid = 0,
                             clazzUid = 0,
                             completed = false
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = false
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = false
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
                         )
                     ),
                     person = Person().apply {
@@ -120,7 +265,79 @@ val CourseDetailProgressScreenPreview = FC<Props> { props ->
                             personUid = 0,
                             courseBlockUid = 0,
                             clazzUid = 0,
+                            completed = false
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
                             completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = false
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = false
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = false
                         ),
                         StudentResult(
                             personUid = 0,
@@ -166,6 +383,78 @@ val CourseDetailProgressScreenPreview = FC<Props> { props ->
                             courseBlockUid = 0,
                             clazzUid = 0,
                             completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = false
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = false
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = false
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
                         )
                     ),
                     person = Person().apply {
@@ -175,7 +464,104 @@ val CourseDetailProgressScreenPreview = FC<Props> { props ->
                     }
                 ),
                 PersonWithResults(
-                    results = listOf(),
+                    results = listOf(
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = false
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = false
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = false
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = false
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        ),
+                        StudentResult(
+                            personUid = 0,
+                            courseBlockUid = 0,
+                            clazzUid = 0,
+                            completed = true
+                        )
+                    ),
                     person = Person().apply {
                         personUid = 5
                         firstNames = "Nelzon"
@@ -254,6 +640,45 @@ val CourseDetailProgressScreenPreview = FC<Props> { props ->
                 },
                 CourseBlock().apply {
                     cbTitle = strings[MessageID.document]
+                },
+                CourseBlock().apply {
+                    cbTitle = strings[MessageID.module]
+                },
+                CourseBlock().apply {
+                    cbTitle = strings[MessageID.video]
+                },
+                CourseBlock().apply {
+                    cbTitle = strings[MessageID.audio]
+                },
+                CourseBlock().apply {
+                    cbTitle = strings[MessageID.document]
+                },
+                CourseBlock().apply {
+                    cbTitle = strings[MessageID.discussion_board]
+                },
+                CourseBlock().apply {
+                    cbTitle = strings[MessageID.module]
+                },
+                CourseBlock().apply {
+                    cbTitle = strings[MessageID.video]
+                },
+                CourseBlock().apply {
+                    cbTitle = strings[MessageID.audio]
+                },
+                CourseBlock().apply {
+                    cbTitle = strings[MessageID.document]
+                },
+                CourseBlock().apply {
+                    cbTitle = strings[MessageID.module]
+                },
+                CourseBlock().apply {
+                    cbTitle = strings[MessageID.video]
+                },
+                CourseBlock().apply {
+                    cbTitle = strings[MessageID.audio]
+                },
+                CourseBlock().apply {
+                    cbTitle = strings[MessageID.document]
                 }
             )
         )
@@ -306,7 +731,6 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                         spacing = responsive(10.px)
 
                         sx {
-//                            position = Position.absolute
                             transform = translatex(scrollX.px)
                         }
 
@@ -363,44 +787,30 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
             }
 
             Container {
+                sx {
+                    marginLeft = 360.px
+                }
                 Stack {
                     direction = responsive(StackDirection.row)
-                    justifyContent = JustifyContent.spaceBetween
 
-                    sx {
-                        width = 100.pct
-//            overflowX = Overflow.hidden
-//                marginLeft = -scrollX.px
-//                display = Display.flex
-//                alignItems = AlignItems.flexStart
-//                justifyContent = JustifyContent.flexStart
-                    }
+                    props.uiState.courseBlocks.forEachIndexed { index, item ->
 
-                    Box {
-                        sx {
-                            width = 200.px
-                        }
-                    }
+                        Typography {
 
-                    Stack {
-                        direction = responsive(StackDirection.row)
-
-                        props.uiState.courseBlocks.forEachIndexed { index, item ->
-
-                            Typography {
-                                sx {
-                                    width = 600.px
-                                    transform = rotate(270.deg)
-                                    textOverflow = TextOverflow.ellipsis
+                            sx {
+                                width = 60.px
+                                transform = rotate(270.deg)
+                                textOverflow = TextOverflow.ellipsis
+                                height = 100.px
+//                                    overflow = Overflow.hidden
 //                        if (scrollX > index){
 //                            position = Position.absolute
 //                            marginLeft = -(44*index).px
 //                            color = Color("000000")
 //                        }
-                                }
-
-                                + item.cbTitle
                             }
+
+                            + item.cbTitle
                         }
                     }
                 }
