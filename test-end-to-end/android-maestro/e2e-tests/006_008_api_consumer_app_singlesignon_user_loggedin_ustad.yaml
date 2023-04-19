@@ -1,6 +1,6 @@
 appId: com.toughra.ustadmobile
 tags:
-  - checklist6
+  - checklist0
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/006_008_api_consumer_app_singlesignon_user_loggedin_ustad"
   TESTNAME: 006_008_api_consumer_app_singlesignon_user_loggedin_ustad

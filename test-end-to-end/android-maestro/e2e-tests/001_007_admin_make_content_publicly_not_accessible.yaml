@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - checklist0
 env:
  TESTCONTENTNAME: "PubliclyNotAccessibleContentTest"
  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_007_admin_make_content_publicly_not_accessible"

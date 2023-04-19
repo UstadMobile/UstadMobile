@@ -1,6 +1,6 @@
 appId: com.toughra.ustadmobile
 tags:
-  - checklist6
+  - checklist0
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/006_002_user_registration_age_over_13"
   TESTNAME: 006_002_user_registration_age_over_13

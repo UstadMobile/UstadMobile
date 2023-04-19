@@ -1,6 +1,6 @@
 appId: com.toughra.ustadmobile
 tags:
-  - checklist7
+  - checklist0
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/007_002_panic_trigger_hide_app"
   TESTNAME: 007_002_panic_trigger_hide_app

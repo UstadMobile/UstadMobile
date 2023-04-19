@@ -1,6 +1,6 @@
 appId: com.toughra.ustadmobile
 tags:
-  - checklist6
+  - checklist0
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/006_005_admin_can_enable_or_disable_guest_login"
   TESTNAME: 006_005_admin_can_enable_or_disable_guest_login.yaml
