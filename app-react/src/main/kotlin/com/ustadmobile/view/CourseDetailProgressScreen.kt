@@ -4,32 +4,41 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.CourseDetailProgressUiState
+import com.ustadmobile.core.viewmodel.PersonWithResults
+import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
+import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
-import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
-import csstype.*
+import csstype.Overflow
+import csstype.pct
+import csstype.rotate
+import csstype.deg
+import csstype.px
+import csstype.Color
+import csstype.unaryMinus
+import csstype.Contain
+import csstype.translatex
+import csstype.Position
+import csstype.Height
+import csstype.Display
+import csstype.AlignItems
 import js.core.jso
-import kotlinx.browser.window
-import mui.icons.material.*
+import mui.icons.material.CheckBoxOutlined
+import mui.icons.material.Message
 import mui.material.*
-import mui.material.List
-import mui.material.styles.TypographyVariant
-import mui.material.StackDirection
 import mui.system.responsive
 import mui.system.sx
 import org.w3c.dom.HTMLElement
-import org.w3c.dom.ScrollToOptions
-import react.*
-import react.dom.onChange
-import tanstack.virtual.core.elementScroll
-import tanstack.virtual.core.windowScroll
+import react.FC
+import react.Props
+import react.create
+import react.useState
 
-external interface CourseDetailProgressProps : UstadScreenProps {
+external interface CourseDetailProgressProps : Props {
 
     var uiState: CourseDetailProgressUiState
 
@@ -37,27 +46,114 @@ external interface CourseDetailProgressProps : UstadScreenProps {
 
 }
 
-private val personList = (0..150).map {
-    PersonWithDisplayDetails().apply {
-        firstNames = "Person"
-        lastName = "$it"
-        personUid = it.toLong()
-    }
-}
+val CourseDetailProgressScreenPreview = FC<Props> { props ->
 
-private val headerList = (0..50).map {
-    "Dashboard"
-}
-
-val CourseDetailProgressScreenPreview = FC<UstadScreenProps> { props ->
-
+    val strings = useStringsXml()
     CourseDetailProgressScreenComponent2 {
-
-        + props
-
         uiState = CourseDetailProgressUiState(
-            students = { ListPagingSource(personList) },
-            results = headerList
+            students = { ListPagingSource(listOf(
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 1
+                        firstNames = "Bart"
+                        lastName = "Simpson"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 2
+                        firstNames = "Shelly"
+                        lastName = "Mackleberry"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 3
+                        firstNames = "Tracy"
+                        lastName = "Mackleberry"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 4
+                        firstNames = "Nelzon"
+                        lastName = "Muntz"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 5
+                        firstNames = "Nelzon"
+                        lastName = "Muntz"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 6
+                        firstNames = "Nelzon"
+                        lastName = "Muntz"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 7
+                        firstNames = "Nelzon"
+                        lastName = "Muntz"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 8
+                        firstNames = "Nelzon"
+                        lastName = "Muntz"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 9
+                        firstNames = "Nelzon"
+                        lastName = "Muntz"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 10
+                        firstNames = "Nelzon"
+                        lastName = "Muntz"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 11
+                        firstNames = "Nelzon"
+                        lastName = "Muntz"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 12
+                        firstNames = "Nelzon"
+                        lastName = "Muntz"
+                    }
+                )
+            )) },
+            courseBlocks = listOf(
+                CourseBlock().apply {
+                    cbTitle = strings[MessageID.discussion_board]
+                }
+            )
         )
     }
 }
@@ -65,60 +161,23 @@ val CourseDetailProgressScreenPreview = FC<UstadScreenProps> { props ->
 
 val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props ->
 
-    val strings = useStringsXml()
     val infiniteQueryResult = usePagingSource(
         props.uiState.students, true, 50
     )
+
+    val muiAppState = useMuiAppState()
 
     var scrollX by useState { 0 }
 
     val (selectedItems, setSelectedItems) = useState(setOf<Int>())
 
-    Container {
-        Stack {
-            direction = responsive(StackDirection.row)
-
-            sx {
-                width = 100.pct
-//            overflowX = Overflow.hidden
-//                marginLeft = -scrollX.px
-//                display = Display.flex
-//                alignItems = AlignItems.flexStart
-//                justifyContent = JustifyContent.flexStart
-            }
-
-            Box {
-                sx {
-                    width = 200.px
-                }
-            }
-
-            props.uiState.results.forEachIndexed { index, item ->
-
-                Typography {
-                    sx {
-                        width = 44.px
-                        transform = rotate(270.deg)
-                        if (scrollX > index){
-                            position = Position.absolute
-                            marginLeft = -(44*index).px
-                            color = Color("000000")
-                        }
-                    }
-
-                    + item
-                }
-            }
-        }
-    }
-
 
     VirtualList {
 
         style = jso {
-            height = "calc(100vh - ${props.muiAppState.appBarHeight+100}px)".unsafeCast<Height>()
+            height = "calc(100vh - ${muiAppState.appBarHeight+100}px)".unsafeCast<Height>()
             width = 100.pct
-//            contain = Contain.strict
+            contain = Contain.strict
             overflowY = Overflow.scroll
 //            display = Display.flex
 //            alignItems = AlignItems.flexStart
@@ -133,58 +192,54 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 
             infiniteQueryPagingItems(
                 items = infiniteQueryResult,
-                key = { it.personUid.toString() }
+                key = { it.person.personUid.toString() }
             ) { person ->
 
                 Stack.create {
                     direction = responsive(StackDirection.row)
 
-                    Box{
+                    Stack {
+                        direction = responsive(StackDirection.row)
+                        spacing = responsive(10.px)
 
                         sx {
-                            position = Position.absolute
+//                            position = Position.absolute
                             transform = translatex(scrollX.px)
                         }
+
                         onClick = {
-                            person?.also { props.onClickStudent(it) }
+                            person?.also { props.onClickStudent(it.person) }
                         }
 
                         UstadPersonAvatar {
-                            personUid = person?.personUid ?: 0
+
+                            personUid = person?.person?.personUid ?: 0
                         }
 
                         Typography {
-                            + "${person?.fullName()}"
+                            sx {
+                                width = 300.px
+                            }
+                            + "${person?.person?.fullName()}"
                         }
-
                     }
 
                     (0..60).forEachIndexed { index, item ->
-                        Typography {
+                        Icon {
+
                             sx {
                                 width = 60.px
-//                                if (scrollX > index){
-//                                    position = Position.absolute
-//                                    marginLeft = -(44*index).px
-//                                    color = Color("000000")
-//                                }
+                                if (scrollX > index){
+//                                        position = Position.absolute
+//                                        marginLeft = -(44*index).px
+                                    color = Color("#006400")
+                                }
                             }
-                            + "Text $index"
+
+                            + CheckBoxOutlined.create()
                         }
-//                        Icon {
-//
-//                            sx {
-//                                width = 60.px
-//                                if (scrollX > index){
-//                                    position = Position.absolute
-//                                    marginLeft = -(44*index).px
-//                                    color = Color("000000")
-//                                }
-//                            }
-//
-//                            + CheckBoxOutlined.create()
-//                        }
                     }
+
                 }
             }
         }
@@ -194,17 +249,52 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
             sx {
                 width = 100.pct
                 overflowX = Overflow.scroll
-                display =  Display.flex
-                alignItems = AlignItems.flexStart
+//                display =  Display.flex
+//                alignItems = AlignItems.flexStart
             }
             onScroll = { event ->
                 scrollX = event.target.unsafeCast<HTMLElement>().scrollLeft.toInt()
             }
-            Box {
 
+            Container {
+                Stack {
+                    direction = responsive(StackDirection.row)
 
-                VirtualListOutlet()
+                    sx {
+                        width = 100.pct
+//            overflowX = Overflow.hidden
+//                marginLeft = -scrollX.px
+//                display = Display.flex
+//                alignItems = AlignItems.flexStart
+//                justifyContent = JustifyContent.flexStart
+                    }
+
+                    Box {
+                        sx {
+                            width = 200.px
+                        }
+                    }
+
+            props.uiState.courseBlocks.forEachIndexed { index, item ->
+
+                Typography {
+                    sx {
+                        width = 44.px
+                        transform = rotate(270.deg)
+//                        if (scrollX > index){
+//                            position = Position.absolute
+//                            marginLeft = -(44*index).px
+//                            color = Color("000000")
+//                        }
+                    }
+
+                    + item
+                }
             }
+                }
+            }
+
+            VirtualListOutlet()
         }
     }
 }

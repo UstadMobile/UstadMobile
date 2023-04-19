@@ -3,20 +3,27 @@ package com.ustadmobile.port.android.view
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.paging.compose.items
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.ListItem
+import androidx.compose.material.Text
+import androidx.compose.material.Icon
 import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.CourseDetailProgressUiState
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
@@ -24,12 +31,11 @@ import com.ustadmobile.port.android.view.composable.UstadPersonAvatar
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.core.paging.ListPagingSource
-import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
+import com.ustadmobile.core.viewmodel.PersonWithResults
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -75,14 +81,14 @@ private fun CourseDetailProgressScreen(
                         .height(120.dp),
                         verticalAlignment = Alignment.Bottom
                     ) {
-                        uiState.results.forEach { result ->
-                            Text(modifier = Modifier
-                                .vertical()
-                                    .rotate(-90f)
-                                .height(25.dp),
-                                overflow = TextOverflow.Ellipsis,
-                                text = result)
-                        }
+//                        uiState.results.forEach { result ->
+//                            Text(modifier = Modifier
+//                                .vertical()
+//                                    .rotate(-90f)
+//                                .height(25.dp),
+//                                overflow = TextOverflow.Ellipsis,
+//                                text = result)
+//                        }
                     }
                 }
             }
@@ -90,23 +96,23 @@ private fun CourseDetailProgressScreen(
 
         items(
             items = lazyPagingItems,
-            key = { it.personUid }
+            key = { it.person.personUid }
         ) { student ->
 
             ListItem(
                 modifier = Modifier.clickable {
-                    student?.also { onClickStudent(it) }
+                    student?.also { onClickStudent(it.person) }
                 },
                 icon = {
                     UstadPersonAvatar(personUid = 0)
                 },
-                text = { Text("${student?.fullName()}") },
+                text = { Text("${student?.person?.fullName()}") },
                 trailing = {
                     Box(modifier = Modifier.width(120.dp)) {
                         Row(modifier = Modifier
                             .horizontalScroll(scrollState)) {
 
-                            uiState.results.forEach { result ->
+                            student?.results?.forEach { result ->
                                 Icon(
                                     Icons.Outlined.CheckBox,
                                     contentDescription = "",
@@ -209,90 +215,104 @@ fun CourseDetailProgressScreenPreview() {
     val uiState = CourseDetailProgressUiState(
         students = {
             ListPagingSource(listOf(
-                Person().apply {
-                    personUid = 1
-                    firstNames = "Bart"
-                    lastName = "Simpson"
-                },
-                Person().apply {
-                    personUid = 2
-                    firstNames = "Shelly"
-                    lastName = "Mackleberry"
-                },
-                Person().apply {
-                    personUid = 3
-                    firstNames = "Tracy"
-                    lastName = "Mackleberry"
-                },
-                Person().apply {
-                    personUid = 4
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 5
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 6
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 7
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 8
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 9
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 10
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 11
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                },
-                Person().apply {
-                    personUid = 12
-                    firstNames = "Nelzon"
-                    lastName = "Muntz"
-                }
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 1
+                        firstNames = "Bart"
+                        lastName = "Simpson"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 2
+                        firstNames = "Shelly"
+                        lastName = "Mackleberry"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 3
+                        firstNames = "Tracy"
+                        lastName = "Mackleberry"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 4
+                        firstNames = "Nelzon"
+                        lastName = "Muntz"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 5
+                        firstNames = "Nelzon"
+                        lastName = "Muntz"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 6
+                        firstNames = "Nelzon"
+                        lastName = "Muntz"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 7
+                        firstNames = "Nelzon"
+                        lastName = "Muntz"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 8
+                        firstNames = "Nelzon"
+                        lastName = "Muntz"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 9
+                        firstNames = "Nelzon"
+                        lastName = "Muntz"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 10
+                        firstNames = "Nelzon"
+                        lastName = "Muntz"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 11
+                        firstNames = "Nelzon"
+                        lastName = "Muntz"
+                    }
+                ),
+                PersonWithResults(
+                    results = listOf(),
+                    person = Person().apply {
+                        personUid = 12
+                        firstNames = "Nelzon"
+                        lastName = "Muntz"
+                    }
+                )
             ))
         },
-        results = listOf(
-            stringResource(R.string.discussion_board),
-            stringResource(R.string.dashboard),
-            stringResource(R.string.module),
-            stringResource(R.string.video),
-            stringResource(R.string.assignments),
-            stringResource(R.string.document),
-            stringResource(R.string.audio),
-            stringResource(R.string.phone),
-            stringResource(R.string.change_photo),
-            stringResource(R.string.ebook),
-            stringResource(R.string.discussion_board),
-            stringResource(R.string.dashboard),
-            stringResource(R.string.module),
-            stringResource(R.string.video),
-            stringResource(R.string.assignments),
-            stringResource(R.string.document),
-            stringResource(R.string.audio),
-            stringResource(R.string.phone),
-            stringResource(R.string.change_photo),
-            stringResource(R.string.ebook),
-        )
     )
 
     CourseDetailProgressScreen(uiState)
