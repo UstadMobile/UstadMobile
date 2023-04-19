@@ -1,10 +1,14 @@
 package com.ustadmobile.port.android.view.composable
 
+import android.text.Html
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -15,20 +19,47 @@ import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
 
 @Composable
 fun UstadCourseBlockEdit(
     uiState: CourseBlockEditUiState,
     modifier: Modifier = Modifier,
-    onCourseBlockChange: (CourseBlock?) -> Unit = {}
+    onCourseBlockChange: (CourseBlock?) -> Unit = {},
+    onClickEditDescription: () -> Unit = {},
+    scrollState: ScrollState? = null,
 ){
 
     Column(
         modifier = modifier
     ){
+        
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("title")
+                .defaultItemPadding(),
+            value = uiState.courseBlock?.cbTitle?: "",
+            onValueChange = {
+                onCourseBlockChange(uiState.courseBlock?.shallowCopy {
+                    cbTitle = it
+                })
+            },
+            label = { Text(stringResource(R.string.title)) }
+        )
+
+        HtmlClickableTextField(
+            html = uiState.courseBlock?.cbDescription ?: "",
+            label = stringResource(R.string.description),
+            onClick = onClickEditDescription,
+            modifier = Modifier.fillMaxWidth().testTag("description")
+        )
 
         UstadDateTimeEditTextField(
             value = uiState.courseBlock?.cbHideUntilDate ?: 0,
+            modifier = Modifier
+                .testTag("hide_until_date")
+                .defaultItemPadding(),
             dateLabel = stringResource(id = R.string.dont_show_before)
                 .addOptionalSuffix(),
             timeLabel = stringResource(id = R.string.time),

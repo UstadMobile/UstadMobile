@@ -73,7 +73,7 @@ kotlin {
         }
     }
 
-    js(LEGACY) {
+    js(IR) {
         browser {
             testTask {
                 useKarma {
@@ -97,7 +97,7 @@ kotlin {
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation "io.github.aakira:napier:$version_napier"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
-                compileOnly "com.github.UstadMobile.door:door-annotations:$version_door"
+                compileOnly "com.github.UstadMobile.door:room-annotations:$version_door"
  
             }
         }

@@ -26,17 +26,20 @@ fun LanguageDetailScreen(
 
         UstadDetailField(
             valueText = uiState.language?.name ?: "",
-            labelText = stringResource(R.string.name)
+            labelText = stringResource(R.string.name),
+            imageId = 0,
         )
 
         UstadDetailField(
             valueText = uiState.language?.iso_639_1_standard ?: "",
-            labelText = stringResource(R.string.two_letter_code)
+            labelText = stringResource(R.string.two_letter_code),
+            imageId = 0,
         )
 
         UstadDetailField(
             valueText = uiState.language?.iso_639_2_standard ?: "",
-            labelText = stringResource(R.string.three_letter_code)
+            labelText = stringResource(R.string.three_letter_code),
+            imageId = 0,
         )
     }
 }

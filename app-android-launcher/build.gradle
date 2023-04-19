@@ -140,6 +140,14 @@ tasks.whenTaskAdded { task ->
     }
 }
 
+configurations.all {
+    /**
+     * As per Door room-annotations module README: exclude the room-annotations module to avoid
+     * duplicate class error
+     */
+    exclude group: "com.github.UstadMobile.door", module: "room-annotations"
+}
+
 dependencies {
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
 

@@ -12,13 +12,20 @@ import com.ustadmobile.mui.components.UstadListSortHeader
 import com.ustadmobile.util.colorForAttendanceStatus
 import com.ustadmobile.util.ext.format
 import csstype.Padding
+import csstype.VerticalAlign
 import csstype.px
-import mui.icons.material.*
+//WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
+import mui.icons.material.PersonAdd
+import mui.icons.material.AccountCircle
+import mui.icons.material.LensRounded
+import mui.icons.material.Check
+import mui.icons.material.Close
 import mui.material.*
 import mui.material.List
 import mui.system.responsive
 import mui.system.sx
 import react.*
+
 
 external interface ClazzMemberListScreenProps : Props {
 
@@ -57,11 +64,11 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
                 onClickFilterChip = props.onClickFilterChip
             }
 
-            UstadListSortHeader {
-                activeSortOrderOption = props.uiState.activeSortOrderOption
-                enabled = props.uiState.fieldsEnabled
-                onClickSort = props.onClickSort
-            }
+//            UstadListSortHeader {
+//                activeSortOrderOption = props.uiState.activeSortOrderOption
+//                enabled = props.uiState.fieldsEnabled
+//                onClickSort = props.onClickSort
+//            }
 
             List {
 
@@ -175,8 +182,7 @@ private val StudentListItem = FC<StudentListItemProps> { props ->
                     "${props.person.firstNames}" +
                             " ${props.person.lastName}"
                 )
-                secondary = Stack.create {
-                    direction = responsive(StackDirection.row)
+                secondary = Typography.create {
 
                     LensRounded {
                         sx {
@@ -186,15 +192,14 @@ private val StudentListItem = FC<StudentListItemProps> { props ->
                                 right = 0.px,
                                 left = 5.px
                             )
+                            verticalAlign = VerticalAlign.middle
                         }
                         color = colorForAttendanceStatus(props.person.attendance)
                     }
 
-                    Typography {
-                        + (props.person.attendance * 100)
-                            .toString()
-                            .format(strings[MessageID.x_percent_attended])
-                    }
+                    + (props.person.attendance * 100)
+                        .toString()
+                        .format(strings[MessageID.x_percent_attended])
                 }
             }
         }

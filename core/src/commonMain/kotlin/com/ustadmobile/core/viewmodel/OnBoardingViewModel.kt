@@ -21,14 +21,12 @@ data class OnboardingUiState(
 class OnBoardingViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
-): UstadViewModel(di, savedStateHandle) {
+): UstadViewModel(di, savedStateHandle, OnBoardingView.VIEW_NAME) {
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
 
     val uiState: Flow<OnboardingUiState>
         get() = _uiState.asStateFlow()
-
-    private val systemImpl: UstadMobileSystemImpl by instance()
 
     init {
         val allLanguages = systemImpl.getAllUiLanguagesList()

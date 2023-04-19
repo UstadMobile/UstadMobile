@@ -40,15 +40,15 @@ class SingleItemSection(
 class InfiniteQueryResultSection<TItem, TData, TError>(
     private val infiniteQueryResult: UseInfiniteQueryResult<TData, TError>,
     private val infiniteSectionIndex: Int,
-    private val dataPageToItems: (TData) -> List<TItem?>,
+    private val dataPagesToItems: (Array<out TData>) -> List<TItem?>,
     private val itemToKey: (item: TItem, index: Int) -> String,
     private val createNode: (item: TItem?, index: Int) -> ReactNode,
 ): VirtualListSection() {
 
     override val elements: List<VirtualListElement>
         get() {
-            val resultRows: List<TItem?> = infiniteQueryResult.data?.pages?.flatMap { data: TData ->
-                dataPageToItems(data)
+            val resultRows = infiniteQueryResult.data?.pages?.let {
+                dataPagesToItems(it)
             } ?: listOf()
 
             val queryResult = infiniteQueryResult

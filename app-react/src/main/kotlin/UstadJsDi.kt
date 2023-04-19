@@ -9,15 +9,11 @@ import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJs
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.redux.ReduxAppStateManager
-import com.ustadmobile.redux.ReduxThemeState
-import com.ustadmobile.util.ContainerMounterJs
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.XmlSerializer
 import com.ustadmobile.xmlpullparserkmp.setInputString
@@ -112,14 +108,6 @@ internal fun ustadJsDi(
     }
 
     constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with false
-
-    bind<ReduxThemeState>() with singleton{
-        ReduxThemeState(ReduxAppStateManager.getCurrentState().appTheme?.theme)
-    }
-
-    bind<ContainerMounter>() with singleton {
-        ContainerMounterJs()
-    }
 
     bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
         XmlPullParserFactory.newInstance().also {

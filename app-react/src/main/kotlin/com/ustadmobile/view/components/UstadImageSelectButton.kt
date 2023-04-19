@@ -4,7 +4,6 @@ import com.ustadmobile.hooks.useAttachmentUriSrc
 import com.ustadmobile.mui.components.ThemeContext
 import csstype.*
 import emotion.react.css
-import js.core.get
 import js.core.jso
 import mui.icons.material.AddAPhoto
 import mui.material.*
@@ -28,7 +27,7 @@ val UstadImageSelectButton = FC<UstadImageSelectButtonProps> { props ->
 
     val imageHref = useAttachmentUriSrc(props.imageUri, false)?.toString()
 
-    val theme by useContext(ThemeContext)
+    val theme by useRequiredContext(ThemeContext)
 
     Box {
         sx {
