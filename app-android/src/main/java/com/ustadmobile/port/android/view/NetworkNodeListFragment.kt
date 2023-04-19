@@ -3,7 +3,6 @@ package com.ustadmobile.port.android.view
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -143,18 +142,13 @@ private fun LeadingContent(
                 .size(24.dp),
         )
 
-        Box(
+        LinearProgressIndicator(
+            progress = (networkNode.wifiDirectDeviceStatus/100.0)
+                .toFloat(),
             modifier = Modifier
+                .height(4.dp)
                 .width(32.dp)
-                .height(5.dp)
-        ) {
-            LinearProgressIndicator(
-                progress = (networkNode.wifiDirectDeviceStatus/100.0)
-                    .toFloat(),
-                modifier = Modifier
-                    .height(4.dp)
-            )
-        }
+        )
 
     }
 }
