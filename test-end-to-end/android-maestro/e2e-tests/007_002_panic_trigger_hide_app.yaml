@@ -30,8 +30,12 @@ env:
     file: "../common/panic_trigger_ripple.yaml"
 - launchApp # launch notepad
 - assertVisible: "What's on your mind?"
-- longPressOn:
-    id: "com.toughra.ustadmobile:id/activity_notepad_edittext"
+- repeat:
+    while:
+      notVisible: "Paste"
+    commands:
+      - longPressOn:
+          id: "com.toughra.ustadmobile:id/activity_notepad_edittext"
 - tapOn: "Paste"
 - launchApp
 - assertVisible: "Library"

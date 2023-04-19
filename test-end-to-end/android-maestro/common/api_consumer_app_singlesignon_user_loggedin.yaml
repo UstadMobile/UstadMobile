@@ -4,8 +4,8 @@ appId: com.ustadmobile.ustadapiconsumer
 - tapOn: "Request Token"
 - extendedWaitUntil:
       visible:
-          text: "Ustad Mobile"
-      timeout: 2000
+      text: "Ustad Mobile"
+      timeout: 20000
 - tapOn:
     text: "Ustad Mobile"
     index: 0
