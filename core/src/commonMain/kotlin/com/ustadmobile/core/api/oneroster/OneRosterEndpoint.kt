@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.api.DoorJsonRequest
 import com.ustadmobile.core.api.DoorJsonResponse
 import com.ustadmobile.core.api.oneroster.model.*
+import com.ustadmobile.core.api.util.forwardheader.parseForwardHeader
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.door.ext.DoorTag
@@ -36,23 +37,29 @@ class OneRosterEndpoint(
     suspend fun serve(request: DoorJsonRequest): DoorJsonResponse {
         val endpointUrl = URLBuilder().takeFrom(request.url).apply {
             encodedPath = encodedPath.substringBefore("/api/oneroster/").requirePostfix("/")
+
+            /**
+             * Use forward headers to get the original host and protocol
+             */
+            val originalForwardHeader = request.headers.entries.firstOrNull{
+                it.key.equals("forwarded", ignoreCase = true)
+            }?.let { parseForwardHeader(it.value) }?.firstOrNull()
+
+            originalForwardHeader?.protoVal?.also { proto ->
+                protocol = URLProtocol.createOrDefault(proto)
+            }
+
+            originalForwardHeader?.hostVal?.also { hostVal ->
+                host = hostVal.substringBefore(":")
+                if(hostVal.contains(":")) {
+                    port = hostVal.substringAfter(":").toInt()
+                }else {
+                    port = DEFAULT_PORT
+                }
+            }
         }.build()
 
-        val matchingEndpoints = endpointUrl to URLBuilder(endpointUrl).apply {
-            protocol = if(endpointUrl.protocol == URLProtocol.HTTP) {
-                URLProtocol.HTTPS
-            }else {
-                URLProtocol.HTTP
-            }
-        }
-
-        val activeEndpoints = activeEndpointsGetter()
-        val matchingEndpointUrls = Pair(matchingEndpoints.first.toString(),
-            matchingEndpoints.second.toString())
-
-        val endpoint = activeEndpoints.firstOrNull {
-            it.url == matchingEndpointUrls.first || it.url == matchingEndpointUrls.second
-        } ?: return DoorJsonResponse(400, "text/plain", responseBody = "No such endpoint")
+        val endpoint = Endpoint(endpointUrl.toString())
 
         val pathSegments = request.url.pathSegments
         val index = pathSegments.indexOfLast {
