@@ -4,6 +4,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.isDateSet
+import com.ustadmobile.core.util.ext.toggle
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadView
@@ -27,7 +28,7 @@ data class ClazzDetailOverviewUiState(
 
     val clazzCodeVisible: Boolean = false,
 
-    val collapsedBlockUids: List<Long> = emptyList(),
+    val collapsedBlockUids: Set<Long> = emptySet(),
 
 ) {
     val clazzSchoolUidVisible: Boolean
@@ -65,7 +66,7 @@ class ClazzDetailOverviewViewModel(
     private val pagingSourceFactory: () -> PagingSource<Int, CourseBlockWithCompleteEntity> = {
         activeRepo.courseBlockDao.findAllCourseBlockByClazzUidLive(
                 entityUidArg, accountManager.activeAccount.personUid,
-                _uiState.value.collapsedBlockUids, systemTimeInMillis()
+                _uiState.value.collapsedBlockUids.toList(), systemTimeInMillis()
         ).also {
             lastCourseBlockPagingSource?.invalidate()
             lastCourseBlockPagingSource = it
@@ -115,6 +116,19 @@ class ClazzDetailOverviewViewModel(
                         }
                     }
                 }
+            }
+        }
+    }
+
+    fun onClickCourseBlock(courseBlock: CourseBlock) {
+        when(courseBlock.cbType) {
+            CourseBlock.BLOCK_MODULE_TYPE -> {
+                _uiState.update { prev ->
+                    prev.copy(
+                        collapsedBlockUids = prev.collapsedBlockUids.toggle(courseBlock.cbUid)
+                    )
+                }
+                lastCourseBlockPagingSource?.invalidate()
             }
         }
     }

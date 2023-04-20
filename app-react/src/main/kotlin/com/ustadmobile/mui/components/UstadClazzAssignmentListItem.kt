@@ -24,7 +24,7 @@ external interface UstadClazzAssignmentListItemProps: Props {
 
     var courseBlock: CourseBlockWithCompleteEntity
 
-    var onClickAssignment: (ClazzAssignmentWithMetrics?) -> Unit
+    var onClickCourseBlock: (CourseBlock) -> Unit
 
     var padding: Padding
 }
@@ -35,7 +35,7 @@ val UstadClazzAssignmentListItem = FC<UstadClazzAssignmentListItemProps> { props
 
     ListItem{
         ListItemButton{
-            onClick = { props.onClickAssignment(assignment) }
+            onClick = { props.onClickCourseBlock(props.courseBlock) }
 
             sx {
                 padding = props.padding

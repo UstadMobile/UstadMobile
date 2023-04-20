@@ -1,16 +1,22 @@
 package com.ustadmobile.view.clazzdetailoverview
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.ustadViewName
+import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.core.viewmodel.ClazzDetailOverviewUiState
+import com.ustadmobile.core.viewmodel.ClazzDetailOverviewViewModel
 import com.ustadmobile.hooks.useFormattedDateRange
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.UstadDetailField
+import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
@@ -26,6 +32,7 @@ import react.*
 import mui.icons.material.Group
 import mui.icons.material.Event
 import mui.icons.material.Login
+import react.router.useLocation
 
 
 external interface ClazzDetailOverviewProps : Props {
@@ -34,13 +41,7 @@ external interface ClazzDetailOverviewProps : Props {
 
     var onClickClassCode: (String) -> Unit
 
-    var onClickCourseDiscussion: (CourseDiscussion?) -> Unit
-
-    var onClickCourseExpandCollapse: (CourseBlockWithCompleteEntity) -> Unit
-
-    var onClickTextBlock: (CourseBlockWithCompleteEntity) -> Unit
-
-    var onClickAssignment: (ClazzAssignmentWithMetrics?) -> Unit
+    var onClickCourseBlock: (CourseBlock) -> Unit
 
     var onClickContentEntry: (
         ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
@@ -144,10 +145,7 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
             ) { courseBlockItem ->
                 ClazzDetailOverviewCourseBlockListItem.create {
                     courseBlock = courseBlockItem
-                    onClickCourseDiscussion = props.onClickCourseDiscussion
-                    onClickCourseExpandCollapse = props.onClickCourseExpandCollapse
-                    onClickTextBlock = props.onClickTextBlock
-                    onClickAssignment = props.onClickAssignment
+                    onClickCourseBlock = props.onClickCourseBlock
                     onClickContentEntry = props.onClickContentEntry
                     onClickDownloadContentEntry = props.onClickDownloadContentEntry
                 }
@@ -165,6 +163,28 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
 
 val ICON_SIZE = 40.0.px
 
+
+val ClazzDetailOverviewScreen = FC<Props> {
+    val location = useLocation()
+
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        ClazzDetailOverviewViewModel(di, savedStateHandle, location.ustadViewName)
+    }
+
+    val uiStateVal: ClazzDetailOverviewUiState by viewModel.uiState.collectAsState(
+        ClazzDetailOverviewUiState())
+
+    val appState by viewModel.appUiState.collectAsState(AppUiState())
+
+    UstadFab {
+        fabState = appState.fabState
+    }
+
+    ClazzDetailOverviewComponent2 {
+        uiState = uiStateVal
+        onClickCourseBlock = viewModel::onClickCourseBlock
+    }
+}
 
 val ClazzDetailOverviewScreenPreview = FC<Props> {
     ClazzDetailOverviewComponent2 {

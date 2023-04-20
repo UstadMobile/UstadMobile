@@ -22,13 +22,7 @@ external interface ClazzDetailOverviewCourseBlockListItemProps : Props {
 
     var courseBlock: CourseBlockWithCompleteEntity?
 
-    var onClickCourseDiscussion: (CourseDiscussion?) -> Unit
-
-    var onClickCourseExpandCollapse: (CourseBlockWithCompleteEntity) -> Unit
-
-    var onClickTextBlock: (CourseBlockWithCompleteEntity) -> Unit
-
-    var onClickAssignment: (ClazzAssignmentWithMetrics?) -> Unit
+    var onClickCourseBlock: (CourseBlock) -> Unit
 
     var onClickContentEntry: (
         ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
@@ -57,7 +51,7 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
                     }
 
                     onClick = { _ ->
-                        courseBlockVal?.also { props.onClickCourseExpandCollapse(it) }
+                        courseBlockVal?.also { props.onClickCourseBlock(it) }
                     }
 
                     ListItemIcon {
@@ -83,7 +77,7 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
 
                 secondaryAction = IconButton.create {
                     onClick = {_ ->
-                        props.courseBlock?.also { props.onClickCourseExpandCollapse(it) }
+                        props.courseBlock?.also { props.onClickCourseBlock(it) }
                     }
                     + trailingIcon.create()
                 }
@@ -98,7 +92,7 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
                     }
 
                     onClick = { _ ->
-                        props.courseBlock?.courseDiscussion?.also { props.onClickCourseDiscussion(it) }
+                        props.courseBlock?.also { props.onClickCourseBlock(it) }
                     }
 
                     ListItemIcon {
@@ -132,7 +126,7 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
                     }
 
                     onClick = {_ ->
-                        courseBlockVal?.also { props.onClickTextBlock(it) }
+                        courseBlockVal?.also { props.onClickCourseBlock(it) }
                     }
 
                     ListItemIcon {
@@ -161,7 +155,7 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
             if(courseBlockVal != null) {
                 UstadClazzAssignmentListItem {
                     courseBlock = courseBlockVal
-                    onClickAssignment = props.onClickAssignment
+                    onClickCourseBlock = props.onClickCourseBlock
                 }
             }
         }

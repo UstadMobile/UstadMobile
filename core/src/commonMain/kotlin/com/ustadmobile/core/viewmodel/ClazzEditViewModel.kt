@@ -2,6 +2,8 @@ package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.controller.asCourseBlockWithEntity
 import com.ustadmobile.core.db.dao.deactivateByUids
+import com.ustadmobile.core.domain.courseblockupdate.AddOrUpdateCourseBlockUseCase
+import com.ustadmobile.core.domain.courseblockupdate.UpdateCourseBlocksOnReorderOrCommitUseCase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -85,6 +87,10 @@ data class ClazzEditUiState(
 class ClazzEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
+    private val addOrUpdateCourseBlockUseCase: AddOrUpdateCourseBlockUseCase =
+        AddOrUpdateCourseBlockUseCase(),
+    private val updateCourseBlocksOnReorderOrCommitUseCase: UpdateCourseBlocksOnReorderOrCommitUseCase =
+        UpdateCourseBlocksOnReorderOrCommitUseCase(),
 ): UstadEditViewModel(di, savedStateHandle, ClazzEdit2View.VIEW_NAME) {
 
     private val _uiState = MutableStateFlow(ClazzEditUiState())
@@ -218,12 +224,12 @@ class ClazzEditViewModel(
             launch {
                 resultReturner.filteredResultFlowForKey(RESULT_KEY_COURSEBLOCK).collect { result ->
                     val courseBlock = result.result as? CourseBlock ?: return@collect
-                    val courseBlockWithEntity = courseBlock.asCourseBlockWithEntity()
-                    val newCourseBlockList = _uiState.value.courseBlockList.replaceOrAppend(
-                        courseBlockWithEntity
-                    ) {
-                        it.cbUid == courseBlock.cbUid
-                    }
+                    val newCourseBlockList = addOrUpdateCourseBlockUseCase(
+                        currentList = _uiState.value.courseBlockList,
+                        clazzUid = _uiState.value.entity?.clazzUid
+                            ?: throw IllegalStateException("Clazz must not be null when collecting course block"),
+                        addOrUpdateBlock = courseBlock,
+                    )
 
                     updateCourseBlockList(newCourseBlockList)
                 }
@@ -423,12 +429,8 @@ class ClazzEditViewModel(
                     }, systemTimeInMillis()
                 )
 
-                val courseBlockModulesToCommit = _uiState.value.courseBlockList.mapIndexed {index, block ->
-                    block.shallowCopy {
-                        cbClazzUid = clazzUid
-                        cbIndex = index
-                    }
-                }
+                val courseBlockModulesToCommit = updateCourseBlocksOnReorderOrCommitUseCase(
+                    _uiState.value.courseBlockList)
                 activeDb.courseBlockDao.upsertListAsync(courseBlockModulesToCommit)
                 activeDb.courseBlockDao.deactivateByUids(
                     initState.courseBlockList.findKeysNotInOtherList(courseBlockModulesToCommit) {
@@ -458,12 +460,13 @@ class ClazzEditViewModel(
 
 
     fun onCourseBlockMoved(from: Int, to: Int) {
-        val newCourseBlockList = _uiState.value.courseBlockList.toMutableList().apply {
+        val reorderedList = _uiState.value.courseBlockList.toMutableList().apply {
             add(to, removeAt(from))
         }.toList()
+        val newList = updateCourseBlocksOnReorderOrCommitUseCase(reorderedList, to)
 
         viewModelScope.launch {
-            updateCourseBlockList(newCourseBlockList)
+            updateCourseBlockList(newList)
         }
     }
 
