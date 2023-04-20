@@ -36,6 +36,15 @@ import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.PersonWithResults
+import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
+
+private val resultList = (0..10).map {
+    PersonWithDisplayDetails().apply {
+        firstNames = "Person"
+        lastName = "$it"
+        personUid = it.toLong()
+    }
+}
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable

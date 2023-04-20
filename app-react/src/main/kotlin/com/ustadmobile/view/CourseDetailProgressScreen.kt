@@ -19,7 +19,6 @@ import csstype.*
 import js.core.jso
 import mui.icons.material.CheckBoxOutlineBlank
 import mui.icons.material.CheckBoxOutlined
-import mui.icons.material.Message
 import mui.material.*
 import mui.system.responsive
 import mui.system.sx
@@ -27,8 +26,8 @@ import org.w3c.dom.HTMLElement
 import react.FC
 import react.Props
 import react.create
-import react.dom.html.ReactHTML.style
 import react.useState
+import kotlin.random.Random
 
 external interface CourseDetailProgressProps : Props {
 
@@ -38,650 +37,42 @@ external interface CourseDetailProgressProps : Props {
 
 }
 
+private val resultList = (0..10).map {
+
+    val randomBoolean = Random.nextBoolean()
+    StudentResult(
+        personUid = 0,
+        courseBlockUid = it.toLong(),
+        clazzUid = 0,
+        completed = randomBoolean
+    )
+}
+
+val personList = (0..150).map {
+    PersonWithResults(
+        results = resultList,
+        person = Person().apply {
+            personUid = 0
+            firstNames = "Person $it"
+            lastName = "Simpson"
+        }
+    )
+}
+
+val strings = useStringsXml()
+private val courseBlockList = (0..10).map {
+    CourseBlock().apply {
+        cbUid = it.toLong()
+        cbTitle = strings[MessageID.discussion_board]
+    }
+}
+
 val CourseDetailProgressScreenPreview = FC<Props> { props ->
 
-    val strings = useStringsXml()
     CourseDetailProgressScreenComponent2 {
         uiState = CourseDetailProgressUiState(
-            students = { ListPagingSource(listOf(
-                PersonWithResults(
-                    results = listOf(
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = false
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = false
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = false
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = false
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        )
-                    ),
-                    person = Person().apply {
-                        personUid = 1
-                        firstNames = "Bart"
-                        lastName = "Simpson"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = false
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = false
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = false
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = false
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        )
-                    ),
-                    person = Person().apply {
-                        personUid = 2
-                        firstNames = "Shelly"
-                        lastName = "Mackleberry"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = false
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = false
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = false
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = false
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        )
-                    ),
-                    person = Person().apply {
-                        personUid = 3
-                        firstNames = "Tracy"
-                        lastName = "Mackleberry"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = false
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = false
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = false
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = false
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        )
-                    ),
-                    person = Person().apply {
-                        personUid = 4
-                        firstNames = "Nelzon"
-                        lastName = "Muntz"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = false
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = false
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = false
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = false
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        ),
-                        StudentResult(
-                            personUid = 0,
-                            courseBlockUid = 0,
-                            clazzUid = 0,
-                            completed = true
-                        )
-                    ),
-                    person = Person().apply {
-                        personUid = 5
-                        firstNames = "Nelzon"
-                        lastName = "Muntz"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(),
-                    person = Person().apply {
-                        personUid = 6
-                        firstNames = "Nelzon"
-                        lastName = "Muntz"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(),
-                    person = Person().apply {
-                        personUid = 7
-                        firstNames = "Nelzon"
-                        lastName = "Muntz"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(),
-                    person = Person().apply {
-                        personUid = 8
-                        firstNames = "Nelzon"
-                        lastName = "Muntz"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(),
-                    person = Person().apply {
-                        personUid = 9
-                        firstNames = "Nelzon"
-                        lastName = "Muntz"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(),
-                    person = Person().apply {
-                        personUid = 10
-                        firstNames = "Nelzon"
-                        lastName = "Muntz"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(),
-                    person = Person().apply {
-                        personUid = 11
-                        firstNames = "Nelzon"
-                        lastName = "Muntz"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(),
-                    person = Person().apply {
-                        personUid = 12
-                        firstNames = "Nelzon"
-                        lastName = "Muntz"
-                    }
-                )
-            )) },
-            courseBlocks = listOf(
-                CourseBlock().apply {
-                    cbTitle = strings[MessageID.discussion_board]
-                },
-                CourseBlock().apply {
-                    cbTitle = strings[MessageID.module]
-                },
-                CourseBlock().apply {
-                    cbTitle = strings[MessageID.video]
-                },
-                CourseBlock().apply {
-                    cbTitle = strings[MessageID.audio]
-                },
-                CourseBlock().apply {
-                    cbTitle = strings[MessageID.document]
-                },
-                CourseBlock().apply {
-                    cbTitle = strings[MessageID.module]
-                },
-                CourseBlock().apply {
-                    cbTitle = strings[MessageID.video]
-                },
-                CourseBlock().apply {
-                    cbTitle = strings[MessageID.audio]
-                },
-                CourseBlock().apply {
-                    cbTitle = strings[MessageID.document]
-                },
-                CourseBlock().apply {
-                    cbTitle = strings[MessageID.discussion_board]
-                },
-                CourseBlock().apply {
-                    cbTitle = strings[MessageID.module]
-                },
-                CourseBlock().apply {
-                    cbTitle = strings[MessageID.video]
-                },
-                CourseBlock().apply {
-                    cbTitle = strings[MessageID.audio]
-                },
-                CourseBlock().apply {
-                    cbTitle = strings[MessageID.document]
-                },
-                CourseBlock().apply {
-                    cbTitle = strings[MessageID.module]
-                },
-                CourseBlock().apply {
-                    cbTitle = strings[MessageID.video]
-                },
-                CourseBlock().apply {
-                    cbTitle = strings[MessageID.audio]
-                },
-                CourseBlock().apply {
-                    cbTitle = strings[MessageID.document]
-                }
-            )
+            students = { ListPagingSource(personList) },
+            courseBlocks = courseBlockList
         )
     }
 }
@@ -697,9 +88,6 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 
     var scrollX by useState { 0 }
 
-    val (selectedItems, setSelectedItems) = useState(setOf<Int>())
-
-
     VirtualList {
 
         style = jso {
@@ -707,11 +95,6 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
             width = 100.pct
             contain = Contain.strict
             overflowY = Overflow.scroll
-//            display = Display.flex
-//            alignItems = AlignItems.flexStart
-//            position = Position.absolute
-//            marginLeft = 0.px
-//            marginTop = 100.px
         }
 
 
@@ -768,11 +151,11 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                                         color = Color("#006400")
                                     }
                                 }
-//                                if (bool?.completed == true){
+                                if (bool?.completed == true){
                                     + CheckBoxOutlined.create()
-//                                } else {
-//                                    + CheckBoxOutlineBlank.create()
-//                                }
+                                } else {
+                                    + CheckBoxOutlineBlank.create()
+                                }
                             }
                         }
                     }
