@@ -40,3 +40,9 @@ fun CourseTerminology?.toTerminologyEntries(
         TerminologyEntry(it.key, it.value, termMap[it.key] ?: systemImpl?.getString(it.value))
     }
 }
+
+fun List<TerminologyEntry>.encodeToStringMap(
+    json: Json
+): String {
+    return json.encodeStringMapToString(map { it.id to (it.term ?: "") }.toMap())
+}

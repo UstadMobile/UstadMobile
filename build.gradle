@@ -15,8 +15,8 @@ buildscript {
 }
 
 plugins {
-    id 'com.android.application' version '7.4.0' apply false
-    id 'com.android.library' version '7.4.0' apply false
+    id 'com.android.application' version '7.4.2' apply false
+    id 'com.android.library' version '7.4.2' apply false
     id 'org.jetbrains.kotlin.android' version "$version_kotlin" apply false
     id 'org.jetbrains.kotlin.plugin.serialization' version "$version_kotlin" apply false
     id 'org.jetbrains.kotlin.plugin.atomicfu' version "$version_kotlin" apply false
@@ -72,9 +72,9 @@ ext {
     ustadVersion = project.version
     ustadVersionCode = 232
 
-    version_door = "0.0.63o7"
+    version_door = "0.0.63o10"
     version_retriever = "0.0.1e"
-    version_xmlpullparserkmp = '0.0.20'
+    version_xmlpullparserkmp = '0.0.23'
 
     version_gradle_buildconfig_plugin = "1.1.7"
     version_ksp = "1.0.9"
@@ -213,10 +213,8 @@ ext {
     version_better_link_movement="2.2.0"
 
     /*Kotlin react web app*/
-    kotlinWrappersVersion = "1.0.0-pre.494"
+    kotlinWrappersVersion = "1.0.0-pre.526"
 
-    version_npm_moment = "^2.29.4"
-    version_npm_moment_timezone = "^0.5.34"
     version_npm_mement_io = "^2.14.0"
     version_npm_mui_lab = "5.0.0-alpha.89"
 
@@ -232,15 +230,17 @@ ext {
 
     version_npm_timezones = "^1.6.1"
     version_npm_buffer = "^6.0.3"
-    version_npm_asmcrypto = "2.3.2"
+    version_npm_asmcrypto = "2.3.2" //required for client side one-way password encryption
+    version_crypto_browserify = "3.12.0" //required by asmcrypto
+    version_stream_browserify = "3.0.0" //required by cipher-base
+
     version_npm_emotion = "11.10.5"
     version_npm_google_charts = "^3.0.15"
     version_npm_html_to_image = "^1.9.0"
     version_npm_date_fns = "2.29.1"
     version_npm_mime_matcher = "^1.0.5"
-    version_npm_mui_rte = "^2.0.1"
-    version_npm_draft_js = "^0.11.7"
-    version_npm_draft_js_html_export = "^1.4.1"
+    version_npm_react_quill = "2.0.0"
+
     version_npm_striptags = "^3.2.0"
     version_npm_react_easy_sort = "^1.5.1"
     version_react_linkify = "^1.0.0-alpha"

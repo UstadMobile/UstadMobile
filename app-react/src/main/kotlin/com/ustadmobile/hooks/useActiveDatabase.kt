@@ -7,14 +7,14 @@ import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-import react.useContext
 import react.useMemo
+import react.useRequiredContext
 
 /**
  * Use the active database as per the accountmanager
  */
 fun useActiveDatabase(tag: Int = DoorTag.TAG_DB) : UmAppDatabase {
-    val di = useContext(DIContext)
+    val di = useRequiredContext(DIContext)
     val accountManager: UstadAccountManager = useMemo(dependencies = emptyArray()) {
         di.direct.instance()
     }

@@ -54,8 +54,8 @@ fun useUstadScreens(): UstadScreens {
                 SchoolEditScreenPreview),
             UstadScreen(LanguageDetailView.VIEW_NAME, name = "LanguageDetail Preview",
                 LanguageDetailPreview),
-            UstadScreen(ClazzEdit2View.VIEW_NAME, "Clazz Edit Preview",
-                ClazzEditScreenPreview),
+//            UstadScreen(ClazzEdit2View.VIEW_NAME, "Clazz Edit Preview",
+//                ClazzEditScreenPreview),
             UstadScreen("EasySort", "Easy Sort", EasySortPreview),
             UstadScreen(ErrorReportView.VIEW_NAME, name = "ErrorReport Preview", ErrorReportPreview),
             UstadScreen(LanguageEditView.VIEW_NAME, "LanguageEdit Preview", LanguageEditPreview),
@@ -116,9 +116,9 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen(AccountListView.VIEW_NAME, "AccountList Preview", AccountListScreenPreview),
             UstadScreen(ClazzMemberListView.VIEW_NAME, "ClazzMemberList Preview",
                 ClazzMemberListScreenPreview),
-            UstadScreen(ClazzList2View.VIEW_NAME, "Clazz List Preview",
-                ClazzListScreenPreview
-            ),
+//            UstadScreen(ClazzList2View.VIEW_NAME, "Clazz List Preview",
+//                ClazzListScreenPreview
+//            ),
             UstadScreen("VirtualListPreview", "Virtual List Preview",
                 VirtualListPreview),
             UstadScreen("UstadAssignmentFileSubmissionHeader",
@@ -139,3 +139,4 @@ fun useUstadScreens(): UstadScreens {
         )
     }
 }
+

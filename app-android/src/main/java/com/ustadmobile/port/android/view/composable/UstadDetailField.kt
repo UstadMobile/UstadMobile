@@ -25,6 +25,25 @@ fun UstadDetailField(
     valueText: String,
     labelText: String,
     modifier: Modifier = Modifier,
+    icon: (@Composable () -> Unit)? = null,
+    onClick: (() -> Unit)? = null,
+    secondaryActionContent: (@Composable () -> Unit)? = null,
+) {
+    UstadDetailField(
+        valueText = AnnotatedString(valueText),
+        labelText = AnnotatedString(labelText),
+        modifier = modifier,
+        icon = icon,
+        onClick = onClick,
+        secondaryActionContent = secondaryActionContent,
+    )
+}
+
+@Composable
+fun UstadDetailField(
+    valueText: String,
+    labelText: String,
+    modifier: Modifier = Modifier,
     imageId: Int = 0,
     onClick: (() -> Unit)? = null,
     secondaryActionContent: (@Composable () -> Unit)? = null,
@@ -38,6 +57,34 @@ fun UstadDetailField(
         secondaryActionContent = secondaryActionContent,
     )
 }
+
+@Composable
+fun UstadDetailField(
+    valueText: AnnotatedString,
+    labelText: AnnotatedString,
+    modifier: Modifier = Modifier,
+    imageId: Int = 0,
+    onClick: (() -> Unit)? = null,
+    secondaryActionContent: (@Composable () -> Unit)? = null,
+) {
+    UstadDetailField(
+        valueText = valueText,
+        labelText = labelText,
+        modifier = modifier,
+        onClick = onClick,
+        secondaryActionContent = secondaryActionContent,
+        icon = {
+            Image(
+                painter = painterResource(id = imageId),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(
+                    color = contentColorFor(backgroundColor = MaterialTheme.colors.background)),
+                modifier = Modifier
+                    .size(24.dp))
+        }
+    )
+}
+
 /**
  * Main field layout for detail fields in DetailViews
  */
@@ -46,7 +93,7 @@ fun UstadDetailField(
     valueText: AnnotatedString,
     labelText: AnnotatedString,
     modifier: Modifier = Modifier,
-    imageId: Int = 0,
+    icon: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     secondaryActionContent: (@Composable () -> Unit)? = null,
 ){
@@ -59,7 +106,7 @@ fun UstadDetailField(
             DetailFieldContent(
                 valueText = valueText,
                 labelText = labelText,
-                imageId = imageId,
+                icon = icon,
                 secondaryActionContent = secondaryActionContent,
             )
         }
@@ -68,7 +115,7 @@ fun UstadDetailField(
             modifier = modifier,
             valueText = valueText,
             labelText = labelText,
-            imageId = imageId,
+            icon = icon,
             secondaryActionContent = secondaryActionContent,
         )
     }
@@ -77,20 +124,14 @@ fun UstadDetailField(
 @Composable
 private fun DetailFieldContent(
     modifier: Modifier = Modifier,
-    imageId: Int = 0,
+    icon: (@Composable () -> Unit)? = null,
     valueText: AnnotatedString,
     labelText: AnnotatedString,
     secondaryActionContent: (@Composable () -> Unit)? = null,
 ) {
     Row(modifier){
-        if (imageId != 0){
-            Image(
-                painter = painterResource(id = imageId),
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(
-                    color = contentColorFor(backgroundColor = MaterialTheme.colors.background)),
-                modifier = Modifier
-                    .size(24.dp))
+        if (icon != null){
+            icon()
         } else {
             Box(modifier = Modifier.width(24.dp))
         }

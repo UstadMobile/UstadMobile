@@ -181,6 +181,7 @@ class PersonAuthRegisterRouteTest {
     )  = testPersonAuthRegisterApplication { client ->
         val repo: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_REPO)
         val pbkdf2Params: Pbkdf2Params by serverDi.instance()
+        val httpClient: HttpClient by serverDi.instance()
 
         val person = runBlocking {
             repo.insertPersonAndGroup(Person().apply {
@@ -190,7 +191,8 @@ class PersonAuthRegisterRouteTest {
         }
 
         runBlocking {
-            repo.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params)
+            repo.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params,
+                Endpoint("localhost"), httpClient)
         }
 
         val httpResponse = runBlocking {
@@ -214,6 +216,7 @@ class PersonAuthRegisterRouteTest {
     )  = testPersonAuthRegisterApplication { client ->
         val repo: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_REPO)
         val pbkdf2Params: Pbkdf2Params by serverDi.instance()
+        val httpClient: HttpClient by serverDi.instance()
 
         val person = runBlocking {
             repo.insertPersonAndGroup(Person().apply {
@@ -223,7 +226,8 @@ class PersonAuthRegisterRouteTest {
         }
 
         runBlocking {
-            repo.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params)
+            repo.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params,
+                Endpoint("localhost"), httpClient)
         }
 
         val httpResponse = runBlocking {
@@ -241,6 +245,7 @@ class PersonAuthRegisterRouteTest {
     ) = testPersonAuthRegisterApplication {
         val repo: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_REPO)
         val pbkdf2Params: Pbkdf2Params by serverDi.instance()
+        val httpClient: HttpClient by serverDi.instance()
 
         val person = runBlocking {
             repo.insertPersonAndGroup(Person().apply {
@@ -250,7 +255,8 @@ class PersonAuthRegisterRouteTest {
         }
 
         runBlocking {
-            repo.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params)
+            repo.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params,
+                Endpoint("localhost"), httpClient)
             repo.personParentJoinDao.insertAsync(PersonParentJoin().apply {
                 ppjMinorPersonUid = person.personUid
                 ppjStatus = PersonParentJoin.STATUS_UNSET

@@ -65,6 +65,7 @@ val CourseDiscussionDetailComponent2 = FC<CourseDiscussionDetailProps> { props -
             + strings[MessageID.posts]
         }
 
+        //Change that to FAB
         List {
             //Add post:
             ListItem {

@@ -79,3 +79,22 @@ fun <Option: Any> ChildrenBuilder.UstadSelectField(
 ) {
     child(UstadSelectFieldFC, jso(block))
 }
+
+data class PreviewOption(val value: String, val label: String)
+
+val UstadSelectFieldPreview = FC<Props> {
+
+    var currentValue by useState { "1" }
+
+    UstadSelectField<PreviewOption> {
+        options = listOf(PreviewOption("1", "one"), PreviewOption("2", "two"))
+        itemValue = { it.value }
+        itemLabel = { ReactNode(it.label) }
+        onChange = {
+            currentValue = it.value
+        }
+        label = "Preview"
+        id = "testselect"
+        value = currentValue
+    }
+}

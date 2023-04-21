@@ -49,9 +49,7 @@ import java.util.*
 
 class PersonDetailFragment : UstadBaseMvvmFragment(){
 
-    private val viewModel: PersonDetailViewModel by viewModels {
-        UstadViewModelProviderFactory(di, this, requireArguments())
-    }
+    private val viewModel: PersonDetailViewModel by ustadViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -260,7 +258,9 @@ private fun DetailFields(uiState: PersonDetailUiState){
         if (uiState.personGenderVisible){
             UstadDetailField(
                 valueText = gender,
-                labelText = stringResource(R.string.gender_literal))
+                labelText = stringResource(R.string.gender_literal),
+                imageId = 0,
+            )
         }
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -269,7 +269,8 @@ private fun DetailFields(uiState: PersonDetailUiState){
             UstadDetailField(
                 imageId = R.drawable.ic_badge_24dp,
                 valueText = uiState.person?.personOrgId ?: "",
-                labelText = stringResource(R.string.organization_id))
+                labelText = stringResource(R.string.organization_id)
+            )
         }
 
         Spacer(modifier = Modifier.height(10.dp))

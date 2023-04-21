@@ -1,8 +1,8 @@
 package com.ustadmobile.mui.components
 
+import com.ustadmobile.entities.USTAD_SCREENS
 import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
-import com.ustadmobile.view.UstadScreensContext
 import csstype.Color
 import csstype.Display
 import csstype.None
@@ -14,14 +14,13 @@ import react.router.dom.NavLink
 import emotion.react.css
 import react.ReactNode
 import react.dom.html.ReactHTML.nav
-import react.useContext
 
 external interface SidebarProps: Props {
     var visible: Boolean
 }
 
 val Sidebar = FC<SidebarProps> { props ->
-    val ustadScreens = useContext(UstadScreensContext)
+    val ustadScreens = USTAD_SCREENS
     Box {
         component = nav
         sx {

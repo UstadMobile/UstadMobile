@@ -1,6 +1,9 @@
 package com.ustadmobile.core.schedule
 
 import com.ustadmobile.lib.db.entities.Schedule
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.junit.Assert
 import org.junit.Test
 
@@ -15,14 +18,22 @@ class TestScheduleExt  {
         }
 
         val fromTime = 1589393140000 // Wed 13/May/2020
+        val fromInstant = Instant.fromEpochMilliseconds(fromTime)
+        val timeZone = TimeZone.of("Asia/Dubai")
 
-        val nextOccurence = schedule.nextOccurence("Asia/Dubai", fromTime)
-        val nextFromTime = nextOccurence.from.format("EEE, dd MMM yyyy HH:mm:ss z")
-        val nextToTime = nextOccurence.to.format("EEE, dd MMM yyyy HH:mm:ss z")
-        Assert.assertEquals("Next occurence start time = Friday 15/May 0600 UTC/1000 local",
-                "Fri, 15 May 2020 06:00:00 UTC", nextFromTime)
-        Assert.assertEquals("Next occurence finish time = Friday 15/May 0800 UTC/1000 local",
-                "Fri, 15 May 2020 08:00:00 UTC", nextToTime)
+
+        val nextOccurence = schedule.nextOccurenceX(timeZone, fromInstant.toLocalDateTime(timeZone))
+
+        val nextLocalDateTime = nextOccurence.first.toLocalDateTime(timeZone)
+
+        //Next instance should be Friday 15/May/2020 at 10am Dubai time
+        Assert.assertEquals(10, nextLocalDateTime.hour)
+        Assert.assertEquals(15, nextLocalDateTime.dayOfMonth)
+        Assert.assertEquals(5, nextLocalDateTime.monthNumber)
+        Assert.assertEquals(2020, nextLocalDateTime.year)
+
+        val finishLocalDateTime = nextOccurence.second.toLocalDateTime(timeZone)
+        Assert.assertEquals(12, finishLocalDateTime.hour)
     }
 
 }

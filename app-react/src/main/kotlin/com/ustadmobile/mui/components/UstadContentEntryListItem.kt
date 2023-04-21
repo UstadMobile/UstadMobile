@@ -13,7 +13,14 @@ import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.ext.paddingCourseBlockIndent
 import com.ustadmobile.view.CONTENT_ENTRY_TYPE_ICON_MAP
 import csstype.*
-import mui.icons.material.*
+//WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
+import mui.icons.material.BookOutlined
+import mui.icons.material.CheckCircle
+import mui.icons.material.Folder
+import mui.icons.material.Cancel
+import mui.icons.material.TextSnippet
+import mui.icons.material.EmojiEvents
+import mui.icons.material.Download
 import mui.material.*
 import mui.system.responsive
 import mui.system.sx
