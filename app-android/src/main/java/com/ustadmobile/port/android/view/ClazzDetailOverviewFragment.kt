@@ -8,6 +8,21 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -18,23 +33,32 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.RateLimitedLiveData
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzDetailOverviewView
+import com.ustadmobile.core.viewmodel.ClazzDetailOverviewUiState
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
-import com.ustadmobile.lib.db.entities.CourseBlock
-import com.ustadmobile.lib.db.entities.CourseBlockWithCompleteEntity
-import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.util.compose.messageIdResource
+import com.ustadmobile.port.android.util.compose.rememberFormattedTime
+import com.ustadmobile.port.android.util.ext.MS_PER_HOUR
+import com.ustadmobile.port.android.util.ext.MS_PER_MIN
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
+import com.ustadmobile.port.android.view.composable.UstadClazzAssignmentListItem
+import com.ustadmobile.port.android.view.composable.UstadContentEntryListItem
+import com.ustadmobile.port.android.view.composable.UstadDetailField
+import com.ustadmobile.port.android.view.composable.paddingCourseBlockIndent
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -51,7 +75,7 @@ interface ClazzDetailOverviewEventListener {
 }
 
 class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(),
-        ClazzDetailOverviewView, ClazzDetailFragmentEventHandler, Observer<PagedList<Schedule>>,
+        ClazzDetailOverviewView,  Observer<PagedList<Schedule>>,
         ClazzDetailOverviewEventListener {
 
 
@@ -373,6 +397,14 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
     companion object {
 
+        val BLOCK_ICON_MAP = mapOf(
+            CourseBlock.BLOCK_MODULE_TYPE to R.drawable.ic_baseline_folder_open_24,
+            CourseBlock.BLOCK_ASSIGNMENT_TYPE to R.drawable.baseline_assignment_turned_in_24,
+            CourseBlock.BLOCK_CONTENT_TYPE to R.drawable.video_youtube,
+            CourseBlock.BLOCK_TEXT_TYPE to R.drawable.ic_baseline_title_24,
+            CourseBlock.BLOCK_DISCUSSION_TYPE to R.drawable.ic_baseline_forum_24
+        )
+
         val SCHEDULE_DIFF_UTIL = object: DiffUtil.ItemCallback<Schedule>() {
             override fun areItemsTheSame(oldItem: Schedule, newItem: Schedule): Boolean {
                 return oldItem.scheduleUid == newItem.scheduleUid
@@ -432,4 +464,332 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         }
     }
 
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ClazzDetailOverviewScreen(
+    uiState: ClazzDetailOverviewUiState = ClazzDetailOverviewUiState(),
+    onClickClassCode: (String) -> Unit = {},
+    onClickCourseDiscussion: (CourseDiscussion?) -> Unit = {},
+    onClickCourseExpandCollapse: (CourseBlockWithCompleteEntity) -> Unit = {},
+    onClickTextBlock: (CourseBlockWithCompleteEntity) -> Unit = {},
+    onClickAssignment: (ClazzAssignmentWithMetrics?) -> Unit = {},
+    onClickContentEntry: (
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+    ) -> Unit = {},
+    onClickDownloadContentEntry: (
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+    ) -> Unit = {},
+) {
+    val numMembers = stringResource(R.string.x_teachers_y_students,
+        uiState.clazz?.numTeachers ?: 0,
+        uiState.clazz?.numStudents ?: 0)
+
+    val clazzStartTime = rememberFormattedTime(
+        timeInMs = (uiState.clazz?.clazzStartTime ?: 0).toInt()
+    )
+
+    val clazzEndTime = rememberFormattedTime(
+        timeInMs = (uiState.clazz?.clazzEndTime ?: 0).toInt()
+    )
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .defaultScreenPadding()
+    ){
+
+        item {
+            Text(text = uiState.clazz?.clazzDesc ?: "")
+        }
+
+        item {
+            UstadDetailField(
+                modifier = Modifier.fillMaxWidth(),
+                imageId = R.drawable.ic_group_black_24dp,
+                valueText = numMembers,
+                labelText = stringResource(R.string.members)
+            )
+        }
+
+        item {
+            if (uiState.clazzCodeVisible) {
+                UstadDetailField(
+                    imageId = R.drawable.ic_login_24px,
+                    valueText = numMembers,
+                    labelText = stringResource(R.string.class_code),
+                    onClick = {
+                        onClickClassCode(uiState.clazz?.clazzCode ?: "")
+                    }
+                )
+            }
+        }
+
+        item {
+            if (uiState.clazzSchoolUidVisible){
+                UstadDetailField(
+                    imageId = R.drawable.ic_school_black_24dp,
+                    valueText = uiState.clazz?.clazzSchool?.schoolName ?: "",
+                    labelText = null,
+                )
+            }
+        }
+
+        item {
+            if (uiState.clazzDateVisible){
+                UstadDetailField(
+                    imageId = R.drawable.ic_event_black_24dp,
+                    valueText = "$clazzStartTime - $clazzEndTime",
+                    labelText = null,
+                )
+            }
+        }
+
+        item {
+            if (uiState.clazzHolidayCalendarVisible){
+                UstadDetailField(
+                    imageId = R.drawable.ic_event_black_24dp,
+                    valueText = uiState.clazz?.clazzHolidayCalendar?.umCalendarName ?: "",
+                    labelText = null,
+                )
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(20.dp))
+        }
+
+        item {
+            Text(
+                text = stringResource(id = R.string.schedule)
+            )
+        }
+
+        items(
+            items = uiState.scheduleList,
+            key = { Pair(1, it.scheduleUid) }
+        ){ schedule ->
+
+            val fromTimeFormatted = rememberFormattedTime(
+                timeInMs = schedule.sceduleStartTime.toInt()
+            )
+            val toTimeFormatted = rememberFormattedTime(
+                timeInMs = schedule.scheduleEndTime.toInt()
+            )
+            val text = "${messageIdResource(id = schedule.scheduleFrequency)} " +
+                    " ${messageIdResource(schedule.scheduleDay)} " +
+                    " $fromTimeFormatted - $toTimeFormatted "
+
+            ListItem(
+                text = { Text(text) },
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(20.dp))
+        }
+
+        items(
+            items = uiState.courseBlockList,
+            key = { Pair(2, it.cbUid) }
+        ){ courseBlock ->
+
+            CourseBlockListItem(
+                courseBlock = courseBlock,
+                onClickCourseDiscussion = onClickCourseDiscussion,
+                onClickCourseExpandCollapse = onClickCourseExpandCollapse,
+                onClickTextBlock = onClickTextBlock,
+                onClickAssignment = onClickAssignment,
+                onClickContentEntry = onClickContentEntry,
+                onClickDownloadContentEntry = onClickDownloadContentEntry
+            )
+        }
+    }
+}
+
+val ICON_SIZE = 40.dp
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun CourseBlockListItem(
+    courseBlock: CourseBlockWithCompleteEntity,
+    onClickCourseDiscussion: (CourseDiscussion?) -> Unit,
+    onClickCourseExpandCollapse: (CourseBlockWithCompleteEntity) -> Unit,
+    onClickTextBlock: (CourseBlockWithCompleteEntity) -> Unit,
+    onClickAssignment: (ClazzAssignmentWithMetrics?) -> Unit,
+    onClickContentEntry: (
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+    ) -> Unit,
+    onClickDownloadContentEntry: (
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+    ) -> Unit,
+){
+
+    when(courseBlock.cbType){
+        CourseBlock.BLOCK_MODULE_TYPE  -> {
+
+            val trailingIcon = if(courseBlock.expanded)
+                Icons.Default.KeyboardArrowUp
+            else
+                Icons.Default.KeyboardArrowDown
+            ListItem(
+                modifier = Modifier.paddingCourseBlockIndent(courseBlock.cbIndentLevel)
+                    .clickable {
+                        onClickCourseExpandCollapse(courseBlock)
+                    },
+                text = { Text(courseBlock.cbTitle ?: "") },
+                secondaryText = { Text(courseBlock.cbDescription ?: "") },
+                icon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_folder_open_24),
+                        modifier = Modifier.size(ICON_SIZE),
+                        contentDescription = "")
+                },
+                trailing = {
+                    Icon(trailingIcon, contentDescription = "")
+                }
+            )
+        }
+        CourseBlock.BLOCK_DISCUSSION_TYPE -> {
+            ListItem(
+                modifier = Modifier.paddingCourseBlockIndent(courseBlock.cbIndentLevel)
+                    .clickable {
+                        onClickCourseDiscussion(courseBlock.courseDiscussion)
+                    },
+                text = { Text(courseBlock.cbTitle ?: "") },
+                secondaryText = { Text(courseBlock.cbDescription ?: "") },
+                icon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_forum_24),
+                        modifier = Modifier.size(ICON_SIZE),
+                        contentDescription = "")
+                }
+            )
+        }
+        CourseBlock.BLOCK_TEXT_TYPE -> {
+//            val cbDescription = if(courseBlock.cbDescription != null)
+//                Html.fromHtml(courseBlock.cbDescription, HtmlCompat.FROM_HTML_MODE_LEGACY)
+//            else
+//                SpannedString.valueOf("")
+
+            ListItem(
+                modifier = Modifier.paddingCourseBlockIndent(courseBlock.cbIndentLevel)
+                    .clickable {
+                    onClickTextBlock(courseBlock)
+                },
+                text = { Text(courseBlock.cbTitle ?: "") },
+                secondaryText = {  },
+                icon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_title_24),
+                        modifier = Modifier.size(ICON_SIZE),
+                        contentDescription = "")
+                }
+            )
+        }
+        CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
+            courseBlock.assignment?.also {
+                UstadClazzAssignmentListItem(
+                    courseBlock = courseBlock,
+                    onClickAssignment = onClickAssignment
+                )
+            }
+        }
+        CourseBlock.BLOCK_CONTENT_TYPE -> {
+            courseBlock.entry?.also {
+                UstadContentEntryListItem(
+                    contentEntry = it,
+                    onClickContentEntry = onClickContentEntry,
+                    onClickDownloadContentEntry = onClickDownloadContentEntry
+                )
+            }
+        }
+    }
+}
+
+@Composable
+@Preview
+fun ClazzDetailOverviewScreenPreview() {
+    val uiState = ClazzDetailOverviewUiState(
+        clazz = ClazzWithDisplayDetails().apply {
+            clazzDesc = "Description"
+            clazzCode = "abc123"
+            clazzSchoolUid = 1
+            clazzStartTime = ((14 * MS_PER_HOUR) + (30 * MS_PER_MIN)).toLong()
+            clazzEndTime = System.currentTimeMillis()
+            clazzSchool = School().apply {
+                schoolName = "School Name"
+            }
+            clazzHolidayCalendar = HolidayCalendar().apply {
+                umCalendarName = "Holiday Calendar"
+            }
+        },
+        scheduleList = listOf(
+            Schedule().apply {
+                scheduleUid = 1
+                sceduleStartTime = 0
+                scheduleEndTime = 0
+                scheduleFrequency = MessageID.yearly
+                scheduleDay = MessageID.sunday
+            },
+            Schedule().apply {
+                scheduleUid = 2
+                sceduleStartTime = 0
+                scheduleEndTime = 0
+                scheduleFrequency = MessageID.yearly
+                scheduleDay = MessageID.sunday
+            }
+        ),
+        courseBlockList = listOf(
+            CourseBlockWithCompleteEntity().apply {
+                cbUid = 1
+                cbTitle = "Module"
+                cbDescription = "Description"
+                cbType = CourseBlock.BLOCK_MODULE_TYPE
+            },
+            CourseBlockWithCompleteEntity().apply {
+                cbUid = 2
+                cbTitle = "Main discussion board"
+                cbType = CourseBlock.BLOCK_DISCUSSION_TYPE
+            },
+            CourseBlockWithCompleteEntity().apply {
+                cbUid = 3
+                cbDescription = "Description"
+                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                assignment = ClazzAssignmentWithMetrics().apply {
+                    caTitle = "Assignment"
+                    fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
+                    progressSummary = AssignmentProgressSummary().apply {
+                        submittedStudents = 5
+                        markedStudents = 10
+                    }
+                }
+            },
+            CourseBlockWithCompleteEntity().apply {
+                cbUid = 4
+                cbType = CourseBlock.BLOCK_CONTENT_TYPE
+                entry = ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
+                    title = "Content Entry"
+                    scoreProgress = ContentEntryStatementScoreProgress().apply {
+                        success = StatementEntity.RESULT_SUCCESS
+                        progress = 70
+                    }
+                }
+            },
+            CourseBlockWithCompleteEntity().apply {
+                cbUid = 5
+                cbTitle = "Text Block Module"
+                cbDescription = "<pre>\n" +
+                        "            GeeksforGeeks\n" +
+                        "                         A Computer   Science Portal   For Geeks\n" +
+                        "        </pre>"
+                cbType = CourseBlock.BLOCK_TEXT_TYPE
+            }
+        ),
+        clazzCodeVisible = true
+    )
+    MdcTheme {
+        ClazzDetailOverviewScreen(uiState)
+    }
 }

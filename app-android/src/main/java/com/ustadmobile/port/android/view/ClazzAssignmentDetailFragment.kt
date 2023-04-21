@@ -25,7 +25,7 @@ interface ClazzAssignmentDetailFragmentEventHandler {
 
 }
 
-class ClazzAssignmentDetailFragment: UstadDetailFragment<ClazzAssignment>(), ClazzAssignmentDetailView, ClazzDetailFragmentEventHandler {
+class ClazzAssignmentDetailFragment: UstadDetailFragment<ClazzAssignment>(), ClazzAssignmentDetailView {
 
     private var mBinding: FragmentClazzAssignmentDetailBinding? = null
 

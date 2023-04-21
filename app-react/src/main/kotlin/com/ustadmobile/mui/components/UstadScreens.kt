@@ -62,7 +62,7 @@ private val tanstackQueryClient = QueryClient()
 class UstadScreenContextData(
     val onAppUiStateChanged: (AppUiState) -> Unit,
 
-    val muiAppState: StateFlow<MuiAppState>,
+    val muiAppState: StateInstance<MuiAppState>,
 
     val showSnackFunction: SnackBarDispatcher
 ) {
@@ -78,10 +78,9 @@ val UstadScreens = FC<Props> {
     val loaderData = useLoaderData() as UstadScreensLoaderData
     var snack: Snack? by useState { null }
 
-    val muiStateFlow = useMemo(dependencies = emptyArray()) {
-        MutableStateFlow(MuiAppState())
-    }
+    val muiState = useState { MuiAppState() }
 
+    var muiStateVar by muiState
 
 
     UstadScreensContext(
@@ -89,7 +88,7 @@ val UstadScreens = FC<Props> {
             onAppUiStateChanged = {
                 appUiState = it
             },
-            muiAppState = muiStateFlow,
+            muiAppState = muiState,
             showSnackFunction = {
                 snack = it
             },
@@ -125,8 +124,8 @@ val UstadScreens = FC<Props> {
                     Header {
                         this.appUiState = appUiState
                         setAppBarHeight = {
-                            if(muiStateFlow.value.appBarHeight != it) {
-                                muiStateFlow.update { prev -> prev.copy(appBarHeight = it) }
+                            if(muiStateVar.appBarHeight != it) {
+                                muiStateVar = muiStateVar.copy(appBarHeight = it)
                             }
                         }
                     }
