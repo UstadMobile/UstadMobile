@@ -51,7 +51,8 @@ class ClazzEditFragment : UstadBaseMvvmFragment() {
 
     private var bottomSheetOptionList: List<TitleDescBottomSheetOption> = listOf()
 
-    private val viewModel: ClazzEditViewModel by ustadViewModels()
+    private val viewModel: ClazzEditViewModel by ustadViewModels(::ClazzEditViewModel)
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
         viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
@@ -354,6 +355,8 @@ private fun ClazzEditScreen(
 
 
 
+        /*
+         Not currently in use
         item {
             UstadMessageIdOptionExposedDropDownMenuField(
                 value = uiState.entity?.clazzEnrolmentPolicy ?: 0,
@@ -368,6 +371,7 @@ private fun ClazzEditScreen(
                 modifier = Modifier.defaultItemPadding(),
             )
         }
+         */
 
         item {
             UstadClickableTextField(
@@ -435,13 +439,13 @@ private fun ClazzEditBasicDetails(
 
 
         Row {
-            UstadDateEditTextField(
+            UstadDateField(
                 value = uiState.entity?.clazzStartTime ?: 0,
                 modifier = Modifier
                     .weight(1f)
                     .defaultItemPadding(end = 8.dp),
-                label = stringResource(id = R.string.start_date),
-                error = uiState.clazzStartDateError,
+                label = { Text(stringResource(id = R.string.start_date)) } ,
+                //error = uiState.clazzStartDateError,
                 enabled = uiState.fieldsEnabled,
                 timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
                 onValueChange = {
@@ -453,13 +457,13 @@ private fun ClazzEditBasicDetails(
                 }
             )
 
-            UstadDateEditTextField(
+            UstadDateField(
                 value = uiState.entity?.clazzEndTime ?: 0,
                 modifier = Modifier
                     .weight(1f)
                     .defaultItemPadding(start = 8.dp),
-                label = stringResource(id = R.string.end_date).addOptionalSuffix(),
-                error = uiState.clazzEndDateError,
+                label = { Text(stringResource(id = R.string.end_date).addOptionalSuffix()) },
+                //error = uiState.clazzEndDateError,
                 enabled = uiState.fieldsEnabled,
                 timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
                 onValueChange = {

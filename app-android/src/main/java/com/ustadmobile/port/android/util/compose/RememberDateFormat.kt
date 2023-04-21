@@ -20,12 +20,17 @@ fun rememberFormattedDate(
 ): String {
     val context = LocalContext.current
     return remember(timeInMillis, timeZoneId) {
-        DateFormat
-            .getDateFormat(context)
-            .apply {
-                timeZone = TimeZone.getTimeZone(timeZoneId)
-            }
-            .format(Date(timeInMillis))
+        if(timeInMillis > 0 && timeInMillis != Long.MAX_VALUE) {
+            DateFormat
+                .getDateFormat(context)
+                .apply {
+                    timeZone = TimeZone.getTimeZone(timeZoneId)
+                }
+                .format(Date(timeInMillis))
+        }else {
+            ""
+        }
+
     }
 }
 

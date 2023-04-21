@@ -16,6 +16,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 /**
  * Workaround to make a textfield clickable. See
  * https://issuetracker.google.com/issues/172154008
+ *
+ * This needs to change to using a box as per https://caelis.medium.com/jetpack-compose-datepicker-textfield-39808e42646a
  */
 @Composable
 fun UstadClickableTextField(

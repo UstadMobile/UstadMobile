@@ -290,7 +290,11 @@ class ClazzEditViewModel(
     fun onEntityChanged(entity: ClazzWithHolidayCalendarAndSchoolAndTerminology?) {
         _uiState.update { prev ->
             prev.copy(
-                entity = entity
+                entity = entity,
+                clazzEndDateError = updateErrorMessageOnChange(prev.entity?.clazzEndTime,
+                    entity?.clazzEndTime, prev.clazzEndDateError),
+                clazzStartDateError = updateErrorMessageOnChange(prev.entity?.clazzStartTime,
+                    entity?.clazzStartTime, prev.clazzStartDateError)
             )
         }
 

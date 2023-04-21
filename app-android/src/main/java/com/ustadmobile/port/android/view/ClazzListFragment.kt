@@ -57,7 +57,9 @@ import kotlinx.coroutines.launch
 
 class ClazzListFragment(): UstadBaseMvvmFragment() {
 
-    private val viewModel: ClazzListViewModel by ustadViewModels(lookupDestinationName = true)
+    private val viewModel: ClazzListViewModel by ustadViewModels { di, savedStateHandle ->
+        ClazzListViewModel(di, savedStateHandle, "FOO")
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

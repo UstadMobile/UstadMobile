@@ -212,9 +212,6 @@ fun UstadDateEditTextField(
     error: String? = null,
     onValueChange: (Long) -> Unit = {},
 ) {
-    var errorText by remember(error) {
-        mutableStateOf(error)
-    }
 
     val dateFormatted = rememberFormattedDate(
         timeInMillis = value,
@@ -223,13 +220,11 @@ fun UstadDateEditTextField(
 
     val context = LocalContext.current
 
-    UstadTextEditField(
-        value = dateFormatted,
-        label = label,
-        enabled = enabled,
+    UstadClickableTextField(
         modifier = modifier,
-        onValueChange = {},
-        readOnly = true,
+        value = dateFormatted,
+        enabled = enabled,
+        label = { Text(label) },
         onClick = {
             val supportFragmentManager =
                 (context.getActivityContext() as AppCompatActivity)
@@ -251,10 +246,13 @@ fun UstadDateEditTextField(
                         tzInstance[Calendar.MILLISECOND] = 0
 
                         onValueChange(tzInstance.timeInMillis)
-                        errorText = null
                     }
                 }
                 .show(supportFragmentManager, "tag")
+        },
+        readOnly = true,
+        onValueChange = {
+
         }
     )
 }

@@ -32,7 +32,7 @@ fun UstadClazzAssignmentListItem(
 
     courseBlock: CourseBlockWithCompleteEntity,
 
-    onClickAssignment: (ClazzAssignmentWithMetrics?) -> Unit = {}
+    onClick: () -> Unit = { },
 
 ){
 
@@ -44,10 +44,7 @@ fun UstadClazzAssignmentListItem(
 
     ListItem(
         modifier = modifier
-            .clickable {
-                onClickAssignment(assignment)
-            },
-
+            .clickable(onClick = onClick),
         icon = {
             Icon(
                 Icons.Default.AssignmentTurnedIn,

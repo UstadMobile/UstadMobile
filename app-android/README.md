@@ -66,3 +66,7 @@ class GetOfflineAuthActivityResultContract: ActivityResultContract<String?, GetT
     }
 }
 ```
+
+### Known issues
+* Collapsing toolbar / coordinator layout does not work with Jetpack compose views: see https://developer.android.com/reference/kotlin/androidx/compose/ui/input/nestedscroll/package-summary 
+and https://issuetracker.google.com/issues/174348612

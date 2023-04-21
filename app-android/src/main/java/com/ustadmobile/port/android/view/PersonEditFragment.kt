@@ -36,8 +36,7 @@ import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 class PersonEditFragment: UstadBaseMvvmFragment() {
 
-    private val viewModel: PersonEditViewModel by ustadViewModels()
-
+    private val viewModel: PersonEditViewModel by ustadViewModels(::PersonEditViewModel)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

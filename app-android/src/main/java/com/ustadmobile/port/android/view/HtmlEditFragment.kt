@@ -19,7 +19,7 @@ import com.ustadmobile.port.android.view.composable.AztecEditor
 
 class HtmlEditFragment: UstadBaseMvvmFragment() {
 
-    val viewModel: HtmlEditViewModel by ustadViewModels()
+    val viewModel: HtmlEditViewModel by ustadViewModels(::HtmlEditViewModel)
 
     override fun onCreateView(
         inflater: LayoutInflater,
