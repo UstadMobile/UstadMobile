@@ -19,7 +19,11 @@ import csstype.*
 import js.core.jso
 import mui.icons.material.CheckBoxOutlineBlank
 import mui.icons.material.CheckBoxOutlined
-import mui.material.*
+import mui.material.Stack
+import mui.material.StackDirection
+import mui.material.Typography
+import mui.material.Container
+import mui.material.Icon
 import mui.system.responsive
 import mui.system.sx
 import org.w3c.dom.HTMLElement
@@ -145,10 +149,8 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 
                                 sx {
                                     width = 60.px
-                                    if (scrollX > index){
-//                                        position = Position.absolute
-//                                        marginLeft = -(44*index).px
-                                        color = Color("#006400")
+                                    if (scrollX > (index*60)){
+                                        color = Color("#00000000")
                                     }
                                 }
                                 if (bool?.completed == true){
@@ -192,18 +194,23 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                                 transform = rotate(270.deg)
                                 textOverflow = TextOverflow.ellipsis
                                 height = 100.px
-//                                    overflow = Overflow.hidden
-//                        if (scrollX > index){
-//                            position = Position.absolute
-//                            marginLeft = -(44*index).px
-//                            color = Color("000000")
-//                        }
+                                if (scrollX > (index*60)){
+                                    color = Color("#00000000")
+                                }
                             }
 
                             + item.cbTitle
                         }
                     }
                 }
+            }
+
+            Typography {
+                sx {
+                    position = Position.absolute
+                    marginLeft = 0.px
+                }
+               + "$scrollX"
             }
 
             VirtualListOutlet()
