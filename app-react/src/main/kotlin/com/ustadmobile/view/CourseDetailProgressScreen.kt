@@ -16,14 +16,13 @@ import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import csstype.*
+import csstype.PropertyName.Companion.lineClamp
+import csstype.PropertyName.Companion.maxLines
 import js.core.jso
+import kotlinext.js.asJsObject
 import mui.icons.material.CheckBoxOutlineBlank
 import mui.icons.material.CheckBoxOutlined
-import mui.material.Stack
-import mui.material.StackDirection
-import mui.material.Typography
-import mui.material.Container
-import mui.material.Icon
+import mui.material.*
 import mui.system.responsive
 import mui.system.sx
 import org.w3c.dom.HTMLElement
@@ -141,6 +140,8 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 
                     Stack {
                         direction = responsive(StackDirection.row)
+                        justifyContent = JustifyContent.end
+
                         props.uiState.courseBlocks.forEachIndexed { index, item ->
 
                             val bool = person?.results?.first { it.courseBlockUid == item.cbUid}
@@ -171,8 +172,6 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
             sx {
                 width = 100.pct
                 overflowX = Overflow.scroll
-//                display =  Display.flex
-//                alignItems = AlignItems.flexStart
             }
             onScroll = { event ->
                 scrollX = event.target.unsafeCast<HTMLElement>().scrollLeft.toInt()
@@ -180,19 +179,26 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 
             Container {
                 sx {
-                    marginLeft = 360.px
+                    marginLeft = 340.px
                 }
                 Stack {
                     direction = responsive(StackDirection.row)
+                    justifyContent = JustifyContent.end
 
                     props.uiState.courseBlocks.forEachIndexed { index, item ->
 
                         Typography {
 
+
                             sx {
                                 width = 60.px
                                 transform = rotate(270.deg)
                                 textOverflow = TextOverflow.ellipsis
+                                overflow = Overflow.hidden
+                                overflowInline =  Overflow.clip
+//                                asDynamic().maxLines = 0
+//                                asDynamic().WebkitLineClamp = 1
+//                                display = asDynamic().WebkitBox
                                 height = 100.px
                                 if (scrollX > (index*60)){
                                     color = Color("#00000000")
