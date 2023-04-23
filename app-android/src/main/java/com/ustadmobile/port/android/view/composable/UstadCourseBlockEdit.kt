@@ -130,6 +130,7 @@ fun UstadCourseBlockEdit(
 
         UstadDateTimeField(
             value = uiState.courseBlock?.cbDeadlineDate ?: 0,
+            unsetDefault = Long.MAX_VALUE,
             dateLabel = { Text(stringResource(id = R.string.deadline).addOptionalSuffix()) },
             timeLabel = { stringResource(id = R.string.time) },
             timeZoneId = uiState.timeZone,
@@ -145,6 +146,7 @@ fun UstadCourseBlockEdit(
         if (uiState.gracePeriodVisible){
             UstadDateTimeField(
                 value = uiState.courseBlock?.cbGracePeriodDate ?: 0,
+                unsetDefault = Long.MAX_VALUE,
                 dateLabel = { Text(stringResource(id = R.string.end_of_grace_period)) },
                 timeLabel = { stringResource(id = R.string.time) },
                 timeZoneId = uiState.timeZone,

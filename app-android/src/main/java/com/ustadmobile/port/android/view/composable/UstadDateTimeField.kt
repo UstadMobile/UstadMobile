@@ -19,6 +19,7 @@ fun UstadDateTimeField(
     timeZoneId: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    unsetDefault: Long = 0,
     onValueChange: (Long) -> Unit = {},
 ) {
 
@@ -30,7 +31,11 @@ fun UstadDateTimeField(
     }
 
     val timeOfDayInMs = remember(value) {
-        calendar.timeOfDayInMs
+        if(value != unsetDefault) {
+            calendar.timeOfDayInMs
+        }else {
+            0
+        }
     }
 
     val dateInMs = remember(value) {
@@ -44,6 +49,7 @@ fun UstadDateTimeField(
             value = dateInMs,
             label = dateLabel,
             timeZoneId = timeZoneId,
+            unsetDefault = unsetDefault,
             onValueChange = {
                 onValueChange(it + timeOfDayInMs)
             }
