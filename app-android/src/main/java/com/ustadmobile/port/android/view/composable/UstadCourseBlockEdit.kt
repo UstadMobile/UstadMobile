@@ -55,15 +55,19 @@ fun UstadCourseBlockEdit(
             modifier = Modifier.fillMaxWidth().testTag("description")
         )
 
-        UstadDateTimeEditTextField(
+        UstadDateTimeField(
             value = uiState.courseBlock?.cbHideUntilDate ?: 0,
             modifier = Modifier
                 .testTag("hide_until_date")
                 .defaultItemPadding(),
-            dateLabel = stringResource(id = R.string.dont_show_before)
-                .addOptionalSuffix(),
-            timeLabel = stringResource(id = R.string.time),
-            timeZoneId = uiState.timeZone
+            dateLabel = { Text(stringResource(R.string.dont_show_before).addOptionalSuffix()) },
+            timeLabel = { Text(stringResource(R.string.time)) },
+            timeZoneId = uiState.timeZone,
+            onValueChange = {
+                onCourseBlockChange(uiState.courseBlock?.shallowCopy {
+                    cbHideUntilDate = it
+                })
+            }
         )
 
         Text(
@@ -124,21 +128,31 @@ fun UstadCourseBlockEdit(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        UstadDateTimeEditTextField(
+        UstadDateTimeField(
             value = uiState.courseBlock?.cbDeadlineDate ?: 0,
-            dateLabel = stringResource(id = R.string.deadline).addOptionalSuffix(),
-            timeLabel = stringResource(id = R.string.time),
-            timeZoneId = uiState.timeZone
+            dateLabel = { Text(stringResource(id = R.string.deadline).addOptionalSuffix()) },
+            timeLabel = { stringResource(id = R.string.time) },
+            timeZoneId = uiState.timeZone,
+            onValueChange = {
+                onCourseBlockChange(uiState.courseBlock?.shallowCopy {
+                    cbDeadlineDate = it
+                })
+            }
         )
 
         Spacer(modifier = Modifier.height(10.dp))
 
         if (uiState.gracePeriodVisible){
-            UstadDateTimeEditTextField(
+            UstadDateTimeField(
                 value = uiState.courseBlock?.cbGracePeriodDate ?: 0,
-                dateLabel = stringResource(id = R.string.end_of_grace_period),
-                timeLabel = stringResource(id = R.string.time),
-                timeZoneId = uiState.timeZone
+                dateLabel = { Text(stringResource(id = R.string.end_of_grace_period)) },
+                timeLabel = { stringResource(id = R.string.time) },
+                timeZoneId = uiState.timeZone,
+                onValueChange = {
+                    onCourseBlockChange(uiState.courseBlock?.shallowCopy {
+                        cbGracePeriodDate = it
+                    })
+                }
             )
 
             Spacer(modifier = Modifier.height(10.dp))

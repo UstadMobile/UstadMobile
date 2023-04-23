@@ -28,7 +28,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.port.android.util.ext.getActivityContext
+import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.min
@@ -40,7 +40,7 @@ class DateVisualTransformation: VisualTransformation {
     private val mask = "ddmmyyyy"
 
     override fun filter(text: AnnotatedString): TransformedText {
-        val trimmed = if(text.length >= 8) text.substring(0..7) else text.text
+        val trimmed = if(text.length >= mask.length) text.substring(0..7) else text.text
         val output = buildAnnotatedString {
             for (i in 0 until 8) {
                 if(i < trimmed.length) {
@@ -157,9 +157,7 @@ fun UstadDateField(
         trailingIcon = {
             IconButton(
                 onClick = {
-                    val supportFragmentManager =
-                        (context.getActivityContext() as AppCompatActivity)
-                            .supportFragmentManager
+                    val supportFragmentManager = context.getContextSupportFragmentManager()
                     MaterialDatePicker.Builder
                         .datePicker()
                         .apply {
