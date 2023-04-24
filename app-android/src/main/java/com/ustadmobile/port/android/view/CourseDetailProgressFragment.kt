@@ -160,7 +160,6 @@ private fun Modifier.vertical() = layout { measurable, constraints ->
     }
 }
 
-
 private val courseBlockList = (0..10).map {
     CourseBlock().apply {
         cbUid = it.toLong()
