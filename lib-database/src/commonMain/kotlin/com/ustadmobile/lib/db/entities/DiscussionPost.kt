@@ -52,10 +52,15 @@ open class DiscussionPost() {
 
     var discussionPostTitle: String? = null
 
+    //This is the HTML message
     var discussionPostMessage: String? = null
 
     var discussionPostStartDate: Long = 0
 
+    /**
+     * TODO: Rename this to discussionPostDiscussionBlockUid
+     * This indicates if this is the main post or a response to it. 0 means it is the main post.
+     */
     var discussionPostDiscussionTopicUid: Long = 0
 
     var discussionPostVisible: Boolean = true
@@ -65,6 +70,7 @@ open class DiscussionPost() {
     //The person who started this post
     var discussionPostStartedPersonUid: Long = 0
 
+    // The Course Uid
     var discussionPostClazzUid: Long = 0
 
     @LastChangedTime

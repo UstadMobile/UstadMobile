@@ -187,4 +187,23 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     @Update
     abstract suspend fun updateAsync(entity: DiscussionPost): Int
 
+
+
+    @Query("""
+       SELECT
+              DiscussionPost.*,
+              Person.*
+        FROM DiscussionPost
+        LEFT JOIN Person
+          ON DiscussionPost.discussionPostStartedPersonUid = Person.personUid
+        
+       WHERE DiscussionPost.discussionPostDiscussionTopicUid = :entityUid
+              AND CAST(DiscussionPost.discussionPostVisible AS INTEGER) = 1
+              AND CAST(DiscussionPost.discussionPostArchive AS INTEGER) = 0
+              
+    ORDER BY DiscussionPost.discussionPostStartDate DESC
+    """)
+    abstract fun findAllRepliesByPostUidAsFlow(entityUid: Long):
+            Flow<List<DiscussionPostWithPerson>>
+
 }
