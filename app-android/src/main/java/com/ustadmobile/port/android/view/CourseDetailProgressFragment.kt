@@ -97,7 +97,7 @@ private fun CourseDetailProgressScreen(
                                 .vertical()
                                 .rotate(-90f)
                                 .height(25.dp)
-                                .width(60.dp),
+                                .width(80.dp),
                                 overflow = TextOverflow.Ellipsis,
                                 text = courseBlock.cbTitle ?: "")
                         }
@@ -163,7 +163,7 @@ private fun Modifier.vertical() = layout { measurable, constraints ->
 private val courseBlockList = (0..10).map {
     CourseBlock().apply {
         cbUid = it.toLong()
-        cbTitle = "discussion_board"
+        cbTitle = "discussion board"
     }
 }
 
