@@ -167,8 +167,6 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                 overflowY = Overflow.scroll
             }
 
-
-
             content = virtualListContent {
 
                 infiniteQueryPagingItems(
@@ -215,7 +213,9 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 
                                 props.uiState.courseBlocks.forEachIndexed { index, item ->
 
-                                    val bool = person?.results?.first { it.courseBlockUid == item.cbUid}
+                                    val bool = person?.results?.first {
+                                        it.courseBlockUid == item.cbUid
+                                    }
 
                                     Icon {
 
