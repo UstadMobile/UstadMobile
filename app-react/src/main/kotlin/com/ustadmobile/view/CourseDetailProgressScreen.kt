@@ -15,10 +15,27 @@ import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
-import csstype.*
+import csstype.Contain
+import csstype.pct
+import csstype.px
+import csstype.deg
+import csstype.Padding
+import csstype.Color
+import csstype.Height
+import csstype.JustifyContent
+import csstype.translatex
+import csstype.Overflow
+import csstype.rotate
+import csstype.TextOverflow
 import js.core.jso
-import mui.icons.material.*
-import mui.material.*
+import mui.icons.material.CheckBoxOutlineBlank
+import mui.icons.material.CheckBoxOutlined
+import mui.material.Container
+import mui.material.Stack
+import mui.material.Typography
+import mui.material.Icon
+import mui.material.StackDirection
+import mui.material.Box
 import mui.system.responsive
 import mui.system.sx
 import org.w3c.dom.HTMLElement
@@ -69,6 +86,9 @@ private val courseBlockList = (0..10).map {
 val CourseDetailProgressScreenPreview = FC<Props> { props ->
 
     CourseDetailProgressScreenComponent2 {
+
+        + props
+
         uiState = CourseDetailProgressUiState(
             students = { ListPagingSource(personList) },
             courseBlocks = courseBlockList
@@ -230,48 +250,4 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
         }
     }
 
-}
-
-external interface ContentHeaderProps : Props {
-
-    var courseBlocks: List<CourseBlock>
-
-    var scrollX: Int
-
-}
-
-private val ContentHeader = FC <ContentHeaderProps> { props ->
-
-    Container {
-        sx {
-            marginLeft = 240.px
-            marginRight = 60.px
-        }
-        Stack {
-            direction = responsive(StackDirection.row)
-            justifyContent = JustifyContent.end
-
-            props.courseBlocks.forEachIndexed { index, item ->
-
-                Typography {
-
-
-                    sx {
-                        width = 60.px
-                        transform = rotate(270.deg)
-                        textOverflow = TextOverflow.ellipsis
-                        overflow = Overflow.hidden
-                        lineHeight = 1.rem
-                        overflowInline =  Overflow.clip
-                        height = 100.px
-                        if (props.scrollX > (index*60)){
-                            color = Color("#00000000")
-                        }
-                    }
-
-                    + item.cbTitle
-                }
-            }
-        }
-    }
 }
