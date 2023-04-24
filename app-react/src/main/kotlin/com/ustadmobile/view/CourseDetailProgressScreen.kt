@@ -1,8 +1,10 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.core.util.ext.progressBadge
 import com.ustadmobile.core.viewmodel.CourseDetailProgressUiState
 import com.ustadmobile.core.viewmodel.PersonWithResults
 import com.ustadmobile.core.viewmodel.StudentResult
@@ -17,12 +19,13 @@ import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import csstype.*
 import csstype.PropertyName.Companion.lineClamp
+import csstype.PropertyName.Companion.maxInlineSize
 import csstype.PropertyName.Companion.maxLines
 import js.core.jso
 import kotlinext.js.asJsObject
-import mui.icons.material.CheckBoxOutlineBlank
-import mui.icons.material.CheckBoxOutlined
+import mui.icons.material.*
 import mui.material.*
+import mui.material.Badge
 import mui.system.responsive
 import mui.system.sx
 import org.w3c.dom.HTMLElement
@@ -30,6 +33,7 @@ import react.FC
 import react.Props
 import react.create
 import react.useState
+import kotlin.math.ln
 import kotlin.random.Random
 
 external interface CourseDetailProgressProps : Props {
@@ -111,7 +115,6 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 
                 Stack.create {
                     direction = responsive(StackDirection.row)
-                    justifyContent = JustifyContent.spaceBetween
 
                     Stack {
                         direction = responsive(StackDirection.row)
@@ -132,32 +135,38 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 
                         Typography {
                             sx {
-                                width = 300.px
+                                width = 240.px
                             }
                             + "${person?.person?.fullName()}"
                         }
                     }
 
-                    Stack {
-                        direction = responsive(StackDirection.row)
-                        justifyContent = JustifyContent.end
+                    Container {
+                        sx {
+                            marginLeft = 240.px
+                        }
 
-                        props.uiState.courseBlocks.forEachIndexed { index, item ->
+                        Stack {
+                            direction = responsive(StackDirection.row)
+                            justifyContent = JustifyContent.end
 
-                            val bool = person?.results?.first { it.courseBlockUid == item.cbUid}
+                            props.uiState.courseBlocks.forEachIndexed { index, item ->
 
-                            Icon {
+                                val bool = person?.results?.first { it.courseBlockUid == item.cbUid}
 
-                                sx {
-                                    width = 60.px
-                                    if (scrollX > (index*60)){
-                                        color = Color("#00000000")
+                                Icon {
+
+                                    sx {
+                                        width = 60.px
+                                        if (scrollX > (index*60)){
+                                            color = Color("#00000000")
+                                        }
                                     }
-                                }
-                                if (bool?.completed == true){
-                                    + CheckBoxOutlined.create()
-                                } else {
-                                    + CheckBoxOutlineBlank.create()
+                                    if (bool?.completed == true){
+                                        + CheckBoxOutlined.create()
+                                    } else {
+                                        + CheckBoxOutlineBlank.create()
+                                    }
                                 }
                             }
                         }
@@ -177,49 +186,93 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
                 scrollX = event.target.unsafeCast<HTMLElement>().scrollLeft.toInt()
             }
 
-            Container {
-                sx {
-                    marginLeft = 340.px
-                }
-                Stack {
-                    direction = responsive(StackDirection.row)
-                    justifyContent = JustifyContent.end
+            Stack {
+                direction = responsive(StackDirection.row)
 
-                    props.uiState.courseBlocks.forEachIndexed { index, item ->
-
-                        Typography {
-
-
-                            sx {
-                                width = 60.px
-                                transform = rotate(270.deg)
-                                textOverflow = TextOverflow.ellipsis
-                                overflow = Overflow.hidden
-                                overflowInline =  Overflow.clip
-//                                asDynamic().maxLines = 0
-//                                asDynamic().WebkitLineClamp = 1
-//                                display = asDynamic().WebkitBox
-                                height = 100.px
-                                if (scrollX > (index*60)){
-                                    color = Color("#00000000")
-                                }
-                            }
-
-                            + item.cbTitle
+                Box {
+                    Typography {
+                        sx {
+                            width = 290.px
                         }
                     }
                 }
-            }
 
-            Typography {
-                sx {
-                    position = Position.absolute
-                    marginLeft = 0.px
+                Container {
+                    sx {
+                        marginLeft = 240.px
+                    }
+
+                    Stack {
+                        direction = responsive(StackDirection.row)
+                        justifyContent = JustifyContent.end
+
+                        props.uiState.courseBlocks.forEachIndexed { index, item ->
+
+                            Typography {
+
+                                sx {
+                                    width = 60.px
+                                    transform = rotate(270.deg)
+                                    textOverflow = TextOverflow.ellipsis
+                                    overflowInline =  Overflow.clip
+                                    padding = Padding(vertical = 10.px, horizontal = 0.px)
+                                    if (scrollX > (index*60)){
+                                        color = Color("#00000000")
+                                    }
+                                }
+                                + item.cbTitle
+                            }
+                        }
+                    }
                 }
-               + "$scrollX"
+
             }
 
             VirtualListOutlet()
+        }
+    }
+}
+
+external interface ContentHeaderProps : Props {
+
+    var courseBlocks: List<CourseBlock>
+
+    var scrollX: Int
+
+}
+
+private val ContentHeader = FC <ContentHeaderProps> { props ->
+
+    Container {
+        sx {
+            marginLeft = 240.px
+            marginRight = 60.px
+        }
+        Stack {
+            direction = responsive(StackDirection.row)
+            justifyContent = JustifyContent.end
+
+            props.courseBlocks.forEachIndexed { index, item ->
+
+                Typography {
+
+
+                    sx {
+                        width = 60.px
+                        transform = rotate(270.deg)
+                        textOverflow = TextOverflow.ellipsis
+                        overflow = Overflow.hidden
+                        lineHeight = 1.rem
+                        overflowInline =  Overflow.clip
+                        height = 100.px
+                        if (props.scrollX > (index*60)){
+                            color = Color("#00000000")
+                        }
+                    }
+
+                    + item.cbTitle
+                }
+            }
         }
     }
 }
