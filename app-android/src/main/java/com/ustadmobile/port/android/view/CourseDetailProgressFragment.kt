@@ -116,7 +116,7 @@ private fun CourseDetailProgressScreen(
                     student?.also { onClickStudent(it.person) }
                 },
                 icon = {
-                    UstadPersonAvatar(personUid = 0)
+                    UstadPersonAvatar(personUid = student?.person?.personUid ?: 0)
                 },
                 text = { Text("${student?.person?.fullName()}") },
                 trailing = {
