@@ -1,16 +1,11 @@
 package com.ustadmobile.port.android.view.composable
 
-import android.text.Html
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.toughra.ustadmobile.R
@@ -27,7 +22,6 @@ fun UstadCourseBlockEdit(
     modifier: Modifier = Modifier,
     onCourseBlockChange: (CourseBlock?) -> Unit = {},
     onClickEditDescription: () -> Unit = {},
-    scrollState: ScrollState? = null,
 ){
 
     Column(
@@ -52,7 +46,9 @@ fun UstadCourseBlockEdit(
             html = uiState.courseBlock?.cbDescription ?: "",
             label = stringResource(R.string.description),
             onClick = onClickEditDescription,
-            modifier = Modifier.fillMaxWidth().testTag("description")
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("description")
         )
 
         UstadDateTimeField(
@@ -94,16 +90,20 @@ fun UstadCourseBlockEdit(
             Spacer(modifier = Modifier.width(15.dp))
 
             if (uiState.minScoreVisible){
-                UstadTextEditField(
+                UstadNumberTextField(
                     modifier = Modifier.weight(0.5F),
-                    value = (uiState.courseBlock?.cbMaxPoints ?: 0).toString(),
-                    suffixText = stringResource(id = R.string.points),
-                    label = stringResource(id = R.string.points),
+                    value = (uiState.courseBlock?.cbMaxPoints?.toFloat() ?: 0f),
+                    label = { Text(stringResource(R.string.points)) },
                     enabled = uiState.fieldsEnabled,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    onValueChange = { newString ->
+                    trailingIcon = {
+                        Text(
+                            text = stringResource(R.string.points),
+                            modifier = Modifier.padding(end = 16.dp)
+                        )
+                    },
+                    onValueChange = {
                         onCourseBlockChange(uiState.courseBlock?.shallowCopy {
-                            cbMaxPoints = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
+                            cbMaxPoints = it.toInt()
                         })
                     }
                 )
@@ -112,16 +112,20 @@ fun UstadCourseBlockEdit(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        UstadTextEditField(
-            value = (uiState.courseBlock?.cbMaxPoints ?: 0).toString(),
-            suffixText =  stringResource(id = R.string.points),
-            label = stringResource(id = R.string.maximum_points),
-            error = uiState.caStartDateError,
+        UstadNumberTextField(
+            modifier = Modifier.defaultItemPadding().fillMaxWidth(),
+            value = (uiState.courseBlock?.cbMaxPoints?.toFloat() ?: 0f),
+            trailingIcon = {
+                Text(
+                    text = stringResource(R.string.points),
+                    modifier = Modifier.padding(end = 16.dp)
+                )
+            },
+            label = { Text(stringResource(id = R.string.maximum_points)) },
             enabled = uiState.fieldsEnabled,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            onValueChange = { newString ->
+            onValueChange = {
                 onCourseBlockChange(uiState.courseBlock?.shallowCopy {
-                    cbMaxPoints = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
+                    cbMaxPoints = it.toInt()
                 })
             }
         )
@@ -159,16 +163,18 @@ fun UstadCourseBlockEdit(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            UstadTextEditField(
-                value = (uiState.courseBlock?.cbLateSubmissionPenalty ?: 0).toString(),
-                label = stringResource(id = R.string.late_submission_penalty),
-                error = uiState.caStartDateError,
+            UstadNumberTextField(
+                modifier = Modifier.fillMaxWidth().testTag("late_penalty_field"),
+                value = (uiState.courseBlock?.cbLateSubmissionPenalty?.toFloat() ?: 0f),
+                label = { Text(stringResource(id = R.string.late_submission_penalty)) },
+                //error = uiState.caStartDateError,
                 enabled = uiState.fieldsEnabled,
-                suffixText = "%",
-                keyboardOptions =  KeyboardOptions(keyboardType = KeyboardType.Number),
-                onValueChange = { newString ->
+                trailingIcon = {
+                    Text(text = "%", modifier = Modifier.padding(end = 16.dp))
+                },
+                onValueChange = {
                     onCourseBlockChange(uiState.courseBlock?.shallowCopy {
-                        cbLateSubmissionPenalty = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
+                        cbLateSubmissionPenalty = it.toInt()
                     })
                 }
             )

@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view.composable
 
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Column
@@ -21,13 +20,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.android.material.datepicker.MaterialDatePicker
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.util.StringAndSerialNum
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDate
-import com.ustadmobile.port.android.util.ext.getActivityContext
 import java.util.*
 
 @Composable
@@ -202,6 +199,7 @@ fun UstadTextEditPasswordPreview() {
 }
 
 @Composable
+@Deprecated("Should use UstadDateField")
 fun UstadDateEditTextField(
     value: Long,
     label: String,
@@ -225,35 +223,11 @@ fun UstadDateEditTextField(
         value = dateFormatted,
         enabled = enabled,
         label = { Text(label) },
-        onClick = {
-            val supportFragmentManager =
-                (context.getActivityContext() as AppCompatActivity)
-                    .supportFragmentManager
-            MaterialDatePicker.Builder
-                .datePicker()
-                .build()
-                .apply {
-                    addOnPositiveButtonClickListener {
-                        //The MaterialDatePicker will return the time in UTC. We need to adjust this
-                        //for the specified timezone
-                        val utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-                        utcCalendar.timeInMillis = it
-
-                        val tzInstance = Calendar.getInstance(TimeZone.getTimeZone(timeZoneId))
-                        tzInstance.set(utcCalendar[Calendar.YEAR],
-                            utcCalendar[Calendar.MONTH], utcCalendar[Calendar.DAY_OF_MONTH],
-                            0, 0, 0)
-                        tzInstance[Calendar.MILLISECOND] = 0
-
-                        onValueChange(tzInstance.timeInMillis)
-                    }
-                }
-                .show(supportFragmentManager, "tag")
-        },
         readOnly = true,
         onValueChange = {
 
-        }
+        },
+        onClick = { },
     )
 }
 

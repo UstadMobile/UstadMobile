@@ -28,7 +28,6 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.locale.entityconstants.EnrolmentPolicyConstants
 import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
 import com.ustadmobile.core.util.ext.editIconId
 import com.ustadmobile.core.viewmodel.ClazzEditUiState
@@ -327,20 +326,20 @@ private fun ClazzEditScreen(
         }
 
         item {
+            UstadEditHeader(text = stringResource(id = R.string.course_setup))
+        }
+
+        item {
             UstadClickableTextField(
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultItemPadding(),
-                value = uiState.entity?.holidayCalendar?.umCalendarName ?: "",
-                label = { Text(stringResource(id = R.string.holiday_calendar)) },
+                label = { Text(stringResource(id = R.string.timezone)) },
+                value = uiState.entity?.clazzTimeZone ?: "",
+                onClick = onClickTimezone,
                 enabled = uiState.fieldsEnabled,
-                onValueChange = {},
-                onClick = onClickHolidayCalendar
+                onValueChange = { }
             )
-        }
-
-        item {
-            UstadEditHeader(text = stringResource(id = R.string.course_setup))
         }
 
         item {
@@ -353,26 +352,6 @@ private fun ClazzEditScreen(
             )
         }
 
-
-
-        /*
-         Not currently in use
-        item {
-            UstadMessageIdOptionExposedDropDownMenuField(
-                value = uiState.entity?.clazzEnrolmentPolicy ?: 0,
-                label = stringResource(R.string.enrolment_policy),
-                options = EnrolmentPolicyConstants.ENROLMENT_POLICY_MESSAGE_IDS,
-                enabled = uiState.fieldsEnabled,
-                onOptionSelected = {
-                    onClazzChanged(uiState.entity?.shallowCopy{
-                        clazzEnrolmentPolicy = it.value
-                    })
-                },
-                modifier = Modifier.defaultItemPadding(),
-            )
-        }
-         */
-
         item {
             UstadClickableTextField(
                 value = uiState.entity?.terminology?.ctTitle ?: "",
@@ -380,7 +359,6 @@ private fun ClazzEditScreen(
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {},
                 onClick = onClickTerminology,
-                onClickEnabled = !reorderLazyListState.listState.isScrollInProgress,
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultItemPadding(),
@@ -410,6 +388,7 @@ private fun ClazzEditBasicDetails(
             value = uiState.entity?.clazzName ?: "",
             label = { Text(stringResource( R.string.name )) },
             enabled = uiState.fieldsEnabled,
+            maxLines = 1,
             onValueChange = {
                 onClazzChanged(
                     uiState.entity?.shallowCopy {
@@ -425,18 +404,6 @@ private fun ClazzEditBasicDetails(
             onClick = onClickEditDescription,
             modifier = Modifier.fillMaxWidth().testTag("description")
         )
-
-        UstadClickableTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultItemPadding(),
-            value = uiState.entity?.school?.schoolName ?: "",
-            label = { Text(stringResource(id = R.string.institution)) },
-            enabled = uiState.fieldsEnabled,
-            onClick = onClickSchool,
-            onValueChange = {}
-        )
-
 
         Row {
             UstadDateField(
@@ -476,17 +443,7 @@ private fun ClazzEditBasicDetails(
             )
         }
 
-        UstadClickableTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultItemPadding(),
-            label = { Text(stringResource(id = R.string.timezone)) },
-            value = uiState.entity?.clazzTimeZone ?: "",
-            onClick = onClickTimezone,
-            onClickEnabled = !reorderLazyListState.listState.isScrollInProgress,
-            enabled = uiState.fieldsEnabled,
-            onValueChange = { }
-        )
+
     }
 }
 
@@ -567,6 +524,7 @@ fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
     ClazzEditScreen(
         uiState = uiState,
         onClazzChanged = viewModel::onEntityChanged,
+        onClickTimezone = viewModel::onClickTimezone,
         onCheckedAttendance = viewModel::onCheckedAttendanceChanged,
         onClickEditDescription = viewModel::onClickEditDescription,
         onClickAddSchedule = viewModel::onClickAddSchedule,
