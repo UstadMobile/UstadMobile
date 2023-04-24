@@ -1,15 +1,7 @@
 package com.ustadmobile.port.android.view
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.paging.compose.items
 import androidx.compose.material.ExperimentalMaterialApi
@@ -26,25 +18,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.viewmodel.CourseDetailProgressUiState
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.view.composable.UstadPersonAvatar
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.PersonWithResults
-import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
-
-private val resultList = (0..10).map {
-    PersonWithDisplayDetails().apply {
-        firstNames = "Person"
-        lastName = "$it"
-        personUid = it.toLong()
-    }
-}
+import com.ustadmobile.core.viewmodel.StudentResult
+import com.ustadmobile.lib.db.entities.CourseBlock
+import kotlin.random.Random
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -75,29 +62,34 @@ private fun CourseDetailProgressScreen(
 
         stickyHeader {
 
-
-            Box(Modifier
-                .fillMaxWidth()
-                .defaultItemPadding(),
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.TopEnd
             ){
 
                 Box(
-                    modifier = Modifier.width(120.dp)
-                        .height(120.dp)
+                    modifier = Modifier
+                        .width(120.dp)
+                        .height(90.dp)
                 ) {
-                    Row(modifier = Modifier.horizontalScroll(scrollState)
-                        .height(120.dp),
+                    Row(modifier = Modifier
+                        .horizontalScroll(scrollState)
+                        .height(90.dp)
+                        .background(Color.White),
                         verticalAlignment = Alignment.Bottom
                     ) {
-//                        uiState.results.forEach { result ->
-//                            Text(modifier = Modifier
-//                                .vertical()
-//                                    .rotate(-90f)
-//                                .height(25.dp),
-//                                overflow = TextOverflow.Ellipsis,
-//                                text = result)
-//                        }
+                        uiState.courseBlocks.forEach { courseBlock ->
+                            Text(modifier = Modifier
+                                .vertical()
+                                .rotate(-90f)
+                                .height(25.dp)
+                                .width(60.dp),
+                                overflow = TextOverflow.Ellipsis,
+                                text = courseBlock.cbTitle ?: "")
+                        }
                     }
                 }
             }
@@ -121,9 +113,18 @@ private fun CourseDetailProgressScreen(
                         Row(modifier = Modifier
                             .horizontalScroll(scrollState)) {
 
-                            student?.results?.forEach { result ->
+                            uiState.courseBlocks.forEach { courseBlock ->
+
+                                val bool = student?.results?.first {
+                                    it.courseBlockUid == courseBlock.cbUid
+                                }
+
                                 Icon(
-                                    Icons.Outlined.CheckBox,
+                                    imageVector = if (bool?.completed == true){
+                                        Icons.Outlined.CheckBox
+                                    } else {
+                                        Icons.Outlined.CheckBoxOutlineBlank
+                                    },
                                     contentDescription = "",
                                     modifier = Modifier.defaultMinSize()
                                 )
@@ -138,75 +139,6 @@ private fun CourseDetailProgressScreen(
     }
 }
 
-//    LazyColumn(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .defaultScreenPadding(),
-//    ) {
-//
-//        stickyHeader {
-//
-////            LazyRow(
-////                modifier = Modifier
-////                    .defaultItemPadding()
-////                    .padding(start = 40.dp),
-////                state = stateRowX,
-////                userScrollEnabled = false
-////            ) {
-////                items(
-////                    items = uiState.results,
-////                ){ result ->
-////                    CheckBoxTitle(text = result)
-////                }
-////            }
-//
-//        }
-//
-//        items(
-//            items = uiState.students,
-//            key = { student -> student.personUid }
-//        ){ student ->
-//            ListItem(
-//                modifier = Modifier.clickable {
-//                    onClickStudent(student)
-//                },
-//                icon = {
-//                    UstadPersonAvatar(personUid = 0)
-//                },
-//                text = { Text(student.fullName()) },
-//                trailing = {
-//
-////                    LazyRow(
-////                        state = stateRowY,
-////                        userScrollEnabled = false
-////                    ) {
-////                        items(
-////                            items = uiState.results,
-////                        ){ _ ->
-////                            Icon(
-////                                Icons.Outlined.CheckBox,
-////                                contentDescription = "",
-////                                modifier = Modifier.defaultMinSize()
-////                            )
-////                        }
-////                    }
-//                }
-//            )
-//        }
-//    }
-//}
-
-@Composable
-private fun CheckBoxTitle(
-    text: String
-){
-    Text(
-        modifier = Modifier.vertical()
-            .rotate(-90f)
-            .height(22.dp),
-        text = text)
-}
-
 private fun Modifier.vertical() = layout { measurable, constraints ->
     val placeable = measurable.measure(constraints)
     layout(placeable.height, placeable.width) {
@@ -217,111 +149,43 @@ private fun Modifier.vertical() = layout { measurable, constraints ->
     }
 }
 
+
+private val courseBlockList = (0..10).map {
+    CourseBlock().apply {
+        cbUid = it.toLong()
+        cbTitle = "discussion_board"
+    }
+}
+
+private val resultList = (0..10).map {
+
+    val randomBoolean = Random.nextBoolean()
+    StudentResult(
+        personUid = 0,
+        courseBlockUid = it.toLong(),
+        clazzUid = 0,
+        completed = randomBoolean
+    )
+}
+
+val personList = (0..150).map {
+    PersonWithResults(
+        results = resultList,
+        person = Person().apply {
+            personUid = it.toLong()
+            firstNames = "Person $it"
+            lastName = "Simpson"
+        }
+    )
+}
+
 @Composable
 @Preview
 fun CourseDetailProgressScreenPreview() {
 
     val uiState = CourseDetailProgressUiState(
-        students = {
-            ListPagingSource(listOf(
-                PersonWithResults(
-                    results = listOf(),
-                    person = Person().apply {
-                        personUid = 1
-                        firstNames = "Bart"
-                        lastName = "Simpson"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(),
-                    person = Person().apply {
-                        personUid = 2
-                        firstNames = "Shelly"
-                        lastName = "Mackleberry"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(),
-                    person = Person().apply {
-                        personUid = 3
-                        firstNames = "Tracy"
-                        lastName = "Mackleberry"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(),
-                    person = Person().apply {
-                        personUid = 4
-                        firstNames = "Nelzon"
-                        lastName = "Muntz"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(),
-                    person = Person().apply {
-                        personUid = 5
-                        firstNames = "Nelzon"
-                        lastName = "Muntz"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(),
-                    person = Person().apply {
-                        personUid = 6
-                        firstNames = "Nelzon"
-                        lastName = "Muntz"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(),
-                    person = Person().apply {
-                        personUid = 7
-                        firstNames = "Nelzon"
-                        lastName = "Muntz"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(),
-                    person = Person().apply {
-                        personUid = 8
-                        firstNames = "Nelzon"
-                        lastName = "Muntz"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(),
-                    person = Person().apply {
-                        personUid = 9
-                        firstNames = "Nelzon"
-                        lastName = "Muntz"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(),
-                    person = Person().apply {
-                        personUid = 10
-                        firstNames = "Nelzon"
-                        lastName = "Muntz"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(),
-                    person = Person().apply {
-                        personUid = 11
-                        firstNames = "Nelzon"
-                        lastName = "Muntz"
-                    }
-                ),
-                PersonWithResults(
-                    results = listOf(),
-                    person = Person().apply {
-                        personUid = 12
-                        firstNames = "Nelzon"
-                        lastName = "Muntz"
-                    }
-                )
-            ))
-        },
+        students = { ListPagingSource(personList) },
+        courseBlocks = courseBlockList
     )
 
     CourseDetailProgressScreen(uiState)
