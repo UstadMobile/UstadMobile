@@ -51,31 +51,37 @@ fun UstadCourseBlockEdit(
                 .testTag("description")
         )
 
-        UstadDateTimeField(
-            value = uiState.courseBlock?.cbHideUntilDate ?: 0,
-            modifier = Modifier
-                .testTag("hide_until_date")
-                .defaultItemPadding(),
-            dateLabel = { Text(stringResource(R.string.dont_show_before).addOptionalSuffix()) },
-            timeLabel = { Text(stringResource(R.string.time)) },
-            timeZoneId = uiState.timeZone,
-            onValueChange = {
-                onCourseBlockChange(uiState.courseBlock?.shallowCopy {
-                    cbHideUntilDate = it
-                })
-            }
-        )
+        UstadInputFieldLayout(
+            modifier = Modifier.defaultItemPadding(),
+            errorText = uiState.caHideUntilDateError,
+        ) {
+            UstadDateTimeField(
+                value = uiState.courseBlock?.cbHideUntilDate ?: 0,
+                modifier = Modifier
+                    .testTag("hide_until_date"),
+                dateLabel = { Text(stringResource(R.string.dont_show_before).addOptionalSuffix()) },
+                timeLabel = { Text(stringResource(R.string.time)) },
+                timeZoneId = uiState.timeZone,
+                onValueChange = {
+                    onCourseBlockChange(uiState.courseBlock?.shallowCopy {
+                        cbHideUntilDate = it
+                    })
+                }
+            )
+        }
 
-        Text(
-            text = stringResource(R.string.class_timezone_set, uiState.timeZone),
-            modifier = Modifier.padding(start = 16.dp)
-        )
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Row() {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
             UstadMessageIdOptionExposedDropDownMenuField(
-                modifier = Modifier.weight(0.5F),
+                modifier = Modifier
+                    .testTag("completion_criteria")
+                    .fillMaxWidth()
+                    .weight(0.5F)
+                    .defaultItemPadding(end = if (uiState.minScoreVisible) 8.dp else 16.dp),
                 value = uiState.courseBlock?.cbCompletionCriteria ?: 0,
                 label = stringResource(R.string.completion_criteria),
                 options = CompletionCriteriaConstants.COMPLETION_CRITERIA_MESSAGE_IDS,
@@ -87,11 +93,14 @@ fun UstadCourseBlockEdit(
                 enabled = uiState.fieldsEnabled,
             )
 
-            Spacer(modifier = Modifier.width(15.dp))
-
             if (uiState.minScoreVisible){
+                Spacer(modifier = Modifier.width(15.dp))
+
                 UstadNumberTextField(
-                    modifier = Modifier.weight(0.5F),
+                    modifier = Modifier
+                        .testTag("min_score")
+                        .weight(0.5F)
+                        .defaultItemPadding(start = 0.dp),
                     value = (uiState.courseBlock?.cbMaxPoints?.toFloat() ?: 0f),
                     label = { Text(stringResource(R.string.points)) },
                     enabled = uiState.fieldsEnabled,
@@ -113,7 +122,10 @@ fun UstadCourseBlockEdit(
         Spacer(modifier = Modifier.height(10.dp))
 
         UstadNumberTextField(
-            modifier = Modifier.defaultItemPadding().fillMaxWidth(),
+            modifier = Modifier
+                .testTag("max_points")
+                .defaultItemPadding()
+                .fillMaxWidth(),
             value = (uiState.courseBlock?.cbMaxPoints?.toFloat() ?: 0f),
             trailingIcon = {
                 Text(
@@ -132,42 +144,56 @@ fun UstadCourseBlockEdit(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        UstadDateTimeField(
-            value = uiState.courseBlock?.cbDeadlineDate ?: 0,
-            unsetDefault = Long.MAX_VALUE,
-            dateLabel = { Text(stringResource(id = R.string.deadline).addOptionalSuffix()) },
-            timeLabel = { stringResource(id = R.string.time) },
-            timeZoneId = uiState.timeZone,
-            onValueChange = {
-                onCourseBlockChange(uiState.courseBlock?.shallowCopy {
-                    cbDeadlineDate = it
-                })
-            }
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        if (uiState.gracePeriodVisible){
+        UstadInputFieldLayout(
+            modifier = Modifier.defaultItemPadding(),
+            errorText = uiState.caDeadlineError
+        ) {
             UstadDateTimeField(
-                value = uiState.courseBlock?.cbGracePeriodDate ?: 0,
+                modifier = Modifier.testTag("deadline"),
+                value = uiState.courseBlock?.cbDeadlineDate ?: 0,
+                isError = uiState.caDeadlineError != null,
                 unsetDefault = Long.MAX_VALUE,
-                dateLabel = { Text(stringResource(id = R.string.end_of_grace_period)) },
+                dateLabel = { Text(stringResource(id = R.string.deadline).addOptionalSuffix()) },
                 timeLabel = { stringResource(id = R.string.time) },
                 timeZoneId = uiState.timeZone,
                 onValueChange = {
                     onCourseBlockChange(uiState.courseBlock?.shallowCopy {
-                        cbGracePeriodDate = it
+                        cbDeadlineDate = it
                     })
                 }
             )
+        }
 
-            Spacer(modifier = Modifier.height(10.dp))
+
+
+        if (uiState.gracePeriodVisible){
+            UstadInputFieldLayout(
+                modifier = Modifier.defaultItemPadding(),
+                errorText = uiState.caGracePeriodError,
+            ) {
+                UstadDateTimeField(
+                    modifier = Modifier.testTag("grace_period"),
+                    value = uiState.courseBlock?.cbGracePeriodDate ?: 0,
+                    unsetDefault = Long.MAX_VALUE,
+                    dateLabel = { Text(stringResource(id = R.string.end_of_grace_period)) },
+                    timeLabel = { stringResource(id = R.string.time) },
+                    timeZoneId = uiState.timeZone,
+                    onValueChange = {
+                        onCourseBlockChange(uiState.courseBlock?.shallowCopy {
+                            cbGracePeriodDate = it
+                        })
+                    }
+                )
+            }
+
 
             UstadNumberTextField(
-                modifier = Modifier.fillMaxWidth().testTag("late_penalty_field"),
+                modifier = Modifier
+                    .defaultItemPadding()
+                    .fillMaxWidth()
+                    .testTag("late_penalty_field"),
                 value = (uiState.courseBlock?.cbLateSubmissionPenalty?.toFloat() ?: 0f),
                 label = { Text(stringResource(id = R.string.late_submission_penalty)) },
-                //error = uiState.caStartDateError,
                 enabled = uiState.fieldsEnabled,
                 trailingIcon = {
                     Text(text = "%", modifier = Modifier.padding(end = 16.dp))

@@ -101,9 +101,9 @@ fun UstadDateField(
     timeZoneId: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    isError: Boolean = false,
     onValueChange: (Long) -> Unit = {},
     unsetDefault: Long = 0,
-
 ) {
 
     val timeZone = remember(timeZoneId) {
@@ -134,6 +134,7 @@ fun UstadDateField(
         modifier = modifier,
         value = rawValue,
         enabled = enabled,
+        isError = isError,
         onValueChange = {
             val filtered = it.filter { it.isDigit() }
             rawValue = filtered.substring(0, min(filtered.length, 8))
@@ -152,7 +153,7 @@ fun UstadDateField(
         },
         label = label,
         visualTransformation = DateVisualTransformation(),
-        maxLines = 1,
+        singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         trailingIcon = {
             IconButton(

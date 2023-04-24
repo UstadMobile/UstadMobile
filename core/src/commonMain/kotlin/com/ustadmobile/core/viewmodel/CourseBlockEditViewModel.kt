@@ -3,9 +3,7 @@ package com.ustadmobile.core.viewmodel
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadEditView.Companion.DEFAULT_COMMIT_DELAY
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
@@ -23,7 +21,7 @@ data class CourseBlockEditUiState(
 
     val fieldsEnabled: Boolean = true,
 
-    val caStartDateError: String? = null,
+    val caHideUntilDateError: String? = null,
 
     val caDeadlineError: String? = null,
 

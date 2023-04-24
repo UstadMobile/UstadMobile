@@ -384,7 +384,7 @@ class ClazzEditViewModel(
 
         if(initEntity.clazzEndTime <= initEntity.clazzStartTime) {
             _uiState.update { prev ->
-                prev.copy(clazzEndDateError = systemImpl.getString(MessageID.error_start_date_before_clazz_date))
+                prev.copy(clazzEndDateError = systemImpl.getString(MessageID.end_is_before_start))
             }
         }
 

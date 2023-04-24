@@ -91,6 +91,7 @@ fun UstadTimeField(
     label: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    isError: Boolean = false,
     onValueChange: (Int) -> Unit = {},
 ) {
 
@@ -116,6 +117,7 @@ fun UstadTimeField(
         label = label,
         modifier = modifier,
         enabled = enabled,
+        isError = isError,
         onValueChange = {
             val filtered = it.filter { it.isDigit() }
             rawValue = filtered.substring(0, min(filtered.length, 4))
@@ -153,7 +155,7 @@ fun UstadTimeField(
             }
         },
         visualTransformation = TimeVisualTransformation(),
-        maxLines = 1,
+        singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
     )
 

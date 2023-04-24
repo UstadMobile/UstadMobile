@@ -10,7 +10,6 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.onTextChange
-import com.ustadmobile.view.components.UstadEditHeader
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.wrappers.quill.ReactQuill
 import csstype.px
@@ -119,7 +118,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             value = (props.uiState.courseBlock?.cbMaxPoints ?: 0).toString()
             suffixText = strings[MessageID.points]
             label = strings[MessageID.points]
-            error = props.uiState.caStartDateError
+            error = props.uiState.caHideUntilDateError
             enabled = props.uiState.fieldsEnabled
             inputProps = {
                 it.inputMode = InputMode.numeric
@@ -162,7 +161,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             UstadTextEditField {
                 value = (props.uiState.courseBlock?.cbLateSubmissionPenalty ?: 0).toString()
                 label = strings[MessageID.late_submission_penalty]
-                error = props.uiState.caStartDateError
+                error = props.uiState.caHideUntilDateError
                 enabled = props.uiState.fieldsEnabled
                 suffixText = "%"
                 onChange = { newString ->

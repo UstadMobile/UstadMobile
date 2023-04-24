@@ -20,6 +20,8 @@ fun UstadDateTimeField(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     unsetDefault: Long = 0,
+    dateFieldWeight: Float = 0.6f,
+    isError: Boolean = false,
     onValueChange: (Long) -> Unit = {},
 ) {
 
@@ -44,23 +46,25 @@ fun UstadDateTimeField(
 
     Row(modifier = modifier) {
         UstadDateField(
-            modifier = Modifier.weight(0.7f, true)
+            modifier = Modifier.weight(dateFieldWeight, true)
                 .padding(end = 8.dp),
             value = dateInMs,
             label = dateLabel,
             timeZoneId = timeZoneId,
             unsetDefault = unsetDefault,
+            isError = isError,
             onValueChange = {
                 onValueChange(it + timeOfDayInMs)
             }
         )
 
         UstadTimeField(
-            modifier = Modifier.weight(0.3f, true)
+            modifier = Modifier.weight(1 - dateFieldWeight, true)
                 .padding(start= 8.dp),
             value = timeOfDayInMs,
             label = timeLabel,
             enabled = enabled,
+            isError = isError,
             onValueChange =  {
                 onValueChange(it + dateInMs)
             }

@@ -249,59 +249,50 @@ fun <T> UstadExposedDropDownMenuField(
     label: String,
     options: List<T>,
     onOptionSelected: (T) -> Unit,
-    itemText: @Composable (T) -> String,
     modifier: Modifier = Modifier,
-    error: String? = null,
+    isError: Boolean = false,
+    itemText: @Composable (T) -> String,
     enabled: Boolean = true,
 ) {
 
-    var errorText: String? by remember {
-        mutableStateOf(error)
-    }
-
-    UstadEditField(
+    var expanded by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(
+        expanded = expanded,
         modifier = modifier,
-        error = error,
+        onExpandedChange = {
+            expanded = !expanded
+        }
     ) {
-        var expanded by remember { mutableStateOf(false) }
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = {
-                expanded = !expanded
+        OutlinedTextField(
+            value = value?.let { itemText(it) } ?: "",
+            modifier = Modifier.fillMaxWidth(),
+            onValueChange = { },
+            readOnly = true,
+            label = { Text(label) },
+            isError = isError,
+            enabled = enabled,
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(
+                    expanded = expanded
+                )
+            },
+            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded ,
+            onDismissRequest = {
+                expanded = false
             }
         ) {
-            OutlinedTextField(
-                value = value?.let { itemText(it) } ?: "",
-                modifier = Modifier.fillMaxWidth(),
-                onValueChange = { },
-                readOnly = true,
-                label = { Text(label) },
-                isError = errorText != null,
-                enabled = enabled,
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(
-                        expanded = expanded
-                    )
-                },
-                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
-            )
-
-            ExposedDropdownMenu(
-                expanded = expanded ,
-                onDismissRequest = {
-                    expanded = false
-                }
-            ) {
-                options.forEach { option ->
-                    DropdownMenuItem(
-                        onClick = {
-                            expanded = false
-                            errorText = null
-                            onOptionSelected(option)
-                        }
-                    ) {
-                        Text(text = itemText(option))
+            options.forEach { option ->
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        onOptionSelected(option)
                     }
+                ) {
+                    Text(text = itemText(option))
                 }
             }
         }
@@ -315,17 +306,17 @@ fun UstadMessageIdOptionExposedDropDownMenuField(
     options: List<MessageIdOption2>,
     onOptionSelected: (MessageIdOption2) -> Unit,
     modifier: Modifier = Modifier,
-    error: String? = null,
+    isError: Boolean = false,
     enabled: Boolean = true,
 ) {
     UstadExposedDropDownMenuField(
         value = options.firstOrNull { it.value == value },
         label = label,
         options = options,
-        onOptionSelected,
+        onOptionSelected = onOptionSelected,
         itemText = { messageIdResource(id = it.messageId) },
         modifier = modifier,
-        error = error,
+        isError = isError,
         enabled = enabled,
     )
 }
