@@ -1,10 +1,8 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.paging.ListPagingSource
-import com.ustadmobile.core.util.ext.progressBadge
 import com.ustadmobile.core.viewmodel.CourseDetailProgressUiState
 import com.ustadmobile.core.viewmodel.PersonWithResults
 import com.ustadmobile.core.viewmodel.StudentResult
@@ -18,11 +16,7 @@ import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import csstype.*
-import csstype.PropertyName.Companion.lineClamp
-import csstype.PropertyName.Companion.maxInlineSize
-import csstype.PropertyName.Companion.maxLines
 import js.core.jso
-import kotlinext.js.asJsObject
 import mui.icons.material.*
 import mui.material.*
 import mui.material.Badge
@@ -95,142 +89,149 @@ val CourseDetailProgressScreenComponent2 = FC<CourseDetailProgressProps> { props
 
     var scrollX by useState { 0 }
 
-    VirtualList {
-
-        style = jso {
-            height = "calc(100vh - ${muiAppState.appBarHeight+100}px)".unsafeCast<Height>()
+    Container {
+        sx {
             width = 100.pct
-            contain = Contain.strict
-            overflowY = Overflow.scroll
+            overflowX = Overflow.scroll
+        }
+        onScroll = { event ->
+            scrollX = event.target.unsafeCast<HTMLElement>().scrollLeft.toInt()
         }
 
+        Stack {
+            direction = responsive(StackDirection.row)
 
+            Box {
+                Typography {
+                    sx {
+                        width = 315.px
+                    }
+                }
+            }
 
-        content = virtualListContent {
+            Container {
+                sx {
+                    marginLeft = 240.px
+                }
 
-            infiniteQueryPagingItems(
-                items = infiniteQueryResult,
-                key = { it.person.personUid.toString() }
-            ) { person ->
-
-                Stack.create {
+                Stack {
                     direction = responsive(StackDirection.row)
+                    justifyContent = JustifyContent.end
 
-                    Stack {
-                        direction = responsive(StackDirection.row)
-                        spacing = responsive(10.px)
-
-                        sx {
-                            transform = translatex(scrollX.px)
-                        }
-
-                        onClick = {
-                            person?.also { props.onClickStudent(it.person) }
-                        }
-
-                        UstadPersonAvatar {
-
-                            personUid = person?.person?.personUid ?: 0
-                        }
+                    props.uiState.courseBlocks.forEachIndexed { index, item ->
 
                         Typography {
+
                             sx {
-                                width = 240.px
+                                width = 60.px
+                                transform = rotate(270.deg)
+                                textOverflow = TextOverflow.ellipsis
+                                overflowInline =  Overflow.clip
+                                padding = Padding(vertical = 10.px, horizontal = 0.px)
+                                if (scrollX > (index*60)){
+                                    color = Color("#00000000")
+                                }
                             }
-                            + "${person?.person?.fullName()}"
+                            + item.cbTitle
                         }
                     }
+                }
+            }
 
-                    Container {
-                        sx {
-                            marginLeft = 240.px
-                        }
+        }
+
+        VirtualList {
+
+            style = jso {
+                height = "calc(100vh - ${muiAppState.appBarHeight+100}px)".unsafeCast<Height>()
+                width = 100.pct
+                contain = Contain.strict
+                overflowY = Overflow.scroll
+            }
+
+
+
+            content = virtualListContent {
+
+                infiniteQueryPagingItems(
+                    items = infiniteQueryResult,
+                    key = { it.person.personUid.toString() }
+                ) { person ->
+
+                    Stack.create {
+                        direction = responsive(StackDirection.row)
 
                         Stack {
                             direction = responsive(StackDirection.row)
-                            justifyContent = JustifyContent.end
+                            spacing = responsive(10.px)
 
-                            props.uiState.courseBlocks.forEachIndexed { index, item ->
-
-                                val bool = person?.results?.first { it.courseBlockUid == item.cbUid}
-
-                                Icon {
-
-                                    sx {
-                                        width = 60.px
-                                        if (scrollX > (index*60)){
-                                            color = Color("#00000000")
-                                        }
-                                    }
-                                    if (bool?.completed == true){
-                                        + CheckBoxOutlined.create()
-                                    } else {
-                                        + CheckBoxOutlineBlank.create()
-                                    }
-                                }
+                            sx {
+                                transform = translatex(scrollX.px)
                             }
-                        }
-                    }
 
-                }
-            }
-        }
+                            onClick = {
+                                person?.also { props.onClickStudent(it.person) }
+                            }
 
+                            UstadPersonAvatar {
 
-        Container {
-            sx {
-                width = 100.pct
-                overflowX = Overflow.scroll
-            }
-            onScroll = { event ->
-                scrollX = event.target.unsafeCast<HTMLElement>().scrollLeft.toInt()
-            }
-
-            Stack {
-                direction = responsive(StackDirection.row)
-
-                Box {
-                    Typography {
-                        sx {
-                            width = 290.px
-                        }
-                    }
-                }
-
-                Container {
-                    sx {
-                        marginLeft = 240.px
-                    }
-
-                    Stack {
-                        direction = responsive(StackDirection.row)
-                        justifyContent = JustifyContent.end
-
-                        props.uiState.courseBlocks.forEachIndexed { index, item ->
+                                personUid = person?.person?.personUid ?: 0
+                            }
 
                             Typography {
-
                                 sx {
-                                    width = 60.px
-                                    transform = rotate(270.deg)
-                                    textOverflow = TextOverflow.ellipsis
-                                    overflowInline =  Overflow.clip
-                                    padding = Padding(vertical = 10.px, horizontal = 0.px)
-                                    if (scrollX > (index*60)){
-                                        color = Color("#00000000")
-                                    }
+                                    width = 240.px
                                 }
-                                + item.cbTitle
+                                + "${person?.person?.fullName()}"
                             }
                         }
+
+                        Container {
+                            sx {
+                                marginLeft = 240.px
+                            }
+
+                            Stack {
+                                direction = responsive(StackDirection.row)
+                                justifyContent = JustifyContent.end
+
+                                props.uiState.courseBlocks.forEachIndexed { index, item ->
+
+                                    val bool = person?.results?.first { it.courseBlockUid == item.cbUid}
+
+                                    Icon {
+
+                                        sx {
+                                            width = 60.px
+                                            if (scrollX > (index*60)){
+                                                color = Color("#00000000")
+                                            }
+                                        }
+                                        if (bool?.completed == true){
+                                            + CheckBoxOutlined.create()
+                                        } else {
+                                            + CheckBoxOutlineBlank.create()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                     }
                 }
-
             }
 
-            VirtualListOutlet()
+
+            Container {
+                sx {
+                    width = 100.pct
+                    overflowX = Overflow.hidden
+                }
+                VirtualListOutlet()
+            }
         }
     }
+
 }
 
 external interface ContentHeaderProps : Props {
