@@ -53,7 +53,7 @@ class NavControllerAdapter(
                         inclusive = false
                     }
                 }else if(goOptions.popUpToViewName != null) {
-                    popUpTo(resolveViewId(viewName)) {
+                    popUpTo(resolveViewId(goOptions.popUpToViewName)) {
                         inclusive = goOptions.popUpToInclusive
                     }
                 }
