@@ -19,7 +19,6 @@ import csstype.*
 import js.core.jso
 import mui.icons.material.*
 import mui.material.*
-import mui.material.Badge
 import mui.system.responsive
 import mui.system.sx
 import org.w3c.dom.HTMLElement
@@ -27,7 +26,6 @@ import react.FC
 import react.Props
 import react.create
 import react.useState
-import kotlin.math.ln
 import kotlin.random.Random
 
 external interface CourseDetailProgressProps : Props {
