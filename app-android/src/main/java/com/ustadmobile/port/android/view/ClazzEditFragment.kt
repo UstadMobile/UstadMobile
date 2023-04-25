@@ -16,6 +16,7 @@ import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.OneToManyJoinEditListener
+import com.ustadmobile.core.util.ext.setFlag
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.door.lifecycle.LiveData
@@ -30,6 +31,9 @@ interface ClazzEditFragmentEventHandler {
     fun onAddCourseBlockClicked()
 
     fun handleAttendanceClicked(isChecked: Boolean)
+
+    fun handlePasswordlessLoginClicked(isChecked: Boolean)
+
 }
 class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolAndTerminology>(),
         ClazzEdit2View, ClazzEditFragmentEventHandler,
@@ -228,8 +232,19 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
     }
 
     override fun handleAttendanceClicked(isChecked: Boolean) {
-        val clazz = mDataBinding?.clazz
-        clazz?.clazzFeatures = if(isChecked) Clazz.CLAZZ_FEATURE_ATTENDANCE else 0
+        val clazz: ClazzWithHolidayCalendarAndSchoolAndTerminology = mDataBinding?.clazz ?: return
+        clazz.clazzFeatures = clazz.clazzFeatures.setFlag(
+            Clazz.CLAZZ_FEATURE_ATTENDANCE, isChecked
+        )
+        mDataBinding?.clazz = clazz
+    }
+
+    override fun handlePasswordlessLoginClicked(isChecked: Boolean) {
+        val clazz: ClazzWithHolidayCalendarAndSchoolAndTerminology = mDataBinding?.clazz ?: return
+        clazz.clazzFeatures = clazz.clazzFeatures.setFlag(
+            Clazz.CLAZZ_FEATURE_PASSWORDLESS_STUDENT_LOGIN, isChecked
+        )
+
         mDataBinding?.clazz = clazz
     }
 

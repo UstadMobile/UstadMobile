@@ -173,6 +173,7 @@ open class Clazz() {
         const val CLAZZ_FEATURE_ATTENDANCE = 1L
         const val CLAZZ_FEATURE_ACTIVITY = 4L
         const val CLAZZ_FEATURE_CLAZZ_ASSIGNMENT = 8L
+        const val CLAZZ_FEATURE_PASSWORDLESS_STUDENT_LOGIN = 16L
 
         const val CLAZZ_CODE_DEFAULT_LENGTH = 6
 

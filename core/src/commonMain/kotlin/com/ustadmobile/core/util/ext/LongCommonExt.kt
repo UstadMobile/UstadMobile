@@ -14,3 +14,19 @@ fun Long.hasFlag(flag: Long): Boolean {
     return (this and flag) == flag
 }
 
+fun Long.removeFlag(flag: Long): Long {
+    return if(hasFlag(flag)){
+        this - flag
+    }else {
+        this
+    }
+}
+
+fun Long.setFlag(flag: Long, enabled: Boolean) : Long {
+    return removeFlag(flag).let {
+        if(enabled)
+            (it or flag)
+        else
+            it
+    }
+}

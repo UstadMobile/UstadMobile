@@ -401,6 +401,20 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_setup_heading" />
 
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/activity_clazz_edit_student_passwordless_switch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/dimen_20dp"
+                android:enabled="@{fieldsEnabled}"
+                android:text="@string/allow_no_password_single_sign_on"
+                android:checked="@{(clazz.clazzFeatures &amp; Clazz.CLAZZ_FEATURE_PASSWORDLESS_STUDENT_LOGIN) == Clazz.CLAZZ_FEATURE_PASSWORDLESS_STUDENT_LOGIN}"
+                android:onCheckedChanged="@{(view, isChecked) -> activityEventHandler.handlePasswordlessLoginClicked(isChecked)}"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_attendance_switch" />
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/clazz_enrolment_policy"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -411,7 +425,7 @@
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_attendance_switch">
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_student_passwordless_switch">
 
                 <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:layout_width="match_parent"
