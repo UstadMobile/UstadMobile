@@ -17,10 +17,10 @@ import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
-import com.ustadmobile.mui.common.Sizes
-import com.ustadmobile.mui.common.justifyContent
+import com.ustadmobile.mui.common.*
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.mui.components.UstadListSortHeader
+import com.ustadmobile.mui.components.UstadRawHtml
 import com.ustadmobile.util.colorForAttendanceStatus
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
@@ -295,7 +295,17 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
                         }
 
                         Typography {
-                            + (props.clazzItem?.clazzDesc ?: "")
+                            sx {
+                                webKitLineClamp = 2
+                                display = DisplayWebkitBox
+                                webkitBoxOrient = "vertical"
+                                overflow = Overflow.hidden
+                                textOverflow = TextOverflow.ellipsis
+                            }
+
+                            UstadRawHtml {
+                                html = (props.clazzItem?.clazzDesc ?: "")
+                            }
                         }
                     }
 

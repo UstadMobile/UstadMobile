@@ -1,6 +1,7 @@
 package com.ustadmobile.mui.common
 
 import csstype.Cursor
+import csstype.Display
 import csstype.JustifyContent
 import csstype.PropertiesBuilder
 import js.core.jso
@@ -184,3 +185,19 @@ inline var PropertiesBuilder.inputCursor: Cursor?
             }
         }
     }
+
+
+inline var PropertiesBuilder.webKitLineClamp: Int
+    get() = asDynamic()["-webkit-line-clamp"]
+    set(value) {
+        asDynamic()["-webkit-line-clamp"] = value
+    }
+
+val DisplayWebkitBox = "-webkit-box".unsafeCast<Display>()
+
+inline var PropertiesBuilder.webkitBoxOrient: String
+    get() = asDynamic()["-webkit-box-orient"]
+    set(value) {
+        asDynamic()["-webkit-box-orient"] = value
+    }
+

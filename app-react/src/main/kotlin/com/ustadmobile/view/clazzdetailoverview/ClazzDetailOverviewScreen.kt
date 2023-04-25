@@ -16,6 +16,7 @@ import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.UstadDetailField
+import com.ustadmobile.mui.components.UstadRawHtml
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -86,8 +87,11 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
                     direction = responsive(StackDirection.column)
                     spacing = responsive(10.px)
 
+
                     Typography{
-                        + (props.uiState.clazz?.clazzDesc ?: "")
+                        UstadRawHtml {
+                            html = (props.uiState.clazz?.clazzDesc ?: "")
+                        }
                     }
 
                     UstadDetailField {
@@ -118,6 +122,7 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
                         UstadDetailField {
                             icon = Event.create()
                             valueText = ReactNode(clazzDateRangeFormatted)
+                            labelText = "${strings[MessageID.start_date]} - ${strings[MessageID.end_date]}"
                         }
                     }
 

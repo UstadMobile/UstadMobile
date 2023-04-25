@@ -164,7 +164,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("DateTimeEdit", "Date Time Edit", DateTimeEditFieldPreview),
     UstadScreen(ClazzDetailView.VIEW_NAME, "Clazz Detail", ClazzDetailScreen),
     UstadScreen(ClazzDetailOverviewView.VIEW_NAME, "Clazz Detail Overview",
-        ClazzDetailOverviewScreenPreview),
+        ClazzDetailOverviewScreen),
     UstadScreen(CourseGroupSetListView.VIEW_NAME, "Clazz Groups",ClazzGroupSetDummy),
 )
 
