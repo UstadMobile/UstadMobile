@@ -1,7 +1,6 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.util.ext.chopOffSeconds
-import com.ustadmobile.door.util.systemTimeInMillis
 import csstype.px
 import js.core.jso
 import kotlinx.datetime.*
@@ -18,7 +17,7 @@ import web.html.InputType
  * datetime input format because DateTimePicker on MUI 5 doesn't work as expected (this should
  * be fixed in MUI6).
  */
-external interface UstadDateTimeEditFieldProps: PropsWithSx {
+external interface UstadDateTimeFieldProps: PropsWithSx {
     /**
      * The value as time in millis since 1970
      */
@@ -34,7 +33,7 @@ external interface UstadDateTimeEditFieldProps: PropsWithSx {
     /**
      * Field label
      */
-    var label: String
+    var label: ReactNode?
 
     /**
      * onChange function. Will provide the selected time in milliseconds since 1970
@@ -42,14 +41,16 @@ external interface UstadDateTimeEditFieldProps: PropsWithSx {
     var onChange: (Long) -> Unit
 
     /**
-     * Error text to show, if any
+     * True if is error, false otherwise
      */
-    var error: String?
+    var error: Boolean?
+
+    var helperText: ReactNode?
 
     /**
      * Set to false to disable. Default (null) will set the component as enabled.
      */
-    var enabled: Boolean?
+    var disabled: Boolean?
 
     var id: String?
 
@@ -64,7 +65,7 @@ external interface UstadDateTimeEditFieldProps: PropsWithSx {
 
 }
 
-val UstadDateTimeEditField = FC<UstadDateTimeEditFieldProps> { props ->
+val UstadDateTimeField = FC<UstadDateTimeFieldProps> { props ->
 
     fun Long.timeToIsoDateTimeInputFieldString(): String {
         return if(this != (props.unsetDefault ?: 0L)) {
@@ -95,13 +96,16 @@ val UstadDateTimeEditField = FC<UstadDateTimeEditFieldProps> { props ->
 
     TextField {
         type = InputType.datetimeLocal
-        label = ReactNode(props.label)
+        label = props.label
+        helperText = props.helperText
         value = rawValue
         InputLabelProps = jso {
             shrink = true
         }
         id = props.id
         fullWidth = props.fullWidth
+        disabled = props.disabled
+        error = props.error
         sx = props.sx
         onChange = {
             val targetElValue = (it.target as HTMLInputElement).value
@@ -120,17 +124,16 @@ val UstadDateTimeEditField = FC<UstadDateTimeEditFieldProps> { props ->
 
 val DateTimeEditFieldPreview = FC<Props> {
     var dateTime: Long by useState { 0 }
-    UstadDateTimeEditField {
+    UstadDateTimeField {
         sx {
             margin = 20.px
         }
         timeInMillis = dateTime
         timeZoneId = TimeZone.currentSystemDefault().id
-        label = "Date and time"
+        label = ReactNode("Date and time")
         onChange = {
             dateTime = it
         }
-        enabled = true
     }
 
 }
