@@ -46,10 +46,7 @@ import com.ustadmobile.port.android.util.compose.rememberFormattedDateRange
 import com.ustadmobile.port.android.util.compose.rememberFormattedTime
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
-import com.ustadmobile.port.android.view.composable.UstadClazzAssignmentListItem
-import com.ustadmobile.port.android.view.composable.UstadContentEntryListItem
-import com.ustadmobile.port.android.view.composable.UstadDetailField
-import com.ustadmobile.port.android.view.composable.paddingCourseBlockIndent
+import com.ustadmobile.port.android.view.composable.*
 
 interface ClazzDetailOverviewEventListener {
     fun onClickClassCode(code: String?)
@@ -141,10 +138,9 @@ private fun ClazzDetailOverviewScreen(
             .fillMaxSize()
             .defaultScreenPadding()
     ){
-
         item {
-            Text(
-                text = uiState.clazz?.clazzDesc ?: "",
+            HtmlText(
+                html = uiState.clazz?.clazzDesc ?: "",
                 modifier = Modifier.defaultItemPadding()
             )
         }
