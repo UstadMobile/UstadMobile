@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -45,6 +46,7 @@ import org.burnoutcrew.reorderable.*
 import java.util.*
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
 import com.ustadmobile.port.android.view.ClazzEditFragment.Companion.ADD_COURSE_BLOCK_OPTIONS
+import kotlinx.parcelize.Parcelize
 
 class ClazzEditFragment : UstadBaseMvvmFragment() {
 
@@ -142,6 +144,17 @@ class ClazzEditFragment : UstadBaseMvvmFragment() {
 }
 
 
+@Parcelize
+class CourseBlockKey(val cbUid: Long): Parcelable {
+    override fun equals(other: Any?): Boolean {
+        return other === this || (other as? CourseBlockKey)?.cbUid == cbUid
+    }
+
+    override fun hashCode(): Int {
+        return cbUid.hashCode()
+    }
+}
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ClazzEditScreen(
@@ -166,16 +179,18 @@ private fun ClazzEditScreen(
     onClickDeleteBlockPopupMenu: (CourseBlockWithEntity) -> Unit = {},
 ) {
 
-    val courseBlockKeys : List<Long> by remember(uiState.courseBlockList) {
-        derivedStateOf { uiState.courseBlockList.map { it.cbUid } }
-    }
+    //The number of items in the LazyColumn before the start of CourseBlocks
+    val courseBlockIndexOffset = 3
 
     val reorderLazyListState = rememberReorderableLazyListState(
         onMove = { from, to ->
-            onMoveCourseBlock(from, to)
+            onMoveCourseBlock(
+                ItemPosition(from.index - courseBlockIndexOffset, from.key),
+                ItemPosition(to.index - courseBlockIndexOffset, to.key),
+            )
         },
         canDragOver = { draggedOver, dragging ->
-            draggedOver.key in courseBlockKeys
+            draggedOver.key is CourseBlockKey
         },
         onDragEnd = { start, end  ->
             //validate the result
@@ -227,12 +242,11 @@ private fun ClazzEditScreen(
 
         items (
             items = uiState.courseBlockList,
-            key = { it.cbUid }
+            key = {  CourseBlockKey(it.cbUid) }
         ) { courseBlock ->
-
             val courseBlockEditAlpha: Float = if (courseBlock.cbHidden) 0.5F else 1F
             val startPadding = ((courseBlock.cbIndentLevel * 24) + 8).dp
-            ReorderableItem(state = reorderLazyListState, key = courseBlock.cbUid) { dragging ->
+            ReorderableItem(state = reorderLazyListState, key = CourseBlockKey(courseBlock.cbUid)) { dragging ->
                 ListItem(
                     modifier = Modifier
                         .clickable {
@@ -294,7 +308,8 @@ private fun ClazzEditScreen(
         }
 
         items(
-            uiState.clazzSchedules
+            uiState.clazzSchedules,
+            key = { it.scheduleUid },
         ){ schedule ->
 
             val fromTimeFormatted = rememberFormattedTime(timeInMs = schedule.sceduleStartTime.toInt())
