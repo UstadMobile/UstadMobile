@@ -46,6 +46,7 @@ import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.material.icons.outlined.LibraryAddCheck
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -459,6 +460,7 @@ private fun PagerView(
                 }
             },
             modifier = Modifier.weight(1F)
+                .testTag("")
         ) {
             Icon(
                 Icons.Default.ArrowBack,
