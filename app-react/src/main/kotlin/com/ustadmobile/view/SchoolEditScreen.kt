@@ -6,14 +6,22 @@ import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.SchoolEditUiState
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.mui.common.inputCursor
+import com.ustadmobile.mui.common.readOnly
+import com.ustadmobile.util.ext.onTextChange
+import csstype.Cursor
 import csstype.px
-import mui.material.*
+import js.core.jso
+import mui.material.Container
+import mui.material.TextField
+import mui.material.FormControlVariant
+import mui.material.Stack
+import mui.material.Box
 import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
-import react.dom.onChange
 import react.useState
 
 external interface SchoolEditScreenProps : Props {
@@ -44,10 +52,9 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
                 value = props.uiState.entity?.schoolName ?: ""
                 label = ReactNode(strings[MessageID.name])
                 disabled = !props.uiState.fieldsEnabled
-                onChange = {
-                    val currentVal = it.target.asDynamic().value
+                onTextChange = {
                     props.onSchoolChanged(props.uiState.entity?.shallowCopy {
-                        schoolName = currentVal?.toString() ?: ""
+                        schoolName = it
                     })
                 }
             }
@@ -58,30 +65,39 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
                 value = props.uiState.entity?.schoolDesc ?: ""
                 label = ReactNode(strings[MessageID.description])
                 disabled = !props.uiState.fieldsEnabled
-                onChange = {
-                    val currentVal = it.target.asDynamic().value
+                onTextChange = {
                     props.onSchoolChanged(props.uiState.entity?.shallowCopy {
-                        schoolDesc = currentVal?.toString() ?: ""
+                        schoolDesc = it
                     })
                 }
             }
 
-            UstadTextEditField {
+            TextField {
+                sx {
+                    inputCursor = Cursor.pointer
+                }
+                id = "schoolTimeZone"
                 value = props.uiState.entity?.schoolTimeZone ?: ""
-                label = strings[MessageID.timezone]
-                enabled = props.uiState.fieldsEnabled
-                readOnly = true
-                onClick = props.onClickTimeZone
-                onChange = { }
+                label = ReactNode(strings[MessageID.timezone])
+                disabled = !props.uiState.fieldsEnabled
+                onClick = { props.onClickTimeZone() }
+                inputProps = jso {
+                    readOnly = true
+                }
             }
 
-            UstadTextEditField {
+            TextField {
+                sx {
+                    inputCursor = Cursor.pointer
+                }
+                id = "umCalendarName"
                 value = props.uiState.entity?.holidayCalendar?.umCalendarName ?: ""
-                label = strings[MessageID.holiday_calendar]
-                enabled = props.uiState.fieldsEnabled
-                readOnly = true
-                onClick = props.onClickHolidayCalendar
-                onChange = { }
+                label = ReactNode(strings[MessageID.holiday_calendar])
+                disabled = !props.uiState.fieldsEnabled
+                onClick = { props.onClickHolidayCalendar() }
+                inputProps = jso {
+                    readOnly = true
+                }
             }
 
             TextField {
@@ -90,10 +106,9 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
                 value = props.uiState.entity?.schoolAddress ?: ""
                 label = ReactNode(strings[MessageID.address])
                 disabled = !props.uiState.fieldsEnabled
-                onChange = {
-                    val currentVal = it.target.asDynamic().value
+                onTextChange = {
                     props.onSchoolChanged(props.uiState.entity?.shallowCopy {
-                        schoolAddress = currentVal?.toString() ?: ""
+                        schoolAddress = it
                     })
                 }
             }
@@ -104,10 +119,9 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
                 value = props.uiState.entity?.schoolPhoneNumber ?: ""
                 label = ReactNode(strings[MessageID.phone_number])
                 disabled = !props.uiState.fieldsEnabled
-                onChange = {
-                    val currentVal = it.target.asDynamic().value
+                onTextChange = {
                     props.onSchoolChanged(props.uiState.entity?.shallowCopy {
-                        schoolPhoneNumber = currentVal?.toString() ?: ""
+                        schoolPhoneNumber = it
                     })
                 }
             }
@@ -118,10 +132,9 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
                 value = props.uiState.entity?.schoolEmailAddress ?: ""
                 label = ReactNode(strings[MessageID.email])
                 disabled = !props.uiState.fieldsEnabled
-                onChange = {
-                    val currentVal = it.target.asDynamic().value
+                onTextChange = {
                     props.onSchoolChanged(props.uiState.entity?.shallowCopy {
-                        schoolEmailAddress = currentVal?.toString() ?: ""
+                        schoolEmailAddress = it
                     })
                 }
             }
