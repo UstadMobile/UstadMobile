@@ -35,6 +35,7 @@ import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.binding.MODE_END_OF_DAY
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
+import com.ustadmobile.port.android.view.composable.UstadClickableTextField
 import com.ustadmobile.port.android.view.composable.UstadInputFieldLayout
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadDateField
@@ -244,10 +245,10 @@ fun ClazzEnrolmentEditScreen(
         )
 
 
-        UstadTextEditField(
+        UstadClickableTextField(
             modifier = Modifier.testTag("leavingReasonTitle"),
             value = uiState.clazzEnrolment?.leavingReason?.leavingReasonTitle ?: "",
-            label = stringResource(id = R.string.leaving_reason),
+            label = { Text(stringResource(id = R.string.leaving_reason)) },
             onValueChange = {},
             enabled = uiState.leavingReasonEnabled,
             onClick = onClickLeavingReason
