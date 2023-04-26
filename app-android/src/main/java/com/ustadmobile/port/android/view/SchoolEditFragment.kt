@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,7 +37,6 @@ import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.lib.db.entities.ScopedGrantAndName
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), SchoolEditView{
 
@@ -144,9 +146,10 @@ private fun SchoolEditScreen(
     )  {
 
         item {
-            UstadTextEditField(
+            OutlinedTextField(
+                modifier = Modifier.testTag("schoolName"),
                 value = uiState.entity?.schoolName ?: "",
-                label = stringResource(id = R.string.name),
+                label = { Text(stringResource(id = R.string.name)) },
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
                     onSchoolChanged(uiState.entity?.shallowCopy{
@@ -157,9 +160,10 @@ private fun SchoolEditScreen(
         }
 
         item {
-            UstadTextEditField(
+            OutlinedTextField(
+                modifier = Modifier.testTag("schoolDesc"),
                 value = uiState.entity?.schoolDesc ?: "",
-                label = stringResource(id = R.string.description),
+                label = { Text(stringResource(id = R.string.description)) },
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
                     onSchoolChanged(uiState.entity?.shallowCopy{
@@ -172,6 +176,7 @@ private fun SchoolEditScreen(
 
         item {
             UstadTextEditField(
+                modifier = Modifier.testTag("schoolTimeZone"),
                 value = uiState.entity?.schoolTimeZone ?: "",
                 label = stringResource(id = R.string.timezone),
                 enabled = uiState.fieldsEnabled,
@@ -183,6 +188,7 @@ private fun SchoolEditScreen(
 
         item {
             UstadTextEditField(
+                modifier = Modifier.testTag("umCalendarName"),
                 value = uiState.entity?.holidayCalendar?.umCalendarName ?: "",
                 label = stringResource(id = R.string.holiday_calendar),
                 enabled = uiState.fieldsEnabled,
@@ -193,9 +199,10 @@ private fun SchoolEditScreen(
         }
 
         item {
-            UstadTextEditField(
+            OutlinedTextField(
+                modifier = Modifier.testTag("schoolAddress"),
                 value = uiState.entity?.schoolAddress ?: "",
-                label = stringResource(id = R.string.address),
+                label = { Text(stringResource(id = R.string.address)) },
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
                     onSchoolChanged(uiState.entity?.shallowCopy{
@@ -210,9 +217,10 @@ private fun SchoolEditScreen(
         }
 
         item {
-            UstadTextEditField(
+            OutlinedTextField(
+                modifier = Modifier.testTag("schoolPhoneNumber"),
                 value = uiState.entity?.schoolPhoneNumber ?: "",
-                label = stringResource(id = R.string.phone_number),
+                label = { Text(stringResource(id = R.string.phone_number)) },
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
                     onSchoolChanged(uiState.entity?.shallowCopy{
@@ -223,9 +231,10 @@ private fun SchoolEditScreen(
         }
 
         item {
-            UstadTextEditField(
+            OutlinedTextField(
+                modifier = Modifier.testTag("schoolEmailAddress"),
                 value = uiState.entity?.schoolEmailAddress ?: "",
-                label = stringResource(id = R.string.email),
+                label = { Text(stringResource(id = R.string.email)) },
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
                     onSchoolChanged(uiState.entity?.shallowCopy{
@@ -251,7 +260,7 @@ fun SchoolEditScreenPreview() {
             schoolEmailAddress = "info@schoola.com"
         },
     )
-    MdcTheme {
-        SchoolEditScreen(uiState)
-    }
+
+    SchoolEditScreen(uiState)
+
 }
