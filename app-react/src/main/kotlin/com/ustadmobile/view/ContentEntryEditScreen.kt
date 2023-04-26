@@ -33,7 +33,6 @@ import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
-import react.dom.onChange
 
 external interface ContentEntryEditScreenProps : Props {
 
@@ -259,7 +258,6 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
                 onClick = {
                     props.onClickLanguage()
                 }
-                onChange = {}
             }
         }
     }
