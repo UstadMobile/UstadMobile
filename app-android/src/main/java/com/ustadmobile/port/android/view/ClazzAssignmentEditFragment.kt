@@ -42,7 +42,10 @@ import com.ustadmobile.port.android.util.compose.rememberCourseTerminologyEntrie
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.binding.isSet
-import com.ustadmobile.port.android.view.composable.*
+import com.ustadmobile.port.android.view.composable.UstadCourseBlockEdit
+import com.ustadmobile.port.android.view.composable.UstadNumberTextField
+import com.ustadmobile.port.android.view.composable.UstadSwitchField
+import com.ustadmobile.port.android.view.composable.UstadExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 
 
@@ -518,9 +521,9 @@ private fun ClazzAssignmentEditScreen(
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
-                    modifier = Modifier
-                        .weight(0.7F)
+                UstadInputFieldLayout(
+                    modifier = Modifier.weight(0.7F),
+                    errorText = uiState.reviewerCountError,
                 ) {
                     UstadNumberTextField(
                         modifier = Modifier
@@ -538,10 +541,6 @@ private fun ClazzAssignmentEditScreen(
                                 })
                         },
                     )
-
-                    uiState.reviewerCountError?.also {
-                        UstadErrorText(error = it)
-                    }
                 }
 
                 OutlinedButton(
