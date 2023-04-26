@@ -109,8 +109,10 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
 
             if (props.uiState.updateContentVisible){
                 Button {
+                    id = "updateContentButton"
                     onClick = { props.onClickUpdateContent }
                     variant = ButtonVariant.contained
+                    disabled = !props.uiState.fieldsEnabled
 
                     + strings[MessageID.update_content].uppercase()
                 }
@@ -127,10 +129,12 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
             }
 
             TextField {
+                id = "title"
                 variant = FormControlVariant.outlined
                 value = props.uiState.entity?.title ?: ""
                 label = ReactNode(strings[MessageID.title])
                 error = props.uiState.titleError != null
+                helperText = props.uiState.titleError?.let { ReactNode(it) }
                 disabled = !props.uiState.fieldsEnabled
                 onTextChange = {
                     props.onContentChanged(
@@ -142,6 +146,7 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
             }
 
             TextField {
+                id = "description"
                 variant = FormControlVariant.outlined
                 value = props.uiState.entity?.description ?: ""
                 label = ReactNode(strings[MessageID.description])
@@ -161,6 +166,7 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
             }
 
             TextField {
+                id = "author"
                 variant = FormControlVariant.outlined
                 value = props.uiState.entity?.author ?: ""
                 label = ReactNode(strings[MessageID.entry_details_author])
@@ -175,6 +181,7 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
             }
 
             TextField {
+                id = "publisher"
                 variant = FormControlVariant.outlined
                 value = props.uiState.entity?.publisher ?: ""
                 label = ReactNode(strings[MessageID.entry_details_publisher])
@@ -189,9 +196,11 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
             }
 
             UstadMessageIdSelectField {
+                id = "licenseType"
                 value = props.uiState.entity?.licenseType ?: 0
                 options = LicenceConstants.LICENSE_MESSAGE_IDS
                 label = strings[MessageID.licence]
+                enabled = props.uiState.fieldsEnabled
                 id = (props.uiState.entity?.licenseType ?: 0).toString()
                 onChange = {
                     props.onContentChanged(
@@ -204,9 +213,11 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
 
             if (props.uiState.containerStorageOptionVisible){
                 UstadDropDownField {
+                    id = "selectedContainerStorageDir"
                     value = props.uiState.selectedContainerStorageDir
                     label = strings[MessageID.content_creation_storage_option_title]
                     options = props.uiState.storageOptions
+                    enabled = props.uiState.fieldsEnabled
                     itemLabel = { ReactNode((it as? ContainerStorageDir)?.name ?: "") }
                     itemValue = { (it as? ContainerStorageDir)?.name ?: "" }
                     onChange = {
@@ -217,7 +228,8 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
 
             if (props.uiState.contentCompressVisible){
                 UstadSwitchField {
-                    checked= props.uiState.compressionEnabled ?: false
+                    id = "compressionEnabled"
+                    checked= props.uiState.compressionEnabled
                     onChanged = { props.onChangeCompress(it) }
                     label = strings[MessageID.compress]
                     enabled = props.uiState.fieldsEnabled
@@ -225,6 +237,7 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
             }
 
             UstadSwitchField {
+                id = "publik"
                 checked= props.uiState.entity?.publik ?: false
                 onChanged = { props.onChangePubliclyAccessible(it) }
                 label = strings[MessageID.publicly_accessible]
@@ -235,6 +248,7 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
                 sx {
                     inputCursor = Cursor.pointer
                 }
+                id = "languageName"
                 variant = FormControlVariant.outlined
                 value = props.uiState.entity?.language?.name ?: ""
                 label = ReactNode(strings[MessageID.language])
