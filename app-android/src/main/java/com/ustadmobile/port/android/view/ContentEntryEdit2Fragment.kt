@@ -10,13 +10,20 @@ import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.AdapterView
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.contentColorFor
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Button
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,7 +37,6 @@ import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
-import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntryEdit2Binding
 import com.ustadmobile.core.contentjob.MetadataResult
@@ -48,10 +54,15 @@ import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.view.ContentEntryAddOptionsBottomSheetFragment.Companion.ARG_SHOW_ADD_FOLDER
 import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
 import com.ustadmobile.port.android.view.binding.isSet
-import com.ustadmobile.port.android.view.composable.*
+import com.ustadmobile.port.android.view.composable.UstadCourseBlockEdit
+import com.ustadmobile.port.android.view.composable.UstadExposedDropDownMenuField
+import com.ustadmobile.port.android.view.composable.UstadSwitchField
+import com.ustadmobile.port.android.view.composable.UstadClickableTextField
+import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 
 
 interface ContentEntryEdit2FragmentEventHandler {
@@ -504,7 +515,9 @@ private fun ContentEntryEditScreen(
             Button(
                 onClick = onClickUpdateContent,
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .defaultItemPadding()
+                    .testTag("updateContentButton"),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = colorResource(id = R.color.secondaryColor)
                 )
@@ -515,23 +528,22 @@ private fun ContentEntryEditScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(15.dp))
-
-            Text(updateContentText)
+            Text(modifier = Modifier.defaultItemPadding(), text = updateContentText)
         }
-
-        Spacer(modifier = Modifier.height(15.dp))
 
         if (uiState.entity?.leaf == true){
-            Text(text = stringResource(id = R.string.supported_files))
+            Text(modifier = Modifier.defaultItemPadding(),
+                text = stringResource(id = R.string.supported_files))
         }
 
-        Spacer(modifier = Modifier.height(15.dp))
-
-        UstadTextEditField(
+        OutlinedTextField(
+            modifier = Modifier
+                .testTag("title")
+                .fillMaxWidth()
+                .defaultItemPadding(),
             value = uiState.entity?.title ?: "",
-            label = stringResource(id = R.string.title),
-            error = uiState.titleError,
+            label = { Text(stringResource(id = R.string.title)) },
+            isError = uiState.titleError != null,
             enabled = uiState.fieldsEnabled,
             onValueChange = {
                 onContentChanged(uiState.entity?.shallowCopy {
@@ -541,11 +553,13 @@ private fun ContentEntryEditScreen(
             }
         )
 
-        Spacer(modifier = Modifier.height(15.dp))
-
-        UstadTextEditField(
+        OutlinedTextField(
+            modifier = Modifier
+                .testTag("description")
+                .fillMaxWidth()
+                .defaultItemPadding(),
             value = uiState.entity?.description ?: "",
-            label = stringResource(id = R.string.description),
+            label = { Text(stringResource(id = R.string.description)) },
             enabled = uiState.fieldsEnabled,
             onValueChange = {
                 onContentChanged(uiState.entity?.shallowCopy {
@@ -555,18 +569,18 @@ private fun ContentEntryEditScreen(
             }
         )
 
-        Spacer(modifier = Modifier.height(15.dp))
-
         UstadCourseBlockEdit(
             uiState = uiState.courseBlockEditUiState,
             onCourseBlockChange = onCourseBlockChange
         )
 
-        Spacer(modifier = Modifier.height(15.dp))
-
-        UstadTextEditField(
+        OutlinedTextField(
+            modifier = Modifier
+                .testTag("author")
+                .fillMaxWidth()
+                .defaultItemPadding(),
             value = uiState.entity?.author ?: "",
-            label = stringResource(id = R.string.entry_details_author),
+            label = { Text(stringResource(id = R.string.entry_details_author)) },
             enabled = uiState.fieldsEnabled,
             onValueChange = {
                 onContentChanged(uiState.entity?.shallowCopy {
@@ -576,11 +590,13 @@ private fun ContentEntryEditScreen(
             }
         )
 
-        Spacer(modifier = Modifier.height(15.dp))
-
-        UstadTextEditField(
+        OutlinedTextField(
+            modifier = Modifier
+                .testTag("publisher")
+                .fillMaxWidth()
+                .defaultItemPadding(),
             value = uiState.entity?.publisher ?: "",
-            label = stringResource(id = R.string.entry_details_publisher),
+            label = { Text(stringResource(id = R.string.entry_details_publisher)) },
             enabled = uiState.fieldsEnabled,
             onValueChange = {
                 onContentChanged(uiState.entity?.shallowCopy {
@@ -590,9 +606,11 @@ private fun ContentEntryEditScreen(
             }
         )
 
-        Spacer(modifier = Modifier.height(15.dp))
-
         UstadMessageIdOptionExposedDropDownMenuField(
+            modifier = Modifier
+                .testTag("licenseType")
+                .fillMaxWidth()
+                .defaultItemPadding(),
             value = uiState.entity?.licenseType ?: 0,
             options = LicenceConstants.LICENSE_MESSAGE_IDS,
             label = stringResource(id = R.string.licence),
@@ -605,23 +623,27 @@ private fun ContentEntryEditScreen(
             }
         )
 
-        Spacer(modifier = Modifier.height(15.dp))
-
         if (uiState.containerStorageOptionVisible){
             UstadExposedDropDownMenuField(
+                modifier = Modifier
+                    .testTag("selectedContainerStorageDir")
+                    .fillMaxWidth()
+                    .defaultItemPadding(),
                 value = uiState.selectedContainerStorageDir,
                 label = stringResource(R.string.content_creation_storage_option_title),
                 options = uiState.storageOptions,
-                onOptionSelected = { onSelectContainerStorageDir(it as ContainerStorageDir) },
-                itemText = { (it as ContainerStorageDir).name ?: "" },
+                onOptionSelected = { onSelectContainerStorageDir(it) },
+                itemText = { it.name ?: "" },
                 enabled = uiState.fieldsEnabled,
             )
         }
 
-        Spacer(modifier = Modifier.height(15.dp))
-
         if (uiState.contentCompressVisible){
             UstadSwitchField(
+                modifier = Modifier
+                    .testTag("compressionEnabled")
+                    .fillMaxWidth()
+                    .defaultItemPadding(),
                 checked = uiState.compressionEnabled,
                 label = stringResource(id = R.string.compress),
                 enabled = uiState.fieldsEnabled,
@@ -631,9 +653,11 @@ private fun ContentEntryEditScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(15.dp))
-
         UstadSwitchField(
+            modifier = Modifier
+                .testTag("publik")
+                .fillMaxWidth()
+                .defaultItemPadding(),
             checked = uiState.entity?.publik ?: false,
             label = stringResource(id = R.string.publicly_accessible),
             enabled = uiState.fieldsEnabled,
@@ -642,11 +666,13 @@ private fun ContentEntryEditScreen(
             }
         )
 
-        Spacer(modifier = Modifier.height(15.dp))
-
-        UstadTextEditField(
+        UstadClickableTextField(
+            modifier = Modifier
+                .testTag("languageName")
+                .fillMaxWidth()
+                .defaultItemPadding(),
             value = uiState.entity?.language?.name ?: "",
-            label = stringResource(id = R.string.language),
+            label = { Text(stringResource(id = R.string.language)) },
             readOnly = true,
             enabled = uiState.fieldsEnabled,
             onClick = onClickLanguage,
@@ -690,9 +716,7 @@ fun ContentEntryEditScreenPreview() {
         )
     )
 
-    MdcTheme {
-        ContentEntryEditScreen(
-            uiState = uiStateVal
-        )
-    }
+    ContentEntryEditScreen(
+        uiState = uiStateVal
+    )
 }
