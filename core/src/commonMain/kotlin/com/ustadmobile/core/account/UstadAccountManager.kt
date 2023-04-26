@@ -3,10 +3,7 @@ package com.ustadmobile.core.account
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.encryptWithPbkdf2
-import com.ustadmobile.core.util.ext.insertPersonAndGroup
-import com.ustadmobile.core.util.ext.toUmAccount
-import com.ustadmobile.core.util.ext.withEndpoint
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.util.safeStringify
@@ -92,7 +89,10 @@ class UstadAccountManager(
 
     private val httpClient: HttpClient by di.instance()
 
-    private val endpointsWithActiveSessions = concurrentSafeListOf<Endpoint>()
+    private val endpointsWithActiveSessions = concurrentSafeSetOf<Endpoint>()
+
+    val activeEndpoints: List<Endpoint>
+        get() = endpointsWithActiveSessions.toList()
 
     init {
         val activeUserSessionFromJson = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, appContext)?.let {
