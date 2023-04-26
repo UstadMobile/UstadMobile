@@ -7,4 +7,10 @@ interface StudentNoPasswordSignOnCourseListView: UstadView {
 
     var coursesLists: List<StudentNoPasswordSignOnCourseListPresenter.EndpointNoPasswordCourseList>?
 
+    companion object {
+
+        const val VIEW_NAME = "StudentNoPasswordSignOnCourseList"
+
+    }
+
 }

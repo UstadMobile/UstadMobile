@@ -11,8 +11,11 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.port.android.view.StudentNoPasswordSignOnStudentListView
 
 class StudentNoPasswordSignOnCourseListPresenter(
     context: Any,
@@ -40,11 +43,11 @@ class StudentNoPasswordSignOnCourseListPresenter(
     }
 
     fun onClickCourse(endpoint: Endpoint, course: Clazz) {
-        println("Select course and endpoint $endpoint ${course.clazzName}")
-
-        //Proceed to select student
-        //requireNavController().navigate(
-
+        requireNavController().navigate(
+            StudentNoPasswordSignOnStudentListView.VIEW_NAME,
+            mapOf(UstadView.ARG_ACCOUNT_ENDPOINT to endpoint.url,
+                UstadView.ARG_CLAZZUID to course.clazzUid.toString()),
+        )
     }
 
 }

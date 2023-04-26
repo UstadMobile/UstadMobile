@@ -324,4 +324,19 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         updateTime: Long
     ): Int
 
+    @Query("""
+        SELECT Person.*
+          FROM ClazzEnrolment
+               JOIN Person
+                    ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
+         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+           AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+           AND :time BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft
+    """)
+    abstract fun findActiveStudentsInCourse(
+        clazzUid: Long,
+        time: Long,
+    ): DataSourceFactory<Int, Person>
+
+
 }

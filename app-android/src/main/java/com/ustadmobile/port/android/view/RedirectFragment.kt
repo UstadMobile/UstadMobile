@@ -51,7 +51,7 @@ class RedirectFragment : UstadBaseFragment(), RedirectView {
              */
             if(intent.action == UstadAccountManager.ACTION_STUDENT_NO_PASSWORD_SINGLE_SIGN_ON) {
                 findNavController().navigate(
-                    resId = R.id.student_no_password_sign_on_course_list,
+                    resId = R.id.student_no_password_sign_on_course_list_dest,
                     args = bundleOf(),
                     navOptions = navOptions {
                         popUpTo(R.id.redirect_dest) {

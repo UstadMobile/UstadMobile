@@ -210,7 +210,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
         SELECT Clazz.*
           FROM Clazz
          WHERE (Clazz.clazzFeatures & ${Clazz.CLAZZ_FEATURE_PASSWORDLESS_STUDENT_LOGIN}) = ${Clazz.CLAZZ_FEATURE_PASSWORDLESS_STUDENT_LOGIN}
-           AND time BETWEEN Clazz.clazzStartTime AND Clazz.clazzEndTime
+           AND :time BETWEEN Clazz.clazzStartTime AND Clazz.clazzEndTime
       ORDER BY Clazz.clazzName 
     """)
     abstract fun findStudentNoPasswordSignOnClazzes(time: Long): DataSourceFactory<Int, Clazz>

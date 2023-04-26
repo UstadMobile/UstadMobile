@@ -25,6 +25,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ExternalAppPermission
 import com.ustadmobile.port.android.authenticator.IAuthenticatorActivity
+import com.ustadmobile.port.android.domain.CreateExternalAccessPermissionUseCase
+import com.ustadmobile.port.android.domain.GrantExternalAccessUseCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.decodeFromString
@@ -46,6 +48,9 @@ class GrantAppPermissionPresenter(
     arguments: Map<String, String>,
     view: GrantAppPermissionView,
     di: DI,
+    private val grantExternalAccessUseCase: GrantExternalAccessUseCase = GrantExternalAccessUseCase(di),
+    private val createExternalAccessPermissionUseCase: CreateExternalAccessPermissionUseCase =
+        CreateExternalAccessPermissionUseCase(di.direct.instance(), di)
 ): UstadBaseController<GrantAppPermissionView>(
     context, arguments, view, di
 ) {
@@ -58,10 +63,7 @@ class GrantAppPermissionPresenter(
 
     private var mExtAccessPermission: ExternalAppPermission? = null
 
-    val prefKey = stringPreferencesKey("$KEY_PREFIX_EAPUID$eapUid")
-
     private lateinit var authenticatorActivity: IAuthenticatorActivity
-
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -73,13 +75,10 @@ class GrantAppPermissionPresenter(
         authenticatorActivity = (activity as IAuthenticatorActivity)
 
         presenterScope.launch {
-            mExtAccessPermission = dataStore.data.map { preferences ->
-                preferences[prefKey]?.let {
-                    json.decodeFromString<ExternalAppPermission>(it)
-                }
-            }.first() ?: ExternalAppPermission(
-                eapPackageId = authenticatorActivity.callingComponent?.packageName,
-                eapAuthToken = UUID.randomUUID().toString(),
+            mExtAccessPermission = createExternalAccessPermissionUseCase(
+                eapUidArg = eapUid,
+                pendingRequestDataStore = dataStore,
+                authenticatorActivity = authenticatorActivity
             )
         }
 
@@ -95,50 +94,24 @@ class GrantAppPermissionPresenter(
     fun onClickApprove() {
         val extAccessPermission = mExtAccessPermission ?: return
         presenterScope.launch {
-            val db: UmAppDatabase = on(ustadAccountManager.activeEndpoint).direct.instance(
-                tag = DoorTag.TAG_DB)
-
-            val packageId = extAccessPermission.eapPackageId
-
-            val authToken = extAccessPermission.eapAuthToken
-            if(packageId != null && authToken != null) {
-                val activeAccountName = ustadAccountManager.activeSession?.displayName ?: "ERR"
-                extAccessPermission.eapPersonUid = ustadAccountManager.activeSession?.person?.personUid ?: 0
-                extAccessPermission.eapStartTime = systemTimeInMillis()
-                extAccessPermission.eapExpireTime = Long.MAX_VALUE
-
-                val dataStore = (context as Context).pendingRequestsDataStore
-
-                dataStore.edit { preferences ->
-                    preferences.remove(prefKey)
-                }
-
-                db.externalAppPermissionDao.insertAsync(extAccessPermission)
-
-                val resultDataIntent = if(returnAccountName) {
-                    Intent().apply {
-                        putExtra(AccountManager.KEY_ACCOUNT_NAME, activeAccountName)
-                        putExtra(AccountManager.KEY_ACCOUNT_TYPE, UstadAccountManager.ACCOUNT_TYPE)
-                        putExtra(AccountManager.KEY_AUTHTOKEN, authToken)
-                        putExtra("endpointUrl", ustadAccountManager.activeEndpoint.url)
-                        putExtra("sourcedId",
-                            ustadAccountManager.activeSession?.person?.personUid?.toString())
-                    }
-                }else {
-                    null
-                }
-
-                authenticatorActivity.finishWithAccountAuthenticatorResult(
-                    Activity.RESULT_OK, resultDataIntent)
-            }else {
+            try {
+                grantExternalAccessUseCase(
+                    endpoint = ustadAccountManager.activeEndpoint,
+                    pendingRequestDataStore = (context as Context).pendingRequestsDataStore,
+                    extAccessPermission = extAccessPermission,
+                    activeAccountName = ustadAccountManager.activeSession?.displayName ?: "ERR",
+                    personUid = ustadAccountManager.activeSession?.person?.personUid ?: 0,
+                    authenticatorActivity = authenticatorActivity,
+                    returnAccountName = returnAccountName,
+                )
+            }catch(e: Exception) {
                 view.showSnackBar("ERROR")
             }
         }
     }
 
     fun onClickCancel() {
-        authenticatorActivity.finishWithAccountAuthenticatorResult(Activity.RESULT_CANCELED
-        )
+        authenticatorActivity.finishWithAccountAuthenticatorResult(Activity.RESULT_CANCELED)
     }
 
 }

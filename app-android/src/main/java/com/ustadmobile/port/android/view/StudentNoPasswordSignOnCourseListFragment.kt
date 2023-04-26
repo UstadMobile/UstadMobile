@@ -127,6 +127,13 @@ class StudentNoPasswordSignOnCourseListFragment: UstadBaseFragment(
         mPresenter?.onCreate(backStackSavedState)
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mBinding?.fragmentListRecyclerview?.adapter = null
+        mBinding = null
+        mPresenter = null
+    }
+
     companion object {
 
         val CLAZZ_DIFF_UTIL = object: DiffUtil.ItemCallback<Clazz>() {

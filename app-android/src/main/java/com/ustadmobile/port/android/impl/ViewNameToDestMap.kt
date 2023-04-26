@@ -7,6 +7,8 @@ import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadDestination
 import com.ustadmobile.core.view.*
 import com.ustadmobile.port.android.view.PanicButtonSettingsView
+import com.ustadmobile.port.android.view.StudentNoPasswordSignOnCourseListView
+import com.ustadmobile.port.android.view.StudentNoPasswordSignOnStudentListView
 
 @Keep
 class ViewNameToDestMap: DestinationProvider {
@@ -185,6 +187,10 @@ class ViewNameToDestMap: DestinationProvider {
             ScopedGrantDetailView.VIEW_NAME to UstadDestination(R.id.scoped_grant_detail_dest),
             PanicButtonSettingsView.VIEW_NAME to UstadDestination(R.id.panic_button_settings_dest),
             GrantAppPermissionView.VIEW_NAME to UstadDestination(R.id.grant_app_permission_dest),
+            StudentNoPasswordSignOnCourseListView.VIEW_NAME to
+                    UstadDestination(R.id.student_no_password_sign_on_course_list_dest),
+            StudentNoPasswordSignOnStudentListView.VIEW_NAME to
+                    UstadDestination(R.id.student_no_password_sign_on_student_list_dest)
     )
 
     override val navControllerViewId: Int
