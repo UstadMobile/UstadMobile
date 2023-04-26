@@ -13,7 +13,6 @@ import android.widget.AdapterView
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ButtonDefaults
@@ -55,6 +54,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.ContentEntryAddOptionsBottomSheetFragment.Companion.ARG_SHOW_ADD_FOLDER
 import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
 import com.ustadmobile.port.android.view.binding.isSet
@@ -62,6 +62,7 @@ import com.ustadmobile.port.android.view.composable.UstadCourseBlockEdit
 import com.ustadmobile.port.android.view.composable.UstadExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadSwitchField
 import com.ustadmobile.port.android.view.composable.UstadClickableTextField
+import com.ustadmobile.port.android.view.composable.UstadInputFieldLayout
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 
 
@@ -500,7 +501,7 @@ private fun ContentEntryEditScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .defaultScreenPadding()
             .verticalScroll(rememberScrollState()),
     )  {
 
@@ -536,22 +537,27 @@ private fun ContentEntryEditScreen(
                 text = stringResource(id = R.string.supported_files))
         }
 
-        OutlinedTextField(
-            modifier = Modifier
-                .testTag("title")
-                .fillMaxWidth()
-                .defaultItemPadding(),
-            value = uiState.entity?.title ?: "",
-            label = { Text(stringResource(id = R.string.title)) },
-            isError = uiState.titleError != null,
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onContentChanged(uiState.entity?.shallowCopy {
+        UstadInputFieldLayout(
+            modifier = Modifier.fillMaxWidth(),
+            errorText = uiState.titleError,
+        ) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .testTag("title")
+                    .fillMaxWidth()
+                    .defaultItemPadding(),
+                value = uiState.entity?.title ?: "",
+                label = { Text(stringResource(id = R.string.title)) },
+                isError = uiState.titleError != null,
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onContentChanged(uiState.entity?.shallowCopy {
                         title = it
                     }
-                )
-            }
-        )
+                    )
+                }
+            )
+        }
 
         OutlinedTextField(
             modifier = Modifier
