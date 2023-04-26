@@ -14,10 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzEnrolmentBinding
 import com.ustadmobile.core.controller.ClazzEnrolmentEditPresenter
@@ -70,9 +70,7 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
             )
 
             setContent {
-                MdcTheme {
-                    ClazzEnrolmentEditScreen()
-                }
+                ClazzEnrolmentEditScreen()
             }
         }
     }
@@ -177,6 +175,7 @@ fun ClazzEnrolmentEditScreen(
             errorText = uiState.roleSelectedError,
         ) {
             UstadMessageIdOptionExposedDropDownMenuField(
+                modifier = Modifier.testTag("clazzEnrolmentRole"),
                 value = uiState.clazzEnrolment?.clazzEnrolmentRole ?: 0,
                 label = stringResource(R.string.role),
                 options = RoleConstants.ROLE_MESSAGE_IDS,
@@ -196,6 +195,7 @@ fun ClazzEnrolmentEditScreen(
             errorText = uiState.startDateError,
         ) {
             UstadDateField(
+                modifier = Modifier.testTag("clazzEnrolmentDateJoined"),
                 value = uiState.clazzEnrolment?.clazzEnrolmentDateJoined ?: 0,
                 label = { Text(stringResource(id = R.string.start_date)) },
                 enabled = uiState.fieldsEnabled,
@@ -215,6 +215,7 @@ fun ClazzEnrolmentEditScreen(
             errorText = uiState.endDateError,
         ) {
             UstadDateField(
+                modifier = Modifier.testTag("clazzEnrolmentDateLeft"),
                 value = uiState.clazzEnrolment?.clazzEnrolmentDateLeft ?: 0,
                 label = { Text(stringResource(id = R.string.end_date)) },
                 enabled = uiState.fieldsEnabled,
@@ -230,6 +231,7 @@ fun ClazzEnrolmentEditScreen(
 
 
         UstadMessageIdOptionExposedDropDownMenuField(
+            modifier = Modifier.testTag("clazzEnrolmentOutcome"),
             value = uiState.clazzEnrolment?.clazzEnrolmentOutcome ?: 0,
             label = stringResource(R.string.outcome),
             options = OutcomeConstants.OUTCOME_MESSAGE_IDS,
@@ -243,6 +245,7 @@ fun ClazzEnrolmentEditScreen(
 
 
         UstadTextEditField(
+            modifier = Modifier.testTag("leavingReasonTitle"),
             value = uiState.clazzEnrolment?.leavingReason?.leavingReasonTitle ?: "",
             label = stringResource(id = R.string.leaving_reason),
             onValueChange = {},
@@ -261,7 +264,5 @@ fun ClazzEnrolmentEditScreenPreview() {
         },
     )
 
-    MdcTheme {
-        ClazzEnrolmentEditScreen(uiState)
-    }
+    ClazzEnrolmentEditScreen(uiState)
 }

@@ -42,6 +42,7 @@ val ClazzEnrolmentEditScreenComponent2 = FC<ClazzEnrolmentEditScreenProps> { pro
             spacing = responsive(20.px)
 
             UstadMessageIdSelectField {
+                id = "clazzEnrolmentRole"
                 value = props.uiState.clazzEnrolment?.clazzEnrolmentRole ?: 0
                 label = strings[MessageID.role]
                 options = RoleConstants.ROLE_MESSAGE_IDS
@@ -56,6 +57,7 @@ val ClazzEnrolmentEditScreenComponent2 = FC<ClazzEnrolmentEditScreenProps> { pro
             }
 
             UstadDateField {
+                id = "clazzEnrolmentDateJoined"
                 timeInMillis = props.uiState.clazzEnrolment?.clazzEnrolmentDateJoined ?: 0
                 label = ReactNode(strings[MessageID.start_date])
                 disabled = !props.uiState.fieldsEnabled
@@ -71,6 +73,7 @@ val ClazzEnrolmentEditScreenComponent2 = FC<ClazzEnrolmentEditScreenProps> { pro
             }
 
             UstadDateField {
+                id = "clazzEnrolmentDateLeft"
                 timeInMillis = props.uiState.clazzEnrolment?.clazzEnrolmentDateLeft ?: 0
                 label = ReactNode(strings[MessageID.end_date])
                 disabled = !props.uiState.fieldsEnabled
@@ -86,6 +89,7 @@ val ClazzEnrolmentEditScreenComponent2 = FC<ClazzEnrolmentEditScreenProps> { pro
             }
 
             UstadMessageIdSelectField {
+                id = "clazzEnrolmentOutcome"
                 value = props.uiState.clazzEnrolment?.clazzEnrolmentOutcome ?: 0
                 label = strings[MessageID.outcome]
                 options = OutcomeConstants.OUTCOME_MESSAGE_IDS
@@ -99,6 +103,7 @@ val ClazzEnrolmentEditScreenComponent2 = FC<ClazzEnrolmentEditScreenProps> { pro
             }
 
             UstadTextEditField {
+                id = "leavingReasonTitle"
                 value = props.uiState.clazzEnrolment?.leavingReason?.leavingReasonTitle ?: ""
                 label = strings[MessageID.leaving_reason]
                 onChange = {}
