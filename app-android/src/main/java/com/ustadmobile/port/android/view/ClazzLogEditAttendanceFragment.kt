@@ -460,7 +460,6 @@ private fun PagerView(
                 }
             },
             modifier = Modifier.weight(1F)
-                .testTag("")
         ) {
             Icon(
                 Icons.Default.ArrowBack,
