@@ -127,7 +127,7 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
             }
 
             TextField {
-                id = "schoolPhoneNumber"
+                id = "schoolEmailAddress"
                 variant = FormControlVariant.outlined
                 value = props.uiState.entity?.schoolEmailAddress ?: ""
                 label = ReactNode(strings[MessageID.email])
