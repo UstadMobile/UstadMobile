@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import androidx.paging.PagedListAdapter
@@ -13,12 +14,21 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.databinding.FragmentListBinding
 import com.toughra.ustadmobile.databinding.ItemStudentNoPasswordCourseBinding
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.door.attachments.retrieveAttachment
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.port.android.presenter.StudentNoPasswordSignOnCourseListPresenter
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 class StudentNoPasswordSignOnCourseListFragment: UstadBaseFragment(
 
@@ -28,7 +38,9 @@ class StudentNoPasswordSignOnCourseListFragment: UstadBaseFragment(
     //Switch to binding
     class NoPasswordCourseViewHolder(
         val binding: ItemStudentNoPasswordCourseBinding,
-    ): ViewHolder(binding.root)
+    ): ViewHolder(binding.root) {
+        var loadImageJob: Job? = null
+    }
 
     inner class NoPasswordCourseListAdapter(
         private val endpoint: Endpoint
@@ -46,11 +58,26 @@ class StudentNoPasswordSignOnCourseListFragment: UstadBaseFragment(
 
         override fun onBindViewHolder(holder: NoPasswordCourseViewHolder, position: Int) {
             val clazz = getItem(position)
+            holder.loadImageJob?.cancel()
+
             if(clazz != null) {
                 holder.binding.studentNoPasswordCourseLinearLayout.setOnClickListener {
                     mPresenter?.onClickCourse(endpoint, clazz)
                 }
+
+                holder.loadImageJob = viewLifecycleOwner.lifecycleScope.launch {
+                    val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
+                    val coursePicture = db.coursePictureDao.findByClazzUidAsync(clazz.clazzUid)
+                    val doorUri = coursePicture?.coursePictureUri?.let { db.retrieveAttachment(it) }
+                    if(doorUri != null) {
+                        holder.binding.itemClazzListCardImage.visibility = View.VISIBLE
+                        Picasso.get().load(doorUri.uri).into(holder.binding.itemClazzListCardImage)
+                    }else {
+                        holder.binding.itemClazzListCardImage.visibility = View.GONE
+                    }
+                }
             }else {
+                holder.binding.itemClazzListCardImage.visibility = View.GONE
                 holder.binding.studentNoPasswordCourseLinearLayout.setOnClickListener(null)
             }
 
