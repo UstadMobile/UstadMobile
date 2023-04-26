@@ -4,9 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentRedirectBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.RedirectPresenter
@@ -41,6 +44,25 @@ class RedirectFragment : UstadBaseFragment(), RedirectView {
 
             val intent = requireActivity().intent
             val intentData = intent.data?.toString()
+
+            /**
+             * Young student no password single sign-on Android is an exception: does not use
+             * accountmanager etc.
+             */
+            if(intent.action == UstadAccountManager.ACTION_STUDENT_NO_PASSWORD_SINGLE_SIGN_ON) {
+                findNavController().navigate(
+                    resId = R.id.student_no_password_sign_on_course_list,
+                    args = bundleOf(),
+                    navOptions = navOptions {
+                        popUpTo(R.id.redirect_dest) {
+                            inclusive = true
+                        }
+                    }
+                )
+
+                return@onStart
+            }
+
 
             val intentMap = mutableMapOf<String, String>()
 

@@ -22,9 +22,7 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.http.content.*
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Dispatchers
@@ -454,6 +452,10 @@ class UstadAccountManager(
          * Intent action indicating that the caller wants to get an authentication token
          */
         const val ACTION_GET_AUTH_TOKEN = "com.ustadmobile.AUTH_GET_TOKEN"
+
+        //Change this - this is temporary for V0 deployment in Sierra Leone
+        const val ACTION_STUDENT_NO_PASSWORD_SINGLE_SIGN_ON = "com.ustadmobile.AUTH_GET_TOKEN"
+
 
     }
 

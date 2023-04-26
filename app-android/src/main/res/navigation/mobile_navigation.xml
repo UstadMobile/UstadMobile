@@ -462,4 +462,11 @@
         android:id="@+id/grant_app_permission_dest"
         android:name="com.ustadmobile.port.android.view.GrantAppPermissionFragment"/>
 
+    <fragment
+        android:id="@+id/student_no_password_sign_on_course_list"
+        android:name="com.ustadmobile.port.android.view.StudentNoPasswordSignOnCourseListFragment"
+        android:label="@string/course"
+        />
+
+
 </navigation>
