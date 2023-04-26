@@ -14,7 +14,7 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.UstadDateEditField
+import com.ustadmobile.mui.components.UstadDateField
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.view.components.UstadImageSelectButton
 import com.ustadmobile.view.components.UstadSelectField
@@ -107,9 +107,9 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                 }
             }
 
-            UstadDateEditField {
+            UstadDateField {
                 timeInMillis = props.uiState.person?.dateOfBirth ?: 0
-                label = strings[MessageID.birthday]
+                label = ReactNode(strings[MessageID.birthday])
                 timeZoneId = UstadMobileConstants.UTC
                 onChange = {
                     props.onPersonChanged(

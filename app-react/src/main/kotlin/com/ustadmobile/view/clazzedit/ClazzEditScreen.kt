@@ -5,7 +5,6 @@ import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.locale.StringsXml
-import com.ustadmobile.core.impl.locale.entityconstants.EnrolmentPolicyConstants
 import com.ustadmobile.lib.db.entities.Schedule.Companion.SCHEDULE_FREQUENCY_WEEKLY
 import com.ustadmobile.lib.db.entities.Schedule.Companion.DAY_MONDAY
 import com.ustadmobile.core.util.MS_PER_HOUR
@@ -16,8 +15,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.common.input
 import com.ustadmobile.mui.common.readOnly
-import com.ustadmobile.mui.components.UstadDateEditField
-import com.ustadmobile.view.components.UstadMessageIdSelectField
+import com.ustadmobile.mui.components.UstadDateField
 import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.view.components.UstadEditHeader
 import com.ustadmobile.view.components.UstadSwitchField
@@ -33,9 +31,8 @@ import react.*
 import com.ustadmobile.util.ext.onTextChange
 import csstype.Cursor
 import js.core.jso
-import kotlinx.css.input
-import kotlin.js.json
 import com.ustadmobile.mui.common.inputCursor
+import com.ustadmobile.wrappers.quill.ReactQuill
 
 const val COURSE_BLOCK_DRAG_CLASS = "dragging_course_block"
 
@@ -105,17 +102,14 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 }
             }
 
-            TextField {
+            ReactQuill {
                 value = props.uiState.entity?.clazzDesc ?: ""
-                label = ReactNode(strings[MessageID.description].addOptionalSuffix(strings))
-                disabled = !props.uiState.fieldsEnabled
                 id = "clazz_desc"
-                onTextChange = {
-                    props.onClazzChanged(
-                        props.uiState.entity?.shallowCopy {
-                            clazzDesc = it
-                        }
-                    )
+                placeholder = strings[MessageID.description]
+                onChange = {
+                    props.onClazzChanged(props.uiState.entity?.shallowCopy {
+                        clazzDesc = it
+                    })
                 }
             }
 
@@ -127,12 +121,13 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                     width = 100.pct
                 }
 
-                UstadDateEditField {
+                UstadDateField {
                     timeInMillis = props.uiState.entity?.clazzStartTime ?: 0
                     timeZoneId = props.uiState.timeZone
-                    label = strings[MessageID.start_date]
-                    error = props.uiState.clazzStartDateError
-                    enabled = props.uiState.fieldsEnabled
+                    label = ReactNode(strings[MessageID.start_date])
+                    error = props.uiState.clazzStartDateError != null
+                    helperText = props.uiState.clazzStartDateError?.let { ReactNode(it) }
+                    disabled = !props.uiState.fieldsEnabled
                     fullWidth = true
                     id = "clazz_start_time"
                     onChange = {
@@ -144,12 +139,13 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                     }
                 }
 
-                UstadDateEditField {
+                UstadDateField {
                     timeInMillis = props.uiState.entity?.clazzEndTime ?: 0
                     timeZoneId = props.uiState.timeZone
-                    label = strings[MessageID.end_date].addOptionalSuffix(strings)
-                    error = props.uiState.clazzEndDateError
-                    enabled = props.uiState.fieldsEnabled
+                    label = ReactNode(strings[MessageID.end_date].addOptionalSuffix(strings))
+                    error = props.uiState.clazzEndDateError != null
+                    helperText = props.uiState.clazzEndDateError?.let { ReactNode(it) }
+                    disabled = !props.uiState.fieldsEnabled
                     unsetDefault = Long.MAX_VALUE
                     fullWidth = true
                     id = "clazz_end_time"

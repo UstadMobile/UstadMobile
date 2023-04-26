@@ -15,3 +15,12 @@ fun LocalDateTime.ageInYears(): Int {
         .periodUntil(Clock.System.now(), TimeZone.UTC)
     return dateTimePeriod.years
 }
+
+fun LocalDateTime.chopOffSeconds() : LocalDateTime {
+    if(second > 0 || nanosecond > 0) {
+        return LocalDateTime(date, LocalTime(hour, minute))
+    }else {
+        return this
+    }
+}
+

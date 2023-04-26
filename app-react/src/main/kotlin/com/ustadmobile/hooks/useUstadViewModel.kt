@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.mui.components.NavResultReturnerContext
+import com.ustadmobile.mui.components.TabSearchParamContext
 import com.ustadmobile.mui.components.UstadScreensContext
 import org.kodein.di.DI
 import org.kodein.di.bind
@@ -20,11 +21,13 @@ import react.useRequiredContext
  * Composition to handle the UstadViewModel - includes handling of appuistate and navigation flow
  */
 fun <T: UstadViewModel> useUstadViewModel(
-    block: (di: DI, savedStateHandle: UstadSavedStateHandle) -> T
+    collectAppUiState: Boolean = true,
+    block: (di: DI, savedStateHandle: UstadSavedStateHandle) -> T,
 ): T {
     val appDi = useRequiredContext(DIContext)
     val ustadScreensContext = useRequiredContext(UstadScreensContext)
     val navResultReturner = useRequiredContext(NavResultReturnerContext)
+    val tabUrlSearchParams = useContext(TabSearchParamContext)
 
     val di = useMemo(dependencies = emptyArray()) {
         DI {
@@ -40,7 +43,9 @@ fun <T: UstadViewModel> useUstadViewModel(
         }
     }
 
-    val viewModel = useViewModel { savedStateHandle ->
+    val viewModel = useViewModel(
+        overrideSearchParams = tabUrlSearchParams
+    ) { savedStateHandle ->
         block(di, savedStateHandle)
     }
 

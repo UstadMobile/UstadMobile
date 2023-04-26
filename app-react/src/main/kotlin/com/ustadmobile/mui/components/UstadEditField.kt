@@ -4,7 +4,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.MS_PER_MIN
-import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.mui.common.*
 import com.ustadmobile.view.components.UstadSwitchField
@@ -19,7 +18,6 @@ import react.dom.aria.ariaLabel
 import web.html.InputMode
 import web.html.InputType
 import react.dom.onChange
-import web.html.HTMLInputElement
 
 external interface UstadEditFieldProps: PropsWithChildren {
 
@@ -169,111 +167,6 @@ val UstadTextEditField = FC<UstadEditFieldProps> { props ->
     }
 }
 
-external interface UstadDateEditFieldProps : Props {
-
-    /**
-     * The value as time in millis since 1970
-     */
-    var timeInMillis: Long
-
-    /**
-     * Required: The timezone being used
-     */
-    var timeZoneId: String
-
-    /**
-     * Field label
-     */
-    var label: String
-
-    /**
-     * onChange function. Will provide the selected time in milliseconds since 1970
-     */
-    var onChange: (Long) -> Unit
-
-    var error: String?
-
-    var enabled: Boolean?
-
-    var fullWidth: Boolean
-
-    /**
-     * We often use 0 and Long.MAX_VALUE as a placeholder for a default (e.g. unset) date. If this
-     * property is set, then this value will be emitted by the onChange function when the user deletes
-     * the date
-     */
-    var unsetDefault: Long?
-
-    var id: String?
-
-}
-
-/**
- * Max value for a Javascript date as per
- * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
- */
-val JS_DATE_MAX = 8640000000000000L
-
-/**
- * We often use 0 and Long.MAX_VALUE as placeholders for unset dates. This makes queries
- * straightforward e.g. if no end date is set by the user, the end date is stored as Long.MAX_VALUE,
- * and would appear in active courses if applicable etc.
- *
- * These unset dates should not (however) be displayed to the user.
- */
-fun Long.isSetDate(): Boolean {
-    return this > 0L && this < JS_DATE_MAX
-}
-
-val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
-
-    fun Long.timeToIsoDateInputFieldString(): String {
-        return if(this != (props.unsetDefault ?: 0)) {
-            Instant.fromEpochMilliseconds(this)
-                .toLocalDateTime(TimeZone.of(props.timeZoneId))
-                .date.toString()
-        }else {
-            ""
-        }
-    }
-
-    var rawValue: String? by useState {
-        props.timeInMillis.timeToIsoDateInputFieldString()
-    }
-
-    useEffect(props.timeInMillis) {
-        rawValue = props.timeInMillis.timeToIsoDateInputFieldString()
-    }
-
-
-    TextField {
-        type = InputType.date
-        label = ReactNode(props.label)
-        value = rawValue
-        InputLabelProps = jso {
-            shrink = true
-        }
-        id = props.id
-        fullWidth = props.fullWidth
-
-        onChange = {
-            val targetEl = it.target as HTMLInputElement
-            rawValue = targetEl.value
-            val valueAsDate = targetEl.valueAsDate
-            //Avoid triggering the a change when user has not finished filling in year
-            if(valueAsDate != null && valueAsDate.getFullYear() > 1000) {
-                //Add 1 to month number: Javascript starts at 0, Kotlin starts at 1
-                val localDateTime = LocalDateTime(valueAsDate.getFullYear(),
-                    valueAsDate.getMonth() + 1, valueAsDate.getDate(), 0, 0)
-                val instant = localDateTime.toInstant(TimeZone.of(props.timeZoneId))
-                props.onChange(instant.toEpochMilliseconds())
-            }else if(targetEl.value.isEmpty()) {
-                props.onChange(props.unsetDefault ?: 0)
-            }
-        }
-    }
-}
-
 
 
 external interface UstadDropDownFieldProps: Props {
@@ -389,43 +282,37 @@ val UstadEditFieldPreviews = FC<Props> {
         spacing = responsive(5)
 
         var date1 : Long by useState { systemTimeInMillis() }
-        UstadDateEditField {
+        UstadDateField {
             timeInMillis = date1
+            id = "date_edit_field"
             timeZoneId = TimeZone.currentSystemDefault().id
-            label = "Date"
+            label = ReactNode("Date")
             onChange = {
                 date1 = it
             }
-            error = "Bad Day"
+            error = true
+            helperText = ReactNode("Bady Day")
         }
 
         var unsetMinDate: Long by useState { 0L }
 
-        UstadDateEditField {
+        UstadDateField {
             timeInMillis = unsetMinDate
             timeZoneId = TimeZone.currentSystemDefault().id
-            label = "Unset min date"
+            id = "date_edit_unset"
+            label = ReactNode("Unset min date")
             onChange = {
                 unsetMinDate = it
             }
         }
 
-        var dateTime: Long by useState { systemTimeInMillis() }
-        UstadDateTimeEditField {
-            timeInMillis = dateTime
-            timeZoneId = TimeZone.currentSystemDefault().id
-            label = "Date and time"
-            onChange = {
-                dateTime = it
-            }
-            enabled = true
-        }
 
         var time: Int by useState { (14 * MS_PER_HOUR) + (30 * MS_PER_MIN) }
 
-        UstadTimeEditField {
+        UstadTimeField {
             timeInMillis = time
-            label = "Time"
+            id = "time_field"
+            label = ReactNode("Time")
             onChange = {
                 time = it
             }
@@ -434,6 +321,7 @@ val UstadEditFieldPreviews = FC<Props> {
         UstadTextEditField {
             label = "Read only field"
             value = "Cant change me"
+            id = "read_only_edit_field"
             onChange = { }
             readOnly = true
             onClick = {
@@ -446,6 +334,7 @@ val UstadEditFieldPreviews = FC<Props> {
         UstadDropDownField {
             value = selectedOption
             label = "Select options"
+            id = "select_field"
             options = listOf(DropDownOption("One", "1"),
                 DropDownOption("Two", "2"))
             itemLabel = { ReactNode((it as? DropDownOption)?.label ?: "") }
@@ -459,6 +348,7 @@ val UstadEditFieldPreviews = FC<Props> {
 
         UstadSwitchField {
             label = "Switch"
+            id = "switch_field"
             checked = switchChecked
             onChanged = {
                 switchChecked = it
@@ -468,6 +358,7 @@ val UstadEditFieldPreviews = FC<Props> {
         var maxScore by useState { 42 }
         UstadTextEditField {
             label = "Maximum score"
+            id = "maximum_score"
             value = maxScore.toString()
             onChange = { newString ->
                 maxScore = newString.filter { it.isDigit() }.toIntOrNull() ?: 0

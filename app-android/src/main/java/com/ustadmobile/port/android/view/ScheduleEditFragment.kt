@@ -30,7 +30,7 @@ import com.ustadmobile.port.android.view.composable.UstadTimeEditTextField
 
 class ScheduleEditFragment: UstadBaseMvvmFragment() {
 
-    private val viewModel: ScheduleEditViewModel by ustadViewModels()
+    private val viewModel: ScheduleEditViewModel by ustadViewModels(::ScheduleEditViewModel)
 
     override fun onCreateView(
         inflater: LayoutInflater,

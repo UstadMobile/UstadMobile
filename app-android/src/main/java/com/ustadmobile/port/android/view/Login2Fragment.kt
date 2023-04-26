@@ -32,7 +32,7 @@ import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 class Login2Fragment : UstadBaseMvvmFragment() {
 
-    private val viewModel: LoginViewModel by ustadViewModels()
+    private val viewModel: LoginViewModel by ustadViewModels(::LoginViewModel)
 
     override fun onCreateView(
         inflater: LayoutInflater,

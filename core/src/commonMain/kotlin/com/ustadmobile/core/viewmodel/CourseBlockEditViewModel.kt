@@ -3,9 +3,7 @@ package com.ustadmobile.core.viewmodel
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadEditView.Companion.DEFAULT_COMMIT_DELAY
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
@@ -23,7 +21,7 @@ data class CourseBlockEditUiState(
 
     val fieldsEnabled: Boolean = true,
 
-    val caStartDateError: String? = null,
+    val caHideUntilDateError: String? = null,
 
     val caTitleError: String? = null,
 
@@ -101,7 +99,7 @@ class CourseBlockEditViewModel(
             }
 
             launch {
-                resultReturner.filteredResultFlowForKey(KEY_HTML_DESC).collect {result ->
+                resultReturner.filteredResultFlowForKey(RESULT_KEY_HTML_DESC).collect {result ->
                     val descriptionHtml = result.result as? String ?: return@collect
                     onEntityChanged(_uiState.value.courseBlock?.shallowCopy {
                         cbDescription = descriptionHtml
@@ -125,13 +123,9 @@ class CourseBlockEditViewModel(
 
     //Take the user to a separate screen with rich text editor.
     fun onClickEditDescription() {
-        navController.navigate(
-            viewName = HtmlEditViewModel.DEST_NAME,
-            args = mapOf(
-                HtmlEditViewModel.ARG_HTML to (_uiState.value.courseBlock?.cbDescription ?: ""),
-                UstadView.ARG_RESULT_DEST_KEY to KEY_HTML_DESC,
-                UstadView.ARG_RESULT_DEST_VIEWNAME to destinationName
-            )
+        navigateToEditHtml(
+            currentValue = _uiState.value.courseBlock?.cbDescription,
+            resultKey = RESULT_KEY_HTML_DESC
         )
     }
 
@@ -146,7 +140,6 @@ class CourseBlockEditViewModel(
 
         const val ARG_BLOCK_TYPE = "blockType"
 
-        const val KEY_HTML_DESC = "description"
 
     }
 

@@ -16,26 +16,19 @@ import org.kodein.di.DI
  * @param destinationName if provided, then look for a constructor where the destinationName can be
  * explicitly provided. Otherwise, use only DI and SavedStateHandle constructor
  */
-class UstadViewModelProviderFactory(
+class UstadViewModelProviderFactory<T: ViewModel>(
     private val di: DI,
     owner: SavedStateRegistryOwner,
     defaultArgs: Bundle?,
-    private val destinationName: String?,
+    private val vmFactory: (DI, UstadSavedStateHandle) -> T,
 ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
 
+    @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(
         key: String,
         modelClass: Class<T>,
         handle: SavedStateHandle
     ): T {
-        return if(destinationName != null){
-            modelClass.getConstructor(
-                DI::class.java, UstadSavedStateHandle::class.java, String::class.java,
-            ).newInstance(di, SavedStateHandleAdapter(handle), destinationName)
-        }else {
-            modelClass.getConstructor(
-                DI::class.java, UstadSavedStateHandle::class.java,
-            ).newInstance(di, SavedStateHandleAdapter(handle))
-        }
+        return vmFactory(di, SavedStateHandleAdapter(handle)) as T
     }
 }

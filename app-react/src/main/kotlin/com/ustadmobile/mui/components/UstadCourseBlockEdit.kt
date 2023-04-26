@@ -70,11 +70,14 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
         }
 
 
-
-        UstadDateTimeEditField {
+        UstadDateTimeField {
             timeInMillis = props.uiState.courseBlock?.cbHideUntilDate ?: 0
-            label = strings[MessageID.dont_show_before].addOptionalSuffix(strings)
+            label = ReactNode(strings[MessageID.dont_show_before].addOptionalSuffix(strings))
             id = "hide_until_date"
+            disabled = !props.uiState.fieldsEnabled
+            helperText = props.uiState.caHideUntilDateError?.let { ReactNode(it) }
+            error = props.uiState.caHideUntilDateError != null
+            timeZoneId = props.uiState.timeZone
             error = props.uiState.caStartDateError
             enabled = props.uiState.fieldsEnabled
             onChange = {
@@ -125,6 +128,16 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             }
         }
 
+        UstadTextEditField {
+            value = (props.uiState.courseBlock?.cbMaxPoints ?: 0).toString()
+            suffixText = strings[MessageID.points]
+            label = strings[MessageID.points]
+            error = props.uiState.caHideUntilDateError
+            enabled = props.uiState.fieldsEnabled
+            inputProps = {
+                it.inputMode = InputMode.numeric
+            }
+            onChange = { newString ->
         UstadNumberTextField {
             id = "cbMaxPoints"
             value = (props.uiState.courseBlock?.cbMaxPoints ?: 0).toFloat()
@@ -139,9 +152,16 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             }
         }
 
+        UstadDateTimeField {
         UstadDateTimeEditField {
             id = "cbDeadlineDate"
             timeInMillis = props.uiState.courseBlock?.cbDeadlineDate ?: 0
+            timeZoneId = props.uiState.timeZone
+            unsetDefault = Long.MAX_VALUE
+            label = ReactNode(strings[MessageID.deadline].addOptionalSuffix(strings))
+            disabled = !props.uiState.fieldsEnabled
+            helperText = props.uiState.caDeadlineError?.let { ReactNode(it) }
+            error = props.uiState.caDeadlineError != null
             label = strings[MessageID.deadline].addOptionalSuffix(strings)
             enabled = props.uiState.fieldsEnabled
             error = props.uiState.caDeadlineError
@@ -155,9 +175,16 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
 
         if (props.uiState.gracePeriodVisible){
 
+            UstadDateTimeField {
             UstadDateTimeEditField {
                 id = "cbGracePeriodDate"
                 timeInMillis = props.uiState.courseBlock?.cbGracePeriodDate ?: 0
+                timeZoneId = props.uiState.timeZone
+                unsetDefault = Long.MAX_VALUE
+                label = ReactNode(strings[MessageID.end_of_grace_period])
+                disabled = !props.uiState.fieldsEnabled
+                helperText = props.uiState.caGracePeriodError?.let { ReactNode(it) }
+                error = props.uiState.caGracePeriodError != null
                 label = strings[MessageID.end_of_grace_period]
                 enabled = props.uiState.fieldsEnabled
                 timeZoneId = TimeZone.currentSystemDefault().id
@@ -168,6 +195,12 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
                 }
             }
 
+            UstadTextEditField {
+                value = (props.uiState.courseBlock?.cbLateSubmissionPenalty ?: 0).toString()
+                label = strings[MessageID.late_submission_penalty]
+                error = props.uiState.caHideUntilDateError
+                enabled = props.uiState.fieldsEnabled
+                suffixText = "%"
             UstadNumberTextField {
                 id = "cbLateSubmissionPenalty"
                 value = (props.uiState.courseBlock?.cbLateSubmissionPenalty ?: 0).toFloat()

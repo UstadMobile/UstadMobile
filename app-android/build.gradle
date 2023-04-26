@@ -5,6 +5,7 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'org.jetbrains.kotlin.android'
     id 'org.jetbrains.kotlin.kapt'
+    id 'kotlin-parcelize'
 }
 
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode

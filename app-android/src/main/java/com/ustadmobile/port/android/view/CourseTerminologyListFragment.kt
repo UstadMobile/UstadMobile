@@ -40,9 +40,9 @@ import com.ustadmobile.lib.db.entities.CourseTerminology
 
 class CourseTerminologyListFragment: UstadBaseMvvmFragment() {
 
-    private val viewModel: CourseTerminologyListViewModel by ustadViewModels()
+    private val viewModel: CourseTerminologyListViewModel by ustadViewModels(::CourseTerminologyListViewModel)
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
         viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
 

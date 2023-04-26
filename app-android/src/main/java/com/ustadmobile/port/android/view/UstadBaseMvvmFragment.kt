@@ -42,6 +42,8 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
     }
 
 
+    //protected val destinationName: String by lazy { requireDestinationViewName() }
+
     /**
      * Shortcut to use the UstadViewModelProviderFactory and reduce boilerplate
      *
@@ -50,21 +52,9 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
      * not needed
      */
     inline fun <reified VM: ViewModel> ustadViewModels(
-        lookupDestinationName: Boolean = false
+        noinline vmFactory: (DI, UstadSavedStateHandle) -> VM,
     ): Lazy<VM> = viewModels {
-        val destinationName = if(lookupDestinationName) {
-            requireDestinationViewName()
-        }else {
-            null
-        }
-
-
-        UstadViewModelProviderFactory(
-            di = di,
-            owner = this,
-            defaultArgs = arguments,
-            destinationName = destinationName
-        )
+        UstadViewModelProviderFactory(di, this, arguments, vmFactory)
     }
 
     override val di by DI.lazy {
@@ -280,6 +270,9 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        mMenuProvider?.also {
+            requireActivity().removeMenuProvider(it)
+        }
         mMenuProvider = null
     }
 

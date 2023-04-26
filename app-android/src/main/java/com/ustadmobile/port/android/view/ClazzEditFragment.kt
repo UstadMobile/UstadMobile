@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,6 +20,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,7 +29,6 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.locale.entityconstants.EnrolmentPolicyConstants
 import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
 import com.ustadmobile.core.util.ext.editIconId
 import com.ustadmobile.core.viewmodel.ClazzEditUiState
@@ -45,12 +46,14 @@ import org.burnoutcrew.reorderable.*
 import java.util.*
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
 import com.ustadmobile.port.android.view.ClazzEditFragment.Companion.ADD_COURSE_BLOCK_OPTIONS
+import kotlinx.parcelize.Parcelize
 
 class ClazzEditFragment : UstadBaseMvvmFragment() {
 
     private var bottomSheetOptionList: List<TitleDescBottomSheetOption> = listOf()
 
-    private val viewModel: ClazzEditViewModel by ustadViewModels()
+    private val viewModel: ClazzEditViewModel by ustadViewModels(::ClazzEditViewModel)
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
         viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
@@ -141,6 +144,17 @@ class ClazzEditFragment : UstadBaseMvvmFragment() {
 }
 
 
+@Parcelize
+class CourseBlockKey(val cbUid: Long): Parcelable {
+    override fun equals(other: Any?): Boolean {
+        return other === this || (other as? CourseBlockKey)?.cbUid == cbUid
+    }
+
+    override fun hashCode(): Int {
+        return cbUid.hashCode()
+    }
+}
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ClazzEditScreen(
@@ -148,6 +162,7 @@ private fun ClazzEditScreen(
     onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit = {},
     onMoveCourseBlock: (from: ItemPosition, to: ItemPosition) -> Unit = {_, _ -> },
     onClickSchool: () -> Unit = {},
+    onClickEditDescription: () -> Unit = {},
     onClickTimezone: () -> Unit = {},
     onClickEditCourseBlock: (CourseBlockWithEntity) -> Unit = {},
     onClickAddCourseBlock: () -> Unit = {},
@@ -164,16 +179,18 @@ private fun ClazzEditScreen(
     onClickDeleteBlockPopupMenu: (CourseBlockWithEntity) -> Unit = {},
 ) {
 
-    val courseBlockKeys : List<Long> by remember(uiState.courseBlockList) {
-        derivedStateOf { uiState.courseBlockList.map { it.cbUid } }
-    }
+    //The number of items in the LazyColumn before the start of CourseBlocks
+    val courseBlockIndexOffset = 3
 
     val reorderLazyListState = rememberReorderableLazyListState(
         onMove = { from, to ->
-            onMoveCourseBlock(from, to)
+            onMoveCourseBlock(
+                ItemPosition(from.index - courseBlockIndexOffset, from.key),
+                ItemPosition(to.index - courseBlockIndexOffset, to.key),
+            )
         },
         canDragOver = { draggedOver, dragging ->
-            draggedOver.key in courseBlockKeys
+            draggedOver.key is CourseBlockKey
         },
         onDragEnd = { start, end  ->
             //validate the result
@@ -190,10 +207,10 @@ private fun ClazzEditScreen(
             ReorderableItem(reorderableState = reorderLazyListState, key = 1) {
                 ClazzEditBasicDetails(
                     uiState = uiState,
-                    reorderLazyListState = reorderLazyListState,
                     onClazzChanged= onClazzChanged,
                     onClickSchool = onClickSchool,
                     onClickTimezone = onClickTimezone,
+                    onClickEditDescription = onClickEditDescription,
                 )
             }
         }
@@ -225,12 +242,11 @@ private fun ClazzEditScreen(
 
         items (
             items = uiState.courseBlockList,
-            key = { it.cbUid }
+            key = {  CourseBlockKey(it.cbUid) }
         ) { courseBlock ->
-
             val courseBlockEditAlpha: Float = if (courseBlock.cbHidden) 0.5F else 1F
             val startPadding = ((courseBlock.cbIndentLevel * 24) + 8).dp
-            ReorderableItem(state = reorderLazyListState, key = courseBlock.cbUid) { dragging ->
+            ReorderableItem(state = reorderLazyListState, key = CourseBlockKey(courseBlock.cbUid)) { dragging ->
                 ListItem(
                     modifier = Modifier
                         .clickable {
@@ -292,7 +308,8 @@ private fun ClazzEditScreen(
         }
 
         items(
-            uiState.clazzSchedules
+            uiState.clazzSchedules,
+            key = { it.scheduleUid },
         ){ schedule ->
 
             val fromTimeFormatted = rememberFormattedTime(timeInMs = schedule.sceduleStartTime.toInt())
@@ -323,20 +340,20 @@ private fun ClazzEditScreen(
         }
 
         item {
+            UstadEditHeader(text = stringResource(id = R.string.course_setup))
+        }
+
+        item {
             UstadClickableTextField(
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultItemPadding(),
-                value = uiState.entity?.holidayCalendar?.umCalendarName ?: "",
-                label = { Text(stringResource(id = R.string.holiday_calendar)) },
+                label = { Text(stringResource(id = R.string.timezone)) },
+                value = uiState.entity?.clazzTimeZone ?: "",
+                onClick = onClickTimezone,
                 enabled = uiState.fieldsEnabled,
-                onValueChange = {},
-                onClick = onClickHolidayCalendar
+                onValueChange = { }
             )
-        }
-
-        item {
-            UstadEditHeader(text = stringResource(id = R.string.course_setup))
         }
 
         item {
@@ -349,23 +366,6 @@ private fun ClazzEditScreen(
             )
         }
 
-
-
-        item {
-            UstadMessageIdOptionExposedDropDownMenuField(
-                value = uiState.entity?.clazzEnrolmentPolicy ?: 0,
-                label = stringResource(R.string.enrolment_policy),
-                options = EnrolmentPolicyConstants.ENROLMENT_POLICY_MESSAGE_IDS,
-                enabled = uiState.fieldsEnabled,
-                onOptionSelected = {
-                    onClazzChanged(uiState.entity?.shallowCopy{
-                        clazzEnrolmentPolicy = it.value
-                    })
-                },
-                modifier = Modifier.defaultItemPadding(),
-            )
-        }
-
         item {
             UstadClickableTextField(
                 value = uiState.entity?.terminology?.ctTitle ?: "",
@@ -373,7 +373,6 @@ private fun ClazzEditScreen(
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {},
                 onClick = onClickTerminology,
-                onClickEnabled = !reorderLazyListState.listState.isScrollInProgress,
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultItemPadding(),
@@ -385,10 +384,10 @@ private fun ClazzEditScreen(
 @Composable
 private fun ClazzEditBasicDetails(
     uiState: ClazzEditUiState,
-    reorderLazyListState: ReorderableLazyListState,
     onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit = {},
     onClickSchool: () -> Unit = {},
     onClickTimezone: () -> Unit = {},
+    onClickEditDescription: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier.defaultScreenPadding()
@@ -402,6 +401,7 @@ private fun ClazzEditBasicDetails(
             value = uiState.entity?.clazzName ?: "",
             label = { Text(stringResource( R.string.name )) },
             enabled = uiState.fieldsEnabled,
+            singleLine = true,
             onValueChange = {
                 onClazzChanged(
                     uiState.entity?.shallowCopy {
@@ -411,83 +411,61 @@ private fun ClazzEditBasicDetails(
             }
         )
 
-        OutlinedTextField(
+        HtmlClickableTextField(
+            html = uiState.entity?.clazzDesc ?: "",
+            label = stringResource(R.string.description),
+            onClick = onClickEditDescription,
             modifier = Modifier
                 .fillMaxWidth()
-                .defaultItemPadding(),
-            value = uiState.entity?.clazzDesc ?: "",
-            label = { Text(stringResource(id = R.string.description).addOptionalSuffix()) },
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onClazzChanged(
-                    uiState.entity?.shallowCopy {
-                        clazzDesc = it
-                    }
-                )
-            }
+                .testTag("description")
         )
-
-        UstadClickableTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultItemPadding(),
-            value = uiState.entity?.school?.schoolName ?: "",
-            label = { Text(stringResource(id = R.string.institution)) },
-            enabled = uiState.fieldsEnabled,
-            onClick = onClickSchool,
-            onValueChange = {}
-        )
-
 
         Row {
-            UstadDateEditTextField(
-                value = uiState.entity?.clazzStartTime ?: 0,
+            UstadInputFieldLayout(
                 modifier = Modifier
                     .weight(1f)
                     .defaultItemPadding(end = 8.dp),
-                label = stringResource(id = R.string.start_date),
-                error = uiState.clazzStartDateError,
-                enabled = uiState.fieldsEnabled,
-                timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
-                onValueChange = {
-                    onClazzChanged(
-                        uiState.entity?.shallowCopy {
-                            clazzStartTime = it
-                        }
-                    )
-                }
-            )
+                errorText = uiState.clazzStartDateError
+            ) {
+                UstadDateField(
+                    value = uiState.entity?.clazzStartTime ?: 0,
+                    modifier = Modifier.testTag("start_date"),
+                    label = { Text(stringResource(id = R.string.start_date)) } ,
+                    isError = uiState.clazzStartDateError != null,
+                    enabled = uiState.fieldsEnabled,
+                    timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
+                    onValueChange = {
+                        onClazzChanged(
+                            uiState.entity?.shallowCopy {
+                                clazzStartTime = it
+                            }
+                        )
+                    }
+                )
+            }
 
-            UstadDateEditTextField(
-                value = uiState.entity?.clazzEndTime ?: 0,
-                modifier = Modifier
-                    .weight(1f)
-                    .defaultItemPadding(start = 8.dp),
-                label = stringResource(id = R.string.end_date).addOptionalSuffix(),
-                error = uiState.clazzEndDateError,
-                enabled = uiState.fieldsEnabled,
-                timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
-                onValueChange = {
-                    onClazzChanged(
-                        uiState.entity?.shallowCopy {
-                            clazzEndTime = it
-                        }
-                    )
-                }
-            )
+            UstadInputFieldLayout(
+                modifier = Modifier.weight(1f).defaultItemPadding(start = 8.dp),
+                errorText = uiState.clazzEndDateError
+            ) {
+                UstadDateField(
+                    value = uiState.entity?.clazzEndTime ?: 0,
+                    modifier = Modifier.testTag("end_date"),
+                    label = { Text(stringResource(id = R.string.end_date).addOptionalSuffix()) },
+                    isError = uiState.clazzEndDateError != null,
+                    enabled = uiState.fieldsEnabled,
+                    unsetDefault = Long.MAX_VALUE,
+                    timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
+                    onValueChange = {
+                        onClazzChanged(
+                            uiState.entity?.shallowCopy {
+                                clazzEndTime = it
+                            }
+                        )
+                    }
+                )
+            }
         }
-
-        UstadClickableTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultItemPadding(),
-            label = { Text(stringResource(id = R.string.timezone)) },
-            value = uiState.entity?.clazzTimeZone ?: "",
-            onClick = onClickTimezone,
-            onClickEnabled = !reorderLazyListState.listState.isScrollInProgress,
-            enabled = uiState.fieldsEnabled,
-            onValueChange = { }
-        )
     }
 }
 
@@ -568,7 +546,9 @@ fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
     ClazzEditScreen(
         uiState = uiState,
         onClazzChanged = viewModel::onEntityChanged,
+        onClickTimezone = viewModel::onClickTimezone,
         onCheckedAttendance = viewModel::onCheckedAttendanceChanged,
+        onClickEditDescription = viewModel::onClickEditDescription,
         onClickAddSchedule = viewModel::onClickAddSchedule,
         onClickEditSchedule = viewModel::onClickEditSchedule,
         onClickDeleteSchedule = viewModel::onClickDeleteSchedule,

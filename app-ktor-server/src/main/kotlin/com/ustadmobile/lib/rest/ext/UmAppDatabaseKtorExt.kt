@@ -13,6 +13,7 @@ import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.requireDbAndRepo
 import com.ustadmobile.door.ext.toHexString
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.randomString
 import io.github.aakira.napier.Napier
@@ -25,15 +26,6 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
 
-internal fun UmAppDatabase.insertDefaultSite() {
-    siteDao.insert(Site().apply {
-        siteUid = 1L
-        siteName = "My Site"
-        guestLogin = false
-        registrationAllowed = false
-        authSalt = randomString(20)
-    })
-}
 
 fun UmAppDatabase.insertCourseTerminology(di: DI){
     val (db, repo) = requireDbAndRepo()
@@ -99,15 +91,13 @@ suspend fun UmAppDatabase.initAdminUser(
             adminPassFile.parentFile.mkdirs()
         }
 
-        val hexFile = File(passwordFilePath, "hex.txt")
+        val saltFile = File(passwordFilePath, "salt-${systemTimeInMillis()}.txt")
 
         val repo: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
         val salt = repo.siteDao.getSiteAsync()!!.authSalt!!
 
-        hexFile.writeText(
-            adminPass.doublePbkdf2Hash(
-                salt, di.direct.instance(), Endpoint("localhost"), di.direct.instance()
-            ).toHexString()
+        saltFile.writeText(
+            "$salt / $adminPass"
         )
 
         grantScopedPermission(adminPerson, Role.ALL_PERMISSIONS, ScopedGrant.ALL_TABLES,

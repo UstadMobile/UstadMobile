@@ -32,7 +32,7 @@ import com.ustadmobile.port.android.view.composable.UstadErrorText
 
 class CourseTerminologyEditFragment: UstadBaseMvvmFragment() {
 
-    val viewModel: CourseTerminologyEditViewModel by ustadViewModels()
+    val viewModel: CourseTerminologyEditViewModel by ustadViewModels(::CourseTerminologyEditViewModel)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
