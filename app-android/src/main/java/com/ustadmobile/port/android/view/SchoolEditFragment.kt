@@ -21,7 +21,6 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSchoolEditBinding
 import com.ustadmobile.core.controller.SchoolEditPresenter
@@ -37,6 +36,7 @@ import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.lib.db.entities.ScopedGrantAndName
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.composable.UstadClickableTextField
 
 class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), SchoolEditView{
 
@@ -175,10 +175,10 @@ private fun SchoolEditScreen(
 
 
         item {
-            UstadTextEditField(
+            UstadClickableTextField(
                 modifier = Modifier.testTag("schoolTimeZone"),
                 value = uiState.entity?.schoolTimeZone ?: "",
-                label = stringResource(id = R.string.timezone),
+                label = { Text(stringResource(id = R.string.timezone)) },
                 enabled = uiState.fieldsEnabled,
                 readOnly = true,
                 onClick = onClickTimeZone,
@@ -187,10 +187,10 @@ private fun SchoolEditScreen(
         }
 
         item {
-            UstadTextEditField(
+            UstadClickableTextField(
                 modifier = Modifier.testTag("umCalendarName"),
                 value = uiState.entity?.holidayCalendar?.umCalendarName ?: "",
-                label = stringResource(id = R.string.holiday_calendar),
+                label = { Text(stringResource(id = R.string.holiday_calendar)) },
                 enabled = uiState.fieldsEnabled,
                 readOnly = true,
                 onClick = onClickHolidayCalendar,
