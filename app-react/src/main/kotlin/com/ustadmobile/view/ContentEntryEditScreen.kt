@@ -11,16 +11,29 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.common.inputCursor
+import com.ustadmobile.mui.common.readOnly
+import com.ustadmobile.mui.components.UstadCourseBlockEdit
+import com.ustadmobile.mui.components.UstadDropDownField
+import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.view.components.UstadSwitchField
+import csstype.Cursor
 import csstype.px
-import mui.material.*
+import js.core.jso
+import mui.material.Container
+import mui.material.TextField
+import mui.material.Button
+import mui.material.ButtonVariant
+import mui.material.Typography
+import mui.material.FormControlVariant
 import mui.material.Stack
 import mui.system.responsive
+import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
+import react.dom.onChange
 
 external interface ContentEntryEditScreenProps : Props {
 
@@ -43,7 +56,7 @@ external interface ContentEntryEditScreenProps : Props {
 }
 
 val ContentEntryEditScreenPreview = FC<Props> {
-    val strings = useStringsXml()
+
     ContentEntryEditScreenComponent2 {
         uiState = ContentEntryEditUiState(
             entity = ContentEntryWithBlockAndLanguage().apply {
@@ -113,12 +126,13 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
                 }
             }
 
-            UstadTextEditField {
+            TextField {
+                variant = FormControlVariant.outlined
                 value = props.uiState.entity?.title ?: ""
-                label = strings[MessageID.title]
-                error = props.uiState.titleError
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
+                label = ReactNode(strings[MessageID.title])
+                error = props.uiState.titleError != null
+                disabled = !props.uiState.fieldsEnabled
+                onTextChange = {
                     props.onContentChanged(
                         props.uiState.entity?.shallowCopy {
                             title = it
@@ -127,11 +141,12 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
                 }
             }
 
-            UstadTextEditField {
+            TextField {
+                variant = FormControlVariant.outlined
                 value = props.uiState.entity?.description ?: ""
-                label = strings[MessageID.description]
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
+                label = ReactNode(strings[MessageID.description])
+                disabled = !props.uiState.fieldsEnabled
+                onTextChange = {
                     props.onContentChanged(
                         props.uiState.entity?.shallowCopy {
                             description = it
@@ -145,11 +160,12 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
                 onCourseBlockChange = props.onCourseBlockChange
             }
 
-            UstadTextEditField {
+            TextField {
+                variant = FormControlVariant.outlined
                 value = props.uiState.entity?.author ?: ""
-                label = strings[MessageID.entry_details_author]
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
+                label = ReactNode(strings[MessageID.entry_details_author])
+                disabled = !props.uiState.fieldsEnabled
+                onTextChange = {
                     props.onContentChanged(
                         props.uiState.entity?.shallowCopy {
                             author = it
@@ -158,11 +174,12 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
                 }
             }
 
-            UstadTextEditField {
+            TextField {
+                variant = FormControlVariant.outlined
                 value = props.uiState.entity?.publisher ?: ""
-                label = strings[MessageID.entry_details_publisher]
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
+                label = ReactNode(strings[MessageID.entry_details_publisher])
+                disabled = !props.uiState.fieldsEnabled
+                onTextChange = {
                     props.onContentChanged(
                         props.uiState.entity?.shallowCopy {
                             publisher = it
@@ -179,7 +196,7 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
                 onChange = {
                     props.onContentChanged(
                         props.uiState.entity?.shallowCopy {
-                            licenseType = it?.value ?: 0
+                            licenseType = it.value
                         }
                     )
                 }
@@ -214,12 +231,20 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
                 enabled = props.uiState.fieldsEnabled
             }
 
-            UstadTextEditField {
+            TextField {
+                sx {
+                    inputCursor = Cursor.pointer
+                }
+                variant = FormControlVariant.outlined
                 value = props.uiState.entity?.language?.name ?: ""
-                label = strings[MessageID.language]
-                readOnly = true
-                enabled = props.uiState.fieldsEnabled
-                onClick = props.onClickLanguage
+                label = ReactNode(strings[MessageID.language])
+                disabled = !props.uiState.fieldsEnabled
+                inputProps = jso {
+                    readOnly = true
+                }
+                onClick = {
+                    props.onClickLanguage()
+                }
                 onChange = {}
             }
         }
