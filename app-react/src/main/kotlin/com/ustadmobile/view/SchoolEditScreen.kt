@@ -6,15 +6,22 @@ import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.SchoolEditUiState
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.mui.common.inputCursor
+import com.ustadmobile.mui.common.readOnly
+import com.ustadmobile.util.ext.onTextChange
+import csstype.Cursor
 import csstype.px
-import mui.material.Box
+import js.core.jso
 import mui.material.Container
+import mui.material.TextField
+import mui.material.FormControlVariant
 import mui.material.Stack
+import mui.material.Box
 import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
+import react.ReactNode
 import react.useState
 
 external interface SchoolEditScreenProps : Props {
@@ -39,73 +46,93 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
         Stack {
             spacing = responsive(15.px)
 
-            UstadTextEditField {
+            TextField {
+                id = "schoolName"
+                variant = FormControlVariant.outlined
                 value = props.uiState.entity?.schoolName ?: ""
-                label = strings[MessageID.name]
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
+                label = ReactNode(strings[MessageID.name])
+                disabled = !props.uiState.fieldsEnabled
+                onTextChange = {
                     props.onSchoolChanged(props.uiState.entity?.shallowCopy {
                         schoolName = it
                     })
                 }
             }
 
-            UstadTextEditField {
+            TextField {
+                id = "schoolDesc"
+                variant = FormControlVariant.outlined
                 value = props.uiState.entity?.schoolDesc ?: ""
-                label = strings[MessageID.description]
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
+                label = ReactNode(strings[MessageID.description])
+                disabled = !props.uiState.fieldsEnabled
+                onTextChange = {
                     props.onSchoolChanged(props.uiState.entity?.shallowCopy {
                         schoolDesc = it
                     })
                 }
             }
 
-            UstadTextEditField {
+            TextField {
+                sx {
+                    inputCursor = Cursor.pointer
+                }
+                id = "schoolTimeZone"
                 value = props.uiState.entity?.schoolTimeZone ?: ""
-                label = strings[MessageID.timezone]
-                enabled = props.uiState.fieldsEnabled
-                readOnly = true
-                onClick = props.onClickTimeZone
-                onChange = { }
+                label = ReactNode(strings[MessageID.timezone])
+                disabled = !props.uiState.fieldsEnabled
+                onClick = { props.onClickTimeZone() }
+                inputProps = jso {
+                    readOnly = true
+                }
             }
 
-            UstadTextEditField {
+            TextField {
+                sx {
+                    inputCursor = Cursor.pointer
+                }
+                id = "umCalendarName"
                 value = props.uiState.entity?.holidayCalendar?.umCalendarName ?: ""
-                label = strings[MessageID.holiday_calendar]
-                enabled = props.uiState.fieldsEnabled
-                readOnly = true
-                onClick = props.onClickHolidayCalendar
-                onChange = { }
+                label = ReactNode(strings[MessageID.holiday_calendar])
+                disabled = !props.uiState.fieldsEnabled
+                onClick = { props.onClickHolidayCalendar() }
+                inputProps = jso {
+                    readOnly = true
+                }
             }
 
-            UstadTextEditField {
+            TextField {
+                id = "schoolAddress"
+                variant = FormControlVariant.outlined
                 value = props.uiState.entity?.schoolAddress ?: ""
-                label = strings[MessageID.address]
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
+                label = ReactNode(strings[MessageID.address])
+                disabled = !props.uiState.fieldsEnabled
+                onTextChange = {
                     props.onSchoolChanged(props.uiState.entity?.shallowCopy {
                         schoolAddress = it
                     })
                 }
             }
 
-            UstadTextEditField {
+            TextField {
+                id = "schoolPhoneNumber"
+                variant = FormControlVariant.outlined
                 value = props.uiState.entity?.schoolPhoneNumber ?: ""
-                label = strings[MessageID.phone_number]
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
+                label = ReactNode(strings[MessageID.phone_number])
+                disabled = !props.uiState.fieldsEnabled
+                onTextChange = {
                     props.onSchoolChanged(props.uiState.entity?.shallowCopy {
                         schoolPhoneNumber = it
                     })
                 }
             }
 
-            UstadTextEditField {
+            TextField {
+                id = "schoolEmailAddress"
+                variant = FormControlVariant.outlined
                 value = props.uiState.entity?.schoolEmailAddress ?: ""
-                label = strings[MessageID.email]
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
+                label = ReactNode(strings[MessageID.email])
+                disabled = !props.uiState.fieldsEnabled
+                onTextChange = {
                     props.onSchoolChanged(props.uiState.entity?.shallowCopy {
                         schoolEmailAddress = it
                     })
