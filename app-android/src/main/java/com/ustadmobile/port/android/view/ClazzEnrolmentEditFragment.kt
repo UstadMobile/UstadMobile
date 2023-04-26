@@ -32,6 +32,7 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.binding.MODE_END_OF_DAY
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
@@ -172,11 +173,15 @@ fun ClazzEnrolmentEditScreen(
     )  {
 
         UstadInputFieldLayout(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultItemPadding(),
             errorText = uiState.roleSelectedError,
         ) {
             UstadMessageIdOptionExposedDropDownMenuField(
-                modifier = Modifier.testTag("clazzEnrolmentRole"),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("clazzEnrolmentRole"),
                 value = uiState.clazzEnrolment?.clazzEnrolmentRole ?: 0,
                 label = stringResource(R.string.role),
                 options = RoleConstants.ROLE_MESSAGE_IDS,
@@ -192,11 +197,15 @@ fun ClazzEnrolmentEditScreen(
 
 
         UstadInputFieldLayout(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultItemPadding(),
             errorText = uiState.startDateError,
         ) {
             UstadDateField(
-                modifier = Modifier.testTag("clazzEnrolmentDateJoined"),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("clazzEnrolmentDateJoined"),
                 value = uiState.clazzEnrolment?.clazzEnrolmentDateJoined ?: 0,
                 label = { Text(stringResource(id = R.string.start_date)) },
                 enabled = uiState.fieldsEnabled,
@@ -212,11 +221,15 @@ fun ClazzEnrolmentEditScreen(
 
 
         UstadInputFieldLayout(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultItemPadding(),
             errorText = uiState.endDateError,
         ) {
             UstadDateField(
-                modifier = Modifier.testTag("clazzEnrolmentDateLeft"),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("clazzEnrolmentDateLeft"),
                 value = uiState.clazzEnrolment?.clazzEnrolmentDateLeft ?: 0,
                 label = { Text(stringResource(id = R.string.end_date)) },
                 enabled = uiState.fieldsEnabled,
@@ -232,7 +245,10 @@ fun ClazzEnrolmentEditScreen(
 
 
         UstadMessageIdOptionExposedDropDownMenuField(
-            modifier = Modifier.testTag("clazzEnrolmentOutcome"),
+            modifier = Modifier
+                .testTag("clazzEnrolmentOutcome")
+                .defaultItemPadding()
+                .fillMaxWidth(),
             value = uiState.clazzEnrolment?.clazzEnrolmentOutcome ?: 0,
             label = stringResource(R.string.outcome),
             options = OutcomeConstants.OUTCOME_MESSAGE_IDS,
@@ -246,7 +262,10 @@ fun ClazzEnrolmentEditScreen(
 
 
         UstadClickableTextField(
-            modifier = Modifier.testTag("leavingReasonTitle"),
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultItemPadding()
+                .testTag("leavingReasonTitle"),
             value = uiState.clazzEnrolment?.leavingReason?.leavingReasonTitle ?: "",
             label = { Text(stringResource(id = R.string.leaving_reason)) },
             onValueChange = {},
