@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -30,12 +31,10 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.binding.MODE_END_OF_DAY
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
-import com.ustadmobile.port.android.view.composable.UstadDateEditTextField
-import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
-import com.ustadmobile.port.android.view.composable.UstadTextEditField
-import com.ustadmobile.port.android.view.composable.UstadInputFieldLayout
+import com.ustadmobile.port.android.view.composable.*
 import java.util.*
 
 
@@ -166,7 +165,8 @@ fun ClazzEnrolmentEditScreen(
 ) {
     Column(
         modifier = Modifier
-            .padding(16.dp)
+            .defaultScreenPadding()
+            .fillMaxSize()
     )  {
 
         UstadInputFieldLayout(
@@ -188,37 +188,43 @@ fun ClazzEnrolmentEditScreen(
         }
 
 
-        Spacer(modifier = Modifier.width(15.dp))
+        UstadInputFieldLayout(
+            modifier = Modifier.fillMaxWidth(),
+            errorText = uiState.startDateError,
+        ) {
+            UstadDateField(
+                value = uiState.clazzEnrolment?.clazzEnrolmentDateJoined ?: 0,
+                label = { Text(stringResource(id = R.string.start_date)) },
+                enabled = uiState.fieldsEnabled,
+                isError = uiState.startDateError != null,
+                timeZoneId = uiState.clazzEnrolment?.timeZone ?: "UTC",
+                onValueChange = {
+                    onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy{
+                        clazzEnrolmentDateJoined = it
+                    })
+                }
+            )
+        }
 
-        UstadDateEditTextField(
-            value = uiState.clazzEnrolment?.clazzEnrolmentDateJoined ?: 0,
-            label = stringResource(id = R.string.start_date),
-            enabled = uiState.fieldsEnabled,
-            error = uiState.startDateError,
-            timeZoneId = uiState.clazzEnrolment?.timeZone ?: "UTC",
-            onValueChange = {
-                onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy{
-                    clazzEnrolmentDateJoined = it
-                })
-            }
-        )
 
-        Spacer(modifier = Modifier.width(15.dp))
+        UstadInputFieldLayout(
+            modifier = Modifier.fillMaxWidth(),
+            errorText = uiState.endDateError,
+        ) {
+            UstadDateField(
+                value = uiState.clazzEnrolment?.clazzEnrolmentDateLeft ?: 0,
+                label = { Text(stringResource(id = R.string.end_date)) },
+                enabled = uiState.fieldsEnabled,
+                isError = uiState.endDateError != null,
+                timeZoneId = uiState.clazzEnrolment?.timeZone ?: "UTC",
+                onValueChange = {
+                    onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy{
+                        clazzEnrolmentDateLeft = it
+                    })
+                }
+            )
+        }
 
-        UstadDateEditTextField(
-            value = uiState.clazzEnrolment?.clazzEnrolmentDateLeft ?: 0,
-            label = stringResource(id = R.string.end_date),
-            enabled = uiState.fieldsEnabled,
-            error = uiState.endDateError,
-            timeZoneId = uiState.clazzEnrolment?.timeZone ?: "UTC",
-            onValueChange = {
-                onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy{
-                    clazzEnrolmentDateLeft = it
-                })
-            }
-        )
-
-        Spacer(modifier = Modifier.width(15.dp))
 
         UstadMessageIdOptionExposedDropDownMenuField(
             value = uiState.clazzEnrolment?.clazzEnrolmentOutcome ?: 0,
@@ -232,7 +238,6 @@ fun ClazzEnrolmentEditScreen(
             },
         )
 
-        Spacer(modifier = Modifier.width(15.dp))
 
         UstadTextEditField(
             value = uiState.clazzEnrolment?.leavingReason?.leavingReasonTitle ?: "",
