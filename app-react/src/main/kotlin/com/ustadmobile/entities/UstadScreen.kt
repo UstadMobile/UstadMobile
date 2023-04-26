@@ -169,7 +169,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
 
     UstadScreen(CourseDiscussionDetailView.VIEW_NAME, "Course Discussion Detail Preview",
         CourseDiscussionDetailPreview),
-    UstadScreen(DiscussionPostDetailView.VIEW_NAME, name = "Course Discussion Post Detail",
+    UstadScreen("DiscussionPostDetailViewDemo", name = "Course Discussion Post Detail",
         DiscussionPostDetailPreview),
     UstadScreen(DiscussionPostDetailView.VIEW_NAME, name = "Real Course Discussion Post Detail",
         DiscussionPostDetailScreen),

@@ -129,7 +129,7 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
           FROM DiscussionPost 
          WHERE DiscussionPost.discussionPostUid = :postUid
     """)
-    abstract suspend fun getPostTitleAsFlow(postUid: Long): Flow<String?>
+    abstract fun getPostTitleAsFlow(postUid: Long): Flow<String?>
 
     @Query("""
         SELECT * 
@@ -167,7 +167,7 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
          WHERE DiscussionPost.discussionPostUid = :uid
            
     """)
-    abstract suspend fun findWithDetailsByUidAsFlow(uid: Long): Flow<DiscussionPostWithDetails?>
+    abstract fun findWithDetailsByUidAsFlow(uid: Long): Flow<DiscussionPostWithDetails?>
 
     @Query("""
         SELECT DiscussionPost.*,
