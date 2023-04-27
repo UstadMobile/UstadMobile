@@ -19,7 +19,8 @@ import org.kodein.di.instance
 data class DiscussionPostDetailUiState2(
     val discussionPost: DiscussionPostWithDetails? = null,
     val replies: List<DiscussionPostWithPerson> = emptyList(),
-    val messageReplyTitle: String? = null
+    val messageReplyTitle: String? = null,
+    val loggedInPersonUid: Long = 0L
 
 ){
 
@@ -90,6 +91,7 @@ class DiscussionPostDetailViewModel(
 
 
     }
+
 
     //onClicks:
 

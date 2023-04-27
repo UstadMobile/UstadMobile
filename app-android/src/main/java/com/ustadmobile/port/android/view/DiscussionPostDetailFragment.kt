@@ -6,6 +6,7 @@ import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,11 +14,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.ListItem
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.material.*
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.DiscussionPostDetailUiState2
@@ -26,21 +23,24 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
 import com.ustadmobile.lib.db.entities.DiscussionPostWithPerson
 import com.ustadmobile.lib.db.entities.Person
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
+import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import java.util.*
 
@@ -159,99 +159,125 @@ private fun DiscussionPostDetailFragmentScreen(
         )
 
 
-        //TODO: Figure how to save to new comment thingi
-        UstadTextEditField(
-            value = "",
-            label = stringResource(id = R.string.add_a_reply),
-            error = uiState.messageReplyTitle,
-            enabled = true,
-            onValueChange = {
-//                onContentChanged(uiState.discussionPost?.shallowCopy {
-//                    discussionPostTitle = it
-//                })
+        val enabled = true
+        var newReplyText = ""
+
+        val onClickAddComment: (() -> Unit) = {
+            //TODO: Remove TextEditField
+
+            if(!newReplyText.isEmpty()) {
+                onClickAddMessage(newReplyText)
+
+            }
+        }
+
+        ListItem(
+            text = {
+                UstadTextEditField(
+                    value = "",
+                    label = stringResource(id = R.string.add_a_reply),
+                    error = uiState.messageReplyTitle,
+                    enabled = true,
+                    onValueChange = {
+                        newReplyText = it
+                    }
+                )
+
+            },
+            trailing = {
+                TextButton(
+                    onClick = onClickAddComment,
+                    modifier = Modifier,
+                    border = BorderStroke(0.dp, Color.Transparent),
+                    enabled = enabled,
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = colorResource(id = R.color.grey_a_40),
+                    )
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.add),
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier,
+                        color = contentColorFor(
+                            colorResource(id = R.color.grey_a_40)
+                        )
+                    )
+                }
             }
         )
 
         Box(modifier = Modifier.weight(1f)) {
-            Messages(uiState.replies, onClickMessage)
-        }
-    }
 
-}
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                state = LazyListState(),
+            ) {
+                itemsIndexed(uiState.replies?: emptyList()) { _, reply ->
 
-@Composable
-private fun Messages(
-    replies: List<DiscussionPostWithPerson> = emptyList(),
-    onClickMessage: (DiscussionPostWithPerson) -> Unit = {}
-){
+                    Row(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        val context = LocalContext.current
+                        val datePosted = remember { DateFormat.getDateFormat(context)
+                            .format(Date(reply.discussionPostStartDate ?: 0)).toString() }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
-        state = LazyListState(),
-    ) {
-        itemsIndexed(replies) { _, item ->
-            MessageItem(item)
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-private fun MessageItem(post: DiscussionPostWithPerson){
-    Row(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ){
-        val context = LocalContext.current
-        val datePosted = remember { DateFormat.getDateFormat(context)
-            .format(Date(post.discussionPostStartDate ?: 0)).toString() }
-
-        val fullName= post.replyPerson?.fullName() ?: ""
+                        val fullName= reply.replyPerson?.fullName() ?: ""
 
 
-        ListItem(
-            modifier = Modifier.clickable {
-                //onClickPost(post)
-            },
-            icon = {
-                //TODO: replace with avatar
-                Icon(
-                    imageVector = Icons.Filled.Person,
-                    contentDescription = null
-                )
-            },
-            text = {
-                Text(fullName ?: "" )
-            },
+                        if(reply.discussionPostStartedPersonUid == uiState.loggedInPersonUid){
 
-            secondaryText = {
-                Column {
-                    Text(post.discussionPostMessage?: "")
-                }
-            },
-            singleLineSecondaryText = false,
-            trailing = {
-                Column {
-                    Text(datePosted)
+                            UstadDetailField(
+                                valueText = fullName,
+                                labelText = reply.discussionPostMessage?: "",
+
+                                icon = {
+                                    //TODO: replace with avatar
+                                    Icon(
+                                        imageVector = Icons.Filled.Person,
+                                        contentDescription = null
+                                    )
+                                },
+                                secondaryActionContent = {
+                                    IconButton(
+                                        onClick = {
+                                            onClickDeleteMessage(reply)
+                                        },
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Delete,
+                                            contentDescription = stringResource(id = R.string.delete),
+                                        )
+                                    }
+                                }
+                            )
+                        }else{
+                            UstadDetailField(
+                                valueText = fullName,
+                                labelText = reply.discussionPostMessage?: "",
+                                icon = {
+                                    //TODO: replace with avatar
+                                    Icon(
+                                        imageVector = Icons.Filled.Person,
+                                        contentDescription = null
+                                    )
+                                },
+                                secondaryActionContent = {
+
+                                }
+                            )
+                        }
+
+                    }
+
                 }
             }
-        )
-
-
-
+        }
     }
+
 }
-
-
-
-
-
-
-
-
-
 
 
 @Composable
@@ -263,6 +289,9 @@ fun DiscussionPostDetailScreenFragmentPreview(){
             authorPersonFirstNames = "Mohammed"
             authorPersonLastName = "Iqbaal"
             discussionPostVisible = true
+            discussionPostStartedPersonUid = 1
+            discussionPostDiscussionTopicUid = 0
+            discussionPostUid = 1
             discussionPostMessage = "Hi everyone, cna I get some help in how to submit the assignemnt?"
             discussionPostStartDate = systemTimeInMillis()
 
@@ -271,6 +300,8 @@ fun DiscussionPostDetailScreenFragmentPreview(){
             DiscussionPostWithPerson().apply {
 
                 discussionPostMessage = "I have the same question on Android"
+                discussionPostDiscussionTopicUid = 1
+                discussionPostStartedPersonUid = 2
                 replyPerson = Person().apply {
                     firstNames = "Chahid"
                     lastName = "Dabir"
@@ -280,6 +311,8 @@ fun DiscussionPostDetailScreenFragmentPreview(){
             },
             DiscussionPostWithPerson().apply {
                 discussionPostMessage = "I think it is briefly explained in section 42"
+                discussionPostDiscussionTopicUid = 1
+                discussionPostStartedPersonUid = 3
                 replyPerson = Person().apply {
                     firstNames = "Daanesh"
                     lastName = "Dabish"
@@ -290,6 +323,8 @@ fun DiscussionPostDetailScreenFragmentPreview(){
 
             DiscussionPostWithPerson().apply {
                 discussionPostMessage = "Thanks everyone, I got it working now on Android!"
+                discussionPostDiscussionTopicUid = 1
+                discussionPostStartedPersonUid = 1
                 replyPerson = Person().apply {
                     firstNames = "Mohammed"
                     lastName = "Iqbaal"
@@ -298,6 +333,7 @@ fun DiscussionPostDetailScreenFragmentPreview(){
                 }
             },
         ),
+        loggedInPersonUid = 1
     )
 
     MdcTheme{
