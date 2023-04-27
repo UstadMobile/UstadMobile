@@ -75,6 +75,9 @@ class UserSession {
         // so that findUnsentEntities will work as expected
         const val TYPE_UPSTREAM = 2
 
+        const val TYPE_STUDENT_NO_PASSWORD_SESSION = 4
+
+
         const val STATUS_ACTIVE = 1
 
         const val STATUS_NEEDS_REAUTH = 2

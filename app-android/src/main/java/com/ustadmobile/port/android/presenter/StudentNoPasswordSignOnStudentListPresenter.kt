@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.presenter
 
 import android.content.Context
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Person
@@ -11,6 +12,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ExternalAppPermission
+import com.ustadmobile.lib.db.entities.UserSession
 import com.ustadmobile.port.android.authenticator.IAuthenticatorActivity
 import com.ustadmobile.port.android.domain.CreateExternalAccessPermissionUseCase
 import com.ustadmobile.port.android.domain.GrantExternalAccessUseCase
@@ -44,6 +46,8 @@ class StudentNoPasswordSignOnStudentListPresenter(
 
     private var mExtAccessPermission: ExternalAppPermission? = null
 
+    private val accountManager: UstadAccountManager by instance()
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
@@ -75,6 +79,15 @@ class StudentNoPasswordSignOnStudentListPresenter(
         val extAccessPermission = mExtAccessPermission ?: return
 
         presenterScope.launch {
+            val sessionExists = accountManager.activeSessionsList().any {
+                it.endpoint == mEndpoint && it.person.personUid == person.personUid
+            }
+
+            if(!sessionExists){
+                accountManager.addSession(person, mEndpoint.url, null,
+                    sessionType = UserSession.TYPE_STUDENT_NO_PASSWORD_SESSION)
+            }
+
             try {
                 grantExternalAccessUseCase(
                     endpoint = mEndpoint,

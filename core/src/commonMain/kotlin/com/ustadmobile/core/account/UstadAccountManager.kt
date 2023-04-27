@@ -224,7 +224,8 @@ class UstadAccountManager(
     suspend fun addSession(
         person: Person,
         endpointUrl: String,
-        password: String?
+        password: String?,
+        sessionType: Int = UserSession.TYPE_STANDARD,
     ) : UserSessionWithPersonAndEndpoint{
         val endpoint = Endpoint(endpointUrl)
         val endpointRepo: UmAppDatabase = di.on(endpoint).direct

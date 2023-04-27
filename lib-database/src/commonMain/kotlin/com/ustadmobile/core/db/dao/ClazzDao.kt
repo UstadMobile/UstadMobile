@@ -232,6 +232,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                (SELECT ClazzEnrolment.clazzEnrolmentUid
                   FROM ClazzEnrolment
                  WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :filterByEnrolledMemberPersonUid
+                   AND ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
                )  
     """)
     abstract suspend fun findOneRosterUserClazzes(
