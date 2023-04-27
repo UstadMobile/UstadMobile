@@ -421,6 +421,33 @@ class UstadAccountManager(
         activeSession = addSession(guestPerson, endpointUrl, null)
     }
 
+    suspend fun setSessionLock(endpoint: Endpoint, sessionUid: Long, locked: Boolean) {
+        val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
+        db.userSessionDao.updateSessionLock(sessionUid, locked, systemTimeInMillis())
+
+        val activeSessionVal = activeSession
+        if(activeSessionVal != null && activeSessionVal.userSession.usUid == sessionUid) {
+            val usVal = activeSessionVal.userSession
+            activeSession = activeSessionVal.copy(
+                userSession = UserSession().apply {
+                    usUid = usVal.usUid
+                    usPcsn = usVal.usPcsn
+                    usLcsn = usVal.usLcsn
+                    usLct = usVal.usLct
+                    usPersonUid = usVal.usPersonUid
+                    usClientNodeId = usVal.usClientNodeId
+                    usStartTime = usVal.usStartTime
+                    usEndTime = usVal.usEndTime
+                    usStatus = usVal.usStatus
+                    usReason = usVal.usReason
+                    usAuth = usVal.usAuth
+                    usSessionType = usVal.usSessionType
+                    this.locked = locked
+                }
+            )
+        }
+    }
+
 
     companion object {
 

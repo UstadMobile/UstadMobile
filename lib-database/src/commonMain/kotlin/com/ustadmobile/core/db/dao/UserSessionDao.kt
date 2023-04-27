@@ -237,4 +237,12 @@ expect abstract class UserSessionDao {
     """)
     abstract suspend fun findAllActiveNodeIdsWithSchoolBasedPermission(schoolUids: List<Long>): List<Long>
 
+    @Query("""
+        UPDATE UserSession
+           SET locked = :locked,
+               usLct = :time
+         WHERE usUid = :sessionUid  
+    """)
+    abstract suspend fun updateSessionLock(sessionUid: Long, locked: Boolean, time: Long)
+
 }

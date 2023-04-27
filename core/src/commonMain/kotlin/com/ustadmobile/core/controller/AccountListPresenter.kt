@@ -103,6 +103,13 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
         }
     }
 
+    fun handleClickLockSession(session: UserSessionWithPersonAndEndpoint) {
+        presenterScope.launch {
+            accountManager.setSessionLock(session.endpoint, session.userSession.usUid,
+                !session.userSession.locked)
+        }
+    }
+
     fun handleClickProfile(personUid: Long){
         impl.go(PersonDetailView.VIEW_NAME, mapOf(ARG_ENTITY_UID to personUid.toString()),
                 context)

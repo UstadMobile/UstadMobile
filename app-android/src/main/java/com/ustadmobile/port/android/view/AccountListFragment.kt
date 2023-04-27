@@ -239,7 +239,8 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
             override fun areContentsTheSame(oldItem: UserSessionWithPersonAndEndpoint, newItem: UserSessionWithPersonAndEndpoint): Boolean {
                 return oldItem.userSession.usStatus == newItem.userSession.usStatus &&
                         oldItem.person.fullName() == newItem.person.fullName() &&
-                        oldItem.endpoint == newItem.endpoint
+                        oldItem.endpoint == newItem.endpoint &&
+                        oldItem.userSession.locked == newItem.userSession.locked
             }
         }
 

@@ -50,6 +50,25 @@
             app:layout_constraintStart_toStartOf="parent"
             />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/account_lock_icons"
+            android:onClick="@{()->presenter.handleClickLockSession(session)}"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/dimen_20dp"
+            app:icon="@{session.userSession.locked ? @drawable/baseline_lock_24 : @drawable/outline_lock_open_24}"
+            app:iconTint="?colorOnIconTint"
+            style="@style/UmTheme.Widget.TextButton.IconOnly"
+            app:layout_constraintEnd_toEndOf="@id/person_full_name"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:id="@+id/account_right_barrier"
+            app:barrierDirection="end"
+            app:constraint_referenced_ids="account_lock_icons,person_full_name"/>
+
         <!-- Line 1-->
         <com.google.android.material.button.MaterialButton
             android:visibility="@{activeAccount ? View.GONE: View.VISIBLE}"
@@ -62,7 +81,7 @@
             app:icon="@drawable/ic_delete_black_24dp"
             app:iconTint="?colorOnIconTint"
             style="@style/UmTheme.Widget.TextButton.IconOnly"
-            app:layout_constraintStart_toEndOf="@id/person_full_name"
+            app:layout_constraintStart_toEndOf="@id/account_right_barrier"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -97,7 +116,6 @@
         <TextView
             android:lines="1"
             app:layout_constraintHorizontal_bias="0.0"
-            android:paddingBottom="@dimen/dimen_16dp"
             android:layout_marginStart="@dimen/dimen_10dp"
             android:layout_marginTop="@dimen/dimen_8dp"
             android:textAppearance="@style/UmTheme.TextAppearance.Caption"
@@ -114,26 +132,25 @@
             android:id="@+id/account_link_icon"
             android:layout_width="@dimen/dimen_16dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             android:src="@drawable/link"
             android:tint="?colorOnIconTint"
-            app:layout_constraintStart_toEndOf="@+id/person_username"
-            app:layout_constraintTop_toBottomOf="@+id/person_full_name"
-            android:layout_marginStart="@dimen/dimen_16dp"/>
+            app:layout_constraintStart_toStartOf="@+id/person_full_name"
+            app:layout_constraintTop_toBottomOf="@+id/account_user_icon"
+            />
 
         <TextView
             android:id="@+id/person_link"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dimen_8dp"
+            android:layout_marginTop="4dp"
             android:lines="1"
             android:text="@{session.endpoint.url}"
             app:layout_constraintHorizontal_bias="0.0"
             android:layout_marginStart="@dimen/dimen_10dp"
             android:textAppearance="@style/UmTheme.TextAppearance.Caption"
             app:layout_constraintEnd_toStartOf="@+id/account_delete_icon"
-            app:layout_constraintStart_toEndOf="@+id/account_link_icon"
-            app:layout_constraintTop_toBottomOf="@+id/person_full_name"
+            app:layout_constraintStart_toEndOf="@+id/account_user_icon"
+            app:layout_constraintTop_toBottomOf="@+id/account_user_icon"
             tools:text="https://example.com" />
 
         <androidx.constraintlayout.widget.Barrier
@@ -141,7 +158,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:barrierDirection="bottom"
-            app:constraint_referenced_ids="person_username" />
+            app:constraint_referenced_ids="person_username,person_link,account_link_icon" />
 
 
         <com.google.android.material.button.MaterialButton

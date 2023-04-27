@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -60,6 +61,9 @@ class UserSession {
     var usAuth: String? = null
 
     var usSessionType: Int = TYPE_STANDARD
+
+    @ColumnInfo(defaultValue = "0")
+    var locked: Boolean = false
 
     companion object {
 

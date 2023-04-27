@@ -129,7 +129,7 @@ import com.ustadmobile.lib.db.entities.*
     StudentResult::class,
     StudentResultReplicate::class,
 
-], version = 110)
+], version = 111)
 @MinReplicationVersion(60)
 expect abstract class UmAppDatabase : RoomDatabase {
 
