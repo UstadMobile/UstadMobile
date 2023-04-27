@@ -33,6 +33,7 @@ import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.core.viewmodel.ClazzAssignmentEditUiState
+import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyWithEntity
@@ -542,6 +543,7 @@ private fun ClazzAssignmentEditScreen(
                     onClick = onClickAssignReviewers,
                     modifier = Modifier
                         .weight(0.3F)
+                        .height(IntrinsicSize.Max)
                         .testTag("buttonAssignReviewers"),
                     enabled = uiState.fieldsEnabled,
                 ) {

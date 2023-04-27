@@ -78,7 +78,6 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             helperText = props.uiState.caHideUntilDateError?.let { ReactNode(it) }
             error = props.uiState.caHideUntilDateError != null
             timeZoneId = props.uiState.timeZone
-            error = props.uiState.caStartDateError
             onChange = {
                 props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
                     cbHideUntilDate = it
