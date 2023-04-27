@@ -25,7 +25,6 @@ import java.lang.Integer.max
 import java.lang.Integer.min
 import java.util.*
 import com.ustadmobile.core.viewmodel.ClazzLogEditAttendanceUiState
-import com.google.android.material.composethemeadapter.MdcTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -459,11 +458,11 @@ private fun PagerView(
                     }
                 }
             },
-            modifier = Modifier.weight(1F)
+            modifier = Modifier.weight(1F).testTag("backButton")
         ) {
             Icon(
                 Icons.Default.ArrowBack,
-                contentDescription = ""
+                contentDescription = "backButton"
             )
         }
 
@@ -489,11 +488,11 @@ private fun PagerView(
                     }
                 }
             },
-            modifier = Modifier.weight(1F)
+            modifier = Modifier.weight(1F).testTag("forwardButton")
         ) {
             Icon(
                 Icons.Default.ArrowForward,
-                contentDescription = ""
+                contentDescription = "forwardButton"
             )
         }
     }
@@ -594,7 +593,6 @@ fun ClazzLogEditAttendanceScreenPreview() {
             }
         )
     )
-    MdcTheme {
-        ClazzLogEditAttendanceScreen(uiState)
-    }
+
+    ClazzLogEditAttendanceScreen(uiState)
 }

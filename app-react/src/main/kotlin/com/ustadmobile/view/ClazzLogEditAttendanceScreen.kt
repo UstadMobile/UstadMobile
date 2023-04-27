@@ -167,6 +167,7 @@ private val PagerView = FC<PagerViewProps> { props ->
             xs = 1
 
             Button {
+                id = "backButton"
                 variant = ButtonVariant.text
                 onClick = {
                     if (currentClazzLog != 0){
@@ -197,6 +198,7 @@ private val PagerView = FC<PagerViewProps> { props ->
             xs = 1
 
             Button {
+                id = "forwardButton"
                 variant = ButtonVariant.text
                 onClick = {
                     if (currentClazzLog < props.list.size-1){
@@ -253,6 +255,7 @@ private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
 
             STATUS_TO_ICON_MAP.forEach { (status ,icon) ->
                 ToggleButton {
+                    id = "toggleButton"
                     disabled = !props.fieldsEnabled
                     selected = (props.clazzLog.attendanceStatus == status)
 
