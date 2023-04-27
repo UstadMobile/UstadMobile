@@ -540,7 +540,9 @@ private fun ClazzAssignmentEditScreen(
 
                 OutlinedButton(
                     onClick = onClickAssignReviewers,
-                    modifier = Modifier.weight(0.3F),
+                    modifier = Modifier
+                        .weight(0.3F)
+                        .testTag("buttonAssignReviewers"),
                     enabled = uiState.fieldsEnabled,
                 ) {
                     Text(stringResource(R.string.assign_reviewers))

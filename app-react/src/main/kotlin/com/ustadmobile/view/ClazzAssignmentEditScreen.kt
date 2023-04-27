@@ -266,6 +266,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     }
 
                     Button {
+                        id = "buttonAssignReviewers"
                         fullWidth = true
                         onClick = { props.onClickAssignReviewers() }
                         disabled = !props.uiState.fieldsEnabled

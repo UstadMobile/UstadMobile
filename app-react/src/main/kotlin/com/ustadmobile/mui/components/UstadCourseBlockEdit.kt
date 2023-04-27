@@ -150,10 +150,6 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             disabled = !props.uiState.fieldsEnabled
             helperText = props.uiState.caDeadlineError?.let { ReactNode(it) }
             error = props.uiState.caDeadlineError != null
-            label = ReactNode(strings[MessageID.deadline].addOptionalSuffix(strings))
-            disabled = !props.uiState.fieldsEnabled
-            error = props.uiState.caDeadlineError
-            timeZoneId = TimeZone.currentSystemDefault().id
             onChange = {
                 props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
                     cbDeadlineDate = it
@@ -172,8 +168,6 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
                 disabled = !props.uiState.fieldsEnabled
                 helperText = props.uiState.caGracePeriodError?.let { ReactNode(it) }
                 error = props.uiState.caGracePeriodError != null
-                label = ReactNode(strings[MessageID.end_of_grace_period])
-                disabled = !props.uiState.fieldsEnabled
                 timeZoneId = TimeZone.currentSystemDefault().id
                 onChange = {
                     props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
@@ -186,7 +180,6 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
                 id = "cbLateSubmissionPenalty"
                 value = (props.uiState.courseBlock?.cbLateSubmissionPenalty ?: 0).toFloat()
                 label = ReactNode(strings[MessageID.late_submission_penalty])
-                error = props.uiState.caHideUntilDateError
                 disabled = !props.uiState.fieldsEnabled
                 asDynamic().InputProps = jso<InputBaseProps> {
                     endAdornment = InputAdornment.create {
