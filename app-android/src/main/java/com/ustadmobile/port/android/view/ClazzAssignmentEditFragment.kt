@@ -33,7 +33,6 @@ import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.core.viewmodel.ClazzAssignmentEditUiState
-import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyWithEntity
@@ -42,11 +41,7 @@ import com.ustadmobile.port.android.util.compose.rememberCourseTerminologyEntrie
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.binding.isSet
-import com.ustadmobile.port.android.view.composable.UstadCourseBlockEdit
-import com.ustadmobile.port.android.view.composable.UstadNumberTextField
-import com.ustadmobile.port.android.view.composable.UstadSwitchField
-import com.ustadmobile.port.android.view.composable.UstadExposedDropDownMenuField
-import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
+import com.ustadmobile.port.android.view.composable.*
 
 
 class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), ClazzAssignmentEditView,
