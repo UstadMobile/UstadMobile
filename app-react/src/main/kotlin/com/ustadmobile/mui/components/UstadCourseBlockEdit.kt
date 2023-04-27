@@ -10,7 +10,6 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.onTextChange
-import com.ustadmobile.view.components.UstadEditHeader
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.wrappers.quill.ReactQuill
 import csstype.px
@@ -66,11 +65,13 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
         }
 
 
-        UstadDateTimeEditField {
+        UstadDateTimeField {
             timeInMillis = props.uiState.courseBlock?.cbHideUntilDate ?: 0
-            label = strings[MessageID.dont_show_before].addOptionalSuffix(strings)
+            label = ReactNode(strings[MessageID.dont_show_before].addOptionalSuffix(strings))
             id = "hide_until_date"
-            enabled = props.uiState.fieldsEnabled
+            disabled = !props.uiState.fieldsEnabled
+            helperText = props.uiState.caHideUntilDateError?.let { ReactNode(it) }
+            error = props.uiState.caHideUntilDateError != null
             timeZoneId = props.uiState.timeZone
             onChange = {
                 props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
@@ -119,7 +120,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             value = (props.uiState.courseBlock?.cbMaxPoints ?: 0).toString()
             suffixText = strings[MessageID.points]
             label = strings[MessageID.points]
-            error = props.uiState.caStartDateError
+            error = props.uiState.caHideUntilDateError
             enabled = props.uiState.fieldsEnabled
             inputProps = {
                 it.inputMode = InputMode.numeric
@@ -131,12 +132,14 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             }
         }
 
-        UstadDateTimeEditField {
+        UstadDateTimeField {
             timeInMillis = props.uiState.courseBlock?.cbDeadlineDate ?: 0
             timeZoneId = props.uiState.timeZone
             unsetDefault = Long.MAX_VALUE
-            label = strings[MessageID.deadline].addOptionalSuffix(strings)
-            enabled = props.uiState.fieldsEnabled
+            label = ReactNode(strings[MessageID.deadline].addOptionalSuffix(strings))
+            disabled = !props.uiState.fieldsEnabled
+            helperText = props.uiState.caDeadlineError?.let { ReactNode(it) }
+            error = props.uiState.caDeadlineError != null
             onChange = {
                 props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
                     cbDeadlineDate = it
@@ -146,12 +149,14 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
 
         if (props.uiState.gracePeriodVisible){
 
-            UstadDateTimeEditField {
+            UstadDateTimeField {
                 timeInMillis = props.uiState.courseBlock?.cbGracePeriodDate ?: 0
                 timeZoneId = props.uiState.timeZone
                 unsetDefault = Long.MAX_VALUE
-                label = strings[MessageID.end_of_grace_period]
-                enabled = props.uiState.fieldsEnabled
+                label = ReactNode(strings[MessageID.end_of_grace_period])
+                disabled = !props.uiState.fieldsEnabled
+                helperText = props.uiState.caGracePeriodError?.let { ReactNode(it) }
+                error = props.uiState.caGracePeriodError != null
                 onChange = {
                     props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
                         cbGracePeriodDate = it
@@ -162,7 +167,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             UstadTextEditField {
                 value = (props.uiState.courseBlock?.cbLateSubmissionPenalty ?: 0).toString()
                 label = strings[MessageID.late_submission_penalty]
-                error = props.uiState.caStartDateError
+                error = props.uiState.caHideUntilDateError
                 enabled = props.uiState.fieldsEnabled
                 suffixText = "%"
                 onChange = { newString ->

@@ -47,6 +47,7 @@ import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
+import com.ustadmobile.port.android.view.composable.HtmlText
 import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
 import com.ustadmobile.port.android.view.composable.UstadListSortHeader
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
@@ -57,7 +58,9 @@ import kotlinx.coroutines.launch
 
 class ClazzListFragment(): UstadBaseMvvmFragment() {
 
-    private val viewModel: ClazzListViewModel by ustadViewModels(lookupDestinationName = true)
+    private val viewModel: ClazzListViewModel by ustadViewModels { di, savedStateHandle ->
+        ClazzListViewModel(di, savedStateHandle, "FOO")
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -245,7 +248,10 @@ fun ClazzListItem(
                         text = clazz?.clazzName ?: "",
                         style = MaterialTheme.typography.h6,
                     )
-                    Text(clazz?.clazzDesc ?: "")
+                    HtmlText(
+                        html = clazz?.clazzDesc ?: "",
+                        htmlMaxLines = 3,
+                    )
                 }
 
                 if(role != null) {

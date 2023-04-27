@@ -49,7 +49,7 @@
 
     <item name="tag_aztec" type="id"/>
 
-    <item name="tag_clickable_textfield_html" type="id"/>
+    <item name="tag_textfield_html" type="id"/>
 
 
 </resources>

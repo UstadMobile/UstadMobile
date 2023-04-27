@@ -34,7 +34,7 @@ class ClazzDetailFragment: UstadBaseMvvmFragment() {
         tab.text = mTabs[position].label
     }
 
-    private val viewModel: ClazzDetailViewModel by ustadViewModels()
+    private val viewModel: ClazzDetailViewModel by ustadViewModels(::ClazzDetailViewModel)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val rootView: View
@@ -65,9 +65,11 @@ class ClazzDetailFragment: UstadBaseMvvmFragment() {
     }
 
     override fun onDestroyView() {
+        mediator?.detach()
         mBinding?.fragmentClazzDetailViewpager?.adapter = null
         mPagerAdapter = null
         mBinding = null
+        mediator = null
 
         super.onDestroyView()
     }

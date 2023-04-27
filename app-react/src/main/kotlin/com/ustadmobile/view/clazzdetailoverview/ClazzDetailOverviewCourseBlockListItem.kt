@@ -20,15 +20,9 @@ import mui.icons.material.Title
 
 external interface ClazzDetailOverviewCourseBlockListItemProps : Props {
 
-    var courseBlock: CourseBlockWithCompleteEntity
+    var courseBlock: CourseBlockWithCompleteEntity?
 
-    var onClickCourseDiscussion: (CourseDiscussion?) -> Unit
-
-    var onClickCourseExpandCollapse: (CourseBlockWithCompleteEntity) -> Unit
-
-    var onClickTextBlock: (CourseBlockWithCompleteEntity) -> Unit
-
-    var onClickAssignment: (ClazzAssignmentWithMetrics?) -> Unit
+    var onClickCourseBlock: (CourseBlock) -> Unit
 
     var onClickContentEntry: (
         ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
@@ -39,11 +33,12 @@ external interface ClazzDetailOverviewCourseBlockListItemProps : Props {
 }
 
 val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockListItemProps> { props ->
+    val courseBlockVal = props.courseBlock
 
-    when(props.courseBlock.cbType){
+    when(courseBlockVal?.cbType ?: 0){
         CourseBlock.BLOCK_MODULE_TYPE  -> {
 
-            val trailingIcon = if(props.courseBlock.expanded)
+            val trailingIcon = if(courseBlockVal?.expanded == true)
                 KeyboardArrowUp
             else
                 KeyboardArrowDown
@@ -52,11 +47,11 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
                 ListItemButton {
 
                     sx {
-                        padding = paddingCourseBlockIndent(props.courseBlock.cbIndentLevel)
+                        padding = paddingCourseBlockIndent(courseBlockVal?.cbIndentLevel ?: 0)
                     }
 
-                    onClick = {
-                        props.onClickCourseExpandCollapse(props.courseBlock)
+                    onClick = { _ ->
+                        courseBlockVal?.also { props.onClickCourseBlock(it) }
                     }
 
                     ListItemIcon {
@@ -75,14 +70,14 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
                     }
 
                     ListItemText {
-                        primary = ReactNode(props.courseBlock.cbTitle ?: "")
-                        secondary = ReactNode(props.courseBlock.cbDescription ?: "")
+                        primary = ReactNode(courseBlockVal?.cbTitle ?: "")
+                        secondary = ReactNode(courseBlockVal?.cbDescription ?: "")
                     }
                 }
 
                 secondaryAction = IconButton.create {
-                    onClick = {
-                        props.onClickCourseExpandCollapse(props.courseBlock)
+                    onClick = {_ ->
+                        props.courseBlock?.also { props.onClickCourseBlock(it) }
                     }
                     + trailingIcon.create()
                 }
@@ -93,11 +88,11 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
                 ListItemButton {
 
                     sx {
-                        padding = paddingCourseBlockIndent(props.courseBlock.cbIndentLevel)
+                        padding = paddingCourseBlockIndent(props.courseBlock?.cbIndentLevel ?: 0)
                     }
 
-                    onClick = {
-                        props.onClickCourseDiscussion(props.courseBlock.courseDiscussion)
+                    onClick = { _ ->
+                        props.courseBlock?.also { props.onClickCourseBlock(it) }
                     }
 
                     ListItemIcon {
@@ -116,8 +111,8 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
                     }
 
                     ListItemText {
-                        primary = ReactNode(props.courseBlock.cbTitle ?: "")
-                        secondary = ReactNode(props.courseBlock.cbDescription ?: "")
+                        primary = ReactNode(props.courseBlock?.cbTitle ?: "")
+                        secondary = ReactNode(props.courseBlock?.cbDescription ?: "")
                     }
                 }
             }
@@ -127,11 +122,11 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
                 ListItemButton {
 
                     sx {
-                        padding = paddingCourseBlockIndent(props.courseBlock.cbIndentLevel)
+                        padding = paddingCourseBlockIndent(courseBlockVal?.cbIndentLevel ?: 0)
                     }
 
-                    onClick = {
-                        props.onClickTextBlock(props.courseBlock)
+                    onClick = {_ ->
+                        courseBlockVal?.also { props.onClickCourseBlock(it) }
                     }
 
                     ListItemIcon {
@@ -150,25 +145,29 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
                     }
 
                     ListItemText {
-                        primary = ReactNode(props.courseBlock.cbTitle ?: "")
+                        primary = ReactNode(props.courseBlock?.cbTitle ?: "")
 //                        secondary = { Html(courseBlock.cbDescription) },
                     }
                 }
             }
         }
         CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
-            UstadClazzAssignmentListItem {
-                courseBlock = props.courseBlock
-                onClickAssignment = props.onClickAssignment
+            if(courseBlockVal != null) {
+                UstadClazzAssignmentListItem {
+                    courseBlock = courseBlockVal
+                    onClickCourseBlock = props.onClickCourseBlock
+                }
             }
         }
         CourseBlock.BLOCK_CONTENT_TYPE -> {
-            UstadContentEntryListItem {
-                contentEntry = props.courseBlock.entry
-                    ?: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer()
-                onClickContentEntry = props.onClickContentEntry
-                onClickDownloadContentEntry = props.onClickDownloadContentEntry
+            courseBlockVal?.entry?.also { contentEntryItem ->
+                UstadContentEntryListItem {
+                    contentEntry = contentEntryItem
+                    onClickContentEntry = props.onClickContentEntry
+                    onClickDownloadContentEntry = props.onClickDownloadContentEntry
+                }
             }
+
         }
     }
 }

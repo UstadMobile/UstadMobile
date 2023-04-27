@@ -34,7 +34,7 @@ import com.ustadmobile.port.android.view.composable.UstadErrorText
 
 class SiteEnterLinkFragment : UstadBaseMvvmFragment() {
 
-    private val viewModel: SiteEnterLinkViewModel by ustadViewModels()
+    private val viewModel: SiteEnterLinkViewModel by ustadViewModels(::SiteEnterLinkViewModel)
 
     override fun onCreateView(
         inflater: LayoutInflater,

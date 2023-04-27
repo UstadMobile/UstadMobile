@@ -4,7 +4,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.viewmodel.RegisterAgeRedirectUiState
-import com.ustadmobile.mui.components.UstadDateEditField
+import com.ustadmobile.mui.components.UstadDateField
 import csstype.px
 import mui.material.Button
 import mui.material.ButtonVariant
@@ -15,6 +15,7 @@ import mui.system.StackDirection
 import mui.system.responsive
 import react.FC
 import react.Props
+import react.ReactNode
 import react.useState
 
 external interface RegisterAgeRedirectProps : Props {
@@ -51,10 +52,10 @@ val RegisterAgeRedirectComponent2 = FC<RegisterAgeRedirectProps> { props ->
                 + strings[MessageID.what_is_your_date_of_birth]
             }
 
-            UstadDateEditField {
+            UstadDateField {
                 timeInMillis = props.uiState.dateOfBirth
                 timeZoneId = UstadMobileConstants.UTC
-                label = strings[MessageID.birthday]
+                label = ReactNode(strings[MessageID.birthday])
                 onChange = { props.onSetDate(it) }
             }
 

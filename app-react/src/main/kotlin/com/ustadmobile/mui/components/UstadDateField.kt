@@ -9,7 +9,7 @@ import web.html.HTMLInputElement
 import web.html.InputType
 
 
-external interface UstadDateEditFieldProps : Props {
+external interface UstadDateFieldProps : Props {
 
     /**
      * The value as time in millis since 1970
@@ -24,18 +24,20 @@ external interface UstadDateEditFieldProps : Props {
     /**
      * Field label
      */
-    var label: String
+    var label: ReactNode?
+
+    var helperText: ReactNode?
 
     /**
      * onChange function. Will provide the selected time in milliseconds since 1970
      */
     var onChange: (Long) -> Unit
 
-    var error: String?
+    var error: Boolean?
 
-    var enabled: Boolean?
+    var disabled: Boolean?
 
-    var fullWidth: Boolean
+    var fullWidth: Boolean?
 
     /**
      * We often use 0 and Long.MAX_VALUE as a placeholder for a default (e.g. unset) date. If this
@@ -65,7 +67,7 @@ fun Long.isSetDate(): Boolean {
     return this > 0L && this < JS_DATE_MAX
 }
 
-val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
+val UstadDateField = FC<UstadDateFieldProps> { props ->
 
     fun Long.timeToIsoDateInputFieldString(): String {
         return if(this != (props.unsetDefault ?: 0)) {
@@ -90,13 +92,16 @@ val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
 
     TextField {
         type = InputType.date
-        label = ReactNode(props.label)
+        label = props.label
         value = rawValue
         InputLabelProps = jso {
             shrink = true
         }
         id = props.id
         fullWidth = props.fullWidth
+        helperText = props.helperText
+        error = props.error
+        disabled = props.disabled
 
         onChange = {
             val targetElValue = (it.target as HTMLInputElement).value

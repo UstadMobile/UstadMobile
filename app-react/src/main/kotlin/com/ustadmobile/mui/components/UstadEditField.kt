@@ -282,24 +282,25 @@ val UstadEditFieldPreviews = FC<Props> {
         spacing = responsive(5)
 
         var date1 : Long by useState { systemTimeInMillis() }
-        UstadDateEditField {
+        UstadDateField {
             timeInMillis = date1
             id = "date_edit_field"
             timeZoneId = TimeZone.currentSystemDefault().id
-            label = "Date"
+            label = ReactNode("Date")
             onChange = {
                 date1 = it
             }
-            error = "Bad Day"
+            error = true
+            helperText = ReactNode("Bady Day")
         }
 
         var unsetMinDate: Long by useState { 0L }
 
-        UstadDateEditField {
+        UstadDateField {
             timeInMillis = unsetMinDate
             timeZoneId = TimeZone.currentSystemDefault().id
             id = "date_edit_unset"
-            label = "Unset min date"
+            label = ReactNode("Unset min date")
             onChange = {
                 unsetMinDate = it
             }

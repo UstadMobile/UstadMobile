@@ -328,7 +328,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
               LEFT JOIN CourseTerminology
               ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
         WHERE Clazz.clazzUid = :clazzUid""")
-    abstract fun getClazzWithDisplayDetails(clazzUid: Long, currentTime: Long): LiveData<ClazzWithDisplayDetails?>
+    abstract fun getClazzWithDisplayDetails(clazzUid: Long, currentTime: Long): Flow<ClazzWithDisplayDetails?>
 
 
     /**

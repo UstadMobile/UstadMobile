@@ -37,10 +37,10 @@ fun HtmlClickableTextField(
     }
 
     fun TextView.updateHtml() {
-        val currentHtml = getTag(R.id.tag_clickable_textfield_html)
+        val currentHtml = getTag(R.id.tag_textfield_html)
         if(currentHtml != html) {
             text = html.htmlTextToSpanned()
-            setTag(R.id.tag_clickable_textfield_html, html)
+            setTag(R.id.tag_textfield_html, html)
         }
         
         if(maxLines != maxHtmlLines) {

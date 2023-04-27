@@ -21,7 +21,7 @@ import com.ustadmobile.port.android.view.composable.UstadCourseBlockEdit
 
 class CourseBlockEditFragment: UstadBaseMvvmFragment() {
 
-    private val viewModel: CourseBlockEditViewModel by ustadViewModels()
+    private val viewModel: CourseBlockEditViewModel by ustadViewModels(::CourseBlockEditViewModel)
 
     override fun onCreateView(
         inflater: LayoutInflater,

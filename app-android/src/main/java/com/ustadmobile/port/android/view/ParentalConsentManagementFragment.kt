@@ -35,6 +35,7 @@ import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.util.compose.rememberFormattedDate
 import com.ustadmobile.port.android.view.binding.loadHtmlData
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
+import com.ustadmobile.port.android.view.composable.UstadInputFieldLayout
 import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
 
 
@@ -180,18 +181,25 @@ private fun ParentalConsentManagementScreen(
         Spacer(modifier = Modifier.height(10.dp))
 
         if (uiState.relationshipVisible){
-            UstadMessageIdOptionExposedDropDownMenuField(
-                value = uiState.personParentJoin?.ppjRelationship ?: 0,
-                label = stringResource(R.string.relationship),
-                options = PersonParentJoinConstants.RELATIONSHIP_MESSAGE_IDS,
-                onOptionSelected = {
-                    onChangeRelation(uiState.personParentJoin?.shallowCopy{
-                        ppjRelationship = it.value
-                    })
-                },
-                error = uiState.relationshipError,
-                enabled = uiState.fieldsEnabled,
-            )
+            UstadInputFieldLayout(
+                modifier = Modifier.fillMaxWidth(),
+                errorText = uiState.relationshipError,
+            ) {
+                UstadMessageIdOptionExposedDropDownMenuField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = uiState.personParentJoin?.ppjRelationship ?: 0,
+                    label = stringResource(R.string.relationship),
+                    options = PersonParentJoinConstants.RELATIONSHIP_MESSAGE_IDS,
+                    onOptionSelected = {
+                        onChangeRelation(uiState.personParentJoin?.shallowCopy{
+                            ppjRelationship = it.value
+                        })
+                    },
+                    isError = uiState.relationshipError != null,
+                    enabled = uiState.fieldsEnabled,
+                )
+            }
+
         }
 
         Spacer(modifier = Modifier.height(20.dp))

@@ -32,7 +32,7 @@ import kotlinx.datetime.TimeZone as TimeZoneKt
 
 class TimeZoneListFragment : UstadBaseMvvmFragment() {
 
-    val viewModel: TimeZoneListViewModel by ustadViewModels()
+    val viewModel: TimeZoneListViewModel by ustadViewModels(::TimeZoneListViewModel)
 
     override fun onCreateView(
         inflater: LayoutInflater,
