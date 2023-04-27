@@ -1,11 +1,7 @@
 package com.ustadmobile.core.util.ext
 
-import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArraySet
 
 actual fun <T> concurrentSafeSetOf(vararg items: T): MutableSet<T> {
-
-    val mutableSet: MutableSet<T> = ConcurrentHashMap.newKeySet()
-    mutableSet.addAll(items)
-
-    return mutableSet
+    return CopyOnWriteArraySet(items.asList())
 }

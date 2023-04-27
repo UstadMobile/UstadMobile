@@ -33,7 +33,7 @@ apt-get install ffmpeg
 On Windows:
 * Download [FFMPEG Windows Build](https://www.gyan.dev/ffmpeg/builds/)
 * Copy the binaries to the working directory (e.g. the same directory where ustad-server-all.jar is)
-* Alternatively, place the ffmpeg binaries anywhere you wish, then set the path in application.conf
+* Alternatively, place the ffmpeg binaries anywhere you wish, then set the path in ustad-server.conf
   (see section below)
 
 
@@ -65,7 +65,8 @@ keytool -importkeystore -alias $ALIAS -destkeystore /etc/letsencrypt/live/$DOMAI
 
 Unzip the example config file and edit it as required:
 ```
-unzip ustad-server-all.jar application.conf
+unzip ustad-server-all.jar application.conf 
+mv application.conf ustad-server.conf
 ```
 
 Edit the server config file as required to enable HTTPS/SSL and set the database url:
@@ -145,7 +146,7 @@ ktor {
 Run the server using the Java command:
 
 ```
-java -jar ustad-server-all.jar -config=application.conf
+java -jar ustad-server-all.jar -config=ustad-server.conf
 ```
 
 ## Configure Apache HTTP Proxy (optional)
