@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.DiscussionPostDetailView
+import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.*
@@ -28,8 +29,9 @@ data class DiscussionPostDetailUiState2(
 
 class DiscussionPostDetailViewModel(
     di: DI,
-    savedStateHandle: UstadSavedStateHandle
-): DetailViewModel<DiscussionPostWithDetails>(di, savedStateHandle, DiscussionPostDetailView.VIEW_NAME){
+    savedStateHandle: UstadSavedStateHandle,
+    destinationName: String = DiscussionPostDetailView.VIEW_NAME,
+): DetailViewModel<DiscussionPostWithDetails>(di, savedStateHandle, destinationName){
 
     private val _uiState = MutableStateFlow(DiscussionPostDetailUiState2())
 
