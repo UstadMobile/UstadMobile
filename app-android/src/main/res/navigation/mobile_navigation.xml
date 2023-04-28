@@ -474,5 +474,10 @@
         android:label="@string/student"
         />
 
+    <fragment
+        android:id="@+id/account_unlock_dest"
+        android:name="com.ustadmobile.port.android.view.AccountUnlockFragment"
+        />
+
 
 </navigation>

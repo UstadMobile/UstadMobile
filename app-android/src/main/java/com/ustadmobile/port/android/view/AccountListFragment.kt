@@ -23,15 +23,8 @@ import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 import org.kodein.di.instance
 
-interface AccountListFragmentEventHandler {
 
-    fun onClickLock(session: UserSessionWithPersonAndEndpoint)
-
-    fun onClickUserSession(session: UserSessionWithPersonAndEndpoint)
-
-}
-
-class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickListener, AccountListFragmentEventHandler {
+class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickListener {
 
 
     class AccountAdapter(
@@ -227,22 +220,6 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         mergeRecyclerAdapter = null
         mIntentMessageAdapter = null
         mPresenter = null
-    }
-
-    override fun onClickLock(session: UserSessionWithPersonAndEndpoint) {
-        if(session.userSession.locked) {
-            //try unlock
-        }else {
-            mPresenter?.handleClickLockSession(session)
-        }
-    }
-
-    override fun onClickUserSession(session: UserSessionWithPersonAndEndpoint) {
-        if(session.userSession.locked) {
-            //unlock
-        }else {
-            mPresenter?.handleClickUserSession(session)
-        }
     }
 
     companion object {

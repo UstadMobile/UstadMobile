@@ -190,7 +190,10 @@ class ViewNameToDestMap: DestinationProvider {
             StudentNoPasswordSignOnCourseListView.VIEW_NAME to
                     UstadDestination(R.id.student_no_password_sign_on_course_list_dest),
             StudentNoPasswordSignOnStudentListView.VIEW_NAME to
-                    UstadDestination(R.id.student_no_password_sign_on_student_list_dest)
+                    UstadDestination(R.id.student_no_password_sign_on_student_list_dest),
+            AccountUnlockView.VIEW_NAME to UstadDestination(R.id.account_unlock_dest,
+                hideAccountIcon = true, actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL,
+                hideBottomNavigation = true),
     )
 
     override val navControllerViewId: Int

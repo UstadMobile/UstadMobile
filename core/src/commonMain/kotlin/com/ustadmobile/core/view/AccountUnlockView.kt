@@ -1,10 +1,10 @@
-package com.ustadmobile.port.android.view
-
-import com.ustadmobile.core.view.UstadView
+package com.ustadmobile.core.view
 
 interface AccountUnlockView : UstadView {
 
     var accountName: String?
+
+    var error: String?
 
     companion object {
 

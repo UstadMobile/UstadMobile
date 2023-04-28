@@ -1570,4 +1570,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="allow_no_password_single_sign_on">Allow no-password single sign-on for students when teacher or parent is signed in.</string>
 
+    <string name="unlock">Unlock</string>
+
 </resources>

@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.domain.StartUserSessionUseCase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -19,6 +20,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT_MESSAGE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_MAX_DATE_OF_BIRTH
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
+import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_TITLE
 import com.ustadmobile.door.lifecycle.LifecycleOwner
@@ -43,6 +45,8 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
 
     //Removes the active account from the main list (this is normally at the top)
     private val accountListMediator = DoorMediatorLiveData<List<UserSessionWithPersonAndEndpoint>>()
+
+    private val startUserSessionUseCase = StartUserSessionUseCase(accountManager)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -103,10 +107,32 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
         }
     }
 
+    private fun navigateToUnlockSession(
+        session: UserSessionWithPersonAndEndpoint,
+        next: String?,
+    ) {
+        val args = mutableMapOf(
+            UstadView.ARG_ACCOUNT_ENDPOINT to session.endpoint.url,
+            ARG_ENTITY_UID to session.userSession.usUid.toString(),
+            ARG_POPUPTO_ON_FINISH to (arguments[ARG_POPUPTO_ON_FINISH] ?: UstadView.ROOT_DEST),
+        )
+        if(next != null)
+            args[ARG_NEXT] = next
+
+        requireNavController().navigate(
+            viewName = AccountUnlockView.VIEW_NAME,
+            args = args.toMap()
+        )
+    }
+
     fun handleClickLockSession(session: UserSessionWithPersonAndEndpoint) {
-        presenterScope.launch {
-            accountManager.setSessionLock(session.endpoint, session.userSession.usUid,
-                !session.userSession.locked)
+        if(session.userSession.locked) {
+            navigateToUnlockSession(session, next = null)
+        }else {
+            presenterScope.launch {
+                accountManager.setSessionLock(session.endpoint, session.userSession.usUid,
+                    !session.userSession.locked)
+            }
         }
     }
 
@@ -126,16 +152,21 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
         }
     }
 
+    /**
+     *
+     */
     fun handleClickUserSession(session: UserSessionWithPersonAndEndpoint){
-        accountManager.activeSession = session
-        val goOptions = UstadMobileSystemCommon.UstadGoOptions(
-            arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.ROOT_DEST,
-            false)
-        val snackMsg = impl.getString(MessageID.logged_in_as, context)
-            .replace("%1\$s", session.person.username ?: "")
-            .replace("%2\$s", session.endpoint.url)
-        val dest = nextDest.appendQueryArgs(
-            mapOf(UstadView.ARG_SNACK_MESSAGE to snackMsg).toQueryString())
-        requireNavController().navigateToViewUri(dest, goOptions)
+        if(session.userSession.locked) {
+            navigateToUnlockSession(session, next = nextDest)
+        }else {
+            startUserSessionUseCase(
+                session = session,
+                systemImpl = impl,
+                context = context,
+                popUpToOnFinish = arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.ROOT_DEST,
+                nextDest = nextDest,
+                navController = requireNavController(),
+            )
+        }
     }
 }

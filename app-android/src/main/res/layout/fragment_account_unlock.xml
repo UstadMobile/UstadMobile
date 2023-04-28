@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="mEventHandler"
+            type="com.ustadmobile.port.android.view.AccountUnlockFragmentEventHandler" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/account_name_text"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            android:paddingHorizontal="@dimen/dimen_16dp"
+            android:layout_width="match_parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="account@server.name"
+            android:layout_height="wrap_content"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:id="@+id/password_view"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:hint="@string/password"
+            app:errorTextColor="?colorError"
+            app:hintEnabled="true"
+            android:enabled="true"
+            app:passwordToggleEnabled="true"
+            app:layout_constraintTop_toBottomOf="@+id/account_name_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <!-- android:inputType="textCapWords" -->
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/person_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/login_error_text"
+            android:visibility="invisible"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:textColor="?colorError"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+            android:gravity="center_horizontal"
+            android:layout_width="match_parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/password_view"
+            tools:text="@string/wrong_user_pass_combo"
+            android:layout_height="wrap_content"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/unlock_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginTop="@dimen/dimen_20dp"
+            android:backgroundTint="?colorSecondary"
+            android:onClick="@{() -> mEventHandler.onClickUnlock()}"
+            android:padding="@dimen/dimen_20dp"
+            android:text="@string/unlock"
+            android:textColor="?colorOnSecondary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/login_error_text"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
