@@ -4,6 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.paging.PagedList
@@ -27,6 +31,37 @@ import com.ustadmobile.lib.db.entities.DiscussionTopicListDetail
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.*
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import android.text.format.DateFormat
+import androidx.compose.foundation.*
+import androidx.compose.foundation.lazy.*
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Person
+import com.google.android.material.composethemeadapter.MdcTheme
+import com.ustadmobile.core.viewmodel.CourseDiscussionDetailUiState
+import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.CourseBlock
+
+import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
+import com.ustadmobile.port.android.util.compose.rememberFormattedDate
+import java.util.*
 
 
 class CourseDiscussionDetailFragment: UstadDetailFragment<CourseDiscussion>(),
@@ -145,6 +180,125 @@ class CourseDiscussionDetailFragment: UstadDetailFragment<CourseDiscussion>(),
             ustadFragmentTitle = value?.courseDiscussionTitle
         }
 
+}
 
 
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun CourseDiscussionDetailScreen(
+    uiState: CourseDiscussionDetailUiState = CourseDiscussionDetailUiState(),
+    onClickAddPost: () -> Unit = {},
+    onClickPost: (DiscussionPostWithDetails) -> Unit = {},
+    onClickDeletePost: (DiscussionPostWithDetails) -> Unit = {},
+){
+
+    LazyColumn{
+
+        //Description:
+        item{
+
+            Text(
+                uiState.courseBlock?.cbDescription?:"",
+                style = Typography.body1,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+
+        item{
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        item{
+            Text(stringResource(R.string.posts),
+                style = Typography.h4,
+                modifier = Modifier.padding(8.dp))
+        }
+
+
+        items(
+            items = uiState.posts,
+            key = { post -> post.discussionPostUid }
+        ){ post ->
+
+            val datePosted = rememberFormattedDate( timeInMillis = post.discussionPostStartDate,
+                "UTC" )
+
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickPost(post)
+                },
+                icon = {
+                    //TODO: replace with avatar
+                    Icon(
+                        imageVector = Icons.Filled.Person,
+                        contentDescription = null
+                    )
+                },
+                text = {
+                    Text(post.discussionPostTitle ?: "" )
+                },
+
+                secondaryText = {
+                    Column {
+                        //Text(post.discussionPostMessage?: "")
+                        Text(post.postLatestMessage?: "")
+                    }
+                },
+                singleLineSecondaryText = false,
+                trailing = {
+                    Column {
+                        Text(datePosted)
+                        Text(stringResource(R.string.num_replies, post.postRepliesCount))
+                    }
+                }
+            )
+        }
+
+    }
+
+}
+
+@Composable
+@Preview
+fun CourseDiscussionDetailScreenPreview(){
+    val uiState = CourseDiscussionDetailUiState(
+
+        courseBlock = CourseBlock().apply{
+          cbTitle = "Discussions on Module 4: Statistics and Data Science"
+          cbDescription = "Here Any discussion related to Module 4 of Data Science chapter goes here."
+        },
+
+
+        posts = listOf(
+            DiscussionPostWithDetails().apply {
+                discussionPostTitle = "Can I join after week 2?"
+                discussionPostUid = 0L
+                discussionPostMessage = "Iam late to class, CAn I join after?"
+                discussionPostVisible = true
+                postRepliesCount = 4
+                postLatestMessage = "Just make sure you submit a late assignment."
+                authorPersonFirstNames = "Mike"
+                authorPersonLastName = "Jones"
+                discussionPostStartDate = systemTimeInMillis()
+            },
+            DiscussionPostWithDetails().apply {
+                discussionPostTitle = "How to install xlib?"
+                discussionPostMessage = "Which version of python do I need?"
+                discussionPostVisible = true
+                discussionPostUid = 1L
+                postRepliesCount = 2
+                postLatestMessage = "I have the same question"
+                authorPersonFirstNames = "Bodium"
+                authorPersonLastName = "Carafe"
+                discussionPostStartDate = systemTimeInMillis()
+            }
+
+        ),
+
+        )
+
+    MdcTheme{
+        CourseDiscussionDetailScreen(uiState)
+    }
 }
