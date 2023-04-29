@@ -1,6 +1,9 @@
 package com.ustadmobile.core.viewmodel.clazzassignment.edit
 
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.peerreviewallocation.UpdatePeerReviewAllocationUseCase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
@@ -81,6 +84,10 @@ data class ClazzAssignmentEditUiState(
 class ClazzAssignmentEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
+    val peerReviewAllocationUseCaseFactory: (UmAppDatabase, UstadMobileSystemImpl)
+        -> UpdatePeerReviewAllocationUseCase = { db, systemImpl ->
+        UpdatePeerReviewAllocationUseCase(db, systemImpl)
+    }
 ): UstadEditViewModel(di, savedStateHandle, ClazzAssignmentEditView.VIEW_NAME) {
 
     private val _uiState = MutableStateFlow(ClazzAssignmentEditUiState())
@@ -221,7 +228,8 @@ class ClazzAssignmentEditViewModel(
         return submissionRequiredError != null ||
             courseBlockEditUiState.caMaxPointsError != null ||
             courseBlockEditUiState.caDeadlineError != null ||
-            courseBlockEditUiState.caGracePeriodError != null
+            courseBlockEditUiState.caGracePeriodError != null ||
+            reviewerCountError != null
     }
 
 
@@ -240,7 +248,6 @@ class ClazzAssignmentEditViewModel(
         }
 
         viewModelScope.launch {
-            println(savedStateHandle[KEY_INIT_STATE])
             val initState = savedStateHandle[KEY_INIT_STATE]?.let { initStateJson ->
                 withContext(Dispatchers.Default) {
                     json.decodeFromString(ClazzAssignmentEditUiState.serializer(), initStateJson)
@@ -300,6 +307,14 @@ class ClazzAssignmentEditViewModel(
                 errorSnack = systemImpl.getString(MessageID.error) + "Cannot change marking type after submissions made"
             }
 
+            if(assignment.caMarkingType == ClazzAssignment.MARKED_BY_PEERS &&
+                assignment.caPeerReviewerCount < 1
+            ) {
+                _uiState.update { prev ->
+                    prev.copy(reviewerCountError = systemImpl.getString(MessageID.score_greater_than_zero))
+                }
+            }
+
             _uiState.update { prev ->
                 prev.copy(fieldsEnabled = true)
             }
@@ -313,10 +328,30 @@ class ClazzAssignmentEditViewModel(
                 return@launch
             }
 
+            if(assignment.caMarkingType == ClazzAssignment.MARKED_BY_PEERS &&
+                initState.entity?.assignment?.caPeerReviewerCount != assignment.caPeerReviewerCount
+            ) {
+                val newAllocations = peerReviewAllocationUseCaseFactory(
+                    activeDb, systemImpl
+                ).invoke(
+                    existingAllocations = _uiState.value.entity?.assignmentPeerAllocations ?: emptyList(),
+                    groupUid = assignment.caGroupUid,
+                    clazzUid = assignment.caClazzUid,
+                    assignmentUid = assignment.caUid,
+                    numReviewsPerSubmission = assignment.caPeerReviewerCount,
+                    allocateRemaining = true
+                )
+
+                _uiState.update { prev ->
+                    prev.copy(
+                        entity = prev.entity?.shallowCopyWithEntity {
+                            assignmentPeerAllocations = newAllocations
+                        }
+                    )
+                }
+            }
+
             finishWithResult(_uiState.value.entity)
         }
-
-
-
     }
 }
