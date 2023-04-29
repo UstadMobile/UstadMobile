@@ -7,6 +7,7 @@ import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.flow.Flow
 import kotlin.js.JsName
 
 @DoorDao
@@ -147,5 +148,22 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
                        LIMIT 1)
     """)
     abstract fun checkNoSubmissionsMade(assignmentUid: Long): LiveData<Boolean>
+
+    @Query("""
+         SELECT NOT EXISTS(SELECT 1
+                        FROM CourseAssignmentSubmission
+                       WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
+                       LIMIT 1)
+    """)
+    abstract suspend fun checkNoSubmissionsMadeAsync(assignmentUid: Long): Boolean
+
+
+    @Query("""
+         SELECT NOT EXISTS(SELECT 1
+                        FROM CourseAssignmentSubmission
+                       WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
+                       LIMIT 1)
+    """)
+    abstract suspend fun checkNoSubmissionsMadeFlow(assignmentUid: Long): Flow<Boolean>
 
 }

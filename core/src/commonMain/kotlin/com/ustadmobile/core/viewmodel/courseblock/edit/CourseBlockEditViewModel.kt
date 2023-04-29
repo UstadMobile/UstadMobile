@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
+@kotlinx.serialization.Serializable
 data class CourseBlockEditUiState(
 
     val courseBlock: CourseBlock? = null,

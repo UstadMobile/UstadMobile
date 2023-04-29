@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.UstadEditView
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
@@ -155,12 +156,13 @@ abstract class UstadEditViewModel(
         newEntityMessageId: Int,
         editEntityMessageId: Int,
     ): String {
-        val entityUid = savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0L
+        val isEditing = (savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0L) != 0L ||
+            ARG_ENTITY_JSON in savedStateHandle.keys
         return systemImpl.getString(
-            if(entityUid == 0L) {
-                newEntityMessageId
-            }else {
+            if(isEditing) {
                 editEntityMessageId
+            }else {
+                newEntityMessageId
             }
         )
     }

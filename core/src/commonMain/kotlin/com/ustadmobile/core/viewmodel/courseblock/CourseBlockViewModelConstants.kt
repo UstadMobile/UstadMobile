@@ -6,6 +6,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 
 class CourseBlockViewModelConstants {
 
+    @kotlinx.serialization.Serializable
     enum class CompletionCriteria(val messageId: Int, val value: Int) {
         AUTOMATIC(MessageID.automatic, ContentEntry.COMPLETION_CRITERIA_AUTOMATIC),
         MIN_SCORE(MessageID.minimum_score, ContentEntry.COMPLETION_CRITERIA_MIN_SCORE),
