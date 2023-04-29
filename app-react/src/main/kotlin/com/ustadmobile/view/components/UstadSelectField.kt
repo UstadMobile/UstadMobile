@@ -7,6 +7,8 @@ import react.*
 
 external interface UstadSelectFieldProps<T: Any>: Props {
 
+    var value: T
+
     var options: List<T>
 
     var itemValue: (T) -> String
@@ -19,8 +21,6 @@ external interface UstadSelectFieldProps<T: Any>: Props {
 
     var id: String
 
-    var value: String
-
     var fullWidth: Boolean
 
     var enabled: Boolean?
@@ -31,6 +31,12 @@ external interface UstadSelectFieldProps<T: Any>: Props {
 
 private val UstadSelectFieldFC = FC<UstadSelectFieldProps<Any>> { props ->
 
+    val selectVal = try {
+        props.itemValue(props.value)
+    }catch(e: Exception){
+        throw IllegalArgumentException("SelectField(id=${props.id}): cannot get value. Not in options list maybe?", e)
+    }
+
     FormControl {
         fullWidth = true
 
@@ -40,7 +46,7 @@ private val UstadSelectFieldFC = FC<UstadSelectFieldProps<Any>> { props ->
         }
 
         Select {
-            value = props.value
+            value = selectVal
             id = props.id
             labelId = "${props.id}_label"
             label = ReactNode(props.label)
@@ -84,14 +90,14 @@ data class PreviewOption(val value: String, val label: String)
 
 val UstadSelectFieldPreview = FC<Props> {
 
-    var currentValue by useState { "1" }
+    var currentValue by useState { PreviewOption("1", "one") }
 
     UstadSelectField<PreviewOption> {
         options = listOf(PreviewOption("1", "one"), PreviewOption("2", "two"))
         itemValue = { it.value }
         itemLabel = { ReactNode(it.label) }
         onChange = {
-            currentValue = it.value
+            currentValue = it
         }
         label = "Preview"
         id = "testselect"

@@ -2,8 +2,8 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.impl.locale.entityconstants.CompletionCriteriaConstants
-import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
+import com.ustadmobile.core.viewmodel.courseblock.CourseBlockViewModelConstants.CompletionCriteria
+import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
@@ -11,6 +11,7 @@ import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadMessageIdSelectField
+import com.ustadmobile.view.components.UstadSelectField
 import com.ustadmobile.wrappers.quill.ReactQuill
 import csstype.px
 import js.core.jso
@@ -92,11 +93,13 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             spacing = responsive(15.px)
 
 
-            UstadMessageIdSelectField {
+            UstadSelectField<CompletionCriteria> {
                 id = "cbCompletionCriteria"
-                value = props.uiState.courseBlock?.cbCompletionCriteria ?: 0
+                value = CompletionCriteria.valueOf(props.uiState.courseBlock?.cbCompletionCriteria ?: 0)
                 label = strings[MessageID.completion_criteria]
-                options = CompletionCriteriaConstants.COMPLETION_CRITERIA_MESSAGE_IDS
+                options = props.uiState.completionCriteriaOptions
+                itemValue = { it.value.toString() }
+                itemLabel = { ReactNode(strings[it.messageId]) }
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
                     props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
@@ -180,6 +183,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
                 value = (props.uiState.courseBlock?.cbLateSubmissionPenalty ?: 0).toFloat()
                 label = ReactNode(strings[MessageID.late_submission_penalty])
                 disabled = !props.uiState.fieldsEnabled
+                helperText = ReactNode(strings[MessageID.penalty_label])
                 asDynamic().InputProps = jso<InputBaseProps> {
                     endAdornment = InputAdornment.create {
                         position = InputAdornmentPosition.end
@@ -191,10 +195,6 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
                         cbLateSubmissionPenalty = newString.toInt()
                     })
                 }
-            }
-
-            Typography {
-               + strings[MessageID.penalty_label]
             }
         }
     }

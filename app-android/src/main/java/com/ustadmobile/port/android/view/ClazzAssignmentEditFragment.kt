@@ -32,8 +32,8 @@ import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.CourseGroupSet
-import com.ustadmobile.core.viewmodel.ClazzAssignmentEditUiState
-import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
+import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditUiState
+import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyWithEntity

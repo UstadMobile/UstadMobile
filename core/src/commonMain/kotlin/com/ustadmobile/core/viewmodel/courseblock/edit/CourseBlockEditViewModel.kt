@@ -1,9 +1,11 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.courseblock.edit
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.UstadEditView.Companion.DEFAULT_COMMIT_DELAY
+import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.courseblock.CourseBlockViewModelConstants.CompletionCriteria
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
@@ -18,6 +20,8 @@ import org.kodein.di.DI
 data class CourseBlockEditUiState(
 
     val courseBlock: CourseBlock? = null,
+
+    val completionCriteriaOptions: List<CompletionCriteria> = CompletionCriteria.values().toList(),
 
     val fieldsEnabled: Boolean = true,
 
@@ -99,7 +103,7 @@ class CourseBlockEditViewModel(
             }
 
             launch {
-                resultReturner.filteredResultFlowForKey(RESULT_KEY_HTML_DESC).collect {result ->
+                resultReturner.filteredResultFlowForKey(RESULT_KEY_HTML_DESC).collect { result ->
                     val descriptionHtml = result.result as? String ?: return@collect
                     onEntityChanged(_uiState.value.courseBlock?.shallowCopy {
                         cbDescription = descriptionHtml

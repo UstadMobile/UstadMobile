@@ -3,7 +3,7 @@ package com.ustadmobile.entities
 import com.ustadmobile.core.components.NAVHOST_CLEARSTACK_VIEWNAME
 import com.ustadmobile.core.components.NavHostClearStackPlaceholder
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.viewmodel.CourseBlockEditViewModel
+import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.*
 import com.ustadmobile.view.clazzedit.ClazzEditScreen
@@ -20,11 +20,11 @@ import com.ustadmobile.wrappers.quill.QuillDemo
 import com.ustadmobile.view.timezonelist.TimeZoneListScreen
 import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
 import com.ustadmobile.core.viewmodel.CourseTerminologyListViewModel
+import com.ustadmobile.view.clazzassignment.edit.ClazzAssignmentEditScreenPreview
 import com.ustadmobile.view.courseterminologylist.CourseTerminologyListScreen
 import com.ustadmobile.view.clazzdetail.ClazzDetailScreen
 import com.ustadmobile.view.clazzdetailoverview.ClazzDetailOverviewScreen
 import com.ustadmobile.view.clazzgroupset.ClazzGroupSetDummy
-import com.ustadmobile.view.clazzdetailoverview.ClazzDetailOverviewScreenPreview
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -164,7 +164,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(
         ClazzAssignmentEditView.VIEW_NAME,
         "ClazzAssignmentEdit Preview",
-        ClazzAssignmentEditScreenPreview),
+        ClazzAssignmentEditScreenPreview
+    ),
     UstadScreen("DateTimeEdit", "Date Time Edit", DateTimeEditFieldPreview),
     UstadScreen(ClazzDetailView.VIEW_NAME, "Clazz Detail", ClazzDetailScreen),
     UstadScreen(ClazzDetailOverviewView.VIEW_NAME, "Clazz Detail Overview",
