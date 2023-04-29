@@ -294,6 +294,12 @@ class ClazzAssignmentEditViewModel(
                 errorSnack = systemImpl.getString(MessageID.error) + "Cannot change groups after submissions made"
             }
 
+            if(initState.entity?.assignment?.caMarkingType != assignment.caMarkingType &&
+                errorSnack == null && !checkNoSubmissionsMade()
+            ) {
+                errorSnack = systemImpl.getString(MessageID.error) + "Cannot change marking type after submissions made"
+            }
+
             _uiState.update { prev ->
                 prev.copy(fieldsEnabled = true)
             }

@@ -183,11 +183,11 @@ class ClazzAssignmentEditViewModelTest {
 
             viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere { it.fieldsEnabled }
-                val submission = CourseAssignmentSubmission().apply {
+
+                activeDb.courseAssignmentSubmissionDao.insert(CourseAssignmentSubmission().apply {
                     casAssignmentUid = clazzAssignmentUid
                     casSubmitterUid = 1
-                    casUid = activeDb.courseAssignmentSubmissionDao.insert(this)
-                }
+                })
 
                 viewModel.onAssignmentChanged(readyState.entity?.assignment?.shallowCopy {
                     caGroupUid = 5
@@ -203,5 +203,49 @@ class ClazzAssignmentEditViewModelTest {
             })
         }
     }
+
+    @Test
+    fun givenExistingAssignmentMarkingTypeWasChanged_whenSubmissionMarkedBeforeSave_thenShowError() {
+        testViewModel<ClazzAssignmentEditViewModel> {
+            val testAssignment = ClazzAssignment().apply {
+                caMarkingType = ClazzAssignment.MARKED_BY_COURSE_LEADER
+                caGroupUid = 0//individual submission
+            }
+            val clazzAssignmentUid = activeDb.clazzAssignmentDao.insert(testAssignment)
+            testAssignment.caUid = clazzAssignmentUid
+            val testBlock = CourseBlockWithEntity().apply {
+                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                cbEntityUid = clazzAssignmentUid
+                assignment = testAssignment
+            }
+
+            viewModelFactory {
+                savedStateHandle[ARG_ENTITY_JSON] = json.encodeToString(testBlock)
+                ClazzAssignmentEditViewModel(di, savedStateHandle)
+            }
+
+            viewModel.uiState.test(timeout = 5.seconds) {
+                val readyState = awaitItemWhere { it.fieldsEnabled }
+
+                activeDb.courseAssignmentSubmissionDao.insert(CourseAssignmentSubmission().apply {
+                    casAssignmentUid = clazzAssignmentUid
+                    casSubmitterUid = 1
+                })
+
+                viewModel.onAssignmentChanged(readyState.entity?.assignment?.shallowCopy {
+                    caMarkingType = ClazzAssignment.MARKED_BY_PEERS
+                })
+
+                viewModel.onClickSave()
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            val mockSnackBarDispatcher = di.direct.instance<SnackBarDispatcher>()
+            verify(mockSnackBarDispatcher, timeout(5000)).showSnackBar(argWhere {
+                it.message.startsWith(systemImpl.getString(MessageID.error))
+            })
+        }
+    }
+
 
 }
