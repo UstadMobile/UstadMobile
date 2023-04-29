@@ -13,6 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.math.min
 
 class UpdatePeerReviewAllocationUseCaseTest {
 
@@ -20,20 +21,21 @@ class UpdatePeerReviewAllocationUseCaseTest {
         on { getString(MessageID.group_number) }.thenReturn("Group %1\$s")
     }
 
-
-    fun assertAllocationsAreValid(
+    private fun assertAllocationsAreValid(
         submitterUids: List<Long>,
         numReviewsPerSubmission: Int,
         allocations: List<PeerReviewerAllocation>
     ) {
+        val expectedNumberOfReviews = min(numReviewsPerSubmission, submitterUids.size - 1)
+
         submitterUids.forEach { personUid ->
             val itemsThisPersonMarks = allocations.filter { it.praMarkerSubmitterUid == personUid }
 
             //Should have the expected number of items to mark: if the maths is not even, then some
             // might have one fewer items to mark
             assertTrue(
-                itemsThisPersonMarks.size >= (numReviewsPerSubmission - 1) &&
-                    itemsThisPersonMarks.size <= numReviewsPerSubmission,
+                itemsThisPersonMarks.size >= (expectedNumberOfReviews - 1) &&
+                    itemsThisPersonMarks.size <= expectedNumberOfReviews,
                 "Number of reviews "
             )
 
@@ -160,7 +162,26 @@ class UpdatePeerReviewAllocationUseCaseTest {
         }
     }
 
-    //impossible allocation?
+    @Test
+    fun givenClazzWithSubmitters_whenTooManyReviewsSet_thenShouldRunThroughWithSomeAllocationsEmpty() {
+        val db = DatabaseBuilder.databaseBuilder(
+            UmAppDatabase::class, dbUrl = "jdbc:sqlite::memory:"
+        ).build()
+
+        val clazzUid = 42L
+        val numReviewsPerSubmission = 6
+
+        db.insertPeopleIntoClass(42L, (1L..5).toList())
+
+        val updatePraUseCase = UpdatePeerReviewAllocationUseCase(db, systemImpl)
+
+        runBlocking {
+            val allocations = updatePraUseCase(emptyList(), 0, clazzUid, 1, numReviewsPerSubmission, true)
+            assertAllocationsAreValid((1L..5L).toList(), numReviewsPerSubmission, allocations)
+            assertTrue(allocations.count { it.praMarkerSubmitterUid == 0L } > 0,
+                "As more reviews per submission have been requested than peers are available, some allocations will be unassigned")
+        }
+    }
 
 
 }

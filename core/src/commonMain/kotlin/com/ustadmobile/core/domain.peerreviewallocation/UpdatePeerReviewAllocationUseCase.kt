@@ -65,7 +65,7 @@ class UpdatePeerReviewAllocationUseCase(
             submitterToMarkUid.submitterUid to existingAllocationsForSubmitter
         }.toMap()
 
-        var allocationList = allocationsForEachSubmitter.flatMap { it.value }
+        val allocationList = allocationsForEachSubmitter.flatMap { it.value }.toMutableList()
 
         if(allocateRemaining) {
             //put into bucket: each submitter uid n times, n = reviewsPerSubmission - count assignments
@@ -80,16 +80,15 @@ class UpdatePeerReviewAllocationUseCase(
                 }
             }.shuffled().toMutableList()
 
-            //go through each empty PeerReviewAllocation where praMarkerSubmitterUid = 0. Select anyone eligible in the from bucket.
-            allocationList = allocationList.map { allocation ->
-                //For each allocation that has not yet been assigned a marker
+            for(index in allocationList.indices) {
+                val allocation = allocationList[index]
                 if(allocation.praMarkerSubmitterUid == 0L) {
                     //Dont assign anyone to mark a single peer more than once
                     val otherMarkersForThisSubmitter = allocationList.filter {
                         it.praToMarkerSubmitterUid == allocation.praToMarkerSubmitterUid
                     }.map {
                         it.praMarkerSubmitterUid
-                    }
+                    }.filter { it != 0L }
 
                     val selectedMarkerUid = fromBucket.firstOrNull {
                         it != allocation.praToMarkerSubmitterUid &&
@@ -98,11 +97,9 @@ class UpdatePeerReviewAllocationUseCase(
                         fromBucket.remove(it)
                     }
 
-                    allocation.shallowCopy {
+                    allocationList[index] = allocation.shallowCopy {
                         praMarkerSubmitterUid = selectedMarkerUid ?: 0
                     }
-                }else {
-                    allocation
                 }
             }
         }
