@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItem as UstadCourseAssignmentMarkListItemUiState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -50,6 +49,7 @@ import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
+import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime

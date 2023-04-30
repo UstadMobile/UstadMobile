@@ -22,7 +22,8 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
-import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItem as UstadCourseAssignmentMarkListItemUiState
+import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItemUiState as UstadCourseAssignmentMarkListItemUiState
+import com.ustadmobile.mui.components.UstadCourseAssignmentMarkListItem
 
 val ASSIGNMENT_STATUS_MAP = mapOf(
     CourseAssignmentSubmission.NOT_SUBMITTED to Done.create(),
