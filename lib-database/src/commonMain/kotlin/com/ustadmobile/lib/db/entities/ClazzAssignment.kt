@@ -30,8 +30,10 @@ open class ClazzAssignment {
     @PrimaryKey(autoGenerate = true)
     var caUid: Long = 0
 
+    @Deprecated("Use title on courseblock")
     var caTitle: String? = null
 
+    @Deprecated("Use description on courseblock")
     var caDescription: String? = null
 
     /**

@@ -1,5 +1,7 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
@@ -325,5 +327,20 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
                      WHERE caUid = :uid""")
     abstract fun findByUidLive(uid: Long): LiveData<ClazzAssignment?>
 
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertListAsync(entities: List<ClazzAssignment>)
+
+    @Query("""
+        UPDATE ClazzAssignment
+           SET caActive = :active,
+               caLct = :changeTime
+         WHERE caUid IN (:uidList)   
+    """)
+    abstract suspend fun updateActiveByList(
+        uidList: List<Long>,
+        active: Boolean,
+        changeTime: Long
+    )
 
 }

@@ -164,6 +164,6 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
                        WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
                        LIMIT 1)
     """)
-    abstract suspend fun checkNoSubmissionsMadeFlow(assignmentUid: Long): Flow<Boolean>
+    abstract fun checkNoSubmissionsMadeFlow(assignmentUid: Long): Flow<Boolean>
 
 }

@@ -450,6 +450,13 @@ class ClazzEditViewModel(
                         it.cbUid
                     }, systemTimeInMillis()
                 )
+
+                val assignmentsToUpsert = _uiState.value.courseBlockList.mapNotNull { it.assignment }
+                activeDb.clazzAssignmentDao.upsertListAsync(assignmentsToUpsert)
+                val assignmentsToDeactivate = initState.courseBlockList.mapNotNull { it.assignment}
+                    .findKeysNotInOtherList(assignmentsToUpsert) { it.caUid }
+                activeDb.clazzAssignmentDao.takeIf { assignmentsToDeactivate.isNotEmpty() }
+                    ?.updateActiveByList(assignmentsToDeactivate, false, systemTimeInMillis())
             }
 
             val entityTimeZone = TimeZone.of(entity.effectiveTimeZone)
