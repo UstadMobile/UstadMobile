@@ -21,10 +21,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyWithEntity
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
@@ -40,8 +37,6 @@ data class ClazzAssignmentEditUiState(
 
     val groupSetEnabled: Boolean = true,
 
-    val caTitleError: String? = null,
-
     val reviewerCountError: String? = null,
 
     val groupSet: CourseGroupSet? = null,
@@ -49,8 +44,6 @@ data class ClazzAssignmentEditUiState(
     val timeZone: String? = null,
 
     val entity: CourseBlockWithEntity? = null,
-
-    val minScoreVisible: Boolean = false,
 
     val courseTerminology: CourseTerminology? = null,
 
@@ -125,6 +118,7 @@ class ClazzAssignmentEditViewModel(
                         cbUid = activeDb.doorPrimaryKeyManager.nextId(CourseBlock.TABLE_ID)
                         cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
                         cbEntityUid = assignmentUid
+                        cbCompletionCriteria = ClazzAssignment.COMPLETION_CRITERIA_GRADED
                         assignment = ClazzAssignment().apply {
                             caUid = assignmentUid
                             caClazzUid = savedStateHandle[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
@@ -170,7 +164,7 @@ class ClazzAssignmentEditViewModel(
     }
 
     fun onAssignmentChanged(entity: ClazzAssignment?) {
-        _uiState.update { prev ->
+        val newState = _uiState.updateAndGet { prev ->
             prev.copy(
                 entity = prev.entity?.shallowCopyWithEntity {
                     assignment = entity
@@ -181,13 +175,27 @@ class ClazzAssignmentEditViewModel(
                     prev.submissionRequiredError
                 }else {
                     null
+                },
+                reviewerCountError = if(prev.reviewerCountError != null &&
+                    entity?.caPeerReviewerCount == prev.entity?.assignment?.caPeerReviewerCount &&
+                    entity?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS
+                ) {
+                    prev.reviewerCountError
+                }else {
+                    null
                 }
             )
         }
+
+        scheduleEntityCommitToSavedState(
+            entity = newState.entity,
+            serializer = CourseBlockWithEntity.serializer(),
+            commitDelay = 200,
+        )
     }
 
     fun onCourseBlockChanged(entity: CourseBlock?) {
-        _uiState.update { prev ->
+        val newState = _uiState.updateAndGet { prev ->
             val prevBlock = prev.courseBlockEditUiState.courseBlock
 
             prev.copy(
@@ -222,6 +230,12 @@ class ClazzAssignmentEditViewModel(
                 )
             )
         }
+
+        scheduleEntityCommitToSavedState(
+            entity = newState.entity,
+            serializer = CourseBlockWithEntity.serializer(),
+            commitDelay = 200,
+        )
     }
 
     private fun ClazzAssignmentEditUiState.hasErrors() : Boolean {
@@ -237,6 +251,14 @@ class ClazzAssignmentEditViewModel(
         return activeDb.courseAssignmentSubmissionDao.checkNoSubmissionsMadeAsync(
             _uiState.value.entity?.assignment?.caUid ?: 0L
         )
+    }
+
+    fun onClickSubmissionType() {
+        //Go to list of groups with option to select individual
+    }
+
+    fun onClickAssignReviewers() {
+        //Go to assign peer reviewers
     }
 
     fun onClickSave() {

@@ -20,7 +20,7 @@ import com.ustadmobile.wrappers.quill.QuillDemo
 import com.ustadmobile.view.timezonelist.TimeZoneListScreen
 import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
 import com.ustadmobile.core.viewmodel.CourseTerminologyListViewModel
-import com.ustadmobile.view.clazzassignment.edit.ClazzAssignmentEditScreenPreview
+import com.ustadmobile.view.clazzassignment.edit.ClazzAssignmentEditScreen
 import com.ustadmobile.view.courseterminologylist.CourseTerminologyListScreen
 import com.ustadmobile.view.clazzdetail.ClazzDetailScreen
 import com.ustadmobile.view.clazzdetailoverview.ClazzDetailOverviewScreen
@@ -163,8 +163,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         CourseTerminologyListScreen),
     UstadScreen(
         ClazzAssignmentEditView.VIEW_NAME,
-        "ClazzAssignmentEdit Preview",
-        ClazzAssignmentEditScreenPreview
+        "ClazzAssignmentEdit",
+        ClazzAssignmentEditScreen
     ),
     UstadScreen("DateTimeEdit", "Date Time Edit", DateTimeEditFieldPreview),
     UstadScreen(ClazzDetailView.VIEW_NAME, "Clazz Detail", ClazzDetailScreen),

@@ -225,11 +225,17 @@ class ClazzEditViewModel(
             launch {
                 resultReturner.filteredResultFlowForKey(RESULT_KEY_COURSEBLOCK).collect { result ->
                     val courseBlock = result.result as? CourseBlock ?: return@collect
+                    val courseBlockWithEntity = result.result as? CourseBlockWithEntity
+                    val assignment = courseBlockWithEntity?.assignment
+                    val peerReviewerAllocations = courseBlockWithEntity?.assignmentPeerAllocations
+
                     val newCourseBlockList = addOrUpdateCourseBlockUseCase(
                         currentList = _uiState.value.courseBlockList,
                         clazzUid = _uiState.value.entity?.clazzUid
                             ?: throw IllegalStateException("Clazz must not be null when collecting course block"),
                         addOrUpdateBlock = courseBlock,
+                        assignment = assignment,
+                        assignmentPeerReviewAllocations = peerReviewerAllocations,
                     )
 
                     updateCourseBlockList(newCourseBlockList)
@@ -356,6 +362,8 @@ class ClazzEditViewModel(
             CourseBlock.BLOCK_TEXT_TYPE,
             CourseBlock.BLOCK_MODULE_TYPE ->
                 CourseBlockEditViewModel.DEST_NAME to RESULT_KEY_COURSEBLOCK
+            CourseBlock.BLOCK_ASSIGNMENT_TYPE ->
+                ClazzAssignmentEditView.VIEW_NAME to RESULT_KEY_COURSEBLOCK
             else -> return
         }
 
@@ -548,6 +556,14 @@ class ClazzEditViewModel(
                     key = RESULT_KEY_COURSEBLOCK,
                     serializer = CourseBlock.serializer(),
                     currentValue = block
+                )
+            }
+            CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
+                navigateForResult(
+                    nextViewName = ClazzAssignmentEditView.VIEW_NAME,
+                    key = RESULT_KEY_COURSEBLOCK,
+                    serializer = CourseBlockWithEntity.serializer(),
+                    currentValue = block,
                 )
             }
         }

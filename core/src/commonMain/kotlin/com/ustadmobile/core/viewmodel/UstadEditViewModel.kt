@@ -156,8 +156,7 @@ abstract class UstadEditViewModel(
         newEntityMessageId: Int,
         editEntityMessageId: Int,
     ): String {
-        val isEditing = (savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0L) != 0L ||
-            ARG_ENTITY_JSON in savedStateHandle.keys
+        val isEditing = entityUidArg != 0L || ARG_ENTITY_JSON in savedStateHandle.keys
         return systemImpl.getString(
             if(isEditing) {
                 editEntityMessageId

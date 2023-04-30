@@ -1,8 +1,10 @@
 package com.ustadmobile.core.domain.courseblockupdate
 
 import com.ustadmobile.core.util.ext.asCourseBlockWithEntity
+import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
+import com.ustadmobile.lib.db.entities.PeerReviewerAllocation
 import com.ustadmobile.lib.db.entities.ext.shallowCopyWithEntity
 
 /**
@@ -17,9 +19,14 @@ class AddOrUpdateCourseBlockUseCase {
     operator fun invoke(
         currentList: List<CourseBlockWithEntity>,
         clazzUid: Long,
-        addOrUpdateBlock: CourseBlock
+        addOrUpdateBlock: CourseBlock,
+        assignment: ClazzAssignment? = null,
+        assignmentPeerReviewAllocations: List<PeerReviewerAllocation>?,
     ) : List<CourseBlockWithEntity> {
-        val courseBlockWithEntity = addOrUpdateBlock.asCourseBlockWithEntity()
+        val courseBlockWithEntity = addOrUpdateBlock.asCourseBlockWithEntity(
+            assignment = assignment,
+            assignmentPeerReviewAllocations = assignmentPeerReviewAllocations,
+        )
         val currentIndex = currentList.indexOfFirst {
             it.cbUid == addOrUpdateBlock.cbUid
         }

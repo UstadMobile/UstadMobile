@@ -1,19 +1,21 @@
 package com.ustadmobile.view.clazzassignment.edit
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.*
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditUiState
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants.TextLimitType
+import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
 import com.ustadmobile.hooks.courseTerminologyResource
 import com.ustadmobile.hooks.useCourseTerminologyEntries
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ClazzAssignment.Companion.COMPLETION_CRITERIA_GRADED
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.lib.db.entities.ext.shallowCopyWithEntity
 import com.ustadmobile.mui.common.input
 import com.ustadmobile.mui.common.readOnly
 import com.ustadmobile.mui.components.UstadCourseBlockEdit
@@ -36,7 +38,7 @@ external interface ClazzAssignmentEditScreenProps : Props {
 
     var uiState: ClazzAssignmentEditUiState
 
-    var onChangeCourseBlockWithEntity: (CourseBlockWithEntity?) -> Unit
+    var onAssignmentChanged: (ClazzAssignment?) -> Unit
 
     //Used by embedded CourseBlockEdit
     var onChangeCourseBlock: (CourseBlock?) -> Unit
@@ -67,14 +69,8 @@ val ClazzAssignmentEditScreenPreview = FC<Props> {
                 gracePeriodVisible = true,
                 completionCriteriaOptions = ClazzAssignmentEditUiState.ASSIGNMENT_COMPLETION_CRITERIAS,
             ),
-            minScoreVisible = true,
             entity = entity
         )
-
-        onChangeCourseBlockWithEntity = {
-            entity = it
-        }
-
     }
 }
 
@@ -116,11 +112,10 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 id = "caRequireFileSubmission"
                 label = strings[MessageID.require_file_submission]
                 checked = props.uiState.entity?.assignment?.caRequireFileSubmission ?: false
+                error = props.uiState.submissionRequiredError
                 onChanged = {
-                    props.onChangeCourseBlockWithEntity(props.uiState.entity?.shallowCopyWithEntity {
-                        assignment = props.uiState.entity?.assignment?.shallowCopy {
-                            caRequireFileSubmission = it
-                        }
+                    props.onAssignmentChanged(props.uiState.entity?.assignment?.shallowCopy {
+                        caRequireFileSubmission = it
                     })
                 }
                 enabled = props.uiState.fieldsEnabled
@@ -134,12 +129,11 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     options = FileTypeConstants.FILE_TYPE_MESSAGE_IDS
                     enabled = props.uiState.fieldsEnabled
                     onChange = {
-                        props.onChangeCourseBlockWithEntity(
-                            props.uiState.entity?.shallowCopyWithEntity {
-                                assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                    caFileType = it.value
-                                }
-                            })
+                        props.onAssignmentChanged(
+                            props.uiState.entity?.assignment?.shallowCopy {
+                                caFileType = it.value
+                            }
+                        )
                     }
                 }
 
@@ -150,12 +144,11 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     label = ReactNode(strings[MessageID.size_limit])
                     disabled = !props.uiState.fieldsEnabled
                     onChange = {
-                        props.onChangeCourseBlockWithEntity(
-                            props.uiState.entity?.shallowCopyWithEntity {
-                                assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                    caSizeLimit = it.toInt()
-                                }
-                            })
+                        props.onAssignmentChanged(
+                            props.uiState.entity?.assignment?.shallowCopy {
+                                caSizeLimit = it.toInt()
+                            }
+                        )
                     }
                 }
 
@@ -166,12 +159,11 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     label = ReactNode(strings[MessageID.number_of_files])
                     disabled = props.uiState.fieldsEnabled
                     onChange = {
-                        props.onChangeCourseBlockWithEntity(
-                            props.uiState.entity?.shallowCopyWithEntity {
-                                assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                    caNumberOfFiles = it.toInt()
-                                }
-                            })
+                        props.onAssignmentChanged(
+                            props.uiState.entity?.assignment?.shallowCopy {
+                                caNumberOfFiles = it.toInt()
+                            }
+                        )
                     }
                 }
             }
@@ -180,11 +172,10 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 id = "caRequireTextSubmission"
                 label = strings[MessageID.require_text_submission]
                 checked = props.uiState.entity?.assignment?.caRequireTextSubmission ?: false
+                error = props.uiState.submissionRequiredError
                 onChanged = {
-                    props.onChangeCourseBlockWithEntity(props.uiState.entity?.shallowCopyWithEntity {
-                        assignment = props.uiState.entity?.assignment?.shallowCopy {
-                            caRequireTextSubmission = it
-                        }
+                    props.onAssignmentChanged(props.uiState.entity?.assignment?.shallowCopy {
+                        caRequireTextSubmission = it
                     })
                 }
                 enabled = props.uiState.fieldsEnabled
@@ -202,12 +193,11 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     label = strings[MessageID.limit]
                     enabled = props.uiState.fieldsEnabled
                     onChange = {
-                        props.onChangeCourseBlockWithEntity(
-                            props.uiState.entity?.shallowCopyWithEntity {
-                                assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                    caTextLimitType = it.value
-                                }
-                            })
+                        props.onAssignmentChanged(
+                            props.uiState.entity?.assignment?.shallowCopy {
+                                caTextLimitType = it.value
+                            }
+                        )
                     }
                 }
 
@@ -219,29 +209,28 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     disabled = !props.uiState.fieldsEnabled
 
                     onChange = {
-                        props.onChangeCourseBlockWithEntity(
-                            props.uiState.entity?.shallowCopyWithEntity {
-                                assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                    caTextLimit = it.toInt()
-                                }
-                            })
+                        props.onAssignmentChanged(
+                            props.uiState.entity?.assignment?.shallowCopy {
+                                caTextLimit = it.toInt()
+                            }
+                        )
                     }
                 }
             }
 
             UstadMessageIdSelectField {
                 id = "caSubmissionPolicy"
-                value = props.uiState.entity?.assignment?.caSubmissionPolicy ?: 0
+                value = props.uiState.entity?.assignment?.caSubmissionPolicy
+                    ?: ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
                 label = strings[MessageID.submission_policy]
                 options = SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
-                    props.onChangeCourseBlockWithEntity(
-                        props.uiState.entity?.shallowCopyWithEntity {
-                            assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                caSubmissionPolicy = it.value
-                            }
-                        })
+                    props.onAssignmentChanged(
+                        props.uiState.entity?.assignment?.shallowCopy {
+                            caSubmissionPolicy = it.value
+                        }
+                    )
                 }
             }
 
@@ -260,12 +249,11 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 }
                 itemValue = { it.toString() }
                 onChange = {
-                    props.onChangeCourseBlockWithEntity(
-                        props.uiState.entity?.shallowCopyWithEntity {
-                            assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                caMarkingType = it
-                            }
-                        })
+                    props.onAssignmentChanged(
+                        props.uiState.entity?.assignment?.shallowCopy {
+                            caMarkingType = it
+                        }
+                    )
                 }
             }
 
@@ -284,12 +272,11 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                         error = props.uiState.reviewerCountError != null
                         helperText = props.uiState.reviewerCountError?.let { ReactNode(it) }
                         onChange = {
-                            props.onChangeCourseBlockWithEntity(
-                                props.uiState.entity?.shallowCopyWithEntity{
-                                    assignment = props.uiState.entity?.assignment?.shallowCopy {
-                                        caPeerReviewerCount = it.toInt()
-                                    }
-                                })
+                            props.onAssignmentChanged(
+                                props.uiState.entity?.assignment?.shallowCopy {
+                                    caPeerReviewerCount = it.toInt()
+                                }
+                            )
                         }
                     }
 
@@ -309,10 +296,8 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 label = strings[MessageID.allow_class_comments]
                 checked = props.uiState.entity?.assignment?.caClassCommentEnabled ?: false
                 onChanged = {
-                    props.onChangeCourseBlockWithEntity(props.uiState.entity?.shallowCopyWithEntity {
-                        assignment = props.uiState.entity?.assignment?.shallowCopy {
-                            caClassCommentEnabled = it
-                        }
+                    props.onAssignmentChanged(props.uiState.entity?.assignment?.shallowCopy {
+                        caClassCommentEnabled = it
                     })
                 }
                 enabled = props.uiState.fieldsEnabled
@@ -323,14 +308,30 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 label = strings[MessageID.allow_private_comments_from_students]
                 checked = props.uiState.entity?.assignment?.caPrivateCommentsEnabled ?: false
                 onChanged = {
-                    props.onChangeCourseBlockWithEntity(props.uiState.entity?.shallowCopyWithEntity {
-                        assignment = props.uiState.entity?.assignment?.shallowCopy {
-                            caPrivateCommentsEnabled = it
-                        }
+                    props.onAssignmentChanged(props.uiState.entity?.assignment?.shallowCopy {
+                        caPrivateCommentsEnabled = it
                     })
                 }
                 enabled = props.uiState.fieldsEnabled
             }
         }
     }
+}
+
+val ClazzAssignmentEditScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        ClazzAssignmentEditViewModel(di, savedStateHandle)
+    }
+
+    val uiStateVal: ClazzAssignmentEditUiState by viewModel.uiState.collectAsState(
+        ClazzAssignmentEditUiState())
+
+    ClazzAssignmentEditScreenComponent2 {
+        uiState = uiStateVal
+        onAssignmentChanged = viewModel::onAssignmentChanged
+        onChangeCourseBlock = viewModel::onCourseBlockChanged
+        onClickSubmissionType = viewModel::onClickSubmissionType
+        onClickAssignReviewers = viewModel::onClickAssignReviewers
+    }
+
 }
