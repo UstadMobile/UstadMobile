@@ -19,7 +19,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItem
+import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.lib.db.entities.CourseAssignmentMarkWithPersonMarker
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.util.compose.rememberFormattedTime
@@ -27,7 +27,7 @@ import com.ustadmobile.port.android.util.compose.rememberFormattedTime
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun UstadCourseAssignmentMarkListItem(
-    uiState: UstadCourseAssignmentMarkListItem,
+    uiState: UstadCourseAssignmentMarkListItemUiState,
     modifier: Modifier = Modifier,
     onClickMark: (CourseAssignmentMarkWithPersonMarker?) -> Unit = {},
 ){
@@ -89,7 +89,7 @@ fun UstadCourseAssignmentMarkListItem(
 @Preview
 private fun UstadMarksPersonListItemPreview() {
     UstadCourseAssignmentMarkListItem(
-        uiState = UstadCourseAssignmentMarkListItem(
+        uiState = UstadCourseAssignmentMarkListItemUiState(
             mark = CourseAssignmentMarkWithPersonMarker().apply {
                 marker = Person().apply {
                     firstNames = "John"

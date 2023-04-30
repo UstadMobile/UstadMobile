@@ -1,10 +1,9 @@
 package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.util.ext.isDateSet
+import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
 
 data class ContentEntryEditUiState(

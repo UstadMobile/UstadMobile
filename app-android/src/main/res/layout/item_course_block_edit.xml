@@ -7,7 +7,7 @@
         <import type="com.ustadmobile.core.util.TreeOneToManyJoinEditListener"/>
         <import type="com.ustadmobile.lib.db.entities.CourseBlockWithEntity"/>
         <import type="com.ustadmobile.lib.db.entities.CourseBlock"/>
-        <import type="com.ustadmobile.port.android.view.ClazzEditFragment"/>
+        <import type="com.ustadmobile.port.android.view.clazz.edit.ClazzEditFragment"/>
 
         <variable
             name="block"

@@ -2,7 +2,7 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItem
+import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.hooks.useFormattedTime
 import com.ustadmobile.lib.db.entities.CourseAssignmentMarkWithPersonMarker
 import com.ustadmobile.lib.db.entities.Person
@@ -22,7 +22,7 @@ import react.dom.html.ReactHTML.span
 
 external interface UstadCourseAssignmentMarkListItemProps : Props {
 
-    var uiState: UstadCourseAssignmentMarkListItem
+    var uiState: UstadCourseAssignmentMarkListItemUiState
 
     var onClickMark: (CourseAssignmentMarkWithPersonMarker) -> Unit
 
@@ -105,7 +105,7 @@ val UstadCourseAssignmentMarkListItem = FC<UstadCourseAssignmentMarkListItemProp
 val UstadCourseAssignmentMarkListItemPreview = FC<Props> {
 
     UstadCourseAssignmentMarkListItem {
-        uiState = UstadCourseAssignmentMarkListItem(
+        uiState = UstadCourseAssignmentMarkListItemUiState(
             mark = CourseAssignmentMarkWithPersonMarker().apply {
                 marker = Person().apply {
                     firstNames = "John"

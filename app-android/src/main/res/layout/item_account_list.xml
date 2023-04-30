@@ -6,7 +6,7 @@
     <data>
         <import type="com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint"/>
         <import type="android.view.View"/>
-        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
+        <import type="com.ustadmobile.port.android.view.person.detail.PersonDetailFragment"/>
         <variable
             name="session"
             type="UserSessionWithPersonAndEndpoint" />

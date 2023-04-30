@@ -14,6 +14,7 @@ import com.ustadmobile.door.annotation.NewNodeIdParam
 import com.ustadmobile.door.annotation.ReplicationRunOnChange
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 
@@ -321,11 +322,12 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         "Container","ContentEntryParentChildJoin","PersonGroupMember",
         "Clazz","ScopedGrant","ClazzEnrolment","CourseAssignmentSubmission",
         "CourseGroupMember"])
-    abstract fun findAllCourseBlockByClazzUidLive(clazzUid: Long,
-                                                  personUid: Long,
-                                                  collapseList: List<Long>,
-                                                  currentTime: Long):
-            DataSourceFactory<Int, CourseBlockWithCompleteEntity>
+    abstract fun findAllCourseBlockByClazzUidLive(
+        clazzUid: Long,
+        personUid: Long,
+        collapseList: List<Long>,
+        currentTime: Long
+    ): PagingSource<Int, CourseBlockWithCompleteEntity>
 
 
     @Query("""
@@ -335,5 +337,8 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
          WHERE cbUid = :cbUid""")
     abstract suspend fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
 
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertListAsync(entities: List<CourseBlock>)
 
 }

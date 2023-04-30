@@ -8,7 +8,7 @@
 
         <variable
             name="fragmentEventHandler"
-            type="com.ustadmobile.port.android.view.ClazzDetailOverviewEventListener" />
+            type="com.ustadmobile.port.android.view.clazz.detailoverview.ClazzDetailOverviewEventListener" />
 
         <variable
             name="permissionButtonVisible"

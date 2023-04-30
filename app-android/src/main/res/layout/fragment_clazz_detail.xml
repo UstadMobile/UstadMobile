@@ -4,27 +4,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-        <import type="android.view.View"/>
-
-        <variable
-            name="clazz"
-            type="com.ustadmobile.lib.db.entities.Clazz" />
-
-        <variable
-            name="loading"
-            type="boolean" />
-
-        <variable
-            name="fieldsEnabled"
-            type="boolean" />
-
-        <variable
-            name="editButtonMode"
-            type="com.ustadmobile.core.view.EditButtonMode"/>
-
-        <variable
-            name="fragmentEventHandler"
-            type="com.ustadmobile.port.android.view.ClazzDetailFragmentEventHandler" />
 
     </data>
 

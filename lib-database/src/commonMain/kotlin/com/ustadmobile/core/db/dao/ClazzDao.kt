@@ -12,6 +12,7 @@ import com.ustadmobile.core.db.dao.ClazzDaoCommon.SORT_CLAZZNAME_DESC
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
 import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
@@ -20,6 +21,7 @@ import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_PERSONGROUPMEMB
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_TEACHER
 import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
+import kotlinx.coroutines.flow.Flow
 
 @Repository
 @DoorDao
@@ -100,6 +102,9 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
 
     @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : Clazz?
+
+    @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
+    abstract fun findByUidAsFlow(uid: Long): Flow<Clazz?>
 
     @Query("""
         SELECT Clazz.*, 
@@ -203,7 +208,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
         currentTime: Long,
         permission: Long,
         selectedSchool: Long
-    ) : DataSourceFactory<Int, ClazzWithListDisplayDetails>
+    ) : PagingSource<Int, ClazzWithListDisplayDetails>
 
 
     @Query("SELECT Clazz.clazzUid AS uid, Clazz.clazzName AS labelName From Clazz WHERE clazzUid IN (:ids)")
@@ -259,8 +264,28 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                  WHERE Clazz.clazzUid = :clazzUid
                    AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid)
     """)
-    abstract suspend fun personHasPermissionWithClazz(accountPersonUid: Long, clazzUid: Long,
-                                                      permission: Long) : Boolean
+    abstract suspend fun personHasPermissionWithClazz(
+        accountPersonUid: Long,
+        clazzUid: Long,
+        permission: Long
+    ) : Boolean
+
+    @Query("""
+        SELECT EXISTS( 
+               SELECT PrsGrpMbr.groupMemberPersonUid
+                  FROM Clazz
+                       ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+                          :permission
+                          ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
+                 WHERE Clazz.clazzUid = :clazzUid
+                   AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid)
+    """)
+    abstract fun personHasPermissionWithClazzAsFlow(
+        accountPersonUid: Long,
+        clazzUid: Long,
+        permission: Long
+    ): Flow<Boolean>
+
 
     @Query("""
         SELECT ScopedGrant.sgPermissions
@@ -303,7 +328,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
               LEFT JOIN CourseTerminology
               ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
         WHERE Clazz.clazzUid = :clazzUid""")
-    abstract fun getClazzWithDisplayDetails(clazzUid: Long, currentTime: Long): LiveData<ClazzWithDisplayDetails?>
+    abstract fun getClazzWithDisplayDetails(clazzUid: Long, currentTime: Long): Flow<ClazzWithDisplayDetails?>
 
 
     /**

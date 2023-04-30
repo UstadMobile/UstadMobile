@@ -6,6 +6,9 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadDestination
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
+import com.ustadmobile.core.viewmodel.HtmlEditViewModel
+import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
 import com.ustadmobile.port.android.view.PanicButtonSettingsView
 
 @Keep
@@ -185,6 +188,11 @@ class ViewNameToDestMap: DestinationProvider {
             ScopedGrantDetailView.VIEW_NAME to UstadDestination(R.id.scoped_grant_detail_dest),
             PanicButtonSettingsView.VIEW_NAME to UstadDestination(R.id.panic_button_settings_dest),
             GrantAppPermissionView.VIEW_NAME to UstadDestination(R.id.grant_app_permission_dest),
+            CourseBlockEditViewModel.DEST_NAME to UstadDestination(R.id.course_block_edit_dest,
+                actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
+            HtmlEditViewModel.DEST_NAME to UstadDestination(R.id.html_edit_dest,
+                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
+            TimeZoneListViewModel.DEST_NAME to UstadDestination(R.id.time_zone_list_dest)
     )
 
     override val navControllerViewId: Int

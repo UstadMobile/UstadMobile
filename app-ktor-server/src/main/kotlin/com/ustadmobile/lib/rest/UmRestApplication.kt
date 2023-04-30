@@ -81,9 +81,12 @@ val REQUIRED_EXTERNAL_COMMANDS = listOf("ffmpeg", "ffprobe")
  * List of prefixes which are always answered by the KTOR server. When using JsDev proxy mode, any
  * other url will be sent to the JS dev proxy
  */
-val KTOR_SERVER_ROUTES = listOf("/UmAppDatabase", "/ConcatenatedContainerFiles2",
+val KTOR_SERVER_ROUTES = listOf(
+    "/UmAppDatabase", "/ConcatenatedContainerFiles2",
     "/ContainerEntryList", "/ContainerEntryFile", "/auth", "/ContainerMount",
-    "/ContainerUpload2", "/Site", "/import", "/contentupload", "/websocket", "/pdf")
+    "/ContainerUpload2", "/Site", "/import", "/contentupload", "/websocket", "/pdf",
+    "/api"
+)
 
 
 /**
@@ -136,7 +139,8 @@ fun Application.umRestApplication(
         }
     }
 
-    install(CallLogging)
+    //Uncomment if needed -generates a lot of output
+    //install(CallLogging)
 
     Napier.takeLogarithm()
     Napier.base(LogbackAntiLog())
@@ -396,7 +400,7 @@ fun Application.umRestApplication(
         }
 
         registerContextTranslator { call: ApplicationCall ->
-            appConfig.dbModeToEndpoint(call, dbMode)
+            call.callEndpoint
         }
 
         onReady {
@@ -462,6 +466,12 @@ fun Application.umRestApplication(
         ContentUploadRoute()
 
         GetAppRoute()
+
+        route("api") {
+            route("pbkdf2"){
+                Pbkdf2Route()
+            }
+        }
 
         static("umapp") {
             resources("umapp")

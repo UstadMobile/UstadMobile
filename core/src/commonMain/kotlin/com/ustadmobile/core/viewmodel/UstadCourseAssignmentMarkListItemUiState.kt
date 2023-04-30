@@ -4,7 +4,7 @@ import com.ustadmobile.lib.db.entities.CourseAssignmentMarkWithPersonMarker
 import com.ustadmobile.lib.db.entities.CourseBlock
 
 
-data class UstadCourseAssignmentMarkListItem(
+data class UstadCourseAssignmentMarkListItemUiState(
 
     val mark: CourseAssignmentMarkWithPersonMarker = CourseAssignmentMarkWithPersonMarker(),
 

@@ -2,14 +2,11 @@ package com.ustadmobile.port.android.view
 
 import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.UstadDetailView
-import com.ustadmobile.port.android.view.util.PresenterViewLifecycleObserver
 
 abstract class UstadDetailFragment<T: Any>: UstadBaseFragment(), UstadDetailView<T> {
 
@@ -22,11 +19,11 @@ abstract class UstadDetailFragment<T: Any>: UstadBaseFragment(), UstadDetailView
             fabManager?.visible = (value == EditButtonMode.FAB)
         }
 
-    protected open var mActivityWithFab: UstadListViewActivityWithFab? = null
+    protected open var mActivityWithFab: UstadActivityWithFab? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        mActivityWithFab = (context as? UstadListViewActivityWithFab)
+        mActivityWithFab = (context as? UstadActivityWithFab)
     }
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {

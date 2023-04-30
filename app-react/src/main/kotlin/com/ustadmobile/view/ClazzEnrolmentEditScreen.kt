@@ -9,8 +9,8 @@ import com.ustadmobile.core.viewmodel.ClazzEnrolmentEditUiState
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.UstadDateEditField
-import com.ustadmobile.mui.components.UstadMessageIdDropDownField
+import com.ustadmobile.mui.components.UstadDateField
+import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.mui.components.UstadTextEditField
 import csstype.px
 import mui.material.Container
@@ -19,6 +19,7 @@ import mui.system.StackDirection
 import mui.system.responsive
 import react.FC
 import react.Props
+import react.ReactNode
 import react.useState
 
 external interface ClazzEnrolmentEditScreenProps : Props {
@@ -40,7 +41,7 @@ val ClazzEnrolmentEditScreenComponent2 = FC<ClazzEnrolmentEditScreenProps> { pro
             direction = responsive(StackDirection.column)
             spacing = responsive(20.px)
 
-            UstadMessageIdDropDownField {
+            UstadMessageIdSelectField {
                 value = props.uiState.clazzEnrolment?.clazzEnrolmentRole ?: 0
                 label = strings[MessageID.role]
                 options = RoleConstants.ROLE_MESSAGE_IDS
@@ -49,16 +50,17 @@ val ClazzEnrolmentEditScreenComponent2 = FC<ClazzEnrolmentEditScreenProps> { pro
                 onChange = {
                     props.onClazzEnrolmentChanged(
                         props.uiState.clazzEnrolment?.shallowCopy {
-                            clazzEnrolmentRole = it?.value ?: 0
+                            clazzEnrolmentRole = it.value
                     })
                 }
             }
 
-            UstadDateEditField {
+            UstadDateField {
                 timeInMillis = props.uiState.clazzEnrolment?.clazzEnrolmentDateJoined ?: 0
-                label = strings[MessageID.start_date]
-                enabled = props.uiState.fieldsEnabled
-                error = props.uiState.startDateError
+                label = ReactNode(strings[MessageID.start_date])
+                disabled = !props.uiState.fieldsEnabled
+                error = props.uiState.startDateError != null
+                helperText = props.uiState.startDateError?.let { ReactNode(it) }
                 timeZoneId = props.uiState.clazzEnrolment?.timeZone ?: "UTC"
                 onChange = {
                     props.onClazzEnrolmentChanged(
@@ -68,11 +70,12 @@ val ClazzEnrolmentEditScreenComponent2 = FC<ClazzEnrolmentEditScreenProps> { pro
                 }
             }
 
-            UstadDateEditField {
+            UstadDateField {
                 timeInMillis = props.uiState.clazzEnrolment?.clazzEnrolmentDateLeft ?: 0
-                label = strings[MessageID.end_date]
-                enabled = props.uiState.fieldsEnabled
-                error = props.uiState.endDateError
+                label = ReactNode(strings[MessageID.end_date])
+                disabled = !props.uiState.fieldsEnabled
+                error = props.uiState.endDateError != null
+                helperText = props.uiState.endDateError?.let { ReactNode(it) }
                 timeZoneId = props.uiState.clazzEnrolment?.timeZone ?: "UTC"
                 onChange = {
                     props.onClazzEnrolmentChanged(
@@ -82,7 +85,7 @@ val ClazzEnrolmentEditScreenComponent2 = FC<ClazzEnrolmentEditScreenProps> { pro
                 }
             }
 
-            UstadMessageIdDropDownField {
+            UstadMessageIdSelectField {
                 value = props.uiState.clazzEnrolment?.clazzEnrolmentOutcome ?: 0
                 label = strings[MessageID.outcome]
                 options = OutcomeConstants.OUTCOME_MESSAGE_IDS
@@ -90,7 +93,7 @@ val ClazzEnrolmentEditScreenComponent2 = FC<ClazzEnrolmentEditScreenProps> { pro
                 onChange = {
                     props.onClazzEnrolmentChanged(
                         props.uiState.clazzEnrolment?.shallowCopy {
-                            clazzEnrolmentOutcome = it?.value ?: 0
+                            clazzEnrolmentOutcome = it.value
                     })
                 }
             }

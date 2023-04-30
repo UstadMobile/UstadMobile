@@ -42,11 +42,37 @@ class PeerReviewerAllocation {
     @ReplicationVersionId
     var praLct: Long = 0
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is PeerReviewerAllocation) return false
+
+        if (praUid != other.praUid) return false
+        if (praMarkerSubmitterUid != other.praMarkerSubmitterUid) return false
+        if (praToMarkerSubmitterUid != other.praToMarkerSubmitterUid) return false
+        if (praAssignmentUid != other.praAssignmentUid) return false
+        if (praActive != other.praActive) return false
+        if (praLct != other.praLct) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = praUid.hashCode()
+        result = 31 * result + praMarkerSubmitterUid.hashCode()
+        result = 31 * result + praToMarkerSubmitterUid.hashCode()
+        result = 31 * result + praAssignmentUid.hashCode()
+        result = 31 * result + praActive.hashCode()
+        result = 31 * result + praLct.hashCode()
+        return result
+    }
+
     companion object {
 
         const val TABLE_ID = 140
 
     }
+
+
 
 
 }

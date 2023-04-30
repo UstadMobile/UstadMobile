@@ -3,15 +3,12 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.hooks.useViewModel
-import com.ustadmobile.core.impl.appstate.AppUiState
-import com.ustadmobile.core.impl.appstate.FabUiState
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.SiteEnterLinkViewModel
 import react.dom.html.ReactHTML.img
-import com.ustadmobile.mui.components.UstadTextEditField
-import com.ustadmobile.view.components.UstadFab
+import com.ustadmobile.util.ext.onTextChange
 import csstype.px
 import mui.icons.material.Add
 import mui.material.*
@@ -31,20 +28,12 @@ external interface SiteEnterLinkProps : Props {
     var onEditTextValueChange: (String) -> Unit
 }
 
-val SiteEnterLinkScreen = FC<UstadScreenProps> { props ->
-    val viewModel = useViewModel(
-        onAppUiStateChange = props.onAppUiStateChanged
-    ) { di, savedSateHandle ->
-        console.log("Creating SiteEnterLinkViewModel")
-        SiteEnterLinkViewModel(di, savedSateHandle)
+val SiteEnterLinkScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        SiteEnterLinkViewModel(di, savedStateHandle)
     }
 
     val uiState by viewModel.uiState.collectAsState(SiteEnterLinkUiState())
-    val appState by viewModel.appUiState.collectAsState(AppUiState())
-
-    UstadFab {
-        fabState = appState.fabState
-    }
 
     SiteEnterLinkComponent2 {
         this.uiState = uiState
@@ -74,12 +63,14 @@ val SiteEnterLinkComponent2 = FC <SiteEnterLinkProps> { props ->
                 + strings[MessageID.please_enter_the_linK]
             }
 
-            UstadTextEditField {
+            TextField {
+                id = "sitelink_textfield"
                 value = props.uiState.siteLink
-                label = strings[MessageID.site_link]
-                error = props.uiState.linkError?.toString()
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
+                label = ReactNode(strings[MessageID.site_link])
+                helperText = props.uiState.linkError?.let { ReactNode(it) }
+                error = helperText != null
+                disabled = !props.uiState.fieldsEnabled
+                onTextChange = {
                     props.onEditTextValueChange(it)
                 }
             }
@@ -91,6 +82,7 @@ val SiteEnterLinkComponent2 = FC <SiteEnterLinkProps> { props ->
             }
 
             Button {
+                id = "next_button"
                 onClick = { props.onClickNext() }
                 variant = ButtonVariant.contained
                 disabled = !props.uiState.fieldsEnabled
@@ -104,7 +96,8 @@ val SiteEnterLinkComponent2 = FC <SiteEnterLinkProps> { props ->
             }
 
             Button {
-                onClick = { props.onClickNewLearningEnvironment }
+                id = "new_env_button"
+                onClick = { props.onClickNewLearningEnvironment() }
                 variant = ButtonVariant.text
 
                 startIcon = Add.create()

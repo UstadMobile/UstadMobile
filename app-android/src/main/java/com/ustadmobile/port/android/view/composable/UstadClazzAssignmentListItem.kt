@@ -32,7 +32,7 @@ fun UstadClazzAssignmentListItem(
 
     courseBlock: CourseBlockWithCompleteEntity,
 
-    onClickAssignment: (ClazzAssignmentWithMetrics?) -> Unit = {}
+    onClick: () -> Unit = { },
 
 ){
 
@@ -44,10 +44,7 @@ fun UstadClazzAssignmentListItem(
 
     ListItem(
         modifier = modifier
-            .clickable {
-                onClickAssignment(assignment)
-            },
-
+            .clickable(onClick = onClick),
         icon = {
             Icon(
                 Icons.Default.AssignmentTurnedIn,
@@ -55,11 +52,14 @@ fun UstadClazzAssignmentListItem(
                 modifier = Modifier.size(40.dp)
             )
         },
-        text = { Text(assignment?.caTitle ?: "") },
+        text = { Text(courseBlock.cbTitle ?: "") },
         secondaryText = {
             Column{
                 if (blockUiState.cbDescriptionVisible){
-                    Text(text = courseBlock.cbDescription ?: "")
+                    HtmlText(
+                        html = courseBlock.cbDescription ?: "",
+                        htmlMaxLines = 1,
+                    )
                 }
 
                 DateAndPointRow(courseBlock = courseBlock)

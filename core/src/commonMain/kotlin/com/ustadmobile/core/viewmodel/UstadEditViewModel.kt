@@ -3,12 +3,16 @@ package com.ustadmobile.core.viewmodel
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.util.ext.cancelPrevJobAndLaunchDelayed
 import com.ustadmobile.core.view.UstadEditView
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerializationStrategy
 import org.kodein.di.DI
 
 /**
@@ -19,9 +23,14 @@ import org.kodein.di.DI
 abstract class UstadEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-) : UstadViewModel(di, savedStateHandle){
+    destinationName: String,
+) : UstadViewModel(di, savedStateHandle, destinationName){
 
     protected var saveStateJob: Job? = null
+
+    protected val entityUidArg: Long by lazy(LazyThreadSafetyMode.NONE) {
+        savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0
+    }
 
     /**
      * Load an entity for editing:
@@ -43,16 +52,17 @@ abstract class UstadEditViewModel(
      *        be displayed first (so the user sees this whilst the value is loading from the repo).
      * @param T the entity type
      */
-    protected inline fun <reified T> loadEntity(
+    protected suspend fun <T> loadEntity(
+        serializer: KSerializer<T>,
         loadFromStateKeys: List<String> = listOf(KEY_ENTITY_STATE, UstadEditView.ARG_ENTITY_JSON),
         savedStateKey: String = loadFromStateKeys.first(),
-        onLoadFromDb: (UmAppDatabase) -> T?,
-        makeDefault: () -> T,
-        uiUpdate: (T) -> Unit,
-    ) : T {
+        onLoadFromDb: suspend (UmAppDatabase) -> T?,
+        makeDefault: suspend () -> T?,
+        uiUpdate: (T?) -> Unit,
+    ) : T? {
 
         loadFromStateKeys.forEach { key ->
-            val savedVal: T? = savedStateHandle.getJson<T>(key)
+            val savedVal: T? = savedStateHandle.getJson(key, serializer)
             if(savedVal != null) {
                 uiUpdate(savedVal)
                 return savedVal
@@ -66,29 +76,16 @@ abstract class UstadEditViewModel(
 
         try {
             val repoVal = onLoadFromDb(activeRepo) ?: makeDefault()
-            savedStateHandle.setJson(savedStateKey, repoVal)
+            if(repoVal != null)
+                savedStateHandle.setJson(savedStateKey, serializer, repoVal)
             uiUpdate(repoVal)
             return repoVal
         }catch(e: Exception) {
             //could happen when connectivity is not so good
+            if(dbVal != null)
+                savedStateHandle.setJson(savedStateKey, serializer, dbVal)
 
-            savedStateHandle.setJson(savedStateKey, dbVal)
             return dbVal ?: makeDefault().also(uiUpdate)
-        }
-    }
-
-    /**
-     * Commit an entity to the savedStateHandle if the entity is not null.
-     *
-     * @param entity the entity to save
-     * @param key the key to use for the savedStateHandle
-     */
-    protected inline fun <reified T> commitEntityToSavedState(
-        entity: T?,
-        key: String = KEY_ENTITY_STATE,
-    ) {
-        if(entity != null) {
-            savedStateHandle.setJson(key, entity)
         }
     }
 
@@ -98,10 +95,16 @@ abstract class UstadEditViewModel(
      */
     protected inline fun <reified T> scheduleEntityCommitToSavedState(
         entity: T?,
-        key: String = KEY_ENTITY_STATE
+        key: String = KEY_ENTITY_STATE,
+        serializer: SerializationStrategy<T>,
+        commitDelay: Long = COMMIT_DELAY,
     ) {
-        saveStateJob = viewModelScope.cancelPrevJobAndLaunchDelayed(saveStateJob, COMMIT_DELAY) {
-            commitEntityToSavedState(entity = entity, key = key)
+        saveStateJob?.cancel()
+        saveStateJob = viewModelScope.launch {
+            delay(commitDelay)
+            if(entity != null) {
+                savedStateHandle.setJson(key, serializer, entity)
+            }
         }
     }
 
@@ -128,12 +131,10 @@ abstract class UstadEditViewModel(
         val popUpToViewName = savedStateHandle[UstadView.ARG_RESULT_DEST_VIEWNAME]
         val saveToKey = savedStateHandle[UstadView.ARG_RESULT_DEST_KEY]
 
-        val createdNewEntity = savedStateHandle[ARG_ENTITY_UID] != null
+        val createdNewEntity = savedStateHandle[ARG_ENTITY_UID] == null
         val returnResultExpected = (popUpToViewName != null && saveToKey != null)
 
-        if(!createdNewEntity || returnResultExpected) {
-            finishWithResult(result)
-        }else {
+        if(createdNewEntity && !returnResultExpected) {
             navController.navigate(
                 viewName = detailViewName,
                 args = mapOf(ARG_ENTITY_UID to entityUid.toString()),
@@ -142,7 +143,45 @@ abstract class UstadEditViewModel(
                     popUpToInclusive = true
                 )
             )
+        }else {
+            finishWithResult(result)
         }
+    }
+
+    /**
+     * Simple function to get the title for an edit view where there is one message id for editing
+     * an existing entity and another message id for the title if creating a new entity.
+     */
+    protected fun createEditTitle(
+        newEntityMessageId: Int,
+        editEntityMessageId: Int,
+    ): String {
+        val isEditing = entityUidArg != 0L || ARG_ENTITY_JSON in savedStateHandle.keys
+        return systemImpl.getString(
+            if(isEditing) {
+                editEntityMessageId
+            }else {
+                newEntityMessageId
+            }
+        )
+    }
+
+    /**
+     * Shorthand to check if an error message state should be cleared. If there is no error message,
+     * return null. If the new value has changed, clear the error message. Otherwise leave the
+     * error message as is
+     */
+    protected fun updateErrorMessageOnChange(
+        prevFieldValue: Any?,
+        currentFieldValue: Any?,
+        currentErrorMessage: String?,
+    ): String? {
+        return if(currentErrorMessage == null)
+            null
+        else if(prevFieldValue != currentFieldValue)
+            null
+        else
+            currentErrorMessage
     }
 
     companion object {
@@ -151,6 +190,6 @@ abstract class UstadEditViewModel(
          * The default delay between the user making a change and committing the entity value to
          * savedstate.
          */
-        const val COMMIT_DELAY = 100L
+        const val COMMIT_DELAY = 200L
     }
 }

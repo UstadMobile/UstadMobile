@@ -2,19 +2,13 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.mui.common.Area
-import csstype.integer
-import mui.material.AppBar
-import mui.material.AppBarPosition
-import mui.material.Toolbar
-import mui.material.Typography
+import csstype.*
 import mui.system.sx
-import csstype.number
-import mui.material.styles.TypographyVariant.h6
+import mui.material.*
+import mui.material.styles.TypographyVariant.Companion.h6
 import react.*
 import react.dom.html.ReactHTML.div
 import web.html.HTMLElement
-
-val DEFAULT_APPBAR_HEIGHT = 64
 
 external interface HeaderProps: Props {
     var appUiState: AppUiState
@@ -24,7 +18,7 @@ external interface HeaderProps: Props {
 }
 
 val Header = FC<HeaderProps> { props ->
-    var theme by useContext(ThemeContext)
+    val theme by useRequiredContext(ThemeContext)
     val appBarRef = useRef<HTMLElement>(null)
 
     useEffect(appBarRef.current?.clientHeight){
@@ -50,6 +44,27 @@ val Header = FC<HeaderProps> { props ->
 
                 + (props.appUiState.title ?: "Ustad Mobile")
             }
+
+            if(props.appUiState.searchState.visible) {
+                AppBarSearch {
+                    onTextChanged = props.appUiState.searchState.onSearchTextChanged
+                    searchText = props.appUiState.searchState.searchText
+                }
+            }
+
+            if(props.appUiState.actionBarButtonState.visible) {
+                Button {
+                    sx {
+                        color = theme.palette.common.white
+                    }
+                    id = "actionBarButton"
+                    onClick = {
+                        props.appUiState.actionBarButtonState.onClick()
+                    }
+                    + props.appUiState.actionBarButtonState.text
+                }
+            }
+
         }
     }
 }

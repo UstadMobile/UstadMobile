@@ -32,7 +32,7 @@ external interface UstadDetailFieldProps: Props {
     /**
      * The string for the label e.g. Phone number etc
      */
-    var labelText: String
+    var labelText: String?
 
     /**
      * An icon to display for this property, if any. If null, a blank space will be inserted so the
@@ -97,11 +97,13 @@ val UstadDetailField = FC<UstadDetailFieldProps> { props ->
                     + props.valueText
                 }
 
-                Typography {
-                    align = TypographyAlign.left
+                props.labelText?.also { labelText ->
+                    Typography {
+                        align = TypographyAlign.left
 
-                    variant = TypographyVariant.caption
-                    + props.labelText
+                        variant = TypographyVariant.caption
+                        + labelText
+                    }
                 }
             }
         }

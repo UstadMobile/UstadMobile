@@ -6,7 +6,6 @@ import com.ustadmobile.core.viewmodel.SiteDetailUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.UstadDetailField
 import csstype.px
-import mui.icons.material.*
 import mui.material.*
 import mui.material.styles.TypographyVariant
 import mui.system.Stack
@@ -17,6 +16,10 @@ import react.Props
 import react.create
 import mui.material.List
 import react.ReactNode
+
+import mui.icons.material.AccountBalanceRounded
+import mui.icons.material.HowToRegRounded
+import mui.icons.material.ManageSearchOutlined
 
 
 external interface SiteDetailProps : Props {
