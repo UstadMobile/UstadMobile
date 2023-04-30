@@ -6,8 +6,10 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.core.util.ext.toggle
 import com.ustadmobile.core.util.ext.whenSubscribed
+import com.ustadmobile.core.view.ClazzAssignmentDetailView
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.paging.PagingSource
@@ -131,6 +133,10 @@ class ClazzDetailOverviewViewModel(
                     )
                 }
                 lastCourseBlockPagingSource?.invalidate()
+            }
+            CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
+                navController.navigate(ClazzAssignmentDetailView.VIEW_NAME,
+                    mapOf(ARG_ENTITY_UID to courseBlock.cbEntityUid.toString()))
             }
         }
     }

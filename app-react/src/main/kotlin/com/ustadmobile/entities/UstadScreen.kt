@@ -32,6 +32,7 @@ import com.ustadmobile.view.person.edit.PersonEditScreen
 import com.ustadmobile.view.person.edit.PersonEditScreenPreview
 import com.ustadmobile.view.person.list.PersonListScreen
 import com.ustadmobile.view.person.list.PersonListScreenPreview
+import com.ustadmobile.view.clazzassignment.detail.ClazzAssignmentDetailScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -182,6 +183,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         ClazzDetailOverviewScreen
     ),
     UstadScreen(CourseGroupSetListView.VIEW_NAME, "Clazz Groups",ClazzGroupSetDummy),
+    UstadScreen(ClazzAssignmentDetailView.VIEW_NAME, "ClazzAssignmentDetail",
+        ClazzAssignmentDetailScreen),
 )
 
 
