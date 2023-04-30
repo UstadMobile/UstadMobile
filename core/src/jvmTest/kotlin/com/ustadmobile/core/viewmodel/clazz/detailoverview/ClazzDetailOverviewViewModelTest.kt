@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.clazz.detailoverview
 
 import app.cash.turbine.test
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
@@ -8,7 +8,6 @@ import com.ustadmobile.core.util.ext.awaitItemWhere
 import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
 import kotlin.test.Test

@@ -21,7 +21,7 @@ class AddOrUpdateCourseBlockUseCase {
         clazzUid: Long,
         addOrUpdateBlock: CourseBlock,
         assignment: ClazzAssignment? = null,
-        assignmentPeerReviewAllocations: List<PeerReviewerAllocation>?,
+        assignmentPeerReviewAllocations: List<PeerReviewerAllocation>? = null,
     ) : List<CourseBlockWithEntity> {
         val courseBlockWithEntity = addOrUpdateBlock.asCourseBlockWithEntity(
             assignment = assignment,
