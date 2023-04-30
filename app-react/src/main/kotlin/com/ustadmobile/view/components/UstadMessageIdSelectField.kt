@@ -1,5 +1,6 @@
 package com.ustadmobile.view.components
 
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.EnrolmentPolicyConstants
 import com.ustadmobile.core.util.MessageIdOption2
@@ -54,7 +55,8 @@ val UstadMessageIdSelectField = FC<MessageIDSelectFieldProps> { props ->
     val strings = useStringsXml()
 
     UstadSelectField<MessageIdOption2> {
-        value = props.value.toString()
+        value = props.options.firstOrNull { it.value == props.value }
+            ?: throw IllegalArgumentException("MessageIdSelectField(id=${props.id}): value ${props.value} not in option list")
         label = props.label
         options = props.options
         fullWidth = props.fullWidth

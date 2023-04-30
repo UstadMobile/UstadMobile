@@ -12,6 +12,7 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -224,11 +225,17 @@ class ClazzEditViewModel(
             launch {
                 resultReturner.filteredResultFlowForKey(RESULT_KEY_COURSEBLOCK).collect { result ->
                     val courseBlock = result.result as? CourseBlock ?: return@collect
+                    val courseBlockWithEntity = result.result as? CourseBlockWithEntity
+                    val assignment = courseBlockWithEntity?.assignment
+                    val peerReviewerAllocations = courseBlockWithEntity?.assignmentPeerAllocations
+
                     val newCourseBlockList = addOrUpdateCourseBlockUseCase(
                         currentList = _uiState.value.courseBlockList,
                         clazzUid = _uiState.value.entity?.clazzUid
                             ?: throw IllegalStateException("Clazz must not be null when collecting course block"),
                         addOrUpdateBlock = courseBlock,
+                        assignment = assignment,
+                        assignmentPeerReviewAllocations = peerReviewerAllocations,
                     )
 
                     updateCourseBlockList(newCourseBlockList)
@@ -355,6 +362,8 @@ class ClazzEditViewModel(
             CourseBlock.BLOCK_TEXT_TYPE,
             CourseBlock.BLOCK_MODULE_TYPE ->
                 CourseBlockEditViewModel.DEST_NAME to RESULT_KEY_COURSEBLOCK
+            CourseBlock.BLOCK_ASSIGNMENT_TYPE ->
+                ClazzAssignmentEditView.VIEW_NAME to RESULT_KEY_COURSEBLOCK
             else -> return
         }
 
@@ -441,6 +450,13 @@ class ClazzEditViewModel(
                         it.cbUid
                     }, systemTimeInMillis()
                 )
+
+                val assignmentsToUpsert = _uiState.value.courseBlockList.mapNotNull { it.assignment }
+                activeDb.clazzAssignmentDao.upsertListAsync(assignmentsToUpsert)
+                val assignmentsToDeactivate = initState.courseBlockList.mapNotNull { it.assignment}
+                    .findKeysNotInOtherList(assignmentsToUpsert) { it.caUid }
+                activeDb.clazzAssignmentDao.takeIf { assignmentsToDeactivate.isNotEmpty() }
+                    ?.updateActiveByList(assignmentsToDeactivate, false, systemTimeInMillis())
             }
 
             val entityTimeZone = TimeZone.of(entity.effectiveTimeZone)
@@ -547,6 +563,14 @@ class ClazzEditViewModel(
                     key = RESULT_KEY_COURSEBLOCK,
                     serializer = CourseBlock.serializer(),
                     currentValue = block
+                )
+            }
+            CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
+                navigateForResult(
+                    nextViewName = ClazzAssignmentEditView.VIEW_NAME,
+                    key = RESULT_KEY_COURSEBLOCK,
+                    serializer = CourseBlockWithEntity.serializer(),
+                    currentValue = block,
                 )
             }
         }

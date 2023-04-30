@@ -27,6 +27,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
 import java.text.SimpleDateFormat
@@ -117,7 +118,7 @@ fun UstadDateField(
     }
 
     fun Long.toDateString(): String {
-        return if(this > 0 && this != Long.MAX_VALUE) {
+        return if(isDateSet()) {
             dateFormatter.format(Date(this))
         }else {
             ""
@@ -162,7 +163,7 @@ fun UstadDateField(
                     MaterialDatePicker.Builder
                         .datePicker()
                         .apply {
-                            if(value != 0L && value != Long.MAX_VALUE) {
+                            if(value.isDateSet()) {
                                 setSelection(value - timeZone.getOffset(value))
                             }
                         }

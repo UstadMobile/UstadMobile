@@ -1,9 +1,12 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.courseblock.edit
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.core.view.UstadEditView.Companion.DEFAULT_COMMIT_DELAY
+import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.courseblock.CourseBlockViewModelConstants.CompletionCriteria
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
@@ -15,28 +18,38 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
+@kotlinx.serialization.Serializable
 data class CourseBlockEditUiState(
 
     val courseBlock: CourseBlock? = null,
+
+    val completionCriteriaOptions: List<CompletionCriteria> = CompletionCriteria.values().toList(),
 
     val fieldsEnabled: Boolean = true,
 
     val caHideUntilDateError: String? = null,
 
+    val caTitleError: String? = null,
+
     val caDeadlineError: String? = null,
 
-    val deadlineVisible: Boolean = false,
+    val deadlineVisible: Boolean = true,
 
     val caMaxPointsError: String? = null,
 
     val caGracePeriodError: String? = null,
 
-    val gracePeriodVisible: Boolean = false,
-
     val timeZone: String = "UTC",
 ) {
     val minScoreVisible: Boolean
         get() = courseBlock?.cbCompletionCriteria == ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
+
+    val gracePeriodVisible: Boolean
+        get() = deadlineVisible && courseBlock?.cbDeadlineDate.isDateSet()
+
+    val latePenaltyVisible: Boolean
+        get() = gracePeriodVisible && courseBlock?.cbGracePeriodDate.isDateSet()
+
 }
 
 class CourseBlockEditViewModel(
@@ -97,7 +110,7 @@ class CourseBlockEditViewModel(
             }
 
             launch {
-                resultReturner.filteredResultFlowForKey(RESULT_KEY_HTML_DESC).collect {result ->
+                resultReturner.filteredResultFlowForKey(RESULT_KEY_HTML_DESC).collect { result ->
                     val descriptionHtml = result.result as? String ?: return@collect
                     onEntityChanged(_uiState.value.courseBlock?.shallowCopy {
                         cbDescription = descriptionHtml

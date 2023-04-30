@@ -1,7 +1,9 @@
 package com.ustadmobile.core.util.ext
 
+import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
+import com.ustadmobile.lib.db.entities.PeerReviewerAllocation
 
 /**
  * Icon to use in editing screens for this module. If it is a ContentEntry, it will show the
@@ -15,7 +17,10 @@ val CourseBlockWithEntity.editIconId: Int
         cbType
     }
 
-fun CourseBlock.asCourseBlockWithEntity(): CourseBlockWithEntity {
+fun CourseBlock.asCourseBlockWithEntity(
+    assignment: ClazzAssignment? = null,
+    assignmentPeerReviewAllocations: List<PeerReviewerAllocation>? = null,
+): CourseBlockWithEntity {
     return CourseBlockWithEntity().also {
         it.cbUid = cbUid
         it.cbType = cbType
@@ -36,5 +41,8 @@ fun CourseBlock.asCourseBlockWithEntity(): CourseBlockWithEntity {
         it.cbHidden = cbHidden
         it.cbEntityUid = cbEntityUid
         it.cbLct = cbLct
+
+        it.assignment = assignment
+        it.assignmentPeerAllocations = assignmentPeerReviewAllocations
     }
 }

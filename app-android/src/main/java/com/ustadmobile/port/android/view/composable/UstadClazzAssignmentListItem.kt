@@ -52,11 +52,14 @@ fun UstadClazzAssignmentListItem(
                 modifier = Modifier.size(40.dp)
             )
         },
-        text = { Text(assignment?.caTitle ?: "") },
+        text = { Text(courseBlock.cbTitle ?: "") },
         secondaryText = {
             Column{
                 if (blockUiState.cbDescriptionVisible){
-                    Text(text = courseBlock.cbDescription ?: "")
+                    HtmlText(
+                        html = courseBlock.cbDescription ?: "",
+                        htmlMaxLines = 1,
+                    )
                 }
 
                 DateAndPointRow(courseBlock = courseBlock)

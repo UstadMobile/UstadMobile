@@ -4,6 +4,7 @@ import android.text.format.DateFormat
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import com.ustadmobile.core.util.ext.isDateSet
 import java.util.*
 
 /**
@@ -20,7 +21,7 @@ fun rememberFormattedDate(
 ): String {
     val context = LocalContext.current
     return remember(timeInMillis, timeZoneId) {
-        if(timeInMillis > 0 && timeInMillis != Long.MAX_VALUE) {
+        if(timeInMillis.isDateSet()) {
             DateFormat
                 .getDateFormat(context)
                 .apply {
@@ -30,7 +31,6 @@ fun rememberFormattedDate(
         }else {
             ""
         }
-
     }
 }
 

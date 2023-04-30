@@ -17,6 +17,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadDateField
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.view.components.UstadImageSelectButton
+import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.view.components.UstadSelectField
 import mui.system.Container
 import mui.system.Stack
@@ -77,13 +78,11 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                 }
             }
 
-            UstadSelectField<MessageIdOption2> {
-                value = props.uiState.person?.gender?.toString() ?: Person.GENDER_UNSET.toString()
+            UstadMessageIdSelectField {
+                value = props.uiState.person?.gender ?: Person.GENDER_UNSET
                 options = GENDER_MESSAGE_IDS_AND_UNSET
                 label = strings[MessageID.gender_literal]
-                id = (props.uiState.person?.gender ?: 0).toString()
-                itemValue = { it.value.toString() }
-                itemLabel = { ReactNode(if(it.messageId == 0) " " else strings[it.messageId]) }
+                id = "gender"
                 onChange = { messageIdOpt ->
                     props.onPersonChanged(
                         props.uiState.person?.shallowCopy {

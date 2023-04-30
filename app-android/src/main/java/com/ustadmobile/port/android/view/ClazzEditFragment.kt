@@ -30,6 +30,7 @@ import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
+import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.util.ext.editIconId
 import com.ustadmobile.core.viewmodel.ClazzEditUiState
 import com.ustadmobile.core.viewmodel.ClazzEditViewModel
@@ -87,7 +88,7 @@ class ClazzEditFragment : UstadBaseMvvmFragment() {
                         requireContext().getString(R.string.add_course_block_content_desc),
                         CourseBlock.BLOCK_CONTENT_TYPE),
                 TitleDescBottomSheetOption(
-                        requireContext().getString(R.string.assignments),
+                        requireContext().getString(R.string.clazz_assignment),
                         requireContext().getString(R.string.add_assignment_block_content_desc),
                         CourseBlock.BLOCK_ASSIGNMENT_TYPE),
                 TitleDescBottomSheetOption(
@@ -454,7 +455,7 @@ private fun ClazzEditBasicDetails(
                     label = { Text(stringResource(id = R.string.end_date).addOptionalSuffix()) },
                     isError = uiState.clazzEndDateError != null,
                     enabled = uiState.fieldsEnabled,
-                    unsetDefault = Long.MAX_VALUE,
+                    unsetDefault = UNSET_DISTANT_FUTURE,
                     timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
                     onValueChange = {
                         onClazzChanged(
