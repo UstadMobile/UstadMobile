@@ -19,6 +19,7 @@ import com.ustadmobile.core.view.RegisterMinorWaitForParentView
 import com.ustadmobile.core.view.RegisterMinorWaitForParentView.Companion.ARG_PARENT_CONTACT
 import com.ustadmobile.core.view.RegisterMinorWaitForParentView.Companion.ARG_USERNAME
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
+import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.flow.doorFlow
 import com.ustadmobile.door.room.InvalidationTrackerObserver

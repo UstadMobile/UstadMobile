@@ -6,6 +6,8 @@ import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.flow.filter

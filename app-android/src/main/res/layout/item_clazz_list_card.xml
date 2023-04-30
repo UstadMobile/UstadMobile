@@ -9,7 +9,7 @@
         <import type="com.ustadmobile.core.util.ext.ClazzExtKt"/>
         <import type="com.ustadmobile.core.util.ext.ClazzEnrolmentExtKt"/>
         <import type="android.view.View"/>
-        <import type="com.ustadmobile.port.android.view.ClazzListFragment"/>
+        <import type="com.ustadmobile.port.android.view.clazz.list.ClazzListFragment"/>
 
         <variable
             name="clazz"

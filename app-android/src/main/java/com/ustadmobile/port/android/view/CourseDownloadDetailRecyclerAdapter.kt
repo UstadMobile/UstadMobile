@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemCourseDetailDownloadBinding
+import com.ustadmobile.port.android.view.clazz.detailoverview.ClazzDetailOverviewEventListener
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
 class CourseDownloadDetailRecyclerAdapter(val listener: ClazzDetailOverviewEventListener?)

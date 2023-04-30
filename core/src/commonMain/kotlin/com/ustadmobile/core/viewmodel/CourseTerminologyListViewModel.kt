@@ -4,6 +4,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.CourseTerminologyEditView
 import com.ustadmobile.core.view.CourseTerminologyListView
+import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import kotlinx.coroutines.flow.flowOf
