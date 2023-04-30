@@ -135,6 +135,16 @@ class ClazzAssignmentEditViewModel(
                 }
             )
 
+            if(savedStateHandle[KEY_INIT_STATE] == null) {
+                savedStateHandle[KEY_INIT_STATE] = withContext(Dispatchers.Default) {
+                    json.encodeToString(_uiState.value)
+                }
+            }
+
+            _uiState.update { prev ->
+                prev.copy(fieldsEnabled = true)
+            }
+
             launch {
                 //If there are submissions, do not allow the user to change the groups
                 _uiState.whenSubscribed {
@@ -150,17 +160,22 @@ class ClazzAssignmentEditViewModel(
                 }
             }
 
-            if(savedStateHandle[KEY_INIT_STATE] == null) {
-                savedStateHandle[KEY_INIT_STATE] = withContext(Dispatchers.Default) {
-                    json.encodeToString(_uiState.value)
+            launch {
+                navResultReturner.filteredResultFlowForKey(RESULT_KEY_HTML_DESC).collect { result ->
+                    val descriptionHtml = result.result as? String ?: return@collect
+                    onCourseBlockChanged(_uiState.value.entity?.shallowCopyWithEntity {
+                        cbDescription = descriptionHtml
+                    })
                 }
             }
-
-            _uiState.update { prev ->
-                prev.copy(fieldsEnabled = true)
-            }
         }
+    }
 
+    fun onClickEditDescription() {
+        navigateToEditHtml(
+            currentValue = _uiState.value.entity?.cbDescription,
+            resultKey = RESULT_KEY_HTML_DESC
+        )
     }
 
     fun onAssignmentChanged(entity: ClazzAssignment?) {

@@ -3,6 +3,7 @@ package com.ustadmobile.core.viewmodel.courseblock.edit
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.core.view.UstadEditView.Companion.DEFAULT_COMMIT_DELAY
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.CourseBlockViewModelConstants.CompletionCriteria
@@ -38,12 +39,17 @@ data class CourseBlockEditUiState(
 
     val caGracePeriodError: String? = null,
 
-    val gracePeriodVisible: Boolean = false,
-
     val timeZone: String = "UTC",
 ) {
     val minScoreVisible: Boolean
         get() = courseBlock?.cbCompletionCriteria == ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
+
+    val gracePeriodVisible: Boolean
+        get() = deadlineVisible && courseBlock?.cbDeadlineDate.isDateSet()
+
+    val latePenaltyVisible: Boolean
+        get() = gracePeriodVisible && courseBlock?.cbGracePeriodDate.isDateSet()
+
 }
 
 class CourseBlockEditViewModel(

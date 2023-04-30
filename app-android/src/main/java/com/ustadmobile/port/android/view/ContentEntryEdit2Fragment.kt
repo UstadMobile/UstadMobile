@@ -671,7 +671,6 @@ fun ContentEntryEditScreenPreview() {
                 cbMaxPoints = 78
                 cbCompletionCriteria = 14
             },
-            gracePeriodVisible = true,
         ),
         storageOptions = listOf(
             ContainerStorageDir(

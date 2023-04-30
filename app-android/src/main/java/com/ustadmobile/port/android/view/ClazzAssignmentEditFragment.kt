@@ -24,8 +24,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.locale.entityconstants.*
-import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants.MarkingType
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditUiState
@@ -72,7 +73,8 @@ private fun ClazzAssignmentEditScreen(viewModel: ClazzAssignmentEditViewModel) {
         onChangeAssignment = viewModel::onAssignmentChanged,
         onChangeCourseBlock = viewModel::onCourseBlockChanged,
         onClickAssignReviewers =  viewModel::onClickAssignReviewers,
-        onClickSubmissionType = viewModel::onClickSubmissionType
+        onClickSubmissionType = viewModel::onClickSubmissionType,
+        onClickEditDescription = viewModel::onClickEditDescription,
     )
 }
 
@@ -83,6 +85,7 @@ private fun ClazzAssignmentEditScreen(
     onChangeCourseBlock: (CourseBlock?) -> Unit = {},
     onClickSubmissionType: () -> Unit = {},
     onClickAssignReviewers: () -> Unit = {},
+    onClickEditDescription: () -> Unit = {},
 ) {
 
     val terminologyEntries = rememberCourseTerminologyEntries(uiState.courseTerminology)
@@ -97,7 +100,8 @@ private fun ClazzAssignmentEditScreen(
 
         UstadCourseBlockEdit(
             uiState = uiState.courseBlockEditUiState,
-            onCourseBlockChange = onChangeCourseBlock
+            onCourseBlockChange = onChangeCourseBlock,
+            onClickEditDescription = onClickEditDescription,
         )
 
         UstadClickableTextField(
@@ -112,21 +116,25 @@ private fun ClazzAssignmentEditScreen(
             onValueChange = {}
         )
 
-        UstadSwitchField(
-            modifier = Modifier
-                .defaultItemPadding()
-                .testTag("caRequireFileSubmission"),
-            label = stringResource(id = R.string.require_file_submission),
-            checked = uiState.entity?.assignment?.caRequireFileSubmission ?: false,
-            onChange = {
-               onChangeAssignment(
-                   uiState.entity?.assignment?.shallowCopy {
-                       caRequireFileSubmission = it
-                   }
-               )
-            },
-            enabled = uiState.fieldsEnabled
-        )
+        UstadInputFieldLayout(
+            modifier = Modifier.defaultItemPadding(),
+            errorText = uiState.submissionRequiredError,
+        ) {
+            UstadSwitchField(
+                modifier = Modifier
+                    .testTag("caRequireFileSubmission"),
+                label = stringResource(id = R.string.require_file_submission),
+                checked = uiState.entity?.assignment?.caRequireFileSubmission ?: false,
+                onChange = {
+                    onChangeAssignment(
+                        uiState.entity?.assignment?.shallowCopy {
+                            caRequireFileSubmission = it
+                        }
+                    )
+                },
+                enabled = uiState.fieldsEnabled
+            )
+        }
 
         if (uiState.fileSubmissionVisible){
             UstadMessageIdOptionExposedDropDownMenuField(
@@ -187,21 +195,26 @@ private fun ClazzAssignmentEditScreen(
             )
         }
 
-        UstadSwitchField(
-            modifier = Modifier
-                .defaultItemPadding()
-                .testTag("caRequireTextSubmission"),
-            label = stringResource(id = R.string.require_text_submission),
-            checked = uiState.entity?.assignment?.caRequireTextSubmission ?: false,
-            onChange = {
-                onChangeAssignment(
-                    uiState.entity?.assignment?.shallowCopy {
-                        caRequireTextSubmission = it
-                    }
-                )
-            },
-            enabled = uiState.fieldsEnabled
-        )
+        UstadInputFieldLayout(
+            modifier = Modifier.defaultItemPadding(),
+            errorText = uiState.submissionRequiredError,
+        ) {
+            UstadSwitchField(
+                modifier = Modifier
+                    .testTag("caRequireTextSubmission"),
+                label = stringResource(id = R.string.require_text_submission),
+                checked = uiState.entity?.assignment?.caRequireTextSubmission ?: false,
+                onChange = {
+                    onChangeAssignment(
+                        uiState.entity?.assignment?.shallowCopy {
+                            caRequireTextSubmission = it
+                        }
+                    )
+                },
+                enabled = uiState.fieldsEnabled
+            )
+        }
+
 
         if (uiState.textSubmissionVisible) {
             UstadMessageIdOptionExposedDropDownMenuField(
@@ -258,25 +271,28 @@ private fun ClazzAssignmentEditScreen(
             },
         )
 
-        UstadExposedDropDownMenuField(
+        UstadExposedDropDownMenuField<MarkingType>(
             modifier = Modifier
                 .defaultItemPadding()
                 .testTag("caMarkingType"),
-            value = uiState.entity?.assignment?.caMarkingType ?: ClazzAssignment.MARKED_BY_COURSE_LEADER,
+            value = MarkingType.valueOf(uiState.entity?.assignment?.caMarkingType ?: 0),
             label = stringResource(R.string.marked_by),
-            options = MarkingTypeConstants.MARKING_TYPE_MESSAGE_IDS,
+            options = MarkingType.values().toList(),
             enabled = uiState.markingTypeEnabled,
             itemText = { markingType ->
-                val messageId = MarkingTypeConstants.MARKING_TYPE_MESSAGE_IDS.first {
-                    it.value == markingType
-                }.messageId
-                courseTerminologyEntryResource(
-                    terminologyEntries, messageId)
+                if(markingType == MarkingType.PEERS) {
+                    stringResource(R.string.peers)
+                }else {
+                    courseTerminologyEntryResource(
+                        terminologyEntries = terminologyEntries,
+                        messageId = MessageID.teacher
+                    )
+                }
             },
             onOptionSelected = {
                 onChangeAssignment(
                     uiState.entity?.assignment?.shallowCopy {
-                        caMarkingType = (it as MessageIdOption2).value
+                        caMarkingType = it.value
                     }
                 )
             },
@@ -361,7 +377,6 @@ fun ClazzAssignmentEditScreenPreview() {
                 cbMaxPoints = 78
                 cbCompletionCriteria = 14
             },
-            gracePeriodVisible = true,
         ),
         entity = CourseBlockWithEntity().apply {
             assignment = ClazzAssignment().apply {

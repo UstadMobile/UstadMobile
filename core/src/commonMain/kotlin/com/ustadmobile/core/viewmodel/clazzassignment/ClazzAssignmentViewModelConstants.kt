@@ -10,4 +10,16 @@ object ClazzAssignmentViewModelConstants {
         LIMIT_CHARS(MessageID.characters, ClazzAssignment.TEXT_CHAR_LIMIT),
     }
 
+    enum class MarkingType(val value: Int) {
+        TEACHER(ClazzAssignment.MARKED_BY_COURSE_LEADER),
+        PEERS(ClazzAssignment.MARKED_BY_PEERS);
+
+        companion object {
+
+            fun valueOf(value: Int): MarkingType {
+                return values().firstOrNull { it.value == value } ?: values().first()
+            }
+        }
+    }
+
 }

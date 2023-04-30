@@ -37,6 +37,7 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.*
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.viewmodel.ClazzDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.ClazzDetailOverviewViewModel
@@ -129,7 +130,7 @@ private fun ClazzDetailOverviewScreen(
 
     val clazzDateRange = rememberFormattedDateRange(
         startTimeInMillis = uiState.clazz?.clazzStartTime ?: 0L,
-        endTimeInMillis = uiState.clazz?.clazzEndTime ?: Long.MAX_VALUE,
+        endTimeInMillis = uiState.clazz?.clazzEndTime ?: UNSET_DISTANT_FUTURE,
         timeZoneId = uiState.clazz?.clazzTimeZone ?: "UTC",
     )
 
