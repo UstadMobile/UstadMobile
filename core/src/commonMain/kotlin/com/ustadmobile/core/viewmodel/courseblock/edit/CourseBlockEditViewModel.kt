@@ -33,7 +33,7 @@ data class CourseBlockEditUiState(
 
     val caDeadlineError: String? = null,
 
-    val deadlineVisible: Boolean = false,
+    val deadlineVisible: Boolean = true,
 
     val caMaxPointsError: String? = null,
 

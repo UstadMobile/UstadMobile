@@ -143,24 +143,26 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             }
         }
 
-        UstadDateTimeField {
-            id = "cbDeadlineDate"
-            timeInMillis = props.uiState.courseBlock?.cbDeadlineDate ?: 0
-            timeZoneId = props.uiState.timeZone
-            unsetDefault = Long.MAX_VALUE
-            label = ReactNode(strings[MessageID.deadline].addOptionalSuffix(strings))
-            disabled = !props.uiState.fieldsEnabled
-            helperText = props.uiState.caDeadlineError?.let { ReactNode(it) }
-            error = props.uiState.caDeadlineError != null
-            onChange = {
-                props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
-                    cbDeadlineDate = it
-                })
+        if(props.uiState.deadlineVisible) {
+            UstadDateTimeField {
+                id = "cbDeadlineDate"
+                timeInMillis = props.uiState.courseBlock?.cbDeadlineDate ?: 0
+                timeZoneId = props.uiState.timeZone
+                unsetDefault = Long.MAX_VALUE
+                label = ReactNode(strings[MessageID.deadline].addOptionalSuffix(strings))
+                disabled = !props.uiState.fieldsEnabled
+                helperText = props.uiState.caDeadlineError?.let { ReactNode(it) }
+                error = props.uiState.caDeadlineError != null
+                onChange = {
+                    props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
+                        cbDeadlineDate = it
+                    })
+                }
             }
         }
 
-        if (props.uiState.gracePeriodVisible){
 
+        if (props.uiState.gracePeriodVisible){
             UstadDateTimeField {
                 id = "cbGracePeriodDate"
                 timeInMillis = props.uiState.courseBlock?.cbGracePeriodDate ?: 0
@@ -177,7 +179,9 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
                     })
                 }
             }
+        }
 
+        if(props.uiState.latePenaltyVisible) {
             UstadNumberTextField {
                 id = "cbLateSubmissionPenalty"
                 value = (props.uiState.courseBlock?.cbLateSubmissionPenalty ?: 0).toFloat()
@@ -211,7 +215,6 @@ val UstadCourseBlockEditPreview = FC<Props> {
                     cbCompletionCriteria = 14
                     cbCompletionCriteria = ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
                 },
-                gracePeriodVisible = true,
             )
         }
     }

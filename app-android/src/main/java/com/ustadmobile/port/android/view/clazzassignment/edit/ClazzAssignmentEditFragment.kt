@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.view
+package com.ustadmobile.port.android.view.clazzassignment.edit
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -38,6 +38,7 @@ import com.ustadmobile.port.android.util.compose.courseTerminologyEntryResource
 import com.ustadmobile.port.android.util.compose.rememberCourseTerminologyEntries
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
+import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.*
 
 

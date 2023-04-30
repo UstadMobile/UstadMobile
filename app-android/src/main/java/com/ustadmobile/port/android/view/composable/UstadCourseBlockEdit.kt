@@ -157,25 +157,28 @@ fun UstadCourseBlockEdit(
         }
 
 
-        UstadInputFieldLayout(
-            modifier = Modifier.defaultItemPadding(),
-            errorText = uiState.caDeadlineError
-        ) {
-            UstadDateTimeField(
-                modifier = Modifier.testTag("cbDeadlineDate"),
-                value = uiState.courseBlock?.cbDeadlineDate ?: 0,
-                isError = uiState.caDeadlineError != null,
-                unsetDefault = UNSET_DISTANT_FUTURE,
-                dateLabel = { Text(stringResource(id = R.string.deadline).addOptionalSuffix()) },
-                timeLabel = { stringResource(id = R.string.time) },
-                timeZoneId = uiState.timeZone,
-                onValueChange = {
-                    onCourseBlockChange(uiState.courseBlock?.shallowCopy {
-                        cbDeadlineDate = it
-                    })
-                }
-            )
+        if(uiState.deadlineVisible) {
+            UstadInputFieldLayout(
+                modifier = Modifier.defaultItemPadding(),
+                errorText = uiState.caDeadlineError
+            ) {
+                UstadDateTimeField(
+                    modifier = Modifier.testTag("cbDeadlineDate"),
+                    value = uiState.courseBlock?.cbDeadlineDate ?: 0,
+                    isError = uiState.caDeadlineError != null,
+                    unsetDefault = UNSET_DISTANT_FUTURE,
+                    dateLabel = { Text(stringResource(id = R.string.deadline).addOptionalSuffix()) },
+                    timeLabel = { stringResource(id = R.string.time) },
+                    timeZoneId = uiState.timeZone,
+                    onValueChange = {
+                        onCourseBlockChange(uiState.courseBlock?.shallowCopy {
+                            cbDeadlineDate = it
+                        })
+                    }
+                )
+            }
         }
+
 
         if (uiState.gracePeriodVisible){
             UstadInputFieldLayout(

@@ -4,9 +4,11 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.*
+import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditUiState
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants.TextLimitType
+import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants.MarkingType
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
 import com.ustadmobile.hooks.courseTerminologyResource
 import com.ustadmobile.hooks.useCourseTerminologyEntries
@@ -66,7 +68,6 @@ val ClazzAssignmentEditScreenPreview = FC<Props> {
                     cbMaxPoints = 78
                     cbCompletionCriteria = COMPLETION_CRITERIA_GRADED
                 },
-                gracePeriodVisible = true,
                 completionCriteriaOptions = ClazzAssignmentEditUiState.ASSIGNMENT_COMPLETION_CRITERIAS,
             ),
             entity = entity
@@ -234,24 +235,26 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 }
             }
 
-            UstadSelectField<Int> {
+            UstadSelectField<MarkingType> {
                 id = "caMarkingType"
-                value = (props.uiState.entity?.assignment?.caMarkingType
-                    ?: ClazzAssignment.MARKED_BY_COURSE_LEADER)
+                value = MarkingType.valueOf(props.uiState.entity?.assignment?.caMarkingType ?: 0)
                 label = strings[MessageID.marked_by]
-                options = listOf(ClazzAssignment.MARKED_BY_COURSE_LEADER, ClazzAssignment.MARKED_BY_PEERS)
+                options = MarkingType.values().toList()
                 enabled = props.uiState.markingTypeEnabled
                 itemLabel = { markingType ->
-                    val messageId = MarkingTypeConstants.MARKING_TYPE_MESSAGE_IDS.first {
-                        it.value == markingType
-                    }.messageId
-                    ReactNode(courseTerminologyResource(terminologyEntries, strings, messageId))
+                    val text = if(markingType == MarkingType.PEERS){
+                        strings[MessageID.peers]
+                    }else {
+                        courseTerminologyResource(terminologyEntries, strings, MessageID.teacher)
+                    }
+
+                    ReactNode(text)
                 }
                 itemValue = { it.toString() }
                 onChange = {
                     props.onAssignmentChanged(
                         props.uiState.entity?.assignment?.shallowCopy {
-                            caMarkingType = it
+                            caMarkingType = it.value
                         }
                     )
                 }
@@ -285,7 +288,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                         fullWidth = true
                         onClick = { props.onClickAssignReviewers() }
                         disabled = !props.uiState.fieldsEnabled
-                        variant = ButtonVariant.contained
+                        variant = ButtonVariant.outlined
                         + strings[MessageID.assign_reviewers]
                     }
                 }
