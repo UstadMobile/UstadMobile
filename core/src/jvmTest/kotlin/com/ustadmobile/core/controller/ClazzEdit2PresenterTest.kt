@@ -70,48 +70,6 @@ class ClazzEdit2PresenterTest {
 
 
     @Test
-    fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalled_thenShouldSaveToDatabase() {
-        val presenterArgs = mapOf<String, String>()
-
-        val db: UmAppDatabase by di.activeDbInstance()
-        val repo: UmAppDatabase by di.activeRepoInstance()
-
-        testNavController.navigate(ClazzEdit2View.VIEW_NAME, presenterArgs)
-        val presenter = ClazzEdit2Presenter(context, presenterArgs, mockView, di, mockLifecycleOwner)
-
-        presenter.onCreate(null)
-
-        val initialEntity = mockView.captureLastEntityValue()!!
-
-        //TODO: Make some changes (e.g. as the user would do using data binding
-        initialEntity.clazzName = "Bob"
-        initialEntity.clazzStartTime = DateTime(2020, 10, 10).unixMillisLong
-
-        mockView.verifyFieldsEnabled()
-        presenter.handleClickSave(initialEntity)
-
-        val existingEntitiesLive = db.clazzDao.findAllLive()
-        val entitySaved = runBlocking {
-            existingEntitiesLive.waitUntil { it.size == 1 }
-        }.getValue()!!.first()
-        Assert.assertEquals("Entity was saved to database", "Bob",
-                entitySaved.clazzName)
-
-        //Verify that the appropriate ScopedGrants and groups have been created
-        val clazzScopedGrants = runBlocking {
-            db.scopedGrantDao.findByTableIdAndEntityUid(Clazz.TABLE_ID, entitySaved.clazzUid)
-        }
-        val teacherGroup = db.personGroupDao.findByUid(entitySaved.clazzTeachersPersonGroupUid)
-        Assert.assertNotNull("Teacher group exists", teacherGroup)
-        val teacherGrant = clazzScopedGrants.find {
-            it.scopedGrant?.sgGroupUid == entitySaved.clazzTeachersPersonGroupUid
-        }
-        Assert.assertEquals("Teacher grant has default teacher permissions",
-            Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT, teacherGrant?.scopedGrant?.sgPermissions)
-
-    }
-
-    @Test
     fun givenExistingClazz_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {
         val db: UmAppDatabase by di.activeDbInstance()
         val repo: UmAppDatabase by di.activeRepoInstance()

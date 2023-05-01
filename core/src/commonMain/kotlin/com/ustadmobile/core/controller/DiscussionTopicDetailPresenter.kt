@@ -15,7 +15,7 @@ import com.ustadmobile.lib.db.entities.DiscussionTopic
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
-
+@Deprecated("Remove Topics")
 class DiscussionTopicDetailPresenter(
         context: Any, arguments: Map<String, String>,
         view: DiscussionTopicDetailView,

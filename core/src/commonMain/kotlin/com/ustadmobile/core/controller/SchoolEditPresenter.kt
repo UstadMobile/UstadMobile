@@ -59,15 +59,6 @@ class SchoolEditPresenter(context: Any,
 
         }
 
-        observeSavedStateResult(
-            TimeZoneListPresenter.RESULT_TIMEZONE_KEY,
-            ListSerializer(String.serializer()), String::class) {
-            val timeZone = it.firstOrNull() ?: return@observeSavedStateResult
-            entity?.schoolTimeZone = timeZone
-            view.entity = entity
-            requireSavedStateHandle()[TimeZoneListPresenter.RESULT_TIMEZONE_KEY] = null
-
-        }
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): SchoolWithHolidayCalendar? {
@@ -144,16 +135,6 @@ class SchoolEditPresenter(context: Any,
     }
 
     fun handleTimeZoneClicked() {
-        navigateForResult(
-            NavigateForResultOptions(
-            this,
-                entity?.schoolTimeZone,
-                TimeZoneListView.VIEW_NAME,
-                String::class,
-                String.serializer(),
-                TimeZoneListPresenter.RESULT_TIMEZONE_KEY
-            )
-        )
     }
 
     fun handleHolidayCalendarClicked() {

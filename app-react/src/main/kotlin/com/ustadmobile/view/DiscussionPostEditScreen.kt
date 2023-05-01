@@ -1,31 +1,23 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
 import com.ustadmobile.core.viewmodel.DiscussionPostEditUiState
-import com.ustadmobile.core.viewmodel.SiteEditUiState
+import com.ustadmobile.core.viewmodel.DiscussionPostEditViewModel
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.UstadCourseBlockEdit
-import com.ustadmobile.mui.components.UstadDateTimeEditField
 import com.ustadmobile.mui.components.UstadTextEditField
-import com.ustadmobile.util.ext.addOptionalSuffix
-import com.ustadmobile.view.components.UstadBlankIcon
-import com.ustadmobile.view.components.UstadSwitchField
 import csstype.px
-import kotlinx.html.currentTimeMillis
-import mui.icons.material.Add
-import mui.icons.material.Delete
 import mui.material.*
-import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import react.FC
 import react.Props
-import react.create
 
 external interface DiscussionPostEditProps: Props {
     var uiState: DiscussionPostEditUiState
+    var onPostChanged: (DiscussionPost?) -> Unit
 }
 
 val DiscussionPostEditComponent2 = FC<DiscussionPostEditProps> { props ->
@@ -45,7 +37,10 @@ val DiscussionPostEditComponent2 = FC<DiscussionPostEditProps> { props ->
                 error = props.uiState.discussionPostTitleError
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
-                    //TODO
+                    props.onPostChanged(
+                        props.uiState.discussionPost?.shallowCopy {
+                            discussionPostTitle = it
+                        })
                 }
             }
 
@@ -55,20 +50,13 @@ val DiscussionPostEditComponent2 = FC<DiscussionPostEditProps> { props ->
                 error = props.uiState.discussionPostDescError
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
-                    //TODO
+                    props.onPostChanged(
+                        props.uiState.discussionPost?.shallowCopy {
+                            discussionPostMessage = it
+                        })
                 }
             }
 
-
-            /*
-                onChange = {
-                    props.onSiteChanged(
-                        props.uiState.site?.shallowCopy {
-                            siteName = it
-                        })
-                }
-
-                 */
         }
 
     }
@@ -93,3 +81,16 @@ val DiscussionPostEditPreview = FC<Props> {
             )
     }
 }
+
+val DiscussionPostEditScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        DiscussionPostEditViewModel(di, savedStateHandle)
+    }
+    val uiStateVar by viewModel.uiState.collectAsState(DiscussionPostEditUiState())
+
+    DiscussionPostEditComponent2{
+        uiState = uiStateVar
+        onPostChanged = viewModel::onEntityChanged
+    }
+}
+

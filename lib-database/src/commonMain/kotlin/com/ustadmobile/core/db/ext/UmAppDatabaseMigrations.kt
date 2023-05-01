@@ -1396,6 +1396,23 @@ val MIGRATION_108_109 = DoorMigrationStatementList(108, 109) { db ->
     stmtList
 }
 
+/**
+ * Work In Progress:
+ * Rename DiscussionPost.discussionPostDiscussionTopicUid to discussionPostDiscussionBlockUid
+ * Remove DiscussionTopic
+ *
+ */
+val MIGRATION_109_110 = DoorMigrationStatementList(109, 110) {db ->
+    val stmtList = mutableListOf<String>()
+    if (db.dbType() == DoorDbType.SQLITE) {
+
+    } else {
+
+    }
+
+    stmtList
+}
+
 fun migrationList() = listOf<DoorMigration>(
     UmAppDatabaseReplicationMigration91_92, MIGRATION_92_93, MIGRATION_93_94, MIGRATION_94_95,
     MIGRATION_95_96, MIGRATION_96_97, MIGRATION_97_98, MIGRATION_98_99,

@@ -1,14 +1,13 @@
 package com.ustadmobile.port.android.view.composable
 
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
@@ -16,6 +15,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 /**
  * Workaround to make a textfield clickable. See
  * https://issuetracker.google.com/issues/172154008
+ *
+ * As per https://caelis.medium.com/jetpack-compose-datepicker-textfield-39808e42646a
  */
 @Composable
 fun UstadClickableTextField(
@@ -39,34 +40,32 @@ fun UstadClickableTextField(
     shape: Shape = MaterialTheme.shapes.small,
     colors: TextFieldColors = TextFieldDefaults.outlinedTextFieldColors()
 ) {
-    val interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
+    Box {
+       OutlinedTextField(
+           value = value,
+           onValueChange = onValueChange,
+           modifier = modifier,
+           enabled = enabled,
+           readOnly = readOnly,
+           textStyle = textStyle,
+           label = label,
+           placeholder = placeholder,
+           leadingIcon = leadingIcon,
+           trailingIcon = trailingIcon,
+           isError = isError,
+           visualTransformation = visualTransformation,
+           keyboardOptions = keyboardOptions,
+           keyboardActions = keyboardActions,
+           singleLine = singleLine,
+           maxLines = maxLines,
+           shape = shape,
+           colors = colors,
+       )
 
-    val isPressed = interactionSource.collectIsPressedAsState().value
-    LaunchedEffect(isPressed){
-        if(isPressed) {
-            onClick()
-        }
+        Box(
+            modifier = Modifier.matchParentSize()
+                .alpha(0f)
+                .clickable(onClick = onClick)
+        )
     }
-
-    OutlinedTextField(
-        value = value,
-        interactionSource = interactionSource,
-        onValueChange = onValueChange,
-        modifier = modifier,
-        enabled = enabled,
-        readOnly = readOnly,
-        textStyle = textStyle,
-        label = label,
-        placeholder = placeholder,
-        leadingIcon = leadingIcon,
-        trailingIcon = trailingIcon,
-        isError = isError,
-        visualTransformation = visualTransformation,
-        keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
-        singleLine = singleLine,
-        maxLines = maxLines,
-        shape = shape,
-        colors = colors,
-    )
 }

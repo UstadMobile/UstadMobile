@@ -7,6 +7,7 @@ import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.flow.Flow
 
 @DoorDao
 @Repository
@@ -124,6 +125,13 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     abstract suspend fun getPostTitle(postUid: Long): String?
 
     @Query("""
+        SELECT DiscussionPost.discussionPostTitle 
+          FROM DiscussionPost 
+         WHERE DiscussionPost.discussionPostUid = :postUid
+    """)
+    abstract fun getPostTitleAsFlow(postUid: Long): Flow<String?>
+
+    @Query("""
         SELECT * 
          FROM DiscussionPost
         WHERE DiscussionPost.discussionPostUid = :uid
@@ -159,9 +167,43 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
          WHERE DiscussionPost.discussionPostUid = :uid
            
     """)
+    abstract fun findWithDetailsByUidAsFlow(uid: Long): Flow<DiscussionPostWithDetails?>
+
+    @Query("""
+        SELECT DiscussionPost.*,
+            Person.firstNames as authorPersonFirstNames,
+            Person.lastName as authorPersonLastName,
+            '' AS postLatestMessage,
+            0 AS postRepliesCount, 
+            DiscussionPost.discussionPostLct AS postLatestMessageTimestamp
+             
+          FROM DiscussionPost     
+          LEFT JOIN Person ON Person.personUid = DiscussionPost.discussionPostStartedPersonUid
+         WHERE DiscussionPost.discussionPostUid = :uid
+           
+    """)
     abstract fun findWithDetailsByUidLive(uid: Long): LiveData<DiscussionPostWithDetails?>
 
     @Update
     abstract suspend fun updateAsync(entity: DiscussionPost): Int
+
+
+
+    @Query("""
+       SELECT
+              DiscussionPost.*,
+              Person.*
+        FROM DiscussionPost
+        LEFT JOIN Person
+          ON DiscussionPost.discussionPostStartedPersonUid = Person.personUid
+        
+       WHERE DiscussionPost.discussionPostDiscussionTopicUid = :entityUid
+              AND CAST(DiscussionPost.discussionPostVisible AS INTEGER) = 1
+              AND CAST(DiscussionPost.discussionPostArchive AS INTEGER) = 0
+              
+    ORDER BY DiscussionPost.discussionPostStartDate DESC
+    """)
+    abstract fun findAllRepliesByPostUidAsFlow(entityUid: Long):
+            Flow<List<DiscussionPostWithPerson>>
 
 }

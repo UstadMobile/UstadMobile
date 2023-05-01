@@ -197,8 +197,14 @@ private fun ContentEntryListScreen(
         ){ contentEntry ->
 
             UstadContentEntryListItem(
-                onClickContentEntry = onClickContentEntry,
-                onClickDownloadContentEntry = onClickDownloadContentEntry,
+                onClick = {
+                    @Suppress("UNNECESSARY_SAFE_CALL")
+                    contentEntry?.also { onClickContentEntry(it) }
+                },
+                onClickDownload = {
+                    @Suppress("UNNECESSARY_SAFE_CALL")
+                    contentEntry?.also { onClickDownloadContentEntry(it) }
+                },
                 contentEntry = contentEntry
             )
         }

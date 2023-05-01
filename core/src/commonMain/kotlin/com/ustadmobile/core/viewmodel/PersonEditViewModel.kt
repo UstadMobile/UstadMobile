@@ -1,18 +1,14 @@
 package com.ustadmobile.core.viewmodel
 
-import com.soywiz.klock.DateTime
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
-import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.schedule.age
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonEditView.Companion.REGISTER_MODE_MINOR
@@ -29,6 +25,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -79,10 +76,8 @@ data class PersonEditUiState(
 
 class PersonEditViewModel(
     di: DI,
-    savedStateHandle: UstadSavedStateHandle
-): UstadEditViewModel(di, savedStateHandle) {
-
-    private val systemImpl: UstadMobileSystemImpl by instance()
+    savedStateHandle: UstadSavedStateHandle,
+): UstadEditViewModel(di, savedStateHandle, PersonEditView.VIEW_NAME) {
 
     private val _uiState: MutableStateFlow<PersonEditUiState> = MutableStateFlow(
         PersonEditUiState(
@@ -124,6 +119,7 @@ class PersonEditViewModel(
             awaitAll(
                 async {
                     loadEntity(
+                        serializer = PersonWithAccount.serializer(),
                         onLoadFromDb = { it.personDao.findPersonAccountByUid(entityUid) },
                         makeDefault = {
                             PersonWithAccount().also {
@@ -137,6 +133,7 @@ class PersonEditViewModel(
                 },
                 async {
                     loadEntity(
+                        serializer = PersonPicture.serializer(),
                         loadFromStateKeys =listOf(STATE_KEY_PICTURE),
                         onLoadFromDb = {
                             it.personPictureDao.findByPersonUidAsync(entityUid)
@@ -190,10 +187,12 @@ class PersonEditViewModel(
             )
         }
 
-        if(personPicture != null) {
-            savedStateHandle.setJson(STATE_KEY_PICTURE, PersonPicture.serializer(), personPicture)
-        }else {
-            savedStateHandle.set(STATE_KEY_PICTURE, null)
+        viewModelScope.launch {
+            if(personPicture != null) {
+                savedStateHandle.setJson(STATE_KEY_PICTURE, PersonPicture.serializer(), personPicture)
+            }else {
+                savedStateHandle[STATE_KEY_PICTURE] = null
+            }
         }
     }
 
@@ -333,9 +332,7 @@ class PersonEditViewModel(
                         activeDb.personDao.updateAsync(savePerson)
                     }
 
-                    val dateBirthDateTime = DateTime(savePerson.dateOfBirth)
-
-                    if(dateBirthDateTime.age() < UstadMobileConstants.MINOR_AGE_THRESHOLD) {
+                    if(Instant.fromEpochMilliseconds(savePerson.dateOfBirth).isDateOfBirthAMinor()) {
                         //Mark this as approved by the current user
                         val approved = activeDb.personParentJoinDao.isMinorApproved(
                             savePerson.personUid)

@@ -1,12 +1,14 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useUstadViewModel
+import com.ustadmobile.core.hooks.ustadViewName
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.PersonListUiState
 import com.ustadmobile.core.viewmodel.PersonListViewModel
+import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.mui.components.UstadListSortHeader
@@ -20,14 +22,15 @@ import csstype.Height
 import csstype.Overflow
 import csstype.pct
 import js.core.jso
-import mui.icons.material.AccountCircle
 import mui.material.*
 import react.FC
+import react.Props
 import react.ReactNode
 import react.create
+import react.router.useLocation
 
 
-external interface PersonListProps: UstadScreenProps {
+external interface PersonListProps: Props {
     var uiState: PersonListUiState
     var onSortOrderChanged: (SortOrderOption) -> Unit
     var onListItemClick: (PersonWithDisplayDetails) -> Unit
@@ -37,10 +40,11 @@ val PersonListComponent2 = FC<PersonListProps> { props ->
     val infiniteQueryResult = usePagingSource(
         props.uiState.personList, true, 50
     )
+    val muiAppState = useMuiAppState()
 
     VirtualList {
         style = jso {
-            height = "calc(100vh - ${props.muiAppState.appBarHeight}px)".unsafeCast<Height>()
+            height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
             width = 100.pct
             contain = Contain.strict
             overflowY = Overflow.scroll
@@ -96,7 +100,7 @@ val demoPersonList = (0..150).map {
     }
 }
 
-val PersonListScreenPreview = FC<UstadScreenProps> { props ->
+val PersonListScreenPreview = FC<Props> { props ->
     PersonListComponent2 {
         + props
         uiState = PersonListUiState(
@@ -105,12 +109,10 @@ val PersonListScreenPreview = FC<UstadScreenProps> { props ->
     }
 }
 
-val PersonListScreen = FC<UstadScreenProps> { props ->
-    val viewModel = useUstadViewModel(
-        onAppUiStateChange = props.onAppUiStateChanged
-    ) { di, savedSateHandle ->
-        console.log("Creating PersonListviewModel")
-        PersonListViewModel(di, savedSateHandle)
+val PersonListScreen = FC<Props> {
+    val location = useLocation()
+    val viewModel = useUstadViewModel {di, savedStateHandle ->
+        PersonListViewModel(di, savedStateHandle, location.ustadViewName)
     }
 
     val uiState: PersonListUiState by viewModel.uiState.collectAsState(PersonListUiState())
@@ -124,7 +126,6 @@ val PersonListScreen = FC<UstadScreenProps> { props ->
         this.uiState = uiState
         onListItemClick = viewModel::onClickEntry
         onSortOrderChanged = viewModel::onSortOrderChanged
-        + props
     }
 
 

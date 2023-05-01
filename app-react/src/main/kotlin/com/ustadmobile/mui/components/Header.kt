@@ -5,12 +5,10 @@ import com.ustadmobile.mui.common.Area
 import csstype.*
 import mui.system.sx
 import mui.material.*
-import mui.material.styles.TypographyVariant.h6
+import mui.material.styles.TypographyVariant.Companion.h6
 import react.*
 import react.dom.html.ReactHTML.div
 import web.html.HTMLElement
-
-val DEFAULT_APPBAR_HEIGHT = 64
 
 external interface HeaderProps: Props {
     var appUiState: AppUiState
@@ -20,7 +18,7 @@ external interface HeaderProps: Props {
 }
 
 val Header = FC<HeaderProps> { props ->
-    var theme by useContext(ThemeContext)
+    val theme by useRequiredContext(ThemeContext)
     val appBarRef = useRef<HTMLElement>(null)
 
     useEffect(appBarRef.current?.clientHeight){

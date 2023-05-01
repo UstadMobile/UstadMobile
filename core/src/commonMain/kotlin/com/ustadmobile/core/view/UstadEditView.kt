@@ -8,6 +8,8 @@ interface UstadEditView<RT : Any>: UstadSingleEntityView<RT> {
 
         const val ARG_ENTITY_JSON = "entity"
 
+        const val DEFAULT_COMMIT_DELAY = 200L
+
     }
 
 }

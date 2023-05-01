@@ -35,6 +35,7 @@ import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 import com.ustadmobile.port.android.view.composable.UstadDateEditTextField
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
+import com.ustadmobile.port.android.view.composable.UstadInputFieldLayout
 import java.util.*
 
 
@@ -168,18 +169,24 @@ fun ClazzEnrolmentEditScreen(
             .padding(16.dp)
     )  {
 
-        UstadMessageIdOptionExposedDropDownMenuField(
-            value = uiState.clazzEnrolment?.clazzEnrolmentRole ?: 0,
-            label = stringResource(R.string.role),
-            options = RoleConstants.ROLE_MESSAGE_IDS,
-            error = uiState.roleSelectedError,
-            enabled = uiState.fieldsEnabled,
-            onOptionSelected = {
-                onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy{
-                    clazzEnrolmentRole = it.value
-                })
-            },
-        )
+        UstadInputFieldLayout(
+            modifier = Modifier.fillMaxWidth(),
+            errorText = uiState.roleSelectedError,
+        ) {
+            UstadMessageIdOptionExposedDropDownMenuField(
+                value = uiState.clazzEnrolment?.clazzEnrolmentRole ?: 0,
+                label = stringResource(R.string.role),
+                options = RoleConstants.ROLE_MESSAGE_IDS,
+                isError = uiState.roleSelectedError != null,
+                enabled = uiState.fieldsEnabled,
+                onOptionSelected = {
+                    onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy{
+                        clazzEnrolmentRole = it.value
+                    })
+                },
+            )
+        }
+
 
         Spacer(modifier = Modifier.width(15.dp))
 

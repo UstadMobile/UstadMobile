@@ -4,55 +4,148 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.ListItem
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.CourseTerminologyListPresenter
-import com.ustadmobile.core.controller.UstadListPresenter
-import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.CourseTerminologyListView
+import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.core.viewmodel.CourseTerminologyListUiState
+import com.ustadmobile.core.viewmodel.CourseTerminologyListViewModel
 import com.ustadmobile.lib.db.entities.CourseTerminology
-import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 
+class CourseTerminologyListFragment: UstadBaseMvvmFragment() {
 
-class CourseTerminologyListFragment(): UstadListViewFragment<CourseTerminology, CourseTerminology>(),
-        CourseTerminologyListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+    private val viewModel: CourseTerminologyListViewModel by ustadViewModels(::CourseTerminologyListViewModel)
 
-    private var mPresenter: CourseTerminologyListPresenter? = null
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
+        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
 
-    override val listPresenter: UstadListPresenter<*, in CourseTerminology>?
-        get() = mPresenter
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+            )
 
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = super.onCreateView(inflater, container, savedInstanceState)
-        mPresenter = CourseTerminologyListPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner).withViewLifecycle()
-
-        mDataRecyclerViewAdapter = CourseTerminologyListRecyclerAdapter(mPresenter)
-        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
-            requireContext().getString(R.string.add_new_terminology))
-        return view
+            setContent {
+                MdcTheme {
+                    CourseTerminologyListScreen(viewModel)
+                }
+            }
+        }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        ustadFragmentTitle = requireContext().getString(R.string.select_terminology)
+
+}
+
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun CourseTerminologyListScreen(
+    uiState: CourseTerminologyListUiState,
+    onClickAddNewItem: () -> Unit = { },
+    onClickItem: (CourseTerminology) -> Unit = { },
+) {
+    val pager = remember(uiState.terminologyList) {
+        Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
+            pagingSourceFactory = uiState.terminologyList
+        )
     }
 
-    /**
-     * OnClick function that will handle when the user clicks to create a new item
-     */
-    override fun onClick(view: View?) {
-        if(view?.id == R.id.item_createnew_layout)
-            mPresenter?.handleClickAddNewItem()
+    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+
+    LazyColumn(
+        modifier = Modifier
+            .padding(vertical = 8.dp)
+            .fillMaxWidth()
+    ){
+        if(uiState.showAddItemInList) {
+            item {
+                ListItem(
+                    modifier = Modifier.clickable {
+                        onClickAddNewItem()
+                    },
+                    text = { Text(stringResource(R.string.add_new_terminology)) },
+                    icon = {
+                        Icon(imageVector = Icons.Filled.Add, contentDescription = null)
+                    }
+                )
+            }
+        }
+
+        items(
+            items = lazyPagingItems,
+            key = { it.ctUid },
+        ) { terminology ->
+
+            ListItem(
+                modifier = Modifier.clickable {
+                    terminology?.also { onClickItem(it) }
+                },
+                text = { Text(terminology?.ctTitle ?: "") },
+                icon = {
+                    Spacer(modifier = Modifier.size(24.dp))
+                }
+            )
+        }
     }
+}
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        mPresenter = null
-        dbRepo = null
-    }
+@Composable
+fun CourseTerminologyListScreen(
+    viewModel: CourseTerminologyListViewModel
+) {
+    val uiState: CourseTerminologyListUiState by viewModel.uiState.collectAsState(
+        CourseTerminologyListUiState())
 
-    override val displayTypeRepo: Any?
-        get() = dbRepo?.courseTerminologyDao
+    CourseTerminologyListScreen(
+        uiState = uiState,
+        onClickAddNewItem = viewModel::onClickAdd,
+        onClickItem = viewModel::onClickEntry
+    )
 
+}
+
+
+@Composable
+@Preview
+fun CourseTerminologyListScreenPreview() {
+    CourseTerminologyListScreen(
+        uiState = CourseTerminologyListUiState(
+            showAddItemInList = true,
+            terminologyList = {
+                ListPagingSource(listOf(
+                    CourseTerminology().apply {
+                        ctUid = 1
+                        ctTitle = "English"
+                    }
+                ))
+            }
+        )
+    )
 }

@@ -4,30 +4,23 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
@@ -38,17 +31,11 @@ import com.ustadmobile.core.viewmodel.PersonEditViewModel
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.port.android.view.composable.UstadDateEditTextField
-import com.ustadmobile.port.android.view.composable.UstadImageSelectButton
-import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
-import com.ustadmobile.port.android.view.composable.UstadTextEditField
+import com.ustadmobile.port.android.view.composable.*
 
 class PersonEditFragment: UstadBaseMvvmFragment() {
 
-    private val viewModel: PersonEditViewModel by viewModels {
-        UstadViewModelProviderFactory(di, this, arguments)
-    }
-
+    private val viewModel: PersonEditViewModel by ustadViewModels(::PersonEditViewModel)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -118,18 +105,25 @@ fun PersonEditScreen(
             }
         )
 
-        UstadMessageIdOptionExposedDropDownMenuField(
-            value = uiState.person?.gender ?: 0,
-            label = stringResource(R.string.gender_literal),
-            options = GENDER_MESSAGE_IDS,
-            onOptionSelected = {
-                onPersonChanged(uiState.person?.shallowCopy{
-                    gender = it.value
-                })
-            },
-            error = uiState.genderError,
-            enabled = uiState.fieldsEnabled,
-        )
+        UstadInputFieldLayout(
+            modifier = Modifier.fillMaxWidth(),
+            errorText = uiState.genderError,
+        ) {
+            UstadMessageIdOptionExposedDropDownMenuField(
+                value = uiState.person?.gender ?: 0,
+                modifier = Modifier.testTag("gender").fillMaxWidth(),
+                label = stringResource(R.string.gender_literal),
+                options = GENDER_MESSAGE_IDS,
+                onOptionSelected = {
+                    onPersonChanged(uiState.person?.shallowCopy{
+                        gender = it.value
+                    })
+                },
+                isError = uiState.genderError != null,
+                enabled = uiState.fieldsEnabled,
+            )
+        }
+
 
         if (uiState.parentalEmailVisible){
             UstadTextEditField(
@@ -148,6 +142,7 @@ fun PersonEditScreen(
 
         UstadDateEditTextField(
             value = uiState.person?.dateOfBirth ?: 0,
+            modifier = Modifier.fillMaxWidth(),
             label = stringResource(id = R.string.birthday),
             error = uiState.dateOfBirthError,
             enabled = uiState.fieldsEnabled,

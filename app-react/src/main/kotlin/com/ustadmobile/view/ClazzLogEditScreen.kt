@@ -5,13 +5,14 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.ClazzLogEditUiState
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.UstadDateTimeEditField
+import com.ustadmobile.mui.components.UstadDateTimeField
 import csstype.px
 import mui.material.Container
 import mui.material.Stack
 import mui.system.responsive
 import react.FC
 import react.Props
+import react.ReactNode
 import react.useState
 
 external interface ClazzLogEditScreenProps : Props {
@@ -33,11 +34,12 @@ private val ClazzLogEditScreenComponent2 = FC<ClazzLogEditScreenProps> { props -
         Stack {
             spacing = responsive(20.px)
 
-            UstadDateTimeEditField {
+            UstadDateTimeField {
                 timeInMillis = props.uiState.clazzLog?.logDate ?: 0
-                label = strings[MessageID.date]
-                enabled = props.uiState.fieldsEnabled
-                error = props.uiState.dateError
+                label = ReactNode(strings[MessageID.date])
+                disabled = !props.uiState.fieldsEnabled
+                helperText = props.uiState.dateError?.let { ReactNode(it) }
+                error = props.uiState.dateError != null
                 timeZoneId = props.uiState.timeZone
                 onChange = {
                     props.onChangeClazzLog(props.uiState.clazzLog?.shallowCopy {

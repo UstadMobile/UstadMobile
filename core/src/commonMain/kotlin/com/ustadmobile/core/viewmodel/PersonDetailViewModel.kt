@@ -71,13 +71,11 @@ data class PersonDetailUiState(
 class PersonDetailViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
-): DetailViewModel<Person>(di, savedStateHandle) {
+): DetailViewModel<Person>(di, savedStateHandle, PersonDetailView.VIEW_NAME) {
 
     private val _uiState = MutableStateFlow(PersonDetailUiState())
 
     val uiState: Flow<PersonDetailUiState> = _uiState.asStateFlow()
-
-    private val systemImpl: UstadMobileSystemImpl by instance()
 
     private val personUid = savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0
 

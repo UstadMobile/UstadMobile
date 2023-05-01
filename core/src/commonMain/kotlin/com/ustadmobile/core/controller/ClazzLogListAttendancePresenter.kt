@@ -1,17 +1,10 @@
 package com.ustadmobile.core.controller
 
-import com.soywiz.klock.DateTime
-import com.soywiz.klock.days
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
-import com.ustadmobile.core.schedule.localEndOfDay
-import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.ext.attendancePercentage
-import com.ustadmobile.core.util.ext.effectiveTimeZone
-import com.ustadmobile.core.util.ext.latePercentage
-import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.door.*
@@ -27,7 +20,11 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.TimeZone
 import org.kodein.di.DI
+import kotlinx.datetime.minus
 
 class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, String>, view: ClazzLogListAttendanceView,
                           di: DI, lifecycleOwner: LifecycleOwner
@@ -188,9 +185,11 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
     override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {}
 
     fun handleClickGraphDuration(days: Int) {
-        val endOfDay = DateTime.now().toOffsetByTimezone(clazzTimeZone ?: "UTC")
-                .localEndOfDay.utc.unixMillisLong
-        graphDateRange = (endOfDay - days.days.millisecondsLong) to endOfDay
+        val endOfDay = Clock.System.now().toLocalEndOfDay(clazzTimeZone ?: "UTC")
+            .toEpochMilliseconds()
+        val graphStart = Clock.System.now().minus(days, DateTimeUnit.DAY,
+            TimeZone.currentSystemDefault())
+        graphDateRange = graphStart.toEpochMilliseconds() to endOfDay
         graphDbData?.removeObserver(graphObserver)
         graphDbData = repo.clazzLogDao.findByClazzUidWithinTimeRangeLive(clazzUidFilter,
                 graphDateRange.first, graphDateRange.second, ClazzLog.STATUS_RECORDED)
