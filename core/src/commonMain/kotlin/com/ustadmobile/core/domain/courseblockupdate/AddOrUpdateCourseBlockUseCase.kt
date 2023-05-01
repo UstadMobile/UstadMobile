@@ -5,6 +5,7 @@ import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.PeerReviewerAllocation
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyWithEntity
 
 /**
@@ -40,6 +41,9 @@ class AddOrUpdateCourseBlockUseCase {
             courseBlockMutableList.apply {
                 add(courseBlockWithEntity.shallowCopyWithEntity {
                     cbClazzUid = clazzUid
+                    this.assignment = courseBlockWithEntity.assignment?.shallowCopy {
+                        caClazzUid = clazzUid
+                    }
                 })
             }
             .autoIndent(courseBlockMutableList.size - 1)
