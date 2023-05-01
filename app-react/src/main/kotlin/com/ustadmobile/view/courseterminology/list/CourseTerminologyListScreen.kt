@@ -1,7 +1,7 @@
-package com.ustadmobile.view.courseterminologylist
+package com.ustadmobile.view.courseterminology.list
 
-import com.ustadmobile.core.viewmodel.CourseTerminologyListUiState
-import com.ustadmobile.core.viewmodel.CourseTerminologyListViewModel
+import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListUiState
+import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListViewModel
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.hooks.useMuiAppState

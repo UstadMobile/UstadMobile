@@ -1,12 +1,12 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.schedule.edit
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
-import com.ustadmobile.core.viewmodel.ScheduleEditUiState
-import com.ustadmobile.core.viewmodel.ScheduleEditViewModel
+import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditUiState
+import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ext.shallowCopy

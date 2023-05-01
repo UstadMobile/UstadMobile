@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.view
+package com.ustadmobile.port.android.view.login
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -25,8 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.viewmodel.LoginUiState
-import com.ustadmobile.core.viewmodel.LoginViewModel
+import com.ustadmobile.core.viewmodel.login.LoginUiState
+import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 

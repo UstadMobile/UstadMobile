@@ -12,7 +12,7 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.viewmodel.CourseTerminologyListViewModel
+import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListViewModel
 import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel

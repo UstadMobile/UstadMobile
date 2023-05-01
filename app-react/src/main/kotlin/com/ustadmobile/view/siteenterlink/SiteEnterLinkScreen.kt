@@ -1,12 +1,12 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.siteenterlink
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.locale.StringsXml
-import com.ustadmobile.core.viewmodel.SiteEnterLinkUiState
-import com.ustadmobile.core.viewmodel.SiteEnterLinkViewModel
+import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
+import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import react.dom.html.ReactHTML.img
 import com.ustadmobile.util.ext.onTextChange
 import csstype.px

@@ -19,9 +19,9 @@ import react.FC
 import com.ustadmobile.wrappers.quill.QuillDemo
 import com.ustadmobile.view.timezonelist.TimeZoneListScreen
 import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
-import com.ustadmobile.core.viewmodel.CourseTerminologyListViewModel
+import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListViewModel
 import com.ustadmobile.view.clazzassignment.edit.ClazzAssignmentEditScreen
-import com.ustadmobile.view.courseterminologylist.CourseTerminologyListScreen
+import com.ustadmobile.view.courseterminology.list.CourseTerminologyListScreen
 import com.ustadmobile.view.clazz.detail.ClazzDetailScreen
 import com.ustadmobile.view.clazz.list.ClazzListScreen
 import com.ustadmobile.view.clazz.detailoverview.ClazzDetailOverviewScreen
@@ -33,6 +33,11 @@ import com.ustadmobile.view.person.edit.PersonEditScreenPreview
 import com.ustadmobile.view.person.list.PersonListScreen
 import com.ustadmobile.view.person.list.PersonListScreenPreview
 import com.ustadmobile.view.clazzassignment.detail.ClazzAssignmentDetailScreen
+import com.ustadmobile.view.clazzassignment.detailsubmissionstab.ClazzAssignmentDetailSubmissionsTab
+import com.ustadmobile.view.courseterminology.edit.CourseTerminologyEditScreen
+import com.ustadmobile.view.login.LoginScreen
+import com.ustadmobile.view.schedule.edit.ScheduleEditScreen
+import com.ustadmobile.view.siteenterlink.SiteEnterLinkScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -57,9 +62,11 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(PersonAccountEditView.VIEW_NAME, "Person Account Edit Preview",
         PersonAccountEditPreview),
     UstadScreen(Login2View.VIEW_NAME, "Login Preview",
-        LoginScreen),
+        LoginScreen
+    ),
     UstadScreen(SiteEnterLinkView.VIEW_NAME, "Site Enter Link Preview",
-        SiteEnterLinkScreen),
+        SiteEnterLinkScreen
+    ),
     UstadScreen(ParentalConsentManagementView.VIEW_NAME, "Parental Consent Management Preview",
         ParentalConsentManagementPreview),
     UstadScreen(SettingsView.VIEW_NAME, "Settings Preview",
@@ -73,7 +80,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(RegisterMinorWaitForParentView.VIEW_NAME, "RegisterMinorWaitForParent Preview",
         RegisterMinorWaitForParentPreview),
     UstadScreen(ScheduleEditView.VIEW_NAME, "ScheduleEdit",
-        ScheduleEditScreen),
+        ScheduleEditScreen
+    ),
     UstadScreen(ContentEntryEdit2View.VIEW_NAME, "ContentEntryEdit Preview",
         ContentEntryEditScreenPreview),
     UstadScreen(SiteDetailView.VIEW_NAME, name = "Site Detail Preview", SiteDetailPreview),
@@ -106,7 +114,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ScopedGrantEditView.VIEW_NAME,
         "ScopedGrantEdit Preview", ScopedGrantEditScreenPreview),
     UstadScreen(CourseTerminologyEditView.VIEW_NAME,
-        "CourseTerminologyEdit Preview", CourseTerminologyEditScreen),
+        "CourseTerminologyEdit Preview", CourseTerminologyEditScreen
+    ),
     UstadScreen("UstadListFilterChipsHeader",
         "UstadListFilterChipsHeaderPreview Preview", UstadListFilterChipsHeaderPreview),
     UstadScreen("UstadListSortHeader",
@@ -170,8 +179,10 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("UstadNumberTextEditField", "UstadNumberTextEditField Preview",
         UstadNumberTextFieldPreview),
     UstadScreen(TimeZoneListViewModel.DEST_NAME, "Time Zone List", TimeZoneListScreen),
-    UstadScreen(CourseTerminologyListViewModel.DEST_NAME, "Course Terminology List",
-        CourseTerminologyListScreen),
+    UstadScreen(
+        CourseTerminologyListViewModel.DEST_NAME, "Course Terminology List",
+        CourseTerminologyListScreen
+    ),
     UstadScreen(
         ClazzAssignmentEditView.VIEW_NAME,
         "ClazzAssignmentEdit",
@@ -185,6 +196,9 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(CourseGroupSetListView.VIEW_NAME, "Clazz Groups",ClazzGroupSetDummy),
     UstadScreen(ClazzAssignmentDetailView.VIEW_NAME, "ClazzAssignmentDetail",
         ClazzAssignmentDetailScreen),
+    UstadScreen(ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME,
+        "ClazzAssignmentDetailStudentProgressOverviewList",
+        ClazzAssignmentDetailSubmissionsTab),
 )
 
 

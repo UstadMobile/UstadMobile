@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.siteenterlink
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.SiteEnterLinkView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
+import com.ustadmobile.core.viewmodel.UstadViewModel
 import io.ktor.client.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

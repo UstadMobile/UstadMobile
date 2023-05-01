@@ -1,14 +1,14 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.courseterminology.edit
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.util.ext.encodeStringMapToString
 import com.ustadmobile.core.util.ext.encodeToStringMap
 import com.ustadmobile.core.util.ext.replace
 import com.ustadmobile.core.util.ext.toTerminologyEntries
 import com.ustadmobile.core.view.CourseTerminologyEditView
+import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.lib.db.entities.TerminologyEntry

@@ -1,8 +1,7 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.schedule.edit
 
 import app.cash.turbine.test
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.ext.awaitItemWhere

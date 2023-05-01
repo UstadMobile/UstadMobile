@@ -83,7 +83,8 @@ class PersonListViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 navigationVisible = true,
-                searchState = createSearchEnabledState()
+                searchState = createSearchEnabledState(),
+                title = listTitle(MessageID.people, MessageID.select_person)
             )
         }
 

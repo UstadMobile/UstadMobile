@@ -1,12 +1,11 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.login
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.hooks.useUstadViewModel
-import com.ustadmobile.core.viewmodel.LoginUiState
-import com.ustadmobile.core.viewmodel.LoginViewModel
-import mui.material.ButtonVariant.*
+import com.ustadmobile.core.viewmodel.login.LoginUiState
+import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.util.ext.onTextChange
 import csstype.px

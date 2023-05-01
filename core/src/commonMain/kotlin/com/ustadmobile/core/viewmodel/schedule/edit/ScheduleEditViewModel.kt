@@ -1,9 +1,10 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.schedule.edit
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.ScheduleEditView
+import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.Schedule
 import kotlinx.coroutines.flow.Flow

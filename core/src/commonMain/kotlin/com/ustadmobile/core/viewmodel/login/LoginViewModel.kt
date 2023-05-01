@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.login
 
 import com.ustadmobile.core.account.AdultAccountRequiredException
 import com.ustadmobile.core.account.ConsentNotGrantedException
@@ -15,6 +15,7 @@ import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.lib.db.entities.Site
 import io.github.aakira.napier.Napier
 import io.ktor.client.*

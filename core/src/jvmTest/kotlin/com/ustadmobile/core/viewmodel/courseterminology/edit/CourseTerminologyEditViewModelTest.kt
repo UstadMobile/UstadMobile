@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.courseterminology.edit
 
 import app.cash.turbine.test
 import com.ustadmobile.core.controller.TerminologyKeys.TEACHER_KEY

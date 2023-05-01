@@ -1,11 +1,11 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.courseterminology.edit
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
-import com.ustadmobile.core.viewmodel.CourseTerminologyEditUiState
-import com.ustadmobile.core.viewmodel.CourseTerminologyEditViewModel
+import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditUiState
+import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.lib.db.entities.TerminologyEntry

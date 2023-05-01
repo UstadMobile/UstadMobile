@@ -57,7 +57,12 @@ val UstadScreenTabPanel = FC<UstadScreenTabProps> {props ->
                     overflowY = "auto".unsafeCast<Overflow>()
                 }
 
-                + USTAD_SCREENS.single { it.key == props.viewName }.component.create()
+                try {
+                    + USTAD_SCREENS.single { it.key == props.viewName }.component.create()
+                }catch(e: Exception) {
+                    throw IllegalArgumentException("Cannot find/error creating view for ${props.viewName}")
+                }
+
             }
         }
     }

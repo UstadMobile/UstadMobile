@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.view
+package com.ustadmobile.port.android.view.schedule.edit
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -21,10 +21,11 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
-import com.ustadmobile.core.viewmodel.ScheduleEditUiState
-import com.ustadmobile.core.viewmodel.ScheduleEditViewModel
+import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditUiState
+import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadTimeEditTextField
 
