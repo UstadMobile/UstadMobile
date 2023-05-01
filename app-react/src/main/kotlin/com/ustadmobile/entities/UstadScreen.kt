@@ -70,8 +70,6 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(SiteEditView.VIEW_NAME, name = "Site Edit Preview", SiteEditPreview),
     UstadScreen(SchoolDetailOverviewView.VIEW_NAME, "SchoolDetailOverview Preview",
         SchoolDetailOverviewScreenPreview),
-    UstadScreen(SchoolEditView.VIEW_NAME, "School Edit Preview",
-        SchoolEditScreenPreview),
     UstadScreen(LanguageDetailView.VIEW_NAME, name = "LanguageDetail Preview",
         LanguageDetailPreview),
     UstadScreen(ClazzEdit2View.VIEW_NAME, "Course Edit",
@@ -166,6 +164,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ClazzDetailOverviewView.VIEW_NAME, "Clazz Detail Overview",
         ClazzDetailOverviewScreen),
     UstadScreen(CourseGroupSetListView.VIEW_NAME, "Clazz Groups",ClazzGroupSetDummy),
+    UstadScreen(SchoolEditView.VIEW_NAME, "School Edit Preview",
+        SchoolEditScreenPreview),
 )
 
 
