@@ -64,8 +64,6 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         RegisterMinorWaitForParentPreview),
     UstadScreen(ScheduleEditView.VIEW_NAME, "ScheduleEdit",
         ScheduleEditScreen),
-    UstadScreen(ContentEntryEdit2View.VIEW_NAME, "ContentEntryEdit Preview",
-        ContentEntryEditScreenPreview),
     UstadScreen(SiteDetailView.VIEW_NAME, name = "Site Detail Preview", SiteDetailPreview),
     UstadScreen(SiteEditView.VIEW_NAME, name = "Site Edit Preview", SiteEditPreview),
     UstadScreen(SchoolDetailOverviewView.VIEW_NAME, "SchoolDetailOverview Preview",
@@ -166,6 +164,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ClazzDetailOverviewView.VIEW_NAME, "Clazz Detail Overview",
         ClazzDetailOverviewScreen),
     UstadScreen(CourseGroupSetListView.VIEW_NAME, "Clazz Groups",ClazzGroupSetDummy),
+    UstadScreen(ContentEntryEdit2View.VIEW_NAME, "ContentEntryEdit Preview",
+        ContentEntryEditScreenPreview),
 )
 
 
