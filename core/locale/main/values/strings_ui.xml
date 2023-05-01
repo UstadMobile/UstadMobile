@@ -1586,4 +1586,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="end_is_before_start">End is before start</string>
 
+    <string name="select_person">Select person</string>
+
 </resources>

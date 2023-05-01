@@ -34,8 +34,8 @@ import androidx.paging.compose.items
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.paging.ListPagingSource
-import com.ustadmobile.core.viewmodel.CourseTerminologyListUiState
-import com.ustadmobile.core.viewmodel.CourseTerminologyListViewModel
+import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListUiState
+import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListViewModel
 import com.ustadmobile.lib.db.entities.CourseTerminology
 
 class CourseTerminologyListFragment: UstadBaseMvvmFragment() {
@@ -121,7 +121,8 @@ fun CourseTerminologyListScreen(
     viewModel: CourseTerminologyListViewModel
 ) {
     val uiState: CourseTerminologyListUiState by viewModel.uiState.collectAsState(
-        CourseTerminologyListUiState())
+        CourseTerminologyListUiState()
+    )
 
     CourseTerminologyListScreen(
         uiState = uiState,

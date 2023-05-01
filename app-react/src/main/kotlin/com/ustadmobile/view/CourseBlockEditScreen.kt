@@ -1,8 +1,8 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
-import com.ustadmobile.core.viewmodel.CourseBlockEditViewModel
+import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
+import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.mui.components.UstadCourseBlockEdit
 import mui.system.Container
 import react.FC

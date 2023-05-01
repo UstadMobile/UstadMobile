@@ -28,8 +28,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.viewmodel.SiteEnterLinkUiState
-import com.ustadmobile.core.viewmodel.SiteEnterLinkViewModel
+import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
+import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.port.android.view.composable.UstadErrorText
 
 class SiteEnterLinkFragment : UstadBaseMvvmFragment() {

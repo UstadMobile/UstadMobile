@@ -30,10 +30,17 @@ open class ClazzAssignment {
     @PrimaryKey(autoGenerate = true)
     var caUid: Long = 0
 
+    @Deprecated("Use title on courseblock")
     var caTitle: String? = null
 
+    @Deprecated("Use description on courseblock")
     var caDescription: String? = null
 
+    /**
+     * Assignments can be for individuals or groups. If the assignment should be submitted by each,
+     * individual student, then caGroupUid = 0 (the default). If in groups, then caGroupUid is the
+     * cgsUid of the CourseGroupSet
+     */
     @ColumnInfo(defaultValue = "0")
     var caGroupUid: Long = 0
 
@@ -60,16 +67,16 @@ open class ClazzAssignment {
     @ColumnInfo(defaultValue = "1")
     var caNumberOfFiles: Int = 1
 
-    @ColumnInfo(defaultValue = "1")
+    @ColumnInfo(defaultValue = "$SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE")
     var caSubmissionPolicy: Int = SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
 
-    @ColumnInfo(defaultValue = "1")
+    @ColumnInfo(defaultValue = "$MARKED_BY_COURSE_LEADER")
     var caMarkingType: Int = MARKED_BY_COURSE_LEADER
 
     @ColumnInfo(defaultValue = "1")
     var caRequireTextSubmission: Boolean = true
 
-    @ColumnInfo(defaultValue = "1")
+    @ColumnInfo(defaultValue = "$TEXT_WORD_LIMIT")
     var caTextLimitType: Int = TEXT_WORD_LIMIT
 
     @ColumnInfo(defaultValue = "500")

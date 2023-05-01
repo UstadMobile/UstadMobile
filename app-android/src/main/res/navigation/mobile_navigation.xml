@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/home_clazzlist_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzListFragment"
+        android:name="com.ustadmobile.port.android.view.clazz.list.ClazzListFragment"
         android:label="@string/courses" />
 
     <fragment
@@ -47,12 +47,12 @@
 
     <fragment
         android:id="@+id/clazz_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzEditFragment" />
+        android:name="com.ustadmobile.port.android.view.clazz.edit.ClazzEditFragment" />
 
     <fragment
 
         android:id="@+id/clazz_list_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzListFragment" />
+        android:name="com.ustadmobile.port.android.view.clazz.list.ClazzListFragment" />
 
     <fragment
         android:id="@+id/chat_detail_dest"
@@ -60,7 +60,7 @@
 
     <fragment
         android:id="@+id/clazz_detail_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzDetailFragment" />
+        android:name="com.ustadmobile.port.android.view.clazz.detail.ClazzDetailFragment" />
 
     <fragment
         android:id="@+id/clazz_log_edit_attendance_dest"
@@ -69,7 +69,7 @@
 
     <fragment
         android:id="@+id/person_edit_dest"
-        android:name="com.ustadmobile.port.android.view.PersonEditFragment" />
+        android:name="com.ustadmobile.port.android.view.person.edit.PersonEditFragment" />
 
     <!--
      This is repeated so that it can be explicitly recognized for purposes of controlling
@@ -77,15 +77,15 @@
      -->
     <fragment
         android:id="@+id/person_edit_register_dest"
-        android:name="com.ustadmobile.port.android.view.PersonEditFragment"/>
+        android:name="com.ustadmobile.port.android.view.person.edit.PersonEditFragment"/>
 
     <fragment
         android:id="@+id/person_detail_dest"
-        android:name="com.ustadmobile.port.android.view.PersonDetailFragment" />
+        android:name="com.ustadmobile.port.android.view.person.detail.PersonDetailFragment" />
 
     <fragment
         android:id="@+id/schedule_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ScheduleEditFragment" />
+        android:name="com.ustadmobile.port.android.view.schedule.edit.ScheduleEditFragment" />
 
     <fragment
         android:id="@+id/report_edit_dest"
@@ -173,7 +173,7 @@
 
     <fragment
         android:id="@+id/clazz_assignment_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzAssignmentEditFragment" />
+        android:name="com.ustadmobile.port.android.view.clazzassignment.edit.ClazzAssignmentEditFragment" />
 
     <fragment
         android:id="@+id/assignment_peer_allocation_edit_dest"
@@ -311,7 +311,7 @@
 
     <fragment
         android:id="@+id/login_dest"
-        android:name="com.ustadmobile.port.android.view.Login2Fragment"
+        android:name="com.ustadmobile.port.android.view.login.Login2Fragment"
         android:label="@string/login"
         />
 

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
+        <import type="com.ustadmobile.port.android.view.person.detail.PersonDetailFragment"/>
         <import type="com.ustadmobile.port.android.view.CommentsBottomSheet"/>
 
         <variable name="hintText"

@@ -15,8 +15,8 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.composethemeadapter.MdcTheme
-import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
-import com.ustadmobile.core.viewmodel.CourseBlockEditViewModel
+import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
+import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.port.android.view.composable.UstadCourseBlockEdit
 
 class CourseBlockEditFragment: UstadBaseMvvmFragment() {

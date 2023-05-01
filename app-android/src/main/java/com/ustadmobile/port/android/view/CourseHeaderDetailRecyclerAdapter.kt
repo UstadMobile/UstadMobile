@@ -8,6 +8,7 @@ import com.ustadmobile.core.controller.TerminologyKeys
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toTermMap
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
+import com.ustadmobile.port.android.view.clazz.detailoverview.ClazzDetailOverviewEventListener
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI

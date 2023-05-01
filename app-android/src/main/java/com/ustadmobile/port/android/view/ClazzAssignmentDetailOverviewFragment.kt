@@ -4,6 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -22,16 +28,35 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
+import com.ustadmobile.core.viewmodel.ClazzAssignmentDetailOverviewUiState
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import androidx.compose.material.*
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import com.google.android.material.composethemeadapter.MdcTheme
+import com.ustadmobile.core.controller.SubmissionConstants
+import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
+import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
+import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItemUiState
+import com.ustadmobile.port.android.util.compose.messageIdMapResource
+import com.ustadmobile.port.android.util.compose.messageIdResource
+import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
+import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment.Companion.SUBMISSION_POLICY_MAP
+import com.ustadmobile.port.android.view.composable.*
+import java.util.*
 
 
 interface ClazzAssignmentDetailOverviewFragmentEventHandler {
@@ -423,4 +448,329 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
     }
 
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun ClazzAssignmentDetailOverviewScreen(
+    uiState: ClazzAssignmentDetailOverviewUiState,
+    onClickFilterChip: (MessageIdOption2) -> Unit = {},
+    onClickMark: (CourseAssignmentMarkWithPersonMarker?) -> Unit = {},
+    onClickNewPublicComment: () -> Unit = {},
+    onClickNewPrivateComment: () -> Unit = {},
+    onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = {},
+    onClickDeleteSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = { },
+    onClickAddTextSubmission: () -> Unit = { },
+    onClickAddFileSubmission: () -> Unit = { },
+    onClickSubmitSubmission: () -> Unit = { }
+){
+
+    val formattedDateTime = rememberFormattedDateTime(
+        timeInMillis = uiState.clazzAssignment?.block?.cbDeadlineDate ?: 0,
+        timeZoneId = TimeZone.getDefault().id
+    )
+
+    val caSubmissionPolicyText = messageIdResource(
+        SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS[
+                uiState.clazzAssignment?.caSubmissionPolicy ?:
+                ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE].messageId)
+
+    val caFileType = messageIdMapResource(
+        map = SubmissionConstants.FILE_TYPE_MAP,
+        key = uiState.clazzAssignment?.caFileType ?: ClazzAssignment.FILE_TYPE_DOC
+    )
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .defaultScreenPadding()
+    ) {
+
+        if (uiState.caDescriptionVisible){
+            item {
+                Text (
+                    text =uiState.clazzAssignment?.caDescription ?: "",
+                    modifier = Modifier.defaultItemPadding()
+                )
+            }
+        }
+
+        if (uiState.cbDeadlineDateVisible){
+            item {
+                UstadDetailField(
+                    valueText = "$formattedDateTime (${TimeZone.getDefault().id})",
+                    labelText = stringResource(id = R.string.deadline),
+                    imageId = R.drawable.ic_event_available_black_24dp,
+                    onClick = {  }
+                )
+            }
+        }
+
+        item {
+            UstadDetailField(
+                valueText = caSubmissionPolicyText,
+                labelText = stringResource(id = R.string.submission_policy),
+                imageId = SUBMISSION_POLICY_MAP[uiState.clazzAssignment?.caSubmissionPolicy]
+                    ?: R.drawable.ic_baseline_task_alt_24,
+                onClick = {  }
+            )
+        }
+
+        item {
+            UstadAssignmentSubmissionHeader(
+                uiState = uiState.submissionHeaderUiState,
+            )
+        }
+
+        item {
+            ListItem(
+              text = { Text(stringResource(R.string.submissions)) }
+            )
+        }
+
+        items(
+            items = uiState.draftSubmissionList,
+            key = { Pair(1, it.casUid) }
+        ){ submission ->
+            UstadAssignmentSubmissionListItem(
+                submission = submission,
+                onClickOpenSubmission = onClickOpenSubmission,
+                onClickDeleteSubmission = onClickDeleteSubmission,
+            )
+        }
+
+        if (uiState.addTextVisible){
+            item {
+                OutlinedButton(
+                    onClick = onClickAddTextSubmission,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultItemPadding(),
+                    enabled = uiState.fieldsEnabled,
+                ) {
+                    Text(stringResource(R.string.add_text).uppercase())
+                }
+            }
+        }
+
+        if (uiState.addFileVisible){
+            item {
+                OutlinedButton(
+                    onClick = onClickAddFileSubmission,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultItemPadding(),
+                    enabled = uiState.fieldsEnabled,
+                ) {
+                    Text(stringResource(R.string.add_file).uppercase())
+                }
+            }
+        }
+
+        if (uiState.addFileVisible) {
+
+            item {
+                Text("${stringResource(R.string.file_type_chosen)} $caFileType",
+                    modifier = Modifier.defaultItemPadding())
+            }
+
+            item {
+                Text(stringResource(R.string.max_number_of_files,
+                    uiState.clazzAssignment?.caNumberOfFiles ?: 0),
+                    modifier = Modifier.defaultItemPadding())
+            }
+        }
+
+        if (uiState.unassignedErrorVisible) {
+            item {
+                Text(uiState.unassignedError ?: "",
+                    modifier = Modifier.defaultItemPadding())
+            }
+        }
+
+        if (uiState.submitSubmissionButtonVisible){
+            item {
+                Button(
+                    onClick = onClickSubmitSubmission,
+                    enabled = uiState.fieldsEnabled,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultItemPadding(),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = colorResource(id = R.color.secondaryColor)
+                    )
+                ) {
+                    Text(stringResource(R.string.submit).uppercase(),
+                        color = contentColorFor(
+                            colorResource(id = R.color.secondaryColor)
+                        )
+                    )
+                }
+            }
+        }
+
+        items(
+            items = uiState.submittedSubmissionList,
+            key = { Pair(2, it.casUid) }
+        ){ submission ->
+            UstadAssignmentSubmissionListItem(
+                submission = submission,
+                onClickOpenSubmission = onClickOpenSubmission,
+            )
+        }
+
+        item {
+            ListItem(
+                text = { Text(stringResource(R.string.grades_class_age)) }
+            )
+        }
+
+        item {
+            UstadListFilterChipsHeader(
+                filterOptions = uiState.gradeFilterChips,
+                selectedChipId = uiState.selectedChipId,
+                enabled = uiState.fieldsEnabled,
+                onClickFilterChip = { onClickFilterChip(it) },
+            )
+        }
+
+        items(
+            items = uiState.markList,
+            key = { Pair(3, it.camUid) }
+        ){ mark ->
+            UstadCourseAssignmentMarkListItem(
+                onClickMark = onClickMark,
+                uiState = UstadCourseAssignmentMarkListItemUiState(
+                    mark = mark,
+                    block = uiState.clazzAssignment?.block ?: CourseBlock()
+                ),
+            )
+        }
+
+        item {
+            ListItem(
+                text = {Text(stringResource(R.string.class_comments))}
+            )
+        }
+
+        item {
+            UstadAddCommentListItem(
+                text = stringResource(id = R.string.add_class_comment),
+                enabled = uiState.fieldsEnabled,
+                personUid = 0,
+                onClickAddComment = { onClickNewPublicComment() }
+            )
+        }
+
+        items(
+            items = uiState.publicCommentList,
+            key = { Pair(4, it.commentsUid) }
+        ){ comment ->
+
+            UstadCommentListItem(commentWithPerson = comment)
+        }
+
+        item {
+            ListItem(
+                text = {Text(stringResource(R.string.private_comments))}
+            )
+        }
+
+        item {
+            UstadAddCommentListItem(
+                text = stringResource(id = R.string.add_private_comment),
+                enabled = uiState.fieldsEnabled,
+                personUid = 0,
+                onClickAddComment = { onClickNewPrivateComment() }
+            )
+        }
+
+        items(
+            items = uiState.privateCommentList,
+            key = { Pair(5, it.commentsUid) }
+        ){ comment ->
+            UstadCommentListItem(commentWithPerson = comment)
+        }
+    }
+}
+
+@Composable
+@Preview
+fun ClazzAssignmentDetailOverviewScreenPreview(){
+
+    val uiState = ClazzAssignmentDetailOverviewUiState(
+        addFileVisible = true,
+        addTextVisible = true,
+        hasFilesToSubmit = true,
+        deadlinePassed = false,
+        clazzAssignment = ClazzAssignmentWithCourseBlock().apply {
+            caDescription = "Read the stories and describe the main characters."
+            caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
+            caFileType =  ClazzAssignment.FILE_TYPE_DOC
+            block = CourseBlock().apply {
+                cbDeadlineDate = 1677063785
+            }
+        },
+        markList = listOf(
+            CourseAssignmentMarkWithPersonMarker().apply {
+                marker = Person().apply {
+                    firstNames = "John"
+                    lastName = "Smith"
+                    isGroup = true
+                    camMarkerSubmitterUid = 2
+                    camMarkerComment = "Comment"
+                }
+            }
+        ),
+        publicCommentList = listOf(
+            CommentsWithPerson().apply {
+                commentsUid = 1
+                commentsPerson = Person().apply {
+                    firstNames = "Bob"
+                    lastName = "Dylan"
+                }
+                commentsText = "I like this activity. Shall we discuss this in our next meeting?"
+            }
+        ),
+        privateCommentList = listOf(
+            CommentsWithPerson().apply {
+                commentsUid = 1
+                commentsPerson = Person().apply {
+                    firstNames = "Bob"
+                    lastName = "Dylan"
+                }
+                commentsText = "I like this activity. Shall we discuss this in our next meeting?"
+            }
+        ),
+        submissionHeaderUiState = UstadAssignmentSubmissionHeaderUiState(
+            assignmentStatus = CourseAssignmentSubmission.MARKED,
+            assignmentMark = AverageCourseAssignmentMark().apply {
+                averagePenalty = 12
+            }
+        ),
+        submittedSubmissionList = listOf(
+            CourseAssignmentSubmissionWithAttachment().apply {
+                casUid = 1
+                casTimestamp = 1677744388299
+                casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
+                attachment = CourseAssignmentSubmissionAttachment().apply {
+                    casaFileName = "Submitted Submission"
+                }
+            },
+        ),
+        draftSubmissionList = listOf(
+            CourseAssignmentSubmissionWithAttachment().apply {
+                casUid = 1
+                casTimestamp = 1677744388299
+                casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
+                attachment = CourseAssignmentSubmissionAttachment().apply {
+                    casaFileName = "Draft Submission"
+                }
+            },
+        )
+    )
+
+    MdcTheme {
+        ClazzAssignmentDetailOverviewScreen(uiState)
+    }
 }

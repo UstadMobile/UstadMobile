@@ -20,8 +20,8 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.viewmodel.CourseTerminologyEditUiState
-import com.ustadmobile.core.viewmodel.CourseTerminologyEditViewModel
+import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditUiState
+import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.compose.messageIdResource
@@ -122,7 +122,8 @@ fun CourseTerminologyEditScreen(
     viewModel: CourseTerminologyEditViewModel
 ) {
     val uiState: CourseTerminologyEditUiState by viewModel.uiState.collectAsState(
-        CourseTerminologyEditUiState())
+        CourseTerminologyEditUiState()
+    )
 
     CourseTerminologyEditScreen(
         uiState = uiState,

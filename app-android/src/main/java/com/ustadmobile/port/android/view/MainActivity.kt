@@ -53,6 +53,7 @@ import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.view.*
 import com.ustadmobile.port.android.impl.nav.NavHostTempFileRegistrar
 import com.ustadmobile.port.android.util.ext.registerDestinationTempFile
+import com.ustadmobile.port.android.view.person.detail.PersonDetailFragment
 import com.ustadmobile.port.android.view.util.UstadActivityWithBottomNavigation
 
 

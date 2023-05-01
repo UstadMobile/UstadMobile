@@ -1,5 +1,7 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
@@ -10,6 +12,7 @@ import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.flow.Flow
 
 
 @DoorDao
@@ -289,6 +292,32 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
 
 
     @Query("""
+        SELECT * 
+          FROM ClazzAssignment 
+         WHERE caUid = :uid
+    """)
+    abstract fun findByUidAsFlow(uid: Long): Flow<ClazzAssignment?>
+
+    @Query("""
+        SELECT EXISTS( 
+               SELECT PrsGrpMbr.groupMemberPersonUid
+                  FROM Clazz
+                       ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+                          :permission
+                          ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
+                 WHERE Clazz.clazzUid = 
+                       (SELECT caClazzUid 
+                          FROM ClazzAssignment
+                         WHERE caUid = :clazzAssignmentUid)
+                   AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid)
+    """)
+    abstract fun personHasPermissionWithClazzByAssignmentUidAsFlow(
+        accountPersonUid: Long,
+        clazzAssignmentUid: Long,
+        permission: Long
+    ): Flow<Boolean>
+
+    @Query("""
           SELECT COALESCE((
            SELECT caGroupUid
            FROM ClazzAssignment
@@ -325,5 +354,20 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
                      WHERE caUid = :uid""")
     abstract fun findByUidLive(uid: Long): LiveData<ClazzAssignment?>
 
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertListAsync(entities: List<ClazzAssignment>)
+
+    @Query("""
+        UPDATE ClazzAssignment
+           SET caActive = :active,
+               caLct = :changeTime
+         WHERE caUid IN (:uidList)   
+    """)
+    abstract suspend fun updateActiveByList(
+        uidList: List<Long>,
+        active: Boolean,
+        changeTime: Long
+    )
 
 }
