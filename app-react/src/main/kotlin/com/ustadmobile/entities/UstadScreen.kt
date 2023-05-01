@@ -205,7 +205,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         DiscussionPostEditScreen),
     UstadScreen("DiscussionPostEditViewDemo", name = "Discussion Post Edit Preview",
         DiscussionPostEditPreview),
-    
+
     UstadScreen(ClazzAssignmentDetailView.VIEW_NAME, "ClazzAssignmentDetail",
         ClazzAssignmentDetailScreen),
     UstadScreen(ClazzAssignmentDetailOverviewView.VIEW_NAME, "ClazzAssignmentDetailOverview",
