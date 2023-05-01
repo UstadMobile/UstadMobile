@@ -197,7 +197,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ClazzAssignmentDetailView.VIEW_NAME, "ClazzAssignmentDetail",
         ClazzAssignmentDetailScreen),
     UstadScreen(ClazzAssignmentDetailOverviewView.VIEW_NAME, "ClazzAssignmentDetailOverview",
-        ClazzAssignmentDetailOverviewScreenPreview)
+        ClazzAssignmentDetailOverviewScreenPreview),
     UstadScreen(ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME,
         "ClazzAssignmentDetailStudentProgressOverviewList",
         ClazzAssignmentDetailSubmissionsTab),
