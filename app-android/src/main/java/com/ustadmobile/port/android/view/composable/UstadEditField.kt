@@ -199,50 +199,6 @@ fun UstadTextEditPasswordPreview() {
 }
 
 @Composable
-@Deprecated("Should use UstadDateField")
-fun UstadDateEditTextField(
-    value: Long,
-    label: String,
-    timeZoneId: String,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    @Suppress("UNUSED_PARAMETER") //Reserved for future use
-    error: String? = null,
-    onValueChange: (Long) -> Unit = {},
-) {
-
-    val dateFormatted = rememberFormattedDate(
-        timeInMillis = value,
-        timeZoneId = timeZoneId
-    )
-
-    val context = LocalContext.current
-
-    UstadClickableTextField(
-        modifier = modifier,
-        value = dateFormatted,
-        enabled = enabled,
-        label = { Text(label) },
-        readOnly = true,
-        onValueChange = {
-
-        },
-        onClick = { },
-    )
-}
-
-@Preview
-@Composable
-private fun UstadDateTextFieldPreview() {
-    UstadDateEditTextField(
-        value = System.currentTimeMillis(),
-        label = "Date",
-        enabled = true,
-        timeZoneId = TimeZone.getDefault().id
-    )
-}
-
-@Composable
 @OptIn(ExperimentalMaterialApi::class)
 fun <T> UstadExposedDropDownMenuField(
     value: T?,

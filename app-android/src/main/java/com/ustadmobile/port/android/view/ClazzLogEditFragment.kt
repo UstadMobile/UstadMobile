@@ -3,8 +3,10 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.android.material.composethemeadapter.MdcTheme
@@ -19,7 +21,7 @@ import com.ustadmobile.core.viewmodel.ClazzLogEditUiState
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
-import com.ustadmobile.port.android.view.composable.UstadDateTimeEditTextField
+import com.ustadmobile.port.android.view.composable.UstadDateTimeField
 
 
 interface ClazzLogEditFragmentEventHandler {
@@ -108,12 +110,12 @@ private fun ClazzLogEditScreen(
     uiState: ClazzLogEditUiState = ClazzLogEditUiState(),
     onChangeClazzLog: (ClazzLog?) -> Unit = {},
 ) {
-    UstadDateTimeEditTextField(
+    UstadDateTimeField(
+        modifier = Modifier.fillMaxWidth().testTag("log_datetime"),
         value = uiState.clazzLog?.logDate ?: 0L,
-        dateLabel = stringResource(id = R.string.date),
-        timeLabel = stringResource(R.string.time),
+        dateLabel = { Text(stringResource(id = R.string.date)) },
+        timeLabel = { Text(stringResource(R.string.time)) },
         timeZoneId = uiState.timeZone,
-        modifier = Modifier.fillMaxWidth(),
         onValueChange = {
             onChangeClazzLog(uiState.clazzLog?.shallowCopy {
                 logDate = it
