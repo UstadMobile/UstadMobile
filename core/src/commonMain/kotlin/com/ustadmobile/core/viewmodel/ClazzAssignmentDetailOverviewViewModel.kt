@@ -2,40 +2,50 @@ package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.db.dao.CourseAssignmentMarkDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.util.ext.isDateSet
+import com.ustadmobile.core.util.ext.whenSubscribed
+import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import org.kodein.di.DI
 import kotlin.jvm.JvmInline
 
 
 data class ClazzAssignmentDetailOverviewUiState(
 
+    val assignment: ClazzAssignment? = null,
 
-    val clazzAssignment: ClazzAssignmentWithCourseBlock? = null,
+    val courseBlock: CourseBlock? = null,
 
-    val draftSubmissionList: List<CourseAssignmentSubmissionWithAttachment> =
-        emptyList(),
+    internal val submitterUid: Long = 0,
+
+    val submissionMark: AverageCourseAssignmentMark? = null,
 
     val submittedSubmissionList: List<CourseAssignmentSubmissionWithAttachment> =
         emptyList(),
 
-    val markList: List<CourseAssignmentMarkWithPersonMarker> = emptyList(),
+    val draftSubmissionList: List<CourseAssignmentSubmissionWithAttachment> =
+        emptyList(),
 
-    val addedCourseAssignmentSubmission: List<CourseAssignmentSubmissionWithAttachment> = emptyList(),
+    val addTextSubmissionVisible: Boolean = true,
+
+    val addFileSubmissionVisible: Boolean = true,
+
+    val markList: List<CourseAssignmentMarkWithPersonMarker> = emptyList(),
 
     val publicCommentList: List<CommentsWithPerson> = emptyList(),
 
     val privateCommentList: List<CommentsWithPerson> = emptyList(),
 
     val showPrivateComments: Boolean = true,
-
-    val showSubmission: Boolean = true,
-
-    val addTextSubmissionVisible: Boolean = true,
-
-    val addFileSubmissionVisible: Boolean = true,
-
-    val submissionMark: AverageCourseAssignmentMark? = null,
 
     val submissionStatus: Int? = null,
 
@@ -53,8 +63,6 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val hasFilesToSubmit: Boolean = false,
 
-    val deadlinePassed: Boolean = false,
-
     val unassignedError: String? = null,
 
     val addTextVisible: Boolean = false,
@@ -64,16 +72,54 @@ data class ClazzAssignmentDetailOverviewUiState(
 ) {
 
     val caDescriptionVisible: Boolean
-        get() = !clazzAssignment?.caDescription.isNullOrBlank()
+        get() = !assignment?.caDescription.isNullOrBlank()
 
     val cbDeadlineDateVisible: Boolean
-        get() = clazzAssignment?.block?.cbDeadlineDate.isDateSet()
+        get() = courseBlock?.cbDeadlineDate.isDateSet()
 
     val submitSubmissionButtonVisible: Boolean
-        get() = hasFilesToSubmit && !deadlinePassed && unassignedError.isNullOrBlank()
+        get() = draftSubmissionList.isNotEmpty()
 
     val unassignedErrorVisible: Boolean
         get() = !unassignedError.isNullOrBlank()
+
+    val showClassComments: Boolean
+        get() = assignment?.caClassCommentEnabled == true
+
+    val activeUserIsSubmitter: Boolean
+        get() = submitterUid != 0L
+
+    val isWithinDeadlineOrGracePeriod: Boolean
+        get() {
+            val timeNow = systemTimeInMillis()
+            if((courseBlock?.cbDeadlineDate ?: UNSET_DISTANT_FUTURE) < timeNow) {
+                return true
+            }
+            if(courseBlock?.cbGracePeriodDate.isDateSet() &&
+                (courseBlock?.cbGracePeriodDate ?: 0L) < timeNow
+            ) {
+                return true
+            }
+
+            return false
+        }
+
+    val activeUserCanSubmit: Boolean
+        get() {
+            if(!activeUserIsSubmitter)
+                return false
+
+            if(!isWithinDeadlineOrGracePeriod)
+                return false
+
+            if(assignment?.caSubmissionPolicy != ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED &&
+                    submittedSubmissionList.isNotEmpty()
+            ) {
+                return false
+            }
+
+            return true
+        }
 
 }
 
@@ -87,5 +133,41 @@ value class CourseAssignmentMarkWithPersonMarkerUiState(
 
     val markerGroupNameVisible: Boolean
         get() = mark.isGroup && mark.camMarkerSubmitterUid != 0L
+
+}
+
+class ClazzAssignmentDetailOverviewViewModel(
+    di: DI,
+    savedStateHandle: UstadSavedStateHandle,
+) : DetailViewModel<ClazzAssignment>(
+    di, savedStateHandle, ClazzAssignmentDetailOverviewView.VIEW_NAME
+){
+
+    private val _uiState = MutableStateFlow(ClazzAssignmentDetailOverviewUiState())
+
+    val uiState: Flow<ClazzAssignmentDetailOverviewUiState> = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            _appUiState.whenSubscribed {
+                launch {
+                    activeRepo.clazzAssignmentDao.findAssignmentCourseBlockAndSubmitterUidAsFlow(
+                        assignmentUid = entityUidArg,
+                        accountPersonUid = accountManager.activeAccount.personUid,
+                    ).collect { assignmentData ->
+                        _uiState.update { prev ->
+                            prev.copy(
+                                assignment = assignmentData?.clazzAssignment,
+                                courseBlock = assignmentData?.courseBlock,
+                                submitterUid = assignmentData?.submitterUid ?: 0
+                            )
+                        }
+                    }
+                }
+
+            }
+        }
+
+    }
 
 }

@@ -43,12 +43,10 @@ import org.kodein.di.on
 import androidx.compose.material.*
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.compose.messageIdResource
@@ -466,18 +464,18 @@ fun ClazzAssignmentDetailOverviewScreen(
 ){
 
     val formattedDateTime = rememberFormattedDateTime(
-        timeInMillis = uiState.clazzAssignment?.block?.cbDeadlineDate ?: 0,
+        timeInMillis = uiState.courseBlock?.cbDeadlineDate ?: 0,
         timeZoneId = TimeZone.getDefault().id
     )
 
     val caSubmissionPolicyText = messageIdResource(
         SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS[
-                uiState.clazzAssignment?.caSubmissionPolicy ?:
+                uiState.assignment?.caSubmissionPolicy ?:
                 ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE].messageId)
 
     val caFileType = messageIdMapResource(
         map = SubmissionConstants.FILE_TYPE_MAP,
-        key = uiState.clazzAssignment?.caFileType ?: ClazzAssignment.FILE_TYPE_DOC
+        key = uiState.assignment?.caFileType ?: ClazzAssignment.FILE_TYPE_DOC
     )
 
     LazyColumn(
@@ -489,7 +487,7 @@ fun ClazzAssignmentDetailOverviewScreen(
         if (uiState.caDescriptionVisible){
             item {
                 Text (
-                    text =uiState.clazzAssignment?.caDescription ?: "",
+                    text =uiState.assignment?.caDescription ?: "",
                     modifier = Modifier.defaultItemPadding()
                 )
             }
@@ -510,7 +508,7 @@ fun ClazzAssignmentDetailOverviewScreen(
             UstadDetailField(
                 valueText = caSubmissionPolicyText,
                 labelText = stringResource(id = R.string.submission_policy),
-                imageId = SUBMISSION_POLICY_MAP[uiState.clazzAssignment?.caSubmissionPolicy]
+                imageId = SUBMISSION_POLICY_MAP[uiState.assignment?.caSubmissionPolicy]
                     ?: R.drawable.ic_baseline_task_alt_24,
                 onClick = {  }
             )
@@ -576,7 +574,7 @@ fun ClazzAssignmentDetailOverviewScreen(
 
             item {
                 Text(stringResource(R.string.max_number_of_files,
-                    uiState.clazzAssignment?.caNumberOfFiles ?: 0),
+                    uiState.assignment?.caNumberOfFiles ?: 0),
                     modifier = Modifier.defaultItemPadding())
             }
         }
@@ -642,7 +640,7 @@ fun ClazzAssignmentDetailOverviewScreen(
                 onClickMark = onClickMark,
                 uiState = UstadCourseAssignmentMarkListItemUiState(
                     mark = mark,
-                    block = uiState.clazzAssignment?.block ?: CourseBlock()
+                    block = uiState.courseBlock ?: CourseBlock()
                 ),
             )
         }
@@ -702,15 +700,6 @@ fun ClazzAssignmentDetailOverviewScreenPreview(){
         addFileVisible = true,
         addTextVisible = true,
         hasFilesToSubmit = true,
-        deadlinePassed = false,
-        clazzAssignment = ClazzAssignmentWithCourseBlock().apply {
-            caDescription = "Read the stories and describe the main characters."
-            caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
-            caFileType =  ClazzAssignment.FILE_TYPE_DOC
-            block = CourseBlock().apply {
-                cbDeadlineDate = 1677063785
-            }
-        },
         markList = listOf(
             CourseAssignmentMarkWithPersonMarker().apply {
                 marker = Person().apply {
@@ -740,12 +729,6 @@ fun ClazzAssignmentDetailOverviewScreenPreview(){
                     lastName = "Dylan"
                 }
                 commentsText = "I like this activity. Shall we discuss this in our next meeting?"
-            }
-        ),
-        submissionHeaderUiState = UstadAssignmentSubmissionHeaderUiState(
-            assignmentStatus = CourseAssignmentSubmission.MARKED,
-            assignmentMark = AverageCourseAssignmentMark().apply {
-                averagePenalty = 12
             }
         ),
         submittedSubmissionList = listOf(

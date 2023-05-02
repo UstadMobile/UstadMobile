@@ -370,4 +370,39 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
         changeTime: Long
     )
 
+    @Query("""
+        WITH PersonIsStudent(isStudent)
+             AS (SELECT EXISTS(
+                        SELECT ClazzEnrolment.clazzEnrolmentPersonUid
+                           FROM ClazzEnrolment
+                          WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+                            AND ClazzEnrolment.clazzEnrolmentClazzUid = 
+                                (SELECT caClazzUid 
+                                   FROM ClazzAssignment
+                                  WHERE caUid = :assignmentUid) 
+                            AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}))
+                        
+        SELECT ClazzAssignment.*,
+               CourseBlock.*,
+               (CASE 
+                   WHEN NOT (SELECT isStudent FROM PersonIsStudent) THEN 0 
+                   WHEN (ClazzAssignment.caGroupUid = 0) 
+                    AND (SELECT isStudent FROM PersonIsStudent) THEN :accountPersonUid 
+                   ELSE COALESCE(
+                                 (SELECT cgmGroupNumber
+                                    FROM CourseGroupMember
+                                   WHERE cgmSetUid = ClazzAssignment.caGroupUid
+                                     AND cgmPersonUid = :accountPersonUid), 0)
+                   END) AS submitterUid
+                   
+          FROM ClazzAssignment
+               JOIN CourseBlock
+                    ON CourseBlock.cbEntityUid = ClazzAssignment.caUid
+         WHERE ClazzAssignment.caUid = :assignmentUid           
+    """)
+    abstract fun findAssignmentCourseBlockAndSubmitterUidAsFlow(
+        assignmentUid: Long,
+        accountPersonUid: Long,
+    ): Flow<ClazzAssignmentCourseBlockAndSubmitterUid?>
+
 }

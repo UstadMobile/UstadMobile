@@ -6,7 +6,6 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.ClazzAssignmentDetailOverviewUiState
-import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
@@ -61,18 +60,18 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
         val strings = useStringsXml()
 
         val formattedDateTime = useFormattedDateAndTime(
-            timeInMillis = props.uiState.clazzAssignment?.block?.cbDeadlineDate ?: 0,
+            timeInMillis = props.uiState.courseBlock?.cbDeadlineDate ?: 0,
             timezoneId = TimeZone.currentSystemDefault().id
         )
 
         val caSubmissionPolicyText = strings[SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS[
-                props.uiState.clazzAssignment?.caSubmissionPolicy ?:
+                props.uiState.assignment?.caSubmissionPolicy ?:
                 ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE].messageId]
 
 
         val caFileType = strings[
                 SubmissionConstants.FILE_TYPE_MAP[
-                        props.uiState.clazzAssignment?.caFileType] ?: MessageID.document
+                        props.uiState.assignment?.caFileType] ?: MessageID.document
         ]
 
         Container {
@@ -83,7 +82,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
 
                 if (props.uiState.caDescriptionVisible){
                     Typography {
-                        + (props.uiState.clazzAssignment?.caDescription ?: "")
+                        + (props.uiState.assignment?.caDescription ?: "")
                     }
                 }
 
@@ -102,7 +101,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                     valueText = ReactNode(caSubmissionPolicyText)
                     labelText = strings[MessageID.submission_policy]
                     icon = (ASSIGNMENT_STATUS_MAP[
-                            props.uiState.clazzAssignment?.caSubmissionPolicy] ?: Done.create())
+                            props.uiState.assignment?.caSubmissionPolicy] ?: Done.create())
                     onClick = {  }
                 }
 
@@ -161,7 +160,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                         Typography{
                             + strings[MessageID.max_number_of_files]
                                 .replace("%1\$s",
-                                    (props.uiState.clazzAssignment?.caNumberOfFiles ?: 0)
+                                    (props.uiState.assignment?.caNumberOfFiles ?: 0)
                                         .toString())
                         }
                     }
@@ -210,7 +209,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                             onClickMark = props.onClickMark
                             uiState = UstadCourseAssignmentMarkListItemUiState(
                                 mark = markItem,
-                                block = props.uiState.clazzAssignment?.block ?: CourseBlock()
+                                block = props.uiState.courseBlock ?: CourseBlock()
                             )
                         }
                     }
@@ -270,16 +269,6 @@ val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
         addFileVisible = true,
         addTextVisible = true,
         hasFilesToSubmit = true,
-        deadlinePassed = false,
-        clazzAssignment = ClazzAssignmentWithCourseBlock().apply {
-            caDescription = "Read the stories and describe the main characters."
-            caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
-            caFileType =  ClazzAssignment.FILE_TYPE_DOC
-            block = CourseBlock().apply {
-                cbDeadlineDate = 1677063785
-                cbLateSubmissionPenalty = 12
-            }
-        },
         markList = listOf(
             CourseAssignmentMarkWithPersonMarker().apply {
                 marker = Person().apply {
@@ -310,12 +299,6 @@ val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
                     lastName = "Dylan"
                 }
                 commentsText = "I like this activity. Shall we discuss this in our next meeting?"
-            }
-        ),
-        submissionHeaderUiState = UstadAssignmentSubmissionHeaderUiState(
-            assignmentStatus = CourseAssignmentSubmission.MARKED,
-            assignmentMark = AverageCourseAssignmentMark().apply {
-                averagePenalty = 12
             }
         ),
         submittedSubmissionList = listOf(
