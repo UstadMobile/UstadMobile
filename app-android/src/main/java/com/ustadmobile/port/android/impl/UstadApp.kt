@@ -217,9 +217,6 @@ open class UstadApp : Application(), DIAware {
 
         bind<Gson>() with singleton {
             val builder = GsonBuilder()
-            builder.registerTypeAdapter(Statement::class.java, StatementSerializer())
-            builder.registerTypeAdapter(Statement::class.java, StatementDeserializer())
-            builder.registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
             builder.create()
         }
 

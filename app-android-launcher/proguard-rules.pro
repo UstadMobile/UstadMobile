@@ -28,9 +28,6 @@
 -keep public class com.ustadmobile.lib.db.entities.**{
        *;
 }
--keep public class com.ustadmobile.lib.db.sync.entities.**{
-       *;
-}
 -keep public class com.ustadmobile.core.db.**{
     public <init>(...);
 }
@@ -42,36 +39,11 @@
 }
 
 -keep public class com.toughra.ustadmobile.BuildConfig
--keep public class com.ustadmobile.codec2.Codec2{
-        *;
-}
 
-#content editor
--keep public class com.ustadmobile.port.android.umeditor.**{
-       *;
-}
 
 -keep public class com.ustadmobile.core.contentformats.metadata.*{
     *;
 }
-
- #
- ###################################################################################################
- #### OKHttp3 rules as per
- ## https://github.com/square/okhttp/blob/master/okhttp/src/main/resources/META-INF/proguard/okhttp3.pro
- ###################################################################################################
- ## JSR 305 annotations are for embedding nullability information.
--dontwarn javax.annotation.**
- #
- ## A resource is loaded with a relative path so the package of this class must be preserved.
--keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
- #
- ## Animal Sniffer compileOnly dependency to ensure APIs are compatible with older versions of Java.
--dontwarn org.codehaus.mojo.animal_sniffer.*
- #
- ## OkHttp platform used only on JVM and when Conscrypt dependency is available.
--dontwarn okhttp3.internal.platform.ConscryptPlatform
- ####
 
  # Prevent proguard from stripping interface information from TypeAdapterFactory,
  # JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)
@@ -91,9 +63,10 @@
 -dontwarn org.openjsse.net.ssl.OpenJSSE
 -dontwarn org.slf4j.impl.StaticLoggerBinder
 
+-dontwarn java.lang.invoke.StringConcatFactory
+
 # As per KodeIn DI docs:
 # https://kosi-libs.org/kodein/7.19/framework/android.html#_proguard_configuration
--dontwarn java.lang.invoke.StringConcatFactory
 
 -keep, allowobfuscation, allowoptimization class org.kodein.type.TypeReference
 -keep, allowobfuscation, allowoptimization class org.kodein.type.JVMAbstractTypeToken$Companion$WrappingTest

@@ -123,7 +123,7 @@ ext {
     version_napier = "2.6.1"
     version_browser_proxy = "2.1.5"
     version_logback = "1.4.5"
-    version_kodein_di = "7.20.0"
+    version_kodein_di = "7.20.1"
     version_netty_tcnative = "2.0.57.Final"
     version_quartz_scheduler = "2.3.2"
     version_httpcomponents_core5 = "5.2.1"
