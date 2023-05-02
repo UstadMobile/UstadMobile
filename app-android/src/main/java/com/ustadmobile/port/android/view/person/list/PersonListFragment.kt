@@ -20,7 +20,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.port.android.view.composable.UstadListSortHeader
 import androidx.paging.compose.items
-import com.google.accompanist.themeadapter.appcompat.MdcTheme
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.*
 import com.ustadmobile.core.viewmodel.person.list.PersonListUiState

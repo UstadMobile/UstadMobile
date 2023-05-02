@@ -44,7 +44,7 @@ import androidx.compose.material.*
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.themeadapter.appcompat.MdcTheme
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
 import com.ustadmobile.core.util.MessageIdOption2

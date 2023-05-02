@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
-import com.google.accompanist.themeadapter.appcompat.MdcTheme
+import com.google.accompanist.themeadapter.material.MdcTheme
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

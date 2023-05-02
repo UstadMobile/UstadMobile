@@ -147,7 +147,7 @@ ext {
     version_compose_accompanist = "0.28.0"
 
     //As per https://github.com/material-components/material-components-android-compose-theme-adapter/releases
-    version_compose_theme_adapter = "1.2.1"
+    version_compose_theme_adapter = "0.31.1-alpha"
 
     //List reordering for compose: https://github.com/aclassen/ComposeReorderable
     version_composereorderable = "0.9.6"
