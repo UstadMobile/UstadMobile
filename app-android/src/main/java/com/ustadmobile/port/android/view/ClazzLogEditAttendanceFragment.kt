@@ -25,7 +25,7 @@ import java.lang.Integer.max
 import java.lang.Integer.min
 import java.util.*
 import com.ustadmobile.core.viewmodel.ClazzLogEditAttendanceUiState
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.accompanist.themeadapter.appcompat.MdcTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items

@@ -39,7 +39,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.accompanist.themeadapter.appcompat.MdcTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntry2DetailBinding

@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.*
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.accompanist.themeadapter.appcompat.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.*
 import com.ustadmobile.core.generated.locale.MessageID

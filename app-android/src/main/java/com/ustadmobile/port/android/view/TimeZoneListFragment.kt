@@ -22,7 +22,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.accompanist.themeadapter.appcompat.MdcTheme
 import com.ustadmobile.core.util.ext.formattedString
 import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
 import com.ustadmobile.core.viewmodel.TimezoneListUiState

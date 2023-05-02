@@ -15,7 +15,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.accompanist.themeadapter.appcompat.MdcTheme
 import com.toughra.ustadmobile.databinding.FragmentScopedGrantEditBinding
 import com.ustadmobile.core.controller.ScopedGrantEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter

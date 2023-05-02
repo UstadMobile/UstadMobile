@@ -317,7 +317,7 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-tooling"
     implementation "androidx.activity:activity-compose:$version_activity_compose"
     implementation "androidx.compose.material:material-icons-extended"
-    implementation "com.google.android.material:compose-theme-adapter:$version_compose_theme_adapter"
+    implementation "com.google.accompanist:accompanist-themeadapter-appcompat:$version_compose_theme_adapter"
     implementation "com.google.accompanist:accompanist-pager:$version_compose_accompanist"
     implementation "com.google.accompanist:accompanist-pager-indicators:$version_compose_accompanist"
     implementation "org.burnoutcrew.composereorderable:reorderable:$version_composereorderable"

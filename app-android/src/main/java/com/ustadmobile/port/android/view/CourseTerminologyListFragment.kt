@@ -31,7 +31,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.accompanist.themeadapter.appcompat.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListUiState
