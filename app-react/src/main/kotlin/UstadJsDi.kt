@@ -70,7 +70,7 @@ internal fun ustadJsDi(
         ).also { impl ->
             appConfigs.forEach {
                 val value = when(it.key){
-                    AppConfig.KEY_API_URL -> apiUrl
+                    AppConfigKeys.KEY_API_URL -> apiUrl
                     else -> it.value
                 }
                 impl.setAppPref(it.key, value)
@@ -155,10 +155,10 @@ internal fun ustadJsDi(
     bind<Pbkdf2Params>() with singleton {
         val systemImpl: UstadMobileSystemImpl = instance()
         val numIterations = systemImpl.getAppConfigInt(
-            AppConfig.KEY_PBKDF2_ITERATIONS,
+            AppConfigKeys.KEY_PBKDF2_ITERATIONS,
             UstadMobileConstants.PBKDF2_ITERATIONS, this)
         val keyLength = systemImpl.getAppConfigInt(
-            AppConfig.KEY_PBKDF2_KEYLENGTH,
+            AppConfigKeys.KEY_PBKDF2_KEYLENGTH,
             UstadMobileConstants.PBKDF2_KEYLENGTH, this)
 
         Pbkdf2Params(numIterations, keyLength)

@@ -3,7 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.AppConfigKeys
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.lifecycle.DoorState
@@ -70,7 +70,7 @@ class UstadBaseControllerTest {
         systemImpl = mock {
             on { getAppConfigDefaultFirstDest() }.thenReturn(ContentEntryList2View.VIEW_NAME)
 
-            on{ getAppConfigBoolean(eq(AppConfig.KEY_ALLOW_SERVER_SELECTION), any()) }.thenReturn(true)
+            on{ getAppConfigBoolean(eq(AppConfigKeys.KEY_ALLOW_SERVER_SELECTION), any()) }.thenReturn(true)
         }
 
         mockView = mock  { }

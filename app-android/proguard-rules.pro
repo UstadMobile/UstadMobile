@@ -30,3 +30,13 @@
     kotlinx.serialization.KSerializer serializer(...);
 }
 # End rules as per Kotlinx Serialization README
+
+# As per KodeIn DI docs:
+# https://kosi-libs.org/kodein/7.19/framework/android.html#_proguard_configuration
+-dontwarn java.lang.invoke.StringConcatFactory
+
+-keep, allowobfuscation, allowoptimization class org.kodein.type.TypeReference
+-keep, allowobfuscation, allowoptimization class org.kodein.type.JVMAbstractTypeToken$Companion$WrappingTest
+
+-keep, allowobfuscation, allowoptimization class * extends org.kodein.type.TypeReference
+-keep, allowobfuscation, allowoptimization class * extends org.kodein.type.JVMAbstractTypeToken$Companion$WrappingTest

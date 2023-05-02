@@ -28,7 +28,6 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.plugins.json.*
 import io.ktor.serialization.gson.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.ListSerializer
@@ -115,7 +114,7 @@ class UstadAccountManagerTest {
     @Before
     fun setup() {
         mockSystemImpl = mock {
-            on { getAppConfigString(eq(AppConfig.KEY_API_URL), any()) }
+            on { getAppConfigString(eq(AppConfigKeys.KEY_API_URL), any()) }
                     .thenReturn("http://app.ustadmobile.com/")
         }
 

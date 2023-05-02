@@ -367,7 +367,7 @@ abstract class UstadBaseController<V : UstadView>(
         val impl: UstadMobileSystemImpl = direct.instance()
         val numAccountsRemaining = accountManager.activeSessionCount()
         val canSelectServer = if(UmPlatformUtil.isWeb) false else impl.getAppConfigBoolean(
-            AppConfig.KEY_ALLOW_SERVER_SELECTION, context)
+            AppConfigKeys.KEY_ALLOW_SERVER_SELECTION, context)
 
         //Wherever the user is going now, we must wipe the backstack
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(

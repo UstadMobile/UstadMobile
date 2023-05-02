@@ -5,6 +5,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.doublePbkdf2Hash
 import com.ustadmobile.core.util.ext.grantScopedPermission
@@ -30,16 +31,16 @@ import java.io.File
 fun UmAppDatabase.insertCourseTerminology(di: DI){
     val (db, repo) = requireDbAndRepo()
     val termList = db.courseTerminologyDao.findAllCourseTerminologyList()
+    val supportLangConfig: SupportedLanguagesConfig = di.direct.instance()
     if(termList.isEmpty()) {
 
         val impl: UstadMobileSystemImpl by di.instance()
         val json: Json by di.instance()
 
-        val languageOptions = impl.getAllUiLanguagesList()
+        val languageOptions = supportLangConfig.supportedUiLanguages
         val terminologyList = mutableListOf<CourseTerminology>()
 
         languageOptions.forEach { pair ->
-            if(pair.langCode.isEmpty()) return@forEach
 
             terminologyList.add(CourseTerminology().apply {
                 ctUid = (pair.langCode[0].code shl(8)) + (pair.langDisplay[1].code).toLong()

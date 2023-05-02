@@ -1,6 +1,5 @@
 
 plugins {
-    id 'maven-publish'
     id 'com.android.library'
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'org.jetbrains.kotlin.android'
@@ -141,12 +140,12 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
 }
 
@@ -461,39 +460,3 @@ dependencies {
     kaptAndroidTest "androidx.databinding:databinding-compiler:$version_androidx_databinding"
 }
 
-task sourceJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    classifier "source"
-}
-
-afterEvaluate {
-    publishing {
-        publications {
-            release(MavenPublication) {
-                // Applies the component for the release build variant.
-                from components.release
-
-                // You can then customize attributes of the publication as shown below.
-                groupId = rootProject.group
-                artifactId = project.name
-                version = rootProject.version
-            }
-            // Creates a Maven publication called “debug”.
-            debug(MavenPublication) {
-                // Applies the component for the debug build variant.
-                from components.debug
-
-                groupId = rootProject.group
-                artifactId = project.name
-                version = rootProject.version
-            }
-        }
-
-
-        repositories {
-            maven {
-                url rootProject.ext.buildConfigProperties['repo.dir']
-            }
-        }
-    }
-}

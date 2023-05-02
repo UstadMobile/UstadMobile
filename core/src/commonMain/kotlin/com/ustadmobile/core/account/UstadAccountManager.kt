@@ -1,7 +1,7 @@
 package com.ustadmobile.core.account
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.AppConfigKeys
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.encryptWithPbkdf2
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
@@ -120,7 +120,7 @@ class UstadAccountManager(
 
 
         val activeEndpointStr = systemImpl.getAppPref(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY)
-            ?: systemImpl.getAppConfigString(AppConfig.KEY_API_URL, MANIFEST_URL_FALLBACK)
+            ?: systemImpl.getAppConfigString(AppConfigKeys.KEY_API_URL, MANIFEST_URL_FALLBACK)
             ?: MANIFEST_URL_FALLBACK
 
         _activeEndpoint = atomic(Endpoint(activeEndpointStr))

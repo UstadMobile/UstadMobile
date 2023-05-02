@@ -2,7 +2,7 @@ package com.ustadmobile.core.viewmodel.person.edit
 
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.AppConfigKeys
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import org.kodein.di.DI
-import org.kodein.di.instance
 
 data class PersonEditUiState(
 
@@ -95,10 +94,10 @@ class PersonEditViewModel(
         get() = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
     private val serverUrl = savedStateHandle[UstadView.ARG_SERVER_URL]
-        ?: systemImpl.getAppConfigString(AppConfig.KEY_API_URL, "http://localhost") ?: ""
+        ?: systemImpl.getAppConfigString(AppConfigKeys.KEY_API_URL, "http://localhost") ?: ""
 
     private val nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: systemImpl.getAppConfigString(
-        AppConfig.KEY_FIRST_DEST, ContentEntryList2View.VIEW_NAME
+        AppConfigKeys.KEY_FIRST_DEST, ContentEntryList2View.VIEW_NAME
     ) ?: ContentEntryList2View.VIEW_NAME
 
     init {

@@ -48,6 +48,7 @@ import com.ustadmobile.core.db.PermissionManagementIncomingReplicationListener
 import com.ustadmobile.core.contentjob.DummyContentPluginUploader
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.db.ext.preload
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.lib.util.SysPathUtil
@@ -166,6 +167,8 @@ fun Application.umRestApplication(
 
     di {
         import(CommonJvmDiModule)
+        bind<SupportedLanguagesConfig>() with singleton { SupportedLanguagesConfig() }
+
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {
             File(tmpRootDir, context.identifier(dbMode)).also {
                 it.takeIf { !it.exists() }?.mkdirs()
@@ -323,10 +326,10 @@ fun Application.umRestApplication(
         bind<Pbkdf2Params>() with singleton {
             val systemImpl: UstadMobileSystemImpl = instance()
             val numIterations = systemImpl.getAppConfigInt(
-                AppConfig.KEY_PBKDF2_ITERATIONS,
+                AppConfigKeys.KEY_PBKDF2_ITERATIONS,
                 UstadMobileConstants.PBKDF2_ITERATIONS, context)
             val keyLength = systemImpl.getAppConfigInt(
-                AppConfig.KEY_PBKDF2_KEYLENGTH,
+                AppConfigKeys.KEY_PBKDF2_KEYLENGTH,
                 UstadMobileConstants.PBKDF2_KEYLENGTH, context)
 
             Pbkdf2Params(numIterations, keyLength)

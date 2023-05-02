@@ -6,7 +6,7 @@ import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import org.mockito.kotlin.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.AppConfigKeys
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -196,7 +196,7 @@ class AccountListPresenterTest {
     @Test
     fun givenSelectServerAllowed_whenAccountButtonClicked_thenShouldOpenGetStartedScreen(){
         impl.stub {
-            on{getAppConfigBoolean(eq(AppConfig.KEY_ALLOW_SERVER_SELECTION), any())}.thenReturn(true)
+            on{getAppConfigBoolean(eq(AppConfigKeys.KEY_ALLOW_SERVER_SELECTION), any())}.thenReturn(true)
         }
         val presenter = AccountListPresenter(context, mapOf(), mockView, di, mockedLifecycleOwner)
 
@@ -251,7 +251,7 @@ class AccountListPresenterTest {
         }
 
         impl.stub {
-            on{getAppConfigBoolean(eq(AppConfig.KEY_ALLOW_SERVER_SELECTION), any())}.thenReturn(true)
+            on{getAppConfigBoolean(eq(AppConfigKeys.KEY_ALLOW_SERVER_SELECTION), any())}.thenReturn(true)
         }
 
         val presenter = AccountListPresenter(context, mapOf(), mockView, di, mockedLifecycleOwner)
@@ -282,7 +282,7 @@ class AccountListPresenterTest {
         }
 
         impl.stub {
-            on{getAppConfigBoolean(eq(AppConfig.KEY_ALLOW_SERVER_SELECTION), any())}
+            on{getAppConfigBoolean(eq(AppConfigKeys.KEY_ALLOW_SERVER_SELECTION), any())}
                 .thenReturn(false)
         }
 

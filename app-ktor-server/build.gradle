@@ -2,15 +2,13 @@
 plugins {
     id 'application'
     id 'kotlin'
-    id 'maven-publish'
-
     id 'com.github.johnrengelman.shadow' version "$version_shadow"
     id 'kotlinx-serialization'
 }
 
 
 compileKotlin{
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "17"
     kotlinOptions {
         freeCompilerArgs += "-Xopt-in=com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview"
     }
@@ -18,7 +16,7 @@ compileKotlin{
 }
 
 compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "17"
     kotlinOptions {
         freeCompilerArgs += "-Xopt-in=com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview"
     }
@@ -132,8 +130,8 @@ shadowJar {
 
 }
 
-sourceCompatibility = "8"
-targetCompatibility = "8"
+sourceCompatibility = "17"
+targetCompatibility = "17"
 
 if(findProperty("ktorbundleproductionjs") == "true") {
     //Required to ensure that JS resources are ready before any other task copies them etc.

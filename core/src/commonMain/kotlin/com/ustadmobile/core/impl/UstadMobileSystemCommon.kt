@@ -107,7 +107,7 @@ abstract class UstadMobileSystemCommon {
      * selecting to continue as a guest.
      */
     fun getAppConfigDefaultFirstDest(): String {
-        return getAppConfigString(AppConfig.KEY_FIRST_DEST, null)
+        return getAppConfigString(AppConfigKeys.KEY_FIRST_DEST, null)
             ?: ClazzList2View.VIEW_NAME_HOME
     }
 
@@ -283,7 +283,7 @@ abstract class UstadMobileSystemCommon {
     @JsName("getAllUiLanguagesList")
     open fun getAllUiLanguagesList(): List<UiLanguage> {
         val languagesConfigVal = getAppConfigString(
-            AppConfig.KEY_SUPPORTED_LANGUAGES,
+            AppConfigKeys.KEY_SUPPORTED_LANGUAGES,
             ""
         ) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
         val availableLangs = languagesConfigVal.split(",").sorted()
@@ -370,10 +370,6 @@ abstract class UstadMobileSystemCommon {
         val currentlyDisplayedLocale = getDisplayedLocale()
         return !(currentlyDisplayedLocale != null && oldLocale != null
                 && oldLocale.substring(0, 2) == currentlyDisplayedLocale.substring(0, 2))
-    }
-
-    protected fun getContentDirName(context: Any): String? {
-        return getAppConfigString(AppConfig.KEY_CONTENT_DIR_NAME, DEFAULT_CONTENT_DIR_NAME)
     }
 
 

@@ -111,7 +111,7 @@ actual open class UstadMobileSystemImpl(
             val di: DI by closestDI(context)
             val impl : UstadMobileSystemImpl = di.direct.instance()
 
-            val baseName = impl.getAppConfigString(AppConfig.KEY_APP_BASE_NAME, "") + "-" +
+            val baseName = impl.getAppConfigString(AppConfigKeys.KEY_APP_BASE_NAME, "") + "-" +
                     impl.getVersion(context)
 
 

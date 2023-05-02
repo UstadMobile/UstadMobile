@@ -7,7 +7,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabaseJsImplementations
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
-import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.AppConfigKeys
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.Snack
@@ -37,9 +37,6 @@ import io.github.aakira.napier.Napier
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import mui.material.Snackbar
 import mui.material.Typography
 import org.w3c.dom.url.URLSearchParams
@@ -168,7 +165,7 @@ val ustadScreensLoader: LoaderFunction = {
     Napier.base(UstadAntilog())
     Napier.d("Index: Window.onLoad")
     val url = window.location.href
-    val apiUrl = URLSearchParams().get(AppConfig.KEY_API_URL)
+    val apiUrl = URLSearchParams().get(AppConfigKeys.KEY_API_URL)
         ?: url.substringBefore(if(url.indexOf("umapp/") != -1) "umapp/" else "#/")
 
     val dbName = sanitizeDbNameFromUrl(window.location.origin)

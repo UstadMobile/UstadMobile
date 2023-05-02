@@ -5,7 +5,7 @@ import com.ustadmobile.core.account.ConsentNotGrantedException
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.AppConfigKeys
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
@@ -62,7 +62,7 @@ class Login2Presenter(
             arguments.getValue(ARG_SERVER_URL)
         } else {
             impl.getAppConfigString(
-                AppConfig.KEY_API_URL, "http://localhost"
+                AppConfigKeys.KEY_API_URL, "http://localhost"
             )?:""
         }
 

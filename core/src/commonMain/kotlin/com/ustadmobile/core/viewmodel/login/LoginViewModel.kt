@@ -4,7 +4,7 @@ import com.ustadmobile.core.account.AdultAccountRequiredException
 import com.ustadmobile.core.account.ConsentNotGrantedException
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.AppConfigKeys
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -65,7 +65,7 @@ class LoginViewModel(
         nextDestination = PersonListView.VIEW_NAME// savedStateHandle[UstadView.ARG_NEXT] ?: impl.getAppConfigDefaultFirstDest()
 
         serverUrl = savedStateHandle[UstadView.ARG_SERVER_URL] ?: impl.getAppConfigString(
-            AppConfig.KEY_API_URL, "http://localhost"
+            AppConfigKeys.KEY_API_URL, "http://localhost"
         ) ?: ""
 
         _uiState.update { prev ->
