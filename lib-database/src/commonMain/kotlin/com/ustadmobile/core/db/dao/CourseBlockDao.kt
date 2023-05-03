@@ -16,6 +16,7 @@ import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.flow.Flow
 import kotlin.js.JsName
 
 @Repository
@@ -84,6 +85,9 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     @JsName("findByUid")
     @Query("SELECT * FROM CourseBlock WHERE cbUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long): CourseBlock?
+
+    @Query("SELECT * FROM CourseBlock WHERE cbUid = :uid")
+    abstract fun findByUidFlow(uid: Long): Flow<CourseBlock?>
 
     @Update
     abstract suspend fun updateAsync(entity: CourseBlock): Int

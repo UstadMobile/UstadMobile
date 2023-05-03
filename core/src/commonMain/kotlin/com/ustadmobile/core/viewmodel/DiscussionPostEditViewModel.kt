@@ -79,7 +79,8 @@ class DiscussionPostEditViewModel (
                                 //Any default value does here
                                 it.discussionPostClazzUid = clazzUid
                                 it.discussionPostDiscussionTopicUid = 0L
-                                it.discussionPostArchive = false
+                                //Setting reply to true:
+                                it.discussionPostArchive = true
                                 it.discussionPostStartedPersonUid = accountManager.activeAccount.personUid
                                 it.discussionPostStartDate = systemTimeInMillis()
                             }

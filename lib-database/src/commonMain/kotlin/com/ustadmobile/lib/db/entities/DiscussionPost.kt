@@ -52,7 +52,7 @@ open class DiscussionPost() {
 
     var discussionPostTitle: String? = null
 
-    //This is the HTML message
+    //This is the HTML message or Reply
     var discussionPostMessage: String? = null
 
     var discussionPostStartDate: Long = 0
@@ -65,6 +65,9 @@ open class DiscussionPost() {
 
     var discussionPostVisible: Boolean = true
 
+    /**
+     * TODO: Rename to discussionPostReply > Indicates that it is a post reply or not.
+     */
     var discussionPostArchive: Boolean = false
 
     //The person who started this post

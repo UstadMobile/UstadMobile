@@ -6,6 +6,7 @@ import androidx.room.Update
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
 
@@ -206,4 +207,93 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     abstract fun findAllRepliesByPostUidAsFlow(entityUid: Long):
             Flow<List<DiscussionPostWithPerson>>
 
+
+    @Query("""
+            SELECT
+              DiscussionPost.*,
+              Person.firstNames as authorPersonFirstNames,
+              Person.lastName as authorPersonLastName,
+              (
+                SELECT DiscussionPost.discussionPostMessage 
+                  FROM DiscussionPost 
+                 WHERE DiscussionPost.discussionPostDiscussionTopicUid = 2
+                   AND CAST(DiscussionPost.discussionPostArchive AS INTEGER) = 1 
+                 ORDER BY DiscussionPost.discussionPostStartDate 
+                  DESC LIMIT 1
+            ) as postLatestMessage
+ 			,
+            ( 
+                SELECT COUNT(*) 
+                FROM DiscussionPost AS DP
+                WHERE DP.discussionPostDiscussionTopicUid = DiscussionPost.discussionPostUid
+                AND CAST(DP.discussionPostArchive AS INTEGER) = 1
+            ) as postRepliesCount,
+            (
+                SELECT DDP.discussionPostStartDate 
+                FROM DiscussionPost AS DDP
+                WHERE DDP.discussionPostDiscussionTopicUid = DiscussionPost.discussionPostUid
+                AND CAST(DDP.discussionPostArchive AS INTEGER) = 1
+                ORDER BY DDP.discussionPostStartDate 
+                DESC LIMIT 1
+            ) AS postLatestMessageTimestamp
+              
+        FROM DiscussionPost
+        LEFT JOIN Person
+          ON DiscussionPost.discussionPostStartedPersonUid = Person.personUid
+   
+        
+       WHERE DiscussionPost.discussionPostDiscussionTopicUid = :entityUid
+              AND CAST(DiscussionPost.discussionPostVisible AS INTEGER) = 1
+              AND CAST(DiscussionPost.discussionPostArchive AS INTEGER) = 0
+              
+    ORDER BY DiscussionPost.discussionPostStartDate DESC
+    """)
+    abstract fun findAllPostsByCourseBlockAsFlow(entityUid: Long):
+            Flow<List<DiscussionPostWithDetails>>
+
+
+    @Query("""
+            SELECT
+              DiscussionPost.*,
+              Person.firstNames as authorPersonFirstNames,
+              Person.lastName as authorPersonLastName,
+              (
+                SELECT DiscussionPost.discussionPostMessage 
+                  FROM DiscussionPost 
+                 WHERE DiscussionPost.discussionPostDiscussionTopicUid = 2
+                   AND CAST(DiscussionPost.discussionPostArchive AS INTEGER) = 1 
+                 ORDER BY DiscussionPost.discussionPostStartDate 
+                  DESC LIMIT 1
+            ) as postLatestMessage
+ 			,
+            ( 
+                SELECT COUNT(*) 
+                FROM DiscussionPost AS DP
+                WHERE DP.discussionPostDiscussionTopicUid = DiscussionPost.discussionPostUid
+                AND CAST(DP.discussionPostArchive AS INTEGER) = 1
+            ) as postRepliesCount,
+            (
+                SELECT DDP.discussionPostStartDate 
+                FROM DiscussionPost AS DDP
+                WHERE DDP.discussionPostDiscussionTopicUid = DiscussionPost.discussionPostUid
+                AND CAST(DDP.discussionPostArchive AS INTEGER) = 1
+                ORDER BY DDP.discussionPostStartDate 
+                DESC LIMIT 1
+            ) AS postLatestMessageTimestamp
+              
+        FROM DiscussionPost
+        LEFT JOIN Person
+          ON DiscussionPost.discussionPostStartedPersonUid = Person.personUid
+   
+        
+       WHERE DiscussionPost.discussionPostDiscussionTopicUid = :entityUid
+              AND CAST(DiscussionPost.discussionPostVisible AS INTEGER) = 1
+              AND CAST(DiscussionPost.discussionPostArchive AS INTEGER) = 0
+              AND (DiscussionPost.discussionPostTitle LIKE :searchQuery OR 
+                DiscussionPost.discussionPostMessage LIKE :searchQuery)
+              
+    ORDER BY DiscussionPost.discussionPostStartDate DESC
+    """)
+    abstract fun findAllPostsByCourseBlockAsPagingSource(entityUid: Long, searchQuery: String):
+            PagingSource<Int, DiscussionPostWithDetails>
 }
