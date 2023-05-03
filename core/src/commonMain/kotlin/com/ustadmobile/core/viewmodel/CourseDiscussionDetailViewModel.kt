@@ -68,7 +68,8 @@ class CourseDiscussionDetailViewModel(
         }
         _uiState.update { prev ->
             prev.copy(
-                posts = pagingSourceFactory
+                posts = pagingSourceFactory,
+                loggedInPersonUid = loggedInPersonUid
             )
         }
 

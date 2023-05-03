@@ -196,7 +196,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(CourseGroupSetListView.VIEW_NAME, "Clazz Groups",ClazzGroupSetDummy),
 
     UstadScreen(CourseDiscussionDetailView.VIEW_NAME, "Course Discussion Detail Preview",
-        CourseDiscussionDetailPreview),
+        CourseDiscussionDetailScreen),
     UstadScreen("DiscussionPostDetailViewDemo", name = "Course Discussion Post Detail",
         DiscussionPostDetailPreview),
     UstadScreen(DiscussionPostDetailView.VIEW_NAME, name = "Real Course Discussion Post Detail",

@@ -1,14 +1,20 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.ustadViewName
+import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.CourseDiscussionDetailUiState
+import com.ustadmobile.core.viewmodel.CourseDiscussionDetailViewModel
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.components.UstadBlankIcon
+import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -24,6 +30,7 @@ import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import mui.system.sx
 import react.*
+import react.router.useLocation
 import kotlin.js.Date
 
 external interface CourseDiscussionDetailProps: Props {
@@ -111,49 +118,6 @@ val CourseDiscussionDetailComponent2 = FC<CourseDiscussionDetailProps> { props -
                             secondary = ReactNode("${item?.discussionPostTitle}")
 
                         }
-                    //discussionPostTitle
-
-
-                        /*
-                    ListItem {
-                        disablePadding = true
-
-
-                        ListItemButton {
-                            ListItemIcon {
-                                UstadBlankIcon { }
-                            }
-
-                            onClick = {
-                                props.onClickPost(item)
-                            }
-
-                            val dateFormatted =
-                                useMemo(dependencies = arrayOf(item.postLatestMessageTimestamp)) {
-                                    Date(item.postLatestMessageTimestamp ?: 0L).toLocaleDateString()
-                                }
-
-
-
-                            UstadDetailField {
-                                icon = AccountCircle.create()
-                                valueText = ReactNode(
-                                    item.authorPersonFirstNames + " " + item.authorPersonLastName
-                                        ?: ""
-                                )
-                                labelText = item.discussionPostTitle ?: ""
-
-
-                            }
-
-
-                        }
-                    }
-                    */
-
-
-
-
 
                 }
             }
@@ -163,82 +127,29 @@ val CourseDiscussionDetailComponent2 = FC<CourseDiscussionDetailProps> { props -
             }
         }
 
-        /*
-        //Change that to FAB
-        List {
-            //Add post:
-            ListItem {
-                disablePadding = true
-
-                ListItemButton {
-                    onClick = {
-                        props.onClickAddItem()
-                    }
-
-                    ListItemIcon {
-                        Add {}
-                    }
-
-                    ListItemText {
-                        +(strings[MessageID.post])
-                    }
-                }
-            }
-
-            //Posts:
-
-            props.uiState.posts.forEach { item ->
-                ListItem {
-                    disablePadding = true
-//                    secondaryAction = IconButton.create {
-//                        onClick = {
-//                            props.onDeleteClick(item)
-//                        }
-//                        Delete {}
-//                    }
-
-                    ListItemButton {
-                        ListItemIcon {
-                            UstadBlankIcon { }
-                        }
-
-                        onClick = {
-                            props.onClickPost(item)
-                        }
-
-                        val dateFormatted = useMemo(dependencies = arrayOf(item.postLatestMessageTimestamp)) {
-                            Date(item.postLatestMessageTimestamp ?: 0L).toLocaleDateString()
-                        }
-
-
-
-                        UstadDetailField{
-                            icon = AccountCircle.create()
-                            valueText = ReactNode(item.authorPersonFirstNames + " " + item.authorPersonLastName?: "")
-                            labelText = item.discussionPostTitle?:""
-
-
-                        }
-
-//                        UstadMessageField{
-//                            icon = AccountCircle.create()
-//                            thirdTextIcon = Message.create()
-//                            secondText = item.discussionPostTitle?:""
-//                            firstText = item.authorPersonFirstNames + " " + item.authorPersonLastName?: ""
-//                            thirdText = item.postLatestMessage ?: ""
-//                            fourthText = dateFormatted
-//                            fifthText = item.postRepliesCount.toString() + " replies"
-//                            secondaryActionContent = null
-//
-//                        }
-
-                    }
-                }
-            }
-
-
-            */
         }
+    }
+}
+
+
+val CourseDiscussionDetailScreen = FC<Props>{
+    val location = useLocation()
+    val viewModel = useUstadViewModel{di, savedStateHandle ->
+        CourseDiscussionDetailViewModel(di, savedStateHandle, location.ustadViewName)
+    }
+
+    val uiState: CourseDiscussionDetailUiState by viewModel.uiState.collectAsState(CourseDiscussionDetailUiState())
+    val appState by viewModel.appUiState.collectAsState(AppUiState())
+
+    UstadFab{
+        fabState = appState.fabState
+    }
+
+    CourseDiscussionDetailComponent2{
+        this.uiState = uiState
+        onClickPost = viewModel::onClick
+        onClickAddItem = viewModel::onClickAdd
+        onDeleteClick = viewModel::onClickDeleteEntry
     }
 }
 
