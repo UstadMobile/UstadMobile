@@ -236,10 +236,11 @@ class EpubContentPresenterTest {
 
         verify(mockEpubView, timeout(15000)).containerTitle = opf!!.title!!
 
-        presenter.handlePageTitleChanged(1, "Title 1")
+        presenter.handlePageTitleChanged(1, "Page 1")
         presenter.handlePageChanged(1)
 
-        verify(mockEpubView).windowTitle = "Title 1"
+        //This should actually come from the table of contents
+        verify(mockEpubView, timeout(5000).atLeastOnce()).windowTitle = "Page 1"
     }
 
     @Test

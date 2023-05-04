@@ -38,6 +38,7 @@
         <item name="colorTabIndicator">@color/primaryColor</item>
         <item name="colorTabText" >@color/iconTintColor</item>
         <item name="colorSelectedTabText">@color/primaryColor</item>
+        <item name="colorOnOrganisationText">@color/primaryLightVariantColor</item>
         <item name="colorPrimaryBackground">@android:color/transparent</item>
         <item name="colorPrimarySurface">?colorSurface</item>
         <item name="android:navigationBarColor" tools:ignore="NewApi">?colorSurface</item>

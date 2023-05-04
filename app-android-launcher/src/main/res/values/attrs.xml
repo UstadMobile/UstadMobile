@@ -10,6 +10,7 @@
     <attr name="colorOnIconTint" format="color"/>
     <attr name="colorOnSecondaryText" format="color"/>
     <attr name="colorOnTintPrimary" format="color"/>
+    <attr name="colorOnOrganisationText" format="color"/>
 
     <!--For label view's-->
     <declare-styleable name="LabelLinkView">

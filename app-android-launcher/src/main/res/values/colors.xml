@@ -1,4 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Color scheme as per https://material.io/resources/color/#!/?view.left=0&view.right=0&primary.color=02a9f4&secondary.color=7B1FA2 -->
+    <color name="primaryLightColor">#c748ac</color> <!--@200 Intensity-->
+    <color name="primaryLightVariantColor">#F6A9E6</color>
+    <color name="primaryColor">#93057c</color> <!--@500 Intensity-->
+    <color name="primaryVariantColor">#7A0467</color> <!--@600 Intensity-->
+    <color name="primaryDarkColor">#61004f</color> <!--@700 Intensity-->
 
+    <color name="secondaryColor">#28b5fc</color> <!--@500 Intensity-->
+    <color name="secondaryDarkColor">#4a0072</color> <!--@700 Intensity-->
+
+    <color name="errorLightColor">#cf6679</color> <!--@200 Intensity-->
+    <color name="errorColor">#b00020</color> <!--@500 Intensity-->
+    <color name="surfaceColor">#ffffff</color>
+    <color name="backgroundColor">#ffffff</color>
+
+    <color name="onPrimaryColor">#ffffff</color>
+    <color name="onSecondaryColor">#000000</color>
+    <color name="onSurfaceColor">#000000</color>
+    <color name="onBackgroundColor">#121212</color>
+    <color name="onPrimaryColorLight">#E8EAED</color>
+    <color name="onErrorColor">#ffffff</color>
+
+    <color name="navigationBarColor">#000000</color>
+    <color name="iconTintColor">#727272</color>
+    <color name="successColor">#4CAF50</color>
 </resources>
