@@ -47,7 +47,8 @@ class RedirectPresenter(
                 }
             }
 
-            accountManager.activeSession != null -> {
+            //There is an active, unlocked session
+            accountManager.activeSession?.userSession?.locked == false -> {
                 Napier.d { "Redirect: go to ${ContentEntryList2View.VIEW_NAME_HOME}" }
                 systemImpl.setAppPref(TAG_REDIRECTED, "true", context)
                 ustadNavController?.navigate(ContentEntryList2View.VIEW_NAME_HOME, mapOf())

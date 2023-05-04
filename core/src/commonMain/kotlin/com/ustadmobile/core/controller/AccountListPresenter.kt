@@ -8,10 +8,7 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UmPlatformUtil
-import com.ustadmobile.core.util.ext.appendQueryArgs
-import com.ustadmobile.core.util.ext.navigateToViewUri
 import com.ustadmobile.core.util.ext.putIfNotAlreadySet
-import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.AccountListView.Companion.ACTIVE_ACCOUNT_MODE_HEADER
 import com.ustadmobile.core.view.AccountListView.Companion.ARG_ACTIVE_ACCOUNT_MODE
@@ -61,7 +58,10 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
         view.accountListLive = accountListMediator
 
         accountListMediator.addSource(accountManager.activeUserSessionsLive) { sessionList ->
-            val newList = sessionList.toMutableList()
+            val newList = sessionList.filter {
+                it.userSession.usAuth != null
+            }.toMutableList()
+
             if(activeAccountMode == ACTIVE_ACCOUNT_MODE_HEADER)
                 newList.removeAll { it.userSession.usUid == accountManager.activeSession?.userSession?.usUid }
 
@@ -74,7 +74,7 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
                 newList.removeAll { it.person.dateOfBirth > maxDateOfBirth }
             }
 
-            accountListMediator.postValue(newList)
+            accountListMediator.postValue(newList.toList())
         }
 
         nextDest = arguments[ARG_NEXT] ?: impl.getAppConfigDefaultFirstDest(context)
@@ -132,6 +132,17 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
             presenterScope.launch {
                 accountManager.setSessionLock(session.endpoint, session.userSession.usUid,
                     !session.userSession.locked)
+
+                //If locking the active session, then clear the stack so that the user cannot
+                //go back to re-enter the session
+                if(session.userSession.usUid == accountManager.activeSession?.userSession?.usUid) {
+                    val goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                        arguments[ARG_POPUPTO_ON_FINISH] ?: UstadView.ROOT_DEST,
+                        false)
+                    requireNavController().navigate(
+                        AccountListView.VIEW_NAME, mapOf(), goOptions
+                    )
+                }
             }
         }
     }
