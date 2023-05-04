@@ -73,6 +73,7 @@ class AccountListPresenterTest {
             usUid = 42
             usPersonUid = 50
             usStatus = UserSession.STATUS_ACTIVE
+            usAuth = "secret"
         },
         person = Person().apply {
             personUid = 50

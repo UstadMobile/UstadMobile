@@ -60,7 +60,7 @@ allprojects {
 }
 
 //Major.minor.database version
-version = "0.4.4"
+version = "0.4.5"
 group = "com.ustadmobile.app"
 
 /**
@@ -70,7 +70,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 232
+    ustadVersionCode = 233
 
     version_door = "0.0.63l"
     version_httpoveripc = "0.0.1n"
