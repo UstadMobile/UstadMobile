@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.RepSubscriptionInitListener
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageIdMap
 import com.ustadmobile.core.impl.*
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJs
@@ -18,10 +19,6 @@ import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.XmlSerializer
 import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.ktor.client.*
-import io.ktor.client.engine.js.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,10 +33,11 @@ import com.ustadmobile.core.impl.locale.JsStringXml
 internal fun ustadJsDi(
     dbBuilt: UmAppDatabase,
     dbNodeIdAndAuth: NodeIdAndAuth,
-    appConfigs: HashMap<String, String>,
-    apiUrl: String,
     defaultStringsXmlStr: String,
     displayLocaleStringsXmlStr: String?,
+    json: Json,
+    httpClient: HttpClient,
+    configMap: Map<String, String>
 ) = DI {
 
     val messageIdMapFlipped: Map<String, Int> by lazy {
@@ -64,18 +62,16 @@ internal fun ustadJsDi(
         }
     }
 
+    bind<SupportedLanguagesConfig>() with singleton {
+        configMap["com.ustadmobile.uilanguages"]?.let {languageList ->
+            SupportedLanguagesConfig(languageList)
+        } ?: SupportedLanguagesConfig()
+    }
+
     bind<UstadMobileSystemImpl>() with singleton {
         UstadMobileSystemImpl(
             instance(tag = JsStringXml.DEFAULT), instanceOrNull(tag = JsStringXml.DISPLAY)
-        ).also { impl ->
-            appConfigs.forEach {
-                val value = when(it.key){
-                    AppConfigKeys.KEY_API_URL -> apiUrl
-                    else -> it.value
-                }
-                impl.setAppPref(it.key, value)
-            }
-        }
+        )
     }
 
     bind<UstadAccountManager>() with singleton {
@@ -132,12 +128,7 @@ internal fun ustadJsDi(
     }
 
     bind<HttpClient>() with singleton {
-        HttpClient(Js) {
-            install(ContentNegotiation) {
-                json(json = instance())
-            }
-            install(HttpTimeout)
-        }
+        httpClient
     }
 
     bind<ContainerStorageManager> () with scoped(EndpointScope.Default).singleton{
@@ -162,9 +153,6 @@ internal fun ustadJsDi(
     bind<ClazzLogCreatorManager>() with singleton { ClazzLogCreatorManagerJs() }
 
     bind<Json>() with singleton {
-        Json {
-            encodeDefaults = true
-            ignoreUnknownKeys = true
-        }
+        json
     }
 }

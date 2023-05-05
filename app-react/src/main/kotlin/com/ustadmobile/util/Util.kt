@@ -13,14 +13,6 @@ object Util {
         return data as String
     }
 
-    suspend fun <T> loadFileContentAsMap(fileName: String) : T{
-        val res = (window.fetch(fileName) as Promise<dynamic>).await()
-        val data = (res.json() as Promise<dynamic>).await()
-        return (js("Object.entries") as (dynamic) -> Array<Array<Any?>>)
-            .invoke(data)
-            .map { entry -> entry[0] as String to entry[1] }.toMap() as T
-    }
-
     /**
      * Regrex came from http://detectmobilebrowsers.com
      */
@@ -55,15 +47,4 @@ object Util {
             textArea.remove()
         }
     }
-
-    const val ASSET_ENTRY = "assets/entry_placeholder.jpeg"
-
-    const val ASSET_ACCOUNT = "assets/account.jpg"
-
-    const val ASSET_BOOK = "assets/book.png"
-
-    const val ASSET_FOLDER = "assets/folder.png"
-
-
-
 }

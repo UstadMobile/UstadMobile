@@ -34,11 +34,20 @@ import csstype.array
 import csstype.Auto
 import csstype.GridTemplateAreas
 import io.github.aakira.napier.Napier
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.engine.js.Js
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.get
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlinx.coroutines.*
+import kotlinx.serialization.json.Json
 import mui.material.Snackbar
 import mui.material.Typography
+import org.kodein.di.instance
 import org.w3c.dom.url.URLSearchParams
 import react.*
 import react.router.useLoaderData
@@ -193,7 +202,6 @@ val ustadScreensLoader: LoaderFunction = {
     @OptIn(DelicateCoroutinesApi::class)
     GlobalScope.promise {
         val dbBuilt = dbBuilder.build()
-        val appConfigs = Util.loadFileContentAsMap<HashMap<String, String>>("appconfig.json")
         Napier.d("Index: loaded appConfig")
         val defaultStringsXmlStr = Util.loadAssetsAsText(defaultAssetPath)
         val displayedLocale = UstadMobileSystemImpl.displayedLocale
@@ -203,8 +211,30 @@ val ustadScreensLoader: LoaderFunction = {
             null
         }
 
-        val di = ustadJsDi(dbBuilt, dbNodeIdAndAuth, appConfigs, apiUrl, defaultStringsXmlStr,
-            foreignStringXmlStr)
+        val json = Json {
+            encodeDefaults = true
+            ignoreUnknownKeys = true
+        }
+
+        val httpClient = HttpClient(Js) {
+            install(ContentNegotiation) {
+                json(json = json)
+            }
+            install(HttpTimeout)
+        }
+
+        val configJson: Map<String, String> = httpClient.get("ustad-config.json").body()
+
+        val di = ustadJsDi(
+            dbBuilt = dbBuilt,
+            dbNodeIdAndAuth = dbNodeIdAndAuth,
+            defaultStringsXmlStr = defaultStringsXmlStr,
+            displayLocaleStringsXmlStr = foreignStringXmlStr,
+            json = json,
+            httpClient = httpClient,
+            configMap = configJson,
+        )
+
         UstadScreensLoaderData(di)
     }
 }
