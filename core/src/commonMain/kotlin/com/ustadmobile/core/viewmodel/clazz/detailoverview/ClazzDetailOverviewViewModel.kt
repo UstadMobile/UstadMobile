@@ -141,7 +141,7 @@ class ClazzDetailOverviewViewModel(
             }
             CourseBlock.BLOCK_DISCUSSION_TYPE -> {
                 navController.navigate(CourseDiscussionDetailView.VIEW_NAME,
-                    mapOf(ARG_ENTITY_UID to courseBlock.cbEntityUid.toString()))
+                    mapOf(ARG_ENTITY_UID to courseBlock.cbUid.toString()))
             }
         }
     }

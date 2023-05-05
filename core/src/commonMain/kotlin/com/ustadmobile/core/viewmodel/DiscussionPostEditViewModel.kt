@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.DiscussionPostEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
+import com.ustadmobile.core.viewmodel.person.edit.PersonEditUiState
 import com.ustadmobile.door.ext.withDoorTransaction
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -31,19 +32,21 @@ data class DiscussionPostEditUiState(
 class DiscussionPostEditViewModel (
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-    destinationName: String = DiscussionPostEditView.VIEW_NAME,
-): UstadEditViewModel(di, savedStateHandle, destinationName){
+): UstadEditViewModel(di, savedStateHandle, DiscussionPostEditView.VIEW_NAME){
 
-    private val _uiState: MutableStateFlow<DiscussionPostEditUiState> =
-        MutableStateFlow(
-            DiscussionPostEditUiState(
-                fieldsEnabled = false,
-            )
+    private val _uiState: MutableStateFlow<DiscussionPostEditUiState> = MutableStateFlow(
+        DiscussionPostEditUiState(
+            fieldsEnabled = false,
         )
+    )
+
     val uiState: Flow<DiscussionPostEditUiState> = _uiState.asStateFlow()
 
     private val discussionPostUid: Long
         get() = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
+
+    private val discussionBlockUid: Long
+        get() = savedStateHandle[UstadView.ARG_BLOCK_UID]?.toLong() ?: 0
 
     private val clazzUid: Long
         get() = savedStateHandle[ARG_CLAZZUID]?.toLong()?:0L
@@ -78,9 +81,9 @@ class DiscussionPostEditViewModel (
                             DiscussionPost().also {
                                 //Any default value does here
                                 it.discussionPostClazzUid = clazzUid
-                                it.discussionPostDiscussionTopicUid = 0L
-                                //Setting reply to true:
-                                it.discussionPostArchive = true
+                                it.discussionPostDiscussionTopicUid = discussionBlockUid
+                                //Setting reply to false:
+                                it.discussionPostArchive = false
                                 it.discussionPostStartedPersonUid = accountManager.activeAccount.personUid
                                 it.discussionPostStartDate = systemTimeInMillis()
                             }
@@ -108,13 +111,7 @@ class DiscussionPostEditViewModel (
 
     fun onEntityChanged(entity: DiscussionPost?) {
         _uiState.update { prev ->
-            prev.copy(
-                discussionPost = entity,
-                discussionPostTitleError = updateErrorMessageOnChange(prev.discussionPost?.discussionPostTitle,
-                    entity?.discussionPostTitle, prev.discussionPostTitleError),
-                discussionPostDescError = updateErrorMessageOnChange(prev.discussionPost?.discussionPostMessage,
-                    entity?.discussionPostMessage, prev.discussionPostDescError)
-            )
+            prev.copy(discussionPost = entity)
         }
 
         scheduleEntityCommitToSavedState(
@@ -124,26 +121,42 @@ class DiscussionPostEditViewModel (
         )
     }
 
+    private fun DiscussionPostEditUiState.hasErrors(): Boolean {
+        return discussionPostTitleError != null ||
+                discussionPostDescError != null
+    }
+
     /**
      * On click save post.
      */
     fun onClickSave(){
 
+        loadingState = LoadingUiState.INDETERMINATE
+        _uiState.update { prev -> prev.copy(fieldsEnabled = false) }
+        val requiredFieldMessage = systemImpl.getString(MessageID.field_required_prompt)
+
         val post = _uiState.value.discussionPost ?: return
+        post.discussionPostArchive = false //This denotes that this is not a  reply
 
         _uiState.update { prev ->
             prev.copy(
                 discussionPostTitleError = if(post.discussionPostTitle.isNullOrEmpty()){
-                    systemImpl.getString(MessageID.field_required_prompt)
+                    requiredFieldMessage
                 }else{
                     null
                 },
                 discussionPostDescError =  if(post.discussionPostMessage.isNullOrEmpty()){
-                    systemImpl.getString(MessageID.field_required_prompt)
+                    requiredFieldMessage
                 }else{
                     null
                 }
             )
+        }
+
+        if(_uiState.value.hasErrors()){
+            loadingState = LoadingUiState.NOT_LOADING
+            _uiState.update { prev -> prev.copy(fieldsEnabled = true) }
+            return
         }
 
         viewModelScope.launch {
@@ -152,9 +165,9 @@ class DiscussionPostEditViewModel (
 
                 activeDb.withDoorTransactionAsync {
                     if(entityUidArg == 0L){
-                        activeDb.discussionPostDao.insert(post)
+                        activeDb.discussionPostDao.insertAsync(post)
                     }else{
-                        activeDb.discussionPostDao.update(post)
+                        activeDb.discussionPostDao.updateAsync(post)
                     }
                 }
                 finishWithResult(post)

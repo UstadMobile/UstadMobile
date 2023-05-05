@@ -25,11 +25,8 @@ val DiscussionPostEditComponent2 = FC<DiscussionPostEditProps> { props ->
     val strings = useStringsXml()
 
     Container {
-        maxWidth = "lg"
-
         Stack {
-            direction = responsive(mui.material.StackDirection.column)
-            spacing = responsive(10.px)
+            spacing = responsive(2)
 
             UstadTextEditField {
                 value = props.uiState.discussionPost?.discussionPostTitle ?: ""
@@ -86,6 +83,7 @@ val DiscussionPostEditScreen = FC<Props> {
     val viewModel = useUstadViewModel { di, savedStateHandle ->
         DiscussionPostEditViewModel(di, savedStateHandle)
     }
+
     val uiStateVar by viewModel.uiState.collectAsState(DiscussionPostEditUiState())
 
     DiscussionPostEditComponent2{

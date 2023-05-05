@@ -9,6 +9,9 @@ import com.ustadmobile.core.view.CourseDiscussionDetailView
 import com.ustadmobile.core.view.DiscussionPostDetailView
 import com.ustadmobile.core.view.DiscussionPostEditView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_BLOCK_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.CourseBlock
@@ -100,7 +103,15 @@ class CourseDiscussionDetailViewModel(
     }
 
     override fun onClickAdd(){
-        navigateToCreateNew(DiscussionPostEditView.VIEW_NAME)
+        navController.navigate(
+            DiscussionPostEditView.VIEW_NAME,
+            mapOf(
+                ARG_BLOCK_UID to courseBlockUid.toString(),
+                ARG_CLAZZUID to clazzUid.toString()
+            )
+        )
+
+        //navigateToCreateNew(DiscussionPostEditView.VIEW_NAME)
     }
 
 }
