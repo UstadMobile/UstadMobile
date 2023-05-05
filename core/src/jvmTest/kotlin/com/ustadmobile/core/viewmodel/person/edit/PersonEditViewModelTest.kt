@@ -18,7 +18,7 @@ import com.ustadmobile.core.view.PersonEditView.Companion.ARG_REGISTRATION_MODE
 import com.ustadmobile.core.view.RegisterMinorWaitForParentView
 import com.ustadmobile.core.view.RegisterMinorWaitForParentView.Companion.ARG_PARENT_CONTACT
 import com.ustadmobile.core.view.RegisterMinorWaitForParentView.Companion.ARG_USERNAME
-import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
+import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.flow.doorFlow
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -125,7 +125,7 @@ class PersonEditViewModelTest {
 
             viewModelFactory {
                 savedStateHandle[ARG_REGISTRATION_MODE] = PersonEditView.REGISTER_MODE_ENABLED.toString()
-                savedStateHandle[ARG_SERVER_URL] = serverUrl
+                savedStateHandle[ARG_API_URL] = serverUrl
                 PersonEditViewModel(di, savedStateHandle)
             }
 
@@ -199,7 +199,7 @@ class PersonEditViewModelTest {
             viewModelFactory {
                 savedStateHandle[ARG_REGISTRATION_MODE] =
                     (PersonEditView.REGISTER_MODE_ENABLED or PersonEditView.REGISTER_MODE_MINOR).toString()
-                savedStateHandle[ARG_SERVER_URL] = activeEndpoint.url
+                savedStateHandle[ARG_API_URL] = activeEndpoint.url
                 savedStateHandle[ARG_DATE_OF_BIRTH] = minorDateOfBirth.toString()
                 PersonEditViewModel(di, savedStateHandle)
             }
@@ -266,7 +266,7 @@ class PersonEditViewModelTest {
             viewModelFactory {
                 savedStateHandle[ARG_REGISTRATION_MODE] =
                     (PersonEditView.REGISTER_MODE_ENABLED or PersonEditView.REGISTER_MODE_MINOR).toString()
-                savedStateHandle[ARG_SERVER_URL] = activeEndpoint.url
+                savedStateHandle[ARG_API_URL] = activeEndpoint.url
                 savedStateHandle[ARG_DATE_OF_BIRTH] = minorDateOfBirth.toString()
                 PersonEditViewModel(di, savedStateHandle)
             }

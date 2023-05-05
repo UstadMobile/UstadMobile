@@ -2,14 +2,13 @@ package com.ustadmobile.core.impl
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT_MESSAGE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
-import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
+import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import kotlinx.coroutines.GlobalScope
@@ -91,24 +90,11 @@ abstract class UstadMobileSystemCommon {
 
 
     /**
-     * Lookup a value from the app runtime configuration. These come from a properties file loaded
-     * from the assets folder.
-     *
-     * @param key The config key to lookup
-     * @param defaultVal The default value to return if the key is not found
-     *
-     * @return The value of the key if found, if not, the default value provided
-     */
-    @JsName("getAppConfigString")
-    abstract fun getAppConfigString(key: String, defaultVal: String?): String?
-
-    /**
      * Get the default first destination that the user should be taken to after logging in or
      * selecting to continue as a guest.
      */
-    fun getAppConfigDefaultFirstDest(): String {
-        return getAppConfigString(AppConfigKeys.KEY_FIRST_DEST, null)
-            ?: ClazzList2View.VIEW_NAME_HOME
+    fun getDefaultFirstDest(): String {
+        return ClazzList2View.VIEW_NAME_HOME
     }
 
     fun goToDeepLink(deepLink: String, accountManager: UstadAccountManager, context: Any) {
@@ -145,7 +131,7 @@ abstract class UstadMobileSystemCommon {
                 }else {
                     val args = mapOf(ARG_NEXT to viewUri,
                         ARG_INTENT_MESSAGE to intentMessage,
-                        ARG_SERVER_URL to endpointUrl)
+                        ARG_API_URL to endpointUrl)
                     go(Login2View.VIEW_NAME, args, context)
                 }
 
@@ -298,33 +284,6 @@ abstract class UstadMobileSystemCommon {
             MIME_TYPES[mimeType]
         } else null
 
-    }
-
-
-    /**
-     * Get a boolean from the app configuration. App config is stored as a string, so this is
-     * converted to a boolean using Boolean.parseBoolean
-     *
-     * @param key The preference key to lookup
-     * @param defaultVal The default value to return if the key is not found
-     * @param context System context object
-     * @return The boolean value of the given preference key if found, otherwise the default value
-     */
-    private fun getAppConfigBoolean(key: String, defaultVal: Boolean, context: Any): Boolean {
-        val strVal = getAppConfigString(key, null)
-        return strVal?.toBoolean() ?: defaultVal
-    }
-
-    /**
-     * Get a boolean from the app configuration. App config is stored as a string, so this is
-     * converted to a boolean using Boolean.parseBoolean
-     *
-     * @param key The preference key to lookup
-     * @param context System viewContext object
-     * @return The boolean value of the given preference key if found, otherwise false
-     */
-    fun getAppConfigBoolean(key: String, context: Any): Boolean {
-        return getAppConfigBoolean(key, false, context)
     }
 
 

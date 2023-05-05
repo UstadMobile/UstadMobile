@@ -4,11 +4,11 @@ import com.ustadmobile.core.account.AdultAccountRequiredException
 import com.ustadmobile.core.account.ConsentNotGrantedException
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.AppConfigKeys
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
+import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
@@ -59,14 +59,15 @@ class LoginViewModel(
 
     private val httpClient: HttpClient by instance()
 
+    private val apiUrlConfig: ApiUrlConfig by instance()
+
     private var verifiedSite: Site? = null
 
     init {
-        nextDestination = PersonListView.VIEW_NAME// savedStateHandle[UstadView.ARG_NEXT] ?: impl.getAppConfigDefaultFirstDest()
+        nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzList2View.VIEW_NAME_HOME
 
-        serverUrl = savedStateHandle[UstadView.ARG_SERVER_URL] ?: impl.getAppConfigString(
-            AppConfigKeys.KEY_API_URL, "http://localhost"
-        ) ?: ""
+        serverUrl = savedStateHandle[UstadView.ARG_API_URL] ?: apiUrlConfig.presetApiUrl
+            ?: "http://localhost"
 
         _uiState.update { prev ->
             prev.copy(
@@ -214,7 +215,7 @@ class LoginViewModel(
 
     fun onClickCreateAccount(){
         val args = mutableMapOf(
-            UstadView.ARG_SERVER_URL to serverUrl,
+            UstadView.ARG_API_URL to serverUrl,
             SiteTermsDetailView.ARG_SHOW_ACCEPT_BUTTON to true.toString(),
             SiteTermsDetailView.ARG_USE_DISPLAY_LOCALE to true.toString(),
             UstadView.ARG_POPUPTO_ON_FINISH to

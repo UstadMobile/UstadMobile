@@ -111,9 +111,9 @@ actual open class UstadMobileSystemImpl(
             val di: DI by closestDI(context)
             val impl : UstadMobileSystemImpl = di.direct.instance()
 
-            val baseName = impl.getAppConfigString(AppConfigKeys.KEY_APP_BASE_NAME, "") + "-" +
+            val baseName =  (context.applicationInfo.metaData
+                .getString("com.ustadmobile.shareappbasename") ?: "ustad")  + "-" +
                     impl.getVersion(context)
-
 
             var apkFileIn: FileInputStream? = null
             val outDir = File(context.filesDir, "shared")
@@ -399,37 +399,6 @@ actual open class UstadMobileSystemImpl(
             UMLog.l(UMLog.ERROR, UMLog.ERROR, key, e)
         }
         return null
-    }
-
-    /**
-     * Lookup a value from the app runtime configuration. These come from a properties file loaded
-     * from the assets folder, the path of which is set by the manifest preference
-     * com.sutadmobile.core.appconfig .
-     *
-     * @param key The config key to lookup
-     * @param defaultVal The default value to return if the key is not found
-     * @param context Systme context object
-     *
-     * @return The value of the key if found, if not, the default value provided
-     */
-    actual override fun getAppConfigString(key: String, defaultVal: String?): String? {
-        if (appConfig == null) {
-            val appPrefResource = getManifestPreference("com.ustadmobile.core.appconfig",
-                    applicationContext) ?: "com/ustadmobile/core/appconfig.properties"
-            appConfig = Properties()
-            var prefIn: InputStream? = null
-
-            try {
-                prefIn =  applicationContext.assets.open(appPrefResource)
-                appConfig!!.load(prefIn)
-            } catch (e: IOException) {
-                UMLog.l(UMLog.ERROR, 685, appPrefResource, e)
-            } finally {
-                prefIn?.close()
-            }
-        }
-
-        return appConfig!!.getProperty(key, defaultVal)
     }
 
 

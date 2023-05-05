@@ -3,7 +3,6 @@ package com.ustadmobile.core.db
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.preload
-import com.ustadmobile.core.impl.AppConfigKeys
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DiTag

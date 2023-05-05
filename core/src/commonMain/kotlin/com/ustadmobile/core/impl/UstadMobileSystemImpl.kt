@@ -117,19 +117,6 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
 
 
     /**
-     * Lookup a value from the app runtime configuration. These come from a properties file loaded
-     * from the assets folder, the path of which is set by the manifest preference
-     * com.sutadmobile.core.appconfig .
-     *
-     * @param key The config key to lookup
-     * @param defaultVal The default value to return if the key is not found
-     * @param context Systme context object
-     *
-     * @return The value of the key if found, if not, the default value provided
-     */
-    override fun getAppConfigString(key: String, defaultVal: String?): String?
-
-    /**
      * Open the given link in a browser and/or tab depending on the platform
      */
     override fun openLinkInBrowser(url: String, context: Any)

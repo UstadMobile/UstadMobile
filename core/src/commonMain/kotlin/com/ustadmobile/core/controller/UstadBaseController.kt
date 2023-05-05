@@ -27,6 +27,7 @@ import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.*
+import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.nav.UstadBackStackEntry
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -365,20 +366,19 @@ abstract class UstadBaseController<V : UstadView>(
     suspend fun navigateToStartNewUserSession() {
         val accountManager: UstadAccountManager = direct.instance()
         val impl: UstadMobileSystemImpl = direct.instance()
+        val apiUrlConfig: ApiUrlConfig = direct.instance()
         val numAccountsRemaining = accountManager.activeSessionCount()
-        val canSelectServer = if(UmPlatformUtil.isWeb) false else impl.getAppConfigBoolean(
-            AppConfigKeys.KEY_ALLOW_SERVER_SELECTION, context)
 
         //Wherever the user is going now, we must wipe the backstack
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
             popUpToViewName = UstadView.ROOT_DEST, popUpToInclusive = false)
 
         when {
-            numAccountsRemaining == 0 && canSelectServer -> {
+            numAccountsRemaining == 0 && apiUrlConfig.canSelectServer -> {
                 impl.go(SiteEnterLinkView.VIEW_NAME, mapOf(), context, goOptions)
             }
 
-            numAccountsRemaining == 0 && !canSelectServer -> {
+            numAccountsRemaining == 0 && !apiUrlConfig.canSelectServer -> {
                 impl.go(Login2View.VIEW_NAME, mapOf(), context, goOptions)
             }
 

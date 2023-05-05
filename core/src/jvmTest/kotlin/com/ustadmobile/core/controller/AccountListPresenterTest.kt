@@ -6,11 +6,10 @@ import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import org.mockito.kotlin.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.AppConfigKeys
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
+import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -105,7 +104,7 @@ class AccountListPresenterTest {
 
         mockView = mock { }
         impl = mock{
-            on { getAppConfigDefaultFirstDest() }.thenReturn(ContentEntryList2View.VIEW_NAME)
+            on { getDefaultFirstDest() }.thenReturn(ContentEntryList2View.VIEW_NAME)
             on { getString(any<Int>(), any()) }.thenAnswer {
                 val messageId = it.getArgument<Int>(0)
                 if(messageId == MessageID.logged_in_as) {
@@ -158,7 +157,7 @@ class AccountListPresenterTest {
     fun givenStoreAccounts_whenAppLaunched_thenShouldShowAllAccounts(){
         mockActiveSessionsLive.setValue(defaultSessionList)
 
-        val presenter = AccountListPresenter(context, mapOf(), mockView, di, mockedLifecycleOwner)
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
         presenter.onCreate(null)
 
         argumentCaptor<LiveData<List<UserSessionWithPersonAndEndpoint>>>{
@@ -176,7 +175,7 @@ class AccountListPresenterTest {
 
     @Test
     fun givenActiveAccountExists_whenAppLaunched_thenShouldShowIt(){
-        val presenter = AccountListPresenter(context, mapOf(), mockView, di, mockedLifecycleOwner)
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
 
         presenter.onCreate(null)
 
@@ -196,9 +195,9 @@ class AccountListPresenterTest {
     @Test
     fun givenSelectServerAllowed_whenAccountButtonClicked_thenShouldOpenGetStartedScreen(){
         impl.stub {
-            on{getAppConfigBoolean(eq(AppConfigKeys.KEY_ALLOW_SERVER_SELECTION), any())}.thenReturn(true)
+            //on{getAppConfigBoolean(eq(AppConfigKeys.KEY_ALLOW_SERVER_SELECTION), any())}.thenReturn(true)
         }
-        val presenter = AccountListPresenter(context, mapOf(), mockView, di, mockedLifecycleOwner)
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
 
         presenter.onCreate(null)
         presenter.handleClickAddAccount()
@@ -212,9 +211,9 @@ class AccountListPresenterTest {
     @Test
     fun givenSelectServerNotAllowed_whenAccountButtonClicked_thenShouldOpenLoginScreen(){
         impl.stub {
-            on{getAppConfigBoolean(any(), any())}.thenReturn(false)
+            //on{getAppConfigBoolean(any(), any())}.thenReturn(false)
         }
-        val presenter = AccountListPresenter(context, mapOf(), mockView, di, mockedLifecycleOwner)
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
 
         presenter.onCreate(null)
         presenter.handleClickAddAccount()
@@ -229,7 +228,7 @@ class AccountListPresenterTest {
     @Test
     fun givenDeleteAccountButton_whenClicked_thenShouldRemoveAccountFromTheDevice(){
         mockActiveSessionsLive.setValue(defaultSessionList)
-        val presenter = AccountListPresenter(context, mapOf(), mockView, di, mockedLifecycleOwner)
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
         presenter.onCreate(null)
 
         presenter.handleClickDeleteSession(defaultSessionList[0])
@@ -251,10 +250,10 @@ class AccountListPresenterTest {
         }
 
         impl.stub {
-            on{getAppConfigBoolean(eq(AppConfigKeys.KEY_ALLOW_SERVER_SELECTION), any())}.thenReturn(true)
+            //on{getAppConfigBoolean(eq(AppConfigKeys.KEY_ALLOW_SERVER_SELECTION), any())}.thenReturn(true)
         }
 
-        val presenter = AccountListPresenter(context, mapOf(), mockView, di, mockedLifecycleOwner)
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
 
         presenter.onCreate(null)
 
@@ -282,12 +281,12 @@ class AccountListPresenterTest {
         }
 
         impl.stub {
-            on{getAppConfigBoolean(eq(AppConfigKeys.KEY_ALLOW_SERVER_SELECTION), any())}
-                .thenReturn(false)
+//            on{getAppConfigBoolean(eq(AppConfigKeys.KEY_ALLOW_SERVER_SELECTION), any())}
+//                .thenReturn(false)
         }
 
 
-        val presenter = AccountListPresenter(context, mapOf(), mockView, di, mockedLifecycleOwner)
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
 
         presenter.onCreate(null)
 
@@ -314,7 +313,7 @@ class AccountListPresenterTest {
             }.thenReturn(1)
         }
 
-        val presenter = AccountListPresenter(context, mapOf(), mockView, di, mockedLifecycleOwner)
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
 
         presenter.onCreate(null)
         presenter.handleClickLogout(defaultSessionList[0])
@@ -340,7 +339,7 @@ class AccountListPresenterTest {
         mockActiveSessionsLive.setValue(defaultSessionList + secondAccountList)
         mockActiveSessionLive.setValue(defaultSessionList[0])
 
-        val presenter = AccountListPresenter(context, mapOf(), mockView, di, mockedLifecycleOwner)
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
 
         presenter.onCreate(null)
 
@@ -360,7 +359,7 @@ class AccountListPresenterTest {
 
     @Test
     fun givenProfileButton_whenClicked_thenShouldGoToProfileView(){
-        val presenter = AccountListPresenter(context, mapOf(), mockView, di, mockedLifecycleOwner)
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
 
         presenter.onCreate(null)
 
@@ -418,8 +417,8 @@ class AccountListPresenterTest {
         mockActiveSessionsLive.setValue(sessionList)
 
         val presenter = AccountListPresenter(context,
-            mapOf(AccountListView.ARG_FILTER_BY_ENDPOINT to activeEndpointArg), mockView, di,
-            mockedLifecycleOwner)
+            mapOf(AccountListView.ARG_FILTER_BY_ENDPOINT to activeEndpointArg), mockView, di
+        )
         presenter.onCreate(mapOf())
 
         //wait for the list to be set on the view
@@ -438,13 +437,13 @@ class AccountListPresenterTest {
         }
 
         verify(impl, timeout(5000)).go(eq(Login2View.VIEW_NAME), argWhere { argMap ->
-            argMap[ARG_SERVER_URL] == activeEndpointArg
+            argMap[ARG_API_URL] == activeEndpointArg
         }, any())
     }
 
     @Test
     fun givenAboutButton_whenClicked_thenShouldGoToAboutView(){
-        val presenter = AccountListPresenter(context, mapOf(), mockView, di, mockedLifecycleOwner)
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
 
         presenter.onCreate(null)
 

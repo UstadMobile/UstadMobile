@@ -4,7 +4,6 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import org.mockito.kotlin.*
-import com.ustadmobile.core.impl.AppConfigKeys
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.view.*
@@ -72,7 +71,7 @@ class RedirectPresenterTest {
 
     @Test
     fun givenAppLaunched_whenUserHasNotLoggedInBefore_thenShouldNavigateToGetStarted() {
-        whenever(impl.getAppConfigBoolean(eq(AppConfigKeys.KEY_ALLOW_SERVER_SELECTION), any())).thenReturn(true)
+        //whenever(impl.getAppConfigBoolean(eq(AppConfigKeys.KEY_ALLOW_SERVER_SELECTION), any())).thenReturn(true)
         mockedAccountManager.stub {
             onBlocking { activeSessionCount(any(), any()) }.thenReturn(0)
         }

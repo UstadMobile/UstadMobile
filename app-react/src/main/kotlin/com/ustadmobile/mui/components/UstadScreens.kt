@@ -7,7 +7,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabaseJsImplementations
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
-import com.ustadmobile.core.impl.AppConfigKeys
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.Snack
@@ -47,8 +46,6 @@ import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import mui.material.Snackbar
 import mui.material.Typography
-import org.kodein.di.instance
-import org.w3c.dom.url.URLSearchParams
 import react.*
 import react.router.useLoaderData
 import ustadJsDi
@@ -173,9 +170,6 @@ val UstadScreens = FC<Props> {
 val ustadScreensLoader: LoaderFunction = {
     Napier.base(UstadAntilog())
     Napier.d("Index: Window.onLoad")
-    val url = window.location.href
-    val apiUrl = URLSearchParams().get(AppConfigKeys.KEY_API_URL)
-        ?: url.substringBefore(if(url.indexOf("umapp/") != -1) "umapp/" else "#/")
 
     val dbName = sanitizeDbNameFromUrl(window.location.origin)
     val dbUrl = "sqlite:$dbName"
@@ -202,7 +196,6 @@ val ustadScreensLoader: LoaderFunction = {
     @OptIn(DelicateCoroutinesApi::class)
     GlobalScope.promise {
         val dbBuilt = dbBuilder.build()
-        Napier.d("Index: loaded appConfig")
         val defaultStringsXmlStr = Util.loadAssetsAsText(defaultAssetPath)
         val displayedLocale = UstadMobileSystemImpl.displayedLocale
         val foreignStringXmlStr = if(displayedLocale != "en") {

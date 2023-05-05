@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
+import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.UstadNavController
@@ -108,6 +109,10 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
                 encodeDefaults = true
                 ignoreUnknownKeys = true
             }
+        }
+
+        bind<ApiUrlConfig>() with singleton {
+            ApiUrlConfig(presetApiUrl = null)
         }
 
         bind<UstadAccountManager>() with singleton {

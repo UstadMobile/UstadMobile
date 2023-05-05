@@ -204,7 +204,7 @@ class PersonAccountEditPresenterTest  {
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString(),
             UstadView.ARG_RESULT_DEST_VIEWNAME   to "",
             UstadView.ARG_RESULT_DEST_KEY to "",
-                UstadView.ARG_SERVER_URL to serverUrl)
+                UstadView.ARG_API_URL to serverUrl)
         val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 
@@ -228,7 +228,7 @@ class PersonAccountEditPresenterTest  {
     fun givenPresenterCreatedInAccountCreationMode_whenAllFieldsAreFilledAndSaveClicked_thenShouldCreateAnAccount(){
         val person = createPerson(isAdmin = false, withUsername = false, matchPassword = true)
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString(),
-                UstadView.ARG_SERVER_URL to serverUrl)
+                UstadView.ARG_API_URL to serverUrl)
         val presenter = PersonAccountEditPresenter(context, args, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 
@@ -249,7 +249,7 @@ class PersonAccountEditPresenterTest  {
     fun givenPresenterCreatedInAccountCreationMode_whenPasswordDoNotMatchAndSaveClicked_thenShouldErrors(){
         val person = createPerson(isAdmin = true, withUsername = false, matchPassword = false)
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString(),
-                UstadView.ARG_SERVER_URL to serverUrl)
+                UstadView.ARG_API_URL to serverUrl)
         val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 

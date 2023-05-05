@@ -9,6 +9,7 @@ import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.waitUntil
+import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.userAtServer
 import com.ustadmobile.door.DatabaseBuilder
@@ -93,6 +94,8 @@ class UstadAccountManagerTest {
 
     lateinit var mockSystemImpl: UstadMobileSystemImpl
 
+    lateinit var apiUrlConfig: ApiUrlConfig
+
     val appContext = Any()
 
     lateinit var mockWebServer: MockWebServer
@@ -113,10 +116,8 @@ class UstadAccountManagerTest {
 
     @Before
     fun setup() {
-        mockSystemImpl = mock {
-            on { getAppConfigString(eq(AppConfigKeys.KEY_API_URL), any()) }
-                    .thenReturn("http://app.ustadmobile.com/")
-        }
+        apiUrlConfig = ApiUrlConfig("http://app.ustadmobile.com/")
+        mockSystemImpl = mock { }
 
         mockWebServer = MockWebServer().also {
             it.start()
@@ -136,6 +137,8 @@ class UstadAccountManagerTest {
             bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
                 nodeIdAndAuth
             }
+
+            bind<ApiUrlConfig>() with singleton { apiUrlConfig }
 
             bind<Pbkdf2Params>() with singleton {
                 Pbkdf2Params(iterations = 10000, keyLength = 512)
@@ -171,6 +174,10 @@ class UstadAccountManagerTest {
                     }
                     install(HttpTimeout)
                 }
+            }
+
+            bind<Json>() with singleton {
+                Json { encodeDefaults = true }
             }
 
             bind<Gson>() with singleton {

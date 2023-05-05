@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.impl
 import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Bundle
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.squareup.picasso.OkHttp3Downloader
@@ -10,8 +11,6 @@ import com.squareup.picasso.Picasso
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.assignment.ClazzAssignmentIncomingReplicationListener
 import com.ustadmobile.core.catalog.contenttype.*
-import com.ustadmobile.core.contentformats.xapi.ContextActivity
-import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentjob.ContentJobManager
@@ -42,9 +41,6 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
-import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
-import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
-import com.ustadmobile.core.contentformats.xapi.StatementSerializer
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
@@ -62,22 +58,30 @@ import java.io.File
 import java.net.URI
 import java.util.concurrent.Executors
 import com.ustadmobile.core.db.dao.commitLiveConnectivityStatus
+import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
 
 open class UstadApp : Application(), DIAware {
 
+    private val Context.appMetaData: Bundle?
+        get() = this.applicationContext.packageManager.getApplicationInfo(
+            applicationContext.packageName, PackageManager.GET_META_DATA
+        ).metaData
+
     val diModule = DI.Module("UstadApp-Android") {
         import(CommonJvmDiModule)
 
         bind<SupportedLanguagesConfig>() with singleton {
-            val appInfo = applicationContext.packageManager.getApplicationInfo(
-                applicationContext.packageName, PackageManager.GET_META_DATA
-            )
-
-            appInfo.metaData?.getString(METADATA_KEY_SUPPORTED_LANGS)?.let { langCodeList ->
+            applicationContext.appMetaData?.getString(METADATA_KEY_SUPPORTED_LANGS)?.let { langCodeList ->
                 SupportedLanguagesConfig(langCodeList)
             } ?: SupportedLanguagesConfig()
+        }
+
+        bind<ApiUrlConfig>() with singleton {
+            ApiUrlConfig(
+                presetApiUrl = applicationContext.appMetaData?.getString(METADATA_KEY_API_URL)
+            )
         }
 
         bind<UstadMobileSystemImpl>() with singleton {
@@ -320,6 +324,10 @@ open class UstadApp : Application(), DIAware {
     companion object {
 
         const val METADATA_KEY_SUPPORTED_LANGS = "com.ustadmobile.uilanguages"
+
+        const val METADATA_KEY_API_URL = "com.ustadmobile.apiurl"
+
+        const val METADATA_KEY_SHARE_BASENAME = "com.ustadmobile.shareappbasename"
 
     }
 

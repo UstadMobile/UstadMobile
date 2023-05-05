@@ -108,7 +108,7 @@ class SiteTermsDetailPresenterTest {
         }
 
         val presenter = SiteTermsDetailPresenter(Any(),
-                mapOf(UstadView.ARG_SERVER_URL to "http://localhost/",
+                mapOf(UstadView.ARG_API_URL to "http://localhost/",
                     SiteTermsDetailView.ARG_USE_DISPLAY_LOCALE to true.toString(),
                     SiteTermsDetailView.ARG_SHOW_ACCEPT_BUTTON to true.toString()),
                 mockView, mockLifecycleOwner, di)

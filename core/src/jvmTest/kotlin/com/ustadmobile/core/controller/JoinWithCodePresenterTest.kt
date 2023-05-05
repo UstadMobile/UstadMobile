@@ -16,7 +16,6 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -143,7 +142,7 @@ class JoinWithCodePresenterTest {
     @Test
     fun givenLoadedWithIncorrectCode_whenLoading_thenShouldShowError(){
         val presenter = JoinWithCodePresenter(context, mapOf(
-                UstadView.ARG_SERVER_URL to apiUrl.toString(),
+                UstadView.ARG_API_URL to apiUrl.toString(),
                 UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString()
         ), mockView, di)
         presenter.onCreate(null)

@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.RepSubscriptionInitListener
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageIdMap
 import com.ustadmobile.core.impl.*
+import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
@@ -26,6 +27,11 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import com.ustadmobile.core.impl.locale.JsStringXml
+import com.ustadmobile.util.resolveEndpoint
+import web.location.location
+import web.url.URLSearchParams
+
+
 
 /**
  * KodeIn DI builder for JS/Browser.
@@ -45,6 +51,8 @@ internal fun ustadJsDi(
     }
 
     val xppFactory = XmlPullParserFactory.newInstance()
+
+    val apiUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
 
     bind<StringsXml>(tag = JsStringXml.DEFAULT) with singleton {
         val defaultXpp = xppFactory.newPullParser()
@@ -66,6 +74,10 @@ internal fun ustadJsDi(
         configMap["com.ustadmobile.uilanguages"]?.let {languageList ->
             SupportedLanguagesConfig(languageList)
         } ?: SupportedLanguagesConfig()
+    }
+
+    bind<ApiUrlConfig>() with singleton {
+        ApiUrlConfig(apiUrl)
     }
 
     bind<UstadMobileSystemImpl>() with singleton {

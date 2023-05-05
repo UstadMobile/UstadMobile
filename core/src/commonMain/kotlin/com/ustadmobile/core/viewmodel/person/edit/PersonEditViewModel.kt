@@ -2,12 +2,12 @@ package com.ustadmobile.core.viewmodel.person.edit
 
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.AppConfigKeys
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 data class PersonEditUiState(
 
@@ -90,15 +91,16 @@ class PersonEditViewModel(
     private val registrationModeFlags = savedStateHandle[PersonEditView.ARG_REGISTRATION_MODE]?.toInt()
         ?: PersonEditView.REGISTER_MODE_NONE
 
+    private val apiUrlConfig: ApiUrlConfig by instance()
+
     private val entityUid: Long
         get() = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
-    private val serverUrl = savedStateHandle[UstadView.ARG_SERVER_URL]
-        ?: systemImpl.getAppConfigString(AppConfigKeys.KEY_API_URL, "http://localhost") ?: ""
+    private val serverUrl = savedStateHandle[UstadView.ARG_API_URL]
+        ?: apiUrlConfig.presetApiUrl ?: "http://localhost"
 
-    private val nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: systemImpl.getAppConfigString(
-        AppConfigKeys.KEY_FIRST_DEST, ContentEntryList2View.VIEW_NAME
-    ) ?: ContentEntryList2View.VIEW_NAME
+    private val nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: systemImpl.getDefaultFirstDest()
+        ?: ContentEntryList2View.VIEW_NAME
 
     init {
         loadingState = LoadingUiState.INDETERMINATE

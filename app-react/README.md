@@ -10,6 +10,10 @@ Wrappers for other libraries (see package com.ustadmobile.wrappers ) created as 
 * [Kotlin for the JS Platform - Javascript Modules (official)](https://kotlinlang.org/docs/js-modules.html)
 * [Kotlin for the JS Platform - Use dependencies from npm (official)](https://kotlinlang.org/docs/using-packages-from-npm.html)
 
+The api url endpoint is normally determined automatically by checking the browser location href. You 
+can override it by adding ```apiUrl=https://domain.myendpoint.com/path/``` to the url (value must by
+url encoded as normal).
+
 ## MUI React/JS UI Development
 
 Run the app-react module via Gradle:
