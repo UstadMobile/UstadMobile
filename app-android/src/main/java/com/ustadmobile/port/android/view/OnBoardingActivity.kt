@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -39,6 +40,7 @@ import com.ustadmobile.core.viewmodel.OnboardingUiState
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.util.ext.getActivityContext
 import com.ustadmobile.port.android.util.ext.getUstadLocaleSetting
+import kotlinx.coroutines.delay
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import java.util.*
@@ -46,6 +48,7 @@ import java.util.*
 class OnBoardingActivity : ComponentActivity() {
 
     val di: DI by closestDI()
+
     private val viewModel: OnBoardingViewModel by viewModels {
         provideFactory(di, this, null)
     }
@@ -69,6 +72,13 @@ class OnBoardingActivity : ComponentActivity() {
         setContent {
             MdcTheme {
                 OnboardingScreenViewModel(viewModel = viewModel)
+            }
+        }
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.reloadCommandFlow.collect {
+                delay(100)
+                recreate()
             }
         }
     }
@@ -96,11 +106,11 @@ private fun OnboardingScreenViewModel(viewModel: OnBoardingViewModel) {
     val context = LocalContext.current.getActivityContext()
     OnboardingScreen(uiState.languageList, uiState.currentLanguage,
         onSetLanguage = { viewModel.onLanguageSelected(it) },
-        onClickNext = {
-            viewModel.onClickNext()
-            val intent = Intent(context, MainActivity::class.java)
-            context.getActivityContext().startActivity(intent)
-        }
+//        onClickNext = {
+//            viewModel.onClickNext()
+//            val intent = Intent(context, MainActivity::class.java)
+//            context.getActivityContext().startActivity(intent)
+//        }
     )
 }
 
@@ -210,14 +220,13 @@ private fun SetLanguageMenu(
 
             }
         ) {
-            val activity = LocalContext.current.getActivityContext()
+
             langList.forEachIndexed { index, uiLanguage ->
                 DropdownMenuItem(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         expanded = false
                         onItemSelected(uiLanguage)
-                        activity.recreate()
                     }
                 ) {
                     Text(text = uiLanguage.langDisplay)
