@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.impl
 
 import android.app.Application
 import android.content.Context
+import android.content.pm.PackageManager
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.squareup.picasso.OkHttp3Downloader
@@ -19,8 +20,6 @@ import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
-import com.ustadmobile.core.impl.AppConfigKeys.KEY_PBKDF2_ITERATIONS
-import com.ustadmobile.core.impl.AppConfigKeys.KEY_PBKDF2_KEYLENGTH
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_COROUTINE_CONTEXT
@@ -71,7 +70,15 @@ open class UstadApp : Application(), DIAware {
     val diModule = DI.Module("UstadApp-Android") {
         import(CommonJvmDiModule)
 
-        bind<SupportedLanguagesConfig>() with singleton { SupportedLanguagesConfig() }
+        bind<SupportedLanguagesConfig>() with singleton {
+            val appInfo = applicationContext.packageManager.getApplicationInfo(
+                applicationContext.packageName, PackageManager.GET_META_DATA
+            )
+
+            appInfo.metaData?.getString(METADATA_KEY_SUPPORTED_LANGS)?.let { langCodeList ->
+                SupportedLanguagesConfig(langCodeList)
+            } ?: SupportedLanguagesConfig()
+        }
 
         bind<UstadMobileSystemImpl>() with singleton {
             UstadMobileSystemImpl(applicationContext)
@@ -255,11 +262,8 @@ open class UstadApp : Application(), DIAware {
 
 
         bind<Pbkdf2Params>() with singleton {
-            val systemImpl: UstadMobileSystemImpl = instance()
-            val numIterations = systemImpl.getAppConfigInt(KEY_PBKDF2_ITERATIONS,
-                UstadMobileConstants.PBKDF2_ITERATIONS, applicationContext)
-            val keyLength = systemImpl.getAppConfigInt(KEY_PBKDF2_KEYLENGTH,
-                UstadMobileConstants.PBKDF2_KEYLENGTH, applicationContext)
+            val numIterations = UstadMobileConstants.PBKDF2_ITERATIONS
+            val keyLength = UstadMobileConstants.PBKDF2_KEYLENGTH
 
             Pbkdf2Params(numIterations, keyLength)
         }
@@ -311,6 +315,12 @@ open class UstadApp : Application(), DIAware {
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
+    }
+
+    companion object {
+
+        const val METADATA_KEY_SUPPORTED_LANGS = "com.ustadmobile.uilanguages"
+
     }
 
 }

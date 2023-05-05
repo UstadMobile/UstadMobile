@@ -275,25 +275,6 @@ abstract class UstadMobileSystemCommon {
     abstract fun getString(messageCode: Int): String
 
     /**
-     * Get a list of all languages available for the UI. This is a list of pairs in the form of
-     * langcode, language display name. The first entry will always be empty constant which
-     * tells the app to use the system default language.
-     *
-     */
-    @JsName("getAllUiLanguagesList")
-    open fun getAllUiLanguagesList(): List<UiLanguage> {
-        val languagesConfigVal = getAppConfigString(
-            AppConfigKeys.KEY_SUPPORTED_LANGUAGES,
-            ""
-        ) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
-        val availableLangs = languagesConfigVal.split(",").sorted()
-
-
-        return listOf(UiLanguage(LOCALE_USE_SYSTEM, getString(MessageID.use_device_language))) +
-                availableLangs.map { UiLanguage(it ,(LANGUAGE_NAMES[it] ?: it)) }
-    }
-
-    /**
      * Return the mime type for the given extension
      *
      * @param extension the extension without the leading .
@@ -346,18 +327,6 @@ abstract class UstadMobileSystemCommon {
         return getAppConfigBoolean(key, false, context)
     }
 
-
-    /**
-     * Get an integer from the app configuration.
-     *
-     * @param key The preference key to lookup
-     * @param defaultVal The default value if the preference key is not found
-     * @param context System context object
-     * @return The integer value of the value if found, otherwise the default value
-     */
-    open fun getAppConfigInt(key: String, defaultVal: Int, context: Any): Int {
-        return getAppConfigString(key, "" + defaultVal)!!.toInt()
-    }
 
     /**
      * Determine if the two given locales are the same as far as what the user will see.

@@ -17,10 +17,15 @@
         >
 
         <!--
-         The path to the asset containing the app runtime configuration.
+        The list of available UI languages as a comma separated list. See
+        com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+
+        Uncomment if you to reduce the number of languages displayed.
+
+        <meta-data android:name="com.ustadmobile.uilanguages"
+            android:value="en,fa,ps,ar,tg,bn,ne,my"/>
+
         -->
-        <meta-data android:name="com.ustadmobile.core.appconfig"
-            android:value="com/ustadmobile/core/appconfig.properties"/>
 
         <activity
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"

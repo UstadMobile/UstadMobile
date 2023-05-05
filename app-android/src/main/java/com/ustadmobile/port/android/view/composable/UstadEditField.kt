@@ -241,7 +241,7 @@ fun <T> UstadExposedDropDownMenuField(
                 expanded = false
             }
         ) {
-            options.forEach { option ->
+            options.takeIf { expanded }?.forEach { option ->
                 DropdownMenuItem(
                     onClick = {
                         expanded = false

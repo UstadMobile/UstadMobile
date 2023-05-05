@@ -153,13 +153,8 @@ internal fun ustadJsDi(
     }
 
     bind<Pbkdf2Params>() with singleton {
-        val systemImpl: UstadMobileSystemImpl = instance()
-        val numIterations = systemImpl.getAppConfigInt(
-            AppConfigKeys.KEY_PBKDF2_ITERATIONS,
-            UstadMobileConstants.PBKDF2_ITERATIONS, this)
-        val keyLength = systemImpl.getAppConfigInt(
-            AppConfigKeys.KEY_PBKDF2_KEYLENGTH,
-            UstadMobileConstants.PBKDF2_KEYLENGTH, this)
+        val numIterations = UstadMobileConstants.PBKDF2_ITERATIONS
+        val keyLength = UstadMobileConstants.PBKDF2_KEYLENGTH
 
         Pbkdf2Params(numIterations, keyLength)
     }

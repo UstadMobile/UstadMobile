@@ -75,12 +75,6 @@ class OnBoardingActivity : ComponentActivity() {
             }
         }
 
-        lifecycleScope.launchWhenStarted {
-            viewModel.reloadCommandFlow.collect {
-                delay(100)
-                recreate()
-            }
-        }
     }
 
     companion object {
@@ -106,11 +100,11 @@ private fun OnboardingScreenViewModel(viewModel: OnBoardingViewModel) {
     val context = LocalContext.current.getActivityContext()
     OnboardingScreen(uiState.languageList, uiState.currentLanguage,
         onSetLanguage = { viewModel.onLanguageSelected(it) },
-//        onClickNext = {
-//            viewModel.onClickNext()
-//            val intent = Intent(context, MainActivity::class.java)
-//            context.getActivityContext().startActivity(intent)
-//        }
+        onClickNext = {
+            viewModel.onClickNext()
+            val intent = Intent(context, MainActivity::class.java)
+            context.getActivityContext().startActivity(intent)
+        }
     )
 }
 
@@ -187,6 +181,7 @@ private fun SetLanguageMenu(
     onItemSelected: (UstadMobileSystemCommon.UiLanguage) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -220,13 +215,13 @@ private fun SetLanguageMenu(
 
             }
         ) {
-
-            langList.forEachIndexed { index, uiLanguage ->
+            langList.takeIf { expanded }?.forEach { uiLanguage ->
                 DropdownMenuItem(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         expanded = false
                         onItemSelected(uiLanguage)
+                        context.getActivityContext().recreate()
                     }
                 ) {
                     Text(text = uiLanguage.langDisplay)

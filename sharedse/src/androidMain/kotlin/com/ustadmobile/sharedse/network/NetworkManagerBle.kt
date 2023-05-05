@@ -1,8 +1,6 @@
 package com.ustadmobile.sharedse.network
 
-import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -14,9 +12,6 @@ import android.net.wifi.p2p.WifiP2pManager
 import android.os.Build
 import android.os.Looper.getMainLooper
 import android.os.ParcelUuid
-import android.os.SystemClock
-import androidx.annotation.RequiresApi
-import androidx.annotation.VisibleForTesting
 import androidx.core.net.ConnectivityManagerCompat
 import com.ustadmobile.core.impl.UMAndroidUtil.normalizeAndroidWifiSsid
 import com.ustadmobile.core.impl.UMLog
@@ -28,16 +23,13 @@ import fi.iki.elonen.NanoHTTPD
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.plugins.json.*
 import io.ktor.serialization.gson.*
 import kotlinx.coroutines.CoroutineDispatcher
 import okhttp3.OkHttpClient
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
-import java.io.IOException
 import java.net.HttpURLConnection
-import java.net.InetAddress
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -448,121 +440,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
                 android.provider.Settings.ACTION_BLUETOOTH_SETTINGS))
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    actual override fun setWifiEnabled(enabled: Boolean): Boolean {
-        return wifiManager.setWifiEnabled(enabled)
-    }
-
-
-    actual override fun awaitWifiDirectGroupReady(timeout: Long): WiFiDirectGroupBle {
-        wifiDirectGroupLastRequestedTime.set(System.currentTimeMillis())
-        wifiP2pGroupServiceManager!!.setEnabled(true)
-        wifiP2pGroupServiceManager!!.await({ state -> state == AsyncServiceManager.STATE_STARTED || state == AsyncServiceManager.STATE_STOPPED },
-                timeout)
-        return wifiP2pGroupServiceManager!!.group
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    actual override fun connectToWiFi(ssid: String, passphrase: String, timeout: Int) {
-        managerHelper.deleteTemporaryWifiDirectSsids()
-        managerHelper.setGroupInfo(ssid,passphrase)
-
-        val startTime = System.currentTimeMillis()
-
-        val connectionDeadline = System.currentTimeMillis() + timeout
-
-        var connectedOrFailed = false
-
-        var networkEnabled = false
-
-        var networkSeenInScan = false
-
-        val scanLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY,
-                "NetworkManagerBle-Scan")
-        scanLock.acquire()
-
-        do {
-            UMLog.l(UMLog.INFO, 693, "ConnectToWifi: Trying to connect to $ssid. " +
-                    "Current SSID = ${wifiManager.connectionInfo?.ssid}")
-            if (isConnectedToRequiredWiFi(ssid)) {
-                UMLog.l(UMLog.INFO, 693,
-                        "ConnectToWifi: Already connected to WiFi with ssid =$ssid")
-                break
-            }else if (!networkEnabled) {
-                networkEnabled = managerHelper.enableWifiNetwork()
-                UMLog.l(UMLog.INFO, 693,
-                        "ConnectToWifi: called enableWifiNetwork for $ssid Result: $networkEnabled")
-            } else {
-                val routeInfo = wifiManager.dhcpInfo
-                val currentSsid = normalizeAndroidWifiSsid(wifiManager.connectionInfo?.ssid)
-                val isCorrectSsid = (currentSsid == ssid)
-                val hasDhcpGateway = routeInfo != null && routeInfo.gateway > 0
-
-                if (isCorrectSsid && hasDhcpGateway) {
-                    @SuppressLint("DefaultLocale")
-                    val gatewayIp = String.format("%d.%d.%d.%d",
-                            routeInfo.gateway and 0xff,
-                            routeInfo.gateway shr 8 and 0xff,
-                            routeInfo.gateway shr 16 and 0xff,
-                            routeInfo.gateway shr 24 and 0xff)
-                    UMLog.l(UMLog.INFO, 693,
-                            "Trying to ping gateway IP personAddress $gatewayIp")
-                    if (ping(gatewayIp, 1000)) {
-                        UMLog.l(UMLog.INFO, 693,
-                                "Ping successful! $ssid")
-                        connectedOrFailed = true
-                    } else {
-                        UMLog.l(UMLog.INFO, 693,
-                                "ConnectToWifi: ping to $gatewayIp failed on $ssid")
-                    }
-                } else if (!isCorrectSsid){
-                    UMLog.l(UMLog.INFO, 693,
-                            "ConnectToWifi: Connected to wrong SSID: Got: $currentSsid Wanted: $ssid")
-                }else if(!hasDhcpGateway) {
-                    UMLog.l(UMLog.INFO, 693,
-                            "ConnectToWifi: Connected to correct network, but no DHCP gateway yet on $currentSsid")
-                }
-            }
-
-
-            if (!connectedOrFailed && System.currentTimeMillis() > connectionDeadline) {
-                UMLog.l(UMLog.INFO, 693, " TIMEOUT: failed to connect $ssid")
-                break
-            }
-            SystemClock.sleep(1000)
-
-        } while (!connectedOrFailed)
-
-        scanLock.release()
-
-        UMLog.l(UMLog.DEBUG, 0, "ConnectToWifi: Finished")
-    }
-
-    private fun ping(ipAddress: String, timeout: Int): Boolean {
-        try {
-            return InetAddress.getByName(ipAddress).isReachable(timeout)
-        } catch (e: IOException) {
-            //ping did not succeed
-        }
-
-        return false
-    }
-
-    private fun isConnectedToRequiredWiFi(ssid: String): Boolean {
-        val wifiInfo = wifiManager.connectionInfo
-        return wifiInfo != null && normalizeAndroidWifiSsid(wifiInfo.ssid) == normalizeAndroidWifiSsid(ssid)
-    }
-
-
-    actual override fun restoreWifi() {
-        UMLog.l(UMLog.INFO, 339, "NetworkManager: restore wifi")
-        managerHelper.restoreWiFi()
-    }
 
     /**
      * Start monitoring network changes
@@ -575,20 +452,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
         if (connectivityManager != null) {
             connectivityManager!!.requestNetwork(networkRequest, UmNetworkCallback())
         }
-    }
-
-    /**
-     * Get bluetooth manager instance
-     * @return Instance of a BluetoothManager
-     */
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
-    internal fun getBluetoothManager(): BluetoothManager {
-        return bluetoothManager as BluetoothManager
-    }
-
-    @VisibleForTesting
-    fun setBluetoothManager(manager: BluetoothManager) {
-        this.bluetoothManager = manager
     }
 
     override fun lockWifi(lockHolder: Any) {
