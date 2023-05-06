@@ -204,7 +204,7 @@ class PersonEditViewModelTest {
                 PersonEditViewModel(di, savedStateHandle)
             }
 
-            viewModel.uiState.test(timeout = 5000.seconds) {
+            viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere {
                     it.approvalPersonParentJoin != null && it.person != null && it.fieldsEnabled
                 }

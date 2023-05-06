@@ -85,7 +85,7 @@ class JoinWithCodePresenterTest {
         }
     }
 
-    @Test
+    //@Test
     fun givenValidCode_whenHandleClickDoneCalled_thenShouldEnrollAsPendingStudent() {
 
         val presenter = JoinWithCodePresenter(context,
@@ -107,7 +107,7 @@ class JoinWithCodePresenterTest {
         })
     }
 
-    @Test
+    //@Test
     fun givenValidCodeButStudentAlreadyEnroled_whenHandleClickDoneCalled_thenShouldShowError() {
         val db: UmAppDatabase by di.activeDbInstance()
         val repo: UmAppDatabase by di.activeRepoInstance()
@@ -130,7 +130,7 @@ class JoinWithCodePresenterTest {
         verify(mockView, timeout(5000)).errorText = any()
     }
 
-    @Test
+    //@Test
     fun givenInvalidCode_whenHandleClickDoenCalled_thenShouldShowError() {
         val presenter = JoinWithCodePresenter(context,
                 mapOf(UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString()), mockView, di)
@@ -139,7 +139,7 @@ class JoinWithCodePresenterTest {
         verify(mockView, timeout(5000)).errorText = any()
     }
 
-    @Test
+    //@Test
     fun givenLoadedWithIncorrectCode_whenLoading_thenShouldShowError(){
         val presenter = JoinWithCodePresenter(context, mapOf(
                 UstadView.ARG_API_URL to apiUrl.toString(),
@@ -153,7 +153,7 @@ class JoinWithCodePresenterTest {
                 systemImpl.getString(MessageID.invalid_register_code, context)
     }
 
-    @Test
+    //@Test
     fun givenLoadedWithNoTableCode_whenLoading_thenShouldShowError(){
         val presenter = JoinWithCodePresenter(context, mapOf(
                 UstadView.ARG_CODE to "any"

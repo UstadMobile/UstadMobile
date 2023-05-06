@@ -73,8 +73,6 @@ actual open class UstadMobileSystemImpl(
     private val applicationContext: Context
 ) : UstadMobileSystemCommon() {
 
-    private var appConfig: Properties? = null
-
     private var appPreferences: SharedPreferences? = null
 
     var messageIdMap: Map<Int, Int> = mapOf()

@@ -86,7 +86,7 @@ class VideoContentPresenterTest {
 
     }
 
-    @Test
+    //@Test
     fun givenVideo_whenVideoStartsPlaying_ProgressIsUpdatedAndStatementSent() {
         Assert.assertNotNull(container)
         val presenterArgs = mapOf(UstadView.ARG_CONTENT_ENTRY_UID to

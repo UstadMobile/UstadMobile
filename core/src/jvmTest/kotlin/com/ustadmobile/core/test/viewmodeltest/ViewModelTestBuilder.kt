@@ -13,6 +13,7 @@ import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.impl.nav.NavResultReturner
+import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.isLazyInitialized
@@ -170,7 +171,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         }
 
         bind<NavResultReturner>() with singleton {
-            mock { }
+            spy(NavResultReturnerImpl())
         }
     }
 

@@ -65,8 +65,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
 
     private lateinit var wifiManager: WifiManager
 
-    private var bluetoothManager: Any? = null
-
     private var bluetoothAdapter: BluetoothAdapter? = null
 
     private val mContext: Context = context as Context
@@ -83,19 +81,13 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
 
     private val wifiLockReference = AtomicReference<WifiManager.WifiLock>()
 
-    private lateinit var wifiP2pGroupServiceManager: WifiP2PGroupServiceManager
-
     internal lateinit var managerHelper : NetworkManagerBleHelper
 
     private val wifiDirectGroupLastRequestedTime = AtomicLong()
 
-    private val wifiDirectRequestLastCompletedTime = AtomicLong()
-
     private val numActiveRequests = AtomicInteger()
 
     val enablePromptsSnackbarManager = EnablePromptsSnackbarManager()
-
-    private var localOkHttpClient: OkHttpClient? = null
 
     override var localConnectionOpener: ConnectionOpener? = null
         get() = field
@@ -157,23 +149,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
 
                     notifyStateChanged(if (group != null) STATE_STARTED else STATE_STOPPED)
                 }
-            }
-        }
-
-        val group: WiFiDirectGroupBle
-            get() = wiFiDirectGroup.get()
-
-        private inner class CheckTimeoutRunnable : Runnable {
-            override fun run() {
-                val timeNow = System.currentTimeMillis()
-                val timedOut = (networkManager.numActiveRequests.get() == 0
-                        && timeNow - networkManager.wifiDirectGroupLastRequestedTime.get() > TIMEOUT_AFTER_GROUP_CREATION
-                        && timeNow - networkManager.wifiDirectRequestLastCompletedTime.get() > TIMEOUT_AFTER_LAST_REQUEST)
-                setEnabled(!timedOut)
-
-//                if (state != STATE_STOPPED)
-//                    timeoutCheckHandler.postDelayed(CheckTimeoutRunnable(),
-//                            TIMEOUT_CHECK_INTERVAL.toLong())
             }
         }
 
@@ -379,14 +354,8 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
         }
 
         wifiP2PCapable.set(wifiP2pManager != null)
-        wifiP2pGroupServiceManager = WifiP2PGroupServiceManager(this)
 
 
-        if (wifiP2PCapable.get()) {
-            wifiP2pChannel = wifiP2pManager!!.initialize(mContext, getMainLooper(), null)
-            mContext.registerReceiver(wifiP2pGroupServiceManager.wifiP2pBroadcastReceiver,
-                    IntentFilter(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION))
-        }
 
         startMonitoringNetworkChanges()
 
@@ -485,15 +454,9 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
      * {@inheritDoc}
      */
     override fun onDestroy() {
-        wifiP2pGroupServiceManager!!.setEnabled(false)
 
 
         mContext.unregisterReceiver(networkStateChangeReceiver)
-
-
-        if (wifiP2PCapable.get()) {
-            mContext.unregisterReceiver(wifiP2pGroupServiceManager!!.wifiP2pBroadcastReceiver)
-        }
 
         super.onDestroy()
     }

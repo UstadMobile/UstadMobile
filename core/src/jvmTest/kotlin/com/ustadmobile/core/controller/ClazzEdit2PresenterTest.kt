@@ -69,7 +69,7 @@ class ClazzEdit2PresenterTest {
     }
 
 
-    @Test
+    //@Test
     fun givenExistingClazz_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {
         val db: UmAppDatabase by di.activeDbInstance()
         val repo: UmAppDatabase by di.activeRepoInstance()

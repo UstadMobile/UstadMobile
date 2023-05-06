@@ -360,18 +360,18 @@ class PersonEditViewModel(
                         activeDb.personPictureDao.updateAsync(personPictureVal)
                     }
                 }
-            }
 
-            //Handle the following scenario: ClazzMemberList (user selects to add a student to enrol),
-            // PersonList, PersonEdit, EnrolmentEdit
-            val goToOnComplete = savedStateHandle[UstadView.ARG_GO_TO_COMPLETE]
-            if(goToOnComplete != null) {
-                navController.navigate(goToOnComplete, mutableMapOf<String, String>().apply {
-                    putFromSavedStateIfPresent(savedStateHandle, ON_COMPLETE_PASS_ARGS)
-                    put(UstadView.ARG_PERSON_UID, savePerson.personUid.toString())
-                }.toMap())
-            }else {
-                finishWithResult(PersonDetailView.VIEW_NAME, savePerson.personUid, savePerson)
+                //Handle the following scenario: ClazzMemberList (user selects to add a student to enrol),
+                // PersonList, PersonEdit, EnrolmentEdit
+                val goToOnComplete = savedStateHandle[UstadView.ARG_GO_TO_COMPLETE]
+                if(goToOnComplete != null) {
+                    navController.navigate(goToOnComplete, mutableMapOf<String, String>().apply {
+                        putFromSavedStateIfPresent(savedStateHandle, ON_COMPLETE_PASS_ARGS)
+                        put(UstadView.ARG_PERSON_UID, savePerson.personUid.toString())
+                    }.toMap())
+                }else {
+                    finishWithResult(PersonDetailView.VIEW_NAME, savePerson.personUid, savePerson)
+                }
             }
         }
 
