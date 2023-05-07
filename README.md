@@ -99,7 +99,7 @@ Code is contained (mostly) in the following modules:
 * [app-ktor-server](app-ktor-server/): Contains the HTTP rest server (implemented using KTOR)
 * [core](core/) : Contains view models, ui state, core business logic.
 * [sharedse](sharedse/): Contains some shared implementations for operating systems with a disk (JVM/Android)
-* [lib-database](lib-database/): contains the database, DAOs, and entity classes.
+* [lib-database](lib-database/): contains the database: DAOs (e.g. SQL queries), and entity classes.
 * [lib-util](lib-util/): Small utility functions
 * [test-end-to-end](test-end-to-end/) End-to-end tests that run the app and server.
 * [testserver-controller](testserver-controller/) An HTTP server that can control starting and 
