@@ -10,7 +10,7 @@ Ustad Mobile is licensed under the AGPLv3 license: please see the LICENSE file f
 See [INSTALL.md](INSTALL.md) for instructions for installation on your own server using binary 
 downloads.
 
-## Getting started building from source:
+## Development environment setup:
 
 This is a Kotlin Multiplatform project. This repository contains the Android app, web app, and
 backend server source code in its modules. Android Studio is the development environment for the 
