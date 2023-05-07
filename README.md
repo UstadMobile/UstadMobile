@@ -35,7 +35,14 @@ Option 2: Install OpenJDK17+
 sudo apt-get install openjdk-18-jdk
 ```
 
-Windows/Mac: follow instructions as per the [Java website](https://www.java.com/en/download/help/path.html).
+Windows: Search for "Environment Variables" - then "Edit the system environment variables". Create a
+new environment variable. Set the variable name to JAVA_HOME and set the value to the directory 
+where you have Android Studio\jbr e.g. C:\user\myusername\AndroidStudio\jbr where Android Studio is
+installed in C:\user\myusername\AndroidStudio\ .
+
+Now find the PATH variable. Append ```;%JAVA_HOME%\bin``` to the value and save it. 
+
+Further details: see the [Java website](https://www.java.com/en/download/help/path.html).
 
 * __Step 3: Import the project in Android Studio__: Select File, New, Project from Version Control. Enter
 https://github.com/UstadMobile/UstadMobile.git and wait for the project to import.
