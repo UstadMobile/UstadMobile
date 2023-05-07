@@ -8,6 +8,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
+import com.toughra.ustadmobile.BuildConfig
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.assignment.ClazzAssignmentIncomingReplicationListener
 import com.ustadmobile.core.catalog.contenttype.*
@@ -61,8 +62,12 @@ import com.ustadmobile.core.db.dao.commitLiveConnectivityStatus
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
+import org.acra.config.httpSender
+import org.acra.data.StringFormat
+import org.acra.ktx.initAcra
+import org.acra.sender.HttpSender
 
-open class UstadApp : Application(), DIAware {
+class UstadApp : Application(), DIAware {
 
     private val Context.appMetaData: Bundle?
         get() = this.applicationContext.packageManager.getApplicationInfo(
@@ -319,6 +324,17 @@ open class UstadApp : Application(), DIAware {
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
+        if(BuildConfig.ACRA_HTTP_URI.isNotBlank()) {
+            initAcra {
+                reportFormat = StringFormat.JSON
+                httpSender {
+                    uri = BuildConfig.ACRA_HTTP_URI
+                    basicAuthLogin = BuildConfig.ACRA_BASIC_LOGIN
+                    basicAuthPassword = BuildConfig.ACRA_BASIC_PASS
+                    httpMethod = HttpSender.Method.POST
+                }
+            }
+        }
     }
 
     companion object {

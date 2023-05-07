@@ -16,16 +16,8 @@ url encoded as normal).
 
 ## Getting started from source
 
-* Start the rest backend server if not already running:
-
-Linux/MacOS:
-```
-$ ./runserver.sh
-```
-Windows:
-```
-$ runserver.bat
-```
+* Follow steps in the [project README](../#development-environment-setup)  to setup development 
+environment and start the server.
 
 * Run the web app using Gradle:
 

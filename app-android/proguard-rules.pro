@@ -7,6 +7,45 @@
     *;
 }
 
+# umDatabase entities
+-keep public class com.ustadmobile.lib.db.entities.**{
+       *;
+}
+-keep public class com.ustadmobile.core.db.**{
+    public <init>(...);
+}
+-keep public class com.ustadmobile.core.controller.IndexLog{
+       *;
+}
+-keep public class com.ustadmobile.core.controller.IndexLog$IndexEntry{
+       *;
+}
+
+-keep public class com.toughra.ustadmobile.BuildConfig
+
+
+-keep public class com.ustadmobile.core.contentformats.metadata.*{
+    *;
+}
+
+ # Prevent proguard from stripping interface information from TypeAdapterFactory,
+ # JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)
+ -keep class * implements com.google.gson.TypeAdapterFactory
+ -keep class * implements com.google.gson.JsonSerializer
+ -keep class * implements com.google.gson.JsonDeserializer
+
+# As per Android Gradle Plugin 8 (2/May/2023) - probably OKHTTP related
+-dontwarn org.bouncycastle.jsse.BCSSLParameters
+-dontwarn org.bouncycastle.jsse.BCSSLSocket
+-dontwarn org.bouncycastle.jsse.provider.BouncyCastleJsseProvider
+-dontwarn org.conscrypt.Conscrypt$Version
+-dontwarn org.conscrypt.Conscrypt
+-dontwarn org.conscrypt.ConscryptHostnameVerifier
+-dontwarn org.openjsse.javax.net.ssl.SSLParameters
+-dontwarn org.openjsse.javax.net.ssl.SSLSocket
+-dontwarn org.openjsse.net.ssl.OpenJSSE
+-dontwarn org.slf4j.impl.StaticLoggerBinder
+
 # As per KodeIn DI docs:
 # https://kosi-libs.org/kodein/7.19/framework/android.html#_proguard_configuration
 -dontwarn java.lang.invoke.StringConcatFactory

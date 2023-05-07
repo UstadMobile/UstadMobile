@@ -92,18 +92,17 @@ This multi-module Gradle project built using Kotlin Multiplatform. It builds for
 * KTOR Server (JVM) (app-ktor-server)
 
 Code is contained (mostly) in the following modules:
+
+* [app-android](app-android/): Contains the Android app
+* [app-react](app-react/): Contains the web app (written in Kotlin, using React via kotlin-wrappers)
+* [app-ktor-server](app-ktor-server/): Contains the HTTP rest server (implemented using KTOR)
 * [core](core/) : Contains view models, ui state, core business logic.
 * [sharedse](sharedse/): Contains some shared implementations for operating systems with a disk (JVM/Android)
-* [app-ktor-server](app-ktor-server/): Contains the HTTP rest server (implemented using KTOR)
-* [app-android](app-android/): Contains Android implementation, forms the basis of the app in
-  app-android-launcher but can also be used as a library in other apps.
-* [app-react](app-react/): Contains the web version implemented using Kotlin/JS
-* [app-android-launcher/](app-android-launcher/): Standalone app launcher that uses app-android.
-* [lib-database](lib-database/): contains the database, DAO, and entity classes.
+* [lib-database](lib-database/): contains the database, DAOs, and entity classes.
 * [lib-util](lib-util/): Small utility functions
 * [test-end-to-end](test-end-to-end/) End-to-end tests that run the app and server.
 * [testserver-controller](testserver-controller/) An HTTP server that can control starting and 
   stopping the main server, and manage adb screen recording. Used by end-to-end testing.
 
-To build debug / release versions for any given platform please see the README in the directory for that platform.
+To build / run versions for any given platform please see the README in the module for that platform.
 
