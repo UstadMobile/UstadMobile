@@ -76,7 +76,7 @@ const val CONF_GOOGLE_API = "secret"
 /**
  * List of external commands (e.g. media converters) that must be found or have locations specified
  */
-val REQUIRED_EXTERNAL_COMMANDS = listOf("ffmpeg", "ffprobe")
+val REQUIRED_EXTERNAL_COMMANDS = emptyList<String>()
 
 /**
  * List of prefixes which are always answered by the KTOR server. When using JsDev proxy mode, any
@@ -356,13 +356,13 @@ fun Application.umRestApplication(
         bind<File>(tag = DiTag.TAG_FILE_FFMPEG) with singleton {
             //The availability of ffmpeg is checked on startup
             SysPathUtil.findCommandInPath("ffmpeg",
-                manuallySpecifiedLocation = appConfig.commandFileProperty("ffmpeg"))!!
+                manuallySpecifiedLocation = appConfig.commandFileProperty("ffmpeg")) ?: File("err")
         }
 
         bind<File>(tag = DiTag.TAG_FILE_FFPROBE) with singleton {
             //The availability of ffmpeg is checked on startup
             SysPathUtil.findCommandInPath("ffprobe",
-                manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"))!!
+                manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"))  ?: File("err")
         }
 
         bind<File>(tag = DiTag.TAG_FILE_UPLOAD_TMP_DIR) with scoped(EndpointScope.Default).singleton {
