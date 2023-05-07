@@ -16,8 +16,8 @@ url encoded as normal).
 
 ## Getting started from source
 
-* Follow steps in the [project README](../#development-environment-setup)  to setup development 
-environment and start the server.
+* Follow steps in the [main project README](../README.md#development-environment-setup) to setup development
+  environment and start the server.
 
 * Run the web app using Gradle:
 
