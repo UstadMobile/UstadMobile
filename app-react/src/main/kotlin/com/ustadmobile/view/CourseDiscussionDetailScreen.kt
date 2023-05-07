@@ -21,6 +21,7 @@ import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import com.ustadmobile.view.person.list.demoPersonList
 import csstype.*
+import csstype.HtmlAttributes.Companion.align
 import js.core.jso
 import kotlinx.html.currentTimeMillis
 import mui.icons.material.*
@@ -68,10 +69,6 @@ val CourseDiscussionDetailComponent2 = FC<CourseDiscussionDetailProps> { props -
         Stack {
             direction = responsive(mui.material.StackDirection.column)
             spacing = responsive(10.px)
-
-
-
-
         }
 
         Box{
@@ -83,6 +80,7 @@ val CourseDiscussionDetailComponent2 = FC<CourseDiscussionDetailProps> { props -
         Typography {
             variant = TypographyVariant.h6
             + strings[MessageID.posts]
+            align = TypographyAlign.left
         }
 
         VirtualList {
@@ -101,11 +99,6 @@ val CourseDiscussionDetailComponent2 = FC<CourseDiscussionDetailProps> { props -
                 ) { item ->
 
                     ListItem.create{
-                        ListItemButton{
-                            onClick = {
-                                item?.also{props.onClickPost(it)}
-                            }
-                        }
 
                         ListItemIcon{
                             UstadPersonAvatar{
@@ -117,6 +110,10 @@ val CourseDiscussionDetailComponent2 = FC<CourseDiscussionDetailProps> { props -
                             primary = ReactNode("${item?.authorPersonFirstNames} ${item?.authorPersonLastName}")
                             secondary = ReactNode("${item?.discussionPostTitle}")
 
+                        }
+
+                        onClick = {
+                            item?.also{props.onClickPost(it)}
                         }
 
                 }
