@@ -23,9 +23,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="1.0998546"
-     inkscape:cx="288.67452"
-     inkscape:cy="428.23842"
+     inkscape:zoom="1.5554293"
+     inkscape:cx="378.35214"
+     inkscape:cy="424.96307"
      inkscape:window-width="2681"
      inkscape:window-height="1665"
      inkscape:window-x="344"
@@ -137,180 +137,206 @@
          style="stroke-width:0.264583"
          x="12.931637"
          y="151.38673">Android app</tspan></text>
-    <rect
-       style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
-       id="rect6729"
-       width="57.924473"
-       height="7.8491302"
-       x="75.385887"
-       y="28.308033" />
-    <rect
-       style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
-       id="rect6729-3"
-       width="57.924473"
-       height="7.8491302"
-       x="75.272209"
-       y="37.551071" />
-    <rect
-       style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
-       id="rect6729-3-5"
-       width="57.924473"
-       height="7.8491302"
-       x="75.393616"
-       y="47.364941" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="85.691238"
-       y="33.446285"
-       id="text10339"><tspan
-         sodipodi:role="line"
-         id="tspan10337"
-         style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
-         x="85.691238"
-         y="33.446285">Postgres / SQLite</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="99.961571"
-       y="42.765751"
-       id="text10339-6"><tspan
-         sodipodi:role="line"
-         id="tspan10337-7"
-         style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
-         x="99.961571"
-         y="42.765751">JDBC</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="85.984962"
-       y="52.657703"
-       id="text10339-6-3"><tspan
-         sodipodi:role="line"
-         id="tspan10337-7-5"
-         style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
-         x="85.984962"
-         y="52.657703">Door Database Lib</tspan></text>
-    <rect
-       style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
-       id="rect6729-3-5-6"
-       width="57.924473"
-       height="7.8491302"
-       x="75.561211"
-       y="70.502777" />
-    <rect
-       style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
-       id="rect6729-3-5-6-1"
-       width="57.924473"
-       height="7.8491302"
-       x="75.561211"
-       y="79.939407" />
+    <g
+       id="g76401">
+      <rect
+         style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
+         id="rect6729"
+         width="57.924473"
+         height="7.8491302"
+         x="75.522293"
+         y="28.308033" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="86.420532"
+         y="33.400486"
+         id="text10339"><tspan
+           sodipodi:role="line"
+           id="tspan10337"
+           style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+           x="86.420532"
+           y="33.400486">Postgres / SQLite</tspan></text>
+    </g>
+    <g
+       id="g76406"
+       transform="translate(0,0.2854154)">
+      <rect
+         style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
+         id="rect6729-3"
+         width="57.924473"
+         height="7.8491302"
+         x="75.522293"
+         y="37.551071" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="99.561836"
+         y="42.765751"
+         id="text10339-6"><tspan
+           sodipodi:role="line"
+           id="tspan10337-7"
+           style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+           x="99.561836"
+           y="42.765751">JDBC</tspan></text>
+    </g>
+    <g
+       id="g76411">
+      <rect
+         style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
+         id="rect6729-3-5"
+         width="57.924473"
+         height="7.8491302"
+         x="75.522293"
+         y="47.364941" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="84.746216"
+         y="52.657703"
+         id="text10339-6-3"><tspan
+           sodipodi:role="line"
+           id="tspan10337-7-5"
+           style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+           x="84.746216"
+           y="52.657703">Door Database Lib</tspan></text>
+    </g>
     <rect
        style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect6729-3-5-6-1-0"
        width="57.924473"
        height="7.8491302"
-       x="75.772377"
+       x="75.522293"
        y="94.868706" />
+    <g
+       id="g76421"
+       transform="translate(0,-0.01562001)">
+      <rect
+         style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
+         id="rect6729-3-5-6"
+         width="57.924473"
+         height="7.8491302"
+         x="75.522293"
+         y="70.502777" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="86.303741"
+         y="75.606583"
+         id="text10339-6-3-2"><tspan
+           sodipodi:role="line"
+           id="tspan10337-7-5-9"
+           style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+           x="86.303741"
+           y="75.606583">KTOR Application</tspan></text>
+    </g>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="85.753227"
-       y="75.606583"
-       id="text10339-6-3-2"><tspan
-         sodipodi:role="line"
-         id="tspan10337-7-5-9"
-         style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
-         x="85.753227"
-         y="75.606583">KTOR Application</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="82.071457"
-       y="99.959099"
+       x="80.46328"
+       y="99.961159"
        id="text10339-6-3-2-9"><tspan
          sodipodi:role="line"
          id="tspan10337-7-5-9-3"
          style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
-         x="82.071457"
-         y="99.959099">Apache / Nginx (Proxy)</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="91.143456"
-       y="84.935562"
-       id="text10339-6-3-2-2"><tspan
-         sodipodi:role="line"
-         id="tspan10337-7-5-9-7"
-         style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
-         x="91.143456"
-         y="84.935562">Netty (JVM)</tspan></text>
-    <rect
-       style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
-       id="rect21457"
-       width="57.924473"
-       height="7.8491302"
-       x="75.393616"
-       y="61.034908" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="78.680107"
-       y="66.213348"
-       id="text21461"><tspan
-         sodipodi:role="line"
-         id="tspan21459"
-         style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
-         x="78.680107"
-         y="66.213348">Core Kotlin Multiplatform</tspan></text>
-    <rect
-       style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
-       id="rect6729-3-5-6-6"
-       width="57.924473"
-       height="7.8491302"
-       x="17.488541"
-       y="203.392" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="25.563889"
-       y="208.4958"
-       id="text10339-6-3-2-1"><tspan
-         sodipodi:role="line"
-         id="tspan10337-7-5-9-2"
-         style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
-         x="25.563889"
-         y="208.4958">Jetpack Compose UI</tspan></text>
-    <rect
-       style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
-       id="rect21457-9"
-       width="57.924473"
-       height="7.8491302"
-       x="17.320946"
-       y="193.92412" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="20.607437"
-       y="199.10257"
-       id="text21461-3"><tspan
-         sodipodi:role="line"
-         id="tspan21459-1"
-         style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
-         x="20.607437"
-         y="199.10257">Core Kotlin Multiplatform</tspan></text>
+         x="80.46328"
+         y="99.961159">Apache / Nginx (Proxy)</tspan></text>
+    <g
+       id="g76431">
+      <rect
+         style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
+         id="rect6729-3-5-6-1"
+         width="57.924473"
+         height="7.8491302"
+         x="75.522293"
+         y="79.939407" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="92.437729"
+         y="85.029793"
+         id="text10339-6-3-2-2"><tspan
+           sodipodi:role="line"
+           id="tspan10337-7-5-9-7"
+           style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+           x="92.437729"
+           y="85.029793">Netty (JVM)</tspan></text>
+    </g>
+    <g
+       id="g76416">
+      <rect
+         style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
+         id="rect21457"
+         width="57.924473"
+         height="7.8491302"
+         x="75.522293"
+         y="61.034908" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="78.208122"
+         y="66.213348"
+         id="text21461"><tspan
+           sodipodi:role="line"
+           id="tspan21459"
+           style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+           x="78.208122"
+           y="66.213348">Core Kotlin Multiplatform</tspan></text>
+    </g>
+    <g
+       id="g76461">
+      <rect
+         style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
+         id="rect6729-3-5-6-6"
+         width="57.924473"
+         height="7.8491302"
+         x="17.547325"
+         y="203.392" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="25.642635"
+         y="208.48445"
+         id="text10339-6-3-2-1"><tspan
+           sodipodi:role="line"
+           id="tspan10337-7-5-9-2"
+           style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+           x="25.642635"
+           y="208.48445">Jetpack Compose UI</tspan></text>
+    </g>
+    <g
+       id="g76456">
+      <rect
+         style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
+         id="rect21457-9"
+         width="57.924473"
+         height="7.8491302"
+         x="17.547325"
+         y="193.92412" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="20.23315"
+         y="199.01657"
+         id="text21461-3"><tspan
+           sodipodi:role="line"
+           id="tspan21459-1"
+           style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+           x="20.23315"
+           y="199.01657">Core Kotlin Multiplatform</tspan></text>
+    </g>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
        x="-51.993652"
-       y="71.097237"
+       y="71.506569"
        id="text22920"
        transform="rotate(-90)"><tspan
          sodipodi:role="line"
          id="tspan22918"
          style="font-size:4.23333px;stroke-width:0.264583"
          x="-51.993652"
-         y="71.097237">Database</tspan></text>
+         y="71.506569">Database</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
@@ -327,92 +353,102 @@
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
        x="-105.1088"
-       y="70.988045"
+       y="71.471428"
        id="text22920-6-6"
        transform="rotate(-90)"><tspan
          sodipodi:role="line"
          id="tspan22918-0-2"
          style="font-size:4.23333px;stroke-width:0.264583"
          x="-105.1088"
-         y="70.988045">HTTP </tspan></text>
-    <rect
-       style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
-       id="rect6729-7"
-       width="57.924473"
-       height="7.8491302"
-       x="17.765976"
-       y="156.72563" />
-    <rect
-       style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
-       id="rect6729-3-9"
-       width="57.924473"
-       height="7.8491302"
-       x="17.652298"
-       y="165.96867" />
-    <rect
-       style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
-       id="rect6729-3-5-2"
-       width="57.924473"
-       height="7.8491302"
-       x="17.773705"
-       y="175.78255" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="39.167263"
-       y="161.9417"
-       id="text10339-0"><tspan
-         sodipodi:role="line"
-         id="tspan10337-2"
-         style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
-         x="39.167263"
-         y="161.9417">SQLite</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="32.837585"
-       y="171.44933"
-       id="text10339-6-37"><tspan
-         sodipodi:role="line"
-         id="tspan10337-7-59"
-         style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
-         x="32.837585"
-         y="171.44933">Jetpack Room</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="28.365051"
-       y="181.0753"
-       id="text10339-6-3-22"><tspan
-         sodipodi:role="line"
-         id="tspan10337-7-5-8"
-         style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
-         x="28.365051"
-         y="181.0753">Door Database Lib</tspan></text>
+         y="71.471428">HTTP </tspan></text>
+    <g
+       id="g76441">
+      <rect
+         style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
+         id="rect6729-7"
+         width="57.924473"
+         height="7.8491302"
+         x="17.547325"
+         y="156.72563" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="39.573555"
+         y="161.98552"
+         id="text10339-0"><tspan
+           sodipodi:role="line"
+           id="tspan10337-2"
+           style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+           x="39.573555"
+           y="161.98552">SQLite</tspan></text>
+    </g>
+    <g
+       id="g76446"
+       transform="translate(0,0.2854154)">
+      <rect
+         style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
+         id="rect6729-3-9"
+         width="57.924473"
+         height="7.8491302"
+         x="17.547325"
+         y="165.96867" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="32.311989"
+         y="171.06113"
+         id="text10339-6-37"><tspan
+           sodipodi:role="line"
+           id="tspan10337-7-59"
+           style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+           x="32.311989"
+           y="171.06113">Jetpack Room</tspan></text>
+    </g>
+    <g
+       id="g76451">
+      <rect
+         style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
+         id="rect6729-3-5-2"
+         width="57.924473"
+         height="7.8491302"
+         x="17.547325"
+         y="175.78255" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="26.771248"
+         y="181.28531"
+         id="text10339-6-3-22"><tspan
+           sodipodi:role="line"
+           id="tspan10337-7-5-8"
+           style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+           x="26.771248"
+           y="181.28531">Door Database Lib</tspan></text>
+    </g>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
        x="-180.41125"
-       y="13.477326"
+       y="14.013017"
        id="text22920-9"
        transform="rotate(-90)"><tspan
          sodipodi:role="line"
          id="tspan22918-7"
          style="font-size:4.23333px;stroke-width:0.264583"
          x="-180.41125"
-         y="13.477326">Database</tspan></text>
+         y="14.013017">Database</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
        x="-213.98453"
-       y="13.728086"
+       y="13.602707"
        id="text22920-9-9"
        transform="rotate(-90)"><tspan
          sodipodi:role="line"
          id="tspan22918-7-4"
          style="font-size:4.23333px;stroke-width:0.264583"
          x="-213.98453"
-         y="13.728086">Application</tspan></text>
+         y="13.602707">Application</tspan></text>
     <rect
        style="opacity:0.999;fill:none;stroke:#000000;stroke-width:0.233359;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect846-6-7"
@@ -431,102 +467,114 @@
          style="stroke-width:0.264583"
          x="128.42015"
          y="151.53461">Web app</tspan></text>
-    <rect
-       style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
-       id="rect6729-3-5-6-6-5"
-       width="57.924473"
-       height="7.8491302"
-       x="133.21445"
-       y="192.43381" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="139.70232"
-       y="197.53761"
-       id="text10339-6-3-2-1-0"><tspan
-         sodipodi:role="line"
-         id="tspan10337-7-5-9-2-3"
-         style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
-         x="139.70232"
-         y="197.53761">React Components UI</tspan></text>
-    <rect
-       style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
-       id="rect21457-9-6"
-       width="57.924473"
-       height="7.8491302"
-       x="133.04686"
-       y="182.96593" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="136.33334"
-       y="188.14438"
-       id="text21461-3-1"><tspan
-         sodipodi:role="line"
-         id="tspan21459-1-0"
-         style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+    <g
+       id="g76496">
+      <rect
+         style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
+         id="rect6729-3-5-6-6-5"
+         width="57.924473"
+         height="7.8491302"
+         x="133.21445"
+         y="203.017" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="139.10524"
+         y="208.35336"
+         id="text10339-6-3-2-1-0"><tspan
+           sodipodi:role="line"
+           id="tspan10337-7-5-9-2-3"
+           style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+           x="139.10524"
+           y="208.35336">React Framework/MUI</tspan></text>
+    </g>
+    <g
+       id="g76486">
+      <rect
+         style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
+         id="rect21457-9-6"
+         width="57.924473"
+         height="7.8491302"
+         x="133.04686"
+         y="182.96593" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
          x="136.33334"
-         y="188.14438">Core Kotlin Multiplatform</tspan></text>
-    <rect
-       style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
-       id="rect6729-3-5-2-2"
-       width="57.924473"
-       height="7.8491302"
-       x="133.26222"
-       y="157.93898" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="143.85356"
-       y="163.23174"
-       id="text10339-6-3-22-5"><tspan
-         sodipodi:role="line"
-         id="tspan10337-7-5-8-4"
-         style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
-         x="143.85356"
-         y="163.23174">TanStack Query</tspan></text>
-    <rect
-       style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
-       id="rect6729-3-5-2-2-4"
-       width="57.924473"
-       height="7.8491302"
-       x="133.26222"
-       y="167.90475" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="143.85356"
-       y="173.19751"
-       id="text10339-6-3-22-5-7"><tspan
-         sodipodi:role="line"
-         id="tspan10337-7-5-8-4-4"
-         style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
-         x="143.85356"
-         y="173.19751">Door Database Lib</tspan></text>
+         y="188.05838"
+         id="text21461-3-1"><tspan
+           sodipodi:role="line"
+           id="tspan21459-1-0"
+           style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+           x="136.33334"
+           y="188.05838">Core Kotlin Multiplatform</tspan></text>
+    </g>
+    <g
+       id="g76476">
+      <rect
+         style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
+         id="rect6729-3-5-2-2"
+         width="57.924473"
+         height="7.8491302"
+         x="133.26222"
+         y="157.93898" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="145.74693"
+         y="163.23174"
+         id="text10339-6-3-22-5"><tspan
+           sodipodi:role="line"
+           id="tspan10337-7-5-8-4"
+           style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+           x="145.74693"
+           y="163.23174">TanStack Query</tspan></text>
+    </g>
+    <g
+       id="g76481">
+      <rect
+         style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
+         id="rect6729-3-5-2-2-4"
+         width="57.924473"
+         height="7.8491302"
+         x="133.26222"
+         y="167.90475" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="142.48615"
+         y="173.19751"
+         id="text10339-6-3-22-5-7"><tspan
+           sodipodi:role="line"
+           id="tspan10337-7-5-8-4-4"
+           style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+           x="142.48615"
+           y="173.19751">Door Database Lib</tspan></text>
+    </g>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
        x="-172.09254"
-       y="128.96584"
+       y="129.62022"
        id="text22920-9-7"
        transform="rotate(-90)"><tspan
          sodipodi:role="line"
          id="tspan22918-7-6"
          style="font-size:4.23333px;stroke-width:0.264583"
          x="-172.09254"
-         y="128.96584">Data</tspan></text>
+         y="129.62022">Data</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="-203.02634"
-       y="129.45399"
+       x="-208.84709"
+       y="129.27502"
        id="text22920-9-9-5"
        transform="rotate(-90)"><tspan
          sodipodi:role="line"
          id="tspan22918-7-4-6"
          style="font-size:4.23333px;stroke-width:0.264583"
-         x="-203.02634"
-         y="129.45399">Application</tspan></text>
+         x="-208.84709"
+         y="129.27502">Application</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow1Lstart);marker-end:url(#Arrow1Lend)"
        d="m 94.435828,114.88677 -55.17208,23.48074"
@@ -559,5 +607,27 @@
          style="font-size:3.52778px;stroke-width:0.264583"
          x="166.10513"
          y="60.851963">REST API usage</tspan></text>
+    <g
+       id="g76491"
+       transform="translate(0,0.05976702)">
+      <rect
+         style="opacity:0.999;fill:#55a99a;fill-opacity:1;stroke:none;stroke-width:0.255139;stroke-miterlimit:4;stroke-dasharray:none"
+         id="rect68455"
+         width="57.924473"
+         height="7.8491302"
+         x="133.04686"
+         y="192.9317" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="142.5737"
+         y="198.02415"
+         id="text68459"><tspan
+           sodipodi:role="line"
+           id="tspan68457"
+           style="font-size:4.23333px;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+           x="142.5737"
+           y="198.02415">Kotlin/JS wrappers</tspan></text>
+    </g>
   </g>
 </svg>
