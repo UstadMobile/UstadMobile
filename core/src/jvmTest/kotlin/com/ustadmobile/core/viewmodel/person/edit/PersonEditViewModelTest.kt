@@ -27,6 +27,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.delay
 import org.kodein.di.*
 import org.mockito.kotlin.*
 import kotlin.test.Test
@@ -174,6 +175,9 @@ class PersonEditViewModelTest {
             viewModel.onClickSave()
 
             val db = di.direct.on(activeEndpoint).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+
+            //Should not be needed - issue is with doorFlow
+            delay(1000)
 
             db.doorFlow(arrayOf("Person")) {
                 db.personDao.getAllPerson()

@@ -218,7 +218,6 @@ task generateCoreStringToAndroidResMap {
 }
 tasks.whenTaskAdded { task ->
     if (task.name.startsWith("compile") || task.name.startsWith("assemble")) {
-        //TODO: Fix lib-content-editor to track up to date correctly, then add ":lib-content-editor:build" dependency
         task.dependsOn(generateCoreStringToAndroidResMap)
     }
 

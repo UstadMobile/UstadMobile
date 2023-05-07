@@ -81,12 +81,14 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    signingConfigs {
-        release {
-            keyAlias keyStorePropertiesExists ? keystoreProperties['keyAlias'] : "default"
-            keyPassword keyStorePropertiesExists ? keystoreProperties['keyPassword'] : "default"
-            storeFile keyStorePropertiesExists ? file(keystoreProperties['storeFile']) : new File("keystore.ks")
-            storePassword keyStorePropertiesExists ? keystoreProperties['storePassword'] : "default"
+    if(keyStorePropertiesExists) {
+        signingConfigs {
+            release {
+                keyAlias keyStorePropertiesExists ? keystoreProperties['keyAlias'] : "default"
+                keyPassword keyStorePropertiesExists ? keystoreProperties['keyPassword'] : "default"
+                storeFile keyStorePropertiesExists ? file(keystoreProperties['storeFile']) : new File("keystore.ks")
+                storePassword keyStorePropertiesExists ? keystoreProperties['storePassword'] : "default"
+            }
         }
     }
 
@@ -99,7 +101,9 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            if(keyStorePropertiesExists) {
+                signingConfig signingConfigs.release
+            }
         }
     }
     lint {

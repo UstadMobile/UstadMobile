@@ -331,6 +331,18 @@ task prepareLocale {
     }
 }
 
+afterEvaluate {
+    compileKotlinJs.dependsOn(prepareLocale)
+    compileKotlinJvm.dependsOn(prepareLocale)
+    jvmSourcesJar.dependsOn(prepareLocale)
+    jsSourcesJar.dependsOn(prepareLocale)
+    compileReleaseKotlinAndroid.dependsOn(prepareLocale)
+    compileDebugKotlinAndroid.dependsOn(prepareLocale)
+    sourcesJar.dependsOn(prepareLocale)
+    assemble.dependsOn(prepareLocale)
+    compileCommonMainKotlinMetadata.dependsOn(prepareLocale)
+}
+
 task copyStringValuesToWebAssets {
     File outDir = project.file("${reactLocaleOutPath}/locales/")
     if(!outDir.exists()){
@@ -346,16 +358,6 @@ task copyStringValuesToWebAssets {
         FileWriter writer = new FileWriter(project.file("${outDir.absolutePath}/${localeCode}.xml").absolutePath)
         writer.write(file.getText())
         writer.flush()
-    }
-}
-
-tasks.whenTaskAdded { task ->
-    if (task.name == "compileTestKotlinJvm") {
-        task.dependsOn(copyTestResources)
-    }
-
-    if(task.name.startsWith("compile") || task.name.startsWith("assemble") || task.name.endsWith("Jar") || task.name.startsWith("build")) {
-        task.dependsOn(prepareLocale)
     }
 }
 

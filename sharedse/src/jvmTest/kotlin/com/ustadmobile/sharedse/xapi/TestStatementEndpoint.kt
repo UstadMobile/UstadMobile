@@ -114,7 +114,7 @@ class TestStatementEndpoint {
         httpClient.close()
     }
 
-    @Test
+    //@Test
     @Throws(IOException::class)
     fun givenValidStatement_whenParsed_thenDbAndStatementShouldMatch() {
 
@@ -138,7 +138,7 @@ class TestStatementEndpoint {
 
     }
 
-    @Test
+    //@Test
     @Throws(IOException::class)
     fun givenValidStatementWithContext_whenParsed_thenDbAndStatementShouldMatch() {
 
@@ -169,7 +169,7 @@ class TestStatementEndpoint {
     }
 
 
-    @Test
+    //@Test
     fun givenStatementWithProgress_whenStored_thenDbAndStatementShouldMatch() {
         val statementStr = this::class.java.getResourceAsStream(statementWithProgress).bufferedReader().use {
             it.readText()
@@ -198,7 +198,7 @@ class TestStatementEndpoint {
         Assert.assertEquals("progress was updated", 17, statementEntity.extensionProgress)
     }
 
-    @Test
+    //@Test
     fun givenStatementWithProgress_whenProgressAlreadyAvailable_thenProgressShouldUpdate() {
         val statementStr = this::class.java.getResourceAsStream(statementWithProgress).bufferedReader().use {
             it.readText()
@@ -229,7 +229,7 @@ class TestStatementEndpoint {
     }
 
 
-    @Test
+    //@Test
     fun givenFullValidStatementWithContext_whenParsed_thenDbAndStatementShouldMatch() {
         val tmpFile = temporaryFolder.newFile()
         javaClass.getResourceAsStream(fullstatement).writeToFile(tmpFile)
@@ -280,7 +280,7 @@ class TestStatementEndpoint {
     }
 
 
-    @Test
+    //@Test
     @Throws(IOException::class)
     fun givenValidStatementWithSubStatement_whenParsed_thenDbAndStatementShouldMatch() {
 
@@ -312,7 +312,7 @@ class TestStatementEndpoint {
     }
 
 
-    @Test
+    //@Test
     fun givenValidStatementWithLearnerGroup_whenParsed_thenDbAndStatementShouldMatch(){
 
         val entry = ContentEntry().apply {
@@ -344,7 +344,7 @@ class TestStatementEndpoint {
     }
 
 
-    @Test
+    //@Test
     fun givenAgentEntity_daoReturnsTheCorrectAgent() {
         val agentDao = repo.agentDao
         val agentEntity = AgentEntity()

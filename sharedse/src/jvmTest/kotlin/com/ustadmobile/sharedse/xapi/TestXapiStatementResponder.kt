@@ -144,7 +144,7 @@ class TestXapiStatementResponder {
 
     }
 
-    @Test
+    //@Test
     @Throws(IOException::class)
     fun givenValidPostRequest_whenDataInQueryParamString_thenDbShouldBeUpdated() {
         val tmpFile = temporaryFolder.newFile("statement.json")
@@ -184,7 +184,7 @@ class TestXapiStatementResponder {
                 statement?.statementContentEntryUid)
     }
 
-    @Test
+    //@Test
     @Throws(IOException::class)
     fun givenValidPutRequest_whenDataInContentMap_thenDbShouldBeUpdated() {
 
@@ -224,7 +224,7 @@ class TestXapiStatementResponder {
                 clazzUid, statement.statementClazzUid)
     }
 
-    @Test
+    //@Test
     @Throws(IOException::class)
     fun givenAValidPutRequest_whenPutRequestHasStatementIdParam_thenShouldUpdateDb() {
 

@@ -1,8 +1,6 @@
 # Ustad Mobile Android app module
 
-This is a normal gradle build and should build and run with Android Studio as normal. It can normally
-be selected from the list of run items at the top of Android Studio to run on the emulator as 
-normal.
+This is a normal gradle build and should build and run with Android Studio as normal. 
 
 ### Command line debug APK build 
 
