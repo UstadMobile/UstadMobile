@@ -8,7 +8,7 @@ via fragments.
 
 * Follow steps in the [project README](../#development-environment-setup) to setup development
   environment and start the server.
-* ![android run screenshot](android-run.png)
+* ![android run screenshot](android-run.png)  
 Run the app by selecting "app-android" in the Android toolbar and clicking the run button.
 * Enter the URL of the server and tap "next". You can use the local IP address of your laptop. e.g.
 __http://192.168.1.42:8087/__ where your IP address is 192.168.1.42 (server default port is 8087) . 
