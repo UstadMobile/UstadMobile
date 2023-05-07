@@ -81,7 +81,7 @@ if [ "$NCRESULT" == "0" ]; then
   exit 1
 fi
 
-echo "Starting Ustad server on port 8087 - Use [Ctrl+C] to stop."
+echo "Starting Ustad HTTP/REST server on port 8087 - Use [Ctrl+C] to stop."
 java $DEBUGARGS -jar build/libs/ustad-server-all.jar -P:ktor.ustad.jsDevServer=http://localhost:8080/ $SERVERARGS
 
 # Go back to wherever we started from
