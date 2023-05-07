@@ -6,7 +6,7 @@ via fragments.
 
 ## Getting started from source
 
-* Follow steps in the [project README](../) to setup development
+* Follow steps in the [main project README](../README.md) to setup development
   environment and start the server.
 * ![android run screenshot](android-run.png)  
 Run the app by selecting "app-android" in the Android toolbar and clicking the run button.
@@ -15,7 +15,7 @@ __http://192.168.1.42:8087/__ where your IP address is 192.168.1.42 (server defa
 You __cannot__ use 127.0.0.1 or localhost (on the Android device/emulator, this refers to the 
 device/emulator, not the host PC.). If using an emulator, you can use http://10.0.2.2:8087/ (because
 10.0.2.2 on an Android emulator always refers to the host PC).
-* Enter the username admin, and the admin password. See [project README](../#development-environment-setup)
+* Enter the username admin, and the admin password. See [main project README](../#development-environment-setup)
 for how to find the initial admin password.
 
 ### Command line debug APK build
