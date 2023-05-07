@@ -7,40 +7,35 @@ Ustad Mobile is licensed under the AGPLv3 license: please see the LICENSE file f
 
 ## Installing on a server (self-hosting)
 
-See [INSTALL.md](INSTALL.md) for instructions for installation on your own server using release
+See [INSTALL.md](INSTALL.md) for instructions for installation on your own server using binary 
 downloads.
 
 ## Getting started building from source:
 
-This is a Kotlin Multiplatform project. This repository contains the entire Android app, web app, and
+This is a Kotlin Multiplatform project. This repository contains the Android app, web app, and
 backend server source code in its modules. 
 
 * __Import the project in Android Studio__: Select File, New, Project from Version Control. Enter
 https://github.com/UstadMobile/UstadMobile.git and wait for the project to import.
 
-* __Build it__ :
-Linux command line:
+* __Build/run the server__: Run the server locally:
+
+Linux/MacOS:
 ```
-./gradlew -Pktorbundleproductionjs=true build
-```
-Windows command line:
-```
-gradlew  -Pktorbundleproductionjs=true build
+$ ./runserver.sh
 ```
 
-Start the server:
-
-You should now be able to open the web version on http://localhost:8087/ . The admin password will
-be found in ./app-ktor-server/data/singleton/admin.txt
-
-* __Install and run the Android app__ : run
+Windows:
 ```
-adb install ./app-android-launcher/build/outputs/apk/debug/app-android-launcher-debug.apk
+$ runserver.bat
 ```
 
-You should now be able to open the Android app. When the Android app starts, enter the address of
-the rest server
-e.g. http://192.168.1.123:8087/ where 192.168.1.123 is the IP address of your development machine.
+This will start the server on port 8087. This will run the REST API which is required by the Android
+and web apps. It will not include the web client app itself. To use the web client app in the browser,
+you must build/run it (as below).
+
+* __Build/run the Android and/or web client version__ : see [app-android](app-android/) for the
+Android app, [app-react](app-react/) for the web app.
 
 ## Contributing
 
@@ -66,7 +61,7 @@ This multi-module Gradle project built using Kotlin Multiplatform. It builds for
 * KTOR Server (JVM) (app-ktor-server)
 
 Code is contained (mostly) in the following modules:
-* [core](core/) : Contains presenters, view interfaces, and core business logic.
+* [core](core/) : Contains view models, ui state, core business logic.
 * [sharedse](sharedse/): Contains some shared implementations for operating systems with a disk (JVM/Android)
 * [app-ktor-server](app-ktor-server/): Contains the HTTP rest server (implemented using KTOR)
 * [app-android](app-android/): Contains Android implementation, forms the basis of the app in
