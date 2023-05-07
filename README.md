@@ -12,6 +12,9 @@ downloads.
 
 ## Getting started building from source:
 
+This is a Kotlin Multiplatform project. This repository contains the entire Android app, web app, and
+backend server source code in its modules. 
+
 * __Import the project in Android Studio__: Select File, New, Project from Version Control. Enter
 https://github.com/UstadMobile/UstadMobile.git and wait for the project to import.
 
