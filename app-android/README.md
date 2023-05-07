@@ -6,7 +6,7 @@ via fragments.
 
 ## Getting started from source
 
-* Follow steps in the [project README](../#development-environment-setup) to setup development
+* Follow steps in the [project README](../) to setup development
   environment and start the server.
 * ![android run screenshot](android-run.png)  
 Run the app by selecting "app-android" in the Android toolbar and clicking the run button.
