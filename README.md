@@ -59,9 +59,11 @@ Windows:
 $ runserver.bat
 ```
 
-This will start the server on port 8087. This will run the REST API which is required by the Android
-and web apps. It will not include the web client app itself. To use the web client app in the browser,
-you must build/run it (as below).
+This will start the server on port 8087. The admin password will be randomly generated - you can find
+it in app-ktor-server/data/singleton/admin.txt .
+
+This will run the REST API which is required by the Android and web apps. It will not include the 
+web client app itself. To use the web client app in the browser, you must build/run it (as below).
 
 * __Step 5: Build/run the Android and/or web client version__ : see [app-android](app-android/) for the
 Android app, [app-react](app-react/) for the web app.
@@ -104,21 +106,4 @@ Code is contained (mostly) in the following modules:
   stopping the main server, and manage adb screen recording. Used by end-to-end testing.
 
 To build debug / release versions for any given platform please see the README in the directory for that platform.
-
-## Configuration management
-
-There are two parts to the configuration:
-
-* Build configuration : buildconfig.properties contains properties used
-during the build and testing process.
-
-* App config : a .properties file that is contained in the assets. This can be overriden when the
-  app is used as a library. By default [com/ustadmobile/core/appconfig.properties](core/src/main/assets/com/ustadmobile/core/appconfig.properties) 
-  will be used. This can be overriden by setting the com.ustadmobile.core.appconfig manifest property 
-  (e.g. meta-data in AndroidManifest.xml).
-
-The build configuration system uses two .properties files: 
-* **buildconfig.default.properties**: Contains default options
-* **buildconfig.local.properties** : Contains any custom options and is excluded from git. Any option set in buildconfig.local.properties will override what's set in the default properties.
-
 
