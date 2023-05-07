@@ -66,6 +66,12 @@ The production bundle is included as static assets when building the server for 
 The production Javascript bundle will only be include with app-ktor-server if the ktorbundleproductionjs
 argument is set as follows:
 
+Linux/MacOS:
+```
+$ ./gradlew app-ktor-server:shadowJar -Pktorbundleproductionjs=true
+```
+
+Windows:
 ```
 $ gradlew app-ktor-server:shadowJar -Pktorbundleproductionjs=true
 ```
