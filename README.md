@@ -17,8 +17,7 @@ backend server source code in its modules. Android Studio is the development env
 entire project. 
 
 *  __Step 1: Download and install Android Studio__: If you don't already have the latest version, download 
-from [https://developer.android.com/studio](https://developer.android.com/studio). Switch to the 
-dev-mvvm-primary branch (Menu: Git - Branches - search for dev-mvvm-primary - checkout ).
+from [https://developer.android.com/studio](https://developer.android.com/studio).
 
 * __Step 2: Make sure that java is on your system path__: If you already have OpenJDK17+, you can use that.
 If not, you can use the version that is bundled with Android Studio. 
@@ -46,7 +45,8 @@ Now find the PATH variable. Append ```;%JAVA_HOME%\bin``` to the value and save 
 Further details: see the [Java website](https://www.java.com/en/download/help/path.html).
 
 * __Step 3: Import the project in Android Studio__: Select File, New, Project from Version Control. Enter
-https://github.com/UstadMobile/UstadMobile.git and wait for the project to import.
+https://github.com/UstadMobile/UstadMobile.git and wait for the project to import. Switch to the
+  dev-mvvm-primary branch (Menu: Git - Branches - search for dev-mvvm-primary - checkout ).
 
 * __Step 4: Build/run the server__: Run the server locally:
 
