@@ -13,12 +13,34 @@ downloads.
 ## Getting started building from source:
 
 This is a Kotlin Multiplatform project. This repository contains the Android app, web app, and
-backend server source code in its modules. 
+backend server source code in its modules. Android Studio is the development environment for the 
+entire project. 
 
-* __Import the project in Android Studio__: Select File, New, Project from Version Control. Enter
+*  __Step 1: Download and install Android Studio__: If you don't already have the latest version, download 
+from [https://developer.android.com/studio](https://developer.android.com/studio).
+
+* __Step 2: Make sure that java is on your system path__: If you already have OpenJDK17+, you can use that.
+If not, you can use the version that is bundled with Android Studio. 
+
+Linux:
+Option 1: Edit ~/.profile and add the following lines to the bottom (where Android Studio is installed in ~/android-studio):
+
+```
+export JAVA_HOME=~/android-studio/jbr
+export PATH=$JAVA_HOME:PATH
+```
+
+Option 2: Install OpenJDK17+
+```
+sudo apt-get install openjdk-18-jdk
+```
+
+Windows/Mac: follow instructions as per the [Java website](https://www.java.com/en/download/help/path.html).
+
+* __Step 3: Import the project in Android Studio__: Select File, New, Project from Version Control. Enter
 https://github.com/UstadMobile/UstadMobile.git and wait for the project to import.
 
-* __Build/run the server__: Run the server locally:
+* __Step 4: Build/run the server__: Run the server locally:
 
 Linux/MacOS:
 ```
@@ -34,7 +56,7 @@ This will start the server on port 8087. This will run the REST API which is req
 and web apps. It will not include the web client app itself. To use the web client app in the browser,
 you must build/run it (as below).
 
-* __Build/run the Android and/or web client version__ : see [app-android](app-android/) for the
+* __Step 5: Build/run the Android and/or web client version__ : see [app-android](app-android/) for the
 Android app, [app-react](app-react/) for the web app.
 
 ## Contributing
