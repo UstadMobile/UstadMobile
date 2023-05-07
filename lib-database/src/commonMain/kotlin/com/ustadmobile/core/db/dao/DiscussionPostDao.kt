@@ -200,7 +200,7 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
         
        WHERE DiscussionPost.discussionPostDiscussionTopicUid = :entityUid
               AND CAST(DiscussionPost.discussionPostVisible AS INTEGER) = 1
-              AND CAST(DiscussionPost.discussionPostArchive AS INTEGER) = 0
+              AND CAST(DiscussionPost.discussionPostArchive AS INTEGER) = 1
               
     ORDER BY DiscussionPost.discussionPostStartDate DESC
     """)

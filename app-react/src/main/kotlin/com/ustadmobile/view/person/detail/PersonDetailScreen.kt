@@ -313,6 +313,7 @@ private val Classes = FC<PersonDetailProps> { props ->
 
     List{
         props.uiState.clazzes.forEach {
+            console.log("Each clazz")
             ListItem{
                 Stack {
                     direction = responsive(StackDirection.row)

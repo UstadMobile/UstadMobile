@@ -4,7 +4,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.appstate.AppUiState
-import com.ustadmobile.core.viewmodel.DiscussionPostDetailUiState2
+import com.ustadmobile.core.viewmodel.DiscussionPostDetailUiState
 import com.ustadmobile.core.viewmodel.DiscussionPostDetailViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.DiscussionPost
@@ -26,7 +26,7 @@ import react.ReactNode
 import react.create
 
 external interface DiscussionPostDetailProps: Props {
-    var uiState: DiscussionPostDetailUiState2
+    var uiState: DiscussionPostDetailUiState
     var onClickMessage: (DiscussionPostWithPerson) -> Unit
     var onDeleteMessage: (DiscussionPostWithPerson) -> Unit
     var onClickAddMessage: (String) -> Unit
@@ -35,7 +35,6 @@ external interface DiscussionPostDetailProps: Props {
 val DiscussionPostDetailComponent2 = FC<DiscussionPostDetailProps> { props ->
 
     val strings = useStringsXml()
-
 
 
     Container {
@@ -86,7 +85,23 @@ val DiscussionPostDetailComponent2 = FC<DiscussionPostDetailProps> { props ->
                 placeholder = strings[MessageID.add_a_reply]
                 onChange = {
                     // TODO this
+                    newReply.discussionPostMessage = it
                 }
+            }
+
+            Button{
+                onClick = {
+                    val response = newReply.discussionPostMessage
+
+                    if (response != null) {
+                        props.onClickAddMessage(response)
+                    }
+
+                }
+                variant = ButtonVariant.contained
+
+                + strings[MessageID.send]
+
             }
 
 
@@ -95,8 +110,10 @@ val DiscussionPostDetailComponent2 = FC<DiscussionPostDetailProps> { props ->
 
         List {
 
+            console.log("Checking replies..")
             props.uiState.replies.forEach { item ->
 
+                console.log("Got reply!")
                 val thisAuthorName = item.replyPerson?.fullName() ?: ""
                 ListItem {
                     disablePadding = true
@@ -125,6 +142,8 @@ val DiscussionPostDetailComponent2 = FC<DiscussionPostDetailProps> { props ->
                             icon = mui.icons.material.Person.create()
                         }
 
+
+
                     }
                 }
             }
@@ -134,7 +153,7 @@ val DiscussionPostDetailComponent2 = FC<DiscussionPostDetailProps> { props ->
 
 val DiscussionPostDetailPreview = FC<Props> {
     DiscussionPostDetailComponent2 {
-        uiState = DiscussionPostDetailUiState2(
+        uiState = DiscussionPostDetailUiState(
 
             discussionPost = DiscussionPostWithDetails().apply {
                 discussionPostTitle = "Submitting the assignment - help in formatting"
@@ -190,8 +209,8 @@ val DiscussionPostDetailScreen = FC<Props>{
         DiscussionPostDetailViewModel(di, savedStateHandle)
     }
 
-    val uiState: DiscussionPostDetailUiState2 by viewModel.uiState.collectAsState(
-        DiscussionPostDetailUiState2()
+    val uiState: DiscussionPostDetailUiState by viewModel.uiState.collectAsState(
+        DiscussionPostDetailUiState()
     )
     val appState by viewModel.appUiState.collectAsState(AppUiState())
 

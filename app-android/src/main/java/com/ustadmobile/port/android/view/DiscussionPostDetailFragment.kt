@@ -17,7 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.viewmodel.DiscussionPostDetailUiState2
+import com.ustadmobile.core.viewmodel.DiscussionPostDetailUiState
 import com.ustadmobile.core.viewmodel.DiscussionPostDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
@@ -81,7 +81,7 @@ class DiscussionPostDetailFragment: UstadBaseMvvmFragment() {
 
 @Composable
 fun DiscussionPostDetailFragmentScreen(viewModel: DiscussionPostDetailViewModel){
-    val uiState: DiscussionPostDetailUiState2 by viewModel.uiState.collectAsState(DiscussionPostDetailUiState2())
+    val uiState: DiscussionPostDetailUiState by viewModel.uiState.collectAsState(DiscussionPostDetailUiState())
 
     val context = LocalContext.current
 
@@ -97,7 +97,7 @@ fun DiscussionPostDetailFragmentScreen(viewModel: DiscussionPostDetailViewModel)
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun DiscussionPostDetailFragmentScreen(
-    uiState: DiscussionPostDetailUiState2 = DiscussionPostDetailUiState2(),
+    uiState: DiscussionPostDetailUiState = DiscussionPostDetailUiState(),
     onClickDeleteMessage: (DiscussionPostWithPerson) -> Unit = {},
     onClickMessage: (DiscussionPostWithPerson) -> Unit = {},
     onClickAddMessage: (String) -> Unit = {},
@@ -285,7 +285,7 @@ private fun DiscussionPostDetailFragmentScreen(
 @Composable
 @Preview
 fun DiscussionPostDetailScreenFragmentPreview(){
-    val uiState = DiscussionPostDetailUiState2(
+    val uiState = DiscussionPostDetailUiState(
         discussionPost = DiscussionPostWithDetails().apply {
             discussionPostTitle = "Submitting an assignment"
             authorPersonFirstNames = "Mohammed"
