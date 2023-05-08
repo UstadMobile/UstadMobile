@@ -50,6 +50,8 @@ external interface UstadDetailFieldProps: Props {
      * Optional secondary space (will be end-aligned)
      */
     var secondaryActionContent: ReactNode?
+
+    var htmlMode: Boolean?
 }
 
 /**
@@ -102,7 +104,15 @@ val UstadDetailField = FC<UstadDetailFieldProps> { props ->
                         align = TypographyAlign.left
 
                         variant = TypographyVariant.caption
-                        + labelText
+
+
+                        if(props.htmlMode == true ){
+                            UstadRawHtml {
+                                html = (labelText)
+                            }
+                        }else{
+                            + labelText
+                        }
                     }
                 }
             }

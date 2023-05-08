@@ -59,10 +59,11 @@ val CourseDiscussionDetailComponent2 = FC<CourseDiscussionDetailProps> { props -
             + strings[MessageID.description]
         }
 
-        Typography {
-            + props.uiState.courseBlock?.cbDescription.toString()
+        Typography{
+            UstadRawHtml {
+                html = (props.uiState.courseBlock?.cbDescription.toString())
+            }
         }
-
 
         maxWidth = "lg"
 

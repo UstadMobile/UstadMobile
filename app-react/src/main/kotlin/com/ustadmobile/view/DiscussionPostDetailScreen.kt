@@ -12,6 +12,7 @@ import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
 import com.ustadmobile.lib.db.entities.DiscussionPostWithPerson
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.mui.components.UstadDetailField
+import com.ustadmobile.mui.components.UstadRawHtml
 import com.ustadmobile.view.components.UstadBlankIcon
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.wrappers.quill.ReactQuill
@@ -57,11 +58,10 @@ val DiscussionPostDetailComponent2 = FC<DiscussionPostDetailProps> { props ->
 
         UstadDetailField {
             valueText = ReactNode(authorFullName?:"")
-
             labelText = props.uiState.discussionPost?.discussionPostMessage?:""
             icon = mui.icons.material.Person.create()
+            htmlMode = true
         }
-
 
 
         Box{
@@ -84,7 +84,6 @@ val DiscussionPostDetailComponent2 = FC<DiscussionPostDetailProps> { props ->
                 id = "add_a_reply"
                 placeholder = strings[MessageID.add_a_reply]
                 onChange = {
-                    // TODO this
                     newReply.discussionPostMessage = it
                 }
             }
@@ -110,7 +109,9 @@ val DiscussionPostDetailComponent2 = FC<DiscussionPostDetailProps> { props ->
 
         List {
 
-            props.uiState.replies.forEach { item ->
+            props.uiState.replies.forEach {
+                item ->
+
                 val thisAuthorName = item.replyPerson?.fullName() ?: ""
                 ListItem {
                     disablePadding = true
@@ -133,10 +134,12 @@ val DiscussionPostDetailComponent2 = FC<DiscussionPostDetailProps> { props ->
                             props.onClickMessage(item)
                         }
 
+
                         UstadDetailField {
                             valueText = ReactNode(thisAuthorName ?: "")
                             labelText = item.discussionPostMessage?:""
                             icon = mui.icons.material.Person.create()
+                            htmlMode = true
                         }
 
 
