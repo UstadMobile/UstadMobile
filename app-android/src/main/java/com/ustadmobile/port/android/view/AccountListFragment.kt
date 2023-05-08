@@ -202,8 +202,8 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
 
         mBinding?.accountListRecycler?.layoutManager = LinearLayoutManager(requireContext())
         val impl: UstadMobileSystemImpl by instance()
-        mPresenter = AccountListPresenter(requireContext(),arguments.toStringMap(),this, di,
-            viewLifecycleOwner).withViewLifecycle()
+        mPresenter = AccountListPresenter(requireContext(),arguments.toStringMap(),this, di
+        ).withViewLifecycle()
 
         val versionText = impl.getVersion(requireContext()) + " - " +
             Instant.fromEpochMilliseconds(impl.getBuildTimestamp(requireContext())).toString()

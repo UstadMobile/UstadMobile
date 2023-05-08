@@ -7,7 +7,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabaseJsImplementations
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.Snack
@@ -22,6 +21,7 @@ import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
 import com.ustadmobile.util.Util
+import com.ustadmobile.util.resolveEndpoint
 import com.ustadmobile.view.Content
 import csstype.Display
 import mui.system.Box
@@ -34,18 +34,25 @@ import csstype.array
 import csstype.Auto
 import csstype.GridTemplateAreas
 import io.github.aakira.napier.Napier
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.engine.js.Js
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.get
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.serialization.json.Json
 import mui.material.Snackbar
 import mui.material.Typography
-import org.w3c.dom.url.URLSearchParams
 import react.*
 import react.router.useLoaderData
 import ustadJsDi
+import web.location.location
+import web.url.URL
+import web.url.URLSearchParams
 import kotlin.random.Random
 
 //Roughly as per components/Showcases on MUI-showcase #d71c6d1
@@ -167,9 +174,6 @@ val UstadScreens = FC<Props> {
 val ustadScreensLoader: LoaderFunction = {
     Napier.base(UstadAntilog())
     Napier.d("Index: Window.onLoad")
-    val url = window.location.href
-    val apiUrl = URLSearchParams().get(AppConfig.KEY_API_URL)
-        ?: url.substringBefore(if(url.indexOf("umapp/") != -1) "umapp/" else "#/")
 
     val dbName = sanitizeDbNameFromUrl(window.location.origin)
     val dbUrl = "sqlite:$dbName"
@@ -196,8 +200,6 @@ val ustadScreensLoader: LoaderFunction = {
     @OptIn(DelicateCoroutinesApi::class)
     GlobalScope.promise {
         val dbBuilt = dbBuilder.build()
-        val appConfigs = Util.loadFileContentAsMap<HashMap<String, String>>("appconfig.json")
-        Napier.d("Index: loaded appConfig")
         val defaultStringsXmlStr = Util.loadAssetsAsText(defaultAssetPath)
         val displayedLocale = UstadMobileSystemImpl.displayedLocale
         val foreignStringXmlStr = if(displayedLocale != "en") {
@@ -206,8 +208,33 @@ val ustadScreensLoader: LoaderFunction = {
             null
         }
 
-        val di = ustadJsDi(dbBuilt, dbNodeIdAndAuth, appConfigs, apiUrl, defaultStringsXmlStr,
-            foreignStringXmlStr)
+        val json = Json {
+            encodeDefaults = true
+            ignoreUnknownKeys = true
+        }
+
+        val httpClient = HttpClient(Js) {
+            install(ContentNegotiation) {
+                json(json = json)
+            }
+            install(HttpTimeout)
+        }
+
+
+        val apiUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
+        val ustadConfigHref = URL("ustad-config.json", apiUrl).href
+        val configJson: Map<String, String> = httpClient.get(ustadConfigHref).body()
+
+        val di = ustadJsDi(
+            dbBuilt = dbBuilt,
+            dbNodeIdAndAuth = dbNodeIdAndAuth,
+            defaultStringsXmlStr = defaultStringsXmlStr,
+            displayLocaleStringsXmlStr = foreignStringXmlStr,
+            json = json,
+            httpClient = httpClient,
+            configMap = configJson,
+        )
+
         UstadScreensLoaderData(di)
     }
 }

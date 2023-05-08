@@ -10,9 +10,8 @@ import com.ustadmobile.lib.db.entities.Person.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 /**
- * Created by mike on 3/8/18.
+ * Represents an actual person in the system. May or may not have a user account.
  */
-
 @Entity
 @ReplicateEntity(tableId = TABLE_ID, tracker = PersonReplicate::class)
  @Triggers(arrayOf(

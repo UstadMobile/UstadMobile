@@ -18,7 +18,7 @@ import com.ustadmobile.core.view.PersonEditView.Companion.ARG_REGISTRATION_MODE
 import com.ustadmobile.core.view.RegisterMinorWaitForParentView
 import com.ustadmobile.core.view.RegisterMinorWaitForParentView.Companion.ARG_PARENT_CONTACT
 import com.ustadmobile.core.view.RegisterMinorWaitForParentView.Companion.ARG_USERNAME
-import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
+import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.flow.doorFlow
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -27,6 +27,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.delay
 import org.kodein.di.*
 import org.mockito.kotlin.*
 import kotlin.test.Test
@@ -125,7 +126,7 @@ class PersonEditViewModelTest {
 
             viewModelFactory {
                 savedStateHandle[ARG_REGISTRATION_MODE] = PersonEditView.REGISTER_MODE_ENABLED.toString()
-                savedStateHandle[ARG_SERVER_URL] = serverUrl
+                savedStateHandle[ARG_API_URL] = serverUrl
                 PersonEditViewModel(di, savedStateHandle)
             }
 
@@ -175,6 +176,9 @@ class PersonEditViewModelTest {
 
             val db = di.direct.on(activeEndpoint).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
 
+            //Should not be needed - issue is with doorFlow
+            delay(1000)
+
             db.doorFlow(arrayOf("Person")) {
                 db.personDao.getAllPerson()
             }.assertItemReceived(timeout = 5.seconds) { list ->
@@ -199,12 +203,12 @@ class PersonEditViewModelTest {
             viewModelFactory {
                 savedStateHandle[ARG_REGISTRATION_MODE] =
                     (PersonEditView.REGISTER_MODE_ENABLED or PersonEditView.REGISTER_MODE_MINOR).toString()
-                savedStateHandle[ARG_SERVER_URL] = activeEndpoint.url
+                savedStateHandle[ARG_API_URL] = activeEndpoint.url
                 savedStateHandle[ARG_DATE_OF_BIRTH] = minorDateOfBirth.toString()
                 PersonEditViewModel(di, savedStateHandle)
             }
 
-            viewModel.uiState.test(timeout = 5000.seconds) {
+            viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere {
                     it.approvalPersonParentJoin != null && it.person != null && it.fieldsEnabled
                 }
@@ -266,7 +270,7 @@ class PersonEditViewModelTest {
             viewModelFactory {
                 savedStateHandle[ARG_REGISTRATION_MODE] =
                     (PersonEditView.REGISTER_MODE_ENABLED or PersonEditView.REGISTER_MODE_MINOR).toString()
-                savedStateHandle[ARG_SERVER_URL] = activeEndpoint.url
+                savedStateHandle[ARG_API_URL] = activeEndpoint.url
                 savedStateHandle[ARG_DATE_OF_BIRTH] = minorDateOfBirth.toString()
                 PersonEditViewModel(di, savedStateHandle)
             }

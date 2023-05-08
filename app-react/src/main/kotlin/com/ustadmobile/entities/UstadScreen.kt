@@ -150,9 +150,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(AccountListView.VIEW_NAME, "AccountList Preview", AccountListScreenPreview),
     UstadScreen(ClazzMemberListView.VIEW_NAME, "ClazzMemberList Preview",
         ClazzMemberListScreenPreview),
-    UstadScreen(ClazzList2View.VIEW_NAME, "Clazz List",
-        ClazzListScreen
-    ),
+    UstadScreen(ClazzList2View.VIEW_NAME, "Clazz List",ClazzListScreen),
+    UstadScreen(ClazzList2View.VIEW_NAME_HOME, "ClazzListHome", ClazzListScreen),
     UstadScreen("VirtualListPreview", "Virtual List Preview",
         VirtualListPreview),
     UstadScreen("UstadAssignmentFileSubmissionHeader",

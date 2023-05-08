@@ -3,6 +3,7 @@ package com.ustadmobile.core.impl
 import com.ustadmobile.core.impl.nav.NavCommand
 import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
+import com.ustadmobile.core.impl.nav.TestNavCommand
 import com.ustadmobile.door.util.systemTimeInMillis
 import org.junit.Test
 import org.mockito.kotlin.mock
@@ -29,9 +30,9 @@ class NavCommandExecutionTrackerTest {
     @Test
     fun givenNavCommandTimedOut_whenRunOrExecuteCalled_thenShouldNotExecute() {
         val execTracker = NavCommandExecutionTracker()
-        val navCommand = mock<NavCommand> {
-            on { timestamp }.thenReturn((systemTimeInMillis() - NavCommandExecutionTracker.DEFAULT_TIMEOUT) -1)
-        }
+        val navCommand = TestNavCommand(
+            (systemTimeInMillis() - NavCommandExecutionTracker.DEFAULT_TIMEOUT) -1
+        )
 
         val counter = AtomicInteger()
 

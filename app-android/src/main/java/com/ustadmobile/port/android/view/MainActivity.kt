@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -34,7 +33,6 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityMainBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.DbPreloadWorker
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.NavControllerAdapter
@@ -111,12 +109,6 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
         ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_24dp)?.also {
             it.setTint(ContextCompat.getColor(this, R.color.onPrimaryColor))
         }
-    }
-
-    //Check contentonly mode. See appconfig.properties for details. When enabled, the bottom nav
-    // is only visible as admin (e.g. normal users only see content)
-    private val contentOnlyForNonAdmin: Boolean by lazy {
-        impl.getAppConfigBoolean(AppConfig.KEY_CONTENT_ONLY_MODE, this)
     }
 
     //This is actually managed by the underlying fragments.

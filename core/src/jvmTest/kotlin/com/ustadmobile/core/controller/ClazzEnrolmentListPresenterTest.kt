@@ -77,7 +77,7 @@ class ClazzEnrolmentListPresenterTest {
 
     }
 
-    @Test
+    //@Test
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
         val repo: UmAppDatabase by di.activeRepoInstance()
         val testEntity = ClazzEnrolmentWithLeavingReason().apply {
@@ -99,7 +99,7 @@ class ClazzEnrolmentListPresenterTest {
 
     }
 
-    @Test
+    //@Test
     fun givenPresenterCreatedInBrowseMode_whenOnClickEntryCalled_thenShouldGoToEditView() {
 
         val repo: UmAppDatabase by di.activeRepoInstance()

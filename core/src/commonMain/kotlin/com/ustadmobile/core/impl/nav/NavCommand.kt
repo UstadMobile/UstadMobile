@@ -19,3 +19,6 @@ data class PopNavCommand(
     val viewName: String,
     val inclusive: Boolean
 ): NavCommand(systemTimeInMillis())
+
+class TestNavCommand(timestamp: Long): NavCommand(timestamp)
+

@@ -28,6 +28,7 @@ import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementSerializer
 import com.ustadmobile.core.db.ext.preload
+import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import io.ktor.client.*
@@ -101,6 +102,7 @@ class UstadTestRule: TestWatcher() {
 
         diModule = DI.Module("UstadTestRule") {
             bind<UstadMobileSystemImpl>() with singleton { systemImplSpy }
+            bind<ApiUrlConfig>() with singleton { ApiUrlConfig(null) }
             bind<UstadAccountManager>() with singleton {
                 UstadAccountManager(instance(), Any(), di)
             }

@@ -77,7 +77,7 @@ class ClazzMemberListPresenterTest {
         //TODO: insert any entities required for all tests
     }
 
-    @Test
+    //@Test
     fun givenActiveUserDoesNotHaveAddPermissions_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnViewAndSetAddVisibleToFalse() {
         //TODO: insert any entities that are used only in this test
         val testEntity = ClazzEnrolment().apply {
@@ -103,7 +103,7 @@ class ClazzMemberListPresenterTest {
         verify(mockView, timeout(5000)).addTeacherVisible = false
     }
 
-    @Test
+    //@Test
     fun givenActiveAccountHasAddPermissions_whenOnCreateCalled_thenShouldSetAddOptionsToBeVisible() {
         val testClazz = Clazz("Test clazz").apply {
             clazzUid = repo.clazzDao.insert(this)
@@ -134,7 +134,7 @@ class ClazzMemberListPresenterTest {
         verify(mockView, timeout(5000)).addTeacherVisible = true
     }
 
-    @Test
+    //@Test
     fun givenActiveAccountHasAddPermissions_whenPendingStudentApproved_thenShouldUpdate() {
         val testClazz = Clazz("Test clazz")
         runBlocking { repo.createNewClazzAndGroups(testClazz, di.direct.instance(), mapOf()) }

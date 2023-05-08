@@ -64,7 +64,7 @@ class SiteEnterLinkViewModel(
                     .requirePostfix("/")
                 val site = httpClient.verifySite(endpointUrl)
                 val args = mutableMapOf(
-                    UstadView.ARG_SERVER_URL to endpointUrl,
+                    UstadView.ARG_API_URL to endpointUrl,
                     ARG_SITE to json.encodeToString(site),
                 )
                 ARGS_TO_PASS_THROUGH.forEach { argName ->

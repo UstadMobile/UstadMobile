@@ -219,22 +219,6 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
     }
 
 
-    /**
-     * Lookup a value from the app runtime configuration. These come from a properties file loaded
-     * from the assets folder, the path of which is set by the manifest preference
-     * com.sutadmobile.core.appconfig .
-     *
-     * @param key The config key to lookup
-     * @param defaultVal The default value to return if the key is not found
-     * @param context Systme context object
-     *
-     * @return The value of the key if found, if not, the default value provided
-     */
-    actual override fun getAppConfigString(key: String, defaultVal: String?): String?{
-        return appConfig.getProperty(key, defaultVal)
-    }
-
-
     override fun openFileInDefaultViewer(
         context: Any,
         doorUri: DoorUri,

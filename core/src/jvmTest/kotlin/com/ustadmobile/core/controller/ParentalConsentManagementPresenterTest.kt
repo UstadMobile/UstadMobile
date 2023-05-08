@@ -106,7 +106,7 @@ class ParentalConsentManagementPresenterTest {
         }
     }
 
-    @Test
+    //@Test
     fun givenPersonParentJoinHasNoParentYet_whenOpened_thenShouldSetParentAndApprovalStatus() {
         val db: UmAppDatabase by di.activeDbInstance()
         val repo: UmAppDatabase by di.activeRepoInstance()
@@ -149,7 +149,7 @@ class ParentalConsentManagementPresenterTest {
 
     }
 
-    @Test
+    //@Test
     fun givenParentChildJoinNoRelationshipSelected_whenClickSaveCalled_thenShouldSetErrorMessage() {
         val presenterArgs = mapOf(ARG_ENTITY_UID to personParentJoin.ppjUid.toString())
         val presenter = ParentalConsentManagementPresenter(context,

@@ -10,7 +10,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
-import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
+import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
@@ -108,7 +108,7 @@ suspend fun UstadNavController.navigateToLink(
         {
             val args = mutableMapOf(ARG_NEXT to viewUri)
             if(endpointUrl != null)
-                args[ARG_SERVER_URL] = endpointUrl
+                args[ARG_API_URL] = endpointUrl
 
             navigate(Login2View.VIEW_NAME, args.toMap(), goOptions)
         }

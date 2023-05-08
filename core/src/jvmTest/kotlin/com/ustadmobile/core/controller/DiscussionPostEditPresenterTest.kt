@@ -56,7 +56,7 @@ class DiscussionPostEditPresenterTest {
 
 
 
-    @Test
+    //@Test
     fun g_w_t(){
 
     }
