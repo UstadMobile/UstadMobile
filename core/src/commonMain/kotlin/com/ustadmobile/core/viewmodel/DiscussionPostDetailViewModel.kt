@@ -59,35 +59,40 @@ class DiscussionPostDetailViewModel(
 
             _uiState.whenSubscribed {
                 launch {
-                    activeDb.discussionPostDao.findWithDetailsByUidAsFlow(postUid).collect {
-                        post ->
+                    activeDb.discussionPostDao.findWithDetailsByUidAsFlow(postUid).collect { post ->
                         _uiState.update { prev -> prev.copy(discussionPost = post) }
                         _appUiState.update { prev ->
                             prev.copy(
-                                loadingState = if(post != null) {LoadingUiState.NOT_LOADING} else {
-                                    LoadingUiState.INDETERMINATE}
+                                loadingState = if (post != null) {
+                                    LoadingUiState.NOT_LOADING
+                                } else {
+                                    LoadingUiState.INDETERMINATE
+                                }
                             )
                         }
-                        clazzUid = post?.discussionPostClazzUid?:0L
+                        clazzUid = post?.discussionPostClazzUid ?: 0L
                     }
 
 
-                    activeDb.discussionPostDao.getPostTitleAsFlow(postUid).collect{
+                }
 
-                        _appUiState.update {
-                            prev ->
+
+                launch {
+                    activeDb.discussionPostDao.getPostTitleAsFlow(postUid).collect {
+
+                        _appUiState.update { prev ->
                             prev.copy(
                                 title = it
                             )
                         }
                     }
                 }
-            }
 
-            launch {
-                //Get replies as flow:
-                activeDb.discussionPostDao.findAllRepliesByPostUidAsFlow(postUid).collect {
-                    _uiState.update { prev -> prev.copy(replies = it) }
+                launch {
+                    //Get replies as flow:
+                    activeDb.discussionPostDao.findAllRepliesByPostUidAsFlow(postUid).collect {
+                        _uiState.update { prev -> prev.copy(replies = it) }
+                    }
                 }
             }
         }
