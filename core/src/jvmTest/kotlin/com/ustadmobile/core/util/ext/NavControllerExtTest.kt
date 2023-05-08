@@ -152,7 +152,7 @@ class NavControllerExtTest {
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"
-            } && UMURLEncoder.decodeUTF8(args[UstadView.ARG_SERVER_URL]!!) == linkEndpointUrl
+            } && UMURLEncoder.decodeUTF8(args[UstadView.ARG_API_URL]!!) == linkEndpointUrl
         }, any())
     }
 

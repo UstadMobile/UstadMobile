@@ -4,7 +4,6 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.atomicfu'
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.android.library'
-    id 'maven-publish'
 }
 
 android {
@@ -30,8 +29,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = '1.8'
-        targetCompatibility = '1.8'
+        sourceCompatibility = '17'
+        targetCompatibility = '17'
     }
     testOptions {
         unitTests {
@@ -45,13 +44,13 @@ android {
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
         kotlinOptions {
-            jvmTarget = "1.8"
+            jvmTarget = "17"
         }
     }
 }
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility = '17'
+targetCompatibility = '17'
 
 group rootProject.group
 version rootProject.version
@@ -262,18 +261,3 @@ tasks.whenTaskAdded { task ->
 jvmTest.dependsOn(copyTestResources)
 
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId rootProject.group
-            artifactId project.name
-            version rootProject.version
-        }
-    }
-
-    repositories {
-        maven {
-            url rootProject.ext.buildConfigProperties['repo.dir']
-        }
-    }
-}

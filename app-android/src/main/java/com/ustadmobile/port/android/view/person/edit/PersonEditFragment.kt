@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -112,7 +113,9 @@ fun PersonEditScreen(
         ) {
             UstadMessageIdOptionExposedDropDownMenuField(
                 value = uiState.person?.gender ?: 0,
-                modifier = Modifier.testTag("gender").fillMaxWidth(),
+                modifier = Modifier
+                    .testTag("gender")
+                    .fillMaxWidth(),
                 label = stringResource(R.string.gender_literal),
                 options = GENDER_MESSAGE_IDS,
                 onOptionSelected = {
@@ -141,19 +144,23 @@ fun PersonEditScreen(
             )
         }
 
-        UstadDateEditTextField(
-            value = uiState.person?.dateOfBirth ?: 0,
-            modifier = Modifier.fillMaxWidth(),
-            label = stringResource(id = R.string.birthday),
-            error = uiState.dateOfBirthError,
-            enabled = uiState.fieldsEnabled,
-            timeZoneId = UstadMobileConstants.UTC,
-            onValueChange = {
-                onPersonChanged(uiState.person?.shallowCopy{
-                    dateOfBirth = it
-                })
-            }
-        )
+        UstadInputFieldLayout(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            UstadDateField(
+                value = uiState.person?.dateOfBirth ?: 0,
+                label = { Text(stringResource(id = R.string.birthday)) },
+                isError = uiState.dateOfBirthError != null,
+                enabled = uiState.fieldsEnabled,
+                timeZoneId = UstadMobileConstants.UTC,
+                onValueChange = {
+                    onPersonChanged(uiState.person?.shallowCopy{
+                        dateOfBirth = it
+                    })
+                }
+            )
+        }
+
 
         UstadTextEditField(
             value = uiState.person?.phoneNum ?: "",

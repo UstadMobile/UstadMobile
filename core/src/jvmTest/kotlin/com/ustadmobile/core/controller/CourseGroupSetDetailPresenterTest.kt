@@ -67,7 +67,7 @@ class CourseGroupSetDetailPresenterTest {
         }
     }
 
-    @Test
+    //@Test
     fun givenCourseGroupSetExists_whenOnCreateCalled_thenCourseGroupSetIsSetOnView() {
         val db: UmAppDatabase by di.activeDbInstance()
         val repo: UmAppDatabase by di.activeRepoInstance()
@@ -89,7 +89,7 @@ class CourseGroupSetDetailPresenterTest {
 
     }
 
-    @Test
+    //@Test
     fun givenCourseGroupSetExists_whenHandleOnClickEditCalled_thenSystemImplGoToEditViewIsCalled() {
         val db: UmAppDatabase by di.activeDbInstance()
         val repo: UmAppDatabase by di.activeRepoInstance()

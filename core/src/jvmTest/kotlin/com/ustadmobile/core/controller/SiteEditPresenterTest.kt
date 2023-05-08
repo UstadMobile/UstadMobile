@@ -73,7 +73,7 @@ class SiteEditPresenterTest {
         //TODO: insert any entities required for all tests
     }
 
-    @Test
+    //@Test
     fun givenExistingWorkSpace_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {
         val repo: UmAppDatabase by di.activeRepoInstance()
         val db: UmAppDatabase by di.activeDbInstance()

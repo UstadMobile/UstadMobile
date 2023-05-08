@@ -5,9 +5,9 @@ import com.ustadmobile.core.account.ConsentNotGrantedException
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
@@ -20,7 +20,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT_MESSAGE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
-import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
+import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
 import com.ustadmobile.lib.db.entities.Site
 import io.github.aakira.napier.Napier
@@ -45,6 +45,8 @@ class Login2Presenter(
 
     private val impl: UstadMobileSystemImpl by instance()
 
+    private val apiUrlConfig: ApiUrlConfig by instance()
+
     private val accountManager: UstadAccountManager by instance()
 
     private val httpClient: HttpClient by instance()
@@ -56,14 +58,12 @@ class Login2Presenter(
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        nextDestination = arguments[ARG_NEXT] ?: impl.getAppConfigDefaultFirstDest()
+        nextDestination = arguments[ARG_NEXT] ?: impl.getDefaultFirstDest()
 
-        serverUrl = if (arguments.containsKey(ARG_SERVER_URL)) {
-            arguments.getValue(ARG_SERVER_URL)
+        serverUrl = if (arguments.containsKey(ARG_API_URL)) {
+            arguments.getValue(ARG_API_URL)
         } else {
-            impl.getAppConfigString(
-                AppConfig.KEY_API_URL, "http://localhost"
-            )?:""
+            apiUrlConfig.presetApiUrl ?: "http://localhost"
         }
 
         view.versionInfo = impl.getVersion(context)
@@ -156,7 +156,7 @@ class Login2Presenter(
 
     fun handleCreateAccount(){
         val args = mutableMapOf(
-                ARG_SERVER_URL to serverUrl,
+                ARG_API_URL to serverUrl,
                 SiteTermsDetailView.ARG_SHOW_ACCEPT_BUTTON to true.toString(),
                 SiteTermsDetailView.ARG_USE_DISPLAY_LOCALE to true.toString(),
                 ARG_POPUPTO_ON_FINISH to (arguments[ARG_POPUPTO_ON_FINISH] ?: Login2View.VIEW_NAME))

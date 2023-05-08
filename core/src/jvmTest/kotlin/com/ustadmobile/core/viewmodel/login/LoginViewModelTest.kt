@@ -29,6 +29,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.seconds
 
 @Suppress("RemoveExplicitTypeArguments")
 class LoginViewModelTest {
@@ -65,7 +66,7 @@ class LoginViewModelTest {
         listOf(true, false).forEach { testRegistrationAllowed ->
             testViewModel<LoginViewModel> {
                 viewModelFactory {
-                    savedStateHandle[UstadView.ARG_SERVER_URL] = "http://localhost:8087/"
+                    savedStateHandle[UstadView.ARG_API_URL] = "http://localhost:8087/"
                     savedStateHandle[UstadView.ARG_SITE] = json.encodeToString(Site().apply {
                         registrationAllowed = testRegistrationAllowed
                     })
@@ -84,7 +85,7 @@ class LoginViewModelTest {
         listOf(true, false).forEach { testGuestAllowed ->
             testViewModel<LoginViewModel> {
                 viewModelFactory {
-                    savedStateHandle[UstadView.ARG_SERVER_URL] = "http://localhost:8087/"
+                    savedStateHandle[UstadView.ARG_API_URL] = "http://localhost:8087/"
                     savedStateHandle[UstadView.ARG_SITE] = json.encodeToString(Site().apply {
                         guestLogin = testGuestAllowed
                     })
@@ -105,7 +106,7 @@ class LoginViewModelTest {
     fun givenCreateAccountVisible_whenClickCreateAccount_thenShouldNavigateToAgeRedirect() {
         testViewModel<LoginViewModel> {
             viewModelFactory {
-                savedStateHandle[UstadView.ARG_SERVER_URL] = "http://localhost:8087/"
+                savedStateHandle[UstadView.ARG_API_URL] = "http://localhost:8087/"
                 savedStateHandle[UstadView.ARG_SITE] = json.encodeToString(Site().apply {
                     registrationAllowed = true
                 })
@@ -142,7 +143,7 @@ class LoginViewModelTest {
                 mockWebServer.start()
                 mockWebServer.enqueueSiteResponse(Site())
 
-                savedStateHandle[UstadView.ARG_SERVER_URL] = mockWebServer
+                savedStateHandle[UstadView.ARG_API_URL] = mockWebServer
                     .url("/").toString()
                 savedStateHandle[UstadView.ARG_NEXT] = nextDestination
                 LoginViewModel(di, savedStateHandle)
@@ -158,7 +159,7 @@ class LoginViewModelTest {
 
             viewModel.navCommandFlow.filter {
                 (it as? NavigateNavCommand)?.viewName == nextDestination && it.goOptions.clearStack
-            }.test(name = "Receive navigate to next destination command") {
+            }.test(name = "Receive navigate to next destination command", timeout = 5.seconds) {
                 viewModel.onClickLogin()
                 assertNotNull(awaitItem())
             }
@@ -190,7 +191,7 @@ class LoginViewModelTest {
             viewModelFactory {
                 mockWebServer.start()
                 mockWebServer.enqueueSiteResponse(Site())
-                savedStateHandle[UstadView.ARG_SERVER_URL] = mockWebServer
+                savedStateHandle[UstadView.ARG_API_URL] = mockWebServer
                     .url("/").toString()
                 LoginViewModel(di, savedStateHandle)
             }
@@ -236,7 +237,7 @@ class LoginViewModelTest {
             }
 
             viewModelFactory {
-                savedStateHandle[UstadView.ARG_SERVER_URL] = "http://localhost:79/"
+                savedStateHandle[UstadView.ARG_API_URL] = "http://localhost:79/"
                 LoginViewModel(di, savedStateHandle)
             }
 
@@ -265,7 +266,7 @@ class LoginViewModelTest {
                 mockWebServer.start()
                 mockWebServer.enqueueSiteResponse(Site())
 
-                savedStateHandle[UstadView.ARG_SERVER_URL] = mockWebServer
+                savedStateHandle[UstadView.ARG_API_URL] = mockWebServer
                     .url("/").toString()
                 LoginViewModel(di, savedStateHandle)
             }
@@ -293,7 +294,7 @@ class LoginViewModelTest {
             viewModelFactory {
                 mockWebServer.start()
                 mockWebServer.enqueueSiteResponse(Site())
-                savedStateHandle[UstadView.ARG_SERVER_URL] = mockWebServer
+                savedStateHandle[UstadView.ARG_API_URL] = mockWebServer
                     .url("/").toString()
                 LoginViewModel(di, savedStateHandle)
             }

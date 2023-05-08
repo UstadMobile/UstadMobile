@@ -2,6 +2,7 @@ package com.ustadmobile.core.impl.locale
 
 import com.ustadmobile.core.generated.locale.MessageIdMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.APPCONFIG_PROPERTIES_PATH
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import org.junit.Assert
 import org.junit.Test
 import org.xmlpull.v1.XmlPullParserFactory
@@ -67,14 +68,9 @@ class StringsXmlTest {
         val defaultStringsXml = loadStringsFromResource("/values/strings_ui.xml",
             map)
         Assert.assertNotNull(defaultStringsXml)
+        val supportedLanguagesConfig = SupportedLanguagesConfig()
 
-        val appConfig = Properties().also { props ->
-            this::class.java.getResourceAsStream(APPCONFIG_PROPERTIES_PATH).use {
-                props.load(it)
-            }
-        }
-
-        val locales = appConfig.getProperty("app.ui_languages")
+        val locales = supportedLanguagesConfig.availableLanguagesConfig
         locales.split(",").filter { it != "en" }.forEach { locale ->
             try {
                 val stringsXml = loadStringsFromResource("/values-$locale/strings_ui.xml", map,

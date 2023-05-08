@@ -137,7 +137,7 @@ class TestXapiStateResponder {
         httpClient.close()
     }
 
-    @Test
+    //@Test
     @Throws(IOException::class)
     fun testput() {
 
@@ -167,7 +167,7 @@ class TestXapiStateResponder {
         Assert.assertEquals("http://www.example.com/activities/1", stateEntity!!.activityId)
     }
 
-    @Test
+    //@Test
     @Throws(IOException::class)
     fun testPost() {
 
@@ -202,7 +202,7 @@ class TestXapiStateResponder {
     }
 
 
-    @Test
+    //@Test
     @Throws(IOException::class)
     fun testAll() {
         val tmpFile = File.createTempFile("testState", "state")

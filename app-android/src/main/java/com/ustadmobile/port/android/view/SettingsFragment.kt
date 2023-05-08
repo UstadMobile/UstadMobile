@@ -16,11 +16,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.material.MdcTheme
+import androidx.core.content.ContextCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSettingsBinding
 import com.ustadmobile.core.controller.SettingsPresenter
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SettingsView
@@ -101,8 +104,12 @@ class SettingsFragment : UstadBaseFragment(), SettingsView, SettingsFragmentEven
     }
 
     override fun onClickAppLanguage() {
+        val supportedLangConfig : SupportedLanguagesConfig by instance()
+        val langList = supportedLangConfig.supportedUiLanguagesAndSysDefault(
+            requireContext().getString(R.string.use_device_language)
+        )
+
         val systemImpl: UstadMobileSystemImpl by instance()
-        val langList = systemImpl.getAllUiLanguagesList()
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.app_language)
             .setItems(langList.map { it.langDisplay }.toTypedArray()) { _, which ->

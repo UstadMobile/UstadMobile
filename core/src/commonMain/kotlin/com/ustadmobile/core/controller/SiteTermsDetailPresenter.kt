@@ -51,7 +51,7 @@ class SiteTermsDetailPresenter(
         //Therefor we will lookup the db/repo ourselves instead of using the val provided by the argument
         //itself.
 
-        val serverUrl = arguments[UstadView.ARG_SERVER_URL] ?: accountManager.activeAccount.endpointUrl
+        val serverUrl = arguments[UstadView.ARG_API_URL] ?: accountManager.activeAccount.endpointUrl
         val endpoint = Endpoint(serverUrl)
 
         val dbToUse : UmAppDatabase = if(db is DoorDatabaseRepository) {

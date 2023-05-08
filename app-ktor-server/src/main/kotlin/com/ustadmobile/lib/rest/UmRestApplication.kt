@@ -48,6 +48,7 @@ import com.ustadmobile.core.db.PermissionManagementIncomingReplicationListener
 import com.ustadmobile.core.contentjob.DummyContentPluginUploader
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.db.ext.preload
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.lib.util.SysPathUtil
@@ -75,7 +76,7 @@ const val CONF_GOOGLE_API = "secret"
 /**
  * List of external commands (e.g. media converters) that must be found or have locations specified
  */
-val REQUIRED_EXTERNAL_COMMANDS = listOf("ffmpeg", "ffprobe")
+val REQUIRED_EXTERNAL_COMMANDS = emptyList<String>()
 
 /**
  * List of prefixes which are always answered by the KTOR server. When using JsDev proxy mode, any
@@ -166,6 +167,8 @@ fun Application.umRestApplication(
 
     di {
         import(CommonJvmDiModule)
+        bind<SupportedLanguagesConfig>() with singleton { SupportedLanguagesConfig() }
+
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {
             File(tmpRootDir, context.identifier(dbMode)).also {
                 it.takeIf { !it.exists() }?.mkdirs()
@@ -321,13 +324,8 @@ fun Application.umRestApplication(
         }
 
         bind<Pbkdf2Params>() with singleton {
-            val systemImpl: UstadMobileSystemImpl = instance()
-            val numIterations = systemImpl.getAppConfigInt(
-                AppConfig.KEY_PBKDF2_ITERATIONS,
-                UstadMobileConstants.PBKDF2_ITERATIONS, context)
-            val keyLength = systemImpl.getAppConfigInt(
-                AppConfig.KEY_PBKDF2_KEYLENGTH,
-                UstadMobileConstants.PBKDF2_KEYLENGTH, context)
+            val numIterations = UstadMobileConstants.PBKDF2_ITERATIONS
+            val keyLength = UstadMobileConstants.PBKDF2_KEYLENGTH
 
             Pbkdf2Params(numIterations, keyLength)
         }
@@ -358,13 +356,13 @@ fun Application.umRestApplication(
         bind<File>(tag = DiTag.TAG_FILE_FFMPEG) with singleton {
             //The availability of ffmpeg is checked on startup
             SysPathUtil.findCommandInPath("ffmpeg",
-                manuallySpecifiedLocation = appConfig.commandFileProperty("ffmpeg"))!!
+                manuallySpecifiedLocation = appConfig.commandFileProperty("ffmpeg")) ?: File("err")
         }
 
         bind<File>(tag = DiTag.TAG_FILE_FFPROBE) with singleton {
             //The availability of ffmpeg is checked on startup
             SysPathUtil.findCommandInPath("ffprobe",
-                manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"))!!
+                manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"))  ?: File("err")
         }
 
         bind<File>(tag = DiTag.TAG_FILE_UPLOAD_TMP_DIR) with scoped(EndpointScope.Default).singleton {

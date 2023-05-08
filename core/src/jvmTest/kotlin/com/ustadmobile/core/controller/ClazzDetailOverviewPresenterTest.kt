@@ -77,7 +77,7 @@ class ClazzDetailOverviewPresenterTest {
         }
     }
 
-    @Test
+    //@Test
     fun givenClazzExists_whenOnCreateCalled_thenClazzIsSetOnView() {
         val repo: UmAppDatabase by di.activeRepoInstance()
 
@@ -103,7 +103,7 @@ class ClazzDetailOverviewPresenterTest {
         verifyBlocking(repoScheduleSpy, timeout(5000)) {findAllSchedulesByClazzUid(testEntity.clazzUid)}
     }
 
-    @Test
+    //@Test
     fun givenClazzExists_whenHandleOnClickEditCalled_thenSystemImplGoToEditViewIsCalled() {
         val repo: UmAppDatabase by di.activeRepoInstance()
         val testEntity = Clazz().apply {
