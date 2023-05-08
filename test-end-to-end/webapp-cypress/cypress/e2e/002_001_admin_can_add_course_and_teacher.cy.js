@@ -1,0 +1,16 @@
+describe('The admin can add course and a teacher', () => {
+  it('Ustad Mobile - add course and a teacher test', () => {
+  cy.startTestServer()
+  cy.login('admin','testpass')
+  cy.addCourse('TestCourse')
+  cy.wait(2000)
+  cy.go('back')
+  cy.wait(2000)
+  cy.addTeacher_Course('TestCourse','sudha','madhav','Female','sm','test')
+  cy.logout()
+  cy.reload()
+  cy.login('sm','test')
+  cy.contains('Courses').click()
+  cy.wait(2000)
+ })
+})
