@@ -50,6 +50,8 @@ web client (e.g. the webpack development server).
 ### Known Issues:
 
 1. Do not import mui.icons.material.* - this will make autocomplete/intellisense unusably slow in the IDE.
+2. Production bundle does not load timezones - causes crash on viewing course. Development version
+loads timezones OK. Appears to be a Dead Code Elimination (DCE) issue.
 
 ### Building for production
 

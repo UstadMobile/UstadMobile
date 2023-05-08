@@ -21,6 +21,7 @@ import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
 import com.ustadmobile.util.Util
+import com.ustadmobile.util.resolveEndpoint
 import com.ustadmobile.view.Content
 import csstype.Display
 import mui.system.Box
@@ -49,6 +50,9 @@ import mui.material.Typography
 import react.*
 import react.router.useLoaderData
 import ustadJsDi
+import web.location.location
+import web.url.URL
+import web.url.URLSearchParams
 import kotlin.random.Random
 
 //Roughly as per components/Showcases on MUI-showcase #d71c6d1
@@ -216,7 +220,10 @@ val ustadScreensLoader: LoaderFunction = {
             install(HttpTimeout)
         }
 
-        val configJson: Map<String, String> = httpClient.get("ustad-config.json").body()
+
+        val apiUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
+        val ustadConfigHref = URL("ustad-config.json", apiUrl).href
+        val configJson: Map<String, String> = httpClient.get(ustadConfigHref).body()
 
         val di = ustadJsDi(
             dbBuilt = dbBuilt,
