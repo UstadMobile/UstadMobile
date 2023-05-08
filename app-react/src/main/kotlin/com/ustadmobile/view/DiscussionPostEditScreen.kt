@@ -9,6 +9,7 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.wrappers.quill.ReactQuill
 import csstype.px
 import mui.material.*
 import mui.system.responsive
@@ -41,11 +42,10 @@ val DiscussionPostEditComponent2 = FC<DiscussionPostEditProps> { props ->
                 }
             }
 
-            UstadTextEditField {
+            ReactQuill {
                 value = props.uiState.discussionPost?.discussionPostMessage ?: ""
-                label = strings[MessageID.message]
-                error = props.uiState.discussionPostDescError
-                enabled = props.uiState.fieldsEnabled
+                id = "add_a_new_post_message"
+                placeholder = strings[MessageID.message]
                 onChange = {
                     props.onPostChanged(
                         props.uiState.discussionPost?.shallowCopy {
