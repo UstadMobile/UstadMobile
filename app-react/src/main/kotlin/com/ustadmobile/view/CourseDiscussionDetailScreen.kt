@@ -100,20 +100,24 @@ val CourseDiscussionDetailComponent2 = FC<CourseDiscussionDetailProps> { props -
 
                     ListItem.create{
 
-                        ListItemIcon{
-                            UstadPersonAvatar{
-                                personUid = item?.discussionPostStartedPersonUid?: 0
+                        ListItemButton {
+                            onClick = {
+                                item?.also { props.onClickPost(it) }
                             }
-                        }
 
-                        ListItemText{
-                            primary = ReactNode("${item?.authorPersonFirstNames} ${item?.authorPersonLastName}")
-                            secondary = ReactNode("${item?.discussionPostTitle}")
+                            ListItemIcon {
+                                UstadPersonAvatar {
+                                    personUid = item?.discussionPostStartedPersonUid ?: 0
+                                }
+                            }
 
-                        }
+                            ListItemText {
+                                primary =
+                                    ReactNode("${item?.authorPersonFirstNames} ${item?.authorPersonLastName}")
+                                secondary = ReactNode("${item?.discussionPostTitle}")
 
-                        onClick = {
-                            item?.also{props.onClickPost(it)}
+                            }
+
                         }
 
                 }

@@ -110,10 +110,7 @@ val DiscussionPostDetailComponent2 = FC<DiscussionPostDetailProps> { props ->
 
         List {
 
-            console.log("Checking replies..")
             props.uiState.replies.forEach { item ->
-
-                console.log("Got reply!")
                 val thisAuthorName = item.replyPerson?.fullName() ?: ""
                 ListItem {
                     disablePadding = true

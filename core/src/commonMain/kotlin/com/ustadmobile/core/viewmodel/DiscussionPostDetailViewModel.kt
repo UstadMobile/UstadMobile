@@ -105,7 +105,10 @@ class DiscussionPostDetailViewModel(
         //TODO
     }
     fun onClickDeleteEntry(entry: DiscussionPostWithPerson){
-        //TODO
+        viewModelScope.launch {
+            entry.discussionPostVisible = false
+            activeDb.discussionPostDao.updateAsync(entry)
+        }
     }
 
     fun addMessage(message: String) {
