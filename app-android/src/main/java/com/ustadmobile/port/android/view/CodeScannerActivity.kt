@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.Preview
+import androidx.camera.core.Preview as CameraPreview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.*
@@ -17,7 +17,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import com.example.codescanner.ui.theme.CodeScannerTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.common.util.concurrent.ListenableFuture
@@ -29,7 +28,7 @@ fun CodeScannerScreen(){
 
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    var preview by remember { mutableStateOf<Preview?>(null) }
+    var preview by remember { mutableStateOf<CameraPreview?>(null) }
     val barCodeVal = remember { mutableStateOf("") }
 
     AndroidView(
@@ -53,7 +52,7 @@ fun CodeScannerScreen(){
                 ProcessCameraProvider.getInstance(context)
 
             cameraProviderFuture.addListener({
-                preview = Preview.Builder().build().also {
+                preview = CameraPreview.Builder().build().also {
                     it.setSurfaceProvider(previewView.surfaceProvider)
                 }
                 val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()

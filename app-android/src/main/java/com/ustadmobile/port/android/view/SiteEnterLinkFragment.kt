@@ -11,6 +11,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,9 +28,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
+import com.google.android.material.timepicker.MaterialTimePicker
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.util.MS_PER_HOUR
+import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
+import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
 import com.ustadmobile.port.android.view.composable.UstadErrorText
 
 class SiteEnterLinkFragment : UstadBaseMvvmFragment() {
@@ -90,6 +95,18 @@ private fun SiteEnterLinkScreen(
             isError = uiState.linkError != null,
             enabled = uiState.fieldsEnabled,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
+            trailingIcon = {
+                IconButton(
+                    onClick = {
+
+                    },
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.QrCodeScanner,
+                        contentDescription = "",
+                    )
+                }
+            },
             keyboardActions = KeyboardActions(
                 onGo = {
                     onClickNext()
