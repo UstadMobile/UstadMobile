@@ -16,7 +16,30 @@ class VideoShrinkerJvm: Shrinker {
         val srcFile = srcUri.toFile()
         val destFile = srcUri.toFile()
 
-        //TODO here: use ffmpeg to compress
-        TODO("Not yet implemented")
+        //TODO here: use ffmpeg to compress --> done
+        // TODO: need to discuss config implementation details
+
+        val pb = ProcessBuilder(
+            "ffmpeg",
+            "-i",
+            srcFile.absolutePath.toString(),
+            "-vf",
+            "-quality",
+            "good",
+            "-c:v",
+            "libvpx-vp9",
+            "libvorbis",
+            destFile.absolutePath.toString()
+        )
+
+        pb.redirectErrorStream(true)
+        val process = pb.start()
+        process.waitFor()
+        // progressListener = pb.start()
+        // progressListener.waitFor()
+
+
     }
+
+
 }

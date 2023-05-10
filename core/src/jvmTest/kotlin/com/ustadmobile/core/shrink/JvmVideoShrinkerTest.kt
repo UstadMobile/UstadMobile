@@ -6,7 +6,6 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import java.io.File
 import kotlin.test.assertTrue
 
 class JvmVideoShrinkerTest {
