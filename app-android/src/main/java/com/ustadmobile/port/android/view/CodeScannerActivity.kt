@@ -55,10 +55,12 @@ fun CodeScannerScreen(){
                     it.setSurfaceProvider(previewView.surfaceProvider)
                 }
                 val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
-                val barcodeAnalyser = BarCodeAnalyser { barcode ->
-                    barcode.rawValue?.let { barcodeValue ->
-                        barCodeVal.value = barcodeValue
-                        Toast.makeText(context, barcodeValue, Toast.LENGTH_SHORT).show()
+                val barcodeAnalyser = BarCodeAnalyser { barcodes ->
+                    barcodes.forEach { barcode ->
+                        barcode.rawValue?.let { barcodeValue ->
+                            barCodeVal.value = barcodeValue
+                            Toast.makeText(context, barcodeValue, Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
                 val imageAnalysis: ImageAnalysis = ImageAnalysis.Builder()
