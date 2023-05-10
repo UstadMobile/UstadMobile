@@ -32,6 +32,11 @@ application {
     applicationName = "ustad-server"
 }
 
+tasks.withType(CreateStartScripts) {
+    unixStartScriptGenerator.template = resources.text.fromFile("$projectDir/src/scripttemplates/unixStartScript.txt")
+    windowsStartScriptGenerator.template = resources.text.fromFile("$projectDir/src/scripttemplates/windowsStartScript.txt")
+}
+
 ktor {
     fatJar {
         archiveFileName.set("ustad-server-all.jar")
