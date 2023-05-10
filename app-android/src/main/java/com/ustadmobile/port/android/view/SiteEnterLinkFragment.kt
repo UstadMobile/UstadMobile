@@ -35,9 +35,9 @@ import com.ustadmobile.port.android.view.composable.UstadErrorText
 import android.Manifest
 import androidx.compose.material.Button
 import androidx.compose.material.Text
-//import androidx.compose.runtime.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
+import com.ustadmobile.core.impl.nav.CommandFlowUstadNavController
 
 class SiteEnterLinkFragment : UstadBaseMvvmFragment() {
 
@@ -72,6 +72,7 @@ private fun SiteEnterLinkScreen(
 ) {
 
     val cameraPermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
+    val navController = CommandFlowUstadNavController()
 
     Column(
         modifier = Modifier
@@ -105,6 +106,8 @@ private fun SiteEnterLinkScreen(
                 IconButton(
                     onClick = {
                         cameraPermissionState.launchPermissionRequest()
+//                        if (cameraPermissionState.hasPermission){
+//                        }
                     },
                 ) {
                     Icon(
