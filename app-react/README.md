@@ -62,10 +62,10 @@ argument is set as follows:
 
 Linux/MacOS:
 ```
-$ ./gradlew app-ktor-server:shadowJar -Pktorbundleproductionjs=true
+$ ./gradlew app-ktor-server:distZip -Pktorbundleproductionjs=true
 ```
 
 Windows:
 ```
-$ gradlew app-ktor-server:shadowJar -Pktorbundleproductionjs=true
+$ gradlew app-ktor-server:distZip -Pktorbundleproductionjs=true
 ```
