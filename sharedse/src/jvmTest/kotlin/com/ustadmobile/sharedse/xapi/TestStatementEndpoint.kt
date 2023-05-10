@@ -69,7 +69,6 @@ class TestStatementEndpoint {
 
     @Before
     fun setup() {
-        checkJndiSetup()
         val endpointScope = EndpointScope()
         val endpointUrl = Endpoint("http://localhost:8087/")
 

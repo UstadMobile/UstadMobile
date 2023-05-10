@@ -75,7 +75,6 @@ class TestXapiStatementResponder {
     @Before
     @Throws(IOException::class)
     fun setup() {
-        checkJndiSetup()
         val endpointScope = EndpointScope()
         di = DI {
             bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {

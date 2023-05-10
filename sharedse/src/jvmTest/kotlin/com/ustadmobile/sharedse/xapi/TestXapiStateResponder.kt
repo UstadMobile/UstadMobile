@@ -74,7 +74,6 @@ class TestXapiStateResponder {
     @Before
     @Throws(IOException::class)
     fun setup() {
-        checkJndiSetup()
         val endpointScope = EndpointScope()
 
         okHttpClient = OkHttpClient()
