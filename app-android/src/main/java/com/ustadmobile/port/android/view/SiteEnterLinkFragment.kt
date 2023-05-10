@@ -28,14 +28,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
-import com.google.android.material.timepicker.MaterialTimePicker
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.util.MS_PER_HOUR
-import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
-import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
 import com.ustadmobile.port.android.view.composable.UstadErrorText
+import android.Manifest
+import androidx.compose.material.Button
+import androidx.compose.material.Text
+//import androidx.compose.runtime.*
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberPermissionState
 
 class SiteEnterLinkFragment : UstadBaseMvvmFragment() {
 
@@ -60,6 +62,7 @@ class SiteEnterLinkFragment : UstadBaseMvvmFragment() {
 
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun SiteEnterLinkScreen(
     uiState: SiteEnterLinkUiState = SiteEnterLinkUiState(),
@@ -67,6 +70,9 @@ private fun SiteEnterLinkScreen(
     onClickNewLearningEnvironment: () -> Unit = {},
     onEditTextValueChange: (String) -> Unit = {},
 ) {
+
+    val cameraPermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -98,7 +104,7 @@ private fun SiteEnterLinkScreen(
             trailingIcon = {
                 IconButton(
                     onClick = {
-
+                        cameraPermissionState.launchPermissionRequest()
                     },
                 ) {
                     Icon(
@@ -113,6 +119,8 @@ private fun SiteEnterLinkScreen(
                 }
             )
         )
+
+        CodeScannerScreen()
 
         uiState.linkError?.also {
             UstadErrorText(error = it)

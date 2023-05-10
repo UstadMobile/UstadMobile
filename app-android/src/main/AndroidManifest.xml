@@ -10,6 +10,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <!-- Used for content editing when a user wants to add pictures/video from camera -->
     <!--
     Temporarily disabled until we introduce syncable attachments
