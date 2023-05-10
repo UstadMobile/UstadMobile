@@ -287,4 +287,4 @@ eval "set -- \$(
         tr '\\n' ' '
     )" '"\$@"'
 
-exec "\$JAVACMD" "\$@" -config=\$APP_HOME/ustad-server.conf
+exec "\$JAVACMD" -Dapp_home=\$APP_HOME -Dlogs_dir=\$APP_HOME/log "\$@" -config=\$APP_HOME/ustad-server.conf

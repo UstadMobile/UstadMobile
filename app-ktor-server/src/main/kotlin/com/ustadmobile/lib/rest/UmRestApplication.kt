@@ -160,7 +160,24 @@ fun Application.umRestApplication(
 
     val dbMode = dbModeOverride ?:
         appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
-    val dataDirPath = File(environment.config.propertyOrNull("ktor.ustad.datadir")?.getString() ?: "data")
+
+    //When this is running through the start script created by Gradle, app_home will be set, and we
+    // will use this as the base directory for any relative path. If not, we will use the working
+    // directory as the base path.
+    val baseDir = System.getProperty("app_home")?.let { File(it) } ?: File(System.getProperty("user.dir"))
+    val dataDirPropValue = environment.config.propertyOrNull("ktor.ustad.datadir")?.getString() ?: "data"
+    val dataDirConf = File(dataDirPropValue)
+
+    val dataDirPath = if(dataDirConf.isAbsolute) {
+        dataDirConf
+    }else {
+        File(baseDir, dataDirPropValue)
+    }
+
+    fun String.replaceDbUrlVars(): String {
+        return replace("\${datadir}", dataDirPath.absolutePath)
+    }
+
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
 
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
@@ -225,6 +242,7 @@ fun Application.umRestApplication(
                 UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
             val dbUrl = appConfig.property("ktor.database.url").getString()
                 .replace("(hostname)", dbHostName)
+                .replaceDbUrlVars()
             if(dbUrl.startsWith("jdbc:postgresql"))
                 Class.forName("org.postgresql.Driver")
 
@@ -298,7 +316,9 @@ fun Application.umRestApplication(
 
         bind<Scheduler>() with singleton {
             val dbProperties = environment.config.databasePropertiesFromSection("quartz",
-                "jdbc:sqlite:data/quartz.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
+                "jdbc:sqlite:\${datadir}/quartz.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
+            dbProperties.setProperty("url", dbProperties.getProperty("url").replaceDbUrlVars())
+
             InitialContext().apply {
                 bindDataSourceIfNotExisting("quartzds", dbProperties)
                 initQuartzDb("java:/comp/env/jdbc/quartzds")
