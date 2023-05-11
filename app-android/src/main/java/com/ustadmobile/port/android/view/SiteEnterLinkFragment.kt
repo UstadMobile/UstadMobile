@@ -67,12 +67,12 @@ class SiteEnterLinkFragment : UstadBaseMvvmFragment() {
 private fun SiteEnterLinkScreen(
     uiState: SiteEnterLinkUiState = SiteEnterLinkUiState(),
     onClickNext: () -> Unit = {},
+    onClickQRCodeScan: () -> Unit = {},
     onClickNewLearningEnvironment: () -> Unit = {},
     onEditTextValueChange: (String) -> Unit = {},
 ) {
 
     val cameraPermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
-    val navController = CommandFlowUstadNavController()
 
     Column(
         modifier = Modifier
@@ -106,8 +106,9 @@ private fun SiteEnterLinkScreen(
                 IconButton(
                     onClick = {
                         cameraPermissionState.launchPermissionRequest()
-//                        if (cameraPermissionState.hasPermission){
-//                        }
+                        if (cameraPermissionState.hasPermission){
+                            onClickQRCodeScan()
+                        }
                     },
                 ) {
                     Icon(
@@ -122,8 +123,6 @@ private fun SiteEnterLinkScreen(
                 }
             )
         )
-
-        CodeScannerScreen()
 
         uiState.linkError?.also {
             UstadErrorText(error = it)
@@ -191,6 +190,7 @@ private fun SiteEnterLinkScreenForViewModel(
     SiteEnterLinkScreen(
         uiState = uiState,
         onClickNext = viewModel::onClickNext,
+        onClickQRCodeScan = viewModel::onClickQRCodeScan,
         onClickNewLearningEnvironment = { },
         onEditTextValueChange = viewModel::onSiteLinkUpdated,
     )

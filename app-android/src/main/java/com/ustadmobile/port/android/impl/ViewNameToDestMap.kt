@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.UstadDestination
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
+import com.ustadmobile.core.viewmodel.QRCodeScannerViewModel
 import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
 import com.ustadmobile.port.android.view.PanicButtonSettingsView
 
@@ -192,7 +193,8 @@ class ViewNameToDestMap: DestinationProvider {
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             HtmlEditViewModel.DEST_NAME to UstadDestination(R.id.html_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
-            TimeZoneListViewModel.DEST_NAME to UstadDestination(R.id.time_zone_list_dest)
+            TimeZoneListViewModel.DEST_NAME to UstadDestination(R.id.time_zone_list_dest),
+            QRCodeScannerViewModel.DEST_NAME to UstadDestination(R.id.qr_code_scan_dest)
     )
 
     override val navControllerViewId: Int

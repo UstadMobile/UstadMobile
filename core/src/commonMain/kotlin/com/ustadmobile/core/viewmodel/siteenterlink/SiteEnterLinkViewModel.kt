@@ -11,6 +11,8 @@ import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.SiteEnterLinkView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
+import com.ustadmobile.core.viewmodel.QRCodeScannerUiState
+import com.ustadmobile.core.viewmodel.QRCodeScannerViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import io.ktor.client.*
 import kotlinx.coroutines.flow.*
@@ -48,6 +50,18 @@ class SiteEnterLinkViewModel(
                 title = impl.getString(MessageID.enter_link),
                 navigationVisible = false,
             )
+        }
+    }
+
+    fun onClickQRCodeScan() {
+        _uiState.update {
+            it.copy(fieldsEnabled = false)
+        }
+
+        viewModelScope.launch {
+
+            navController.navigate(QRCodeScannerViewModel.DEST_NAME, emptyMap())
+
         }
     }
 

@@ -472,7 +472,7 @@
 
     <fragment
         android:id="@+id/qr_code_scan_dest"
-        android:name="com.ustadmobile.port.android.view.ParentalConsentManagementFragment"
+        android:name="com.ustadmobile.port.android.view.QRCodeScannerFragment"
         android:label="@string/qr_code_scan"/>
 
 </navigation>

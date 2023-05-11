@@ -33,7 +33,7 @@ import java.util.concurrent.Executors
 
 class QRCodeScannerFragment: UstadBaseMvvmFragment(){
 
-    private val viewModel: QRCodeScannerViewModel by ustadViewModels(com.ustadmobile.core.viewmodel::QRCodeScannerViewModel)
+    private val viewModel: QRCodeScannerViewModel by ustadViewModels(::QRCodeScannerViewModel)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)

@@ -24,19 +24,12 @@ data class QRCodeScannerUiState(
 
     val fieldsEnabled: Boolean = true,
 
-) {
-
-    companion object {
-
-        const val DEST_NAME = "QrCodeScan"
-
-    }
-}
+)
 
 class QRCodeScannerViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-): UstadEditViewModel(di, savedStateHandle, QRCodeScannerUiState.DEST_NAME) {
+): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(QRCodeScannerUiState())
 
@@ -105,5 +98,11 @@ class QRCodeScannerViewModel(
             }
 
         }
+    }
+
+    companion object {
+
+        const val DEST_NAME = "QrCodeScan"
+
     }
 }
