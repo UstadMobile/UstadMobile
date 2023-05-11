@@ -21,7 +21,6 @@ import com.ustadmobile.core.db.dao.ContextXObjectStatementJoinDaoCommon
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.test.util.ext.bindDbAndRepoWithEndpoint
-import com.ustadmobile.util.test.checkJndiSetup
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
