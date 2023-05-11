@@ -1,6 +1,9 @@
 package com.ustadmobile.port.android.view
 
+import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.camera.core.CameraSelector
@@ -11,19 +14,54 @@ import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.google.common.util.concurrent.ListenableFuture
+import com.ustadmobile.core.viewmodel.QRCodeScannerUiState
+import com.ustadmobile.core.viewmodel.QRCodeScannerViewModel
 import com.ustadmobile.port.android.util.BarCodeAnalyser
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
+class QRCodeScannerFragment: UstadBaseMvvmFragment(){
+
+    private val viewModel: QRCodeScannerViewModel by ustadViewModels(com.ustadmobile.core.viewmodel::QRCodeScannerViewModel)
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
+        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
+
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+            )
+
+            setContent {
+                MdcTheme {
+                    QRCodeScannerScreen(viewModel)
+                }
+            }
+        }
+    }
+}
+
 @Composable
-fun CodeScannerScreen(){
+private fun QRCodeScannerScreen(viewModel: QRCodeScannerViewModel) {
+    val uiState by viewModel.uiState.collectAsState(initial = QRCodeScannerUiState())
+
+    QRCodeScannerScreen()
+}
+
+@Composable
+private fun QRCodeScannerScreen() {
 
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -88,6 +126,7 @@ fun CodeScannerScreen(){
 
 @Composable
 @Preview
-fun CodeScannerScreenPreview(){
-    CodeScannerScreen()
+fun QRCodeScannerScreenPreview() {
+
+    QRCodeScannerScreen()
 }
