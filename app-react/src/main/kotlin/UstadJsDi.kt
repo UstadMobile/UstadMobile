@@ -53,6 +53,7 @@ internal fun ustadJsDi(
     val xppFactory = XmlPullParserFactory.newInstance()
 
     val apiUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
+    console.log("Api URL = $apiUrl (location.href = ${location.href}")
 
     bind<StringsXml>(tag = JsStringXml.DEFAULT) with singleton {
         val defaultXpp = xppFactory.newPullParser()

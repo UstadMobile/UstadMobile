@@ -19,12 +19,14 @@ fun resolveEndpoint(
     searchParams: URLSearchParams,
 ): String {
     val searchParamApiUrl = searchParams[SEARCH_PARAM_KEY_API_URL]
-    if(searchParamApiUrl != null) {
-        return searchParamApiUrl
+    return if(searchParamApiUrl != null) {
+        searchParamApiUrl
     }else if(href.contains(UstadUrlComponents.DEFAULT_DIVIDER)) {
-        return href.substringBefore(UstadUrlComponents.DEFAULT_DIVIDER)
+        href.substringBefore(UstadUrlComponents.DEFAULT_DIVIDER)
             .removeSuffix("/umapp").requirePostfix("/")
-    }else {
-        return href
+    }else if(href.contains("/umapp/"))
+        href.substringBefore("/umapp/").requirePostfix("/")
+    else {
+        href
     }
 }

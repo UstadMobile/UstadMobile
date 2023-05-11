@@ -2,6 +2,7 @@ package com.ustadmobile
 
 import com.ustadmobile.mui.common.Sizes
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.view.redirect.RedirectScreen
 import com.ustadmobile.wrappers.jsjodatime.jsJodaTz
 import js.core.jso
 import react.FC
@@ -60,6 +61,10 @@ private val hashRouter = createHashRouter(
                     loader = ustadScreenLoader
                     Component = UstadScreen
                     ErrorBoundary = Error
+                },
+                jso {
+                    Component = RedirectScreen
+                    index = true
                 },
                 jso {
                     path = "*"
