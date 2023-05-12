@@ -411,6 +411,8 @@ class ClazzEditViewModel(
 
     fun onClickSave() {
         val initEntity = _uiState.value.entity ?: return
+        if(loadingState == LoadingUiState.INDETERMINATE)
+            return
 
         if (initEntity.clazzStartTime == 0L) {
             _uiState.update { prev ->

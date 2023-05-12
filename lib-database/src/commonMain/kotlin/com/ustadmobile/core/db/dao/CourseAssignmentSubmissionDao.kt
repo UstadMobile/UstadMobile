@@ -95,6 +95,32 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
             : DataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>
 
     @Query("""
+         SELECT CourseAssignmentSubmission.*, CourseAssignmentSubmissionAttachment.*
+          FROM CourseAssignmentSubmission
+               LEFT JOIN CourseAssignmentSubmissionAttachment
+                    ON CourseAssignmentSubmissionAttachment.casaSubmissionUid = CourseAssignmentSubmission.casUid
+         WHERE casSubmitterUid = 
+               (SELECT CASE
+                    WHEN (SELECT caGroupUid
+                            FROM ClazzAssignment
+                           WHERE caUid = :assignmentUid) = 0 THEN :accountPersonUid
+                    ELSE COALESCE(
+                          (SELECT CourseGroupMember.cgmGroupNumber
+                             FROM CourseGroupMember
+                            WHERE CourseGroupMember.cgmSetUid = 
+                                  (SELECT caGroupUid
+                                     FROM ClazzAssignment
+                                    WHERE caUid = :assignmentUid)
+                              AND CourseGroupMember.cgmPersonUid = :accountPersonUid), -1)
+                    END)
+               
+    """)
+    abstract fun getAllSubmissionsForUser(
+        accountPersonUid: Long,
+        assignmentUid: Long,
+    ): Flow<List<CourseAssignmentSubmissionWithAttachment>>
+
+    @Query("""
         SELECT Count(casUid)
           FROM CourseAssignmentSubmission
          WHERE casAssignmentUid = :assignmentUid

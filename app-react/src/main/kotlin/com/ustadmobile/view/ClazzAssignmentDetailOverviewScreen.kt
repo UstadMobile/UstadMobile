@@ -183,7 +183,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                 }
 
                 List{
-                    props.uiState.submittedSubmissionList.forEach { submissionItem ->
+                    props.uiState.submittedSubmissionList?.forEach { submissionItem ->
                         UstadAssignmentSubmissionListItem{
                             submission = submissionItem
                             onClickOpenSubmission = props.onClickOpenSubmission

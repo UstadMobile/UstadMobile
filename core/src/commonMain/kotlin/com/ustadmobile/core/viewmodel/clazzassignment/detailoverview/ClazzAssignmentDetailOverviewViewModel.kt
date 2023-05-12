@@ -21,6 +21,10 @@ import org.kodein.di.DI
 import kotlin.jvm.JvmInline
 
 
+/**
+ * @param submittedSubmissionList List of submissions made by the active user (or their group).
+ * null if not yet loaded
+ */
 data class ClazzAssignmentDetailOverviewUiState(
 
     val assignment: ClazzAssignment? = null,
@@ -31,15 +35,10 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val submissionMark: AverageCourseAssignmentMark? = null,
 
-    val submittedSubmissionList: List<CourseAssignmentSubmissionWithAttachment> =
-        emptyList(),
+    val submittedSubmissionList: List<CourseAssignmentSubmissionWithAttachment>? = null,
 
     val draftSubmissionList: List<CourseAssignmentSubmissionWithAttachment> =
         emptyList(),
-
-    val addTextSubmissionVisible: Boolean = true,
-
-    val addFileSubmissionVisible: Boolean = true,
 
     val markList: List<CourseAssignmentMarkWithPersonMarker> = emptyList(),
 
@@ -94,11 +93,11 @@ data class ClazzAssignmentDetailOverviewUiState(
     val isWithinDeadlineOrGracePeriod: Boolean
         get() {
             val timeNow = systemTimeInMillis()
-            if((courseBlock?.cbDeadlineDate ?: UNSET_DISTANT_FUTURE) < timeNow) {
+            if(timeNow < (courseBlock?.cbDeadlineDate ?: UNSET_DISTANT_FUTURE)) {
                 return true
             }
             if(courseBlock?.cbGracePeriodDate.isDateSet() &&
-                (courseBlock?.cbGracePeriodDate ?: 0L) < timeNow
+                timeNow <= (courseBlock?.cbGracePeriodDate ?: 0L)
             ) {
                 return true
             }
@@ -115,13 +114,21 @@ data class ClazzAssignmentDetailOverviewUiState(
                 return false
 
             if(assignment?.caSubmissionPolicy != ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED &&
-                    submittedSubmissionList.isNotEmpty()
+                (submittedSubmissionList == null || submittedSubmissionList.isNotEmpty())
             ) {
                 return false
             }
 
             return true
         }
+
+
+    val addTextSubmissionVisible: Boolean
+        get() = activeUserCanSubmit && assignment?.caRequireTextSubmission == true
+
+    val addFileSubmissionVisible: Boolean
+        get() = activeUserCanSubmit && assignment?.caRequireFileSubmission == true
+
 
 }
 
@@ -151,7 +158,7 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     init {
         viewModelScope.launch {
-            _appUiState.whenSubscribed {
+            _uiState.whenSubscribed {
                 launch {
                     activeRepo.clazzAssignmentDao.findAssignmentCourseBlockAndSubmitterUidAsFlow(
                         assignmentUid = entityUidArg,
@@ -166,6 +173,20 @@ class ClazzAssignmentDetailOverviewViewModel(
                         }
                     }
                 }
+
+                launch {
+                    activeRepo.courseAssignmentSubmissionDao.getAllSubmissionsForUser(
+                        accountPersonUid = accountManager.activeSession?.person?.personUid ?: 0L,
+                        assignmentUid = entityUidArg,
+                    ).collect {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                submittedSubmissionList = it
+                            )
+                        }
+                    }
+                }
+
 
             }
         }

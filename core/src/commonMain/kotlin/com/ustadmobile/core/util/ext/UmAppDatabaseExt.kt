@@ -75,7 +75,10 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(
     }))
 
 
-    clazz.clazzUid = clazzDao.insertAsync(clazz)
+    val generatedUid = clazzDao.insertAsync(clazz)
+    if(clazz.clazzUid != 0L)
+        clazz.clazzUid = generatedUid
+
 }
 
 

@@ -608,7 +608,7 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         items(
-            items = uiState.submittedSubmissionList,
+            items = uiState.submittedSubmissionList ?: emptyList(),
             key = { Pair(2, it.casUid) }
         ){ submission ->
             UstadAssignmentSubmissionListItem(
