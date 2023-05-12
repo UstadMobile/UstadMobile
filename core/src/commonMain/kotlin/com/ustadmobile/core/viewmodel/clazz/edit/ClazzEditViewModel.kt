@@ -1,6 +1,5 @@
 package com.ustadmobile.core.viewmodel.clazz.edit
 
-import com.ustadmobile.core.controller.asCourseBlockWithEntity
 import com.ustadmobile.core.db.dao.deactivateByUids
 import com.ustadmobile.core.domain.courseblockupdate.AddOrUpdateCourseBlockUseCase
 import com.ustadmobile.core.domain.courseblockupdate.UpdateCourseBlocksOnReorderOrCommitUseCase
@@ -87,6 +86,33 @@ data class ClazzEditUiState(
     }
 
 }
+
+fun CourseBlockWithEntityDb.asCourseBlockWithEntity(
+    topicList: List<DiscussionTopic>,
+    assignmentPeerAllocations: List<PeerReviewerAllocation>
+):
+    CourseBlockWithEntity {
+    val relevantTopics: List<DiscussionTopic> = topicList.filter {
+        it.discussionTopicCourseDiscussionUid == this.courseDiscussion?.courseDiscussionUid
+    }.sortedBy { it.discussionTopicIndex }
+
+    val assignmentAllocations = assignmentPeerAllocations.filter {
+        it.praAssignmentUid == this.assignment?.caUid
+    }
+
+    val courseBlockWithEntity = CourseBlockWithEntity()
+    courseBlockWithEntity.createFromDb(this)
+    courseBlockWithEntity.topics = relevantTopics
+    courseBlockWithEntity.assignmentPeerAllocations = assignmentAllocations
+    courseBlockWithEntity.topicUidsToRemove = listOf()
+    courseBlockWithEntity.assignmentPeerAllocationsToRemove = listOf()
+
+
+    return courseBlockWithEntity
+
+}
+
+
 
 class ClazzEditViewModel(
     di: DI,

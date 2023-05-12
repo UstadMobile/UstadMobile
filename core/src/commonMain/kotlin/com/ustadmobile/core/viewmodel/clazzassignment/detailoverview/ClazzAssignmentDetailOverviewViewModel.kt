@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.clazzassignment.detailoverview
 
 import com.ustadmobile.core.db.dao.CourseAssignmentMarkDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
@@ -8,6 +8,8 @@ import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
+import com.ustadmobile.core.viewmodel.DetailViewModel
+import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow

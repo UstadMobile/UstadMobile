@@ -28,7 +28,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
-import com.ustadmobile.core.viewmodel.ClazzAssignmentDetailOverviewUiState
+import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewUiState
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ext.asRepositoryLiveData
@@ -43,7 +43,6 @@ import org.kodein.di.on
 import androidx.compose.material.*
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants

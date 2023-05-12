@@ -55,7 +55,7 @@ val UstadClazzAssignmentListItem = FC<UstadClazzAssignmentListItemProps> { props
             }
 
             ListItemText {
-                primary = ReactNode(assignment?.caTitle ?: "")
+                primary = ReactNode(props.courseBlock.cbTitle ?: "")
                 secondary = SecondaryContent.create{
                     courseBlock = props.courseBlock
                 }
@@ -66,7 +66,6 @@ val UstadClazzAssignmentListItem = FC<UstadClazzAssignmentListItemProps> { props
 
 private val DateAndPointRow = FC<UstadClazzAssignmentListItemProps> { props ->
 
-    val strings = useStringsXml()
     val dateTime = useFormattedDateAndTime(
         timeInMillis = props.courseBlock.cbDeadlineDate,
         timezoneId = TimeZone.currentSystemDefault().id
@@ -186,12 +185,12 @@ val UstadClazzAssignmentListItemPreview = FC<Props> {
         UstadClazzAssignmentListItem {
 
             courseBlock = CourseBlockWithCompleteEntity().apply {
+                cbTitle = "Module"
                 cbDescription = "Description"
                 cbDeadlineDate = 1672707505000
                 cbMaxPoints = 100
                 cbIndentLevel = 1
                 assignment = ClazzAssignmentWithMetrics().apply {
-                    caTitle = "Module"
 //To be fixed as part of the assignment screens
 //                    mark = CourseAssignmentMark().apply {
 //                        camPenalty = 20
