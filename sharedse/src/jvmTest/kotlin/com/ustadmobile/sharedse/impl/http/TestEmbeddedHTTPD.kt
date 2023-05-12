@@ -56,7 +56,7 @@ class TestEmbeddedHTTPD {
     @Throws(IOException::class)
     fun startServer() {
         di = DI {
-            bind<NetworkManagerBle>() with singleton { mock<NetworkManagerBle> {} }
+
         }
         httpd = EmbeddedHTTPD(0, di)
         httpd.start()

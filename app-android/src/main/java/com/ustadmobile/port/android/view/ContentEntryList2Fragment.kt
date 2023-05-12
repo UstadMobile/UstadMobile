@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.recyclerview.widget.DiffUtil
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryList2Presenter
 import com.ustadmobile.core.controller.UstadListPresenter

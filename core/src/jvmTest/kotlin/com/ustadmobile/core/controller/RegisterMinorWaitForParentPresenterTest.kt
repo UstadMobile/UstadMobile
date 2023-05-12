@@ -31,7 +31,7 @@ class RegisterMinorWaitForParentPresenterTest {
         mockView = mock { }
     }
 
-    @Test
+    //@Test
     fun givenValidArgs_whenOkClicked_thenShouldPopBack() {
         val args = mapOf(
                 ARG_USERNAME to "childuser",

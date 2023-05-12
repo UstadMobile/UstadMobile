@@ -18,7 +18,7 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSchoolEditBinding
 import com.ustadmobile.core.controller.SchoolEditPresenter

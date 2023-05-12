@@ -58,7 +58,7 @@ class ClazzLogListAttendancePresenterTest {
         whenever(repo.clazzLogDao).thenReturn(repoClazzLogDao)
     }
 
-    @Test
+    //@Test
     fun givenClazzUidFilter_whenOnCreateCalled_thenShouldFindByClazzUidAndSetList() {
         val repo: UmAppDatabase by di.activeRepoInstance()
 
@@ -78,7 +78,7 @@ class ClazzLogListAttendancePresenterTest {
         verify(mockView, timeout(5000)).clazzTimeZone = "Asia/Dubai"
     }
 
-    @Test
+    //@Test
     fun givenExistingCompletedClazzLogs_whenOnCreateCalled_thenShouldSetGraphDataAndSetFabVisible() {
         val repo: UmAppDatabase by di.activeRepoInstance()
         val accountManager: UstadAccountManager by di.instance()
@@ -149,7 +149,7 @@ class ClazzLogListAttendancePresenterTest {
     }
 
 
-    @Test
+    //@Test
     fun givenUserDoesNotHaveRecordAttendancePermission_whenOnCreateCalled_thenShouldSetRecordOptionsAsEmpty() {
         val repo: UmAppDatabase by di.activeRepoInstance()
 

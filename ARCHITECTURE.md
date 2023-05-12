@@ -1,3 +1,7 @@
+# Diagram
+
+![Architecture diagram](doc-assets/arch.svg)
+
 # Environment constraints:
 * **Limited (or no) connectivity** - connectivity: may or may not be available, if connectivity is available, it may have limited bandwidth, high latency, and packet loss. Connectivity when available is often metered.
 * **Low-end devices**: devices are often low memory (e.g 512MB - 1GB RAM on Android, 4GB on desktop PCs), with limited storage space (e.g. 8-16GB) - such as Android Go. Devices will often use an older version of the Android OS (e.g. second hand devices etc).

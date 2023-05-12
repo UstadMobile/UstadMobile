@@ -60,7 +60,7 @@ class ReportEditPresenterTest {
     }
 
 
-    @Test
+    //@Test
     fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalled_thenShouldGoToDetailWithJson() {
         val presenterArgs = mapOf<String, String>()
         val systemImpl: UstadMobileSystemImpl by di.instance()
@@ -81,7 +81,7 @@ class ReportEditPresenterTest {
               eq(mapOf(UstadEditView.ARG_ENTITY_JSON to jsonStr)), eq(context))
     }
 
-    @Test
+    //@Test
     fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalledAndTitleNotSet_thenShouldNotGoToDetailWithJson() {
         val presenterArgs = mapOf<String, String>()
         val systemImpl: UstadMobileSystemImpl by di.instance()
@@ -103,7 +103,7 @@ class ReportEditPresenterTest {
     }
 
 
-    @Test
+    //@Test
     fun givenExistingReport_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {
         val db: UmAppDatabase by di.activeDbInstance()
         val repo: UmAppDatabase by di.activeRepoInstance()

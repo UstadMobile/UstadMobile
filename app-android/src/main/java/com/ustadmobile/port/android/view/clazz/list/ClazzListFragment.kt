@@ -34,7 +34,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants

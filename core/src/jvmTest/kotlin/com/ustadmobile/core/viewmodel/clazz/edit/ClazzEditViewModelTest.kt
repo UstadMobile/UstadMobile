@@ -6,12 +6,14 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
+import com.ustadmobile.core.util.ext.awaitItemWhere
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.flow.doorFlow
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
@@ -35,10 +37,8 @@ class ClazzEditViewModelTest {
                 }
             }
 
-            viewModel.uiState.assertItemReceived(timeout = 5.seconds) { it.fieldsEnabled && it.entity != null }
-
             viewModel.uiState.test(timeout = 5.seconds) {
-                val state = awaitItem()
+                val state = awaitItemWhere { it.fieldsEnabled }
                 viewModel.onEntityChanged(state.entity?.shallowCopy {
                     clazzName = "Test course"
                     clazzDesc = "Test description"
@@ -50,7 +50,7 @@ class ClazzEditViewModelTest {
 
                 db.doorFlow(arrayOf("Clazz")) {
                     db.clazzDao.findAll()
-                }.assertItemReceived { allClazzes ->
+                }.assertItemReceived(timeout = 5.seconds) { allClazzes ->
                     allClazzes.any {
                         it.clazzName == "Test course" && it.clazzDesc == "Test description"
                     }
@@ -96,18 +96,20 @@ class ClazzEditViewModelTest {
                 }
             }
 
-            viewModel.uiState.filter { it.entity?.clazzName == "Spelling Clazz" }
-                .test(timeout = 5.seconds) {
-                    val state = awaitItem()
+            viewModel.uiState.test(timeout = 5.seconds) {
+                val state = awaitItemWhere { it.fieldsEnabled }
 
-                    viewModel.onEntityChanged(state.entity?.shallowCopy {
-                        clazzName = "New Spelling Clazz"
-                    })
+                viewModel.onEntityChanged(state.entity?.shallowCopy {
+                    clazzName = "New Spelling Clazz"
+                })
 
-                    cancelAndIgnoreRemainingEvents()
-                }
+                cancelAndIgnoreRemainingEvents()
+            }
 
             viewModel.onClickSave()
+
+            //This should **NOT** be needed -however it seems that the doorFlow needs checked for a potential race condition
+            delay(1000)
 
             activeDb.doorFlow(arrayOf("Clazz")) {
                 activeDb.clazzDao.findAll()

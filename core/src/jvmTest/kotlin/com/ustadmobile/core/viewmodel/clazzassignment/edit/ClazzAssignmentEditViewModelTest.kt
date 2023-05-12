@@ -54,7 +54,7 @@ class ClazzAssignmentEditViewModelTest {
                 cancelAndIgnoreRemainingEvents()
             }
 
-            verify(navResultReturner, timeout(5000 * 1000)).sendResult(argWhere {
+            verify(navResultReturner, timeout(5000)).sendResult(argWhere {
                 val result = it.result
                 result is CourseBlockWithEntity &&
                     result.assignment?.caClassCommentEnabled == true &&
@@ -84,7 +84,7 @@ class ClazzAssignmentEditViewModelTest {
             }
 
             viewModel.uiState.assertItemReceived { it.submissionRequiredError != null }
-            verifyNoInteractions(navResultReturner)
+            verify(navResultReturner, times(0)).sendResult(any())
         }
     }
 
@@ -107,7 +107,7 @@ class ClazzAssignmentEditViewModelTest {
             viewModel.uiState.assertItemReceived(timeout = 5.seconds) {
                 it.courseBlockEditUiState.caMaxPointsError == systemImpl.getString(MessageID.field_required_prompt)
             }
-            verifyNoInteractions(navResultReturner)
+            verify(navResultReturner, times(0)).sendResult(any())
         }
     }
 

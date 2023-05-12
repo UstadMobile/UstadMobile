@@ -5,6 +5,9 @@ import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
+/**
+ * Represents a group in the system. Each individual user also has their own one member group.
+ */
 @Triggers(arrayOf(
      Trigger(
          name = "persongroup_remote_insert",

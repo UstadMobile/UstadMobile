@@ -7,13 +7,12 @@ import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
+import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
 import com.ustadmobile.core.view.SiteEnterLinkView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.lib.db.entities.Site
 import io.ktor.client.*
-import io.ktor.client.plugins.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
@@ -40,7 +39,7 @@ class SiteEnterLinkPresenter(context: Any, arguments: Map<String, String>, view:
             val args = arguments.toMutableMap().also {
                 val siteLink = view.siteLink
                 if(siteLink != null)
-                    it[ARG_SERVER_URL] = validatedLinkVal
+                    it[ARG_API_URL] = validatedLinkVal
 
                 it[ARG_SITE] = Json.encodeToString(Site.serializer(), mSite)
             }
@@ -75,7 +74,7 @@ class SiteEnterLinkPresenter(context: Any, arguments: Map<String, String>, view:
 
     fun handleClickUsePublicLibrary() {
         val args = arguments.toMutableMap().also {
-            it[ARG_SERVER_URL] = "https://library.ustadmobile.app/"
+            it[ARG_API_URL] = "https://library.ustadmobile.app/"
             it[ARG_SITE] = safeStringify(di, Site.serializer(), Site().apply {
                 registrationAllowed = true
                 guestLogin = true
