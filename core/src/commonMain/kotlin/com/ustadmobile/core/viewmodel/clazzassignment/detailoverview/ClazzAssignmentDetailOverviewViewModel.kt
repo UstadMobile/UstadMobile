@@ -22,7 +22,7 @@ import kotlin.jvm.JvmInline
 
 
 /**
- * @param submittedSubmissionList List of submissions made by the active user (or their group).
+ * @param latestSubmissionAttachments List of submissions made by the active user (or their group).
  * null if not yet loaded
  */
 data class ClazzAssignmentDetailOverviewUiState(
@@ -35,10 +35,9 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val submissionMark: AverageCourseAssignmentMark? = null,
 
-    val submittedSubmissionList: List<CourseAssignmentSubmissionWithAttachment>? = null,
+    val latestSubmission: CourseAssignmentSubmission? = null,
 
-    val draftSubmissionList: List<CourseAssignmentSubmissionWithAttachment> =
-        emptyList(),
+    val latestSubmissionAttachments: List<CourseAssignmentSubmissionAttachment>? = null,
 
     val markList: List<CourseAssignmentMarkWithPersonMarker> = emptyList(),
 
@@ -66,7 +65,7 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val unassignedError: String? = null,
 
-    val addTextVisible: Boolean = false,
+    val submissionTextFieldVisible: Boolean = false,
 
     val addFileVisible: Boolean = false
 
@@ -79,7 +78,7 @@ data class ClazzAssignmentDetailOverviewUiState(
         get() = courseBlock?.cbDeadlineDate.isDateSet()
 
     val submitSubmissionButtonVisible: Boolean
-        get() = draftSubmissionList.isNotEmpty()
+        get() = activeUserCanSubmit
 
     val unassignedErrorVisible: Boolean
         get() = !unassignedError.isNullOrBlank()
@@ -114,7 +113,7 @@ data class ClazzAssignmentDetailOverviewUiState(
                 return false
 
             if(assignment?.caSubmissionPolicy != ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED &&
-                (submittedSubmissionList == null || submittedSubmissionList.isNotEmpty())
+                latestSubmission != null
             ) {
                 return false
             }
@@ -173,7 +172,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                         }
                     }
                 }
-
+                /*
                 launch {
                     activeRepo.courseAssignmentSubmissionDao.getAllSubmissionsForUser(
                         accountPersonUid = accountManager.activeSession?.person?.personUid ?: 0L,
@@ -181,15 +180,17 @@ class ClazzAssignmentDetailOverviewViewModel(
                     ).collect {
                         _uiState.update { prev ->
                             prev.copy(
-                                submittedSubmissionList = it
+                                latestSubmissionAttachments = it
                             )
                         }
                     }
                 }
-
-
+                 */
             }
         }
+    }
+
+    fun onClickSubmit() {
 
     }
 

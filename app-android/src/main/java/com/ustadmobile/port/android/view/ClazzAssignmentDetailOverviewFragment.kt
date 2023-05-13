@@ -41,6 +41,10 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.InsertDriveFile
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import com.google.accompanist.themeadapter.material.MdcTheme
@@ -520,62 +524,51 @@ fun ClazzAssignmentDetailOverviewScreen(
             )
         }
 
-        item {
-            ListItem(
-              text = { Text(stringResource(R.string.submissions)) }
-            )
-        }
-
-        items(
-            items = uiState.draftSubmissionList,
-            key = { Pair(1, it.casUid) }
-        ){ submission ->
-            UstadAssignmentSubmissionListItem(
-                submission = submission,
-                onClickOpenSubmission = onClickOpenSubmission,
-                onClickDeleteSubmission = onClickDeleteSubmission,
-            )
-        }
-
-        if (uiState.addTextVisible){
+        if(uiState.activeUserIsSubmitter) {
             item {
-                OutlinedButton(
-                    onClick = onClickAddTextSubmission,
+                UstadEditHeader(text = stringResource(R.string.your_submission))
+            }
+
+            item {
+                HtmlClickableTextField(
+                    html = "",
+                    label = stringResource(R.string.text),
+                    onClick = {  },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .defaultItemPadding(),
-                    enabled = uiState.fieldsEnabled,
-                ) {
-                    Text(stringResource(R.string.add_text).uppercase())
+                        .testTag("submission_text")
+                )
+            }
+
+            if(uiState.addFileVisible) {
+                item {
+                    ListItem(
+                        modifier = Modifier.testTag("add_file"),
+                        text = { Text(stringResource(R.string.add_file)) },
+                        secondaryText = {
+                            Text(
+                                "${stringResource(R.string.file_type_chosen)} $caFileType" +
+                                stringResource(R.string.max_number_of_files,
+                                    uiState.assignment?.caNumberOfFiles ?: 0),
+                            )
+                        },
+                        icon = {
+                            Icon(imageVector = Icons.Default.Add, contentDescription = null)
+                        }
+                    )
                 }
             }
-        }
 
-        if (uiState.addFileVisible){
-            item {
-                OutlinedButton(
-                    onClick = onClickAddFileSubmission,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .defaultItemPadding(),
-                    enabled = uiState.fieldsEnabled,
-                ) {
-                    Text(stringResource(R.string.add_file).uppercase())
-                }
-            }
-        }
-
-        if (uiState.addFileVisible) {
-
-            item {
-                Text("${stringResource(R.string.file_type_chosen)} $caFileType",
-                    modifier = Modifier.defaultItemPadding())
-            }
-
-            item {
-                Text(stringResource(R.string.max_number_of_files,
-                    uiState.assignment?.caNumberOfFiles ?: 0),
-                    modifier = Modifier.defaultItemPadding())
+            items(
+                items = uiState.latestSubmissionAttachments ?: emptyList(),
+                key = { Pair(1, it.casaUid) }
+            ){ attachment ->
+                ListItem(
+                    text = { Text(attachment.casaFileName ?: "") },
+                    icon = {
+                        Icon(imageVector = Icons.Default.InsertDriveFile, contentDescription = null)
+                    }
+                )
             }
         }
 
@@ -607,15 +600,6 @@ fun ClazzAssignmentDetailOverviewScreen(
             }
         }
 
-        items(
-            items = uiState.submittedSubmissionList ?: emptyList(),
-            key = { Pair(2, it.casUid) }
-        ){ submission ->
-            UstadAssignmentSubmissionListItem(
-                submission = submission,
-                onClickOpenSubmission = onClickOpenSubmission,
-            )
-        }
 
         item {
             ListItem(
@@ -697,9 +681,23 @@ fun ClazzAssignmentDetailOverviewScreen(
 fun ClazzAssignmentDetailOverviewScreenPreview(){
 
     val uiState = ClazzAssignmentDetailOverviewUiState(
+        assignment = ClazzAssignment().apply {
+            caRequireTextSubmission = true
+        },
+        courseBlock = CourseBlock().apply {
+            cbDeadlineDate = 1685509200000L
+            cbDescription = "Complete your assignment or <b>else</b>"
+        },
+        submitterUid = 42L,
         addFileVisible = true,
-        addTextVisible = true,
+        submissionTextFieldVisible = true,
         hasFilesToSubmit = true,
+        latestSubmissionAttachments = listOf(
+            CourseAssignmentSubmissionAttachment().apply {
+                casaUid = 1L
+                casaFileName = "File.pdf"
+            },
+        ),
         markList = listOf(
             CourseAssignmentMarkWithPersonMarker().apply {
                 marker = Person().apply {
@@ -731,26 +729,6 @@ fun ClazzAssignmentDetailOverviewScreenPreview(){
                 commentsText = "I like this activity. Shall we discuss this in our next meeting?"
             }
         ),
-        submittedSubmissionList = listOf(
-            CourseAssignmentSubmissionWithAttachment().apply {
-                casUid = 1
-                casTimestamp = 1677744388299
-                casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
-                attachment = CourseAssignmentSubmissionAttachment().apply {
-                    casaFileName = "Submitted Submission"
-                }
-            },
-        ),
-        draftSubmissionList = listOf(
-            CourseAssignmentSubmissionWithAttachment().apply {
-                casUid = 1
-                casTimestamp = 1677744388299
-                casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
-                attachment = CourseAssignmentSubmissionAttachment().apply {
-                    casaFileName = "Draft Submission"
-                }
-            },
-        )
     )
 
     MdcTheme {

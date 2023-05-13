@@ -1588,4 +1588,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="select_person">Select person</string>
 
+    <string name="your_submission">Your submission</string>
+
 </resources>

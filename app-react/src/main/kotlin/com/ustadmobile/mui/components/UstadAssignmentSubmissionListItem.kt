@@ -49,10 +49,7 @@ val UstadAssignmentSubmissionListItem = FC<UstadAssignmentSubmissionListItemProp
 
             ListItemIcon {
                 BookOutlined {
-                    sx {
-                        width = 70.px
-                        height = 70.px
-                    }
+
                 }
 
             }

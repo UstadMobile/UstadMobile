@@ -12,7 +12,6 @@ import com.ustadmobile.mui.components.*
 import csstype.JustifyContent
 import csstype.px
 import kotlinx.datetime.TimeZone
-import mui.icons.material.*
 import mui.material.*
 import mui.system.responsive
 import mui.material.List
@@ -23,6 +22,12 @@ import react.ReactNode
 import react.create
 import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItemUiState as UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.mui.components.UstadCourseAssignmentMarkListItem
+import com.ustadmobile.wrappers.quill.ReactQuill
+import mui.icons.material.Done
+import mui.icons.material.DoneAll
+import mui.icons.material.EventAvailable
+import mui.icons.material.Add
+import mui.icons.material.InsertDriveFile as InsertDriveFileIcon
 
 val ASSIGNMENT_STATUS_MAP = mapOf(
     CourseAssignmentSubmission.NOT_SUBMITTED to Done.create(),
@@ -80,10 +85,8 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
             Stack {
                 spacing = responsive(20.px)
 
-                if (props.uiState.caDescriptionVisible){
-                    Typography {
-                        + (props.uiState.assignment?.caDescription ?: "")
-                    }
+                UstadRawHtml {
+                    html = props.uiState.courseBlock?.cbDescription ?: ""
                 }
 
                 if (props.uiState.cbDeadlineDateVisible){
@@ -109,84 +112,70 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
                     uiState = props.uiState.submissionHeaderUiState
                 }
 
-                List{
+                if(props.uiState.activeUserCanSubmit) {
+                    Typography {
+                        + strings[MessageID.your_submission]
+                    }
 
-                    ListItem {
-                        ListItemText {
-                            primary = ReactNode(strings[MessageID.submissions])
+                    if (props.uiState.submissionTextFieldVisible) {
+                        ReactQuill {
+                            id = "assignment_text"
                         }
                     }
 
-                    props.uiState.draftSubmissionList.forEach { submissionItem ->
-                        UstadAssignmentSubmissionListItem {
-                            submission = submissionItem
-                            onClickOpenSubmission = props.onClickOpenSubmission
-                            onClickDeleteSubmission = props.onClickDeleteSubmission
-                        }
-                    }
-                }
+                    List {
+                        ListItem {
+                            ListItemButton {
+                                id = "add_file"
+                                onClick = {
+                                    props.onClickAddFileSubmission()
+                                }
+                                ListItemIcon {
+                                    Add { }
+                                }
 
-                if (props.uiState.addTextVisible) {
-                    Button {
-                        onClick = { props.onClickAddTextSubmission() }
-                        disabled = !props.uiState.fieldsEnabled
-
-                        variant = ButtonVariant.outlined
-                        + strings[MessageID.add_text].uppercase()
-                    }
-                }
-
-                if (props.uiState.addFileVisible) {
-                    Button {
-                        onClick = { props.onClickAddFileSubmission() }
-                        disabled = !props.uiState.fieldsEnabled
-
-                        variant = ButtonVariant.outlined
-                        + strings[MessageID.add_file].uppercase()
-                    }
-                }
-
-                Stack {
-                    direction = responsive(StackDirection.row)
-                    sx {
-                        justifyContent = JustifyContent.spaceBetween
-                    }
-
-                    if (props.uiState.addFileVisible) {
-                        Typography{
-                            + ("${strings[MessageID.file_type_chosen]} $caFileType")
+                                ListItemText {
+                                    primary = ReactNode(strings[MessageID.add_file].uppercase())
+                                    secondary = ReactNode(
+                                        "${strings[MessageID.file_type_chosen]} $caFileType " +
+                                            strings[MessageID.max_number_of_files]
+                                                .replace("%1\$s",
+                                                    (props.uiState.assignment?.caNumberOfFiles ?: 0)
+                                                        .toString())
+                                    )
+                                }
+                            }
                         }
 
-                        Typography{
-                            + strings[MessageID.max_number_of_files]
-                                .replace("%1\$s",
-                                    (props.uiState.assignment?.caNumberOfFiles ?: 0)
-                                        .toString())
+                        props.uiState.latestSubmissionAttachments?.forEach { submissionItem ->
+                            ListItem {
+                                ListItemButton {
+                                    ListItemIcon {
+                                        InsertDriveFileIcon {  }
+                                    }
+
+                                    ListItemText {
+                                        primary = ReactNode(submissionItem.casaFileName ?: "")
+                                    }
+                                }
+                            }
                         }
                     }
-                }
 
-                if (props.uiState.unassignedErrorVisible) {
-                    Typography{
-                        + (props.uiState.unassignedError ?: "")
+
+                    if (props.uiState.unassignedErrorVisible) {
+                        Typography {
+                            + (props.uiState.unassignedError ?: "")
+                        }
                     }
-                }
 
-                if (props.uiState.submitSubmissionButtonVisible) {
-                    Button {
-                        onClick = { props.onClickSubmitSubmission() }
-                        disabled = !props.uiState.fieldsEnabled
-                        variant = ButtonVariant.contained
+                    if (props.uiState.submitSubmissionButtonVisible) {
+                        Button {
+                            onClick = { props.onClickSubmitSubmission() }
+                            disabled = !props.uiState.fieldsEnabled
+                            variant = ButtonVariant.contained
 
-                        + strings[MessageID.submit].uppercase()
-                    }
-                }
-
-                List{
-                    props.uiState.submittedSubmissionList?.forEach { submissionItem ->
-                        UstadAssignmentSubmissionListItem{
-                            submission = submissionItem
-                            onClickOpenSubmission = props.onClickOpenSubmission
+                            + strings[MessageID.submit].uppercase()
                         }
                     }
                 }
@@ -266,9 +255,23 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 =
 val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
 
     val uiStateVal = ClazzAssignmentDetailOverviewUiState(
+        assignment = ClazzAssignment().apply {
+            caRequireTextSubmission = true
+        },
+        courseBlock = CourseBlock().apply {
+            cbDeadlineDate = 1685509200000L
+            cbDescription = "Complete your assignment or <b>else</b>"
+        },
+        submitterUid = 42L,
         addFileVisible = true,
-        addTextVisible = true,
+        submissionTextFieldVisible = true,
         hasFilesToSubmit = true,
+        latestSubmissionAttachments = listOf(
+            CourseAssignmentSubmissionAttachment().apply {
+                casaUid = 1L
+                casaFileName = "File.pdf"
+            },
+        ),
         markList = listOf(
             CourseAssignmentMarkWithPersonMarker().apply {
                 marker = Person().apply {
@@ -301,26 +304,6 @@ val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
                 commentsText = "I like this activity. Shall we discuss this in our next meeting?"
             }
         ),
-        submittedSubmissionList = listOf(
-            CourseAssignmentSubmissionWithAttachment().apply {
-                casUid = 1
-                casTimestamp = 1677744388299
-                casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
-                attachment = CourseAssignmentSubmissionAttachment().apply {
-                    casaFileName = "Submitted Submission"
-                }
-            },
-        ),
-        draftSubmissionList = listOf(
-            CourseAssignmentSubmissionWithAttachment().apply {
-                casUid = 1
-                casTimestamp = 1677744388299
-                casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
-                attachment = CourseAssignmentSubmissionAttachment().apply {
-                    casaFileName = "Draft Submission"
-                }
-            },
-        )
     )
 
     ClazzAssignmentDetailOverviewScreenComponent2 {

@@ -86,13 +86,13 @@ class ClazzAssignmentDetailOverviewViewModelTest {
 
             viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere {
-                    it.assignment != null && it.courseBlock != null  && it.submittedSubmissionList != null
+                    it.assignment != null && it.courseBlock != null  && it.latestSubmissionAttachments != null
                 }
                 assertTrue(readyState.activeUserIsSubmitter)
                 assertTrue(readyState.activeUserCanSubmit)
                 assertTrue(readyState.addFileSubmissionVisible)
                 assertTrue(readyState.addTextSubmissionVisible)
-                assertEquals(0, readyState.submittedSubmissionList?.size)
+                assertEquals(0, readyState.latestSubmissionAttachments?.size)
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -124,12 +124,46 @@ class ClazzAssignmentDetailOverviewViewModelTest {
 
             viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere {
-                    it.assignment != null && it.courseBlock != null && it.submittedSubmissionList != null
+                    it.assignment != null && it.courseBlock != null && it.latestSubmissionAttachments != null
                 }
                 assertTrue(readyState.activeUserIsSubmitter)
                 assertFalse(readyState.addFileSubmissionVisible)
                 assertFalse(readyState.addTextSubmissionVisible)
-                assertEquals(1, readyState.submittedSubmissionList?.size)
+                assertEquals(1, readyState.latestSubmissionAttachments?.size)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+    }
+
+    @Test
+    fun givenStudentWithSubmissionNotMarkedAndMultipleSubmissionPolicy_whenShown_thenShowAddFileTextWithSubmittedStatus() {
+        testClazzAssignmentDetailOverviewViewModel(
+            activeUserRole = ClazzEnrolment.ROLE_STUDENT,
+            assignment = ClazzAssignment().apply {
+                caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED
+                caRequireTextSubmission = true
+                caRequireTextSubmission = true
+            }
+        ) { testContext ->
+            activeDb.courseAssignmentSubmissionDao.insertAsync(CourseAssignmentSubmission().apply {
+                casSubmitterUid = testContext.person.personUid
+                casSubmitterPersonUid = testContext.person.personUid
+                casText = "Test text"
+            })
+
+            viewModelFactory {
+                savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
+            }
+
+            viewModel.uiState.test(timeout = 5.seconds) {
+                val readyState = awaitItemWhere {
+                    it.assignment != null && it.courseBlock != null && it.latestSubmissionAttachments != null
+                }
+                assertTrue(readyState.activeUserIsSubmitter)
+                assertTrue(readyState.addFileSubmissionVisible)
+                assertTrue(readyState.addTextSubmissionVisible)
+                assertEquals(1, readyState.latestSubmissionAttachments?.size)
                 cancelAndIgnoreRemainingEvents()
             }
         }
