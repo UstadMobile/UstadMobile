@@ -2,7 +2,10 @@ package com.ustadmobile.core.viewmodel.clazzassignment.detailoverview
 
 import app.cash.turbine.test
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.domain.assignment.submitassignment.AssignmentDeadlinePassedException
+import com.ustadmobile.core.domain.assignment.submitassignment.SubmitAssignmentUseCase
 import com.ustadmobile.core.test.viewmodeltest.ViewModelTestBuilder
+import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
@@ -16,6 +19,8 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.Person
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -84,7 +89,7 @@ class ClazzAssignmentDetailOverviewViewModelTest {
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
-            viewModel.uiState.test(timeout = 500.seconds) {
+            viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere {
                     it.assignment != null && it.courseBlock != null  && it.latestSubmission != null
                 }
@@ -169,5 +174,47 @@ class ClazzAssignmentDetailOverviewViewModelTest {
             }
         }
     }
+
+
+    @Test
+    fun givenValidAssignment_whenSubmitAssignmentUseCaseThrowsException_thenShouldShowErrorMessage() {
+        testClazzAssignmentDetailOverviewViewModel(
+            activeUserRole = ClazzEnrolment.ROLE_STUDENT,
+            assignment = ClazzAssignment().apply {
+                caRequireFileSubmission = true
+                caRequireTextSubmission = true
+                caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
+            }
+        ) { testContext ->
+            val exceptionMessage = "Deadline passed"
+            val mockSubmissionUseCase = mock<SubmitAssignmentUseCase> {
+                onBlocking { invoke(any(), any(), any(), any(), any()) }
+                    .thenThrow(AssignmentDeadlinePassedException(exceptionMessage))
+            }
+
+            viewModelFactory {
+                savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                ClazzAssignmentDetailOverviewViewModel(
+                    di, savedStateHandle,
+                    submitAssignmentUseCase = mockSubmissionUseCase
+                )
+            }
+
+            viewModel.uiState.test(timeout = 500.seconds) {
+                awaitItemWhere {
+                    it.assignment != null && it.courseBlock != null && it.latestSubmission != null
+                }
+
+                viewModel.onChangeSubmissionText("I can has cheezburger")
+                viewModel.onClickSubmit()
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            viewModel.uiState.assertItemReceived(timeout = 500.seconds) {
+                it.submissionError == exceptionMessage
+            }
+        }
+    }
+
 
 }

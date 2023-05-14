@@ -1,7 +1,10 @@
 package com.ustadmobile.core.viewmodel.clazzassignment.detailoverview
 
 import com.ustadmobile.core.db.dao.CourseAssignmentMarkDaoCommon
+import com.ustadmobile.core.domain.assignment.submitassignment.SubmitAssignmentUseCase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.appstate.LoadingUiState
+import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
@@ -12,6 +15,7 @@ import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
@@ -70,7 +74,9 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val submissionTextFieldVisible: Boolean = false,
 
-    val addFileVisible: Boolean = false
+    val addFileVisible: Boolean = false,
+
+    val submissionError: String? = null,
 
 ) {
 
@@ -151,6 +157,7 @@ value class CourseAssignmentMarkWithPersonMarkerUiState(
 class ClazzAssignmentDetailOverviewViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
+    private val submitAssignmentUseCase: SubmitAssignmentUseCase = SubmitAssignmentUseCase(),
 ) : DetailViewModel<ClazzAssignment>(
     di, savedStateHandle, ClazzAssignmentDetailOverviewView.VIEW_NAME
 ){
@@ -232,8 +239,46 @@ class ClazzAssignmentDetailOverviewViewModel(
         }
     }
 
-    fun onClickSubmit() {
+    fun onChangeSubmissionText(text: String) {
+        _uiState.update { prev ->
+            prev.copy(
+                latestSubmission = prev.latestSubmission?.shallowCopy {
+                    casText = text
+                    casTimestamp = 0
+                }
+            )
+        }
+    }
 
+    fun onClickSubmit() {
+        if(loadingState == LoadingUiState.INDETERMINATE)
+            return
+
+        val submission = _uiState.value.latestSubmission ?: return
+
+        loadingState = LoadingUiState.INDETERMINATE
+
+        viewModelScope.launch {
+            try {
+                submitAssignmentUseCase(
+                    db = activeDb,
+                    systemImpl = systemImpl,
+                    assignmentUid = entityUidArg,
+                    accountPersonUid = accountManager.activeSession?.person?.personUid ?: 0L,
+                    submission = submission
+                )
+                _uiState.takeIf { it.value.submissionError != null }?.update { prev ->
+                    prev.copy(submissionError = null)
+                }
+                snackDispatcher.showSnackBar(Snack(systemImpl.getString(MessageID.submitted)))
+            }catch(e: Exception) {
+                _uiState.update { prev ->
+                    prev.copy(submissionError = e.message)
+                }
+            }finally {
+                loadingState = LoadingUiState.NOT_LOADING
+            }
+        }
     }
 
     companion object {

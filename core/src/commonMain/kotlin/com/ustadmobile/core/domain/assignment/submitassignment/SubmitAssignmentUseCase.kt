@@ -9,10 +9,19 @@ import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionAttachment
 
 /**
- * Handle submission of an assignment
+ * Handle submission of an assignment - checks to ensure that the submission is valid and then stores
+ * in the database. Will throw an Exception if the submission is not valid.
  */
 class SubmitAssignmentUseCase {
 
+    /**
+     * @param db the system database to save in
+     * @param systemImpl
+     * @param assignmentUid assignment uid that is being submitted
+     * @param accountPersonUid the active user who is submitting
+     * @param submission the CourseAssignment the user wants to submit
+     */
+    @Throws(AssignmentSubmissionException::class)
     suspend operator fun invoke(
         db: UmAppDatabase,
         systemImpl: UstadMobileSystemImpl,
