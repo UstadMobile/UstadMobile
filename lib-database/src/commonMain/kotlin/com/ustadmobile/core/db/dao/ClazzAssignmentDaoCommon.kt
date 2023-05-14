@@ -97,6 +97,23 @@ object ClazzAssignmentDaoCommon {
             )
         """
 
+    const val SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL = """
+        SELECT CASE
+                    WHEN (SELECT caGroupUid
+                            FROM ClazzAssignment
+                           WHERE caUid = :assignmentUid) = 0 THEN :accountPersonUid
+                    ELSE COALESCE(
+                          (SELECT CourseGroupMember.cgmGroupNumber
+                             FROM CourseGroupMember
+                            WHERE CourseGroupMember.cgmSetUid = 
+                                  (SELECT caGroupUid
+                                     FROM ClazzAssignment
+                                    WHERE caUid = :assignmentUid)
+                              AND CourseGroupMember.cgmPersonUid = :accountPersonUid), -1)
+                    END
+    """
+
+
     const val SORT_DEADLINE_ASC = 1
 
     const val SORT_DEADLINE_DESC = 2

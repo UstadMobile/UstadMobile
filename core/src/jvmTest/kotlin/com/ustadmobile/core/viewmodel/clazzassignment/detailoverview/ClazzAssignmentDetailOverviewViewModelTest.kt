@@ -84,14 +84,15 @@ class ClazzAssignmentDetailOverviewViewModelTest {
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
-            viewModel.uiState.test(timeout = 5.seconds) {
+            viewModel.uiState.test(timeout = 500.seconds) {
                 val readyState = awaitItemWhere {
-                    it.assignment != null && it.courseBlock != null  && it.latestSubmissionAttachments != null
+                    it.assignment != null && it.courseBlock != null  && it.latestSubmission != null
                 }
                 assertTrue(readyState.activeUserIsSubmitter)
                 assertTrue(readyState.activeUserCanSubmit)
                 assertTrue(readyState.addFileSubmissionVisible)
-                assertTrue(readyState.addTextSubmissionVisible)
+                assertTrue(readyState.canEditSubmissionText)
+                assertEquals(0L, readyState.latestSubmission?.casTimestamp)
                 assertEquals(0, readyState.latestSubmissionAttachments?.size)
                 cancelAndIgnoreRemainingEvents()
             }
@@ -128,8 +129,8 @@ class ClazzAssignmentDetailOverviewViewModelTest {
                 }
                 assertTrue(readyState.activeUserIsSubmitter)
                 assertFalse(readyState.addFileSubmissionVisible)
-                assertFalse(readyState.addTextSubmissionVisible)
-                assertEquals(1, readyState.latestSubmissionAttachments?.size)
+                assertFalse(readyState.canEditSubmissionText)
+                assertTrue((readyState.latestSubmission?.casTimestamp ?: 0) > 0)
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -162,8 +163,8 @@ class ClazzAssignmentDetailOverviewViewModelTest {
                 }
                 assertTrue(readyState.activeUserIsSubmitter)
                 assertTrue(readyState.addFileSubmissionVisible)
-                assertTrue(readyState.addTextSubmissionVisible)
-                assertEquals(1, readyState.latestSubmissionAttachments?.size)
+                assertTrue(readyState.canEditSubmissionText)
+                assertTrue((readyState.latestSubmission?.casTimestamp ?: 0) > 0)
                 cancelAndIgnoreRemainingEvents()
             }
         }

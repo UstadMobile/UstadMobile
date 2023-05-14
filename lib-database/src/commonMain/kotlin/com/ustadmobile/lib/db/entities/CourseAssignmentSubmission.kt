@@ -28,17 +28,33 @@ open class CourseAssignmentSubmission {
     @PrimaryKey(autoGenerate = true)
     var casUid: Long = 0
 
+    /**
+     * Foreign key: assignment uid for the assignment, for which this is a submission
+     */
     var casAssignmentUid: Long = 0
 
-    // if individual then personUid else groupNumber
+    /**
+     * The submitterUid - the personUid of submitter if individual, the groupNum if this is by group
+     */
     var casSubmitterUid: Long = 0
 
+    /**
+     * The personUid for the submitter - whether this is a group assignment or individual - always the
+     * personUid of the person who clicked submit
+     */
     var casSubmitterPersonUid: Long = 0
 
+    /**
+     * The text of the assignment submission itself (HTML)
+     */
     var casText: String? = null
 
     var casType: Int = 0
 
+    /**
+     * The timestamp for when this entry was submitted. Zero indicates that it is still a draft/not
+     * saved in the database yet.
+     */
     @LastChangedTime
     @ReplicationVersionId
     var casTimestamp: Long = 0

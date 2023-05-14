@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
@@ -237,6 +238,63 @@ abstract class UstadViewModel(
                 UstadView.ARG_RESULT_DEST_VIEWNAME to destinationName
             )
         )
+    }
+
+    /**
+     * Load an entity for editing:
+     *
+     * 1. Try to load from JSON in saved state. This normally looks at KEY_ENTITY_STATE first,
+     *    then ARG_ENTITY_JSON for a value that has been passed as an argument.
+     * 2. If nothing found in loadFromStateKeys, then try to load from the database and then the
+     *    repository. If loading from the repository fails, use the value from the database.
+     * 3. If nothing is found in the database/repository, then make a default value
+     *
+     * @param loadFromStateKeys a list of keys to look for a saved value (in order to check).
+     * @param savedStateKey the key that should be used to save the current value (e.g. as the user
+     *        edits).
+     * @param onLoadFromDb a function that will load the given entity from the database and/or repo
+     * @param makeDefault a function that will create a default value if nothing is found in the
+     *        database or repo.
+     * @param uiUpdate the functin that will update the UI to display the given entity. When loading
+     *        from the database/repository, the value that is loaded from the local database will
+     *        be displayed first (so the user sees this whilst the value is loading from the repo).
+     * @param T the entity type
+     */
+    protected suspend fun <T> loadEntity(
+        serializer: KSerializer<T>,
+        loadFromStateKeys: List<String> = listOf(KEY_ENTITY_STATE, UstadEditView.ARG_ENTITY_JSON),
+        savedStateKey: String = loadFromStateKeys.first(),
+        onLoadFromDb: suspend (UmAppDatabase) -> T?,
+        makeDefault: suspend () -> T?,
+        uiUpdate: (T?) -> Unit,
+    ) : T? {
+
+        loadFromStateKeys.forEach { key ->
+            val savedVal: T? = savedStateHandle.getJson(key, serializer)
+            if(savedVal != null) {
+                uiUpdate(savedVal)
+                return savedVal
+            }
+        }
+
+        val dbVal = onLoadFromDb(activeDb)
+        if(dbVal != null) {
+            uiUpdate(dbVal)
+        }
+
+        try {
+            val repoVal = onLoadFromDb(activeRepo) ?: makeDefault()
+            if(repoVal != null)
+                savedStateHandle.setJson(savedStateKey, serializer, repoVal)
+            uiUpdate(repoVal)
+            return repoVal
+        }catch(e: Exception) {
+            //could happen when connectivity is not so good
+            if(dbVal != null)
+                savedStateHandle.setJson(savedStateKey, serializer, dbVal)
+
+            return dbVal ?: makeDefault().also(uiUpdate)
+        }
     }
 
 

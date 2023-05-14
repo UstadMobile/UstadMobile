@@ -12,11 +12,14 @@ import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import kotlin.jvm.JvmInline
 
@@ -113,7 +116,7 @@ data class ClazzAssignmentDetailOverviewUiState(
                 return false
 
             if(assignment?.caSubmissionPolicy != ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED &&
-                latestSubmission != null
+                (latestSubmission?.casTimestamp ?: 1) > 0
             ) {
                 return false
             }
@@ -122,11 +125,12 @@ data class ClazzAssignmentDetailOverviewUiState(
         }
 
 
-    val addTextSubmissionVisible: Boolean
+    val canEditSubmissionText: Boolean
         get() = activeUserCanSubmit && assignment?.caRequireTextSubmission == true
 
     val addFileSubmissionVisible: Boolean
         get() = activeUserCanSubmit && assignment?.caRequireFileSubmission == true
+
 
 
 }
@@ -172,21 +176,59 @@ class ClazzAssignmentDetailOverviewViewModel(
                         }
                     }
                 }
-                /*
-                launch {
-                    activeRepo.courseAssignmentSubmissionDao.getAllSubmissionsForUser(
-                        accountPersonUid = accountManager.activeSession?.person?.personUid ?: 0L,
-                        assignmentUid = entityUidArg,
-                    ).collect {
-                        _uiState.update { prev ->
-                            prev.copy(
-                                latestSubmissionAttachments = it
-                            )
-                        }
-                    }
-                }
-                 */
             }
+        }
+
+        viewModelScope.launch {
+            awaitAll(
+                async {
+                    loadEntity(
+                        serializer = CourseAssignmentSubmission.serializer(),
+                        loadFromStateKeys = listOf(STATE_LATEST_SUBMISSION),
+                        onLoadFromDb = { db ->
+                            db.courseAssignmentSubmissionDao.getLatestSubmissionForUserAsync(
+                                accountManager.activeSession?.person?.personUid ?: 0L,
+                                assignmentUid = entityUidArg,
+                            )
+                        },
+                        makeDefault = {
+                            CourseAssignmentSubmission().apply {
+                                casAssignmentUid = entityUidArg
+                                casSubmitterPersonUid = accountManager.activeSession?.person?.personUid ?: 0L
+                            }
+                        },
+                        uiUpdate = {
+                            _uiState.update { prev ->
+                                prev.copy(
+                                    latestSubmission = it
+                                )
+                            }
+                        }
+                    )
+                },
+                async {
+                    loadEntity(
+                        serializer = ListSerializer(CourseAssignmentSubmissionAttachment.serializer()),
+                        loadFromStateKeys = listOf(STATE_LATEST_SUBMISSION_ATTACHMENTS),
+                        onLoadFromDb = { db ->
+                            db.courseAssignmentSubmissionAttachmentDao.getLatestSubmissionAttachmentsForUserAsync(
+                                accountPersonUid = accountManager.activeSession?.person?.personUid ?: 0L,
+                                assignmentUid = entityUidArg
+                            )
+                        },
+                        makeDefault = {
+                            emptyList()
+                        },
+                        uiUpdate = {
+                            _uiState.update { prev ->
+                                prev.copy(
+                                    latestSubmissionAttachments = it
+                                )
+                            }
+                        }
+                    )
+                }
+            )
         }
     }
 
@@ -194,4 +236,11 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     }
 
+    companion object {
+
+        const val STATE_LATEST_SUBMISSION = "latestSubmission"
+
+        const val STATE_LATEST_SUBMISSION_ATTACHMENTS = "latestSubmissionAttachments"
+
+    }
 }
