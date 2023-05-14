@@ -34,7 +34,13 @@ open class CourseAssignmentSubmission {
     var casAssignmentUid: Long = 0
 
     /**
-     * The submitterUid - the personUid of submitter if individual, the groupNum if this is by group
+     * The submitterUid - the personUid of submitter if individual, the groupNum if this is by group.
+     * A submitterUid of 0 means that the person is NOT a submitter for this assignment. To be
+     * considered as a submitter:
+     *   If the assignment requires individual submissions, the personUid must be enrolled in the
+     *   course with the student role.
+     *   If the assignment requires a group submission, the person must have a CourseGroupMember
+     *   for the cgmGroupUid specified by the ClazzAssignment
      */
     var casSubmitterUid: Long = 0
 

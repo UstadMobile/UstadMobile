@@ -5,7 +5,9 @@ import androidx.room.OnConflictStrategy
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.core.db.MAX_VALID_DATE
 import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.ASSIGNMENT_PERMISSION
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL
 import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SUBMITTER_LIST_CTE
 import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SUBMITTER_LIST_WITHOUT_ASSIGNMENT_CTE
 import com.ustadmobile.door.paging.DataSourceFactory
@@ -267,18 +269,9 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
 
 
     @Query("""
-        SELECT (CASE WHEN ClazzAssignment.caGroupUid = 0 
-                     THEN :personUid 
-                     WHEN CourseGroupMember.cgmUid IS NULL 
-                     THEN 0 
-                     ELSE CourseGroupMember.cgmGroupNumber END) as submitterUid
-          FROM ClazzAssignment
-               LEFT JOIN CourseGroupMember
-               ON cgmSetUid = ClazzAssignment.caGroupUid
-               AND cgmPersonUid = :personUid
-         WHERE caUid = :assignmentUid
+        $SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL
     """)
-    abstract suspend fun getSubmitterUid(assignmentUid: Long, personUid: Long): Long
+    abstract suspend fun getSubmitterUid(assignmentUid: Long, accountPersonUid: Long): Long
 
     @Update
     abstract suspend fun updateAsync(clazzAssignment: ClazzAssignment)
@@ -405,4 +398,21 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
         accountPersonUid: Long,
     ): Flow<ClazzAssignmentCourseBlockAndSubmitterUid?>
 
+
+    @Query("""
+        WITH CourseBlockDeadlines(deadline, gracePeriod) AS
+             (SELECT CourseBlock.cbDeadlineDate AS deadline,
+                     CourseBlock.cbGracePeriodDate AS gracePeriod
+                FROM CourseBlock
+               WHERE CourseBlock.cbEntityUid = :assignmentUid
+                 AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+               LIMIT 1)
+        SELECT CASE
+               WHEN (SELECT gracePeriod 
+                       FROM CourseBlockDeadlines)
+                    BETWEEN 1 AND $MAX_VALID_DATE THEN (SELECT gracePeriod FROM CourseBlockDeadlines)
+               ELSE (SELECT deadline FROM CourseBlockDeadlines)
+               END AS latestSubmissionTimeAllowed
+    """)
+    abstract suspend fun getLatestSubmissionTimeAllowed(assignmentUid: Long): Long
 }

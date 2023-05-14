@@ -119,6 +119,17 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
         assignmentUid: Long
     ): CourseAssignmentSubmission?
 
+    @Query("""
+        SELECT EXISTS
+               (SELECT CourseAssignmentSubmission.casUid
+                  FROM CourseAssignmentSubmission
+                 WHERE casSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL))
+    """)
+    abstract suspend fun doesUserHaveSubmissions(
+        accountPersonUid: Long,
+        assignmentUid: Long,
+    ): Boolean
+
 
     @Query("""
         SELECT Count(casUid)

@@ -24,6 +24,17 @@ import kotlinx.serialization.Serializable
      ]
  )
 ))
+
+/**
+ * Represents an Assignment for those with a student role in a given course.
+ *
+ * Assignments can be submitted by individuals (caGroupUid = 0) or groups (caGroupUid = the
+ * CourseGroupSet uid).
+ *
+ * Submitter Uids will be the group number if submitting by group, or the personuid if submitting
+ * individually. See CourseAssignmentSubmission.casSubmitterUid
+ *
+ */
 @Serializable
 open class ClazzAssignment {
 

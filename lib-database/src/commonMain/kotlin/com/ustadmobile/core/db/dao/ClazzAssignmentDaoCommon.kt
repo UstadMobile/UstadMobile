@@ -97,11 +97,25 @@ object ClazzAssignmentDaoCommon {
             )
         """
 
+    /**
+     * Get the submitterUid for the given assignment uid and person uid, if any.
+     * See doc on submitterUid on CourseAssignmentSubmission.casSubmitterUid
+     */
     const val SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL = """
         SELECT CASE
                     WHEN (SELECT caGroupUid
                             FROM ClazzAssignment
-                           WHERE caUid = :assignmentUid) = 0 THEN :accountPersonUid
+                           WHERE caUid = :assignmentUid) = 0
+                         THEN (SELECT COALESCE(
+                               (SELECT ClazzEnrolment.clazzEnrolmentPersonUid
+                                  FROM ClazzEnrolment
+                                 WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+                                   AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                                   AND ClazzEnrolment.clazzEnrolmentClazzUid = 
+                                       (SELECT ClazzAssignment.caClazzUid
+                                          FROM ClazzAssignment
+                                         WHERE ClazzAssignment.caUid = :assignmentUid)
+                                 LIMIT 1), 0))       
                     ELSE COALESCE(
                           (SELECT CourseGroupMember.cgmGroupNumber
                              FROM CourseGroupMember
@@ -109,7 +123,7 @@ object ClazzAssignmentDaoCommon {
                                   (SELECT caGroupUid
                                      FROM ClazzAssignment
                                     WHERE caUid = :assignmentUid)
-                              AND CourseGroupMember.cgmPersonUid = :accountPersonUid), -1)
+                              AND CourseGroupMember.cgmPersonUid = :accountPersonUid), 0)
                     END
     """
 
