@@ -13,14 +13,20 @@ import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.timeout
+import org.mockito.kotlin.verifyBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -215,6 +221,149 @@ class ClazzAssignmentDetailOverviewViewModelTest {
             }
         }
     }
+
+    @Test
+    fun givenStudentWithSubmissionMarkedAndSingleSubmissionPolicy_whenShown_thenShowMarkedStatusWithNoAddTextFileButtons() {
+        testClazzAssignmentDetailOverviewViewModel(
+            activeUserRole = ClazzEnrolment.ROLE_STUDENT,
+            assignment = ClazzAssignment().apply {
+                caRequireFileSubmission = true
+                caRequireTextSubmission = true
+                caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
+            }
+        ) { testContext ->
+            //insert submission
+            activeDb.courseAssignmentSubmissionDao.insert(CourseAssignmentSubmission().apply {
+                casSubmitterPersonUid = testContext.person.personUid
+                casSubmitterUid = testContext.person.personUid
+                casText = "I can has cheezburger"
+            })
+
+            //insert mark
+            activeDb.courseAssignmentMarkDao.insert(CourseAssignmentMark().apply {
+                camMark = 5f
+                camSubmitterUid = testContext.person.personUid
+                camAssignmentUid = testContext.assignment.caUid
+            })
+
+            viewModelFactory {
+                savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
+            }
+
+            viewModel.uiState.test(timeout = 5.seconds) {
+                val stateWithMark = awaitItemWhere {
+                    it.submissionMark != null && it.assignment != null && it.courseBlock != null
+                }
+                assertEquals(5f, stateWithMark.submissionMark?.averageScore)
+                assertFalse(stateWithMark.activeUserCanSubmit)
+                assertEquals(CourseAssignmentSubmission.MARKED, stateWithMark.submissionStatus)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+    }
+
+    @Test
+    fun givenStudentWithSubmissionMarkedAndMultipleSubmissionPolicy_whenShown_thenShowMarkedStatusAndAddTextFileButtons() {
+        testClazzAssignmentDetailOverviewViewModel(
+            activeUserRole = ClazzEnrolment.ROLE_STUDENT,
+            assignment = ClazzAssignment().apply {
+                caRequireFileSubmission = true
+                caRequireTextSubmission = true
+                caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED
+            }
+        ) { testContext ->
+            //insert submission
+            activeDb.courseAssignmentSubmissionDao.insert(CourseAssignmentSubmission().apply {
+                casSubmitterPersonUid = testContext.person.personUid
+                casSubmitterUid = testContext.person.personUid
+                casText = "I can has cheezburger"
+            })
+
+            //insert mark
+            activeDb.courseAssignmentMarkDao.insert(CourseAssignmentMark().apply {
+                camMark = 5f
+                camSubmitterUid = testContext.person.personUid
+                camAssignmentUid = testContext.assignment.caUid
+            })
+
+            viewModelFactory {
+                savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
+            }
+
+            viewModel.uiState.test(timeout = 5.seconds) {
+                val stateWithMark = awaitItemWhere {
+                    it.submissionMark != null && it.assignment != null && it.courseBlock != null
+                }
+                assertEquals(5f, stateWithMark.submissionMark?.averageScore)
+                assertTrue(stateWithMark.activeUserCanSubmit)
+                assertEquals(CourseAssignmentSubmission.MARKED, stateWithMark.submissionStatus)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+    }
+
+    @Test
+    fun givenStudentWithNoSubmissionAndSingleSubmitPolicy_whenClickSubmitSubmission_thenSubmitAndHideAddTextFile() {
+        testClazzAssignmentDetailOverviewViewModel(
+            activeUserRole = ClazzEnrolment.ROLE_STUDENT,
+            assignment = ClazzAssignment().apply {
+                caRequireFileSubmission = true
+                caRequireTextSubmission = true
+                caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
+            }
+        ) { testContext ->
+            val submissionText = "I can haz cheezburger"
+
+            val mockSubmitterUseCase = mock<SubmitAssignmentUseCase> {
+                onBlocking { invoke(any(), any(), any(), any(), any()) }.thenAnswer {
+                    val submission = it.arguments[4] as CourseAssignmentSubmission
+                    SubmitAssignmentUseCase.SubmitAssignmentResult(submission.shallowCopy {
+                        casTimestamp = systemTimeInMillis()
+                    })
+                }
+            }
+
+            viewModelFactory {
+                savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle, mockSubmitterUseCase)
+            }
+
+            viewModel.uiState.test(timeout = 5.seconds) {
+                awaitItemWhere {
+                    it.assignment != null && it.courseBlock != null && it.latestSubmission != null
+                }
+
+                viewModel.onChangeSubmissionText(submissionText)
+                viewModel.onClickSubmit()
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            verifyBlocking(mockSubmitterUseCase, timeout(5000)) {
+                invoke(any(), any(), any(), any(), argWhere {
+                    it.casText == submissionText
+                })
+            }
+
+            viewModel.uiState.test(timeout = 5.seconds) {
+                val submittedDoneState = awaitItemWhere {
+                    (it.latestSubmission?.casTimestamp ?: 0) > 0
+                }
+
+                assertFalse(submittedDoneState.activeUserCanSubmit)
+                assertEquals(CourseAssignmentSubmission.SUBMITTED,
+                    submittedDoneState.submissionStatus)
+                assertEquals(submissionText, submittedDoneState.latestSubmission?.casText)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+    }
+
+
+
+
+
 
 
 }

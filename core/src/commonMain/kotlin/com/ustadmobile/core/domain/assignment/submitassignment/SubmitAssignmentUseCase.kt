@@ -7,12 +7,17 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionAttachment
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 
 /**
  * Handle submission of an assignment - checks to ensure that the submission is valid and then stores
  * in the database. Will throw an Exception if the submission is not valid.
  */
 class SubmitAssignmentUseCase {
+
+    data class SubmitAssignmentResult(
+        val submission: CourseAssignmentSubmission?
+    )
 
     /**
      * @param db the system database to save in
@@ -28,8 +33,8 @@ class SubmitAssignmentUseCase {
         assignmentUid: Long,
         accountPersonUid: Long,
         submission: CourseAssignmentSubmission,
-    ) {
-        db.withDoorTransactionAsync {
+    ) : SubmitAssignmentResult {
+        return db.withDoorTransactionAsync {
             val submitterUid = db.clazzAssignmentDao.getSubmitterUid(
                 assignmentUid, accountPersonUid
             )
@@ -50,10 +55,15 @@ class SubmitAssignmentUseCase {
                 throw AssignmentDeadlinePassedException("Deadline passed!")
             }
 
-            submission.casAssignmentUid = assignmentUid
-            submission.casSubmitterUid = submitterUid
-            submission.casSubmitterPersonUid = accountPersonUid
-            db.courseAssignmentSubmissionDao.insertAsync(submission)
+            val submissionToSave = submission.shallowCopy {
+                casAssignmentUid = assignmentUid
+                casSubmitterUid = submitterUid
+                casSubmitterPersonUid = accountPersonUid
+            }
+
+            db.courseAssignmentSubmissionDao.insertAsync(submissionToSave)
+
+            SubmitAssignmentResult(submissionToSave)
         }
     }
 

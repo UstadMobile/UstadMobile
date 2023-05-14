@@ -54,8 +54,6 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val showPrivateComments: Boolean = true,
 
-    val submissionStatus: Int? = null,
-
     val fieldsEnabled: Boolean = true,
 
     val selectedChipId: Int = CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES,
@@ -137,6 +135,16 @@ data class ClazzAssignmentDetailOverviewUiState(
     val addFileSubmissionVisible: Boolean
         get() = activeUserCanSubmit && assignment?.caRequireFileSubmission == true
 
+    val submissionStatus: Int?
+        get() {
+            return if(submissionMark != null) {
+                CourseAssignmentSubmission.MARKED
+            }else if((latestSubmission?.casTimestamp ?: 0) > 0) {
+                CourseAssignmentSubmission.SUBMITTED
+            }else {
+                null
+            }
+        }
 
 
 }
@@ -179,6 +187,23 @@ class ClazzAssignmentDetailOverviewViewModel(
                                 assignment = assignmentData?.clazzAssignment,
                                 courseBlock = assignmentData?.courseBlock,
                                 submitterUid = assignmentData?.submitterUid ?: 0
+                            )
+                        }
+                    }
+                }
+
+                launch {
+                    activeRepo.courseAssignmentMarkDao.getAverageMarkForUserAsFlow(
+                        accountPersonUid = activeUserPersonUid,
+                        assignmentUid = entityUidArg,
+                    ).collect { mark ->
+                        _uiState.takeIf { mark != _uiState.value.submissionMark }?.update { prev ->
+                            prev.copy(
+                                submissionMark = if(mark.averageScore >= 0) {
+                                    mark
+                                }else {
+                                    null
+                                }
                             )
                         }
                     }
@@ -260,16 +285,21 @@ class ClazzAssignmentDetailOverviewViewModel(
 
         viewModelScope.launch {
             try {
-                submitAssignmentUseCase(
+                val submissionResult = submitAssignmentUseCase(
                     db = activeDb,
                     systemImpl = systemImpl,
                     assignmentUid = entityUidArg,
                     accountPersonUid = accountManager.activeSession?.person?.personUid ?: 0L,
                     submission = submission
                 )
-                _uiState.takeIf { it.value.submissionError != null }?.update { prev ->
-                    prev.copy(submissionError = null)
+
+                _uiState.update { prev ->
+                    prev.copy(
+                        latestSubmission = submissionResult.submission ?: prev.latestSubmission,
+                        submissionError = null
+                    )
                 }
+
                 snackDispatcher.showSnackBar(Snack(systemImpl.getString(MessageID.submitted)))
             }catch(e: Exception) {
                 _uiState.update { prev ->

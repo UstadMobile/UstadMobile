@@ -100,6 +100,8 @@ object ClazzAssignmentDaoCommon {
     /**
      * Get the submitterUid for the given assignment uid and person uid, if any.
      * See doc on submitterUid on CourseAssignmentSubmission.casSubmitterUid
+     *
+     * Requires accountPersonUid and assignmentUid as variables
      */
     const val SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL = """
         SELECT CASE
