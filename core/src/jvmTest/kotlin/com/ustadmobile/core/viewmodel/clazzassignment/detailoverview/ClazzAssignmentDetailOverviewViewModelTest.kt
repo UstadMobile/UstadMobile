@@ -10,13 +10,17 @@ import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
+import com.ustadmobile.core.util.ext.loadFirstList
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.lib.db.entities.CourseBlock
@@ -484,5 +488,94 @@ class ClazzAssignmentDetailOverviewViewModelTest {
             }
         }
     }
+
+    @Test
+    fun givenStudentLoggedIn_whenShown_willShowExistingPrivateCommentsAndAllowSubmissionOfNewPrivateComment() {
+        testClazzAssignmentDetailOverviewViewModel(
+            activeUserRole = ClazzEnrolment.ROLE_STUDENT,
+            assignment = ClazzAssignment().apply {
+                caPrivateCommentsEnabled = true
+            },
+        ) { testContext ->
+            val teacherComment = "You want burger?"
+            val replyComment = "I can has cheezburger"
+            activeDb.commentsDao.insertAsync(Comments().apply {
+                commentsText = teacherComment
+                commentsEntityUid = testContext.assignment.caUid
+                commentSubmitterUid = testContext.person.personUid
+                commentsDateTimeAdded = systemTimeInMillis()
+            })
+
+            viewModelFactory {
+                savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
+            }
+
+            viewModel.uiState.test(timeout = 5.seconds) {
+                val commentReadyState = awaitItemWhere { it.privateComments() !is EmptyPagingSource }
+                val commentLoadResult: List<CommentsAndName> = commentReadyState.privateComments().loadFirstList()
+                assertEquals(teacherComment, commentLoadResult.first().comment.commentsText)
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            viewModel.onChangePrivateCommentText(replyComment)
+            viewModel.onClickSubmitPrivateComment()
+            viewModel.uiState.test(timeout = 5.seconds) {
+                val commentReadyState = awaitItemWhere {
+                    it.privateComments() !is EmptyPagingSource && it.newPrivateCommentText == ""
+                }
+                val commentsAfterReply = commentReadyState.privateComments().loadFirstList()
+                assertEquals(replyComment, commentsAfterReply.first().comment.commentsText)
+                assertEquals(teacherComment, commentsAfterReply[1].comment.commentsText)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+    }
+
+    @Test
+    fun givenCourseCommentsEnabled_whenShown_willShowExistingCourseCommentsAndAllowSubmissionOfNewCourseComment() {
+        testClazzAssignmentDetailOverviewViewModel(
+            activeUserRole = ClazzEnrolment.ROLE_STUDENT,
+            assignment = ClazzAssignment().apply {
+                caPrivateCommentsEnabled = true
+                caClassCommentEnabled = true
+            },
+        ) { testContext ->
+            val startComment = "I can has cheezburger"
+            val replyComment = "Yes you kan"
+
+            activeDb.commentsDao.insertAsync(Comments().apply {
+                commentsText = startComment
+                commentsEntityUid = testContext.assignment.caUid
+                commentSubmitterUid = 0
+            })
+
+            viewModelFactory {
+                savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
+            }
+
+            viewModel.uiState.test(timeout = 5.seconds) {
+                val commentReadyState = awaitItemWhere { it.courseComments() !is EmptyPagingSource  }
+                val commentsOnLoad = commentReadyState.courseComments().loadFirstList()
+                assertEquals(startComment, commentsOnLoad.first().comment.commentsText)
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            viewModel.onChangeCourseCommentText(replyComment)
+            viewModel.onClickSubmitCourseComment()
+
+            viewModel.uiState.test(timeout = 5.seconds) {
+                val commentReadyState = awaitItemWhere {
+                    it.courseComments() !is EmptyPagingSource && it.newCourseCommentText == ""
+                }
+                val commentsAfterReply = commentReadyState.courseComments().loadFirstList()
+                assertEquals(replyComment, commentsAfterReply.first().comment.commentsText)
+                assertEquals(startComment, commentsAfterReply[1].comment.commentsText)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+    }
+
 
 }

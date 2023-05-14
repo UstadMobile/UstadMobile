@@ -44,14 +44,20 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.InsertDriveFile
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
+import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItemUiState
+import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
@@ -59,6 +65,7 @@ import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment.Companion.SUBMISSION_POLICY_MAP
 import com.ustadmobile.port.android.view.composable.*
 import java.util.*
+import androidx.paging.compose.items
 
 
 interface ClazzAssignmentDetailOverviewFragmentEventHandler {
@@ -467,6 +474,22 @@ fun ClazzAssignmentDetailOverviewScreen(
     onClickSubmitSubmission: () -> Unit = { }
 ){
 
+    val privateCommentsPager = remember(uiState.privateComments) {
+        Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
+            pagingSourceFactory = uiState.privateComments
+        )
+    }
+    val privateCommentsLazyPagingItems = privateCommentsPager.flow.collectAsLazyPagingItems()
+
+    val courseCommentsPager = remember(uiState.courseComments) {
+        Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
+            pagingSourceFactory = uiState.courseComments
+        )
+    }
+    val courseCommentsLazyPagingItems = courseCommentsPager.flow.collectAsLazyPagingItems()
+
     val formattedDateTime = rememberFormattedDateTime(
         timeInMillis = uiState.courseBlock?.cbDeadlineDate ?: 0,
         timeZoneId = TimeZone.getDefault().id
@@ -645,11 +668,10 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         items(
-            items = uiState.publicCommentList,
-            key = { Pair(4, it.commentsUid) }
+            items = courseCommentsLazyPagingItems,
+            key = { Pair(4, it.comment.commentsUid) }
         ){ comment ->
-
-            UstadCommentListItem(commentWithPerson = comment)
+            UstadCommentListItem(commentAndName = comment)
         }
 
         item {
@@ -668,10 +690,10 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         items(
-            items = uiState.privateCommentList,
-            key = { Pair(5, it.commentsUid) }
+            items = privateCommentsLazyPagingItems,
+            key = { Pair(5, it.comment.commentsUid) }
         ){ comment ->
-            UstadCommentListItem(commentWithPerson = comment)
+            UstadCommentListItem(commentAndName = comment)
         }
     }
 }
@@ -709,26 +731,32 @@ fun ClazzAssignmentDetailOverviewScreenPreview(){
                 }
             }
         ),
-        publicCommentList = listOf(
-            CommentsWithPerson().apply {
-                commentsUid = 1
-                commentsPerson = Person().apply {
+        courseComments = {
+            ListPagingSource(listOf(
+                CommentsAndName().apply {
+                    comment = Comments().apply {
+                        commentsUid = 1
+                        commentsText = "This is a very difficult assignment."
+                    }
                     firstNames = "Bob"
                     lastName = "Dylan"
                 }
-                commentsText = "I like this activity. Shall we discuss this in our next meeting?"
-            }
-        ),
-        privateCommentList = listOf(
-            CommentsWithPerson().apply {
-                commentsUid = 1
-                commentsPerson = Person().apply {
-                    firstNames = "Bob"
-                    lastName = "Dylan"
-                }
-                commentsText = "I like this activity. Shall we discuss this in our next meeting?"
-            }
-        ),
+            ))
+        },
+        privateComments = {
+            ListPagingSource(
+                listOf(
+                    CommentsAndName().apply {
+                        comment = Comments().apply {
+                            commentsUid = 2
+                            commentsText = "Can I please have extension? My rabbit ate my homework."
+                        }
+                        firstNames = "Bob"
+                        lastName = "Dylan"
+                    }
+                ),
+            )
+        },
     )
 
     MdcTheme {

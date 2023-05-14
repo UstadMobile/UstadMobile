@@ -1,9 +1,9 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.hooks.useFormattedTime
-import com.ustadmobile.lib.db.entities.CommentsWithPerson
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.hooks.useFormattedDateAndTime
+import com.ustadmobile.lib.db.composites.CommentsAndName
 import csstype.px
+import kotlinx.datetime.TimeZone
 import mui.icons.material.Person as PersonIcon
 import mui.material.*
 import mui.system.sx
@@ -11,17 +11,21 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import com.ustadmobile.lib.db.entities.Comments
 
 
 external interface UstadCommentListItemProps : Props {
 
-    var commentWithPerson: CommentsWithPerson
+    var commentsAndName: CommentsAndName?
 
 }
 
 val UstadCommentListItem = FC<UstadCommentListItemProps> { props ->
 
-    val formattedTime = useFormattedTime(props.commentWithPerson.commentsDateTimeAdded.toInt())
+    val formattedTime = useFormattedDateAndTime(
+        timeInMillis = props.commentsAndName?.comment?.commentsDateTimeAdded ?: 0L,
+        timezoneId = TimeZone.currentSystemDefault().id
+    )
 
     ListItem {
 
@@ -35,8 +39,8 @@ val UstadCommentListItem = FC<UstadCommentListItemProps> { props ->
         }
 
         ListItemText {
-            primary = ReactNode(props.commentWithPerson.commentsPerson?.fullName() ?: "")
-            secondary = ReactNode(props.commentWithPerson.commentsText ?: "")
+            primary = ReactNode("${props.commentsAndName?.firstNames} ${props.commentsAndName?.lastName}")
+            secondary = ReactNode(props.commentsAndName?.comment?.commentsText ?: "")
         }
 
         secondaryAction = Typography.create {
@@ -49,13 +53,14 @@ val UstadCommentListItem = FC<UstadCommentListItemProps> { props ->
 val UstadCommentListItemPreview = FC<Props> {
 
     UstadCommentListItem {
-        commentWithPerson = CommentsWithPerson().apply {
-            commentsUid = 1
-            commentsPerson = Person().apply {
-                firstNames = "Bob"
-                lastName = "Dylan"
+        commentsAndName = CommentsAndName().apply {
+            comment = Comments().apply {
+                commentsUid = 1
+                commentsText = "I like this activity. Shall we discuss this in our next meeting?"
             }
-            commentsText = "I like this activity. Shall we discuss this in our next meeting?"
+
+            firstNames = "Bob"
+            lastName = "Dylan"
         }
     }
 }

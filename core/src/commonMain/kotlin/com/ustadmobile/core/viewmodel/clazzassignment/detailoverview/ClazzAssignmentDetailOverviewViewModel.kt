@@ -13,7 +13,10 @@ import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
+import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
+import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.async
@@ -31,6 +34,8 @@ import kotlin.jvm.JvmInline
 /**
  * @param latestSubmissionAttachments List of submissions made by the active user (or their group).
  * null if not yet loaded
+ *
+ * @param newPrivateCommentText the text in the textfield for a new private comment
  */
 data class ClazzAssignmentDetailOverviewUiState(
 
@@ -48,9 +53,9 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val markList: List<CourseAssignmentMarkWithPersonMarker> = emptyList(),
 
-    val publicCommentList: List<CommentsWithPerson> = emptyList(),
+    val courseComments: () -> PagingSource<Int, CommentsAndName> = { EmptyPagingSource() },
 
-    val privateCommentList: List<CommentsWithPerson> = emptyList(),
+    val privateComments: () -> PagingSource<Int, CommentsAndName> = { EmptyPagingSource() },
 
     val fieldsEnabled: Boolean = true,
 
@@ -74,10 +79,14 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val submissionError: String? = null,
 
+    val newPrivateCommentText: String = "",
+
+    val newCourseCommentText: String = "",
+
     ) {
 
     val caDescriptionVisible: Boolean
-        get() = !assignment?.caDescription.isNullOrBlank()
+        get() = !courseBlock?.cbDescription.isNullOrBlank()
 
     val cbDeadlineDateVisible: Boolean
         get() = courseBlock?.cbDeadlineDate.isDateSet()
@@ -178,6 +187,17 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     val uiState: Flow<ClazzAssignmentDetailOverviewUiState> = _uiState.asStateFlow()
 
+    private val privateCommentsPagingSourceFactory: () -> PagingSource<Int, CommentsAndName> = {
+        activeRepo.commentsDao.findPrivateCommentsForUserByAssignmentUid(
+            accountPersonUid = activeUserPersonUid,
+            assignmentUid = entityUidArg,
+        )
+    }
+
+    private val courseCommentsPagingSourceFactory: () -> PagingSource<Int, CommentsAndName> = {
+        activeRepo.commentsDao.findCourseCommentsByAssignmentUid(assignmentUid = entityUidArg)
+    }
+
     init {
         viewModelScope.launch {
             _uiState.whenSubscribed {
@@ -198,6 +218,12 @@ class ClazzAssignmentDetailOverviewViewModel(
                                 }else {
                                     null
                                 }
+                            )
+                        }
+
+                        _appUiState.update { prev ->
+                            prev.copy(
+                                title = assignmentData?.courseBlock?.cbTitle ?: ""
                             )
                         }
                     }
@@ -273,6 +299,13 @@ class ClazzAssignmentDetailOverviewViewModel(
                 }
             )
         }
+
+        _uiState.update { prev ->
+            prev.copy(
+                privateComments = privateCommentsPagingSourceFactory,
+                courseComments = courseCommentsPagingSourceFactory,
+            )
+        }
     }
 
     fun onChangeSubmissionText(text: String) {
@@ -283,6 +316,75 @@ class ClazzAssignmentDetailOverviewViewModel(
                     casTimestamp = 0
                 }
             )
+        }
+    }
+
+    fun onChangePrivateCommentText(text: String) {
+        _uiState.update { prev ->
+            prev.copy(
+                newPrivateCommentText = text
+            )
+        }
+    }
+
+    fun onClickSubmitPrivateComment() {
+        val submitterUid = _uiState.value.submitterUid
+        if(submitterUid <= 0)
+            //invalid - this should never happen because private comment field would not be visible
+            return
+
+
+        if(loadingState == LoadingUiState.INDETERMINATE)
+            return
+
+        loadingState = LoadingUiState.INDETERMINATE
+
+        viewModelScope.launch {
+            try {
+                activeDb.commentsDao.insertAsync(Comments().apply {
+                    commentSubmitterUid = submitterUid
+                    commentsPersonUid = activeUserPersonUid
+                    commentsEntityUid = entityUidArg
+                    commentsText = _uiState.value.newPrivateCommentText
+                    commentsDateTimeAdded = systemTimeInMillis()
+                })
+                _uiState.update { prev ->
+                    prev.copy(newPrivateCommentText = "")
+                }
+            }finally {
+                loadingState = LoadingUiState.NOT_LOADING
+            }
+        }
+    }
+
+    fun onChangeCourseCommentText(text: String) {
+        _uiState.update { prev ->
+            prev.copy(
+                newCourseCommentText = text
+            )
+        }
+    }
+
+    fun onClickSubmitCourseComment() {
+        if(loadingState == LoadingUiState.INDETERMINATE)
+            return
+
+        loadingState = LoadingUiState.INDETERMINATE
+        viewModelScope.launch {
+            try {
+                activeDb.commentsDao.insertAsync(Comments().apply {
+                    commentSubmitterUid = 0
+                    commentsPersonUid = activeUserPersonUid
+                    commentsEntityUid = entityUidArg
+                    commentsText = _uiState.value.newCourseCommentText
+                    commentsDateTimeAdded = systemTimeInMillis()
+                })
+                _uiState.update { prev ->
+                    prev.copy(newCourseCommentText = "")
+                }
+            }finally {
+                loadingState = LoadingUiState.NOT_LOADING
+            }
         }
     }
 
