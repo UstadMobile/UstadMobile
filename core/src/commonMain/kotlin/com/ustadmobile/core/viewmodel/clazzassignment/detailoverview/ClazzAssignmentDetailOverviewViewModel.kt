@@ -52,8 +52,6 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val privateCommentList: List<CommentsWithPerson> = emptyList(),
 
-    val showPrivateComments: Boolean = true,
-
     val fieldsEnabled: Boolean = true,
 
     val selectedChipId: Int = CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES,
@@ -76,7 +74,7 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val submissionError: String? = null,
 
-) {
+    ) {
 
     val caDescriptionVisible: Boolean
         get() = !assignment?.caDescription.isNullOrBlank()
@@ -145,6 +143,12 @@ data class ClazzAssignmentDetailOverviewUiState(
                 null
             }
         }
+
+    val privateCommentSectionVisible: Boolean
+        get() = activeUserIsSubmitter
+
+    val submitPrivateCommentVisible: Boolean
+        get() = activeUserIsSubmitter && assignment?.caPrivateCommentsEnabled == true
 
 
 }
