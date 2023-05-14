@@ -41,6 +41,8 @@ open class CourseAssignmentSubmission {
      *   course with the student role.
      *   If the assignment requires a group submission, the person must have a CourseGroupMember
      *   for the cgmGroupUid specified by the ClazzAssignment
+     * A submitterUid of -1 means that the person is enrolled as a student in the course, however
+     * it is a group assignment and the student is not assigned to any group.
      */
     var casSubmitterUid: Long = 0
 
@@ -68,6 +70,8 @@ open class CourseAssignmentSubmission {
     companion object {
 
         const val TABLE_ID = 522
+
+        const val SUBMITTER_ENROLLED_BUT_NOT_IN_GROUP = -1L
 
         const val SUBMISSION_TYPE_TEXT = 1
         const val SUBMISSION_TYPE_FILE = 2

@@ -92,7 +92,7 @@ data class ClazzAssignmentDetailOverviewUiState(
         get() = assignment?.caClassCommentEnabled == true
 
     val activeUserIsSubmitter: Boolean
-        get() = submitterUid != 0L
+        get() = submitterUid > 0L
 
     val isWithinDeadlineOrGracePeriod: Boolean
         get() {
@@ -145,10 +145,10 @@ data class ClazzAssignmentDetailOverviewUiState(
         }
 
     val privateCommentSectionVisible: Boolean
-        get() = activeUserIsSubmitter
+        get() = activeUserIsSubmitter && unassignedError == null
 
     val submitPrivateCommentVisible: Boolean
-        get() = activeUserIsSubmitter && assignment?.caPrivateCommentsEnabled == true
+        get() = privateCommentSectionVisible && assignment?.caPrivateCommentsEnabled == true
 
 
 }
@@ -187,10 +187,17 @@ class ClazzAssignmentDetailOverviewViewModel(
                         accountPersonUid = accountManager.activeAccount.personUid,
                     ).collect { assignmentData ->
                         _uiState.update { prev ->
+                            val isEnrolledButNotInGroup = assignmentData?.submitterUid ==
+                                CourseAssignmentSubmission.SUBMITTER_ENROLLED_BUT_NOT_IN_GROUP
                             prev.copy(
                                 assignment = assignmentData?.clazzAssignment,
                                 courseBlock = assignmentData?.courseBlock,
-                                submitterUid = assignmentData?.submitterUid ?: 0
+                                submitterUid = assignmentData?.submitterUid ?: 0,
+                                unassignedError = if(isEnrolledButNotInGroup) {
+                                    systemImpl.getString(MessageID.unassigned_error)
+                                }else {
+                                    null
+                                }
                             )
                         }
                     }

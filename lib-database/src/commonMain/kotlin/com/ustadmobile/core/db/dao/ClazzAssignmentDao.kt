@@ -377,16 +377,7 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
                         
         SELECT ClazzAssignment.*,
                CourseBlock.*,
-               (CASE 
-                   WHEN NOT (SELECT isStudent FROM PersonIsStudent) THEN 0 
-                   WHEN (ClazzAssignment.caGroupUid = 0) 
-                    AND (SELECT isStudent FROM PersonIsStudent) THEN :accountPersonUid 
-                   ELSE COALESCE(
-                                 (SELECT cgmGroupNumber
-                                    FROM CourseGroupMember
-                                   WHERE cgmSetUid = ClazzAssignment.caGroupUid
-                                     AND cgmPersonUid = :accountPersonUid), 0)
-                   END) AS submitterUid
+               ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL) AS submitterUid
                    
           FROM ClazzAssignment
                JOIN CourseBlock

@@ -59,6 +59,10 @@ open class ClazzAssignment {
 
     var caClassCommentEnabled: Boolean = true
 
+    /**
+     * True if submitters can submit a private comment (e.g. from student to teacher, or peer to peer).
+     * Those with create learner record permission can always make a private comment.
+     */
     @ColumnInfo(defaultValue = "1")
     var caPrivateCommentsEnabled: Boolean = true
 

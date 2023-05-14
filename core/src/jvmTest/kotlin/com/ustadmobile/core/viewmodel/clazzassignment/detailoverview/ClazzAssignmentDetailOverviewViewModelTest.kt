@@ -20,6 +20,7 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.lib.db.entities.CourseBlock
+import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import org.mockito.kotlin.any
@@ -30,6 +31,8 @@ import org.mockito.kotlin.verifyBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
@@ -41,13 +44,15 @@ class ClazzAssignmentDetailOverviewViewModelTest {
         val clazz: Clazz,
         val assignment: ClazzAssignment,
         val courseBlock: CourseBlock,
-        val person: Person
+        val person: Person,
+        val groupSet: CourseGroupSet? = null,
     )
 
     private fun testClazzAssignmentDetailOverviewViewModel(
         activeUserRole: Int,
         assignment: ClazzAssignment = ClazzAssignment(),
         courseBlock: CourseBlock = CourseBlock(),
+        groupSet: CourseGroupSet? = null,
         block: suspend ViewModelTestBuilder<ClazzAssignmentDetailOverviewViewModel>.(AssignmentDetailOverviewTestContext) -> Unit
     ) {
         testViewModel {
@@ -60,10 +65,14 @@ class ClazzAssignmentDetailOverviewViewModelTest {
                 }
                 activeDb.createNewClazzAndGroups(clazz, systemImpl, emptyMap())
 
-
                 activeDb.takeIf { activeUserRole != 0 }?.enrolPersonIntoClazzAtLocalTimezone(
                     activePerson, clazzUid, activeUserRole
                 )
+
+                if(groupSet != null) {
+                    groupSet.cgsUid = activeDb.courseGroupSetDao.insertAsync(groupSet)
+                    assignment.caGroupUid = groupSet.cgsUid
+                }
 
                 assignment.caClazzUid = clazzUid
                 assignment.caUid = activeDb.clazzAssignmentDao.insertAsync(assignment)
@@ -74,7 +83,7 @@ class ClazzAssignmentDetailOverviewViewModelTest {
 
                 AssignmentDetailOverviewTestContext(
                     clazz, assignment, courseBlock,
-                    activePerson
+                    activePerson, groupSet,
                 )
             }
 
@@ -417,9 +426,63 @@ class ClazzAssignmentDetailOverviewViewModelTest {
     }
 
 
+    @Test
+    fun givenUserNotAssignedInGroup_whenShown_displayErrorAndDontShowSubmitAndAddTextFileButtonsAndPrivateOff() {
+        testClazzAssignmentDetailOverviewViewModel(
+            activeUserRole = ClazzEnrolment.ROLE_STUDENT,
+            assignment = ClazzAssignment().apply {
+                caPrivateCommentsEnabled = true
+                caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
+            },
+            groupSet = CourseGroupSet().apply {
+                cgsName = "Test groups"
+            }
+        ) {testContext ->
+            viewModelFactory {
+                savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
+            }
+
+            viewModel.uiState.test(timeout = 5.seconds) {
+                val readyState = awaitItemWhere {
+                    it.assignment != null && it.courseBlock != null && it.unassignedError != null
+                }
+
+                assertNotNull(readyState.unassignedError)
+                assertFalse(readyState.activeUserCanSubmit)
+                assertFalse(readyState.activeUserIsSubmitter)
+                assertFalse(readyState.privateCommentSectionVisible)
+            }
+
+        }
+    }
 
 
+    @Test
+    fun givenUserIsNotStudent_whenShown_dontShowPrivateCommentsSubmissionStatusScoreAndAddFileText() {
+        testClazzAssignmentDetailOverviewViewModel(
+            activeUserRole = ClazzEnrolment.ROLE_TEACHER,
+            assignment = ClazzAssignment().apply {
+                caPrivateCommentsEnabled = true
+                caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
+            },
+        ) { testContext ->
+            viewModelFactory {
+                savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
+            }
 
+            viewModel.uiState.test(timeout = 5.seconds) {
+                val readyState = awaitItemWhere {
+                    it.assignment != null && it.courseBlock != null
+                }
 
+                assertFalse(readyState.privateCommentSectionVisible)
+                assertFalse(readyState.submitPrivateCommentVisible)
+                assertFalse(readyState.activeUserIsSubmitter)
+                assertFalse(readyState.activeUserCanSubmit)
+            }
+        }
+    }
 
 }
