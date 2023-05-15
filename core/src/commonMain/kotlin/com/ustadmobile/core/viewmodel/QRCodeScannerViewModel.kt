@@ -20,7 +20,7 @@ import org.kodein.di.instance
 @kotlinx.serialization.Serializable
 data class QRCodeScannerUiState(
 
-    val barCodeVal: String = "",
+    val qrCode: String = "",
 
     val fieldsEnabled: Boolean = true,
 
@@ -35,15 +35,13 @@ class QRCodeScannerViewModel(
 
     val uiState: Flow<QRCodeScannerUiState> = _uiState.asStateFlow()
 
-    private val snackDisaptcher: SnackBarDispatcher by instance()
-
     init {
         _appUiState.update { prev ->
             prev.copy(
                 hideBottomNavigation = true,
                 userAccountIconVisible = false,
                 loadingState = LoadingUiState.INDETERMINATE,
-                title = createEditTitle(MessageID.new_assignment, MessageID.edit_assignment),
+                title = createEditTitle(MessageID.qr_code_scan, MessageID.qr_code_scan),
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
                     text = systemImpl.getString(MessageID.done),
@@ -72,8 +70,10 @@ class QRCodeScannerViewModel(
     }
 
 
-    fun onQRCodeDetected(){
-
+    fun onQRCodeDetected(qrCode: String){
+        _uiState.update { prev ->
+            prev.copy(qrCode = qrCode)
+        }
     }
 
     private fun QRCodeScannerUiState.hasErrors() : Boolean {
@@ -81,26 +81,10 @@ class QRCodeScannerViewModel(
     }
 
     fun onClickSave() {
-        if(!_uiState.value.fieldsEnabled)
-            return
+        val siteLink = _uiState.value.qrCode
 
-        _uiState.update { prev ->
-            prev.copy(fieldsEnabled = false)
-        }
-
-        viewModelScope.launch {
-            val initState = savedStateHandle[KEY_INIT_STATE]?.let { initStateJson ->
-                withContext(Dispatchers.Default) {
-                    json.decodeFromString(QRCodeScannerUiState.serializer(), initStateJson)
-                }
-            } ?: return@launch
-
-
-
-            if(_uiState.value.hasErrors()) {
-                return@launch
-            }
-
+        if(_uiState.value.qrCode.isNotBlank()) {
+            finishWithResult(siteLink)
         }
     }
 

@@ -11,12 +11,14 @@ import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.SiteEnterLinkView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
-import com.ustadmobile.core.viewmodel.QRCodeScannerUiState
 import com.ustadmobile.core.viewmodel.QRCodeScannerViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import io.ktor.client.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.encodeToString
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -51,6 +53,32 @@ class SiteEnterLinkViewModel(
                 navigationVisible = false,
             )
         }
+
+        viewModelScope.launch {
+
+            launch {
+                resultReturner.filteredResultFlowForKey(RESULT_KEY_SITE_LINK).collect { result ->
+                    val returnedSiteLink = result.result as? String ?: return@collect
+
+                    _uiState.update { prev ->
+                        prev.copy(
+                            siteLink = returnedSiteLink
+                        )
+                    }
+
+                    savedStateHandle[RESULT_KEY_SITE_LINK] = withContext(
+                        Dispatchers.Default) {
+                        json.encodeToString(String.serializer(), returnedSiteLink)
+                    }
+                }
+            }
+
+            _uiState.update { prev ->
+                prev.copy(fieldsEnabled = true)
+            }
+
+            loadingState = LoadingUiState.NOT_LOADING
+        }
     }
 
     fun onClickQRCodeScan() {
@@ -58,11 +86,12 @@ class SiteEnterLinkViewModel(
             it.copy(fieldsEnabled = false)
         }
 
-        viewModelScope.launch {
-
-            navController.navigate(QRCodeScannerViewModel.DEST_NAME, emptyMap())
-
-        }
+        navigateForResult(
+            QRCodeScannerViewModel.DEST_NAME,
+            key = RESULT_KEY_SITE_LINK,
+            currentValue = _uiState.value.siteLink,
+            serializer = String.serializer()
+        )
     }
 
     fun onClickNext() {
@@ -115,6 +144,8 @@ class SiteEnterLinkViewModel(
     companion object {
 
         val ARGS_TO_PASS_THROUGH = listOf(UstadView.ARG_NEXT, UstadView.ARG_INTENT_MESSAGE)
+
+        const val RESULT_KEY_SITE_LINK = "siteLink"
 
     }
 
