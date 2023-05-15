@@ -25,6 +25,7 @@ external interface AssignmentCommentTextFieldListItemProps: Props {
     var value: String
     var activeUserPersonUid: Long
     var onClickSubmit: () -> Unit
+    var textFieldId: String
 }
 
 val AssignmentCommentTextFieldListItem = FC<AssignmentCommentTextFieldListItemProps> { props ->
@@ -42,6 +43,7 @@ val AssignmentCommentTextFieldListItem = FC<AssignmentCommentTextFieldListItemPr
             fullWidth = true
             value = props.value
             onTextChange = props.onChange
+            id = props.textFieldId
 
             if(props.value.isNotEmpty()) {
                 asDynamic().InputProps = jso<InputBaseProps> {

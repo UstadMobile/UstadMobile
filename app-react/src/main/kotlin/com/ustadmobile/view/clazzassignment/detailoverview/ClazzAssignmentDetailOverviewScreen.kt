@@ -50,6 +50,8 @@ external interface ClazzAssignmentDetailOverviewScreenProps : Props {
 
     var uiState: ClazzAssignmentDetailOverviewUiState
 
+    var onChangeSubmissionText: (String) -> Unit
+
     var onClickFilterChip: (MessageIdOption2) -> Unit
 
     var onClickMark: (CourseAssignmentMarkWithPersonMarker) -> Unit
@@ -165,6 +167,9 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                     item {
                         ReactQuill.create {
                             id = "assignment_text"
+                            value = props.uiState.latestSubmission?.casText ?: ""
+                            onChange = props.onChangeSubmissionText
+                            readOnly = !props.uiState.activeUserCanSubmit
                         }
                     }
                 }
@@ -221,6 +226,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                     item {
                         Button.create {
                             onClick = { props.onClickSubmitSubmission() }
+                            id = "sbumit_button"
                             disabled = !props.uiState.fieldsEnabled
                             variant = ButtonVariant.contained
                             fullWidth = true
@@ -278,6 +284,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                     label = ReactNode(strings[MessageID.add_class_comment])
                     value = props.uiState.newCourseCommentText
                     activeUserPersonUid = props.uiState.activeUserPersonUid
+                    textFieldId = "course_comment_textfield"
                 }
             }
 
@@ -306,6 +313,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                         label = ReactNode(strings[MessageID.add_private_comment])
                         value = props.uiState.newPrivateCommentText
                         activeUserPersonUid = props.uiState.activeUserPersonUid
+                        textFieldId = "private_comment_textfield"
                     }
                 }
 
