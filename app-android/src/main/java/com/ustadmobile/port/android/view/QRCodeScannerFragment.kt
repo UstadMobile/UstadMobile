@@ -66,7 +66,7 @@ private fun QRCodeScannerScreen(viewModel: QRCodeScannerViewModel) {
 @Composable
 private fun QRCodeScannerScreen(
     uiState: QRCodeScannerUiState = QRCodeScannerUiState(),
-    onQRCodeDetected: () -> Unit = {},
+    onQRCodeDetected: (String) -> Unit = {},
 ) {
 
     val context = LocalContext.current
@@ -103,7 +103,7 @@ private fun QRCodeScannerScreen(
                     barcodes.forEach { barcode ->
                         barcode.rawValue?.let { barcodeValue ->
                             barCodeVal.value = barcodeValue
-                            Toast.makeText(context, barcodeValue, Toast.LENGTH_SHORT).show()
+                            onQRCodeDetected(barcodeValue)
                         }
                     }
                 }

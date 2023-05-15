@@ -3,7 +3,6 @@ package com.ustadmobile.core.viewmodel
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
-import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -14,15 +13,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import org.kodein.di.DI
-import org.kodein.di.instance
 
 
 @kotlinx.serialization.Serializable
 data class QRCodeScannerUiState(
 
     val qrCode: String = "",
-
-    val fieldsEnabled: Boolean = true,
 
 )
 
@@ -50,10 +46,6 @@ class QRCodeScannerViewModel(
             )
         }
 
-        _uiState.update { prev ->
-            prev.copy(fieldsEnabled = false)
-        }
-
         viewModelScope.launch {
 
             if(savedStateHandle[KEY_INIT_STATE] == null) {
@@ -61,11 +53,6 @@ class QRCodeScannerViewModel(
                     json.encodeToString(_uiState.value)
                 }
             }
-
-            _uiState.update { prev ->
-                prev.copy(fieldsEnabled = true)
-            }
-
         }
     }
 
@@ -74,10 +61,8 @@ class QRCodeScannerViewModel(
         _uiState.update { prev ->
             prev.copy(qrCode = qrCode)
         }
-    }
 
-    private fun QRCodeScannerUiState.hasErrors() : Boolean {
-        return true
+        onClickSave()
     }
 
     fun onClickSave() {
