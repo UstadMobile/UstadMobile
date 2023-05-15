@@ -20,6 +20,8 @@ data class QRCodeScannerUiState(
 
     val qrCode: String = "",
 
+    val qrCodeError: String? = null,
+
 )
 
 class QRCodeScannerViewModel(
@@ -55,7 +57,6 @@ class QRCodeScannerViewModel(
             }
         }
     }
-
 
     fun onQRCodeDetected(qrCode: String){
         _uiState.update { prev ->
