@@ -37,6 +37,7 @@ import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
+import com.ustadmobile.view.components.UstadDetailHeader
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 
 val ASSIGNMENT_STATUS_MAP = mapOf(
@@ -95,6 +96,10 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
         props.uiState.courseComments, true, 50
     )
 
+    val privateCommentIninfiteQueryResult = usePagingSource(
+        props.uiState.privateComments, true, 50
+    )
+
 
     VirtualList {
         style = jso {
@@ -139,107 +144,121 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 }
             }
 
-            //submission section
-            item {
-                Stack.create {
-                    if (props.uiState.activeUserCanSubmit) {
-                        Typography {
-                            +strings[MessageID.your_submission]
-                        }
 
-                        if (props.uiState.submissionTextFieldVisible) {
-                            ReactQuill {
-                                id = "assignment_text"
-                            }
-                        }
-
-                        List {
-                            ListItem {
-                                ListItemButton {
-                                    id = "add_file"
-                                    onClick = {
-                                        props.onClickAddFileSubmission()
-                                    }
-                                    ListItemIcon {
-                                        Add { }
-                                    }
-
-                                    ListItemText {
-                                        primary =
-                                            ReactNode(strings[MessageID.add_file].uppercase())
-                                        secondary = ReactNode(
-                                            "${strings[MessageID.file_type_chosen]} $caFileType " +
-                                                strings[MessageID.max_number_of_files]
-                                                    .replace(
-                                                        "%1\$s",
-                                                        (props.uiState.assignment?.caNumberOfFiles
-                                                            ?: 0)
-                                                            .toString()
-                                                    )
-                                        )
-                                    }
-                                }
-                            }
-
-                            props.uiState.latestSubmissionAttachments?.forEach { submissionItem ->
-                                ListItem {
-                                    ListItemButton {
-                                        ListItemIcon {
-                                            InsertDriveFileIcon { }
-                                        }
-
-                                        ListItemText {
-                                            primary =
-                                                ReactNode(submissionItem.casaFileName ?: "")
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-
-                        if (props.uiState.unassignedErrorVisible) {
-                            Typography {
-                                +(props.uiState.unassignedError ?: "")
-                            }
-                        }
-
-                        if (props.uiState.submitSubmissionButtonVisible) {
-                            Button {
-                                onClick = { props.onClickSubmitSubmission() }
-                                disabled = !props.uiState.fieldsEnabled
-                                variant = ButtonVariant.contained
-
-                                +strings[MessageID.submit].uppercase()
-                            }
-                        }
+            if (props.uiState.unassignedErrorVisible) {
+                ListItem {
+                    ListItemText {
+                        primary = ReactNode(props.uiState.unassignedError ?: "")
                     }
                 }
             }
 
-            //List of grades awarded
-            item {
-                List.create {
-
-                    Typography {
-                        +strings[MessageID.grades_class_age]
+            //submission section
+            if(props.uiState.activeUserIsSubmitter) {
+                item {
+                    UstadDetailHeader.create {
+                        header = ReactNode(strings[MessageID.your_submission])
                     }
+                }
 
-                    UstadListFilterChipsHeader {
-                        filterOptions = props.uiState.gradeFilterChips
-                        selectedChipId = props.uiState.selectedChipId
-                        enabled = props.uiState.fieldsEnabled
-                        onClickFilterChip = { props.onClickFilterChip(it) }
-                    }
-
-                    props.uiState.markList.forEach { markItem ->
-                        UstadCourseAssignmentMarkListItem {
-                            onClickMark = props.onClickMark
-                            uiState = UstadCourseAssignmentMarkListItemUiState(
-                                mark = markItem,
-                                block = props.uiState.courseBlock ?: CourseBlock()
-                            )
+                if(props.uiState.submissionTextFieldVisible) {
+                    item {
+                        ReactQuill.create {
+                            id = "assignment_text"
                         }
+                    }
+                }
+
+                if(props.uiState.addFileVisible) {
+                    item {
+                        ListItem.create {
+                            ListItemButton {
+                                id = "add_file"
+                                onClick = {
+                                    props.onClickAddFileSubmission()
+                                }
+                                ListItemIcon {
+                                    Add { }
+                                }
+
+                                ListItemText {
+                                    primary =
+                                        ReactNode(strings[MessageID.add_file].uppercase())
+                                    secondary = ReactNode(
+                                        "${strings[MessageID.file_type_chosen]} $caFileType " +
+                                            strings[MessageID.max_number_of_files]
+                                                .replace(
+                                                    "%1\$s",
+                                                    (props.uiState.assignment?.caNumberOfFiles
+                                                        ?: 0)
+                                                        .toString()
+                                                )
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                items(
+                    list = props.uiState.latestSubmissionAttachments ?: emptyList(),
+                    key = { "sa_${it.casaUid}"}
+                ) { submissionAttachment ->
+                    ListItem.create {
+                        ListItemButton {
+                            ListItemIcon {
+                                InsertDriveFileIcon { }
+                            }
+
+                            ListItemText {
+                                primary = ReactNode(submissionAttachment.casaFileName ?: "")
+                            }
+                        }
+                    }
+                }
+
+                if (props.uiState.submitSubmissionButtonVisible) {
+                    item {
+                        Button.create {
+                            onClick = { props.onClickSubmitSubmission() }
+                            disabled = !props.uiState.fieldsEnabled
+                            variant = ButtonVariant.contained
+                            fullWidth = true
+
+                            +strings[MessageID.submit].uppercase()
+                        }
+                    }
+
+                }
+
+                //List of grades awarded
+                item {
+                    UstadDetailHeader.create {
+                        header = ReactNode(strings[MessageID.grades_class_age])
+                    }
+                }
+
+                item {
+                    ListItem.create {
+                        UstadListFilterChipsHeader {
+                            filterOptions = props.uiState.gradeFilterChips
+                            selectedChipId = props.uiState.selectedChipId
+                            enabled = props.uiState.fieldsEnabled
+                            onClickFilterChip = { props.onClickFilterChip(it) }
+                        }
+                    }
+                }
+
+                items(
+                    list = props.uiState.markList,
+                    key = { "mark_${it.camUid}"}
+                ) { markItem ->
+                    UstadCourseAssignmentMarkListItem.create {
+                        onClickMark = props.onClickMark
+                        uiState = UstadCourseAssignmentMarkListItemUiState(
+                            mark = markItem,
+                            block = props.uiState.courseBlock ?: CourseBlock()
+                        )
                     }
                 }
             }
@@ -270,6 +289,35 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                     commentsAndName = comment
                 }
             }
+
+            //Private comments
+            if(props.uiState.activeUserIsSubmitter) {
+                item {
+                    ListItem.create {
+                        ListItemText {
+                            primary = ReactNode(strings[MessageID.private_comments])
+                        }
+                    }
+                }
+
+                item {
+                    AssignmentCommentTextFieldListItem.create {
+                        onChange = props.onChangePrivateComment
+                        label = ReactNode(strings[MessageID.add_private_comment])
+                        value = props.uiState.newPrivateCommentText
+                        activeUserPersonUid = props.uiState.activeUserPersonUid
+                    }
+                }
+
+                infiniteQueryPagingItems(
+                    items = privateCommentIninfiteQueryResult,
+                    key = { "pc_${it.comment.commentsUid}" }
+                ) { comment ->
+                    UstadCommentListItem.create {
+                        commentsAndName = comment
+                    }
+                }
+            }
         }
 
         Container {
@@ -294,6 +342,9 @@ val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
             addFileVisible = true,
             submissionTextFieldVisible = true,
             hasFilesToSubmit = true,
+            latestSubmission = CourseAssignmentSubmission().apply {
+                casText = ""
+            },
             latestSubmissionAttachments = listOf(
                 CourseAssignmentSubmissionAttachment().apply {
                     casaUid = 1L
