@@ -57,11 +57,17 @@ class QRCodeScannerFragment: UstadBaseMvvmFragment(){
 private fun QRCodeScannerScreen(viewModel: QRCodeScannerViewModel) {
     val uiState by viewModel.uiState.collectAsState(initial = QRCodeScannerUiState())
 
-    QRCodeScannerScreen()
+    QRCodeScannerScreen(
+        uiState = uiState,
+        onQRCodeDetected = viewModel::onQRCodeDetected,
+    )
 }
 
 @Composable
-private fun QRCodeScannerScreen() {
+private fun QRCodeScannerScreen(
+    uiState: QRCodeScannerUiState = QRCodeScannerUiState(),
+    onQRCodeDetected: () -> Unit = {},
+) {
 
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current

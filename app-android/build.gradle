@@ -427,6 +427,7 @@ dependencies {
 
     implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
 
+    //Camera
     implementation "androidx.camera:camera-core:${version_camerax_compose}"
     implementation "androidx.camera:camera-camera2:${version_camerax_compose}"
     implementation "androidx.camera:camera-lifecycle:${version_camerax_compose}"

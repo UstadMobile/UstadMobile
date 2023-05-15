@@ -72,6 +72,10 @@ class QRCodeScannerViewModel(
     }
 
 
+    fun onQRCodeDetected(){
+
+    }
+
     private fun QRCodeScannerUiState.hasErrors() : Boolean {
         return true
     }
