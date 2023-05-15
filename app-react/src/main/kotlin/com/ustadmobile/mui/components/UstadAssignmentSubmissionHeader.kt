@@ -5,7 +5,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
-import com.ustadmobile.view.ASSIGNMENT_STATUS_MAP
+import com.ustadmobile.view.clazzassignment.detailoverview.ASSIGNMENT_STATUS_MAP
 import csstype.rgba
 import js.core.jso
 import mui.icons.material.Done

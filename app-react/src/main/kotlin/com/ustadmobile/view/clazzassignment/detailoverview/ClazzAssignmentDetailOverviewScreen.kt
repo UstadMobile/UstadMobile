@@ -1,4 +1,4 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.clazzassignment.detailoverview
 
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.generated.locale.MessageID
@@ -19,14 +19,13 @@ import mui.system.responsive
 import mui.material.List
 import react.FC
 import react.Props
+import react.useState
 import react.ReactNode
 import react.create
 import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItemUiState as UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.mui.components.UstadCourseAssignmentMarkListItem
 import com.ustadmobile.wrappers.quill.ReactQuill
-import csstype.Contain
 import csstype.Height
-import csstype.Overflow
 import csstype.pct
 import js.core.jso
 import mui.icons.material.Done
@@ -37,6 +36,7 @@ import mui.icons.material.InsertDriveFile as InsertDriveFileIcon
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import com.ustadmobile.hooks.usePagingSource
+import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 
 val ASSIGNMENT_STATUS_MAP = mapOf(
@@ -53,9 +53,9 @@ external interface ClazzAssignmentDetailOverviewScreenProps : Props {
 
     var onClickMark: (CourseAssignmentMarkWithPersonMarker) -> Unit
 
-    var onClickNewPublicComment: () -> Unit
+    var onChangeCourseComment: (String) -> Unit
 
-    var onClickNewPrivateComment: () -> Unit
+    var onChangePrivateComment: (String) -> Unit
 
     var onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit
 
@@ -254,8 +254,11 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
             }
 
             item {
-                TextField.create {
-                    value = "Add course comment"
+                AssignmentCommentTextFieldListItem.create {
+                    onChange = props.onChangeCourseComment
+                    label = ReactNode(strings[MessageID.add_class_comment])
+                    value = props.uiState.newCourseCommentText
+                    activeUserPersonUid = props.uiState.activeUserPersonUid
                 }
             }
 
@@ -276,121 +279,75 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
 
 }
 
-
-
-//        Container {
-//            maxWidth = "lg"
-//
-//            Stack {
-//                spacing = responsive(20.px)
-//
-//
-//
-//
-//
-//
-//
-////                List{
-////
-////
-////
-////                    UstadAddCommentListItem {
-////                        text = strings[MessageID.add_class_comment]
-////                        enabled = props.uiState.fieldsEnabled
-////                        personUid = 0
-////                        onClickSubmit = { props.onClickNewPublicComment() }
-////                    }
-////
-////                    props.uiState.courseComments.forEach { comment ->
-////
-////                    }
-////                }
-//
-//                List{
-//
-//                    ListItem{
-//                        ListItemText {
-//                            primary = ReactNode(strings[MessageID.private_comments])
-//                        }
-//                    }
-//
-//                    UstadAddCommentListItem{
-//                        text = strings[MessageID.add_private_comment]
-//                        enabled = props.uiState.fieldsEnabled
-//                        personUid = 0
-//                        onClickSubmit = { props.onClickNewPrivateComment() }
-//                    }
-//
-//                    props.uiState.privateComments.forEach { comment ->
-//                        UstadCommentListItem {
-//                            commentWithPerson = comment
-//                        }
-//                    }
-//                }
-//            }
-
 val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
 
-    val uiStateVal = ClazzAssignmentDetailOverviewUiState(
-        assignment = ClazzAssignment().apply {
-            caRequireTextSubmission = true
-        },
-        courseBlock = CourseBlock().apply {
-            cbDeadlineDate = 1685509200000L
-            cbDescription = "Complete your assignment or <b>else</b>"
-        },
-        submitterUid = 42L,
-        addFileVisible = true,
-        submissionTextFieldVisible = true,
-        hasFilesToSubmit = true,
-        latestSubmissionAttachments = listOf(
-            CourseAssignmentSubmissionAttachment().apply {
-                casaUid = 1L
-                casaFileName = "File.pdf"
+    var uiStateVar by useState {
+        ClazzAssignmentDetailOverviewUiState(
+            assignment = ClazzAssignment().apply {
+                caRequireTextSubmission = true
             },
-        ),
-        markList = listOf(
-            CourseAssignmentMarkWithPersonMarker().apply {
-                marker = Person().apply {
-                    firstNames = "John"
-                    lastName = "Smith"
-                    isGroup = true
-                    camMarkerSubmitterUid = 2
-                    camMarkerComment = "Comment"
+            courseBlock = CourseBlock().apply {
+                cbDeadlineDate = 1685509200000L
+                cbDescription = "Complete your assignment or <b>else</b>"
+            },
+            submitterUid = 42L,
+            addFileVisible = true,
+            submissionTextFieldVisible = true,
+            hasFilesToSubmit = true,
+            latestSubmissionAttachments = listOf(
+                CourseAssignmentSubmissionAttachment().apply {
+                    casaUid = 1L
+                    casaFileName = "File.pdf"
+                },
+            ),
+            markList = listOf(
+                CourseAssignmentMarkWithPersonMarker().apply {
+                    marker = Person().apply {
+                        firstNames = "John"
+                        lastName = "Smith"
+                        isGroup = true
+                        camMarkerSubmitterUid = 2
+                        camMarkerComment = "Comment"
 
-                }
-            }
-        ),
-        courseComments = {
-            ListPagingSource(listOf(
-                CommentsAndName().apply {
-                    comment = Comments().apply {
-                        commentsUid = 1
-                        commentsText = "This is a very difficult assignment."
                     }
-                    firstNames = "Bob"
-                    lastName = "Dylan"
                 }
-            ))
-        },
-        privateComments = {
-            ListPagingSource(
-                listOf(
+            ),
+            courseComments = {
+                ListPagingSource(listOf(
                     CommentsAndName().apply {
                         comment = Comments().apply {
-                            commentsUid = 2
-                            commentsText = "Can I please have extension? My rabbit ate my homework."
+                            commentsUid = 1
+                            commentsText = "This is a very difficult assignment."
                         }
                         firstNames = "Bob"
                         lastName = "Dylan"
                     }
-                ),
-            )
-        },
-    )
+                ))
+            },
+            privateComments = {
+                ListPagingSource(
+                    listOf(
+                        CommentsAndName().apply {
+                            comment = Comments().apply {
+                                commentsUid = 2
+                                commentsText = "Can I please have extension? My rabbit ate my homework."
+                            }
+                            firstNames = "Bob"
+                            lastName = "Dylan"
+                        }
+                    ),
+                )
+            },
+        )
+    }
 
     ClazzAssignmentDetailOverviewScreenComponent2 {
-        uiState = uiStateVal
+        uiState = uiStateVar
         onClickDeleteSubmission = {}
+        onChangeCourseComment = {
+            uiStateVar = uiStateVar.copy(
+                newCourseCommentText = it
+            )
+        }
     }
 }

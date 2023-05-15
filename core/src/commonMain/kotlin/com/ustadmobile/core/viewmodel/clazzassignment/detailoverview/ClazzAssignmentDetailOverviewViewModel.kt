@@ -83,7 +83,8 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val newCourseCommentText: String = "",
 
-    ) {
+    val activeUserPersonUid: Long = 0,
+) {
 
     val caDescriptionVisible: Boolean
         get() = !courseBlock?.cbDescription.isNullOrBlank()
@@ -199,6 +200,9 @@ class ClazzAssignmentDetailOverviewViewModel(
     }
 
     init {
+        _uiState.update { prev ->
+            prev.copy(activeUserPersonUid = activeUserPersonUid)
+        }
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {

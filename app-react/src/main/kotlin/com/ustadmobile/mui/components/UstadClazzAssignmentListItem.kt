@@ -7,7 +7,7 @@ import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.ext.paddingCourseBlockIndent
-import com.ustadmobile.view.ASSIGNMENT_STATUS_MAP
+import com.ustadmobile.view.clazzassignment.detailoverview.ASSIGNMENT_STATUS_MAP
 import csstype.*
 import kotlinx.datetime.TimeZone
 import mui.icons.material.AssignmentTurnedIn
