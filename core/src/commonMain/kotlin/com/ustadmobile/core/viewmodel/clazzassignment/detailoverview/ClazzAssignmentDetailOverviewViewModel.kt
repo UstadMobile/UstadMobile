@@ -434,5 +434,7 @@ class ClazzAssignmentDetailOverviewViewModel(
 
         const val STATE_LATEST_SUBMISSION_ATTACHMENTS = "latestSubmissionAttachments"
 
+        const val DEST_NAME = "CourseAssignmentDetailOverviewView"
+
     }
 }

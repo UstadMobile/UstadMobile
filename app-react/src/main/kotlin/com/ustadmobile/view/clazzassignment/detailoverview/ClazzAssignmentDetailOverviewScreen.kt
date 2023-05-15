@@ -2,11 +2,13 @@ package com.ustadmobile.view.clazzassignment.detailoverview
 
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewUiState
+import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewViewModel
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.lib.db.composites.CommentsAndName
@@ -28,22 +30,23 @@ import com.ustadmobile.wrappers.quill.ReactQuill
 import csstype.Height
 import csstype.pct
 import js.core.jso
-import mui.icons.material.Done
-import mui.icons.material.DoneAll
-import mui.icons.material.EventAvailable
-import mui.icons.material.Add
+import mui.icons.material.Done as DoneIcon
+import mui.icons.material.DoneAll as DoneAllIcon
+import mui.icons.material.EventAvailable as EventAvailableIcon
+import mui.icons.material.Add as AddIcon
 import mui.icons.material.InsertDriveFile as InsertDriveFileIcon
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import com.ustadmobile.hooks.usePagingSource
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
 import com.ustadmobile.view.components.UstadDetailHeader
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 
 val ASSIGNMENT_STATUS_MAP = mapOf(
-    CourseAssignmentSubmission.NOT_SUBMITTED to Done.create(),
-    CourseAssignmentSubmission.SUBMITTED to Done.create(),
-    CourseAssignmentSubmission.MARKED to DoneAll.create()
+    CourseAssignmentSubmission.NOT_SUBMITTED to DoneIcon.create(),
+    CourseAssignmentSubmission.SUBMITTED to DoneIcon.create(),
+    CourseAssignmentSubmission.MARKED to DoneAllIcon.create()
 )
 
 external interface ClazzAssignmentDetailOverviewScreenProps : Props {
@@ -60,11 +63,11 @@ external interface ClazzAssignmentDetailOverviewScreenProps : Props {
 
     var onChangePrivateComment: (String) -> Unit
 
-    var onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit
+    var onClickSubmitCourseComment: () -> Unit
+
+    var onClickSubmitPrivateComment: () -> Unit
 
     var onClickDeleteSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit
-
-    var onClickAddTextSubmission: () -> Unit
 
     var onClickAddFileSubmission: () -> Unit
 
@@ -81,10 +84,9 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
         timezoneId = TimeZone.currentSystemDefault().id
     )
 
-    val caSubmissionPolicyText =
-        strings[SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS[
-            props.uiState.assignment?.caSubmissionPolicy
-                ?: ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE].messageId]
+    val policyMessageId = SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS
+        .firstOrNull { it.value == props.uiState.assignment?.caSubmissionPolicy }?.messageId
+        ?: MessageID.submit_all_at_once_submission_policy
 
 
     val caFileType = strings[
@@ -127,16 +129,16 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                                 "$formattedDateTime (${TimeZone.currentSystemDefault().id})"
                             )
                             labelText = strings[MessageID.deadline]
-                            icon = EventAvailable.create()
+                            icon = EventAvailableIcon.create()
                             onClick = { }
                         }
                     }
 
                     UstadDetailField {
-                        valueText = ReactNode(caSubmissionPolicyText)
+                        valueText = ReactNode(strings[policyMessageId])
                         labelText = strings[MessageID.submission_policy]
                         icon = (ASSIGNMENT_STATUS_MAP[
-                            props.uiState.assignment?.caSubmissionPolicy] ?: Done.create())
+                            props.uiState.assignment?.caSubmissionPolicy] ?: DoneIcon.create())
                         onClick = { }
                     }
 
@@ -183,7 +185,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                                     props.onClickAddFileSubmission()
                                 }
                                 ListItemIcon {
-                                    Add { }
+                                    AddIcon { }
                                 }
 
                                 ListItemText {
@@ -285,6 +287,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                     value = props.uiState.newCourseCommentText
                     activeUserPersonUid = props.uiState.activeUserPersonUid
                     textFieldId = "course_comment_textfield"
+                    onClickSubmit = props.onClickSubmitCourseComment
                 }
             }
 
@@ -314,6 +317,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                         value = props.uiState.newPrivateCommentText
                         activeUserPersonUid = props.uiState.activeUserPersonUid
                         textFieldId = "private_comment_textfield"
+                        onClickSubmit = props.onClickSubmitPrivateComment
                     }
                 }
 
@@ -333,6 +337,26 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
         }
     }
 
+}
+
+val ClazzAssignmentDetailOverviewScreen = FC<Props> {
+
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
+    }
+
+    val uiStateVal by viewModel.uiState.collectAsState(ClazzAssignmentDetailOverviewUiState())
+
+    ClazzAssignmentDetailOverviewScreenComponent2 {
+        uiState = uiStateVal
+        onChangeSubmissionText = viewModel::onChangeSubmissionText
+        onChangeCourseComment = viewModel::onChangeCourseCommentText
+        onChangePrivateComment = viewModel::onChangePrivateCommentText
+        onClickSubmitCourseComment = viewModel::onClickSubmitCourseComment
+        onClickSubmitPrivateComment = viewModel::onClickSubmitPrivateComment
+        onClickSubmitSubmission = viewModel::onClickSubmit
+
+    }
 }
 
 val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
