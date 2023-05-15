@@ -1,13 +1,14 @@
 package com.ustadmobile.port.android.view
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview as CameraPreview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -25,11 +26,15 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.google.common.util.concurrent.ListenableFuture
+import com.google.mlkit.vision.barcode.Barcode
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions
+import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.common.InputImage
 import com.ustadmobile.core.viewmodel.QRCodeScannerUiState
 import com.ustadmobile.core.viewmodel.QRCodeScannerViewModel
-import com.ustadmobile.port.android.util.BarCodeAnalyser
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class QRCodeScannerFragment: UstadBaseMvvmFragment(){
 
@@ -61,6 +66,44 @@ private fun QRCodeScannerScreen(viewModel: QRCodeScannerViewModel) {
         uiState = uiState,
         onQRCodeDetected = viewModel::onQRCodeDetected,
     )
+}
+
+@SuppressLint("UnsafeOptInUsageError")
+class BarCodeAnalyser(
+    private val onBarcodeDetected: (barcodes: List<Barcode>) -> Unit,
+): ImageAnalysis.Analyzer {
+    private var lastAnalyzedTimeStamp = 0L
+
+    override fun analyze(image: ImageProxy) {
+        val currentTimestamp = System.currentTimeMillis()
+        if (currentTimestamp - lastAnalyzedTimeStamp >= TimeUnit.SECONDS.toMillis(1)) {
+            image.image?.let { imageToAnalyze ->
+                val options = BarcodeScannerOptions.Builder()
+                    .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
+                    .build()
+                val barcodeScanner = BarcodeScanning.getClient(options)
+                val imageToProcess = InputImage.fromMediaImage(imageToAnalyze, image.imageInfo.rotationDegrees)
+
+                barcodeScanner.process(imageToProcess)
+                    .addOnSuccessListener { barcodes ->
+                        if (barcodes.isNotEmpty()) {
+                            onBarcodeDetected(barcodes)
+                        } else {
+                            Log.d("TAG", "analyze: No barcode Scanned")
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.d("TAG", "BarcodeAnalyser: Something went wrong $exception")
+                    }
+                    .addOnCompleteListener {
+                        image.close()
+                    }
+            }
+            lastAnalyzedTimeStamp = currentTimestamp
+        } else {
+            image.close()
+        }
+    }
 }
 
 @Composable
