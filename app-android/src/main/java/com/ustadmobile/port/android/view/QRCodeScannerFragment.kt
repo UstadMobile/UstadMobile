@@ -85,7 +85,7 @@ private fun QRCodeScannerScreen(
                 implementationMode = PreviewView.ImplementationMode.COMPATIBLE
             }
         },
-        modifier = Modifier.fillMaxSize().padding(50.dp),
+        modifier = Modifier.fillMaxSize(),
         update = { previewView ->
             val cameraSelector: CameraSelector = CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK)
