@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.widget.TextViewCompat
 import com.toughra.ustadmobile.R
-import com.ustadmobile.port.android.util.text.htmlTextToSpanned
+import com.ustadmobile.core.util.text.htmlTextToSpanned
 
 @Composable
 fun HtmlText(

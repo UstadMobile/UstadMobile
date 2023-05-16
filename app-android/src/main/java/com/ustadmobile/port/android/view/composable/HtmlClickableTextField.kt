@@ -11,7 +11,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.toughra.ustadmobile.R
-import com.ustadmobile.port.android.util.text.htmlTextToSpanned
+import com.ustadmobile.core.util.text.htmlTextToSpanned
 
 /**
  * Jetpack compose does not support Html.fromHtml spannable like views do. We need something that

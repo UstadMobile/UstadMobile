@@ -25,6 +25,8 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.navigation.navGraphViewModels
+import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.*
 import com.ustadmobile.port.android.impl.ViewNameToDestMap
 import com.ustadmobile.port.android.view.util.UstadActivityWithBottomNavigation
@@ -57,11 +59,21 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
         UstadViewModelProviderFactory(di, this, arguments, vmFactory)
     }
 
+    inner class FragmentSnackDisaptcher(): SnackBarDispatcher {
+        override fun showSnackBar(snack: Snack) {
+            (activity as? MainActivity)?.hideSoftKeyboard()
+            (activity as? MainActivity)?.showSnackBar(snack.message)
+        }
+    }
+
     override val di by DI.lazy {
         val closestDi: DI by closestDI()
         extend(closestDi)
         bind<NavResultReturner>() with singleton {
             navResultReturnerViewModel
+        }
+        bind<SnackBarDispatcher>() with singleton {
+            FragmentSnackDisaptcher()
         }
     }
 

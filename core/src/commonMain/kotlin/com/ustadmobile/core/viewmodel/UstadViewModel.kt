@@ -241,7 +241,7 @@ abstract class UstadViewModel(
             args = mapOf(
                 HtmlEditViewModel.ARG_HTML to (currentValue ?: ""),
                 UstadView.ARG_RESULT_DEST_KEY to resultKey,
-                UstadView.ARG_RESULT_DEST_VIEWNAME to destinationName
+                UstadView.ARG_RESULT_DEST_VIEWNAME to destinationName,
             )
         )
     }

@@ -178,7 +178,10 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
         val scrollFlags = ustadDestination?.actionBarScrollBehavior ?:
             (AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL)
         (mBinding.mainCollapsingToolbar.collapsingToolbar.layoutParams as? AppBarLayout.LayoutParams)?.scrollFlags = scrollFlags
+        hideSoftKeyboard()
+    }
 
+    fun hideSoftKeyboard(){
         //Hide the soft keyboard if showing when moving to the next screen
         val currentFocusView = currentFocus
         if(currentFocusView != null) {

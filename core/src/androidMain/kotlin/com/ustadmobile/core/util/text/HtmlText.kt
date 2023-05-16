@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.util.text
+package com.ustadmobile.core.util.text
 
 import android.os.Build
 import android.text.Html
