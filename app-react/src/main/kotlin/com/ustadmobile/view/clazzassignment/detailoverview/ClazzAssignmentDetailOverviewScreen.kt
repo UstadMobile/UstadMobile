@@ -18,7 +18,6 @@ import csstype.px
 import kotlinx.datetime.TimeZone
 import mui.material.*
 import mui.system.responsive
-import mui.material.List
 import react.FC
 import react.Props
 import react.useState
@@ -373,7 +372,6 @@ val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
             submitterUid = 42L,
             addFileVisible = true,
             submissionTextFieldVisible = true,
-            hasFilesToSubmit = true,
             latestSubmission = CourseAssignmentSubmission().apply {
                 casText = ""
             },

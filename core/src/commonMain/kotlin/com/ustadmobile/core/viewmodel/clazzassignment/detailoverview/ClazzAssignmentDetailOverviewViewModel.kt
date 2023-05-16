@@ -69,8 +69,6 @@ data class ClazzAssignmentDetailOverviewUiState(
     val submissionHeaderUiState: UstadAssignmentSubmissionHeaderUiState =
         UstadAssignmentSubmissionHeaderUiState(),
 
-    val hasFilesToSubmit: Boolean = false,
-
     val unassignedError: String? = null,
 
     val submissionTextFieldVisible: Boolean = false,
@@ -302,6 +300,14 @@ class ClazzAssignmentDetailOverviewViewModel(
                     )
                 }
             )
+
+            launch {
+                navResultReturner.filteredResultFlowForKey(KEY_SUBMISSION_HTML).collect {
+                    val newSubmissionHtml = it.result as? String ?: return@collect
+                    onChangeSubmissionText(newSubmissionHtml)
+                }
+            }
+
         }
 
         _uiState.update { prev ->
@@ -310,6 +316,16 @@ class ClazzAssignmentDetailOverviewViewModel(
                 courseComments = courseCommentsPagingSourceFactory,
             )
         }
+    }
+
+    /**
+     * Used on mobile to bring user to a new screen to edit submission
+     */
+    fun onClickEditSubmissionText() {
+        navigateToEditHtml(
+            currentValue = _uiState.value.latestSubmission?.casText ?: "",
+            resultKey = KEY_SUBMISSION_HTML
+        )
     }
 
     fun onChangeSubmissionText(text: String) {
@@ -433,6 +449,8 @@ class ClazzAssignmentDetailOverviewViewModel(
         const val STATE_LATEST_SUBMISSION = "latestSubmission"
 
         const val STATE_LATEST_SUBMISSION_ATTACHMENTS = "latestSubmissionAttachments"
+
+        const val KEY_SUBMISSION_HTML = "submissionHtml"
 
         const val DEST_NAME = "CourseAssignmentDetailOverviewView"
 

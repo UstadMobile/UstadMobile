@@ -185,9 +185,9 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
     }
 
     override fun open(publicComment: Boolean) {
-        val sendCommentSheet = CommentsBottomSheet(publicComment, requireContext().getString(R.string.add_private_comment),
-                accountManager.activeAccount.personUid,  mPresenter?.newPrivateCommentListener)
-        sendCommentSheet.show(childFragmentManager, sendCommentSheet.tag)
+//        val sendCommentSheet = CommentsBottomSheet(publicComment, requireContext().getString(R.string.add_private_comment),
+//                accountManager.activeAccount.personUid,  mPresenter?.newPrivateCommentListener)
+//        sendCommentSheet.show(childFragmentManager, sendCommentSheet.tag)
     }
 
     override var gradeFilterChips: List<ListFilterIdOption>? = null
