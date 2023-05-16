@@ -107,6 +107,8 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                }
             }
 
+            /*
+            These items are not yet active
             Button {
                 id = "create_account_button"
                 onClick = { props.onClickCreateAccount() }
@@ -137,6 +139,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                 align = TypographyAlign.center
                 + props.uiState.versionInfo
             }
+             */
         }
     }
 }

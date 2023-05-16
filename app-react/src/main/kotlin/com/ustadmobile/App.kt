@@ -2,6 +2,8 @@ package com.ustadmobile
 
 import com.ustadmobile.mui.common.Sizes
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.view.redirect.RedirectScreen
+import com.ustadmobile.wrappers.jsjodatime.jsJodaTz
 import js.core.jso
 import react.FC
 import react.Props
@@ -22,6 +24,11 @@ import kotlinext.js.require
 fun main() {
     //As per Quill wrapper (and demo). Css loader must be enabled.
     require("react-quill/dist/quill.snow.css")
+
+    // As per https://github.com/Kotlin/kotlinx-datetime/issues/178
+    //Avoid joda time timezones being DCE'd out
+    jsJodaTz
+
     val root = document.createElement(div)
         .also { document.body.appendChild(it) }
 
@@ -54,6 +61,10 @@ private val hashRouter = createHashRouter(
                     loader = ustadScreenLoader
                     Component = UstadScreen
                     ErrorBoundary = Error
+                },
+                jso {
+                    Component = RedirectScreen
+                    index = true
                 },
                 jso {
                     path = "*"

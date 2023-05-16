@@ -1,5 +1,6 @@
 <configuration>
-    <property name="LOG_DIR" value="./log/" />
+    <!-- Will use the Java system property logs_dir if set, otherwise, fallback to ./log/ -->
+    <property name="LOG_DIR" value="${logs_dir:-./log/}" />
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <file>${LOG_DIR}/ustad-server.log</file>

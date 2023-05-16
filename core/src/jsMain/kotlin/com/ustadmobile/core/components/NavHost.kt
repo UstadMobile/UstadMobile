@@ -16,8 +16,12 @@ import org.w3c.dom.get
 import org.w3c.dom.set
 import react.*
 import react.router.NavigateFunction
+import react.router.NavigateOptions
 import react.router.useLocation
 import react.router.useNavigate
+import remix.run.router.LocationState
+import kotlin.js.Json
+import kotlin.js.json
 
 const val KEY_NAV_CONTROLLER_POPUPTO_PAGE = "navControllerPopUpTo"
 const val KEY_NAV_CONTROLLER_POPUPTO_INCLUSIVE = "navControllerPopUpToInc"
@@ -66,6 +70,31 @@ const val NAVHOST_CLEARSTACK_VIEWNAME = "ClearStack"
  *
  */
 
+//As per https://github.com/remix-run/history/blob/main/docs/api-reference.md#location.key
+// the first key will always be "default"
+
+/**
+ * the location.key of the first entry in the history stack. This is used to spot when we have
+ * reached the end of the stack.
+ *
+ * The initial location key will be "default" (as per
+ * https://github.com/remix-run/history/blob/main/docs/api-reference.md#location.key ).
+ *
+ * If/when we use navigation with the replace option, then the key that represents the first entry
+ * in the stack will change. If replace navigation is used when on the firstKey, the state
+ * key "isNewFirstLocation" must be set. The NavHost effect will then update firstLocationKey
+ */
+private var firstLocationKey: String
+    get() = web.storage.sessionStorage.getItem("firstLocationKey") ?: "default"
+    set(value) {
+        web.storage.sessionStorage.setItem("firstLocationKey", value)
+    }
+
+fun NavigateOptions.setIsNewFirstLocation(fromLocation: Location) {
+    if(replace == true && fromLocation.key == firstLocationKey) {
+        state = json("isNewFirstLocation" to true).unsafeCast<LocationState>()
+    }
+}
 
 /**
  * NavHostFunction will execute a NavCommand. These are collected from the ViewModel's
@@ -95,17 +124,21 @@ class NavHostFunction(
                 val popUpToView = cmd.goOptions.popUpToViewName?.effectivePopUpTo()
 
                 if((popUpToView == null || popUpToView == location.ustadViewName) &&
-                    !cmd.goOptions.clearStack
+                    (!cmd.goOptions.clearStack || location.key == firstLocationKey)
                 ) {
                     /*
                      * When there is no stack popping:
                      * popUpToView == null
                      * popUpToView is the current view, and popUpToInclusive = false (edge case)
-                     * AND clearStack is false in both cases
+                     * AND clearStack is false, or there is no history remaining (therefor location.key == firstLocationKey)
                      */
                     Napier.d("NavHostFunction: go to /${cmd.viewName}?${cmd.args.toUrlQueryString()}")
+                    val replaceNav = popUpToView == location.ustadViewName && cmd.goOptions.popUpToInclusive
+                        || cmd.goOptions.clearStack
+
                     navigateFn.invoke("/${cmd.viewName}?${cmd.args.toUrlQueryString()}", jso {
-                        replace = popUpToView == location.ustadViewName && cmd.goOptions.popUpToInclusive
+                        replace = replaceNav
+                        setIsNewFirstLocation(fromLocation = location)
                     })
                 }else {
                     Napier.d("NavHostFunction: pop, then go /${cmd.viewName}?${cmd.args.toUrlQueryString()}")
@@ -185,11 +218,6 @@ val NavHost = FC<PropsWithChildren> { props ->
         }
 
 
-        val firstEntryKey = useMemo(dependencies = emptyArray()) {
-            sessionStorage[KEY_HAVHOST_ROOT_KEY]
-                ?: location.key.also { sessionStorage[KEY_HAVHOST_ROOT_KEY] = it }
-        }
-
 
         //This should be cancelled - needs to use state and effect
         val coroutineScope = useMemo(dependencies = emptyArray()) {
@@ -199,6 +227,14 @@ val NavHost = FC<PropsWithChildren> { props ->
         var navTimeoutJob: Job? by useState { null }
 
         useEffect(dependencies = arrayOf(location.key)) {
+            console.log("NavHost: key = ${location.key}")
+
+            val isNewFirstLocation = location.state?.unsafeCast<Json>()?.get("isNewFirstLocation") == true
+            if(isNewFirstLocation) {
+                console.log("NavHost: New first location key = ${location.key}")
+                firstLocationKey = location.key
+            }
+
             navTimeoutJob?.cancel()
 
             val popupToTarget = sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_PAGE]
@@ -250,7 +286,7 @@ val NavHost = FC<PropsWithChildren> { props ->
                 //ClearStack was set, we have now reached the first entry in the history, but we did not
                 // yet navigate to the dummy placeholder (NAVHOST_CLEARSTACK_VIEWNAME) to clear the
                 // top off the stack and prevent forward navigation
-                clearStack && location.key == firstEntryKey && !clearStackHitPlaceholder -> {
+                clearStack && location.key == firstLocationKey && !clearStackHitPlaceholder -> {
                     navigateFn.invoke("/$NAVHOST_CLEARSTACK_VIEWNAME")
                 }
 
@@ -268,6 +304,7 @@ val NavHost = FC<PropsWithChildren> { props ->
                     if(navToAfterPop != null) {
                         navigateFn.invoke(navToAfterPop, jso {
                             replace = true
+                            setIsNewFirstLocation(fromLocation = location)
                         })
                     }
                 }
@@ -276,7 +313,9 @@ val NavHost = FC<PropsWithChildren> { props ->
                 // reached it yet, or clearStack has been set and we have not yet cleared the stack
                 else -> {
                     showChildren = false
-                    navigateFn.invoke(-1)
+
+                    //Handling this needs to be double checked - e.g. if popUpTo is set to something not in the stack
+                    navigateFn.takeIf { location.key != firstLocationKey }?.invoke(-1)
 
                     //Set a timeout in case we have hit the go back limit, in which case navigateFn(-1)
                     // will have no effect.

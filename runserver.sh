@@ -55,7 +55,7 @@ if [ "$NOBUILD" != "true" ] && [ "$STOP" != "true" ]; then
     exit 2
   fi
 
-  ./gradlew $SERVER_BUILD_ARGS app-ktor-server:shadowJar
+  ./gradlew $SERVER_BUILD_ARGS app-ktor-server:buildFatJar
   if [ "$?" != "0" ]; then
     echo "Error compiling server"
     exit 2
@@ -63,7 +63,7 @@ if [ "$NOBUILD" != "true" ] && [ "$STOP" != "true" ]; then
 fi
 
 if [ ! -e $BASEDIR/app-ktor-server/build/libs/ustad-server-all.jar ]; then
-  echo "Please build the server jar: ./gradlew app-ktor-server:shadowJar"
+  echo "Please build the server jar: ./gradlew app-ktor-server:buildFatJar"
   exit 1
 fi
 

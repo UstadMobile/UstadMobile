@@ -136,12 +136,9 @@ public class NetworkManagerBleHelper {
 
 
     public int getLastNetworkIdAdded(){
-        List<WifiConfiguration> configuredNetworks = wifiManager.getConfiguredNetworks();
-        for(WifiConfiguration config : configuredNetworks){
-            if(UMAndroidUtil.INSTANCE.normalizeAndroidWifiSsid(config.SSID).equals(ssid)){
-                return config.networkId;
-            }
-        }
+
+        //This is no longer used
+
         return -1;
     }
 
@@ -151,25 +148,7 @@ public class NetworkManagerBleHelper {
     public void deleteTemporaryWifiDirectSsids(){
         if (temporaryWifiDirectSsids.isEmpty())
             return;
-        List<WifiConfiguration> configuredNetworks = wifiManager.getConfiguredNetworks();
 
-        String ssid;
-
-        for(WifiConfiguration config : configuredNetworks){
-            if (config.SSID == null)
-                continue;
-            ssid = UMAndroidUtil.INSTANCE.normalizeAndroidWifiSsid(config.SSID);
-
-            if (temporaryWifiDirectSsids.contains(ssid)) {
-                boolean removedOk = wifiManager.removeNetwork(config.networkId);
-                if (removedOk) {
-                    temporaryWifiDirectSsids.remove(ssid);
-                    if (temporaryWifiDirectSsids.isEmpty())
-                        return;
-                }
-
-            }
-        }
     }
 
     /**
