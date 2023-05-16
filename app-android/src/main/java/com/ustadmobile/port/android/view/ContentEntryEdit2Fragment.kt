@@ -199,8 +199,8 @@ class ContentEntryEdit2Fragment(
     override var fileImportErrorVisible: Boolean = false
         set(value) {
             val typedVal = TypedValue()
-            requireActivity().theme.resolveAttribute(if (value) R.attr.colorError
-            else R.attr.colorOnSurface, typedVal, true)
+            requireActivity().theme.resolveAttribute(if (value) androidx.appcompat.R.attr.colorError
+            else com.google.android.material.R.attr.colorOnSurface, typedVal, true)
             mBinding?.importErrorColor = typedVal.data
             mBinding?.isImportError = value
             field = value

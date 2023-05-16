@@ -468,7 +468,7 @@ fun PendingStudentListItem(
                     }
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.exo_ic_check),
+                        painter = painterResource(id = com.google.android.exoplayer2.ui.R.drawable.exo_ic_check),
                         contentDescription = stringResource(R.string.accept)
                     )
                 }

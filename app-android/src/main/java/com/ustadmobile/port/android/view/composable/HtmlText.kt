@@ -37,7 +37,7 @@ fun HtmlText(
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
                 TextViewCompat.setTextAppearance(this,
-                    R.style.TextAppearance_MaterialComponents_Body1)
+                    com.google.android.material.R.style.TextAppearance_MaterialComponents_Body1)
             }
         },
         update = {

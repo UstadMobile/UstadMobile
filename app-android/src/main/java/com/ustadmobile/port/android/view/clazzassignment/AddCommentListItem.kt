@@ -39,7 +39,7 @@ fun AddCommentListItem(
                 border = BorderStroke(0.dp, Color.Transparent),
                 enabled = enabled,
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = colorResource(id = R.color.grey_a_40),
+                    backgroundColor = colorResource(id = org.wordpress.aztec.R.color.grey_a_40),
                 )
             ) {
                 Text(
@@ -47,7 +47,7 @@ fun AddCommentListItem(
                     textAlign = TextAlign.Start,
                     modifier = Modifier.fillMaxWidth(),
                     color = contentColorFor(
-                        colorResource(id = R.color.grey_a_40))
+                        colorResource(id = org.wordpress.aztec.R.color.grey_a_40))
                 )
             }
         }
