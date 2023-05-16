@@ -9,6 +9,7 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.util.ext.isDateSet
+import com.ustadmobile.core.util.ext.textLength
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.viewmodel.DetailViewModel
@@ -48,6 +49,8 @@ data class ClazzAssignmentDetailOverviewUiState(
     val submissionMark: AverageCourseAssignmentMark? = null,
 
     val latestSubmission: CourseAssignmentSubmission? = null,
+
+    var submissionTooLong: Boolean = false,
 
     val latestSubmissionAttachments: List<CourseAssignmentSubmissionAttachment>? = null,
 
@@ -158,6 +161,9 @@ data class ClazzAssignmentDetailOverviewUiState(
     val submitPrivateCommentVisible: Boolean
         get() = privateCommentSectionVisible && assignment?.caPrivateCommentsEnabled == true
 
+    val currentSubmissionLength: Int? by lazy {
+        latestSubmission?.textLength(assignment?.caTextLimitType ?: ClazzAssignment.TEXT_WORD_LIMIT)
+    }
 
 }
 

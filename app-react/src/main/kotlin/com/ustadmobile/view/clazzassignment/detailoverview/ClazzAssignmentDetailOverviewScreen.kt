@@ -38,6 +38,7 @@ import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
 import com.ustadmobile.view.components.UstadDetailHeader
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -166,12 +167,27 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
 
                 if(props.uiState.submissionTextFieldVisible) {
                     item {
-                        ReactQuill.create {
-                            id = "assignment_text"
-                            value = props.uiState.latestSubmission?.casText ?: ""
-                            onChange = props.onChangeSubmissionText
-                            readOnly = !props.uiState.activeUserCanSubmit
+                        Stack.create {
+                            direction = responsive(StackDirection.column)
+
+                            ReactQuill {
+                                id = "assignment_text"
+                                value = props.uiState.latestSubmission?.casText ?: ""
+                                onChange = props.onChangeSubmissionText
+                                readOnly = !props.uiState.activeUserCanSubmit
+                            }
+
+                            props.uiState.currentSubmissionLength?.also { submissionLength ->
+                                val limitTypeMessageId = if(props.uiState.assignment?.caTextLimitType == ClazzAssignment.TEXT_CHAR_LIMIT) {
+                                    MessageID.characters
+                                }else {
+                                    MessageID.words
+                                }
+                                + "${strings[limitTypeMessageId]}: $submissionLength / "
+                                + "${props.uiState.assignment?.caTextLimit} "
+                            }
                         }
+
                     }
                 }
 
@@ -425,6 +441,13 @@ val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
     ClazzAssignmentDetailOverviewScreenComponent2 {
         uiState = uiStateVar
         onClickDeleteSubmission = {}
+        onChangeSubmissionText = {text ->
+            uiStateVar = uiStateVar.copy(
+                latestSubmission = uiStateVar.latestSubmission?.shallowCopy {
+                    casText = text
+                },
+            )
+        }
         onChangeCourseComment = {
             uiStateVar = uiStateVar.copy(
                 newCourseCommentText = it
