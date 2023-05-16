@@ -66,10 +66,7 @@ class SiteEnterLinkViewModel(
                         )
                     }
 
-                    savedStateHandle[RESULT_KEY_SITE_LINK] = withContext(
-                        Dispatchers.Default) {
-                        json.encodeToString(String.serializer(), returnedSiteLink)
-                    }
+                    onClickNext()
                 }
             }
 

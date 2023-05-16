@@ -29,7 +29,6 @@ import com.google.mlkit.vision.barcode.Barcode
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
-import com.ustadmobile.core.viewmodel.QRCodeScannerUiState
 import com.ustadmobile.core.viewmodel.QRCodeScannerViewModel
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -59,10 +58,8 @@ class QRCodeScannerFragment: UstadBaseMvvmFragment(){
 
 @Composable
 private fun QRCodeScannerScreen(viewModel: QRCodeScannerViewModel) {
-    val uiState by viewModel.uiState.collectAsState(initial = QRCodeScannerUiState())
 
     QRCodeScannerScreen(
-        uiState = uiState,
         onQRCodeDetected = viewModel::onQRCodeDetected,
     )
 }
@@ -107,7 +104,6 @@ class BarCodeAnalyser(
 
 @Composable
 private fun QRCodeScannerScreen(
-    uiState: QRCodeScannerUiState = QRCodeScannerUiState(),
     onQRCodeDetected: (String) -> Unit = {},
 ) {
 
