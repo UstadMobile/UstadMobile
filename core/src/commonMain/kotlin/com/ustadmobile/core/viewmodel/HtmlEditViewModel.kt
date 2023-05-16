@@ -13,7 +13,11 @@ import org.kodein.di.DI
 
 
 data class HtmlEditUiState(
-    val html: String = ""
+    val html: String = "",
+    val wordLimit: Int? = null,
+    val charLimit: Int? = null,
+    val wordCount: Int? = null,
+    val charCount: Int? = null,
 )
 
 class HtmlEditViewModel(
@@ -27,7 +31,11 @@ class HtmlEditViewModel(
 
     init {
         _uiState.update { prev ->
-            prev.copy(html = savedStateHandle[ARG_HTML] ?: "")
+            prev.copy(
+                html = savedStateHandle[ARG_HTML] ?: "",
+                wordLimit = savedStateHandle[ARG_WORD_LIMIT]?.toInt() ?: 0,
+                charLimit = savedStateHandle[ARG_CHAR_LIMIT]?.toInt() ?: 0,
+            )
         }
 
         _appUiState.update { prev ->
@@ -62,6 +70,10 @@ class HtmlEditViewModel(
     companion object {
 
         const val ARG_HTML = "html"
+
+        const val ARG_WORD_LIMIT = "wordLimit"
+
+        const val ARG_CHAR_LIMIT = "charLimit"
 
         const val DEST_NAME = "HtmlEdit"
 
