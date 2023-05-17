@@ -14,10 +14,8 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
 import com.ustadmobile.core.viewmodel.QRCodeScannerViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import io.ktor.client.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.encodeToString
 import org.kodein.di.DI
