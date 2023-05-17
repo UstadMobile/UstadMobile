@@ -8,7 +8,7 @@
         <import type="com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary"/>
         <import type="com.ustadmobile.port.android.view.person.detail.PersonDetailFragment"/>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
-        <import type="com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment"/>
+        <import type="com.ustadmobile.port.android.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewFragment"/>
         <import type="com.ustadmobile.core.controller.SubmissionConstants"/>
         <import type="com.ustadmobile.lib.db.entities.CourseAssignmentSubmission"/>
         <import type="android.view.View"/>

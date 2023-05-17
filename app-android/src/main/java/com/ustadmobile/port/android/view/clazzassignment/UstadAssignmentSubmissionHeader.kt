@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.view.composable
+package com.ustadmobile.port.android.view.clazzassignment
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
@@ -10,11 +10,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
+import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
-import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment
+import com.ustadmobile.port.android.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewFragment
+import com.ustadmobile.port.android.view.composable.UstadDetailField
 
 
 @Composable

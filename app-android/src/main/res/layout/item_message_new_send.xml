@@ -5,7 +5,7 @@
 
     <data>
         <import type="com.ustadmobile.port.android.view.person.detail.PersonDetailFragment"/>
-        <import type="com.ustadmobile.port.android.view.CommentsBottomSheet"/>
+        <import type="com.ustadmobile.port.android.view.clazzassignment.CommentsBottomSheet"/>
 
         <variable name="hintText"
             type="String"/>

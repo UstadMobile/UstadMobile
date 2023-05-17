@@ -23,7 +23,7 @@ import react.Props
 import react.useState
 import react.ReactNode
 import react.create
-import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItemUiState as UstadCourseAssignmentMarkListItemUiState
+import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState as UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.mui.components.UstadCourseAssignmentMarkListItem
 import com.ustadmobile.wrappers.quill.ReactQuill
 import csstype.Height

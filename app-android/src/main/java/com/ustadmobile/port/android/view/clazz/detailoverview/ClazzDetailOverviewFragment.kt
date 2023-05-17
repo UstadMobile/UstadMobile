@@ -43,6 +43,7 @@ import com.ustadmobile.port.android.util.compose.rememberFormattedTime
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
+import com.ustadmobile.port.android.view.clazzassignment.UstadClazzAssignmentListItem
 import com.ustadmobile.port.android.view.composable.*
 
 interface ClazzDetailOverviewEventListener {

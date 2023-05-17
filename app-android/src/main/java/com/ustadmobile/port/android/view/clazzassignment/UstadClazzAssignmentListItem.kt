@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.view.composable
+package com.ustadmobile.port.android.view.clazzassignment
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,12 +17,12 @@ import com.toughra.ustadmobile.R
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.controller.SubmissionConstants
-import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.listItemUiState
 import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
-import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment.Companion.ASSIGNMENT_STATUS_MAP
+import com.ustadmobile.port.android.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewFragment.Companion.ASSIGNMENT_STATUS_MAP
+import com.ustadmobile.port.android.view.composable.HtmlText
 import java.util.*
 
 @OptIn(ExperimentalMaterialApi::class)

@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.view
+package com.ustadmobile.port.android.view.clazzassignment.detailoverview
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -36,7 +36,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItemUiState
+import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewViewModel
 import com.ustadmobile.lib.db.composites.CommentsAndName
@@ -47,9 +47,13 @@ import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
-import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment.Companion.SUBMISSION_POLICY_MAP
+import com.ustadmobile.port.android.view.clazzassignment.CommentsBottomSheet
+import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
+import com.ustadmobile.port.android.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewFragment.Companion.SUBMISSION_POLICY_MAP
 import com.ustadmobile.port.android.view.clazzassignment.AddCommentListItem
 import com.ustadmobile.port.android.view.clazzassignment.CommentListItem
+import com.ustadmobile.port.android.view.clazzassignment.UstadAssignmentSubmissionHeader
+import com.ustadmobile.port.android.view.clazzassignment.UstadCourseAssignmentMarkListItem
 import com.ustadmobile.port.android.view.composable.*
 import java.util.*
 

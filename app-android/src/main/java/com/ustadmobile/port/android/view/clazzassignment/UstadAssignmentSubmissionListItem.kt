@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.view.composable
+package com.ustadmobile.port.android.view.clazzassignment
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
