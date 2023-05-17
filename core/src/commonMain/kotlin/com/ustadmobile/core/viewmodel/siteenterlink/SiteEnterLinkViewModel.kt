@@ -69,7 +69,7 @@ class SiteEnterLinkViewModel(
             }
 
             _uiState.update { prev ->
-                prev.copy(fieldsEnabled = true)
+                prev.copy(fieldsEnabled = false)
             }
 
             loadingState = LoadingUiState.NOT_LOADING
