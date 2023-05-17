@@ -3,17 +3,24 @@ package com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
+import com.ustadmobile.core.viewmodel.UstadListViewModel
+import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
+import org.kodein.di.DI
 
 data class ClazzMemberListUiState(
 
-    val studentList: List<PersonWithClazzEnrolmentDetails> = emptyList(),
+    val studentList: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = { EmptyPagingSource() },
 
-    val teacherList: List<PersonWithClazzEnrolmentDetails> = emptyList(),
+    val teacherList: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = { EmptyPagingSource() },
 
-    val pendingStudentList: List<PersonWithClazzEnrolmentDetails> = emptyList(),
+    val pendingStudentList: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = {
+        EmptyPagingSource()
+    },
 
     val addTeacherVisible: Boolean = false,
 
@@ -45,3 +52,33 @@ data class ClazzMemberListUiState(
 
     val terminologyStrings: CourseTerminologyStrings? = null
 )
+
+class ClazzMemberListViewModel(
+    di: DI, savedStateHandle: UstadSavedStateHandle
+): UstadListViewModel<ClazzMemberListUiState>(
+    di, savedStateHandle, ClazzMemberListUiState(), DEST_NAME
+) {
+
+    private val teacherListPagingSource: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = {
+        TODO()
+    }
+
+
+    init {
+
+    }
+
+    override fun onUpdateSearchResult(searchText: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onClickAdd() {
+        TODO("Not yet implemented")
+    }
+
+    companion object {
+
+        val DEST_NAME = "CourseMembers"
+
+    }
+}

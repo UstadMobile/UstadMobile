@@ -7,9 +7,12 @@ import com.ustadmobile.core.util.EventCollator2
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.paging.PagingSource
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 import org.kodein.di.DI
+
+typealias ListPagingSourceFactory<T> = () -> PagingSource<Int, T>
 
 /**
  * @param S the UI State type
