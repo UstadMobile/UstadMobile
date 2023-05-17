@@ -10,7 +10,7 @@ import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.CourseGroupSetListView
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.port.android.view.ClazzLogListAttendanceFragment
-import com.ustadmobile.port.android.view.ClazzMemberListFragment
+import com.ustadmobile.port.android.view.clazzenrolment.clazzmemberlist.ClazzMemberListFragment
 import com.ustadmobile.port.android.view.CourseGroupSetListFragment
 import com.ustadmobile.port.android.view.UstadMvvmTabsFragment
 import com.ustadmobile.port.android.view.clazz.detailoverview.ClazzDetailOverviewFragment

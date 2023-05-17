@@ -1,19 +1,38 @@
 package com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist
 
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon
+import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.IApproveOrDeclinePendingEnrolmentRequestUseCase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.toQueryLikeParam
+import com.ustadmobile.core.util.ext.whenSubscribed
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
+import com.ustadmobile.core.viewmodel.UstadListViewModel
+import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
+import com.ustadmobile.door.paging.PagingSource
+import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
+import com.ustadmobile.lib.db.entities.Role
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 
 data class ClazzMemberListUiState(
 
-    val studentList: List<PersonWithClazzEnrolmentDetails> = emptyList(),
+    val studentList: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = { EmptyPagingSource() },
 
-    val teacherList: List<PersonWithClazzEnrolmentDetails> = emptyList(),
+    val teacherList: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = { EmptyPagingSource() },
 
-    val pendingStudentList: List<PersonWithClazzEnrolmentDetails> = emptyList(),
+    val pendingStudentList: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = {
+        EmptyPagingSource()
+    },
 
     val addTeacherVisible: Boolean = false,
 
@@ -45,3 +64,121 @@ data class ClazzMemberListUiState(
 
     val terminologyStrings: CourseTerminologyStrings? = null
 )
+
+class ClazzMemberListViewModel(
+    di: DI, savedStateHandle: UstadSavedStateHandle
+): UstadListViewModel<ClazzMemberListUiState>(
+    di, savedStateHandle, ClazzMemberListUiState(), DEST_NAME
+) {
+
+    private val approveOrDeclinePendingEnrolmentUseCase: IApproveOrDeclinePendingEnrolmentRequestUseCase by
+        on(accountManager.activeEndpoint).instance()
+
+    private val clazzUid = savedStateHandle[UstadView.ARG_CLAZZUID]?.toLong()
+        ?: throw IllegalArgumentException("No clazzuid")
+
+    private var lastTeacherListPagingSource: PagingSource<Int, PersonWithClazzEnrolmentDetails>? = null
+
+    private var lastStudentListPagingsource: PagingSource<Int, PersonWithClazzEnrolmentDetails>? = null
+
+    private var lastPendingStudentListPagingSource: PagingSource<Int, PersonWithClazzEnrolmentDetails>? = null
+
+    private fun getMembersAsPagingSource(
+        roleId: Int
+    ) : PagingSource<Int, PersonWithClazzEnrolmentDetails>  {
+        return activeRepo.clazzEnrolmentDao.findByClazzUidAndRole(
+            clazzUid = clazzUid,
+            roleId = roleId,
+            sortOrder = _uiState.value.activeSortOrderOption.flag,
+            filter = _uiState.value.selectedChipId,
+            searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
+            accountPersonUid = activeUserPersonUid,
+            currentTime = systemTimeInMillis(),
+        )
+    }
+
+    private val teacherListPagingSource: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = {
+        getMembersAsPagingSource(ClazzEnrolment.ROLE_TEACHER).also {
+            lastTeacherListPagingSource?.invalidate()
+            lastTeacherListPagingSource = it
+        }
+    }
+
+    private val studentListPagingSource: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = {
+        getMembersAsPagingSource(ClazzEnrolment.ROLE_STUDENT).also {
+            lastStudentListPagingsource?.invalidate()
+            lastStudentListPagingsource = it
+        }
+    }
+
+    private val pendingStudentListPagingSource: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = {
+        getMembersAsPagingSource(ClazzEnrolment.ROLE_STUDENT_PENDING).also {
+            lastPendingStudentListPagingSource?.invalidate()
+            lastPendingStudentListPagingSource = it
+        }
+    }
+
+
+    init {
+        _uiState.update { prev ->
+            prev.copy(
+                studentList = studentListPagingSource,
+                teacherList = teacherListPagingSource,
+                pendingStudentList = pendingStudentListPagingSource,
+            )
+        }
+
+        viewModelScope.launch {
+            _uiState.whenSubscribed {
+                launch {
+                    activeDb.clazzDao.personHasPermissionWithClazzAsFlow(
+                        accountPersonUid = activeUserPersonUid, clazzUid = clazzUid,
+                        permission = Role.PERMISSION_CLAZZ_ADD_TEACHER
+                    ).collect { canAddTeacher ->
+                        _uiState.takeIf { it.value.addTeacherVisible != canAddTeacher }?.update { prev ->
+                            prev.copy(addTeacherVisible = canAddTeacher)
+                        }
+                    }
+                }
+
+                launch {
+                    activeDb.clazzDao.personHasPermissionWithClazzAsFlow(
+                        accountPersonUid = activeUserPersonUid, clazzUid = clazzUid,
+                        permission = Role.PERMISSION_CLAZZ_ADD_STUDENT
+                    ).collect { canAddStudent ->
+                        _uiState.takeIf { it.value.addStudentVisible != canAddStudent }?.update { prev ->
+                            prev.copy(addStudentVisible = canAddStudent)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onUpdateSearchResult(searchText: String) {
+
+    }
+
+    override fun onClickAdd() {
+        //Do nothing
+    }
+
+    fun onClickRespondToPendingEnrolment(
+        enrolmentDetails: PersonWithClazzEnrolmentDetails,
+        approved: Boolean
+    ) {
+        viewModelScope.launch {
+            approveOrDeclinePendingEnrolmentUseCase(
+                personUid = enrolmentDetails.personUid,
+                clazzUid = clazzUid,
+                approved = approved
+            )
+        }
+    }
+
+    companion object {
+
+        val DEST_NAME = "CourseMembers"
+
+    }
+}

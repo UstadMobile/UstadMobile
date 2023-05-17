@@ -49,6 +49,7 @@ import com.ustadmobile.core.contentjob.DummyContentPluginUploader
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.db.ext.preload
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.di.commonDomainDiModule
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.lib.util.SysPathUtil
@@ -184,6 +185,7 @@ fun Application.umRestApplication(
 
     di {
         import(CommonJvmDiModule)
+        import(commonDomainDiModule(EndpointScope.Default))
         bind<SupportedLanguagesConfig>() with singleton { SupportedLanguagesConfig() }
 
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {

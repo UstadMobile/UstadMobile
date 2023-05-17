@@ -63,20 +63,20 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     }
 
     private fun updateListOnView() {
-        view.list = repo.clazzEnrolmentDao.findByClazzUidAndRole(filterByClazzUid,
-                ClazzEnrolment.ROLE_TEACHER, selectedSortOption?.flag ?: 0,
-                searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY,
-                mLoggedInPersonUid, systemTimeInMillis())
-        view.studentList = repo.clazzEnrolmentDao.findByClazzUidAndRole(filterByClazzUid,
-                ClazzEnrolment.ROLE_STUDENT, selectedSortOption?.flag ?: 0,
-                searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY,
-                mLoggedInPersonUid, systemTimeInMillis())
-        if (view.addStudentVisible) {
-            view.pendingStudentList = db.clazzEnrolmentDao.findByClazzUidAndRole(filterByClazzUid,
-                    ClazzEnrolment.ROLE_STUDENT_PENDING, selectedSortOption?.flag ?: 0,
-                    searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY,
-                    mLoggedInPersonUid, systemTimeInMillis())
-        }
+//        view.list = repo.clazzEnrolmentDao.findByClazzUidAndRole(filterByClazzUid,
+//                ClazzEnrolment.ROLE_TEACHER, selectedSortOption?.flag ?: 0,
+//                searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY,
+//                mLoggedInPersonUid, systemTimeInMillis())
+//        view.studentList = repo.clazzEnrolmentDao.findByClazzUidAndRole(filterByClazzUid,
+//                ClazzEnrolment.ROLE_STUDENT, selectedSortOption?.flag ?: 0,
+//                searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY,
+//                mLoggedInPersonUid, systemTimeInMillis())
+//        if (view.addStudentVisible) {
+//            view.pendingStudentList = db.clazzEnrolmentDao.findByClazzUidAndRole(filterByClazzUid,
+//                    ClazzEnrolment.ROLE_STUDENT_PENDING, selectedSortOption?.flag ?: 0,
+//                    searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY,
+//                    mLoggedInPersonUid, systemTimeInMillis())
+//        }
     }
 
     override fun handleClickEntry(entry: PersonWithClazzEnrolmentDetails) {

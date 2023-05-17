@@ -37,10 +37,12 @@ import com.ustadmobile.view.clazzassignment.detailoverview.ClazzAssignmentDetail
 import com.ustadmobile.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewScreen
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewViewModel
 import com.ustadmobile.view.clazzassignment.detailsubmissionstab.ClazzAssignmentDetailSubmissionsTab
+import com.ustadmobile.view.clazzenrolment.clazzmemberlist.ClazzMemberListScreenPreview
 import com.ustadmobile.view.courseterminology.edit.CourseTerminologyEditScreen
 import com.ustadmobile.view.login.LoginScreen
 import com.ustadmobile.view.schedule.edit.ScheduleEditScreen
 import com.ustadmobile.view.siteenterlink.SiteEnterLinkScreen
+import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -151,8 +153,9 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ContentEntryList2View.VIEW_NAME, "ContentEntryList Preview",
         ContentEntryListScreenPreview),
     UstadScreen(AccountListView.VIEW_NAME, "AccountList Preview", AccountListScreenPreview),
-    UstadScreen(ClazzMemberListView.VIEW_NAME, "ClazzMemberList Preview",
-        ClazzMemberListScreenPreview),
+    UstadScreen(ClazzMemberListViewModel.DEST_NAME, "ClazzMemberList Preview",
+        ClazzMemberListScreenPreview
+    ),
     UstadScreen(ClazzList2View.VIEW_NAME, "Clazz List",ClazzListScreen),
     UstadScreen(ClazzList2View.VIEW_NAME_HOME, "ClazzListHome", ClazzListScreen),
     UstadScreen("VirtualListPreview", "Virtual List Preview",
