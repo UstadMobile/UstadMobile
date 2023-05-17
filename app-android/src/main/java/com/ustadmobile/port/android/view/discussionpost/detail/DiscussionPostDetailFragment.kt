@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.view
+package com.ustadmobile.port.android.view.discussionpost.detail
 
 
 import android.os.Bundle
@@ -15,10 +15,9 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.viewmodel.DiscussionPostDetailUiState
-import com.ustadmobile.core.viewmodel.DiscussionPostDetailViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailUiState
+import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
 import com.ustadmobile.lib.db.entities.DiscussionPostWithPerson
@@ -33,13 +32,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
+import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
+import com.ustadmobile.port.android.view.composable.HtmlClickableTextField
+import com.ustadmobile.port.android.view.composable.HtmlText
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import java.util.*
@@ -81,7 +86,9 @@ class DiscussionPostDetailFragment: UstadBaseMvvmFragment() {
 
 @Composable
 fun DiscussionPostDetailFragmentScreen(viewModel: DiscussionPostDetailViewModel){
-    val uiState: DiscussionPostDetailUiState by viewModel.uiState.collectAsState(DiscussionPostDetailUiState())
+    val uiState: DiscussionPostDetailUiState by viewModel.uiState.collectAsState(
+        DiscussionPostDetailUiState()
+    )
 
     val context = LocalContext.current
 
@@ -89,7 +96,9 @@ fun DiscussionPostDetailFragmentScreen(viewModel: DiscussionPostDetailViewModel)
         uiState = uiState,
         onClickAddMessage = viewModel::addMessage,
         onClickDeleteMessage = viewModel::onClickDeleteEntry,
-        onClickMessage = viewModel::onClickEntry
+        onClickMessage = viewModel::onClickEntry,
+        onClickEditReply = viewModel::onClickEditReply,
+        onClickAddMessageD = viewModel::addMessageD,
     )
 
 
@@ -101,6 +110,8 @@ private fun DiscussionPostDetailFragmentScreen(
     onClickDeleteMessage: (DiscussionPostWithPerson) -> Unit = {},
     onClickMessage: (DiscussionPostWithPerson) -> Unit = {},
     onClickAddMessage: (String) -> Unit = {},
+    onClickEditReply: () -> Unit = {},
+    onClickAddMessageD: () -> Unit = {},
 ) {
 
     Column(
@@ -118,11 +129,11 @@ private fun DiscussionPostDetailFragmentScreen(
             .format(Date(uiState.discussionPost?.discussionPostStartDate ?: 0)).toString() }
 
 
-        Text(
-            uiState.discussionPost?.discussionPostTitle ?: "",
-            style = Typography.body1,
+        HtmlText(
+            html = uiState.discussionPost?.discussionPostTitle ?: "",
             modifier = Modifier.padding(8.dp)
         )
+
         Spacer(modifier = Modifier.height(10.dp))
 
         ListItem(
@@ -142,7 +153,12 @@ private fun DiscussionPostDetailFragmentScreen(
 
             secondaryText = {
                 Column {
-                    Text(uiState.discussionPost?.discussionPostMessage?: "")
+                    HtmlText(
+                        html = uiState.discussionPost?.discussionPostMessage ?: "",
+                        modifier = Modifier.padding(8.dp)
+                    )
+
+
                 }
             },
             singleLineSecondaryText = false,
@@ -157,7 +173,7 @@ private fun DiscussionPostDetailFragmentScreen(
         Text(
             stringResource(R.string.messages),
             style = Typography.h4,
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(4.dp)
         )
 
 
@@ -165,48 +181,53 @@ private fun DiscussionPostDetailFragmentScreen(
         var newReplyText = ""
 
         val onClickAddComment: (() -> Unit) = {
-            //TODO: Remove TextEditField
+
+            newReplyText = uiState.messageReplyTitle?:""
 
             if(!newReplyText.isEmpty()) {
                 onClickAddMessage(newReplyText)
 
+            }else{
+                onClickAddMessageD()
             }
+
+
         }
 
-        ListItem(
-            text = {
-                UstadTextEditField(
-                    value = "",
-                    label = stringResource(id = R.string.add_a_reply),
-                    error = uiState.messageReplyTitle,
-                    enabled = true,
-                    onValueChange = {
-                        newReplyText = it
-                    }
-                )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ){
 
-            },
-            trailing = {
-                TextButton(
-                    onClick = onClickAddComment,
+            HtmlClickableTextField(
+                html = uiState.messageReplyTitle ?: "",
+                label = stringResource(R.string.add_a_reply),
+                onClick = onClickEditReply,
+                modifier = Modifier.fillMaxWidth(fraction = 0.7F).testTag("add_a_reply")
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            TextButton(
+                onClick = onClickAddComment,
+                modifier = Modifier,
+                border = BorderStroke(0.dp, Color.Transparent),
+                enabled = enabled,
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = colorResource(id = R.color.grey_a_40),
+                )
+            ) {
+                Text(
+                    text = stringResource(id = R.string.add),
+                    textAlign = TextAlign.Start,
                     modifier = Modifier,
-                    border = BorderStroke(0.dp, Color.Transparent),
-                    enabled = enabled,
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = colorResource(id = R.color.grey_a_40),
+                    color = contentColorFor(
+                        colorResource(id = R.color.grey_a_40)
                     )
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.add),
-                        textAlign = TextAlign.Start,
-                        modifier = Modifier,
-                        color = contentColorFor(
-                            colorResource(id = R.color.grey_a_40)
-                        )
-                    )
-                }
+                )
             }
-        )
+
+        }
+
 
         Box(modifier = Modifier.weight(1f)) {
 

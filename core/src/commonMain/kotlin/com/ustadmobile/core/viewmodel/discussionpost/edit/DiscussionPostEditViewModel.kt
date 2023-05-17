@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.discussionpost.edit
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
@@ -8,11 +8,11 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.DiscussionPostEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
-import com.ustadmobile.core.viewmodel.person.edit.PersonEditUiState
-import com.ustadmobile.door.ext.withDoorTransaction
+import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.DiscussionPost
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
@@ -98,6 +98,14 @@ class DiscussionPostEditViewModel (
 
             )
 
+            launch {
+                resultReturner.filteredResultFlowForKey(RESULT_KEY_HTML_DESC).collect { result ->
+                    val newMessage = result.result as? String ?: return@collect
+                    onEntityChanged(_uiState.value.discussionPost?.shallowCopy {
+                        discussionPostMessage = newMessage
+                    })
+                }
+            }
 
             _uiState.update { prev ->
                 prev.copy(
@@ -107,6 +115,13 @@ class DiscussionPostEditViewModel (
             }
             loadingState = LoadingUiState.NOT_LOADING
         }
+    }
+
+    fun onClickEditMessage() {
+        navigateToEditHtml(
+            currentValue = _uiState.value.discussionPost?.discussionPostMessage,
+            resultKey = RESULT_KEY_HTML_DESC
+        )
     }
 
     fun onEntityChanged(entity: DiscussionPost?) {

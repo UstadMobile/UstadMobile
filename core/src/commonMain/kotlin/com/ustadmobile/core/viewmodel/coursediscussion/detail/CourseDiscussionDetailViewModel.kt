@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.coursediscussion.detail
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
@@ -11,15 +11,11 @@ import com.ustadmobile.core.view.DiscussionPostEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_BLOCK_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.CourseBlock
-import com.ustadmobile.lib.db.entities.CourseDiscussion
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -37,7 +33,7 @@ class CourseDiscussionDetailViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
     destinationName: String = CourseDiscussionDetailView.VIEW_NAME,
-):UstadListViewModel<CourseDiscussionDetailUiState>(di, savedStateHandle, CourseDiscussionDetailUiState(), destinationName){
+): UstadListViewModel<CourseDiscussionDetailUiState>(di, savedStateHandle, CourseDiscussionDetailUiState(), destinationName){
 
     private var lastPagingSource: PagingSource<Int, DiscussionPostWithDetails>? = null
 

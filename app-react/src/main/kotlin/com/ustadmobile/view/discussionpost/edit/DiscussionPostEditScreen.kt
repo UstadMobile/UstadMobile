@@ -1,16 +1,15 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.discussionpost.edit
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.viewmodel.DiscussionPostEditUiState
-import com.ustadmobile.core.viewmodel.DiscussionPostEditViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditUiState
+import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.wrappers.quill.ReactQuill
-import csstype.px
 import mui.material.*
 import mui.system.responsive
 import react.FC

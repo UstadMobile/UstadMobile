@@ -181,15 +181,15 @@
 
     <fragment
         android:id="@+id/course_discussion_detail_dest"
-        android:name="com.ustadmobile.port.android.view.CourseDiscussionDetailFragment" />
+        android:name="com.ustadmobile.port.android.view.coursediscussion.detail.CourseDiscussionDetailFragment" />
 
  <fragment
         android:id="@+id/discussion_post_edit_dest"
-        android:name="com.ustadmobile.port.android.view.DiscussionPostEditFragment" />
+        android:name="com.ustadmobile.port.android.view.discussionpost.edit.DiscussionPostEditFragment" />
 
  <fragment
         android:id="@+id/discussion_post_detail_dest"
-        android:name="com.ustadmobile.port.android.view.DiscussionPostDetailFragment" />
+        android:name="com.ustadmobile.port.android.view.discussionpost.detail.DiscussionPostDetailFragment" />
 
     <fragment
         android:id="@+id/clazz_assignment_detail_dest"

@@ -148,11 +148,16 @@ private fun DetailFieldContent(
             )
 
             if(labelText != null) {
-                Text(
-                    text = labelText,
-                    style = MaterialTheme.typography.subtitle1,
-                    color = colorResource(R.color.list_subheader),
+                HtmlText(
+                    html = labelText.text?:"",
+                    modifier = Modifier.padding(8.dp)
                 )
+
+//                Text(
+//                    text = labelText,
+//                    style = MaterialTheme.typography.subtitle1,
+//                    color = colorResource(R.color.list_subheader),
+//                )
             }
 
         }

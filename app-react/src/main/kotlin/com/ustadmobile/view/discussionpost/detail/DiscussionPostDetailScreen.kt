@@ -1,18 +1,17 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.discussionpost.detail
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.appstate.AppUiState
-import com.ustadmobile.core.viewmodel.DiscussionPostDetailUiState
-import com.ustadmobile.core.viewmodel.DiscussionPostDetailViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailUiState
+import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.DiscussionPost
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
 import com.ustadmobile.lib.db.entities.DiscussionPostWithPerson
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.mui.components.UstadDetailField
-import com.ustadmobile.mui.components.UstadRawHtml
 import com.ustadmobile.view.components.UstadBlankIcon
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.wrappers.quill.ReactQuill

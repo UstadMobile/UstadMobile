@@ -1,4 +1,4 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.coursediscussion.detail
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
@@ -6,33 +6,27 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
-import com.ustadmobile.core.viewmodel.CourseDiscussionDetailUiState
-import com.ustadmobile.core.viewmodel.CourseDiscussionDetailViewModel
+import com.ustadmobile.core.viewmodel.coursediscussion.detail.CourseDiscussionDetailUiState
+import com.ustadmobile.core.viewmodel.coursediscussion.detail.CourseDiscussionDetailViewModel
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.view.components.UstadBlankIcon
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
-import com.ustadmobile.view.person.list.demoPersonList
 import csstype.*
-import csstype.HtmlAttributes.Companion.align
 import js.core.jso
 import kotlinx.html.currentTimeMillis
-import mui.icons.material.*
 import mui.material.*
-import mui.material.List
 import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import mui.system.sx
 import react.*
 import react.router.useLocation
-import kotlin.js.Date
 
 external interface CourseDiscussionDetailProps: Props {
     var uiState: CourseDiscussionDetailUiState
@@ -140,7 +134,9 @@ val CourseDiscussionDetailScreen = FC<Props>{
         CourseDiscussionDetailViewModel(di, savedStateHandle, location.ustadViewName)
     }
 
-    val uiState: CourseDiscussionDetailUiState by viewModel.uiState.collectAsState(CourseDiscussionDetailUiState())
+    val uiState: CourseDiscussionDetailUiState by viewModel.uiState.collectAsState(
+        CourseDiscussionDetailUiState()
+    )
     val appState by viewModel.appUiState.collectAsState(AppUiState())
 
     UstadFab{

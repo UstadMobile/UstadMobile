@@ -34,7 +34,13 @@ import com.ustadmobile.view.person.list.PersonListScreen
 import com.ustadmobile.view.person.list.PersonListScreenPreview
 import com.ustadmobile.view.clazzassignment.detail.ClazzAssignmentDetailScreen
 import com.ustadmobile.view.clazzassignment.detailsubmissionstab.ClazzAssignmentDetailSubmissionsTab
+import com.ustadmobile.view.coursediscussion.detail.CourseDiscussionDetailPreview
+import com.ustadmobile.view.coursediscussion.detail.CourseDiscussionDetailScreen
 import com.ustadmobile.view.courseterminology.edit.CourseTerminologyEditScreen
+import com.ustadmobile.view.discussionpost.detail.DiscussionPostDetailPreview
+import com.ustadmobile.view.discussionpost.detail.DiscussionPostDetailScreen
+import com.ustadmobile.view.discussionpost.edit.DiscussionPostEditPreview
+import com.ustadmobile.view.discussionpost.edit.DiscussionPostEditScreen
 import com.ustadmobile.view.login.LoginScreen
 import com.ustadmobile.view.schedule.edit.ScheduleEditScreen
 import com.ustadmobile.view.siteenterlink.SiteEnterLinkScreen
@@ -195,17 +201,23 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(CourseGroupSetListView.VIEW_NAME, "Clazz Groups",ClazzGroupSetDummy),
 
     UstadScreen(CourseDiscussionDetailView.VIEW_NAME, "Course Discussion Detail Preview",
-        CourseDiscussionDetailScreen),
+        CourseDiscussionDetailScreen
+    ),
     UstadScreen("DiscussionPostDetailViewDemo", name = "Course Discussion Post Detail",
-        DiscussionPostDetailPreview),
+        DiscussionPostDetailPreview
+    ),
     UstadScreen(DiscussionPostDetailView.VIEW_NAME, name = "Real Course Discussion Post Detail",
-        DiscussionPostDetailScreen),
+        DiscussionPostDetailScreen
+    ),
     UstadScreen(DiscussionPostEditView.VIEW_NAME, name = "Discussion Post Edit",
-        DiscussionPostEditScreen),
+        DiscussionPostEditScreen
+    ),
     UstadScreen("DiscussionPostEditViewDemo", name = "Discussion Post Edit Preview",
-        DiscussionPostEditPreview),
+        DiscussionPostEditPreview
+    ),
     UstadScreen("CourseDiscussionDetailDemo", name = "Course Discussion Detail Preview",
-        CourseDiscussionDetailPreview),
+        CourseDiscussionDetailPreview
+    ),
 
     UstadScreen(ClazzAssignmentDetailView.VIEW_NAME, "ClazzAssignmentDetail",
         ClazzAssignmentDetailScreen),
