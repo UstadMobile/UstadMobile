@@ -21,7 +21,7 @@ class QRCodeScannerViewModel(
             prev.copy(
                 hideBottomNavigation = true,
                 userAccountIconVisible = false,
-                loadingState = LoadingUiState.INDETERMINATE,
+                loadingState = LoadingUiState.NOT_LOADING,
                 title = impl.getString(MessageID.qr_code_scan)
             )
         }

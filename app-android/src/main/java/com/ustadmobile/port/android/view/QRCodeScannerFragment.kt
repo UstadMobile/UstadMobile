@@ -204,7 +204,6 @@ private fun QRCodeScannerScreen(
         BarcodeScanningDecorationLayout(
             width = width.value,
             height = height.value,
-            onScanningAreaReady = {  },
         )
     }
 }
@@ -213,7 +212,6 @@ private fun QRCodeScannerScreen(
 fun BarcodeScanningDecorationLayout(
     width: Int,
     height: Int,
-    onScanningAreaReady: (RectF) -> Unit,
 ) {
     fun calculateScanningRect(size: Int, centerPoint: PointF): RectF {
         val scanningAreaSize = size * 0.8F
@@ -234,11 +232,7 @@ fun BarcodeScanningDecorationLayout(
     val scanningFrameCornerRadius = dp2Px(dp = 6.dp)
 
     Canvas(
-        modifier = Modifier
-            .fillMaxSize()
-            .onGloballyPositioned {
-                onScanningAreaReady.invoke(scanningAreaRect)
-            },
+        modifier = Modifier.fillMaxSize(),
         onDraw = {
             scanningAreaPath.reset()
             cameraBoundaryPath.reset()
