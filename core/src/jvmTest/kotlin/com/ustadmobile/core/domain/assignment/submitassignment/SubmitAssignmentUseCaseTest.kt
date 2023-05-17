@@ -220,4 +220,26 @@ class SubmitAssignmentUseCaseTest {
         }
     }
 
+    @Test(expected = AssignmentTextTooLongException::class)
+    fun givenValidAssignment_whenTextTooLong_thenWillThrowTextTooLongException() {
+        testSubmitAssignment(
+            assignment = ClazzAssignment().apply {
+                caTextLimitType = ClazzAssignment.TEXT_WORD_LIMIT
+                caTextLimit = 5
+            }
+        ) {
+            val submitUseCase = SubmitAssignmentUseCase()
+            val response = "I can still has cheezburger, right?"
+            submitUseCase(
+                db = db,
+                systemImpl = systemImpl,
+                assignmentUid = assignment.caUid,
+                accountPersonUid = person.personUid,
+                submission = CourseAssignmentSubmission().apply {
+                    casText = response
+                }
+            )
+        }
+    }
+
 }

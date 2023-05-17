@@ -14,3 +14,7 @@ class AssignmentAlreadySubmittedException(
 class AssignmentDeadlinePassedException(
     message: String?
 ): AssignmentSubmissionException(message)
+
+class AssignmentTextTooLongException(
+    message: String?
+): AssignmentSubmissionException(message)

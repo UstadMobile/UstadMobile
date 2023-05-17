@@ -2,11 +2,12 @@ package com.ustadmobile.core.domain.assignment.submitassignment
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.countWords
+import com.ustadmobile.core.util.ext.htmlToPlainText
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
-import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionAttachment
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 
 /**
@@ -53,6 +54,21 @@ class SubmitAssignmentUseCase {
 
             if(db.clazzAssignmentDao.getLatestSubmissionTimeAllowed(assignmentUid) < systemTimeInMillis()) {
                 throw AssignmentDeadlinePassedException("Deadline passed!")
+            }
+
+
+            if(assignment.caRequireTextSubmission) {
+                if(assignment.caTextLimitType == ClazzAssignment.TEXT_WORD_LIMIT &&
+                    (submission.casText?.htmlToPlainText()?.countWords()?: 0) > assignment.caTextLimit
+                ) {
+                    throw AssignmentTextTooLongException("Too many words")
+                }
+
+                if(assignment.caTextLimitType == ClazzAssignment.TEXT_CHAR_LIMIT &&
+                    (submission.casText?.htmlToPlainText()?.length ?: 0) > assignment.caTextLimit
+                ) {
+                    throw AssignmentTextTooLongException("Too many chars")
+                }
             }
 
             val submissionToSave = submission.shallowCopy {
