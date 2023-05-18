@@ -129,6 +129,7 @@ private fun QRCodeScannerScreen(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var preview by remember { mutableStateOf<CameraPreview?>(null) }
+    var barcodeRememberValue by remember { mutableStateOf("") }
 
     Box(modifier = Modifier.fillMaxSize()) {
         val width = remember { mutableStateOf(0) }
@@ -154,8 +155,8 @@ private fun QRCodeScannerScreen(
                         RectF(
                             0F,
                             0F,
-                            width.value.toFloat(),
-                            height.value.toFloat()
+                            200F,
+                            200F
                         )
                     )
                 },
@@ -175,7 +176,7 @@ private fun QRCodeScannerScreen(
                     val barcodeAnalyser = BarCodeAnalyser { barcodes ->
                         barcodes.forEach { barcode ->
                             barcode.rawValue?.let { barcodeValue ->
-                                onQRCodeDetected(barcodeValue)
+                                barcodeRememberValue = barcodeValue
                             }
                         }
                     }
@@ -204,6 +205,8 @@ private fun QRCodeScannerScreen(
         BarcodeScanningDecorationLayout(
             width = width.value,
             height = height.value,
+            barcode = barcodeRememberValue,
+            onScanningAreaReady = onQRCodeDetected
         )
     }
 }
@@ -212,13 +215,15 @@ private fun QRCodeScannerScreen(
 fun BarcodeScanningDecorationLayout(
     width: Int,
     height: Int,
+    barcode: String = "",
+    onScanningAreaReady: (String) -> Unit = {},
 ) {
     fun calculateScanningRect(size: Int, centerPoint: PointF): RectF {
-        val scanningAreaSize = size * 0.8F
+        val scanningAreaSize = size * 0.5F
         val left = centerPoint.x - scanningAreaSize * 0.5F
-        val top = centerPoint.y - scanningAreaSize * 0.5F
+        val top = centerPoint.y - scanningAreaSize * 0.4F
         val right = centerPoint.x + scanningAreaSize * 0.5F
-        val bottom = centerPoint.y + scanningAreaSize * 0.1F
+        val bottom = centerPoint.y + scanningAreaSize * 0.3F
         return RectF(left, top, right, bottom)
     }
 
@@ -232,7 +237,12 @@ fun BarcodeScanningDecorationLayout(
     val scanningFrameCornerRadius = dp2Px(dp = 6.dp)
 
     Canvas(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize()
+            .onGloballyPositioned {
+                if (barcode.isNotEmpty()){
+                    onScanningAreaReady.invoke(barcode)
+                }
+            },
         onDraw = {
             scanningAreaPath.reset()
             cameraBoundaryPath.reset()
