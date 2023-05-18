@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.DetailViewModel
+import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT
 import kotlinx.coroutines.flow.*
@@ -34,7 +35,7 @@ class ClazzDetailViewModel(
                 label = systemImpl.getString(MessageID.course),
             ),
             TabItem(
-                viewName = ClazzMemberListView.VIEW_NAME,
+                viewName = ClazzMemberListViewModel.DEST_NAME,
                 args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
                 label = systemImpl.getString(MessageID.members),
             )
@@ -87,6 +88,10 @@ class ClazzDetailViewModel(
                 }
             }
         }
+    }
+
+    companion object {
+        const val DEST_NAME = "Course"
     }
 
 }

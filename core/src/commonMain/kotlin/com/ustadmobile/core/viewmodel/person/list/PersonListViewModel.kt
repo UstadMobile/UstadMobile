@@ -132,6 +132,10 @@ class PersonListViewModel(
         navigateOnItemClicked(PersonDetailView.VIEW_NAME, entry.personUid, entry)
     }
 
+    companion object {
+
+        const val DEST_NAME = "People"
+    }
 
 }
 

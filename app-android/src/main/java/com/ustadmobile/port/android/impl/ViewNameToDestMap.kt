@@ -10,6 +10,7 @@ import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
 import com.ustadmobile.port.android.view.PanicButtonSettingsView
+import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 
 @Keep
 class ViewNameToDestMap: DestinationProvider {
@@ -20,7 +21,7 @@ class ViewNameToDestMap: DestinationProvider {
                     hideBottomNavigation = true),
             ClazzList2View.VIEW_NAME_HOME to UstadDestination(R.id.home_clazzlist_dest),
             ClazzList2View.VIEW_NAME to UstadDestination(R.id.clazz_list_dest),
-            ClazzDetailView.VIEW_NAME to UstadDestination(R.id.clazz_detail_dest),
+            ClazzDetailViewModel.DEST_NAME to UstadDestination(R.id.clazz_detail_dest),
             HolidayEditView.VIEW_NAME to UstadDestination(R.id.holiday_edit_dest,
                     hideBottomNavigation = true),
             HolidayCalendarListView.VIEW_NAME to UstadDestination(R.id.holidaycalendar_list_dest),

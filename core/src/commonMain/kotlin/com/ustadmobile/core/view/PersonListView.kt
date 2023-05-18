@@ -8,7 +8,7 @@ interface PersonListView: UstadListView<Person, PersonWithDisplayDetails> {
     var inviteViaLinkVisibile: Boolean
 
     companion object {
-        const val VIEW_NAME = "PersonListView"
+        const val VIEW_NAME = "People"
 
         const val VIEW_NAME_HOME = "PersonListHome"
 

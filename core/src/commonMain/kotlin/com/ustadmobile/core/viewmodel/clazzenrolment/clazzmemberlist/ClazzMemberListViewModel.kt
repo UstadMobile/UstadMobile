@@ -9,12 +9,18 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.util.ext.whenSubscribed
+import com.ustadmobile.core.view.ClazzEnrolmentEditView
+import com.ustadmobile.core.view.ClazzMemberListView
+import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
+import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
+import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 import com.ustadmobile.lib.db.entities.Role
@@ -68,7 +74,7 @@ data class ClazzMemberListUiState(
 class ClazzMemberListViewModel(
     di: DI, savedStateHandle: UstadSavedStateHandle
 ): UstadListViewModel<ClazzMemberListUiState>(
-    di, savedStateHandle, ClazzMemberListUiState(), DEST_NAME
+    di, savedStateHandle, ClazzMemberListUiState(), ClazzDetailViewModel.DEST_NAME,
 ) {
 
     private val approveOrDeclinePendingEnrolmentUseCase: IApproveOrDeclinePendingEnrolmentRequestUseCase by
@@ -128,6 +134,13 @@ class ClazzMemberListViewModel(
             )
         }
 
+        _appUiState.update { prev ->
+            prev.copy(
+                navigationVisible = true,
+                searchState = createSearchEnabledState(),
+            )
+        }
+
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
@@ -151,16 +164,38 @@ class ClazzMemberListViewModel(
                         }
                     }
                 }
+
+                launch {
+                    activeDb.clazzDao.getTitleByUidAsFlow(clazzUid).collect { clazzTitle ->
+                        _appUiState.takeIf { _appUiState.value.title != clazzTitle }?.update { prev ->
+                            prev.copy(title = clazzTitle)
+                        }
+                    }
+                }
             }
         }
     }
 
-    override fun onUpdateSearchResult(searchText: String) {
+    private fun invalidatePagingSources(){
+        lastTeacherListPagingSource?.invalidate()
+        lastStudentListPagingsource?.invalidate()
+        lastPendingStudentListPagingSource?.invalidate()
+    }
 
+    override fun onUpdateSearchResult(searchText: String) {
+        invalidatePagingSources()
     }
 
     override fun onClickAdd() {
         //Do nothing
+    }
+
+    fun onClickFilterChip(filterOption: MessageIdOption2) {
+        _uiState.update { prev ->
+            prev.copy(selectedChipId = filterOption.value)
+        }
+
+        invalidatePagingSources()
     }
 
     fun onClickRespondToPendingEnrolment(
@@ -174,6 +209,36 @@ class ClazzMemberListViewModel(
                 approved = approved
             )
         }
+    }
+
+    fun onClickAddNewMember(role: Int) {
+        val args = mutableMapOf(
+            PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to clazzUid.toString(),
+            UstadView.ARG_FILTER_BY_ENROLMENT_ROLE to role.toString(),
+            UstadView.ARG_CLAZZUID to clazzUid.toString(),
+            UstadView.ARG_GO_TO_COMPLETE to ClazzEnrolmentEditView.VIEW_NAME,
+            UstadView.ARG_POPUPTO_ON_FINISH to destinationName,
+            ClazzMemberListView.ARG_HIDE_CLAZZES to true.toString(),
+            UstadView.ARG_SAVE_TO_DB to true.toString(),
+            UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString(),
+        )
+        navController.navigate(
+            viewName = PersonListViewModel.DEST_NAME,
+            args = args
+        )
+    }
+
+    fun onClickEntry(
+        entry: PersonWithClazzEnrolmentDetails
+    ) {
+        //navigate to enrolmentlist
+    }
+
+    fun onSortOrderChanged(sortOption: SortOrderOption) {
+        _uiState.update { prev ->
+            prev.copy(activeSortOrderOption = sortOption)
+        }
+        invalidatePagingSources()
     }
 
     companion object {

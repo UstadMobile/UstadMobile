@@ -1,16 +1,21 @@
 package com.ustadmobile.view.clazzenrolment.clazzmemberlist
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListUiState
+import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
+import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 import com.ustadmobile.mui.components.UstadAddListItem
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
+import com.ustadmobile.mui.components.UstadListSortHeader
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
@@ -42,11 +47,9 @@ external interface ClazzMemberListScreenProps : Props {
     var onClickPendingRequest: (enrolment: PersonWithClazzEnrolmentDetails,
                                 approved: Boolean) -> Unit
 
-    var onClickFilterChip: (MessageIdOption2?) -> Unit
+    var onClickFilterChip: (MessageIdOption2) -> Unit
 
-    var onClickAddNewTeacher: () -> Unit
-
-    var onClickAddNewStudent: () -> Unit
+    var onClickAddNewMember: (role: Int) -> Unit
 
     var onClickSort: (SortOrderOption) -> Unit
 
@@ -76,6 +79,15 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
 
         content = virtualListContent {
             item {
+                UstadListSortHeader.create {
+                    activeSortOrderOption = props.uiState.activeSortOrderOption
+                    enabled = true
+                    onClickSort = props.onClickSort
+                    sortOptions = props.uiState.sortOptions
+                }
+            }
+
+            item {
                 UstadListFilterChipsHeader.create {
                     filterOptions = props.uiState.filterOptions
                     selectedChipId = props.uiState.selectedChipId
@@ -83,14 +95,6 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
                     onClickFilterChip = props.onClickFilterChip
                 }
             }
-
-//            item {
-//            UstadListSortHeader {
-//                activeSortOrderOption = props.uiState.activeSortOrderOption
-//                enabled = props.uiState.fieldsEnabled
-//                onClickSort = props.onClickSort
-//            }
-//            }
 
             item {
                 ListItem.create {
@@ -107,7 +111,7 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
                         ?: strings[MessageID.add_a_teacher]
                     enabled = props.uiState.fieldsEnabled
                     icon = PersonAdd.create()
-                    onClickAdd = { props.onClickAddNewTeacher }
+                    onClickAdd = { props.onClickAddNewMember(ClazzEnrolment.ROLE_TEACHER) }
                 }
             }
 
@@ -146,7 +150,7 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
                             ?: strings[MessageID.add_a_student]
                         enabled = props.uiState.fieldsEnabled
                         icon = PersonAdd.create()
-                        onClickAdd = { props.onClickAddNewStudent }
+                        onClickAdd = { props.onClickAddNewMember(ClazzEnrolment.ROLE_STUDENT) }
                     }
                 }
             }
@@ -190,6 +194,23 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
     }
 }
 
+val ClazzMemberListScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        ClazzMemberListViewModel(di, savedStateHandle)
+    }
+
+    val uiStateVal by viewModel.uiState.collectAsState(ClazzMemberListUiState())
+
+    ClazzMemberListScreenComponent2 {
+        uiState = uiStateVal
+        onClickEntry = viewModel::onClickEntry
+        onClickPendingRequest = viewModel::onClickRespondToPendingEnrolment
+        onClickFilterChip = viewModel::onClickFilterChip
+        onClickAddNewMember = viewModel::onClickAddNewMember
+        onClickSort = viewModel::onSortOrderChanged
+    }
+
+}
 
 external interface StudentListItemProps : Props {
 

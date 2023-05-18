@@ -363,4 +363,11 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     @Query("SELECT Clazz.*, School.* FROM Clazz LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid WHERE clazz.clazzUid = :clazzUid")
     abstract suspend fun getClazzWithSchool(clazzUid: Long): ClazzWithSchool?
 
+    @Query("""
+        SELECT Clazz.clazzName
+          FROM Clazz
+         WHERE Clazz.clazzUid = :clazzUid
+    """)
+    abstract fun getTitleByUidAsFlow(clazzUid: Long): Flow<String?>
+
 }

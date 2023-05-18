@@ -33,7 +33,7 @@ import com.toughra.ustadmobile.databinding.*
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
-import com.ustadmobile.core.view.ClazzDetailView
+import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
 import com.ustadmobile.lib.db.entities.*
@@ -59,7 +59,7 @@ interface ClazzDetailOverviewEventListener {
 class ClazzDetailOverviewFragment: UstadBaseMvvmFragment() {
 
     private val viewModel: ClazzDetailOverviewViewModel by ustadViewModels { di, savedStateHandle ->
-        ClazzDetailOverviewViewModel(di, savedStateHandle, ClazzDetailView.VIEW_NAME)
+        ClazzDetailOverviewViewModel(di, savedStateHandle, ClazzDetailViewModel.DEST_NAME)
     }
 
     override fun onCreateView(
