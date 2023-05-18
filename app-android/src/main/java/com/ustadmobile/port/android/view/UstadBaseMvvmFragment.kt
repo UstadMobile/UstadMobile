@@ -4,6 +4,8 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
@@ -79,7 +81,7 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
 
     private val navCommandExecTracker: NavCommandExecutionTracker by instance()
 
-    class AppUiStateMenuProvider(
+    inner class AppUiStateMenuProvider(
         initAppUiState: AppUiState?
     ): MenuProvider, SearchView.OnQueryTextListener, SearchView.OnCloseListener {
 
@@ -94,22 +96,47 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
                     searchViewVal.setQuery(value.searchState.searchText, false)
             }
 
+        private val closeSearchBackPressedCallback: OnBackPressedCallback
+
+        init {
+            closeSearchBackPressedCallback = requireActivity().onBackPressedDispatcher.addCallback(
+                this@UstadBaseMvvmFragment
+            ) {
+                closeSearch()
+            }
+        }
+
         override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-            menuInflater.inflate(R.menu.menu_done, menu)
-            val buttonMenuItem = menu.findItem(R.id.menu_done)
             val appStateVal = appUiState ?: return
 
-            buttonMenuItem.title = appStateVal.actionBarButtonState.text ?: ""
-            buttonMenuItem.isVisible = appStateVal.actionBarButtonState.visible
+            if(appStateVal.actionBarButtonState.visible) {
+                menuInflater.inflate(R.menu.menu_done, menu)
+                val buttonMenuItem = menu.findItem(R.id.menu_done)
 
-            val searchMenuItem = menu.findItem(R.id.menu_search)
-            searchMenuItem.isVisible = appStateVal.searchState.visible
-            searchView = (searchMenuItem?.actionView as SearchView).also {
-                it.setOnQueryTextListener(this)
-                it.setOnCloseListener(this)
-                it.setQuery(appStateVal.searchState.searchText, false)
-                it.isIconified = appStateVal.searchState.searchText == ""
+
+                buttonMenuItem.title = appStateVal.actionBarButtonState.text ?: ""
             }
+
+            if(appStateVal.searchState.visible) {
+                menuInflater.inflate(R.menu.menu_search, menu)
+                val searchMenuItem = menu.findItem(R.id.menu_search)
+                if(searchView != searchMenuItem?.actionView) {
+                    searchView?.also {
+                        it.setOnQueryTextListener(null)
+                        it.setOnCloseListener(null)
+                    }
+
+                    searchView = (searchMenuItem?.actionView as SearchView).also {
+                        it.setOnQueryTextListener(this)
+                        it.setOnCloseListener(this)
+                        it.setQuery(appStateVal.searchState.searchText, false)
+                        it.isIconified = appStateVal.searchState.searchText == ""
+                    }
+                }
+            }
+
+            closeSearchBackPressedCallback.isEnabled = searchView?.isIconified == false &&
+                appStateVal.searchState.visible
         }
 
         override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -128,6 +155,8 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
 
         override fun onQueryTextChange(newText: String?): Boolean {
             appUiState?.searchState?.onSearchTextChanged?.invoke(newText ?: "")
+            closeSearchBackPressedCallback.isEnabled = searchView?.isIconified == false &&
+                appUiState?.searchState?.visible == true
             return false
         }
 
@@ -136,9 +165,18 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
             return false
         }
 
+        private fun closeSearch() {
+            searchView?.apply {
+                setQuery("",true)
+                isIconified = true
+                closeSearchBackPressedCallback.isEnabled = false
+            }
+        }
+
         fun detach() {
             searchView?.setOnQueryTextListener(null)
             searchView?.setOnCloseListener(null)
+
         }
     }
 
@@ -190,7 +228,7 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
         transform: (AppUiState) -> AppUiState = { it },
     ) {
         mMenuProvider = AppUiStateMenuProvider(null).also {
-            requireActivity().addMenuProvider(it, viewLifecycleOwner)
+            requireActivity().addMenuProvider(it, viewLifecycleOwner, Lifecycle.State.RESUMED)
         }
 
         launch {
@@ -247,23 +285,8 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
                     val bottomNav = (activity as? UstadActivityWithBottomNavigation)?.bottomNavigationView
                     bottomNav?.takeIf { it.visibility != bottomNavVisibility }?.visibility = bottomNavVisibility
 
-                    val currentActionBarState = mMenuProvider?.appUiState?.actionBarButtonState
-                    val currentSearchBarState = mMenuProvider?.appUiState?.searchState
-                    val newActionBarState = appUiState.actionBarButtonState
-                    val newSearchBarState = mMenuProvider?.appUiState?.searchState
-                    if(mMenuProvider?.appUiState != appUiState) {
-                        mMenuProvider?.appUiState = appUiState
-                        if(
-                            currentActionBarState == null ||
-                            currentSearchBarState == null ||
-                            newActionBarState.visible != currentActionBarState.visible ||
-                            newActionBarState.enabled != currentActionBarState.enabled ||
-                            newActionBarState.text != currentActionBarState.text ||
-                            newSearchBarState?.visible != currentSearchBarState.visible
-                        ) {
-                            requireActivity().invalidateMenu()
-                        }
-                    }
+                    mMenuProvider?.appUiState = appUiState
+                    requireActivity().invalidateMenu()
                 }
             }
         }
@@ -282,9 +305,7 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        mMenuProvider?.also {
-            requireActivity().removeMenuProvider(it)
-        }
+        mMenuProvider?.detach()
         mMenuProvider = null
     }
 

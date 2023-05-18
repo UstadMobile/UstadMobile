@@ -3,6 +3,7 @@ package com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.IApproveOrDeclinePendingEnrolmentRequestUseCase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
@@ -138,6 +139,7 @@ class ClazzMemberListViewModel(
             prev.copy(
                 navigationVisible = true,
                 searchState = createSearchEnabledState(),
+                actionBarButtonState = ActionBarButtonUiState(visible = false),
             )
         }
 

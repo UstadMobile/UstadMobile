@@ -208,7 +208,6 @@ abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         searchManager?.searchListener = listPresenter
-        menu.findItem(R.id.menu_search).isVisible = true
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

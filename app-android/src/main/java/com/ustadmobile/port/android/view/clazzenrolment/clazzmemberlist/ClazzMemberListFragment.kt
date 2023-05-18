@@ -10,11 +10,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -24,9 +30,12 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListUiState
+import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
+import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
+import com.ustadmobile.port.android.view.SortBottomSheetFragment
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.UstadAddListItem
 import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
@@ -34,26 +43,66 @@ import com.ustadmobile.port.android.view.composable.UstadListSortHeader
 
 class ClazzMemberListFragment() : UstadBaseMvvmFragment() {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    private val viewModel: ClazzMemberListViewModel by ustadViewModels(::ClazzMemberListViewModel)
 
-        return view
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
+        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
+
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+            )
+
+            setContent {
+                MdcTheme {
+                    ClazzMemberListScreen(viewModel)
+                }
+            }
+        }
     }
 
+}
 
-    companion object {
+@Composable
+fun ClazzMemberListScreen(
+    viewModel: ClazzMemberListViewModel
+) {
+    val uiState by viewModel.uiState.collectAsState(ClazzMemberListUiState())
+    val context = LocalContext.current
 
-    }
+    ClazzMemberListScreen(
+        uiState = uiState,
+        onClickEntry = viewModel::onClickEntry,
+        onClickAddNewMember = viewModel::onClickAddNewMember,
+        onClickPendingRequest = viewModel::onClickRespondToPendingEnrolment,
+        onClickSort = {
+            SortBottomSheetFragment(
+                sortOptions = uiState.sortOptions,
+                selectedSort = uiState.activeSortOrderOption,
+                onSortOptionSelected = {
+                    viewModel.onSortOrderChanged(it)
+                }
+            ).show(context.getContextSupportFragmentManager(), "SortOptions")
+        },
+        onClickFilterChip = viewModel::onClickFilterChip,
+    )
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun ClazzMemberListScreen(
+fun ClazzMemberListScreen(
     uiState: ClazzMemberListUiState = ClazzMemberListUiState(),
     onClickEntry: (PersonWithClazzEnrolmentDetails) -> Unit = {},
-    onClickAddNewTeacher: () -> Unit = {},
-    onClickAddNewStudent: () -> Unit = {},
-    onClickPendingRequest: (enrolment: PersonWithClazzEnrolmentDetails,
-                            approved: Boolean) -> Unit,
+    onClickAddNewMember: (role: Int) -> Unit = {},
+    onClickPendingRequest: (
+        enrolment: PersonWithClazzEnrolmentDetails,
+        approved: Boolean
+    ) -> Unit = {_, _ -> },
     onClickSort: () -> Unit = {},
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
 ) {
@@ -121,7 +170,9 @@ private fun ClazzMemberListScreen(
                         ?: stringResource(R.string.add_a_teacher),
                     enabled = uiState.fieldsEnabled,
                     icon = Icons.Filled.PersonAdd,
-                    onClickAdd = onClickAddNewTeacher
+                    onClickAdd = {
+                        onClickAddNewMember(ClazzEnrolment.ROLE_TEACHER)
+                    }
                 )
             }
         }
@@ -162,7 +213,9 @@ private fun ClazzMemberListScreen(
                         ?: stringResource(R.string.add_a_student),
                     enabled = uiState.fieldsEnabled,
                     icon = Icons.Filled.PersonAdd,
-                    onClickAdd = onClickAddNewStudent
+                    onClickAdd = {
+                        onClickAddNewMember(ClazzEnrolment.ROLE_STUDENT)
+                    }
                 )
             }
         }

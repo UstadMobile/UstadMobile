@@ -32,20 +32,6 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
         setHasOptionsMenu(true)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_done, menu)
-
-        val menuItem = menu.findItem(R.id.menu_done)
-
-        menuItem.title = if(mEditPresenter?.persistenceMode == UstadSingleEntityPresenter.PersistenceMode.DB) {
-            requireContext().getString(R.string.save)
-        }else {
-            requireContext().getString(R.string.done)
-        }
-
-        menuItem.isEnabled = fieldsEnabled
-    }
-
     protected fun setEditFragmentTitle(newTitleId: Int, editStringId: Int) {
         val entityUid = arguments?.getString(ARG_ENTITY_UID)?.toLong() ?: 0L
         val entityJsonStr = arguments?.getString(UstadEditView.ARG_ENTITY_JSON)
