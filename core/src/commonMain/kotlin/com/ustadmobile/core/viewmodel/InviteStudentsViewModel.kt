@@ -34,11 +34,11 @@ class InviteStudentsViewModel(
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = createEditTitle(MessageID.invit, MessageID.edit_schedule),
+                title = createEditTitle(MessageID.invite_link_desc, MessageID.invite_link_desc),
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
                     text = systemImpl.getString(MessageID.done),
-                    onClick = this::onClickSave
+                    onClick = this::onClickInvite
                 )
             )
         }
@@ -55,9 +55,9 @@ class InviteStudentsViewModel(
                 },
                 onLoadFromDb = { null }, //Does not load from database
                 uiUpdate = { schedule ->
-                    _uiState.update { prev ->
-                        prev.copy(entity = schedule)
-                    }
+//                    _uiState.update { prev ->
+//                        prev.copy(entity = schedule)
+//                    }
                 }
             )
 
@@ -65,6 +65,10 @@ class InviteStudentsViewModel(
                 prev.copy(fieldsEnabled = true)
             }
         }
+    }
+
+    fun onClickInvite() {
+
     }
 
     companion object {
