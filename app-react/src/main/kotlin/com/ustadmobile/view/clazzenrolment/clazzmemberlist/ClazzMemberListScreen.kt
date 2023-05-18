@@ -106,12 +106,14 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
             }
 
             if (props.uiState.addTeacherVisible){
-                UstadAddListItem.create {
-                    text = props.uiState.terminologyStrings?.get(MessageID.add_a_teacher)
-                        ?: strings[MessageID.add_a_teacher]
-                    enabled = props.uiState.fieldsEnabled
-                    icon = PersonAdd.create()
-                    onClickAdd = { props.onClickAddNewMember(ClazzEnrolment.ROLE_TEACHER) }
+                item {
+                    UstadAddListItem.create {
+                        text = props.uiState.terminologyStrings?.get(MessageID.add_a_teacher)
+                            ?: strings[MessageID.add_a_teacher]
+                        enabled = props.uiState.fieldsEnabled
+                        icon = PersonAdd.create()
+                        onClickAdd = { props.onClickAddNewMember(ClazzEnrolment.ROLE_TEACHER) }
+                    }
                 }
             }
 
