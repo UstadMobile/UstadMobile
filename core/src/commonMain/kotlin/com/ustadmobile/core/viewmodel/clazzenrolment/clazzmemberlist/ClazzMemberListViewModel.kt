@@ -17,6 +17,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
+import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.door.paging.PagingSource
@@ -216,13 +217,10 @@ class ClazzMemberListViewModel(
     fun onClickAddNewMember(role: Int) {
         val args = mutableMapOf(
             PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to clazzUid.toString(),
-            UstadView.ARG_FILTER_BY_ENROLMENT_ROLE to role.toString(),
+            ClazzEnrolmentEditViewModel.ARG_ROLE to role.toString(),
             UstadView.ARG_CLAZZUID to clazzUid.toString(),
             UstadView.ARG_GO_TO_COMPLETE to ClazzEnrolmentEditView.VIEW_NAME,
             UstadView.ARG_POPUPTO_ON_FINISH to destinationName,
-            ClazzMemberListView.ARG_HIDE_CLAZZES to true.toString(),
-            UstadView.ARG_SAVE_TO_DB to true.toString(),
-            UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString(),
         )
         navController.navigate(
             viewName = PersonListViewModel.DEST_NAME,

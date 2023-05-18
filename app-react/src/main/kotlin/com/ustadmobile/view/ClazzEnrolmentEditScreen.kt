@@ -5,13 +5,15 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.OutcomeConstants
 import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
-import com.ustadmobile.core.viewmodel.ClazzEnrolmentEditUiState
+import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditUiState
+import com.ustadmobile.hooks.courseTerminologyResource
+import com.ustadmobile.hooks.useCourseTerminologyEntries
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadDateField
 import com.ustadmobile.view.components.UstadMessageIdSelectField
-import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.view.components.UstadSelectField
 import csstype.px
 import mui.material.Container
 import mui.system.Stack
@@ -36,26 +38,40 @@ val ClazzEnrolmentEditScreenComponent2 = FC<ClazzEnrolmentEditScreenProps> { pro
 
     val strings: StringsXml = useStringsXml()
 
+    val terminologyEntries = useCourseTerminologyEntries(props.uiState.courseTerminology)
+
     Container {
         Stack {
             direction = responsive(StackDirection.column)
             spacing = responsive(20.px)
 
-            UstadMessageIdSelectField {
-                value = props.uiState.clazzEnrolment?.clazzEnrolmentRole ?: 0
+            UstadSelectField<Int> {
+                id = "enrolment_role"
+                value = props.uiState.clazzEnrolment?.clazzEnrolmentRole ?: ClazzEnrolment.ROLE_STUDENT
                 label = strings[MessageID.role]
-                options = RoleConstants.ROLE_MESSAGE_IDS
+                options = props.uiState.roleOptions
                 error = props.uiState.roleSelectedError
                 enabled = props.uiState.fieldsEnabled
+                itemValue = { "$it" }
+                itemLabel = {
+                    val messageId = when(it) {
+                        ClazzEnrolment.ROLE_TEACHER -> MessageID.teacher
+                        else -> MessageID.student
+                    }
+
+                    ReactNode(courseTerminologyResource(terminologyEntries, strings, messageId))
+                }
                 onChange = {
                     props.onClazzEnrolmentChanged(
                         props.uiState.clazzEnrolment?.shallowCopy {
-                            clazzEnrolmentRole = it.value
-                    })
+                            clazzEnrolmentRole = it
+                        }
+                    )
                 }
             }
 
             UstadDateField {
+                id = "date_joined"
                 timeInMillis = props.uiState.clazzEnrolment?.clazzEnrolmentDateJoined ?: 0
                 label = ReactNode(strings[MessageID.start_date])
                 disabled = !props.uiState.fieldsEnabled
@@ -71,6 +87,7 @@ val ClazzEnrolmentEditScreenComponent2 = FC<ClazzEnrolmentEditScreenProps> { pro
             }
 
             UstadDateField {
+                id = "date_left"
                 timeInMillis = props.uiState.clazzEnrolment?.clazzEnrolmentDateLeft ?: 0
                 label = ReactNode(strings[MessageID.end_date])
                 disabled = !props.uiState.fieldsEnabled
@@ -85,7 +102,9 @@ val ClazzEnrolmentEditScreenComponent2 = FC<ClazzEnrolmentEditScreenProps> { pro
                 }
             }
 
+
             UstadMessageIdSelectField {
+                id = "outcome"
                 value = props.uiState.clazzEnrolment?.clazzEnrolmentOutcome ?: 0
                 label = strings[MessageID.outcome]
                 options = OutcomeConstants.OUTCOME_MESSAGE_IDS
@@ -96,14 +115,6 @@ val ClazzEnrolmentEditScreenComponent2 = FC<ClazzEnrolmentEditScreenProps> { pro
                             clazzEnrolmentOutcome = it.value
                     })
                 }
-            }
-
-            UstadTextEditField {
-                value = props.uiState.clazzEnrolment?.leavingReason?.leavingReasonTitle ?: ""
-                label = strings[MessageID.leaving_reason]
-                onChange = {}
-                enabled = props.uiState.leavingReasonEnabled
-                onClick = props.onClickLeavingReason
             }
         }
     }

@@ -370,4 +370,11 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     """)
     abstract fun getTitleByUidAsFlow(clazzUid: Long): Flow<String?>
 
+
+    @Query("""
+        SELECT Clazz.clazzTimeZone
+          FROM Clazz
+         WHERE Clazz.clazzUid = :clazzUid 
+    """)
+    abstract suspend fun getClazzTimeZoneByClazzUidAsync(clazzUid: Long): String?
 }
