@@ -9,7 +9,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import com.toughra.ustadmobile.databinding.FragmentClazzDetailBinding
+import com.toughra.ustadmobile.databinding.FragmentMvvmTabsBinding
 import com.ustadmobile.core.impl.appstate.TabItem
 import com.ustadmobile.port.android.view.util.TabItemFragmentStateAdapter
 
@@ -26,7 +26,7 @@ abstract class UstadMvvmTabsFragment(
     private val viewNameToFragmentMap: Map<String, Class<out Fragment>>
 ): UstadBaseMvvmFragment() {
 
-    private var mBinding: FragmentClazzDetailBinding? = null
+    private var mBinding: FragmentMvvmTabsBinding? = null
 
     private var mPagerAdapter: TabItemFragmentStateAdapter? = null
 
@@ -74,7 +74,7 @@ abstract class UstadMvvmTabsFragment(
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val rootView: View
 
-        mBinding = FragmentClazzDetailBinding.inflate(inflater, container, false).also {
+        mBinding = FragmentMvvmTabsBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.fragmentClazzTabs.tabs.tabGravity = TabLayout.GRAVITY_FILL
 
