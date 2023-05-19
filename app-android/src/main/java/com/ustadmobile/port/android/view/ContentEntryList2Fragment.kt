@@ -2,24 +2,30 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.recyclerview.widget.DiffUtil
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ContentEntryList2Presenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.ext.determineListMode
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_SELECT_FOLDER_VISIBLE
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_USE_CHIPS
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_TITLE
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+import com.ustadmobile.core.viewmodel.ContentEntryListUiState
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
 import com.ustadmobile.port.android.view.ContentEntryAddOptionsBottomSheetFragment.Companion.ARG_SHOW_ADD_FOLDER
+import com.ustadmobile.port.android.view.composable.UstadContentEntryListItem
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import org.kodein.di.direct
@@ -170,5 +176,82 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                         oldItem.ceInactive == newItem.ceInactive
             }
         }
+    }
+}
+
+@Composable
+private fun ContentEntryListScreen(
+    uiState: ContentEntryListUiState = ContentEntryListUiState(),
+    onClickContentEntry: (
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit = {},
+    onClickDownloadContentEntry: (
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit = {},
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    )  {
+
+        items(
+            items = uiState.contentEntryList,
+            key = { contentEntry -> contentEntry.contentEntryUid }
+        ){ contentEntry ->
+
+            UstadContentEntryListItem(
+                onClick = {
+                    @Suppress("UNNECESSARY_SAFE_CALL")
+                    contentEntry?.also { onClickContentEntry(it) }
+                },
+                onClickDownload = {
+                    @Suppress("UNNECESSARY_SAFE_CALL")
+                    contentEntry?.also { onClickDownloadContentEntry(it) }
+                },
+                contentEntry = contentEntry
+            )
+        }
+    }
+}
+
+@Composable
+@Preview
+private fun ContentEntryListScreenPreview() {
+    val uiStateVal = ContentEntryListUiState(
+        contentEntryList = listOf(
+            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
+                contentEntryUid = 1
+                leaf = false
+                ceInactive = true
+                scoreProgress = ContentEntryStatementScoreProgress().apply {
+                    progress = 10
+                    penalty = 20
+                    success = RESULT_SUCCESS
+                }
+                contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
+                title = "Content Title 1"
+                description = "Content Description 1"
+            },
+            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
+                contentEntryUid = 2
+                leaf = true
+                ceInactive = false
+                scoreProgress = ContentEntryStatementScoreProgress().apply {
+                    progress = 60
+                    penalty = 20
+                }
+                contentTypeFlag = ContentEntry.TYPE_DOCUMENT
+                title = "Content Title 2"
+                description = "Content Description 2"
+            },
+            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
+                contentEntryUid = 3
+                leaf = true
+                ceInactive = false
+                contentTypeFlag = ContentEntry.TYPE_DOCUMENT
+                title = "Content Title 3"
+                description = "Content Description 3"
+            }
+        ),
+    )
+    MdcTheme {
+        ContentEntryListScreen(uiStateVal)
     }
 }

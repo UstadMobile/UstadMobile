@@ -7,7 +7,7 @@
  */
 package com.ustadmobile.wrappers.reacteasysort
 
-import dom.html.HTMLElement
+import web.html.HTMLElement
 import react.*
 
 external interface SortableListProps: PropsWithChildren {

@@ -1,13 +1,10 @@
 package com.ustadmobile.core.controller
 
-import com.soywiz.klock.DateTime
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
-import com.ustadmobile.core.schedule.localMidnight
-import com.ustadmobile.core.schedule.toLocalMidnight
-import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.ext.toLocalMidnight
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView
@@ -17,8 +14,9 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ClazzLog
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
@@ -55,11 +53,12 @@ class ClazzLogEditPresenter(context: Any,
             editEntity = ClazzLog()
         }
 
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch(doorMainDispatcher()) {
             val timeZone = db.clazzDao.getClazzWithSchool(editEntity.clazzLogClazzUid)
                     .effectiveTimeZone()
             view.timeZone = timeZone
-            val localMidnight = DateTime(editEntity.logDate).toLocalMidnight(timeZone).unixMillisLong
+            val localMidnight = Instant.fromEpochMilliseconds(editEntity.logDate)
+                .toLocalMidnight(timeZone).toEpochMilliseconds()
             view.date = localMidnight
             view.time = editEntity.logDate - localMidnight
         }
@@ -95,12 +94,14 @@ class ClazzLogEditPresenter(context: Any,
         val presenter = this
 
 
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch(doorMainDispatcher()) {
             val effectiveTimeZone = db.clazzDao.getClazzWithSchool(entity.clazzLogClazzUid)
                     ?.effectiveTimeZone() ?: "UTC"
 
-            entity.logDate = DateTime(view.date).toOffsetByTimezone(effectiveTimeZone)
-                    .localMidnight.utc.unixMillisLong + view.time
+            entity.logDate = Instant.fromEpochMilliseconds(view.date)
+                .toLocalMidnight(TimeZone.of(effectiveTimeZone))
+                .toEpochMilliseconds() + view.time
+
             if(arguments[ARG_NEXT]?.startsWith(ClazzLogEditAttendanceView.VIEW_NAME) == true) {
                 navigateForResult(
                     NavigateForResultOptions(

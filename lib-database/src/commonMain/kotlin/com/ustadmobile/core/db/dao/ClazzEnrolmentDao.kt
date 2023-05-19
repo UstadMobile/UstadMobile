@@ -18,8 +18,10 @@ import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_DESC
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
+import kotlinx.coroutines.flow.Flow
 
 @Repository
 @DoorDao
@@ -165,7 +167,9 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         AND ClazzEnrolment.clazzEnrolmentActive
         ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
     """)
-    abstract fun findAllClazzesByPersonWithClazz(personUid: Long): DataSourceFactory<Int, ClazzEnrolmentWithClazzAndAttendance>
+    abstract fun findAllClazzesByPersonWithClazz(
+        personUid: Long
+    ): Flow<List<ClazzEnrolmentWithClazzAndAttendance>>
 
     @Query("""SELECT COALESCE(MAX(clazzEnrolmentDateLeft),0) FROM ClazzEnrolment WHERE 
         ClazzEnrolment.clazzEnrolmentPersonUid = :selectedPerson 
@@ -289,8 +293,15 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     """)
     @QueryLiveTables(value = ["Clazz", "Person", "ClazzEnrolment", "PersonGroupMember", "ScopedGrant"])
     @SqliteOnly
-    abstract fun findByClazzUidAndRole(clazzUid: Long, roleId: Int, sortOrder: Int, searchText: String? = "%",
-                                       filter: Int, accountPersonUid: Long, currentTime: Long): DataSourceFactory<Int, PersonWithClazzEnrolmentDetails>
+    abstract fun findByClazzUidAndRole(
+        clazzUid: Long,
+        roleId: Int,
+        sortOrder: Int,
+        searchText: String? = "%",
+        filter: Int,
+        accountPersonUid: Long,
+        currentTime: Long
+    ): PagingSource<Int, PersonWithClazzEnrolmentDetails>
 
     @Query("""
         UPDATE ClazzEnrolment 

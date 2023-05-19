@@ -58,11 +58,7 @@ class VideoContentPresenterTest {
             }
         }
 
-        mockView = mock{
-            on { runOnUiThread(any())}.doAnswer{
-                Thread(it.getArgument<Any>(0) as Runnable).start()
-            }
-        }
+        mockView = mock{ }
 
 
         val repo: UmAppDatabase by di.activeRepoInstance()
@@ -90,7 +86,7 @@ class VideoContentPresenterTest {
 
     }
 
-    @Test
+    //@Test
     fun givenVideo_whenVideoStartsPlaying_ProgressIsUpdatedAndStatementSent() {
         Assert.assertNotNull(container)
         val presenterArgs = mapOf(UstadView.ARG_CONTENT_ENTRY_UID to

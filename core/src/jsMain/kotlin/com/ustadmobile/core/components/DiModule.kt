@@ -12,7 +12,6 @@ external interface DIProps: PropsWithChildren {
 }
 
 val DIModule = FC<DIProps> { props ->
-    console.log("DIMOdule DI=${props.di}")
     DIContext(props.di) {
         +props.children
     }

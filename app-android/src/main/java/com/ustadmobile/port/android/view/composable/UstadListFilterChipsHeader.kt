@@ -28,12 +28,16 @@ fun UstadListFilterChipsHeader(
             rememberScrollState()
         )
     ){
-        filterOptions.forEach { filterOption ->
+        filterOptions.forEachIndexed { index, filterOption ->
             FilterChip(
                 selected = filterOption.value == selectedChipId,
                 onClick = { onClickFilterChip(filterOption) },
                 enabled = enabled,
-                modifier = Modifier.padding(horizontal = 5.dp),
+                modifier = Modifier
+                    .padding(
+                        start = if(index == 0) 16.dp else 8.dp,
+                        end = if(index == filterOptions.size - 1) 16.dp else 8.dp
+                    ),
             ) {
                 Text(messageIdResource(id = filterOption.messageId))
             }

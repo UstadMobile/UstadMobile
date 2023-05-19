@@ -6,7 +6,13 @@ import com.ustadmobile.core.viewmodel.SchoolDetailOverviewUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.UstadDetailField
 import csstype.px
-import mui.icons.material.*
+//WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
+import mui.icons.material.ExitToApp
+import mui.icons.material.LocationOn
+import mui.icons.material.Call
+import mui.icons.material.CalendarMonth
+import mui.icons.material.Email
+import mui.icons.material.Language
 import mui.material.*
 import mui.material.List
 import mui.material.styles.TypographyVariant
@@ -17,6 +23,8 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+
+
 
 external interface SchoolDetailOverviewProps : Props {
 
@@ -88,7 +96,7 @@ val SchoolDetailOverviewScreenComponent2 = FC<SchoolDetailOverviewProps> { props
 
             if (props.uiState.schoolCodeLayoutVisible){
                 UstadDetailField {
-                    valueText = props.uiState.entity?.schoolCode ?: ""
+                    valueText = ReactNode(props.uiState.entity?.schoolCode ?: "")
                     labelText = strings[MessageID.school_code]
                     icon = ExitToApp.create()
                     onClick = props.onClickSchoolCode
@@ -97,7 +105,7 @@ val SchoolDetailOverviewScreenComponent2 = FC<SchoolDetailOverviewProps> { props
 
             if (props.uiState.schoolAddressVisible){
                 UstadDetailField {
-                    valueText = props.uiState.entity?.schoolAddress ?: ""
+                    valueText = ReactNode(props.uiState.entity?.schoolAddress ?: "")
                     labelText = strings[MessageID.address]
                     icon = LocationOn.create()
                 }
@@ -105,7 +113,7 @@ val SchoolDetailOverviewScreenComponent2 = FC<SchoolDetailOverviewProps> { props
 
             if (props.uiState.schoolPhoneNumberVisible){
                 UstadDetailField {
-                    valueText = props.uiState.entity?.schoolPhoneNumber ?: ""
+                    valueText = ReactNode(props.uiState.entity?.schoolPhoneNumber ?: "")
                     labelText = strings[MessageID.phone_number]
                     icon = Call.create()
                     onClick = props.onClickSchoolPhoneNumber
@@ -114,7 +122,7 @@ val SchoolDetailOverviewScreenComponent2 = FC<SchoolDetailOverviewProps> { props
 
             if (props.uiState.calendarUidVisible){
                 UstadDetailField {
-                    valueText = props.uiState.entity?.holidayCalendar?.umCalendarName ?: ""
+                    valueText = ReactNode(props.uiState.entity?.holidayCalendar?.umCalendarName ?: "")
                     labelText = strings[MessageID.holiday_calendar]
                     icon = CalendarMonth.create()
                 }
@@ -122,7 +130,7 @@ val SchoolDetailOverviewScreenComponent2 = FC<SchoolDetailOverviewProps> { props
 
             if (props.uiState.schoolEmailAddressVisible){
                 UstadDetailField {
-                    valueText = props.uiState.entity?.schoolAddress ?: ""
+                    valueText = ReactNode(props.uiState.entity?.schoolAddress ?: "")
                     labelText = strings[MessageID.email]
                     icon = Email.create()
                     onClick = props.onClickEmail
@@ -131,7 +139,7 @@ val SchoolDetailOverviewScreenComponent2 = FC<SchoolDetailOverviewProps> { props
 
             if (props.uiState.schoolTimeZoneVisible){
                 UstadDetailField {
-                    valueText = props.uiState.entity?.schoolTimeZone ?: ""
+                    valueText = ReactNode(props.uiState.entity?.schoolTimeZone ?: "")
                     labelText = strings[MessageID.timezone]
                     icon = Language.create()
                 }

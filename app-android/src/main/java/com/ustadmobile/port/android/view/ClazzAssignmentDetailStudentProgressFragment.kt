@@ -13,21 +13,18 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentDetailOverviewBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzAssignmentDetailStudentProgressPresenter
 import com.ustadmobile.core.controller.FileSubmissionListItemListener
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
-import com.ustadmobile.lib.db.entities.CommentsWithPerson
-import com.ustadmobile.lib.db.entities.CourseAssignmentMark
-import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionWithAttachment
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
@@ -48,6 +45,8 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         ClazzAssignmentDetailStudentProgressView, ClazzAssignmentDetailStudentProgressFragmentEventHandler,
         OpenSheetListener, FileSubmissionListItemListener {
 
+    private var marksAdapter: GradesListAdapter? = null
+    private var gradesHeaderAdapter: GradesHeaderAdapter? = null
     private var dbRepo: UmAppDatabase? = null
 
     val accountManager: UstadAccountManager by instance()
@@ -56,7 +55,6 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    private var mBinding: FragmentClazzAssignmentDetailOverviewBinding? = null
 
     private var submissionsHeaderAdapter: SimpleHeadingRecyclerAdapter? = null
     private var submissionStatusHeaderAdapter: SubmissionStatusHeaderAdapter? = null
@@ -68,6 +66,14 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         t -> run {
         markSubmissionAdapter?.markStudentVisible = !t.isEmpty()
         submissionAdapter?.submitList(t)
+    }
+    }
+
+    private var courseMarkLiveData: LiveData<PagedList<CourseAssignmentMarkWithPersonMarker>>? = null
+    private val courseMarkObserver = Observer<PagedList<CourseAssignmentMarkWithPersonMarker>?> {
+            t -> run {
+        gradesHeaderAdapter?.visible = t.isNotEmpty()
+        marksAdapter?.submitList(t)
     }
     }
 
@@ -86,9 +92,9 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
-        mBinding = FragmentClazzAssignmentDetailOverviewBinding.inflate(inflater, container, false).also {
-            rootView = it.root
-        }
+//        mBinding = FragmentClazzAssignmentDetailOverviewBinding.inflate(inflater, container, false).also {
+//            rootView = it.root
+//        }
 
 
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
@@ -96,8 +102,8 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         mPresenter = ClazzAssignmentDetailStudentProgressPresenter(requireContext(), arguments.toStringMap(), this,
                 di, viewLifecycleOwner)
 
-        detailMergerRecyclerView =
-                rootView.findViewById(R.id.fragment_clazz_assignment_detail_overview)
+//        detailMergerRecyclerView =
+//                rootView.findViewById(R.id.fragment_clazz_assignment_detail_overview)
 
         // 1
         submissionsHeaderAdapter = SimpleHeadingRecyclerAdapter(getText(R.string.submissions).toString()).apply {
@@ -118,6 +124,10 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         // 4 mark grade
         markSubmissionAdapter = MarkFileSubmissionAdapter(this)
 
+        gradesHeaderAdapter = GradesHeaderAdapter(
+            onFilterOptionSelected = mPresenter)
+
+        marksAdapter = GradesListAdapter()
 
         // 5 - Private
         privateCommentsHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
@@ -137,14 +147,16 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             privateCommentsObserver = PagedListSubmitObserver(it)
         }
 
-        detailMergerRecyclerAdapter = ConcatAdapter(submissionsHeaderAdapter,
-                submissionStatusHeaderAdapter, submissionAdapter,
-                markSubmissionAdapter, privateCommentsHeadingRecyclerAdapter,
-                newPrivateCommentRecyclerAdapter, privateCommentsRecyclerAdapter)
+        detailMergerRecyclerAdapter = ConcatAdapter(
+            submissionsHeaderAdapter, submissionStatusHeaderAdapter, submissionAdapter,
+            markSubmissionAdapter, gradesHeaderAdapter, marksAdapter,
+            privateCommentsHeadingRecyclerAdapter, newPrivateCommentRecyclerAdapter,
+            privateCommentsRecyclerAdapter
+        )
         detailMergerRecyclerView?.adapter = detailMergerRecyclerAdapter
         detailMergerRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
-        return rootView
+        TODO("Will be removed")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -156,7 +168,6 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
     override fun onDestroyView() {
         super.onDestroyView()
         mPresenter = null
-        mBinding = null
         mPresenter = null
         entity = null
 
@@ -171,10 +182,16 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
     }
 
     override fun open(publicComment: Boolean) {
-        val sendCommentSheet = CommentsBottomSheet(publicComment, requireContext().getString(R.string.add_private_comment),
-                accountManager.activeAccount.personUid,  mPresenter?.newPrivateCommentListener)
-        sendCommentSheet.show(childFragmentManager, sendCommentSheet.tag)
+//        val sendCommentSheet = CommentsBottomSheet(publicComment, requireContext().getString(R.string.add_private_comment),
+//                accountManager.activeAccount.personUid,  mPresenter?.newPrivateCommentListener)
+//        sendCommentSheet.show(childFragmentManager, sendCommentSheet.tag)
     }
+
+    override var gradeFilterChips: List<ListFilterIdOption>? = null
+        set(value) {
+            field = value
+            gradesHeaderAdapter?.filterOptions = value
+        }
 
 
     override var clazzCourseAssignmentSubmissionAttachment: DataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>? = null
@@ -185,6 +202,17 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             field = value
             submissionAttachmentLiveDataCourse?.observeIfFragmentViewIsReady(this, fileSubmissionObserver)
         }
+
+
+    override var markList: DataSourceFactory<Int, CourseAssignmentMarkWithPersonMarker>? = null
+        set(value) {
+            val dbRepoVal = dbRepo?: return
+            courseMarkLiveData?.removeObserver(courseMarkObserver)
+            courseMarkLiveData = value?.asRepositoryLiveData(dbRepoVal.courseAssignmentMarkDao)
+            field = value
+            courseMarkLiveData?.observeIfFragmentViewIsReady(this, courseMarkObserver)
+        }
+
 
     override var clazzAssignmentPrivateComments: DataSource.Factory<Int, CommentsWithPerson>? = null
         set(value) {
@@ -221,7 +249,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             ustadFragmentTitle = value
         }
 
-    override var submissionScore: CourseAssignmentMark? = null
+    override var submissionScore: AverageCourseAssignmentMark? = null
         get() = field
         set(value) {
             field = value
@@ -244,16 +272,19 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             markSubmissionAdapter?.assignment = value
             submissionAdapter?.assignment = value
             submissionStatusHeaderAdapter?.assignment = value
+            marksAdapter?.courseblock = value?.block
         }
 
     override fun onSubmitGradeClicked() {
         val grade = markSubmissionAdapter?.grade ?: return
-        mPresenter?.onClickSubmitGrade(grade)
+        val comment = markSubmissionAdapter?.comment
+        mPresenter?.onClickSubmitGrade(grade, comment)
     }
 
     override fun onSubmitGradeAndMarkNextClicked() {
         val grade = markSubmissionAdapter?.grade ?: return
-        mPresenter?.onClickSubmitGradeAndMarkNext(grade)
+        val comment = markSubmissionAdapter?.comment
+        mPresenter?.onClickSubmitGradeAndMarkNext(grade, comment)
     }
 
     override fun onClickDeleteSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment) {

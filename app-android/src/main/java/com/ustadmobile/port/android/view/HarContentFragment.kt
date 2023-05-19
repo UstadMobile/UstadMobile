@@ -17,10 +17,12 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.util.mimeTypeToPlayStoreIdMap
 import com.ustadmobile.core.view.HarAndroidView
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.kodein.di.instance
 
 
 class HarContentFragment : UstadBaseFragment(), HarAndroidView, FragmentBackHandler {
@@ -31,16 +33,7 @@ class HarContentFragment : UstadBaseFragment(), HarAndroidView, FragmentBackHand
     private var presenter: HarContentPresenter? = null
     val recorder = PayloadRecorder()
 
-    private var networkManagerProvider: BleNetworkManagerProvider? = null
-
     private var mBinding: FragmentHarContentBinding? = null
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        if (context is BleNetworkManagerProvider) {
-            networkManagerProvider = context
-        }
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         mBinding = FragmentHarContentBinding.inflate(inflater, container, false).also {
@@ -61,9 +54,9 @@ class HarContentFragment : UstadBaseFragment(), HarAndroidView, FragmentBackHand
         super.onViewCreated(view, savedInstanceState)
         GlobalScope.launch(Dispatchers.Main) {
             val thisFrag = this@HarContentFragment
-            val networkManagerBle = networkManagerProvider?.networkManager?.await()
+            val embeddedHttp: EmbeddedHTTPD by di.instance()
             presenter = HarContentPresenter(requireContext(), arguments.toStringMap(),
-                    thisFrag, networkManagerBle?.httpd?.localHttpUrl ?: "", di).withViewLifecycle()
+                    thisFrag, embeddedHttp.localHttpUrl, di).withViewLifecycle()
             presenter?.onCreate(savedInstanceState.toNullableStringMap())
         }
     }

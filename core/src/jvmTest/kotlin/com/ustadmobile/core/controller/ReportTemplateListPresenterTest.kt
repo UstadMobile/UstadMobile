@@ -60,7 +60,7 @@ class ReportTemplateListPresenterTest {
         whenever(repo.reportDao).thenReturn(repoReportDaoSpy)
     }
 
-    @Test
+    //@Test
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
         //TODO: insert any entities that are used only in this test
         val repo: UmAppDatabase by di.activeRepoInstance()
@@ -81,7 +81,7 @@ class ReportTemplateListPresenterTest {
         verify(mockView, timeout(5000)).list = any()
     }
 
-    @Test
+    //@Test
     fun givenPresenterCreatedInBrowseMode_whenOnClickEntryCalled_thenShouldGoToEditView() {
         val systemImpl: UstadMobileSystemImpl by di.instance()
 

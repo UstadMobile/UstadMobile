@@ -113,6 +113,20 @@ expect abstract class UserSessionDao {
     @Query(FIND_LOCAL_SESSIONS_SQL)
     abstract suspend fun findAllLocalSessionsAsync(): List<UserSessionAndPerson>
 
+    @Query("""
+            SELECT UserSession.*, Person.*
+              FROM UserSession
+                   JOIN Person ON UserSession.usPersonUid = Person.personUid
+             WHERE Person.username = :username
+               AND UserSession.usClientNodeId = (
+                   SELECT COALESCE(
+                          (SELECT nodeClientId 
+                            FROM SyncNode
+                           LIMIT 1), 0))
+               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}        
+            """)
+    abstract suspend fun findLocalSessionByUsername(username: String?): UserSessionAndPerson?
+
     /**
      * Count sessions on this device. If maxDateOfBirth is non-zero, then this can be used to
      * provide a cut-off (e.g. to find only sessions for adults where their date of birth must be

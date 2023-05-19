@@ -25,7 +25,7 @@ import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_CLOUD
 /**
  * This RecyclerViewAdapter is intended to be placed in a MergeAdapter at the end. It
  */
-class ListStatusRecyclerViewAdapter<T>(var lifecycleOwner: LifecycleOwner?,
+class ListStatusRecyclerViewAdapter<T: Any>(var lifecycleOwner: LifecycleOwner?,
         val emptyStateString: String? = null,
         val emptyStateDrawableId: Int = R.drawable.ic_empty): ListAdapter<RepositoryLoadHelper.RepoLoadStatus, ListStatusRecyclerViewAdapter.StatusViewHolder>(LOAD_STATUS_DIFF_UTIL),
         Observer<RepositoryLoadHelper.RepoLoadStatus> {

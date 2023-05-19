@@ -1,7 +1,7 @@
 package com.ustadmobile.view.components
 
 import csstype.*
-import kotlinx.js.jso
+import js.core.jso
 import mui.material.*
 import react.FC
 import react.Props
@@ -43,6 +43,11 @@ external interface UstadSwitchFieldProps: Props {
      */
     var error: String?
 
+    /**
+     * DOM id
+     */
+    var id: String?
+
 }
 
 /**
@@ -62,6 +67,7 @@ val UstadSwitchField = FC<UstadSwitchFieldProps> { props ->
             labelPlacement = LabelPlacement.start
             control = Switch.create {
                 checked = props.checked
+                id = props.id
                 onChange = { _, value ->
                     props.onChanged(value)
                 }

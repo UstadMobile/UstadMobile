@@ -1,6 +1,10 @@
 package com.ustadmobile.mui.common
 
+import csstype.Cursor
+import csstype.Display
 import csstype.JustifyContent
+import csstype.PropertiesBuilder
+import js.core.jso
 import mui.material.*
 import muix.pickers.*
 import react.ReactNode
@@ -163,3 +167,37 @@ inline var StackProps.justifyContent: JustifyContent
     set(value) {
         asDynamic().justifyContent = value
     }
+
+inline fun PropertiesBuilder.input(
+    crossinline block: PropertiesBuilder.() -> Unit,
+) {
+    asDynamic().input = jso(block)
+}
+
+inline var PropertiesBuilder.inputCursor: Cursor?
+    get() = asDynamic().input?.cursor
+    set(value) {
+        if(asDynamic().input != null) {
+            asDynamic().input.cursor = value
+        }else {
+            asDynamic().input = jso<PropertiesBuilder> {
+                cursor = value
+            }
+        }
+    }
+
+
+inline var PropertiesBuilder.webKitLineClamp: Int
+    get() = asDynamic()["-webkit-line-clamp"]
+    set(value) {
+        asDynamic()["-webkit-line-clamp"] = value
+    }
+
+val DisplayWebkitBox = "-webkit-box".unsafeCast<Display>()
+
+inline var PropertiesBuilder.webkitBoxOrient: String
+    get() = asDynamic()["-webkit-box-orient"]
+    set(value) {
+        asDynamic()["-webkit-box-orient"] = value
+    }
+

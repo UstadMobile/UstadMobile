@@ -4,7 +4,7 @@
 
     <data>
 
-        <import type="com.ustadmobile.port.android.view.ClazzListFragment"/>
+        <import type="com.ustadmobile.port.android.view.clazz.list.ClazzListFragment"/>
 
         <variable
             name="clazz"

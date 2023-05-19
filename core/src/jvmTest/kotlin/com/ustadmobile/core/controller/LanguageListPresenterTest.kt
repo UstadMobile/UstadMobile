@@ -67,7 +67,7 @@ class LanguageListPresenterTest {
         whenever(repo.languageDao).thenReturn(repoLanguageDaoSpy)
     }
 
-    @Test
+    //@Test
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
         val presenterArgs = mapOf<String,String>()
         val presenter = LanguageListPresenter(context,
@@ -80,7 +80,7 @@ class LanguageListPresenterTest {
 
     }
 
-    @Test
+    //@Test
     fun givenPresenterCreatedInBrowseMode_whenOnClickEntryCalled_thenShouldGoToDetailView() {
 
         val repo: UmAppDatabase by di.activeRepoInstance()

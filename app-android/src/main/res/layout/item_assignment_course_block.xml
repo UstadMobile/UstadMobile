@@ -6,11 +6,12 @@
     <data>
         <import type="com.ustadmobile.lib.db.entities.CourseBlockWithCompleteEntity"/>
         <import type="com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics"/>
+        <import type="com.ustadmobile.lib.db.entities.ClazzAssignment"/>
         <import type="com.ustadmobile.lib.db.entities.CourseBlock"/>
         <import type="com.ustadmobile.lib.db.entities.CourseAssignmentSubmission"/>
-        <import type="com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment"/>
+        <import type="com.ustadmobile.port.android.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewFragment"/>
         <import type="com.ustadmobile.core.controller.SubmissionConstants"/>
-        <import type="com.ustadmobile.port.android.view.ClazzEditFragment"/>
+        <import type="com.ustadmobile.port.android.view.clazz.edit.ClazzEditFragment"/>
         <import type="android.view.View"/>
 
         <variable
@@ -122,7 +123,7 @@
             android:layout_marginStart="@dimen/dimen_12dp"
             app:layout_goneMarginStart="@dimen/dimen_0dp"
             android:visibility="@{assignment.mark != null ? View.VISIBLE : View.GONE}"
-            android:text='@{assignment.mark.camMark + &quot;/&quot; + block.cbMaxPoints + " " + @string/points}'
+            android:text='@{assignment.mark.averageScore + &quot;/&quot; + block.cbMaxPoints + " " + @string/points}'
             app:layout_constraintStart_toEndOf="@id/line3_deadline"
             app:layout_constraintTop_toBottomOf="@id/item_block_line2_desc"
             tools:text="8/10 points" />
@@ -139,7 +140,7 @@
             android:textColor="@color/errorColor"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:text="@{@string/late_penalty(block.cbLateSubmissionPenalty)}"
-            android:visibility="@{assignment.mark != null &amp; assignment.mark.camPenalty != 0 ? View.VISIBLE : View.GONE}"
+            android:visibility="@{assignment.mark != null &amp; assignment.mark.averagePenalty != 0 ? View.VISIBLE : View.GONE}"
             app:layout_constraintStart_toEndOf="@+id/submission_status_score_value"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/item_block_line2_desc"
@@ -188,12 +189,11 @@
             android:id="@+id/line3_progress_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:visibility="@{assignment.progressSummary.hasMetricsPermission ? View.VISIBLE : View.GONE}"
+            android:visibility="@{assignment.progressSummary.hasMetricsPermission || assignment.caMarkingType == ClazzAssignment.MARKED_BY_PEERS ? View.VISIBLE : View.GONE}"
             android:text="@{@string/three_num_items_with_name_with_comma(assignment.progressSummary.calculateNotSubmittedStudents(), @string/not_submitted_cap, assignment.progressSummary.submittedStudents, @string/submitted_cap, assignment.progressSummary.markedStudents, @string/marked)}"
             app:layout_constraintEnd_toEndOf="parent"
-            tools:visibility="gone"
             app:layout_constraintStart_toStartOf="@+id/item_block_line1_text"
-            app:layout_constraintTop_toBottomOf="@+id/deadline_barrier"
+            app:layout_constraintTop_toBottomOf="@+id/item_person_file_submission_status"
             tools:text="1 Not submitted, 2 Submitted, 2 Marked" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

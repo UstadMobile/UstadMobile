@@ -7,9 +7,7 @@
         <import type="android.view.View"/>
         <import type="com.ustadmobile.core.controller.PersonConstants"/>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
-        <import type="com.ustadmobile.core.controller.PersonDetailPresenter"/>
-        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
-        <import type="com.ustadmobile.port.android.view.CommentsBottomSheet"/>
+        <import type="com.ustadmobile.port.android.view.clazzassignment.CommentsBottomSheet"/>
 
         <variable
             name="chat"

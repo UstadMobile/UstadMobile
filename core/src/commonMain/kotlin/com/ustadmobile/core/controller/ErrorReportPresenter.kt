@@ -13,7 +13,6 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ErrorReport
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -41,10 +40,10 @@ class ErrorReportPresenter(
 
         val savedErrUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong()
             ?: navController.currentBackStackEntry?.savedStateHandle
-                ?.get<String>(KEY_ERROR_SAVED)?.toLong()
+                ?.get(KEY_ERROR_SAVED)?.toLong()
             ?: 0
 
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch(doorMainDispatcher()) {
             val errorReport = if(savedErrUid == 0L) {
                 ErrorReport().apply{
                     errorCode = arguments[ErrorReportView.ARG_ERR_CODE]?.toInt() ?: -1
@@ -74,7 +73,7 @@ class ErrorReportPresenter(
     }
 
     fun handleClickTakeMeHome() {
-        systemImpl.go(systemImpl.getAppConfigDefaultFirstDest(context), mapOf(), context,
+        systemImpl.go(systemImpl.getDefaultFirstDest(), mapOf(), context,
             UstadMobileSystemCommon.UstadGoOptions(
                 arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.ROOT_DEST,
                 false))

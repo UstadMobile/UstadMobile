@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -16,34 +18,33 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.viewModels
-import com.google.android.material.composethemeadapter.MdcTheme
+import androidx.lifecycle.lifecycleScope
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.viewmodel.SiteEnterLinkUiState
-import com.ustadmobile.core.viewmodel.SiteEnterLinkViewModel
-import com.ustadmobile.port.android.view.composable.UstadTextEditField
+import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
+import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
+import com.ustadmobile.port.android.view.composable.UstadErrorText
 
+class SiteEnterLinkFragment : UstadBaseMvvmFragment() {
 
-class SiteEnterLinkFragment : UstadBaseFragment() {
+    private val viewModel: SiteEnterLinkViewModel by ustadViewModels(::SiteEnterLinkViewModel)
 
-    private val viewModel: SiteEnterLinkViewModel by viewModels {
-        UstadViewModelProviderFactory(di, this, requireArguments())
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
+        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
 
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(
-                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
-            )
-
             setContent {
                 MdcTheme {
                     SiteEnterLinkScreenForViewModel(viewModel)
@@ -77,13 +78,29 @@ private fun SiteEnterLinkScreen(
 
         Text(stringResource(R.string.please_enter_the_linK))
 
-        UstadTextEditField(
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("site_link_text"),
             value = uiState.siteLink,
-            label = stringResource(id = R.string.site_link),
-            onValueChange = onEditTextValueChange,
-            errorString = uiState.linkError,
+            label = { Text(stringResource(id = R.string.site_link)) },
+            onValueChange = {
+                onEditTextValueChange(it)
+            },
+            isError = uiState.linkError != null,
             enabled = uiState.fieldsEnabled,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
+            keyboardActions = KeyboardActions(
+                onGo = {
+                    onClickNext()
+                }
+            )
         )
+
+        uiState.linkError?.also {
+            UstadErrorText(error = it)
+        }
+
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -91,6 +108,7 @@ private fun SiteEnterLinkScreen(
             onClick = onClickNext,
             enabled = uiState.fieldsEnabled,
             modifier = Modifier
+                .testTag("next_button")
                 .fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = colorResource(id = R.color.secondaryColor)
@@ -110,8 +128,10 @@ private fun SiteEnterLinkScreen(
         Button(
             onClick = onClickNewLearningEnvironment,
             modifier = Modifier
+                .testTag("create_new_button")
                 .fillMaxWidth(),
             elevation = null,
+            enabled = uiState.fieldsEnabled,
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color.Transparent,
                 contentColor = colorResource(id = R.color.primaryColor),

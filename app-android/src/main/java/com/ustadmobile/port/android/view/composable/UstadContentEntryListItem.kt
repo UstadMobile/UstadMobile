@@ -16,7 +16,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.impl.locale.entityconstants.ContentEntryTypeLabelConstants
@@ -33,24 +33,15 @@ import com.ustadmobile.port.android.view.ContentEntryDetailOverviewFragment.Comp
 fun UstadContentEntryListItem(
     modifier: Modifier = Modifier,
     contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
-
-    onClickContentEntry: (
-        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-    ) -> Unit = {},
-
-    onClickDownloadContentEntry: (
-        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-    ) -> Unit = {},
+    onClick: () -> Unit = { },
+    onClickDownload: () -> Unit = { },
 ) {
 
     val uiState = contentEntry.listItemUiState
     ListItem(
         modifier = modifier
             .alpha((uiState.containerAlpha).toFloat())
-            .clickable {
-                onClickContentEntry(uiState.contentEntry)
-            },
-
+            .clickable(onClick = onClick),
         text = { Text(uiState.contentEntry.title ?: "") },
         icon = {
             LeadingContent(
@@ -66,7 +57,7 @@ fun UstadContentEntryListItem(
         },
         trailing = {
             SecondaryAction(
-                onClick = onClickDownloadContentEntry,
+                onClick = onClickDownload,
                 contentEntry = uiState.contentEntry
             )
         }
@@ -179,11 +170,11 @@ private fun SecondaryContent(
 
 @Composable
 private fun SecondaryAction(
-    onClick: (ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit,
+    onClick: () -> Unit,
     contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 ){
     IconButton(
-        onClick = { onClick(contentEntry) },
+        onClick = onClick,
     ) {
 
         CircularProgressIndicator(

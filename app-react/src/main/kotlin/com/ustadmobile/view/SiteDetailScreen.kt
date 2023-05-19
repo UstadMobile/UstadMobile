@@ -6,7 +6,6 @@ import com.ustadmobile.core.viewmodel.SiteDetailUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.UstadDetailField
 import csstype.px
-import mui.icons.material.*
 import mui.material.*
 import mui.material.styles.TypographyVariant
 import mui.system.Stack
@@ -16,6 +15,11 @@ import react.FC
 import react.Props
 import react.create
 import mui.material.List
+import react.ReactNode
+
+import mui.icons.material.AccountBalanceRounded
+import mui.icons.material.HowToRegRounded
+import mui.icons.material.ManageSearchOutlined
 
 
 external interface SiteDetailProps : Props {
@@ -37,19 +41,19 @@ val SiteDetailComponent2 = FC<SiteDetailProps> { props ->
             UstadDetailField {
                 icon = AccountBalanceRounded.create()
                 labelText = strings[MessageID.name]
-                valueText = props.uiState.site?.siteName.toString()
+                valueText = ReactNode(props.uiState.site?.siteName.toString())
             }
 
             UstadDetailField {
                 icon = ManageSearchOutlined.create()
                 labelText = strings[MessageID.guest_login_enabled]
-                valueText = props.uiState.site?.guestLogin.toString()
+                valueText = ReactNode(props.uiState.site?.guestLogin.toString())
             }
 
             UstadDetailField {
                 icon = HowToRegRounded.create()
                 labelText = strings[MessageID.registration_allowed]
-                valueText = props.uiState.site?.registrationAllowed.toString()
+                valueText = ReactNode(props.uiState.site?.registrationAllowed.toString())
             }
 
             Typography {

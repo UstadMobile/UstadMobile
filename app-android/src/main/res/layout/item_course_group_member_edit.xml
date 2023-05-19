@@ -6,7 +6,7 @@
     <data>
 
         <import type="com.ustadmobile.lib.db.entities.CourseGroupMemberPerson"/>
-        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
+        <import type="com.ustadmobile.port.android.view.person.detail.PersonDetailFragment"/>
         <import type="com.ustadmobile.core.util.IdOption" />
         <import type="com.ustadmobile.port.android.view.CourseGroupSetEditFragmentEventHandler"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener" />

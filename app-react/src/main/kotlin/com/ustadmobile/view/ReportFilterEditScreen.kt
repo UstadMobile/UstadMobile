@@ -9,7 +9,7 @@ import com.ustadmobile.core.viewmodel.ReportFilterEditUiState
 import com.ustadmobile.lib.db.entities.ReportFilter
 import com.ustadmobile.lib.db.entities.UidAndLabel
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.UstadMessageIdDropDownField
+import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.view.components.UstadBlankIcon
 import csstype.px
@@ -22,7 +22,7 @@ import react.Props
 import react.ReactNode
 import react.create
 import react.dom.aria.ariaLabel
-import react.dom.html.InputMode
+import web.html.InputMode
 
 external interface ReportFilterEditScreenProps : Props {
 
@@ -65,7 +65,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
             direction = responsive(StackDirection.column)
             spacing = responsive(10.px)
 
-            UstadMessageIdDropDownField {
+            UstadMessageIdSelectField {
                 value = props.uiState.reportFilter?.reportFilterField ?: 0
                 label = strings[MessageID.report_filter_edit_field]
                 options = FieldConstants.FIELD_MESSAGE_IDS
@@ -74,7 +74,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                 onChange = {
                     props.onReportFilterChanged(
                         props.uiState.reportFilter?.shallowCopy {
-                            reportFilterField = it?.value ?: 0
+                            reportFilterField = it.value
                         })
                 }
             }
@@ -83,7 +83,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                 direction = responsive(StackDirection.row)
                 spacing = responsive(10.px)
 
-                UstadMessageIdDropDownField {
+                UstadMessageIdSelectField {
                     value = props.uiState.reportFilter?.reportFilterCondition ?: 0
                     label = strings[MessageID.report_filter_edit_condition]
                     options = ConditionConstants.CONDITION_MESSAGE_IDS
@@ -92,12 +92,12 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                     onChange = {
                         props.onReportFilterChanged(
                             props.uiState.reportFilter?.shallowCopy {
-                                reportFilterCondition = it?.value ?: 0
+                                reportFilterCondition = it.value
                             })
                     }
                 }
 
-                UstadMessageIdDropDownField {
+                UstadMessageIdSelectField {
                     value = props.uiState.reportFilter?.reportFilterDropDownValue ?: 0
                     label = strings[MessageID.report_filter_edit_values]
                     options = ContentCompletionStatusConstants.CONTENT_COMPLETION_STATUS_MESSAGE_IDS
@@ -106,7 +106,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                     onChange = {
                         props.onReportFilterChanged(
                             props.uiState.reportFilter?.shallowCopy {
-                                reportFilterDropDownValue = it?.value ?: 0
+                                reportFilterDropDownValue = it.value
                             })
                     }
                 }

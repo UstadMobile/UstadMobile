@@ -48,6 +48,8 @@ import com.ustadmobile.core.db.PermissionManagementIncomingReplicationListener
 import com.ustadmobile.core.contentjob.DummyContentPluginUploader
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.db.ext.preload
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.di.commonDomainDiModule
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.lib.util.SysPathUtil
@@ -62,10 +64,7 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.websocket.*
 import org.kodein.di.ktor.di
 import java.util.*
-import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
-import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.rest.logging.LogbackAntiLog
-import com.ustadmobile.lib.util.randomString
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -78,15 +77,18 @@ const val CONF_GOOGLE_API = "secret"
 /**
  * List of external commands (e.g. media converters) that must be found or have locations specified
  */
-val REQUIRED_EXTERNAL_COMMANDS = listOf("ffmpeg", "ffprobe")
+val REQUIRED_EXTERNAL_COMMANDS = emptyList<String>()
 
 /**
  * List of prefixes which are always answered by the KTOR server. When using JsDev proxy mode, any
  * other url will be sent to the JS dev proxy
  */
-val KTOR_SERVER_ROUTES = listOf("/UmAppDatabase", "/ConcatenatedContainerFiles2",
+val KTOR_SERVER_ROUTES = listOf(
+    "/UmAppDatabase", "/ConcatenatedContainerFiles2",
     "/ContainerEntryList", "/ContainerEntryFile", "/auth", "/ContainerMount",
-    "/ContainerUpload2", "/Site", "/import", "/contentupload", "/websocket", "/pdf")
+    "/ContainerUpload2", "/Site", "/import", "/contentupload", "/websocket", "/pdf",
+    "/api"
+)
 
 
 /**
@@ -102,6 +104,7 @@ private fun Endpoint.identifier(
     sanitizeDbNameFromUrl(url)
 }
 
+@Suppress("unused") // This is used as the KTOR server main module via application.conf
 fun Application.umRestApplication(
     dbModeOverride: String? = null,
     singletonDbName: String = "UmAppDatabase"
@@ -138,7 +141,8 @@ fun Application.umRestApplication(
         }
     }
 
-    install(CallLogging)
+    //Uncomment if needed -generates a lot of output
+    //install(CallLogging)
 
     Napier.takeLogarithm()
     Napier.base(LogbackAntiLog())
@@ -157,13 +161,33 @@ fun Application.umRestApplication(
 
     val dbMode = dbModeOverride ?:
         appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
-    val dataDirPath = File(environment.config.propertyOrNull("ktor.ustad.datadir")?.getString() ?: "data")
+
+    //When this is running through the start script created by Gradle, app_home will be set, and we
+    // will use this as the base directory for any relative path. If not, we will use the working
+    // directory as the base path.
+    val baseDir = System.getProperty("app_home")?.let { File(it) } ?: File(System.getProperty("user.dir"))
+    val dataDirPropValue = environment.config.propertyOrNull("ktor.ustad.datadir")?.getString() ?: "data"
+    val dataDirConf = File(dataDirPropValue)
+
+    val dataDirPath = if(dataDirConf.isAbsolute) {
+        dataDirConf
+    }else {
+        File(baseDir, dataDirPropValue)
+    }
+
+    fun String.replaceDbUrlVars(): String {
+        return replace("\${datadir}", dataDirPath.absolutePath)
+    }
+
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
 
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
 
     di {
         import(CommonJvmDiModule)
+        import(commonDomainDiModule(EndpointScope.Default))
+        bind<SupportedLanguagesConfig>() with singleton { SupportedLanguagesConfig() }
+
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {
             File(tmpRootDir, context.identifier(dbMode)).also {
                 it.takeIf { !it.exists() }?.mkdirs()
@@ -220,6 +244,7 @@ fun Application.umRestApplication(
                 UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
             val dbUrl = appConfig.property("ktor.database.url").getString()
                 .replace("(hostname)", dbHostName)
+                .replaceDbUrlVars()
             if(dbUrl.startsWith("jdbc:postgresql"))
                 Class.forName("org.postgresql.Driver")
 
@@ -233,12 +258,6 @@ fun Application.umRestApplication(
                 .addCallback(InsertDefaultSiteCallback())
                 .addMigrations(*migrationList().toTypedArray())
                 .build()
-
-            if(appConfig.propertyOrNull("ktor.database.cleardb")?.getString()?.toBoolean() == true) {
-                Napier.i("Clearing database ${db} as ktor.database.cleardb is set")
-                db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
-                db.insertDefaultSite()
-            }
 
             db.addIncomingReplicationListener(PermissionManagementIncomingReplicationListener(db))
 
@@ -299,7 +318,9 @@ fun Application.umRestApplication(
 
         bind<Scheduler>() with singleton {
             val dbProperties = environment.config.databasePropertiesFromSection("quartz",
-                "jdbc:sqlite:data/quartz.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
+                "jdbc:sqlite:\${datadir}/quartz.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
+            dbProperties.setProperty("url", dbProperties.getProperty("url").replaceDbUrlVars())
+
             InitialContext().apply {
                 bindDataSourceIfNotExisting("quartzds", dbProperties)
                 initQuartzDb("java:/comp/env/jdbc/quartzds")
@@ -325,13 +346,8 @@ fun Application.umRestApplication(
         }
 
         bind<Pbkdf2Params>() with singleton {
-            val systemImpl: UstadMobileSystemImpl = instance()
-            val numIterations = systemImpl.getAppConfigInt(
-                AppConfig.KEY_PBKDF2_ITERATIONS,
-                UstadMobileConstants.PBKDF2_ITERATIONS, context)
-            val keyLength = systemImpl.getAppConfigInt(
-                AppConfig.KEY_PBKDF2_KEYLENGTH,
-                UstadMobileConstants.PBKDF2_KEYLENGTH, context)
+            val numIterations = UstadMobileConstants.PBKDF2_ITERATIONS
+            val keyLength = UstadMobileConstants.PBKDF2_KEYLENGTH
 
             Pbkdf2Params(numIterations, keyLength)
         }
@@ -340,7 +356,6 @@ fun Application.umRestApplication(
             AuthManager(context, di).also { authManager ->
                 val repo: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_REPO)
                 runBlocking {
-                    //THIS IS A RACE CONDITION!!
                     repo.initAdminUser(context, authManager, di,
                         appConfig.propertyOrNull("ktor.ustad.adminpass")?.getString())
                 }
@@ -363,13 +378,13 @@ fun Application.umRestApplication(
         bind<File>(tag = DiTag.TAG_FILE_FFMPEG) with singleton {
             //The availability of ffmpeg is checked on startup
             SysPathUtil.findCommandInPath("ffmpeg",
-                manuallySpecifiedLocation = appConfig.commandFileProperty("ffmpeg"))!!
+                manuallySpecifiedLocation = appConfig.commandFileProperty("ffmpeg")) ?: File("err")
         }
 
         bind<File>(tag = DiTag.TAG_FILE_FFPROBE) with singleton {
             //The availability of ffmpeg is checked on startup
             SysPathUtil.findCommandInPath("ffprobe",
-                manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"))!!
+                manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"))  ?: File("err")
         }
 
         bind<File>(tag = DiTag.TAG_FILE_UPLOAD_TMP_DIR) with scoped(EndpointScope.Default).singleton {
@@ -405,7 +420,7 @@ fun Application.umRestApplication(
         }
 
         registerContextTranslator { call: ApplicationCall ->
-            appConfig.dbModeToEndpoint(call, dbMode)
+            call.callEndpoint
         }
 
         onReady {
@@ -472,8 +487,10 @@ fun Application.umRestApplication(
 
         GetAppRoute()
 
-        if (devMode) {
-            DevModeRoute()
+        route("api") {
+            route("pbkdf2"){
+                Pbkdf2Route()
+            }
         }
 
         static("umapp") {

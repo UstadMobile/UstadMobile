@@ -5,12 +5,12 @@ import android.view.MenuItem
 import android.view.View
 import android.webkit.WebView
 import android.widget.TextView
+import androidx.lifecycle.lifecycleScope
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.AboutPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.view.AboutView
-import com.ustadmobile.sharedse.network.NetworkManagerBle
-import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.launch
 import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
 
@@ -48,9 +48,9 @@ class AboutActivity : UstadBaseActivity(), AboutView, DIAware {
     }
 
     override fun setAboutHTML(aboutHTML: String) {
-        runOnUiThread {
+        lifecycleScope.launch {
             (findViewById<View>(R.id.about_html) as WebView)
-                    .loadData(aboutHTML, "text/html", "UTF-8")
+                .loadData(aboutHTML, "text/html", "UTF-8")
         }
     }
 
@@ -64,5 +64,4 @@ class AboutActivity : UstadBaseActivity(), AboutView, DIAware {
         return super.onOptionsItemSelected(item)
     }
 
-    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
 }

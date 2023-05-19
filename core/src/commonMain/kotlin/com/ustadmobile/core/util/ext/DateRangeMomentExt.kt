@@ -1,8 +1,8 @@
 package com.ustadmobile.core.util.ext
 
-import com.soywiz.klock.*
 import com.ustadmobile.lib.db.entities.DateRangeMoment
 import com.ustadmobile.lib.db.entities.Moment
+import kotlinx.datetime.*
 import kotlin.math.abs
 
 fun DateRangeMoment.toFixedDatePair(): Pair<Long, Long>{
@@ -19,18 +19,20 @@ fun Moment.toFixedDate(): Long{
     }else{
 
         if(relUnit == Moment.DAYS_REL_UNIT && relOffSet == -0){
-            return DateTime.now().startOfDay.unixMillisLong
+            return Clock.System.now().toLocalMidnight(TimeZone.currentSystemDefault())
+                .toEpochMilliseconds()
         }
 
-        val timeNow = DateTime.now().startOfDay
-        val timeOffset = when(relUnit){
-            Moment.DAYS_REL_UNIT -> timeNow - abs(relOffSet).days
-            Moment.MONTHS_REL_UNIT -> timeNow - abs(relOffSet).months
-            Moment.WEEKS_REL_UNIT -> timeNow - abs(relOffSet).weeks
-            Moment.YEARS_REL_UNIT -> timeNow - abs(relOffSet).years
-            else -> timeNow
+        val dateTimeUnit = when(relUnit){
+            Moment.DAYS_REL_UNIT -> DateTimeUnit.DAY
+            Moment.MONTHS_REL_UNIT -> DateTimeUnit.MONTH
+            Moment.WEEKS_REL_UNIT -> DateTimeUnit.WEEK
+            Moment.YEARS_REL_UNIT -> DateTimeUnit.YEAR
+            else -> throw IllegalArgumentException("relUnit not a valid Moment. REL UNIT constnat")
         }
-        return timeOffset.unixMillisLong
+
+        return Clock.System.now().minus(relOffSet, dateTimeUnit, TimeZone.currentSystemDefault())
+            .toEpochMilliseconds()
     }
 }
 
@@ -48,10 +50,11 @@ fun Moment.toDisplayString(): String{
     when(typeFlag){
 
         Moment.TYPE_FLAG_FIXED -> {
-
-            str += DateTime(fixedTime).format("dd/MM/yyyy")
-
+            val dateTime = Instant.fromEpochMilliseconds(fixedTime)
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+            str += "${dateTime.dayOfMonth}/${dateTime.monthNumber}/${dateTime.year}"
         }
+
         Moment.TYPE_FLAG_RELATIVE ->{
 
             if(relUnit == Moment.DAYS_REL_UNIT && relOffSet == -0){

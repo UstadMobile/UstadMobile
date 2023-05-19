@@ -1,13 +1,6 @@
 plugins {
     id 'org.jetbrains.kotlin.js'
 
-    /**
-     * This seems to work around a bug that prevents dead code elimination working as per
-     *  https://youtrack.jetbrains.com/issue/KT-51712
-     *
-     *
-     */
-    id "io.github.turansky.kfc.legacy-union" version "5.65.0"
     id 'org.jetbrains.kotlin.plugin.serialization'
 }
 
@@ -19,7 +12,9 @@ repositories {
 }
 
 kotlin {
-    js(LEGACY) {
+    js(IR) {
+        useCommonJs()
+
         browser {
             //Specify distribution bundle output directory - this is used by app-ktor-server as a
             // resource directory
@@ -27,20 +22,20 @@ kotlin {
                 directory = project.file("build/dist-web/umapp")
             }
 
-            binaries.executable()
-            webpackTask {
-                cssSupport.enabled = true
+            commonWebpackConfig {
+                cssSupport {
+                    it.enabled.set(true)
+                }
             }
-            runTask {
-                cssSupport.enabled = true
-            }
+
             testTask {
                 useKarma {
                     useChromeHeadless()
-                    webpackConfig.cssSupport.enabled = true
                 }
             }
         }
+
+        binaries.executable()
     }
 }
 
@@ -60,11 +55,13 @@ dependencies {
     implementation "org.jetbrains.kotlin-wrappers:kotlin-mui"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-mui-icons"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-emotion"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-query-core"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-react-query"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-virtual-core"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-react-virtual"
     implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
     implementation npm("@js-joda/timezone", "$version_npm_joda_timezone")
 
-    implementation npm("moment","$version_npm_moment")
-    implementation npm("moment-timezone","$version_npm_moment_timezone")
     implementation npm("@date-io/moment","$version_npm_mement_io")
     implementation npm("@mui/lab","$version_npm_mui_lab")
     implementation npm("@mui/styles","$version_npm_mui_styles")
@@ -73,7 +70,7 @@ dependencies {
     implementation npm("@mui/x-date-pickers", "$version_npm_mui_x_date_pickers")
     implementation npm("date-fns","$version_npm_date_fns")
     implementation npm("html-to-image","$version_npm_html_to_image")
-    implementation "com.github.UstadMobile.door:door-annotations:$version_door"
+    implementation "com.github.UstadMobile.door:room-annotations:$version_door"
     implementation "org.kodein.di:kodein-di:$version_kodein_di"
     implementation npm("react-google-charts","$version_npm_google_charts")
     implementation "com.github.UstadMobile.door:door-runtime:$version_door"
@@ -83,11 +80,9 @@ dependencies {
     implementation npm("timezones.json","$version_npm_timezones")
     implementation npm("striptags","$version_npm_striptags")
     implementation npm("mime-matcher","$version_npm_mime_matcher")
-    implementation npm("mui-rte","$version_npm_mui_rte")
-    implementation npm("draft-js","$version_npm_draft_js")
-    implementation npm("draft-js-export-html","$version_npm_draft_js_html_export")
+    implementation npm("react-quill", "$version_npm_react_quill")
     implementation npm("react-easy-sort","$version_npm_react_easy_sort")
-    implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
+    implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
     implementation "io.github.aakira:napier:$version_napier"
     implementation npm("linkifyjs", "$version_linkify_js")
     implementation npm("linkify-react", "$version_linkify_react")

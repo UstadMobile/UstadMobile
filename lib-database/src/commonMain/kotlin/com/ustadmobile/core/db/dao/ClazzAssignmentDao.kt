@@ -1,13 +1,20 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.core.db.MAX_VALID_DATE
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.ASSIGNMENT_PERMISSION
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL
 import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SUBMITTER_LIST_CTE
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SUBMITTER_LIST_WITHOUT_ASSIGNMENT_CTE
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.flow.Flow
 
 
 @DoorDao
@@ -87,7 +94,9 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
     abstract suspend fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
 
     @Query("""
-            $SUBMITTER_LIST_CTE
+           $ASSIGNMENT_PERMISSION,
+         
+           $SUBMITTER_LIST_CTE
             
             SELECT (SELECT COUNT(*) FROM SubmitterList) AS totalStudents,
             
@@ -125,10 +134,17 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
           AND caUid = :assignmentUid                  
     """)
     abstract fun getProgressSummaryForAssignment(
-        assignmentUid: Long, clazzUid: Long, group: String) : LiveData<AssignmentProgressSummary?>
+        assignmentUid: Long,
+        clazzUid: Long,
+        group: String,
+        submitterUid: Long,
+        loggedInPersonUid: Long
+    ) : LiveData<AssignmentProgressSummary?>
 
 
     @Query("""
+         $ASSIGNMENT_PERMISSION,
+         
          $SUBMITTER_LIST_CTE
         
          SELECT submitterId AS submitterUid,
@@ -182,27 +198,80 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
           WHERE name LIKE :searchText
        ORDER BY name 
     """)
-    abstract fun getSubmitterListForAssignment(
+    @QueryLiveTables(value = ["ClazzAssignment","CourseAssignmentMark","CourseAssignmentSubmission",
+    "Comments", "ClazzEnrolment", "Person","PersonGroupMember","ScopedGrant","Clazz","PeerReviewerAllocation",
+    "CourseGroupMember"])
+    abstract fun getSubmitterListForAssignmentSummary(
         assignmentUid: Long,
         clazzUid: Long,
         group: String,
-        searchText: String
-    ): DataSourceFactory<Int, PersonGroupAssignmentSummary>
+        searchText: String,
+        submitterUid: Long,
+        loggedInPersonUid: Long
+    ): DataSourceFactory<Int, AssignmentSubmitterSummary>
+
+    @Query("""
+         $SUBMITTER_LIST_WITHOUT_ASSIGNMENT_CTE
+        
+         SELECT submitterId AS submitterUid,
+                name, 
+                0 as fileSubmissionStatus,
+                (CASE WHEN :groupUid = 0 
+                 THEN 'TRUE' 
+                 ELSE 'FALSE' END) AS isGroupAssignment,
+                 
+                 '' as latestPrivateComment
+                 
+          FROM SubmitterList    
+      ORDER BY name         
+    """)
+    abstract suspend fun getSubmitterListForAssignmentList(
+        groupUid: Long,
+        clazzUid: Long,
+        group: String
+    ): List<AssignmentSubmitterSummary>
 
 
     @Query("""
-        SELECT (CASE WHEN ClazzAssignment.caGroupUid = 0 
-                     THEN :personUid 
-                     WHEN CourseGroupMember.cgmUid IS NULL 
-                     THEN 0 
-                     ELSE CourseGroupMember.cgmGroupNumber END) as submitterUid
+        $ASSIGNMENT_PERMISSION
+        
+        SELECT (CASE WHEN caMarkingType = ${ClazzAssignment.MARKED_BY_COURSE_LEADER}
+                    THEN (SELECT hasPermission FROM AssignmentPermission)
+                    ELSE PeerReviewerAllocation.praUid IS NOT NULL END)
           FROM ClazzAssignment
-               LEFT JOIN CourseGroupMember
-               ON cgmSetUid = ClazzAssignment.caGroupUid
-               AND cgmPersonUid = :personUid
-         WHERE caUid = :assignmentUid
+              
+               LEFT JOIN PeerReviewerAllocation
+               ON PeerReviewerAllocation.praToMarkerSubmitterUid = :selectedPersonUid
+               AND PeerReviewerAllocation.praMarkerSubmitterUid = :submitterUid
+               AND praActive
+         WHERE caUid = :caUid 
     """)
-    abstract suspend fun getSubmitterUid(assignmentUid: Long, personUid: Long): Long
+    abstract suspend fun canMarkAssignment(
+        caUid: Long,
+        clazzUid: Long,
+        loggedInPersonUid: Long,
+        submitterUid: Long,
+        selectedPersonUid: Long): Boolean
+
+
+
+    @Query("""
+         $SUBMITTER_LIST_WITHOUT_ASSIGNMENT_CTE
+        
+         SELECT COUNT(*) 
+          FROM SubmitterList
+    """)
+    abstract suspend fun getSubmitterCountFromAssignment(
+        groupUid: Long,
+        clazzUid: Long,
+        group: String
+    ): Int
+
+
+    @Query("""
+        $SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL
+    """)
+    abstract suspend fun getSubmitterUid(assignmentUid: Long, accountPersonUid: Long): Long
 
     @Update
     abstract suspend fun updateAsync(clazzAssignment: ClazzAssignment)
@@ -216,12 +285,46 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
 
 
     @Query("""
+        SELECT * 
+          FROM ClazzAssignment 
+         WHERE caUid = :uid
+    """)
+    abstract fun findByUidAsFlow(uid: Long): Flow<ClazzAssignment?>
+
+    @Query("""
+        SELECT EXISTS( 
+               SELECT PrsGrpMbr.groupMemberPersonUid
+                  FROM Clazz
+                       ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+                          :permission
+                          ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
+                 WHERE Clazz.clazzUid = 
+                       (SELECT caClazzUid 
+                          FROM ClazzAssignment
+                         WHERE caUid = :clazzAssignmentUid)
+                   AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid)
+    """)
+    abstract fun personHasPermissionWithClazzByAssignmentUidAsFlow(
+        accountPersonUid: Long,
+        clazzAssignmentUid: Long,
+        permission: Long
+    ): Flow<Boolean>
+
+    @Query("""
           SELECT COALESCE((
            SELECT caGroupUid
            FROM ClazzAssignment
           WHERE caUid = :uid),-1)
     """)
     abstract suspend fun getGroupUidFromAssignment(uid: Long): Long
+
+    @Query("""
+          SELECT COALESCE((
+           SELECT caMarkingType
+           FROM ClazzAssignment
+          WHERE caUid = :uid),-1)
+    """)
+    abstract suspend fun getMarkingTypeFromAssignment(uid: Long): Int
 
     @Query("""
         SELECT * 
@@ -245,4 +348,62 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
     abstract fun findByUidLive(uid: Long): LiveData<ClazzAssignment?>
 
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertListAsync(entities: List<ClazzAssignment>)
+
+    @Query("""
+        UPDATE ClazzAssignment
+           SET caActive = :active,
+               caLct = :changeTime
+         WHERE caUid IN (:uidList)   
+    """)
+    abstract suspend fun updateActiveByList(
+        uidList: List<Long>,
+        active: Boolean,
+        changeTime: Long
+    )
+
+    @Query("""
+        WITH PersonIsStudent(isStudent)
+             AS (SELECT EXISTS(
+                        SELECT ClazzEnrolment.clazzEnrolmentPersonUid
+                           FROM ClazzEnrolment
+                          WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+                            AND ClazzEnrolment.clazzEnrolmentClazzUid = 
+                                (SELECT caClazzUid 
+                                   FROM ClazzAssignment
+                                  WHERE caUid = :assignmentUid) 
+                            AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}))
+                        
+        SELECT ClazzAssignment.*,
+               CourseBlock.*,
+               ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL) AS submitterUid
+                   
+          FROM ClazzAssignment
+               JOIN CourseBlock
+                    ON CourseBlock.cbEntityUid = ClazzAssignment.caUid
+         WHERE ClazzAssignment.caUid = :assignmentUid           
+    """)
+    abstract fun findAssignmentCourseBlockAndSubmitterUidAsFlow(
+        assignmentUid: Long,
+        accountPersonUid: Long,
+    ): Flow<ClazzAssignmentCourseBlockAndSubmitterUid?>
+
+
+    @Query("""
+        WITH CourseBlockDeadlines(deadline, gracePeriod) AS
+             (SELECT CourseBlock.cbDeadlineDate AS deadline,
+                     CourseBlock.cbGracePeriodDate AS gracePeriod
+                FROM CourseBlock
+               WHERE CourseBlock.cbEntityUid = :assignmentUid
+                 AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+               LIMIT 1)
+        SELECT CASE
+               WHEN (SELECT gracePeriod 
+                       FROM CourseBlockDeadlines)
+                    BETWEEN 1 AND $MAX_VALID_DATE THEN (SELECT gracePeriod FROM CourseBlockDeadlines)
+               ELSE (SELECT deadline FROM CourseBlockDeadlines)
+               END AS latestSubmissionTimeAllowed
+    """)
+    abstract suspend fun getLatestSubmissionTimeAllowed(assignmentUid: Long): Long
 }

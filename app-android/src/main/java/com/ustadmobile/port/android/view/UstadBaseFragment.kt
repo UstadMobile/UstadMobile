@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -24,7 +23,6 @@ import com.ustadmobile.port.android.view.util.*
 import kotlinx.coroutines.CoroutineScope
 import org.kodein.di.*
 import org.kodein.di.android.x.closestDI
-import java.util.*
 
 /**
  * Created by mike on 10/15/15.
@@ -32,8 +30,6 @@ import java.util.*
 open class UstadBaseFragment : Fragment(), UstadView, DIAware {
 
     private var searchView: SearchView? = null
-
-    private val runOnAttach = Vector<Runnable>()
 
     protected var titleLifecycleObserver: TitleLifecycleObserver? = null
 
@@ -104,13 +100,15 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        /*
+        Disabled - will be removed upon completion of MVVM transition
         titleLifecycleObserver = TitleLifecycleObserver(null, (activity as? AppCompatActivity)?.supportActionBar).also {
             viewLifecycleOwner.lifecycle.addObserver(it)
         }
 
         if(fabManagementEnabled) {
             fabManager = FabManagerLifecycleObserver(
-                    (activity as? UstadListViewActivityWithFab)?.activityFloatingActionButton,
+                    (activity as? UstadActivityWithFab)?.activityFloatingActionButton,
                 false, 0, null).also {
                 viewLifecycleOwner.lifecycle.addObserver(it)
             }
@@ -139,6 +137,7 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
                 savedStateHandle?.set(KEY_ARG_SNACKBAR_SHOWN, true.toString())
             }
         }
+         */
 
     }
 
@@ -147,28 +146,9 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
     }
 
-    override fun runOnUiThread(r: Runnable?) {
-        if (activity != null) {
-            activity?.runOnUiThread(r)
-        } else {
-            runOnAttach.add(r)
-        }
-    }
-
     fun <T : UstadBaseController<*>> T.withViewLifecycle(): T {
         viewLifecycleOwner.lifecycle.addObserver(PresenterViewLifecycleObserver(this))
         return this
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-
-        val runnables = runOnAttach.iterator()
-        while (runnables.hasNext()) {
-            val current = runnables.next()
-            current.run()
-            runnables.remove()
-        }
     }
 
     companion object {

@@ -8,6 +8,7 @@ import com.ustadmobile.core.controller.TerminologyKeys
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toTermMap
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
+import com.ustadmobile.port.android.view.clazz.detailoverview.ClazzDetailOverviewEventListener
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
@@ -31,7 +32,7 @@ class CourseHeaderDetailRecyclerAdapter(val listener: ClazzDetailOverviewEventLi
                 return
             field = value
             viewHolder?.itemBinding?.clazz = value
-            val termMap = value?.terminology.toTermMap(json, systemImpl, context)
+            val termMap = value?.terminology.toTermMap(json, systemImpl)
             teacherStudentCount = """${clazz?.numTeachers ?: 0} ${termMap[TerminologyKeys.TEACHERS_KEY]}, ${clazz?.numStudents ?: 0} ${termMap[TerminologyKeys.STUDENTS_KEY]}"""
         }
 

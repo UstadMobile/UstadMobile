@@ -1,6 +1,6 @@
 package com.ustadmobile.core.util.ext
 
-import com.soywiz.klock.DateTime
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.controller.ReportFilterEditPresenter.Companion.genderMap
 import com.ustadmobile.core.controller.TerminologyKeys
@@ -8,9 +8,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.findEntriesByMd5SumsSafeAsync
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.schedule.localEndOfDay
-import com.ustadmobile.core.schedule.localMidnight
-import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.graph.LabelValueFormatter
 import com.ustadmobile.core.util.graph.MessageIdFormatter
 import com.ustadmobile.core.util.graph.TimeFormatter
@@ -28,6 +25,9 @@ import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
 import com.ustadmobile.lib.util.randomString
 import kotlinx.coroutines.delay
 import com.ustadmobile.core.db.dao.getResults
+import io.ktor.client.*
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 
 /**
  * Insert a new class and
@@ -37,7 +37,6 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(
     clazz: Clazz,
     impl: UstadMobileSystemImpl,
     termMap: Map<String, String>,
-    context: Any
 ) {
     clazz.clazzTeachersPersonGroupUid = personGroupDao.insertAsync(
             PersonGroup("${clazz.clazzName} - " + termMap[TerminologyKeys.TEACHER_KEY]))
@@ -46,10 +45,10 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(
             termMap[TerminologyKeys.STUDENTS_KEY]))
 
     clazz.clazzPendingStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
-            impl.getString(MessageID.pending_requests, context)))
+            impl.getString(MessageID.pending_requests)))
 
     clazz.clazzParentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
-            impl.getString(MessageID.parent, context)))
+            impl.getString(MessageID.parent)))
 
     clazz.takeIf { it.clazzCode == null }?.clazzCode = randomString(Clazz.CLAZZ_CODE_DEFAULT_LENGTH)
 
@@ -76,7 +75,10 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(
     }))
 
 
-    clazz.clazzUid = clazzDao.insertAsync(clazz)
+    val generatedUid = clazzDao.insertAsync(clazz)
+    if(clazz.clazzUid != 0L)
+        clazz.clazzUid = generatedUid
+
 }
 
 
@@ -102,7 +104,8 @@ suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Per
     }
 
     val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
-    val joinTime = DateTime.now().toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
+    val joinTime = Clock.System.now().toLocalMidnight(clazzTimeZone).toEpochMilliseconds()
+
     val clazzEnrolment = ClazzEnrolment().apply {
         clazzEnrolmentPersonUid = personToEnrol.personUid
         clazzEnrolmentClazzUid = clazzUid
@@ -128,11 +131,12 @@ suspend fun UmAppDatabase.processEnrolmentIntoClass(
         ?: throw IllegalArgumentException("processEnrolmentIntoClass: Class does not exist")
     val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
 
-    enrolment.clazzEnrolmentDateJoined = DateTime(enrolment.clazzEnrolmentDateJoined)
-        .toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
+    enrolment.clazzEnrolmentDateJoined = Instant.fromEpochMilliseconds(enrolment.clazzEnrolmentDateJoined)
+        .toLocalMidnight(clazzTimeZone).toEpochMilliseconds()
+
     if(enrolment.clazzEnrolmentDateLeft != Long.MAX_VALUE){
-        enrolment.clazzEnrolmentDateLeft = DateTime(enrolment.clazzEnrolmentDateLeft)
-            .toOffsetByTimezone(clazzTimeZone).localEndOfDay.utc.unixMillisLong
+        enrolment.clazzEnrolmentDateLeft = Instant.fromEpochMilliseconds(enrolment.clazzEnrolmentDateLeft)
+            .toLocalEndOfDay(clazzTimeZone).toEpochMilliseconds()
     }
 
     enrolment.clazzEnrolmentUid = clazzEnrolmentDao.insertAsync(enrolment)
@@ -197,7 +201,7 @@ suspend fun UmAppDatabase.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol: Pe
         throw AlreadyEnroledInSchoolException(existingEnrolment.first())
 
     val schoolTimeZone = schoolVal.schoolTimeZone?: "UTC"
-    val joinTime = DateTime.now().toOffsetByTimezone(schoolTimeZone).localMidnight.utc.unixMillisLong
+    val joinTime = Clock.System.now().toLocalMidnight(schoolTimeZone).toEpochMilliseconds()
     val schoolMember = SchoolMemberWithPerson().apply {
         schoolMemberPersonUid = personToEnrol.personUid
         schoolMemberSchoolUid = schoolUid
@@ -615,19 +619,20 @@ suspend fun UmAppDatabase.insertPersonAuthCredentials2(
     personUid: Long,
     password: String,
     pbkdf2Params: Pbkdf2Params,
-    site: Site? = null
+    endpoint: Endpoint,
+    httpClient: HttpClient,
 ) {
-    val db = (this as DoorDatabaseRepository).db as UmAppDatabase
-    val effectiveSite = site ?: db.siteDao.getSite()
-    val authSalt = effectiveSite?.authSalt ?: throw IllegalStateException("insertAuthCredentials: No auth salt!")
-    val lastChangedBy = db.syncNodeDao.getLocalNodeClientId()
-
-    personAuth2Dao.insertAsync(PersonAuth2().apply {
-        pauthUid = personUid
-        pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
-        pauthAuth = password.doublePbkdf2Hash(authSalt, pbkdf2Params).encodeBase64()
-        pauthLcb = lastChangedBy
-    })
+    val db = (this as? DoorDatabaseRepository)?.db as? UmAppDatabase ?: this
+    db.withDoorTransactionAsync {
+        val authSalt = db.siteDao.getSiteAuthSaltAsync()
+            ?: throw IllegalStateException("insertAuthCredentials: No auth salt!")
+        db.personAuth2Dao.insertAsync(PersonAuth2().apply {
+            pauthUid = personUid
+            pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
+            pauthAuth = password.doublePbkdf2Hash(authSalt, pbkdf2Params,
+                endpoint, httpClient).encodeBase64()
+        })
+    }
 }
 
 /**

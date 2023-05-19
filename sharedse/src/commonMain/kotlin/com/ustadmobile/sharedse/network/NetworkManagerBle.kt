@@ -16,12 +16,4 @@ expect open class NetworkManagerBle(
 
     override fun openBluetoothSettings()
 
-    override fun awaitWifiDirectGroupReady(timeout: Long): WiFiDirectGroupBle
-
-    override fun setWifiEnabled(enabled: Boolean): Boolean
-
-    override fun connectToWiFi(ssid: String, passphrase: String, timeout: Int)
-
-    override fun restoreWifi()
-
 }

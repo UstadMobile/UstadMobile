@@ -117,6 +117,11 @@ adb reverse tcp:8075 tcp:8075
 if [ "$(adb shell pm list packages com.toughra.ustadmobile)" != "" ]; then
   adb shell pm uninstall com.toughra.ustadmobile
 fi
+
+if [ "$(adb shell pm list packages com.toughra.ustadmobile2)" != "" ]; then
+  adb shell pm uninstall com.toughra.ustadmobile2
+fi
+
 adb install $TESTAPK
 
 TESTARG=$TEST
@@ -131,13 +136,16 @@ if [ "$USECONSOLEOUTPUT" == "1" ]; then
   OUTPUTARGS=""
 fi
 
-maestro --device=$TESTSERIAL test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
+maestro  --device=$TESTSERIAL  test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
-         -e TESTSERIAL=$TESTSERIAL $OUTPUTARGS \
+         -e TESTSERIAL=$TESTSERIAL $OUTPUTARGS\
          $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR
 
 TESTSTATUS=$?
 
 $SCRIPTDIR/../../testserver-controller/stop.sh
+
+#Uninstall when finished
+adb shell pm uninstall com.toughra.ustadmobile
 
 exit $TESTSTATUS

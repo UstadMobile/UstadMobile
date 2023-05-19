@@ -1,7 +1,5 @@
 package com.ustadmobile.core.util.ext
 
-import com.soywiz.klock.DateTime
-import com.soywiz.klock.years
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ABSENT
@@ -24,6 +22,10 @@ import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_ATTENDANCE
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_CLASSES
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_DURATION
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_LATES
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
 
 data class QueryParts(val sqlStr: String, val sqlListStr: String, val queryParams: Array<Any>)
 
@@ -207,17 +209,20 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                     val age = filter.reportFilterValue?.toInt() ?: 13
                     val betweenAgeX = filter.reportFilterValueBetweenX?.toInt() ?: 13
                     val betweenAgeY = filter.reportFilterValueBetweenY?.toInt() ?: 18
-                    val now = DateTime.now()
-                    val dateTimeAgeNow = now - age.years
-                    val dateTimeAgeX = now - betweenAgeX.years
-                    val dateTimeAgeY = now - betweenAgeY.years
+                    val now = Clock.System.now()
+                    val dateTimeAgeNow = now.minus(age, DateTimeUnit.YEAR, TimeZone.UTC)
+                        .toLocalMidnight(TimeZone.UTC)
+                    val dateTimeAgeX =  now.minus(betweenAgeX, DateTimeUnit.YEAR, TimeZone.UTC)
+                        .toLocalMidnight(TimeZone.UTC)
+                    val dateTimeAgeY = now.minus(betweenAgeY, DateTimeUnit.YEAR, TimeZone.UTC)
+                        .toLocalMidnight(TimeZone.UTC)
                     filterString += handleCondition(filter.reportFilterCondition)
                     when (filter.reportFilterCondition) {
-                        ReportFilter.CONDITION_GREATER_THAN -> filterString += "${dateTimeAgeNow.dateDayStart.unixMillisLong} "
-                        ReportFilter.CONDITION_LESS_THAN -> filterString += "${dateTimeAgeNow.dateDayStart.unixMillisLong} "
+                        ReportFilter.CONDITION_GREATER_THAN -> filterString += "${dateTimeAgeNow.toEpochMilliseconds()} "
+                        ReportFilter.CONDITION_LESS_THAN -> filterString += "${dateTimeAgeNow.toEpochMilliseconds()} "
                         ReportFilter.CONDITION_BETWEEN -> {
-                            filterString += """ ${dateTimeAgeX.dateDayStart.unixMillisLong} 
-                                AND ${dateTimeAgeY.dateDayStart.unixMillisDouble} """
+                            filterString += """ ${dateTimeAgeX.toEpochMilliseconds()} 
+                                AND ${dateTimeAgeY.toEpochMilliseconds()} """
                         }
                     }
                     whereList.add(filterString)

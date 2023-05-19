@@ -7,7 +7,7 @@
     <data>
 
         <import type="com.ustadmobile.lib.db.entities.CourseGroupMemberPerson"/>
-        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
+        <import type="com.ustadmobile.port.android.view.person.detail.PersonDetailFragment"/>
 
         <variable
             name="groupMember"

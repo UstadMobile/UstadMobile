@@ -37,10 +37,6 @@
             name="passwordConfirmError"
             type="String" />
 
-        <variable
-            name="activityEventHandler"
-            type="com.ustadmobile.port.android.view.PersonEditFragmentEventHandler" />
-
     </data>
 
     <androidx.core.widget.NestedScrollView

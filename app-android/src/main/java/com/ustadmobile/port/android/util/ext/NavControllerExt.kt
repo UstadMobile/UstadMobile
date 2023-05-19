@@ -26,8 +26,11 @@ fun NavController.currentBackStackEntrySavedStateMap() = this.currentBackStackEn
  * @param destination the destination, which when popped from the backstack, should trigger the given
  * file to be deleted.
  */
-fun NavController.registerDestinationTempFile(context: Context, file: File,
-                                              destination: NavDestination? = this.currentDestination) {
+fun NavController.registerDestinationTempFile(
+    context: Context,
+    file: File,
+    destination: NavDestination? = this.currentDestination
+) {
     val destinationId = destination?.id ?: return
     context.getSharedPreferences(SHAREDPREF_TMPFILE_REG, Context.MODE_PRIVATE).edit {
         putInt(file.absolutePath, destinationId)
@@ -54,8 +57,11 @@ fun NavController.unregisterDestinationTempFile(context: Context, file: File){
  * @param name filename to create (under context.cacheDir)
  * @param destination the destination with which this temporary file will be associated.
  */
-fun NavController.createTempFileForDestination(context: Context, name: String,
-                                               destination: NavDestination? = this.currentDestination): File {
+fun NavController.createTempFileForDestination(
+    context: Context,
+    name: String,
+    destination: NavDestination? = this.currentDestination
+): File {
     val newTmpFile = File(context.cacheDir, name)
     registerDestinationTempFile(context, newTmpFile, destination)
     return newTmpFile

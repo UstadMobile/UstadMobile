@@ -2,9 +2,6 @@ package com.ustadmobile.core.impl
 
 import com.ustadmobile.core.generated.locale.MessageIdMap
 import com.ustadmobile.core.impl.locale.StringsXml
-import com.ustadmobile.core.impl.nav.UstadNavController
-import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
-import com.ustadmobile.xmlpullparserkmp.setInputString
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlin.js.Date
@@ -26,7 +23,6 @@ import org.w3c.dom.HTMLAnchorElement
  *        if the display locale is not English.
  */
 actual open class UstadMobileSystemImpl(
-    private val navController: UstadNavController,
     private val defaultStringsXml: StringsXml,
     private val displayLocaleStringsXml: StringsXml?
 ): UstadMobileSystemCommon() {
@@ -107,22 +103,6 @@ actual open class UstadMobileSystemImpl(
      */
     actual fun getBuildTimestamp(context: Any): Long = Date().getTime().toLong()
 
-    /**
-     * Lookup a value from the app runtime configuration. These come from a properties file loaded
-     * from the assets folder, the path of which is set by the manifest preference
-     * com.sutadmobile.core.appconfig .
-     *
-     * @param key The config key to lookup
-     * @param defaultVal The default value to return if the key is not found
-     * @param context Systme context object
-     *
-     * @return The value of the key if found, if not, the default value provided
-     */
-    actual override fun getAppConfigString(key: String, defaultVal: String?): String? {
-        val value =  localStorage.getItem(key)
-        return  value ?: defaultVal
-    }
-
 
     override fun openFileInDefaultViewer(
         context: Any,
@@ -153,11 +133,11 @@ actual open class UstadMobileSystemImpl(
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any,
                            flags: Int,
                            ustadGoOptions: UstadGoOptions) {
-        navController.navigate(viewName,args as Map<String, String>,ustadGoOptions)
+        throw IllegalStateException("Not supported on JS anymore!")
     }
 
     actual fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any) {
-        navController.popBackStack(popUpToViewName,popUpInclusive)
+        throw IllegalStateException("Not supported on JS anymore!")
     }
 
     /**

@@ -2,115 +2,108 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.FragmentListBinding
-import com.toughra.ustadmobile.databinding.ItemTimeZoneBinding
-import com.ustadmobile.core.controller.OnSearchSubmitted
-import com.ustadmobile.core.controller.TimeZoneListPresenter
-import com.ustadmobile.core.util.ext.toNullableStringMap
-import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.TimeZoneListView
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ListItem
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
+import com.google.accompanist.themeadapter.material.MdcTheme
+import com.ustadmobile.core.util.ext.formattedString
+import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
+import com.ustadmobile.core.viewmodel.TimezoneListUiState
+import kotlinx.datetime.Clock
 import java.util.*
+import kotlinx.datetime.TimeZone as TimeZoneKt
 
-class TimeZoneListFragment : UstadBaseFragment() , TimeZoneListView, OnSearchSubmitted{
+class TimeZoneListFragment : UstadBaseMvvmFragment() {
 
-    class TimeZoneViewHolder(var binding: ItemTimeZoneBinding) : RecyclerView.ViewHolder(binding.root)
+    val viewModel: TimeZoneListViewModel by ustadViewModels(::TimeZoneListViewModel)
 
-    inner class TimeZoneRecyclerViewAdapter: ListAdapter<TimeZone, TimeZoneViewHolder>(DIFFUTIL_TIMEZONE) {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TimeZoneViewHolder {
-            return TimeZoneViewHolder(ItemTimeZoneBinding.inflate(LayoutInflater.from(parent.context),
-                parent, false)).also {
-                it.binding.fragment = this@TimeZoneListFragment
-            }
-        }
+        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
+        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
 
-        override fun onBindViewHolder(holder: TimeZoneViewHolder, position: Int) {
-            holder.binding.timeZone = getItem(position)
-        }
-    }
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+            )
 
-
-    var mDataBinding: FragmentListBinding? = null
-
-    private var mRecyclerAdapter: TimeZoneRecyclerViewAdapter? = null
-
-    private var mPresenter: TimeZoneListPresenter? = null
-
-    val allTimeZones : List<TimeZone> by lazy {
-        TimeZone.getAvailableIDs().map { TimeZone.getTimeZone(it) }.sortedBy { it.rawOffset }
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        mDataBinding = FragmentListBinding.inflate(inflater, container, false)
-        mRecyclerAdapter = TimeZoneRecyclerViewAdapter()
-        mDataBinding?.fragmentListRecyclerview?.layoutManager = LinearLayoutManager(requireContext())
-        mDataBinding?.fragmentListRecyclerview?.adapter = mRecyclerAdapter
-        mRecyclerAdapter?.submitList(allTimeZones)
-
-        mPresenter = TimeZoneListPresenter(requireContext(), arguments.toStringMap(),
-            this, di).withViewLifecycle()
-        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
-
-        return mDataBinding?.root
-    }
-
-    fun handleClickTimezone(timeZone: TimeZone) {
-        mPresenter?.handleClickTimeZone(timeZone.id)
-    }
-
-    override fun onSearchSubmitted(text: String?) {
-        if(text == null){
-            mRecyclerAdapter?.submitList(allTimeZones)
-            return
-        }
-
-        GlobalScope.launch {
-            val searchWords = text.split(Regex("\\s+"))
-            val filteredItems = allTimeZones.filter {timeZone ->
-                searchWords.any { timeZone.id.contains(it, ignoreCase = true) }
-                        || searchWords.any { timeZone.displayName.contains(it, ignoreCase = true) }
-            }
-            withContext(Dispatchers.Main) {
-                mRecyclerAdapter?.submitList(filteredItems)
+            setContent {
+                MdcTheme {
+                    TimeZoneListScreen(viewModel)
+                }
             }
         }
     }
+}
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        menu.findItem(R.id.menu_search).isVisible = true
-        searchManager?.searchListener = this
+@OptIn(ExperimentalMaterialApi::class)
+
+@Composable
+fun TimeZoneListScreen(
+    uiState: TimezoneListUiState,
+    onListItemClick: (TimeZoneKt) -> Unit,
+) {
+    val pager = remember(uiState.timeZoneList) {
+        Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
+            pagingSourceFactory = uiState.timeZoneList
+        )
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        mDataBinding?.fragmentListRecyclerview?.adapter = null
-        mRecyclerAdapter = null
-        mPresenter = null
-        mDataBinding = null
-    }
+    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
-    companion object {
-        val DIFFUTIL_TIMEZONE = object: DiffUtil.ItemCallback<TimeZone>() {
-            override fun areItemsTheSame(oldItem: TimeZone, newItem: TimeZone): Boolean {
-                return oldItem.id == newItem.id
+    val timeNow = Clock.System.now()
+
+    LazyColumn(
+        modifier = Modifier
+            .padding(vertical = 8.dp)
+            .fillMaxWidth()
+    ){
+        items(
+            items = lazyPagingItems,
+            key = { it.id },
+        ) { timeZone ->
+            val timeZoneFormatted: String = remember(timeZone?.id) {
+                timeZone?.formattedString(timeNow) ?: ""
             }
 
-            override fun areContentsTheSame(oldItem: TimeZone, newItem: TimeZone): Boolean {
-                return oldItem.id == newItem.id
-            }
+            ListItem(
+                modifier = Modifier
+                    .clickable { timeZone?.also { onListItemClick(it) } },
+                text = { Text(timeZoneFormatted) }
+            )
         }
-
-
-
     }
+}
+
+@Composable
+fun TimeZoneListScreen(
+    viewModel: TimeZoneListViewModel
+) {
+    val uiState: TimezoneListUiState by viewModel.uiState.collectAsState(TimezoneListUiState())
+    TimeZoneListScreen(
+        uiState = uiState,
+        onListItemClick = viewModel::onClickEntry
+    )
 }

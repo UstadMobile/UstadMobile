@@ -2,11 +2,14 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.ext.DoorTag
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
@@ -29,7 +32,9 @@ class SettingsPresenter(context: Any, arguments: Map<String, String>, view: Sett
             view.reasonLeavingVisible = isAdmin
             view.langListVisible = isAdmin
             val currentLangCode = impl.getLocale()
-            view.displayLanguage = impl.getAllUiLanguagesList().firstOrNull {
+            val supportedLangConfig: SupportedLanguagesConfig = di.direct.instance()
+
+            view.displayLanguage = supportedLangConfig.supportedUiLanguagesAndSysDefault(impl).firstOrNull {
                 it.langCode == currentLangCode
             }?.langDisplay ?: ""
         }

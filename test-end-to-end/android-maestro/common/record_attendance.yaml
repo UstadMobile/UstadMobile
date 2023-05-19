@@ -14,5 +14,5 @@ appId: com.toughra.ustadmobile
 - tapOn:
     text: "Partial"
     index: 1
-- takeScreenshot: "${TESTRESULTSDIR}/recorded_attendance"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/recorded_attendance"
 - tapOn: "Save"

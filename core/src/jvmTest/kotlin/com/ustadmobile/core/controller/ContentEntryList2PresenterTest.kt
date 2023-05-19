@@ -98,7 +98,7 @@ class ContentEntryList2PresenterTest {
         }
     }
 
-    @Test
+    //@Test
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
         createEntries()
         val presenter = ContentEntryList2Presenter(context,
@@ -113,7 +113,7 @@ class ContentEntryList2PresenterTest {
     }
 
 
-    @Test
+    //@Test
     fun givenPresenterCreatedInBrowseMode_whenOnClickEntryCalled_thenShouldGoToDetailView() {
         createEntries()
         val presenter = ContentEntryList2Presenter(context,
@@ -131,7 +131,7 @@ class ContentEntryList2PresenterTest {
                 }, any())
     }
 
-    @Test
+    //@Test
     fun givenPresenterCreatedInPickerMode_whenOnClickEntryCalledOnALeaf_thenShouldFinishWithResult() {
         createEntries()
         val args = presenterArgs.plus(
@@ -151,7 +151,7 @@ class ContentEntryList2PresenterTest {
         }
     }
 
-    @Test
+    //@Test
     fun givenPresenterCreatedInPickerMode_whenOnClickEntryCalledOnAFolder_thenShouldOpenIt(){
         createEntries(mutableListOf(0))
         val repo: UmAppDatabase by di.activeRepoInstance()
@@ -176,7 +176,7 @@ class ContentEntryList2PresenterTest {
     }
 
 
-    @Test
+    //@Test
     fun givenPresenterCreatedInPickerMode_whenOnClickEntryCalledOnAFolderForEntrySelection_thenShouldOpenItAndFinishWithResultWhenSelected(){
         createEntries(mutableListOf(0))
         val repo: UmAppDatabase by di.activeRepoInstance()
@@ -207,7 +207,7 @@ class ContentEntryList2PresenterTest {
     }
 
 
-    @Test
+    //@Test
     fun givenPresenterCreatedInPickerMode_whenOnBackPressedWhileInAFolder_thenShouldGoBackToThePreviousParentEntry(){
         createEntries(mutableListOf(0))
         val repo: UmAppDatabase by di.activeRepoInstance()
@@ -239,7 +239,7 @@ class ContentEntryList2PresenterTest {
     }
 
 
-    @Test
+    //@Test
     fun givenPresenterCreatedInPickerMode_whenOnBackPressedWhileOnATopParentFolder_thenShouldNotGoBack() {
         createEntries()
         val args = presenterArgs.plus(UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())

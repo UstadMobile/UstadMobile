@@ -4,30 +4,23 @@ import com.ustadmobile.core.db.RepSubscriptionInitListener
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageIdMap
 import com.ustadmobile.core.impl.*
+import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.impl.locale.StringsXml
-import com.ustadmobile.core.impl.nav.UstadNavController
-import com.ustadmobile.core.navigation.NavControllerJs
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJs
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.redux.ReduxAppStateManager
-import com.ustadmobile.redux.ReduxThemeState
-import com.ustadmobile.util.ContainerMounterJs
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.XmlSerializer
 import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.ktor.client.*
-import io.ktor.client.engine.js.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,6 +28,11 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import com.ustadmobile.core.impl.locale.JsStringXml
+import com.ustadmobile.util.resolveEndpoint
+import web.location.location
+import web.url.URLSearchParams
+
+
 
 /**
  * KodeIn DI builder for JS/Browser.
@@ -42,17 +40,23 @@ import com.ustadmobile.core.impl.locale.JsStringXml
 internal fun ustadJsDi(
     dbBuilt: UmAppDatabase,
     dbNodeIdAndAuth: NodeIdAndAuth,
-    appConfigs: HashMap<String, String>,
-    apiUrl: String,
     defaultStringsXmlStr: String,
     displayLocaleStringsXmlStr: String?,
+    json: Json,
+    httpClient: HttpClient,
+    configMap: Map<String, String>
 ) = DI {
+
+    import(commonDomainDiModule(EndpointScope.Default))
 
     val messageIdMapFlipped: Map<String, Int> by lazy {
         MessageIdMap.idMap.entries.associate { (k, v) -> v to k }
     }
 
     val xppFactory = XmlPullParserFactory.newInstance()
+
+    val apiUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
+    console.log("Api URL = $apiUrl (location.href = ${location.href}")
 
     bind<StringsXml>(tag = JsStringXml.DEFAULT) with singleton {
         val defaultXpp = xppFactory.newPullParser()
@@ -70,19 +74,20 @@ internal fun ustadJsDi(
         }
     }
 
+    bind<SupportedLanguagesConfig>() with singleton {
+        configMap["com.ustadmobile.uilanguages"]?.let {languageList ->
+            SupportedLanguagesConfig(languageList)
+        } ?: SupportedLanguagesConfig()
+    }
+
+    bind<ApiUrlConfig>() with singleton {
+        ApiUrlConfig(apiUrl)
+    }
+
     bind<UstadMobileSystemImpl>() with singleton {
         UstadMobileSystemImpl(
-            instance(),
             instance(tag = JsStringXml.DEFAULT), instanceOrNull(tag = JsStringXml.DISPLAY)
-        ).also { impl ->
-            appConfigs.forEach {
-                val value = when(it.key){
-                    AppConfig.KEY_API_URL -> apiUrl
-                    else -> it.value
-                }
-                impl.setAppPref(it.key, value)
-            }
-        }
+        )
     }
 
     bind<UstadAccountManager>() with singleton {
@@ -116,14 +121,6 @@ internal fun ustadJsDi(
 
     constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with false
 
-    bind<ReduxThemeState>() with singleton{
-        ReduxThemeState(ReduxAppStateManager.getCurrentState().appTheme?.theme)
-    }
-
-    bind<ContainerMounter>() with singleton {
-        ContainerMounterJs()
-    }
-
     bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
         XmlPullParserFactory.newInstance().also {
             it.setNamespaceAware(true)
@@ -147,16 +144,7 @@ internal fun ustadJsDi(
     }
 
     bind<HttpClient>() with singleton {
-        HttpClient(Js) {
-            install(ContentNegotiation) {
-                json(json = instance())
-            }
-            install(HttpTimeout)
-        }
-    }
-
-    bind<UstadNavController>() with singleton {
-        NavControllerJs(json = instance())
+        httpClient
     }
 
     bind<ContainerStorageManager> () with scoped(EndpointScope.Default).singleton{
@@ -172,13 +160,8 @@ internal fun ustadJsDi(
     }
 
     bind<Pbkdf2Params>() with singleton {
-        val systemImpl: UstadMobileSystemImpl = instance()
-        val numIterations = systemImpl.getAppConfigInt(
-            AppConfig.KEY_PBKDF2_ITERATIONS,
-            UstadMobileConstants.PBKDF2_ITERATIONS, this)
-        val keyLength = systemImpl.getAppConfigInt(
-            AppConfig.KEY_PBKDF2_KEYLENGTH,
-            UstadMobileConstants.PBKDF2_KEYLENGTH, this)
+        val numIterations = UstadMobileConstants.PBKDF2_ITERATIONS
+        val keyLength = UstadMobileConstants.PBKDF2_KEYLENGTH
 
         Pbkdf2Params(numIterations, keyLength)
     }
@@ -186,9 +169,6 @@ internal fun ustadJsDi(
     bind<ClazzLogCreatorManager>() with singleton { ClazzLogCreatorManagerJs() }
 
     bind<Json>() with singleton {
-        Json {
-            encodeDefaults = true
-            ignoreUnknownKeys = true
-        }
+        json
     }
 }

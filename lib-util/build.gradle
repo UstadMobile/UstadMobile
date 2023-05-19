@@ -2,7 +2,6 @@
 plugins {
     id 'org.jetbrains.kotlin.multiplatform'
     id 'com.android.library'
-    id 'maven-publish'
     id 'org.jetbrains.kotlin.plugin.serialization'
 }
 
@@ -25,21 +24,21 @@ android {
 
 
     compileOptions {
-        sourceCompatibility = '1.8'
-        targetCompatibility = '1.8'
+        sourceCompatibility = '17'
+        targetCompatibility = '17'
     }
     namespace 'com.ustadmobile.lib.util'
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
         kotlinOptions {
-            jvmTarget = "1.8"
+            jvmTarget = "17"
         }
     }
 
 }
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility = '17'
+targetCompatibility = '17'
 
 group rootProject.group
 version rootProject.version
@@ -65,12 +64,11 @@ kotlin {
 
     android()
 
-    js(LEGACY) {
+    js(IR) {
         browser {
             testTask {
                 useKarma {
                     useChromeHeadless() //change to useChrome to run the actual browser
-                    webpackConfig.cssSupport.enabled = true
                 }
             }
         }
@@ -84,7 +82,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
-                implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
+                implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
             }
         }
 
@@ -125,23 +123,6 @@ kotlin {
             dependsOn commonJvmMain
         }
 
-    }
-}
-
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId rootProject.group
-            artifactId project.name
-            version rootProject.version
-        }
-    }
-
-    repositories {
-        maven {
-            url rootProject.ext.buildConfigProperties['repo.dir']
-        }
     }
 }
 

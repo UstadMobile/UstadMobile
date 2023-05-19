@@ -15,7 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
@@ -30,7 +29,7 @@ import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntryEdit2Binding
 import com.ustadmobile.core.contentjob.MetadataResult
@@ -44,7 +43,7 @@ import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.viewmodel.ContentEntryEditUiState
-import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
+import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
@@ -200,8 +199,8 @@ class ContentEntryEdit2Fragment(
     override var fileImportErrorVisible: Boolean = false
         set(value) {
             val typedVal = TypedValue()
-            requireActivity().theme.resolveAttribute(if (value) R.attr.colorError
-            else R.attr.colorOnSurface, typedVal, true)
+            requireActivity().theme.resolveAttribute(if (value) androidx.appcompat.R.attr.colorError
+            else com.google.android.material.R.attr.colorOnSurface, typedVal, true)
             mBinding?.importErrorColor = typedVal.data
             mBinding?.isImportError = value
             field = value
@@ -672,7 +671,6 @@ fun ContentEntryEditScreenPreview() {
                 cbMaxPoints = 78
                 cbCompletionCriteria = 14
             },
-            gracePeriodVisible = true,
         ),
         storageOptions = listOf(
             ContainerStorageDir(
