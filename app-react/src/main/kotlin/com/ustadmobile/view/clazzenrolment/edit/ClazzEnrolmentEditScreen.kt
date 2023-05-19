@@ -1,5 +1,6 @@
 package com.ustadmobile.view.clazzenrolment.edit
 
+import com.ustadmobile.core.db.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
@@ -100,6 +101,7 @@ val ClazzEnrolmentEditScreenComponent = FC<ClazzEnrolmentEditScreenProps> { prop
                             clazzEnrolmentDateLeft = it
                     })
                 }
+                unsetDefault = UNSET_DISTANT_FUTURE
             }
 
 

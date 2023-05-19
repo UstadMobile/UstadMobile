@@ -100,6 +100,8 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        /*
+        Disabled - will be removed upon completion of MVVM transition
         titleLifecycleObserver = TitleLifecycleObserver(null, (activity as? AppCompatActivity)?.supportActionBar).also {
             viewLifecycleOwner.lifecycle.addObserver(it)
         }
@@ -135,6 +137,7 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
                 savedStateHandle?.set(KEY_ARG_SNACKBAR_SHOWN, true.toString())
             }
         }
+         */
 
     }
 

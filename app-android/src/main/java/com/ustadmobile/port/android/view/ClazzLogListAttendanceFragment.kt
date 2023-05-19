@@ -252,17 +252,17 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        autoShowFabOnAddPermission = false
-        mPresenter = ClazzLogListAttendancePresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di, viewLifecycleOwner).withViewLifecycle().also {
-            mDataRecyclerViewAdapter = ClazzLogListRecyclerAdapter(it, clazzTimeZone)
-        }
-
-
-        graphRecyclerViewAdapter = ClazzLogListGraphRecyclerAdapter(mPresenter,
-                clazzTimeZone ?: "UTC", requireContext())
-        mMergeRecyclerViewAdapter = ConcatAdapter(graphRecyclerViewAdapter, mDataRecyclerViewAdapter)
-        mRecyclerView?.adapter = mMergeRecyclerViewAdapter
+//        autoShowFabOnAddPermission = false
+//        mPresenter = ClazzLogListAttendancePresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
+//                this, di, viewLifecycleOwner).withViewLifecycle().also {
+//            mDataRecyclerViewAdapter = ClazzLogListRecyclerAdapter(it, clazzTimeZone)
+//        }
+//
+//
+//        graphRecyclerViewAdapter = ClazzLogListGraphRecyclerAdapter(mPresenter,
+//                clazzTimeZone ?: "UTC", requireContext())
+//        mMergeRecyclerViewAdapter = ConcatAdapter(graphRecyclerViewAdapter, mDataRecyclerViewAdapter)
+//        mRecyclerView?.adapter = mMergeRecyclerViewAdapter
 
         return view
     }
@@ -275,14 +275,14 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fabManager?.text = requireContext().getString(R.string.record_attendance)
-        fabManager?.icon = R.drawable.baseline_assignment_turned_in_24
-        fabManager?.onClickListener = {
-            val bottomSheet = OptionsBottomSheetFragment(recordAttendanceOptions?.map {
-                it.toBottomSheetOption()
-            } ?: listOf(), this)
-            bottomSheet.show(childFragmentManager, bottomSheet.tag)
-        }
+//        fabManager?.text = requireContext().getString(R.string.record_attendance)
+//        fabManager?.icon = R.drawable.baseline_assignment_turned_in_24
+//        fabManager?.onClickListener = {
+//            val bottomSheet = OptionsBottomSheetFragment(recordAttendanceOptions?.map {
+//                it.toBottomSheetOption()
+//            } ?: listOf(), this)
+//            bottomSheet.show(childFragmentManager, bottomSheet.tag)
+//        }
     }
 
     /**

@@ -213,6 +213,8 @@ abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        /*
+        Disabled - will be removed on completion of MVVM transition
         mDataBinding?.presenter = listPresenter
         mListStatusAdapter = ListStatusRecyclerViewAdapter(viewLifecycleOwner)
 
@@ -235,6 +237,7 @@ abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
 
 
         listPresenter?.onCreate(savedInstanceState.toStringMap())
+         */
     }
 
     override fun onDestroyView() {

@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
@@ -257,25 +258,26 @@ fun ClazzListItem(
                     Text(
                         text = clazz?.clazzName ?: "",
                         style = MaterialTheme.typography.h6,
+                        maxLines = 1,
                     )
                     HtmlText(
                         html = clazz?.clazzDesc ?: "",
-                        htmlMaxLines = 3,
+                        htmlMaxLines = 2,
                     )
                 }
 
-                if(role != null) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Badge,
-                            contentDescription = "",
-                        )
-                        Text(messageIdResource(id = role))
-                    }
-                }
+//                if(role != null) {
+//                    Row(
+//                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+//                        verticalAlignment = Alignment.CenterVertically
+//                    ) {
+//                        Icon(
+//                            imageVector = Icons.Filled.Badge,
+//                            contentDescription = "",
+//                        )
+//                        Text(messageIdResource(id = role))
+//                    }
+//                }
             }
 
             Row(

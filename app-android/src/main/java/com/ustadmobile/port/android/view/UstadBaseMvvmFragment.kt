@@ -176,7 +176,8 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
         fun detach() {
             searchView?.setOnQueryTextListener(null)
             searchView?.setOnCloseListener(null)
-
+            closeSearchBackPressedCallback.remove()
+            searchView = null
         }
     }
 
@@ -304,9 +305,14 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
-        mMenuProvider?.detach()
+        mMenuProvider?.also {
+            it.detach()
+            requireActivity().removeMenuProvider(it)
+        }
         mMenuProvider = null
+
+        super.onDestroyView()
+
     }
 
     companion object {

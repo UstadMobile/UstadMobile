@@ -72,6 +72,7 @@ abstract class UstadMvvmTabsFragment(
         mPagerAdapter = null
         mBinding = null
         mediator = null
+        mTabs = emptyList()
 
         super.onDestroyView()
     }
