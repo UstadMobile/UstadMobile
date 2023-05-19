@@ -18,6 +18,7 @@ import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
+import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
@@ -237,7 +238,13 @@ class ClazzMemberListViewModel(
     fun onClickEntry(
         entry: PersonWithClazzEnrolmentDetails
     ) {
-        //navigate to enrolmentlist
+        navController.navigate(
+            viewName = ClazzEnrolmentListViewModel.DEST_NAME,
+            args = mapOf(
+                UstadView.ARG_PERSON_UID to entry.personUid.toString(),
+                UstadView.ARG_CLAZZUID to clazzUid.toString(),
+            )
+        )
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {

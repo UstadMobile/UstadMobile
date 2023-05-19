@@ -47,7 +47,7 @@ import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.view.clazzenrolment.edit.ClazzEnrolmentEditScreen
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
-import com.ustadmobile.view.clazzenrolment.list.ClazzEnrolmentListPreview
+import com.ustadmobile.view.clazzenrolment.list.ClazzEnrolmentListScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -87,7 +87,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         ClazzEnrolmentEditScreen
     ),
     UstadScreen(ClazzEnrolmentListViewModel.DEST_NAME, "ClazzEnrolmentsList",
-        ClazzEnrolmentListPreview),
+        ClazzEnrolmentListScreen),
     UstadScreen(SiteTermsDetailView.VIEW_NAME, "SiteTermsDetail Preview",
         SiteTermsDetailScreenPreview),
     UstadScreen(RegisterMinorWaitForParentView.VIEW_NAME, "RegisterMinorWaitForParent Preview",

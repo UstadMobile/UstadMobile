@@ -1,15 +1,17 @@
 package com.ustadmobile.view.clazzenrolment.list
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.ClazzEnrolmentListConstants
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListItemUiState
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListUiState
+import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
 import com.ustadmobile.hooks.courseTerminologyResource
 import com.ustadmobile.hooks.useCourseTerminologyEntries
 import com.ustadmobile.hooks.useFormattedDateRange
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
-import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.lib.db.entities.TerminologyEntry
 import com.ustadmobile.mui.components.UstadQuickActionButton
@@ -116,6 +118,19 @@ private val ClazzEnrolmentListItem = FC<ClazzenrolmentListItemProps> { props ->
             secondary = ReactNode(joinedLeftDate)
         }
     }
+}
+
+val ClazzEnrolmentListScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        ClazzEnrolmentListViewModel(di, savedStateHandle)
+    }
+    val uiStateVal by viewModel.uiState.collectAsState(ClazzEnrolmentListUiState())
+    ClazzEnrolmentListComponent2 {
+        uiState = uiStateVal
+        onEditItemClick = viewModel::onClickEditEnrolment
+        onViewProfileClick = viewModel::onClickViewProfile
+    }
+
 }
 
 

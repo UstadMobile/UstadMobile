@@ -7,7 +7,7 @@ object ClazzEnrolmentListConstants {
     val ROLE_TO_MESSAGE_ID_MAP: Map<Int, Int> = mapOf(
         ClazzEnrolment.ROLE_STUDENT to MessageID.student,
         ClazzEnrolment.ROLE_TEACHER to MessageID.teacher,
-        ClazzEnrolment.ROLE_TEACHER to MessageID.parent,
+        ClazzEnrolment.ROLE_PARENT to MessageID.parent,
         ClazzEnrolment.ROLE_STUDENT_PENDING to MessageID.pending
     )
 

@@ -61,8 +61,8 @@ class ClazzEnrolmentListPresenter(
             view.person = repo.personDao.findByUidAsync(selectedPerson)
             view.clazz = repo.clazzDao.findByUidAsync(selectedClazz)
 
-            view.enrolmentList = repo.clazzEnrolmentDao.findAllEnrolmentsByPersonAndClazzUid(
-                    selectedPerson, selectedClazz)
+//            view.enrolmentList = repo.clazzEnrolmentDao.findAllEnrolmentsByPersonAndClazzUid(
+//                    selectedPerson, selectedClazz)
         }
     }
 
