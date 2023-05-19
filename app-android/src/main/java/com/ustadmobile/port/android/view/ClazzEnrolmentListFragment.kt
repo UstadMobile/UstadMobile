@@ -31,7 +31,7 @@ import com.ustadmobile.core.impl.locale.entityconstants.ClazzEnrolmentListConsta
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.view.ClazzEnrolmentListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
-import com.ustadmobile.core.viewmodel.ClazzEnrolmentListUiState
+import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListUiState
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
