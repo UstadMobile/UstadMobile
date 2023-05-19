@@ -8,21 +8,21 @@ import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.util.ext.whenSubscribed
-import com.ustadmobile.core.view.ClazzEnrolmentEditView
-import com.ustadmobile.core.view.ClazzMemberListView
+import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
+import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 import com.ustadmobile.lib.db.entities.Role
@@ -215,13 +215,19 @@ class ClazzMemberListViewModel(
     }
 
     fun onClickAddNewMember(role: Int) {
+        val goToOnPersonSelectedArg = ClazzEnrolmentEditViewModel.DEST_NAME
+            .appendQueryArgs(mapOf(
+                UstadView.ARG_CLAZZUID to clazzUid.toString(),
+                UstadView.ARG_POPUPTO_ON_FINISH to destinationName,
+                ClazzEnrolmentEditViewModel.ARG_ROLE to role.toString(),
+            ))
+
         val args = mutableMapOf(
             PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to clazzUid.toString(),
-            ClazzEnrolmentEditViewModel.ARG_ROLE to role.toString(),
-            UstadView.ARG_CLAZZUID to clazzUid.toString(),
-            UstadView.ARG_GO_TO_COMPLETE to ClazzEnrolmentEditView.VIEW_NAME,
-            UstadView.ARG_POPUPTO_ON_FINISH to destinationName,
+            UstadView.ARG_LISTMODE to ListViewMode.PICKER.mode,
+            PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED to goToOnPersonSelectedArg,
         )
+
         navController.navigate(
             viewName = PersonListViewModel.DEST_NAME,
             args = args

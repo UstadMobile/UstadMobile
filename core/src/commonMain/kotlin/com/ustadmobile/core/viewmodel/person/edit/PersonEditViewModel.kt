@@ -9,10 +9,12 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonEditView.Companion.REGISTER_MODE_MINOR
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_UNSET
@@ -363,12 +365,12 @@ class PersonEditViewModel(
 
                 //Handle the following scenario: ClazzMemberList (user selects to add a student to enrol),
                 // PersonList, PersonEdit, EnrolmentEdit
-                val goToOnComplete = savedStateHandle[UstadView.ARG_GO_TO_COMPLETE]
-                if(goToOnComplete != null) {
-                    navController.navigate(goToOnComplete, mutableMapOf<String, String>().apply {
-                        putFromSavedStateIfPresent(savedStateHandle, ON_COMPLETE_PASS_ARGS)
-                        put(UstadView.ARG_PERSON_UID, savePerson.personUid.toString())
-                    }.toMap())
+                val goToOnPersonSelected = savedStateHandle[ARG_GO_TO_ON_PERSON_SELECTED]
+
+                if(goToOnPersonSelected != null) {
+                    val args = UMFileUtil.parseURLQueryString(goToOnPersonSelected) +
+                        mapOf(UstadView.ARG_PERSON_UID to savePerson.personUid.toString())
+                    navController.navigate(goToOnPersonSelected.substringBefore("?"), args)
                 }else {
                     finishWithResult(PersonDetailView.VIEW_NAME, savePerson.personUid, savePerson)
                 }
@@ -381,12 +383,6 @@ class PersonEditViewModel(
     companion object {
 
         const val STATE_KEY_PICTURE = "picState"
-
-        val ON_COMPLETE_PASS_ARGS = listOf(
-            UstadView.ARG_CLAZZUID,
-            UstadView.ARG_FILTER_BY_ENROLMENT_ROLE,
-            UstadView.ARG_POPUPTO_ON_FINISH,
-        )
 
     }
 

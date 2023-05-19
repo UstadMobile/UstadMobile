@@ -31,8 +31,12 @@ abstract class UstadListViewModel<S>(
 
     open val listMode: ListViewMode
         get() {
-            return if(savedStateHandle[UstadView.ARG_RESULT_DEST_VIEWNAME] != null &&
-                savedStateHandle[UstadView.ARG_RESULT_DEST_KEY] != null
+            return if(
+                savedStateHandle[UstadView.ARG_LISTMODE] == ListViewMode.PICKER.mode ||
+                (
+                    savedStateHandle[UstadView.ARG_RESULT_DEST_VIEWNAME] != null &&
+                        savedStateHandle[UstadView.ARG_RESULT_DEST_KEY] != null
+                )
             ) {
                 ListViewMode.PICKER
             }else {
@@ -149,15 +153,16 @@ abstract class UstadListViewModel<S>(
      */
     protected fun navigateToCreateNew(
         editViewName: String,
+        extraArgs: Map<String, String> = emptyMap()
     ) {
         val resultDest = expectedResultDest
         val args =if(resultDest != null) {
             mapOf(
                 UstadView.ARG_RESULT_DEST_VIEWNAME to resultDest.viewName,
                 UstadView.ARG_RESULT_DEST_KEY to resultDest.key
-            )
+            ) + extraArgs
         }else {
-            mapOf()
+            extraArgs
         }
 
         navController.navigate(editViewName, args)
@@ -195,5 +200,7 @@ abstract class UstadListViewModel<S>(
             }
         )
     }
+
+
 
 }
