@@ -135,7 +135,7 @@ class ClazzEnrolmentEditViewModel(
         }
     }
 
-    fun onEntityChanged(entity: ClazzEnrolmentWithLeavingReason) {
+    fun onEntityChanged(entity: ClazzEnrolmentWithLeavingReason?) {
         _uiState.update { prev ->
             prev.copy(
                 clazzEnrolment = entity
@@ -151,7 +151,12 @@ class ClazzEnrolmentEditViewModel(
 
         loadingState = LoadingUiState.INDETERMINATE
         viewModelScope.launch {
-            activeDb.processEnrolmentIntoClass(entity)
+            if(entityUidArg == 0L) {
+                activeDb.processEnrolmentIntoClass(entity)
+            }else {
+                activeDb.clazzEnrolmentDao.updateAsync(entity)
+            }
+
         }
     }
 

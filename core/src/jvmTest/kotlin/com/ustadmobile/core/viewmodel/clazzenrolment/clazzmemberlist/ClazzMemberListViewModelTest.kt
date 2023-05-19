@@ -39,8 +39,6 @@ class ClazzMemberListViewModelTest {
 
     private fun testClazzMemberViewModel(
         activeUserRole: Int,
-        enrolTeacherNames: List<String> = emptyList(),
-        enrolStudentNames: List<String> = emptyList(),
         block: suspend ViewModelTestBuilder<ClazzMemberListViewModel>.(ClazzMemberViewModelTestContext) -> Unit,
     ) {
         testViewModel {
