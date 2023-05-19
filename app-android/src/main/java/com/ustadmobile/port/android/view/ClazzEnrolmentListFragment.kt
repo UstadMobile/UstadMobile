@@ -31,6 +31,7 @@ import com.ustadmobile.core.impl.locale.entityconstants.ClazzEnrolmentListConsta
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.view.ClazzEnrolmentListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
+import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListItemUiState
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListUiState
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
@@ -42,6 +43,8 @@ import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
+import com.ustadmobile.port.android.util.compose.courseTerminologyEntryResource
+import com.ustadmobile.port.android.util.compose.rememberCourseTerminologyEntries
 
 
 class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzEnrolmentWithLeavingReason>(),
@@ -256,6 +259,7 @@ fun ClazzEnrolmentListScreen(
     onEditItemClick: (ClazzEnrolmentWithLeavingReason) -> Unit = {},
     onViewProfileClick: () -> Unit = {}
 ){
+    val courseTerminologyEntries = rememberCourseTerminologyEntries(uiState.courseTerminology)
 
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -280,7 +284,8 @@ fun ClazzEnrolmentListScreen(
 
         item{
             Text(
-                text = stringResource(id = R.string.person_enrolment_in_class, uiState.personName ?: "", uiState.courseName ?: ""),
+                text = stringResource(id = R.string.person_enrolment_in_class,
+                    uiState.personName ?: "", uiState.courseName ?: ""),
                 style = Typography.body1,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -294,36 +299,68 @@ fun ClazzEnrolmentListScreen(
                 it.clazzEnrolmentUid
             }
         ){  enrolment ->
-
-            val joinedLeftDate = rememberFormattedDateRange(
-                startTimeInMillis = enrolment.clazzEnrolmentDateJoined,
-                endTimeInMillis = enrolment.clazzEnrolmentDateLeft,
-                timeZoneId = "UTC"
-            )
-            var itemPrimaryText = "${messageIdResource(id = ClazzEnrolmentListConstants.ROLE_TO_MESSAGE_ID_MAP[enrolment.clazzEnrolmentRole] ?: 0)} - ${messageIdResource( id = ClazzEnrolmentListConstants.OUTCOME_TO_MESSAGE_ID_MAP[enrolment.clazzEnrolmentOutcome] ?: 0 )}"
-
-            if (enrolment.leavingReason != null){
-                itemPrimaryText = "$itemPrimaryText (${enrolment.leavingReason?.leavingReasonTitle})"
-            }
-
-            ListItem(
-                text = { Text(text = itemPrimaryText) },
-                secondaryText = { Text(text = joinedLeftDate)},
-                trailing = {
-                    IconButton(
-                        onClick = {
-                            onEditItemClick(enrolment)
-                        }
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_edit_white_24dp), 
-                            contentDescription = stringResource(id = R.string.edit)
-                        )
-                    }
-                }
+            ClazzEnrolmentListItem(
+                uiState = uiState.enrolmentItemUiState(enrolment),
+                onEditItemClick = onEditItemClick,
+                terminologyEntries = courseTerminologyEntries,
             )
         }
     }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ClazzEnrolmentListItem(
+    uiState: ClazzEnrolmentListItemUiState,
+    onEditItemClick: (ClazzEnrolmentWithLeavingReason) -> Unit,
+    terminologyEntries: List<TerminologyEntry>,
+) {
+    val enrolment = uiState.enrolment
+
+    val joinedLeftDate = rememberFormattedDateRange(
+        startTimeInMillis = enrolment.clazzEnrolmentDateJoined,
+        endTimeInMillis = enrolment.clazzEnrolmentDateLeft,
+        timeZoneId = uiState.timeZone,
+    )
+
+    val itemPrimaryText = buildString {
+        val roleMessageId = ClazzEnrolmentListConstants
+            .ROLE_TO_MESSAGE_ID_MAP[enrolment.clazzEnrolmentRole]
+            ?: ClazzEnrolment.ROLE_STUDENT
+        val outcomeMessageId = ClazzEnrolmentListConstants
+            .OUTCOME_TO_MESSAGE_ID_MAP[enrolment.clazzEnrolmentOutcome] ?: 0
+
+        append(courseTerminologyEntryResource(terminologyEntries, roleMessageId))
+        append(" - ")
+        append(messageIdResource(id =  outcomeMessageId))
+        if (enrolment.leavingReason != null){
+            append(" (")
+            append(enrolment.leavingReason?.leavingReasonTitle ?: "")
+            append(")")
+        }
+    }
+
+
+
+
+    ListItem(
+        text = { Text(text = itemPrimaryText) },
+        secondaryText = { Text(text = joinedLeftDate)},
+        trailing = {
+            if(uiState.canEdit) {
+                IconButton(
+                    onClick = {
+                        onEditItemClick(enrolment)
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_edit_white_24dp),
+                        contentDescription = stringResource(id = R.string.edit)
+                    )
+                }
+            }
+        }
+    )
 }
 
 @Composable

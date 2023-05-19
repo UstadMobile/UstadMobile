@@ -23,19 +23,19 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import react.dom.aria.ariaLabel
 
 external interface ClazzEnrolmentListProps: Props{
     var uiState: ClazzEnrolmentListUiState
     var onEditItemClick: (ClazzEnrolmentWithLeavingReason) -> Unit
     var onViewProfileClick: () -> Unit
-    var courseTerminology: CourseTerminology?
 }
 
 val ClazzEnrolmentListComponent2 = FC<ClazzEnrolmentListProps> { props ->
 
     val strings = useStringsXml()
 
-    val terminologyEntriesList = useCourseTerminologyEntries(props.courseTerminology)
+    val terminologyEntriesList = useCourseTerminologyEntries(props.uiState.courseTerminology)
 
     Container{
         maxWidth = "lg"
@@ -46,8 +46,9 @@ val ClazzEnrolmentListComponent2 = FC<ClazzEnrolmentListProps> { props ->
 
             UstadQuickActionButton {
                 icon = PersonIcon.create()
+                id = "profile_button"
                 text = strings[MessageID.view_profile]
-                onClick = { props.onViewProfileClick }
+                onClick = { props.onViewProfileClick() }
             }
 
             Divider()
@@ -84,7 +85,7 @@ private val ClazzEnrolmentListItem = FC<ClazzenrolmentListItemProps> { props ->
     val enrolment = props.uiState.enrolment
 
     val joinedLeftDate = useFormattedDateRange(enrolment.clazzEnrolmentDateJoined,
-        enrolment.clazzEnrolmentDateLeft, "UTC")
+        enrolment.clazzEnrolmentDateLeft, props.uiState.timeZone)
 
     val itemPrimaryText = buildString {
         append(courseTerminologyResource(props.terminologyEntries, strings,
@@ -101,6 +102,7 @@ private val ClazzEnrolmentListItem = FC<ClazzenrolmentListItemProps> { props ->
         if(props.uiState.canEdit) {
             ListItemSecondaryAction {
                 IconButton {
+                    ariaLabel = strings[MessageID.edit]
                     onClick = {
                         props.onClickEdit(enrolment)
                     }

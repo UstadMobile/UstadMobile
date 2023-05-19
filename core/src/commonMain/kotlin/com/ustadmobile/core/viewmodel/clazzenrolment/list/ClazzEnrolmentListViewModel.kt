@@ -2,7 +2,7 @@ package com.ustadmobile.core.viewmodel.clazzenrolment.list
 
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
-
+import com.ustadmobile.lib.db.entities.CourseTerminology
 
 
 data class ClazzEnrolmentListUiState(
@@ -11,6 +11,8 @@ data class ClazzEnrolmentListUiState(
     var courseName: String? = null,
     val canEditTeacherEnrolments: Boolean = false,
     val canEditStudentEnrolments: Boolean = false,
+    val courseTerminology: CourseTerminology? = null,
+    val timeZone: String = "UTC",
 ) {
 
     fun enrolmentItemUiState(
@@ -22,7 +24,8 @@ data class ClazzEnrolmentListUiState(
                 canEditTeacherEnrolments
             }else {
                 canEditTeacherEnrolments
-            }
+            },
+            timeZone = timeZone,
         )
     }
 
@@ -31,6 +34,7 @@ data class ClazzEnrolmentListUiState(
 data class ClazzEnrolmentListItemUiState(
     val canEdit: Boolean = false,
     val enrolment: ClazzEnrolmentWithLeavingReason,
+    val timeZone: String,
 )
 
 class ClazzEnrolmentListViewModel {
