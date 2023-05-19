@@ -11,6 +11,9 @@ import mui.material.Tabs
 import mui.system.sx
 import react.*
 import web.html.HTMLElement
+import kotlin.js.Json
+import kotlin.js.json
+import kotlinx.browser.window
 
 data class UstadScreenTabsState(val height: Int = 48)
 
@@ -22,6 +25,8 @@ val UstadScreenTabsStateContext = createContext<TabSizeStateInstance>()
 /**
  * UstadScreenTabs will take a list of TabItem (each one specifying a screen name, argument map, and
  * label string) and create MUI tabs for the given list.
+ *
+ * The active tab will be remembered in the history state.
  */
 external interface UstadScreenTabsProps: Props {
 
@@ -29,9 +34,17 @@ external interface UstadScreenTabsProps: Props {
 
 }
 
+private const val STATE_ACTIVE_TAB_KEY = "activeTab"
+
 val UstadScreenTabs = FC<UstadScreenTabsProps> { props ->
 
-    var currentTab by useState { "0" }
+    val history = useMemo {
+        window.history
+    }
+
+    var currentTab by useState {
+        window.history.state?.unsafeCast<Json>()?.get(STATE_ACTIVE_TAB_KEY) as? String ?: "0"
+    }
 
     val theme by useRequiredContext(ThemeContext)
     val tabSizeState = useState { UstadScreenTabsState() }
@@ -72,6 +85,10 @@ val UstadScreenTabs = FC<UstadScreenTabsProps> { props ->
 
                         onChange = { evt, newTab ->
                             currentTab = newTab
+                            val newState = (window.history.state?.unsafeCast<Json>() ?: json()).also {
+                                it[STATE_ACTIVE_TAB_KEY] = newTab
+                            }
+                            history.replaceState(newState, "")
                         }
 
                         props.tabs.forEachIndexed {  index, tab ->
