@@ -141,6 +141,8 @@ class PersonListViewModel(
                         put(UstadView.ARG_PERSON_UID, entry.personUid.toString())
                         putFromSavedStateIfPresent(savedStateHandle, UstadView.ARG_POPUPTO_ON_FINISH)
                         putFromSavedStateIfPresent(savedStateHandle, UstadView.ARG_CLAZZUID)
+                        putFromSavedStateIfPresent(savedStateHandle,
+                            ClazzEnrolmentEditViewModel.ARG_ROLE)
                     }
                 )
             }

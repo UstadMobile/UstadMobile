@@ -8,8 +8,8 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListUiState
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
-import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
+import com.ustadmobile.hooks.useTabAndAppBarHeight
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
@@ -60,7 +60,7 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
 
     val strings = useStringsXml()
 
-    val muiAppState = useMuiAppState()
+    val tabAndAppBarHeight = useTabAndAppBarHeight()
 
     val teachersInfiniteQueryResult = usePagingSource(props.uiState.teacherList, true)
 
@@ -71,7 +71,7 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
 
     VirtualList {
         style = jso {
-            height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
+            height = "calc(100vh - ${tabAndAppBarHeight}px)".unsafeCast<Height>()
             width = 100.pct
             contain = Contain.strict
             overflowY = Overflow.scroll

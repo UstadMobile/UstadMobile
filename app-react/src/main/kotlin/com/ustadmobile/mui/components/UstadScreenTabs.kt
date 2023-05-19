@@ -15,7 +15,11 @@ import kotlin.js.Json
 import kotlin.js.json
 import kotlinx.browser.window
 
-data class UstadScreenTabsState(val height: Int = 48)
+data class UstadScreenTabsState(val height: Int = DEFAULT_HEIGHT) {
+    companion object {
+        const val DEFAULT_HEIGHT = 48
+    }
+}
 
 typealias TabSizeStateInstance = StateInstance<UstadScreenTabsState>
 
@@ -53,9 +57,12 @@ val UstadScreenTabs = FC<UstadScreenTabsProps> { props ->
     val tabsRef = useRef<HTMLElement>(null)
 
     useEffect(tabsRef.current?.clientHeight) {
-        tabSizeStateVar = tabSizeStateVar.copy(
-            height = tabsRef.current?.clientHeight ?: UstadScreenTabsState().height
-        )
+        val currentTabHeight = tabsRef.current?.clientHeight ?: UstadScreenTabsState.DEFAULT_HEIGHT
+        if(tabSizeState.component1().height != currentTabHeight) {
+            tabSizeStateVar = tabSizeStateVar.copy(
+                height = currentTabHeight
+            )
+        }
     }
 
     UstadScreenTabsStateContext(tabSizeState) {
