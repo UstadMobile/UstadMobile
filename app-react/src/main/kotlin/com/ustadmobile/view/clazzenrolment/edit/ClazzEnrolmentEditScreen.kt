@@ -1,13 +1,15 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.clazzenrolment.edit
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.OutcomeConstants
-import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditUiState
+import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
 import com.ustadmobile.hooks.courseTerminologyResource
 import com.ustadmobile.hooks.useCourseTerminologyEntries
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
@@ -30,11 +32,9 @@ external interface ClazzEnrolmentEditScreenProps : Props {
 
     var onClazzEnrolmentChanged: (ClazzEnrolmentWithLeavingReason?) -> Unit
 
-    var onClickLeavingReason: () -> Unit
-
 }
 
-val ClazzEnrolmentEditScreenComponent2 = FC<ClazzEnrolmentEditScreenProps> { props ->
+val ClazzEnrolmentEditScreenComponent = FC<ClazzEnrolmentEditScreenProps> { props ->
 
     val strings: StringsXml = useStringsXml()
 
@@ -105,7 +105,8 @@ val ClazzEnrolmentEditScreenComponent2 = FC<ClazzEnrolmentEditScreenProps> { pro
 
             UstadMessageIdSelectField {
                 id = "outcome"
-                value = props.uiState.clazzEnrolment?.clazzEnrolmentOutcome ?: 0
+                value = props.uiState.clazzEnrolment?.clazzEnrolmentOutcome
+                    ?: ClazzEnrolment.OUTCOME_IN_PROGRESS
                 label = strings[MessageID.outcome]
                 options = OutcomeConstants.OUTCOME_MESSAGE_IDS
                 enabled = props.uiState.fieldsEnabled
@@ -120,17 +121,15 @@ val ClazzEnrolmentEditScreenComponent2 = FC<ClazzEnrolmentEditScreenProps> { pro
     }
 }
 
-val ClazzEnrolmentEditScreenPreview = FC<Props> {
-
-    val uiStateVar : ClazzEnrolmentEditUiState by useState {
-        ClazzEnrolmentEditUiState(
-            clazzEnrolment = ClazzEnrolmentWithLeavingReason().apply {
-                clazzEnrolmentOutcome = ClazzEnrolment.OUTCOME_GRADUATED
-            },
-        )
+val ClazzEnrolmentEditScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        ClazzEnrolmentEditViewModel(di, savedStateHandle)
     }
 
-    ClazzEnrolmentEditScreenComponent2 {
-        uiState = uiStateVar
+    val uiStateVal by viewModel.uiState.collectAsState(ClazzEnrolmentEditUiState())
+
+    ClazzEnrolmentEditScreenComponent {
+        uiState = uiStateVal
+        onClazzEnrolmentChanged = viewModel::onEntityChanged
     }
 }

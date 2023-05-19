@@ -44,6 +44,8 @@ import com.ustadmobile.view.schedule.edit.ScheduleEditScreen
 import com.ustadmobile.view.siteenterlink.SiteEnterLinkScreen
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
+import com.ustadmobile.view.clazzenrolment.edit.ClazzEnrolmentEditScreen
+import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -79,8 +81,9 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         SettingsPreview),
     UstadScreen(InviteViaLinkView.VIEW_NAME, "Invite Via Link Preview",
         InviteViaLinkPreview),
-    UstadScreen(ClazzEnrolmentEditView.VIEW_NAME, "ClazzEnrolmentEdit Preview",
-        ClazzEnrolmentEditScreenPreview),
+    UstadScreen(ClazzEnrolmentEditViewModel.DEST_NAME, "ClazzEnrolmentEdit",
+        ClazzEnrolmentEditScreen
+    ),
     UstadScreen(SiteTermsDetailView.VIEW_NAME, "SiteTermsDetail Preview",
         SiteTermsDetailScreenPreview),
     UstadScreen(RegisterMinorWaitForParentView.VIEW_NAME, "RegisterMinorWaitForParent Preview",

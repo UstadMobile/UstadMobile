@@ -4,12 +4,14 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.ext.processEnrolmentIntoClass
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
+import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchoolAndTerminology
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.async
@@ -138,9 +140,32 @@ class ClazzEnrolmentEditViewModel(
     fun onEntityChanged(entity: ClazzEnrolmentWithLeavingReason?) {
         _uiState.update { prev ->
             prev.copy(
-                clazzEnrolment = entity
+                clazzEnrolment = entity,
+                roleSelectedError = updateErrorMessageOnChange(
+                    prevFieldValue = prev.clazzEnrolment?.clazzEnrolmentRole,
+                    currentFieldValue = entity?.clazzEnrolmentRole,
+                    currentErrorMessage = prev.roleSelectedError
+                ),
+                startDateError = updateErrorMessageOnChange(
+                    prevFieldValue = prev.clazzEnrolment?.clazzEnrolmentDateJoined,
+                    currentFieldValue = entity?.clazzEnrolmentDateJoined,
+                    currentErrorMessage = prev.startDateError,
+                )
+
             )
         }
+
+        scheduleEntityCommitToSavedState(
+            entity = entity,
+            serializer = ClazzEnrolmentWithLeavingReason.serializer(),
+            commitDelay = 200,
+        )
+    }
+
+    private fun ClazzEnrolmentEditUiState.hasErrors() : Boolean {
+        return roleSelectedError != null ||
+            startDateError != null ||
+            endDateError != null
     }
 
     fun onClickSave() {
@@ -150,6 +175,43 @@ class ClazzEnrolmentEditViewModel(
         val entity = _uiState.value.clazzEnrolment ?: return
 
         loadingState = LoadingUiState.INDETERMINATE
+        _uiState.update { prev ->
+            prev.copy(fieldsEnabled = false)
+        }
+
+        if(entity.clazzEnrolmentRole == 0) {
+            _uiState.update { prev ->
+                prev.copy(
+                    roleSelectedError = systemImpl.getString(MessageID.field_required_prompt)
+                )
+            }
+        }
+
+        if(entity.clazzEnrolmentDateJoined <= MS_PER_HOUR * 24) {
+            _uiState.update { prev ->
+                prev.copy(
+                    startDateError = systemImpl.getString(MessageID.field_required_prompt)
+                )
+            }
+        }
+
+        if(entity.clazzEnrolmentDateLeft <= entity.clazzEnrolmentDateJoined) {
+            _uiState.update { prev ->
+                prev.copy(
+                    endDateError = systemImpl.getString(MessageID.end_is_before_start_error)
+                )
+            }
+        }
+
+        if(_uiState.value.hasErrors()) {
+            _uiState.update { prev ->
+                prev.copy(fieldsEnabled = true)
+            }
+
+            return
+        }
+
+
         viewModelScope.launch {
             if(entityUidArg == 0L) {
                 activeDb.processEnrolmentIntoClass(entity)
@@ -157,6 +219,12 @@ class ClazzEnrolmentEditViewModel(
                 activeDb.clazzEnrolmentDao.updateAsync(entity)
             }
 
+            val popUpToOnFinish = savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH]
+            if(popUpToOnFinish != null){
+                navController.popBackStack(popUpToOnFinish, inclusive = false)
+            }else {
+                finishWithResult(entity)
+            }
         }
     }
 

@@ -4,11 +4,14 @@ import com.ustadmobile.core.db.dao.PersonDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
+import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.core.viewmodel.UstadListViewModel
+import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
 import com.ustadmobile.door.paging.*
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
@@ -129,7 +132,22 @@ class PersonListViewModel(
     }
 
     fun onClickEntry(entry: Person) {
-        navigateOnItemClicked(PersonDetailView.VIEW_NAME, entry.personUid, entry)
+        when(savedStateHandle[UstadView.ARG_GO_TO_COMPLETE]) {
+            //Handle the following scenario: ClazzMemberList (user selects to add a student to enrol),
+            // PersonList -> EnrolmentEdit
+            ClazzEnrolmentEditViewModel.DEST_NAME -> {
+                navController.navigate(ClazzEnrolmentEditViewModel.DEST_NAME,
+                    buildMap {
+                        put(UstadView.ARG_PERSON_UID, entry.personUid.toString())
+                        putFromSavedStateIfPresent(savedStateHandle, UstadView.ARG_POPUPTO_ON_FINISH)
+                        putFromSavedStateIfPresent(savedStateHandle, UstadView.ARG_CLAZZUID)
+                    }
+                )
+            }
+            else -> {
+                navigateOnItemClicked(PersonDetailView.VIEW_NAME, entry.personUid, entry)
+            }
+        }
     }
 
     companion object {
