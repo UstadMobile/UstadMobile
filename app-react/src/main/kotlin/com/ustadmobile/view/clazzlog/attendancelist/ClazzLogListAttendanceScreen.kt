@@ -1,16 +1,21 @@
 package com.ustadmobile.view.clazzlog.attendancelist
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.schedule.totalAttendeeStatusRecorded
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceUiState
+import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTabAndAppBarHeight
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
+import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
@@ -29,16 +34,70 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import react.useState
 import kotlin.math.max
 
 external interface ClazzLogListAttendanceScreenProps : Props {
 
     var uiState: ClazzLogListAttendanceUiState
 
-    var onClickClazz: (ClazzLog) -> Unit
+    var onClickEntry: (ClazzLog) -> Unit
 
     var onClickFilterChip: (MessageIdOption2?) -> Unit
 
+}
+
+val ClazzLogListAttendanceScreen = FC<Props> {
+    val strings = useStringsXml()
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        ClazzLogListAttendanceViewModel(di, savedStateHandle)
+    }
+
+    val uiStateVal by viewModel.uiState.collectAsState(ClazzLogListAttendanceUiState())
+    val appState by viewModel.appUiState.collectAsState(AppUiState())
+
+    var recordDialogVisible: Boolean by useState { false }
+
+    ClazzLogListAttendanceScreenComponent {
+        uiState = uiStateVal
+        onClickEntry = viewModel::onClickEntry
+    }
+
+
+
+    UstadFab {
+        fabState = appState.fabState.copy(
+            onClick = {
+                if(uiStateVal.recordAttendanceOptions.size == 1) {
+                    viewModel.onClickRecordAttendance(uiStateVal.recordAttendanceOptions.first())
+                }else{
+                    recordDialogVisible = true
+                }
+            }
+        )
+    }
+
+    Dialog {
+        open = recordDialogVisible
+        onClose = {_, _ ->
+            recordDialogVisible = false
+        }
+
+        List {
+            uiStateVal.recordAttendanceOptions.forEach { option ->
+                ListItem {
+                    ListItemButton {
+                        onClick = {
+                            viewModel.onClickRecordAttendance(option)
+                        }
+                        ListItemText {
+                            primary = ReactNode(strings[option.messageId])
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 val ClazzLogListAttendanceScreenPreview = FC<Props> {
@@ -104,7 +163,7 @@ private val ClazzLogListAttendanceScreenComponent = FC<ClazzLogListAttendanceScr
 
                 ClazzLogListItem.create {
                     clazzLog = clazzLogItem
-                    onClick = props.onClickClazz
+                    onClick = props.onClickEntry
                     timeZoneId = props.uiState.timeZoneId
                 }
             }

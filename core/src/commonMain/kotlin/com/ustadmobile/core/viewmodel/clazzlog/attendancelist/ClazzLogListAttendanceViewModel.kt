@@ -2,9 +2,12 @@ package com.ustadmobile.core.viewmodel.clazzlog.attendancelist
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.FabUiState
+import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.whenSubscribed
+import com.ustadmobile.core.view.ClazzLogEditAttendanceView
+import com.ustadmobile.core.view.ClazzLogEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
@@ -12,14 +15,11 @@ import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.Role
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import org.kodein.di.DI
-import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
 
 data class ClazzLogListAttendanceUiState(
 
@@ -72,6 +72,7 @@ class ClazzLogListAttendanceViewModel(
     }
 
     //List of points to plot.
+    @Suppress("unused") //For graph data to come
     data class AttendanceGraphData(
         val percentageAttendedSeries: List<Pair<Long, Float>>,
         val percentageLateSeries: List<Pair<Long, Float>>,
@@ -166,6 +167,33 @@ class ClazzLogListAttendanceViewModel(
     }
 
     override fun onClickAdd() {
+
+    }
+
+    fun onClickRecordAttendance(option: RecordAttendanceOption) {
+        when(option) {
+            RecordAttendanceOption.RECORD_ATTENDANCE_NEW_SCHEDULE -> {
+                navigateToCreateNew(ClazzLogEditView.VIEW_NAME)
+            }
+            RecordAttendanceOption.RECORD_ATTENDANCE_MOST_RECENT_SCHEDULE -> {
+                if(loadingState == LoadingUiState.INDETERMINATE)
+                    return
+
+                loadingState = LoadingUiState.INDETERMINATE
+
+                viewModelScope.launch {
+                    val mostRecentLogUid = activeRepo.clazzLogDao
+                        .findMostRecentClazzLogToEditUid(clazzUid)
+                    navController.takeIf { mostRecentLogUid != 0L }?.navigate(
+                        viewName = ClazzLogEditAttendanceView.VIEW_NAME,
+                        args = mapOf(UstadView.ARG_ENTITY_UID to mostRecentLogUid.toString())
+                    )
+                }
+            }
+        }
+    }
+
+    fun onClickEntry(clazzLog: ClazzLog) {
 
     }
 

@@ -48,7 +48,8 @@ import com.ustadmobile.view.clazzenrolment.edit.ClazzEnrolmentEditScreen
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
 import com.ustadmobile.view.clazzenrolment.list.ClazzEnrolmentListScreen
-import com.ustadmobile.view.clazzlog.attendancelist.ClazzLogListAttendanceScreenPreview
+import com.ustadmobile.view.clazzlog.attendancelist.ClazzLogListAttendanceScreen
+import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -158,7 +159,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(JoinWithCodeView.VIEW_NAME, "JoinWithCode Preview",
         JoinWithCodeScreenPreview),
     UstadScreen(ClazzLogListAttendanceViewModel.DEST_NAME, "ClazzLogListAttendance Preview",
-        ClazzLogListAttendanceScreenPreview
+        ClazzLogListAttendanceScreen
     ),
     UstadScreen(ContentEntryList2View.VIEW_NAME, "ContentEntryList Preview",
         ContentEntryListScreenPreview),

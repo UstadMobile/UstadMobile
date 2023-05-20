@@ -157,4 +157,19 @@ expect abstract class ClazzLogDao : BaseDao<ClazzLog> {
     @Update
     abstract suspend fun updateAsync(clazzLog: ClazzLog)
 
+    @Query("""
+        SELECT COALESCE(
+               (SELECT ClazzLog.clazzLogUid
+                  FROM ClazzLog
+                 WHERE ClazzLog.clazzLogClazzUid = :clazzUid
+                   AND (ClazzLog.clazzLogStatusFlag & ${ClazzLog.STATUS_RESCHEDULED}) != ${ClazzLog.STATUS_RESCHEDULED}
+              ORDER BY ClazzLog.logDate DESC
+                 LIMIT 1), 0)
+
+        
+    """)
+    abstract suspend fun findMostRecentClazzLogToEditUid(
+        clazzUid: Long
+    ): Long
+
 }
