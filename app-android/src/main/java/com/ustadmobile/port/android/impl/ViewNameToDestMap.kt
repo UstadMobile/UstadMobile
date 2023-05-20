@@ -11,6 +11,7 @@ import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
 import com.ustadmobile.port.android.view.PanicButtonSettingsView
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
+import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
 
 @Keep
 class ViewNameToDestMap: DestinationProvider {
@@ -95,7 +96,7 @@ class ViewNameToDestMap: DestinationProvider {
             StatementListView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_session_detail_list_dest),
             ClazzLogEditAttendanceView.VIEW_NAME to UstadDestination(R.id.clazz_log_edit_attendance_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
-            ClazzEnrolmentListView.VIEW_NAME to UstadDestination(R.id.clazz_enrolment_list),
+            ClazzEnrolmentListViewModel.DEST_NAME to UstadDestination(R.id.clazz_enrolment_list),
             ClazzEnrolmentEditView.VIEW_NAME to UstadDestination(R.id.clazz_enrolment_edit,
                     hideAccountIcon = true, hideBottomNavigation = true),
             LeavingReasonListView.VIEW_NAME to UstadDestination(R.id.leaving_reason_list),
