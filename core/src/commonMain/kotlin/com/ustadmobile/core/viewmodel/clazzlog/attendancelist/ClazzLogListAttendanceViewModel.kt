@@ -68,7 +68,13 @@ class ClazzLogListAttendanceViewModel(
 
     enum class RecordAttendanceOption(val commandId: Int,val messageId: Int ) {
         RECORD_ATTENDANCE_MOST_RECENT_SCHEDULE(1, MessageID.record_attendance_for_most_recent_occurrence),
-        RECORD_ATTENDANCE_NEW_SCHEDULE(2, MessageID.add_a_new_occurrence)
+        RECORD_ATTENDANCE_NEW_SCHEDULE(2, MessageID.add_a_new_occurrence);
+
+        companion object {
+
+            fun forCommand(commandId: Int) = values().first { it.commandId == commandId }
+
+        }
     }
 
     //List of points to plot.
@@ -194,7 +200,10 @@ class ClazzLogListAttendanceViewModel(
     }
 
     fun onClickEntry(clazzLog: ClazzLog) {
-
+        navController.navigate(
+            viewName = ClazzLogEditAttendanceView.VIEW_NAME,
+            args = mapOf(UstadView.ARG_ENTITY_UID to clazzLog.clazzLogUid.toString())
+        )
     }
 
     companion object {

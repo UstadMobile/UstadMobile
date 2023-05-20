@@ -14,14 +14,19 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -46,22 +51,78 @@ import java.util.*
 import androidx.paging.compose.items
 import com.ustadmobile.core.schedule.totalAttendeeStatusRecorded
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlin.math.max
 
 
 class ClazzLogListAttendanceFragment(): UstadBaseMvvmFragment() {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = super.onCreateView(inflater, container, savedInstanceState)
+    private val viewModel by ustadViewModels(::ClazzLogListAttendanceViewModel)
 
-        return view
-    }
 
     fun ClazzLogListAttendanceViewModel.RecordAttendanceOption.toBottomSheetOption(): BottomSheetOption {
         val systemImpl : UstadMobileSystemImpl = direct.instance()
         return BottomSheetOption(RECORD_ATTENDANCE_OPTIONS_ICON[this] ?: 0,
             systemImpl.getString(this.messageId, requireContext()), this.commandId)
     }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
+        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(
+            viewModel = viewModel,
+            transform = { appUiState ->
+                appUiState.copy(
+                    fabState = appUiState.fabState.copy(
+                        onClick = this::onClickFab
+                    )
+                )
+            }
+        )
+
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+            )
+
+            setContent {
+                MdcTheme {
+                    ClazzLogListAttendanceScreen(viewModel)
+                }
+            }
+        }
+    }
+
+
+    private fun onClickFab() {
+        lifecycleScope.launch {
+            val uiState = viewModel.uiState.first()
+            if(uiState.recordAttendanceOptions.size == 1) {
+                viewModel.onClickRecordAttendance(
+                    uiState.recordAttendanceOptions.first()
+                )
+            }else {
+                OptionsBottomSheetFragment(
+                    optionsList = uiState.recordAttendanceOptions.map {
+                        it.toBottomSheetOption()
+                    },
+                    onOptionSelected = {option ->
+                        viewModel.onClickRecordAttendance(
+                            ClazzLogListAttendanceViewModel.RecordAttendanceOption.forCommand(
+                                option.optionCode
+                            )
+                        )
+                    }
+                )
+            }
+        }
+    }
+
+
 
     companion object {
 
@@ -108,6 +169,18 @@ private fun LineChart.updateLineData(graphData: AttendanceGraphData) {
 }
 
 @Composable
+fun ClazzLogListAttendanceScreen(
+    viewModel: ClazzLogListAttendanceViewModel
+) {
+    val uiState by viewModel.uiState.collectAsState(ClazzLogListAttendanceUiState())
+
+    ClazzLogListAttendanceScreen(
+        uiState = uiState,
+        onClickClazz = viewModel::onClickEntry,
+    )
+}
+
+@Composable
 private fun ClazzLogListAttendanceScreen(
     uiState: ClazzLogListAttendanceUiState = ClazzLogListAttendanceUiState(),
     onClickClazz: (ClazzLog) -> Unit = {},
@@ -126,7 +199,7 @@ private fun ClazzLogListAttendanceScreen(
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-
+        /* Graph will be brought back later
         item {
             AndroidView(
                 modifier = Modifier
@@ -175,6 +248,7 @@ private fun ClazzLogListAttendanceScreen(
                 }
             )
         }
+         */
 
         item {
             UstadListFilterChipsHeader(
