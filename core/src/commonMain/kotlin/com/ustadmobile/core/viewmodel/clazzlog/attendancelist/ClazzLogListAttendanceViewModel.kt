@@ -1,8 +1,10 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.clazzlog.attendancelist
 
 import com.ustadmobile.core.controller.ClazzLogListAttendancePresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
+import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.entities.ClazzLog
 import kotlinx.datetime.TimeZone
 
@@ -22,7 +24,7 @@ data class ClazzLogListAttendanceUiState(
     val recordAttendanceOptions: List<ClazzLogListAttendancePresenter.RecordAttendanceOption> =
         emptyList(),
 
-    val clazzLogsList: List<ClazzLog> = emptyList(),
+    val clazzLogsList: ListPagingSourceFactory<ClazzLog> = { EmptyPagingSource() },
 
     val fieldsEnabled: Boolean = true,
 
@@ -43,3 +45,9 @@ data class AttendanceGraphData(
 
     val graphDateRange: Pair<Long, Long>
 )
+
+class ClazzLogListAttendanceViewModel  {
+
+
+
+}

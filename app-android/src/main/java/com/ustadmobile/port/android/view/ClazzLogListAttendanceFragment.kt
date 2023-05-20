@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.github.mikephil.charting.charts.LineChart
@@ -37,12 +36,11 @@ import com.toughra.ustadmobile.databinding.FragmentClazzLogListAttendanceCharthe
 import com.toughra.ustadmobile.databinding.ItemClazzLogAttendanceListBinding
 import com.ustadmobile.core.controller.ClazzLogListAttendancePresenter
 import com.ustadmobile.core.controller.UstadListPresenter
-import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
-import com.ustadmobile.core.viewmodel.AttendanceGraphData
-import com.ustadmobile.core.viewmodel.ClazzLogListAttendanceUiState
+import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.AttendanceGraphData
+import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceUiState
 import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
