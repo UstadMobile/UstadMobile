@@ -82,6 +82,11 @@ if [ "$NCRESULT" == "0" ]; then
 fi
 
 echo "Starting Ustad HTTP/REST server on port 8087 - Use [Ctrl+C] to stop."
+echo " "
+echo "You can use this to run/connect the Android client as per README.md ."
+echo "If you want to use the web client in a browser, you must run "
+echo "./gradlew app-react:run and then open http://localhost:8087/ in your browser."
+echo "See README.md for more details."
 java $DEBUGARGS -jar build/libs/ustad-server-all.jar -P:ktor.ustad.jsDevServer=http://localhost:8080/ $SERVERARGS
 
 # Go back to wherever we started from

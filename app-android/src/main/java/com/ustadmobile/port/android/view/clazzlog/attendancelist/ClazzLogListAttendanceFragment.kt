@@ -1,8 +1,7 @@
-package com.ustadmobile.port.android.view
+package com.ustadmobile.port.android.view.clazzlog.attendancelist
 
 import android.graphics.Color
 import android.os.Bundle
-import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,16 +23,13 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.*
-import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -51,6 +47,9 @@ import java.util.*
 import androidx.paging.compose.items
 import com.ustadmobile.core.schedule.totalAttendeeStatusRecorded
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
+import com.ustadmobile.port.android.view.BottomSheetOption
+import com.ustadmobile.port.android.view.OptionsBottomSheetFragment
+import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.max
@@ -63,7 +62,8 @@ class ClazzLogListAttendanceFragment(): UstadBaseMvvmFragment() {
 
     fun ClazzLogListAttendanceViewModel.RecordAttendanceOption.toBottomSheetOption(): BottomSheetOption {
         val systemImpl : UstadMobileSystemImpl = direct.instance()
-        return BottomSheetOption(RECORD_ATTENDANCE_OPTIONS_ICON[this] ?: 0,
+        return BottomSheetOption(
+            RECORD_ATTENDANCE_OPTIONS_ICON[this] ?: 0,
             systemImpl.getString(this.messageId, requireContext()), this.commandId)
     }
 

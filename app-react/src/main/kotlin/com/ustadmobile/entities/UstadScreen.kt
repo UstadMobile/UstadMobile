@@ -50,6 +50,8 @@ import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListView
 import com.ustadmobile.view.clazzenrolment.list.ClazzEnrolmentListScreen
 import com.ustadmobile.view.clazzlog.attendancelist.ClazzLogListAttendanceScreen
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
+import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
+import com.ustadmobile.view.clazzlog.edit.ClazzLogEditScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -135,8 +137,10 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         "UstadListFilterChipsHeaderPreview Preview", UstadListFilterChipsHeaderPreview),
     UstadScreen("UstadListSortHeader",
         "UstadListSortHeader", UstadListSortHeaderPreview),
-    UstadScreen(ClazzLogEditView.VIEW_NAME, "ClazzLogEdit Preview",
-        ClazzLogEditScreenPreview),
+    UstadScreen(
+        ClazzLogEditViewModel.DEST_NAME, "ClazzLogEdit Preview",
+        ClazzLogEditScreen
+    ),
     UstadScreen(CourseGroupSetEditView.VIEW_NAME, "CourseGroupSetEdit Preview",
         CourseGroupSetEditScreenPreview),
     UstadScreen("UstadContentEntryListItem", "UstadContentEntryListItem Preview",

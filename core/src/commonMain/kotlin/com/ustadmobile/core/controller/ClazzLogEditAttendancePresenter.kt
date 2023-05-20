@@ -8,9 +8,9 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView.Companion.ARG_NEW_CLAZZLOG
-import com.ustadmobile.core.view.ClazzLogEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
@@ -237,7 +237,7 @@ class ClazzLogEditAttendancePresenter(context: Any,
             updateAttendanceRecordsFromView()
             commitToDatabase()
             if(arguments[ARG_NEW_CLAZZLOG] != null) {
-                systemImpl.popBack(ClazzLogEditView.VIEW_NAME, true, context)
+                systemImpl.popBack(ClazzLogEditViewModel.DEST_NAME, true, context)
             }else {
                 finishWithResult(safeStringify(di,
                     ListSerializer(ClazzLog.serializer()), listOf(entity)))

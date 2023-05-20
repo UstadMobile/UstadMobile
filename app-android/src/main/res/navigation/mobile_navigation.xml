@@ -379,7 +379,7 @@
 
     <fragment
         android:id="@+id/clazz_log_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzLogEditFragment"
+        android:name="com.ustadmobile.port.android.view.clazzlog.edit.ClazzLogEditFragment"
         android:label="@string/add_a_new_occurrence"/>
 
     <fragment

@@ -321,6 +321,8 @@ abstract class UstadViewModel(
         const val KEY_FIRST_INIT_TIME = "firstInit"
 
         const val RESULT_KEY_HTML_DESC = "description"
+
+        const val ARG_TIME_ZONE = "timeZone"
     }
 
 }

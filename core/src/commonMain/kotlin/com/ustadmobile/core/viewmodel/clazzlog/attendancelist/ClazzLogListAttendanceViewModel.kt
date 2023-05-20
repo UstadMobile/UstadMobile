@@ -7,11 +7,12 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView
-import com.ustadmobile.core.view.ClazzLogEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
+import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
+import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.Role
@@ -179,7 +180,13 @@ class ClazzLogListAttendanceViewModel(
     fun onClickRecordAttendance(option: RecordAttendanceOption) {
         when(option) {
             RecordAttendanceOption.RECORD_ATTENDANCE_NEW_SCHEDULE -> {
-                navigateToCreateNew(ClazzLogEditView.VIEW_NAME)
+                navigateToCreateNew(
+                    editViewName = ClazzLogEditViewModel.DEST_NAME,
+                    extraArgs = mapOf(
+                        ARG_TIME_ZONE to _uiState.value.timeZoneId,
+                        UstadView.ARG_CLAZZUID to clazzUid.toString(),
+                    )
+                )
             }
             RecordAttendanceOption.RECORD_ATTENDANCE_MOST_RECENT_SCHEDULE -> {
                 if(loadingState == LoadingUiState.INDETERMINATE)

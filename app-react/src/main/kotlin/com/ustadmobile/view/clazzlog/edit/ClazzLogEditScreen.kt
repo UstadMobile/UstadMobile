@@ -1,8 +1,11 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.clazzlog.edit
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.viewmodel.ClazzLogEditUiState
+import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditUiState
+import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadDateTimeField
@@ -67,3 +70,16 @@ val ClazzLogEditScreenPreview = FC<Props> {
         }
     }
 }
+
+val ClazzLogEditScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        ClazzLogEditViewModel(di, savedStateHandle)
+    }
+    val uiStateVal by viewModel.uiState.collectAsState(ClazzLogEditUiState())
+
+    ClazzLogEditScreenComponent2 {
+        uiState = uiStateVal
+        onChangeClazzLog = viewModel::onEntityChanged
+    }
+}
+
