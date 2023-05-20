@@ -31,7 +31,6 @@ import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.ClazzLogListAttendancePresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
@@ -46,6 +45,7 @@ import java.text.DecimalFormat
 import java.util.*
 import androidx.paging.compose.items
 import com.ustadmobile.core.schedule.totalAttendeeStatusRecorded
+import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
 import kotlin.math.max
 
 
@@ -57,7 +57,7 @@ class ClazzLogListAttendanceFragment(): UstadBaseMvvmFragment() {
         return view
     }
 
-    fun ClazzLogListAttendancePresenter.RecordAttendanceOption.toBottomSheetOption(): BottomSheetOption {
+    fun ClazzLogListAttendanceViewModel.RecordAttendanceOption.toBottomSheetOption(): BottomSheetOption {
         val systemImpl : UstadMobileSystemImpl = direct.instance()
         return BottomSheetOption(RECORD_ATTENDANCE_OPTIONS_ICON[this] ?: 0,
             systemImpl.getString(this.messageId, requireContext()), this.commandId)
@@ -66,9 +66,9 @@ class ClazzLogListAttendanceFragment(): UstadBaseMvvmFragment() {
     companion object {
 
         val RECORD_ATTENDANCE_OPTIONS_ICON = mapOf(
-                ClazzLogListAttendancePresenter.RecordAttendanceOption.RECORD_ATTENDANCE_MOST_RECENT_SCHEDULE
+            ClazzLogListAttendanceViewModel.RecordAttendanceOption.RECORD_ATTENDANCE_MOST_RECENT_SCHEDULE
                         to R.drawable.ic_calendar_today_24px_,
-                ClazzLogListAttendancePresenter.RecordAttendanceOption.RECORD_ATTENDANCE_NEW_SCHEDULE
+            ClazzLogListAttendanceViewModel.RecordAttendanceOption.RECORD_ATTENDANCE_NEW_SCHEDULE
                         to R.drawable.ic_add_black_24dp
         )
 

@@ -157,7 +157,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         ClazzLogEditAttendanceScreenPreview),
     UstadScreen(JoinWithCodeView.VIEW_NAME, "JoinWithCode Preview",
         JoinWithCodeScreenPreview),
-    UstadScreen(ClazzLogListAttendanceView.VIEW_NAME, "ClazzLogListAttendance Preview",
+    UstadScreen(ClazzLogListAttendanceViewModel.DEST_NAME, "ClazzLogListAttendance Preview",
         ClazzLogListAttendanceScreenPreview
     ),
     UstadScreen(ContentEntryList2View.VIEW_NAME, "ContentEntryList Preview",
