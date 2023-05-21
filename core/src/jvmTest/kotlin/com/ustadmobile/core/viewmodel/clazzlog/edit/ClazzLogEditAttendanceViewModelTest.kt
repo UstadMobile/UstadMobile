@@ -156,6 +156,10 @@ class ClazzLogEditAttendanceViewModelTest {
                     }
                 }
 
+                assertTrue(readyState.clazzLogAttendanceRecordList.all {
+                    it.attendanceRecord?.attendanceStatus == 0
+                })
+
                 assertEquals(2, readyState.clazzLogsList.size)
                 defaultEnroledNames.forEach { name ->
                     assertTrue(previousLogState.clazzLogAttendanceRecordList.any {

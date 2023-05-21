@@ -13,6 +13,7 @@ import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
+import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.Role
@@ -198,7 +199,7 @@ class ClazzLogListAttendanceViewModel(
                     val mostRecentLogUid = activeRepo.clazzLogDao
                         .findMostRecentClazzLogToEditUid(clazzUid)
                     navController.takeIf { mostRecentLogUid != 0L }?.navigate(
-                        viewName = ClazzLogEditAttendanceView.VIEW_NAME,
+                        viewName = ClazzLogEditAttendanceViewModel.DEST_NAME,
                         args = mapOf(UstadView.ARG_ENTITY_UID to mostRecentLogUid.toString())
                     )
                 }
@@ -208,7 +209,7 @@ class ClazzLogListAttendanceViewModel(
 
     fun onClickEntry(clazzLog: ClazzLog) {
         navController.navigate(
-            viewName = ClazzLogEditAttendanceView.VIEW_NAME,
+            viewName = ClazzLogEditAttendanceViewModel.DEST_NAME,
             args = mapOf(UstadView.ARG_ENTITY_UID to clazzLog.clazzLogUid.toString())
         )
     }

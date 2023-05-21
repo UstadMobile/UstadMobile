@@ -1,5 +1,7 @@
 package com.ustadmobile.core.viewmodel.clazzlog.editattendance
 
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.replace
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
@@ -86,6 +88,17 @@ class ClazzLogEditAttendanceViewModel(
     private val saveAttendanceRecordsMutex = Mutex()
 
     init {
+        _appUiState.update { prev ->
+            prev.copy(
+                title = systemImpl.getString(MessageID.record_attendance),
+                actionBarButtonState = ActionBarButtonUiState(
+                    visible = true,
+                    text = systemImpl.getString(MessageID.save),
+                    onClick = this::onClickSave
+                )
+            )
+        }
+
         viewModelScope.launch {
             //load the clazzloglist
             val newClazzLogVal = newClazzLog

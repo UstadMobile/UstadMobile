@@ -51,7 +51,9 @@ import com.ustadmobile.view.clazzenrolment.list.ClazzEnrolmentListScreen
 import com.ustadmobile.view.clazzlog.attendancelist.ClazzLogListAttendanceScreen
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
+import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
 import com.ustadmobile.view.clazzlog.edit.ClazzLogEditScreen
+import com.ustadmobile.view.clazzlog.editattendance.ClazzLogEditAttendanceScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -158,8 +160,10 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(NAVHOST_CLEARSTACK_VIEWNAME, "Clear Stack", NavHostClearStackPlaceholder),
     UstadScreen("UstadAddListItem", "UstadAddListItem Preview",
         UstadAddListItemPreview),
-    UstadScreen(ClazzLogEditAttendanceView.VIEW_NAME, name = "ClazzLogEditAttendance Preview",
-        ClazzLogEditAttendanceScreenPreview),
+    UstadScreen(
+        ClazzLogEditAttendanceViewModel.DEST_NAME, name = "ClazzLogEditAttendance Preview",
+        ClazzLogEditAttendanceScreen
+    ),
     UstadScreen(JoinWithCodeView.VIEW_NAME, "JoinWithCode Preview",
         JoinWithCodeScreenPreview),
     UstadScreen(ClazzLogListAttendanceViewModel.DEST_NAME, "ClazzLogListAttendance Preview",

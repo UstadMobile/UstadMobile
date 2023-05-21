@@ -106,6 +106,7 @@ expect abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRe
              (SELECT ClazzEnrolment.clazzEnrolmentPersonUid AS enroledPersonUid
                  FROM ClazzEnrolment
                 WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+                  AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
                   AND :time BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft)
                   
         SELECT Person.*, ClazzLogAttendanceRecord.*

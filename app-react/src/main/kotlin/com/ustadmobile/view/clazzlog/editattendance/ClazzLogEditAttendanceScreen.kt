@@ -1,13 +1,16 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.clazzlog.editattendance
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceUiState
+import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
 import com.ustadmobile.hooks.useFormattedDateAndTime
+import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.lib.db.composites.PersonAndClazzLogAttendanceRecord
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
-import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.common.xs
@@ -28,6 +31,7 @@ import mui.icons.material.ArrowForward
 import mui.icons.material.Done
 import mui.icons.material.Close
 import mui.icons.material.AccessTime
+import react.dom.aria.ariaLabel
 
 external interface ClazzLogEditAttendanceScreenProps : Props {
 
@@ -37,35 +41,41 @@ external interface ClazzLogEditAttendanceScreenProps : Props {
 
     var onChangeClazzLog: (ClazzLog) -> Unit
 
-    var onClazzLogAttendanceChanged: (ClazzLogAttendanceRecordWithPerson) -> Unit
+    var onClazzLogAttendanceChanged: (PersonAndClazzLogAttendanceRecord) -> Unit
 
 }
 
 val ClazzLogEditAttendanceScreenPreview = FC<Props> {
-    ClazzLogEditAttendanceScreenComponent2 {
+    ClazzLogEditAttendanceScreenComponent {
         uiState = ClazzLogEditAttendanceUiState(
             clazzLogAttendanceRecordList = listOf(
-                ClazzLogAttendanceRecordWithPerson().apply {
-                    clazzLogAttendanceRecordUid = 0
-                    attendanceStatus = ClazzLogAttendanceRecord.STATUS_ATTENDED
+                PersonAndClazzLogAttendanceRecord(
                     person = Person().apply {
                         firstNames = "Student Name"
+                    },
+                    attendanceRecord = ClazzLogAttendanceRecord().apply {
+                        clazzLogAttendanceRecordUid = 0
+                        attendanceStatus = ClazzLogAttendanceRecord.STATUS_ATTENDED
                     }
-                },
-                ClazzLogAttendanceRecordWithPerson().apply {
-                    clazzLogAttendanceRecordUid = 1
-                    attendanceStatus = ClazzLogAttendanceRecord.STATUS_ATTENDED
+                ),
+                PersonAndClazzLogAttendanceRecord(
                     person = Person().apply {
                         firstNames = "Student Name"
+                    },
+                    attendanceRecord = ClazzLogAttendanceRecord().apply {
+                        clazzLogAttendanceRecordUid = 1
+                        attendanceStatus = ClazzLogAttendanceRecord.STATUS_ATTENDED
                     }
-                },
-                ClazzLogAttendanceRecordWithPerson().apply {
-                    clazzLogAttendanceRecordUid = 2
-                    attendanceStatus = ClazzLogAttendanceRecord.STATUS_ABSENT
+                ),
+                PersonAndClazzLogAttendanceRecord(
                     person = Person().apply {
                         firstNames = "Student Name"
+                    },
+                    attendanceRecord = ClazzLogAttendanceRecord().apply {
+                        clazzLogAttendanceRecordUid = 2
+                        attendanceStatus = ClazzLogAttendanceRecord.STATUS_ABSENT
                     }
-                }
+                )
             ),
             clazzLogsList = listOf(
                 ClazzLog().apply {
@@ -82,7 +92,22 @@ val ClazzLogEditAttendanceScreenPreview = FC<Props> {
     }
 }
 
-private val ClazzLogEditAttendanceScreenComponent2 = FC<ClazzLogEditAttendanceScreenProps> { props ->
+val ClazzLogEditAttendanceScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        ClazzLogEditAttendanceViewModel(di, savedStateHandle)
+    }
+
+    val uiStateVal by viewModel.uiState.collectAsState(ClazzLogEditAttendanceUiState())
+
+    ClazzLogEditAttendanceScreenComponent {
+        uiState = uiStateVal
+        onClickMarkAll = viewModel::onClickMarkAll
+        onClazzLogAttendanceChanged = viewModel::onClazzLogAttendanceChanged
+        onChangeClazzLog = { viewModel.onChangeClazzLog(it) }
+    }
+}
+
+private val ClazzLogEditAttendanceScreenComponent = FC<ClazzLogEditAttendanceScreenProps> { props ->
 
     val strings = useStringsXml()
 
@@ -97,6 +122,7 @@ private val ClazzLogEditAttendanceScreenComponent2 = FC<ClazzLogEditAttendanceSc
                 timeZone = props.uiState.timeZone
                 list = props.uiState.clazzLogsList
                 onChangeClazzLog = props.onChangeClazzLog
+                currentIndex = props.uiState.currentClazzLogIndex
             }
 
             List {
@@ -136,7 +162,7 @@ private val ClazzLogEditAttendanceScreenComponent2 = FC<ClazzLogEditAttendanceSc
                 props.uiState.clazzLogAttendanceRecordList.forEach { clazzLogAttendance ->
 
                     ClazzLogItemView {
-                        clazzLog = clazzLogAttendance
+                        personAndRecord = clazzLogAttendance
                         onClazzLogAttendanceChanged = props.onClazzLogAttendanceChanged
                         fieldsEnabled = props.uiState.fieldsEnabled
                     }
@@ -157,14 +183,17 @@ external interface PagerViewProps : Props {
 
     var list: List<ClazzLog>
 
+    var currentIndex: Int
+
 }
 
 private val PagerView = FC<PagerViewProps> { props ->
 
-    var currentClazzLog by useState { 0 }
+    val strings = useStringsXml()
+
     val dateTime = useFormattedDateAndTime(
-        props.list[currentClazzLog].logDate,
-        props.timeZone
+        timeInMillis = props.list.getOrNull(props.currentIndex)?.logDate ?: 0L,
+        timezoneId = props.timeZone
     )
 
     Grid {
@@ -174,13 +203,14 @@ private val PagerView = FC<PagerViewProps> { props ->
             item = true
             xs = 1
 
-            Button {
-                variant = ButtonVariant.text
+            IconButton {
+                disabled = props.currentIndex <= 0
+                id = "prev_day_button"
+                ariaLabel = strings[MessageID.previous]
                 onClick = {
-                    if (currentClazzLog != 0){
-                        currentClazzLog -= 1
-
-                        props.onChangeClazzLog(props.list[currentClazzLog])
+                    val prevLog = props.list.getOrNull(props.currentIndex - 1)
+                    if(prevLog != null) {
+                        props.onChangeClazzLog(prevLog)
                     }
                 }
 
@@ -204,13 +234,14 @@ private val PagerView = FC<PagerViewProps> { props ->
             item = true
             xs = 1
 
-            Button {
-                variant = ButtonVariant.text
+            IconButton {
+                disabled = props.currentIndex >= props.list.size -1
+                id = "next_day_button"
+                ariaLabel = strings[MessageID.next]
                 onClick = {
-                    if (currentClazzLog < props.list.size-1){
-                        currentClazzLog += 1
-
-                        props.onChangeClazzLog(props.list[currentClazzLog])
+                    val nextLog = props.list.getOrNull(props.currentIndex + 1)
+                    if(nextLog != null) {
+                        props.onChangeClazzLog(nextLog)
                     }
                 }
 
@@ -224,9 +255,9 @@ private val PagerView = FC<PagerViewProps> { props ->
 
 external interface ClazzLogItemViewProps : Props {
 
-    var clazzLog: ClazzLogAttendanceRecordWithPerson
+    var personAndRecord: PersonAndClazzLogAttendanceRecord
 
-    var onClazzLogAttendanceChanged: (ClazzLogAttendanceRecordWithPerson) -> Unit
+    var onClazzLogAttendanceChanged: (PersonAndClazzLogAttendanceRecord) -> Unit
 
     var fieldsEnabled: Boolean
 }
@@ -251,7 +282,7 @@ private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
 
             ListItemText {
                 primary = ReactNode(
-                    props.clazzLog.person?.personFullName() ?: ""
+                    props.personAndRecord.person?.personFullName() ?: ""
                 )
             }
 
@@ -262,13 +293,16 @@ private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
             STATUS_TO_ICON_MAP.forEach { (status ,icon) ->
                 ToggleButton {
                     disabled = !props.fieldsEnabled
-                    selected = (props.clazzLog.attendanceStatus == status)
+                    selected = (props.personAndRecord.attendanceRecord?.attendanceStatus == status)
 
                     onChange = { _,_ ->
                         props.onClazzLogAttendanceChanged(
-                            props.clazzLog.shallowCopy {
-                                attendanceStatus = status
-                            }
+                            props.personAndRecord.copy(
+                                person = props.personAndRecord.person,
+                                attendanceRecord = props.personAndRecord.attendanceRecord?.shallowCopy {
+                                    attendanceStatus = status
+                                }
+                            )
                         )
                     }
 

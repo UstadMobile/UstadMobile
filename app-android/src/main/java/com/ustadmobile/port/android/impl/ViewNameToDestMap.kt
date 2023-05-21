@@ -95,7 +95,7 @@ class ViewNameToDestMap: DestinationProvider {
             ContentEntryDetailAttemptsListView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_attempt_dest),
             SessionListView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_session_list_dest),
             StatementListView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_session_detail_list_dest),
-            ClazzLogEditAttendanceView.VIEW_NAME to UstadDestination(R.id.clazz_log_edit_attendance_dest,
+            ClazzLogEditAttendanceViewModel.DEST_NAME to UstadDestination(R.id.clazz_log_edit_attendance_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             ClazzEnrolmentListViewModel.DEST_NAME to UstadDestination(R.id.clazz_enrolment_list),
             ClazzEnrolmentEditView.VIEW_NAME to UstadDestination(R.id.clazz_enrolment_edit,

@@ -3,11 +3,15 @@ package com.ustadmobile.core.viewmodel.clazzlog.edit
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.schedule.generateUid
 import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzLog
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -59,6 +63,7 @@ class ClazzLogEditViewModel(
                 makeDefault = {
                     ClazzLog().apply {
                         clazzLogClazzUid = savedStateHandle[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
+                        logDate = systemTimeInMillis()
                     }
                 },
                 uiUpdate = {
@@ -102,9 +107,13 @@ class ClazzLogEditViewModel(
             return
         }
 
-        val newClazzLogJson = json.encodeToString(ClazzLog.serializer(), clazzLog)
+        val clazzLogWithUid = clazzLog.shallowCopy {
+            clazzLogUid = generateUid()
+        }
+
+        val newClazzLogJson = json.encodeToString(ClazzLog.serializer(), clazzLogWithUid)
         navController.navigate(
-            viewName = ClazzLogEditAttendanceView.VIEW_NAME,
+            viewName = ClazzLogEditAttendanceViewModel.DEST_NAME,
             args = mapOf(
                 ClazzLogEditAttendanceView.ARG_NEW_CLAZZLOG to newClazzLogJson,
             )

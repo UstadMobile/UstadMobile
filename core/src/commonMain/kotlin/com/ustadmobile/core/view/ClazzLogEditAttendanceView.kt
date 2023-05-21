@@ -18,7 +18,7 @@ interface ClazzLogEditAttendanceView: UstadEditView<ClazzLog> {
 
     companion object {
 
-        const val VIEW_NAME = "CourseLogEditAttendanceEditView"
+        const val VIEW_NAME = "EditAttendance"
 
         /**
          * When a new clazzlog is provided as an argument, it will be added to the list of available
