@@ -90,9 +90,12 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(
  * @throws IllegalStateException when the person is already in the class
  */
 @Throws(AlreadyEnroledInClassException::class)
-suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Person, clazzUid: Long,
-                                                              role: Int,
-                                                              clazzWithSchool: ClazzWithSchool? = null): ClazzEnrolment {
+suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(
+    personToEnrol: Person,
+    clazzUid: Long,
+    role: Int,
+    clazzWithSchool: ClazzWithSchool? = null
+): ClazzEnrolment {
     val clazzWithSchoolVal = clazzWithSchool ?: clazzDao.getClazzWithSchool(clazzUid)
         ?: throw IllegalArgumentException("Class does not exist")
 

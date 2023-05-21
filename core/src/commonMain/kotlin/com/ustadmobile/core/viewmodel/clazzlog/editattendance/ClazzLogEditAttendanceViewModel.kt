@@ -75,7 +75,7 @@ class ClazzLogEditAttendanceViewModel(
                 serializer = ListSerializer(ClazzLog.serializer()),
                 onLoadFromDb = { db ->
                     val dbLogList = if(newClazzLogVal != null) {
-                        db.clazzLogDao.findByClazzUidAsync(newClazzLogVal.clazzLogUid,
+                        db.clazzLogDao.findByClazzUidAsync(newClazzLogVal.clazzLogClazzUid,
                             ClazzLog.STATUS_RESCHEDULED)
                     }else {
                         db.clazzLogDao.findAllForClazzByClazzLogUid(entityUidArg,
@@ -83,7 +83,7 @@ class ClazzLogEditAttendanceViewModel(
                     }
 
                     val list = if(newClazzLogVal != null) {
-                        (dbLogList + listOf(newClazzLogVal)).sortedByDescending { it.logDate }
+                        (dbLogList + listOf(newClazzLogVal)).sortedBy { it.logDate }
                     }else {
                         dbLogList
                     }
@@ -112,7 +112,7 @@ class ClazzLogEditAttendanceViewModel(
 
                 //New clazzlog was created - start there
                 newClazzLogVal != null -> {
-                    _uiState.value.indexOfClazzLogUid(newClazzLogVal.clazzLogClazzUid) ?: 0
+                    _uiState.value.indexOfClazzLogUid(newClazzLogVal.clazzLogUid) ?: 0
                 }
 
                 //EntityUidArg was specified - go to it
@@ -121,7 +121,7 @@ class ClazzLogEditAttendanceViewModel(
                 }
 
                 //no savedstate, no argument?
-                else -> 0
+                else -> _uiState.value.clazzLogsList.size - 1
             }
 
             onChangeClazzLog(
@@ -178,11 +178,11 @@ class ClazzLogEditAttendanceViewModel(
                 }else {
                     it
                 }
-            }.also {
+            }.also { personAndAttendanceRecordsList ->
                 savedStateHandle.setJson(
-                    savedStateKey,
-                    ListSerializer(PersonAndClazzLogAttendanceRecord.serializer()),
-                    it
+                    key = savedStateKey,
+                    serializer = ListSerializer(PersonAndClazzLogAttendanceRecord.serializer()),
+                    value = personAndAttendanceRecordsList
                 )
             }
 
@@ -199,6 +199,10 @@ class ClazzLogEditAttendanceViewModel(
     }
 
     fun onClickMarkAll(status: Int) {
+
+    }
+
+    fun onClickSave() {
 
     }
 

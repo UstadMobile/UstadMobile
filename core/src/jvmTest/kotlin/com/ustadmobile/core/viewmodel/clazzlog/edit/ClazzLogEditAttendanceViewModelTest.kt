@@ -5,6 +5,8 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.schedule.generateUid
 import com.ustadmobile.core.test.viewmodeltest.ViewModelTestBuilder
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
+import com.ustadmobile.core.util.MS_PER_HOUR
+import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.core.util.ext.awaitItemWhere
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
@@ -15,6 +17,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzLog
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
 import com.ustadmobile.lib.db.entities.Person
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -30,7 +33,8 @@ class ClazzLogEditAttendanceViewModelTest {
 
     data class ClazzLogEditAttendanceViewModelTestContext(
         val activeUser: Person,
-        val clazz: Clazz
+        val clazz: Clazz,
+        val enroledPersons: List<Person>,
     )
 
     private fun testClazzLogEditAttendanceView(
@@ -47,16 +51,18 @@ class ClazzLogEditAttendanceViewModelTest {
 
                 activeDb.createNewClazzAndGroups(clazz, systemImpl, emptyMap())
 
-                namesToEnrol.forEach {name ->
+                val enroledPersons = namesToEnrol.map {name ->
                     val studentPerson = activeDb.insertPersonAndGroup(Person().apply {
                         firstNames = name.split(" ").first()
                         lastName = name.split(" ").last()
                     })
                     activeDb.enrolPersonIntoClazzAtLocalTimezone(studentPerson, clazz.clazzUid,
                         ClazzEnrolment.ROLE_STUDENT)
+
+                    studentPerson
                 }
 
-                ClazzLogEditAttendanceViewModelTestContext(person, clazz)
+                ClazzLogEditAttendanceViewModelTestContext(person, clazz, enroledPersons)
             }
 
             block(context)
@@ -92,12 +98,74 @@ class ClazzLogEditAttendanceViewModelTest {
                         it.person?.firstNames == name.split(" ").first()
                     })
                 }
+                cancelAndIgnoreRemainingEvents()
             }
         }
     }
 
+    @Test
     fun givenNewClazzLogSpecifiedAndPreviousClazzLogExists_whenGoPreviousSelected_thenShouldShowPreviouslyRecordedLogs() {
+        testClazzLogEditAttendanceView { testContext ->
+            activeDb.withDoorTransactionAsync {
+                val clazzLog = ClazzLog().apply {
+                    logDate = systemTimeInMillis() - 1000
+                    clazzLogClazzUid = testContext.clazz.clazzUid
+                    clazzLogNumPresent = testContext.enroledPersons.size
+                    clazzLogUid = generateUid()
+                }
+                activeDb.clazzLogDao.insertAsync(clazzLog)
+                activeDb.clazzLogAttendanceRecordDao.insertListAsync(
+                    testContext.enroledPersons.map {
+                        ClazzLogAttendanceRecord().apply {
+                            clazzLogAttendanceRecordClazzLogUid = clazzLog.clazzLogUid
+                            clazzLogAttendanceRecordPersonUid = it.personUid
+                            attendanceStatus = ClazzLogAttendanceRecord.STATUS_ATTENDED
+                        }
+                    }
+                )
 
+                clazzLog
+            }
+
+            val newClazzLog = ClazzLog().apply {
+                clazzLogClazzUid = testContext.clazz.clazzUid
+                logDate = systemTimeInMillis()
+                clazzLogUid = generateUid()
+            }
+
+            viewModelFactory {
+                savedStateHandle[ClazzLogEditAttendanceViewModel.ARG_NEW_CLAZZLOG] = json.encodeToString(
+                    serializer = ClazzLog.serializer(),
+                    value = newClazzLog
+                )
+
+                ClazzLogEditAttendanceViewModel(di, savedStateHandle)
+            }
+
+            viewModel.uiState.test(timeout = 10.seconds) {
+                val readyState = awaitItemWhere {
+                    it.clazzLogsList.isNotEmpty() && it.clazzLogAttendanceRecordList.isNotEmpty()
+                }
+
+                viewModel.onChangeClazzLog(readyState.clazzLogsList.first())
+
+                val previousLogState = awaitItemWhere { state ->
+                    state.clazzLogAttendanceRecordList.all {
+                        it.attendanceRecord?.attendanceStatus == ClazzLogAttendanceRecord.STATUS_ATTENDED
+                    }
+                }
+
+                assertEquals(2, readyState.clazzLogsList.size)
+                defaultEnroledNames.forEach { name ->
+                    assertTrue(previousLogState.clazzLogAttendanceRecordList.any {
+                        it.person?.firstNames == name.split(" ").first() &&
+                            it.attendanceRecord?.attendanceStatus == ClazzLogAttendanceRecord.STATUS_ATTENDED
+                    })
+                }
+
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
     }
 
     fun givenEntityArgUidSpecified_whenCreated_thenShouldShowClazzLogAndEnrolledStudents() {
