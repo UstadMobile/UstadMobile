@@ -6,6 +6,7 @@ import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.composites.PersonAndClazzLogAttendanceRecord
 import com.ustadmobile.lib.db.entities.*
 
 @DoorDao
@@ -99,5 +100,34 @@ expect abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRe
         newClazzLogUid: Long,
         changedTime: Long
     )
+
+    @Query("""
+        WITH CurrentlyEnrolledPersonUids(enroledPersonUid) AS
+             (SELECT ClazzEnrolment.clazzEnrolmentPersonUid AS enroledPersonUid
+                 FROM ClazzEnrolment
+                WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+                  AND :time BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft)
+                  
+        SELECT Person.*, ClazzLogAttendanceRecord.*
+          FROM Person
+               LEFT JOIN ClazzLogAttendanceRecord 
+                         ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid = 
+                            (SELECT ClazzLogAttendanceRecordInner.clazzLogAttendanceRecordUid  
+                               FROM ClazzLogAttendanceRecord ClazzLogAttendanceRecordInner
+                              WHERE ClazzLogAttendanceRecordInner.clazzLogAttendanceRecordClazzLogUid = :clazzLogUid
+                                AND ClazzLogAttendanceRecordInner.clazzLogAttendanceRecordPersonUid = Person.personUid
+                           ORDER BY ClazzLogAttendanceRecordInner.clazzLogAttendanceRecordLastChangedTime DESC     
+                              LIMIT 1  
+                            )
+         WHERE Person.personUid IN 
+               (SELECT CurrentlyEnrolledPersonUids.enroledPersonUid
+                  FROM CurrentlyEnrolledPersonUids)                
+    """)
+    abstract suspend fun findByClazzAndTime(
+        clazzUid: Long,
+        clazzLogUid: Long,
+        time: Long
+    ): List<PersonAndClazzLogAttendanceRecord>
+
 
 }

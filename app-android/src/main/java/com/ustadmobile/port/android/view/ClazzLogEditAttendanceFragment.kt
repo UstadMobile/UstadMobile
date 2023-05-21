@@ -24,7 +24,7 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson
 import java.lang.Integer.max
 import java.lang.Integer.min
 import java.util.*
-import com.ustadmobile.core.viewmodel.ClazzLogEditAttendanceUiState
+import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceUiState
 import com.google.accompanist.themeadapter.material.MdcTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -433,6 +433,7 @@ private fun ClazzLogEditAttendanceScreen(
 @Composable
 private fun PagerView(
     list: List<ClazzLog>,
+    uiStateIndex: Int,
     timeZone: String,
     onChangeClazzLog: (ClazzLog) -> Unit = {},
 ) {
@@ -442,6 +443,12 @@ private fun PagerView(
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect {
             onChangeClazzLog(list[it])
+        }
+    }
+
+    LaunchedEffect(uiStateIndex) {
+        if(pagerState.currentPage != uiStateIndex) {
+            pagerState.scrollToPage(pagerState.currentPage - 1)
         }
     }
 
@@ -458,7 +465,8 @@ private fun PagerView(
                     }
                 }
             },
-            modifier = Modifier.weight(1F)
+            modifier = Modifier.weight(1F),
+            enabled = pagerState.currentPage > 0
         ) {
             Icon(
                 Icons.Default.ArrowBack,
@@ -488,7 +496,8 @@ private fun PagerView(
                     }
                 }
             },
-            modifier = Modifier.weight(1F)
+            modifier = Modifier.weight(1F),
+            enabled = pagerState.currentPage < list.size -1
         ) {
             Icon(
                 Icons.Default.ArrowForward,

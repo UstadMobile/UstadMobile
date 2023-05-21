@@ -97,12 +97,32 @@ expect abstract class ClazzLogDao : BaseDao<ClazzLog> {
 
 
     //Used by the attendance recording screen to allow the user to go next/prev between days.
-    @Query("""SELECT ClazzLog.* FROM ClazzLog 
-        WHERE clazzLogClazzUid = :clazzUid
-        AND clazzLog.clazzLogStatusFlag != :excludeStatus
-        ORDER BY ClazzLog.logDate ASC""")
-    abstract suspend fun findByClazzUidAsync(clazzUid: Long, excludeStatus: Int): List<ClazzLog>
+    @Query("""
+        SELECT ClazzLog.* 
+          FROM ClazzLog 
+         WHERE ClazzLog.clazzLogClazzUid = :clazzUid
+           AND clazzLog.clazzLogStatusFlag != :excludeStatus
+      ORDER BY ClazzLog.logDate ASC
+    """)
+    abstract suspend fun findByClazzUidAsync(
+        clazzUid: Long,
+        excludeStatus: Int
+    ): List<ClazzLog>
 
+    @Query("""
+        SELECT ClazzLog.* 
+          FROM ClazzLog 
+         WHERE ClazzLog.clazzLogClazzUid = 
+               (SELECT ClazzLogInner.clazzLogClazzUid
+                  FROM ClazzLog ClazzLogInner
+                 WHERE ClazzLogInner.clazzLogUid = :clazzLogUid)
+           AND clazzLog.clazzLogStatusFlag != :excludeStatus
+      ORDER BY ClazzLog.logDate ASC
+    """)
+    abstract suspend fun findAllForClazzByClazzLogUid(
+        clazzLogUid: Long,
+        excludeStatus: Int
+    ): List<ClazzLog>
 
     @Query("""SELECT ClazzLog.* FROM ClazzLog 
         WHERE 
