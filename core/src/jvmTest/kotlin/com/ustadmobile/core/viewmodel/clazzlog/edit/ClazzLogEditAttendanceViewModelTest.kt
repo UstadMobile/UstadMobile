@@ -5,12 +5,11 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.schedule.generateUid
 import com.ustadmobile.core.test.viewmodeltest.ViewModelTestBuilder
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
-import com.ustadmobile.core.util.MS_PER_HOUR
-import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.core.util.ext.awaitItemWhere
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -168,8 +167,40 @@ class ClazzLogEditAttendanceViewModelTest {
         }
     }
 
+    @Test
     fun givenEntityArgUidSpecified_whenCreated_thenShouldShowClazzLogAndEnrolledStudents() {
+        testClazzLogEditAttendanceView { testContext ->
+            val existingClazzLog = activeDb.withDoorTransactionAsync {
+                val clazzLog = ClazzLog().apply {
+                    logDate = systemTimeInMillis() - 1000
+                    clazzLogClazzUid = testContext.clazz.clazzUid
+                    clazzLogNumPresent = testContext.enroledPersons.size
+                    clazzLogUid = generateUid()
+                }
 
+                activeDb.clazzLogDao.insertAsync(clazzLog)
+                clazzLog
+            }
+
+            viewModelFactory {
+                savedStateHandle[UstadView.ARG_ENTITY_UID] = existingClazzLog.clazzLogUid.toString()
+                ClazzLogEditAttendanceViewModel(di, savedStateHandle)
+            }
+
+            viewModel.uiState.test(timeout = 5.seconds) {
+                val readyState = awaitItemWhere {
+                    it.clazzLogsList.isNotEmpty() && it.clazzLogAttendanceRecordList.isNotEmpty()
+                }
+
+                assertEquals(existingClazzLog.clazzLogUid, readyState.clazzLogsList.first().clazzLogUid)
+                defaultEnroledNames.forEach { name ->
+                    assertTrue(readyState.clazzLogAttendanceRecordList.any {
+                        it.person?.firstNames == name.split(" ").first()
+                    })
+                }
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
     }
 
     fun givenNewClazzLogSpecified_whenStatusUpdatedAndSaveClicked_thenShouldSaveIntoDatabase() {
