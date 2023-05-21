@@ -357,28 +357,15 @@ fun BarcodeScanningDecorationLayout(
     fun calculateScanningRect(size: Int, centerPoint: PointF): RectF {
         val scanningAreaSize = size * 0.8F
         val left = centerPoint.x - scanningAreaSize * 0.5F
-        val top = centerPoint.y - scanningAreaSize * 0.5F
+        val top = centerPoint.y - scanningAreaSize * 0.7F
         val right = centerPoint.x + scanningAreaSize * 0.5F
-        val bottom = centerPoint.y + scanningAreaSize * 0.1F
+        val bottom = centerPoint.y + scanningAreaSize * 0.2F
         return RectF(left, top, right, bottom)
-    }
-
-    fun calculateInstructionTextRect(paint: android.graphics.Paint, text: String): RectF {
-        return runCatching {
-            val rect: android.graphics.Rect = android.graphics.Rect()
-            paint.getTextBounds(text, 0, text.length, rect)
-            rect.toRectF()
-        }.getOrNull() ?: RectF()
     }
 
     val scanningAreaPath: Path by remember { mutableStateOf(Path()) }
     val cameraBoundaryPath: Path by remember { mutableStateOf(Path()) }
     val barcodeBoundaryPath: Path by remember { mutableStateOf(Path()) }
-    val instructionTextPaint = Paint().asFrameworkPaint().apply {
-        isAntiAlias = true
-        textSize = LocalDensity.current.run { 18.sp.toPx() }
-        color = Color(0xFF03DAC5).toArgb()
-    }
 
     val centerPoint = PointF(width * 0.5F, height * 0.5F)
     val scanningAreaRect = calculateScanningRect(size = minOf(width, height), centerPoint)
@@ -425,18 +412,6 @@ fun BarcodeScanningDecorationLayout(
                 ),
                 cornerRadius = CornerRadius(x = scanningFrameCornerRadius, y = scanningFrameCornerRadius)
             )
-
-            // draw the instruction text
-            calculateInstructionTextRect(instructionTextPaint, scanningResult.message).let { textBoundary ->
-                drawIntoCanvas {
-                    it.nativeCanvas.drawText(
-                        scanningResult.message,
-                        centerPoint.x - textBoundary.width() * 0.5F,
-                        (scanningAreaRect.top - textBoundary.height()) * 0.5F,
-                        instructionTextPaint
-                    )
-                }
-            }
 
             // draw the bar code result boundary
             scanningResult.globalPosition.let {
