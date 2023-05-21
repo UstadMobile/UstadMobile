@@ -308,13 +308,6 @@ class BarcodeResultBoundaryAnalyzer {
                     )
                 }
             }
-            !checkRectangleNotOverlap(barcodeGlobalPosition, barcodeScanningAreaRect) -> {
-                BarCodeResult(
-                    barCode = barcode,
-                    globalPosition = barcodeGlobalPosition,
-                    message = "BoundaryOverLap"
-                )
-            }
             else -> {
                 BarCodeResult(message = "OutOfBoundary")
             }
@@ -330,9 +323,6 @@ class BarcodeResultBoundaryAnalyzer {
      * NON-Overlap => Cond1 Or Cond2 Or Cond3 Or Cond4
      * Overlap => NOT (Cond1 Or Cond2 Or Cond3 Or Cond4)
      */
-    private fun checkRectangleNotOverlap(areaOne: RectF, areaTwo: RectF): Boolean {
-        return areaTwo.left >= areaOne.right || areaTwo.right < areaOne.left || areaTwo.top > areaOne.bottom || areaTwo.bottom < areaOne.top
-    }
 
     private fun checkRectangleInside(smallArea: RectF, largeArea: RectF): Boolean {
         return smallArea.left > largeArea.left &&
