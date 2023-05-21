@@ -29,8 +29,6 @@ data class ClazzLogEditAttendanceUiState(
 
     val clazzLogAttendanceRecordList: List<PersonAndClazzLogAttendanceRecord> = emptyList(),
 
-    val clazzLogTimezone: String = "UTC",
-
     val currentClazzLogIndex: Int = 0,
 
     val clazzLogsList: List<ClazzLog> = emptyList(),
@@ -132,6 +130,16 @@ class ClazzLogEditAttendanceViewModel(
                     }
                 }
             )
+
+            launch {
+                val timeZone = activeRepo.clazzDao.getClazzTimeZoneByClazzUidAsync(
+                    _uiState.value.currentClazzLog.clazzLogClazzUid
+                )
+
+                _uiState.update { prev ->
+                    prev.copy(timeZone = timeZone ?: "UTC")
+                }
+            }
 
             //now determine the currently active clazzLog to show user
             val currentClazzLogIndexVal = currentClazzLogIndex

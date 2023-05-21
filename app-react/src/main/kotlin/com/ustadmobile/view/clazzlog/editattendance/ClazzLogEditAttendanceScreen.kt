@@ -31,6 +31,7 @@ import mui.icons.material.ArrowForward
 import mui.icons.material.Done
 import mui.icons.material.Close
 import mui.icons.material.AccessTime
+import mui.icons.material.SvgIconComponent
 import react.dom.aria.ariaLabel
 
 external interface ClazzLogEditAttendanceScreenProps : Props {
@@ -262,13 +263,21 @@ external interface ClazzLogItemViewProps : Props {
     var fieldsEnabled: Boolean
 }
 
-private val STATUS_TO_ICON_MAP = mapOf(
-    ClazzLogAttendanceRecord.STATUS_ATTENDED to Done,
-    ClazzLogAttendanceRecord.STATUS_ABSENT to Close,
-    ClazzLogAttendanceRecord.STATUS_PARTIAL to AccessTime
+data class StatusIconAndLabel(
+    val status: Int,
+    val icon: SvgIconComponent,
+    val labelMessageId: Int,
 )
 
+private val STATUS_AND_ICONS = listOf(
+    StatusIconAndLabel(ClazzLogAttendanceRecord.STATUS_ATTENDED, Done, MessageID.present),
+    StatusIconAndLabel(ClazzLogAttendanceRecord.STATUS_ABSENT, Close, MessageID.absent),
+    StatusIconAndLabel(ClazzLogAttendanceRecord.STATUS_PARTIAL, AccessTime, MessageID.partial)
+)
+
+
 private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
+    val strings = useStringsXml()
 
     ListItem{
 
@@ -290,10 +299,11 @@ private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
 
         secondaryAction = ButtonGroup.create {
 
-            STATUS_TO_ICON_MAP.forEach { (status ,icon) ->
+            STATUS_AND_ICONS.forEach { (status, icon, labelMessageId) ->
                 ToggleButton {
                     disabled = !props.fieldsEnabled
                     selected = (props.personAndRecord.attendanceRecord?.attendanceStatus == status)
+                    ariaLabel = strings[labelMessageId]
 
                     onChange = { _,_ ->
                         props.onClazzLogAttendanceChanged(
@@ -309,7 +319,6 @@ private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
                     + icon.create()
                 }
             }
-
         }
     }
 }

@@ -5,7 +5,6 @@ import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.schedule.generateUid
 import com.ustadmobile.core.util.ext.isDateSet
-import com.ustadmobile.core.view.ClazzLogEditAttendanceView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
@@ -115,7 +114,7 @@ class ClazzLogEditViewModel(
         navController.navigate(
             viewName = ClazzLogEditAttendanceViewModel.DEST_NAME,
             args = mapOf(
-                ClazzLogEditAttendanceView.ARG_NEW_CLAZZLOG to newClazzLogJson,
+                ClazzLogEditAttendanceViewModel.ARG_NEW_CLAZZLOG to newClazzLogJson,
             )
         )
     }

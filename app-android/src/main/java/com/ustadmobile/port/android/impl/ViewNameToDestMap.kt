@@ -13,6 +13,7 @@ import com.ustadmobile.port.android.view.PanicButtonSettingsView
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
+import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
 
 @Keep
 class ViewNameToDestMap: DestinationProvider {

@@ -6,11 +6,9 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.whenSubscribed
-import com.ustadmobile.core.view.ClazzLogEditAttendanceView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
-import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel

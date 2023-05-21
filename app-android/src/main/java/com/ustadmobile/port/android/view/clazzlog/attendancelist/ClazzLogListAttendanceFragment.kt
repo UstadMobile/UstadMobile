@@ -117,7 +117,7 @@ class ClazzLogListAttendanceFragment(): UstadBaseMvvmFragment() {
                             )
                         )
                     }
-                )
+                ).show(requireActivity().supportFragmentManager, "attendance_options")
             }
         }
     }
@@ -336,11 +336,13 @@ private fun RowScope.ClazzLogListItemAttendanceStatusBox(
     denominator: Int,
     colorId: Int,
 ) {
-    Box(modifier = Modifier
-        .weight((numerator * 100).toFloat() / max(denominator, 1))
-        .height(6.dp)
-        .background(color = colorResource(id = colorId))
-    )
+    if(numerator > 0) {
+        Box(modifier = Modifier
+            .weight((numerator * 100).toFloat() / max(denominator, 1))
+            .height(6.dp)
+            .background(color = colorResource(id = colorId))
+        )
+    }
 }
 
 @Composable
