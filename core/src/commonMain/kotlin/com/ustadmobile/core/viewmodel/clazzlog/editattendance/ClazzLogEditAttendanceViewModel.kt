@@ -1,18 +1,25 @@
 package com.ustadmobile.core.viewmodel.clazzlog.editattendance
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.ext.replace
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.composites.PersonAndClazzLogAttendanceRecord
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
@@ -39,8 +46,15 @@ data class ClazzLogEditAttendanceUiState(
                 null
         }
     }
+
+    val currentClazzLog: ClazzLog
+        get() = clazzLogsList[currentClazzLogIndex]
 }
 
+/**
+ * This screen is where a teacher would record attendance. It shows a list of students in the course
+ * and allows the teacher to mark each one as present, absent, or partial attendance (e.g. late).
+ */
 class ClazzLogEditAttendanceViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
@@ -64,7 +78,12 @@ class ClazzLogEditAttendanceViewModel(
             savedStateHandle[STATE_KEY_CURRENT_LOG_INDEX] = value.toString()
         }
 
+    private val ClazzLog.savedStateKey: String
+        get() = "$STATE_KEY_LOG_PREFIX${clazzLogUid}"
+
     private var loadClazzLogJob: Job? = null
+
+    private val saveAttendanceRecordsMutex = Mutex()
 
     init {
         viewModelScope.launch {
@@ -194,16 +213,97 @@ class ClazzLogEditAttendanceViewModel(
         }
     }
 
-    fun onClazzLogAttendanceChanged(record: ClazzLogAttendanceRecordWithPerson) {
+    fun onClazzLogAttendanceChanged(record: PersonAndClazzLogAttendanceRecord) {
+        _uiState.update { prev ->
+            prev.copy(
+                clazzLogAttendanceRecordList = prev.clazzLogAttendanceRecordList.replace(record) {
+                    it.person?.personUid == record.person?.personUid
+                }
+            )
+        }
 
+        viewModelScope.launch {
+            commitAttendanceRecordsToState()
+        }
     }
 
     fun onClickMarkAll(status: Int) {
+        _uiState.update { prev ->
+            prev.copy(
+                clazzLogAttendanceRecordList = prev.clazzLogAttendanceRecordList.map { record ->
+                    record.copy(
+                        attendanceRecord = record.attendanceRecord?.shallowCopy {
+                            attendanceStatus = status
+                        }
+                    )
+                }
+            )
+        }
 
+        viewModelScope.launch {
+            commitAttendanceRecordsToState()
+        }
+    }
+
+    private suspend fun commitAttendanceRecordsToState() {
+        saveAttendanceRecordsMutex.withLock {
+            savedStateHandle.setJson(
+                _uiState.value.currentClazzLog.savedStateKey,
+                ListSerializer(PersonAndClazzLogAttendanceRecord.serializer()),
+                _uiState.value.clazzLogAttendanceRecordList
+            )
+        }
     }
 
     fun onClickSave() {
+        viewModelScope.launch {
+            //If an automated test is going on, allow the chagnes to be committed
+            delay(100)
+            saveAttendanceRecordsMutex.withLock {
+                val clazzLogsToSave = mutableListOf<ClazzLog>()
+                val attendanceRecordsToSave = mutableListOf<ClazzLogAttendanceRecord>()
+                savedStateHandle.keys.filter {
+                    it.startsWith(STATE_KEY_LOG_PREFIX)
+                }.forEach { stateKey ->
+                    val clazzLogUid = stateKey.substringAfter(STATE_KEY_LOG_PREFIX).toLong()
+                    val clazzLog = _uiState.value.clazzLogsList.first {
+                        it.clazzLogUid == clazzLogUid
+                    }
 
+                    val logRecords = savedStateHandle.getJson(
+                        stateKey,
+                        ListSerializer(PersonAndClazzLogAttendanceRecord.serializer()),
+                    )?.mapNotNull {
+                        it.attendanceRecord
+                    } ?: emptyList()
+                    clazzLogsToSave += clazzLog.shallowCopy {
+                        clazzLogNumPresent = logRecords.count {
+                            it.attendanceStatus == ClazzLogAttendanceRecord.STATUS_ATTENDED
+                        }
+                        clazzLogNumAbsent = logRecords.count {
+                            it.attendanceStatus == ClazzLogAttendanceRecord.STATUS_ABSENT
+                        }
+                        clazzLogNumPartial = logRecords.count {
+                            it.attendanceStatus == ClazzLogAttendanceRecord.STATUS_PARTIAL
+                        }
+                    }
+
+                    attendanceRecordsToSave += logRecords
+                }
+
+                activeDb.withDoorTransactionAsync {
+                    activeDb.clazzLogDao.upsertListAsync(clazzLogsToSave)
+                    activeDb.clazzLogAttendanceRecordDao.upsertListAsync(attendanceRecordsToSave)
+                }
+            }
+
+            if(newClazzLog != null) {
+                //User came via adding new occurence from attendancelist
+                navController.popBackStack(viewName = ClazzLogEditViewModel.DEST_NAME, inclusive = true)
+            }else {
+                finishWithResult(_uiState.value.currentClazzLog)
+            }
+        }
     }
 
 
@@ -218,8 +318,6 @@ class ClazzLogEditAttendanceViewModel(
         const val DEST_NAME = "EditAttendance"
 
         const val STATE_KEY_CURRENT_LOG_INDEX = "activeIndex"
-
-        const val STATE_KEY_CLAZZLOG_LIST = "clazzLogs"
 
         const val STATE_KEY_LOG_PREFIX = "log_"
 

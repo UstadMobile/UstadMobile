@@ -192,4 +192,11 @@ expect abstract class ClazzLogDao : BaseDao<ClazzLog> {
         clazzUid: Long
     ): Long
 
+
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertListAsync(entityList: List<ClazzLog>)
+
+
+
 }

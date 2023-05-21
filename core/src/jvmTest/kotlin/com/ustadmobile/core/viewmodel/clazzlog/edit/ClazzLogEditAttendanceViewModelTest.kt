@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.schedule.generateUid
 import com.ustadmobile.core.test.viewmodeltest.ViewModelTestBuilder
+import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
@@ -12,6 +13,7 @@ import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.door.flow.doorFlow
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
@@ -203,8 +205,44 @@ class ClazzLogEditAttendanceViewModelTest {
         }
     }
 
+    @Test
     fun givenNewClazzLogSpecified_whenStatusUpdatedAndSaveClicked_thenShouldSaveIntoDatabase() {
+        testClazzLogEditAttendanceView { testContext ->
+            val existingClazzLog = activeDb.withDoorTransactionAsync {
+                val clazzLog = ClazzLog().apply {
+                    logDate = systemTimeInMillis() - 1000
+                    clazzLogClazzUid = testContext.clazz.clazzUid
+                    clazzLogNumPresent = testContext.enroledPersons.size
+                    clazzLogUid = generateUid()
+                }
 
+                activeDb.clazzLogDao.insertAsync(clazzLog)
+                clazzLog
+            }
+
+            viewModelFactory {
+                savedStateHandle[UstadView.ARG_ENTITY_UID] = existingClazzLog.clazzLogUid.toString()
+                ClazzLogEditAttendanceViewModel(di, savedStateHandle)
+            }
+
+            viewModel.uiState.test(timeout = 5.seconds) {
+                awaitItemWhere {
+                    it.clazzLogsList.isNotEmpty() && it.clazzLogAttendanceRecordList.isNotEmpty()
+                }
+
+                viewModel.onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ATTENDED)
+
+                viewModel.onClickSave()
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            activeDb.doorFlow(arrayOf("ClazzLogAttendanceRecord")) {
+                activeDb.clazzLogAttendanceRecordDao.findByClazzLogUid(existingClazzLog.clazzLogUid)
+            }.assertItemReceived(timeout = 5.seconds) { attendanceList ->
+                attendanceList.size == testContext.enroledPersons.size &&
+                    attendanceList.all { it.attendanceStatus == ClazzLogAttendanceRecord.STATUS_ATTENDED }
+            }
+        }
     }
 
 }

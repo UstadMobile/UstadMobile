@@ -2,9 +2,9 @@ package com.ustadmobile.core.db.dao
 
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.composites.PersonAndClazzLogAttendanceRecord
 import com.ustadmobile.lib.db.entities.*
@@ -129,5 +129,8 @@ expect abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRe
         time: Long
     ): List<PersonAndClazzLogAttendanceRecord>
 
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertListAsync(entityList: List<ClazzLogAttendanceRecord>)
 
 }
