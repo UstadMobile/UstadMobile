@@ -24,14 +24,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
@@ -41,10 +37,8 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.toRectF
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.google.common.util.concurrent.ListenableFuture
@@ -148,7 +142,7 @@ fun BarcodeScannerScreen(
                                 super.onSucceed(results, inputImage)
                                 if (results.isNotEmpty()){
                                     val scanningResult = barcodeResultBoundaryAnalyzer.analyze(results, inputImage)
-                                    if (scanningResult.message.equals("PerfectMatch")) {
+                                    if (scanningResult.message == "PerfectMatch" || scanningResult.message == "InsideBoundary") {
                                         scanningResult.barCode?.rawValue?.let { onQRCodeDetected(it) }
                                     }
                                 }
@@ -184,7 +178,6 @@ fun BarcodeScannerScreen(
             onScanningAreaReady = {
                 barcodeResultBoundaryAnalyzer.onBarcodeScanningAreaReady(it)
             },
-            scanningResult = BarCodeResult()
         )
     }
 }
@@ -342,7 +335,6 @@ fun BarcodeScanningDecorationLayout(
     width: Int,
     height: Int,
     onScanningAreaReady: (RectF) -> Unit,
-    scanningResult: BarCodeResult,
 ) {
     fun calculateScanningRect(size: Int, centerPoint: PointF): RectF {
         val scanningAreaSize = size * 0.8F
@@ -361,7 +353,6 @@ fun BarcodeScanningDecorationLayout(
     val scanningAreaRect = calculateScanningRect(size = minOf(width, height), centerPoint)
     val scanningFrameStrokeSize = dp2Px(dp = 4.dp)
     val scanningFrameCornerRadius = dp2Px(dp = 6.dp)
-    val barcodeResultBoundaryStrokeSize = dp2Px(dp = 4.dp)
 
     Canvas(
         modifier = Modifier
@@ -402,29 +393,6 @@ fun BarcodeScanningDecorationLayout(
                 ),
                 cornerRadius = CornerRadius(x = scanningFrameCornerRadius, y = scanningFrameCornerRadius)
             )
-
-            // draw the bar code result boundary
-            scanningResult.globalPosition.let {
-                barcodeBoundaryPath.moveTo(x = it.right - it.width() * 0.2F, y = it.top)
-                barcodeBoundaryPath.lineTo(x = it.right, y = it.top)
-
-                barcodeBoundaryPath.lineTo(x = it.right, y = it.bottom)
-                barcodeBoundaryPath.lineTo(x = it.right - it.width() * 0.2F, y = it.bottom)
-
-                barcodeBoundaryPath.moveTo(x = it.left + it.width() * 0.2F, y = it.bottom)
-                barcodeBoundaryPath.lineTo(x = it.left, y = it.bottom)
-                barcodeBoundaryPath.lineTo(x = it.left, y = it.top)
-                barcodeBoundaryPath.lineTo(x = it.left + it.width() * 0.2F, y = it.top)
-
-                drawPath(
-                    path = barcodeBoundaryPath,
-                    color = Color(0xFF3700B3),
-                    style = Stroke(
-                        join = StrokeJoin.Bevel,
-                        width = barcodeResultBoundaryStrokeSize,
-                    ),
-                )
-            }
         }
     )
 }
