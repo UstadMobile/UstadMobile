@@ -7,10 +7,15 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Button
+import androidx.compose.material.Chip
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FilterChip
+import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -28,6 +33,7 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
+import com.ustadmobile.port.android.view.composable.UstadPersonAvatar
 
 
 class InviteStudentsFragment : UstadBaseMvvmFragment() {
@@ -63,7 +69,8 @@ private fun InviteStudentsScreenForViewModel(
     val uiState: InviteStudentsUiState by viewModel.uiState.collectAsState(InviteStudentsUiState())
     InviteStudentsScreen(
         uiState = uiState,
-        onClickAddStudent = viewModel::onClickAddStudent,
+        onTextFieldChanged = viewModel::onTextFieldChanged,
+        onClickAddRecipient = viewModel::onClickAddRecipient,
     )
 }
 
@@ -71,7 +78,8 @@ private fun InviteStudentsScreenForViewModel(
 @Composable
 private fun InviteStudentsScreen(
     uiState: InviteStudentsUiState = InviteStudentsUiState(),
-    onClickAddStudent: (String) -> Unit = {},
+    onTextFieldChanged: (String) -> Unit = {},
+    onClickAddRecipient: () -> Unit = {},
 ) {
 
     LazyColumn(
@@ -81,15 +89,17 @@ private fun InviteStudentsScreen(
     ) {
 
         items(
-            items = uiState.studentsList,
-            key = { student -> student.personUid }
+            items = uiState.recipients,
+            key = { recipient -> recipient }
         ){ student ->
-            FilterChip(
-                selected = true,
+            Chip(
                 onClick = { },
                 enabled = true,
+//                leadingIcon = {
+//                    Icon(Icons.Default.Book, contentDescription = null)
+//                },
             ) {
-                Text(student.fullName())
+                Text("student.fullName()")
             }
         }
 
@@ -98,14 +108,33 @@ private fun InviteStudentsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultItemPadding(),
-                value = "",
+                value = uiState.textfield,
                 label = { Text(stringResource( R.string.name )) },
                 enabled = uiState.fieldsEnabled,
                 singleLine = true,
                 onValueChange = {
-                    onClickAddStudent(it)
+                    onTextFieldChanged(it)
                 }
             )
+        }
+
+        item {
+            if (uiState.textfield.isNotEmpty()){
+                Button(
+                    onClick = {
+                        onClickAddRecipient()
+                    }
+                ) {
+                    Row {
+                        Column {
+                            Text("")
+                            Text("")
+                        }
+
+                        UstadPersonAvatar(personUid = 0)
+                    }
+                }
+            }
         }
     }
 
@@ -116,29 +145,8 @@ private fun InviteStudentsScreen(
 fun InviteStudentsScreenPreview() {
 
     val uiState = InviteStudentsUiState(
-        studentsList = listOf(
-            Person().apply {
-                personUid = 1
-                firstNames = "Bob Jones"
-                phoneNum = "0799999"
-                emailAddr = "Bob@gmail.com"
-                gender = 2
-                username = "Bob12"
-                dateOfBirth = 1352958816
-                personOrgId = "123"
-                personAddress = "Herat"
-            },
-            Person().apply {
-                personUid = 2
-                firstNames = "Bob Jones"
-                phoneNum = "0799999"
-                emailAddr = "Bob@gmail.com"
-                gender = 2
-                username = "Bob12"
-                dateOfBirth = 1352958816
-                personOrgId = "123"
-                personAddress = "Herat"
-            }
+        recipients = listOf(
+            "Bob Jones","Bob Jones1","Bob@gmail.com"
         ),
     )
 

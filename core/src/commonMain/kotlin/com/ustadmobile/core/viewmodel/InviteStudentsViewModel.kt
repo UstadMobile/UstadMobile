@@ -30,7 +30,9 @@ data class InviteStudentsUiState(
 
     val fieldsEnabled: Boolean = true,
 
-    val studentsList: List<Person> = emptyList(),
+    val recipients: List<String> = emptyList(),
+
+    val textfield: String = "",
 
     val classInvitationLink: String = "",
 
@@ -56,37 +58,16 @@ class InviteStudentsViewModel(
                 )
             )
         }
+    }
 
-        viewModelScope.launch {
-            loadEntity<Schedule>(
-                serializer = Schedule.serializer(),
-                makeDefault = {
-                    Schedule().apply {
-                        scheduleUid = activeDb.doorPrimaryKeyManager.nextIdAsync(Schedule.TABLE_ID)
-                        scheduleActive = true
-                        scheduleFrequency = Schedule.SCHEDULE_FREQUENCY_WEEKLY
-                    }
-                },
-                onLoadFromDb = { null }, //Does not load from database
-                uiUpdate = { schedule ->
-//                    _uiState.update { prev ->
-//                        prev.copy(entity = schedule)
-//                    }
-                }
-            )
-
-            _uiState.update { prev ->
-                prev.copy(fieldsEnabled = true)
-            }
+    fun onTextFieldChanged(text: String) {
+        _uiState.update { prev ->
+            prev.copy(textfield = text)
         }
     }
 
-    fun onClickAddStudent(email: String) {
-        _uiState.update {
-            it.copy(fieldsEnabled = false)
-        }
+    fun onClickAddRecipient() {
 
-        loadingState = LoadingUiState.INDETERMINATE
     }
 
     fun onClickInvite() {
