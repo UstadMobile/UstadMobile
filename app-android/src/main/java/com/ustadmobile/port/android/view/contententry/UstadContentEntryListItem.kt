@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.view.composable
+package com.ustadmobile.port.android.view.contententry
 
 import android.view.*
 import androidx.compose.foundation.*
@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.material.MdcTheme
@@ -21,8 +22,8 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.impl.locale.entityconstants.ContentEntryTypeLabelConstants
 import com.ustadmobile.core.util.ext.progressBadge
-import com.ustadmobile.core.viewmodel.ContentEntryListItemUiState
-import com.ustadmobile.core.viewmodel.listItemUiState
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListItemUiState
+import com.ustadmobile.core.viewmodel.contententry.list.listItemUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
 import com.ustadmobile.port.android.util.compose.messageIdResource
@@ -32,53 +33,56 @@ import com.ustadmobile.port.android.view.ContentEntryDetailOverviewFragment.Comp
 @Composable
 fun UstadContentEntryListItem(
     modifier: Modifier = Modifier,
-    contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
+    contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?,
     onClick: () -> Unit = { },
     onClickDownload: () -> Unit = { },
 ) {
 
-    val uiState = contentEntry.listItemUiState
+    val uiState = contentEntry?.listItemUiState
     ListItem(
         modifier = modifier
-            .alpha((uiState.containerAlpha).toFloat())
+            .alpha((uiState?.containerAlpha ?: 0.0).toFloat())
             .clickable(onClick = onClick),
-        text = { Text(uiState.contentEntry.title ?: "") },
+        text = { Text(uiState?.contentEntry?.title ?: "") },
         icon = {
             LeadingContent(
                 uiState = uiState,
-                contentEntry = uiState.contentEntry
+                contentEntry = uiState?.contentEntry
             )
         },
         secondaryText = {
             SecondaryContent(
-                contentEntry = uiState.contentEntry,
+                contentEntry = uiState?.contentEntry,
                 uiState = uiState
             )
         },
+        /*
+        To be enabled when reactive sync is enabled
         trailing = {
             SecondaryAction(
                 onClick = onClickDownload,
-                contentEntry = uiState.contentEntry
+                contentEntry = uiState?.contentEntry
             )
         }
+         */
     )
 
 }
 
 @Composable
 private fun LeadingContent(
-    uiState: ContentEntryListItemUiState,
-    contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+    uiState: ContentEntryListItemUiState?,
+    contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?
 ){
 
-    val thumbnail: ImageVector = if (contentEntry.leaf)
+    val thumbnail: ImageVector = if (contentEntry?.leaf == true)
         Icons.Outlined.Book
     else
         Icons.Default.Folder
 
     var badgeColor = colorResource(R.color.errorColor)
     var badge = Icons.Default.Cancel
-    if (contentEntry.scoreProgress?.progressBadge() == ProgressConstants.BADGE_CHECK) {
+    if (contentEntry?.scoreProgress?.progressBadge() == ProgressConstants.BADGE_CHECK) {
         badge = Icons.Default.CheckCircle
         badgeColor = colorResource(R.color.successColor)
     }
@@ -97,7 +101,7 @@ private fun LeadingContent(
         )
 
         BadgedBox(badge = {
-            if (contentEntry.scoreProgress?.progressBadge() != ProgressConstants.BADGE_NONE){
+            if (contentEntry?.scoreProgress?.progressBadge() != ProgressConstants.BADGE_NONE){
                 Icon(
                     badge,
                     contentDescription = "",
@@ -106,7 +110,7 @@ private fun LeadingContent(
                 )
             }
         }) {
-            if (uiState.progressVisible){
+            if (uiState?.progressVisible == true){
                 Box(
                     modifier = Modifier
                         .width(45.dp)
@@ -114,7 +118,7 @@ private fun LeadingContent(
                         .padding(end = 10.dp)
                 ) {
                     LinearProgressIndicator(
-                        progress = ((contentEntry.scoreProgress?.progress ?: 0)/100.0)
+                        progress = ((contentEntry?.scoreProgress?.progress ?: 0)/100.0)
                             .toFloat(),
                         modifier = Modifier
                             .height(4.dp)
@@ -127,29 +131,28 @@ private fun LeadingContent(
 
 @Composable
 private fun SecondaryContent(
-    contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
-    uiState: ContentEntryListItemUiState
+    contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?,
+    uiState: ContentEntryListItemUiState?
 ){
     Column(
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        if (uiState.descriptionVisible){
-            Text((contentEntry.description ?: ""))
+        if (uiState?.descriptionVisible == true){
+            Text((contentEntry?.description ?: ""))
         }
 
         Row {
-
-            if (uiState.mimetypeVisible){
+            val contentTypeFlagVal = contentEntry?.contentTypeFlag
+            if (uiState?.mimetypeVisible == true && contentTypeFlagVal != null){
                 Image(painter = painterResource(id =
-                CONTENT_ENTRY_TYPE_ICON_MAP[contentEntry.contentTypeFlag]
-                    ?: ContentEntry.TYPE_EBOOK),
+                CONTENT_ENTRY_TYPE_ICON_MAP[contentTypeFlagVal] ?: ContentEntry.TYPE_EBOOK),
                     contentDescription = "",
                     modifier = Modifier.size(20.dp)
                 )
 
                 Text(
                     messageIdResource(id = ContentEntryTypeLabelConstants
-                        .TYPE_LABEL_MESSAGE_IDS[contentEntry.contentTypeFlag]
+                        .TYPE_LABEL_MESSAGE_IDS[contentTypeFlagVal]
                         .messageId)
                 )
             }
@@ -161,9 +164,9 @@ private fun SecondaryContent(
                 contentDescription = ""
             )
 
-            Text("${contentEntry.scoreProgress?.progress ?: 0}%")
+            Text("${contentEntry?.scoreProgress?.progress ?: 0}%")
 
-            Text(uiState.scoreResultText)
+            Text(uiState?.scoreResultText ?: "")
         }
     }
 }
@@ -171,21 +174,21 @@ private fun SecondaryContent(
 @Composable
 private fun SecondaryAction(
     onClick: () -> Unit,
-    contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+    contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?
 ){
     IconButton(
         onClick = onClick,
     ) {
 
         CircularProgressIndicator(
-            progress = ((contentEntry.scoreProgress?.progress ?: 0) / 100.0)
+            progress = ((contentEntry?.scoreProgress?.progress ?: 0) / 100.0)
                 .toFloat(),
             color = MaterialTheme.colors.secondary
         )
 
         Icon(
             Icons.Filled.FileDownload,
-            contentDescription = ""
+            contentDescription = stringResource(R.string.download)
         )
     }
 }

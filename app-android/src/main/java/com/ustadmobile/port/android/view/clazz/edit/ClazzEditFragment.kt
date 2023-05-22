@@ -45,7 +45,7 @@ import com.ustadmobile.port.android.view.composable.*
 import org.burnoutcrew.reorderable.*
 import java.util.*
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
-import com.ustadmobile.port.android.view.ContentEntryList2Fragment
+import com.ustadmobile.port.android.view.contententry.list.ContentEntryList2Fragment
 import com.ustadmobile.port.android.view.TitleDescBottomSheetOption
 import com.ustadmobile.port.android.view.TitleDescBottomSheetOptionFragment
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment

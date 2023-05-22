@@ -226,6 +226,11 @@ private fun ClazzListScreen(
                 onClickClazz = onClickClazz
             )
         }
+
+        //Host fragment thinks scroll bar behavior increases available height - need to compensate
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            Spacer(modifier =Modifier.height(176.dp))
+        }
     }
 }
 
@@ -280,25 +285,6 @@ fun ClazzListItem(
 //                }
             }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Lens,
-                    contentDescription = "",
-                    tint = colorResource(
-                        id = colorForAttendanceStatus(clazz?.attendanceAverage ?: 0.toFloat())
-                    ),
-                    modifier = Modifier.size(16.dp)
-                )
-                Text(
-                    text = stringResource(
-                        R.string.x_percent_attended,
-                        (clazz?.attendanceAverage ?: 0.toFloat()) * 100
-                    )
-                )
-
-            }
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {

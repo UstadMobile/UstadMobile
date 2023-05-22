@@ -1,10 +1,10 @@
-package com.ustadmobile.mui.components
+package com.ustadmobile.view.contententry
 
 import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.ContentEntryTypeLabelConstants
 import com.ustadmobile.core.util.ext.progressBadge
-import com.ustadmobile.core.viewmodel.listItemUiState
+import com.ustadmobile.core.viewmodel.contententry.list.listItemUiState
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
@@ -32,7 +32,7 @@ import mui.material.Badge
 
 external interface UstadContentEntryListItemProps : Props {
 
-    var contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+    var contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?
 
     var onClickContentEntry: (ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
 
@@ -44,7 +44,7 @@ external interface UstadContentEntryListItemProps : Props {
 
 val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { props ->
 
-    val uiState = props.contentEntry.listItemUiState
+    val uiState = props.contentEntry?.listItemUiState
 
     ListItem{
         ListItemButton {
@@ -52,12 +52,12 @@ val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { props ->
 
             sx {
                 padding = props.padding
-                opacity = number(uiState.containerAlpha)
+                opacity = number(uiState?.containerAlpha ?: 1.0)
             }
 
             ListItemIcon {
                 LeadingContent {
-                    contentEntryItem = uiState.contentEntry
+                    contentEntryItem = uiState?.contentEntry
                 }
             }
 
@@ -66,7 +66,7 @@ val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { props ->
             }
 
             ListItemText {
-                primary = ReactNode(props.contentEntry.title ?: "")
+                primary = ReactNode(props.contentEntry?.title ?: "")
                 secondary = SecondaryContent.create {
                     contentEntryItem = props.contentEntry
                 }
@@ -83,20 +83,20 @@ val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { props ->
 
 private external interface LeadingContentProps: Props {
 
-    var contentEntryItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+    var contentEntryItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?
 }
 
 private val LeadingContent = FC<LeadingContentProps> { props ->
 
-    val uiState = props.contentEntryItem.listItemUiState
-    val thumbnail = if (props.contentEntryItem.leaf)
+    val uiState = props.contentEntryItem?.listItemUiState
+    val thumbnail = if (props.contentEntryItem?.leaf == true)
         BookOutlined
     else
         Folder
 
     var badgeIcon = CheckCircle
     var badgeColor = SvgIconColor.success
-    if (props.contentEntryItem.scoreProgress?.progressBadge() == ProgressConstants.BADGE_CROSS) {
+    if (props.contentEntryItem?.scoreProgress?.progressBadge() == ProgressConstants.BADGE_CROSS) {
         badgeIcon = Cancel
         badgeColor = SvgIconColor.error
     }
@@ -115,7 +115,7 @@ private val LeadingContent = FC<LeadingContentProps> { props ->
 
         Badge {
 
-            if (props.contentEntryItem.scoreProgress?.progressBadge() != ProgressConstants.BADGE_NONE) {
+            if (props.contentEntryItem?.scoreProgress?.progressBadge() != ProgressConstants.BADGE_NONE) {
                 badgeContent = badgeIcon.create {
                     sx {
                         width = 18.px
@@ -125,9 +125,9 @@ private val LeadingContent = FC<LeadingContentProps> { props ->
                 }
             }
 
-            if (uiState.progressVisible){
+            if (uiState?.progressVisible == true){
                 LinearProgress {
-                    value = props.contentEntryItem.scoreProgress?.progress
+                    value = props.contentEntryItem?.scoreProgress?.progress ?: 0
                     variant = LinearProgressVariant.determinate
                     sx {
                         width = 45.px
@@ -142,38 +142,40 @@ private val LeadingContent = FC<LeadingContentProps> { props ->
 
 private external interface SecondaryContentProps: Props {
 
-    var contentEntryItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+    var contentEntryItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?
 }
 
 private val SecondaryContent = FC<SecondaryContentProps> { props ->
 
     val strings = useStringsXml()
-    val uiState = props.contentEntryItem.listItemUiState
+    val uiState = props.contentEntryItem?.listItemUiState
 
     Stack {
         direction = responsive(StackDirection.column)
         justifyContent = JustifyContent.start
 
 
-        if (uiState.descriptionVisible){
+        if (uiState?.descriptionVisible == true){
             Typography {
-                + (props.contentEntryItem.description ?: "")
+                + (props.contentEntryItem?.description ?: "")
             }
         }
 
         Stack {
             direction = responsive(StackDirection.row)
 
-            if (uiState.mimetypeVisible){
+            if (uiState?.mimetypeVisible == true){
                 Icon {
                     + (CONTENT_ENTRY_TYPE_ICON_MAP[props.contentEntryItem
-                        .contentTypeFlag]?.create() ?: TextSnippet.create())
+                        ?.contentTypeFlag]?.create() ?: TextSnippet.create())
                 }
 
+                val contentType = props.contentEntryItem?.contentTypeFlag
+                    ?: ContentEntry.TYPE_DOCUMENT
                 Typography {
                     + (strings[ContentEntryTypeLabelConstants
-                        .TYPE_LABEL_MESSAGE_IDS[props.contentEntryItem.contentTypeFlag]
-                        .messageId])
+                        .TYPE_LABEL_MESSAGE_IDS[contentType].messageId]
+                        )
                 }
 
                 Box {
@@ -186,11 +188,11 @@ private val SecondaryContent = FC<SecondaryContentProps> { props ->
             }
 
             Typography {
-                + "${props.contentEntryItem.scoreProgress?.progress ?: 0}%"
+                + "${props.contentEntryItem?.scoreProgress?.progress ?: 0}%"
             }
 
             Typography {
-                + uiState.scoreResultText
+                + uiState?.scoreResultText
             }
         }
     }
@@ -200,7 +202,7 @@ private val SecondaryContent = FC<SecondaryContentProps> { props ->
 
 private external interface SecondaryActionProps: Props {
 
-    var contentEntryItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+    var contentEntryItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?
 
     var onClick: (ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
 }

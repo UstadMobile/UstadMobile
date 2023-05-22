@@ -54,6 +54,9 @@ import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
 import com.ustadmobile.view.clazzlog.edit.ClazzLogEditScreen
 import com.ustadmobile.view.clazzlog.editattendance.ClazzLogEditAttendanceScreen
+import com.ustadmobile.view.contententry.list.ContentEntryListScreen
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.view.contententry.UstadContentEntryListItemPreview
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -146,7 +149,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(CourseGroupSetEditView.VIEW_NAME, "CourseGroupSetEdit Preview",
         CourseGroupSetEditScreenPreview),
     UstadScreen("UstadContentEntryListItem", "UstadContentEntryListItem Preview",
-        UstadContentEntryListItemPreview),
+        UstadContentEntryListItemPreview
+    ),
     UstadScreen(CourseGroupSetDetailView.VIEW_NAME, "CourseGroupSetDetail Preview",
         CourseGroupSetDetailScreenPreview),
     UstadScreen("UstadClazzAssignmentListItem", "UstadClazzAssignmentListItem Preview",
@@ -169,8 +173,9 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ClazzLogListAttendanceViewModel.DEST_NAME, "ClazzLogListAttendance Preview",
         ClazzLogListAttendanceScreen
     ),
-    UstadScreen(ContentEntryList2View.VIEW_NAME, "ContentEntryList Preview",
-        ContentEntryListScreenPreview),
+    UstadScreen(ContentEntryListViewModel.DEST_NAME, "ContentEntryList Preview",
+        ContentEntryListScreen
+    ),
     UstadScreen(AccountListView.VIEW_NAME, "AccountList Preview", AccountListScreenPreview),
     UstadScreen(
         ClazzMemberListViewModel.DEST_NAME, "ClazzMemberList Preview", ClazzMemberListScreen

@@ -14,6 +14,7 @@ import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.SORT_TITLE_DESC
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 
@@ -302,10 +303,15 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                      END DESC,             
                      ContentEntry.contentEntryUid""")
     @JsName("getChildrenByParentUidWithCategoryFilterOrderByNameAsc")
-    abstract fun getChildrenByParentUidWithCategoryFilterOrderByName(parentUid: Long, langParam: Long,
-                                                                     categoryParam0: Long, personUid: Long,
-                                                                     showHidden: Boolean, onlyFolder: Boolean,
-                                                                     sortOrder: Int): DataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+    abstract fun getChildrenByParentUidWithCategoryFilterOrderByName(
+        parentUid: Long,
+        langParam: Long,
+        categoryParam0: Long,
+        personUid: Long,
+        showHidden: Boolean,
+        onlyFolder: Boolean,
+        sortOrder: Int
+    ): PagingSource<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
 
@@ -355,7 +361,7 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     """)
     abstract fun getContentFromMyCourses(
         personUid: Long
-    ): DataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+    ): PagingSource<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
     @Query("""
@@ -398,7 +404,7 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     """)
     abstract fun getContentByOwner(
         personUid: Long
-    ): DataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+    ): PagingSource<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
     @Update

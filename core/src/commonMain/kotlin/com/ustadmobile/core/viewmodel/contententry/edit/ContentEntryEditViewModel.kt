@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.contententry.edit
 
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.impl.ContainerStorageDir
@@ -36,4 +36,16 @@ data class ContentEntryEditUiState(
 
     val containerStorageOptionVisible: Boolean
         get() = entity?.leaf == true
+}
+
+class ContentEntryEditViewModel {
+
+    companion object {
+
+        const val ARG_LEAF = "leaf"
+
+        const val DEST_NAME = "ContentEntryEdit"
+
+    }
+
 }

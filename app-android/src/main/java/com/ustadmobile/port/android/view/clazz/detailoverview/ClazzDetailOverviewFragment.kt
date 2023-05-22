@@ -45,6 +45,7 @@ import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.clazzassignment.UstadClazzAssignmentListItem
 import com.ustadmobile.port.android.view.composable.*
+import com.ustadmobile.port.android.view.contententry.UstadContentEntryListItem
 
 interface ClazzDetailOverviewEventListener {
     fun onClickClassCode(code: String?)

@@ -42,7 +42,7 @@ import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryEdit2View
-import com.ustadmobile.core.viewmodel.ContentEntryEditUiState
+import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditUiState
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy

@@ -3,7 +3,6 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.KEY_SELECTED_ITEMS
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
@@ -526,12 +525,12 @@ class ContentEntryEdit2Presenter(
                     }
                 } else {
                     // its a folder, check if there is any selected items from previous screen
-                    if (arguments.containsKey(KEY_SELECTED_ITEMS)) {
-                        val selectedItems = arguments[KEY_SELECTED_ITEMS]?.split(",")
-                            ?.map { it.trim().toLong() } ?: listOf()
-                        repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(
-                            entity.contentEntryUid, selectedItems, systemTimeInMillis())
-                    }
+//                    if (arguments.containsKey(KEY_SELECTED_ITEMS)) {
+//                        val selectedItems = arguments[KEY_SELECTED_ITEMS]?.split(",")
+//                            ?.map { it.trim().toLong() } ?: listOf()
+//                        repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(
+//                            entity.contentEntryUid, selectedItems, systemTimeInMillis())
+//                    }
                 }
 
                 view.loading = false

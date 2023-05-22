@@ -10,7 +10,6 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntryAddOptionsBinding
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.controller.ContentEntryAddOptionsListener
-import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.KEY_SELECTED_ITEMS
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toStringMap
