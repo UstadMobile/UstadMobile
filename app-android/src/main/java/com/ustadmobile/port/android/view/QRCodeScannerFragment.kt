@@ -77,14 +77,14 @@ class QRCodeScannerFragment: UstadBaseMvvmFragment(){
 private fun QRCodeScannerScreen(viewModel: QRCodeScannerViewModel) {
 
     BarcodeScannerScreen(
-        onQRCodeDetected = viewModel::onQRCodeDetected
+        onQRCodeDetected = viewModel::onQRCodeDetected,
     )
 }
 
 @Composable
 @androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
 fun BarcodeScannerScreen(
-    onQRCodeDetected: (String) -> Unit = {}
+    onQRCodeDetected: (String) -> Unit = {},
 ) {
 
     val barcodeResultBoundaryAnalyzer = BarcodeResultBoundaryAnalyzer()
@@ -142,7 +142,7 @@ fun BarcodeScannerScreen(
                                 super.onSucceed(results, inputImage)
                                 if (results.isNotEmpty()){
                                     val scanningResult = barcodeResultBoundaryAnalyzer.analyze(results, inputImage)
-                                    if (scanningResult.message == "PerfectMatch" || scanningResult.message == "InsideBoundary") {
+                                    if (scanningResult.isInsideBoundary) {
                                         scanningResult.barCode?.rawValue?.let { onQRCodeDetected(it) }
                                     }
                                 }
@@ -182,25 +182,10 @@ fun BarcodeScannerScreen(
     }
 }
 
-data class BarCodeResult(
-    val barCode: Barcode? = null,
-    val globalPosition: RectF = RectF(), // transformed position of the barcode rectangle
-    val message: String = "",
-)
-
-data class CoordinatesTransformUiModel(
-    val scaleX: Float = 0F,
-    val scaleY: Float = 0F,
-    val offsetX: Float = 0F,
-    val offsetY: Float = 0F,
-)
-
-
 class BarcodeResultBoundaryAnalyzer {
 
     private var barcodeScanningAreaRect: RectF = RectF()
     private var cameraBoundaryRect: RectF = RectF()
-    private val barcodeSizeRateThreshold = 0.2F
 
     fun onBarcodeScanningAreaReady(scanningArea: RectF) {
         barcodeScanningAreaRect = scanningArea
@@ -284,25 +269,14 @@ class BarcodeResultBoundaryAnalyzer {
                 barcodeGlobalPosition,
                 barcodeScanningAreaRect
             ) -> {
-                if (checkDistanceMatched(barcodeGlobalPosition, barcodeScanningAreaRect)) {
-                    // Perfect match
-                    BarCodeResult(
-                        barCode = barcode,
-                        globalPosition = barcodeGlobalPosition,
-                        message = "PerfectMatch"
-                    )
-                } else {
-
-                    // Move closer
-                    BarCodeResult(
-                        barCode = barcode,
-                        globalPosition = barcodeGlobalPosition,
-                        message = "InsideBoundary"
-                    )
-                }
+                BarCodeResult(
+                    barCode = barcode,
+                    globalPosition = barcodeGlobalPosition,
+                    isInsideBoundary = true
+                )
             }
             else -> {
-                BarCodeResult(message = "OutOfBoundary")
+                BarCodeResult(isInsideBoundary = false)
             }
         }
     }
@@ -323,12 +297,78 @@ class BarcodeResultBoundaryAnalyzer {
                 smallArea.right < largeArea.right &&
                 smallArea.bottom < largeArea.bottom
     }
+}
 
-    private fun checkDistanceMatched(smallArea: RectF, largeArea: RectF): Boolean {
-        val rate = (smallArea.width() * smallArea.height()) / (largeArea.width() * largeArea.height())
-        return rate > barcodeSizeRateThreshold
+data class BarCodeResult(
+    val barCode: Barcode? = null,
+    val globalPosition: RectF = RectF(), // transformed position of the barcode rectangle
+    val isInsideBoundary: Boolean = false,
+)
+
+data class CoordinatesTransformUiModel(
+    val scaleX: Float = 0F,
+    val scaleY: Float = 0F,
+    val offsetX: Float = 0F,
+    val offsetY: Float = 0F,
+)
+
+@ExperimentalGetImage
+class BarcodeImageAnalyzer: ImageAnalysis.Analyzer {
+
+    private var processing = false
+    private var processListener: ProcessListener? = null
+
+    override fun analyze(imageProxy: ImageProxy) {
+
+        imageProxy.image?.let { imageToAnalyze ->
+            val options = BarcodeScannerOptions.Builder()
+                .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
+                .build()
+            val barcodeScanner = BarcodeScanning.getClient(options)
+            val imageToProcess = InputImage.fromMediaImage(imageToAnalyze, imageProxy.imageInfo.rotationDegrees)
+
+            if (processing) return
+            processing = true
+            barcodeScanner.process(imageToProcess)
+                .addOnSuccessListener { results ->
+                    processListener?.onSucceed(results, imageToProcess)
+                }
+                .addOnCanceledListener {
+                    processListener?.onCanceled()
+                }
+                .addOnFailureListener {
+                    processListener?.onFailed(it)
+                }
+                .addOnCompleteListener {
+                    imageProxy.close()
+                    processListener?.onCompleted()
+                    processing = false
+                }
+        }
+    }
+
+    fun setProcessListener(listener: ProcessListener) {
+        processListener = listener
+    }
+
+    abstract class ProcessListenerAdapter : ProcessListener {
+        override fun onSucceed(results: List<Barcode>, inputImage: InputImage) {}
+
+        override fun onCanceled() {}
+
+        override fun onCompleted() {}
+
+        override fun onFailed(exception: Exception) {}
+    }
+
+    interface ProcessListener {
+        fun onSucceed(results: List<Barcode>, inputImage: InputImage)
+        fun onCanceled()
+        fun onCompleted()
+        fun onFailed(exception: Exception)
     }
 }
+
 
 @Composable
 fun BarcodeScanningDecorationLayout(
@@ -395,63 +435,6 @@ fun BarcodeScanningDecorationLayout(
             )
         }
     )
-}
-
-@ExperimentalGetImage
-class BarcodeImageAnalyzer: ImageAnalysis.Analyzer {
-
-    private var processing = false
-    private var processListener: ProcessListener? = null
-
-    override fun analyze(imageProxy: ImageProxy) {
-
-        imageProxy.image?.let { imageToAnalyze ->
-            val options = BarcodeScannerOptions.Builder()
-                .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
-                .build()
-            val barcodeScanner = BarcodeScanning.getClient(options)
-            val imageToProcess = InputImage.fromMediaImage(imageToAnalyze, imageProxy.imageInfo.rotationDegrees)
-
-            if (processing) return
-            processing = true
-            barcodeScanner.process(imageToProcess)
-                .addOnSuccessListener { results ->
-                    processListener?.onSucceed(results, imageToProcess)
-                }
-                .addOnCanceledListener {
-                    processListener?.onCanceled()
-                }
-                .addOnFailureListener {
-                    processListener?.onFailed(it)
-                }
-                .addOnCompleteListener {
-                    imageProxy.close()
-                    processListener?.onCompleted()
-                    processing = false
-                }
-        }
-    }
-
-    fun setProcessListener(listener: ProcessListener) {
-        processListener = listener
-    }
-
-    abstract class ProcessListenerAdapter : ProcessListener {
-        override fun onSucceed(results: List<Barcode>, inputImage: InputImage) {}
-
-        override fun onCanceled() {}
-
-        override fun onCompleted() {}
-
-        override fun onFailed(exception: Exception) {}
-    }
-
-    interface ProcessListener {
-        fun onSucceed(results: List<Barcode>, inputImage: InputImage)
-        fun onCanceled()
-        fun onCompleted()
-        fun onFailed(exception: Exception)
-    }
 }
 
 @Composable
