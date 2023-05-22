@@ -1,12 +1,16 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.contententry.edit
 
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.locale.entityconstants.LicenceConstants
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditUiState
+import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
+import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.CourseBlock
@@ -30,7 +34,7 @@ external interface ContentEntryEditScreenProps : Props {
 
     var onClickUpdateContent: () -> Unit
 
-    var onContentChanged: (ContentEntryWithBlockAndLanguage?) -> Unit
+    var onContentEntryChanged: (ContentEntry?) -> Unit
 
     var onChangeCompress: (Boolean) -> Unit
 
@@ -42,9 +46,22 @@ external interface ContentEntryEditScreenProps : Props {
 
 }
 
+val ContentEntryEditScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        ContentEntryEditViewModel(di, savedStateHandle)
+    }
+
+    val uiStateVal by viewModel.uiState.collectAsState(ContentEntryEditUiState())
+
+    ContentEntryEditScreenComponent {
+        uiState = uiStateVal
+        onContentEntryChanged = viewModel::onContentEntryChanged
+    }
+}
+
 val ContentEntryEditScreenPreview = FC<Props> {
     val strings = useStringsXml()
-    ContentEntryEditScreenComponent2 {
+    ContentEntryEditScreenComponent {
         uiState = ContentEntryEditUiState(
             entity = ContentEntryWithBlockAndLanguage().apply {
                 leaf = true
@@ -78,7 +95,7 @@ val ContentEntryEditScreenPreview = FC<Props> {
     }
 }
 
-private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> { props ->
+private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { props ->
 
     val strings = useStringsXml()
     val updateContentText =
@@ -114,11 +131,12 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
 
             UstadTextEditField {
                 value = props.uiState.entity?.title ?: ""
+                id = "content_title"
                 label = strings[MessageID.title]
                 error = props.uiState.titleError
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
-                    props.onContentChanged(
+                    props.onContentEntryChanged(
                         props.uiState.entity?.shallowCopy {
                             title = it
                         }
@@ -128,10 +146,11 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
 
             UstadTextEditField {
                 value = props.uiState.entity?.description ?: ""
+                id = "content_description"
                 label = strings[MessageID.description]
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
-                    props.onContentChanged(
+                    props.onContentEntryChanged(
                         props.uiState.entity?.shallowCopy {
                             description = it
                         }
@@ -139,17 +158,20 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
                 }
             }
 
-            UstadCourseBlockEdit {
-                uiState = props.uiState.courseBlockEditUiState
-                onCourseBlockChange = props.onCourseBlockChange
+            if(props.uiState.courseBlockVisible) {
+                UstadCourseBlockEdit {
+                    uiState = props.uiState.courseBlockEditUiState
+                    onCourseBlockChange = props.onCourseBlockChange
+                }
             }
 
             UstadTextEditField {
                 value = props.uiState.entity?.author ?: ""
                 label = strings[MessageID.entry_details_author]
+                id = "content_author"
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
-                    props.onContentChanged(
+                    props.onContentEntryChanged(
                         props.uiState.entity?.shallowCopy {
                             author = it
                         }
@@ -160,9 +182,10 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
             UstadTextEditField {
                 value = props.uiState.entity?.publisher ?: ""
                 label = strings[MessageID.entry_details_publisher]
+                id = "content_publisher"
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
-                    props.onContentChanged(
+                    props.onContentEntryChanged(
                         props.uiState.entity?.shallowCopy {
                             publisher = it
                         }
@@ -171,34 +194,22 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
             }
 
             UstadMessageIdSelectField {
-                value = props.uiState.entity?.licenseType ?: 0
+                value = props.uiState.entity?.licenseType ?: ContentEntry.LICENSE_TYPE_UNSPECIFIED
                 options = LicenceConstants.LICENSE_MESSAGE_IDS
                 label = strings[MessageID.licence]
-                id = (props.uiState.entity?.licenseType ?: 0).toString()
+                id = "content_license"
                 onChange = {
-                    props.onContentChanged(
+                    props.onContentEntryChanged(
                         props.uiState.entity?.shallowCopy {
-                            licenseType = it?.value ?: 0
+                            licenseType = it.value ?: 0
                         }
                     )
                 }
             }
 
-            if (props.uiState.containerStorageOptionVisible){
-                UstadDropDownField {
-                    value = props.uiState.selectedContainerStorageDir
-                    label = strings[MessageID.content_creation_storage_option_title]
-                    options = props.uiState.storageOptions
-                    itemLabel = { ReactNode((it as? ContainerStorageDir)?.name ?: "") }
-                    itemValue = { (it as? ContainerStorageDir)?.name ?: "" }
-                    onChange = {
-                        props.onSelectContainerStorageDir(it as? ContainerStorageDir)
-                    }
-                }
-            }
-
             if (props.uiState.contentCompressVisible){
                 UstadSwitchField {
+                    id = "content_compression_enabled"
                     checked= props.uiState.compressionEnabled ?: false
                     onChanged = { props.onChangeCompress(it) }
                     label = strings[MessageID.compress]
@@ -207,6 +218,7 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
             }
 
             UstadSwitchField {
+                id = "content_publik"
                 checked= props.uiState.entity?.publik ?: false
                 onChanged = { props.onChangePubliclyAccessible(it) }
                 label = strings[MessageID.publicly_accessible]
@@ -214,6 +226,7 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
             }
 
             UstadTextEditField {
+                id = "content_language"
                 value = props.uiState.entity?.language?.name ?: ""
                 label = strings[MessageID.language]
                 readOnly = true

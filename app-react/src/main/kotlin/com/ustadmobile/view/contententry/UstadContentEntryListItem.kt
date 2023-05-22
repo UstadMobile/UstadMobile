@@ -72,11 +72,6 @@ val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { props ->
                 }
             }
         }
-
-        secondaryAction = SecondaryAction.create {
-            contentEntryItem = props.contentEntry
-            onClick = props.onClickDownloadContentEntry
-        }
     }
 
 }
@@ -113,9 +108,14 @@ private val LeadingContent = FC<LeadingContentProps> { props ->
             }
         }
 
+        /*
+         Restore after reactive sync
         Badge {
 
-            if (props.contentEntryItem?.scoreProgress?.progressBadge() != ProgressConstants.BADGE_NONE) {
+            if (
+                props.contentEntryItem?.scoreProgress != null &&
+                    props.contentEntryItem?.scoreProgress?.progressBadge() != ProgressConstants.BADGE_NONE
+            ) {
                 badgeContent = badgeIcon.create {
                     sx {
                         width = 18.px
@@ -135,6 +135,7 @@ private val LeadingContent = FC<LeadingContentProps> { props ->
                 }
             }
         }
+         */
     }
 }
 
@@ -183,48 +184,28 @@ private val SecondaryContent = FC<SecondaryContentProps> { props ->
                 }
             }
 
+            /*
             Icon {
                 + EmojiEvents.create()
             }
 
-            Typography {
-                + "${props.contentEntryItem?.scoreProgress?.progress ?: 0}%"
-            }
 
-            Typography {
-                + uiState?.scoreResultText
+             Restore after reactive sync
+            if(props.contentEntryItem?.scoreProgress != null) {
+                Typography {
+                    + "${props.contentEntryItem?.scoreProgress?.progress ?: 0}%"
+                }
+
+                Typography {
+                    + uiState?.scoreResultText
+                }
             }
+             */
+
         }
     }
 }
 
-
-
-private external interface SecondaryActionProps: Props {
-
-    var contentEntryItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?
-
-    var onClick: (ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
-}
-
-private val SecondaryAction = FC<SecondaryActionProps> { props ->
-
-    Button {
-
-        onClick = { props.onClick(props.contentEntryItem) }
-
-        CircularProgress {
-            sx {
-                position = Position.absolute
-            }
-
-            variant = CircularProgressVariant.determinate
-            value = 100
-        }
-
-        + Download.create()
-    }
-}
 
 val UstadContentEntryListItemPreview = FC<Props> {
 

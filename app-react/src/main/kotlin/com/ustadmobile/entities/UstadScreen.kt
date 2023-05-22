@@ -57,6 +57,8 @@ import com.ustadmobile.view.clazzlog.editattendance.ClazzLogEditAttendanceScreen
 import com.ustadmobile.view.contententry.list.ContentEntryListScreen
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.view.contententry.UstadContentEntryListItemPreview
+import com.ustadmobile.view.contententry.edit.ContentEntryEditScreen
+import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -104,8 +106,9 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ScheduleEditView.VIEW_NAME, "ScheduleEdit",
         ScheduleEditScreen
     ),
-    UstadScreen(ContentEntryEdit2View.VIEW_NAME, "ContentEntryEdit Preview",
-        ContentEntryEditScreenPreview),
+    UstadScreen(ContentEntryEditViewModel.DEST_NAME, "ContentEntryEdit Preview",
+        ContentEntryEditScreen
+    ),
     UstadScreen(SiteDetailView.VIEW_NAME, name = "Site Detail Preview", SiteDetailPreview),
     UstadScreen(SiteEditView.VIEW_NAME, name = "Site Edit Preview", SiteEditPreview),
     UstadScreen(SchoolDetailOverviewView.VIEW_NAME, "SchoolDetailOverview Preview",

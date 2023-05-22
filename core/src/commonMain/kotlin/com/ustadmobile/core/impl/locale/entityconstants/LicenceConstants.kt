@@ -16,5 +16,6 @@ object LicenceConstants {
         MessageIdOption2(MessageID.licence_type_public_domain, ContentEntry.LICENSE_TYPE_PUBLIC_DOMAIN),
         MessageIdOption2(MessageID.other, ContentEntry.LICENSE_TYPE_OTHER),
         MessageIdOption2(MessageID.license_type_cc_0, ContentEntry.LICENSE_TYPE_CC_0),
+        MessageIdOption2(MessageID.unset, ContentEntry.LICENSE_TYPE_UNSPECIFIED),
     )
 }

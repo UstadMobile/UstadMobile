@@ -1590,4 +1590,8 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="your_submission">Your submission</string>
 
+    <string name="edit_content">Edit content</string>
+
+    <string name="edit_folder">Edit folder</string>
+
 </resources>

@@ -222,7 +222,7 @@
 
     <fragment
         android:id="@+id/content_entry_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ContentEntryEdit2Fragment"
+        android:name="com.ustadmobile.port.android.view.contententry.edit.ContentEntryEdit2Fragment"
         android:label="@string/content" />
 
     <fragment

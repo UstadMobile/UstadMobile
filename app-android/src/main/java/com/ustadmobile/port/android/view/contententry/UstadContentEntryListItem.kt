@@ -157,6 +157,8 @@ private fun SecondaryContent(
                 )
             }
 
+            /*
+            Restore after reactive sync
             Spacer(modifier = Modifier.width(10.dp))
 
             Icon(
@@ -167,6 +169,7 @@ private fun SecondaryContent(
             Text("${contentEntry?.scoreProgress?.progress ?: 0}%")
 
             Text(uiState?.scoreResultText ?: "")
+             */
         }
     }
 }

@@ -62,7 +62,8 @@ class ContentEntryListViewModel(
     di, savedStateHandle, ContentEntryListUiState(), destName
 ) {
 
-    private val parentEntryUid: Long = savedStateHandle[ARG_PARENT_UID]?.toLong() ?: 0
+    private val parentEntryUid: Long = savedStateHandle[ARG_PARENT_UID]?.toLong()
+        ?: LIBRARY_ROOT_CONTENT_ENTRY_UID
 
     private val pagingSourceFactory: ListPagingSourceFactory<ContentEntryAndExtras> = {
         when(_uiState.value.selectedChipId) {
@@ -138,9 +139,10 @@ class ContentEntryListViewModel(
     fun onClickNewFolder() {
         navigateToCreateNew(
             editViewName = ContentEntryEditViewModel.DEST_NAME,
-            extraArgs = mapOf(
-                ContentEntryEditViewModel.ARG_LEAF to false.toString(),
-            )
+            extraArgs = buildMap {
+                put(ContentEntryEditViewModel.ARG_LEAF, false.toString())
+                put(ARG_PARENT_UID, parentEntryUid.toString())
+            }
         )
     }
 
@@ -185,6 +187,8 @@ class ContentEntryListViewModel(
         const val FILTER_FROM_MY_COURSES = 3
 
         const val FILTER_FROM_LIBRARY = 4
+
+        const val LIBRARY_ROOT_CONTENT_ENTRY_UID = 1L
 
 
     }

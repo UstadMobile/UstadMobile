@@ -61,7 +61,7 @@
 
         <variable
             name="activityEventHandler"
-            type="com.ustadmobile.port.android.view.ContentEntryEdit2FragmentEventHandler" />
+            type="com.ustadmobile.port.android.view.contententry.edit.ContentEntryEdit2FragmentEventHandler" />
 
         <variable
             name="licenceOptions"

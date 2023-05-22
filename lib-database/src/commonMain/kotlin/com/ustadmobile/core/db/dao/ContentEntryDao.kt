@@ -70,6 +70,9 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Insert
     abstract suspend fun insertListAsync(entityList: List<ContentEntry>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertAsync(entity: ContentEntry)
+
     @Query("SELECT ContentEntry.*, Language.* FROM ContentEntry LEFT JOIN Language ON Language.langUid = ContentEntry.primaryLanguageUid " +
             "WHERE ContentEntry.contentEntryUid=:entryUuid"
     )
