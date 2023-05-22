@@ -37,7 +37,6 @@ import androidx.compose.material.Button
 import androidx.compose.material.Text
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
-import com.ustadmobile.core.impl.nav.CommandFlowUstadNavController
 
 class SiteEnterLinkFragment : UstadBaseMvvmFragment() {
 
