@@ -211,9 +211,14 @@ class ContentEntryEditViewModel(
 
         const val ARG_LEAF = "leaf"
 
+        const val ARG_URI = "uri"
+
         const val ARG_COURSEBLOCK = "courseBlock"
 
         const val DEST_NAME = "ContentEntryEdit"
+
+        const val ARG_IMPORTED_METADATA = "metadata"
+
 
     }
 

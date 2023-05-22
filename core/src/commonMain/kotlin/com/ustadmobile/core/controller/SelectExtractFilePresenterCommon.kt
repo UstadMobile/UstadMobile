@@ -13,11 +13,10 @@ import com.ustadmobile.core.util.ext.logErrorReport
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.util.safeStringify
-import com.ustadmobile.core.view.ContentEntryEdit2View
-import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.BLOCK_REQUIRED
 import com.ustadmobile.core.view.SelectExtractFileView
 import com.ustadmobile.core.view.SelectFileView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -72,7 +71,7 @@ abstract class SelectExtractFilePresenterCommon(
                 view.loading = false
 
                 when {
-                    (arguments[UstadView.ARG_RESULT_DEST_VIEWNAME] == ContentEntryEdit2View.VIEW_NAME) -> {
+                    (arguments[UstadView.ARG_RESULT_DEST_VIEWNAME] == ContentEntryEditViewModel.DEST_NAME) -> {
                         finishWithResult(
                             safeStringify(
                                 di,
@@ -84,19 +83,18 @@ abstract class SelectExtractFilePresenterCommon(
                     else -> {
                         val args = mutableMapOf<String, String>()
                         args.putEntityAsJson(
-                            ContentEntryEdit2View.ARG_IMPORTED_METADATA, json,
+                            ContentEntryEditViewModel.ARG_IMPORTED_METADATA, json,
                             MetadataResult.serializer(), metadata
                         )
                         args.putFromOtherMapIfPresent(arguments, UstadView.ARG_LEAF)
                         args.putFromOtherMapIfPresent(arguments, UstadView.ARG_PARENT_ENTRY_UID)
-                        args.putFromOtherMapIfPresent(arguments, BLOCK_REQUIRED)
                         args.putFromOtherMapIfPresent(arguments, UstadView.ARG_CLAZZUID)
 
                         navigateForResult(
                             NavigateForResultOptions(
                                 this@SelectExtractFilePresenterCommon,
                                 null,
-                                ContentEntryEdit2View.VIEW_NAME,
+                                ContentEntryEditViewModel.DEST_NAME,
                                 ContentEntry::class,
                                 ContentEntry.serializer(),
                                 arguments = args
