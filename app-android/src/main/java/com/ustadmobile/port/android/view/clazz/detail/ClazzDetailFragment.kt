@@ -5,10 +5,10 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.ustadmobile.core.view.ClazzDetailOverviewView
-import com.ustadmobile.core.view.CourseGroupSetListView
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
+import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.port.android.view.clazzlog.attendancelist.ClazzLogListAttendanceFragment
 import com.ustadmobile.port.android.view.clazzenrolment.clazzmemberlist.ClazzMemberListFragment
 import com.ustadmobile.port.android.view.CourseGroupSetListFragment
@@ -35,7 +35,7 @@ class ClazzDetailFragment: UstadMvvmTabsFragment(VIEWNAME_TO_FRAGMENT_MAP) {
                 ClazzDetailOverviewView.VIEW_NAME to ClazzDetailOverviewFragment::class.java,
                 ClazzMemberListViewModel.DEST_NAME to ClazzMemberListFragment::class.java,
                 ClazzLogListAttendanceViewModel.DEST_NAME to ClazzLogListAttendanceFragment::class.java,
-                CourseGroupSetListView.VIEW_NAME to CourseGroupSetListFragment::class.java
+                CourseGroupSetListViewModel.DEST_NAME to CourseGroupSetListFragment::class.java
         )
 
     }

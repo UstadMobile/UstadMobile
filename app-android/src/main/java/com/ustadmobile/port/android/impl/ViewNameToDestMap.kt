@@ -15,6 +15,7 @@ import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListView
 import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
+import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 
 @Keep
 class ViewNameToDestMap: DestinationProvider {
@@ -74,7 +75,7 @@ class ViewNameToDestMap: DestinationProvider {
                     hideBottomNavigation = true),
             PeerReviewerAllocationEditView.VIEW_NAME to UstadDestination(R.id.assignment_peer_allocation_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
-            CourseGroupSetListView.VIEW_NAME to UstadDestination(R.id.course_group_set_list,
+            CourseGroupSetListViewModel.DEST_NAME to UstadDestination(R.id.course_group_set_list,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             CourseGroupSetEditView.VIEW_NAME to UstadDestination(R.id.course_group_set_edit,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,

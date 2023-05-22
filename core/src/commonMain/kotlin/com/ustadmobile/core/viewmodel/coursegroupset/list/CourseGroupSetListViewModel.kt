@@ -118,6 +118,10 @@ class CourseGroupSetListViewModel(
         )
     }
 
+    fun onClickEntry(entry: CourseGroupSet){
+
+    }
+
     companion object {
 
         const val DEST_NAME = "CourseGroups"

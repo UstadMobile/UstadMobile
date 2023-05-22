@@ -4,77 +4,143 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.ConcatAdapter
-import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.CourseGroupSetListPresenter
-import com.ustadmobile.core.controller.UstadListPresenter
-import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.CourseGroupSetListView
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ListItem
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
+import com.google.accompanist.themeadapter.material.MdcTheme
+import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListUiState
+import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.lib.db.entities.CourseGroupSet
-import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
+import com.ustadmobile.port.android.view.composable.UstadListSortHeader
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
+import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
 
+class CourseGroupSetListFragment(): UstadBaseMvvmFragment(){
 
-class CourseGroupSetListFragment(): UstadListViewFragment<CourseGroupSet, CourseGroupSet>(),
-        CourseGroupSetListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+    private val viewModel by ustadViewModels(::CourseGroupSetListViewModel)
 
-    private var individualRecyclerViewAdapter: IndividualCourseGroupRecyclerAdapter? = null
-    private var mPresenter: CourseGroupSetListPresenter? = null
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
+        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
 
-    override val listPresenter: UstadListPresenter<*, in CourseGroupSet>?
-        get() = mPresenter
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+            )
 
-    override var autoMergeRecyclerViewAdapter: Boolean = false
+            setContent {
+                MdcTheme {
+                    CourseGroupSetListScreen(viewModel = viewModel)
+                }
+            }
+        }
+    }
+}
 
+@Composable
+fun CourseGroupSetListScreen(
+    viewModel: CourseGroupSetListViewModel
+) {
+    val uiState by viewModel.uiState.collectAsState(CourseGroupSetListUiState())
+    val context = LocalContext.current
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = super.onCreateView(inflater, container, savedInstanceState)
-        mPresenter = CourseGroupSetListPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner).withViewLifecycle()
+    CourseGroupSetListScreen(
+        uiState = uiState,
+        onClickEntry = viewModel::onClickEntry,
+        onClickSort =  {
+            SortBottomSheetFragment(
+                sortOptions = uiState.sortOptions,
+                selectedSort = uiState.sortOption,
+                onSortOptionSelected = {
+                    viewModel.onSortOptionChanged(it)
+                }
+            ).show(context.getContextSupportFragmentManager(), "SortOptions")
+        },
+    )
+}
 
-        individualRecyclerViewAdapter = IndividualCourseGroupRecyclerAdapter(mPresenter)
-        mDataRecyclerViewAdapter = CourseGroupSetListRecyclerAdapter(mPresenter)
-        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
-            requireContext().getString(R.string.new_group_set))
-
-        mMergeRecyclerViewAdapter = ConcatAdapter(mUstadListHeaderRecyclerViewAdapter,
-            individualRecyclerViewAdapter, mDataRecyclerViewAdapter)
-
-        mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter
-
-
-        return view
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun CourseGroupSetListScreen(
+    uiState: CourseGroupSetListUiState,
+    onClickEntry: (CourseGroupSet) -> Unit = {},
+    onClickSort: () -> Unit = {},
+) {
+    val pager = remember(uiState.courseGroupSets) {
+        Pager(
+            pagingSourceFactory = uiState.courseGroupSets,
+            config = PagingConfig(pageSize = 20, enablePlaceholders = true)
+        )
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        fabManager?.text = requireContext().getString(R.string.groups)
-        takeIf { arguments?.containsKey(CourseGroupSetListView.ARG_SHOW_INDIVIDUAL) == true }
-            ?.ustadFragmentTitle = requireContext().getString(R.string.submission_type)
-    }
+    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
-    /**
-     * OnClick function that will handle when the user clicks to create a new item
-     */
-    override fun onClick(view: View?) {
-        if(view?.id == R.id.item_createnew_layout)
-            mPresenter?.handleClickCreateNewFab()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        mPresenter = null
-        dbRepo = null
-        individualRecyclerViewAdapter = null
-    }
-
-    override val displayTypeRepo: Any?
-        get() = dbRepo?.courseGroupSetDao
-
-    override var individualList: List<CourseGroupSet>? = null
-        set(value) {
-            field = value
-            individualRecyclerViewAdapter?.submitList(value)
-            mUstadListHeaderRecyclerViewAdapter?.newItemVisible = value?.isNotEmpty() ?: false
+    LazyColumn(
+        modifier = Modifier
+            .padding(vertical = 8.dp)
+            .fillMaxWidth()
+    ){
+        item {
+            UstadListSortHeader(
+                modifier = Modifier.defaultItemPadding(),
+                activeSortOrderOption = uiState.sortOption,
+                onClickSort =   onClickSort
+            )
         }
 
+        items(
+            items = lazyPagingItems,
+            key = { it.cgsUid }
+        ) { courseGroupSet ->
+            ListItem(
+                modifier = Modifier.clickable {
+                    courseGroupSet?.also(onClickEntry)
+                },
+                text = {
+                    Text(courseGroupSet?.cgsName ?: "")
+                },
+            )
+        }
+    }
+}
+
+@Composable
+@Preview
+fun CourseGroupSetListScreenPreview() {
+    CourseGroupSetListScreen(
+        uiState = CourseGroupSetListUiState(
+            courseGroupSets = {
+                ListPagingSource(listOf(
+                    CourseGroupSet().apply {
+                        cgsName = "Assignment groups"
+                        cgsUid = 1
+                    }
+                ))
+            }
+        )
+    )
 }

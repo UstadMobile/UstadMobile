@@ -9,6 +9,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
+import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT
 import kotlinx.coroutines.flow.*
@@ -53,7 +54,7 @@ class ClazzDetailViewModel(
         }
         tabs.add(
             TabItem(
-                viewName = CourseGroupSetListView.VIEW_NAME,
+                viewName = CourseGroupSetListViewModel.DEST_NAME,
                 args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
                 label = systemImpl.getString(MessageID.groups),
             )

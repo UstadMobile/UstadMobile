@@ -59,6 +59,8 @@ import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewMode
 import com.ustadmobile.view.contententry.UstadContentEntryListItemPreview
 import com.ustadmobile.view.contententry.edit.ContentEntryEditScreen
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
+import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
+import com.ustadmobile.view.coursegroupset.list.CourseGroupSetListScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -225,7 +227,6 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ClazzDetailOverviewView.VIEW_NAME, "Clazz Detail Overview",
         ClazzDetailOverviewScreen
     ),
-    UstadScreen(CourseGroupSetListView.VIEW_NAME, "Clazz Groups",ClazzGroupSetDummy),
     UstadScreen(ClazzAssignmentDetailView.VIEW_NAME, "ClazzAssignmentDetail",
         ClazzAssignmentDetailScreen),
     UstadScreen("ClazzAssignmentDetailOverviewPreview", "ClazzAssignmentDetailOverview",
@@ -237,6 +238,9 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME,
         "ClazzAssignmentDetailStudentProgressOverviewList",
         ClazzAssignmentDetailSubmissionsTab),
+    UstadScreen(CourseGroupSetListViewModel.DEST_NAME, "CourseGroupSetList",
+        CourseGroupSetListScreen
+    )
 )
 
 
