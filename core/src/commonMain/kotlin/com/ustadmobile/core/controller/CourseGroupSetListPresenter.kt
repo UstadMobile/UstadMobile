@@ -44,7 +44,7 @@ class CourseGroupSetListPresenter(
     }
 
     private fun updateListOnView() {
-        view.list = repo.courseGroupSetDao.findAllCourseGroupSetForClazz(clazzUidFilter)
+        //view.list = repo.courseGroupSetDao.findAllCourseGroupSetForClazz(clazzUidFilter)
     }
 
     override fun handleClickCreateNewFab() {

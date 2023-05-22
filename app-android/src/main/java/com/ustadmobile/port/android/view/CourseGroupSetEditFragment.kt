@@ -30,7 +30,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.CourseGroupSetEditView
-import com.ustadmobile.core.viewmodel.CourseGroupSetEditUiState
+import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.view.composable.UstadExposedDropDownMenuField

@@ -2,7 +2,7 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.viewmodel.CourseGroupSetEditUiState
+import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditUiState
 import com.ustadmobile.lib.db.entities.CourseGroupMember
 import com.ustadmobile.lib.db.entities.CourseGroupMemberAndName
 import com.ustadmobile.lib.db.entities.CourseGroupSet

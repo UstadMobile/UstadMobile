@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.coursegroupset.edit
 
 import com.ustadmobile.lib.db.entities.CourseGroupMemberAndName
 import com.ustadmobile.lib.db.entities.CourseGroupSet
@@ -11,3 +11,11 @@ data class CourseGroupSetEditUiState(
     val totalGroupError: String? = null,
     val fieldsEnabled: Boolean = true
 )
+
+class CourseGroupSetEditViewModel  {
+
+    companion object {
+        const val DEST_NAME = "CourseGroupsEdit"
+    }
+
+}

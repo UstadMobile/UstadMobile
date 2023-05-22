@@ -5,6 +5,7 @@ import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.lib.db.entities.Role
@@ -82,9 +83,21 @@ expect abstract class CourseGroupSetDao : BaseDao<CourseGroupSet> {
          FROM CourseGroupSet
         WHERE cgsActive
           AND cgsClazzUid = :clazzUid
-     ORDER BY cgsName   
+          AND ((:searchText = '%') OR (cgsName LIKE :searchText))
+     ORDER BY CASE(:sortOrder)
+              WHEN ${CourseGroupSetDaoConstants.SORT_NAME_ASC} THEN cgsName
+              ELSE ''
+              END ASC,
+              CASE(:sortOrder)
+              WHEN ${CourseGroupSetDaoConstants.SORT_NAME_DESC} THEN cgsName
+              ELSE ''
+              END DESC
     """)
-    abstract fun findAllCourseGroupSetForClazz(clazzUid: Long): DataSourceFactory<Int, CourseGroupSet>
+    abstract fun findAllCourseGroupSetForClazz(
+        clazzUid: Long,
+        searchText: String,
+        sortOrder: Int,
+    ): PagingSource<Int, CourseGroupSet>
 
 
     @Query("""

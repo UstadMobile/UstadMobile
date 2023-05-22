@@ -16,6 +16,7 @@ import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
+import com.ustadmobile.core.viewmodel.clazz.collectClazzNameAndUpdateTitle
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
@@ -146,6 +147,10 @@ class ClazzMemberListViewModel(
         }
 
         viewModelScope.launch {
+            launch {
+                collectClazzNameAndUpdateTitle(clazzUid, activeDb, _appUiState)
+            }
+
             _uiState.whenSubscribed {
                 launch {
                     activeDb.clazzDao.personHasPermissionWithClazzAsFlow(
@@ -165,14 +170,6 @@ class ClazzMemberListViewModel(
                     ).collect { canAddStudent ->
                         _uiState.takeIf { it.value.addStudentVisible != canAddStudent }?.update { prev ->
                             prev.copy(addStudentVisible = canAddStudent)
-                        }
-                    }
-                }
-
-                launch {
-                    activeDb.clazzDao.getTitleByUidAsFlow(clazzUid).collect { clazzTitle ->
-                        _appUiState.takeIf { _appUiState.value.title != clazzTitle }?.update { prev ->
-                            prev.copy(title = clazzTitle)
                         }
                     }
                 }
