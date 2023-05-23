@@ -167,7 +167,7 @@ expect abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
                                 AND CourseGroupMember.cgmSetUid = :cgsUid 
                            ORDER BY CourseGroupMember.cgmLct DESC        
                               LIMIT 1)
-
+      ORDER BY Person.firstNames, Person.lastName ASC
     """)
     /**
      * @param cgsUid CourseGroupSetUid - might be 0 if not created yet

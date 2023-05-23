@@ -136,11 +136,11 @@
 
     <fragment
         android:id="@+id/course_group_set_list"
-        android:name="com.ustadmobile.port.android.view.CourseGroupSetListFragment" />
+        android:name="com.ustadmobile.port.android.view.coursegroupset.list.CourseGroupSetListFragment" />
 
     <fragment
         android:id="@+id/course_group_set_edit"
-        android:name="com.ustadmobile.port.android.view.CourseGroupSetEditFragment" />
+        android:name="com.ustadmobile.port.android.view.coursegroupset.edit.CourseGroupSetEditFragment" />
 
     <fragment
         android:id="@+id/course_group_set_detail"

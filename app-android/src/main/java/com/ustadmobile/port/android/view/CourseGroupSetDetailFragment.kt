@@ -129,7 +129,7 @@ fun CourseGroupSetDetailScreen(
                 )
             }
 
-            items(uiState.membersList.filter { it.cgm.cgmGroupNumber == group }, itemContent = {
+            items(uiState.membersList.filter { it.cgm?.cgmGroupNumber == group }, itemContent = {
                 ListItem(
                     text = {
                         Text(text = "${it.name}")

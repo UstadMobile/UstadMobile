@@ -11,7 +11,7 @@ import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttend
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.port.android.view.clazzlog.attendancelist.ClazzLogListAttendanceFragment
 import com.ustadmobile.port.android.view.clazzenrolment.clazzmemberlist.ClazzMemberListFragment
-import com.ustadmobile.port.android.view.CourseGroupSetListFragment
+import com.ustadmobile.port.android.view.coursegroupset.list.CourseGroupSetListFragment
 import com.ustadmobile.port.android.view.UstadMvvmTabsFragment
 import com.ustadmobile.port.android.view.clazz.detailoverview.ClazzDetailOverviewFragment
 

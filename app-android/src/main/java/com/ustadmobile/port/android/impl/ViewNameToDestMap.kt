@@ -16,6 +16,7 @@ import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
+import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditViewModel
 
 @Keep
 class ViewNameToDestMap: DestinationProvider {
@@ -77,7 +78,7 @@ class ViewNameToDestMap: DestinationProvider {
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             CourseGroupSetListViewModel.DEST_NAME to UstadDestination(R.id.course_group_set_list,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
-            CourseGroupSetEditView.VIEW_NAME to UstadDestination(R.id.course_group_set_edit,
+            CourseGroupSetEditViewModel.DEST_NAME to UstadDestination(R.id.course_group_set_edit,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
                     hideBottomNavigation = true),
             CourseGroupSetDetailView.VIEW_NAME to UstadDestination(R.id.course_group_set_detail,

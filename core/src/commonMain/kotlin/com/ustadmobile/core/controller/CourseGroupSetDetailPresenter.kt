@@ -3,9 +3,9 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.view.CourseGroupSetDetailView
-import com.ustadmobile.core.view.CourseGroupSetEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditViewModel
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DI
@@ -56,7 +56,7 @@ class CourseGroupSetDetailPresenter(context: Any,
         navigateForResult(
             NavigateForResultOptions(
                 this, null,
-                CourseGroupSetEditView.VIEW_NAME,
+                CourseGroupSetEditViewModel.DEST_NAME,
                 CourseGroupSet::class,
                 CourseGroupSet.serializer(),
                 ReportDetailPresenter.RESULT_REPORT_KEY,
