@@ -144,7 +144,7 @@
 
     <fragment
         android:id="@+id/course_group_set_detail"
-        android:name="com.ustadmobile.port.android.view.CourseGroupSetDetailFragment" />
+        android:name="com.ustadmobile.port.android.view.coursegroupset.detail.CourseGroupSetDetailFragment" />
 
     <fragment
         android:id="@+id/module_course_block_edit_dest"
@@ -370,7 +370,7 @@
 
     <fragment
         android:id="@+id/time_zone_list_dest"
-        android:name="com.ustadmobile.port.android.view.TimeZoneListFragment"
+        android:name="com.ustadmobile.port.android.view.timezone.TimeZoneListFragment"
         android:label="@string/timezone"/>
 
     <fragment

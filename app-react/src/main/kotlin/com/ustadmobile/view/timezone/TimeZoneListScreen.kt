@@ -1,10 +1,9 @@
-package com.ustadmobile.view.timezonelist
+package com.ustadmobile.view.timezone
 
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.util.ext.formattedString
-import com.ustadmobile.core.util.ext.gmtOffsetString
-import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
-import com.ustadmobile.core.viewmodel.TimezoneListUiState
+import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
+import com.ustadmobile.core.viewmodel.timezone.TimezoneListUiState
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
@@ -16,9 +15,7 @@ import csstype.Height
 import csstype.Overflow
 import csstype.pct
 import js.core.jso
-import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.offsetAt
 import mui.material.Container
 import mui.material.ListItem
 import mui.material.ListItemButton

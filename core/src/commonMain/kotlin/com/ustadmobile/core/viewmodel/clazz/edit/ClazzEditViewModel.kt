@@ -12,7 +12,7 @@ import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListViewModel
-import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
+import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager

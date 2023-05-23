@@ -8,13 +8,14 @@ import com.ustadmobile.core.impl.UstadDestination
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
-import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
+import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.port.android.view.PanicButtonSettingsView
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
+import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditViewModel
 
@@ -81,7 +82,7 @@ class ViewNameToDestMap: DestinationProvider {
             CourseGroupSetEditViewModel.DEST_NAME to UstadDestination(R.id.course_group_set_edit,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
                     hideBottomNavigation = true),
-            CourseGroupSetDetailView.VIEW_NAME to UstadDestination(R.id.course_group_set_detail,
+            CourseGroupSetDetailViewModel.DEST_NAME to UstadDestination(R.id.course_group_set_detail,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             ClazzAssignmentDetailView.VIEW_NAME to UstadDestination(R.id.clazz_assignment_detail_dest),
             ClazzAssignmentDetailStudentProgressView.VIEW_NAME to UstadDestination(R.id.clazz_assignment_detail_student_progress),

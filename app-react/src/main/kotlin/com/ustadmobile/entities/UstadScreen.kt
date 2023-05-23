@@ -17,8 +17,8 @@ import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
 import react.Props
 import react.FC
 import com.ustadmobile.wrappers.quill.QuillDemo
-import com.ustadmobile.view.timezonelist.TimeZoneListScreen
-import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
+import com.ustadmobile.view.timezone.TimeZoneListScreen
+import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListViewModel
 import com.ustadmobile.view.clazzassignment.edit.ClazzAssignmentEditScreen
 import com.ustadmobile.view.courseterminology.list.CourseTerminologyListScreen

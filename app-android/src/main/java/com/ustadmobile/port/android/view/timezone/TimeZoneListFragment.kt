@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.view
+package com.ustadmobile.port.android.view.timezone
 
 import android.os.Bundle
 import android.view.*
@@ -24,8 +24,9 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.ustadmobile.core.util.ext.formattedString
-import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
-import com.ustadmobile.core.viewmodel.TimezoneListUiState
+import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
+import com.ustadmobile.core.viewmodel.timezone.TimezoneListUiState
+import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import kotlinx.datetime.Clock
 import java.util.*
 import kotlinx.datetime.TimeZone as TimeZoneKt

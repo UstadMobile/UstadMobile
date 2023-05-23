@@ -1,8 +1,9 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.timezone
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.paging.PagingSource
 import kotlinx.coroutines.Dispatchers

@@ -131,7 +131,7 @@ expect abstract class CourseGroupSetDao : BaseDao<CourseGroupSet> {
          FROM CourseGroupSet 
         WHERE cgsUid = :uid
         """)
-    abstract suspend fun findByUidAsFlow(uid: Long): Flow<CourseGroupSet?>
+    abstract fun findByUidAsFlow(uid: Long): Flow<CourseGroupSet?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsertAsync(entity: CourseGroupSet)
