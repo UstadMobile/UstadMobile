@@ -84,6 +84,13 @@ class InviteStudentsViewModel(
 
     }
 
+    fun onClickShareLink() {
+
+    }
+    fun onClickCopyLink() {
+
+    }
+
     companion object {
 
         const val DEST_NAME = "InviteStudents"

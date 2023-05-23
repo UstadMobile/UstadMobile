@@ -42,6 +42,10 @@ external interface InviteStudentsProps : Props {
 
     var onClickRemoveRecipient: (String) -> Unit
 
+    var onClickCopyLink: () -> Unit
+
+    var onClickShareLink: () -> Unit
+
 }
 
 val InviteStudentsPreview = FC<Props> { props ->
@@ -62,6 +66,8 @@ val InviteStudentsScreen = FC<Props> {
         onTextFieldChanged = viewModel::onTextFieldChanged
         onClickAddRecipient = viewModel::onClickAddRecipient
         onClickRemoveRecipient = viewModel::onClickRemoveRecipient
+        onClickCopyLink = viewModel::onClickCopyLink
+        onClickShareLink = viewModel::onClickShareLink
     }
 }
 
@@ -150,11 +156,17 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
 
                     Button {
                         variant = ButtonVariant.text
+                        onClick = {
+                            props.onClickShareLink()
+                        }
                         + "Share"
                     }
 
                     Button {
                         variant = ButtonVariant.text
+                        onClick = {
+                            props.onClickCopyLink()
+                        }
                         + "Copy link"
                     }
                 }
