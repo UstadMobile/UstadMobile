@@ -99,7 +99,7 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
                 variant = FormControlVariant.outlined
                 id = "textfield"
                 value = props.uiState.textfield
-                label = ReactNode(strings[MessageID.username])
+                label = ReactNode(strings[MessageID.phone_or_email])
                 onTextChange = {
                     props.onTextFieldChanged(it)
                 }

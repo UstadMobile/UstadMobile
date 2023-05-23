@@ -1598,4 +1598,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="another_email">another@email.com</string>
 
+    <string name="phone_or_email">Phone or email address</string>
+
 </resources>
