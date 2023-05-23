@@ -38,7 +38,7 @@ external interface InviteStudentsProps : Props {
 
     var onTextFieldChanged: (String) -> Unit
 
-    var onClickAddRecipient: (String) -> Unit
+    var onClickAddRecipient: () -> Unit
 
     var onClickRemoveRecipient: (String) -> Unit
 
