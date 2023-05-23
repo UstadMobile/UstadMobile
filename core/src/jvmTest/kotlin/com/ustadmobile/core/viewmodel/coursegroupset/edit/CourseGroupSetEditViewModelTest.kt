@@ -77,7 +77,7 @@ class CourseGroupSetEditViewModelTest {
                 CourseGroupSetEditViewModel(di, savedStateHandle)
             }
 
-            viewModel.uiState.test(timeout = 500.seconds) {
+            viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere {
                     it.fieldsEnabled
                 }
@@ -121,6 +121,7 @@ class CourseGroupSetEditViewModelTest {
                 testContext.enrolledPeople.forEachIndexed { index, person ->
                     val courseGroupMember = members.first { it.personUid == person.personUid }
                     assertEquals(index % 2, courseGroupMember.cgm?.cgmGroupNumber)
+                    assertEquals(courseGroupSetUid, courseGroupMember.cgm?.cgmSetUid)
                 }
 
                 cancelAndIgnoreRemainingEvents()
