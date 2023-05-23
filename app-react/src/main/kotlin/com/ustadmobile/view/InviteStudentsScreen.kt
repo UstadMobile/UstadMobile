@@ -14,6 +14,9 @@ import mui.material.Chip
 import mui.material.ChipVariant
 import mui.material.Container
 import mui.material.FormControlVariant
+import mui.material.ListItem
+import mui.material.ListItemButton
+import mui.material.ListItemText
 import mui.material.TextField
 import mui.material.Typography
 import mui.system.Stack
@@ -30,7 +33,7 @@ external interface InviteStudentsProps : Props {
 
     var onTextFieldChanged: (String) -> Unit
 
-    var onClickAddRecipient: () -> Unit
+    var onClickAddRecipient: (String) -> Unit
 
 }
 
@@ -66,11 +69,13 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
             spacing = responsive(10.px)
 
 
-            Chip {
-                label = ReactNode("Clickable Deletable")
-                variant = ChipVariant.outlined
-                onClick = {}
-                onDelete = {}
+            props.uiState.recipients.forEach { recipient ->
+                Chip {
+                    label = ReactNode(recipient)
+                    variant = ChipVariant.outlined
+                    onClick = {}
+                    onDelete = {}
+                }
             }
 
 
@@ -88,7 +93,7 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
             if (props.uiState.textfield.isNotEmpty()){
                 Button {
                     onClick = {
-                        props.onClickAddRecipient()
+                        props.onClickAddRecipient(props.uiState.textfield)
                     }
 
                    + Stack.create {

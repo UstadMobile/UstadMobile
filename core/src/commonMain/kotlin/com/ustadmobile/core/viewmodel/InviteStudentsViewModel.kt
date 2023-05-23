@@ -66,8 +66,10 @@ class InviteStudentsViewModel(
         }
     }
 
-    fun onClickAddRecipient() {
-
+    fun onClickAddRecipient(recipient: String) {
+        _uiState.update { prev ->
+            prev.copy(recipients = _uiState.value.recipients.plus(recipient))
+        }
     }
 
     fun onClickInvite() {
