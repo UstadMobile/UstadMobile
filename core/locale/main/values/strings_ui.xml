@@ -1590,8 +1590,12 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="your_submission">Your submission</string>
 
-    <string name="invite_students">Your submission</string>
+    <string name="invite_students">Invite students</string>
 
-    <string name="invite">Your submission</string>
+    <string name="invite">Invite</string>
+
+    <string name="add_recipient">Add recipient</string>
+
+    <string name="another_email">another@email.com</string>
 
 </resources>

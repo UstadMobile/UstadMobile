@@ -50,10 +50,10 @@ class InviteStudentsViewModel(
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = createEditTitle(MessageID.invite_link_desc, MessageID.invite_link_desc),
+                title = systemImpl.getString(MessageID.invite_students),
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
-                    text = systemImpl.getString(MessageID.done),
+                    text = systemImpl.getString(MessageID.invite),
                     onClick = this::onClickInvite
                 )
             )

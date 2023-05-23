@@ -120,10 +120,10 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
                         Stack {
 
                             Typography {
-                                + "Add Receipent"
+                                + strings[MessageID.add_recipient]
                             }
                             Typography {
-                                + "another@gmail.com"
+                                + strings[MessageID.another_email]
                             }
                         }
 
