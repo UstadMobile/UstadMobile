@@ -1,16 +1,16 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UserSession
-import kotlin.js.JsName
 
 @Repository
 @DoorDao
@@ -109,13 +109,25 @@ expect abstract class CourseGroupSetDao : BaseDao<CourseGroupSet> {
     """)
     abstract fun findAllCourseGroupSetForClazzList(clazzUid: Long): List<CourseGroupSet>
 
-    @JsName("findByUid")
+    @Query("""
+        SELECT *
+         FROM CourseGroupSet
+        WHERE cgsActive
+          AND cgsClazzUid = :clazzUid
+     ORDER BY cgsName   
+    """)
+    abstract suspend fun findAllCourseGroupSetForClazzListAsync(clazzUid: Long): List<CourseGroupSet>
+
     @Query("""
         SELECT * 
          FROM CourseGroupSet 
         WHERE cgsUid = :uid
         """)
     abstract suspend fun findByUidAsync(uid: Long): CourseGroupSet?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertAsync(entity: CourseGroupSet)
+
 
 
 }

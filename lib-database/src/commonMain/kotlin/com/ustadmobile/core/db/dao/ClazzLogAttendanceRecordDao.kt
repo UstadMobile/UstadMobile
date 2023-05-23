@@ -102,12 +102,7 @@ expect abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRe
     )
 
     @Query("""
-        WITH CurrentlyEnrolledPersonUids(enroledPersonUid) AS
-             (SELECT ClazzEnrolment.clazzEnrolmentPersonUid AS enroledPersonUid
-                 FROM ClazzEnrolment
-                WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
-                  AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-                  AND :time BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft)
+        ${ClazzEnrolmentDaoCommon.WITH_CURRENTLY_ENROLED_STUDENTS_SQL}
                   
         SELECT Person.*, ClazzLogAttendanceRecord.*
           FROM Person

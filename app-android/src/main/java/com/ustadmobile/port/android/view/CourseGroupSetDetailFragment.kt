@@ -1,16 +1,12 @@
 package com.ustadmobile.port.android.view
 
-import android.icu.text.ListFormatter.Width
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.ListItem
@@ -33,16 +29,14 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.CourseGroupSetDetailView
-import com.ustadmobile.core.viewmodel.CourseGroupSetDetailUiState
+import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailUiState
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.CourseGroupMember
 import com.ustadmobile.lib.db.entities.CourseGroupMemberAndName
 import com.ustadmobile.lib.db.entities.CourseGroupMemberPerson
 import com.ustadmobile.lib.db.entities.CourseGroupSet
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
