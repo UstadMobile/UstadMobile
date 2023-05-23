@@ -73,7 +73,8 @@ class CourseGroupSetEditViewModel(
                             db.courseGroupMemberDao.findByCourseGroupSetAndClazz(
                                 cgsUid = entityUidArg,
                                 clazzUid = clazzUidArg,
-                                time = systemTimeInMillis()
+                                time = systemTimeInMillis(),
+                                activeFilter = 0,
                             ).map {
                                 if(it.cgm == null) {
                                     CourseGroupMemberAndName().apply {

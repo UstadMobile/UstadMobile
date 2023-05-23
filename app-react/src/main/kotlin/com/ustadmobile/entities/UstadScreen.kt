@@ -25,7 +25,6 @@ import com.ustadmobile.view.courseterminology.list.CourseTerminologyListScreen
 import com.ustadmobile.view.clazz.detail.ClazzDetailScreen
 import com.ustadmobile.view.clazz.list.ClazzListScreen
 import com.ustadmobile.view.clazz.detailoverview.ClazzDetailOverviewScreen
-import com.ustadmobile.view.clazzgroupset.ClazzGroupSetDummy
 import com.ustadmobile.view.person.detail.PersonDetailPreview
 import com.ustadmobile.view.person.detail.PersonDetailScreen
 import com.ustadmobile.view.person.edit.PersonEditScreen
@@ -63,6 +62,9 @@ import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListView
 import com.ustadmobile.view.coursegroupset.list.CourseGroupSetListScreen
 import com.ustadmobile.view.coursegroupset.edit.CourseGroupSetEditScreen
 import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditViewModel
+import com.ustadmobile.view.coursegroupset.detail.CourseGroupSetDetailScreen
+import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
+
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
 data class UstadScreen(
@@ -157,8 +159,9 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("UstadContentEntryListItem", "UstadContentEntryListItem Preview",
         UstadContentEntryListItemPreview
     ),
-    UstadScreen(CourseGroupSetDetailView.VIEW_NAME, "CourseGroupSetDetail Preview",
-        CourseGroupSetDetailScreenPreview),
+    UstadScreen(CourseGroupSetDetailViewModel.DEST_NAME, "CourseGroupSetDetail Preview",
+        CourseGroupSetDetailScreen
+    ),
     UstadScreen("UstadClazzAssignmentListItem", "UstadClazzAssignmentListItem Preview",
         UstadClazzAssignmentListItemPreview),
     UstadScreen(HolidayCalendarListView.VIEW_NAME, "HolidayCalendarList Preview",

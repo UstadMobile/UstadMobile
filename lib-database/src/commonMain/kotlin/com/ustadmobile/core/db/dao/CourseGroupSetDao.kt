@@ -11,6 +11,7 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UserSession
+import kotlinx.coroutines.flow.Flow
 
 @Repository
 @DoorDao
@@ -124,6 +125,13 @@ expect abstract class CourseGroupSetDao : BaseDao<CourseGroupSet> {
         WHERE cgsUid = :uid
         """)
     abstract suspend fun findByUidAsync(uid: Long): CourseGroupSet?
+
+    @Query("""
+        SELECT * 
+         FROM CourseGroupSet 
+        WHERE cgsUid = :uid
+        """)
+    abstract suspend fun findByUidAsFlow(uid: Long): Flow<CourseGroupSet?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsertAsync(entity: CourseGroupSet)

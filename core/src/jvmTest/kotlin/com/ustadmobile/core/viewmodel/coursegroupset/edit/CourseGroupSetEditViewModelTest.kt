@@ -83,6 +83,7 @@ class CourseGroupSetEditViewModelTest {
                 }
 
                 viewModel.onEntityChanged(readyState.courseGroupSet?.shallowCopy {
+                    cgsName = "Assignment groups"
                     cgsTotalGroups = 2
                 })
 
@@ -115,7 +116,8 @@ class CourseGroupSetEditViewModelTest {
                 val members = activeDb.courseGroupMemberDao.findByCourseGroupSetAndClazz(
                     cgsUid = courseGroupSetUid,
                     clazzUid = testContext.clazz.clazzUid,
-                    time = systemTimeInMillis()
+                    time = systemTimeInMillis(),
+                    activeFilter = 0,
                 )
 
                 testContext.enrolledPeople.forEachIndexed { index, person ->

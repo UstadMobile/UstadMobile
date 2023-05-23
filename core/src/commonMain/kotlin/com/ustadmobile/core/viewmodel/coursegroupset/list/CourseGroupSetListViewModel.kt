@@ -10,6 +10,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.clazz.collectClazzNameAndUpdateTitle
+import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.paging.PagingSource
@@ -119,7 +120,10 @@ class CourseGroupSetListViewModel(
     }
 
     fun onClickEntry(entry: CourseGroupSet){
-
+        navController.navigate(
+            viewName = CourseGroupSetDetailViewModel.DEST_NAME,
+            args = mapOf(UstadView.ARG_ENTITY_UID to entry.cgsUid.toString())
+        )
     }
 
     companion object {
