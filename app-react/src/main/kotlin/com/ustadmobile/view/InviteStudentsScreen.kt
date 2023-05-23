@@ -14,9 +14,6 @@ import mui.material.Chip
 import mui.material.ChipVariant
 import mui.material.Container
 import mui.material.FormControlVariant
-import mui.material.ListItem
-import mui.material.ListItemButton
-import mui.material.ListItemText
 import mui.material.TextField
 import mui.material.Typography
 import mui.system.Stack
@@ -34,6 +31,8 @@ external interface InviteStudentsProps : Props {
     var onTextFieldChanged: (String) -> Unit
 
     var onClickAddRecipient: (String) -> Unit
+
+    var onClickRemoveRecipient: (String) -> Unit
 
 }
 
@@ -54,6 +53,7 @@ val InviteStudentsScreen = FC<Props> {
         this.uiState = uiState
         onTextFieldChanged = viewModel::onTextFieldChanged
         onClickAddRecipient = viewModel::onClickAddRecipient
+        onClickRemoveRecipient = viewModel::onClickRemoveRecipient
     }
 }
 
@@ -74,7 +74,9 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
                     label = ReactNode(recipient)
                     variant = ChipVariant.outlined
                     onClick = {}
-                    onDelete = {}
+                    onDelete = {
+                        props.onClickRemoveRecipient(recipient)
+                    }
                 }
             }
 
