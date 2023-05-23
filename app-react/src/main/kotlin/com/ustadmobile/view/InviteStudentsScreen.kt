@@ -7,16 +7,22 @@ import com.ustadmobile.core.viewmodel.InviteStudentsUiState
 import com.ustadmobile.core.viewmodel.InviteStudentsViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.util.ext.onTextChange
+import com.ustadmobile.view.components.UstadPersonAvatar
 import csstype.px
+import mui.material.Button
+import mui.material.Chip
+import mui.material.ChipVariant
 import mui.material.Container
 import mui.material.FormControlVariant
 import mui.material.TextField
+import mui.material.Typography
 import mui.system.Stack
 import mui.system.StackDirection
 import mui.system.responsive
 import react.FC
 import react.Props
 import react.ReactNode
+import react.create
 
 external interface InviteStudentsProps : Props {
 
@@ -59,6 +65,15 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
             direction = responsive(StackDirection.column)
             spacing = responsive(10.px)
 
+
+            Chip {
+                label = ReactNode("Clickable Deletable")
+                variant = ChipVariant.outlined
+                onClick = {}
+                onDelete = {}
+            }
+
+
             TextField {
                 variant = FormControlVariant.outlined
                 id = "textfield"
@@ -70,6 +85,30 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
                 disabled = !props.uiState.fieldsEnabled
             }
 
+            if (props.uiState.textfield.isNotEmpty()){
+                Button {
+                    onClick = {
+                        props.onClickAddRecipient()
+                    }
+
+                   + Stack.create {
+                        direction = responsive(StackDirection.row)
+
+                        Stack {
+
+                            Typography {
+                                + "Add Receipent"
+                            }
+                            Typography {
+                                + "another@gmail.com"
+                            }
+                        }
+
+                        UstadPersonAvatar {}
+                    }
+                }
+
+            }
         }
     }
 }

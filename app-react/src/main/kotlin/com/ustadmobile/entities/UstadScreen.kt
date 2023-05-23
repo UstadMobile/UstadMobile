@@ -3,6 +3,7 @@ package com.ustadmobile.entities
 import com.ustadmobile.core.components.NAVHOST_CLEARSTACK_VIEWNAME
 import com.ustadmobile.core.components.NavHostClearStackPlaceholder
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.viewmodel.InviteStudentsViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.*
@@ -207,8 +208,9 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME,
         "ClazzAssignmentDetailStudentProgressOverviewList",
         ClazzAssignmentDetailSubmissionsTab),
-    UstadScreen(InviteStudentsViewModel.DEST_NAME, "InviteStudents",
-        InviteStudentsPreview
+    UstadScreen(
+        InviteStudentsViewModel.DEST_NAME, "InviteStudents",
+        InviteStudentsScreen
     )
 )
 

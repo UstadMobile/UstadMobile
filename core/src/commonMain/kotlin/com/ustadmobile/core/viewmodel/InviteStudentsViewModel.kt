@@ -43,7 +43,7 @@ class InviteStudentsViewModel(
     savedStateHandle: UstadSavedStateHandle
 ): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
-    private val _uiState = MutableStateFlow(InviteStudentsUiState(fieldsEnabled = false))
+    private val _uiState = MutableStateFlow(InviteStudentsUiState())
 
     val uiState: Flow<InviteStudentsUiState> = _uiState.asStateFlow()
 
