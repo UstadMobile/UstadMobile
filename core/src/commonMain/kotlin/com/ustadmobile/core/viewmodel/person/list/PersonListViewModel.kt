@@ -8,6 +8,7 @@ import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
+import com.ustadmobile.core.viewmodel.InviteStudentsViewModel
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.door.paging.*
 import com.ustadmobile.lib.db.entities.Person
@@ -132,6 +133,10 @@ class PersonListViewModel(
         navigateOnItemClicked(PersonDetailView.VIEW_NAME, entry.personUid, entry)
     }
 
+
+    fun onClickAddRecipient() {
+        navController.navigate(InviteStudentsViewModel.DEST_NAME, emptyMap())
+    }
 
 }
 
