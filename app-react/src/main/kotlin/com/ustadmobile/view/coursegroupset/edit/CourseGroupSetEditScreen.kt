@@ -1,15 +1,19 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.coursegroupset.edit
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditUiState
+import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditViewModel
+import com.ustadmobile.core.viewmodel.coursegroupset.edit.appendGroupNumIfNotInList
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.CourseGroupMember
 import com.ustadmobile.lib.db.entities.CourseGroupMemberAndName
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.DropDownOption
-import com.ustadmobile.mui.components.UstadDropDownField
-import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.mui.components.UstadNumberTextField
+import com.ustadmobile.util.ext.onTextChange
+import com.ustadmobile.view.components.UstadSelectField
 import csstype.px
 import mui.icons.material.AccountCircle
 import mui.material.*
@@ -22,8 +26,8 @@ import react.ReactNode
 external interface CourseGroupSetEditProps: Props{
     var uiState: CourseGroupSetEditUiState
     var onCourseGroupSetChange: (CourseGroupSet?) -> Unit
-    var onClickAssign: () -> Unit
-    var onCgmChange: (CourseGroupMember?) -> Unit
+    var onClickAssignRandomly: () -> Unit
+    var onChangeGroupAssignment: (personUid: Long, groupNumber: Int) -> Unit
 }
 
 val CourseGroupSetEditComponent2 = FC<CourseGroupSetEditProps> { props ->
@@ -37,12 +41,14 @@ val CourseGroupSetEditComponent2 = FC<CourseGroupSetEditProps> { props ->
             direction = responsive(StackDirection.column)
             spacing = responsive(26.px)
 
-            UstadTextEditField {
+            TextField {
+                id = "cgs_name"
                 value = props.uiState.courseGroupSet?.cgsName ?: ""
-                label = strings[MessageID.title]
-                error = props.uiState.courseTitleError
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
+                label = ReactNode(strings[MessageID.title])
+                error = props.uiState.courseTitleError != null
+                helperText = props.uiState.courseTitleError?.let { ReactNode(it) }
+                disabled = !props.uiState.fieldsEnabled
+                onTextChange = {
                     props.onCourseGroupSetChange(
                         props.uiState.courseGroupSet?.shallowCopy {
                             cgsName = it
@@ -51,29 +57,35 @@ val CourseGroupSetEditComponent2 = FC<CourseGroupSetEditProps> { props ->
                 }
             }
 
-            UstadTextEditField {
-                value = props.uiState.courseGroupSet?.cgsTotalGroups.toString()
-                label = strings[MessageID.number_of_groups]
-                error = props.uiState.numOfGroupsError
-                enabled = props.uiState.fieldsEnabled
-                onChange = { newString ->
+            UstadNumberTextField {
+                id = "cgs_total_groups"
+                value = (props.uiState.courseGroupSet?.cgsTotalGroups ?: 2).toFloat()
+                label = ReactNode(strings[MessageID.number_of_groups])
+                helperText = props.uiState.numOfGroupsError?.let { ReactNode(it) }
+                error = props.uiState.numOfGroupsError != null
+                disabled = !props.uiState.fieldsEnabled
+                onChange = {
                     props.onCourseGroupSetChange(
                         props.uiState.courseGroupSet?.shallowCopy {
-                            cgsTotalGroups = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
+                            cgsTotalGroups = it.toInt()
                         }
                     )
                 }
             }
 
             Button {
-                onClick = { props.onClickAssign }
+                id = "assign_random_groups"
+                onClick = { props.onClickAssignRandomly() }
                 variant = ButtonVariant.contained
 
                 + strings[MessageID.assign_to_random_groups]
             }
 
-            val groups =  (1 ..(props.uiState.courseGroupSet?.cgsTotalGroups ?: 1)).map {
-                DropDownOption("${strings[MessageID.group]} $it", "$it")
+            val groupOptions = (0..(props.uiState.courseGroupSet?.cgsTotalGroups ?: 1)).toList()
+            val itemLabelFn: (Int) -> ReactNode = {
+                ReactNode(
+                    if(it == 0) strings[MessageID.unassigned] else "${strings[MessageID.group]} $it"
+                )
             }
 
             List {
@@ -99,34 +111,52 @@ val CourseGroupSetEditComponent2 = FC<CourseGroupSetEditProps> { props ->
                                 width = 150.px
                             }
 
-                            UstadDropDownField {
-                                value = groups.firstOrNull { it.value == member.cgm.cgmGroupNumber.toString() }
+                            val assignedGroupNum = member.cgm?.cgmGroupNumber ?: 0
+
+                            UstadSelectField<Int> {
+                                id = "person_${member.personUid}_groupselect"
                                 label = ""
-                                options = groups
-                                itemLabel = { ReactNode((it as? DropDownOption)?.label ?: "") }
-                                itemValue = { (it as? DropDownOption)?.value ?: "" }
+                                value = member.cgm?.cgmGroupNumber ?: 0
+                                options = groupOptions.appendGroupNumIfNotInList(assignedGroupNum)
+                                itemValue = { it.toString() }
+                                itemLabel = itemLabelFn
                                 onChange = {
-                                    props.onCgmChange(member.cgm.shallowCopy{
-                                        cgmGroupNumber = (it as DropDownOption).value.toInt()
-                                    })
+                                    props.onChangeGroupAssignment(member.personUid, it)
                                 }
+                                fullWidth = false
+                                enabled = props.uiState.fieldsEnabled
+                                error = (assignedGroupNum !in groupOptions)
                             }
                         }
                     }
                 }
             }
-
-
         }
+    }
+
+}
+
+
+val CourseGroupSetEditScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        CourseGroupSetEditViewModel(di, savedStateHandle)
+    }
+
+    val uiStateVal by viewModel.uiState.collectAsState(CourseGroupSetEditUiState())
+
+
+    CourseGroupSetEditComponent2 {
+        uiState = uiStateVal
+        onChangeGroupAssignment = viewModel::onChangeGroupAssignment
+        onCourseGroupSetChange = viewModel::onEntityChanged
+        onClickAssignRandomly = viewModel::onClickAssignRandomly
     }
 
 }
 
 val CourseGroupSetEditScreenPreview = FC<Props>{
     CourseGroupSetEditComponent2{
-        onCgmChange = {
-
-        }
+        onChangeGroupAssignment = { _, _ -> }
         uiState = CourseGroupSetEditUiState(
             courseGroupSet = CourseGroupSet().apply {
                 cgsName = "ttl"

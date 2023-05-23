@@ -1364,6 +1364,10 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     Option for a teacher or admin to create new groups
     -->
     <string name="add_new_groups">Add new groups</string>
+
+    <!-- Option for a teacher to edit a list of groups -->
+    <string name="edit_groups">Edit groups</string>
+
     <!--
     Used to display the number of replies to a post on a discussion board thread. %1$d will be
     replaced with the number of replies (e.g. 0, 1, 2, etc)

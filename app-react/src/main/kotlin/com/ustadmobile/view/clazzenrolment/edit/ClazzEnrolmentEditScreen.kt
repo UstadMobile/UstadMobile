@@ -51,7 +51,8 @@ val ClazzEnrolmentEditScreenComponent = FC<ClazzEnrolmentEditScreenProps> { prop
                 value = props.uiState.clazzEnrolment?.clazzEnrolmentRole ?: ClazzEnrolment.ROLE_STUDENT
                 label = strings[MessageID.role]
                 options = props.uiState.roleOptions
-                error = props.uiState.roleSelectedError
+                error = props.uiState.roleSelectedError != null
+                helperText = props.uiState.roleSelectedError?.let { ReactNode(it) }
                 enabled = props.uiState.fieldsEnabled
                 itemValue = { "$it" }
                 itemLabel = {

@@ -42,7 +42,7 @@ val CourseGroupSetDetailComponent2 = FC<CourseGroupSetDetailProps> { props ->
                     variant = TypographyVariant.body1
                 }
 
-                props.uiState.membersList.filter { it.cgm.cgmGroupNumber == group }.forEach { member ->
+                props.uiState.membersList.filter { it.cgm?.cgmGroupNumber == group }.forEach { member ->
                     ListItem{
                         ListItemIcon{
                             AccountCircle()

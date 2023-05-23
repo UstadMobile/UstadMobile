@@ -1,8 +1,11 @@
 package com.ustadmobile.core.viewmodel.coursegroupset.edit
 
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
+import com.ustadmobile.core.impl.appstate.LoadingUiState
+import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.replace
-import com.ustadmobile.core.view.CourseGroupSetDetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
@@ -19,6 +22,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
@@ -28,7 +32,6 @@ data class CourseGroupSetEditUiState(
     val membersList: List<CourseGroupMemberAndName> = emptyList(),
     val courseTitleError: String? = null,
     val numOfGroupsError: String? = null,
-    val totalGroupError: String? = null,
     val fieldsEnabled: Boolean = false,
 )
 
@@ -44,6 +47,17 @@ class CourseGroupSetEditViewModel(
     private val clazzUidArg = savedStateHandle[UstadView.ARG_CLAZZUID]?.toLong() ?: 0L
 
     init {
+        _appUiState.update { prev ->
+            prev.copy(
+                title = createEditTitle(
+                    newEntityMessageId = MessageID.add_new_groups,
+                    editEntityMessageId = MessageID.edit_groups
+                ),
+                hideBottomNavigation = true,
+                loadingState = LoadingUiState.INDETERMINATE,
+            )
+        }
+
         viewModelScope.launch {
             val courseGroupSetUid = if(entityUidArg != 0L)
                 entityUidArg
@@ -115,6 +129,17 @@ class CourseGroupSetEditViewModel(
                 }
             )
 
+            _appUiState.update { prev ->
+                prev.copy(
+                    actionBarButtonState = ActionBarButtonUiState(
+                        visible = true,
+                        text = systemImpl.getString(MessageID.save),
+                        enabled = true,
+                        onClick = this@CourseGroupSetEditViewModel::onClickSave
+                    ),
+                    loadingState = LoadingUiState.NOT_LOADING,
+                )
+            }
             _uiState.update { prev ->
                 prev.copy(fieldsEnabled = true)
             }
@@ -126,13 +151,29 @@ class CourseGroupSetEditViewModel(
     ) {
         _uiState.update { prev ->
             prev.copy(
-                courseGroupSet = courseGroupSet
+                courseGroupSet = courseGroupSet,
+                courseTitleError = updateErrorMessageOnChange(
+                    prevFieldValue = prev.courseGroupSet?.cgsName,
+                    currentFieldValue = courseGroupSet?.cgsName,
+                    currentErrorMessage = prev.courseTitleError,
+                ),
+                numOfGroupsError = updateErrorMessageOnChange(
+                    prevFieldValue = prev.courseGroupSet?.cgsTotalGroups,
+                    currentFieldValue = courseGroupSet?.cgsTotalGroups,
+                    currentErrorMessage = prev.numOfGroupsError,
+                )
             )
         }
+
+        scheduleEntityCommitToSavedState(
+            entity = courseGroupSet,
+            serializer = CourseGroupSet.serializer(),
+            commitDelay = 200
+        )
     }
 
     fun onChangeGroupAssignment(personUid: Long, groupNumber: Int) {
-        _uiState.update { prev ->
+        val newState = _uiState.updateAndGet { prev ->
             val currentGroupMemberAndName = prev.membersList.first { it.personUid == personUid }
             prev.copy(
                 membersList = prev.membersList.replace(
@@ -145,17 +186,80 @@ class CourseGroupSetEditViewModel(
                 )
             )
         }
+
+        viewModelScope.launch {
+            savedStateHandle.setJson(
+                key = KEY_COURSEGROUPMEMBERS,
+                serializer = ListSerializer(CourseGroupMemberAndName.serializer()),
+                value = newState.membersList
+            )
+        }
+    }
+
+    fun onClickAssignRandomly() {
+        val totalGroups = _uiState.value.courseGroupSet?.cgsTotalGroups ?: 1
+        val shuffledPersonUidList = _uiState.value.membersList.map { it.personUid }.shuffled()
+        val newMemberList = _uiState.value.membersList.map {
+            it.copy(
+                cgm = it.cgm?.shallowCopy {
+                    cgmGroupNumber = (shuffledPersonUidList.indexOf(it.personUid) % totalGroups) + 1
+                }
+            )
+        }
+
+        _uiState.update { prev ->
+            prev.copy(
+                membersList = newMemberList
+            )
+        }
+
+        viewModelScope.launch {
+            savedStateHandle.setJson(
+                key = KEY_COURSEGROUPMEMBERS,
+                serializer = ListSerializer(CourseGroupMemberAndName.serializer()),
+                value = newMemberList
+            )
+        }
     }
 
 
     fun onClickSave() {
         val courseGroupSet = _uiState.value.courseGroupSet ?: return
 
-        viewModelScope.launch {
-            val membersToSave = _uiState.value.membersList.mapNotNull {
-                it.cgm
-            }
+        val membersToSave = _uiState.value.membersList.mapNotNull {
+            it.cgm
+        }
 
+        val hasInvalidAssignments = membersToSave.any { it.cgmGroupNumber > courseGroupSet.cgsTotalGroups }
+        if(hasInvalidAssignments){
+            snackDispatcher.showSnackBar(Snack(systemImpl.getString(MessageID.error)))
+        }
+
+        if(courseGroupSet.cgsName.isNullOrBlank()) {
+            _uiState.update { prev ->
+                prev.copy(
+                    courseTitleError = systemImpl.getString(MessageID.field_required_prompt)
+                )
+            }
+        }
+
+        if(courseGroupSet.cgsTotalGroups < 1) {
+            _uiState.update { prev ->
+                prev.copy(
+                    numOfGroupsError = systemImpl.getString(MessageID.score_greater_than_zero)
+                )
+            }
+        }
+
+        if(hasInvalidAssignments ||
+            _uiState.value.numOfGroupsError != null
+            || _uiState.value.courseTitleError != null
+        ) {
+            return
+        }
+
+
+        viewModelScope.launch {
             activeDb.withDoorTransactionAsync {
                 activeDb.courseGroupSetDao.upsertAsync(courseGroupSet)
                 activeDb.courseGroupMemberDao.upsertListAsync(membersToSave)
