@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab
 
 import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
@@ -29,5 +29,14 @@ value class AssignmentSubmitterSummaryUiState(
 
     val latestPrivateCommentVisible: Boolean
         get() = !person.latestPrivateComment.isNullOrBlank()
+
+}
+
+class ClazzAssignmentDetailSubmissionsTabViewModel {
+
+    companion object {
+
+        const val DEST_NAME = "CourseAssignmentSubmissions"
+    }
 
 }

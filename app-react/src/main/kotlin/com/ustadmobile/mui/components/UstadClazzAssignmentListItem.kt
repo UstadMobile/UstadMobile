@@ -4,6 +4,7 @@ import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.contententry.list.listItemUiState
+import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.listItemUiState
 import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.entities.*
@@ -138,7 +139,9 @@ private val SecondaryContent = FC<UstadClazzAssignmentListItemProps> { props ->
 
             if (assignmentUiState?.submissionStatusIconVisible == true){
                 Icon{
-                    + ASSIGNMENT_STATUS_MAP[assignment.fileSubmissionStatus]?.create()
+                    ASSIGNMENT_STATUS_MAP[assignment.fileSubmissionStatus]?.also {
+                        + it.create()
+                    }
                 }
             }
 

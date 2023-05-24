@@ -44,9 +44,9 @@ import com.ustadmobile.view.components.UstadDetailHeader
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 
 val ASSIGNMENT_STATUS_MAP = mapOf(
-    CourseAssignmentSubmission.NOT_SUBMITTED to DoneIcon.create(),
-    CourseAssignmentSubmission.SUBMITTED to DoneIcon.create(),
-    CourseAssignmentSubmission.MARKED to DoneAllIcon.create()
+    CourseAssignmentSubmission.NOT_SUBMITTED to DoneIcon,
+    CourseAssignmentSubmission.SUBMITTED to DoneIcon,
+    CourseAssignmentSubmission.MARKED to DoneAllIcon,
 )
 
 external interface ClazzAssignmentDetailOverviewScreenProps : Props {
@@ -138,7 +138,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                         valueText = ReactNode(strings[policyMessageId])
                         labelText = strings[MessageID.submission_policy]
                         icon = (ASSIGNMENT_STATUS_MAP[
-                            props.uiState.assignment?.caSubmissionPolicy] ?: DoneIcon.create())
+                            props.uiState.assignment?.caSubmissionPolicy] ?: DoneIcon).create()
                         onClick = { }
                     }
 
