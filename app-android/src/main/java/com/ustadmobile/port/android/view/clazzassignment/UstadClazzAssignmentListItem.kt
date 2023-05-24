@@ -17,7 +17,6 @@ import com.toughra.ustadmobile.R
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.controller.SubmissionConstants
-import com.ustadmobile.core.viewmodel.contententry.list.listItemUiState
 import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
@@ -159,7 +158,7 @@ private fun UstadClazzAssignmentListItemPreview() {
 //                camMark = 20F
 //            }
             progressSummary = AssignmentProgressSummary().apply {
-                hasMetricsPermission = false
+                activeUserHasViewLearnerRecordsPermission = false
             }
             fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
         }

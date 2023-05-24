@@ -5,7 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 class AssignmentProgressSummary {
 
-    var notSubmittedStudents : Int = 0
 
     var submittedStudents : Int = 0
 
@@ -13,11 +12,17 @@ class AssignmentProgressSummary {
 
     var markedStudents: Int = 0
 
-    var hasMetricsPermission: Boolean = false
+    /**
+     * Indicates if the active user has the learner record select permission for the course,
+     * e.g. they can see all submissions
+     */
+    var activeUserHasViewLearnerRecordsPermission: Boolean = false
 
+    @Deprecated("Will not be used")
     fun calculateNotSubmittedStudents(): Int {
-        notSubmittedStudents = totalStudents - markedStudents - submittedStudents
-        return notSubmittedStudents
+//        notSubmittedStudents = totalStudents - markedStudents - submittedStudents
+//        return notSubmittedStudents
+        return 0
     }
 
 

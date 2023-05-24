@@ -48,13 +48,13 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
 
     private fun updateListOnView() {
         presenterScope.launch {
-            view.progressSummary = repo.clazzAssignmentDao.getProgressSummaryForAssignment(
-                clazzAssignmentUid, clazzUid, "", submitterUid, mLoggedInPersonUid)
+//            view.progressSummary = repo.clazzAssignmentDao.getProgressSummaryForAssignment(
+//                clazzAssignmentUid, clazzUid, "", submitterUid, mLoggedInPersonUid)
 
-            view.list = repo.clazzAssignmentDao.getSubmitterListForAssignmentSummary(
-                clazzAssignmentUid, clazzUid,
-                systemImpl.getString(MessageID.group_number, context).replace("%1\$s",""),
-                searchText.toQueryLikeParam(), submitterUid, mLoggedInPersonUid)
+//            view.list = repo.clazzAssignmentDao.getSubmitterListForAssignmentSummary(
+//                clazzAssignmentUid, clazzUid,
+//                systemImpl.getString(MessageID.group_number, context).replace("%1\$s",""),
+//                searchText.toQueryLikeParam(), submitterUid, mLoggedInPersonUid)
         }
     }
 

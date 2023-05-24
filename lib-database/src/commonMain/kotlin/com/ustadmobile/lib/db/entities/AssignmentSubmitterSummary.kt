@@ -10,6 +10,4 @@ open class AssignmentSubmitterSummary {
 
     var fileSubmissionStatus: Int = 0
 
-    var isGroupAssignment: Boolean = false
-
 }
