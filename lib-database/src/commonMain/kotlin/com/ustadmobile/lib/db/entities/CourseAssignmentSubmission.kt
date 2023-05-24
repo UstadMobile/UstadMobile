@@ -43,6 +43,13 @@ open class CourseAssignmentSubmission {
      *   for the cgmGroupUid specified by the ClazzAssignment
      * A submitterUid of -1 means that the person is enrolled as a student in the course, however
      * it is a group assignment and the student is not assigned to any group.
+     *
+     * If a deadline is set for the assignment, an student's enrolment must be active at the
+     * time of the deadline to be considered as a submitter
+     *
+     * If no deadline is set, the student's enrolment must not end before the start of the
+     * assignment.
+     *
      */
     var casSubmitterUid: Long = 0
 
