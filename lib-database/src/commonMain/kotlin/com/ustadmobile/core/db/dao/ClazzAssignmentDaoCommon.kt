@@ -45,7 +45,9 @@ object ClazzAssignmentDaoCommon {
 
 
 
+    //language=RoomSql
     const val SUBMITTER_LIST_CTE = """
+            -- When using individual submission eg caGroupUid = 0
             SubmitterList (submitterId, name)
             AS (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid AS submitterId, 
                        Person.firstNames || ' ' || Person.lastName AS name

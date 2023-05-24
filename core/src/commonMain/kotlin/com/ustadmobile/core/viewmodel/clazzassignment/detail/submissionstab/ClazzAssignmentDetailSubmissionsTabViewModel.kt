@@ -5,7 +5,7 @@ import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import kotlin.jvm.JvmInline
 
-data class ClazzAssignmentDetailStudentProgressListOverviewUiState(
+data class ClazzAssignmentDetailSubmissionsTabUiState(
 
     val progressSummary: AssignmentProgressSummary? = null,
 
@@ -36,7 +36,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModel {
 
     companion object {
 
-        const val DEST_NAME = "CourseAssignmentSubmissions"
+        const val DEST_NAME = "CourseAssignmentSubmissionsTab"
     }
 
 }

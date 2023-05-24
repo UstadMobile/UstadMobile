@@ -1,7 +1,7 @@
 package com.ustadmobile.view.clazzassignment.detail.submissionstab
 
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.ClazzAssignmentDetailStudentProgressListOverviewUiState
+import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabUiState
 import com.ustadmobile.hooks.useTabAndAppBarHeight
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.view.components.virtuallist.VirtualList
@@ -19,7 +19,7 @@ import react.create
 
 external interface ClazzAssignmentDetailSubmissionsTabComponentProps : Props {
 
-    var uiState: ClazzAssignmentDetailStudentProgressListOverviewUiState
+    var uiState: ClazzAssignmentDetailSubmissionsTabUiState
 
     var onClickPerson: (AssignmentSubmitterSummary?) -> Unit
 
@@ -28,7 +28,7 @@ external interface ClazzAssignmentDetailSubmissionsTabComponentProps : Props {
 val ClazzAssignmentDetailSubmissionsTabPreview = FC<Props> {
 
     ClazzAssignmentDetailSubmissionsTabComponent {
-        uiState = ClazzAssignmentDetailStudentProgressListOverviewUiState(
+        uiState = ClazzAssignmentDetailSubmissionsTabUiState(
             progressSummary = AssignmentProgressSummary().apply {
                 totalStudents = 10
                 submittedStudents = 2
