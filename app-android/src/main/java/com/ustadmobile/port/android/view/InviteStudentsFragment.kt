@@ -108,7 +108,7 @@ private fun InviteStudentsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultItemPadding(),
-                value = uiState.textfield,
+                value = uiState.textField,
                 label = { Text(stringResource( R.string.name )) },
                 enabled = uiState.fieldsEnabled,
                 singleLine = true,
@@ -119,7 +119,7 @@ private fun InviteStudentsScreen(
         }
 
         item {
-            if (uiState.textfield.isNotEmpty()){
+            if (uiState.addRecipientVisible){
                 Button(
                     onClick = {
                         onClickAddRecipient()
