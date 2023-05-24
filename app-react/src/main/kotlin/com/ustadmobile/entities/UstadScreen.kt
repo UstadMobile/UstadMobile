@@ -35,7 +35,7 @@ import com.ustadmobile.view.clazzassignment.detail.ClazzAssignmentDetailScreen
 import com.ustadmobile.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewScreenPreview
 import com.ustadmobile.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewScreen
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewViewModel
-import com.ustadmobile.view.clazzassignment.detailsubmissionstab.ClazzAssignmentDetailSubmissionsTab
+import com.ustadmobile.view.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabScreen
 import com.ustadmobile.view.clazzenrolment.clazzmemberlist.ClazzMemberListScreen
 import com.ustadmobile.view.courseterminology.edit.CourseTerminologyEditScreen
 import com.ustadmobile.view.login.LoginScreen
@@ -241,14 +241,12 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ClazzAssignmentDetailOverviewViewModel.DEST_NAME, "ClazzAssignmentDetailOverview",
         ClazzAssignmentDetailOverviewScreen
     ),
-    UstadScreen(ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME,
+    UstadScreen(ClazzAssignmentDetailSubmissionsTabViewModel.DEST_NAME,
         "ClazzAssignmentDetailStudentProgressOverviewList",
-        ClazzAssignmentDetailSubmissionsTab),
+        ClazzAssignmentDetailSubmissionsTabScreen),
     UstadScreen(CourseGroupSetListViewModel.DEST_NAME, "CourseGroupSetList",
         CourseGroupSetListScreen
     ),
-    UstadScreen(ClazzAssignmentDetailSubmissionsTabViewModel.DEST_NAME, "AssignmentSubmissions",
-        ClazzAssignmentDetailSubmissionsTabPreview)
 )
 
 

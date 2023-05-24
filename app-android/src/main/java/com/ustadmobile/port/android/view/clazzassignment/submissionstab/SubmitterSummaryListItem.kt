@@ -68,7 +68,7 @@ fun SubmitterSummaryListItem (
                         modifier = Modifier.size(16.dp)
                     )
                 }
-                if (personUiState.fileSubmissionStatusTextVisible){
+                if (personUiState.submissionStatusTextVisible){
                     Text(
                         messageIdResource(
                         SubmissionConstants.STATUS_MAP[submitterSummary.fileSubmissionStatus]

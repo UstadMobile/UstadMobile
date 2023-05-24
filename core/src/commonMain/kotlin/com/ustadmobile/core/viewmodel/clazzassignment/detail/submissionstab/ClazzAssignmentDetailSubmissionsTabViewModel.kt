@@ -38,7 +38,7 @@ value class AssignmentSubmitterSummaryUiState(
     val fileSubmissionStatusIconVisible: Boolean
         get() = person.fileSubmissionStatus != CourseAssignmentSubmission.NOT_SUBMITTED
 
-    val fileSubmissionStatusTextVisible: Boolean
+    val submissionStatusTextVisible: Boolean
         get() = person.fileSubmissionStatus != 0
 
     val latestPrivateCommentVisible: Boolean
@@ -56,7 +56,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
     destinationName = ClazzAssignmentDetailViewModel.DEST_NAME
 ){
 
-    val argEntityUid = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
+    private val argEntityUid = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
 
     private var mLastPagingSource: PagingSource<Int, AssignmentSubmitterSummary>? = null
 
@@ -93,8 +93,20 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
                         }
                     }
                 }
+
+                launch {
+                    activeRepo.courseBlockDao.getTitleByAssignmentUid(argEntityUid).collect {
+                        _appUiState.update { prev ->
+                            prev.copy(title = it)
+                        }
+                    }
+                }
             }
         }
+    }
+
+    fun onClickSubmitter(assignmentSubmitter: AssignmentSubmitterSummary) {
+
     }
 
     override fun onUpdateSearchResult(searchText: String) {

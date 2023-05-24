@@ -1,6 +1,7 @@
 package com.ustadmobile.view.clazzassignment.detail.submissionstab
 
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.mui.components.ThemeContext
 import csstype.Border
 import csstype.LineStyle
@@ -46,7 +47,7 @@ val ClazzAssignmentSummaryColumn = FC<ClazzAssignmentSummaryColumnProps> { props
         }
 
         Typography {
-            + (strings[props.messageID])
+            + (strings[props.messageID]).capitalizeFirstLetter()
         }
     }
 

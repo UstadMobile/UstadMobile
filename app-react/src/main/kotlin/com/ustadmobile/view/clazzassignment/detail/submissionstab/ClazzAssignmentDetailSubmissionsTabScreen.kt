@@ -1,8 +1,13 @@
 package com.ustadmobile.view.clazzassignment.detail.submissionstab
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
+import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabUiState
+import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabViewModel
+import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTabAndAppBarHeight
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -21,7 +26,7 @@ external interface ClazzAssignmentDetailSubmissionsTabComponentProps : Props {
 
     var uiState: ClazzAssignmentDetailSubmissionsTabUiState
 
-    var onClickPerson: (AssignmentSubmitterSummary?) -> Unit
+    var onClickSubmitter: (AssignmentSubmitterSummary) -> Unit
 
 }
 
@@ -34,27 +39,48 @@ val ClazzAssignmentDetailSubmissionsTabPreview = FC<Props> {
                 submittedStudents = 2
                 markedStudents = 3
             },
-            assignmentSubmitterList = listOf(
-                AssignmentSubmitterSummary().apply {
-                    submitterUid = 1
-                    name = "Bob Dylan"
-                    latestPrivateComment = "Here is private comment"
-                    fileSubmissionStatus = CourseAssignmentSubmission.MARKED
-                },
-                AssignmentSubmitterSummary().apply {
-                    submitterUid = 2
-                    name = "Morris Rogers"
-                    latestPrivateComment = "Here is private comment"
-                    fileSubmissionStatus = CourseAssignmentSubmission.SUBMITTED
-                }
-            ),
+            assignmentSubmitterList = {
+                ListPagingSource(listOf(
+                    AssignmentSubmitterSummary().apply {
+                        submitterUid = 1
+                        name = "Bob Dylan"
+                        latestPrivateComment = "Here is private comment"
+                        fileSubmissionStatus = CourseAssignmentSubmission.MARKED
+                    },
+                    AssignmentSubmitterSummary().apply {
+                        submitterUid = 2
+                        name = "Morris Rogers"
+                        latestPrivateComment = "Here is private comment"
+                        fileSubmissionStatus = CourseAssignmentSubmission.SUBMITTED
+                    }
+                ))
+            },
         )
     }
 }
 
+val ClazzAssignmentDetailSubmissionsTabScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        ClazzAssignmentDetailSubmissionsTabViewModel(di, savedStateHandle)
+    }
+
+    val uiStateVal by viewModel.uiState.collectAsState(ClazzAssignmentDetailSubmissionsTabUiState())
+
+    ClazzAssignmentDetailSubmissionsTabComponent {
+        uiState = uiStateVal
+        onClickSubmitter = viewModel::onClickSubmitter
+    }
+}
+
+
 private val ClazzAssignmentDetailSubmissionsTabComponent = FC<ClazzAssignmentDetailSubmissionsTabComponentProps> { props ->
 
     val tabAndAppBarHeight = useTabAndAppBarHeight()
+
+    val infiniteQueryResult = usePagingSource(
+        pagingSourceFactory = props.uiState.assignmentSubmitterList,
+        placeholdersEnabled = true
+    )
 
     VirtualList {
         style = jso {
@@ -70,8 +96,8 @@ private val ClazzAssignmentDetailSubmissionsTabComponent = FC<ClazzAssignmentDet
                     direction = responsive(StackDirection.row)
 
                     ClazzAssignmentSummaryColumn {
-                        total = props.uiState.progressSummary?.calculateNotSubmittedStudents()
-                        messageID = MessageID.not_started
+                        total = props.uiState.progressSummary?.totalStudents
+                        messageID = MessageID.students
                         showDivider = true
                     }
 
@@ -83,18 +109,18 @@ private val ClazzAssignmentDetailSubmissionsTabComponent = FC<ClazzAssignmentDet
 
                     ClazzAssignmentSummaryColumn {
                         total = props.uiState.progressSummary?.markedStudents
-                        messageID = MessageID.submitted_cap
+                        messageID = MessageID.marked
                     }
                 }
             }
 
-            items(
-                list = props.uiState.assignmentSubmitterList,
+            infiniteQueryPagingItems(
+                items = infiniteQueryResult,
                 key = { it.submitterUid.toString() }
-            ) { personItem ->
+            ) { submitterSummaryItem ->
                 SubmitterSummaryListItem.create {
-                    submitterSummary = personItem
-                    onClick = props.onClickPerson
+                    submitterSummary = submitterSummaryItem
+                    onClick = props.onClickSubmitter
                 }
             }
         }

@@ -26,7 +26,7 @@ import react.create
 
 external interface SubmitterSummaryListItemProps : Props {
 
-    var submitterSummary: AssignmentSubmitterSummary
+    var submitterSummary: AssignmentSubmitterSummary?
 
     var onClick: (AssignmentSubmitterSummary) -> Unit
 
@@ -36,14 +36,14 @@ val SubmitterSummaryListItem = FC<SubmitterSummaryListItemProps> { props ->
 
     val strings = useStringsXml()
 
-    val personUiState = props.submitterSummary.listItemUiState
+    val personUiState = props.submitterSummary?.listItemUiState
 
-    val assignmentStatusIcon = ASSIGNMENT_STATUS_MAP[props.submitterSummary.fileSubmissionStatus]
+    val assignmentStatusIcon = ASSIGNMENT_STATUS_MAP[props.submitterSummary?.fileSubmissionStatus]
         ?: DoneIcon
 
     ListItem {
         ListItemButton {
-            onClick = { props.onClick(props.submitterSummary) }
+            onClick = {   props.submitterSummary?.also(props.onClick) }
 
             ListItemIcon {
                 + AccountCircleIcon.create {
@@ -55,11 +55,11 @@ val SubmitterSummaryListItem = FC<SubmitterSummaryListItemProps> { props ->
             }
 
             ListItemText {
-                primary = ReactNode(props.submitterSummary.name ?: "")
+                primary = ReactNode(props.submitterSummary?.name ?: "")
                 secondary = Stack.create {
                     direction = responsive(StackDirection.row)
 
-                    if (personUiState.latestPrivateCommentVisible){
+                    if (personUiState?.latestPrivateCommentVisible == true){
                         CommentIcon.create {
                             sx {
                                 width = 12.px
@@ -68,7 +68,7 @@ val SubmitterSummaryListItem = FC<SubmitterSummaryListItemProps> { props ->
                         }
 
                         Typography {
-                            + props.submitterSummary.latestPrivateComment
+                            + props.submitterSummary?.latestPrivateComment
                         }
 
                     }
@@ -80,7 +80,7 @@ val SubmitterSummaryListItem = FC<SubmitterSummaryListItemProps> { props ->
         secondaryAction = Stack.create {
             direction = responsive(StackDirection.row)
 
-            if (personUiState.fileSubmissionStatusIconVisible){
+            if (personUiState?.fileSubmissionStatusIconVisible == true){
                 + assignmentStatusIcon.create {
                     sx {
                         width = 24.px
@@ -88,13 +88,15 @@ val SubmitterSummaryListItem = FC<SubmitterSummaryListItemProps> { props ->
                     }
                 }
             }
-            if (personUiState.fileSubmissionStatusTextVisible){
-                Typography {
-                    + (" "+strings[SubmissionConstants.STATUS_MAP[
-                        props.submitterSummary.fileSubmissionStatus]
-                        ?: MessageID.not_submitted_cap])
-                }
+
+            Typography {
+                + (" "+strings[SubmissionConstants.STATUS_MAP[
+                    props.submitterSummary?.fileSubmissionStatus]
+                    ?: MessageID.not_submitted_cap])
             }
+
         }
     }
 }
+
+
