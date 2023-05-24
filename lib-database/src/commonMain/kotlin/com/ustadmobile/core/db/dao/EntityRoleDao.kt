@@ -38,6 +38,7 @@ expect abstract class EntityRoleDao {
          WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
                AND (Role.rolePermissions & :permission) > 0) AS hasPermission
     """)
+    @Deprecated("This should use ScopedGrant instead: see ScopedGrantDao.userHasSystemLevelPermissionAsFlow")
     abstract suspend fun userHasTableLevelPermission(accountPersonUid: Long, permission: Long) : Boolean
 
     @Query("SELECT * FROM EntityRole WHERE erTableId = :tableId " +

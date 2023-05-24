@@ -1,7 +1,5 @@
 package com.ustadmobile.core.util.ext
 
-import com.soywiz.klock.DateTime
-import com.soywiz.klock.years
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.BrowserLinkOpener
 import com.ustadmobile.core.impl.UstadMobileConstants
@@ -12,7 +10,11 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
-import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
+import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
 
 /**
  * Navigate to a given viewUri
@@ -62,7 +64,8 @@ suspend fun UstadNavController.navigateToLink(
     }
 
     val maxDateOfBirth = if(viewUri?.startsWith(ParentalConsentManagementView.VIEW_NAME) == true) {
-        (DateTime.now() - UstadMobileConstants.ADULT_AGE_THRESHOLD.years).unixMillisLong
+        Clock.System.now().minus(UstadMobileConstants.ADULT_AGE_THRESHOLD, DateTimeUnit.YEAR, TimeZone.UTC)
+            .toEpochMilliseconds()
     }else {
         0L
     }
@@ -88,8 +91,9 @@ suspend fun UstadNavController.navigateToLink(
         //when the active account is already on the given endpoint, or there is no endpoint
         //specified, then go directly to the given view (unless the force account selection option
         //is set)
-        !forceAccountSelection &&
-            (endpointUrl == null || accountManager.activeEndpoint.url == endpointUrl) ->
+        !forceAccountSelection
+            && accountManager.activeSession != null
+            && (endpointUrl == null || accountManager.activeEndpoint.url == endpointUrl) ->
         {
             navigateToViewUri(viewUri, goOptions)
         }
@@ -105,7 +109,7 @@ suspend fun UstadNavController.navigateToLink(
         {
             val args = mutableMapOf(ARG_NEXT to viewUri)
             if(endpointUrl != null)
-                args[ARG_SERVER_URL] = endpointUrl
+                args[ARG_API_URL] = endpointUrl
 
             navigate(Login2View.VIEW_NAME, args.toMap(), goOptions)
         }

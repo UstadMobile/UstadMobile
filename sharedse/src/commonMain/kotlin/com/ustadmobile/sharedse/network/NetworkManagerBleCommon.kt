@@ -59,23 +59,10 @@ abstract class NetworkManagerBleCommon(
 
     protected var wifiLockHolders = mutableListOf<Any>()
 
-    private val knownPeerNodes = mutableMapOf<String, Long>()
-
     protected val _connectivityStatus = MutableLiveData<ConnectivityStatus>()
 
     val connectivityStatus: LiveData<ConnectivityStatus>
         get() = _connectivityStatus
-
-    private val nodeTimeoutChecker = GlobalScope.async {
-        while(isActive) {
-            val timeNow = getSystemTimeInMillis()
-            val lostNodes = knownNetworkNodes
-                    .filter { timeNow - it.lastUpdateTimeStamp > BLE_NODE_TIMEOUT }
-            lostNodes.forEach { handleNodeLost(it) }
-
-            delay(1000)
-        }
-    }
 
 
     /**
@@ -106,89 +93,12 @@ abstract class NetworkManagerBleCommon(
 
     }
 
-    protected open fun onDownloadQueueEmpty() {
-        val currentConnectivityStatus = _connectivityStatus.getValue()
-        if(currentConnectivityStatus != null &&
-                currentConnectivityStatus.connectivityState == ConnectivityStatus.STATE_CONNECTED_LOCAL) {
-            restoreWifi()
-        }
-    }
-
-
-    /**
-     * This should be called by the platform implementation when BLE discovers a nearby device
-     * @param node The nearby device discovered
-     */
-    @Synchronized
-    fun handleNodeDiscovered(node: NetworkNode) {
-        val knownNetworkNode = knownNetworkNodes.firstOrNull { it.bluetoothMacAddress == node.bluetoothMacAddress }
-        if(knownNetworkNode == null) {
-            Napier.i("NetworkManagerBle: Discovered new node on ${node.bluetoothMacAddress} ")
-            knownNetworkNodes += node.apply {
-                lastUpdateTimeStamp = getSystemTimeInMillis()
-            }
-            GlobalScope.launch {
-                networkNodeListeners.forEach { it.onNewNodeDiscovered(node) }
-            }
-        }else {
-            knownNetworkNode.lastUpdateTimeStamp = getSystemTimeInMillis()
-        }
-    }
-
-    /**
-     * This will be called by the nodeTimeoutChecker
-     */
-    fun handleNodeLost(node: NetworkNode) {
-        knownNetworkNodes.removeAll { it.bluetoothMacAddress == node.bluetoothMacAddress }
-        Napier.i("NetworkManagerBle: Node lost: ${node.bluetoothMacAddress}")
-        GlobalScope.launch {
-            networkNodeListeners.forEach { it.onNodeLost(node) }
-        }
-    }
-
-    abstract fun awaitWifiDirectGroupReady(timeout: Long): WiFiDirectGroupBle
 
     /**
      * Open bluetooth setting section from setting panel
      */
     abstract fun openBluetoothSettings()
 
-    /**
-     * Enable or disable WiFi on the device
-     *
-     * @param enabled Enable when true otherwise disable
-     * @return true if the operation is successful, false otherwise
-     */
-    abstract fun setWifiEnabled(enabled: Boolean): Boolean
-
-    /**
-     * Connecting a client to a group network for content acquisition
-     * @param ssid Group network SSID
-     * @param passphrase Group network passphrase
-     */
-    abstract fun connectToWiFi(ssid: String, passphrase: String, timeout: Int)
-
-    fun connectToWiFi(ssid: String, passphrase: String) {
-        connectToWiFi(ssid, passphrase, DEFAULT_WIFI_CONNECTION_TIMEOUT)
-    }
-
-    /**
-     * Restore the 'normal' WiFi connection
-     */
-    abstract fun restoreWifi()
-
-
-    /**
-     * Send message to a specific device
-     * @param context Platform specific context
-     * @param message Message to be send
-     * @param peerToSendMessageTo Peer device to receive the message
-     * @param responseListener Message response listener object
-     */
-    fun sendMessage(context: Any, message: BleMessage, peerToSendMessageTo: NetworkNode,
-                    responseListener: BleMessageResponseListener) {
-
-    }
 
     open fun lockWifi(lockHolder: Any) {
         wifiLockHolders.add(lockHolder)
@@ -198,60 +108,12 @@ abstract class NetworkManagerBleCommon(
         wifiLockHolders.remove(lockHolder)
     }
 
-    /**
-     * Handle node connection history, delete node which failed to connect for over 5 attempts
-     * @param bluetoothAddress node bluetooth address
-     * @param success connection status , True if the connection was made successfully,
-     * otherwise false
-     */
-    fun handleNodeConnectionHistory(bluetoothAddress: String, success: Boolean) {
-        var record: Int = knownBadNodeTrackList[bluetoothAddress] ?: 0
-
-        if (success) {
-            knownBadNodeTrackList[bluetoothAddress] = 0
-            UMLog.l(UMLog.DEBUG, 694,
-                    "Connection succeeded bad node counter was set to 0 for $bluetoothAddress")
-        }
-
-        if (!success) {
-            knownBadNodeTrackList[bluetoothAddress] = record++
-            UMLog.l(UMLog.DEBUG, 694,
-                    "Connection failed and bad node counter set to $record for $bluetoothAddress")
-        }
-
-        if ((knownBadNodeTrackList[bluetoothAddress] ?: 0) > 5) {
-            UMLog.l(UMLog.DEBUG, 694,
-                    "Bad node counter exceeded threshold (5), removing node with address "
-                            + bluetoothAddress + " from the list")
-            knownBadNodeTrackList.remove(bluetoothAddress)
-            knownPeerNodes.remove(bluetoothAddress)
-            //TODO: node should be stored in all stored databases
-            //umAppDatabase.networkNodeDao.deleteByBluetoothAddress(bluetoothAddress)
-
-            UMLog.l(UMLog.DEBUG, 694, "Node with address "
-                    + bluetoothAddress + " removed from the list")
-        }
-    }
-
-    /**
-     * Get bad node by bluetooth address
-     * @param bluetoothAddress node bluetooth address
-     * @return bad node
-     */
-    fun getBadNodeTracker(bluetoothAddress: String): Int? {
-        return knownBadNodeTrackList[bluetoothAddress]
-    }
-
-    fun addNetworkNodeListener(listener: NetworkNodeListener) = networkNodeListeners.add(listener)
-
-    fun removeNetworkNodeListener(listener: NetworkNodeListener) = networkNodeListeners.remove(listener)
-
 
     /**
      * Clean up the network manager for shutdown
      */
     open fun onDestroy() {
-        nodeTimeoutChecker.cancel()
+
 //        nextDownloadItemsLiveData.removeObserver(downloadQueueLocalAvailabilityObserver)
 //        val downloadQueueMonitorRequest = downloadQueueLocalAvailabilityObserver.currentRequest
 //        if(downloadQueueMonitorRequest != null)

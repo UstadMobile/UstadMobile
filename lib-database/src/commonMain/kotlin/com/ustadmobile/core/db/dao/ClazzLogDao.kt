@@ -4,9 +4,11 @@ import com.ustadmobile.door.paging.DataSourceFactory
 import androidx.room.*
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.Role
+import kotlinx.coroutines.flow.Flow
 
 
 @Repository
@@ -81,20 +83,46 @@ expect abstract class ClazzLogDao : BaseDao<ClazzLog> {
     @Query("SELECT * FROM ClazzLog WHERE clazzLogUid = :uid")
     abstract fun findByUidLive(uid: Long): LiveData<ClazzLog?>
 
-    @Query("""SELECT ClazzLog.* FROM ClazzLog 
-        WHERE clazzLogClazzUid = :clazzUid
-        AND clazzLog.clazzLogStatusFlag != :excludeStatus
-        ORDER BY ClazzLog.logDate DESC""")
-    abstract fun findByClazzUidAsFactory(clazzUid: Long, excludeStatus: Int): DataSourceFactory<Int, ClazzLog>
+    @Query("""
+        SELECT ClazzLog.* 
+          FROM ClazzLog 
+         WHERE clazzLogClazzUid = :clazzUid
+           AND clazzLog.clazzLogStatusFlag != :excludeStatus
+      ORDER BY ClazzLog.logDate DESC
+    """)
+    abstract fun findByClazzUidAsFactory(
+        clazzUid: Long,
+        excludeStatus: Int
+    ): PagingSource<Int, ClazzLog>
 
 
     //Used by the attendance recording screen to allow the user to go next/prev between days.
-    @Query("""SELECT ClazzLog.* FROM ClazzLog 
-        WHERE clazzLogClazzUid = :clazzUid
-        AND clazzLog.clazzLogStatusFlag != :excludeStatus
-        ORDER BY ClazzLog.logDate ASC""")
-    abstract suspend fun findByClazzUidAsync(clazzUid: Long, excludeStatus: Int): List<ClazzLog>
+    @Query("""
+        SELECT ClazzLog.* 
+          FROM ClazzLog 
+         WHERE ClazzLog.clazzLogClazzUid = :clazzUid
+           AND clazzLog.clazzLogStatusFlag != :excludeStatus
+      ORDER BY ClazzLog.logDate ASC
+    """)
+    abstract suspend fun findByClazzUidAsync(
+        clazzUid: Long,
+        excludeStatus: Int
+    ): List<ClazzLog>
 
+    @Query("""
+        SELECT ClazzLog.* 
+          FROM ClazzLog 
+         WHERE ClazzLog.clazzLogClazzUid = 
+               (SELECT ClazzLogInner.clazzLogClazzUid
+                  FROM ClazzLog ClazzLogInner
+                 WHERE ClazzLogInner.clazzLogUid = :clazzLogUid)
+           AND clazzLog.clazzLogStatusFlag != :excludeStatus
+      ORDER BY ClazzLog.logDate ASC
+    """)
+    abstract suspend fun findAllForClazzByClazzLogUid(
+        clazzLogUid: Long,
+        excludeStatus: Int
+    ): List<ClazzLog>
 
     @Query("""SELECT ClazzLog.* FROM ClazzLog 
         WHERE 
@@ -128,11 +156,16 @@ expect abstract class ClazzLogDao : BaseDao<ClazzLog> {
     abstract fun findByClazzUidWithinTimeRangeLive(clazzUid: Long, fromTime: Long, toTime: Long, statusFilter: Int): LiveData<List<ClazzLog>>
 
     @Query("""
-        SELECT EXISTS(SELECT ClazzLog.clazzLogUid FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid 
-        AND (:excludeStatusFilter = 0 OR ((ClazzLog.clazzLogStatusFlag & :excludeStatusFilter) = 0)))
+        SELECT EXISTS
+               (SELECT ClazzLog.clazzLogUid 
+                  FROM ClazzLog 
+                 WHERE clazzLogClazzUid = :clazzUid 
+                 AND (:excludeStatusFilter = 0 
+                      OR ((ClazzLog.clazzLogStatusFlag & :excludeStatusFilter) = 0))
+               )
     """)
     @QueryLiveTables(["ClazzLog"])
-    abstract fun clazzHasScheduleLive(clazzUid: Long, excludeStatusFilter: Int): LiveData<Boolean>
+    abstract fun clazzHasScheduleLive(clazzUid: Long, excludeStatusFilter: Int): Flow<Boolean>
 
 
     @Query("""UPDATE ClazzLog 
@@ -143,5 +176,27 @@ expect abstract class ClazzLogDao : BaseDao<ClazzLog> {
 
     @Update
     abstract suspend fun updateAsync(clazzLog: ClazzLog)
+
+    @Query("""
+        SELECT COALESCE(
+               (SELECT ClazzLog.clazzLogUid
+                  FROM ClazzLog
+                 WHERE ClazzLog.clazzLogClazzUid = :clazzUid
+                   AND (ClazzLog.clazzLogStatusFlag & ${ClazzLog.STATUS_RESCHEDULED}) != ${ClazzLog.STATUS_RESCHEDULED}
+              ORDER BY ClazzLog.logDate DESC
+                 LIMIT 1), 0)
+
+        
+    """)
+    abstract suspend fun findMostRecentClazzLogToEditUid(
+        clazzUid: Long
+    ): Long
+
+
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertListAsync(entityList: List<ClazzLog>)
+
+
 
 }

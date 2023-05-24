@@ -63,7 +63,7 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenterTest {
 
     }
 
-    //@Test
+    ////@Test
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnViewAndClickGoesToDetail() {
 
         val db: UmAppDatabase by di.activeDbInstance()

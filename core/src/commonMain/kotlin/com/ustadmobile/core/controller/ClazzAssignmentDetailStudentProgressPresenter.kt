@@ -132,7 +132,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(
                 }
 
         loadMarksList()
-        view.gradeFilterChips = ClazzAssignmentDetailOverviewPresenter.FILTER_OPTIONS.toListFilterOptions(context, di)
+        //view.gradeFilterChips = ClazzAssignmentDetailOverviewPresenter.FILTER_OPTIONS.toListFilterOptions(context, di)
 
         val submissionCount = repo.courseAssignmentSubmissionDao.countSubmissionsFromSubmitter(
             clazzAssignment.caUid, selectedSubmitterUid)

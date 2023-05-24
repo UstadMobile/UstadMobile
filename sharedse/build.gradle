@@ -4,7 +4,6 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.atomicfu'
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.android.library'
-    id 'maven-publish'
 }
 
 android {
@@ -16,12 +15,6 @@ android {
             consumerProguardFiles 'proguard-rules.pro'
         }
     }
-    packagingOptions {
-        resources {
-            excludes += ['META-INF/INDEX.LIST', '**/*.kotlin_metadata', 'META-INF/*.kotlin_module', 'licenses/**.TXT']
-        }
-    }
-
 
     defaultConfig {
         minSdkVersion 21
@@ -29,29 +22,28 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    compileOptions {
-        sourceCompatibility = '1.8'
-        targetCompatibility = '1.8'
-    }
-    testOptions {
-        unitTests {
-            returnDefaultValues = true
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/INDEX.LIST', '**/*.kotlin_metadata', 'META-INF/*.kotlin_module', 'licenses/**.TXT']
         }
     }
-    lint {
-        abortOnError false
+
+    compileOptions {
+        sourceCompatibility = '17'
+        targetCompatibility = '17'
     }
+
     namespace 'com.ustadmobile.port.sharedse'
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
         kotlinOptions {
-            jvmTarget = "1.8"
+            jvmTarget = "17"
         }
     }
 }
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility = '17'
+targetCompatibility = '17'
 
 group rootProject.group
 version rootProject.version
@@ -112,7 +104,7 @@ kotlin {
 
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation project(':lib-database')
-                implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
+                implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
             }
         }
 
@@ -130,7 +122,7 @@ kotlin {
                 implementation "io.ktor:ktor-serialization-gson:$version_ktor"
                 implementation "io.ktor:ktor-io-jvm:$version_ktor"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
-                implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
+                implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
 
             }
         }
@@ -206,7 +198,6 @@ kotlin {
                 implementation project(":lib-test-common")
 
                 implementation "io.github.aakira:napier:$version_napier"
-                implementation "com.soywiz.korlibs.klock:klock:$version_klock"
 
                 implementation "junit:junit:$version_junit"
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
@@ -214,8 +205,6 @@ kotlin {
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "io.github.aakira:napier-jvm:$version_napier"
                 implementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
-                implementation "com.soywiz.korlibs.klock:klock-jvm:$version_klock"
-
                 implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
                 implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
@@ -265,18 +254,3 @@ tasks.whenTaskAdded { task ->
 jvmTest.dependsOn(copyTestResources)
 
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId rootProject.group
-            artifactId project.name
-            version rootProject.version
-        }
-    }
-
-    repositories {
-        maven {
-            url rootProject.ext.buildConfigProperties['repo.dir']
-        }
-    }
-}

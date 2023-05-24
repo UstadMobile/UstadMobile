@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.rest.ext
 
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.lib.rest.CONF_DBMODE_SINGLETON
 import io.ktor.server.application.*
 import io.ktor.http.*
 import io.ktor.server.request.*
@@ -85,3 +87,19 @@ suspend fun ApplicationCall.respondReverseProxy(proxyToBaseUrl: String) {
         }
     }
 }
+
+/**
+ * Property that will resolve the endpoint for a given application call
+ */
+val ApplicationCall.callEndpoint: Endpoint
+    get() {
+        val config = this.application.environment.config
+        val dbMode = config.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
+
+        return if(dbMode == CONF_DBMODE_SINGLETON) {
+            Endpoint("localhost")
+        }else {
+            Endpoint(request.header("Host") ?: "localhost")
+        }
+    }
+

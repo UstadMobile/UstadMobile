@@ -2,7 +2,7 @@ package com.ustadmobile.port.android.view.binding
 
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
-import com.ustadmobile.port.android.view.PersonDetailFragment
+import com.ustadmobile.port.android.view.person.detail.PersonDetailFragment
 
 
 @BindingAdapter(value=["personPicturePersonUid", "personPictureVisibilityGoneIfNoPicture"], requireAll = false)

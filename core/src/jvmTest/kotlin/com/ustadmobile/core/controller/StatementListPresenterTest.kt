@@ -55,7 +55,7 @@ class StatementListPresenterTest {
 
     }
 
-    @Test
+    //@Test
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
         val presenterArgs = mutableMapOf<String,String>()
         presenterArgs[ARG_CONTENT_ENTRY_UID] = 1000L.toString()

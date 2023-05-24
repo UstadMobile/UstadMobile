@@ -9,9 +9,9 @@
         <import type="com.ustadmobile.lib.db.entities.ClazzAssignment"/>
         <import type="com.ustadmobile.lib.db.entities.CourseBlock"/>
         <import type="com.ustadmobile.lib.db.entities.CourseAssignmentSubmission"/>
-        <import type="com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment"/>
+        <import type="com.ustadmobile.port.android.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewFragment"/>
         <import type="com.ustadmobile.core.controller.SubmissionConstants"/>
-        <import type="com.ustadmobile.port.android.view.ClazzEditFragment"/>
+        <import type="com.ustadmobile.port.android.view.clazz.edit.ClazzEditFragment"/>
         <import type="android.view.View"/>
 
         <variable

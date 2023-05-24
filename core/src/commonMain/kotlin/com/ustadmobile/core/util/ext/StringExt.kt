@@ -98,6 +98,19 @@ fun String.capitalizeFirstLetter(): String {
  */
 expect fun String?.validEmail(): Boolean
 
+//Could be done with a regex, but this can be used on long text very frequently, so
+//this is better for performance
 fun String.countWords(): Int {
-    return Regex("""(\s+|(\r\n|\r|\n))""").findAll(this.trim()).count() + 1
+    var lastCharWasWhitespace = true
+
+    var wordCount = 0
+    for(i in 0 until length) {
+        val thisCharWhitespace = this[i].isWhitespace()
+        if(!thisCharWhitespace && lastCharWasWhitespace)
+            wordCount++
+
+        lastCharWasWhitespace = thisCharWhitespace
+    }
+
+    return wordCount
 }

@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
-        <import type="com.ustadmobile.port.android.view.CommentsBottomSheet"/>
+        <import type="com.ustadmobile.port.android.view.person.detail.PersonDetailFragment"/>
 
         <variable name="hintText"
             type="String"/>
@@ -13,13 +12,11 @@
         <variable
             name="personUid"
             type="Long" />
+
         <variable
             name="comment"
             type="String" />
 
-        <variable
-            name="sheet"
-            type="CommentsBottomSheet" />
 
         <variable
             name="listener"
@@ -59,12 +56,12 @@
             android:focusable="true"
             android:focusableInTouchMode="true"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/item_comment_new_send_ib"
+            app:layout_constraintEnd_toStartOf="@+id/item_comment_submit_button"
             app:layout_constraintStart_toEndOf="@+id/item_comment_new_person_icon"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
-            android:id="@+id/item_comment_new_send_ib"
+            android:id="@+id/item_comment_submit_button"
             style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -72,9 +69,6 @@
             android:layout_marginVertical="@dimen/dimen_16dp"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
-            app:buttonListener="@{listener}"
-            app:buttonSheet="@{sheet}"
-            app:editText="@{comment}"
             android:src="@drawable/ic_send_black_24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

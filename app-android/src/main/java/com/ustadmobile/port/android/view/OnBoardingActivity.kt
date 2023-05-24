@@ -25,12 +25,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.SavedStateHandleAdapter
@@ -39,6 +40,7 @@ import com.ustadmobile.core.viewmodel.OnboardingUiState
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.util.ext.getActivityContext
 import com.ustadmobile.port.android.util.ext.getUstadLocaleSetting
+import kotlinx.coroutines.delay
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import java.util.*
@@ -46,6 +48,7 @@ import java.util.*
 class OnBoardingActivity : ComponentActivity() {
 
     val di: DI by closestDI()
+
     private val viewModel: OnBoardingViewModel by viewModels {
         provideFactory(di, this, null)
     }
@@ -71,6 +74,7 @@ class OnBoardingActivity : ComponentActivity() {
                 OnboardingScreenViewModel(viewModel = viewModel)
             }
         }
+
     }
 
     companion object {
@@ -177,6 +181,7 @@ private fun SetLanguageMenu(
     onItemSelected: (UstadMobileSystemCommon.UiLanguage) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -210,14 +215,13 @@ private fun SetLanguageMenu(
 
             }
         ) {
-            val activity = LocalContext.current.getActivityContext()
-            langList.forEachIndexed { index, uiLanguage ->
+            langList.takeIf { expanded }?.forEach { uiLanguage ->
                 DropdownMenuItem(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         expanded = false
                         onItemSelected(uiLanguage)
-                        activity.recreate()
+                        context.getActivityContext().recreate()
                     }
                 ) {
                     Text(text = uiLanguage.langDisplay)

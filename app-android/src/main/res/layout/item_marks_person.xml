@@ -18,7 +18,7 @@
             name="block"
             type="CourseBlock" />
 
-        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
+        <import type="com.ustadmobile.port.android.view.person.detail.PersonDetailFragment"/>
 
     </data>
 

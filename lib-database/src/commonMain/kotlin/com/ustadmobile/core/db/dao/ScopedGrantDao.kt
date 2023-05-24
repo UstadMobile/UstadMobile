@@ -9,6 +9,7 @@ import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.flow.Flow
 
 @DoorDao
 @Repository
@@ -311,6 +312,24 @@ expect abstract class ScopedGrantDao {
          WHERE ScopedGrant.sgUid = :sgUid 
     """)
     abstract fun findByUidLiveWithName(sgUid: Long): LiveData<ScopedGrantWithName?>
+
+    @Query(
+        """
+        SELECT EXISTS(
+                SELECT PersonGroupMember.groupMemberGroupUid
+                  FROM PersonGroupMember 
+                       JOIN ScopedGrant
+                           ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+                 WHERE PersonGroupMember.groupMemberPersonUid = :personUid
+                   AND (ScopedGrant.sgPermissions & :permission) > 0    
+               )
+        """
+    )
+    abstract fun userHasSystemLevelPermissionAsFlow(
+        personUid: Long,
+        permission: Long,
+    ): Flow<Boolean>
+
 
 
 }

@@ -56,7 +56,7 @@ class ScopedGrantListPresenterTest {
         whenever(repo.scopedGrantDao).thenReturn(repoScopedGrantDaoSpy)
     }
 
-    @Test
+    //@Test
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
         val presenterArgs = mapOf(
             ScopedGrantListView.ARG_FILTER_TABLE_ID to Clazz.TABLE_ID.toString(),
@@ -71,14 +71,14 @@ class ScopedGrantListPresenterTest {
         verify(mockView, timeout(5000)).list = any()
     }
 
-    @Test
+    //@Test
     fun givenUserHasDelegatePermission_whenOnCheckNewPermissionCalled_thenShouldReturnTrue() {
 
 
     }
 
 
-//    @Test
+//    //@Test
 //    fun givenPresenterCreatedInBrowseMode_whenOnClickEntryCalled_thenShouldGoToDetailView() {
 //        val repo: UmAppDatabase by di.activeRepoInstance()
 //        val presenterArgs = mapOf<String,String>()

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission.Companion.SUBMITTER_ENROLLED_BUT_NOT_IN_GROUP
 
 object ClazzAssignmentDaoCommon {
 
@@ -96,6 +97,44 @@ object ClazzAssignmentDaoCommon {
            GROUP BY submitterId, name
             )
         """
+
+    private const val SELECT_PERSONUID_IF_ENROLLED_ELSE_0_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL = """
+        SELECT COALESCE(
+                (SELECT ClazzEnrolment.clazzEnrolmentPersonUid
+                   FROM ClazzEnrolment
+                  WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+                    AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                    AND ClazzEnrolment.clazzEnrolmentClazzUid = 
+                        (SELECT ClazzAssignment.caClazzUid
+                           FROM ClazzAssignment
+                          WHERE ClazzAssignment.caUid = :assignmentUid)
+                  LIMIT 1), 0)
+    """
+
+    /**
+     * Get the submitterUid for the given assignment uid and person uid, if any.
+     * See doc on submitterUid on CourseAssignmentSubmission.casSubmitterUid
+     *
+     * Requires accountPersonUid and assignmentUid as variables
+     */
+    const val SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL = """
+        SELECT CASE
+                    WHEN (SELECT caGroupUid
+                            FROM ClazzAssignment
+                           WHERE caUid = :assignmentUid) = 0
+                         THEN ($SELECT_PERSONUID_IF_ENROLLED_ELSE_0_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)       
+                    ELSE COALESCE(
+                          (SELECT CourseGroupMember.cgmGroupNumber
+                             FROM CourseGroupMember
+                            WHERE ($SELECT_PERSONUID_IF_ENROLLED_ELSE_0_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL) > 0
+                              AND CourseGroupMember.cgmSetUid = 
+                                  (SELECT caGroupUid
+                                     FROM ClazzAssignment
+                                    WHERE caUid = :assignmentUid)
+                              AND CourseGroupMember.cgmPersonUid = :accountPersonUid), $SUBMITTER_ENROLLED_BUT_NOT_IN_GROUP)
+                    END
+    """
+
 
     const val SORT_DEADLINE_ASC = 1
 

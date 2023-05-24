@@ -45,13 +45,13 @@ class SchoolDetailOverviewPresenter(context: Any, arguments: Map<String, String>
              db.schoolDao.findByUidWithHolidayCalendarAsync(entityUid)
          } ?: SchoolWithHolidayCalendar()
 
-        val clazzes = withTimeoutOrNull(2000) {
-            repo.clazzDao.findClazzesWithPermission(
-                    "".toQueryLikeParam(),
-                    loggedInPersonUid, listOf(), 0, 0,
-                    0, systemTimeInMillis(), Role.PERMISSION_CLAZZ_SELECT,  entityUid)
-        }
-        view.schoolClazzes = clazzes
+//        val clazzes = withTimeoutOrNull(2000) {
+//            repo.clazzDao.findClazzesWithPermission(
+//                    "".toQueryLikeParam(),
+//                    loggedInPersonUid, listOf(), 0, 0,
+//                    0, systemTimeInMillis(), Role.PERMISSION_CLAZZ_SELECT,  entityUid)
+//        }
+//        view.schoolClazzes = clazzes
 
         return schoolWithHolidayCalendar
     }

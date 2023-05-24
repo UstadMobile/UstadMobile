@@ -23,20 +23,14 @@ class ClazzDetailOverviewPresenter(
     view: ClazzDetailOverviewView,
     di: DI,
     lifecycleOwner: LifecycleOwner,
-    val contentEntryListItemListener: DefaultContentEntryListItemListener =
-        DefaultContentEntryListItemListener(
-            view = view,
-            context = context,
-            di = di,
-            clazzUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-        )
+
 ) : UstadDetailPresenter<ClazzDetailOverviewView, ClazzWithDisplayDetails>(
     context,
     arguments,
     view,
     di,
     lifecycleOwner
-), ContentEntryListItemListener by contentEntryListItemListener {
+) {
 
 
     var collapsedList: MutableSet<Long> = mutableSetOf()
@@ -56,6 +50,8 @@ class ClazzDetailOverviewPresenter(
     }
 
     override fun onLoadLiveData(repo: UmAppDatabase): LiveData<ClazzWithDisplayDetails?>? {
+        TODO()
+        /* Will be removed and replaced by ViewModel
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         view.scheduleList = repo.scheduleDao.findAllSchedulesByClazzUid(entityUid)
         presenterScope.launch {
@@ -70,6 +66,7 @@ class ClazzDetailOverviewPresenter(
         }
 
         return repo.clazzDao.getClazzWithDisplayDetails(entityUid, systemTimeInMillis())
+         */
     }
 
     override fun handleClickEdit() {
@@ -91,9 +88,11 @@ class ClazzDetailOverviewPresenter(
         }else{
             collapsedList.add(courseBlock.cbUid)
         }
+        /* Will be replaced with viewmodel
         view.courseBlockList = repo.courseBlockDao.findAllCourseBlockByClazzUidLive(
             entityUid, accountManager.activeAccount.personUid,
             collapsedList.toList(), systemTimeInMillis())
+         */
     }
 
     fun handleClickAssignment(assignment: ClazzAssignment){

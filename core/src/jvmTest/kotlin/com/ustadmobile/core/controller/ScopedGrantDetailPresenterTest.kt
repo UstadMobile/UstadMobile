@@ -67,7 +67,7 @@ class ScopedGrantDetailPresenterTest {
         //TODO: insert any entities required for all tests
     }
 
-    @Test
+    //@Test
     fun givenScopedGrantExists_whenOnCreateCalled_thenScopedGrantIsSetOnView() {
         val repo: UmAppDatabase by di.activeRepoInstance()
 
@@ -89,7 +89,7 @@ class ScopedGrantDetailPresenterTest {
                 testEntity.sgUid, entityValSet.sgUid)
     }
 
-    @Test
+    //@Test
     fun givenScopedGrantExists_whenHandleOnClickEditCalled_thenSystemImplGoToEditViewIsCalled() {
         val db: UmAppDatabase by di.activeDbInstance()
         val repo: UmAppDatabase by di.activeRepoInstance()

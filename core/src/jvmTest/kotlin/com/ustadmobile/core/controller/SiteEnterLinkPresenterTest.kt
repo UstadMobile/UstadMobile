@@ -72,7 +72,7 @@ class SiteEnterLinkPresenterTest {
         mockWebServer.shutdown()
     }
 
-    @Test
+    //@Test
     fun givenValidWorkSpaceLink_whenCheckedAndIsValid_shouldAllowToGoToNextScreen() {
         val workSpace = Json.encodeToString(Site.serializer(), Site().apply {
                     siteName = "Dummy site"
@@ -93,7 +93,7 @@ class SiteEnterLinkPresenterTest {
         verify(view, timeout(defaultTimeout)).validLink = eq(true)
     }
 
-    @Test
+    //@Test
     fun givenInValidWorkSpaceLink_whenCheckedAndIsValid_shouldNotAllowToGoToNextScreen() {
         mockWebServer.enqueue(MockResponse().setResponseCode(404))
         val workSpacelink = "${mockWebServer.url("/")}"

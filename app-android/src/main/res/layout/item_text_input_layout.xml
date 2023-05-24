@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+Unfortunately, Jetpack Compose doesn't currently support to/from HTML spans etc.
+
+Used to show read-only HTML text inside the TextView in a way that looks like
+it is inside a TextInputLayout. This can then be tapped to bring the user to a
+full screne rich text html editor.
+
+Used by HtmlClickableTextField function
+-->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="0dp"
+    android:layout_margin="0dp">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/text_input_layout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_margin="@dimen/dimen_16dp"
+        android:hint="@string/name"
+        app:hintEnabled="true">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/text_input_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:cursorVisible="false"
+            tools:text=" "
+            />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+
+        android:id="@+id/text_input_layout_textview"
+        android:layout_marginTop="32dp"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="24dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+        tools:text="Hello\n\nHTML\n\nWorld">
+
+    </TextView>
+
+</FrameLayout>

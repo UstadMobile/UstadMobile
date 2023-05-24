@@ -15,7 +15,6 @@ import com.ustadmobile.mui.components.UstadQuickActionButton
 import csstype.*
 import csstype.Padding
 import csstype.PlaceContent.Companion.end
-import mui.icons.material.*
 import mui.material.*
 import mui.material.Badge
 import mui.material.List
@@ -27,6 +26,23 @@ import react.FC
 import react.Props
 import react.create
 import react.useState
+
+//WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
+import mui.icons.material.Book
+import mui.icons.material.SmartDisplay
+import mui.icons.material.TextSnippet
+import mui.icons.material.Article
+import mui.icons.material.Collections
+import mui.icons.material.TouchApp
+import mui.icons.material.Audiotrack
+import mui.icons.material.CheckCircle
+import mui.icons.material.Cancel
+import mui.icons.material.BookOutlined
+import mui.icons.material.EmojiEvents
+import mui.icons.material.LocationOnOutlined
+import mui.icons.material.CheckBoxOutlined
+import mui.icons.material.Delete
+import mui.icons.material.Download
 
 val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
     ContentEntry.TYPE_EBOOK to Book,
