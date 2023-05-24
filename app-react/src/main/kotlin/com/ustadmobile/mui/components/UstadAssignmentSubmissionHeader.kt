@@ -10,9 +10,13 @@ import csstype.rgba
 import js.core.jso
 import mui.icons.material.Done
 import mui.icons.material.EmojiEvents
+import mui.material.ListItem
+import mui.material.ListItemIcon
+import mui.material.ListItemText
 import mui.material.SvgIconProps
 import mui.material.Typography
 import mui.system.Stack
+import react.create
 import react.*
 import react.dom.html.ReactHTML.span
 
@@ -29,17 +33,17 @@ val UstadAssignmentSubmissionHeader = FC<UstadAssignmentSubmissionHeaderProps> {
 
     Stack{
 
-        var imageId: ReactElement<SvgIconProps>? = null
-        if (props.uiState.submissionStatusIconVisible) {
-            imageId = (ASSIGNMENT_STATUS_MAP[props.uiState.assignmentStatus] ?: Done.create())
-        }
 
-        UstadDetailField {
-            valueText = ReactNode(strings[
-                    SubmissionConstants.STATUS_MAP
-                            [props.uiState.assignmentStatus] ?: MessageID.not_submitted_cap])
-            labelText = strings[MessageID.status]
-            icon = imageId
+        ListItem {
+            ListItemIcon {
+                Done.create()
+                + (ASSIGNMENT_STATUS_MAP[props.uiState.assignmentStatus] ?: Done).create()
+            }
+            ListItemText {
+                primary = ReactNode(strings[SubmissionConstants.STATUS_MAP
+                        [props.uiState.assignmentStatus] ?: MessageID.not_submitted_cap])
+                secondary = ReactNode(strings[MessageID.status])
+            }
         }
 
 

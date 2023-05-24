@@ -8,6 +8,7 @@ import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.port.android.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewFragment
+import com.ustadmobile.port.android.view.clazzassignment.submissionstab.ClazzAssignmentDetailSubmissionsTabFragment
 
 class ClazzAssignmentDetailFragment: UstadMvvmTabsFragment(VIEWNAME_TO_FRAGMENT_MAP) {
 
@@ -29,7 +30,7 @@ class ClazzAssignmentDetailFragment: UstadMvvmTabsFragment(VIEWNAME_TO_FRAGMENT_
             ClazzAssignmentDetailOverviewView.VIEW_NAME to
                 ClazzAssignmentDetailOverviewFragment::class.java,
             ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME to
-                ClazzAssignmentDetailStudentProgressListOverviewFragment::class.java
+                ClazzAssignmentDetailSubmissionsTabFragment::class.java
 
         )
     }
