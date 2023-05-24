@@ -91,16 +91,22 @@ object ClazzAssignmentDaoCommon {
     const val HAS_LEARNINGRECORD_SELECT_PERMISSION_CTE_SQL = """
             HasLearningRecordSelectPermission (hasPermission) AS
             (SELECT EXISTS(
-                    SELECT PrsGrpMbr.groupMemberPersonUid
-                      FROM Clazz
-                           ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-                                 ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}
-                                 ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
-                WHERE Clazz.clazzUid = 
-                      (SELECT ClazzAssignment.caClazzUid
-                         FROM ClazzAssignment
-                        WHERE ClazzAssignment.caUid = :assignmentUid)
-                   AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid))
+                    SELECT ScopedGrant.sgUid
+                      FROM PersonGroupMember
+                           JOIN ScopedGrant
+                                ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+                     WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
+                       AND (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
+                            OR
+                            ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES})
+                       AND (ScopedGrant.sgEntityUid = 
+                            (SELECT ClazzAssignment.caClazzUid
+                               FROM ClazzAssignment
+                              WHERE ClazzAssignment.caUid = :assignmentUid)
+                            OR 
+                            ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+                       AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0)
+            )
         """
 
     /**
@@ -155,6 +161,7 @@ object ClazzAssignmentDaoCommon {
                      ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
           WHERE ($SELECT_GROUPSET_UID_FOR_ASSIGNMENT_UID_SQL) = 0
             AND ClazzEnrolment.clazzEnrolmentClazzUid = (SELECT clazzUid FROM AssignmentClazzUid)
+            AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
             -- either the active user has learnign record select permission on class or is an assigned reviewer for submitter
             AND (
                 (SELECT hasPermission 

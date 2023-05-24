@@ -14,6 +14,7 @@ import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.HAS_LEARNINGRECORD_S
 import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SUBMITTER_LIST_CTE2_SQL
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
 
@@ -191,7 +192,7 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
         assignmentUid: Long,
         accountPersonUid: Long,
         group: String,
-    ): Flow<List<AssignmentSubmitterSummary>>
+    ): PagingSource<Int, AssignmentSubmitterSummary>
 
     /**
      * Used by UpdatePeerReviewAllocationUseCase - which needs to run even before the assignment

@@ -56,4 +56,10 @@ class ClazzAssignmentDetailViewModel(
         }
     }
 
+    companion object {
+
+        const val DEST_NAME = "CourseAssignment"
+
+    }
+
 }

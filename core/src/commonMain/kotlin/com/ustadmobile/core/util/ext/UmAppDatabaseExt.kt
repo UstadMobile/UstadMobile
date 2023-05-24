@@ -52,6 +52,9 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(
 
     clazz.takeIf { it.clazzCode == null }?.clazzCode = randomString(Clazz.CLAZZ_CODE_DEFAULT_LENGTH)
 
+    val generatedUid = clazzDao.insertAsync(clazz)
+    if(clazz.clazzUid != 0L)
+        clazz.clazzUid = generatedUid
 
     //Make the default ScopedGrants
     scopedGrantDao.insertListAsync(listOf(ScopedGrant().apply {
@@ -74,10 +77,6 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(
         sgTableId = Clazz.TABLE_ID
     }))
 
-
-    val generatedUid = clazzDao.insertAsync(clazz)
-    if(clazz.clazzUid != 0L)
-        clazz.clazzUid = generatedUid
 
 }
 
