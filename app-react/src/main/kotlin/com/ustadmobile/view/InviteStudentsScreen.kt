@@ -97,8 +97,8 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
 
             TextField {
                 variant = FormControlVariant.outlined
-                id = "textfield"
-                value = props.uiState.textfield
+                id = "textField"
+                value = props.uiState.textField
                 label = ReactNode(strings[MessageID.phone_or_email])
                 onTextChange = {
                     props.onTextFieldChanged(it)
@@ -106,11 +106,11 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
                 disabled = !props.uiState.fieldsEnabled
             }
 
-            if (props.uiState.textfield.isNotEmpty()){
+            if (props.uiState.addRecipientVisible){
                 Button {
                     fullWidth = true
                     onClick = {
-                        props.onClickAddRecipient(props.uiState.textfield)
+                        props.onClickAddRecipient()
                     }
 
                     + Stack.create {

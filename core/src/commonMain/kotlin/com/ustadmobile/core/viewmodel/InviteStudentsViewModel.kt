@@ -8,12 +8,15 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.util.ext.requireHttpPrefix
 import com.ustadmobile.core.util.ext.requirePostfix
+import com.ustadmobile.core.util.ext.validEmail
 import com.ustadmobile.core.util.ext.verifySite
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
+import com.ustadmobile.door.ext.POSTGRES_SELECT_IN_PATTERN
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.Schedule
@@ -32,11 +35,15 @@ data class InviteStudentsUiState(
 
     val recipients: List<String> = emptyList(),
 
-    val textfield: String = "",
+    val textField: String = "",
 
     val classInvitationLink: String = "",
 
-)
+) {
+    val addRecipientVisible: Boolean
+        get() = textField.validEmail()
+
+}
 
 class InviteStudentsViewModel(
     di: DI,
@@ -62,13 +69,16 @@ class InviteStudentsViewModel(
 
     fun onTextFieldChanged(text: String) {
         _uiState.update { prev ->
-            prev.copy(textfield = text)
+            prev.copy(textField = text)
         }
     }
 
     fun onClickAddRecipient() {
         _uiState.update { prev ->
-            prev.copy(recipients = prev.recipients.plus(prev.textfield))
+            prev.copy(
+                recipients = prev.recipients.plus(prev.textField),
+                textField = ""
+            )
         }
     }
 
