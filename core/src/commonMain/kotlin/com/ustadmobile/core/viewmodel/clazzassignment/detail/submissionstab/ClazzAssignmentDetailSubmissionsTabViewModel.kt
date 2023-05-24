@@ -1,7 +1,10 @@
 package com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab
 
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
@@ -23,9 +26,22 @@ data class ClazzAssignmentDetailSubmissionsTabUiState(
 
     val assignmentSubmitterList: ListPagingSourceFactory<AssignmentSubmitterSummary> = {
         EmptyPagingSource()
-    }
+    },
 
-)
+    val sortOptions: List<SortOrderOption> = DEFAULT_SORT_OPTIONS,
+
+    val sortOption: SortOrderOption = sortOptions.first(),
+
+) {
+    companion object {
+
+        val DEFAULT_SORT_OPTIONS = listOf(
+            SortOrderOption(MessageID.name, ClazzAssignmentDaoCommon.SORT_NAME_ASC, true),
+            SortOrderOption(MessageID.name, ClazzAssignmentDaoCommon.SORT_NAME_DESC, false),
+        )
+
+    }
+}
 
 val AssignmentSubmitterSummary.listItemUiState
     get() = AssignmentSubmitterSummaryUiState(this)
@@ -64,7 +80,9 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
         activeRepo.clazzAssignmentDao.getAssignmentSubmitterSummaryListForAssignment(
             assignmentUid = argEntityUid,
             accountPersonUid = activeUserPersonUid,
-            group = systemImpl.getString(MessageID.group)
+            group = systemImpl.getString(MessageID.group),
+            searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
+            sortOption = _uiState.value.sortOption.flag,
         ).also {
             mLastPagingSource?.invalidate()
             mLastPagingSource = it
@@ -75,6 +93,12 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
         _uiState.update { prev ->
             prev.copy(
                 assignmentSubmitterList = pagingSourceFactory
+            )
+        }
+
+        _appUiState.update {prev ->
+            prev.copy(
+                searchState = createSearchEnabledState()
             )
         }
 
@@ -109,12 +133,21 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
 
     }
 
-    override fun onUpdateSearchResult(searchText: String) {
+    fun onChangeSortOption(sortOrderOption: SortOrderOption) {
+        _uiState.update { prev ->
+            prev.copy(
+                sortOption = sortOrderOption
+            )
+        }
+        mLastPagingSource?.invalidate()
+    }
 
+    override fun onUpdateSearchResult(searchText: String) {
+        mLastPagingSource?.invalidate()
     }
 
     override fun onClickAdd() {
-
+        //Do nothing - there is no add submitter - that is controlled by groups/enrolment
     }
 
     companion object {

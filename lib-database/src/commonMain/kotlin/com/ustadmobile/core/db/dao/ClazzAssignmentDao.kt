@@ -11,6 +11,8 @@ import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.WITH_HAS_LEARNINGREC
 import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL
 import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SUBMITTER_LIST_WITHOUT_ASSIGNMENT_CTE
 import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.HAS_LEARNINGRECORD_SELECT_PERMISSION_CTE_SQL
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SORT_NAME_ASC
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SORT_NAME_DESC
 import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SUBMITTER_LIST_CTE2_SQL
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
@@ -177,8 +179,13 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
                               WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
                                 AND CourseAssignmentSubmission.casSubmitterUid = SubmitterList.submitterId 
                               LIMIT 1)
-                    
-           
+         WHERE (:searchText = '%' OR SubmitterList.name LIKE :searchText)
+      ORDER BY CASE(:sortOption)
+               WHEN $SORT_NAME_ASC THEN SubmitterList.name
+               ELSE '' END ASC,
+               CASE(:sortOption)
+               WHEN $SORT_NAME_DESC THEN SubmitterList.name
+               ELSE '' END DESC
     """)
     /**
      * Used by the ClazzAssignmentDetailSubmissionsListTab - gets a list of the name (e.g. the
@@ -192,6 +199,8 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
         assignmentUid: Long,
         accountPersonUid: Long,
         group: String,
+        searchText: String,
+        sortOption: Int,
     ): PagingSource<Int, AssignmentSubmitterSummary>
 
     /**

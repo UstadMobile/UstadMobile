@@ -3,12 +3,14 @@ package com.ustadmobile.view.clazzassignment.detail.submissionstab
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabViewModel
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTabAndAppBarHeight
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.mui.components.UstadListSortHeader
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
@@ -27,6 +29,8 @@ external interface ClazzAssignmentDetailSubmissionsTabComponentProps : Props {
     var uiState: ClazzAssignmentDetailSubmissionsTabUiState
 
     var onClickSubmitter: (AssignmentSubmitterSummary) -> Unit
+
+    var onChangeSortOption: (SortOrderOption) -> Unit
 
 }
 
@@ -69,6 +73,7 @@ val ClazzAssignmentDetailSubmissionsTabScreen = FC<Props> {
     ClazzAssignmentDetailSubmissionsTabComponent {
         uiState = uiStateVal
         onClickSubmitter = viewModel::onClickSubmitter
+        onChangeSortOption = viewModel::onChangeSortOption
     }
 }
 
@@ -111,6 +116,15 @@ private val ClazzAssignmentDetailSubmissionsTabComponent = FC<ClazzAssignmentDet
                         total = props.uiState.progressSummary?.markedStudents
                         messageID = MessageID.marked
                     }
+                }
+            }
+
+            item(key = "sortitem") {
+                UstadListSortHeader.create {
+                    activeSortOrderOption = props.uiState.sortOption
+                    enabled = true
+                    onClickSort = props.onChangeSortOption
+                    sortOptions = props.uiState.sortOptions
                 }
             }
 

@@ -216,4 +216,8 @@ object ClazzAssignmentDaoCommon {
 
     const val SORT_TITLE_DESC = 4
 
+    const val SORT_NAME_ASC = 5
+
+    const val SORT_NAME_DESC = 6
+
 }
