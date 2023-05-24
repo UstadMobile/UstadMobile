@@ -5,6 +5,7 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.PersonListView
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.entities.USTAD_SCREENS
 import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
@@ -36,7 +37,7 @@ data class RootScreen(
 
 val ROOT_SCREENS = listOf(
     RootScreen(ClazzList2View.VIEW_NAME, MessageID.courses, School),
-    RootScreen(ContentEntryList2View.VIEW_NAME, MessageID.library, LibraryBooks),
+    RootScreen(ContentEntryListViewModel.DEST_NAME, MessageID.library, LibraryBooks),
     RootScreen(PersonListView.VIEW_NAME, MessageID.people, Person)
 )
 

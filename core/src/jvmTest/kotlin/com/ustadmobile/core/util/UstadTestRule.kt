@@ -15,6 +15,7 @@ import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.view.ContainerMounter
@@ -118,6 +119,9 @@ class UstadTestRule(
 
         diModule = DI.Module("UstadTestRule") {
             bind<UstadMobileSystemImpl>() with singleton { systemImplSpy }
+            bind<ApiUrlConfig>() with singleton {
+                ApiUrlConfig(presetApiUrl = null)
+            }
             bind<UstadAccountManager>() with singleton {
                 UstadAccountManager(instance(), Any(), di)
             }

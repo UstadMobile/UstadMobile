@@ -28,13 +28,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
@@ -225,6 +226,11 @@ private fun ClazzListScreen(
                 onClickClazz = onClickClazz
             )
         }
+
+        //Host fragment thinks scroll bar behavior increases available height - need to compensate
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            Spacer(modifier =Modifier.height(176.dp))
+        }
     }
 }
 
@@ -257,46 +263,28 @@ fun ClazzListItem(
                     Text(
                         text = clazz?.clazzName ?: "",
                         style = MaterialTheme.typography.h6,
+                        maxLines = 1,
                     )
                     HtmlText(
                         html = clazz?.clazzDesc ?: "",
-                        htmlMaxLines = 3,
+                        htmlMaxLines = 2,
                     )
                 }
 
-                if(role != null) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Badge,
-                            contentDescription = "",
-                        )
-                        Text(messageIdResource(id = role))
-                    }
-                }
+//                if(role != null) {
+//                    Row(
+//                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+//                        verticalAlignment = Alignment.CenterVertically
+//                    ) {
+//                        Icon(
+//                            imageVector = Icons.Filled.Badge,
+//                            contentDescription = "",
+//                        )
+//                        Text(messageIdResource(id = role))
+//                    }
+//                }
             }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Lens,
-                    contentDescription = "",
-                    tint = colorResource(
-                        id = colorForAttendanceStatus(clazz?.attendanceAverage ?: 0.toFloat())
-                    ),
-                    modifier = Modifier.size(16.dp)
-                )
-                Text(
-                    text = stringResource(
-                        R.string.x_percent_attended,
-                        (clazz?.attendanceAverage ?: 0.toFloat()) * 100
-                    )
-                )
-
-            }
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {

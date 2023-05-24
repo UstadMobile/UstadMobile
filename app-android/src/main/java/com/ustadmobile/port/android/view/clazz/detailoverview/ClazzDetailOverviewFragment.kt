@@ -27,13 +27,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.*
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.*
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
-import com.ustadmobile.core.view.ClazzDetailView
+import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
 import com.ustadmobile.lib.db.entities.*
@@ -43,7 +43,9 @@ import com.ustadmobile.port.android.util.compose.rememberFormattedTime
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
+import com.ustadmobile.port.android.view.clazzassignment.UstadClazzAssignmentListItem
 import com.ustadmobile.port.android.view.composable.*
+import com.ustadmobile.port.android.view.contententry.UstadContentEntryListItem
 
 interface ClazzDetailOverviewEventListener {
     fun onClickClassCode(code: String?)
@@ -58,7 +60,7 @@ interface ClazzDetailOverviewEventListener {
 class ClazzDetailOverviewFragment: UstadBaseMvvmFragment() {
 
     private val viewModel: ClazzDetailOverviewViewModel by ustadViewModels { di, savedStateHandle ->
-        ClazzDetailOverviewViewModel(di, savedStateHandle, ClazzDetailView.VIEW_NAME)
+        ClazzDetailOverviewViewModel(di, savedStateHandle, ClazzDetailViewModel.DEST_NAME)
     }
 
     override fun onCreateView(

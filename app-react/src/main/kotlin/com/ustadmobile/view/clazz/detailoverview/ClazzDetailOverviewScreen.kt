@@ -11,8 +11,8 @@ import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
 import com.ustadmobile.hooks.useFormattedDateRange
-import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
+import com.ustadmobile.hooks.useTabAndAppBarHeight
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.UstadDetailField
@@ -66,7 +66,7 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
         props.uiState.clazz?.clazzTimeZone ?: "UTC"
     )
 
-    val muiAppState = useMuiAppState()
+    val tabAndAppBarHeight = useTabAndAppBarHeight()
 
     val courseBlocksResult = usePagingSource(
         props.uiState.courseBlockList, true, 50
@@ -75,7 +75,7 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
 
     VirtualList{
         style = jso {
-            height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
+            height = "calc(100vh - ${tabAndAppBarHeight}px)".unsafeCast<Height>()
             width = 100.pct
             contain = Contain.strict
             overflowY = Overflow.scroll

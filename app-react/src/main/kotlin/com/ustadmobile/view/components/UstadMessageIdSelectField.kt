@@ -67,7 +67,8 @@ val UstadMessageIdSelectField = FC<MessageIDSelectFieldProps> { props ->
         }
         id = props.id
         enabled = props.enabled
-        error = props.error
+        error = props.error != null
+        helperText = props.error.let { ReactNode(it) }
     }
 }
 

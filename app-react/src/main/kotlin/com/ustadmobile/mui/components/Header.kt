@@ -1,5 +1,7 @@
 package com.ustadmobile.mui.components
 
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.mui.common.Area
 import csstype.*
@@ -8,6 +10,7 @@ import mui.material.*
 import mui.material.styles.TypographyVariant.Companion.h6
 import react.*
 import react.dom.html.ReactHTML.div
+import web.dom.document
 import web.html.HTMLElement
 
 external interface HeaderProps: Props {
@@ -20,6 +23,19 @@ external interface HeaderProps: Props {
 val Header = FC<HeaderProps> { props ->
     val theme by useRequiredContext(ThemeContext)
     val appBarRef = useRef<HTMLElement>(null)
+    val strings = useStringsXml()
+
+    var appBarTitle by useState {
+        strings[MessageID.app_name]
+    }
+
+    val appUiStateTitle = props.appUiState.title
+    useEffect(appUiStateTitle) {
+        if(appUiStateTitle != null && appUiStateTitle != appBarTitle) {
+            appBarTitle = appUiStateTitle
+            document.title = "${strings[MessageID.app_name]} : $appUiStateTitle"
+        }
+    }
 
     useEffect(appBarRef.current?.clientHeight){
         appBarRef.current?.also {
@@ -42,7 +58,7 @@ val Header = FC<HeaderProps> { props ->
                 noWrap = true
                 component = div
 
-                + (props.appUiState.title ?: "Ustad Mobile")
+                + appBarTitle
             }
 
             if(props.appUiState.searchState.visible) {

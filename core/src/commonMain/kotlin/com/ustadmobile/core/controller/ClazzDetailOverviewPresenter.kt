@@ -23,20 +23,14 @@ class ClazzDetailOverviewPresenter(
     view: ClazzDetailOverviewView,
     di: DI,
     lifecycleOwner: LifecycleOwner,
-    val contentEntryListItemListener: DefaultContentEntryListItemListener =
-        DefaultContentEntryListItemListener(
-            view = view,
-            context = context,
-            di = di,
-            clazzUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-        )
+
 ) : UstadDetailPresenter<ClazzDetailOverviewView, ClazzWithDisplayDetails>(
     context,
     arguments,
     view,
     di,
     lifecycleOwner
-), ContentEntryListItemListener by contentEntryListItemListener {
+) {
 
 
     var collapsedList: MutableSet<Long> = mutableSetOf()

@@ -4,7 +4,6 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.atomicfu'
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.android.library'
-    id 'maven-publish'
 }
 
 android {
@@ -16,12 +15,6 @@ android {
             consumerProguardFiles 'proguard-rules.pro'
         }
     }
-    packagingOptions {
-        resources {
-            excludes += ['META-INF/INDEX.LIST', '**/*.kotlin_metadata', 'META-INF/*.kotlin_module', 'licenses/**.TXT']
-        }
-    }
-
 
     defaultConfig {
         minSdkVersion 21
@@ -29,29 +22,28 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    compileOptions {
-        sourceCompatibility = '1.8'
-        targetCompatibility = '1.8'
-    }
-    testOptions {
-        unitTests {
-            returnDefaultValues = true
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/INDEX.LIST', '**/*.kotlin_metadata', 'META-INF/*.kotlin_module', 'licenses/**.TXT']
         }
     }
-    lint {
-        abortOnError false
+
+    compileOptions {
+        sourceCompatibility = '17'
+        targetCompatibility = '17'
     }
+
     namespace 'com.ustadmobile.port.sharedse'
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
         kotlinOptions {
-            jvmTarget = "1.8"
+            jvmTarget = "17"
         }
     }
 }
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility = '17'
+targetCompatibility = '17'
 
 group rootProject.group
 version rootProject.version
@@ -262,18 +254,3 @@ tasks.whenTaskAdded { task ->
 jvmTest.dependsOn(copyTestResources)
 
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId rootProject.group
-            artifactId project.name
-            version rootProject.version
-        }
-    }
-
-    repositories {
-        maven {
-            url rootProject.ext.buildConfigProperties['repo.dir']
-        }
-    }
-}

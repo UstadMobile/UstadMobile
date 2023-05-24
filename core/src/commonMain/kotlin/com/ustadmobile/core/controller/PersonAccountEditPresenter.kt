@@ -10,7 +10,7 @@ import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.PersonAccountEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
+import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.Role
@@ -42,7 +42,7 @@ class PersonAccountEditPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        serverUrl = arguments[ARG_SERVER_URL]?:accountManager.activeAccount.endpointUrl
+        serverUrl = arguments[ARG_API_URL]?:accountManager.activeAccount.endpointUrl
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): PersonWithAccount {

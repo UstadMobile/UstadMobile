@@ -9,13 +9,12 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.util.safeStringify
-import com.ustadmobile.core.view.ContentEntryEdit2View
-import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.BLOCK_REQUIRED
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
+import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ContentEntry
 import io.github.aakira.napier.Napier
@@ -64,23 +63,22 @@ class ContentEntryImportLinkPresenter(
                 val data = response.body<MetadataResult>()
                 view.inProgress = false
 
-                if (arguments[ARG_RESULT_DEST_VIEWNAME] == ContentEntryEdit2View.VIEW_NAME) {
+                if (arguments[ARG_RESULT_DEST_VIEWNAME] == ContentEntryEditViewModel.DEST_NAME) {
                     finishWithResult(safeStringify(di, ListSerializer(MetadataResult.serializer()),
                         listOf(data)))
                 } else {
                     val args = mutableMapOf<String, String>()
-                    args.putEntityAsJson(ContentEntryEdit2View.ARG_IMPORTED_METADATA, json,
+                    args.putEntityAsJson(ContentEntryEditViewModel.ARG_IMPORTED_METADATA, json,
                             MetadataResult.serializer(), data)
                     args.putFromOtherMapIfPresent(arguments, ARG_LEAF)
                     args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
-                    args.putFromOtherMapIfPresent(arguments, BLOCK_REQUIRED)
                     args.putFromOtherMapIfPresent(arguments, UstadView.ARG_CLAZZUID)
 
                     navigateForResult(
                         NavigateForResultOptions(
                             this@ContentEntryImportLinkPresenter,
                             null,
-                            ContentEntryEdit2View.VIEW_NAME,
+                            ContentEntryEditViewModel.DEST_NAME,
                             ContentEntry::class,
                             ContentEntry.serializer(),
                             arguments = args)

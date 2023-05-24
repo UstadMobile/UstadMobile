@@ -1364,6 +1364,10 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     Option for a teacher or admin to create new groups
     -->
     <string name="add_new_groups">Add new groups</string>
+
+    <!-- Option for a teacher to edit a list of groups -->
+    <string name="edit_groups">Edit groups</string>
+
     <!--
     Used to display the number of replies to a post on a discussion board thread. %1$d will be
     replaced with the number of replies (e.g. 0, 1, 2, etc)
@@ -1587,5 +1591,11 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <string name="end_is_before_start">End is before start</string>
 
     <string name="select_person">Select person</string>
+
+    <string name="your_submission">Your submission</string>
+
+    <string name="edit_content">Edit content</string>
+
+    <string name="edit_folder">Edit folder</string>
 
 </resources>

@@ -2,17 +2,19 @@ package com.ustadmobile.core.viewmodel.person.edit
 
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonEditView.Companion.REGISTER_MODE_MINOR
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_UNSET
@@ -91,15 +93,16 @@ class PersonEditViewModel(
     private val registrationModeFlags = savedStateHandle[PersonEditView.ARG_REGISTRATION_MODE]?.toInt()
         ?: PersonEditView.REGISTER_MODE_NONE
 
+    private val apiUrlConfig: ApiUrlConfig by instance()
+
     private val entityUid: Long
         get() = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
-    private val serverUrl = savedStateHandle[UstadView.ARG_SERVER_URL]
-        ?: systemImpl.getAppConfigString(AppConfig.KEY_API_URL, "http://localhost") ?: ""
+    private val serverUrl = savedStateHandle[UstadView.ARG_API_URL]
+        ?: apiUrlConfig.presetApiUrl ?: "http://localhost"
 
-    private val nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: systemImpl.getAppConfigString(
-        AppConfig.KEY_FIRST_DEST, ContentEntryList2View.VIEW_NAME
-    ) ?: ContentEntryList2View.VIEW_NAME
+    private val nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: systemImpl.getDefaultFirstDest()
+        ?: ContentEntryList2View.VIEW_NAME
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
@@ -359,18 +362,18 @@ class PersonEditViewModel(
                         activeDb.personPictureDao.updateAsync(personPictureVal)
                     }
                 }
-            }
 
-            //Handle the following scenario: ClazzMemberList (user selects to add a student to enrol),
-            // PersonList, PersonEdit, EnrolmentEdit
-            val goToOnComplete = savedStateHandle[UstadView.ARG_GO_TO_COMPLETE]
-            if(goToOnComplete != null) {
-                navController.navigate(goToOnComplete, mutableMapOf<String, String>().apply {
-                    putFromSavedStateIfPresent(savedStateHandle, ON_COMPLETE_PASS_ARGS)
-                    put(UstadView.ARG_PERSON_UID, savePerson.personUid.toString())
-                }.toMap())
-            }else {
-                finishWithResult(PersonDetailView.VIEW_NAME, savePerson.personUid, savePerson)
+                //Handle the following scenario: ClazzMemberList (user selects to add a student to enrol),
+                // PersonList, PersonEdit, EnrolmentEdit
+                val goToOnPersonSelected = savedStateHandle[ARG_GO_TO_ON_PERSON_SELECTED]
+
+                if(goToOnPersonSelected != null) {
+                    val args = UMFileUtil.parseURLQueryString(goToOnPersonSelected) +
+                        mapOf(UstadView.ARG_PERSON_UID to savePerson.personUid.toString())
+                    navController.navigate(goToOnPersonSelected.substringBefore("?"), args)
+                }else {
+                    finishWithResult(PersonDetailView.VIEW_NAME, savePerson.personUid, savePerson)
+                }
             }
         }
 
@@ -380,12 +383,6 @@ class PersonEditViewModel(
     companion object {
 
         const val STATE_KEY_PICTURE = "picState"
-
-        val ON_COMPLETE_PASS_ARGS = listOf(
-            UstadView.ARG_CLAZZUID,
-            UstadView.ARG_FILTER_BY_ENROLMENT_ROLE,
-            UstadView.ARG_POPUPTO_ON_FINISH,
-        )
 
     }
 

@@ -272,7 +272,7 @@ fun ImageView.isContentCompleteImage(person: PersonWithSessionsDisplay){
     if(person.resultComplete){
         when(person.resultSuccess){
             StatementEntity.RESULT_SUCCESS -> {
-                setImageResource(R.drawable.exo_ic_check)
+                setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_ic_check)
                 visibility = View.VISIBLE
             }
             StatementEntity.RESULT_FAILURE -> {

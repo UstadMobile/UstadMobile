@@ -170,7 +170,8 @@ class PersonAuthRegisterRouteTest {
             val personAuth2 = db.personAuth2Dao.findByPersonUid(createdAccount.personUid)
             val salt = db.siteDao.getSite()?.authSalt ?: throw IllegalStateException("No auth salt!")
             Assert.assertEquals("PersonAuth2 created with valid hashed password",
-                "secret23".doublePbkdf2Hash(salt, pbkdf2Params).encodeBase64(),
+                "secret23".doublePbkdf2Hash(salt, pbkdf2Params,
+                    Endpoint("https://org.ustadmobile.app/"), serverDi.direct.instance()).encodeBase64(),
                 personAuth2?.pauthAuth)
         }
     }

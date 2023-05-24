@@ -84,7 +84,7 @@
 //
 //
 //    //TODO: Re-enable this test after the DAO checks for this
-//    //@Test
+//    ////@Test
 //    fun givenExistingPersonDetails_whenHandleRegisterCalled_thenShouldNotCreateAccount() {
 //        repo!!.personDao.insert(testPerson!!)
 //        val presenter = Register2Presenter(Any(), args!!, mockView!!)
@@ -95,7 +95,7 @@
 //        verify<Register2View>(mockView, timeout(5000)).setErrorMessageView(expectedErrorMsg)
 //    }
 //
-//    @Test
+//    //@Test
 //    fun givenNewPersonDetails_whenHandleRegisterCalled_thenShouldCreateAnAccountAndGenerateAuthToken() {
 //        val presenter = Register2Presenter(Any(), args!!, mockView!!)
 //        presenter.setClientDb(clientDb!!)
@@ -117,7 +117,7 @@
 //                repo!!.personDao.findByUid(activeAccount.personUid))
 //    }
 //
-//    @Test
+//    //@Test
 //    fun givenServerOffline_whenHandleRegisterCalled_thenShouldCallSetErrorMessage() {
 //        val args = Hashtable<String,String>()
 //        server!!.shutdownNow()

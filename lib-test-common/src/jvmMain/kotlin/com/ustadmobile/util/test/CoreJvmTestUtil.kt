@@ -1,21 +1,7 @@
 package com.ustadmobile.util.test
 
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import java.io.*
 import java.util.*
-import javax.naming.InitialContext
-
-actual fun checkJndiSetup() {
-    if(System.getProperty("java.naming.factory.initial") == null) {
-        val jndiProps = Properties()
-        jndiProps.load(FileReader("src/commonTest/resources/jndi.properties"))
-
-        jndiProps.setProperty("org.osjava.sj.root",
-                File(System.getProperty("user.dir"), "jndi-config").absolutePath)
-
-        //setup the env from the file that we had gradle make
-    }
-}
 
 @Deprecated("Not needed anymore - bug it was designed to address is obsolete")
 fun extractTestResourceToFile(testResPath: String, destFile: File,

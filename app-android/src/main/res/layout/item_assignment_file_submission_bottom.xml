@@ -25,7 +25,7 @@
 
         <variable
             name="eventHandler"
-            type="com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragmentEventHandler" />
+            type="com.ustadmobile.port.android.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewFragmentEventHandler" />
 
 
     </data>

@@ -16,7 +16,6 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
@@ -76,7 +75,6 @@ class TestHarScraper {
             bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
-                InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
                 spy(
                     DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
                         "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite")

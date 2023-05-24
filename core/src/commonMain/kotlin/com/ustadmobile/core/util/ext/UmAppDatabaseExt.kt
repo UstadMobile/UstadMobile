@@ -52,6 +52,9 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(
 
     clazz.takeIf { it.clazzCode == null }?.clazzCode = randomString(Clazz.CLAZZ_CODE_DEFAULT_LENGTH)
 
+    val generatedUid = clazzDao.insertAsync(clazz)
+    if(clazz.clazzUid != 0L)
+        clazz.clazzUid = generatedUid
 
     //Make the default ScopedGrants
     scopedGrantDao.insertListAsync(listOf(ScopedGrant().apply {
@@ -75,7 +78,6 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(
     }))
 
 
-    clazz.clazzUid = clazzDao.insertAsync(clazz)
 }
 
 
@@ -87,9 +89,12 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(
  * @throws IllegalStateException when the person is already in the class
  */
 @Throws(AlreadyEnroledInClassException::class)
-suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Person, clazzUid: Long,
-                                                              role: Int,
-                                                              clazzWithSchool: ClazzWithSchool? = null): ClazzEnrolment {
+suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(
+    personToEnrol: Person,
+    clazzUid: Long,
+    role: Int,
+    clazzWithSchool: ClazzWithSchool? = null
+): ClazzEnrolment {
     val clazzWithSchoolVal = clazzWithSchool ?: clazzDao.getClazzWithSchool(clazzUid)
         ?: throw IllegalArgumentException("Class does not exist")
 

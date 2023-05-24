@@ -13,7 +13,6 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ErrorReport
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -74,7 +73,7 @@ class ErrorReportPresenter(
     }
 
     fun handleClickTakeMeHome() {
-        systemImpl.go(systemImpl.getAppConfigDefaultFirstDest(), mapOf(), context,
+        systemImpl.go(systemImpl.getDefaultFirstDest(), mapOf(), context,
             UstadMobileSystemCommon.UstadGoOptions(
                 arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.ROOT_DEST,
                 false))

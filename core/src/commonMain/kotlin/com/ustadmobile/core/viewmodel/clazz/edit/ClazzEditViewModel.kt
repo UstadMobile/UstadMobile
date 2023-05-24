@@ -1,6 +1,5 @@
 package com.ustadmobile.core.viewmodel.clazz.edit
 
-import com.ustadmobile.core.controller.asCourseBlockWithEntity
 import com.ustadmobile.core.db.dao.deactivateByUids
 import com.ustadmobile.core.domain.courseblockupdate.AddOrUpdateCourseBlockUseCase
 import com.ustadmobile.core.domain.courseblockupdate.UpdateCourseBlocksOnReorderOrCommitUseCase
@@ -13,7 +12,7 @@ import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListViewModel
-import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
+import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -87,6 +86,33 @@ data class ClazzEditUiState(
     }
 
 }
+
+fun CourseBlockWithEntityDb.asCourseBlockWithEntity(
+    topicList: List<DiscussionTopic>,
+    assignmentPeerAllocations: List<PeerReviewerAllocation>
+):
+    CourseBlockWithEntity {
+    val relevantTopics: List<DiscussionTopic> = topicList.filter {
+        it.discussionTopicCourseDiscussionUid == this.courseDiscussion?.courseDiscussionUid
+    }.sortedBy { it.discussionTopicIndex }
+
+    val assignmentAllocations = assignmentPeerAllocations.filter {
+        it.praAssignmentUid == this.assignment?.caUid
+    }
+
+    val courseBlockWithEntity = CourseBlockWithEntity()
+    courseBlockWithEntity.createFromDb(this)
+    courseBlockWithEntity.topics = relevantTopics
+    courseBlockWithEntity.assignmentPeerAllocations = assignmentAllocations
+    courseBlockWithEntity.topicUidsToRemove = listOf()
+    courseBlockWithEntity.assignmentPeerAllocationsToRemove = listOf()
+
+
+    return courseBlockWithEntity
+
+}
+
+
 
 class ClazzEditViewModel(
     di: DI,
@@ -385,6 +411,8 @@ class ClazzEditViewModel(
 
     fun onClickSave() {
         val initEntity = _uiState.value.entity ?: return
+        if(loadingState == LoadingUiState.INDETERMINATE)
+            return
 
         if (initEntity.clazzStartTime == 0L) {
             _uiState.update { prev ->

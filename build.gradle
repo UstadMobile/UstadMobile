@@ -5,6 +5,7 @@ buildscript {
     ext.version_kotlin = '1.8.10'
     ext.version_shadow = "7.1.2"
     ext.atomicfu_version = '0.19.0'
+    ext.version_ktor = "2.2.3"
 
     repositories {
         google()
@@ -15,8 +16,8 @@ buildscript {
 }
 
 plugins {
-    id 'com.android.application' version '7.4.2' apply false
-    id 'com.android.library' version '7.4.2' apply false
+    id 'com.android.application' version '8.0.1' apply false
+    id 'com.android.library' version '8.0.1' apply false
     id 'org.jetbrains.kotlin.android' version "$version_kotlin" apply false
     id 'org.jetbrains.kotlin.plugin.serialization' version "$version_kotlin" apply false
     id 'org.jetbrains.kotlin.plugin.atomicfu' version "$version_kotlin" apply false
@@ -79,8 +80,8 @@ ext {
     version_gradle_buildconfig_plugin = "1.1.7"
     version_ksp = "1.0.9"
     version_jacoco_tool = "0.8.5"
-    version_kotlin_jvmTarget = "1.8"
-    version_kotlinx_serialization = "1.4.1"
+    version_kotlin_jvmTarget = "17"
+    version_kotlinx_serialization = "1.5.0"
     version_xmlutil = "0.84.3"
     version_klock = "2.4.13"
     version_ktor = "2.2.3"
@@ -123,7 +124,7 @@ ext {
     version_napier = "2.6.1"
     version_browser_proxy = "2.1.5"
     version_logback = "1.4.5"
-    version_kodein_di = "7.15.0"
+    version_kodein_di = "7.20.1"
     version_netty_tcnative = "2.0.57.Final"
     version_quartz_scheduler = "2.3.2"
     version_httpcomponents_core5 = "5.2.1"
@@ -147,7 +148,7 @@ ext {
     version_compose_accompanist = "0.28.0"
 
     //As per https://github.com/material-components/material-components-android-compose-theme-adapter/releases
-    version_compose_theme_adapter = "1.2.1"
+    version_compose_theme_adapter = "0.28.0"
 
     //List reordering for compose: https://github.com/aclassen/ComposeReorderable
     version_composereorderable = "0.9.6"

@@ -19,12 +19,15 @@ external interface UstadQuickActionButtonProps : Props {
 
     var icon: react.ReactNode
 
+    var id: String?
+
 }
 
 val UstadQuickActionButton = FC<UstadQuickActionButtonProps> { props ->
     Button {
         variant = ButtonVariant.text
         onClick = props.onClick
+        id = props.id
 
         Stack {
             direction = responsive(StackDirection.column)

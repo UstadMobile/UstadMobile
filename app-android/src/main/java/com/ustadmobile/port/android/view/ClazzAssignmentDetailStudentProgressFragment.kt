@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentDetailOverviewBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzAssignmentDetailStudentProgressPresenter
 import com.ustadmobile.core.controller.FileSubmissionListItemListener
@@ -56,7 +55,6 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    private var mBinding: FragmentClazzAssignmentDetailOverviewBinding? = null
 
     private var submissionsHeaderAdapter: SimpleHeadingRecyclerAdapter? = null
     private var submissionStatusHeaderAdapter: SubmissionStatusHeaderAdapter? = null
@@ -94,9 +92,9 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
-        mBinding = FragmentClazzAssignmentDetailOverviewBinding.inflate(inflater, container, false).also {
-            rootView = it.root
-        }
+//        mBinding = FragmentClazzAssignmentDetailOverviewBinding.inflate(inflater, container, false).also {
+//            rootView = it.root
+//        }
 
 
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
@@ -104,8 +102,8 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         mPresenter = ClazzAssignmentDetailStudentProgressPresenter(requireContext(), arguments.toStringMap(), this,
                 di, viewLifecycleOwner)
 
-        detailMergerRecyclerView =
-                rootView.findViewById(R.id.fragment_clazz_assignment_detail_overview)
+//        detailMergerRecyclerView =
+//                rootView.findViewById(R.id.fragment_clazz_assignment_detail_overview)
 
         // 1
         submissionsHeaderAdapter = SimpleHeadingRecyclerAdapter(getText(R.string.submissions).toString()).apply {
@@ -158,7 +156,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         detailMergerRecyclerView?.adapter = detailMergerRecyclerAdapter
         detailMergerRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
-        return rootView
+        TODO("Will be removed")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -170,7 +168,6 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
     override fun onDestroyView() {
         super.onDestroyView()
         mPresenter = null
-        mBinding = null
         mPresenter = null
         entity = null
 
@@ -185,9 +182,9 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
     }
 
     override fun open(publicComment: Boolean) {
-        val sendCommentSheet = CommentsBottomSheet(publicComment, requireContext().getString(R.string.add_private_comment),
-                accountManager.activeAccount.personUid,  mPresenter?.newPrivateCommentListener)
-        sendCommentSheet.show(childFragmentManager, sendCommentSheet.tag)
+//        val sendCommentSheet = CommentsBottomSheet(publicComment, requireContext().getString(R.string.add_private_comment),
+//                accountManager.activeAccount.personUid,  mPresenter?.newPrivateCommentListener)
+//        sendCommentSheet.show(childFragmentManager, sendCommentSheet.tag)
     }
 
     override var gradeFilterChips: List<ListFilterIdOption>? = null

@@ -16,6 +16,7 @@ import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.flow.Flow
 import kotlin.js.JsName
 
 @Repository
@@ -340,5 +341,13 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsertListAsync(entities: List<CourseBlock>)
+
+    @Query("""
+        SELECT CourseBlock.cbTitle
+          FROM CourseBlock 
+         WHERE CourseBlock.cbEntityUid = :assignmentUid
+           AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+    """)
+    abstract fun getTitleByAssignmentUid(assignmentUid: Long) : Flow<String?>
 
 }

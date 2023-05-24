@@ -30,9 +30,6 @@
  */
 package com.ustadmobile.core.view
 
-import kotlinx.coroutines.Runnable
-import kotlin.js.JsName
-
 enum class GetResultMode {
     EDITORNEW, FROMLIST
 }
@@ -107,7 +104,10 @@ interface UstadView {
 
         const val ARG_SITE = "site"
 
-        const val ARG_SERVER_URL = "serverUrl"
+        /**
+         * The argument is the Api Url (e.g. the endpoint).
+         */
+        const val ARG_API_URL = "serverUrl"
 
         /**
          * Can be used with any Android intent to provide a link to open within the app.
@@ -215,7 +215,6 @@ interface UstadView {
          */
         const val ARG_MAX_DATE_OF_BIRTH = "maxDob"
 
-        @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
         const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
 
     }

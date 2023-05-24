@@ -26,7 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
@@ -45,7 +45,7 @@ import com.ustadmobile.port.android.view.composable.*
 import org.burnoutcrew.reorderable.*
 import java.util.*
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
-import com.ustadmobile.port.android.view.ContentEntryList2Fragment
+import com.ustadmobile.port.android.view.contententry.list.ContentEntryList2Fragment
 import com.ustadmobile.port.android.view.TitleDescBottomSheetOption
 import com.ustadmobile.port.android.view.TitleDescBottomSheetOptionFragment
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
