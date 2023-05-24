@@ -24,15 +24,15 @@ import com.ustadmobile.port.android.view.clazzassignment.detailoverview.ClazzAss
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SubmitterSummaryListItem (
-    submitterSummary: AssignmentSubmitterSummary,
+    submitterSummary: AssignmentSubmitterSummary?,
     onClick: (AssignmentSubmitterSummary) -> Unit = {},
 ){
 
-    val personUiState = submitterSummary.listItemUiState
+    val personUiState = submitterSummary?.listItemUiState
 
     ListItem(
         modifier = Modifier.clickable {
-            onClick(submitterSummary)
+            submitterSummary?.also {  onClick(it) }
         },
         icon = {
             Icon(
@@ -41,9 +41,9 @@ fun SubmitterSummaryListItem (
                 modifier = Modifier.size(40.dp)
             )
         },
-        text = { Text(submitterSummary.name ?: "") },
+        text = { Text(submitterSummary?.name ?: "") },
         secondaryText = {
-            if (personUiState.latestPrivateCommentVisible){
+            if (personUiState?.latestPrivateCommentVisible == true){
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ){
@@ -58,7 +58,7 @@ fun SubmitterSummaryListItem (
         },
         trailing = {
             Row{
-                if (personUiState.fileSubmissionStatusIconVisible){
+                if (personUiState?.fileSubmissionStatusIconVisible == true){
                     Icon(
                         painter = painterResource(
                             ClazzAssignmentDetailOverviewFragment.ASSIGNMENT_STATUS_MAP[
@@ -68,14 +68,14 @@ fun SubmitterSummaryListItem (
                         modifier = Modifier.size(16.dp)
                     )
                 }
-                if (personUiState.submissionStatusTextVisible){
-                    Text(
-                        messageIdResource(
-                        SubmissionConstants.STATUS_MAP[submitterSummary.fileSubmissionStatus]
-                            ?: MessageID.not_submitted_cap
-                    )
-                    )
-                }
+
+                Text(
+                    messageIdResource(
+                    SubmissionConstants.STATUS_MAP[submitterSummary?.fileSubmissionStatus]
+                        ?: MessageID.not_submitted_cap
+                )
+                )
+
             }
 
         }

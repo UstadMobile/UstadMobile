@@ -348,6 +348,6 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
          WHERE CourseBlock.cbEntityUid = :assignmentUid
            AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
     """)
-    abstract suspend fun getTitleByAssignmentUid(assignmentUid: Long) : Flow<String?>
+    abstract fun getTitleByAssignmentUid(assignmentUid: Long) : Flow<String?>
 
 }

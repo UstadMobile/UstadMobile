@@ -192,15 +192,27 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     val uiState: Flow<ClazzAssignmentDetailOverviewUiState> = _uiState.asStateFlow()
 
+    private var lastPrivateCommentsPagingSource: PagingSource<Int, CommentsAndName>? = null
+
     private val privateCommentsPagingSourceFactory: () -> PagingSource<Int, CommentsAndName> = {
         activeRepo.commentsDao.findPrivateCommentsForUserByAssignmentUid(
             accountPersonUid = activeUserPersonUid,
             assignmentUid = entityUidArg,
-        )
+        ).also {
+            lastPrivateCommentsPagingSource?.invalidate()
+            lastPrivateCommentsPagingSource = it
+        }
     }
 
+    private var lastCourseCommentsPagingSourceFactory: PagingSource<Int, CommentsAndName>? = null
+
     private val courseCommentsPagingSourceFactory: () -> PagingSource<Int, CommentsAndName> = {
-        activeRepo.commentsDao.findCourseCommentsByAssignmentUid(assignmentUid = entityUidArg)
+        activeRepo.commentsDao.findCourseCommentsByAssignmentUid(
+            assignmentUid = entityUidArg
+        ).also {
+            lastCourseCommentsPagingSourceFactory?.invalidate()
+            lastCourseCommentsPagingSourceFactory = it
+        }
     }
 
     init {
@@ -377,6 +389,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                 _uiState.update { prev ->
                     prev.copy(newPrivateCommentText = "")
                 }
+                lastPrivateCommentsPagingSource?.invalidate()
             }finally {
                 loadingState = LoadingUiState.NOT_LOADING
             }
@@ -408,6 +421,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                 _uiState.update { prev ->
                     prev.copy(newCourseCommentText = "")
                 }
+                lastCourseCommentsPagingSourceFactory?.invalidate()
             }finally {
                 loadingState = LoadingUiState.NOT_LOADING
             }
