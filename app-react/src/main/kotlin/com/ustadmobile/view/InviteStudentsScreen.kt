@@ -17,6 +17,8 @@ import csstype.LengthType
 import csstype.Padding
 import csstype.px
 import mui.icons.material.Add
+import mui.icons.material.Attachment
+import mui.icons.material.AttachmentRounded
 import mui.material.BaseSize
 import mui.material.Box
 import mui.material.Button
@@ -27,6 +29,9 @@ import mui.material.ChipVariant
 import mui.material.Container
 import mui.material.FormControlVariant
 import mui.material.Icon
+import mui.material.IconColor
+import mui.material.NormalSize
+import mui.material.Size
 import mui.material.TextField
 import mui.material.Typography
 import mui.material.Stack
@@ -91,6 +96,7 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
 
             props.uiState.recipients.forEach { recipient ->
                 Chip {
+                    size = Size.small
                     label = ReactNode(recipient)
                     sx {
                         display = Display.block
@@ -151,7 +157,8 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
                    direction = responsive(StackDirection.row)
 
                    Icon {
-                       + Add.create()
+                       color = IconColor.primary
+                       + AttachmentRounded.create()
                    }
 
                    Typography {
@@ -161,6 +168,7 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
 
                 Stack {
                     direction = responsive(StackDirection.row)
+                    justifyContent = JustifyContent.end
 
                     Button {
                         variant = ButtonVariant.text

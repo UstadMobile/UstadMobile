@@ -1,7 +1,9 @@
-package com.ustadmobile.core
+package com.ustadmobile.core.util
 
-import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 
+
+actual fun isValidPhoneNumber(str: String)
 //actual interface PhoneNumberUtil {
 //    actual fun display(): String {
 //        TODO()

@@ -127,7 +127,7 @@ kotlin {
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
 
 
-                implementation "io.michaelrocks:libphonenumber-android:$version_libphonenumber"
+                implementation "com.googlecode.libphonenumber:libphonenumber:$version_libphonenumber"
 
                 compileOnly "net.sf.kxml:kxml2:$version_kxml"
             }
