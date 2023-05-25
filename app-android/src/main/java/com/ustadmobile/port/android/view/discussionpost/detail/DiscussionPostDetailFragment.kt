@@ -77,6 +77,7 @@ fun DiscussionPostDetailFragmentScreen(viewModel: DiscussionPostDetailViewModel)
 
     DiscussionPostDetailFragmentScreen(
         uiState = uiState,
+        onClickAddReply = viewModel::onClickEditReplyHtml
     )
 
 

@@ -67,6 +67,8 @@ import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetail
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabViewModel
 import com.ustadmobile.view.discussionpost.coursediscussiondetail.CourseDiscussionDetailScreen
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
+import com.ustadmobile.view.discussionpost.detail.DiscussionPostDetailPreview
+import com.ustadmobile.view.discussionpost.detail.DiscussionPostDetailScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -238,9 +240,11 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         CourseDiscussionDetailScreen
     ),
     UstadScreen("DiscussionPostDetailViewDemo", name = "Course Discussion Post Detail",
-        DiscussionPostDetailPreview),
+        DiscussionPostDetailPreview
+    ),
     UstadScreen(DiscussionPostDetailView.VIEW_NAME, name = "Real Course Discussion Post Detail",
-        DiscussionPostDetailScreen),
+        DiscussionPostDetailScreen
+    ),
     UstadScreen(DiscussionPostEditView.VIEW_NAME, name = "Discussion Post Edit",
         DiscussionPostEditScreen),
     UstadScreen("DiscussionPostEditViewDemo", name = "Discussion Post Edit Preview",

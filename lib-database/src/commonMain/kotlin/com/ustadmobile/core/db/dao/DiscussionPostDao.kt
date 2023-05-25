@@ -7,6 +7,7 @@ import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.door.paging.PagingSource
+import com.ustadmobile.lib.db.composites.DiscussionPostAndPosterNames
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
 
@@ -195,5 +196,25 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     """)
     abstract fun findAllRepliesByPostUidAsFlow(entityUid: Long):
             Flow<List<DiscussionPostWithPerson>>
+
+    @Query("""
+        SELECT DiscussionPost.*,
+               Person.firstNames,
+               Person.lastName
+          FROM DiscussionPost
+               LEFT JOIN Person
+                         ON Person.personUid = DiscussionPost.discussionPostStartedPersonUid
+         WHERE DiscussionPost.discussionPostUid = :postUid
+            OR DiscussionPost.discussionPostReplyToPostUid= :postUid
+            -- Always get the starting post first, followed by replies
+      ORDER BY CASE(DiscussionPost.discussionPostReplyToPostUid)
+               WHEN 0 THEN 0
+               ELSE 1 END ASC,
+               DiscussionPost.discussionPostStartDate DESC 
+    """)
+    abstract fun findByPostIdWithAllReplies(
+        postUid: Long
+    ): PagingSource<Int, DiscussionPostAndPosterNames>
+
 
 }

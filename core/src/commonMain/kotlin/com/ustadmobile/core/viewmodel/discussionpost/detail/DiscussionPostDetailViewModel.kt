@@ -1,30 +1,29 @@
 package com.ustadmobile.core.viewmodel.discussionpost.detail
 
-import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.DiscussionPostDetailView
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.door.paging.PagingSource
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.DiscussionPostAndPosterNames
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
-import org.kodein.di.instance
 
 data class DiscussionPostDetailUiState2(
     val discussionPosts: ListPagingSourceFactory<DiscussionPostAndPosterNames> = {
         EmptyPagingSource()
     },
-    val discussionPost: DiscussionPostWithDetails? = null,
-    val replies: List<DiscussionPostWithPerson> = emptyList(),
-    val messageReplyTitle: String? = null,
-    val loggedInPersonUid: Long = 0L
-
+    val replyText: String = "",
+    val loggedInPersonUid: Long = 0L,
+    val fieldsEnabled: Boolean = true,
 ){
 
 }
@@ -35,119 +34,104 @@ class DiscussionPostDetailViewModel(
     destinationName: String = DiscussionPostDetailView.VIEW_NAME,
 ): DetailViewModel<DiscussionPostWithDetails>(di, savedStateHandle, destinationName){
 
+    private val pagingSourceFactory: ListPagingSourceFactory<DiscussionPostAndPosterNames> = {
+        activeRepo.discussionPostDao.findByPostIdWithAllReplies(entityUidArg).also {
+            lastPagingSource?.invalidate()
+            lastPagingSource = it
+        }
+    }
+
+    private var lastPagingSource: PagingSource<Int, DiscussionPostAndPosterNames>? = null
+
     private val _uiState = MutableStateFlow(DiscussionPostDetailUiState2())
 
     val uiState: Flow<DiscussionPostDetailUiState2> = _uiState.asStateFlow()
 
-    private val personUid = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
-
-    var clazzUid: Long = 0L
+    private var saveReplyJob: Job? = null
 
     init {
-        val accountManager: UstadAccountManager by instance()
-
-        val loggedInPersonUid = accountManager.activeSession?.userSession?.usPersonUid ?: 0
-
-        val postUid: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
-
-
-
-        viewModelScope.launch {
-
-            //Get the post
-
-
-            //Update the post and title:
-            _uiState.whenSubscribed {
-                launch {
-
-
-
-                    activeDb.discussionPostDao.findWithDetailsByUidAsFlow(postUid).collect {
-                        post ->
-                        _uiState.update { prev -> prev.copy(discussionPost = post) }
-                        clazzUid = post?.discussionPostClazzUid?:0L
-                    }
-
-                    activeDb.discussionPostDao.getPostTitleAsFlow(postUid).collect{
-
-                        _appUiState.update {
-                            prev ->
-                            prev.copy(
-                                title = it
-                            )
-                        }
-                    }
-                }
-            }
-
-            //Get replies as flow:
-            activeDb.discussionPostDao.findAllRepliesByPostUidAsFlow(
-                postUid
-            ).collect{
-                _uiState.update { prev -> prev.copy(replies = it) }
-            }
-
-
-
+        _uiState.update { prev ->
+            prev.copy(
+                discussionPosts = pagingSourceFactory,
+                loggedInPersonUid = activeUserPersonUid,
+                replyText = savedStateHandle[STATE_KEY_REPLY_TEXT] ?: "",
+            )
         }
 
 
-
-    }
-
-
-    //onClicks:
-
-    fun onClickEntry(entry: DiscussionPostWithPerson){
-        //TODO
-    }
-    fun onClickDeleteEntry(entry: DiscussionPostWithPerson){
-        //TODO
-    }
-
-    fun addMessage(message: String) {
-        val postUid: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
-
         viewModelScope.launch {
-            val updateListNeeded = postUid == 0L
-            val loggedInPersonUid = accountManager.activeAccount.personUid
+            resultReturner.filteredResultFlowForKey(STATE_KEY_REPLY_TEXT).collect { result ->
+                val replyText = result.result as? String ?: return@collect
+                submitReply(replyText)
+            }
+        }
+    }
 
-            activeDb.withDoorTransactionAsync { txRepo ->
+    fun onChangeReplyText(replyText: String) {
+        _uiState.update { prev ->
+            prev.copy(replyText = replyText)
+        }
 
-                txRepo.messageDao.insertAsync(
-                    Message(
-                        loggedInPersonUid,
-                        DiscussionPost.TABLE_ID,
-                        postUid,
-                        message,
-                        clazzUid
-                    )
+        saveReplyJob?.cancel()
+        saveReplyJob = viewModelScope.launch {
+            delay(200)
+            savedStateHandle[STATE_KEY_REPLY_TEXT] = replyText
+        }
+    }
+
+
+    //On Android - take the user to a new fullscreen richtext editor
+    fun onClickEditReplyHtml() {
+        navigateToEditHtml(
+            currentValue = _uiState.value.replyText,
+            resultKey = RESULT_KEY_REPLY_TEXT
+        )
+    }
+
+    fun onClickPostReply() {
+        viewModelScope.launch {
+            submitReply(_uiState.value.replyText)
+        }
+    }
+
+    private suspend fun submitReply(replyText: String) {
+        _uiState.update { prev ->
+            prev.copy(fieldsEnabled = false)
+        }
+        loadingState = LoadingUiState.INDETERMINATE
+
+        try {
+            activeDb.withDoorTransactionAsync {
+                val clazzAndBlockUids = activeDb.courseBlockDao.findCourseBlockAndClazzUidByDiscussionPostUid(
+                    entityUidArg
+                ) ?: return@withDoorTransactionAsync
+
+                activeDb.discussionPostDao.insertAsync(DiscussionPost().apply {
+                    discussionPostStartDate = systemTimeInMillis()
+                    discussionPostReplyToPostUid = entityUidArg
+                    discussionPostMessage = replyText
+                    discussionPostStartedPersonUid = activeUserPersonUid
+                    discussionPostClazzUid = clazzAndBlockUids.clazzUid
+                    discussionPostCourseBlockUid = clazzAndBlockUids.courseBlockUid
+                })
+                onChangeReplyText("")
+            }
+            lastPagingSource?.invalidate()
+        }finally {
+            loadingState = LoadingUiState.NOT_LOADING
+            _uiState.update { prev ->
+                prev.copy(
+                    fieldsEnabled = true,
                 )
-
-            }
-
-            if (updateListNeeded) {
-
-                //Get replies as flow:
-                activeDb.discussionPostDao.findAllRepliesByPostUidAsFlow(
-                    postUid
-                ).collect{
-                    _uiState.update { prev -> prev.copy(replies = it) }
-                }
-
-            }
-
-        }
-    }
-
-    fun updateMessageRead(messageRead: MessageRead){
-        viewModelScope.launch {
-            activeDb.withDoorTransactionAsync { txRepo ->
-                txRepo.messageReadDao.insertAsync(messageRead)
             }
         }
     }
 
+    companion object {
+
+        const val RESULT_KEY_REPLY_TEXT = "replyTextResult"
+
+        const val STATE_KEY_REPLY_TEXT = "replyText"
+    }
 
 }

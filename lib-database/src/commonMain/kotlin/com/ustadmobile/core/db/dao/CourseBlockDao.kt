@@ -15,6 +15,7 @@ import com.ustadmobile.door.annotation.ReplicationRunOnChange
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.paging.PagingSource
+import com.ustadmobile.lib.db.composites.CourseBlockUidAndClazzUid
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
 import kotlin.js.JsName
@@ -357,4 +358,18 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     """)
     abstract fun findByUidAsFlow(courseBlockUid: Long): Flow<CourseBlock?>
 
+
+    @Query("""
+        SELECT COALESCE(CourseBlock.cbUid, 0) AS courseBlockUid,
+               COALESCE(CourseBlock.cbClazzUid, 0) AS clazzUid
+          FROM CourseBlock
+         WHERE CourseBlock.cbUid = 
+               (SELECT DiscussionPost.discussionPostCourseBlockUid 
+                  FROM DiscussionPost
+                 WHERE DiscussionPost.discussionPostUid = :postUid)
+         LIMIT 1
+    """)
+    abstract suspend fun findCourseBlockAndClazzUidByDiscussionPostUid(
+        postUid: Long
+    ): CourseBlockUidAndClazzUid?
 }
