@@ -181,7 +181,7 @@
 
  <fragment
         android:id="@+id/discussion_post_edit_dest"
-        android:name="com.ustadmobile.port.android.view.DiscussionPostEditFragment" />
+        android:name="com.ustadmobile.port.android.view.discussionpost.edit.DiscussionPostEditFragment" />
 
  <fragment
         android:id="@+id/discussion_post_detail_dest"

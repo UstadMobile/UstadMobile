@@ -13,12 +13,14 @@ import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.DiscussionPost
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
@@ -53,8 +55,10 @@ class DiscussionPostEditViewModel (
     init {
         loadingState = LoadingUiState.INDETERMINATE
 
-        val title = if(discussionPostUid == 0L) systemImpl.getString(MessageID.add_new) else systemImpl.getString(
-            MessageID.edit)
+        val title = if(discussionPostUid == 0L)
+            systemImpl.getString(MessageID.add_new_post)
+        else
+            systemImpl.getString(MessageID.edit)
 
         _appUiState.update {
             AppUiState(
@@ -63,7 +67,8 @@ class DiscussionPostEditViewModel (
                     visible = true,
                     text = systemImpl.getString(MessageID.post),
                     onClick = this::onClickSave
-                )
+                ),
+                hideBottomNavigation = true,
             )
         }
 
@@ -121,6 +126,23 @@ class DiscussionPostEditViewModel (
 
         scheduleEntityCommitToSavedState(
             entity = entity,
+            serializer = DiscussionPost.serializer(),
+            commitDelay = 200
+        )
+    }
+
+    //Required because Aztec's effect will freeze the copy of the entity,
+    fun onDiscussionPostBodyChanged(postBody: String) {
+        val entityToSave = _uiState.updateAndGet { prev ->
+            prev.copy(
+                discussionPost = prev.discussionPost?.shallowCopy {
+                    discussionPostMessage = postBody
+                }
+            )
+        }.discussionPost
+
+        scheduleEntityCommitToSavedState(
+            entity = entityToSave,
             serializer = DiscussionPost.serializer(),
             commitDelay = 200
         )

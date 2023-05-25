@@ -28,10 +28,9 @@ import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetail
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.DiscussionPostAndPosterNames
 import com.ustadmobile.lib.db.entities.DiscussionPost
-import com.ustadmobile.lib.db.entities.DiscussionPostWithPerson
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.UstadAddCommentListItem
-import java.util.*
+import com.ustadmobile.port.android.view.composable.UstadListSpacerItem
 
 
 class DiscussionPostDetailFragment: UstadBaseMvvmFragment() {
@@ -121,6 +120,8 @@ private fun DiscussionPostDetailFragmentScreen(
                 )
             }
         }
+
+        UstadListSpacerItem()
     }
 }
 

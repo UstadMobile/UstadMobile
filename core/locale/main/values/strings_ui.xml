@@ -1598,4 +1598,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="edit_folder">Edit folder</string>
 
+    <string name="add_new_post">Add a new post</string>
+
 </resources>

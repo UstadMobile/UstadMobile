@@ -1,8 +1,10 @@
 package com.ustadmobile.core.viewmodel.discussionpost.detail
 
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.DetailViewModel
+import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.ext.withDoorTransactionAsync
@@ -59,7 +61,7 @@ class DiscussionPostDetailViewModel(
 
         viewModelScope.launch {
             launch {
-                resultReturner.filteredResultFlowForKey(STATE_KEY_REPLY_TEXT).collect { result ->
+                resultReturner.filteredResultFlowForKey(RESULT_KEY_REPLY_TEXT).collect { result ->
                     val replyText = result.result as? String ?: return@collect
                     submitReply(replyText)
                 }
@@ -94,7 +96,11 @@ class DiscussionPostDetailViewModel(
     fun onClickEditReplyHtml() {
         navigateToEditHtml(
             currentValue = _uiState.value.replyText,
-            resultKey = RESULT_KEY_REPLY_TEXT
+            resultKey = RESULT_KEY_REPLY_TEXT,
+            extraArgs = mapOf(
+                HtmlEditViewModel.ARG_DONE_STR to systemImpl.getString(MessageID.post),
+                HtmlEditViewModel.ARG_TITLE to systemImpl.getString(MessageID.add_a_reply),
+            )
         )
     }
 

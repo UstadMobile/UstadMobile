@@ -42,6 +42,7 @@ import com.ustadmobile.core.util.ext.htmlToPlainText
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.port.android.view.composable.HtmlText
+import com.ustadmobile.port.android.view.composable.UstadListSpacerItem
 
 class CourseDiscussionDetailFragment: UstadBaseMvvmFragment() {
 
@@ -204,6 +205,8 @@ private fun CourseDiscussionDetailScreen(
                 }
             )
         }
+
+        UstadListSpacerItem()
 
     }
 

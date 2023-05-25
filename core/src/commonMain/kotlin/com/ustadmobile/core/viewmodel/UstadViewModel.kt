@@ -234,7 +234,8 @@ abstract class UstadViewModel(
 
     fun navigateToEditHtml(
         currentValue: String?,
-        resultKey: String
+        resultKey: String,
+        extraArgs: Map<String, String> = emptyMap(),
     ) {
         navController.navigate(
             viewName = HtmlEditViewModel.DEST_NAME,
@@ -242,7 +243,7 @@ abstract class UstadViewModel(
                 HtmlEditViewModel.ARG_HTML to (currentValue ?: ""),
                 UstadView.ARG_RESULT_DEST_KEY to resultKey,
                 UstadView.ARG_RESULT_DEST_VIEWNAME to destinationName,
-            )
+            ) + extraArgs
         )
     }
 

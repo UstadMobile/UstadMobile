@@ -32,6 +32,10 @@ class HtmlEditViewModel(
 
     val uiState: Flow<HtmlEditUiState> = _uiState.asStateFlow()
 
+    private val argDoneButtonLabel = savedStateHandle[ARG_DONE_STR]
+
+    private val argTitle = savedStateHandle[ARG_TITLE]
+
     init {
         val htmlText = savedStateHandle[ARG_HTML] ?: ""
         val htmlPlainText by lazy {
@@ -58,9 +62,10 @@ class HtmlEditViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 hideBottomNavigation = true,
+                title = argTitle,
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
-                    text = systemImpl.getString(MessageID.done),
+                    text = argDoneButtonLabel ?: systemImpl.getString(MessageID.done),
                     enabled = true,
                     onClick = this::onClickDone
                 )
@@ -108,6 +113,10 @@ class HtmlEditViewModel(
         const val ARG_WORD_LIMIT = "wordLimit"
 
         const val ARG_CHAR_LIMIT = "charLimit"
+
+        const val ARG_TITLE = "title"
+
+        const val ARG_DONE_STR = "done"
 
         const val DEST_NAME = "HtmlEdit"
 

@@ -1,18 +1,19 @@
-package com.ustadmobile.port.android.view
+package com.ustadmobile.port.android.view.discussionpost.edit
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,7 +24,10 @@ import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditUiSt
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.lib.db.entities.DiscussionPost
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.port.android.view.composable.UstadTextEditField
+import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
+import com.ustadmobile.port.android.view.composable.AztecEditor
+import com.ustadmobile.port.android.view.composable.UstadErrorText
+import com.ustadmobile.port.android.view.composable.UstadInputFieldLayout
 
 class DiscussionPostEditFragment: UstadBaseMvvmFragment(){
 
@@ -33,7 +37,7 @@ class DiscussionPostEditFragment: UstadBaseMvvmFragment(){
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
         viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
@@ -60,7 +64,8 @@ private fun DiscussionPostEditFragmentScreen(viewModel: DiscussionPostEditViewMo
 
     DiscussionPostEditScreen(
         uiState,
-        onContentChanged = viewModel::onEntityChanged
+        onContentChanged = viewModel::onEntityChanged,
+        onDiscussionPostBodyChanged = viewModel::onDiscussionPostBodyChanged,
     )
 }
 
@@ -88,40 +93,42 @@ fun DiscussionPostEditFragmentPreview(){
 private fun DiscussionPostEditScreen(
     uiState: DiscussionPostEditUiState = DiscussionPostEditUiState(),
     onContentChanged: (DiscussionPost?) -> Unit = {},
+    onDiscussionPostBodyChanged: (String) -> Unit = { },
 ){
-
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
+        modifier = Modifier.fillMaxSize(),
     )  {
-
-        UstadTextEditField(
-            value = uiState.discussionPost?.discussionPostTitle ?: "",
-            label = stringResource(id = R.string.title),
-            error = uiState.discussionPostTitleError,
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onContentChanged(uiState.discussionPost?.shallowCopy {
-                    discussionPostTitle = it
-                })
-            }
-        )
-
-        Spacer(modifier = Modifier.height(15.dp))
-
-        UstadTextEditField(
-            value = uiState.discussionPost?.discussionPostMessage ?: "",
-            label = stringResource(id = R.string.message),
-            error = uiState.discussionPostDescError,
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onContentChanged(uiState.discussionPost?.shallowCopy {
-                    discussionPostMessage = it
+        UstadInputFieldLayout(
+            errorText = uiState.discussionPostTitleError,
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp).fillMaxWidth()
+        ) {
+            OutlinedTextField(
+                value = uiState.discussionPost?.discussionPostTitle ?: "",
+                modifier = Modifier.testTag("discussion_post_title").fillMaxWidth(),
+                label = { Text(stringResource(id = R.string.title)) },
+                isError = uiState.discussionPostTitleError != null,
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onContentChanged(uiState.discussionPost?.shallowCopy {
+                        discussionPostTitle = it
                     })
-            }
+                }
+            )
+        }
+
+        AztecEditor(
+            html = uiState.discussionPost?.discussionPostMessage ?: "",
+            onChange = {
+                onDiscussionPostBodyChanged(it)
+            },
+            modifier = Modifier
+                .weight(1f, fill = true)
+                .fillMaxWidth()
         )
+
+        uiState.discussionPostDescError?.also { descError ->
+            UstadErrorText(error = descError)
+        }
 
     }
 
