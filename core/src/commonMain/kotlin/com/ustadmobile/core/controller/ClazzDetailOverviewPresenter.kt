@@ -120,17 +120,6 @@ class ClazzDetailOverviewPresenter(
                 ScopedGrantListView.ARG_FILTER_ENTITY_UID to (arguments[ARG_ENTITY_UID] ?: "0")))
     }
 
-    /**
-     * Goes to CourseDiscussion's Detail screen not edit
-     */
-    fun handleClickCourseDiscussion(courseDiscussion: CourseDiscussion){
-        ustadNavController?.navigate(
-            CourseDiscussionDetailView.VIEW_NAME,
-            mapOf(ARG_ENTITY_UID to courseDiscussion.courseDiscussionUid.toString(),
-                ARG_CLAZZUID to courseDiscussion.courseDiscussionClazzUid.toString())
-        )
-    }
-
 
     companion object {
         const val SAVEDSTATE_KEY_CLAZZ = "Clazz"

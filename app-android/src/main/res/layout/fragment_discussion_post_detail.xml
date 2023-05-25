@@ -6,9 +6,6 @@
 
     <data>
 
-        <variable
-            name="presenter"
-            type="com.ustadmobile.core.controller.CourseDiscussionDetailPresenter" />
     </data>
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/coordinator_layout"
