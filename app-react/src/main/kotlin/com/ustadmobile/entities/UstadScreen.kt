@@ -70,6 +70,8 @@ import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.Cours
 import com.ustadmobile.view.discussionpost.detail.DiscussionPostDetailPreview
 import com.ustadmobile.view.discussionpost.detail.DiscussionPostDetailScreen
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
+import com.ustadmobile.view.discussionpost.edit.DiscussionPostEditPreview
+import com.ustadmobile.view.discussionpost.edit.DiscussionPostEditScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -247,9 +249,11 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         DiscussionPostDetailScreen
     ),
     UstadScreen(DiscussionPostEditView.VIEW_NAME, name = "Discussion Post Edit",
-        DiscussionPostEditScreen),
+        DiscussionPostEditScreen
+    ),
     UstadScreen("DiscussionPostEditViewDemo", name = "Discussion Post Edit Preview",
-        DiscussionPostEditPreview),
+        DiscussionPostEditPreview
+    ),
     UstadScreen(ClazzAssignmentDetailView.VIEW_NAME, "ClazzAssignmentDetail",
         ClazzAssignmentDetailScreen),
     UstadScreen("ClazzAssignmentDetailOverviewPreview", "ClazzAssignmentDetailOverview",

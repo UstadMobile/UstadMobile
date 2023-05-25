@@ -7,8 +7,9 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.DiscussionPostEditView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
+import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.DiscussionPost
@@ -40,13 +41,14 @@ class DiscussionPostEditViewModel (
                 fieldsEnabled = false,
             )
         )
+
     val uiState: Flow<DiscussionPostEditUiState> = _uiState.asStateFlow()
 
     private val discussionPostUid: Long
         get() = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
-    private val clazzUid: Long
-        get() = savedStateHandle[ARG_CLAZZUID]?.toLong()?:0L
+    private val courseBlockUidArg: Long
+        get() = savedStateHandle[ARG_COURSE_BLOCK_UID]?.toLong() ?: 0L
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
@@ -71,13 +73,15 @@ class DiscussionPostEditViewModel (
                     loadEntity(
                         serializer = DiscussionPost.serializer(),
                         onLoadFromDb = {
-                            it.discussionPostDao.takeIf { discussionPostUid != 0L }
-                                ?.findByUid(discussionPostUid)
+                            it.discussionPostDao.takeIf { entityUidArg != 0L }
+                                ?.findByUid(entityUidArg)
                         },
                         makeDefault = {
                             DiscussionPost().also {
                                 //Any default value does here
-                                it.discussionPostClazzUid = clazzUid
+                                it.discussionPostUid = activeDb.doorPrimaryKeyManager
+                                    .nextIdAsync(DiscussionPost.TABLE_ID)
+                                it.discussionPostCourseBlockUid = courseBlockUidArg
                                 it.discussionPostArchive = false
                                 it.discussionPostStartedPersonUid = accountManager.activeAccount.personUid
                                 it.discussionPostStartDate = systemTimeInMillis()
@@ -149,15 +153,23 @@ class DiscussionPostEditViewModel (
                 && _uiState.value.discussionPostDescError == null){
 
                 activeDb.withDoorTransactionAsync {
-                    if(entityUidArg == 0L){
-                        activeDb.discussionPostDao.insert(post)
-                    }else{
-                        activeDb.discussionPostDao.update(post)
-                    }
+                    post.discussionPostClazzUid = activeDb.courseBlockDao
+                        .findClazzUidByCourseBlockUid(post.discussionPostCourseBlockUid)
+
+                    activeDb.discussionPostDao.upsertAsync(post)
                 }
-                finishWithResult(post)
+
+                finishWithResult(
+                    DiscussionPostDetailViewModel.DEST_NAME, post.discussionPostUid, post
+                )
             }
         }
+
+    }
+
+    companion object {
+
+        const val DEST_NAME = "DiscussionPostEdit"
 
     }
 

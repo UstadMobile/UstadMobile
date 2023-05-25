@@ -1,4 +1,4 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.discussionpost.edit
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
@@ -8,12 +8,19 @@ import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditView
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.util.ext.onTextChange
+import com.ustadmobile.wrappers.quill.ReactQuill
 import csstype.px
 import mui.material.*
+import mui.material.styles.TypographyVariant
 import mui.system.responsive
+import mui.system.sx
 import react.FC
 import react.Props
+import react.ReactNode
+import react.useRequiredContext
 
 external interface DiscussionPostEditProps: Props {
     var uiState: DiscussionPostEditUiState
@@ -24,6 +31,8 @@ val DiscussionPostEditComponent2 = FC<DiscussionPostEditProps> { props ->
 
     val strings = useStringsXml()
 
+    val theme by useRequiredContext(ThemeContext)
+
     Container {
         maxWidth = "lg"
 
@@ -31,12 +40,14 @@ val DiscussionPostEditComponent2 = FC<DiscussionPostEditProps> { props ->
             direction = responsive(mui.material.StackDirection.column)
             spacing = responsive(10.px)
 
-            UstadTextEditField {
+            TextField {
                 value = props.uiState.discussionPost?.discussionPostTitle ?: ""
-                label = strings[MessageID.title]
-                error = props.uiState.discussionPostTitleError
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
+                id = "discussion_post_title"
+                label = ReactNode(strings[MessageID.title])
+                error = props.uiState.discussionPostTitleError != null
+                helperText = props.uiState.discussionPostTitleError?.let { ReactNode(it) }
+                disabled = !props.uiState.fieldsEnabled
+                onTextChange = {
                     props.onPostChanged(
                         props.uiState.discussionPost?.shallowCopy {
                             discussionPostTitle = it
@@ -44,21 +55,29 @@ val DiscussionPostEditComponent2 = FC<DiscussionPostEditProps> { props ->
                 }
             }
 
-            UstadTextEditField {
+            ReactQuill {
                 value = props.uiState.discussionPost?.discussionPostMessage ?: ""
-                label = strings[MessageID.message]
-                error = props.uiState.discussionPostDescError
-                enabled = props.uiState.fieldsEnabled
+                id = "discussion_post_message"
                 onChange = {
                     props.onPostChanged(
                         props.uiState.discussionPost?.shallowCopy {
                             discussionPostMessage = it
-                        })
+                        }
+                    )
                 }
+                readOnly = !props.uiState.fieldsEnabled
             }
 
+            props.uiState.discussionPostDescError?.also { discussionPostError ->
+                Typography {
+                    variant = TypographyVariant.caption
+                    sx {
+                        color = theme.palette.error.main
+                    }
+                    + discussionPostError
+                }
+            }
         }
-
     }
 }
 
@@ -66,19 +85,12 @@ val DiscussionPostEditComponent2 = FC<DiscussionPostEditProps> { props ->
 val DiscussionPostEditPreview = FC<Props> {
     DiscussionPostEditComponent2 {
         uiState = DiscussionPostEditUiState(
-
             discussionPost = DiscussionPost().apply {
                 discussionPostTitle = "How to submit report A?"
-                discussionPostMessage =
-                    "For our sales report, do I upload or share a link? "
+                discussionPostMessage = "For our sales report, do I upload or share a link? "
                 discussionPostVisible = true
-
             },
-
-
-
-
-            )
+        )
     }
 }
 

@@ -57,11 +57,22 @@ class DiscussionPostDetailViewModel(
             )
         }
 
-
         viewModelScope.launch {
-            resultReturner.filteredResultFlowForKey(STATE_KEY_REPLY_TEXT).collect { result ->
-                val replyText = result.result as? String ?: return@collect
-                submitReply(replyText)
+            launch {
+                resultReturner.filteredResultFlowForKey(STATE_KEY_REPLY_TEXT).collect { result ->
+                    val replyText = result.result as? String ?: return@collect
+                    submitReply(replyText)
+                }
+            }
+
+            launch {
+                activeRepo.discussionPostDao.getTitleByUidAsFlow(entityUidArg).collect {postTitle ->
+                    _appUiState.takeIf { it.value.title != postTitle }?.update { prev ->
+                        prev.copy(
+                            title = postTitle
+                        )
+                    }
+                }
             }
         }
     }

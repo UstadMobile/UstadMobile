@@ -1,5 +1,7 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
@@ -129,6 +131,12 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     """)
     abstract suspend fun findByUid(uid: Long): DiscussionPost?
 
+    @Query("""
+        SELECT DiscussionPost.discussionPostTitle
+          FROM DiscussionPost
+         WHERE DiscussionPost.discussionPostUid = :uid
+    """)
+    abstract fun getTitleByUidAsFlow(uid: Long): Flow<String?>
 
     @Query("""
         SELECT DiscussionPost.*,
@@ -216,5 +224,9 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
         postUid: Long
     ): PagingSource<Int, DiscussionPostAndPosterNames>
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertAsync(
+        entity: DiscussionPost
+    )
 
 }

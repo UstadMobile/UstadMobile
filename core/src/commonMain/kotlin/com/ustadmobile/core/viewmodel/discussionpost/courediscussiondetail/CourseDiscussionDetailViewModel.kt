@@ -8,6 +8,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
@@ -80,7 +81,12 @@ class CourseDiscussionDetailViewModel(
     }
 
     override fun onClickAdd() {
-
+        navigateToCreateNew(
+            DiscussionPostEditViewModel.DEST_NAME,
+            extraArgs = mapOf(
+                ARG_COURSE_BLOCK_UID to courseBlockUid.toString(),
+            )
+        )
     }
 
     fun onClickPost(post: DiscussionPostWithDetails) {

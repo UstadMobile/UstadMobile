@@ -372,4 +372,13 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     abstract suspend fun findCourseBlockAndClazzUidByDiscussionPostUid(
         postUid: Long
     ): CourseBlockUidAndClazzUid?
+
+    @Query("""
+        SELECT COALESCE(CourseBlock.cbClazzUid, 0) AS clazzUid
+          FROM CourseBlock
+         WHERE CourseBlock.cbUid = :courseBlockUid
+    """)
+    abstract suspend fun findClazzUidByCourseBlockUid(
+        courseBlockUid: Long
+    ): Long
 }

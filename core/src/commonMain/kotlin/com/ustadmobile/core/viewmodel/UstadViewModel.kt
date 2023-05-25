@@ -326,6 +326,8 @@ abstract class UstadViewModel(
 
         const val ARG_PARENT_UID = "parentUid"
 
+        const val ARG_COURSE_BLOCK_UID = "courseBlockUid"
+
     }
 
 }

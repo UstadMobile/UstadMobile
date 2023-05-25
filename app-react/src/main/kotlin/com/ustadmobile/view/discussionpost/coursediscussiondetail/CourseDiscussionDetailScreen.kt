@@ -68,59 +68,10 @@ val CourseDiscussionDetailComponent = FC<CourseDiscussionDetailProps> { props ->
                 items = infiniteQueryResult,
                 key = { it.discussionPostUid.toString() }
             ) { discussionPostItem ->
-                ListItem.create {
-                    alignItems = ListItemAlignItems.flexStart
-
-                    ListItemButton {
-                        alignItems = ListItemButtonAlignItems.flexStart
-
-                        ListItemIcon {
-                            UstadPersonAvatar {
-                                personUid = discussionPostItem?.discussionPostStartedPersonUid ?: 0L
-                            }
-                        }
-
-                        Stack {
-                            Typography {
-                                variant = TypographyVariant.subtitle1
-                                + "${discussionPostItem?.authorPersonFirstNames} ${discussionPostItem?.authorPersonLastName}"
-                            }
-
-                            Typography {
-                                variant = TypographyVariant.subtitle2
-                                + (discussionPostItem?.discussionPostTitle ?:"")
-                            }
-
-                            Stack {
-                                direction = responsive(StackDirection.row)
-
-                                ChatIcon {
-                                    color = SvgIconColor.action
-                                    fontSize = SvgIconSize.small
-                                }
-
-                                Typography {
-                                    variant = TypographyVariant.body1
-
-                                    +(discussionPostItem?.postLatestMessage ?: discussionPostItem?.discussionPostMessage ?: "")
-                                }
-                            }
-
-                            Stack {
-                                direction = responsive(StackDirection.row)
-
-                                ReplyAllIcon {
-                                    color = SvgIconColor.action
-                                    fontSize = SvgIconSize.small
-                                }
-
-                                Typography {
-                                    variant = TypographyVariant.body2
-                                    +(strings[MessageID.num_replies].replace("%1\$d",
-                                        discussionPostItem?.postRepliesCount?.toString() ?: "0"))
-                                }
-                            }
-                        }
+                CourseDiscussionDetailPostListItem.create {
+                    discussionPost = discussionPostItem
+                    onClick = {
+                        discussionPostItem?.also(props.onClickPost)
                     }
                 }
             }
