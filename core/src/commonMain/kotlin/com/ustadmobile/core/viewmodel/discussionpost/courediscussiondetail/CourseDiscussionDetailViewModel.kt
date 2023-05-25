@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
@@ -83,7 +84,12 @@ class CourseDiscussionDetailViewModel(
     }
 
     fun onClickPost(post: DiscussionPostWithDetails) {
-
+        navController.navigate(
+            viewName = DiscussionPostDetailViewModel.DEST_NAME,
+            args = mapOf(
+                UstadView.ARG_ENTITY_UID to post.discussionPostUid.toString()
+            )
+        )
     }
 
     companion object {

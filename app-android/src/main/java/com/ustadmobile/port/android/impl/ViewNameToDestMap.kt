@@ -19,6 +19,7 @@ import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetail
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 
 @Keep
 class ViewNameToDestMap: DestinationProvider {
@@ -69,7 +70,7 @@ class ViewNameToDestMap: DestinationProvider {
             DiscussionPostEditView.VIEW_NAME to UstadDestination(R.id.discussion_post_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
                     hideBottomNavigation = true),
-            DiscussionPostDetailView.VIEW_NAME to UstadDestination(R.id.discussion_post_detail_dest,
+            DiscussionPostDetailViewModel.DEST_NAME to UstadDestination(R.id.discussion_post_detail_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             CourseTerminologyListView.VIEW_NAME to UstadDestination(R.id.course_terminology_list_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),

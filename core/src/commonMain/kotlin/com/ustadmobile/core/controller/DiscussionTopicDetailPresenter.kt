@@ -2,7 +2,6 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.NavigateForResultOptions
-import com.ustadmobile.core.view.DiscussionPostDetailView
 import com.ustadmobile.core.view.DiscussionPostEditView
 import com.ustadmobile.core.view.DiscussionTopicDetailView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
@@ -75,8 +74,8 @@ class DiscussionTopicDetailPresenter(
         val args = mutableMapOf<String, String>()
         args[ARG_ENTITY_UID] = discussionPost.discussionPostUid.toString()
 
-        ustadNavController?.navigate(
-            DiscussionPostDetailView.VIEW_NAME, args)
+//        ustadNavController?.navigate(
+//            DiscussionPostDetailView.VIEW_NAME, args)
     }
 
     companion object{

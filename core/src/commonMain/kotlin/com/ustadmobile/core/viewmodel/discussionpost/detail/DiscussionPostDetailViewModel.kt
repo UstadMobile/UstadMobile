@@ -2,7 +2,6 @@ package com.ustadmobile.core.viewmodel.discussionpost.detail
 
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.view.DiscussionPostDetailView
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
@@ -31,7 +30,7 @@ data class DiscussionPostDetailUiState2(
 class DiscussionPostDetailViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-    destinationName: String = DiscussionPostDetailView.VIEW_NAME,
+    destinationName: String = DEST_NAME,
 ): DetailViewModel<DiscussionPostWithDetails>(di, savedStateHandle, destinationName){
 
     private val pagingSourceFactory: ListPagingSourceFactory<DiscussionPostAndPosterNames> = {
@@ -132,6 +131,8 @@ class DiscussionPostDetailViewModel(
         const val RESULT_KEY_REPLY_TEXT = "replyTextResult"
 
         const val STATE_KEY_REPLY_TEXT = "replyText"
+
+        const val DEST_NAME = "CourseDiscussionPost"
     }
 
 }

@@ -3,16 +3,13 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
-import com.ustadmobile.core.view.DiscussionPostDetailView
 import com.ustadmobile.core.view.DiscussionPostEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.lifecycle.LifecycleOwner
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.DiscussionPost
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
@@ -75,8 +72,8 @@ class DiscussionPostEditPresenter(context: Any,
                 repo.discussionPostDao.updateAsync(entity)
             }
 
-            onFinish(DiscussionPostDetailView.VIEW_NAME, entity.discussionPostUid, entity,
-                DiscussionPost.serializer())
+//            onFinish(DiscussionPostDetailView.VIEW_NAME, entity.discussionPostUid, entity,
+//                DiscussionPost.serializer())
         }
     }
 
