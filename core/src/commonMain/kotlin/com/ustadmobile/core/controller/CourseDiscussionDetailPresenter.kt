@@ -37,7 +37,7 @@ class CourseDiscussionDetailPresenter(
     override fun onLoadLiveData(repo: UmAppDatabase): LiveData<CourseDiscussion?>? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
-        view.topics = repo.discussionTopicDao.getListOfTopicsByDiscussion(entityUid)
+        //view.topics = repo.discussionTopicDao.getListOfTopicsByDiscussion(entityUid)
 
         return repo.courseDiscussionDao.getCourseDiscussionByUid(entityUid)
     }

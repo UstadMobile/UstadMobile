@@ -17,7 +17,6 @@ val Content = FC<Props> {
         sx {
             gridArea = Area.Content
             padding = 0.px
-            paddingTop = 10.px
         }
 
         NavResultReturnerModule {

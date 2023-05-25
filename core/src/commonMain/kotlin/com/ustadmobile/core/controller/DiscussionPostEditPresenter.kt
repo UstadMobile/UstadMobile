@@ -38,7 +38,7 @@ class DiscussionPostEditPresenter(context: Any,
             db.discussionPostDao.findByUid(entityUid)
         } ?: DiscussionPost().apply{
             discussionPostClazzUid = clazzUid
-            discussionPostDiscussionTopicUid = topicUid
+            //discussionPostDiscussionTopicUid = topicUid
             discussionPostStartedPersonUid = accountManager.activeAccount.personUid
             discussionPostStartDate = systemTimeInMillis()
         }

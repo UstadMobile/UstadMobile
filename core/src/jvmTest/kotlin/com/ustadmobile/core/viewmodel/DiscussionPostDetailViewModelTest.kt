@@ -31,7 +31,7 @@ class DiscussionPostDetailViewModelTest {
                 discussionPostTitle = "Test post"
                 discussionPostMessage = "Test message"
                 discussionPostStartDate = getSystemTimeInMillis()
-                discussionPostDiscussionTopicUid = 42L
+                //discussionPostDiscussionTopicUid = 42L
                 discussionPostVisible = true
                 discussionPostArchive = false
                 discussionPostStartedPersonUid = 42L

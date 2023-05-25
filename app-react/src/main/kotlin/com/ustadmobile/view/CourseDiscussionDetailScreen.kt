@@ -2,14 +2,29 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.CourseDiscussionDetailUiState
+import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.hooks.useMuiAppState
+import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.components.UstadBlankIcon
+import com.ustadmobile.view.components.UstadPersonAvatar
+import com.ustadmobile.view.components.virtuallist.VirtualList
+import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
+import com.ustadmobile.view.components.virtuallist.virtualListContent
+import csstype.Contain
+import csstype.Height
+import csstype.Overflow
+import csstype.pct
 import csstype.px
+import js.core.jso
 import kotlinx.html.currentTimeMillis
-import mui.icons.material.*
 import mui.material.*
+import mui.icons.material.Add as AddIcon
+import mui.icons.material.Chat as ChatIcon
+import mui.icons.material.ReplyAll as ReplyAllIcon
 import mui.material.List
 import mui.material.styles.TypographyVariant
 import mui.system.responsive
@@ -28,112 +43,95 @@ val CourseDiscussionDetailComponent2 = FC<CourseDiscussionDetailProps> { props -
 
     val strings = useStringsXml()
 
+    val infiniteQueryResult = usePagingSource(
+        pagingSourceFactory = props.uiState.posts,
+        placeholdersEnabled = true
+    )
 
+    val muiAppState = useMuiAppState()
 
-    Container {
-
-
-        Typography {
-            variant = TypographyVariant.caption
-            + strings[MessageID.description]
+    VirtualList {
+        style = jso {
+            height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
+            width = 100.pct
+            contain = Contain.strict
+            overflowY = Overflow.scroll
         }
 
-        Typography {
-            + props.uiState.courseBlock?.cbDescription.toString()
-        }
-
-
-        maxWidth = "lg"
-
-        Stack {
-            direction = responsive(mui.material.StackDirection.column)
-            spacing = responsive(10.px)
-
-
-
-
-        }
-
-        Box{
-            sx {
-                height = 10.px
-            }
-        }
-
-        Typography {
-            variant = TypographyVariant.h6
-            + strings[MessageID.posts]
-        }
-
-        //Change that to FAB
-        List {
-            //Add post:
-            ListItem {
-                disablePadding = true
-
-                ListItemButton {
-                    onClick = {
-                        props.onClickAddItem()
-                    }
-
-                    ListItemIcon {
-                        Add {}
-                    }
-
-                    ListItemText {
-                        +(strings[MessageID.post])
-                    }
+        content = virtualListContent {
+            item(key = "description") {
+                UstadRawHtml.create {
+                    html = props.uiState.courseBlock?.cbDescription ?: ""
                 }
             }
-
-            //Posts:
-            props.uiState.posts.forEach { item ->
-                ListItem {
-                    disablePadding = true
-//                    secondaryAction = IconButton.create {
-//                        onClick = {
-//                            props.onDeleteClick(item)
-//                        }
-//                        Delete {}
-//                    }
+            item(key = "divider") {
+                Divider.create()
+            }
+            infiniteQueryPagingItems(
+                items = infiniteQueryResult,
+                key = { it.discussionPostUid.toString() }
+            ) { discussionPostItem ->
+                ListItem.create {
+                    alignItems = ListItemAlignItems.flexStart
 
                     ListItemButton {
+                        alignItems = ListItemButtonAlignItems.flexStart
+
                         ListItemIcon {
-                            UstadBlankIcon { }
+                            UstadPersonAvatar {
+                                personUid = discussionPostItem?.discussionPostStartedPersonUid ?: 0L
+                            }
                         }
 
-                        onClick = {
-                            props.onClickPost(item)
+                        Stack {
+                            Typography {
+                                variant = TypographyVariant.subtitle1
+                                + "${discussionPostItem?.authorPersonFirstNames} ${discussionPostItem?.authorPersonLastName}"
+                            }
+
+                            Typography {
+                                variant = TypographyVariant.subtitle2
+                                + (discussionPostItem?.discussionPostTitle ?:"")
+                            }
+
+                            Stack {
+                                direction = responsive(StackDirection.row)
+
+                                ChatIcon {
+                                    color = SvgIconColor.action
+                                    fontSize = SvgIconSize.small
+                                }
+
+                                Typography {
+                                    variant = TypographyVariant.body1
+
+                                    +(discussionPostItem?.postLatestMessage ?: discussionPostItem?.discussionPostMessage ?: "")
+                                }
+                            }
+
+                            Stack {
+                                direction = responsive(StackDirection.row)
+
+                                ReplyAllIcon {
+                                    color = SvgIconColor.action
+                                    fontSize = SvgIconSize.small
+                                }
+
+                                Typography {
+                                    variant = TypographyVariant.body2
+                                    +(strings[MessageID.num_replies].replace("%1\$d",
+                                        discussionPostItem?.postRepliesCount?.toString() ?: "0"))
+                                }
+                            }
                         }
-
-                        val dateFormatted = useMemo(dependencies = arrayOf(item.postLatestMessageTimestamp)) {
-                            Date(item.postLatestMessageTimestamp ?: 0L).toLocaleDateString()
-                        }
-
-
-
-                        UstadDetailField{
-                            icon = AccountCircle.create()
-                            valueText = ReactNode(item.authorPersonFirstNames + " " + item.authorPersonLastName?: "")
-                            labelText = item.discussionPostTitle?:""
-
-
-                        }
-
-//                        UstadMessageField{
-//                            icon = AccountCircle.create()
-//                            thirdTextIcon = Message.create()
-//                            secondText = item.discussionPostTitle?:""
-//                            firstText = item.authorPersonFirstNames + " " + item.authorPersonLastName?: ""
-//                            thirdText = item.postLatestMessage ?: ""
-//                            fourthText = dateFormatted
-//                            fifthText = item.postRepliesCount.toString() + " replies"
-//                            secondaryActionContent = null
-//
-//                        }
-
                     }
                 }
+            }
+        }
+
+        Container {
+            List {
+                VirtualListOutlet()
             }
         }
     }
@@ -149,32 +147,32 @@ val CourseDiscussionDetailPreview = FC<Props> {
                     "This discussion group is for conversations and posts about Sales and Marketting course"
 
             },
-            posts = listOf(
-                DiscussionPostWithDetails().apply {
-                    discussionPostTitle = "Question about Homework A4"
-                    discussionPostMessage = "How is marketting different from sales?"
-                    discussionPostVisible = true
-                    authorPersonFirstNames = "Ahmed"
-                    authorPersonLastName = "Ismail"
-                    postRepliesCount = 5
-                    postLatestMessageTimestamp = currentTimeMillis()
-                    postLatestMessage = "Its very different, check section 43"
-
-                },
-                DiscussionPostWithDetails().apply {
-                    discussionPostTitle = "Introductions"
-                    discussionPostMessage = "I am your supervisor for this module. Ask me anything."
-                    discussionPostVisible = true
-                    authorPersonFirstNames = "Bilal"
-                    authorPersonLastName = "Zaik"
-                    postRepliesCount = 16
-                    postLatestMessageTimestamp = currentTimeMillis()
-                    postLatestMessage = "Can we have an extra class on TSA?"
-
-                }
-            ),
-
-
-            )
+            posts = {
+                ListPagingSource(listOf(
+                    DiscussionPostWithDetails().apply {
+                        discussionPostTitle = "Can I join after week 2?"
+                        discussionPostUid = 0L
+                        discussionPostMessage = "Iam late to class, CAn I join after?"
+                        discussionPostVisible = true
+                        postRepliesCount = 4
+                        postLatestMessage = "Just make sure you submit a late assignment."
+                        authorPersonFirstNames = "Mike"
+                        authorPersonLastName = "Jones"
+                        discussionPostStartDate = systemTimeInMillis()
+                    },
+                    DiscussionPostWithDetails().apply {
+                        discussionPostTitle = "How to install xlib?"
+                        discussionPostMessage = "Which version of python do I need?"
+                        discussionPostVisible = true
+                        discussionPostUid = 1L
+                        postRepliesCount = 2
+                        postLatestMessage = "I have the same question"
+                        authorPersonFirstNames = "Bodium"
+                        authorPersonLastName = "Carafe"
+                        discussionPostStartDate = systemTimeInMillis()
+                    }
+                ))
+            },
+        )
     }
 }

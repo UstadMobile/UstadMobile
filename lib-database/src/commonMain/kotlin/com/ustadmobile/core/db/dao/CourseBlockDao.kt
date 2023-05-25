@@ -350,4 +350,11 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     """)
     abstract fun getTitleByAssignmentUid(assignmentUid: Long) : Flow<String?>
 
+    @Query("""
+        SELECT CourseBlock.*
+          FROM CourseBlock
+         WHERE CourseBlock.cbUid = :courseBlockUid 
+    """)
+    abstract fun findByUidAsFlow(courseBlockUid: Long): Flow<CourseBlock?>
+
 }

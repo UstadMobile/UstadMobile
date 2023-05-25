@@ -6,6 +6,7 @@ import androidx.room.Update
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
 
@@ -79,43 +80,32 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
 
     @Query("""
         SELECT DiscussionPost.*,
-            Person.firstNames as authorPersonFirstNames,
-            Person.lastName as authorPersonLastName,
-            (
-                SELECT Message.messageText 
-                  FROM Message 
-                 WHERE Message.messageTableId = ${DiscussionPost.TABLE_ID}
-                   AND Message.messageEntityUid = DiscussionPost.discussionPostUid 
-                 ORDER BY messageTimestamp 
-                  DESC LIMIT 1
-            ) AS postLatestMessage,
-            (
-                SELECT COUNT(*) 
-                  FROM Message
-                 WHERE Message.messageTableId = ${DiscussionPost.TABLE_ID}
-                   AND Message.messageEntityUid = DiscussionPost.discussionPostUid 
-                   
-            ) AS postRepliesCount, 
-            
-            (
-                SELECT Message.messageTimestamp 
-                  FROM Message 
-                 WHERE Message.messageTableId = ${DiscussionPost.TABLE_ID}
-                   AND Message.messageEntityUid = DiscussionPost.discussionPostUid 
-                 ORDER BY messageTimestamp 
-                  DESC LIMIT 1
-            ) AS postLatestMessageTimestamp
-             
-          FROM DiscussionPost     
-          LEFT JOIN Person ON Person.personUid = DiscussionPost.discussionPostStartedPersonUid
-         WHERE DiscussionPost.discussionPostDiscussionTopicUid = :discussionTopicUid
-           AND CAST(DiscussionPost.discussionPostVisible AS INTEGER) = 1
-           AND CAST(DiscussionPost.discussionPostArchive AS INTEGER) = 0
-      ORDER BY DiscussionPost.discussionPostStartDate DESC
+               Person.firstNames as authorPersonFirstNames,
+               Person.lastName as authorPersonLastName,
+               MostRecentReply.discussionPostMessage AS postLatestMessage,
+               COALESCE(MostRecentReply.discussionPostStartDate, 0) AS postLatestMessageTimestamp,
+               (SELECT COUNT(*)
+                  FROM DiscussionPost DiscussionPostReplies
+                 WHERE DiscussionPostReplies.discussionPostReplyToPostUid = DiscussionPost.discussionPostUid
+               ) AS postRepliesCount
+          FROM DiscussionPost
+               LEFT JOIN DiscussionPost AS MostRecentReply
+                         ON MostRecentReply.discussionPostUid = 
+                            (SELECT MostRecentReplyInner.discussionPostUid
+                               FROM DiscussionPost AS MostRecentReplyInner
+                              WHERE MostRecentReplyInner.discussionPostReplyToPostUid = DiscussionPost.discussionPostUid
+                           ORDER BY MostRecentReplyInner.discussionPostStartDate DESC
+                              LIMIT 1  
+                            )
+               LEFT JOIN Person 
+                         ON Person.personUid = DiscussionPost.discussionPostStartedPersonUid
+         WHERE DiscussionPost.discussionPostCourseBlockUid = :courseBlockUid
+           AND DiscussionPost.discussionPostReplyToPostUid = 0         
+      ORDER BY DiscussionPost.discussionPostStartDate DESC          
     """)
-    abstract fun getPostsByDiscussionTopic(discussionTopicUid: Long)
-            : DataSourceFactory<Int, DiscussionPostWithDetails>
-
+    abstract fun getTopLevelPostsByCourseBlockUid(
+        courseBlockUid: Long
+    ): PagingSource<Int, DiscussionPostWithDetails>
 
     @Query("""
         SELECT DiscussionPost.discussionPostTitle 
@@ -197,7 +187,7 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
         LEFT JOIN Person
           ON DiscussionPost.discussionPostStartedPersonUid = Person.personUid
         
-       WHERE DiscussionPost.discussionPostDiscussionTopicUid = :entityUid
+       WHERE DiscussionPost.discussionPostReplyToPostUid = :entityUid
               AND CAST(DiscussionPost.discussionPostVisible AS INTEGER) = 1
               AND CAST(DiscussionPost.discussionPostArchive AS INTEGER) = 0
               

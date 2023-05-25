@@ -59,7 +59,7 @@ class DiscussionPostEditViewModel (
                 title = title,
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
-                    text = systemImpl.getString(MessageID.save),
+                    text = systemImpl.getString(MessageID.post),
                     onClick = this::onClickSave
                 )
             )
@@ -73,12 +73,11 @@ class DiscussionPostEditViewModel (
                         onLoadFromDb = {
                             it.discussionPostDao.takeIf { discussionPostUid != 0L }
                                 ?.findByUid(discussionPostUid)
-                                       },
+                        },
                         makeDefault = {
                             DiscussionPost().also {
                                 //Any default value does here
                                 it.discussionPostClazzUid = clazzUid
-                                it.discussionPostDiscussionTopicUid = 0L
                                 it.discussionPostArchive = false
                                 it.discussionPostStartedPersonUid = accountManager.activeAccount.personUid
                                 it.discussionPostStartDate = systemTimeInMillis()
