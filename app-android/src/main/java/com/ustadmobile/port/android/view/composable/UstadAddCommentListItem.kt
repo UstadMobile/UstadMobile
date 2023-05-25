@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.view.clazzassignment
+package com.ustadmobile.port.android.view.composable
 
 import  androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.BorderStroke
@@ -12,12 +12,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.material.MdcTheme
-import com.toughra.ustadmobile.R
-import com.ustadmobile.port.android.view.composable.UstadPersonAvatar
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun AddCommentListItem(
+fun UstadAddCommentListItem(
     text: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -58,7 +56,7 @@ fun AddCommentListItem(
 @Preview
 private fun AddCommentListItemPreview() {
     MdcTheme {
-        AddCommentListItem(
+        UstadAddCommentListItem(
             text = "Add",
             enabled = true,
             personUid = 0,

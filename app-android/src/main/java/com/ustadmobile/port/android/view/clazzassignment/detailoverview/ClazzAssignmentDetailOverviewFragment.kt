@@ -50,7 +50,7 @@ import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
 import com.ustadmobile.port.android.view.clazzassignment.CommentsBottomSheet
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewFragment.Companion.SUBMISSION_POLICY_MAP
-import com.ustadmobile.port.android.view.clazzassignment.AddCommentListItem
+import com.ustadmobile.port.android.view.composable.UstadAddCommentListItem
 import com.ustadmobile.port.android.view.clazzassignment.CommentListItem
 import com.ustadmobile.port.android.view.clazzassignment.UstadAssignmentSubmissionHeader
 import com.ustadmobile.port.android.view.clazzassignment.UstadCourseAssignmentMarkListItem
@@ -319,7 +319,7 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         item {
-            AddCommentListItem(
+            UstadAddCommentListItem(
                 text = stringResource(id = R.string.add_class_comment),
                 enabled = uiState.fieldsEnabled,
                 personUid = 0,
@@ -342,7 +342,7 @@ fun ClazzAssignmentDetailOverviewScreen(
             }
 
             item {
-                AddCommentListItem(
+                UstadAddCommentListItem(
                     text = stringResource(id = R.string.add_private_comment),
                     enabled = uiState.fieldsEnabled,
                     personUid = 0,

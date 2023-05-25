@@ -185,7 +185,7 @@
 
  <fragment
         android:id="@+id/discussion_post_detail_dest"
-        android:name="com.ustadmobile.port.android.view.DiscussionPostDetailFragment" />
+        android:name="com.ustadmobile.port.android.view.discussionpost.detail.DiscussionPostDetailFragment" />
 
     <fragment
         android:id="@+id/clazz_assignment_detail_dest"

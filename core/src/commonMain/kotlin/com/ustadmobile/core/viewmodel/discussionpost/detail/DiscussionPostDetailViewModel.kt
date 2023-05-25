@@ -6,7 +6,10 @@ import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.DiscussionPostDetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.DetailViewModel
+import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
+import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.lib.db.composites.DiscussionPostAndPosterNames
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -14,6 +17,9 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 
 data class DiscussionPostDetailUiState2(
+    val discussionPosts: ListPagingSourceFactory<DiscussionPostAndPosterNames> = {
+        EmptyPagingSource()
+    },
     val discussionPost: DiscussionPostWithDetails? = null,
     val replies: List<DiscussionPostWithPerson> = emptyList(),
     val messageReplyTitle: String? = null,
