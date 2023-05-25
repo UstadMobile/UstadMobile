@@ -17,8 +17,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.viewmodel.DiscussionPostDetailUiState2
-import com.ustadmobile.core.viewmodel.DiscussionPostDetailViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailUiState2
+import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
 import com.ustadmobile.lib.db.entities.DiscussionPostWithPerson
@@ -81,7 +81,9 @@ class DiscussionPostDetailFragment: UstadBaseMvvmFragment() {
 
 @Composable
 fun DiscussionPostDetailFragmentScreen(viewModel: DiscussionPostDetailViewModel){
-    val uiState: DiscussionPostDetailUiState2 by viewModel.uiState.collectAsState(DiscussionPostDetailUiState2())
+    val uiState: DiscussionPostDetailUiState2 by viewModel.uiState.collectAsState(
+        DiscussionPostDetailUiState2()
+    )
 
     val context = LocalContext.current
 

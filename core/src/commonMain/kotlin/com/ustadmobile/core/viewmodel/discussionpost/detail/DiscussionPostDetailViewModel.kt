@@ -1,15 +1,11 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.discussionpost.detail
 
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.appstate.FabUiState
-import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.DiscussionPostDetailView
-import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.*

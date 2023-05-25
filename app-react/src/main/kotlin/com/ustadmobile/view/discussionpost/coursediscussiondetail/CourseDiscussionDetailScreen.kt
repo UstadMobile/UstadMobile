@@ -1,15 +1,19 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.discussionpost.coursediscussiondetail
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
-import com.ustadmobile.core.viewmodel.CourseDiscussionDetailUiState
+import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailUiState
+import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.view.components.UstadBlankIcon
+import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -18,28 +22,21 @@ import csstype.Contain
 import csstype.Height
 import csstype.Overflow
 import csstype.pct
-import csstype.px
 import js.core.jso
-import kotlinx.html.currentTimeMillis
 import mui.material.*
-import mui.icons.material.Add as AddIcon
 import mui.icons.material.Chat as ChatIcon
 import mui.icons.material.ReplyAll as ReplyAllIcon
 import mui.material.List
 import mui.material.styles.TypographyVariant
 import mui.system.responsive
-import mui.system.sx
 import react.*
-import kotlin.js.Date
 
 external interface CourseDiscussionDetailProps: Props {
     var uiState: CourseDiscussionDetailUiState
     var onClickPost: (DiscussionPostWithDetails) -> Unit
-    var onDeleteClick: (DiscussionPostWithDetails) -> Unit
-    var onClickAddItem: () -> Unit
 }
 
-val CourseDiscussionDetailComponent2 = FC<CourseDiscussionDetailProps> { props ->
+val CourseDiscussionDetailComponent = FC<CourseDiscussionDetailProps> { props ->
 
     val strings = useStringsXml()
 
@@ -138,7 +135,7 @@ val CourseDiscussionDetailComponent2 = FC<CourseDiscussionDetailProps> { props -
 }
 
 val CourseDiscussionDetailPreview = FC<Props> {
-    CourseDiscussionDetailComponent2 {
+    CourseDiscussionDetailComponent {
         uiState = CourseDiscussionDetailUiState(
 
             courseBlock = CourseBlock().apply {
@@ -175,4 +172,23 @@ val CourseDiscussionDetailPreview = FC<Props> {
             },
         )
     }
+}
+
+val CourseDiscussionDetailScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        CourseDiscussionDetailViewModel(di, savedStateHandle)
+    }
+
+    val uiStateVal by viewModel.uiState.collectAsState(CourseDiscussionDetailUiState())
+    val appUiState by viewModel.appUiState.collectAsState(AppUiState())
+
+    CourseDiscussionDetailComponent {
+        uiState = uiStateVal
+        onClickPost = viewModel::onClickPost
+    }
+
+    UstadFab {
+        fabState = appUiState.fabState
+    }
+
 }

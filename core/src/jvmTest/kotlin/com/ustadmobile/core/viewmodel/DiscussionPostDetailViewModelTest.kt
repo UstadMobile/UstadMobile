@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.DiscussionPost
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -13,8 +14,6 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import kotlin.time.Duration.Companion.minutes
-
-import org.mockito.kotlin.timeout
 
 class DiscussionPostDetailViewModelTest {
 

@@ -1,5 +1,6 @@
 package com.ustadmobile.view.clazz.detailoverview
 
+import com.ustadmobile.core.util.ext.htmlToPlainText
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.UstadClazzAssignmentListItem
 import com.ustadmobile.view.contententry.UstadContentEntryListItem
@@ -112,7 +113,9 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
 
                     ListItemText {
                         primary = ReactNode(props.courseBlock?.cbTitle ?: "")
-                        secondary = ReactNode(props.courseBlock?.cbDescription ?: "")
+                        secondary = ReactNode(
+                            (props.courseBlock?.cbDescription ?: "").htmlToPlainText()
+                        )
                     }
                 }
             }

@@ -4,8 +4,8 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.appstate.AppUiState
-import com.ustadmobile.core.viewmodel.DiscussionPostDetailUiState2
-import com.ustadmobile.core.viewmodel.DiscussionPostDetailViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailUiState2
+import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.DiscussionPost
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails

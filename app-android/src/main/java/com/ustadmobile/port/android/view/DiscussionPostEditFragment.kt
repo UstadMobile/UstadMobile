@@ -19,8 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.viewmodel.DiscussionPostEditUiState
-import com.ustadmobile.core.viewmodel.DiscussionPostEditViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditUiState
+import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.lib.db.entities.DiscussionPost
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
@@ -54,7 +54,9 @@ class DiscussionPostEditFragment: UstadBaseMvvmFragment(){
 
 @Composable
 private fun DiscussionPostEditFragmentScreen(viewModel: DiscussionPostEditViewModel) {
-    val uiState: DiscussionPostEditUiState by viewModel.uiState.collectAsState(DiscussionPostEditUiState())
+    val uiState: DiscussionPostEditUiState by viewModel.uiState.collectAsState(
+        DiscussionPostEditUiState()
+    )
 
     DiscussionPostEditScreen(
         uiState,

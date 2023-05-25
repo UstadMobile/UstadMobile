@@ -3,8 +3,8 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.viewmodel.DiscussionPostEditUiState
-import com.ustadmobile.core.viewmodel.DiscussionPostEditViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditUiState
+import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
