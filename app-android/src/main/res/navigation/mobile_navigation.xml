@@ -177,7 +177,7 @@
 
     <fragment
         android:id="@+id/course_discussion_detail_dest"
-        android:name="com.ustadmobile.port.android.view.CourseDiscussionDetailFragment" />
+        android:name="com.ustadmobile.port.android.view.discussionpost.coursediscussiondetail.CourseDiscussionDetailFragment" />
 
  <fragment
         android:id="@+id/discussion_post_edit_dest"

@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailUiState2
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
@@ -39,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
@@ -195,16 +195,16 @@ private fun DiscussionPostDetailFragmentScreen(
                     border = BorderStroke(0.dp, Color.Transparent),
                     enabled = enabled,
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = colorResource(id = R.color.grey_a_40),
+                        //backgroundColor = colorResource(id = R.color.grey_a_40),
                     )
                 ) {
                     Text(
                         text = stringResource(id = R.string.add),
                         textAlign = TextAlign.Start,
                         modifier = Modifier,
-                        color = contentColorFor(
-                            colorResource(id = R.color.grey_a_40)
-                        )
+//                        color = contentColorFor(
+//                            //colorResource(id = R.color.grey_a_40)
+//                        )
                     )
                 }
             }
@@ -294,7 +294,6 @@ fun DiscussionPostDetailScreenFragmentPreview(){
             authorPersonLastName = "Iqbaal"
             discussionPostVisible = true
             discussionPostStartedPersonUid = 1
-            discussionPostDiscussionTopicUid = 0
             discussionPostUid = 1
             discussionPostMessage = "Hi everyone, cna I get some help in how to submit the assignemnt?"
             discussionPostStartDate = systemTimeInMillis()
@@ -304,7 +303,6 @@ fun DiscussionPostDetailScreenFragmentPreview(){
             DiscussionPostWithPerson().apply {
 
                 discussionPostMessage = "I have the same question on Android"
-                discussionPostDiscussionTopicUid = 1
                 discussionPostStartedPersonUid = 2
                 replyPerson = Person().apply {
                     firstNames = "Chahid"
@@ -315,7 +313,6 @@ fun DiscussionPostDetailScreenFragmentPreview(){
             },
             DiscussionPostWithPerson().apply {
                 discussionPostMessage = "I think it is briefly explained in section 42"
-                discussionPostDiscussionTopicUid = 1
                 discussionPostStartedPersonUid = 3
                 replyPerson = Person().apply {
                     firstNames = "Daanesh"
@@ -327,7 +324,6 @@ fun DiscussionPostDetailScreenFragmentPreview(){
 
             DiscussionPostWithPerson().apply {
                 discussionPostMessage = "Thanks everyone, I got it working now on Android!"
-                discussionPostDiscussionTopicUid = 1
                 discussionPostStartedPersonUid = 1
                 replyPerson = Person().apply {
                     firstNames = "Mohammed"

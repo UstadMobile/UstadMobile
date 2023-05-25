@@ -33,6 +33,7 @@ import com.toughra.ustadmobile.databinding.*
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
+import com.ustadmobile.core.util.ext.htmlToPlainText
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
@@ -275,6 +276,10 @@ fun CourseBlockListItem(
     onClick: () -> Unit,
 ){
 
+    val descriptionPlainText = remember(courseBlock?.cbDescription) {
+        courseBlock?.cbDescription?.htmlToPlainText() ?: ""
+    }
+
     when(courseBlock?.cbType ?: 0){
         CourseBlock.BLOCK_MODULE_TYPE  -> {
 
@@ -305,7 +310,12 @@ fun CourseBlockListItem(
                     .paddingCourseBlockIndent(courseBlock?.cbIndentLevel ?: 0)
                     .clickable(onClick = onClick),
                 text = { Text(courseBlock?.cbTitle ?: "") },
-                secondaryText = { Text(courseBlock?.cbDescription ?: "") },
+                secondaryText = {
+                    Text(
+                        text = descriptionPlainText,
+                        maxLines = 1,
+                    )
+                },
                 icon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_forum_24),
@@ -315,17 +325,17 @@ fun CourseBlockListItem(
             )
         }
         CourseBlock.BLOCK_TEXT_TYPE -> {
-//            val cbDescription = if(courseBlock.cbDescription != null)
-//                Html.fromHtml(courseBlock.cbDescription, HtmlCompat.FROM_HTML_MODE_LEGACY)
-//            else
-//                SpannedString.valueOf("")
-
             ListItem(
                 modifier = Modifier
                     .paddingCourseBlockIndent(courseBlock?.cbIndentLevel ?: 0)
                     .clickable(onClick = onClick),
                 text = { Text(courseBlock?.cbTitle ?: "") },
-                secondaryText = {  },
+                secondaryText = {
+                    Text(
+                        text = descriptionPlainText,
+                        maxLines = 1,
+                    )
+                },
                 icon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_title_24),
