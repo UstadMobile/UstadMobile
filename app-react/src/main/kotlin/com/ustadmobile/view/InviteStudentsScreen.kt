@@ -10,9 +10,15 @@ import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadPersonAvatar
 import csstype.JustifyContent
 import com.ustadmobile.mui.common.justifyContent
+import csstype.Display
+import csstype.Flex
+import csstype.FlexShrink
+import csstype.LengthType
 import csstype.Padding
 import csstype.px
 import mui.icons.material.Add
+import mui.material.BaseSize
+import mui.material.Box
 import mui.material.Button
 import mui.material.ButtonVariant
 import mui.material.Card
@@ -86,6 +92,9 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
             props.uiState.recipients.forEach { recipient ->
                 Chip {
                     label = ReactNode(recipient)
+                    sx {
+                        display = Display.block
+                    }
                     variant = ChipVariant.outlined
                     onClick = {}
                     onDelete = {
@@ -93,7 +102,6 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
                     }
                 }
             }
-
 
             TextField {
                 variant = FormControlVariant.outlined
