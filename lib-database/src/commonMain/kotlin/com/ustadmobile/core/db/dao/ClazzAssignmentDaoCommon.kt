@@ -29,10 +29,20 @@ object ClazzAssignmentDaoCommon {
     //language=RoomSql
     const val SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL = """
         SELECT CASE
+                    -- When assignment is individual then the submitter uid is the personuid if they are enrolled in the course otherwise zero 
                     WHEN (SELECT caGroupUid
                             FROM ClazzAssignment
                            WHERE caUid = :assignmentUid) = 0
-                         THEN ($SELECT_PERSONUID_IF_ENROLLED_ELSE_0_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)       
+                         THEN ($SELECT_PERSONUID_IF_ENROLLED_ELSE_0_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
+                    -- When assignment is by groups but the active user is not an enrolled student then the submitter uid is zero     
+                    WHEN (SELECT caGroupUid
+                            FROM ClazzAssignment
+                           WHERE caUid = :assignmentUid) != 0
+                          AND ($SELECT_PERSONUID_IF_ENROLLED_ELSE_0_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL) = 0
+                          THEN 0
+                    -- When assignment is by groups and the person is an enrolled student the submitter uid is the 
+                    -- group that they are assigned to. If they are not assigned to a group but are enrolled
+                    -- then we submitter uid = SUBMITTER_ENROLLED_BUT_NOT_IN_GROUP
                     ELSE COALESCE(
                           (SELECT CourseGroupMember.cgmGroupNumber
                              FROM CourseGroupMember
@@ -41,7 +51,8 @@ object ClazzAssignmentDaoCommon {
                                   (SELECT caGroupUid
                                      FROM ClazzAssignment
                                     WHERE caUid = :assignmentUid)
-                              AND CourseGroupMember.cgmPersonUid = :accountPersonUid), $SUBMITTER_ENROLLED_BUT_NOT_IN_GROUP)
+                              AND CourseGroupMember.cgmPersonUid = :accountPersonUid
+                            LIMIT 1), $SUBMITTER_ENROLLED_BUT_NOT_IN_GROUP)
                     END
     """
 

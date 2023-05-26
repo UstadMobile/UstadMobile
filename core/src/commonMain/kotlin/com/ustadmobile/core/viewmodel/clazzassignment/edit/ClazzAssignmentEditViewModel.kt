@@ -16,14 +16,15 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.CourseBlockViewModelConstants
+import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyWithEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.encodeToString
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -38,8 +39,6 @@ data class ClazzAssignmentEditUiState(
     val groupSetEnabled: Boolean = true,
 
     val reviewerCountError: String? = null,
-
-    val groupSet: CourseGroupSet? = null,
 
     val timeZone: String? = null,
 
@@ -129,7 +128,7 @@ class ClazzAssignmentEditViewModel(
                     _uiState.update { prev ->
                         prev.copy(
                             entity = it,
-                            courseBlockEditUiState = prev.courseBlockEditUiState.copy(courseBlock = it)
+                            courseBlockEditUiState = prev.courseBlockEditUiState.copy(courseBlock = it),
                         )
                     }
                 }
@@ -166,6 +165,27 @@ class ClazzAssignmentEditViewModel(
                     onCourseBlockChanged(_uiState.value.entity?.shallowCopyWithEntity {
                         cbDescription = descriptionHtml
                     })
+                }
+            }
+
+            launch {
+                navResultReturner.filteredResultFlowForKey(RESULT_KEY_GROUPSET).collect {
+                    val groupSet = it.result as? CourseGroupSet ?: return@collect
+
+                    val newState = _uiState.updateAndGet { prev ->
+                        prev.copy(
+                            entity = prev.entity?.shallowCopyWithEntity {
+                               assignment?.caGroupUid = groupSet.cgsUid
+                               assignmentCourseGroupSetName = groupSet.takeIf { it.cgsUid != 0L }?.cgsName
+                            }
+                        )
+                    }
+
+                    scheduleEntityCommitToSavedState(
+                        entity = newState.entity,
+                        serializer = CourseBlockWithEntity.serializer(),
+                        commitDelay = 200,
+                    )
                 }
             }
         }
@@ -216,6 +236,7 @@ class ClazzAssignmentEditViewModel(
             prev.copy(
                 entity = entity?.asCourseBlockWithEntity()?.also {
                     it.assignment = prev.entity?.assignment
+                    it.assignmentCourseGroupSetName = prev.entity?.assignmentCourseGroupSetName
                 },
                 courseBlockEditUiState = prev.courseBlockEditUiState.copy(
                     courseBlock = entity,
@@ -269,7 +290,16 @@ class ClazzAssignmentEditViewModel(
     }
 
     fun onClickSubmissionType() {
-        //Go to list of groups with option to select individual
+        navigateForResult(
+            nextViewName = CourseGroupSetListViewModel.DEST_NAME,
+            key = RESULT_KEY_GROUPSET,
+            currentValue = null,
+            serializer = String.serializer(),
+            args = mapOf(
+                CourseGroupSetListViewModel.ARG_SHOW_INDIVIDUAL_OPTION to true.toString(),
+                UstadView.ARG_CLAZZUID to (_uiState.value.entity?.assignment?.caClazzUid ?: 0).toString()
+            ),
+        )
     }
 
     fun onClickAssignReviewers() {
@@ -390,5 +420,11 @@ class ClazzAssignmentEditViewModel(
 
             finishWithResult(_uiState.value.entity)
         }
+    }
+
+    companion object {
+
+        const val RESULT_KEY_GROUPSET = "groupSet"
+
     }
 }

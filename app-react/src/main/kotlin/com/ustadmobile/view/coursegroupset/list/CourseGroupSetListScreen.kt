@@ -1,5 +1,6 @@
 package com.ustadmobile.view.coursegroupset.list
 
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -12,6 +13,7 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.mui.components.UstadListSortHeader
 import com.ustadmobile.view.components.UstadFab
+import com.ustadmobile.mui.components.UstadAddListItem
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
@@ -38,11 +40,14 @@ external interface CourseGroupSetListComponentProps: Props {
 
     var onChangeSortOption: (SortOrderOption) -> Unit
 
+    var onClickAddItem: () -> Unit
+
 }
 
 val CourseGroupSetListComponent = FC<CourseGroupSetListComponentProps> { props ->
 
     val tabAndAppBarHeight = useTabAndAppBarHeight()
+    val strings = useStringsXml()
 
     val infiniteQueryResult = usePagingSource(
         pagingSourceFactory = props.uiState.courseGroupSets,
@@ -58,7 +63,7 @@ val CourseGroupSetListComponent = FC<CourseGroupSetListComponentProps> { props -
         }
 
         content = virtualListContent {
-            item {
+            item(key = "sortheader") {
                 UstadListSortHeader.create {
                     activeSortOrderOption = props.uiState.sortOption
                     enabled = true
@@ -67,20 +72,31 @@ val CourseGroupSetListComponent = FC<CourseGroupSetListComponentProps> { props -
                 }
             }
 
+            props.uiState.individualSubmissionOption?.also { individualOption ->
+                item(key = "individual_submission_opt") {
+                    CourseGroupSetListItem.create {
+                        courseGroupSet = individualOption
+                        onClick = props.onClickEntry
+                    }
+                }
+            }
+
+            if(props.uiState.showAddItem) {
+                item(key = "new") {
+                    UstadAddListItem.create {
+                        text = strings[MessageID.add_new_groups]
+                        onClickAdd = props.onClickAddItem
+                    }
+                }
+            }
+
             infiniteQueryPagingItems(
                 items = infiniteQueryResult,
                 key = { it.cgsUid.toString() }
-            ) { courseGroupSet ->
-                ListItem.create {
-                    ListItemButton {
-                        onClick = {
-                            courseGroupSet?.also(props.onClickEntry)
-                        }
-
-                        ListItemText {
-                            primary = ReactNode(courseGroupSet?.cgsName ?: "")
-                        }
-                    }
+            ) { courseGroupSetItem ->
+                CourseGroupSetListItem.create {
+                    courseGroupSet = courseGroupSetItem
+                    onClick = props.onClickEntry
                 }
             }
         }
@@ -91,6 +107,25 @@ val CourseGroupSetListComponent = FC<CourseGroupSetListComponentProps> { props -
             }
         }
 
+    }
+}
+
+external interface CourseGroupSetListItemProps : Props {
+    var courseGroupSet: CourseGroupSet?
+    var onClick: (CourseGroupSet) -> Unit
+}
+
+private val CourseGroupSetListItem = FC<CourseGroupSetListItemProps> { props ->
+    ListItem {
+        ListItemButton {
+            onClick = {
+                props.courseGroupSet?.also(props.onClick)
+            }
+
+            ListItemText {
+                primary = ReactNode(props.courseGroupSet?.cgsName ?: "")
+            }
+        }
     }
 }
 
@@ -106,6 +141,7 @@ val CourseGroupSetListScreen = FC<Props> {
         uiState = uiStateVal
         onClickEntry = viewModel::onClickEntry
         onChangeSortOption = viewModel::onSortOptionChanged
+        onClickAddItem = viewModel::onClickAdd
     }
 
     UstadFab {

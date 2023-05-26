@@ -95,25 +95,29 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
 
 
     @Query("""
-        SELECT * 
+        SELECT CourseBlock.*, assignment.*, courseDiscussion.*, entry.*, Language.*,
+               (SELECT CourseGroupSet.cgsName
+                  FROM CourseGroupSet
+                 WHERE CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                   AND assignment.caGroupUid != 0
+                   AND CourseGroupSet.cgsUid = assignment.caGroupUid) AS assignmentCourseGroupSetName
           FROM CourseBlock 
                LEFT JOIN ClazzAssignment as assignment
-               ON assignment.caUid = CourseBlock.cbEntityUid
-               AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                         ON assignment.caUid = CourseBlock.cbEntityUid
+                            AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
                LEFT JOIN CourseDiscussion as courseDiscussion
-               ON CourseDiscussion.courseDiscussionUid = CourseBlock.cbEntityUid
-               AND CourseBlock.cbType = ${CourseBlock.BLOCK_DISCUSSION_TYPE}
+                         ON CourseDiscussion.courseDiscussionUid = CourseBlock.cbEntityUid
+                            AND CourseBlock.cbType = ${CourseBlock.BLOCK_DISCUSSION_TYPE}
                LEFT JOIN ContentEntry as entry
-               ON entry.contentEntryUid = CourseBlock.cbEntityUid
-               AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
-               
+                         ON entry.contentEntryUid = CourseBlock.cbEntityUid
+                            AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
                LEFT JOIN Language
-               ON Language.langUid = entry.primaryLanguageUid
-                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+                         ON Language.langUid = entry.primaryLanguageUid
+                            AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
                
-         WHERE cbClazzUid = :clazzUid
-           AND cbActive
-      ORDER BY cbIndex
+         WHERE CourseBlock.cbClazzUid = :clazzUid
+           AND CourseBlock.cbActive
+      ORDER BY CourseBlock.cbIndex
           """)
     abstract suspend fun findAllCourseBlockByClazzUidAsync(clazzUid: Long): List<CourseBlockWithEntityDb>
 

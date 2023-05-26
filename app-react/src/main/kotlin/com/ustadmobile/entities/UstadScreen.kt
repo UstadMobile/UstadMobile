@@ -72,7 +72,7 @@ import com.ustadmobile.view.discussionpost.detail.DiscussionPostDetailScreen
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.view.discussionpost.edit.DiscussionPostEditPreview
 import com.ustadmobile.view.discussionpost.edit.DiscussionPostEditScreen
-import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 

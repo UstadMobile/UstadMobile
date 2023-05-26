@@ -9,6 +9,11 @@ open class CourseBlockWithEntityDb: CourseBlock() {
     @Embedded
     var assignment: ClazzAssignment? = null
 
+    /**
+     * If the assignment is set to be marked in groups - this is the label for name of the group
+     */
+    var assignmentCourseGroupSetName: String? = null
+
     @Embedded
     var entry: ContentEntry? = null
 
@@ -18,15 +23,13 @@ open class CourseBlockWithEntityDb: CourseBlock() {
     @Embedded
     var language: Language? = null
 
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other == null || this::class != other::class) return false
+        if (other !is CourseBlockWithEntityDb) return false
         if (!super.equals(other)) return false
 
-        other as CourseBlockWithEntityDb
-
         if (assignment != other.assignment) return false
+        if (assignmentCourseGroupSetName != other.assignmentCourseGroupSetName) return false
         if (entry != other.entry) return false
         if (courseDiscussion != other.courseDiscussion) return false
         if (language != other.language) return false
@@ -37,6 +40,7 @@ open class CourseBlockWithEntityDb: CourseBlock() {
     override fun hashCode(): Int {
         var result = super.hashCode()
         result = 31 * result + (assignment?.hashCode() ?: 0)
+        result = 31 * result + (assignmentCourseGroupSetName?.hashCode() ?: 0)
         result = 31 * result + (entry?.hashCode() ?: 0)
         result = 31 * result + (courseDiscussion?.hashCode() ?: 0)
         result = 31 * result + (language?.hashCode() ?: 0)
