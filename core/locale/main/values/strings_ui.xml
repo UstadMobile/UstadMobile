@@ -1600,4 +1600,17 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="add_new_post">Add a new post</string>
 
+    <!--
+    A score that a teacher gives a student (e.g. 90/100), A+, etc.
+    -->
+    <string name="grades_scoring">Grades</string>
+
+    <!--
+    Mark comment
+    -->
+    <string name="mark_comment">Mark comment</string>
+
+
+    <string name="mark">Mark</string>
+
 </resources>

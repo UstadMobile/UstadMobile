@@ -306,7 +306,6 @@ fun ClazzAssignmentDetailOverviewScreen(
                     onClickMark = onClickMark,
                     uiState = UstadCourseAssignmentMarkListItemUiState(
                         mark = mark,
-                        block = uiState.courseBlock ?: CourseBlock()
                     ),
                 )
             }

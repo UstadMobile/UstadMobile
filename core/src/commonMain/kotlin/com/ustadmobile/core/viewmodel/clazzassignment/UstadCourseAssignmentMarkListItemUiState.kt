@@ -8,13 +8,11 @@ data class UstadCourseAssignmentMarkListItemUiState(
 
     val mark: CourseAssignmentMarkWithPersonMarker = CourseAssignmentMarkWithPersonMarker(),
 
-    val block: CourseBlock = CourseBlock()
-
 ) {
     val markerGroupNameVisible: Boolean
         get() = mark.isGroup && mark.camMarkerSubmitterUid != 0L
 
     val camPenaltyVisible: Boolean
-        get() = mark.camPenalty != 0
+        get() = mark.camPenalty != 0f
 
 }

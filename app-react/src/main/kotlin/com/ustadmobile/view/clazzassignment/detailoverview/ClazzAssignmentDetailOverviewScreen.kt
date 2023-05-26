@@ -40,6 +40,7 @@ import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
+import com.ustadmobile.view.clazzassignment.UstadCommentListItem
 import com.ustadmobile.view.components.UstadDetailHeader
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 
@@ -280,7 +281,6 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                         onClickMark = props.onClickMark
                         uiState = UstadCourseAssignmentMarkListItemUiState(
                             mark = markItem,
-                            block = props.uiState.courseBlock ?: CourseBlock()
                         )
                     }
                 }

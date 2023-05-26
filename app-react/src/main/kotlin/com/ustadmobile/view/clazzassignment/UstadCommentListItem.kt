@@ -1,4 +1,4 @@
-package com.ustadmobile.mui.components
+package com.ustadmobile.view.clazzassignment
 
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.composites.CommentsAndName

@@ -19,6 +19,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.util.ext.penaltyPercentage
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.lib.db.entities.CourseAssignmentMarkWithPersonMarker
 import com.ustadmobile.lib.db.entities.Person
@@ -62,7 +63,7 @@ fun UstadCourseAssignmentMarkListItem(
                     )
                     Text(
                         buildAnnotatedString {
-                            append("${uiState.mark.camMark}/${uiState.block.cbMaxPoints}" +
+                            append("${uiState.mark.camMark}/${uiState.mark.camMaxMark}" +
                                     " ${stringResource(R.string.points)}")
 
 
@@ -70,7 +71,7 @@ fun UstadCourseAssignmentMarkListItem(
                                 withStyle(style = SpanStyle(color = colorResource(R.color.errorColor)))
                                 {
                                     append("  "+stringResource(R.string.late_penalty,
-                                        uiState.block.cbLateSubmissionPenalty))
+                                        uiState.mark.penaltyPercentage()))
                                 }
                             }
                         }

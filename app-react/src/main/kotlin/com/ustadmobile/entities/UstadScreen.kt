@@ -73,6 +73,9 @@ import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetail
 import com.ustadmobile.view.discussionpost.edit.DiscussionPostEditPreview
 import com.ustadmobile.view.discussionpost.edit.DiscussionPostEditScreen
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
+import com.ustadmobile.view.clazzassignment.UstadCommentListItemPreview
+import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentDetailStudentProgressViewModel
+import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentDetailStudentProgressScreenPreview
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -208,7 +211,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("UstadCourseAssignmentMarkListItem", "UstadCourseAssignmentMarkListItem Preview",
         UstadCourseAssignmentMarkListItemPreview),
     UstadScreen("UstadCommentListItem", "UstadCommentListItem Preview",
-        UstadCommentListItemPreview),
+        UstadCommentListItemPreview
+    ),
     UstadScreen("UstadAddCommentListItem", "UstadAddCommentListItem Preview",
         UstadAddCommentListItemPreview),
     UstadScreen("UstadAssignmentFileSubmissionListItem",
@@ -269,6 +273,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(CourseGroupSetListViewModel.DEST_NAME, "CourseGroupSetList",
         CourseGroupSetListScreen
     ),
+    UstadScreen(ClazzAssignmentDetailStudentProgressViewModel.DEST_NAME, "CourseAssignmentSubmitterDetail",
+        ClazzAssignmentDetailStudentProgressScreenPreview),
 )
 
 
