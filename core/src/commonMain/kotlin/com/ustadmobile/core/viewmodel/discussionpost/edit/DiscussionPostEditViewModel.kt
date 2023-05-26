@@ -5,7 +5,6 @@ import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.view.DiscussionPostEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
@@ -34,7 +33,7 @@ data class DiscussionPostEditUiState(
 class DiscussionPostEditViewModel (
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-    destinationName: String = DiscussionPostEditView.VIEW_NAME,
+    destinationName: String = DEST_NAME,
 ): UstadEditViewModel(di, savedStateHandle, destinationName){
 
     private val _uiState: MutableStateFlow<DiscussionPostEditUiState> =

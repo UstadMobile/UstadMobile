@@ -72,6 +72,7 @@ import com.ustadmobile.view.discussionpost.detail.DiscussionPostDetailScreen
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.view.discussionpost.edit.DiscussionPostEditPreview
 import com.ustadmobile.view.discussionpost.edit.DiscussionPostEditScreen
+import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -248,7 +249,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(DiscussionPostDetailViewModel.DEST_NAME, name = "Real Course Discussion Post Detail",
         DiscussionPostDetailScreen
     ),
-    UstadScreen(DiscussionPostEditView.VIEW_NAME, name = "Discussion Post Edit",
+    UstadScreen(DiscussionPostEditViewModel.DEST_NAME, name = "Discussion Post Edit",
         DiscussionPostEditScreen
     ),
     UstadScreen("DiscussionPostEditViewDemo", name = "Discussion Post Edit Preview",

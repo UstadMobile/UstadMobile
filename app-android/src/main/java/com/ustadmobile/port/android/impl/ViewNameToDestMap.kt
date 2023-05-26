@@ -20,6 +20,7 @@ import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListView
 import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 
 @Keep
 class ViewNameToDestMap: DestinationProvider {
@@ -60,14 +61,9 @@ class ViewNameToDestMap: DestinationProvider {
             ModuleCourseBlockEditView.VIEW_NAME to UstadDestination(R.id.module_course_block_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
                     hideBottomNavigation = true),
-            DiscussionTopicEditView.VIEW_NAME to UstadDestination(R.id.course_discussion_topic_edit_dest,
-                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
-                    hideBottomNavigation = true),
-            DiscussionTopicDetailView.VIEW_NAME to UstadDestination(R.id.discussion_topic_detail_dest,
-                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             CourseDiscussionDetailViewModel.DEST_NAME to UstadDestination(R.id.course_discussion_detail_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
-            DiscussionPostEditView.VIEW_NAME to UstadDestination(R.id.discussion_post_edit_dest,
+            DiscussionPostEditViewModel.DEST_NAME to UstadDestination(R.id.discussion_post_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
                     hideBottomNavigation = true),
             DiscussionPostDetailViewModel.DEST_NAME to UstadDestination(R.id.discussion_post_detail_dest,
