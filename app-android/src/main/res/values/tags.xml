@@ -43,4 +43,13 @@
     <item name="tag_webview_html" type="id"/>
 
 
+    <item name="tag_fab_uistate_icon" type="id"/>
+
+    <item name="tag_fab_uistate_listener" type="id"/>
+
+    <item name="tag_aztec" type="id"/>
+
+    <item name="tag_textfield_html" type="id"/>
+
+
 </resources>

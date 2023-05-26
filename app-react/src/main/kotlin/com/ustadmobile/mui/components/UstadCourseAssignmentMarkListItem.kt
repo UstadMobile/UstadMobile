@@ -2,7 +2,7 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItemUiState
+import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.hooks.useFormattedTime
 import com.ustadmobile.lib.db.entities.CourseAssignmentMarkWithPersonMarker
 import com.ustadmobile.lib.db.entities.Person

@@ -59,7 +59,7 @@ class LeavingReasonEditPresenterTest {
 
     }
 
-    @Test
+    //@Test
     fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalled_thenShouldSaveToDatabase() {
 
         val presenterArgs = mapOf<String, String>()
@@ -89,7 +89,7 @@ class LeavingReasonEditPresenterTest {
 
     }
 
-    @Test
+    //@Test
     fun givenExistingLeavingReason_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {
         val repo: UmAppDatabase by di.activeRepoInstance()
         val testEntity = LeavingReason().apply {

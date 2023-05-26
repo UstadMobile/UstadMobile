@@ -5,6 +5,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.doublePbkdf2Hash
 import com.ustadmobile.core.util.ext.grantScopedPermission
@@ -13,6 +14,7 @@ import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.requireDbAndRepo
 import com.ustadmobile.door.ext.toHexString
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.randomString
 import io.github.aakira.napier.Napier
@@ -25,29 +27,20 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
 
-internal fun UmAppDatabase.insertDefaultSite() {
-    siteDao.insert(Site().apply {
-        siteUid = 1L
-        siteName = "My Site"
-        guestLogin = false
-        registrationAllowed = false
-        authSalt = randomString(20)
-    })
-}
 
 fun UmAppDatabase.insertCourseTerminology(di: DI){
     val (db, repo) = requireDbAndRepo()
     val termList = db.courseTerminologyDao.findAllCourseTerminologyList()
+    val supportLangConfig: SupportedLanguagesConfig = di.direct.instance()
     if(termList.isEmpty()) {
 
         val impl: UstadMobileSystemImpl by di.instance()
         val json: Json by di.instance()
 
-        val languageOptions = impl.getAllUiLanguagesList()
+        val languageOptions = supportLangConfig.supportedUiLanguages
         val terminologyList = mutableListOf<CourseTerminology>()
 
         languageOptions.forEach { pair ->
-            if(pair.langCode.isEmpty()) return@forEach
 
             terminologyList.add(CourseTerminology().apply {
                 ctUid = (pair.langCode[0].code shl(8)) + (pair.langDisplay[1].code).toLong()
@@ -99,13 +92,14 @@ suspend fun UmAppDatabase.initAdminUser(
             adminPassFile.parentFile.mkdirs()
         }
 
-        val hexFile = File(passwordFilePath, "hex.txt")
+        val saltFile = File(passwordFilePath, "salt-${systemTimeInMillis()}.txt")
 
         val repo: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
         val salt = repo.siteDao.getSiteAsync()!!.authSalt!!
 
-        hexFile.writeText(
-            adminPass.doublePbkdf2Hash(salt, di.direct.instance()).toHexString())
+        saltFile.writeText(
+            "$salt / $adminPass"
+        )
 
         grantScopedPermission(adminPerson, Role.ALL_PERMISSIONS, ScopedGrant.ALL_TABLES,
                 ScopedGrant.ALL_ENTITIES)

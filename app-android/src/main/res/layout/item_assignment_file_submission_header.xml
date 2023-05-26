@@ -6,7 +6,7 @@
     <data>
         <import type="android.view.View" />
         <import type="com.ustadmobile.core.controller.SubmissionConstants"/>
-        <import type="com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment"/>
+        <import type="com.ustadmobile.port.android.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewFragment"/>
         <import type="com.ustadmobile.lib.db.entities.CourseAssignmentSubmission"/>
 
         <variable

@@ -3,10 +3,12 @@ package com.ustadmobile.core.db.dao
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.flow.Flow
 import kotlin.js.JsName
 
 @DoorDao
@@ -94,6 +96,42 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
             : DataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>
 
     @Query("""
+         SELECT CourseAssignmentSubmission.*, CourseAssignmentSubmissionAttachment.*
+          FROM CourseAssignmentSubmission
+               LEFT JOIN CourseAssignmentSubmissionAttachment
+                    ON CourseAssignmentSubmissionAttachment.casaSubmissionUid = CourseAssignmentSubmission.casUid
+         WHERE casSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
+    """)
+    abstract fun getAllSubmissionsForUser(
+        accountPersonUid: Long,
+        assignmentUid: Long,
+    ): Flow<List<CourseAssignmentSubmissionWithAttachment>>
+
+    @Query("""
+        SELECT CourseAssignmentSubmission.*
+          FROM CourseAssignmentSubmission
+         WHERE casSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
+      ORDER BY casTimestamp DESC
+         LIMIT 1
+    """)
+    abstract suspend fun getLatestSubmissionForUserAsync(
+        accountPersonUid: Long,
+        assignmentUid: Long
+    ): CourseAssignmentSubmission?
+
+    @Query("""
+        SELECT EXISTS
+               (SELECT CourseAssignmentSubmission.casUid
+                  FROM CourseAssignmentSubmission
+                 WHERE casSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL))
+    """)
+    abstract suspend fun doesUserHaveSubmissions(
+        accountPersonUid: Long,
+        assignmentUid: Long,
+    ): Boolean
+
+
+    @Query("""
         SELECT Count(casUid)
           FROM CourseAssignmentSubmission
          WHERE casAssignmentUid = :assignmentUid
@@ -147,5 +185,22 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
                        LIMIT 1)
     """)
     abstract fun checkNoSubmissionsMade(assignmentUid: Long): LiveData<Boolean>
+
+    @Query("""
+         SELECT NOT EXISTS(SELECT 1
+                        FROM CourseAssignmentSubmission
+                       WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
+                       LIMIT 1)
+    """)
+    abstract suspend fun checkNoSubmissionsMadeAsync(assignmentUid: Long): Boolean
+
+
+    @Query("""
+         SELECT NOT EXISTS(SELECT 1
+                        FROM CourseAssignmentSubmission
+                       WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
+                       LIMIT 1)
+    """)
+    abstract fun checkNoSubmissionsMadeFlow(assignmentUid: Long): Flow<Boolean>
 
 }

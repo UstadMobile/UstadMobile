@@ -73,7 +73,7 @@ abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
 
     protected open var autoShowFabOnAddPermission = true
 
-    protected var mActivityWithFab: UstadListViewActivityWithFab? = null
+    protected var mActivityWithFab: UstadActivityWithFab? = null
         get() {
             /*
              The getter will return null so that if the current fragment is not actually visible
@@ -208,12 +208,13 @@ abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         searchManager?.searchListener = listPresenter
-        menu.findItem(R.id.menu_search).isVisible = true
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        /*
+        Disabled - will be removed on completion of MVVM transition
         mDataBinding?.presenter = listPresenter
         mListStatusAdapter = ListStatusRecyclerViewAdapter(viewLifecycleOwner)
 
@@ -236,6 +237,7 @@ abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
 
 
         listPresenter?.onCreate(savedInstanceState.toStringMap())
+         */
     }
 
     override fun onDestroyView() {
@@ -334,7 +336,7 @@ abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        mActivityWithFab = context as? UstadListViewActivityWithFab
+        mActivityWithFab = context as? UstadActivityWithFab
     }
 
     override fun onDetach() {

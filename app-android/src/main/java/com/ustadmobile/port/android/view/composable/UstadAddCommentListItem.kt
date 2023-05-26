@@ -3,17 +3,15 @@ package com.ustadmobile.port.android.view.composable
 import  androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.android.material.composethemeadapter.MdcTheme
-import com.toughra.ustadmobile.R
+import com.google.accompanist.themeadapter.material.MdcTheme
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -27,9 +25,9 @@ fun UstadAddCommentListItem(
     ListItem(
         modifier = modifier,
         icon = {
-            Icon(
-                Icons.Default.Person,
-                contentDescription = null
+            UstadPersonAvatar(
+                personUid = personUid,
+                modifier = Modifier.size(40.dp)
             )
         },
         text = {
@@ -39,7 +37,7 @@ fun UstadAddCommentListItem(
                 border = BorderStroke(0.dp, Color.Transparent),
                 enabled = enabled,
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = colorResource(id = R.color.grey_a_40),
+                    backgroundColor = colorResource(id = org.wordpress.aztec.R.color.grey_a_40),
                 )
             ) {
                 Text(
@@ -47,7 +45,7 @@ fun UstadAddCommentListItem(
                     textAlign = TextAlign.Start,
                     modifier = Modifier.fillMaxWidth(),
                     color = contentColorFor(
-                        colorResource(id = R.color.grey_a_40))
+                        colorResource(id = org.wordpress.aztec.R.color.grey_a_40))
                 )
             }
         }
@@ -56,7 +54,7 @@ fun UstadAddCommentListItem(
 
 @Composable
 @Preview
-private fun UstadAddCommentListItemPreview() {
+private fun AddCommentListItemPreview() {
     MdcTheme {
         UstadAddCommentListItem(
             text = "Add",

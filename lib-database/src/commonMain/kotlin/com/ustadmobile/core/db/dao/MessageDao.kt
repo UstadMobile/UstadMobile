@@ -7,6 +7,7 @@ import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.flow.Flow
 
 @DoorDao
 @Repository
@@ -159,6 +160,25 @@ expect abstract class MessageDao: BaseDao<Message>{
     """)
     abstract fun findAllMessagesByChatUid(entityUid: Long, tableId: Int, loggedInPersonUid: Long):
             DataSourceFactory<Int, MessageWithPerson>
+
+
+    @Query("""
+       SELECT
+              Message.*,
+              Person.*,
+              MessageRead.*
+        FROM Message
+        LEFT JOIN Person
+          ON Message.messageSenderPersonUid = Person.personUid
+        LEFT JOIN MessageRead
+          ON MessageRead.messageReadMessageUid = Message.messageUid
+             AND MessageRead.messageReadPersonUid = :loggedInPersonUid
+       WHERE Message.messageTableId = :tableId
+              AND Message.messageEntityUid = :entityUid
+    ORDER BY Message.messageTimestamp DESC
+    """)
+    abstract fun findAllMessagesByChatUidAsFlow(entityUid: Long, tableId: Int, loggedInPersonUid: Long):
+            Flow<List<MessageWithPerson>>
 
 
 }

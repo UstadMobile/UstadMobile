@@ -9,4 +9,21 @@ class AverageCourseAssignmentMark {
 
     var averagePenalty: Int = 0
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is AverageCourseAssignmentMark) return false
+
+        if (averageScore != other.averageScore) return false
+        if (averagePenalty != other.averagePenalty) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = averageScore.hashCode()
+        result = 31 * result + averagePenalty
+        return result
+    }
+
+
 }

@@ -3,7 +3,7 @@ package com.ustadmobile.port.android.view.binding
 import android.widget.ImageButton
 import androidx.databinding.BindingAdapter
 import com.ustadmobile.core.controller.NewCommentItemListener
-import com.ustadmobile.port.android.view.CommentsBottomSheet
+import com.ustadmobile.port.android.view.clazzassignment.CommentsBottomSheet
 
 @BindingAdapter("buttonListener", "buttonSheet","editText")
 fun ImageButton.setEditButtonClick(listener: NewCommentItemListener,

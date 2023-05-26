@@ -43,6 +43,11 @@ import kotlinx.serialization.Serializable
         ]
     )
 ))
+/**
+ * TODO: Remove and its usages.
+ *
+ */
+@Deprecated("Topics to be removed. ")
 open class DiscussionTopic() {
 
     @PrimaryKey(autoGenerate = true)

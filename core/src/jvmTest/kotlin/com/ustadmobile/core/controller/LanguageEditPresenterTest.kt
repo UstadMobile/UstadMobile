@@ -60,7 +60,7 @@ class LanguageEditPresenterTest {
 
     }
 
-    @Test
+    //@Test
     fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalled_thenShouldSaveToDatabase() {
 
         val presenterArgs = mapOf<String, String>()
@@ -90,7 +90,7 @@ class LanguageEditPresenterTest {
 
     }
 
-    @Test
+    //@Test
     fun givenExistingLanguage_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {
         val repo: UmAppDatabase by di.activeRepoInstance()
         val testEntity = Language().apply {

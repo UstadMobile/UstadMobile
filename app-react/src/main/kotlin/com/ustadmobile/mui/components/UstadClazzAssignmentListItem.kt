@@ -7,7 +7,7 @@ import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.ext.paddingCourseBlockIndent
-import com.ustadmobile.view.ASSIGNMENT_STATUS_MAP
+import com.ustadmobile.view.clazzassignment.detailoverview.ASSIGNMENT_STATUS_MAP
 import csstype.*
 import kotlinx.datetime.TimeZone
 import mui.icons.material.AssignmentTurnedIn
@@ -24,7 +24,7 @@ external interface UstadClazzAssignmentListItemProps: Props {
 
     var courseBlock: CourseBlockWithCompleteEntity
 
-    var onClickAssignment: (ClazzAssignmentWithMetrics?) -> Unit
+    var onClickCourseBlock: (CourseBlock) -> Unit
 
     var padding: Padding
 }
@@ -35,7 +35,7 @@ val UstadClazzAssignmentListItem = FC<UstadClazzAssignmentListItemProps> { props
 
     ListItem{
         ListItemButton{
-            onClick = { props.onClickAssignment(assignment) }
+            onClick = { props.onClickCourseBlock(props.courseBlock) }
 
             sx {
                 padding = props.padding
@@ -55,7 +55,7 @@ val UstadClazzAssignmentListItem = FC<UstadClazzAssignmentListItemProps> { props
             }
 
             ListItemText {
-                primary = ReactNode(assignment?.caTitle ?: "")
+                primary = ReactNode(props.courseBlock.cbTitle ?: "")
                 secondary = SecondaryContent.create{
                     courseBlock = props.courseBlock
                 }
@@ -66,7 +66,6 @@ val UstadClazzAssignmentListItem = FC<UstadClazzAssignmentListItemProps> { props
 
 private val DateAndPointRow = FC<UstadClazzAssignmentListItemProps> { props ->
 
-    val strings = useStringsXml()
     val dateTime = useFormattedDateAndTime(
         timeInMillis = props.courseBlock.cbDeadlineDate,
         timezoneId = TimeZone.currentSystemDefault().id
@@ -138,7 +137,9 @@ private val SecondaryContent = FC<UstadClazzAssignmentListItemProps> { props ->
 
             if (assignmentUiState?.submissionStatusIconVisible == true){
                 Icon{
-                    + ASSIGNMENT_STATUS_MAP[assignment.fileSubmissionStatus]
+                    ASSIGNMENT_STATUS_MAP[assignment.fileSubmissionStatus]?.also {
+                        + it.create()
+                    }
                 }
             }
 
@@ -186,19 +187,19 @@ val UstadClazzAssignmentListItemPreview = FC<Props> {
         UstadClazzAssignmentListItem {
 
             courseBlock = CourseBlockWithCompleteEntity().apply {
+                cbTitle = "Module"
                 cbDescription = "Description"
                 cbDeadlineDate = 1672707505000
                 cbMaxPoints = 100
                 cbIndentLevel = 1
                 assignment = ClazzAssignmentWithMetrics().apply {
-                    caTitle = "Module"
 //To be fixed as part of the assignment screens
 //                    mark = CourseAssignmentMark().apply {
 //                        camPenalty = 20
 //                        camMark = 20F
 //                    }
                     progressSummary = AssignmentProgressSummary().apply {
-                        hasMetricsPermission = false
+                        activeUserHasViewLearnerRecordsPermission = false
                     }
                     fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
                 }

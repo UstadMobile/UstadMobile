@@ -8,7 +8,7 @@
             name="commentwithperson"
             type="com.ustadmobile.lib.db.entities.CommentsWithPerson" />
 
-        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
+        <import type="com.ustadmobile.port.android.view.person.detail.PersonDetailFragment"/>
 
     </data>
 

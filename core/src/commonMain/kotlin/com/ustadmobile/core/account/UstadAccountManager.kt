@@ -1,8 +1,8 @@
 package com.ustadmobile.core.account
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.util.ext.encryptWithPbkdf2
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.toUmAccount
@@ -97,6 +97,8 @@ class UstadAccountManager(
 
     private val json: Json by di.instance()
 
+    private val apiUrlConfig: ApiUrlConfig by di.instance()
+
     init {
         val activeUserSessionFromJson = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY)?.let {
             safeParse(di, UserSessionWithPersonAndEndpoint.serializer(), it)
@@ -120,8 +122,7 @@ class UstadAccountManager(
 
 
         val activeEndpointStr = systemImpl.getAppPref(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY)
-            ?: systemImpl.getAppConfigString(AppConfig.KEY_API_URL, MANIFEST_URL_FALLBACK)
-            ?: MANIFEST_URL_FALLBACK
+            ?: apiUrlConfig.presetApiUrl ?: MANIFEST_URL_FALLBACK
 
         _activeEndpoint = atomic(Endpoint(activeEndpointStr))
 
@@ -256,7 +257,9 @@ class UstadAccountManager(
                 usStartTime = systemTimeInMillis()
                 usSessionType = UserSession.TYPE_STANDARD
                 usStatus = UserSession.STATUS_ACTIVE
-                usAuth = password?.encryptWithPbkdf2(authSalt, pbkdf2Params)?.toHexString()
+                usAuth = password?.encryptWithPbkdf2(
+                    authSalt, pbkdf2Params, endpoint, httpClient
+                )?.toHexString()
                 usUid = endpointRepo.userSessionDao.insertSession(this)
             }
         }

@@ -3,7 +3,6 @@ package com.ustadmobile.core.db
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.preload
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DiTag
@@ -28,7 +27,6 @@ import io.ktor.server.application.*
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.plugins.json.*
 import io.ktor.serialization.gson.*
 import io.ktor.server.routing.*
 import io.ktor.server.engine.*
@@ -180,13 +178,8 @@ class DbReplicationIntegrationTest {
         }
 
         bind<Pbkdf2Params>() with singleton {
-            val systemImpl: UstadMobileSystemImpl = instance()
-            val numIterations = systemImpl.getAppConfigInt(
-                AppConfig.KEY_PBKDF2_ITERATIONS,
-                UstadMobileConstants.PBKDF2_ITERATIONS, context)
-            val keyLength = systemImpl.getAppConfigInt(
-                AppConfig.KEY_PBKDF2_KEYLENGTH,
-                UstadMobileConstants.PBKDF2_KEYLENGTH, context)
+            val numIterations = UstadMobileConstants.PBKDF2_ITERATIONS
+            val keyLength = UstadMobileConstants.PBKDF2_KEYLENGTH
 
             Pbkdf2Params(numIterations, keyLength)
         }
@@ -493,7 +486,7 @@ class DbReplicationIntegrationTest {
         }
 
         runBlocking {
-            localDb1.createNewClazzAndGroups(newClazz, localDi1.direct.instance(), mapOf(), Any())
+            localDb1.createNewClazzAndGroups(newClazz, localDi1.direct.instance(), mapOf())
             localDb1.scopedGrantDao.insertAsync(ScopedGrant().apply {
                 sgFlags = ScopedGrant.FLAG_TEACHER_GROUP.or(ScopedGrant.FLAG_NO_DELETE)
                 sgPermissions = Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT
@@ -552,7 +545,7 @@ class DbReplicationIntegrationTest {
 
 
         runBlocking {
-            localDb1.createNewClazzAndGroups(newClazz, localDi1.direct.instance(), mapOf(), Any())
+            localDb1.createNewClazzAndGroups(newClazz, localDi1.direct.instance(), mapOf())
 
             //Create scopedgrants for groups (that would otherwisee be handled by clazzeditpresenter)
             localDb1.grantScopedPermission(newClazz.clazzTeachersPersonGroupUid,

@@ -29,7 +29,7 @@ kotlin {
             dependencies {
                 kotlin("stdlib-common")
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
-                implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
+                implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
             }
         }
 
@@ -105,5 +105,5 @@ task copyTestResources(type: Copy) {
 
 jvmTest.dependsOn(copyTestResources)
 
-sourceCompatibility = "1.8"
-targetCompatibility = "1.8"
+sourceCompatibility = "17"
+targetCompatibility = "17"

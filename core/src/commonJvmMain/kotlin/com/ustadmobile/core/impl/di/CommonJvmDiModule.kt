@@ -24,11 +24,7 @@ val CommonJvmDiModule = DI.Module("CommonJvm") {
         HttpClient(OkHttp) {
 
             install(ContentNegotiation) {
-                gson {
-                    registerTypeAdapter(Statement::class.java, StatementSerializer())
-                    registerTypeAdapter(Statement::class.java, StatementDeserializer())
-                    registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
-                }
+                gson { }
             }
             install(HttpTimeout)
 
