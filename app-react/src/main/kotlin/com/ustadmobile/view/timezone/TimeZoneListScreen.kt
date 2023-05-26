@@ -31,9 +31,6 @@ external interface TimeZoneListProps: Props {
 }
 
 val TimeZoneListComponent = FC<TimeZoneListProps> {props ->
-    val infiniteQueryResult = usePagingSource(
-        props.uiState.timeZoneList, true, 50
-    )
 
     val muiAppState = useMuiAppState()
 
@@ -46,9 +43,8 @@ val TimeZoneListComponent = FC<TimeZoneListProps> {props ->
         }
 
         content = virtualListContent {
-
-            infiniteQueryPagingItems(
-                items = infiniteQueryResult,
+            items(
+                list = props.uiState.timeZoneList,
                 key = { it.id }
             ) { timeZoneItem ->
                 TimeZoneListItem.create {

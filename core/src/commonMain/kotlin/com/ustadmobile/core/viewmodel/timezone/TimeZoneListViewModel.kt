@@ -4,9 +4,9 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.UstadListViewModel
-import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.paging.PagingSource
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -16,7 +16,7 @@ import kotlinx.datetime.offsetAt
 import org.kodein.di.DI
 
 data class TimezoneListUiState(
-    val timeZoneList: () -> PagingSource<Int, TimeZone> = { EmptyPagingSource() },
+    val timeZoneList: List<TimeZone> = emptyList(),
 )
 
 class TimeZoneListViewModel(
@@ -31,31 +31,9 @@ class TimeZoneListViewModel(
         }.toList().sortedBy { it.offsetAt(now).totalSeconds }
     }
 
-    private val timeZoneList = mutableListOf<TimeZone>()
-
-    private val pagingSourceFactory: () -> PagingSource<Int, TimeZone> = {
-        val searchText = _appUiState.value.searchState.searchText
-        val searchWords = searchText.split(Regex("\\s+"))
-        val newPagingSource = if(searchText.isBlank()){
-            ListPagingSource(timeZoneList.toList())
-        }else {
-            ListPagingSource(timeZoneList.filter { timeZone ->
-                searchWords.all { timeZone.id.contains(it, ignoreCase = true) }
-            })
-        }
-        lastPagingSource?.invalidate()
-        lastPagingSource = newPagingSource
-
-        newPagingSource
-    }
-
-    private var lastPagingSource: PagingSource<Int, TimeZone>?= null
+    private var searchUpdateJob: Job? = null
 
     init {
-        _uiState.update { prev ->
-            prev.copy(timeZoneList = pagingSourceFactory)
-        }
-
         _appUiState.update { prev ->
             prev.copy(
                 title = systemImpl.getString(MessageID.timezone),
@@ -64,18 +42,32 @@ class TimeZoneListViewModel(
         }
 
         viewModelScope.launch {
-            val allZones = withContext(Dispatchers.Default) {
+            val allTimeZonesVal = withContext(Dispatchers.Default) {
                 allTimeZones
             }
 
-            timeZoneList.addAll(allZones)
-
-            lastPagingSource?.invalidate()
+            _uiState.update { prev ->
+                prev.copy(allTimeZonesVal)
+            }
         }
     }
 
     override fun onUpdateSearchResult(searchText: String) {
-        lastPagingSource?.invalidate()
+        searchUpdateJob?.cancel()
+
+        searchUpdateJob = viewModelScope.launch {
+            val filteredList = withContext(Dispatchers.Default){
+                val searchWords = searchText.split(Regex("\\s+"))
+                allTimeZones.filter { timeZone ->
+                    searchWords.all { timeZone.id.contains(it, ignoreCase = true) }
+                }
+            }
+            _uiState.update { prev ->
+                prev.copy(
+                    timeZoneList = filteredList
+                )
+            }
+        }
     }
 
     fun onClickEntry(entry: TimeZone) {

@@ -428,7 +428,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
 
     //LeakCanary - detect memory leaks
-    debugImplementation "com.squareup.leakcanary:leakcanary-android:$version_android_leakcanary"
+    //debugImplementation "com.squareup.leakcanary:leakcanary-android:$version_android_leakcanary"
 
 
     testImplementation project(":lib-test-common")

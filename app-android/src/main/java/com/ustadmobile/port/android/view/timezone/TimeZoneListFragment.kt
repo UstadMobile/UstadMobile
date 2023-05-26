@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
 import androidx.compose.material.Text
@@ -18,10 +19,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.ustadmobile.core.util.ext.formattedString
 import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
@@ -65,14 +62,6 @@ fun TimeZoneListScreen(
     uiState: TimezoneListUiState,
     onListItemClick: (TimeZoneKt) -> Unit,
 ) {
-    val pager = remember(uiState.timeZoneList) {
-        Pager(
-            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
-            pagingSourceFactory = uiState.timeZoneList
-        )
-    }
-
-    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
     val timeNow = Clock.System.now()
 
@@ -82,16 +71,16 @@ fun TimeZoneListScreen(
             .fillMaxWidth()
     ){
         items(
-            items = lazyPagingItems,
+            items = uiState.timeZoneList,
             key = { it.id },
         ) { timeZone ->
-            val timeZoneFormatted: String = remember(timeZone?.id) {
-                timeZone?.formattedString(timeNow) ?: ""
+            val timeZoneFormatted: String = remember(timeZone.id) {
+                timeZone.formattedString(timeNow)
             }
 
             ListItem(
                 modifier = Modifier
-                    .clickable { timeZone?.also { onListItemClick(it) } },
+                    .clickable {  onListItemClick(timeZone) } ,
                 text = { Text(timeZoneFormatted) }
             )
         }
