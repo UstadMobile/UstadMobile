@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
@@ -27,6 +28,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.google.accompanist.themeadapter.material.MdcTheme
+import com.toughra.ustadmobile.R
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListUiState
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
@@ -36,6 +38,7 @@ import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
 import com.ustadmobile.port.android.view.SortBottomSheetFragment
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
+import com.ustadmobile.port.android.view.composable.UstadAddListItem
 
 class CourseGroupSetListFragment(): UstadBaseMvvmFragment(){
 
@@ -73,6 +76,7 @@ fun CourseGroupSetListScreen(
     CourseGroupSetListScreen(
         uiState = uiState,
         onClickEntry = viewModel::onClickEntry,
+        onClickNewItem = viewModel::onClickAdd,
         onClickSort =  {
             SortBottomSheetFragment(
                 sortOptions = uiState.sortOptions,
@@ -91,6 +95,7 @@ fun CourseGroupSetListScreen(
     uiState: CourseGroupSetListUiState,
     onClickEntry: (CourseGroupSet) -> Unit = {},
     onClickSort: () -> Unit = {},
+    onClickNewItem: () -> Unit = {},
 ) {
     val pager = remember(uiState.courseGroupSets) {
         Pager(
@@ -106,12 +111,35 @@ fun CourseGroupSetListScreen(
             .padding(vertical = 8.dp)
             .fillMaxWidth()
     ){
-        item {
+        item(key = "sortheader") {
             UstadListSortHeader(
                 modifier = Modifier.defaultItemPadding(),
                 activeSortOrderOption = uiState.sortOption,
                 onClickSort =   onClickSort
             )
+        }
+
+        uiState.individualSubmissionOption?.also { individualOption ->
+            item(key = "individualsubmission") {
+                ListItem(
+                    modifier = Modifier.clickable {
+                        individualOption.also(onClickEntry)
+                    },
+                    text = {
+                        Text(individualOption.cgsName ?: "")
+                    },
+                )
+            }
+        }
+
+        if(uiState.showAddItem) {
+            item(key = "additem") {
+                UstadAddListItem(
+                    text = stringResource(R.string.add_new_groups),
+                    onClickAdd = onClickNewItem,
+                )
+            }
+
         }
 
         items(
