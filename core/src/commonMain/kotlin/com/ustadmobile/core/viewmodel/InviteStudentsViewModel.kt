@@ -4,6 +4,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.validEmail
+import com.ustadmobile.core.util.isValidPhoneNumber
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,7 +24,7 @@ data class InviteStudentsUiState(
 ) {
 
     val addRecipientVisible: Boolean
-        get() = textField.validEmail()
+        get() = textField.validEmail() && isValidPhoneNumber(textField)
 
 }
 

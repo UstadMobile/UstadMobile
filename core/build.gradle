@@ -245,6 +245,8 @@ kotlin {
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-react"
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom"
 
+                implementation npm("libphonenumber-js", "$version_npm_libphonenumber_js")
+
                 //Required to do encryption for tokens etc.
                 implementation npm("asmcrypto.js","$version_npm_asmcrypto")
                 //required by asmcrypto - see webpack.confg.d
