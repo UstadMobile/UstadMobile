@@ -8,6 +8,7 @@ import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
+import com.ustadmobile.core.viewmodel.InviteStudentsViewModel
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.door.paging.*
 import com.ustadmobile.lib.db.entities.Person
@@ -16,6 +17,7 @@ import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
 
 data class PersonListUiState(
@@ -132,7 +134,20 @@ class PersonListViewModel(
         navigateOnItemClicked(PersonDetailView.VIEW_NAME, entry.personUid, entry)
     }
 
+    fun onClickAddRecipient() {
+        navigateForResult(
+            InviteStudentsViewModel.DEST_NAME,
+            key = RESULT_KEY_SITE_LINK,
+            currentValue = "",
+            serializer = String.serializer()
+        )
+    }
 
+    companion object {
+
+        const val RESULT_KEY_SITE_LINK = "siteLink"
+
+    }
 }
 
 

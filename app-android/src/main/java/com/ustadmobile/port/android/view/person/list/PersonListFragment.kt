@@ -6,7 +6,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
@@ -84,7 +87,8 @@ fun PersonListScreen(
                 }
             ).show(context.getContextSupportFragmentManager(), "SortOptions")
         },
-        onListItemClick = viewModel::onClickEntry
+        onListItemClick = viewModel::onClickEntry,
+        onClickAddRecipient = viewModel::onClickAddRecipient
     )
 }
 
@@ -93,7 +97,8 @@ fun PersonListScreen(
 fun PersonListScreen(
     uiState: PersonListUiState,
     onClickSort: () -> Unit = {},
-    onListItemClick: (PersonWithDisplayDetails) -> Unit = {}
+    onListItemClick: (PersonWithDisplayDetails) -> Unit = {},
+    onClickAddRecipient: () -> Unit = {}
 ){
 
     // As per
@@ -116,13 +121,29 @@ fun PersonListScreen(
     ){
 
         item {
-            UstadListSortHeader(
+            Row(
                 modifier = Modifier
                     .defaultItemPadding()
                     .fillMaxWidth(),
-                activeSortOrderOption = uiState.sortOption,
-                onClickSort = onClickSort
-            )
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                UstadListSortHeader(
+                    activeSortOrderOption = uiState.sortOption,
+                    onClickSort = onClickSort
+                )
+
+                IconButton(
+                    onClick = {
+                        onClickAddRecipient()
+                    },
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "",
+                    )
+                }
+            }
         }
         
         items(
