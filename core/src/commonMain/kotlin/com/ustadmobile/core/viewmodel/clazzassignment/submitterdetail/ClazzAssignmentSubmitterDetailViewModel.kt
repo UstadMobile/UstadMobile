@@ -2,12 +2,24 @@ package com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail
 
 import com.ustadmobile.core.db.dao.CourseAssignmentMarkDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.util.ext.whenSubscribed
+import com.ustadmobile.core.viewmodel.DetailViewModel
+import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
+import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import org.kodein.di.DI
 import kotlin.math.max
 
 /**
@@ -54,7 +66,7 @@ data class ClazzAssignmentSubmitterDetailUiState(
         MessageIdOption2(MessageID.all, CourseAssignmentMarkDaoCommon.ARG_FILTER_ALL_SCORES)
     ),
 
-    val privateCommentsList: List<CommentsAndName> = emptyList(),
+    val privateCommentsList: ListPagingSourceFactory<CommentsAndName> = { EmptyPagingSource() },
 
     val newPrivateCommentText: String = "",
 
@@ -101,9 +113,76 @@ data class ClazzAssignmentSubmitterDetailUiState(
  * Shows a list of the submissions, grades, and comments for any given submitter. This screen is
  * where a teacher or peer can record a mark for a submitter.
  */
-class ClazzAssignmentSubmitterDetailViewModel {
+class ClazzAssignmentSubmitterDetailViewModel(
+    di: DI,
+    savedStateHandle: UstadSavedStateHandle,
+): DetailViewModel<CourseAssignmentSubmission>(di, savedStateHandle, DEST_NAME) {
+
+    private val _uiState = MutableStateFlow(ClazzAssignmentSubmitterDetailUiState())
+
+    val uiState: Flow<ClazzAssignmentSubmitterDetailUiState> = _uiState.asStateFlow()
+
+    private val assignmentUid = savedStateHandle[ARG_ASSIGNMENT_UID]?.toLong()
+        ?: throw IllegalArgumentException("No assignmentUid")
+
+    private val submitterUid = savedStateHandle[ARG_SUBMITTER_UID]?.toLong()
+        ?: throw IllegalArgumentException("No submitter uid")
+
+    private val privateCommentsPagingSourceFactory: ListPagingSourceFactory<CommentsAndName> = {
+        activeRepo.commentsDao.findPrivateCommentsForSubmitterByAssignmentUid(
+            submitterUid = submitterUid,
+            assignmentUid = assignmentUid
+        )
+    }
+
+    init {
+        viewModelScope.launch {
+            _uiState.update { prev ->
+                prev.copy(
+                    privateCommentsList = privateCommentsPagingSourceFactory,
+                    activeUserPersonUid = activeUserPersonUid,
+                )
+            }
+
+            _uiState.whenSubscribed {
+                launch {
+                    activeRepo.courseBlockDao.findCourseBlockByAssignmentUid(assignmentUid).collect {
+                        _uiState.update { prev ->
+                            prev.copy(courseBlock = it)
+                        }
+                    }
+                }
+
+                launch {
+                    activeRepo.courseAssignmentSubmissionDao.getAllSubmissionsFromSubmitterAsFlow(
+                        submitterUid = submitterUid,
+                        assignmentUid = assignmentUid
+                    ).collect {
+                        _uiState.update { prev ->
+                            prev.copy(submissionList = it)
+                        }
+                    }
+                }
+
+                launch {
+                    activeRepo.courseAssignmentMarkDao.getAllMarksForSubmitterAsFlow(
+                        submitterUid= submitterUid,
+                        assignmentUid = assignmentUid
+                    ).collect{
+                        _uiState.update { prev ->
+                            prev.copy(marks = it)
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     companion object {
+
+        const val ARG_ASSIGNMENT_UID = "assignmentUid"
+
+        const val ARG_SUBMITTER_UID = "submitterUid"
 
         const val DEST_NAME = "CourseAssignmentSubmitter"
 

@@ -12,10 +12,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Pending
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.util.MessageIdOption2
@@ -34,7 +38,8 @@ import com.ustadmobile.port.android.view.clazzassignment.CommentListItem
 import com.ustadmobile.port.android.view.clazzassignment.CourseAssignmentSubmissionListItem
 import com.ustadmobile.port.android.view.clazzassignment.UstadCourseAssignmentMarkListItem
 import com.ustadmobile.port.android.view.composable.*
-
+import androidx.paging.compose.items
+import com.ustadmobile.core.paging.ListPagingSource
 
 interface ClazzAssignmentDetailStudentProgressFragmentEventHandler {
 
@@ -69,6 +74,16 @@ fun ClazzAssignmentDetailStudentProgressScreen(
     onClickOpenSubmission: (CourseAssignmentSubmission) -> Unit = {},
     onChangeDraftMark: (CourseAssignmentMark?) -> Unit = {},
 ){
+
+    val privateCommentsPager = remember(uiState.privateCommentsList) {
+        Pager(
+            pagingSourceFactory = uiState.privateCommentsList,
+            config = PagingConfig(pageSize = 50, enablePlaceholders = true)
+        )
+    }
+
+    val privateCommentsLazyPagingItems = privateCommentsPager.flow.collectAsLazyPagingItems()
+
 
     LazyColumn (
         modifier = Modifier
@@ -186,7 +201,7 @@ fun ClazzAssignmentDetailStudentProgressScreen(
         }
 
         items(
-            items = uiState.privateCommentsList,
+            items = privateCommentsLazyPagingItems,
             key = { Pair(Comments.TABLE_ID, it.comment.commentsUid) }
         ) { comment ->
             CommentListItem(commentAndName = comment)
@@ -229,15 +244,17 @@ fun ClazzAssignmentDetailStudentProgressScreenPreview(){
                 markerLastName = "Smith",
             )
         ),
-        privateCommentsList = listOf(
-            CommentsAndName(
-                comment = Comments().apply {
-                    commentsText = "I like this activity. Shall we discuss this in our next meeting?"
-                },
-                firstNames = "Bob",
-                lastName = "Dylan"
-            )
-        ),
+        privateCommentsList = {
+            ListPagingSource(listOf(
+                CommentsAndName(
+                    comment = Comments().apply {
+                        commentsText = "I like this activity. Shall we discuss this in our next meeting?"
+                    },
+                    firstNames = "Bob",
+                    lastName = "Dylan"
+                )
+            ))
+        },
     )
 
 

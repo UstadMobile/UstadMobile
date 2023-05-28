@@ -152,6 +152,21 @@ expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
     ): Flow<List<CourseAssignmentMarkAndMarkerName>>
 
     @Query("""
+        SELECT CourseAssignmentMark.*,
+               Person.firstNames AS markerFirstNames,
+               Person.lastName AS markerLastName
+          FROM CourseAssignmentMark
+               LEFT JOIN Person
+                         ON Person.personUid = CourseAssignmentMark.camMarkerPersonUid
+         WHERE CourseAssignmentMark.camAssignmentUid = :assignmentUid
+           AND CourseAssignmentMark.camSubmitterUid = :submitterUid                         
+    """)
+    abstract fun getAllMarksForSubmitterAsFlow(
+        submitterUid: Long,
+        assignmentUid: Long,
+    ): Flow<List<CourseAssignmentMarkAndMarkerName>>
+
+    @Query("""
           WITH ScoreByMarker AS (
                  SELECT *
                    FROM courseAssignmentMark    

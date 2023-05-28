@@ -110,6 +110,18 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
     @Query("""
         SELECT CourseAssignmentSubmission.*
           FROM CourseAssignmentSubmission
+         WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
+           AND CourseAssignmentSubmission.casSubmitterUid = :submitterUid
+      ORDER BY CourseAssignmentSubmission.casTimestamp DESC      
+    """)
+    abstract fun getAllSubmissionsFromSubmitterAsFlow(
+        submitterUid: Long,
+        assignmentUid: Long,
+    ): Flow<List<CourseAssignmentSubmission>>
+
+    @Query("""
+        SELECT CourseAssignmentSubmission.*
+          FROM CourseAssignmentSubmission
          WHERE casSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
       ORDER BY casTimestamp DESC
          LIMIT 1

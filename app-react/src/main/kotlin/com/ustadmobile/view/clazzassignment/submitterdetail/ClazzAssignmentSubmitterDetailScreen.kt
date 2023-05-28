@@ -3,12 +3,14 @@ package com.ustadmobile.view.clazzassignment.submitterdetail
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
+import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.mapLookupOrBlank
 import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants.SUBMISSION_STAUTUS_MESSAGE_ID
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailUiState
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.hooks.useMuiAppState
+import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.*
@@ -58,6 +60,11 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
     val strings: StringsXml = useStringsXml()
 
     val muiAppState = useMuiAppState()
+
+    val commentsInfiniteQueryResult = usePagingSource(
+        pagingSourceFactory = props.uiState.privateCommentsList,
+        placeholdersEnabled = true,
+    )
 
     VirtualList {
         style = jso {
@@ -171,15 +178,14 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
                 }
             }
 
-            items(
-                list = props.uiState.privateCommentsList,
+            infiniteQueryPagingItems(
+                items = commentsInfiniteQueryResult,
                 key = { it.comment.commentsUid.toString() }
             ) { comment ->
                 UstadCommentListItem.create {
                     commentsAndName = comment
                 }
             }
-
         }
 
         Container {
@@ -221,15 +227,17 @@ val ClazzAssignmentSubmitterDetailScreenPreview = FC<Props> {
                 markerLastName = "Smith",
             )
         ),
-        privateCommentsList = listOf(
-            CommentsAndName(
-                comment = Comments().apply {
-                    commentsText = "I like this activity. Shall we discuss this in our next meeting?"
-                },
-                firstNames = "Bob",
-                lastName = "Dylan"
-            )
-        ),
+        privateCommentsList = {
+            ListPagingSource(listOf(
+                CommentsAndName(
+                    comment = Comments().apply {
+                        commentsText = "I like this activity. Shall we discuss this in our next meeting?"
+                    },
+                    firstNames = "Bob",
+                    lastName = "Dylan"
+                )
+            ))
+        },
     )
 
     ClazzAssignmentSubmitterDetailComponent {

@@ -187,6 +187,23 @@ expect abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments
           FROM Comments
                LEFT JOIN Person 
                     ON Person.personUid = Comments.commentsPersonUid
+         WHERE Comments.commentSubmitterUid = :submitterUid
+           AND Comments.commentsEntityUid = :assignmentUid
+           AND NOT Comments.commentsInActive
+      ORDER BY Comments.commentsDateTimeAdded DESC        
+    """)
+    abstract fun findPrivateCommentsForSubmitterByAssignmentUid(
+        submitterUid: Long,
+        assignmentUid: Long,
+    ): PagingSource<Int, CommentsAndName>
+
+    @Query("""
+        SELECT Comments.*,
+               Person.firstNames AS firstNames, 
+               Person.lastName AS lastName
+          FROM Comments
+               LEFT JOIN Person 
+                    ON Person.personUid = Comments.commentsPersonUid
          WHERE Comments.commentsEntityUid = :assignmentUid
            AND Comments.commentSubmitterUid = 0
       ORDER BY Comments.commentsDateTimeAdded DESC     

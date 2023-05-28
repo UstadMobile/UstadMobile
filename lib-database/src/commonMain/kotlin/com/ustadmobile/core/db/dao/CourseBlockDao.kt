@@ -385,4 +385,15 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     abstract suspend fun findClazzUidByCourseBlockUid(
         courseBlockUid: Long
     ): Long
+
+    @Query("""
+        SELECT CourseBlock.*
+          FROM CourseBlock
+         WHERE CourseBlock.cbEntityUid = :assignmentUid
+           AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+         LIMIT 1 
+    """)
+    abstract fun findCourseBlockByAssignmentUid(
+        assignmentUid: Long
+    ): Flow<CourseBlock?>
 }
