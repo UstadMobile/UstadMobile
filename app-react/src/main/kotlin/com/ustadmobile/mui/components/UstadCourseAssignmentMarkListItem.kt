@@ -2,6 +2,7 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.util.ext.penaltyPercentage
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.hooks.useFormattedTime
 import com.ustadmobile.lib.db.entities.CourseAssignmentMarkWithPersonMarker
@@ -12,6 +13,7 @@ import js.core.jso
 import mui.icons.material.EmojiEvents
 import mui.icons.material.Person2
 import mui.material.*
+import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import mui.system.sx
 import react.FC
@@ -19,6 +21,7 @@ import react.Props
 import react.ReactNode
 import react.create
 import react.dom.html.ReactHTML.span
+import kotlin.math.roundToInt
 
 external interface UstadCourseAssignmentMarkListItemProps : Props {
 
@@ -56,43 +59,47 @@ val UstadCourseAssignmentMarkListItem = FC<UstadCourseAssignmentMarkListItemProp
                 }
             }
 
-            ListItemText {
-                primary = ReactNode(text)
-                secondary = Stack.create {
-                    direction = responsive(StackDirection.column)
+            Stack {
+                Typography {
+                    variant = TypographyVariant.body1
+                    + text
+                }
 
-                    Stack {
-                        direction = responsive(StackDirection.row)
+                Stack {
+                    direction = responsive(StackDirection.row)
 
-                        Icon {
-                            + EmojiEvents.create()
-                        }
+                    Icon {
+                        color = IconColor.action
+                        fontSize = IconSize.small
 
-                        Typography {
-                            + ("${props.uiState.mark.camMark}/${props.uiState.block.cbMaxPoints}" +
-                                    " ${strings[MessageID.points]}")
+                        + EmojiEvents.create()
+                    }
 
-                            + " "
+                    Typography {
+                        variant = TypographyVariant.caption
+                        + "${props.uiState.mark.camMark}/${props.uiState.mark.camMaxMark}"
+                        + " ${strings[MessageID.points]}"
+                        + " "
 
-                            if (props.uiState.camPenaltyVisible) {
-                                span { style = jso {
+                        if (props.uiState.camPenaltyVisible) {
+                            span {
+                                style = jso {
                                     color = rgba(255, 0,0, 1.0)
                                 }
-                                    child(ReactNode(
-                                        strings[MessageID.late_penalty]
-                                            .replace("%1\$s", (
-                                                    props.uiState.block.cbLateSubmissionPenalty)
-                                                .toString())
-                                    ))
-                                }
+
+                                +strings[MessageID.late_penalty]
+                                    .replace(
+                                        oldValue = "%1\$s",
+                                        newValue = props.uiState.mark.penaltyPercentage().toString()
+                                    )
                             }
                         }
                     }
+                }
 
-
-                    Typography {
-                        + (props.uiState.mark.camMarkerComment ?: "")
-                    }
+                Typography {
+                    variant = TypographyVariant.caption
+                    + (props.uiState.mark.camMarkerComment ?: "")
                 }
             }
         }
@@ -113,7 +120,7 @@ val UstadCourseAssignmentMarkListItemPreview = FC<Props> {
                     isGroup = true
                     camMarkerSubmitterUid = 2
                     camMarkerComment = "Comment"
-                    camPenalty = 3
+                    camPenalty = 3f
                 }
             }
         )

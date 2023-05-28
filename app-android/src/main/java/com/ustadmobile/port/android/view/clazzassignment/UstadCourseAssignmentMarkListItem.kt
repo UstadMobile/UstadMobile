@@ -7,6 +7,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.ListItem
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -19,10 +20,14 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.util.ext.penaltyPercentage
+import com.ustadmobile.core.util.ext.roundTo
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.CourseAssignmentMarkWithPersonMarker
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.port.android.util.compose.rememberFormattedTime
+import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import java.util.TimeZone
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -38,7 +43,11 @@ fun UstadCourseAssignmentMarkListItem(
         text += "  (${stringResource(R.string.group_number, uiState.mark.camMarkerSubmitterUid)})"
     }
 
-    val formattedTime = rememberFormattedTime(uiState.mark.camLct.toInt())
+    val formattedTime = rememberFormattedDateTime(
+        timeInMillis = uiState.mark.camLct,
+        timeZoneId = TimeZone.getDefault().id,
+        joinDateAndTime = { date, time -> "$date\n$time" }
+    )
 
     ListItem(
         modifier = modifier.clickable {
@@ -62,21 +71,34 @@ fun UstadCourseAssignmentMarkListItem(
                     )
                     Text(
                         buildAnnotatedString {
-                            append("${uiState.mark.camMark}/${uiState.block.cbMaxPoints}" +
-                                    " ${stringResource(R.string.points)}")
-
+                            append("${uiState.mark.camMark.roundTo(2)}")
+                            append("/${uiState.mark.camMaxMark.roundTo(2)}")
+                            append(" ${stringResource(R.string.points)}")
 
                             if (uiState.camPenaltyVisible){
                                 withStyle(style = SpanStyle(color = colorResource(R.color.errorColor)))
                                 {
-                                    append("  "+stringResource(R.string.late_penalty,
-                                        uiState.block.cbLateSubmissionPenalty))
+                                    append(" ")
+                                    append(
+                                        stringResource(R.string.late_penalty,
+                                            uiState.mark.penaltyPercentage())
+                                    )
                                 }
                             }
                         }
                     )
                 }
-                Text(uiState.mark.camMarkerComment ?: "")
+
+                Row {
+                    Icon(
+                        Icons.Filled.Chat,
+                        contentDescription = "",
+                        modifier = Modifier.size(16.dp)
+                    )
+
+                    Text(uiState.mark.camMarkerComment ?: "")
+                }
+
             }
         },
         trailing = {
@@ -94,11 +116,14 @@ private fun UstadMarksPersonListItemPreview() {
                 marker = Person().apply {
                     firstNames = "John"
                     lastName = "Smith"
-                    isGroup = true
-                    camMarkerSubmitterUid = 2
-                    camMarkerComment = "Comment"
-                    camPenalty = 3
                 }
+                isGroup = true
+                camMarkerSubmitterUid = 2
+                camMarkerComment = "Comment"
+                camMark = 8.1f
+                camPenalty = 0.9f
+                camMaxMark = 10f
+                camLct = systemTimeInMillis()
             }
         )
     )

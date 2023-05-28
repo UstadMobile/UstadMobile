@@ -187,7 +187,7 @@
 
     <fragment
         android:id="@+id/clazz_assignment_detail_student_progress"
-        android:name="com.ustadmobile.port.android.view.ClazzAssignmentDetailStudentProgressFragment"/>
+        android:name="com.ustadmobile.port.android.view.clazzassignment.submitterdetail.ClazzAssignmentDetailStudentProgressFragment"/>
 
     <fragment
         android:id="@+id/content_entry_list_dest"
