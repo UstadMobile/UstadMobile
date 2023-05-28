@@ -31,8 +31,6 @@ external interface UstadCourseAssignmentMarkListItemProps : Props {
 
     var uiState: UstadCourseAssignmentMarkListItemUiState
 
-    var onClickMark: (CourseAssignmentMarkAndMarkerName) -> Unit
-
 }
 
 val UstadCourseAssignmentMarkListItem = FC<UstadCourseAssignmentMarkListItemProps> { props ->
@@ -54,85 +52,80 @@ val UstadCourseAssignmentMarkListItem = FC<UstadCourseAssignmentMarkListItemProp
     )
 
     ListItem{
-        ListItemButton {
-            onClick = {
-                props.onClickMark(props.uiState.mark)
-            }
-
-            ListItemIcon {
-                + Person2.create {
-                    sx {
-                        width = 40.px
-                        height = 40.px
-                    }
-                }
-            }
-
-            Stack {
+        ListItemIcon {
+            + Person2.create {
                 sx {
-                    width = 100.pct
+                    width = 40.px
+                    height = 40.px
+                }
+            }
+        }
+
+        Stack {
+            sx {
+                width = 100.pct
+            }
+
+            Box {
+                sx {
+                    display = Display.flex
+                    justifyContent = JustifyContent.spaceBetween
                 }
 
-                Box {
-                    sx {
-                        display = Display.flex
-                        justifyContent = JustifyContent.spaceBetween
-                    }
-
-                    Typography {
-                        variant = TypographyVariant.body1
-                        + text
-                    }
-
-                    Typography {
-                        variant = TypographyVariant.caption
-                        + formattedTime
-                    }
-
-                }
-
-
-                Stack {
-                    direction = responsive(StackDirection.row)
-                    spacing = responsive(theme.spacing(1))
-
-                    Icon {
-                        color = IconColor.action
-                        fontSize = IconSize.small
-
-                        + EmojiEvents.create()
-                    }
-
-                    Typography {
-                        variant = TypographyVariant.caption
-                        + "${props.uiState.mark.courseAssignmentMark?.camMark}"
-                        + "/${props.uiState.mark.courseAssignmentMark?.camMaxMark}"
-                        + " ${strings[MessageID.points]}"
-                        + " "
-
-                        if (props.uiState.camPenaltyVisible) {
-                            span {
-                                style = jso {
-                                    color = rgba(255, 0,0, 1.0)
-                                }
-
-                                +strings[MessageID.late_penalty]
-                                    .replace(
-                                        oldValue = "%1\$s",
-                                        newValue = props.uiState.mark.courseAssignmentMark?.penaltyPercentage().toString()
-                                    )
-                            }
-                        }
-                    }
+                Typography {
+                    variant = TypographyVariant.body1
+                    + text
                 }
 
                 Typography {
                     variant = TypographyVariant.caption
-                    + (props.uiState.mark.courseAssignmentMark?.camMarkerComment ?: "")
+                    + formattedTime
                 }
+
+            }
+
+
+            Stack {
+                direction = responsive(StackDirection.row)
+                spacing = responsive(theme.spacing(1))
+
+                Icon {
+                    color = IconColor.action
+                    fontSize = IconSize.small
+
+                    + EmojiEvents.create()
+                }
+
+                Typography {
+                    variant = TypographyVariant.caption
+                    + "${props.uiState.mark.courseAssignmentMark?.camMark}"
+                    + "/${props.uiState.mark.courseAssignmentMark?.camMaxMark}"
+                    + " ${strings[MessageID.points]}"
+                    + " "
+
+                    if (props.uiState.camPenaltyVisible) {
+                        span {
+                            style = jso {
+                                color = rgba(255, 0,0, 1.0)
+                            }
+
+                            +strings[MessageID.late_penalty]
+                                .replace(
+                                    oldValue = "%1\$s",
+                                    newValue = props.uiState.mark.courseAssignmentMark?.penaltyPercentage().toString()
+                                )
+                        }
+                    }
+                }
+            }
+
+            Typography {
+                variant = TypographyVariant.caption
+                + (props.uiState.mark.courseAssignmentMark?.camMarkerComment ?: "")
             }
         }
     }
+
 }
 
 val UstadCourseAssignmentMarkListItemPreview = FC<Props> {

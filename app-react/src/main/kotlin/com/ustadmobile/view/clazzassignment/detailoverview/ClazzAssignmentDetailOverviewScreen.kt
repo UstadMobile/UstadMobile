@@ -60,8 +60,6 @@ external interface ClazzAssignmentDetailOverviewScreenProps : Props {
 
     var onClickFilterChip: (MessageIdOption2) -> Unit
 
-    var onClickMark: (CourseAssignmentMarkAndMarkerName) -> Unit
-
     var onChangeCourseComment: (String) -> Unit
 
     var onChangePrivateComment: (String) -> Unit
@@ -280,7 +278,6 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                     key = { "mark_${it.courseAssignmentMark?.camUid}"}
                 ) { markItem ->
                     UstadCourseAssignmentMarkListItem.create {
-                        onClickMark = props.onClickMark
                         uiState = UstadCourseAssignmentMarkListItemUiState(
                             mark = markItem,
                         )
