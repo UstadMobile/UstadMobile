@@ -6,8 +6,7 @@ import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.mapLookupOrBlank
 import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants.SUBMISSION_STAUTUS_MESSAGE_ID
-import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentDetailStudentProgressUiState
-import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionHeaderUiState
+import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailUiState
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.entities.*
@@ -32,9 +31,9 @@ import mui.icons.material.EmojiEvents as EmojiEventsIcon
 import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
 import com.ustadmobile.view.clazzassignment.UstadCommentListItem
 
-external interface ClazzAssignmentDetailStudentProgressScreenProps : Props {
+external interface ClazzAssignmentSubmitterDetailProps : Props {
 
-    var uiState: ClazzAssignmentDetailStudentProgressUiState
+    var uiState: ClazzAssignmentSubmitterDetailUiState
 
     var onClickSubmitGrade: () -> Unit
 
@@ -52,23 +51,11 @@ external interface ClazzAssignmentDetailStudentProgressScreenProps : Props {
 
 }
 
-val ClazzAssignmentDetailStudentProgressScreenComponent2 = FC<ClazzAssignmentDetailStudentProgressScreenProps> { props ->
+val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailProps> { props ->
 
     val strings: StringsXml = useStringsXml()
 
     val muiAppState = useMuiAppState()
-
-    val markFileSubmissionSubmitGradeAndNextText = if (props.uiState.submissionScore == null)
-        MessageID.submit_grade_and_mark_next
-    else
-        MessageID.update_grade_and_mark_next
-
-    val markFileSubmissionSubmitGradeText = if (props.uiState.submissionScore == null)
-        MessageID.submit_grade
-    else
-        MessageID.update_grade
-
-
 
     VirtualList {
         style = jso {
@@ -133,11 +120,13 @@ val ClazzAssignmentDetailStudentProgressScreenComponent2 = FC<ClazzAssignmentDet
                 }
             }
 
-            item(key = "gradefilterchips") {
-                UstadListFilterChipsHeader.create {
-                    onClickFilterChip = props.onClickGradeFilterChip
-                    filterOptions = props.uiState.markListFilterOptions
-                    selectedChipId = props.uiState.markListSelectedChipId
+            if(props.uiState.markListFilterChipsVisible) {
+                item(key = "gradefilterchips") {
+                    UstadListFilterChipsHeader.create {
+                        onClickFilterChip = props.onClickGradeFilterChip
+                        filterOptions = props.uiState.markListFilterOptions
+                        selectedChipId = props.uiState.markListSelectedChipId
+                    }
                 }
             }
 
@@ -199,9 +188,9 @@ val ClazzAssignmentDetailStudentProgressScreenComponent2 = FC<ClazzAssignmentDet
     }
 }
 
-val ClazzAssignmentDetailStudentProgressScreenPreview = FC<Props> {
+val ClazzAssignmentSubmitterDetailScreenPreview = FC<Props> {
 
-    val uiStateVal = ClazzAssignmentDetailStudentProgressUiState(
+    val uiStateVal = ClazzAssignmentSubmitterDetailUiState(
         courseBlock = CourseBlock().apply {
             cbMaxPoints = 50
         },
@@ -240,7 +229,7 @@ val ClazzAssignmentDetailStudentProgressScreenPreview = FC<Props> {
         ),
     )
 
-    ClazzAssignmentDetailStudentProgressScreenComponent2 {
+    ClazzAssignmentSubmitterDetailComponent {
         uiState = uiStateVal
     }
 }

@@ -24,7 +24,7 @@ import kotlin.math.max
  * @param privateCommentsList list of private comments for this submitter
  * @param newPrivateCommentText private comment text currently being drafted by user on screen
  */
-data class ClazzAssignmentDetailStudentProgressUiState(
+data class ClazzAssignmentSubmitterDetailUiState(
 
     val submitMarkError: String? = null,
 
@@ -94,7 +94,11 @@ data class ClazzAssignmentDetailStudentProgressUiState(
 
 }
 
-class ClazzAssignmentDetailStudentProgressViewModel {
+/**
+ * Shows a list of the submissions, grades, and comments for any given submitter. This screen is
+ * where a teacher or peer can record a mark for a submitter.
+ */
+class ClazzAssignmentSubmitterDetailViewModel {
 
     companion object {
 

@@ -90,8 +90,7 @@ val UstadCourseAssignmentMarkListItem = FC<UstadCourseAssignmentMarkListItemProp
                                 +strings[MessageID.late_penalty]
                                     .replace(
                                         oldValue = "%1\$s",
-                                        newValue = props.uiState.mark.penaltyPercentage()
-                                            .roundToInt().toString()
+                                        newValue = props.uiState.mark.penaltyPercentage().toString()
                                     )
                             }
                         }

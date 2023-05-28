@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 109,
-    "identityHash": "385aa111da23e742835b2ec41b9a522c",
+    "identityHash": "288706adbda003605bdb8c8662c3d2df",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5604,7 +5604,7 @@
       },
       {
         "tableName": "CourseAssignmentMark",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`camUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `camAssignmentUid` INTEGER NOT NULL, `camSubmitterUid` INTEGER NOT NULL, `camMarkerSubmitterUid` INTEGER NOT NULL DEFAULT 0, `camMarkerPersonUid` INTEGER NOT NULL DEFAULT 0, `camMarkerComment` TEXT, `camMark` REAL NOT NULL, `camPenalty` INTEGER NOT NULL, `camLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`camUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `camAssignmentUid` INTEGER NOT NULL, `camSubmitterUid` INTEGER NOT NULL, `camMarkerSubmitterUid` INTEGER NOT NULL DEFAULT 0, `camMarkerPersonUid` INTEGER NOT NULL DEFAULT 0, `camMarkerComment` TEXT, `camMark` REAL NOT NULL, `camMaxMark` REAL NOT NULL DEFAULT 1, `camPenalty` REAL NOT NULL, `camLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "camUid",
@@ -5651,9 +5651,16 @@
             "notNull": true
           },
           {
+            "fieldPath": "camMaxMark",
+            "columnName": "camMaxMark",
+            "affinity": "REAL",
+            "notNull": true,
+            "defaultValue": "1"
+          },
+          {
             "fieldPath": "camPenalty",
             "columnName": "camPenalty",
-            "affinity": "INTEGER",
+            "affinity": "REAL",
             "notNull": true
           },
           {
@@ -11244,7 +11251,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '385aa111da23e742835b2ec41b9a522c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '288706adbda003605bdb8c8662c3d2df')"
     ]
   }
 }
