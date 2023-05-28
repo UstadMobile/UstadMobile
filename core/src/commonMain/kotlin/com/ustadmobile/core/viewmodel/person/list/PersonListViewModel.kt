@@ -138,8 +138,8 @@ class PersonListViewModel(
         navigateForResult(
             InviteStudentsViewModel.DEST_NAME,
             key = RESULT_KEY_SITE_LINK,
-            currentValue = "",
-            serializer = String.serializer()
+            currentValue = _uiState.value.showAddItem,
+            serializer = Boolean.serializer()
         )
     }
 
