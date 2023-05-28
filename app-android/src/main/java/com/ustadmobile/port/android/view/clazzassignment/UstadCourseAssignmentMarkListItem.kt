@@ -7,6 +7,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.ListItem
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -22,6 +23,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.util.ext.penaltyPercentage
 import com.ustadmobile.core.util.ext.roundTo
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.CourseAssignmentMarkWithPersonMarker
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
@@ -86,7 +88,17 @@ fun UstadCourseAssignmentMarkListItem(
                         }
                     )
                 }
-                Text(uiState.mark.camMarkerComment ?: "")
+
+                Row {
+                    Icon(
+                        Icons.Filled.Chat,
+                        contentDescription = "",
+                        modifier = Modifier.size(16.dp)
+                    )
+
+                    Text(uiState.mark.camMarkerComment ?: "")
+                }
+
             }
         },
         trailing = {
@@ -104,14 +116,14 @@ private fun UstadMarksPersonListItemPreview() {
                 marker = Person().apply {
                     firstNames = "John"
                     lastName = "Smith"
-                    isGroup = true
-                    camMarkerSubmitterUid = 2
-                    camMarkerComment = "Comment"
-                    camMark = 8.1f
-                    camPenalty = 0.9f
-                    camMaxMark = 10f
-
                 }
+                isGroup = true
+                camMarkerSubmitterUid = 2
+                camMarkerComment = "Comment"
+                camMark = 8.1f
+                camPenalty = 0.9f
+                camMaxMark = 10f
+                camLct = systemTimeInMillis()
             }
         )
     )
