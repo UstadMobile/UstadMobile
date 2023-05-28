@@ -24,7 +24,7 @@ data class InviteStudentsUiState(
 ) {
 
     val addRecipientVisible: Boolean
-        get() = textField.validEmail() && isValidPhoneNumber(textField)
+        get() = textField.validEmail() || isValidPhoneNumber(textField)
 
 }
 

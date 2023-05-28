@@ -8,13 +8,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
+import androidx.compose.material.Card
 import androidx.compose.material.Chip
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FilterChip
 import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -91,15 +94,15 @@ private fun InviteStudentsScreen(
         items(
             items = uiState.recipients,
             key = { recipient -> recipient }
-        ){ student ->
+        ){ recipient ->
             Chip(
                 onClick = { },
                 enabled = true,
-//                leadingIcon = {
-//                    Icon(Icons.Default.Book, contentDescription = null)
-//                },
+                leadingIcon = {
+                    Icon(Icons.Default.Book, contentDescription = null)
+                },
             ) {
-                Text("student.fullName()")
+                Text(recipient)
             }
         }
 
@@ -120,19 +123,42 @@ private fun InviteStudentsScreen(
 
         item {
             if (uiState.addRecipientVisible){
-                Button(
+                TextButton(
                     onClick = {
                         onClickAddRecipient()
                     }
                 ) {
-                    Row {
-                        Column {
-                            Text("")
-                            Text("")
-                        }
-
-                        UstadPersonAvatar(personUid = 0)
+                    Column {
+                        Text(stringResource(R.string.add_recipient))
+                        Text(uiState.textField)
                     }
+                }
+            }
+        }
+
+        item {
+            Card {
+                Row {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = null
+                    )
+                    Text(text = stringResource(R.string.class_id))
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(
+                        onClick = {},
+                        content = { Text(stringResource(R.string.share)) }
+                    )
+
+                    TextButton(
+                        onClick = {},
+                        content = { Text(stringResource(R.string.copy_link)) }
+                    )
                 }
             }
         }
