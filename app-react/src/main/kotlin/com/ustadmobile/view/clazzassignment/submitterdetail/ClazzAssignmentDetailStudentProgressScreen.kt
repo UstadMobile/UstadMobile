@@ -11,9 +11,7 @@ import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionH
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.clazzassignment.CourseAssignmentSubmissionListItem
 import com.ustadmobile.view.clazzassignment.SUBMISSION_STATUS_ICON_MAP
 import com.ustadmobile.view.components.UstadDetailHeader
@@ -31,14 +29,8 @@ import react.Props
 import react.ReactNode
 import react.create
 import mui.icons.material.EmojiEvents as EmojiEventsIcon
-import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
 import com.ustadmobile.view.clazzassignment.UstadCommentListItem
-import csstype.Display
-import csstype.JustifyContent
-import mui.system.responsive
-import mui.system.sx
-import react.useRequiredContext
 
 external interface ClazzAssignmentDetailStudentProgressScreenProps : Props {
 
@@ -144,13 +136,13 @@ val ClazzAssignmentDetailStudentProgressScreenComponent2 = FC<ClazzAssignmentDet
             item(key = "gradefilterchips") {
                 UstadListFilterChipsHeader.create {
                     onClickFilterChip = props.onClickGradeFilterChip
-                    filterOptions = props.uiState.gradeFilterOptions
-                    selectedChipId = props.uiState.selectedChipId
+                    filterOptions = props.uiState.markListFilterOptions
+                    selectedChipId = props.uiState.markListSelectedChipId
                 }
             }
 
             items(
-                list = props.uiState.submittedMarks,
+                list = props.uiState.marks,
                 key = { "grade_${it.camUid}"}
             ){ mark ->
                 UstadCourseAssignmentMarkListItem.create {
@@ -210,12 +202,6 @@ val ClazzAssignmentDetailStudentProgressScreenComponent2 = FC<ClazzAssignmentDet
 val ClazzAssignmentDetailStudentProgressScreenPreview = FC<Props> {
 
     val uiStateVal = ClazzAssignmentDetailStudentProgressUiState(
-        submissionHeaderUiState = UstadAssignmentSubmissionHeaderUiState(
-            assignmentStatus = CourseAssignmentSubmission.MARKED,
-            assignmentMark = AverageCourseAssignmentMark().apply {
-                averagePenalty = 12
-            }
-        ),
         courseBlock = CourseBlock().apply {
             cbMaxPoints = 50
         },
@@ -230,7 +216,7 @@ val ClazzAssignmentDetailStudentProgressScreenPreview = FC<Props> {
                 casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
             },
         ),
-        submittedMarks = listOf(
+        marks = listOf(
             CourseAssignmentMarkWithPersonMarker().apply {
                 marker = Person().apply {
                     firstNames = "John"

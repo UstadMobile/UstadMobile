@@ -4,21 +4,29 @@ import com.ustadmobile.core.db.dao.CourseAssignmentMarkDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.entities.*
+import kotlin.math.max
 
 /**
- * @param submittedMarks Marks for this submitter that have been submitted (e.g. in the database)
+ *
+ * @param submitMarkError Error message to be shown for mark textfield e.g. if not a valid number etc
+ * @param submissionList a list of the submissions from this submitter (group or student)
+ * @param submissionAttachments attachments for the submissions (if any)
+ * @param marks Marks for this submitter that have been recorded (e.g. they are in the database)
  * @param draftMark mark for the given submitter that is being edited/drafted on screen (e.g. for
  * the currently active user to submit)
+ * @param markNextStudentVisible if true, show a button for the marker to record the mark for the
+ * current submitter and move to the next submission that requires marking.
+ * @param markListFilterChipsVisible If there are previous (superceded) grades, the use should see
+ * filter chips with the option to see all, or only the latest.
+ * @param privateCommentsList list of private comments for this submitter
+ * @param newPrivateCommentText private comment text currently being drafted by user on screen
  */
 data class ClazzAssignmentDetailStudentProgressUiState(
 
     val submitMarkError: String? = null,
-
-    val submitterName: String = "",
 
     val courseBlock: CourseBlock? = null,
 
@@ -28,26 +36,19 @@ data class ClazzAssignmentDetailStudentProgressUiState(
 
     val submissionAttachments: List<CourseAssignmentSubmissionAttachment> = emptyList(),
 
-    val submittedMarks: List<CourseAssignmentMarkWithPersonMarker> = emptyList(),
+    val marks: List<CourseAssignmentMarkWithPersonMarker> = emptyList(),
 
     val draftMark: CourseAssignmentMark? = null,
 
-    val submissionScore: AverageCourseAssignmentMark? = null,
-
     val markNextStudentVisible: Boolean =  true,
-
-    val markStudentVisible: Boolean = true,
-
-    val assignment: ClazzAssignmentWithCourseBlock? = null,
 
     val fieldsEnabled: Boolean = true,
 
-    val submissionHeaderUiState: UstadAssignmentSubmissionHeaderUiState =
-        UstadAssignmentSubmissionHeaderUiState(),
+    val markListFilterChipsVisible: Boolean = true,
 
-    val selectedChipId: Int = CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES,
+    val markListSelectedChipId: Int = CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES,
 
-    val gradeFilterOptions: List<MessageIdOption2> = listOf(
+    val markListFilterOptions: List<MessageIdOption2> = listOf(
         MessageIdOption2(MessageID.most_recent, CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES),
         MessageIdOption2(MessageID.all, CourseAssignmentMarkDaoCommon.ARG_FILTER_ALL_SCORES)
     ),
@@ -63,15 +64,15 @@ data class ClazzAssignmentDetailStudentProgressUiState(
     val submissionStatus: Int
         get() {
             return when {
-                submittedMarks.isNotEmpty() -> CourseAssignmentSubmission.MARKED
+                marks.isNotEmpty() -> CourseAssignmentSubmission.MARKED
                 submissionList.isNotEmpty() -> CourseAssignmentSubmission.SUBMITTED
                 else -> CourseAssignmentSubmission.NOT_SUBMITTED
             }
         }
 
     private val latestUniqueMarksByMarker: List<CourseAssignmentMarkWithPersonMarker>
-        get() = submittedMarks.filter { markWithMarker ->
-            markWithMarker.camLct == submittedMarks.filter {
+        get() = marks.filter { markWithMarker ->
+            markWithMarker.camLct == marks.filter {
                 it.camMarkerSubmitterUid == markWithMarker.camMarkerSubmitterUid
             }.maxOf { it.camLct }
         }
@@ -79,7 +80,7 @@ data class ClazzAssignmentDetailStudentProgressUiState(
     val averageScore: Float
         get() {
             return latestUniqueMarksByMarker.let {
-                it.sumOf { it.camMark.toDouble() }.toFloat() / it.size
+                it.sumOf { it.camMark.toDouble() }.toFloat() / max(it.size, 1)
             }
         }
 
