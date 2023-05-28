@@ -6,6 +6,7 @@ import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.door.paging.PagingSource
+import com.ustadmobile.lib.db.composites.PersonNames
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Person.Companion.FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
 import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
@@ -268,5 +269,12 @@ expect abstract class PersonDao : BaseDao<Person> {
 
     @Query("SELECT * FROM Person")
     abstract fun getAllPerson(): List<Person>
+
+    @Query("""
+        SELECT Person.firstNames, Person.lastName
+          FROM Person
+         WHERE Person.personUid = :personUid  
+    """)
+    abstract suspend fun getNamesByUid(personUid: Long): PersonNames?
 
 }

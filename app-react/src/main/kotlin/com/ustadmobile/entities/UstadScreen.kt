@@ -76,6 +76,7 @@ import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditView
 import com.ustadmobile.view.clazzassignment.UstadCommentListItemPreview
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
 import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreenPreview
+import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -273,8 +274,10 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(CourseGroupSetListViewModel.DEST_NAME, "CourseGroupSetList",
         CourseGroupSetListScreen
     ),
-    UstadScreen(ClazzAssignmentSubmitterDetailViewModel.DEST_NAME, "CourseAssignmentSubmitterDetail",
+    UstadScreen("CourseAssignmentSubmitterDetailPreview", "CourseAssignmentSubmitterDetailPreview",
         ClazzAssignmentSubmitterDetailScreenPreview),
+    UstadScreen(ClazzAssignmentSubmitterDetailViewModel.DEST_NAME, "CourseAssignmentSubmitterDetail",
+        ClazzAssignmentSubmitterDetailScreen),
 )
 
 

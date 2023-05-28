@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail
 
 import com.ustadmobile.core.db.dao.CourseAssignmentMarkDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.ListFilterIdOption
@@ -11,6 +12,8 @@ import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
+import com.ustadmobile.door.paging.PagingSource
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.*
@@ -132,8 +135,13 @@ class ClazzAssignmentSubmitterDetailViewModel(
         activeRepo.commentsDao.findPrivateCommentsForSubmitterByAssignmentUid(
             submitterUid = submitterUid,
             assignmentUid = assignmentUid
-        )
+        ).also {
+            lastPrivateCommentsPagingSource?.invalidate()
+            lastPrivateCommentsPagingSource = it
+        }
     }
+
+    private var lastPrivateCommentsPagingSource: PagingSource<Int, CommentsAndName>? = null
 
     init {
         viewModelScope.launch {
@@ -141,7 +149,25 @@ class ClazzAssignmentSubmitterDetailViewModel(
                 prev.copy(
                     privateCommentsList = privateCommentsPagingSourceFactory,
                     activeUserPersonUid = activeUserPersonUid,
+                    draftMark = CourseAssignmentMark(),
                 )
+            }
+
+            launch {
+                val submitterName = if(submitterUid < CourseAssignmentSubmission.MIN_SUBMITTER_UID_FOR_PERSON) {
+                    systemImpl.getString(MessageID.group) + " " + submitterUid
+                }else {
+                    activeRepo.personDao.getNamesByUid(submitterUid)?.let {
+                        "${it.firstNames} ${it.lastName}"
+                    }
+                }
+
+                println("Set submitter name to $submitterName")
+                _appUiState.update { prev ->
+                    prev.copy(
+                        title = submitterName
+                    )
+                }
             }
 
             _uiState.whenSubscribed {
@@ -175,6 +201,44 @@ class ClazzAssignmentSubmitterDetailViewModel(
                     }
                 }
             }
+        }
+    }
+
+    fun onChangePrivateComment(text: String) {
+        _uiState.update { prev ->
+            prev.copy(
+                newPrivateCommentText = text
+            )
+        }
+    }
+
+    fun onSubmitPrivateComment() {
+        if(loadingState == LoadingUiState.INDETERMINATE)
+            return
+
+        loadingState = LoadingUiState.INDETERMINATE
+        viewModelScope.launch {
+            try {
+                activeDb.commentsDao.insertAsync(Comments().apply {
+                    commentSubmitterUid = submitterUid
+                    commentsPersonUid = activeUserPersonUid
+                    commentsEntityUid = assignmentUid
+                    commentsText = _uiState.value.newPrivateCommentText
+                    commentsDateTimeAdded = systemTimeInMillis()
+                })
+                _uiState.update { prev ->
+                    prev.copy(newPrivateCommentText = "")
+                }
+                lastPrivateCommentsPagingSource?.invalidate()
+            }finally {
+                loadingState = LoadingUiState.NOT_LOADING
+            }
+        }
+    }
+
+    fun onChangeDraftMark(draftMark: CourseAssignmentMark?) {
+        _uiState.update { prev ->
+            prev.copy(draftMark = draftMark)
         }
     }
 

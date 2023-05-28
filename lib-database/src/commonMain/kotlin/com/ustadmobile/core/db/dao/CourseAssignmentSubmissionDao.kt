@@ -8,6 +8,7 @@ import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission.Companion.MIN_SUBMITTER_UID_FOR_PERSON
 import kotlinx.coroutines.flow.Flow
 import kotlin.js.JsName
 

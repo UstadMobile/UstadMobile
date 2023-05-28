@@ -50,6 +50,9 @@ val CourseAssignmentMarkEdit = FC<CourseAssignmentMarkEditProps> { props ->
 
     Stack {
         spacing = responsive(theme.spacing(1))
+        sx {
+            paddingTop = theme.spacing(2)
+        }
 
         TextField {
             id = "marker_comment"

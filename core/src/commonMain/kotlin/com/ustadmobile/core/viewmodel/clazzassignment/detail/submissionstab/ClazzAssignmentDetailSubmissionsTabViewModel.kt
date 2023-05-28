@@ -10,6 +10,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
+import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
@@ -130,7 +131,13 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
     }
 
     fun onClickSubmitter(assignmentSubmitter: AssignmentSubmitterSummary) {
-
+        navController.navigate(
+            viewName = ClazzAssignmentSubmitterDetailViewModel.DEST_NAME,
+            args = mapOf(
+                ClazzAssignmentSubmitterDetailViewModel.ARG_ASSIGNMENT_UID to argEntityUid.toString(),
+                ClazzAssignmentSubmitterDetailViewModel.ARG_SUBMITTER_UID to assignmentSubmitter.submitterUid.toString(),
+            )
+        )
     }
 
     fun onChangeSortOption(sortOrderOption: SortOrderOption) {

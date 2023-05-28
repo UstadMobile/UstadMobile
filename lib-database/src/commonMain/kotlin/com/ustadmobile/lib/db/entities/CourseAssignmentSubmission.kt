@@ -87,5 +87,8 @@ open class CourseAssignmentSubmission {
         const val SUBMITTED = 1
         const val MARKED = 2
 
+        const val MIN_SUBMITTER_UID_FOR_PERSON = 10000
+
+
     }
 }

@@ -1,6 +1,7 @@
 package com.ustadmobile.view.clazzassignment.submitterdetail
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.paging.ListPagingSource
@@ -8,9 +9,11 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.mapLookupOrBlank
 import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants.SUBMISSION_STAUTUS_MESSAGE_ID
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailUiState
+import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.*
@@ -193,6 +196,21 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
                 VirtualListOutlet()
             }
         }
+    }
+}
+
+val ClazzAssignmentSubmitterDetailScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        ClazzAssignmentSubmitterDetailViewModel(di, savedStateHandle)
+    }
+
+    val uiStateVal by viewModel.uiState.collectAsState(ClazzAssignmentSubmitterDetailUiState())
+
+    ClazzAssignmentSubmitterDetailComponent {
+        uiState = uiStateVal
+        onChangePrivateComment = viewModel::onChangePrivateComment
+        onClickSubmitPrivateComment = viewModel::onSubmitPrivateComment
+        onChangeDraftMark = viewModel::onChangeDraftMark
     }
 }
 
