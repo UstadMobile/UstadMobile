@@ -39,7 +39,9 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewViewModel
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
+import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.compose.messageIdResource
@@ -114,7 +116,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadBaseMvvmFragment() {
 fun ClazzAssignmentDetailOverviewScreen(
     uiState: ClazzAssignmentDetailOverviewUiState,
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
-    onClickMark: (CourseAssignmentMarkWithPersonMarker?) -> Unit = {},
+    onClickMark: (CourseAssignmentMarkAndMarkerName?) -> Unit = {},
     onClickNewPublicComment: () -> Unit = {},
     onClickNewPrivateComment: () -> Unit = {},
     onClickEditSubmission: () -> Unit = {},
@@ -300,7 +302,7 @@ fun ClazzAssignmentDetailOverviewScreen(
 
             items(
                 items = uiState.markList,
-                key = { Pair(3, it.camUid) }
+                key = { Pair(3, it.courseAssignmentMark?.camUid ?: 0) }
             ){ mark ->
                 UstadCourseAssignmentMarkListItem(
                     onClickMark = onClickMark,
@@ -427,15 +429,18 @@ fun ClazzAssignmentDetailOverviewScreenPreview(){
             casText = ""
         },
         markList = listOf(
-            CourseAssignmentMarkWithPersonMarker().apply {
-                marker = Person().apply {
-                    firstNames = "John"
-                    lastName = "Smith"
-                    isGroup = true
+            CourseAssignmentMarkAndMarkerName(
+                courseAssignmentMark = CourseAssignmentMark().apply {
                     camMarkerSubmitterUid = 2
                     camMarkerComment = "Comment"
-                }
-            }
+                    camMark = 8.1f
+                    camPenalty = 0.9f
+                    camMaxMark = 10f
+                    camLct = systemTimeInMillis()
+                },
+                markerFirstNames = "John",
+                markerLastName = "Smith",
+            )
         ),
         courseComments = {
             ListPagingSource(listOf(

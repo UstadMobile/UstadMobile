@@ -31,11 +31,24 @@ open class CourseAssignmentMark {
 
     var camAssignmentUid: Long = 0
 
+    /**
+     * The submitter uid of the group/person that this mark is for (e.g. the one being marked). See
+     * CourseAssignmentSubmission.casSubmitterUid for details.
+     */
     var camSubmitterUid: Long = 0
 
+    /**
+     * The submitter UID of the marker. If this mark is given by a teacher, then this is 0. If the
+     * assignment is peer marked, then this is the submitter id of the peer that marked it (e.g. the
+     * personUid if individual assignment, or the group number if this is a group-based assignment).
+     */
     @ColumnInfo(defaultValue = "0")
     var camMarkerSubmitterUid: Long = 0
 
+    /**
+     * The personUid of the person who provided the mark. This is always the personUid of the person
+     * who clicked the mark submit button.
+     */
     @ColumnInfo(defaultValue = "0")
     var camMarkerPersonUid: Long = 0
 

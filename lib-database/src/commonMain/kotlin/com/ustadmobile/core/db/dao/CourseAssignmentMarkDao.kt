@@ -8,6 +8,7 @@ import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import kotlinx.coroutines.flow.Flow
 
 @DoorDao
@@ -133,6 +134,22 @@ expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
         accountPersonUid: Long,
         assignmentUid: Long
     ): Flow<AverageCourseAssignmentMark>
+
+    @Query("""
+        SELECT CourseAssignmentMark.*,
+               Person.firstNames AS markerFirstNames,
+               Person.lastName AS markerLastName
+          FROM CourseAssignmentMark
+               LEFT JOIN Person
+                         ON Person.personUid = CourseAssignmentMark.camMarkerPersonUid
+         WHERE ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL) > 0
+           AND CourseAssignmentMark.camAssignmentUid = :assignmentUid
+           AND CourseAssignmentMark.camSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
+    """)
+    abstract fun getAllMarksForUserAsFlow(
+        accountPersonUid: Long,
+        assignmentUid: Long
+    ): Flow<List<CourseAssignmentMarkAndMarkerName>>
 
     @Query("""
           WITH ScoreByMarker AS (

@@ -9,6 +9,7 @@ import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewViewModel
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.lib.db.composites.CommentsAndName
@@ -38,6 +39,7 @@ import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
 import com.ustadmobile.view.clazzassignment.UstadCommentListItem
@@ -58,7 +60,7 @@ external interface ClazzAssignmentDetailOverviewScreenProps : Props {
 
     var onClickFilterChip: (MessageIdOption2) -> Unit
 
-    var onClickMark: (CourseAssignmentMarkWithPersonMarker) -> Unit
+    var onClickMark: (CourseAssignmentMarkAndMarkerName) -> Unit
 
     var onChangeCourseComment: (String) -> Unit
 
@@ -275,7 +277,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
 
                 items(
                     list = props.uiState.markList,
-                    key = { "mark_${it.camUid}"}
+                    key = { "mark_${it.courseAssignmentMark?.camUid}"}
                 ) { markItem ->
                     UstadCourseAssignmentMarkListItem.create {
                         onClickMark = props.onClickMark
@@ -398,16 +400,18 @@ val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
                 },
             ),
             markList = listOf(
-                CourseAssignmentMarkWithPersonMarker().apply {
-                    marker = Person().apply {
-                        firstNames = "John"
-                        lastName = "Smith"
-                        isGroup = true
+                CourseAssignmentMarkAndMarkerName(
+                    courseAssignmentMark = CourseAssignmentMark().apply {
                         camMarkerSubmitterUid = 2
                         camMarkerComment = "Comment"
-
-                    }
-                }
+                        camMark = 8.1f
+                        camPenalty = 0.9f
+                        camMaxMark = 10f
+                        camLct = systemTimeInMillis()
+                    },
+                    markerFirstNames = "John",
+                    markerLastName = "Smith",
+                )
             ),
             courseComments = {
                 ListPagingSource(listOf(

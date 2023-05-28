@@ -22,7 +22,9 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailUiState
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
+import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
@@ -148,7 +150,7 @@ fun ClazzAssignmentDetailStudentProgressScreen(
 
         items(
             items = uiState.marks,
-            key = { Pair(CourseAssignmentMark.TABLE_ID, it.camUid) }
+            key = { Pair(CourseAssignmentMark.TABLE_ID, it.courseAssignmentMark?.camUid ?: 0) }
         ) { mark ->
             UstadCourseAssignmentMarkListItem(
                 uiState = uiState.markListItemUiState(mark)
@@ -214,17 +216,18 @@ fun ClazzAssignmentDetailStudentProgressScreenPreview(){
             },
         ),
         marks = listOf(
-            CourseAssignmentMarkWithPersonMarker().apply {
-                marker = Person().apply {
-                    firstNames = "John"
-                    lastName = "Smith"
-                    isGroup = true
-                    camMark = 10f
+            CourseAssignmentMarkAndMarkerName(
+                courseAssignmentMark = CourseAssignmentMark().apply {
                     camMarkerSubmitterUid = 2
                     camMarkerComment = "Comment"
-                    camPenalty = 3f
-                }
-            }
+                    camMark = 8.1f
+                    camPenalty = 0.9f
+                    camMaxMark = 10f
+                    camLct = systemTimeInMillis()
+                },
+                markerFirstNames = "John",
+                markerLastName = "Smith",
+            )
         ),
         privateCommentsList = listOf(
             CommentsAndName(

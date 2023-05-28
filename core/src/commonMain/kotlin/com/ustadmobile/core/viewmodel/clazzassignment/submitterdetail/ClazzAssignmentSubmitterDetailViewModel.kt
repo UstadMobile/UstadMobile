@@ -6,6 +6,7 @@ import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.lib.db.composites.CommentsAndName
+import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.*
 import kotlin.math.max
 
@@ -36,7 +37,7 @@ data class ClazzAssignmentSubmitterDetailUiState(
 
     val submissionAttachments: List<CourseAssignmentSubmissionAttachment> = emptyList(),
 
-    val marks: List<CourseAssignmentMarkWithPersonMarker> = emptyList(),
+    val marks: List<CourseAssignmentMarkAndMarkerName> = emptyList(),
 
     val draftMark: CourseAssignmentMark? = null,
 
@@ -70,22 +71,24 @@ data class ClazzAssignmentSubmitterDetailUiState(
             }
         }
 
-    private val latestUniqueMarksByMarker: List<CourseAssignmentMarkWithPersonMarker>
+    private val latestUniqueMarksByMarker: List<CourseAssignmentMarkAndMarkerName>
         get() = marks.filter { markWithMarker ->
-            markWithMarker.camLct == marks.filter {
-                it.camMarkerSubmitterUid == markWithMarker.camMarkerSubmitterUid
-            }.maxOf { it.camLct }
+            val mostRecentTsForSubmitterUid = marks.filter {
+                it.courseAssignmentMark?.camMarkerSubmitterUid == markWithMarker.courseAssignmentMark?.camMarkerSubmitterUid
+            }.maxOf { it.courseAssignmentMark?.camLct ?: 0 }
+
+            markWithMarker.courseAssignmentMark?.camLct ==mostRecentTsForSubmitterUid
         }
 
     val averageScore: Float
         get() {
             return latestUniqueMarksByMarker.let {
-                it.sumOf { it.camMark.toDouble() }.toFloat() / max(it.size, 1)
+                it.sumOf { it.courseAssignmentMark?.camMark?.toDouble() ?: 0.0 }.toFloat() / max(it.size, 1)
             }
         }
 
     fun markListItemUiState(
-        mark: CourseAssignmentMarkWithPersonMarker
+        mark: CourseAssignmentMarkAndMarkerName
     ): UstadCourseAssignmentMarkListItemUiState {
         return UstadCourseAssignmentMarkListItemUiState(
             mark

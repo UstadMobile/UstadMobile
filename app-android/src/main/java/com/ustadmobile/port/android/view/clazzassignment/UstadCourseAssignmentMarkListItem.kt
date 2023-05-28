@@ -24,8 +24,8 @@ import com.ustadmobile.core.util.ext.penaltyPercentage
 import com.ustadmobile.core.util.ext.roundTo
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.CourseAssignmentMarkWithPersonMarker
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
+import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import java.util.TimeZone
 
@@ -34,17 +34,17 @@ import java.util.TimeZone
 fun UstadCourseAssignmentMarkListItem(
     uiState: UstadCourseAssignmentMarkListItemUiState,
     modifier: Modifier = Modifier,
-    onClickMark: (CourseAssignmentMarkWithPersonMarker?) -> Unit = {},
+    onClickMark: (CourseAssignmentMarkAndMarkerName?) -> Unit = {},
 ){
 
-    var text = uiState.mark.marker?.fullName() ?: ""
+    var text = uiState.markerName
 
     if (uiState.markerGroupNameVisible){
-        text += "  (${stringResource(R.string.group_number, uiState.mark.camMarkerSubmitterUid)})"
+        text += "  (${stringResource(R.string.group_number, uiState.peerGroupNumber)})"
     }
 
     val formattedTime = rememberFormattedDateTime(
-        timeInMillis = uiState.mark.camLct,
+        timeInMillis = uiState.mark.courseAssignmentMark?.camLct ?: 0,
         timeZoneId = TimeZone.getDefault().id,
         joinDateAndTime = { date, time -> "$date\n$time" }
     )
@@ -71,8 +71,8 @@ fun UstadCourseAssignmentMarkListItem(
                     )
                     Text(
                         buildAnnotatedString {
-                            append("${uiState.mark.camMark.roundTo(2)}")
-                            append("/${uiState.mark.camMaxMark.roundTo(2)}")
+                            append("${uiState.mark.courseAssignmentMark?.camMark?.roundTo(2)}")
+                            append("/${uiState.mark.courseAssignmentMark?.camMaxMark?.roundTo(2)}")
                             append(" ${stringResource(R.string.points)}")
 
                             if (uiState.camPenaltyVisible){
@@ -81,7 +81,7 @@ fun UstadCourseAssignmentMarkListItem(
                                     append(" ")
                                     append(
                                         stringResource(R.string.late_penalty,
-                                            uiState.mark.penaltyPercentage())
+                                            uiState.mark.courseAssignmentMark?.penaltyPercentage() ?: 0)
                                     )
                                 }
                             }
@@ -96,7 +96,7 @@ fun UstadCourseAssignmentMarkListItem(
                         modifier = Modifier.size(16.dp)
                     )
 
-                    Text(uiState.mark.camMarkerComment ?: "")
+                    Text(uiState.mark.courseAssignmentMark?.camMarkerComment ?: "")
                 }
 
             }
@@ -112,19 +112,18 @@ fun UstadCourseAssignmentMarkListItem(
 private fun UstadMarksPersonListItemPreview() {
     UstadCourseAssignmentMarkListItem(
         uiState = UstadCourseAssignmentMarkListItemUiState(
-            mark = CourseAssignmentMarkWithPersonMarker().apply {
-                marker = Person().apply {
-                    firstNames = "John"
-                    lastName = "Smith"
-                }
-                isGroup = true
-                camMarkerSubmitterUid = 2
-                camMarkerComment = "Comment"
-                camMark = 8.1f
-                camPenalty = 0.9f
-                camMaxMark = 10f
-                camLct = systemTimeInMillis()
-            }
+            mark = CourseAssignmentMarkAndMarkerName(
+                courseAssignmentMark = CourseAssignmentMark().apply {
+                    camMarkerSubmitterUid = 2
+                    camMarkerComment = "Comment"
+                    camMark = 8.1f
+                    camPenalty = 0.9f
+                    camMaxMark = 10f
+                    camLct = systemTimeInMillis()
+                },
+                markerFirstNames = "John",
+                markerLastName = "Smith",
+            )
         )
     )
 }

@@ -18,6 +18,7 @@ import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
+import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.async
@@ -25,6 +26,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
@@ -54,7 +56,7 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val latestSubmissionAttachments: List<CourseAssignmentSubmissionAttachment>? = null,
 
-    val markList: List<CourseAssignmentMarkWithPersonMarker> = emptyList(),
+    val markList: List<CourseAssignmentMarkAndMarkerName> = emptyList(),
 
     val courseComments: () -> PagingSource<Int, CommentsAndName> = { EmptyPagingSource() },
 
@@ -261,6 +263,19 @@ class ClazzAssignmentDetailOverviewViewModel(
                                 }else {
                                     null
                                 }
+                            )
+                        }
+                    }
+                }
+
+                launch {
+                    activeRepo.courseAssignmentMarkDao.getAllMarksForUserAsFlow(
+                        accountPersonUid = activeUserPersonUid,
+                        assignmentUid = entityUidArg
+                    ).collect {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                markList = it
                             )
                         }
                     }

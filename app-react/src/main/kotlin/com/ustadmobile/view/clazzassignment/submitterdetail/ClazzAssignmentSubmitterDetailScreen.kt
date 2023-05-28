@@ -7,8 +7,10 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.mapLookupOrBlank
 import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants.SUBMISSION_STAUTUS_MESSAGE_ID
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailUiState
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.lib.db.composites.CommentsAndName
+import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.clazzassignment.CourseAssignmentSubmissionListItem
@@ -132,7 +134,7 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
 
             items(
                 list = props.uiState.marks,
-                key = { "grade_${it.camUid}"}
+                key = { "grade_${it.courseAssignmentMark?.camUid}"}
             ){ mark ->
                 UstadCourseAssignmentMarkListItem.create {
                     uiState = props.uiState.markListItemUiState(mark)
@@ -206,17 +208,18 @@ val ClazzAssignmentSubmitterDetailScreenPreview = FC<Props> {
             },
         ),
         marks = listOf(
-            CourseAssignmentMarkWithPersonMarker().apply {
-                marker = Person().apply {
-                    firstNames = "John"
-                    lastName = "Smith"
-                    isGroup = true
-                    camMark = 10f
+            CourseAssignmentMarkAndMarkerName(
+                courseAssignmentMark = CourseAssignmentMark().apply {
                     camMarkerSubmitterUid = 2
                     camMarkerComment = "Comment"
-                    camPenalty = 3f
-                }
-            }
+                    camMark = 8.1f
+                    camPenalty = 0.9f
+                    camMaxMark = 10f
+                    camLct = systemTimeInMillis()
+                },
+                markerFirstNames = "John",
+                markerLastName = "Smith",
+            )
         ),
         privateCommentsList = listOf(
             CommentsAndName(
