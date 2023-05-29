@@ -23,7 +23,7 @@ data class CourseBlockEditUiState(
 
     val courseBlock: CourseBlock? = null,
 
-    val completionCriteriaOptions: List<CompletionCriteria> = CompletionCriteria.values().toList(),
+    val completionCriteriaOptions: List<CompletionCriteria> = emptyList(),
 
     val fieldsEnabled: Boolean = true,
 
@@ -32,8 +32,6 @@ data class CourseBlockEditUiState(
     val caTitleError: String? = null,
 
     val caDeadlineError: String? = null,
-
-    val deadlineVisible: Boolean = true,
 
     val caMaxPointsError: String? = null,
 
@@ -49,6 +47,18 @@ data class CourseBlockEditUiState(
 
     val latePenaltyVisible: Boolean
         get() = gracePeriodVisible && courseBlock?.cbGracePeriodDate.isDateSet()
+
+    val completionCriteriaVisible: Boolean
+        get() = completionCriteriaOptions.isNotEmpty()
+     
+    val deadlineVisible: Boolean
+        get() = courseBlock?.cbType == CourseBlock.BLOCK_ASSIGNMENT_TYPE ||
+            courseBlock?.cbType == CourseBlock.BLOCK_CONTENT_TYPE
+
+    //For now - really the same as the deadline
+    val maxPointsVisible: Boolean
+        get() = courseBlock?.cbType == CourseBlock.BLOCK_ASSIGNMENT_TYPE ||
+            courseBlock?.cbType == CourseBlock.BLOCK_CONTENT_TYPE
 
 }
 

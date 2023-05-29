@@ -86,25 +86,25 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             }
         }
 
-        + strings[MessageID.class_timezone_set].format(props.uiState.timeZone)
-
         Stack {
             direction = responsive(StackDirection.row)
             spacing = responsive(15.px)
 
 
-            UstadSelectField<CompletionCriteria> {
-                id = "cbCompletionCriteria"
-                value = CompletionCriteria.valueOf(props.uiState.courseBlock?.cbCompletionCriteria ?: 0)
-                label = strings[MessageID.completion_criteria]
-                options = props.uiState.completionCriteriaOptions
-                itemValue = { it.value.toString() }
-                itemLabel = { ReactNode(strings[it.messageId]) }
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
-                    props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
-                        cbCompletionCriteria = it.value
-                    })
+            if(props.uiState.completionCriteriaVisible) {
+                UstadSelectField<CompletionCriteria> {
+                    id = "cbCompletionCriteria"
+                    value = CompletionCriteria.valueOf(props.uiState.courseBlock?.cbCompletionCriteria ?: 0)
+                    label = strings[MessageID.completion_criteria]
+                    options = props.uiState.completionCriteriaOptions
+                    itemValue = { it.value.toString() }
+                    itemLabel = { ReactNode(strings[it.messageId]) }
+                    enabled = props.uiState.fieldsEnabled
+                    onChange = {
+                        props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
+                            cbCompletionCriteria = it.value
+                        })
+                    }
                 }
             }
 
@@ -129,19 +129,22 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             }
         }
 
-        UstadNumberTextField {
-            id = "cbMaxPoints"
-            value = (props.uiState.courseBlock?.cbMaxPoints ?: 0).toFloat()
-            label = ReactNode(strings[MessageID.maximum_points])
-            error = (props.uiState.caMaxPointsError != null)
-            helperText = props.uiState.caMaxPointsError?.let { ReactNode(it) }
-            disabled = !props.uiState.fieldsEnabled
-            onChange = {
-                props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
-                    cbMaxPoints = it.toInt()
-                })
+        if(props.uiState.maxPointsVisible) {
+            UstadNumberTextField {
+                id = "cbMaxPoints"
+                value = (props.uiState.courseBlock?.cbMaxPoints ?: 0).toFloat()
+                label = ReactNode(strings[MessageID.maximum_points])
+                error = (props.uiState.caMaxPointsError != null)
+                helperText = props.uiState.caMaxPointsError?.let { ReactNode(it) }
+                disabled = !props.uiState.fieldsEnabled
+                onChange = {
+                    props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
+                        cbMaxPoints = it.toInt()
+                    })
+                }
             }
         }
+
 
         if(props.uiState.deadlineVisible) {
             UstadDateTimeField {
@@ -212,7 +215,6 @@ val UstadCourseBlockEditPreview = FC<Props> {
             uiState = CourseBlockEditUiState(
                 courseBlock = CourseBlock().apply {
                     cbMaxPoints = 78
-                    cbCompletionCriteria = 14
                     cbCompletionCriteria = ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
                 },
             )
