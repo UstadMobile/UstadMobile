@@ -13,6 +13,8 @@ import com.ustadmobile.mui.common.justifyContent
 import csstype.Display
 import csstype.Flex
 import csstype.FlexShrink
+import csstype.FontVariant
+import csstype.FontVariant.Companion.fullWidth
 import csstype.LengthType
 import csstype.Padding
 import csstype.px
@@ -36,6 +38,7 @@ import mui.material.TextField
 import mui.material.Typography
 import mui.material.Stack
 import mui.material.StackDirection
+import mui.material.TypographyAlign
 import mui.system.responsive
 import mui.system.sx
 import react.FC
@@ -96,12 +99,10 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
 
             props.uiState.recipients.forEach { recipient ->
                 Chip {
-                    size = Size.small
                     label = ReactNode(recipient)
                     sx {
-                        display = Display.block
+                        display = Display.inlineBlock
                     }
-                    variant = ChipVariant.outlined
                     onClick = {}
                     onDelete = {
                         props.onClickRemoveRecipient(recipient)
@@ -114,6 +115,8 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
                 id = "textField"
                 value = props.uiState.textField
                 label = ReactNode(strings[MessageID.phone_or_email])
+                error = props.uiState.textFieldError != null
+                helperText = props.uiState.textFieldError?.let { ReactNode(it) }
                 onTextChange = {
                     props.onTextFieldChanged(it)
                 }
@@ -127,22 +130,14 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
                         props.onClickAddRecipient()
                     }
 
-                    + Stack.create {
-                        direction = responsive(StackDirection.row)
-                        justifyContent = JustifyContent.spaceBetween
-
-                        Stack {
-
-                            Typography {
-                                + strings[MessageID.add_recipient]
-                            }
-                            Typography {
-                                + strings[MessageID.another_email]
-                            }
+                    Container {
+                        Typography {
+                            + strings[MessageID.add_recipient]
+                            align = TypographyAlign.justify
                         }
-
-                        UstadPersonAvatar {
-                            personUid = 1
+                        Typography {
+                            + strings[MessageID.another_email]
+                            align = TypographyAlign.justify
                         }
                     }
                 }
@@ -162,7 +157,7 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
                    }
 
                    Typography {
-                       + "Class invitation link"
+                       + strings[MessageID.class_invitation_link]
                    }
                }
 
@@ -175,7 +170,7 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
                         onClick = {
                             props.onClickShareLink()
                         }
-                        + "Share"
+                        + strings[MessageID.share]
                     }
 
                     Button {
@@ -183,7 +178,7 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
                         onClick = {
                             props.onClickCopyLink()
                         }
-                        + "Copy link"
+                        + strings[MessageID.copy_link]
                     }
                 }
             }
