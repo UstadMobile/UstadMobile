@@ -15,6 +15,7 @@ import androidx.compose.material.Chip
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FilterChip
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -22,6 +23,7 @@ import androidx.compose.material.contentColorFor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -80,6 +82,9 @@ private fun InviteStudentsScreenForViewModel(
         uiState = uiState,
         onTextFieldChanged = viewModel::onTextFieldChanged,
         onClickAddRecipient = viewModel::onClickAddRecipient,
+        onClickRemoveRecipient = viewModel::onClickRemoveRecipient,
+        onClickCopyLink = viewModel::onClickCopyLink,
+        onClickShareLink = viewModel::onClickShareLink,
     )
 }
 
@@ -89,6 +94,9 @@ private fun InviteStudentsScreen(
     uiState: InviteStudentsUiState = InviteStudentsUiState(),
     onTextFieldChanged: (String) -> Unit = {},
     onClickAddRecipient: () -> Unit = {},
+    onClickRemoveRecipient: (String) -> Unit = {},
+    onClickCopyLink: () -> Unit = {},
+    onClickShareLink: () -> Unit = {}
 ) {
 
     LazyColumn(
@@ -103,13 +111,23 @@ private fun InviteStudentsScreen(
         ){ recipient ->
             Chip(
                 onClick = { },
-                enabled = true,
+                enabled = uiState.fieldsEnabled,
                 leadingIcon = {
-                    Icon(Icons.Default.Book, contentDescription = null)
+                    Text(recipient)
                 },
-            ) {
-                Text(recipient)
-            }
+                content = {
+                    IconButton(
+                        onClick = {
+                            onClickRemoveRecipient(recipient)
+                        },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "",
+                        )
+                    }
+                }
+            )
         }
 
         item {
@@ -118,7 +136,7 @@ private fun InviteStudentsScreen(
                     .fillMaxWidth()
                     .defaultItemPadding(),
                 value = uiState.textField,
-                label = { Text(stringResource( R.string.name )) },
+                label = { Text(stringResource( R.string.phone_or_email )) },
                 enabled = uiState.fieldsEnabled,
                 singleLine = true,
                 onValueChange = {
@@ -131,13 +149,15 @@ private fun InviteStudentsScreen(
             if (uiState.addRecipientVisible){
                 TextButton(
                     modifier = Modifier
-                        .fillMaxWidth()
                         .defaultItemPadding(),
                     onClick = {
                         onClickAddRecipient()
                     }
                 ) {
-                    Column {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.Start
+                    ) {
                         Text(stringResource(R.string.add_recipient))
                         Text(uiState.textField)
                     }
@@ -150,7 +170,7 @@ private fun InviteStudentsScreen(
                 modifier = Modifier
                     .defaultItemPadding()
                     .height(120.dp),
-                border = BorderStroke(0.5.dp, contentColorFor(
+                border = BorderStroke(0.4.dp, contentColorFor(
                     colorResource(id = R.color.onBackgroundColor))
                 ),
                 shape = RoundedCornerShape(5.dp),
@@ -174,12 +194,16 @@ private fun InviteStudentsScreen(
                         horizontalArrangement = Arrangement.End
                     ) {
                         TextButton(
-                            onClick = {},
+                            onClick = {
+                                onClickShareLink()
+                            },
                             content = { Text(stringResource(R.string.share)) }
                         )
 
                         TextButton(
-                            onClick = {},
+                            onClick = {
+                                onClickCopyLink()
+                            },
                             content = { Text(stringResource(R.string.copy_link)) }
                         )
                     }
@@ -195,13 +219,7 @@ private fun InviteStudentsScreen(
 @Preview
 fun InviteStudentsScreenPreview() {
 
-    val uiState = InviteStudentsUiState(
-        recipients = listOf(
-            "Bob Jones","Bob Jones1","Bob@gmail.com"
-        ),
-    )
-
     MdcTheme {
-        InviteStudentsScreen(uiState)
+        InviteStudentsScreen()
     }
 }
