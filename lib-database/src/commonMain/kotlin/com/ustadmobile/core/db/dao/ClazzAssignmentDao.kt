@@ -130,8 +130,11 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
                         FROM CourseAssignmentSubmission
                        WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
                          AND CourseAssignmentSubmission.casSubmitterUid = SubmitterList.submitterId)
-                ) AS submittedStudents
-          
+                ) AS submittedStudents,
+              
+              (SELECT (ClazzAssignment.caGroupUid != 0)
+                 FROM ClazzAssignment
+                WHERE ClazzAssignment.caUid = :assignmentUid) AS isGroupAssignment
     """)
     /**
      * Get a summary of the numbers that have submitted/been marked for a given assignment.

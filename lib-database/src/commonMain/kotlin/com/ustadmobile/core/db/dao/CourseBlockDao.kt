@@ -201,6 +201,8 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                                                                            WHERE SubmitterList.assignmentUid = ClazzAssignment.caUid))
                    AS markedStudents,
                    
+                   (ClazzAssignment.caGroupUid != 0) AS isGroupAssignment,
+                   
                    COALESCE((CASE WHEN CourseAssignmentMark.camUid IS NOT NULL 
                           THEN ${CourseAssignmentSubmission.MARKED} 
                           WHEN CourseAssignmentSubmission.casUid IS NOT NULL 

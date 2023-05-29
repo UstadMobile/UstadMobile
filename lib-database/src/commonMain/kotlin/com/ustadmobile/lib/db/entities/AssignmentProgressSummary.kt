@@ -18,6 +18,12 @@ class AssignmentProgressSummary {
      */
     var activeUserHasViewLearnerRecordsPermission: Boolean = false
 
+    /**
+     * Indicates if the assignment is done in groups. This affects the display of the summary
+     * information (e.g. x students vs x groups)
+     */
+    var isGroupAssignment: Boolean = false
+
     @Deprecated("Will not be used")
     fun calculateNotSubmittedStudents(): Int {
 //        notSubmittedStudents = totalStudents - markedStudents - submittedStudents

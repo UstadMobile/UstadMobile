@@ -39,9 +39,13 @@ import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import androidx.paging.compose.items
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.port.android.util.compose.courseTerminologyEntryResource
+import com.ustadmobile.port.android.util.compose.rememberCourseTerminologyEntries
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
 import com.ustadmobile.port.android.view.SortBottomSheetFragment
 import com.ustadmobile.port.android.view.composable.UstadListSortHeader
+import com.ustadmobile.port.android.view.composable.UstadListSpacerItem
 
 
 class ClazzAssignmentDetailSubmissionsTabFragment: UstadBaseMvvmFragment(){
@@ -110,6 +114,18 @@ private fun ClazzAssignmentDetailSubmissionsTabScreen(
 
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
+    val courseTerminologyEntries = rememberCourseTerminologyEntries(
+        courseTerminology = uiState.courseTerminology
+    )
+    val submittersLabel: String = if(uiState.progressSummary?.isGroupAssignment == true) {
+        stringResource(R.string.groups)
+    }else {
+        courseTerminologyEntryResource(
+            terminologyEntries = courseTerminologyEntries,
+            messageId = MessageID.students
+        )
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -123,7 +139,7 @@ private fun ClazzAssignmentDetailSubmissionsTabScreen(
             ) {
                 ClazzAssignmentSummaryColumn(
                     number = uiState.progressSummary?.totalStudents ?: 0,
-                    label = stringResource(R.string.students),
+                    label = submittersLabel,
                     addDividerToEnd = true,
                 )
 
@@ -154,6 +170,8 @@ private fun ClazzAssignmentDetailSubmissionsTabScreen(
         ){ person ->
             SubmitterSummaryListItem(person, onClickPerson)
         }
+
+        UstadListSpacerItem()
 
     }
 }

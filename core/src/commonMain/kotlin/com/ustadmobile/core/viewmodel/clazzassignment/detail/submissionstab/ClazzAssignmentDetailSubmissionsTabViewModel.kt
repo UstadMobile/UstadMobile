@@ -16,6 +16,7 @@ import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
+import com.ustadmobile.lib.db.entities.CourseTerminology
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -32,6 +33,8 @@ data class ClazzAssignmentDetailSubmissionsTabUiState(
     val sortOptions: List<SortOrderOption> = DEFAULT_SORT_OPTIONS,
 
     val sortOption: SortOrderOption = sortOptions.first(),
+
+    val courseTerminology: CourseTerminology? = null,
 
 ) {
     companion object {
@@ -104,6 +107,16 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
         }
 
         viewModelScope.launch {
+            launch {
+                val terminology = activeRepo.courseTerminologyDao
+                    .getTerminologyForAssignment(argEntityUid)
+                _uiState.update { prev ->
+                    prev.copy(
+                        courseTerminology = terminology
+                    )
+                }
+            }
+
             _uiState.whenSubscribed {
                 launch {
                     activeRepo.clazzAssignmentDao.getProgressSummaryForAssignment(
