@@ -96,7 +96,7 @@ expect abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
          WHERE ClazzAssignment.caUid = :assignmentUid 
          LIMIT 1
     """)
-    abstract suspend fun getTerminologyForAssignment(assignmentUid: Long): CourseTerminology
+    abstract suspend fun getTerminologyForAssignment(assignmentUid: Long): CourseTerminology?
 
     @JsName("findByUid")
     @Query("""
