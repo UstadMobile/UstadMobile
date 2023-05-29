@@ -1,6 +1,7 @@
 package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.validEmail
@@ -10,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 data class InviteStudentsUiState(
 
@@ -18,6 +20,8 @@ data class InviteStudentsUiState(
     val recipients: List<String> = emptyList(),
 
     val textField: String = "",
+
+    val textFieldError: String? = null,
 
     val classInvitationLink: String = "",
 
@@ -37,13 +41,15 @@ class InviteStudentsViewModel(
 
     val uiState: Flow<InviteStudentsUiState> = _uiState.asStateFlow()
 
+    private val impl: UstadMobileSystemImpl by instance()
+
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = systemImpl.getString(MessageID.invite_students),
+                title = impl.getString(MessageID.invite_students),
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
-                    text = systemImpl.getString(MessageID.invite),
+                    text = impl.getString(MessageID.invite),
                     onClick = this::onClickInvite
                 )
             )
@@ -51,8 +57,16 @@ class InviteStudentsViewModel(
     }
 
     fun onTextFieldChanged(text: String) {
-        _uiState.update { prev ->
-            prev.copy(textField = text)
+        if (_uiState.value.recipients.contains(_uiState.value.textField)){
+            _uiState.update { prev ->
+                prev.copy(
+                    textFieldError = impl.getString(MessageID.error),
+                )
+            }
+        } else {
+            _uiState.update { prev ->
+                prev.copy(textField = text)
+            }
         }
     }
 
@@ -73,7 +87,7 @@ class InviteStudentsViewModel(
         }
     }
 
-    fun onClickInvite() {
+    private fun onClickInvite() {
 
     }
 
