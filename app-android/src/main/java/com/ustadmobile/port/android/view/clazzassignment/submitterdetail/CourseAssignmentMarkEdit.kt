@@ -17,8 +17,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.view.composable.UstadInputFieldLayout
 import com.ustadmobile.port.android.view.composable.UstadNumberTextField
 
@@ -30,6 +32,8 @@ fun CourseAssignmentMarkEdit(
     onChangeDraftMark: (CourseAssignmentMark) -> Unit,
     onClickSubmitGrade: () -> Unit,
     onClickSubmitGradeAndMarkNext: () -> Unit,
+    submitGradeButtonMessageId: Int,
+    submitGradeButtonAndGoNextMessageId: Int,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -83,10 +87,12 @@ fun CourseAssignmentMarkEdit(
                     .padding(top = 8.dp, start = 8.dp),
                 onClick = onClickSubmitGrade,
             ) {
-                Text(stringResource(R.string.submit))
+                Text(messageIdResource(submitGradeButtonMessageId))
             }
         }
 
+        /*
+        To be enabled when reactive sync is enabled
         OutlinedButton(
             modifier = Modifier
                 .fillMaxWidth()
@@ -96,6 +102,7 @@ fun CourseAssignmentMarkEdit(
         ) {
             Text(stringResource(R.string.return_and_mark_next))
         }
+         */
     }
 }
 
@@ -111,6 +118,8 @@ private fun CourseAssignmentMarkEditPreview() {
         scoreError = null,
         onChangeDraftMark = { },
         onClickSubmitGrade = { },
+        submitGradeButtonMessageId = MessageID.submit,
+        submitGradeButtonAndGoNextMessageId = MessageID.submit_grade_and_mark_next,
         onClickSubmitGradeAndMarkNext = { }
     )
 }

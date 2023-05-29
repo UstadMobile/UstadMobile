@@ -113,6 +113,8 @@ val CourseAssignmentMarkEdit = FC<CourseAssignmentMarkEditProps> { props ->
             }
         }
 
+        /*
+        To be enabled when reactive sync is introduced
         Button {
             id = "submit_and_mark_next"
             variant = ButtonVariant.outlined
@@ -123,6 +125,7 @@ val CourseAssignmentMarkEdit = FC<CourseAssignmentMarkEditProps> { props ->
 
             + strings[props.submitGradeButtonAndGoNextMessageId]
         }
+         */
 
     }
 }

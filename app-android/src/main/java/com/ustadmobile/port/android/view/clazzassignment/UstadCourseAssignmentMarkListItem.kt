@@ -34,7 +34,6 @@ import java.util.TimeZone
 fun UstadCourseAssignmentMarkListItem(
     uiState: UstadCourseAssignmentMarkListItemUiState,
     modifier: Modifier = Modifier,
-    onClickMark: (CourseAssignmentMarkAndMarkerName?) -> Unit = {},
 ){
 
     var text = uiState.markerName
@@ -50,9 +49,7 @@ fun UstadCourseAssignmentMarkListItem(
     )
 
     ListItem(
-        modifier = modifier.clickable {
-            onClickMark(uiState.mark)
-        },
+        modifier = modifier,
         icon = {
             Icon(
                 painter = painterResource(R.drawable.ic_person_black_24dp),

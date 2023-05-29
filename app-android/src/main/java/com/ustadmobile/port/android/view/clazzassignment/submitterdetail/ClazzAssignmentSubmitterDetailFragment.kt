@@ -12,9 +12,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Pending
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.paging.Pager
@@ -40,6 +44,10 @@ import com.ustadmobile.port.android.view.clazzassignment.UstadCourseAssignmentMa
 import com.ustadmobile.port.android.view.composable.*
 import androidx.paging.compose.items
 import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
+import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
+import com.ustadmobile.port.android.view.PersonListScreen
+import com.ustadmobile.port.android.view.clazzassignment.CommentsBottomSheet
 
 interface ClazzAssignmentDetailStudentProgressFragmentEventHandler {
 
@@ -51,16 +59,56 @@ interface ClazzAssignmentDetailStudentProgressFragmentEventHandler {
 
 class ClazzAssignmentSubmitterDetailFragment: UstadBaseMvvmFragment() {
 
+    private val viewModel by ustadViewModels(::ClazzAssignmentSubmitterDetailViewModel)
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+            )
 
+            setContent {
+                MdcTheme {
+                    ClazzAssignmentDetailStudentProgressScreen(viewModel)
+                }
+            }
         }
     }
 
+}
+
+@Composable
+fun ClazzAssignmentDetailStudentProgressScreen(
+    viewModel: ClazzAssignmentSubmitterDetailViewModel
+) {
+    val uiState by viewModel.uiState.collectAsState(ClazzAssignmentSubmitterDetailUiState())
+
+    val newCommentHintText = stringResource(R.string.add_private_comment)
+
+    val localContext = LocalContext.current
+
+    ClazzAssignmentDetailStudentProgressScreen(
+        uiState = uiState,
+        onClickSubmitGrade = viewModel::onClickSubmitMark,
+        onClickSubmitGradeAndMarkNext = viewModel::onClickSubmitMarkAndGoNext,
+        onClickNewPrivateComment = {
+            CommentsBottomSheet(
+                hintText = newCommentHintText,
+                personUid = uiState.activeUserPersonUid,
+                onSubmitComment = {
+                    viewModel.onChangePrivateComment(it)
+                    viewModel.onSubmitPrivateComment()
+                }
+            ).show(localContext.getContextSupportFragmentManager(), "private_comment_sheet")
+        },
+        onClickGradeFilterChip = viewModel::onClickGradeFilterChip,
+        onClickOpenSubmission = viewModel::onClickSubmission,
+        onChangeDraftMark = viewModel::onChangeDraftMark,
+    )
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -113,22 +161,25 @@ fun ClazzAssignmentDetailStudentProgressScreen(
             )
         }
 
-        item(key = "averagescore") {
-            ListItem(
-                icon = {
-                    Icon(
-                        imageVector = Icons.Filled.EmojiEvents,
-                        contentDescription = ""
-                    )
-                },
-                text = {
-                    Text("${uiState.averageScore} ${stringResource(R.string.points)}")
-                },
-                secondaryText = {
-                    Text(stringResource(R.string.score))
-                }
-            )
+        if(uiState.scoreSummaryVisible) {
+            item(key = "averagescore") {
+                ListItem(
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Filled.EmojiEvents,
+                            contentDescription = ""
+                        )
+                    },
+                    text = {
+                        Text("${uiState.averageScore} ${stringResource(R.string.points)}")
+                    },
+                    secondaryText = {
+                        Text(stringResource(R.string.score))
+                    }
+                )
+            }
         }
+
         item(key = "submissionheader") {
             UstadDetailHeader {
                 Text(stringResource(R.string.submissions))
@@ -164,7 +215,7 @@ fun ClazzAssignmentDetailStudentProgressScreen(
         }
 
         items(
-            items = uiState.marks,
+            items = uiState.visibleMarks,
             key = { Pair(CourseAssignmentMark.TABLE_ID, it.courseAssignmentMark?.camUid ?: 0) }
         ) { mark ->
             UstadCourseAssignmentMarkListItem(
@@ -180,6 +231,8 @@ fun ClazzAssignmentDetailStudentProgressScreen(
                     scoreError = uiState.submitMarkError,
                     onChangeDraftMark = onChangeDraftMark,
                     onClickSubmitGrade = onClickSubmitGrade,
+                    submitGradeButtonMessageId = uiState.submitGradeButtonMessageId,
+                    submitGradeButtonAndGoNextMessageId = uiState.submitGradeButtonAndGoNextMessageId,
                     onClickSubmitGradeAndMarkNext = onClickSubmitGradeAndMarkNext
                 )
             }

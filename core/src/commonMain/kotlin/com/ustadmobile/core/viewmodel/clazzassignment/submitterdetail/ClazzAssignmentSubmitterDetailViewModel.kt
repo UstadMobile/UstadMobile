@@ -346,6 +346,14 @@ class ClazzAssignmentSubmitterDetailViewModel(
         }
     }
 
+    fun onClickSubmitMarkAndGoNext() {
+        //inactive
+    }
+
+    fun onClickSubmission(submission: CourseAssignmentSubmission) {
+
+    }
+
     fun onClickGradeFilterChip(option: MessageIdOption2) {
         _uiState.update { prev ->
             prev.copy(

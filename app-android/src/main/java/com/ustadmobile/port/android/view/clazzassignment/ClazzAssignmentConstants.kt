@@ -3,7 +3,7 @@ package com.ustadmobile.port.android.view.clazzassignment
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.DoneAll
-import androidx.compose.material.icons.filled.Pending
+import androidx.compose.material.icons.filled.PendingActions
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 
 object ClazzAssignmentConstants {
@@ -11,7 +11,7 @@ object ClazzAssignmentConstants {
     val SUBMISSION_STATUS_ICON_MAP = mapOf(
         CourseAssignmentSubmission.MARKED to Icons.Filled.DoneAll,
         CourseAssignmentSubmission.SUBMITTED to Icons.Filled.Done,
-        CourseAssignmentSubmission.NOT_SUBMITTED to Icons.Filled.Pending,
+        CourseAssignmentSubmission.NOT_SUBMITTED to Icons.Filled.PendingActions,
     )
 
 }

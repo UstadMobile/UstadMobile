@@ -116,7 +116,6 @@ class ClazzAssignmentDetailOverviewFragment : UstadBaseMvvmFragment() {
 fun ClazzAssignmentDetailOverviewScreen(
     uiState: ClazzAssignmentDetailOverviewUiState,
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
-    onClickMark: (CourseAssignmentMarkAndMarkerName?) -> Unit = {},
     onClickNewPublicComment: () -> Unit = {},
     onClickNewPrivateComment: () -> Unit = {},
     onClickEditSubmission: () -> Unit = {},
@@ -305,7 +304,6 @@ fun ClazzAssignmentDetailOverviewScreen(
                 key = { Pair(3, it.courseAssignmentMark?.camUid ?: 0) }
             ){ mark ->
                 UstadCourseAssignmentMarkListItem(
-                    onClickMark = onClickMark,
                     uiState = UstadCourseAssignmentMarkListItemUiState(
                         mark = mark,
                     ),

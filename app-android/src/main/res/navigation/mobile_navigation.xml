@@ -186,15 +186,15 @@
         android:name="com.ustadmobile.port.android.view.ClazzAssignmentDetailFragment"/>
 
     <fragment
-        android:id="@+id/clazz_assignment_detail_student_progress"
-        android:name="com.ustadmobile.port.android.view.clazzassignment.submitterdetail.ClazzAssignmentDetailStudentProgressFragment"/>
+        android:id="@+id/clazz_assignment_submitter_detail_dest"
+        android:name="com.ustadmobile.port.android.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailFragment"/>
 
     <fragment
         android:id="@+id/content_entry_list_dest"
         android:name="com.ustadmobile.port.android.view.contententry.list.ContentEntryList2Fragment"
         android:label="@string/content">
     </fragment>
-
+2
     <fragment
         android:id="@+id/content_entry_list_home_dest"
         android:name="com.ustadmobile.port.android.view.contententry.list.ContentEntryList2Fragment"
