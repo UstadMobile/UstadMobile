@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Chip
@@ -16,17 +18,21 @@ import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.contentColorFor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
@@ -124,6 +130,9 @@ private fun InviteStudentsScreen(
         item {
             if (uiState.addRecipientVisible){
                 TextButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultItemPadding(),
                     onClick = {
                         onClickAddRecipient()
                     }
@@ -137,29 +146,45 @@ private fun InviteStudentsScreen(
         }
 
         item {
-            Card {
-                Row {
-                    Icon(
-                        Icons.Default.Add,
-                        contentDescription = null
-                    )
-                    Text(text = stringResource(R.string.class_id))
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+            Card(
+                modifier = Modifier
+                    .defaultItemPadding()
+                    .height(120.dp),
+                border = BorderStroke(0.5.dp, contentColorFor(
+                    colorResource(id = R.color.onBackgroundColor))
+                ),
+                shape = RoundedCornerShape(5.dp),
+                elevation = 5.dp
+            ) {
+                Column(
+                    Modifier.defaultItemPadding(),
                 ) {
-                    TextButton(
-                        onClick = {},
-                        content = { Text(stringResource(R.string.share)) }
-                    )
+                    Row(
+                        modifier = Modifier.defaultItemPadding(),
+                    ) {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = null
+                        )
+                        Text(text = stringResource(R.string.class_id))
+                    }
 
-                    TextButton(
-                        onClick = {},
-                        content = { Text(stringResource(R.string.copy_link)) }
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(
+                            onClick = {},
+                            content = { Text(stringResource(R.string.share)) }
+                        )
+
+                        TextButton(
+                            onClick = {},
+                            content = { Text(stringResource(R.string.copy_link)) }
+                        )
+                    }
                 }
+
             }
         }
     }
