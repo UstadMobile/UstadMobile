@@ -28,7 +28,9 @@ data class InviteStudentsUiState(
 ) {
 
     val addRecipientVisible: Boolean
-        get() = textField.validEmail() || isValidPhoneNumber(textField)
+        get() = (textField.validEmail()
+                || isValidPhoneNumber(textField))
+                && textFieldError.isNullOrBlank()
 
 }
 
@@ -57,16 +59,16 @@ class InviteStudentsViewModel(
     }
 
     fun onTextFieldChanged(text: String) {
-        if (_uiState.value.recipients.contains(_uiState.value.textField)){
-            _uiState.update { prev ->
-                prev.copy(
-                    textFieldError = impl.getString(MessageID.error),
-                )
-            }
-        } else {
-            _uiState.update { prev ->
-                prev.copy(textField = text)
-            }
+        _uiState.update { prev ->
+            prev.copy(
+                fieldsEnabled = true,
+                textFieldError = if(prev.recipients.contains(text)) {
+                    impl.getString(MessageID.field_required_prompt)
+                } else {
+                    null
+                },
+                textField = text
+            )
         }
     }
 
