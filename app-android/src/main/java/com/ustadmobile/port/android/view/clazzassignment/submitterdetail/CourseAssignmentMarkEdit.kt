@@ -74,7 +74,10 @@ fun CourseAssignmentMarkEdit(
                         })
                     },
                     trailingIcon = {
-                        Text("/$maxPoints ${stringResource(R.string.points)}")
+                        Text(
+                            modifier = Modifier.padding(end = 8.dp),
+                            text = "/$maxPoints"
+                        )
                     }
                 )
             }
