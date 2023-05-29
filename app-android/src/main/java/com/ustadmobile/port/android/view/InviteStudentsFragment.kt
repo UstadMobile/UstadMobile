@@ -23,6 +23,7 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.contentColorFor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
@@ -194,11 +195,11 @@ private fun InviteStudentsScreen(
                         modifier = Modifier.defaultItemPadding(),
                     ) {
                         Icon(
-                            Icons.Default.Add,
+                            Icons.Filled.Attachment,
                             modifier = Modifier.clip(CircleShape),
                             contentDescription = null,
                         )
-                        Text(text = stringResource(R.string.class_id))
+                        Text(text = stringResource(R.string.class_invitation_link))
                     }
 
                     Row(
