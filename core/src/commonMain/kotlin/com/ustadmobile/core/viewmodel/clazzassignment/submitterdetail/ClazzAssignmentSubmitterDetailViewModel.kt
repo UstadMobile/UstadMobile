@@ -1,10 +1,11 @@
 package com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail
 
 import com.ustadmobile.core.db.dao.CourseAssignmentMarkDaoCommon
+import com.ustadmobile.core.db.dao.CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES
+import com.ustadmobile.core.domain.assignment.submitmark.SubmitMarkUseCase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.whenSubscribed
@@ -60,8 +61,6 @@ data class ClazzAssignmentSubmitterDetailUiState(
 
     val fieldsEnabled: Boolean = true,
 
-    val markListFilterChipsVisible: Boolean = true,
-
     val markListSelectedChipId: Int = CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES,
 
     val markListFilterOptions: List<MessageIdOption2> = listOf(
@@ -74,6 +73,11 @@ data class ClazzAssignmentSubmitterDetailUiState(
     val newPrivateCommentText: String = "",
 
     val activeUserPersonUid: Long = 0,
+
+    /**
+     * If the active user
+     */
+    internal val activeUserSubmitterId: Long = 0,
 
 ) {
 
@@ -110,6 +114,39 @@ data class ClazzAssignmentSubmitterDetailUiState(
         )
     }
 
+    val submitGradeButtonMessageId: Int
+        get() = if(marks.any { it.courseAssignmentMark?.camMarkerSubmitterUid == activeUserSubmitterId }) {
+            MessageID.update_grade
+        }else {
+            MessageID.submit_grade
+        }
+
+    val submitGradeButtonAndGoNextMessageId: Int
+        get() = if(marks.any { it.courseAssignmentMark?.camMarkerSubmitterUid == activeUserSubmitterId }) {
+            MessageID.update_grade_and_mark_next
+        }else {
+            MessageID.submit_grade_and_mark_next
+        }
+
+    val visibleMarks: List<CourseAssignmentMarkAndMarkerName>
+        get() = if(markListSelectedChipId == ARG_FILTER_RECENT_SCORES) {
+            latestUniqueMarksByMarker.sortedByDescending { it.courseAssignmentMark?.camLct ?: 0 }
+        }else {
+            marks
+        }
+
+    val markListFilterChipsVisible: Boolean
+        get() {
+            //Determine if there are multiple marks from a single marker submitter uid.
+            return marks
+                .groupingBy { it.courseAssignmentMark?.camMarkerSubmitterUid ?: 0L }
+                .eachCount().any { it.value > 1 }
+        }
+
+    val scoreSummaryVisible: Boolean
+        get() = marks.isNotEmpty()
+
+
 }
 
 /**
@@ -119,6 +156,7 @@ data class ClazzAssignmentSubmitterDetailUiState(
 class ClazzAssignmentSubmitterDetailViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
+    private val submitMarkUseCase: SubmitMarkUseCase = SubmitMarkUseCase(),
 ): DetailViewModel<CourseAssignmentSubmission>(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(ClazzAssignmentSubmitterDetailUiState())
@@ -162,10 +200,21 @@ class ClazzAssignmentSubmitterDetailViewModel(
                     }
                 }
 
-                println("Set submitter name to $submitterName")
                 _appUiState.update { prev ->
                     prev.copy(
                         title = submitterName
+                    )
+                }
+            }
+
+            launch {
+                val activeUserSubmitterId = activeRepo.clazzAssignmentDao.getSubmitterUid(
+                    assignmentUid = assignmentUid,
+                    accountPersonUid = activeUserPersonUid,
+                )
+                _uiState.update { prev ->
+                    prev.copy(
+                        activeUserSubmitterId = activeUserSubmitterId
                     )
                 }
             }
@@ -238,7 +287,70 @@ class ClazzAssignmentSubmitterDetailViewModel(
 
     fun onChangeDraftMark(draftMark: CourseAssignmentMark?) {
         _uiState.update { prev ->
-            prev.copy(draftMark = draftMark)
+            prev.copy(
+                draftMark = draftMark,
+                submitMarkError = if(prev.draftMark?.camMark == draftMark?.camMark) {
+                    prev.submitMarkError
+                }else {
+                    null
+                }
+            )
+        }
+    }
+
+    fun onClickSubmitMark() {
+        if(loadingState == LoadingUiState.INDETERMINATE)
+            return
+
+
+        val draftMark = _uiState.value.draftMark ?: return
+        val submissions = _uiState.value.submissionList // note: this would be better to check by making it nullable
+        val courseBlock = _uiState.value.courseBlock ?: return
+
+        if(draftMark.camMark < 0) {
+            _uiState.update { prev ->
+                prev.copy(submitMarkError = systemImpl.getString(MessageID.score_greater_than_zero))
+            }
+            return
+        }else if(draftMark.camMark > courseBlock.cbMaxPoints){
+            _uiState.update { prev ->
+                prev.copy(submitMarkError = systemImpl.getString(MessageID.too_high))
+            }
+            return
+        }
+
+        loadingState = LoadingUiState.INDETERMINATE
+
+        viewModelScope.launch {
+            try {
+                submitMarkUseCase(
+                    db = activeDb,
+                    activeUserPersonUid = activeUserPersonUid,
+                    assignmentUid = assignmentUid,
+                    submitterUid = submitterUid,
+                    draftMark = draftMark,
+                    submissions = submissions,
+                    courseBlock = courseBlock
+                )
+
+                _uiState.update { prev ->
+                    prev.copy(
+                        draftMark = CourseAssignmentMark(),
+                    )
+                }
+            }catch(e: Exception) {
+                //nothing yet
+            }finally {
+                loadingState = LoadingUiState.NOT_LOADING
+            }
+        }
+    }
+
+    fun onClickGradeFilterChip(option: MessageIdOption2) {
+        _uiState.update { prev ->
+            prev.copy(
+                markListSelectedChipId = option.value
+            )
         }
     }
 

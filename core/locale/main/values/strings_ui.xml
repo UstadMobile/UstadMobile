@@ -1613,4 +1613,9 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="mark">Mark</string>
 
+    <!--
+    Error message shown if teacher tries to give more points for an assignment than the maximum possible score.
+    -->
+    <string name="too_high">Too high!</string>
+
 </resources>

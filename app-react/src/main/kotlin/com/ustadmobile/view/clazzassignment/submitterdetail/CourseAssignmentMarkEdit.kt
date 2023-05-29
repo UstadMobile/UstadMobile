@@ -42,6 +42,10 @@ external interface CourseAssignmentMarkEditProps: Props {
 
     var onClickSubmitGradeAndMarkNext: () -> Unit
 
+    var submitButtonLabelMessageId: Int
+
+    var submitGradeButtonAndGoNextMessageId: Int
+
 }
 
 val CourseAssignmentMarkEdit = FC<CourseAssignmentMarkEditProps> { props ->
@@ -85,6 +89,8 @@ val CourseAssignmentMarkEdit = FC<CourseAssignmentMarkEditProps> { props ->
                         camMark = it
                     })
                 }
+                helperText = props.scoreError?.let { ReactNode(it) }
+                error = props.scoreError != null
 
                 asDynamic().InputProps = jso<InputBaseProps> {
                     endAdornment = InputAdornment.create {
@@ -103,7 +109,7 @@ val CourseAssignmentMarkEdit = FC<CourseAssignmentMarkEditProps> { props ->
                 }
                 fullWidth = true
 
-                + strings[MessageID.submit]
+                + strings[props.submitButtonLabelMessageId]
             }
         }
 
@@ -115,7 +121,7 @@ val CourseAssignmentMarkEdit = FC<CourseAssignmentMarkEditProps> { props ->
             }
             fullWidth = true
 
-            + strings[MessageID.return_and_mark_next]
+            + strings[props.submitGradeButtonAndGoNextMessageId]
         }
 
     }

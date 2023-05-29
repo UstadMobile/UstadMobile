@@ -123,6 +123,7 @@ private val CourseGroupSetListItem = FC<CourseGroupSetListItemProps> { props ->
             }
 
             ListItemText {
+                inset = true
                 primary = ReactNode(props.courseGroupSet?.cgsName ?: "")
             }
         }

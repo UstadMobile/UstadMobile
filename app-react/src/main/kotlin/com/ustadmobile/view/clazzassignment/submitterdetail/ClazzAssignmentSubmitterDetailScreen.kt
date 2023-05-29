@@ -6,6 +6,7 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.util.ext.mapLookupOrBlank
 import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants.SUBMISSION_STAUTUS_MESSAGE_ID
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailUiState
@@ -89,21 +90,23 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
                             strings.mapLookupOrBlank(
                                 key = props.uiState.submissionStatus,
                                 map = SUBMISSION_STAUTUS_MESSAGE_ID
-                            )
+                            ).capitalizeFirstLetter()
                         )
                         secondary = ReactNode(strings[MessageID.status])
                     }
                 }
             }
 
-            item(key = "averagescore") {
-                ListItem.create {
-                    ListItemIcon {
-                        EmojiEventsIcon { }
-                    }
-                    ListItemText {
-                        primary = ReactNode("${props.uiState.averageScore} ${strings[MessageID.points]}")
-                        secondary = ReactNode(strings[MessageID.score])
+            if(props.uiState.scoreSummaryVisible) {
+                item(key = "averagescore") {
+                    ListItem.create {
+                        ListItemIcon {
+                            EmojiEventsIcon { }
+                        }
+                        ListItemText {
+                            primary = ReactNode("${props.uiState.averageScore} ${strings[MessageID.points]}")
+                            secondary = ReactNode(strings[MessageID.score])
+                        }
                     }
                 }
             }
@@ -143,7 +146,7 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
             }
 
             items(
-                list = props.uiState.marks,
+                list = props.uiState.visibleMarks,
                 key = { "grade_${it.courseAssignmentMark?.camUid}"}
             ){ mark ->
                 UstadCourseAssignmentMarkListItem.create {
@@ -160,6 +163,8 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
                         onChangeDraftMark = props.onChangeDraftMark
                         onClickSubmitGrade = props.onClickSubmitGrade
                         onClickSubmitGradeAndMarkNext = props.onClickSubmitGradeAndMarkNext
+                        submitButtonLabelMessageId = props.uiState.submitGradeButtonMessageId
+                        submitGradeButtonAndGoNextMessageId = props.uiState.submitGradeButtonAndGoNextMessageId
                     }
                 }
             }
@@ -211,6 +216,8 @@ val ClazzAssignmentSubmitterDetailScreen = FC<Props> {
         onChangePrivateComment = viewModel::onChangePrivateComment
         onClickSubmitPrivateComment = viewModel::onSubmitPrivateComment
         onChangeDraftMark = viewModel::onChangeDraftMark
+        onClickSubmitGrade = viewModel::onClickSubmitMark
+        onClickGradeFilterChip = viewModel::onClickGradeFilterChip
     }
 }
 
