@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="12.176" tests="1" failures="1">
+  <testsuite name="Root Suite" timestamp="2023-04-27T06:15:46" tests="0" file="cypress/e2e/002_003_teacher_record_and_edit_attendance.cy.js" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="The admin can add student and  student joins the class using link or code" timestamp="2023-04-27T06:15:46" tests="1" time="12.099" failures="1">
+    <testcase name="The admin can add student and  student joins the class using link or code Ustad Mobile - add student and  student joins the class using link or code" time="0.000" classname="Ustad Mobile - add student and  student joins the class using link or code">
+      <failure message="The following error originated from your application code, not from Cypress. It was caused by an unhandled promise rejection.
+
+  &gt; connect ECONNREFUSED 127.0.0.1:8087
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the `uncaught:exception` event.
+
+https://on.cypress.io/uncaught-exception-from-application" type="Error"><![CDATA[Error: The following error originated from your application code, not from Cypress. It was caused by an unhandled promise rejection.
+
+  > connect ECONNREFUSED 127.0.0.1:8087
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the `uncaught:exception` event.
+
+https://on.cypress.io/uncaught-exception-from-application
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1187:16)]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>
