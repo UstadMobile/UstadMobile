@@ -97,15 +97,14 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
             spacing = responsive(10.px)
 
 
-            props.uiState.recipients.forEach { recipient ->
-                Chip {
-                    label = ReactNode(recipient)
-                    sx {
-                        display = Display.inlineBlock
-                    }
-                    onClick = {}
-                    onDelete = {
-                        props.onClickRemoveRecipient(recipient)
+            Container {
+                props.uiState.recipients.forEach { recipient ->
+                    Chip {
+                        label = ReactNode(recipient)
+                        onClick = {}
+                        onDelete = {
+                            props.onClickRemoveRecipient(recipient)
+                        }
                     }
                 }
             }
