@@ -64,7 +64,7 @@ class InviteStudentsViewModel(
             prev.copy(
                 fieldsEnabled = true,
                 textFieldError = if(prev.recipients.contains(text)) {
-                    impl.getString(MessageID.email_or_phone_exists)
+                    impl.getString(MessageID.duplicate)
                 } else {
                     null
                 },
