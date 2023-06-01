@@ -1,39 +1,24 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.person.invitestudents
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.viewmodel.InviteStudentsUiState
-import com.ustadmobile.core.viewmodel.InviteStudentsViewModel
+import com.ustadmobile.core.viewmodel.person.invitestudents.InviteStudentsUiState
+import com.ustadmobile.core.viewmodel.person.invitestudents.InviteStudentsViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.util.ext.onTextChange
-import com.ustadmobile.view.components.UstadPersonAvatar
 import csstype.JustifyContent
 import com.ustadmobile.mui.common.justifyContent
-import csstype.Display
-import csstype.Flex
-import csstype.FlexShrink
-import csstype.FontVariant
-import csstype.FontVariant.Companion.fullWidth
-import csstype.LengthType
 import csstype.Padding
 import csstype.px
-import mui.icons.material.Add
-import mui.icons.material.Attachment
 import mui.icons.material.AttachmentRounded
-import mui.material.BaseSize
-import mui.material.Box
 import mui.material.Button
 import mui.material.ButtonVariant
 import mui.material.Card
 import mui.material.Chip
-import mui.material.ChipVariant
 import mui.material.Container
 import mui.material.FormControlVariant
 import mui.material.Icon
-import mui.material.IconColor
-import mui.material.NormalSize
-import mui.material.Size
 import mui.material.TextField
 import mui.material.Typography
 import mui.material.Stack
@@ -151,7 +136,6 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
                    direction = responsive(StackDirection.row)
 
                    Icon {
-                       color = IconColor.primary
                        + AttachmentRounded.create()
                    }
 

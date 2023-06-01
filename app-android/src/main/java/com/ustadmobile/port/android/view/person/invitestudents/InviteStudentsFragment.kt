@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.view
+package com.ustadmobile.port.android.view.person.invitestudents
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,11 +10,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Chip
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FilterChip
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
@@ -22,9 +20,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.contentColorFor
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Attachment
-import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -42,15 +38,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.viewmodel.InviteStudentsUiState
-import com.ustadmobile.core.viewmodel.InviteStudentsViewModel
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.core.viewmodel.person.invitestudents.InviteStudentsUiState
+import com.ustadmobile.core.viewmodel.person.invitestudents.InviteStudentsViewModel
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
-import com.ustadmobile.port.android.view.composable.UstadDateField
+import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.UstadInputFieldLayout
-import com.ustadmobile.port.android.view.composable.UstadPersonAvatar
 
 
 class InviteStudentsFragment : UstadBaseMvvmFragment() {

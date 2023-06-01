@@ -3,7 +3,7 @@ package com.ustadmobile.entities
 import com.ustadmobile.core.components.NAVHOST_CLEARSTACK_VIEWNAME
 import com.ustadmobile.core.components.NavHostClearStackPlaceholder
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.viewmodel.InviteStudentsViewModel
+import com.ustadmobile.core.viewmodel.person.invitestudents.InviteStudentsViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.*
@@ -40,6 +40,7 @@ import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssign
 import com.ustadmobile.view.clazzassignment.detailsubmissionstab.ClazzAssignmentDetailSubmissionsTab
 import com.ustadmobile.view.courseterminology.edit.CourseTerminologyEditScreen
 import com.ustadmobile.view.login.LoginScreen
+import com.ustadmobile.view.person.invitestudents.InviteStudentsScreen
 import com.ustadmobile.view.schedule.edit.ScheduleEditScreen
 import com.ustadmobile.view.siteenterlink.SiteEnterLinkScreen
 

@@ -8,7 +8,7 @@ import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
-import com.ustadmobile.core.viewmodel.InviteStudentsViewModel
+import com.ustadmobile.core.viewmodel.person.invitestudents.InviteStudentsViewModel
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.door.paging.*
 import com.ustadmobile.lib.db.entities.Person

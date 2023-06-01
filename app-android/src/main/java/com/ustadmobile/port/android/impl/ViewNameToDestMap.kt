@@ -8,7 +8,7 @@ import com.ustadmobile.core.impl.UstadDestination
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
-import com.ustadmobile.core.viewmodel.InviteStudentsViewModel
+import com.ustadmobile.core.viewmodel.person.invitestudents.InviteStudentsViewModel
 import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
 import com.ustadmobile.port.android.view.PanicButtonSettingsView
 
