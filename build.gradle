@@ -73,7 +73,7 @@ ext {
     ustadVersionCode = 233
 
     version_door = "0.0.63l"
-    version_httpoveripc = "0.0.1n"
+    version_httpoveripc = "0.0.1o"
     version_retriever = "0.0.1e"
     version_xmlpullparserkmp = '0.0.20'
 

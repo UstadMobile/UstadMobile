@@ -65,23 +65,15 @@ expect abstract class StudentResultDao {
     @ReplicationCheckPendingNotificationsFor([StudentResult::class])
     abstract suspend fun replicateOnChange()
 
-    /**
-     *
-     */
-    @Query("""
-        SELECT StudentResult.*,
-               CourseBlock.cbSourcedId AS cbSourcedId
-          FROM StudentResult
-               LEFT JOIN CourseBlock
-                         ON StudentResult.srCourseBlockUid = CourseBlock.cbUid 
-         WHERE StudentResult.srClazzUid = :clazzUid
-           AND StudentResult.srStudentPersonUid = :studentPersonUid
+    /*
+    Permission clause to be restored as part of new sync
+
            AND EXISTS(
-               SELECT ScopedGrant.sgUid 
+               SELECT ScopedGrant.sgUid
                   FROM ScopedGrant
                        JOIN PersonGroupMember
                             ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-                            
+
                  WHERE /* ScopedGrant scope must match the class or person */
                        ((ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
                            AND ScopedGrant.sgEntityUid = StudentResult.srClazzUid)
@@ -93,6 +85,20 @@ expect abstract class StudentResultDao {
                        /* ScopedGrant must be granted to the person as per accountPersonUid */
                    AND PersonGroupMember.groupMemberPersonUid = :accountPersonUid
                )
+
+     */
+    /**
+     *
+     */
+    @Query("""
+        SELECT StudentResult.*,
+               CourseBlock.cbSourcedId AS cbSourcedId
+          FROM StudentResult
+               LEFT JOIN CourseBlock
+                         ON StudentResult.srCourseBlockUid = CourseBlock.cbUid 
+         WHERE StudentResult.srClazzUid = :clazzUid
+           AND StudentResult.srStudentPersonUid = :studentPersonUid
+           AND :accountPersonUid = :accountPersonUid
     """)
     abstract suspend fun findByClazzAndStudent(
         clazzUid: Long,
