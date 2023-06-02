@@ -222,12 +222,8 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
      */
     @Query("""
         SELECT Clazz.*
-          FROM PersonGroupMember
-               ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_CLAZZ_SELECT}
-               ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
-         WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
-           AND PersonGroupMember.groupMemberActive
+          FROM CLAZZ
+          WHERE :accountPersonUid = :accountPersonUid
            AND EXISTS 
                (SELECT ClazzEnrolment.clazzEnrolmentUid
                   FROM ClazzEnrolment
