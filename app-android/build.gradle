@@ -227,6 +227,8 @@ configurations.all {
 }
 
 dependencies {
+    // for VideoShrinker (dev-shrink3)
+    implementation 'net.bramp.ffmpeg:ffmpeg:0.7.0'
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
 
     implementation project(':core')
