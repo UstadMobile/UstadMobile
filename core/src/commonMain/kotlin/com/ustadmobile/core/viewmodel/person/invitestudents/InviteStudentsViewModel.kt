@@ -24,8 +24,6 @@ data class InviteStudentsUiState(
 
     val textFieldError: String? = null,
 
-    val classInvitationLink: String = "",
-
 ) {
 
     val addRecipientVisible: Boolean
@@ -51,7 +49,7 @@ class InviteStudentsViewModel(
             prev.copy(
                 title = impl.getString(MessageID.invite_students),
                 actionBarButtonState = ActionBarButtonUiState(
-                    visible = true,
+                    visible = _uiState.value.recipients.isNotEmpty(),
                     text = impl.getString(MessageID.invite),
                     onClick = this::onClickInvite
                 )
@@ -62,7 +60,6 @@ class InviteStudentsViewModel(
     fun onTextFieldChanged(text: String) {
         _uiState.update { prev ->
             prev.copy(
-                fieldsEnabled = true,
                 textFieldError = if(prev.recipients.contains(text)) {
                     impl.getString(MessageID.duplicate)
                 } else {
@@ -91,13 +88,6 @@ class InviteStudentsViewModel(
     }
 
     private fun onClickInvite() {
-
-    }
-
-    fun onClickShareLink() {
-
-    }
-    fun onClickCopyLink() {
 
     }
 

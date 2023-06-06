@@ -1600,8 +1600,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="phone_or_email">Phone or email address</string>
 
-    <string name="class_invitation_link">Class invitation link</string>
-
     <string name="duplicate">Duplicate</string>
 
 </resources>

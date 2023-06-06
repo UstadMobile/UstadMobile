@@ -7,29 +7,20 @@ import com.ustadmobile.core.viewmodel.person.invitestudents.InviteStudentsUiStat
 import com.ustadmobile.core.viewmodel.person.invitestudents.InviteStudentsViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.util.ext.onTextChange
-import csstype.JustifyContent
-import com.ustadmobile.mui.common.justifyContent
-import csstype.Padding
 import csstype.px
-import mui.icons.material.AttachmentRounded
 import mui.material.Button
-import mui.material.ButtonVariant
-import mui.material.Card
 import mui.material.Chip
 import mui.material.Container
 import mui.material.FormControlVariant
-import mui.material.Icon
 import mui.material.TextField
 import mui.material.Typography
 import mui.material.Stack
 import mui.material.StackDirection
 import mui.material.TypographyAlign
 import mui.system.responsive
-import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
-import react.create
 
 external interface InviteStudentsProps : Props {
 
@@ -40,10 +31,6 @@ external interface InviteStudentsProps : Props {
     var onClickAddRecipient: () -> Unit
 
     var onClickRemoveRecipient: (String) -> Unit
-
-    var onClickCopyLink: () -> Unit
-
-    var onClickShareLink: () -> Unit
 
 }
 
@@ -65,8 +52,6 @@ val InviteStudentsScreen = FC<Props> {
         onTextFieldChanged = viewModel::onTextFieldChanged
         onClickAddRecipient = viewModel::onClickAddRecipient
         onClickRemoveRecipient = viewModel::onClickRemoveRecipient
-        onClickCopyLink = viewModel::onClickCopyLink
-        onClickShareLink = viewModel::onClickShareLink
     }
 }
 
@@ -123,45 +108,6 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
                             + strings[MessageID.another_email]
                             align = TypographyAlign.justify
                         }
-                    }
-                }
-            }
-
-            Card {
-                sx {
-                    padding = Padding(16.px, 17.px)
-                }
-
-               Stack {
-                   direction = responsive(StackDirection.row)
-
-                   Icon {
-                       + AttachmentRounded.create()
-                   }
-
-                   Typography {
-                       + strings[MessageID.class_invitation_link]
-                   }
-               }
-
-                Stack {
-                    direction = responsive(StackDirection.row)
-                    justifyContent = JustifyContent.end
-
-                    Button {
-                        variant = ButtonVariant.text
-                        onClick = {
-                            props.onClickShareLink()
-                        }
-                        + strings[MessageID.share]
-                    }
-
-                    Button {
-                        variant = ButtonVariant.text
-                        onClick = {
-                            props.onClickCopyLink()
-                        }
-                        + strings[MessageID.copy_link]
                     }
                 }
             }
