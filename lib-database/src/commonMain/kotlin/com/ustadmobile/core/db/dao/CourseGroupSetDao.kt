@@ -1,15 +1,17 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UserSession
-import kotlin.js.JsName
+import kotlinx.coroutines.flow.Flow
 
 @Repository
 @DoorDao
@@ -82,9 +84,21 @@ expect abstract class CourseGroupSetDao : BaseDao<CourseGroupSet> {
          FROM CourseGroupSet
         WHERE cgsActive
           AND cgsClazzUid = :clazzUid
-     ORDER BY cgsName   
+          AND ((:searchText = '%') OR (cgsName LIKE :searchText))
+     ORDER BY CASE(:sortOrder)
+              WHEN ${CourseGroupSetDaoConstants.SORT_NAME_ASC} THEN cgsName
+              ELSE ''
+              END ASC,
+              CASE(:sortOrder)
+              WHEN ${CourseGroupSetDaoConstants.SORT_NAME_DESC} THEN cgsName
+              ELSE ''
+              END DESC
     """)
-    abstract fun findAllCourseGroupSetForClazz(clazzUid: Long): DataSourceFactory<Int, CourseGroupSet>
+    abstract fun findAllCourseGroupSetForClazz(
+        clazzUid: Long,
+        searchText: String,
+        sortOrder: Int,
+    ): PagingSource<Int, CourseGroupSet>
 
 
     @Query("""
@@ -96,13 +110,32 @@ expect abstract class CourseGroupSetDao : BaseDao<CourseGroupSet> {
     """)
     abstract fun findAllCourseGroupSetForClazzList(clazzUid: Long): List<CourseGroupSet>
 
-    @JsName("findByUid")
+    @Query("""
+        SELECT *
+         FROM CourseGroupSet
+        WHERE cgsActive
+          AND cgsClazzUid = :clazzUid
+     ORDER BY cgsName   
+    """)
+    abstract suspend fun findAllCourseGroupSetForClazzListAsync(clazzUid: Long): List<CourseGroupSet>
+
     @Query("""
         SELECT * 
          FROM CourseGroupSet 
         WHERE cgsUid = :uid
         """)
     abstract suspend fun findByUidAsync(uid: Long): CourseGroupSet?
+
+    @Query("""
+        SELECT * 
+         FROM CourseGroupSet 
+        WHERE cgsUid = :uid
+        """)
+    abstract fun findByUidAsFlow(uid: Long): Flow<CourseGroupSet?>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertAsync(entity: CourseGroupSet)
+
 
 
 }

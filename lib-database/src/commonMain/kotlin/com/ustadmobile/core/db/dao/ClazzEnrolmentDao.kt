@@ -18,6 +18,8 @@ import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_DESC
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.PagingSource
+import com.ustadmobile.lib.db.composites.CourseNameAndPersonName
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
 import kotlinx.coroutines.flow.Flow
@@ -95,17 +97,23 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         AND clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS} LIMIT 1""")
     abstract suspend fun findByPersonUidAndClazzUidAsync(personUid: Long, clazzUid: Long): ClazzEnrolment?
 
-    @Query("""SELECT ClazzEnrolment.*, LeavingReason.*, 
-         COALESCE(Clazz.clazzTimeZone, COALESCE(School.schoolTimeZone, 'UTC')) as timeZone
-         FROM ClazzEnrolment LEFT JOIN
-        LeavingReason ON LeavingReason.leavingReasonUid = ClazzEnrolment.clazzEnrolmentLeavingReasonUid
-        LEFT JOIN Clazz ON Clazz.clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
-        LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid
-        WHERE clazzEnrolmentPersonUid = :personUid 
-        AND ClazzEnrolment.clazzEnrolmentActive 
-        AND clazzEnrolmentClazzUid = :clazzUid ORDER BY clazzEnrolmentDateLeft DESC""")
+    @Query("""
+        SELECT ClazzEnrolment.*, LeavingReason.*, 
+               COALESCE(Clazz.clazzTimeZone, COALESCE(School.schoolTimeZone, 'UTC')) as timeZone
+          FROM ClazzEnrolment 
+               LEFT JOIN LeavingReason 
+                         ON LeavingReason.leavingReasonUid = ClazzEnrolment.clazzEnrolmentLeavingReasonUid
+               LEFT JOIN Clazz 
+                         ON Clazz.clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
+               LEFT JOIN School 
+                         ON School.schoolUid = Clazz.clazzSchoolUid
+         WHERE clazzEnrolmentPersonUid = :personUid 
+           AND ClazzEnrolment.clazzEnrolmentActive 
+           AND clazzEnrolmentClazzUid = :clazzUid 
+      ORDER BY clazzEnrolmentDateLeft DESC
+           """)
     abstract fun findAllEnrolmentsByPersonAndClazzUid(personUid: Long, clazzUid: Long):
-            DataSourceFactory<Int, ClazzEnrolmentWithLeavingReason>
+            Flow<List<ClazzEnrolmentWithLeavingReason>>
 
     @Query("""SELECT ClazzEnrolment.*, LeavingReason.*,
          COALESCE(Clazz.clazzTimeZone, COALESCE(School.schoolTimeZone, 'UTC')) as timeZone
@@ -292,8 +300,15 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     """)
     @QueryLiveTables(value = ["Clazz", "Person", "ClazzEnrolment", "PersonGroupMember", "ScopedGrant"])
     @SqliteOnly
-    abstract fun findByClazzUidAndRole(clazzUid: Long, roleId: Int, sortOrder: Int, searchText: String? = "%",
-                                       filter: Int, accountPersonUid: Long, currentTime: Long): DataSourceFactory<Int, PersonWithClazzEnrolmentDetails>
+    abstract fun findByClazzUidAndRole(
+        clazzUid: Long,
+        roleId: Int,
+        sortOrder: Int,
+        searchText: String? = "%",
+        filter: Int,
+        accountPersonUid: Long,
+        currentTime: Long
+    ): PagingSource<Int, PersonWithClazzEnrolmentDetails>
 
     @Query("""
         UPDATE ClazzEnrolment 
@@ -326,5 +341,17 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         oldRole: Int,
         updateTime: Long
     ): Int
+
+    @Query("""
+        SELECT Person.firstNames, Person.lastName, Clazz.clazzName
+          FROM Person
+               LEFT JOIN Clazz
+                         ON Clazz.clazzUid = :clazzUid
+        WHERE Person.personUid = :personUid                 
+    """)
+    abstract suspend fun getClazzNameAndPersonName(
+        personUid: Long,
+        clazzUid: Long,
+    ): CourseNameAndPersonName?
 
 }

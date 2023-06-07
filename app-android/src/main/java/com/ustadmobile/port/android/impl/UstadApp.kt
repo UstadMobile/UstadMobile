@@ -61,6 +61,7 @@ import java.util.concurrent.Executors
 import com.ustadmobile.core.db.dao.commitLiveConnectivityStatus
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
 import org.acra.config.httpSender
 import org.acra.data.StringFormat
@@ -76,6 +77,7 @@ class UstadApp : Application(), DIAware {
 
     val diModule = DI.Module("UstadApp-Android") {
         import(CommonJvmDiModule)
+        import(commonDomainDiModule(EndpointScope.Default))
 
         bind<SupportedLanguagesConfig>() with singleton {
             applicationContext.appMetaData?.getString(METADATA_KEY_SUPPORTED_LANGS)?.let { langCodeList ->

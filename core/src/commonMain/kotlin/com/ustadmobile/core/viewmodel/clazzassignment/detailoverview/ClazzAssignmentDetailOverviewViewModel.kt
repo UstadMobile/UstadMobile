@@ -13,11 +13,12 @@ import com.ustadmobile.core.util.ext.textLength
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.viewmodel.DetailViewModel
-import com.ustadmobile.core.viewmodel.UstadAssignmentSubmissionHeaderUiState
+import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
+import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.async
@@ -25,6 +26,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
@@ -54,7 +56,7 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val latestSubmissionAttachments: List<CourseAssignmentSubmissionAttachment>? = null,
 
-    val markList: List<CourseAssignmentMarkWithPersonMarker> = emptyList(),
+    val markList: List<CourseAssignmentMarkAndMarkerName> = emptyList(),
 
     val courseComments: () -> PagingSource<Int, CommentsAndName> = { EmptyPagingSource() },
 
@@ -192,15 +194,27 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     val uiState: Flow<ClazzAssignmentDetailOverviewUiState> = _uiState.asStateFlow()
 
+    private var lastPrivateCommentsPagingSource: PagingSource<Int, CommentsAndName>? = null
+
     private val privateCommentsPagingSourceFactory: () -> PagingSource<Int, CommentsAndName> = {
         activeRepo.commentsDao.findPrivateCommentsForUserByAssignmentUid(
             accountPersonUid = activeUserPersonUid,
             assignmentUid = entityUidArg,
-        )
+        ).also {
+            lastPrivateCommentsPagingSource?.invalidate()
+            lastPrivateCommentsPagingSource = it
+        }
     }
 
+    private var lastCourseCommentsPagingSourceFactory: PagingSource<Int, CommentsAndName>? = null
+
     private val courseCommentsPagingSourceFactory: () -> PagingSource<Int, CommentsAndName> = {
-        activeRepo.commentsDao.findCourseCommentsByAssignmentUid(assignmentUid = entityUidArg)
+        activeRepo.commentsDao.findCourseCommentsByAssignmentUid(
+            assignmentUid = entityUidArg
+        ).also {
+            lastCourseCommentsPagingSourceFactory?.invalidate()
+            lastCourseCommentsPagingSourceFactory = it
+        }
     }
 
     init {
@@ -249,6 +263,19 @@ class ClazzAssignmentDetailOverviewViewModel(
                                 }else {
                                     null
                                 }
+                            )
+                        }
+                    }
+                }
+
+                launch {
+                    activeRepo.courseAssignmentMarkDao.getAllMarksForUserAsFlow(
+                        accountPersonUid = activeUserPersonUid,
+                        assignmentUid = entityUidArg
+                    ).collect {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                markList = it
                             )
                         }
                     }
@@ -377,6 +404,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                 _uiState.update { prev ->
                     prev.copy(newPrivateCommentText = "")
                 }
+                lastPrivateCommentsPagingSource?.invalidate()
             }finally {
                 loadingState = LoadingUiState.NOT_LOADING
             }
@@ -408,6 +436,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                 _uiState.update { prev ->
                     prev.copy(newCourseCommentText = "")
                 }
+                lastCourseCommentsPagingSourceFactory?.invalidate()
             }finally {
                 loadingState = LoadingUiState.NOT_LOADING
             }

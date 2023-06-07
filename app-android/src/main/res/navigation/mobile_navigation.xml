@@ -136,31 +136,21 @@
 
     <fragment
         android:id="@+id/course_group_set_list"
-        android:name="com.ustadmobile.port.android.view.CourseGroupSetListFragment" />
+        android:name="com.ustadmobile.port.android.view.coursegroupset.list.CourseGroupSetListFragment" />
 
     <fragment
         android:id="@+id/course_group_set_edit"
-        android:name="com.ustadmobile.port.android.view.CourseGroupSetEditFragment" />
+        android:name="com.ustadmobile.port.android.view.coursegroupset.edit.CourseGroupSetEditFragment" />
 
     <fragment
         android:id="@+id/course_group_set_detail"
-        android:name="com.ustadmobile.port.android.view.CourseGroupSetDetailFragment" />
+        android:name="com.ustadmobile.port.android.view.coursegroupset.detail.CourseGroupSetDetailFragment" />
 
     <fragment
         android:id="@+id/module_course_block_edit_dest"
         android:name="com.ustadmobile.port.android.view.ModuleCourseBlockEditFragment" />
 
-    <fragment
-        android:id="@+id/course_discussion_course_block_edit_dest"
-        android:name="com.ustadmobile.port.android.view.CourseDiscussionEditFragment" />
 
-  <fragment
-        android:id="@+id/course_discussion_topic_edit_dest"
-        android:name="com.ustadmobile.port.android.view.DiscussionTopicEditFragment" />
-
-<fragment
-        android:id="@+id/discussion_topic_detail_dest"
-        android:name="com.ustadmobile.port.android.view.DiscussionTopicDetailFragment" />
 
 
     <fragment
@@ -181,33 +171,33 @@
 
     <fragment
         android:id="@+id/course_discussion_detail_dest"
-        android:name="com.ustadmobile.port.android.view.CourseDiscussionDetailFragment" />
+        android:name="com.ustadmobile.port.android.view.discussionpost.coursediscussiondetail.CourseDiscussionDetailFragment" />
 
  <fragment
         android:id="@+id/discussion_post_edit_dest"
-        android:name="com.ustadmobile.port.android.view.DiscussionPostEditFragment" />
+        android:name="com.ustadmobile.port.android.view.discussionpost.edit.DiscussionPostEditFragment" />
 
  <fragment
         android:id="@+id/discussion_post_detail_dest"
-        android:name="com.ustadmobile.port.android.view.DiscussionPostDetailFragment" />
+        android:name="com.ustadmobile.port.android.view.discussionpost.detail.DiscussionPostDetailFragment" />
 
     <fragment
         android:id="@+id/clazz_assignment_detail_dest"
         android:name="com.ustadmobile.port.android.view.ClazzAssignmentDetailFragment"/>
 
     <fragment
-        android:id="@+id/clazz_assignment_detail_student_progress"
-        android:name="com.ustadmobile.port.android.view.ClazzAssignmentDetailStudentProgressFragment"/>
+        android:id="@+id/clazz_assignment_submitter_detail_dest"
+        android:name="com.ustadmobile.port.android.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailFragment"/>
 
     <fragment
         android:id="@+id/content_entry_list_dest"
-        android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment"
+        android:name="com.ustadmobile.port.android.view.contententry.list.ContentEntryList2Fragment"
         android:label="@string/content">
     </fragment>
-
+2
     <fragment
         android:id="@+id/content_entry_list_home_dest"
-        android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment"
+        android:name="com.ustadmobile.port.android.view.contententry.list.ContentEntryList2Fragment"
         android:label="@string/library"/>
 
     <fragment
@@ -217,12 +207,12 @@
 
     <fragment
         android:id="@+id/content_entry_list_select_folder"
-        android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment" />
+        android:name="com.ustadmobile.port.android.view.contententry.list.ContentEntryList2Fragment" />
 
 
     <fragment
         android:id="@+id/content_entry_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ContentEntryEdit2Fragment"
+        android:name="com.ustadmobile.port.android.view.contententry.edit.ContentEntryEdit2Fragment"
         android:label="@string/content" />
 
     <fragment
@@ -374,12 +364,12 @@
 
     <fragment
         android:id="@+id/time_zone_list_dest"
-        android:name="com.ustadmobile.port.android.view.TimeZoneListFragment"
+        android:name="com.ustadmobile.port.android.view.timezone.TimeZoneListFragment"
         android:label="@string/timezone"/>
 
     <fragment
         android:id="@+id/clazz_log_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzLogEditFragment"
+        android:name="com.ustadmobile.port.android.view.clazzlog.edit.ClazzLogEditFragment"
         android:label="@string/add_a_new_occurrence"/>
 
     <fragment
@@ -406,14 +396,6 @@
         android:id="@+id/site_terms_edit_dest"
         android:name="com.ustadmobile.port.android.view.SiteTermsEditFragment"
         android:label="@string/edit_terms_and_policies"/>
-
-    <fragment
-        android:id="@+id/text_assignment_edit_dest"
-        android:name="com.ustadmobile.port.android.view.TextAssignmentEditFragment" />
-
-    <fragment
-        android:id="@+id/text_course_block_edit_dest"
-        android:name="com.ustadmobile.port.android.view.TextCourseBlockEditFragment" />
 
     <fragment
         android:id="@+id/text_html_view_detail_dest"

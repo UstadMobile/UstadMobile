@@ -30,7 +30,7 @@
 
         <variable
             name="eventHandler"
-            type="com.ustadmobile.port.android.view.ClazzAssignmentDetailStudentProgressFragmentEventHandler" />
+            type="com.ustadmobile.port.android.view.clazzassignment.submitterdetail.ClazzAssignmentDetailStudentProgressFragmentEventHandler" />
 
     </data>
 

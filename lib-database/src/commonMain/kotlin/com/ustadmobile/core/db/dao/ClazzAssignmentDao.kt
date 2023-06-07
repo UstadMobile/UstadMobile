@@ -6,13 +6,17 @@ import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.core.db.MAX_VALID_DATE
-import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.ASSIGNMENT_PERMISSION
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.ASSIGNMENT_CLAZZ_UID_CTE_SQL
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.WITH_HAS_LEARNINGRECORD_UPDATE_PERMISSION_SQL
 import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL
-import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SUBMITTER_LIST_CTE
 import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SUBMITTER_LIST_WITHOUT_ASSIGNMENT_CTE
-import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.HAS_LEARNINGRECORD_SELECT_PERMISSION_CTE_SQL
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SORT_NAME_ASC
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SORT_NAME_DESC
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SUBMITTER_LIST_CTE2_SQL
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
 
@@ -93,147 +97,146 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
          WHERE caUid = :cbUid""")
     abstract suspend fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
 
+
+
     @Query("""
-           $ASSIGNMENT_PERMISSION,
-         
-           $SUBMITTER_LIST_CTE
-            
-            SELECT (SELECT COUNT(*) FROM SubmitterList) AS totalStudents,
-            
-                    0 as notSubmittedStudents,
-                    
-                    (SELECT COUNT(DISTINCT CourseAssignmentSubmission.casSubmitterUid) 
-                      FROM CourseAssignmentSubmission
-                           LEFT JOIN CourseAssignmentMark
-                           ON CourseAssignmentSubmission.casSubmitterUid = CourseAssignmentMark.camSubmitterUid
-                           AND CourseAssignmentMark.camAssignmentUid = CourseAssignmentSubmission.casAssignmentUid
-                     WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
-                       AND CourseAssignmentMark.camUid IS NULL
-                       AND CourseAssignmentSubmission.casSubmitterUid IN (SELECT submitterId 
-                                                                            FROM SubmitterList))
-                      AS submittedStudents,
-                     
-                     
-                     (SELECT COUNT(DISTINCT CourseAssignmentMark.camSubmitterUid) 
+        WITH $HAS_LEARNINGRECORD_SELECT_PERMISSION_CTE_SQL,
+        $ASSIGNMENT_CLAZZ_UID_CTE_SQL,
+        $SUBMITTER_LIST_CTE2_SQL
+        
+        SELECT 
+              -- whether or not the active user has permission to view learner records 
+              (SELECT hasPermission
+                 FROM HasLearningRecordSelectPermission) AS activeUserHasViewLearnerRecordsPermission,
+        
+              (SELECT COUNT(*)
+                 FROM SubmitterList) AS totalStudents,
+              
+              -- Total marked students
+              (SELECT COUNT(*)
+                 FROM SubmitterList
+                WHERE EXISTS(
+                      SELECT CourseAssignmentMark.camUid
                         FROM CourseAssignmentMark
-                            
-                             JOIN CourseAssignmentSubmission
-                             ON CourseAssignmentSubmission.casSubmitterUid = CourseAssignmentMark.camSubmitterUid
-                             AND CourseAssignmentSubmission.casAssignmentUid = CourseAssignmentMark.camAssignmentUid
-                             
                        WHERE CourseAssignmentMark.camAssignmentUid = :assignmentUid
-                         AND CourseAssignmentMark.camSubmitterUid IN (SELECT submitterId 
-                                                                            FROM SubmitterList))
-                         AS markedStudents, 
-                         
-                         'TRUE' AS hasMetricsPermission
-                         
-         FROM  ClazzAssignment
-        WHERE caActive
-          AND caClazzUid = :clazzUid 
-          AND caUid = :assignmentUid                  
+                         AND CourseAssignmentMark.camSubmitterUid = SubmitterList.submitterId) 
+                ) AS markedStudents,
+              
+              -- Total who have submitted  
+              (SELECT COUNT(*)
+                 FROM SubmitterList
+                WHERE EXISTS(
+                      SELECT CourseAssignmentSubmission.casUid
+                        FROM CourseAssignmentSubmission
+                       WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
+                         AND CourseAssignmentSubmission.casSubmitterUid = SubmitterList.submitterId)
+                ) AS submittedStudents,
+              
+              (SELECT (ClazzAssignment.caGroupUid != 0)
+                 FROM ClazzAssignment
+                WHERE ClazzAssignment.caUid = :assignmentUid) AS isGroupAssignment
     """)
+    /**
+     * Get a summary of the numbers that have submitted/been marked for a given assignment.
+     */
     abstract fun getProgressSummaryForAssignment(
         assignmentUid: Long,
-        clazzUid: Long,
+        accountPersonUid: Long,
         group: String,
-        submitterUid: Long,
-        loggedInPersonUid: Long
-    ) : LiveData<AssignmentProgressSummary?>
-
+    ): Flow<AssignmentProgressSummary?>
 
     @Query("""
-         $ASSIGNMENT_PERMISSION,
-         
-         $SUBMITTER_LIST_CTE
+        WITH $HAS_LEARNINGRECORD_SELECT_PERMISSION_CTE_SQL,
+             $ASSIGNMENT_CLAZZ_UID_CTE_SQL,
+             $SUBMITTER_LIST_CTE2_SQL
         
-         SELECT submitterId AS submitterUid,
-                name, 
-                
-                 COALESCE((CASE WHEN CourseAssignmentMark.camUid IS NOT NULL 
-                          THEN ${CourseAssignmentSubmission.MARKED} 
-                          WHEN CourseAssignmentSubmission.casUid IS NOT NULL 
-                          THEN ${CourseAssignmentSubmission.SUBMITTED} 
-                          ELSE ${CourseAssignmentSubmission.NOT_SUBMITTED} END), 
-                               ${CourseAssignmentSubmission.NOT_SUBMITTED}) AS fileSubmissionStatus,
-                
-                (CASE WHEN ClazzAssignment.caGroupUid = 0 
-                 THEN 'TRUE' 
-                 ELSE 'FALSE' END) AS isGroupAssignment,
-                 
-                 cm.commentsText AS latestPrivateComment 
-
-           FROM SubmitterList
-                JOIN ClazzAssignment
-                ON ClazzAssignment.caUid = :assignmentUid
-           
-                LEFT JOIN CourseAssignmentMark
-                ON CourseAssignmentMark.camUid = (SELECT camUid
-                                                    FROM CourseAssignmentMark
-                                                   WHERE camAssignmentUid = :assignmentUid
-                                                     AND camSubmitterUid = SubmitterList.submitterId
-                                                ORDER BY camLct DESC 
-                                                   LIMIT 1)
-                
-                LEFT JOIN CourseAssignmentSubmission
-                ON CourseAssignmentSubmission.casUid = (SELECT casUid
-                                                          FROM CourseAssignmentSubmission
-                                                         WHERE casAssignmentUid = :assignmentUid
-                                                           AND casSubmitterUid = SubmitterList.submitterId
-                                                      ORDER BY casTimestamp DESC 
-                                                         LIMIT 1)
-                LEFT JOIN Comments AS cm 
-                    ON cm.commentsUid = (
-                                 SELECT Comments.commentsUid 
-                                   FROM Comments 
-                                  WHERE Comments.commentsEntityType = ${ClazzAssignment.TABLE_ID}
-                                    AND commentsEntityUid = :assignmentUid
-                                    AND NOT commentsInActive
-                                    AND NOT commentsPublic
-                                    AND (CASE WHEN ClazzAssignment.caGroupUid = 0
-                                              THEN commentsPersonUid = SubmitterList.submitterId
-                                              ELSE commentSubmitterUid = SubmitterList.submitterId END)
-                               ORDER BY commentsDateTimeAdded DESC LIMIT 1)                                                      
-                                                                      
-          WHERE name LIKE :searchText
-       ORDER BY name 
+        SELECT SubmitterList.name AS name,
+               SubmitterList.submitterId AS submitterUid,
+               Comments.commentsText AS latestPrivateComment,
+               -- Determine submission status - marked, submitted, or not yet submitted
+               CASE 
+               WHEN CourseAssignmentMark.camUid IS NOT NULL THEN ${CourseAssignmentSubmission.MARKED}
+               WHEN CourseAssignmentSubmission.casUid IS NOT NULL THEN ${CourseAssignmentSubmission.SUBMITTED}
+               ELSE ${CourseAssignmentSubmission.NOT_SUBMITTED} 
+               END AS fileSubmissionStatus
+               
+          FROM SubmitterList
+               LEFT JOIN Comments 
+                         ON Comments.commentsUid = 
+                            (SELECT Comments.commentsUid 
+                               FROM Comments
+                              WHERE Comments.commentsEntityUid = :assignmentUid
+                                AND Comments.commentSubmitterUid = SubmitterList.submitterId
+                              LIMIT 1) 
+               LEFT JOIN CourseAssignmentMark
+                         ON CourseAssignmentMark.camUid = 
+                            (SELECT camUid
+                               FROM CourseAssignmentMark
+                              WHERE CourseAssignmentMark.camAssignmentUid = :assignmentUid
+                                AND CourseAssignmentMark.camSubmitterUid = SubmitterList.submitterId
+                              LIMIT 1)
+               LEFT JOIN CourseAssignmentSubmission
+                         ON CourseAssignmentSubmission.casUid = 
+                            (SELECT casUid
+                               FROM CourseAssignmentSubmission
+                              WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
+                                AND CourseAssignmentSubmission.casSubmitterUid = SubmitterList.submitterId 
+                              LIMIT 1)
+         WHERE (:searchText = '%' OR SubmitterList.name LIKE :searchText)
+      ORDER BY CASE(:sortOption)
+               WHEN $SORT_NAME_ASC THEN SubmitterList.name
+               ELSE '' END ASC,
+               CASE(:sortOption)
+               WHEN $SORT_NAME_DESC THEN SubmitterList.name
+               ELSE '' END DESC
     """)
-    @QueryLiveTables(value = ["ClazzAssignment","CourseAssignmentMark","CourseAssignmentSubmission",
-    "Comments", "ClazzEnrolment", "Person","PersonGroupMember","ScopedGrant","Clazz","PeerReviewerAllocation",
-    "CourseGroupMember"])
-    abstract fun getSubmitterListForAssignmentSummary(
+    /**
+     * Used by the ClazzAssignmentDetailSubmissionsListTab - gets a list of the name (e.g. the
+     * person name when submissions are by individual students, "group (groupnum)" when submissions
+     * are by group.
+     *
+     * For each submitter, get the status (not submitted, submitted, marked) and the most recent
+     * private comment (if any).
+     */
+    abstract fun getAssignmentSubmitterSummaryListForAssignment(
         assignmentUid: Long,
-        clazzUid: Long,
+        accountPersonUid: Long,
         group: String,
         searchText: String,
-        submitterUid: Long,
-        loggedInPersonUid: Long
-    ): DataSourceFactory<Int, AssignmentSubmitterSummary>
+        sortOption: Int,
+    ): PagingSource<Int, AssignmentSubmitterSummary>
 
+    /**
+     * Used by UpdatePeerReviewAllocationUseCase - which needs to run even before the assignment
+     * is saved to the database. Finds a list of all the expected submitter ids - list of enrolled
+     * student personuids if the assignment is for individual submission, list of group numbers if
+     * assignment is by groups.
+     */
     @Query("""
-         $SUBMITTER_LIST_WITHOUT_ASSIGNMENT_CTE
-        
-         SELECT submitterId AS submitterUid,
-                name, 
-                0 as fileSubmissionStatus,
-                (CASE WHEN :groupUid = 0 
-                 THEN 'TRUE' 
-                 ELSE 'FALSE' END) AS isGroupAssignment,
-                 
-                 '' as latestPrivateComment
-                 
-          FROM SubmitterList    
-      ORDER BY name         
+         -- Submitter UIDs for individual assignment the list of personuids enrolled in the course
+         SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid AS submitterUid
+           FROM ClazzEnrolment
+          WHERE (:groupSetUid = 0)
+            AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+            AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+            AND :time BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft
+          
+         UNION
+         
+        SELECT DISTINCT CourseGroupMember.cgmGroupNumber AS submitterUid
+          FROM CourseGroupMember
+         WHERE :groupSetUid != 0
+           AND CourseGroupMember.cgmSetUid = :groupSetUid         
     """)
-    abstract suspend fun getSubmitterListForAssignmentList(
-        groupUid: Long,
+    abstract suspend fun getSubmitterUidsByClazzOrGroupSetUid(
         clazzUid: Long,
-        group: String
-    ): List<AssignmentSubmitterSummary>
+        groupSetUid: Long,
+        time: Long
+    ): List<Long>
 
 
     @Query("""
-        $ASSIGNMENT_PERMISSION
+        $WITH_HAS_LEARNINGRECORD_UPDATE_PERMISSION_SQL
         
         SELECT (CASE WHEN caMarkingType = ${ClazzAssignment.MARKED_BY_COURSE_LEADER}
                     THEN (SELECT hasPermission FROM AssignmentPermission)

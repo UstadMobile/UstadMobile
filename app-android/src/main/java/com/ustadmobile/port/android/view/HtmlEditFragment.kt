@@ -60,7 +60,6 @@ fun HtmlEditScreen(
     onHtmlChanged: (String) -> Unit = { },
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        //Text("Aztec here", modifier = Modifier.weight(1f, fill = true).fillMaxWidth())
         AztecEditor(
             html = uiState.html,
             onChange = onHtmlChanged,

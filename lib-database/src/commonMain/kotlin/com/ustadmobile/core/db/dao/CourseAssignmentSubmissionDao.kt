@@ -8,6 +8,7 @@ import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission.Companion.MIN_SUBMITTER_UID_FOR_PERSON
 import kotlinx.coroutines.flow.Flow
 import kotlin.js.JsName
 
@@ -106,6 +107,18 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
         accountPersonUid: Long,
         assignmentUid: Long,
     ): Flow<List<CourseAssignmentSubmissionWithAttachment>>
+
+    @Query("""
+        SELECT CourseAssignmentSubmission.*
+          FROM CourseAssignmentSubmission
+         WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
+           AND CourseAssignmentSubmission.casSubmitterUid = :submitterUid
+      ORDER BY CourseAssignmentSubmission.casTimestamp DESC      
+    """)
+    abstract fun getAllSubmissionsFromSubmitterAsFlow(
+        submitterUid: Long,
+        assignmentUid: Long,
+    ): Flow<List<CourseAssignmentSubmission>>
 
     @Query("""
         SELECT CourseAssignmentSubmission.*

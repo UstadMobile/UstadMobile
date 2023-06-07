@@ -12,7 +12,7 @@ import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListViewModel
-import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
+import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -88,13 +88,8 @@ data class ClazzEditUiState(
 }
 
 fun CourseBlockWithEntityDb.asCourseBlockWithEntity(
-    topicList: List<DiscussionTopic>,
     assignmentPeerAllocations: List<PeerReviewerAllocation>
-):
-    CourseBlockWithEntity {
-    val relevantTopics: List<DiscussionTopic> = topicList.filter {
-        it.discussionTopicCourseDiscussionUid == this.courseDiscussion?.courseDiscussionUid
-    }.sortedBy { it.discussionTopicIndex }
+): CourseBlockWithEntity {
 
     val assignmentAllocations = assignmentPeerAllocations.filter {
         it.praAssignmentUid == this.assignment?.caUid
@@ -102,10 +97,7 @@ fun CourseBlockWithEntityDb.asCourseBlockWithEntity(
 
     val courseBlockWithEntity = CourseBlockWithEntity()
     courseBlockWithEntity.createFromDb(this)
-    courseBlockWithEntity.topics = relevantTopics
     courseBlockWithEntity.assignmentPeerAllocations = assignmentAllocations
-    courseBlockWithEntity.topicUidsToRemove = listOf()
-    courseBlockWithEntity.assignmentPeerAllocationsToRemove = listOf()
 
 
     return courseBlockWithEntity
@@ -211,7 +203,7 @@ class ClazzEditViewModel(
                                 ) ?: emptyList()
 
                             courseBlocksDb.map {
-                                it.asCourseBlockWithEntity(emptyList(), assignmentPeerAllocations)
+                                it.asCourseBlockWithEntity(assignmentPeerAllocations)
                             }
                         },
                         makeDefault = {
@@ -256,6 +248,7 @@ class ClazzEditViewModel(
                     val courseBlock = result.result as? CourseBlock ?: return@collect
                     val courseBlockWithEntity = result.result as? CourseBlockWithEntity
                     val assignment = courseBlockWithEntity?.assignment
+                    val assignmentCourseGroupSetName = courseBlockWithEntity?.assignmentCourseGroupSetName
                     val peerReviewerAllocations = courseBlockWithEntity?.assignmentPeerAllocations
 
                     val newCourseBlockList = addOrUpdateCourseBlockUseCase(
@@ -265,6 +258,7 @@ class ClazzEditViewModel(
                         addOrUpdateBlock = courseBlock,
                         assignment = assignment,
                         assignmentPeerReviewAllocations = peerReviewerAllocations,
+                        assignmentCourseGroupSetName = assignmentCourseGroupSetName,
                     )
 
                     updateCourseBlockList(newCourseBlockList)
@@ -400,7 +394,10 @@ class ClazzEditViewModel(
             nextViewName = viewName,
             key = keyName,
             currentValue = null,
-            args = mapOf(CourseBlockEditViewModel.ARG_BLOCK_TYPE to blockType.toString()),
+            args = mapOf(
+                CourseBlockEditViewModel.ARG_BLOCK_TYPE to blockType.toString(),
+                UstadView.ARG_CLAZZUID to (_uiState.value.entity?.clazzUid?.toString() ?: "0")
+            ),
             serializer = CourseBlockWithEntity.serializer(),
         )
     }

@@ -16,7 +16,7 @@ fun rememberFormattedDateTime(
     },
 ): String  {
     val context = LocalContext.current
-    return remember(timeInMillis) {
+    return remember(timeInMillis, timeZoneId) {
         if(timeInMillis.isDateSet()) {
             val date = Date(timeInMillis)
             val dateFormatted = DateFormat

@@ -167,7 +167,7 @@ class LoginViewModel(
 
         val username = _uiState.value.username
         val password = _uiState.value.password
-
+        goToNextDestAfterLoginOrGuestSelected()
         if(username.isNotEmpty() && password.isNotEmpty()){
             viewModelScope.launch {
                 var errorMessage: String? = null

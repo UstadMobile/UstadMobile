@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import mui.icons.material.Add
+import mui.icons.material.Add as AddIcon
 import mui.material.*
 import react.FC
 import react.Props
@@ -27,7 +27,7 @@ val UstadAddListItem = FC<UstadAddListItemProps> { props ->
             disabled = !(props.enabled ?: true)
 
             ListItemIcon {
-                + (props.icon ?: Add.create())
+                + (props.icon ?: AddIcon.create())
             }
 
             ListItemText{
@@ -46,7 +46,7 @@ val UstadAddListItemPreview = FC<Props> {
     UstadAddListItem {
         text = "Add"
         enabled = true
-        icon = Add.create()
+        icon = AddIcon.create()
         onClickAdd = {}
     }
 }

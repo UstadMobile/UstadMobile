@@ -18,17 +18,17 @@ value class ClazzAssignmentWithMetricsUiState(
         get() = assignment.mark != null
 
     val submissionStatusIconVisible: Boolean
-        get() = assignment.progressSummary?.hasMetricsPermission != null &&
-                assignment.progressSummary?.hasMetricsPermission == false ||
+        get() = assignment.progressSummary?.activeUserHasViewLearnerRecordsPermission != null &&
+                assignment.progressSummary?.activeUserHasViewLearnerRecordsPermission == false ||
                 assignment.fileSubmissionStatus != CourseAssignmentSubmission.NOT_SUBMITTED
 
     val submissionStatusVisible: Boolean
-        get() = assignment.progressSummary?.hasMetricsPermission != null &&
-                assignment.progressSummary?.hasMetricsPermission == false
+        get() = assignment.progressSummary?.activeUserHasViewLearnerRecordsPermission != null &&
+                assignment.progressSummary?.activeUserHasViewLearnerRecordsPermission == false
 
     val progressTextVisible: Boolean
-        get() = assignment.progressSummary?.hasMetricsPermission != null &&
-                assignment.progressSummary?.hasMetricsPermission == true
+        get() = assignment.progressSummary?.activeUserHasViewLearnerRecordsPermission != null &&
+                assignment.progressSummary?.activeUserHasViewLearnerRecordsPermission == true
 
 }
 

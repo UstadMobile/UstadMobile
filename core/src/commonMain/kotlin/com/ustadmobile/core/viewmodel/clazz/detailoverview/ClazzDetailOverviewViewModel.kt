@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.viewmodel.DetailViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -137,6 +138,12 @@ class ClazzDetailOverviewViewModel(
             CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
                 navController.navigate(ClazzAssignmentDetailView.VIEW_NAME,
                     mapOf(ARG_ENTITY_UID to courseBlock.cbEntityUid.toString()))
+            }
+            CourseBlock.BLOCK_DISCUSSION_TYPE -> {
+                navController.navigate(
+                    viewName = CourseDiscussionDetailViewModel.DEST_NAME,
+                    args = mapOf(ARG_ENTITY_UID to courseBlock.cbUid.toString())
+                )
             }
         }
     }

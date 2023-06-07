@@ -234,7 +234,8 @@ abstract class UstadViewModel(
 
     fun navigateToEditHtml(
         currentValue: String?,
-        resultKey: String
+        resultKey: String,
+        extraArgs: Map<String, String> = emptyMap(),
     ) {
         navController.navigate(
             viewName = HtmlEditViewModel.DEST_NAME,
@@ -242,7 +243,7 @@ abstract class UstadViewModel(
                 HtmlEditViewModel.ARG_HTML to (currentValue ?: ""),
                 UstadView.ARG_RESULT_DEST_KEY to resultKey,
                 UstadView.ARG_RESULT_DEST_VIEWNAME to destinationName,
-            )
+            ) + extraArgs
         )
     }
 
@@ -321,6 +322,13 @@ abstract class UstadViewModel(
         const val KEY_FIRST_INIT_TIME = "firstInit"
 
         const val RESULT_KEY_HTML_DESC = "description"
+
+        const val ARG_TIME_ZONE = "timeZone"
+
+        const val ARG_PARENT_UID = "parentUid"
+
+        const val ARG_COURSE_BLOCK_UID = "courseBlockUid"
+
     }
 
 }

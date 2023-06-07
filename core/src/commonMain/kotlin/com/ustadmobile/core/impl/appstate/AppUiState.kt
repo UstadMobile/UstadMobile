@@ -6,6 +6,8 @@ package com.ustadmobile.core.impl.appstate
  * It is emitted as a flow by UstadViewModel.
  *
  * @param hideBottomNavigation hide mobile mode bottom navigation (e.g. if in edit mode). Has no effect on desktop / web.
+ * @param title - the main title for the appbar. If null, then the title will not be changed. This avoids
+ * flicker when switching between screens, tabs, etc.
  */
 data class AppUiState(
     val fabState: FabUiState = FabUiState(),

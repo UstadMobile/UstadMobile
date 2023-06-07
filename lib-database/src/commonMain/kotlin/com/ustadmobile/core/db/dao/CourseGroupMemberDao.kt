@@ -2,10 +2,13 @@ package com.ustadmobile.core.db.dao
 
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.core.db.dao.CourseGroupMemberDaoCommon.FIND_BY_COURSEGROUPSET_AND_CLAZZ_SQL
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.flow.Flow
 
 @Repository
 @DoorDao
@@ -121,5 +124,31 @@ expect abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
 
     @Update
     abstract suspend fun updateListAsync(entityList: List<CourseGroupMember>)
+
+    @Query(FIND_BY_COURSEGROUPSET_AND_CLAZZ_SQL)
+    /**
+     * @param cgsUid CourseGroupSetUid - might be 0 if not created yet
+     * @param clazzUid ClazzUid, required if the coursegroupset does not exist yet, otherwise may be 0
+     * @param time the current time (used to determine if enrolments are active)
+     * @param activeFilter if 1, then only return active members.
+     */
+    abstract suspend fun findByCourseGroupSetAndClazz(
+        cgsUid: Long,
+        clazzUid: Long,
+        time: Long,
+        activeFilter: Int,
+    ): List<CourseGroupMemberAndName>
+
+    @Query(FIND_BY_COURSEGROUPSET_AND_CLAZZ_SQL)
+    abstract fun findByCourseGroupSetAndClazzAsFlow(
+        cgsUid: Long,
+        clazzUid: Long,
+        time: Long,
+        activeFilter: Int,
+    ): Flow<List<CourseGroupMemberAndName>>
+
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertListAsync(list: List<CourseGroupMember>)
 
 }

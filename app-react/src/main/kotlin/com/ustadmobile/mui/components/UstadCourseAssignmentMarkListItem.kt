@@ -2,29 +2,34 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItemUiState
-import com.ustadmobile.hooks.useFormattedTime
-import com.ustadmobile.lib.db.entities.CourseAssignmentMarkWithPersonMarker
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.core.util.ext.penaltyPercentage
+import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
+import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.hooks.useFormattedDateAndTime
+import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
+import com.ustadmobile.lib.db.entities.CourseAssignmentMark
+import csstype.Display
+import csstype.JustifyContent
+import csstype.pct
 import csstype.px
 import csstype.rgba
 import js.core.jso
+import kotlinx.datetime.TimeZone
 import mui.icons.material.EmojiEvents
 import mui.icons.material.Person2
 import mui.material.*
+import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
-import react.ReactNode
 import react.create
 import react.dom.html.ReactHTML.span
+import react.useRequiredContext
 
 external interface UstadCourseAssignmentMarkListItemProps : Props {
 
     var uiState: UstadCourseAssignmentMarkListItemUiState
-
-    var onClickMark: (CourseAssignmentMarkWithPersonMarker) -> Unit
 
 }
 
@@ -32,90 +37,113 @@ val UstadCourseAssignmentMarkListItem = FC<UstadCourseAssignmentMarkListItemProp
 
     val strings = useStringsXml()
 
-    var text = props.uiState.mark.marker?.fullName() ?: ""
+    val theme by useRequiredContext(ThemeContext)
+
+    var text = props.uiState.markerName
 
     if (props.uiState.markerGroupNameVisible){
         text += "  (${strings[MessageID.group_number]
-            .replace("%1\$s", props.uiState.mark.camMarkerSubmitterUid.toString())})"
+            .replace("%1\$s", props.uiState.peerGroupNumber.toString())})"
     }
 
-    val formattedTime = useFormattedTime(props.uiState.mark.camLct.toInt())
+    val formattedTime = useFormattedDateAndTime(
+        timeInMillis = props.uiState.mark.courseAssignmentMark?.camLct ?: 0,
+        timezoneId = TimeZone.currentSystemDefault().id,
+    )
 
     ListItem{
-        ListItemButton {
-            onClick = {
-                props.onClickMark(props.uiState.mark)
-            }
-
-            ListItemIcon {
-                + Person2.create {
-                    sx {
-                        width = 40.px
-                        height = 40.px
-                    }
-                }
-            }
-
-            ListItemText {
-                primary = ReactNode(text)
-                secondary = Stack.create {
-                    direction = responsive(StackDirection.column)
-
-                    Stack {
-                        direction = responsive(StackDirection.row)
-
-                        Icon {
-                            + EmojiEvents.create()
-                        }
-
-                        Typography {
-                            + ("${props.uiState.mark.camMark}/${props.uiState.block.cbMaxPoints}" +
-                                    " ${strings[MessageID.points]}")
-
-                            + " "
-
-                            if (props.uiState.camPenaltyVisible) {
-                                span { style = jso {
-                                    color = rgba(255, 0,0, 1.0)
-                                }
-                                    child(ReactNode(
-                                        strings[MessageID.late_penalty]
-                                            .replace("%1\$s", (
-                                                    props.uiState.block.cbLateSubmissionPenalty)
-                                                .toString())
-                                    ))
-                                }
-                            }
-                        }
-                    }
-
-
-                    Typography {
-                        + (props.uiState.mark.camMarkerComment ?: "")
-                    }
+        ListItemIcon {
+            + Person2.create {
+                sx {
+                    width = 40.px
+                    height = 40.px
                 }
             }
         }
-        secondaryAction = Typography.create {
-            + formattedTime
+
+        Stack {
+            sx {
+                width = 100.pct
+            }
+
+            Box {
+                sx {
+                    display = Display.flex
+                    justifyContent = JustifyContent.spaceBetween
+                }
+
+                Typography {
+                    variant = TypographyVariant.body1
+                    + text
+                }
+
+                Typography {
+                    variant = TypographyVariant.caption
+                    + formattedTime
+                }
+
+            }
+
+
+            Stack {
+                direction = responsive(StackDirection.row)
+                spacing = responsive(theme.spacing(1))
+
+                Icon {
+                    color = IconColor.action
+                    fontSize = IconSize.small
+
+                    + EmojiEvents.create()
+                }
+
+                Typography {
+                    variant = TypographyVariant.caption
+                    + "${props.uiState.mark.courseAssignmentMark?.camMark}"
+                    + "/${props.uiState.mark.courseAssignmentMark?.camMaxMark}"
+                    + " ${strings[MessageID.points]}"
+                    + " "
+
+                    if (props.uiState.camPenaltyVisible) {
+                        span {
+                            style = jso {
+                                color = rgba(255, 0,0, 1.0)
+                            }
+
+                            +strings[MessageID.late_penalty]
+                                .replace(
+                                    oldValue = "%1\$s",
+                                    newValue = props.uiState.mark.courseAssignmentMark?.penaltyPercentage().toString()
+                                )
+                        }
+                    }
+                }
+            }
+
+            Typography {
+                variant = TypographyVariant.caption
+                + (props.uiState.mark.courseAssignmentMark?.camMarkerComment ?: "")
+            }
         }
     }
+
 }
 
 val UstadCourseAssignmentMarkListItemPreview = FC<Props> {
 
     UstadCourseAssignmentMarkListItem {
         uiState = UstadCourseAssignmentMarkListItemUiState(
-            mark = CourseAssignmentMarkWithPersonMarker().apply {
-                marker = Person().apply {
-                    firstNames = "John"
-                    lastName = "Smith"
-                    isGroup = true
+            mark = CourseAssignmentMarkAndMarkerName(
+                courseAssignmentMark = CourseAssignmentMark().apply {
                     camMarkerSubmitterUid = 2
                     camMarkerComment = "Comment"
-                    camPenalty = 3
-                }
-            }
+                    camMark = 8.1f
+                    camPenalty = 0.9f
+                    camMaxMark = 10f
+                    camLct = systemTimeInMillis()
+                },
+                markerFirstNames = "John",
+                markerLastName = "Smith",
+            )
         )
     }
 }

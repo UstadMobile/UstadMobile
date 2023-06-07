@@ -52,6 +52,7 @@ class PeerReviewerAllocationEditPresenter(context: Any,
             editEntity = PeerReviewerAllocationList(null)
         }
 
+        /*
         presenterScope.launch(doorMainDispatcher()) {
 
             if(bundle[SAVED_STATE_SUBMITTER_WITH_ALLOCATIONS] != null){
@@ -95,7 +96,7 @@ class PeerReviewerAllocationEditPresenter(context: Any,
             view.submitterListWithAllocations = submitterListWithAllocations
 
 
-        }
+        }*/
 
         return editEntity
     }

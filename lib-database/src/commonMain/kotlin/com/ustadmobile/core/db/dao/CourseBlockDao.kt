@@ -15,7 +15,9 @@ import com.ustadmobile.door.annotation.ReplicationRunOnChange
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.paging.PagingSource
+import com.ustadmobile.lib.db.composites.CourseBlockUidAndClazzUid
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.flow.Flow
 import kotlin.js.JsName
 
 @Repository
@@ -93,25 +95,29 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
 
 
     @Query("""
-        SELECT * 
+        SELECT CourseBlock.*, assignment.*, courseDiscussion.*, entry.*, Language.*,
+               (SELECT CourseGroupSet.cgsName
+                  FROM CourseGroupSet
+                 WHERE CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                   AND assignment.caGroupUid != 0
+                   AND CourseGroupSet.cgsUid = assignment.caGroupUid) AS assignmentCourseGroupSetName
           FROM CourseBlock 
                LEFT JOIN ClazzAssignment as assignment
-               ON assignment.caUid = CourseBlock.cbEntityUid
-               AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                         ON assignment.caUid = CourseBlock.cbEntityUid
+                            AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
                LEFT JOIN CourseDiscussion as courseDiscussion
-               ON CourseDiscussion.courseDiscussionUid = CourseBlock.cbEntityUid
-               AND CourseBlock.cbType = ${CourseBlock.BLOCK_DISCUSSION_TYPE}
+                         ON CourseDiscussion.courseDiscussionUid = CourseBlock.cbEntityUid
+                            AND CourseBlock.cbType = ${CourseBlock.BLOCK_DISCUSSION_TYPE}
                LEFT JOIN ContentEntry as entry
-               ON entry.contentEntryUid = CourseBlock.cbEntityUid
-               AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
-               
+                         ON entry.contentEntryUid = CourseBlock.cbEntityUid
+                            AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
                LEFT JOIN Language
-               ON Language.langUid = entry.primaryLanguageUid
-                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+                         ON Language.langUid = entry.primaryLanguageUid
+                            AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
                
-         WHERE cbClazzUid = :clazzUid
-           AND cbActive
-      ORDER BY cbIndex
+         WHERE CourseBlock.cbClazzUid = :clazzUid
+           AND CourseBlock.cbActive
+      ORDER BY CourseBlock.cbIndex
           """)
     abstract suspend fun findAllCourseBlockByClazzUidAsync(clazzUid: Long): List<CourseBlockWithEntityDb>
 
@@ -194,6 +200,8 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                                                                             FROM SubmitterList
                                                                            WHERE SubmitterList.assignmentUid = ClazzAssignment.caUid))
                    AS markedStudents,
+                   
+                   (ClazzAssignment.caGroupUid != 0) AS isGroupAssignment,
                    
                    COALESCE((CASE WHEN CourseAssignmentMark.camUid IS NOT NULL 
                           THEN ${CourseAssignmentSubmission.MARKED} 
@@ -341,4 +349,53 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsertListAsync(entities: List<CourseBlock>)
 
+    @Query("""
+        SELECT CourseBlock.cbTitle
+          FROM CourseBlock 
+         WHERE CourseBlock.cbEntityUid = :assignmentUid
+           AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+    """)
+    abstract fun getTitleByAssignmentUid(assignmentUid: Long) : Flow<String?>
+
+    @Query("""
+        SELECT CourseBlock.*
+          FROM CourseBlock
+         WHERE CourseBlock.cbUid = :courseBlockUid 
+    """)
+    abstract fun findByUidAsFlow(courseBlockUid: Long): Flow<CourseBlock?>
+
+
+    @Query("""
+        SELECT COALESCE(CourseBlock.cbUid, 0) AS courseBlockUid,
+               COALESCE(CourseBlock.cbClazzUid, 0) AS clazzUid
+          FROM CourseBlock
+         WHERE CourseBlock.cbUid = 
+               (SELECT DiscussionPost.discussionPostCourseBlockUid 
+                  FROM DiscussionPost
+                 WHERE DiscussionPost.discussionPostUid = :postUid)
+         LIMIT 1
+    """)
+    abstract suspend fun findCourseBlockAndClazzUidByDiscussionPostUid(
+        postUid: Long
+    ): CourseBlockUidAndClazzUid?
+
+    @Query("""
+        SELECT COALESCE(CourseBlock.cbClazzUid, 0) AS clazzUid
+          FROM CourseBlock
+         WHERE CourseBlock.cbUid = :courseBlockUid
+    """)
+    abstract suspend fun findClazzUidByCourseBlockUid(
+        courseBlockUid: Long
+    ): Long
+
+    @Query("""
+        SELECT CourseBlock.*
+          FROM CourseBlock
+         WHERE CourseBlock.cbEntityUid = :assignmentUid
+           AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+         LIMIT 1 
+    """)
+    abstract fun findCourseBlockByAssignmentUid(
+        assignmentUid: Long
+    ): Flow<CourseBlock?>
 }

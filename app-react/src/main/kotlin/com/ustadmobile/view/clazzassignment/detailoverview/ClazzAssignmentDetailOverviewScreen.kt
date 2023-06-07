@@ -9,6 +9,7 @@ import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewViewModel
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.lib.db.composites.CommentsAndName
@@ -23,7 +24,7 @@ import react.Props
 import react.useState
 import react.ReactNode
 import react.create
-import com.ustadmobile.core.viewmodel.UstadCourseAssignmentMarkListItemUiState as UstadCourseAssignmentMarkListItemUiState
+import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState as UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.mui.components.UstadCourseAssignmentMarkListItem
 import com.ustadmobile.wrappers.quill.ReactQuill
 import csstype.Height
@@ -38,15 +39,17 @@ import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
+import com.ustadmobile.view.clazzassignment.UstadCommentListItem
 import com.ustadmobile.view.components.UstadDetailHeader
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 
 val ASSIGNMENT_STATUS_MAP = mapOf(
-    CourseAssignmentSubmission.NOT_SUBMITTED to DoneIcon.create(),
-    CourseAssignmentSubmission.SUBMITTED to DoneIcon.create(),
-    CourseAssignmentSubmission.MARKED to DoneAllIcon.create()
+    CourseAssignmentSubmission.NOT_SUBMITTED to DoneIcon,
+    CourseAssignmentSubmission.SUBMITTED to DoneIcon,
+    CourseAssignmentSubmission.MARKED to DoneAllIcon,
 )
 
 external interface ClazzAssignmentDetailOverviewScreenProps : Props {
@@ -56,8 +59,6 @@ external interface ClazzAssignmentDetailOverviewScreenProps : Props {
     var onChangeSubmissionText: (String) -> Unit
 
     var onClickFilterChip: (MessageIdOption2) -> Unit
-
-    var onClickMark: (CourseAssignmentMarkWithPersonMarker) -> Unit
 
     var onChangeCourseComment: (String) -> Unit
 
@@ -138,7 +139,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                         valueText = ReactNode(strings[policyMessageId])
                         labelText = strings[MessageID.submission_policy]
                         icon = (ASSIGNMENT_STATUS_MAP[
-                            props.uiState.assignment?.caSubmissionPolicy] ?: DoneIcon.create())
+                            props.uiState.assignment?.caSubmissionPolicy] ?: DoneIcon).create()
                         onClick = { }
                     }
 
@@ -274,13 +275,11 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
 
                 items(
                     list = props.uiState.markList,
-                    key = { "mark_${it.camUid}"}
+                    key = { "mark_${it.courseAssignmentMark?.camUid}"}
                 ) { markItem ->
                     UstadCourseAssignmentMarkListItem.create {
-                        onClickMark = props.onClickMark
                         uiState = UstadCourseAssignmentMarkListItemUiState(
                             mark = markItem,
-                            block = props.uiState.courseBlock ?: CourseBlock()
                         )
                     }
                 }
@@ -398,16 +397,18 @@ val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
                 },
             ),
             markList = listOf(
-                CourseAssignmentMarkWithPersonMarker().apply {
-                    marker = Person().apply {
-                        firstNames = "John"
-                        lastName = "Smith"
-                        isGroup = true
+                CourseAssignmentMarkAndMarkerName(
+                    courseAssignmentMark = CourseAssignmentMark().apply {
                         camMarkerSubmitterUid = 2
                         camMarkerComment = "Comment"
-
-                    }
-                }
+                        camMark = 8.1f
+                        camPenalty = 0.9f
+                        camMaxMark = 10f
+                        camLct = systemTimeInMillis()
+                    },
+                    markerFirstNames = "John",
+                    markerLastName = "Smith",
+                )
             ),
             courseComments = {
                 ListPagingSource(listOf(

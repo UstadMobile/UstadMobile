@@ -94,6 +94,7 @@ val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
                 }
 
                 secondaryAction = PopUpMenu.create {
+
                     fieldsEnabled = props.fieldsEnabled
                     onClickHideBlockPopupMenu = props.onClickHideBlockPopupMenu
                     onClickUnHideBlockPopupMenu = props.onClickUnHideBlockPopupMenu

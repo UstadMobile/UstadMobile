@@ -137,7 +137,9 @@ private val SecondaryContent = FC<UstadClazzAssignmentListItemProps> { props ->
 
             if (assignmentUiState?.submissionStatusIconVisible == true){
                 Icon{
-                    + ASSIGNMENT_STATUS_MAP[assignment.fileSubmissionStatus]
+                    ASSIGNMENT_STATUS_MAP[assignment.fileSubmissionStatus]?.also {
+                        + it.create()
+                    }
                 }
             }
 
@@ -197,7 +199,7 @@ val UstadClazzAssignmentListItemPreview = FC<Props> {
 //                        camMark = 20F
 //                    }
                     progressSummary = AssignmentProgressSummary().apply {
-                        hasMetricsPermission = false
+                        activeUserHasViewLearnerRecordsPermission = false
                     }
                     fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
                 }

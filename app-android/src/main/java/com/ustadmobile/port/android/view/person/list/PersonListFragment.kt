@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
@@ -24,6 +26,7 @@ import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.port.android.view.composable.UstadListSortHeader
 import androidx.paging.compose.items
 import com.google.accompanist.themeadapter.material.MdcTheme
+import com.toughra.ustadmobile.R
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.*
 import com.ustadmobile.core.viewmodel.person.list.PersonListUiState
@@ -31,6 +34,7 @@ import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.port.android.util.ext.defaultAvatarSize
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
+import com.ustadmobile.port.android.view.composable.UstadAddListItem
 import com.ustadmobile.port.android.view.composable.UstadPersonAvatar
 
 interface InviteWithLinkHandler{
@@ -88,6 +92,8 @@ fun PersonListScreen(
             ).show(context.getContextSupportFragmentManager(), "SortOptions")
         },
         onListItemClick = viewModel::onClickEntry,
+        onClickAddNew = viewModel::onClickAdd,
+        onListItemClick = viewModel::onClickEntry,
         onClickAddRecipient = viewModel::onClickAddRecipient
     )
 }
@@ -99,6 +105,8 @@ fun PersonListScreen(
     onClickSort: () -> Unit = {},
     onListItemClick: (PersonWithDisplayDetails) -> Unit = {},
     onClickAddRecipient: () -> Unit = {}
+    onListItemClick: (PersonWithDisplayDetails) -> Unit = {},
+    onClickAddNew: () -> Unit = {},
 ){
 
     // As per
@@ -119,6 +127,16 @@ fun PersonListScreen(
             .padding(vertical = 8.dp)
             .fillMaxWidth()
     ){
+
+        item {
+            UstadListSortHeader(
+                modifier = Modifier
+                    .defaultItemPadding()
+                    .fillMaxWidth(),
+                activeSortOrderOption = uiState.sortOption,
+                onClickSort = onClickSort
+            )
+        }
 
         item {
             Row(
@@ -145,7 +163,17 @@ fun PersonListScreen(
                 }
             }
         }
-        
+
+        if(uiState.showAddItem) {
+            item {
+                UstadAddListItem(
+                    modifier = Modifier.testTag("add_new_person"),
+                    text = stringResource(R.string.add_a_new_person),
+                    onClickAdd = onClickAddNew
+                )
+            }
+        }
+
         items(
             items = lazyPagingItems,
             key = { it.personUid },

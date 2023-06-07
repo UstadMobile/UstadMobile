@@ -83,35 +83,37 @@ fun UstadCourseBlockEdit(
 
 
         Row {
-            UstadExposedDropDownMenuField<CompletionCriteria>(
-                modifier = Modifier
-                    .testTag("cbCompletionCriteria")
-                    .fillMaxWidth()
-                    .weight(0.5F)
-                    .defaultItemPadding(end = if (uiState.minScoreVisible) 8.dp else 16.dp),
-                value = CompletionCriteria.valueOf(
-                    uiState.courseBlock?.cbCompletionCriteria ?: 0
-                ),
-                label = stringResource(R.string.completion_criteria),
-                itemText = { messageIdResource(it.messageId) },
-                options = uiState.completionCriteriaOptions,
-                onOptionSelected = {
-                    onCourseBlockChange(uiState.courseBlock?.shallowCopy{
-                        cbCompletionCriteria = it.value
-                    })
-                },
-                enabled = uiState.fieldsEnabled,
-            )
+            if(uiState.completionCriteriaVisible) {
+                UstadExposedDropDownMenuField<CompletionCriteria>(
+                    modifier = Modifier
+                        .testTag("cbCompletionCriteria")
+                        .fillMaxWidth()
+                        .weight(0.5F)
+                        .defaultItemPadding(end = if (uiState.minScoreVisible) 8.dp else 16.dp),
+                    value = CompletionCriteria.valueOf(
+                        uiState.courseBlock?.cbCompletionCriteria ?: 0
+                    ),
+                    label = stringResource(R.string.completion_criteria),
+                    itemText = { messageIdResource(it.messageId) },
+                    options = uiState.completionCriteriaOptions,
+                    onOptionSelected = {
+                        onCourseBlockChange(uiState.courseBlock?.shallowCopy{
+                            cbCompletionCriteria = it.value
+                        })
+                    },
+                    enabled = uiState.fieldsEnabled,
+                )
+            }
 
             if (uiState.minScoreVisible) {
                 Spacer(modifier = Modifier.width(15.dp))
 
                 UstadNumberTextField(
                     modifier = Modifier
-                        .testTag("cbMinPoints")
+                        .testTag("maxPoints")
                         .weight(0.5F)
                         .defaultItemPadding(start = 0.dp),
-                    value = (uiState.courseBlock?.cbMaxPoints?.toFloat() ?: 0f),
+                    value = (uiState.courseBlock?.cbMinPoints?.toFloat() ?: 0f),
                     label = { Text(stringResource(R.string.points)) },
                     enabled = uiState.fieldsEnabled,
                     trailingIcon = {
@@ -122,7 +124,7 @@ fun UstadCourseBlockEdit(
                     },
                     onValueChange = {
                         onCourseBlockChange(uiState.courseBlock?.shallowCopy {
-                            cbMaxPoints = it.toInt()
+                            cbMinPoints = it.toInt()
                         })
                     },
                 )
@@ -130,30 +132,32 @@ fun UstadCourseBlockEdit(
         }
 
 
-        UstadInputFieldLayout(
-            modifier = Modifier.defaultItemPadding(),
-            errorText = uiState.caMaxPointsError,
-        ) {
-            UstadNumberTextField(
-                modifier = Modifier
-                    .testTag("cbMaxPoints")
-                    .fillMaxWidth(),
-                value = (uiState.courseBlock?.cbMaxPoints?.toFloat() ?: 0f),
-                label = { Text(stringResource(id = R.string.maximum_points)) },
-                trailingIcon = {
-                    Text(
-                        text = stringResource(R.string.points),
-                        modifier = Modifier.padding(end = 16.dp)
-                    )
-                },
-                isError = uiState.caMaxPointsError != null,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                onValueChange = {
-                    onCourseBlockChange(uiState.courseBlock?.shallowCopy {
-                        cbMaxPoints = it.toInt()
-                    })
-                },
-            )
+        if(uiState.maxPointsVisible) {
+            UstadInputFieldLayout(
+                modifier = Modifier.defaultItemPadding(),
+                errorText = uiState.caMaxPointsError,
+            ) {
+                UstadNumberTextField(
+                    modifier = Modifier
+                        .testTag("cbMaxPoints")
+                        .fillMaxWidth(),
+                    value = (uiState.courseBlock?.cbMaxPoints?.toFloat() ?: 0f),
+                    label = { Text(stringResource(id = R.string.maximum_points)) },
+                    trailingIcon = {
+                        Text(
+                            text = stringResource(R.string.points),
+                            modifier = Modifier.padding(end = 16.dp)
+                        )
+                    },
+                    isError = uiState.caMaxPointsError != null,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    onValueChange = {
+                        onCourseBlockChange(uiState.courseBlock?.shallowCopy {
+                            cbMaxPoints = it.toInt()
+                        })
+                    },
+                )
+            }
         }
 
 

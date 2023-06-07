@@ -4,11 +4,11 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.appstate.TabItem
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
-import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
 import com.ustadmobile.core.view.ClazzAssignmentDetailView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.viewmodel.DetailViewModel
+import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabViewModel
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.flow.Flow
@@ -48,12 +48,18 @@ class ClazzAssignmentDetailViewModel(
                     systemImpl.getString(MessageID.clazz_assignment))
             )
             if(hasSubmissionsTab) {
-                tabs.add(TabItem(ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME,
+                tabs.add(TabItem(ClazzAssignmentDetailSubmissionsTabViewModel.DEST_NAME,
                     tabArgs, systemImpl.getString(MessageID.submissions)))
             }
 
             ClazzAssignmentDetailUiState(tabs = tabs.toList())
         }
+    }
+
+    companion object {
+
+        const val DEST_NAME = "CourseAssignment"
+
     }
 
 }
