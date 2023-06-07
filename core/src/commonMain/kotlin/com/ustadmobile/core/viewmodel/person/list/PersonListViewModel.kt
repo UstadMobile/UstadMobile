@@ -150,7 +150,7 @@ class PersonListViewModel(
     fun onClickAddRecipient() {
         navigateForResult(
             InviteStudentsViewModel.DEST_NAME,
-            key = RESULT_KEY_SITE_LINK,
+            key = RESULT_KEY_INVITE_STUDENTS,
             currentValue = _uiState.value.showAddItem,
             serializer = Boolean.serializer()
         )
@@ -160,7 +160,7 @@ class PersonListViewModel(
 
         const val DEST_NAME = "People"
 
-        const val RESULT_KEY_SITE_LINK = "siteLink"
+        const val RESULT_KEY_INVITE_STUDENTS = "inviteStudents"
 
     }
 }
