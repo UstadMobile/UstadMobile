@@ -77,11 +77,20 @@ class InviteStudentsViewModel(
                 textField = ""
             )
         }
+        _appUiState.update { prev ->
+            prev.copy(
+                actionBarButtonState = ActionBarButtonUiState(
+                    visible = _uiState.value.recipients.isNotEmpty(),
+                    text = impl.getString(MessageID.invite),
+                    onClick = this::onClickInvite
+                )
+            )
+        }
     }
 
     fun onClickRemoveRecipient(recipient: String) {
         _uiState.update { prev ->
-            prev.copy(recipients = _uiState.value.recipients.filter {
+            prev.copy(recipients = prev.recipients.filter {
                 it != recipient
             })
         }

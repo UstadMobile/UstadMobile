@@ -250,8 +250,8 @@ ext {
     version_pdfview_android = "1.1.0"
     version_pdfbox_apache = "3.0.0-RC1"
     version_pdfview_android = "1.1.0"
-    version_libphonenumber = "8.13.12"
-    version_npm_libphonenumber_js = "1.10.30"
+    version_libphonenumber = "8.13.13"
+    version_npm_libphonenumber_js = "1.10.34"
 }
 
 /*

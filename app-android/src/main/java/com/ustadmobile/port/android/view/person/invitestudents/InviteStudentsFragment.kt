@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Chip
@@ -28,6 +30,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
@@ -98,13 +101,16 @@ private fun InviteStudentsScreen(
             key = { recipient -> recipient }
         ){ recipient ->
             Chip(
+                modifier = Modifier.defaultItemPadding(),
                 onClick = { },
                 enabled = uiState.fieldsEnabled,
                 leadingIcon = {
-                    Text(recipient)
+                    Text(modifier = Modifier.padding(start = 5.dp),
+                        text = recipient)
                 },
                 content = {
                     IconButton(
+                        modifier = Modifier.size(24.dp),
                         onClick = {
                             onClickRemoveRecipient(recipient)
                         },
