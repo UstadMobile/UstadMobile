@@ -16,9 +16,11 @@ import com.ustadmobile.door.paging.*
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
 
@@ -151,8 +153,8 @@ class PersonListViewModel(
         navigateForResult(
             InviteStudentsViewModel.DEST_NAME,
             key = RESULT_KEY_INVITE_STUDENTS,
-            currentValue = _uiState.value.showAddItem,
-            serializer = Boolean.serializer()
+            currentValue = emptyList(),
+            serializer = ListSerializer(String.serializer())
         )
     }
 
