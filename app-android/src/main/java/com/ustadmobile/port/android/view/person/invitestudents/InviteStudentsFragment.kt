@@ -101,7 +101,7 @@ private fun InviteStudentsScreen(
             key = { recipient -> recipient }
         ){ recipient ->
             Chip(
-                modifier = Modifier.defaultItemPadding(),
+                modifier = Modifier.padding(top = 1.dp, start = 5.dp),
                 onClick = { },
                 enabled = uiState.fieldsEnabled,
                 leadingIcon = {
