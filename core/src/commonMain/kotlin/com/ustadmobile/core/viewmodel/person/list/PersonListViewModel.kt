@@ -16,7 +16,6 @@ import com.ustadmobile.door.paging.*
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
