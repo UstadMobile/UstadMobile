@@ -117,7 +117,7 @@ private fun InviteStudentsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "",
+                            contentDescription = stringResource(R.string.remove_from),
                         )
                     }
                 }
