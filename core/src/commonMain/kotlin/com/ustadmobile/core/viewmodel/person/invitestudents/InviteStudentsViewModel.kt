@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -71,16 +74,45 @@ class InviteStudentsViewModel(
     }
 
     fun onClickAddRecipient() {
-        _uiState.update { prev ->
+        val newState = _uiState.updateAndGet { prev ->
             prev.copy(
                 recipients = prev.recipients.plus(prev.textField),
                 textField = ""
             )
         }
+
+        saveState(newState)
+
+        updateAppUiState(newState)
+
+    }
+
+    fun onClickRemoveRecipient(recipient: String) {
+        val newState = _uiState.updateAndGet { prev ->
+            prev.copy(recipients = prev.recipients.filter {
+                it != recipient
+            })
+        }
+
+        saveState(newState)
+
+        updateAppUiState(newState)
+
+    }
+
+    private fun saveState(newState: InviteStudentsUiState){
+        scheduleEntityCommitToSavedState(
+            entity = newState.recipients,
+            serializer = ListSerializer(String.serializer()),
+            commitDelay = 200,
+        )
+    }
+
+    private fun updateAppUiState(newState: InviteStudentsUiState){
         _appUiState.update { prev ->
             prev.copy(
                 actionBarButtonState = ActionBarButtonUiState(
-                    visible = _uiState.value.recipients.isNotEmpty(),
+                    visible = newState.recipients.isNotEmpty(),
                     text = impl.getString(MessageID.invite),
                     onClick = this::onClickInvite
                 )
@@ -88,16 +120,10 @@ class InviteStudentsViewModel(
         }
     }
 
-    fun onClickRemoveRecipient(recipient: String) {
-        _uiState.update { prev ->
-            prev.copy(recipients = prev.recipients.filter {
-                it != recipient
-            })
-        }
-    }
-
     private fun onClickInvite() {
-
+        _uiState.update { prev ->
+            prev.copy(fieldsEnabled = false)
+        }
     }
 
     companion object {
