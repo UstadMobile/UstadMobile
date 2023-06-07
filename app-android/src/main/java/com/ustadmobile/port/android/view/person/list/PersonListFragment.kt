@@ -127,16 +127,6 @@ fun PersonListScreen(
     ){
 
         item {
-            UstadListSortHeader(
-                modifier = Modifier
-                    .defaultItemPadding()
-                    .fillMaxWidth(),
-                activeSortOrderOption = uiState.sortOption,
-                onClickSort = onClickSort
-            )
-        }
-
-        item {
             Row(
                 modifier = Modifier
                     .defaultItemPadding()
