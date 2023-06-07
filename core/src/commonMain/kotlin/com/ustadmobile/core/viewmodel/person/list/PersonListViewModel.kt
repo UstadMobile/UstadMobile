@@ -147,11 +147,6 @@ class PersonListViewModel(
         }
     }
 
-    companion object {
-
-        const val DEST_NAME = "People"
-
-    }
     fun onClickAddRecipient() {
         navigateForResult(
             InviteStudentsViewModel.DEST_NAME,
@@ -162,6 +157,8 @@ class PersonListViewModel(
     }
 
     companion object {
+
+        const val DEST_NAME = "People"
 
         const val RESULT_KEY_SITE_LINK = "siteLink"
 

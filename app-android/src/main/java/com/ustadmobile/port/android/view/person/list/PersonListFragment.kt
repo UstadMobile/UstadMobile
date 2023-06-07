@@ -93,7 +93,6 @@ fun PersonListScreen(
         },
         onListItemClick = viewModel::onClickEntry,
         onClickAddNew = viewModel::onClickAdd,
-        onListItemClick = viewModel::onClickEntry,
         onClickAddRecipient = viewModel::onClickAddRecipient
     )
 }
@@ -104,8 +103,7 @@ fun PersonListScreen(
     uiState: PersonListUiState,
     onClickSort: () -> Unit = {},
     onListItemClick: (PersonWithDisplayDetails) -> Unit = {},
-    onClickAddRecipient: () -> Unit = {}
-    onListItemClick: (PersonWithDisplayDetails) -> Unit = {},
+    onClickAddRecipient: () -> Unit = {},
     onClickAddNew: () -> Unit = {},
 ){
 
