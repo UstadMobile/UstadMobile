@@ -6,6 +6,7 @@ import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.appendQueryArgs
+import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.ScopedGrantDetailView
@@ -30,7 +31,7 @@ data class ScopedGrantListUiState(
 
     val sortOptions: List<SortOrderOption> = listOf(
         SortOrderOption(MessageID.name, PersonDaoCommon.SORT_FIRST_NAME_ASC, true),
-        SortOrderOption(MessageID.name, PersonDaoCommon.SORT_FIRST_NAME_DESC, true),
+        SortOrderOption(MessageID.name, PersonDaoCommon.SORT_FIRST_NAME_DESC, false),
     ),
 
     val sortOption: SortOrderOption = sortOptions.first(),
@@ -54,7 +55,8 @@ class ScopedGrantListViewModel(
 
     private val pagingSourceFactory: () -> PagingSource<Int, ScopedGrantEntityAndName> = {
         activeRepo.scopedGrantDao.findByTableIdAndEntityUidWithNameAsPagingSource(
-            argTableId, argEntityId
+            argTableId, argEntityId, _uiState.value.sortOption.flag,
+            _appUiState.value.searchState.searchText.toQueryLikeParam()
         ).also {
             lastPagingSource?.invalidate()
             lastPagingSource = it

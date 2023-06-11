@@ -30,8 +30,8 @@ import com.ustadmobile.view.person.detail.PersonDetailScreen
 import com.ustadmobile.view.person.edit.PersonEditScreen
 import com.ustadmobile.view.person.edit.PersonEditScreenPreview
 import com.ustadmobile.view.person.list.PersonListScreen
-import com.ustadmobile.view.person.list.ScopedGrantListScreen
-import com.ustadmobile.view.person.list.ScopedGrantListScreenPreview
+import com.ustadmobile.view.scopedgrant.list.ScopedGrantListScreen
+import com.ustadmobile.view.scopedgrant.list.ScopedGrantListScreenPreview
 import com.ustadmobile.view.person.list.PersonListScreenPreview
 import com.ustadmobile.view.clazzassignment.detail.ClazzAssignmentDetailScreen
 import com.ustadmobile.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewScreenPreview
@@ -79,6 +79,7 @@ import com.ustadmobile.view.clazzassignment.UstadCommentListItemPreview
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
 import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreenPreview
 import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreen
+import com.ustadmobile.view.scopedgrant.list.ScopedGrantListScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -281,7 +282,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ClazzAssignmentSubmitterDetailViewModel.DEST_NAME, "CourseAssignmentSubmitterDetail",
         ClazzAssignmentSubmitterDetailScreen),
 
-    UstadScreen(ScopedGrantListView.VIEW_NAME, "Scoped Grant List",
+    UstadScreen(ScopedGrantListView.VIEW_NAME, "Scoped Grant List", ScopedGrantListScreen),
+    UstadScreen("ScopedGrantListScreenPreview", "Scoped Grant List Preview ",
         ScopedGrantListScreenPreview),
 )
 
