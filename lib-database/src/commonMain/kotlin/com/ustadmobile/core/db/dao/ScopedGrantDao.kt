@@ -8,6 +8,9 @@ import com.ustadmobile.core.db.dao.ScopedGrantDaoCommon.SQL_FIND_BY_TABLE_AND_EN
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.PagingSource
+import com.ustadmobile.lib.db.entities.ScopedGrantAndName
+import com.ustadmobile.lib.db.composites.ScopedGrantEntityAndName
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
 
@@ -282,6 +285,11 @@ expect abstract class ScopedGrantDao {
         entityUid: Long
     ): DataSourceFactory<Int, ScopedGrantWithName>
 
+    @Query(SQL_FIND_BY_TABLE_AND_ENTITY)
+    abstract fun findByTableIdAndEntityUidWithNameAsPagingSource(
+        tableId: Int,
+        entityUid: Long
+    ): PagingSource<Int, ScopedGrantEntityAndName>
 
     @Query("""
         SELECT ScopedGrant.*

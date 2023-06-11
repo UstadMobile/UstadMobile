@@ -12,7 +12,7 @@ import com.ustadmobile.lib.db.entities.ScopedGrantAndName
 
 
 class ScopedGrantAndNameEditRecyclerViewAdapter(var listener: OneToManyJoinEditListener<ScopedGrantAndName>?,
-    val permissionList: List<BitmaskMessageId>)
+                                                val permissionList: List<BitmaskMessageId>)
     : ListAdapter<ScopedGrantAndName, ScopedGrantAndNameEditRecyclerViewAdapter.ScopedGrantViewHolder>(DIFFUTIL_SCOPEDGRANTANDNAME){
 
     class ScopedGrantViewHolder(val binding: ItemScopedGrantEditBinding): RecyclerView.ViewHolder(binding.root)

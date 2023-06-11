@@ -9,7 +9,6 @@ import com.ustadmobile.core.controller.ScopedGrantListPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ScopedGrantListView
 import com.ustadmobile.lib.db.entities.ScopedGrant
-import com.ustadmobile.lib.db.entities.ScopedGrantAndName
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.toughra.ustadmobile.R
 import com.ustadmobile.lib.db.entities.ScopedGrantWithName

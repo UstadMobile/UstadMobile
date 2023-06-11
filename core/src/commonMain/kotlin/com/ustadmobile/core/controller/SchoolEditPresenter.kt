@@ -3,20 +3,19 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ScopedGrantOneToManyHelper
-import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.createNewSchoolAndGroups
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.HolidayCalendarListView
 import com.ustadmobile.core.view.SchoolDetailView
 import com.ustadmobile.core.view.SchoolEditView
-import com.ustadmobile.core.view.TimeZoneListView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.lib.db.entities.ScopedGrantAndName
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_STUDENT_GROUP
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_TEACHER_GROUP
@@ -24,7 +23,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
 
 

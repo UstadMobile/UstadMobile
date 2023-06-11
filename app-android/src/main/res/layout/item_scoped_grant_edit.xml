@@ -14,7 +14,7 @@
 
         <variable
             name="scopedGrant"
-            type="ScopedGrantAndName" />
+            type="com.ustadmobile.lib.db.entities.ScopedGrantAndName" />
 
         <variable
             name="scopedGrantFlagMessageIds"

@@ -30,6 +30,8 @@ import com.ustadmobile.view.person.detail.PersonDetailScreen
 import com.ustadmobile.view.person.edit.PersonEditScreen
 import com.ustadmobile.view.person.edit.PersonEditScreenPreview
 import com.ustadmobile.view.person.list.PersonListScreen
+import com.ustadmobile.view.person.list.ScopedGrantListScreen
+import com.ustadmobile.view.person.list.ScopedGrantListScreenPreview
 import com.ustadmobile.view.person.list.PersonListScreenPreview
 import com.ustadmobile.view.clazzassignment.detail.ClazzAssignmentDetailScreen
 import com.ustadmobile.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewScreenPreview
@@ -278,6 +280,9 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         ClazzAssignmentSubmitterDetailScreenPreview),
     UstadScreen(ClazzAssignmentSubmitterDetailViewModel.DEST_NAME, "CourseAssignmentSubmitterDetail",
         ClazzAssignmentSubmitterDetailScreen),
+
+    UstadScreen(ScopedGrantListView.VIEW_NAME, "Scoped Grant List",
+        ScopedGrantListScreenPreview),
 )
 
 
