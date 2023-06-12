@@ -1,5 +1,7 @@
 package com.ustadmobile.view.scopedgrant.list
 
+import com.ustadmobile.core.controller.ScopedGrantEditPresenter.Companion.PERMISSION_LIST_MAP
+import com.ustadmobile.core.controller.ScopedGrantEditPresenter.Companion.PERMISSION_MESSAGE_ID_LIST
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
@@ -7,9 +9,11 @@ import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.view.ScopedGrantListView
 import com.ustadmobile.core.viewmodel.scopedgrant.list.ScopedGrantListUiState
 import com.ustadmobile.core.viewmodel.scopedgrant.list.ScopedGrantListViewModel
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
@@ -28,6 +32,7 @@ import csstype.Overflow
 import csstype.pct
 import js.core.jso
 import mui.icons.material.Add
+import mui.icons.material.Lock
 import mui.material.Container
 import mui.material.ListItem
 import mui.material.ListItemButton
@@ -97,11 +102,14 @@ val ScopedGrantListComponent = FC<ScopedGrantListProps> { props ->
 
                         //TODO: Figure icon
                         ListItemIcon {
-                            +Add.create()
+                            +Lock.create()
                         }
 
                         ListItemText {
                             primary = ReactNode(scopedGrant?.name ?: "")
+                            secondary = ReactNode(
+                                getPermissionAsText(
+                                    scopedGrant?.scopedGrant?.sgPermissions?:0L))
                         }
                     }
                 }
@@ -112,6 +120,24 @@ val ScopedGrantListComponent = FC<ScopedGrantListProps> { props ->
             VirtualListOutlet()
         }
     }
+}
+
+fun getPermissionAsText(permission: Long): String{
+
+    val enabledPermissions = MutableLiveData(PERMISSION_MESSAGE_ID_LIST.map{
+        it.toBitmaskFlag(permission)
+    }.filter { it.enabled })
+
+    val permissionList = enabledPermissions.getValue()
+
+    val strings = useStringsXml()
+    val messageIds = permissionList?.map { it.messageId }
+    val messageIdsStrings: List<String>? = permissionList?.map { strings[it.messageId] }
+
+    val text = messageIdsStrings?.joinToString(" ")
+
+    return text?:""
+
 }
 
 val ScopedGrantListScreen = FC<Props> {

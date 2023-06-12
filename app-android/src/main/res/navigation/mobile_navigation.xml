@@ -173,6 +173,10 @@
         android:id="@+id/course_discussion_detail_dest"
         android:name="com.ustadmobile.port.android.view.discussionpost.coursediscussiondetail.CourseDiscussionDetailFragment" />
 
+    <fragment
+        android:id="@+id/scopedgrant_list_dest"
+        android:name="com.ustadmobile.port.android.view.scopedgrant.list.ScopedGrantList2Fragment"
+
  <fragment
         android:id="@+id/discussion_post_edit_dest"
         android:name="com.ustadmobile.port.android.view.discussionpost.edit.DiscussionPostEditFragment" />

@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.view
+package com.ustadmobile.port.android.view.scopedgrant.list
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -39,9 +39,10 @@ import com.ustadmobile.lib.db.composites.ScopedGrantEntityAndName
 import com.ustadmobile.lib.db.entities.ScopedGrant
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
+import com.ustadmobile.port.android.view.SortBottomSheetFragment
+import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.UstadAddListItem
 import com.ustadmobile.port.android.view.composable.UstadListSortHeader
-import com.ustadmobile.port.android.view.composable.UstadPersonAvatar
 
 class ScopedGrantList2Fragment(): UstadBaseMvvmFragment() {
 

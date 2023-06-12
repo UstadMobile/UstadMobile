@@ -181,7 +181,7 @@ class ViewNameToDestMap: DestinationProvider {
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL,
                 hideAccountIcon = true,
                 hideBottomNavigation = true),
-            ScopedGrantListView.VIEW_NAME to UstadDestination(R.id.scoped_grant_list_dest),
+            ScopedGrantListView.VIEW_NAME to UstadDestination(R.id.scopedgrant_list_dest),
             ScopedGrantDetailView.VIEW_NAME to UstadDestination(R.id.scoped_grant_detail_dest),
             PanicButtonSettingsView.VIEW_NAME to UstadDestination(R.id.panic_button_settings_dest),
             GrantAppPermissionView.VIEW_NAME to UstadDestination(R.id.grant_app_permission_dest),
@@ -189,7 +189,7 @@ class ViewNameToDestMap: DestinationProvider {
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             HtmlEditViewModel.DEST_NAME to UstadDestination(R.id.html_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
-            TimeZoneListViewModel.DEST_NAME to UstadDestination(R.id.time_zone_list_dest)
+            TimeZoneListViewModel.DEST_NAME to UstadDestination(R.id.time_zone_list_dest),
     )
 
     override val navControllerViewId: Int
