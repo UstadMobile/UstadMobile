@@ -155,7 +155,13 @@ fun ScopedGrantListScreen(
                         scopedGrant?.also{ onListItemClick(it) }
                     },
                 
-                text = { Text(text = scopedGrant?.name?:"") },
+                text = {
+                    Text(text = scopedGrant?.name?:"")
+                       },
+
+                secondaryText = {
+                    Text(text = "")
+                },
                 
                 icon = {
                     Icon(

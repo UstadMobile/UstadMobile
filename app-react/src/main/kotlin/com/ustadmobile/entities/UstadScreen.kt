@@ -285,6 +285,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ScopedGrantListView.VIEW_NAME, "Scoped Grant List", ScopedGrantListScreen),
     UstadScreen("ScopedGrantListScreenPreview", "Scoped Grant List Preview ",
         ScopedGrantListScreenPreview),
+
+    //UstadScreen(ScopedGrantEditView.VIEW_NAME, "Scoped Grant Edit", ScopedGrantEditScreen),
 )
 
 

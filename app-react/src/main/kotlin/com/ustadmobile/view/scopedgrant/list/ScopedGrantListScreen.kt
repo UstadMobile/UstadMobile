@@ -100,7 +100,6 @@ val ScopedGrantListComponent = FC<ScopedGrantListProps> { props ->
                             scopedGrant?.also { props.onListItemClick(it) }
                         }
 
-                        //TODO: Figure icon
                         ListItemIcon {
                             +Lock.create()
                         }
@@ -123,20 +122,17 @@ val ScopedGrantListComponent = FC<ScopedGrantListProps> { props ->
 }
 
 fun getPermissionAsText(permission: Long): String{
+    val strings = useStringsXml()
 
     val enabledPermissions = MutableLiveData(PERMISSION_MESSAGE_ID_LIST.map{
         it.toBitmaskFlag(permission)
     }.filter { it.enabled })
 
-    val permissionList = enabledPermissions.getValue()
+    val permissionList = enabledPermissions.getValue()?.joinToString(",") {
+        strings[it.messageId]
+    }
 
-    val strings = useStringsXml()
-    val messageIds = permissionList?.map { it.messageId }
-    val messageIdsStrings: List<String>? = permissionList?.map { strings[it.messageId] }
-
-    val text = messageIdsStrings?.joinToString(" ")
-
-    return text?:""
+    return permissionList?:""
 
 }
 

@@ -156,7 +156,7 @@ class ScopedGrantListViewModel(
             UstadView.ARG_LISTMODE to ListViewMode.PICKER.mode,
             PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED to goToOnPersonSelectedArgs,
         )
-
+        
         navController.navigate(
             viewName = PersonListViewModel.DEST_NAME,
             args = args
