@@ -1,4 +1,4 @@
 package com.ustadmobile.core.util
 
 
-expect fun deviceIsoCode(): String
+expect class CountryProviderImp(context: Any): CountryProvider

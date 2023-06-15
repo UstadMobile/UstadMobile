@@ -1,6 +1,13 @@
 package com.ustadmobile.core.util
 
-actual fun deviceIsoCode(): String {
+import com.ustadmobile.core.viewmodel.CountryProviderUiState
 
-    return ""
+actual class CountryProviderImp(
+    context: Any,
+): CountryProvider {
+
+    override fun getCountry(): CountryProviderUiState {
+        TODO("Not yet implemented")
+    }
+
 }
