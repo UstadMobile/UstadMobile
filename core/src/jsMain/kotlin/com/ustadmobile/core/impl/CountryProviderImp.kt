@@ -1,5 +1,6 @@
-package com.ustadmobile.core.util
+package com.ustadmobile.core.impl
 
+import com.ustadmobile.core.util.CountryProvider
 import com.ustadmobile.core.viewmodel.CountryProviderUiState
 
 actual class CountryProviderImp(
