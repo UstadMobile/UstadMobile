@@ -95,7 +95,7 @@ private fun InviteStudentsScreen(
 ) {
 
     val context = LocalContext.current
-    val tele_man = getSystemService(context.TELEPHONY_SERVICE) as TelephonyManager?
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
