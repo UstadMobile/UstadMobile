@@ -32,6 +32,7 @@ import com.ustadmobile.core.util.ext.toBitmaskFlagList
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ScopedGrantDetailView
 import com.ustadmobile.core.viewmodel.ScopedGrantDetailUiState
+import com.ustadmobile.core.viewmodel.scopedgrant.detail.ScopedGrantDetailUiState
 import com.ustadmobile.lib.db.entities.ScopedGrantWithName
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap

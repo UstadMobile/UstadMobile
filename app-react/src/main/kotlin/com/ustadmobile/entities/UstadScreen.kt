@@ -146,8 +146,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(LanguageEditView.VIEW_NAME, "LanguageEdit Preview", LanguageEditPreview),
     UstadScreen(ReportFilterEditView.VIEW_NAME,
         "ReportFilterEdit Preview", ReportFilterEditScreenPreview),
-    UstadScreen(ScopedGrantDetailView.VIEW_NAME, "ScopedGrantDetail Preview",
-        ScopedGrantDetailScreenPreview),
+
     UstadScreen(ContentEntryImportLinkView.VIEW_NAME, "ContentEntryImportLink Preview",
         ContentEntryImportLinkScreenPreview),
     UstadScreen(HolidayCalendarDetailView.VIEW_NAME, "HolidayCalendarDetail Preview",
@@ -285,6 +284,10 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ScopedGrantListView.VIEW_NAME, "Scoped Grant List", ScopedGrantListScreen),
     UstadScreen("ScopedGrantListScreenPreview", "Scoped Grant List Preview ",
         ScopedGrantListScreenPreview),
+
+    UstadScreen(ScopedGrantDetailView.VIEW_NAME, "Scoped Grant Detail", ScopedGrantDetailScreen),
+    UstadScreen("ScopedGrantDetailScreenPreview", "Scoped Grant Detail Preview", ScopedGrantDetailScreenPreview),
+
 
     //UstadScreen(ScopedGrantEditView.VIEW_NAME, "Scoped Grant Edit", ScopedGrantEditScreen),
 )

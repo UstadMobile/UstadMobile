@@ -310,6 +310,13 @@ expect abstract class ScopedGrantDao {
     abstract suspend fun findByUid(sgUid: Long): ScopedGrant?
 
     @Query("""
+        SELECT ScopedGrant.*
+          FROM ScopedGrant
+         WHERE sgUid = :scopedGrantUid
+    """)
+    abstract fun findByUidFlow(scopedGrantUid: Long): Flow<ScopedGrant?>
+
+    @Query("""
         SELECT ScopedGrant.*, 
                CASE
                WHEN Person.firstNames IS NOT NULL THEN Person.firstNames
