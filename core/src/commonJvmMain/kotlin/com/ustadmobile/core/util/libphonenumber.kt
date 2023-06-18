@@ -13,8 +13,8 @@ actual fun isValidPhoneNumber(di: DI, str: String): Boolean {
     val impl: CountryProviderImp by di.instance()
 
     try {
-        val swissNumberProto = phoneUtil.parse(str, impl.getCountry().countryIsoCode)
-        return phoneUtil.isValidNumber(swissNumberProto)
+        val numberProto = phoneUtil.parse(str, impl.getCountry().countryIsoCode)
+        return phoneUtil.isValidNumber(numberProto)
     } catch (e: NumberParseException) {
         System.err.println("NumberParseException was thrown: $e")
     }
