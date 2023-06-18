@@ -1,3 +1,5 @@
 package com.ustadmobile.core.util
 
-expect fun isValidPhoneNumber(str: String = ""): Boolean
+import org.kodein.di.DI
+
+expect fun isValidPhoneNumber(di: DI, str: String = ""): Boolean
