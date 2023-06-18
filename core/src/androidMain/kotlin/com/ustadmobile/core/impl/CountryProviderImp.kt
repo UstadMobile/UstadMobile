@@ -3,16 +3,17 @@ package com.ustadmobile.core.impl
 import android.content.Context
 import com.ustadmobile.core.util.CountryProvider
 import com.ustadmobile.core.viewmodel.CountryProviderUiState
-
+import android.telephony.TelephonyManager
 
 actual open class CountryProviderImp(
-    private val applicationContext: Context
+    private val applicationContext: Context,
 ) : CountryProvider {
 
     actual override fun getCountry(): CountryProviderUiState {
-        TODO("Not Implement Yet")
-//        val tm = getSystemService((context as Context).TELEPHONY_SERVICE) as TelephonyManager?
-//        tm.getNetworkCountryIso()
+        val tm = applicationContext.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?
+        tm?.networkCountryIso
+
+        return CountryProvider
     }
 
 
