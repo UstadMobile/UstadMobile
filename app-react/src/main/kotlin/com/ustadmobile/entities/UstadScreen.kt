@@ -3,7 +3,6 @@ package com.ustadmobile.entities
 import com.ustadmobile.core.components.NAVHOST_CLEARSTACK_VIEWNAME
 import com.ustadmobile.core.components.NavHostClearStackPlaceholder
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.viewmodel.person.invitestudents.InviteStudentsViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.*
@@ -40,7 +39,6 @@ import com.ustadmobile.view.clazzassignment.detail.submissionstab.ClazzAssignmen
 import com.ustadmobile.view.clazzenrolment.clazzmemberlist.ClazzMemberListScreen
 import com.ustadmobile.view.courseterminology.edit.CourseTerminologyEditScreen
 import com.ustadmobile.view.login.LoginScreen
-import com.ustadmobile.view.person.invitestudents.InviteStudentsScreen
 import com.ustadmobile.view.schedule.edit.ScheduleEditScreen
 import com.ustadmobile.view.siteenterlink.SiteEnterLinkScreen
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
@@ -77,8 +75,10 @@ import com.ustadmobile.view.discussionpost.edit.DiscussionPostEditScreen
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.view.clazzassignment.UstadCommentListItemPreview
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
+import com.ustadmobile.core.viewmodel.person.invitestudents.InviteStudentsViewModel
 import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreenPreview
 import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreen
+import com.ustadmobile.view.person.invitestudents.InviteStudentsScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -280,7 +280,6 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         ClazzAssignmentSubmitterDetailScreenPreview),
     UstadScreen(ClazzAssignmentSubmitterDetailViewModel.DEST_NAME, "CourseAssignmentSubmitterDetail",
         ClazzAssignmentSubmitterDetailScreen),
-        ClazzAssignmentDetailSubmissionsTab),
     UstadScreen(
         InviteStudentsViewModel.DEST_NAME, "InviteStudents",
         InviteStudentsScreen
