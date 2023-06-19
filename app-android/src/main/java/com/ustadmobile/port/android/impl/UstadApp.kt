@@ -95,6 +95,10 @@ class UstadApp : Application(), DIAware {
             UstadMobileSystemImpl(applicationContext)
         }
 
+        bind<CountryProviderImp>() with singleton {
+            CountryProviderImp(applicationContext)
+        }
+
         bind<UstadAccountManager>() with singleton {
             UstadAccountManager(instance(), applicationContext, di)
         }

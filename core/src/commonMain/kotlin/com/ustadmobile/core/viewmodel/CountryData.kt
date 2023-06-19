@@ -1,6 +1,6 @@
 package com.ustadmobile.core.viewmodel
 
-data class CountryProviderUiState(
+data class CountryData(
 
     val countryIsoCode: String = "",
 

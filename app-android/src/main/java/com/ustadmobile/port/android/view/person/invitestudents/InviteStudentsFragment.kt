@@ -7,6 +7,9 @@ import android.provider.ContactsContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -200,8 +203,7 @@ private fun pickContact(
 
 @Override
 fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-    onActivityResult(requestCode, resultCode, data)
-    if (resultCode == Activity.RESULT_OK && requestCode == 111) {
+    if (resultCode == Activity.RESULT_OK && requestCode == 1) {
         println("Data from start activity is ${data.toString()}")
     }
 }

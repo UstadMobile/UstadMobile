@@ -1,9 +1,9 @@
 package com.ustadmobile.core.util
 
-import com.ustadmobile.core.viewmodel.CountryProviderUiState
+import com.ustadmobile.core.viewmodel.CountryData
 
 interface CountryProvider {
 
-    fun getCountry(): CountryProviderUiState
+    fun getCountry(): CountryData
 
 }
