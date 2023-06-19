@@ -8,17 +8,16 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 
 actual open class CountryProviderImp(
-    private val applicationContext: Context,
-    private val di: DI
+    private val applicationContext: Context
 ) : CountryProvider {
 
     actual override fun getCountry(): CountryProviderUiState {
         val tm = applicationContext.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?
-        tm?.networkCountryIso
 
-        val countryProvider: CountryProvider by di.instance()
-
-        return countryProvider.getCountry()
+        print("message from getCountry ${tm?.networkCountryIso ?: ""}")
+        return CountryProviderUiState(
+            countryIsoCode = tm?.networkCountryIso ?: ""
+        )
     }
 
 

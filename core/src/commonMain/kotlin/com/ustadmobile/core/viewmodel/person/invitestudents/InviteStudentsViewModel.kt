@@ -27,14 +27,8 @@ data class InviteStudentsUiState(
 
     val textFieldError: String? = null,
 
-) {
-
-    val addRecipientVisible: Boolean
-        get() = (textField.validEmail()
-                || isValidPhoneNumber(textField))
-                && textFieldError.isNullOrBlank()
-
-}
+    val addRecipientVisible: Boolean = false
+)
 
 class InviteStudentsViewModel(
     di: DI,
@@ -56,6 +50,14 @@ class InviteStudentsViewModel(
                     text = impl.getString(MessageID.invite),
                     onClick = this::onClickInvite
                 )
+            )
+        }
+
+        _uiState.updateAndGet { prev ->
+            prev.copy(
+                addRecipientVisible = (prev.textField.validEmail()
+                || isValidPhoneNumber(di = di, str = prev.textField))
+                && prev.textFieldError.isNullOrBlank()
             )
         }
     }
