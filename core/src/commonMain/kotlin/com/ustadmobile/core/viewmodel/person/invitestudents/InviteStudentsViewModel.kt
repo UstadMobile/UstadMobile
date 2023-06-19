@@ -70,9 +70,25 @@ class InviteStudentsViewModel(
                 } else {
                     null
                 },
-                textField = text
+                textField = text,
+                addRecipientVisible = (isValidEmail(text)
+                        || isValidPhoneNumber(di = di, str = text))
+                        && prev.textFieldError.isNullOrBlank()
             )
         }
+    }
+
+    private fun isValidEmail(str: String): Boolean {
+        if(str.contains("@")){
+            val splittedStr = str.split("@", limit = 2)
+            if (!(splittedStr[0].contains(" ")
+                        || splittedStr[0].isBlank()
+                        || splittedStr[1].contains(" ")
+                        || splittedStr[1].isBlank())){
+                return true
+            }
+        }
+        return false
     }
 
     fun onClickAddRecipient() {
