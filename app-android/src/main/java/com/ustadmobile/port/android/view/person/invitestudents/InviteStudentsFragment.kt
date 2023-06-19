@@ -1,8 +1,9 @@
 package com.ustadmobile.port.android.view.person.invitestudents
 
-import android.content.Context
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
-import android.telephony.TelephonyManager
+import android.provider.ContactsContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,13 +29,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat.getSystemService
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
@@ -65,7 +65,7 @@ class InviteStudentsFragment : UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    InviteStudentsScreenForViewModel(viewModel)
+                    InviteStudentsScreenForViewModel(viewModel, activity = activity)
                 }
             }
         }
@@ -74,7 +74,8 @@ class InviteStudentsFragment : UstadBaseMvvmFragment() {
 
 @Composable
 private fun InviteStudentsScreenForViewModel(
-    viewModel: InviteStudentsViewModel
+    viewModel: InviteStudentsViewModel,
+    activity: FragmentActivity?
 ) {
     val uiState: InviteStudentsUiState by viewModel.uiState.collectAsState(InviteStudentsUiState())
     InviteStudentsScreen(
@@ -82,6 +83,7 @@ private fun InviteStudentsScreenForViewModel(
         onTextFieldChanged = viewModel::onTextFieldChanged,
         onClickAddRecipient = viewModel::onClickAddRecipient,
         onClickRemoveRecipient = viewModel::onClickRemoveRecipient,
+        activity = activity
     )
 }
 
@@ -92,9 +94,8 @@ private fun InviteStudentsScreen(
     onTextFieldChanged: (String) -> Unit = {},
     onClickAddRecipient: () -> Unit = {},
     onClickRemoveRecipient: (String) -> Unit = {},
+    activity: FragmentActivity? = null
 ) {
-
-    val context = LocalContext.current
 
     LazyColumn(
         modifier = Modifier
@@ -138,7 +139,9 @@ private fun InviteStudentsScreen(
                 errorText = uiState.textFieldError
             ) {
                 OutlinedTextField(
-                    modifier = Modifier.testTag("textField").fillMaxWidth(),
+                    modifier = Modifier
+                        .testTag("textField")
+                        .fillMaxWidth(),
                     value = uiState.textField,
                     label = { Text(stringResource( R.string.phone_or_email )) },
                     enabled = uiState.fieldsEnabled,
@@ -170,8 +173,37 @@ private fun InviteStudentsScreen(
                 }
             }
         }
+
+        item {
+            TextButton(
+                modifier = Modifier
+                    .defaultItemPadding(),
+                onClick = {
+                    pickContact(activity)
+                }
+            ) {
+                Text(stringResource(R.string.add_from_contacts))
+            }
+        }
     }
 
+}
+
+private fun pickContact(
+    activity: FragmentActivity?
+){
+    val intent = Intent(Intent.ACTION_PICK).apply {
+        type = ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE
+    }
+    activity?.startActivityForResult(intent, 1)
+}
+
+@Override
+fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    onActivityResult(requestCode, resultCode, data)
+    if (resultCode == Activity.RESULT_OK && requestCode == 111) {
+        println("Data from start activity is ${data.toString()}")
+    }
 }
 
 @Composable
