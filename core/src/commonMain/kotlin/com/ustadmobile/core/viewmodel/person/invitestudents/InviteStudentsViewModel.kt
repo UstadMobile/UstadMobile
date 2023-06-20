@@ -73,7 +73,7 @@ class InviteStudentsViewModel(
                 textField = text,
                 addRecipientVisible = (isValidEmail(text)
                         || isValidPhoneNumber(di = di, str = text))
-                        && prev.textFieldError.isNullOrBlank()
+                        && !prev.recipients.contains(text)
             )
         }
     }
@@ -94,7 +94,11 @@ class InviteStudentsViewModel(
     fun onClickAddContact(text: String) {
         val newState = _uiState.updateAndGet { prev ->
             prev.copy(
-                recipients = prev.recipients.plus(text)
+                recipients = if(!prev.recipients.contains(text)) {
+                    prev.recipients.plus(text)
+                } else {
+                    prev.recipients
+                }
             )
         }
 

@@ -4,6 +4,7 @@ import android.content.Context
 import com.ustadmobile.core.util.CountryProvider
 import com.ustadmobile.core.viewmodel.CountryData
 import android.telephony.TelephonyManager
+import android.util.Log
 
 actual open class CountryProviderImp(
     private val applicationContext: Context
@@ -12,7 +13,6 @@ actual open class CountryProviderImp(
     actual override fun getCountry(): CountryData {
         val tm = applicationContext.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?
 
-        print("message from getCountry ${tm?.networkCountryIso ?: ""}")
         return CountryData(
             countryIsoCode = tm?.networkCountryIso ?: ""
         )
