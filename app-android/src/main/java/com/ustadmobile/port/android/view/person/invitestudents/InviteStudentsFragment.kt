@@ -1,14 +1,13 @@
 package com.ustadmobile.port.android.view.person.invitestudents
 
-import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.ActivityResultCallback
-import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,12 +31,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
@@ -68,7 +67,7 @@ class InviteStudentsFragment : UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    InviteStudentsScreenForViewModel(viewModel, activity = activity)
+                    InviteStudentsScreenForViewModel(viewModel)
                 }
             }
         }
@@ -77,8 +76,7 @@ class InviteStudentsFragment : UstadBaseMvvmFragment() {
 
 @Composable
 private fun InviteStudentsScreenForViewModel(
-    viewModel: InviteStudentsViewModel,
-    activity: FragmentActivity?
+    viewModel: InviteStudentsViewModel
 ) {
     val uiState: InviteStudentsUiState by viewModel.uiState.collectAsState(InviteStudentsUiState())
     InviteStudentsScreen(
@@ -86,7 +84,7 @@ private fun InviteStudentsScreenForViewModel(
         onTextFieldChanged = viewModel::onTextFieldChanged,
         onClickAddRecipient = viewModel::onClickAddRecipient,
         onClickRemoveRecipient = viewModel::onClickRemoveRecipient,
-        activity = activity
+        onClickAddContact = viewModel::onClickAddContact
     )
 }
 
@@ -96,9 +94,33 @@ private fun InviteStudentsScreen(
     uiState: InviteStudentsUiState = InviteStudentsUiState(),
     onTextFieldChanged: (String) -> Unit = {},
     onClickAddRecipient: () -> Unit = {},
+    onClickAddContact: (String) -> Unit = {},
     onClickRemoveRecipient: (String) -> Unit = {},
-    activity: FragmentActivity? = null
 ) {
+
+    val context = LocalContext.current
+
+    val launchDiscoverable = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+        onResult = {
+            val contactUri: Uri = it.data?.data!!
+            val projection: Array<String> = arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER)
+            context.contentResolver.query(contactUri, projection, null, null, null).use { cursor ->
+                // If the cursor returned is valid, get the phone number.
+                if (cursor != null) {
+                    if (cursor.moveToFirst()) {
+                        val numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
+                        onClickAddContact(cursor.getString(numberIndex))
+                    }
+                }
+            }
+
+        }
+    )
+
+    val intent = Intent(Intent.ACTION_PICK).apply {
+        type = ContactsContract.Contacts.CONTENT_TYPE
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -182,7 +204,7 @@ private fun InviteStudentsScreen(
                 modifier = Modifier
                     .defaultItemPadding(),
                 onClick = {
-                    pickContact(activity)
+                    launchDiscoverable.launch(intent)
                 }
             ) {
                 Text(stringResource(R.string.add_from_contacts))
@@ -190,22 +212,6 @@ private fun InviteStudentsScreen(
         }
     }
 
-}
-
-private fun pickContact(
-    activity: FragmentActivity?
-){
-    val intent = Intent(Intent.ACTION_PICK).apply {
-        type = ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE
-    }
-    activity?.startActivityForResult(intent, 1)
-}
-
-@Override
-fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-    if (resultCode == Activity.RESULT_OK && requestCode == 1) {
-        println("Data from start activity is ${data.toString()}")
-    }
 }
 
 @Composable

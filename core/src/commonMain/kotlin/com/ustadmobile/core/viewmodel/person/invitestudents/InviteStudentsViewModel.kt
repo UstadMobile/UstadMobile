@@ -91,6 +91,18 @@ class InviteStudentsViewModel(
         return false
     }
 
+    fun onClickAddContact(text: String) {
+        val newState = _uiState.updateAndGet { prev ->
+            prev.copy(
+                recipients = prev.recipients.plus(text)
+            )
+        }
+
+        saveState(newState)
+
+        updateAppUiState(newState)
+    }
+
     fun onClickAddRecipient() {
         val newState = _uiState.updateAndGet { prev ->
             prev.copy(
