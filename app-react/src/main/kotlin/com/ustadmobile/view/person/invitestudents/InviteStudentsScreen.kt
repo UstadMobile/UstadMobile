@@ -105,7 +105,7 @@ private val InviteStudentsComponent2 = FC<InviteStudentsProps> { props ->
                             align = TypographyAlign.justify
                         }
                         Typography {
-                            + strings[MessageID.another_email]
+                            + props.uiState.textField
                             align = TypographyAlign.justify
                         }
                     }
