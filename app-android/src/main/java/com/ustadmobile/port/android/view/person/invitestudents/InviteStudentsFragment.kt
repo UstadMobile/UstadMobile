@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view.person.invitestudents
 
+import android.app.Activity.RESULT_CANCELED
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -103,14 +104,19 @@ private fun InviteStudentsScreen(
     val launchDiscoverable = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
         onResult = {
-            val contactUri: Uri = it.data?.data!!
+            val contactUri: Uri? = it.data?.data
             val projection: Array<String> = arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER)
-            context.contentResolver.query(contactUri, projection, null, null, null).use { cursor ->
-                // If the cursor returned is valid, get the phone number.
-                if (cursor != null) {
-                    if (cursor.moveToFirst()) {
-                        val numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
-                        onClickAddContact(cursor.getString(numberIndex))
+            if (contactUri != null && it.resultCode != RESULT_CANCELED) {
+                context.contentResolver.query(
+                    contactUri, projection, null, null, null).use { cursor ->
+                    // If the cursor returned is valid, get the phone number.
+                    if (cursor != null) {
+                        if (cursor.moveToFirst()) {
+                            val numberIndex = cursor.getColumnIndex(
+                                ContactsContract.CommonDataKinds.Phone.NUMBER
+                            )
+                            onClickAddContact(cursor.getString(numberIndex))
+                        }
                     }
                 }
             }
@@ -119,7 +125,7 @@ private fun InviteStudentsScreen(
     )
 
     val intent = Intent(Intent.ACTION_PICK).apply {
-        type = ContactsContract.Contacts.CONTENT_TYPE
+        type = ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE
     }
 
     LazyColumn(
