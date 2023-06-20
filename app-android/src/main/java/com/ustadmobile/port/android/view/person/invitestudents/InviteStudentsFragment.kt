@@ -1,6 +1,6 @@
 package com.ustadmobile.port.android.view.person.invitestudents
 
-import android.app.Activity.RESULT_CANCELED
+import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -106,7 +106,7 @@ private fun InviteStudentsScreen(
         onResult = {
             val contactUri: Uri? = it.data?.data
             val projection: Array<String> = arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER)
-            if (contactUri != null && it.resultCode != RESULT_CANCELED) {
+            if (contactUri != null && it.resultCode == RESULT_OK) {
                 context.contentResolver.query(
                     contactUri, projection, null, null, null).use { cursor ->
                     // If the cursor returned is valid, get the phone number.
