@@ -6,6 +6,7 @@ import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.core.db.dao.ScopedGrantDaoCommon.SQL_FIND_BY_TABLE_AND_ENTITY
 import com.ustadmobile.core.db.dao.ScopedGrantDaoCommon.SQL_FIND_BY_TABLE_AND_ENTITY_WITH_PARAMS
+import com.ustadmobile.core.db.dao.ScopedGrantDaoCommon.SQL_FIND_PEOPLE_GRANTED_BY_TABLE_AND_ENTITY
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
@@ -293,6 +294,9 @@ expect abstract class ScopedGrantDao {
         sortOrder: Int,
         searchText: String? = "%"
     ): PagingSource<Int, ScopedGrantEntityAndName>
+
+    @Query(SQL_FIND_PEOPLE_GRANTED_BY_TABLE_AND_ENTITY)
+    abstract fun findPeopleAlreadyGranted(tableId: Int, entityUid: Long): Flow<List<Long>>
 
     @Query("""
         SELECT ScopedGrant.*

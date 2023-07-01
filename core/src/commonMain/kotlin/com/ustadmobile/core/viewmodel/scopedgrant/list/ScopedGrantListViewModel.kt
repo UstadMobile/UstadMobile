@@ -9,6 +9,7 @@ import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.ScopedGrantDetailView
 import com.ustadmobile.core.view.ScopedGrantEditView
 import com.ustadmobile.core.view.ScopedGrantListView
@@ -37,6 +38,8 @@ data class ScopedGrantListUiState(
     val sortOption: SortOrderOption = sortOptions.first(),
 
     val showAddItem: Boolean = false,
+
+    var peopleAlreadyGranted: List<Long> = emptyList()
 )
 
 class ScopedGrantListViewModel(
@@ -69,11 +72,7 @@ class ScopedGrantListViewModel(
                 navigationVisible = true,
                 searchState = createSearchEnabledState(),
                 title = listTitle(MessageID.permissions, MessageID.permission),
-                fabState = FabUiState(
-                    visible = false,
-                    text = systemImpl.getString(MessageID.permission),
-                    icon = FabUiState.FabIcon.ADD,
-                )
+
 
             )
         }
@@ -87,29 +86,45 @@ class ScopedGrantListViewModel(
         viewModelScope.launch {
 
             _uiState.whenSubscribed {
+                activeRepo.scopedGrantDao.findPeopleAlreadyGranted(
+                    argTableId, argEntityId).collect{
+                    _uiState.update { prev ->
+                        prev.copy(peopleAlreadyGranted = it)
+                    }
+                }
+            }
+            _uiState.whenSubscribed {
                 activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
                     accountManager.activeAccount.personUid, Role.PERMISSION_CLAZZ_UPDATE
-                ).collect{ hasAddPermission ->
-                    _appUiState.update {prev ->
+                ).collect { hasAddPermission ->
+                    _appUiState.update { prev ->
                         prev.copy(fabState = prev.fabState.copy(visible = hasAddPermission))
                     }
 
                 }
-            }
 
+
+            }
+        }
+
+        viewModelScope.launch {
             collectHasPermissionFlowAndSetAddNewItemUiState(
                 hasPermissionFlow = {
                     activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
-                        accountManager.activeAccount.personUid, Role.PERMISSION_CLAZZ_UPDATE)
+                        accountManager.activeAccount.personUid, Role.PERMISSION_CLAZZ_UPDATE
+                    )
 
                 },
                 fabMessageId = MessageID.permission,
 
                 onSetAddListItemVisibility = { visible ->
-                    _uiState.update { prev -> prev.copy(showAddItem = visible ) }
+                    _uiState.update { prev -> prev.copy(showAddItem = visible) }
                 }
             )
 
+        }
+
+        viewModelScope.launch {
             launch{
                 navResultReturner.filteredResultFlowForKey(RESULT_KEY_PERSON_SELECT).collect{
                     val person = it.result as? Person ?: return@collect
@@ -140,25 +155,29 @@ class ScopedGrantListViewModel(
                 sortOption = sortOption
             )
         }
-
+        lastPagingSource?.invalidate()
     }
 
     override fun onClickAdd() {
         //Navigate to Select Person > ScopedGrantEdit
 
+        val peopleAlreadyGranted = _uiState.value.peopleAlreadyGranted
+
         val goToOnPersonSelectedArgs = ScopedGrantEditView.VIEW_NAME
             .appendQueryArgs(mapOf(
                 UstadView.ARG_CODE_TABLE to argTableId.toString(),
                 UstadView.ARG_ENTITY_UID to argEntityId.toString(),
+
             ))
 
         val args = mutableMapOf(
             UstadView.ARG_LISTMODE to ListViewMode.PICKER.mode,
             PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED to goToOnPersonSelectedArgs,
+            PersonListView.ARG_EXCLUDE_PERSONUIDS_LIST to peopleAlreadyGranted.joinToString()
         )
 
         navController.navigate(
-            viewName = PersonListViewModel.DEST_NAME,
+            viewName = PersonListView.VIEW_NAME,
             args = args
         )
 

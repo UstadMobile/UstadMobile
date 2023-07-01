@@ -97,6 +97,8 @@ interface UstadView {
 
         const val ARG_PERSON_UID = "personUid"
 
+        const val ARG_PERSON_GROUPUID = "personGroupUid"
+
         /**
          * Somewhere to go after the given Screen is completed e.g. after a login, regisrtation, etc.
          */
@@ -216,6 +218,9 @@ interface UstadView {
         const val ARG_MAX_DATE_OF_BIRTH = "maxDob"
 
         const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
+
+
+        const val ARG_SCOPED_GRANT_UID = "ArgScopedGrantUid"
 
     }
 

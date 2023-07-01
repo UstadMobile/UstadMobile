@@ -1,11 +1,10 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.scopedgrant.detail
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.model.BitmaskFlag
-import com.ustadmobile.core.view.ScopedGrantDetailView
 import com.ustadmobile.core.viewmodel.scopedgrant.detail.ScopedGrantDetailUiState
 import com.ustadmobile.core.viewmodel.scopedgrant.detail.ScopedGrantDetailViewModel
 import com.ustadmobile.hooks.useUstadViewModel
@@ -22,7 +21,7 @@ external interface ScopedGrantDetailProps: Props {
     var uiState: ScopedGrantDetailUiState
 }
 
-val ScopedGrantDetailComponent2 = FC<ScopedGrantDetailProps> { props ->  
+val ScopedGrantDetailComponent2 = FC<ScopedGrantDetailProps> { props ->
 
     Container{
 

@@ -1,9 +1,12 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.scopedgrant.edit
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.model.BitmaskFlag
-import com.ustadmobile.core.viewmodel.ScopedGrantEditUiState
+import com.ustadmobile.core.viewmodel.scopedgrant.edit.ScopedGrantEditUiState
+import com.ustadmobile.core.viewmodel.scopedgrant.edit.ScopedGrantEditViewModel
+import com.ustadmobile.hooks.useUstadViewModel
 import mui.material.*
 import react.*
 
@@ -11,7 +14,7 @@ external interface ScopedGrantEditScreenProps : Props {
 
     var uiState: ScopedGrantEditUiState
 
-    var onChangedBitmask: (BitmaskFlag?) -> Unit
+    var onToggleBitmask: (BitmaskFlag?) -> Unit
 
 }
 
@@ -24,12 +27,13 @@ val ScopedGrantEditScreenComponent2 = FC<ScopedGrantEditScreenProps> { props ->
         List{
             props.uiState.bitmaskList
                 .forEach { bitmask ->
+
                     ListItem{
+
+
                         ListItemButton {
                             onClick = {
-                                props.onChangedBitmask(bitmask.copy(
-                                    enabled = !bitmask.enabled
-                                ))
+                                props.onToggleBitmask(bitmask)
                             }
 
                             ListItemText {
@@ -39,7 +43,9 @@ val ScopedGrantEditScreenComponent2 = FC<ScopedGrantEditScreenProps> { props ->
                             Switch {
                                 checked = bitmask.enabled
                             }
+
                         }
+
                     }
                 }
         }
@@ -65,5 +71,19 @@ val ScopedGrantEditScreenPreview = FC<Props> {
 
     ScopedGrantEditScreenComponent2 {
         uiState = uiStateVar
+    }
+}
+
+
+val ScopedGrantEditScreen = FC<Props> {
+    val viewModel = useUstadViewModel{ di, savedStateHandle ->
+        ScopedGrantEditViewModel(di, savedStateHandle)
+    }
+
+    val uiStateVar by viewModel.uiState.collectAsState(ScopedGrantEditUiState())
+
+    ScopedGrantEditScreenComponent2{
+        uiState = uiStateVar
+        onToggleBitmask = viewModel::onToggleBitmask
     }
 }

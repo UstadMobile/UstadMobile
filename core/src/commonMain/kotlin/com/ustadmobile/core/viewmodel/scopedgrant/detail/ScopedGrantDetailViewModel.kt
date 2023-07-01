@@ -13,6 +13,7 @@ import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ScopedGrantDetailView
 import com.ustadmobile.core.view.ScopedGrantEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_SCOPED_GRANT_UID
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.Role
@@ -140,7 +141,7 @@ class ScopedGrantDetailViewModel(
 
     fun onClickEdit(){
         navController.navigate(ScopedGrantEditView.VIEW_NAME,
-            mapOf(ARG_ENTITY_UID to entityUid.toString()))
+            mapOf(ARG_SCOPED_GRANT_UID to entityUid.toString()))
     }
 
 

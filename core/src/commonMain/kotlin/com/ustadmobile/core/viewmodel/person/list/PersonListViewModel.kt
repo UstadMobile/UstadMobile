@@ -137,7 +137,8 @@ class PersonListViewModel(
 
         if(goToOnPersonSelected != null) {
             val args = UMFileUtil.parseURLQueryString(goToOnPersonSelected) +
-                mapOf(UstadView.ARG_PERSON_UID to entry.personUid.toString())
+                mapOf(UstadView.ARG_PERSON_UID to entry.personUid.toString(),
+                    UstadView.ARG_PERSON_GROUPUID to entry.personGroupUid.toString())
             val goToDestName = goToOnPersonSelected.substringBefore("?")
             navController.navigate(goToDestName, args)
         }else {
