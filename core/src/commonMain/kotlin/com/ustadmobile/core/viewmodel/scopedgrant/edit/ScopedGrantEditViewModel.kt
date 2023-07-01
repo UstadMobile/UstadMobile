@@ -125,7 +125,13 @@ class ScopedGrantEditViewModel(
             }else{
                 activeDb.scopedGrantDao.updateAsync(scopedGrant)
             }
-            finishWithResult(scopedGrant)
+
+            val popUpToFinish = savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH]
+            if(popUpToFinish != null){
+                navController.popBackStack(popUpToFinish, false)
+            }else {
+                finishWithResult(scopedGrant)
+            }
         }
 
     }

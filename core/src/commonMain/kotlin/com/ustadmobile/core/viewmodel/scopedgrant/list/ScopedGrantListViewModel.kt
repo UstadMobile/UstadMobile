@@ -167,6 +167,7 @@ class ScopedGrantListViewModel(
             .appendQueryArgs(mapOf(
                 UstadView.ARG_CODE_TABLE to argTableId.toString(),
                 UstadView.ARG_ENTITY_UID to argEntityId.toString(),
+                UstadView.ARG_POPUPTO_ON_FINISH to destinationName
 
             ))
 
