@@ -25,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider.NewInstanceFactory.Companion.instance
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.compose.items
@@ -32,19 +33,30 @@ import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.controller.ScopedGrantEditPresenter
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.model.BitmaskFlag
+import com.ustadmobile.core.model.BitmaskMessageId
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.scopedgrant.list.ScopedGrantListUiState
 import com.ustadmobile.core.viewmodel.scopedgrant.list.ScopedGrantListViewModel
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.composites.ScopedGrantEntityAndName
 import com.ustadmobile.lib.db.entities.ScopedGrant
+import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
 import com.ustadmobile.port.android.view.SortBottomSheetFragment
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.UstadAddListItem
 import com.ustadmobile.port.android.view.composable.UstadListSortHeader
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.w3c.dom.Text
 
 class ScopedGrantList2Fragment(): UstadBaseMvvmFragment() {
+
+
 
     private val viewModel: ScopedGrantListViewModel by ustadViewModels {
             di, savedStateHandle ->
@@ -149,6 +161,8 @@ fun ScopedGrantListScreen(
             key = { it.scopedGrant?.sgUid ?: 0 }
         ){ scopedGrant ->
 
+            val permissionsText = ""
+
             ListItem(
                 modifier = Modifier
                     .clickable { 
@@ -160,12 +174,12 @@ fun ScopedGrantListScreen(
                        },
 
                 secondaryText = {
-                    Text(text = "")
+                    Text (text = permissionsText)
                 },
                 
                 icon = {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_arrow_forward_black_24dp),
+                        painter = painterResource(id = R.drawable.baseline_lock_24),
                         contentDescription = ""
                     )
                 }
@@ -175,6 +189,23 @@ fun ScopedGrantListScreen(
         
     }
 }
+
+//@Composable
+//fun PermissionListField(permission: Long){
+//    val enabledPermissions = MutableLiveData(
+//        ScopedGrantEditPresenter.PERMISSION_MESSAGE_ID_LIST.map{
+//            it.toBitmaskFlag(permission)
+//        }.filter { it.enabled })
+//
+//    Text(
+//        text = enabledPermissions.value?.joinToString(", ") {
+//            messageIdResource(id = it.messageId)
+//        }.toString()
+//    )
+//}
+
+
+
 
 
 @Preview

@@ -31,7 +31,6 @@ import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.ext.toBitmaskFlagList
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ScopedGrantDetailView
-import com.ustadmobile.core.viewmodel.ScopedGrantDetailUiState
 import com.ustadmobile.core.viewmodel.scopedgrant.detail.ScopedGrantDetailUiState
 import com.ustadmobile.lib.db.entities.ScopedGrantWithName
 import com.ustadmobile.port.android.util.compose.messageIdResource
@@ -58,7 +57,7 @@ class ScopedGrantDetailFragment: UstadDetailFragment<ScopedGrantWithName>(
         }
 
         override fun onBindViewHolder(holder: BitmaskFlagViewHolder, position: Int) {
-            holder.itemBinding.bitmaskFlag = getItem(position)
+
         }
     }
 
@@ -108,7 +107,7 @@ class ScopedGrantDetailFragment: UstadDetailFragment<ScopedGrantWithName>(
             field = value
             mRecyclerAdapter?.submitList(entity?.toBitmaskFlagList())
             ustadFragmentTitle = entity?.name ?: context?.getString(R.string.permission)
-            mBinding?.scopedGrant = value
+
         }
 
 
