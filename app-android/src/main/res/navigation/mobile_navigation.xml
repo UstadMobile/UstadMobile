@@ -173,6 +173,10 @@
         android:id="@+id/course_discussion_detail_dest"
         android:name="com.ustadmobile.port.android.view.discussionpost.coursediscussiondetail.CourseDiscussionDetailFragment" />
 
+    <fragment
+        android:id="@+id/scopedgrant_list_dest"
+        android:name="com.ustadmobile.port.android.view.scopedgrant.list.ScopedGrantList2Fragment"/>
+
  <fragment
         android:id="@+id/discussion_post_edit_dest"
         android:name="com.ustadmobile.port.android.view.discussionpost.edit.DiscussionPostEditFragment" />
@@ -194,7 +198,7 @@
         android:name="com.ustadmobile.port.android.view.contententry.list.ContentEntryList2Fragment"
         android:label="@string/content">
     </fragment>
-2
+
     <fragment
         android:id="@+id/content_entry_list_home_dest"
         android:name="com.ustadmobile.port.android.view.contententry.list.ContentEntryList2Fragment"
@@ -418,7 +422,7 @@
 
     <fragment
         android:id="@+id/scoped_grant_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ScopedGrantEditFragment"/>
+        android:name="com.ustadmobile.port.android.view.scopedgrant.edit.ScopedGrantEdit2Fragment"/>
 
     <fragment
         android:id="@+id/error_report_dest"
@@ -432,7 +436,7 @@
 
     <fragment
         android:id="@+id/scoped_grant_detail_dest"
-        android:name="com.ustadmobile.port.android.view.ScopedGrantDetailFragment"/>
+        android:name="com.ustadmobile.port.android.view.scopedgrant.detail.ScopedGrantDetail2Fragment"/>
 
     <fragment
         android:id="@+id/panic_button_settings_dest"

@@ -23,7 +23,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ScopedGrantEditView
-import com.ustadmobile.core.viewmodel.ScopedGrantEditUiState
+import com.ustadmobile.core.viewmodel.scopedgrant.edit.ScopedGrantEditUiState
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.ScopedGrant
 import com.ustadmobile.port.android.util.compose.messageIdResource
@@ -92,7 +92,6 @@ class ScopedGrantEditFragment: UstadEditFragment<ScopedGrant>(), ScopedGrantEdit
         get() = field
         set(value) {
             field = value
-            mBinding?.scopedGrant = value
         }
 
     override var fieldsEnabled: Boolean = false

@@ -113,6 +113,7 @@ private fun ClazzDetailOverviewScreen(
     onClickDownloadContentEntry: (
         ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
     ) -> Unit = {},
+    onClickPermissions: () -> Unit = {}
 ) {
     val pager = remember(uiState.courseBlockList) {
         Pager(
@@ -133,11 +134,22 @@ private fun ClazzDetailOverviewScreen(
         timeZoneId = uiState.clazz?.clazzTimeZone ?: "UTC",
     )
 
+
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .defaultScreenPadding()
     ){
+
+        item {
+            UstadQuickActionButton(
+                labelText = stringResource(R.string.permissions),
+                imageId = R.drawable.baseline_lock_24,
+                onClick = onClickPermissions
+            )
+        }
+
         item {
             HtmlText(
                 html = uiState.clazz?.clazzDesc ?: "",
@@ -372,6 +384,7 @@ fun ClazzDetailOverviewScreen(viewModel: ClazzDetailOverviewViewModel) {
     ClazzDetailOverviewScreen(
         uiState = uiState,
         onClickCourseBlock = viewModel::onClickCourseBlock,
+        onClickPermissions = viewModel::onClickPermissions,
     )
 
 }

@@ -5,9 +5,14 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.core.db.dao.ScopedGrantDaoCommon.SQL_FIND_BY_TABLE_AND_ENTITY
+import com.ustadmobile.core.db.dao.ScopedGrantDaoCommon.SQL_FIND_BY_TABLE_AND_ENTITY_WITH_PARAMS
+import com.ustadmobile.core.db.dao.ScopedGrantDaoCommon.SQL_FIND_PEOPLE_GRANTED_BY_TABLE_AND_ENTITY
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.PagingSource
+import com.ustadmobile.lib.db.entities.ScopedGrantAndName
+import com.ustadmobile.lib.db.composites.ScopedGrantEntityAndName
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
 
@@ -282,6 +287,16 @@ expect abstract class ScopedGrantDao {
         entityUid: Long
     ): DataSourceFactory<Int, ScopedGrantWithName>
 
+    @Query(SQL_FIND_BY_TABLE_AND_ENTITY_WITH_PARAMS)
+    abstract fun findByTableIdAndEntityUidWithNameAsPagingSource(
+        tableId: Int,
+        entityUid: Long,
+        sortOrder: Int,
+        searchText: String? = "%"
+    ): PagingSource<Int, ScopedGrantEntityAndName>
+
+    @Query(SQL_FIND_PEOPLE_GRANTED_BY_TABLE_AND_ENTITY)
+    abstract fun findPeopleAlreadyGranted(tableId: Int, entityUid: Long): Flow<List<Long>>
 
     @Query("""
         SELECT ScopedGrant.*
@@ -297,6 +312,13 @@ expect abstract class ScopedGrantDao {
          WHERE sgUid = :sgUid 
     """)
     abstract suspend fun findByUid(sgUid: Long): ScopedGrant?
+
+    @Query("""
+        SELECT ScopedGrant.*
+          FROM ScopedGrant
+         WHERE sgUid = :scopedGrantUid
+    """)
+    abstract fun findByUidFlow(scopedGrantUid: Long): Flow<ScopedGrant?>
 
     @Query("""
         SELECT ScopedGrant.*, 

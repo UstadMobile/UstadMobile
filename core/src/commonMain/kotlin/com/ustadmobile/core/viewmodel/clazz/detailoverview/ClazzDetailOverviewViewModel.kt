@@ -8,10 +8,12 @@ import com.ustadmobile.core.util.ext.toggle
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ClazzAssignmentDetailView
 import com.ustadmobile.core.view.ClazzEdit2View
+import com.ustadmobile.core.view.ScopedGrantListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -123,6 +125,16 @@ class ClazzDetailOverviewViewModel(
                 }
             }
         }
+    }
+
+    fun onClickPermissions(){
+
+        navController.navigate(
+            viewName = ScopedGrantListView.VIEW_NAME,
+            args = mapOf(
+                UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString(),
+                UstadView.ARG_ENTITY_UID to entityUidArg.toString())
+        )
     }
 
     fun onClickCourseBlock(courseBlock: CourseBlock) {

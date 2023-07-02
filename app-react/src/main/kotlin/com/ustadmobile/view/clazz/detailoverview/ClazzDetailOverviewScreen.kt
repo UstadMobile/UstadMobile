@@ -16,6 +16,7 @@ import com.ustadmobile.hooks.useTabAndAppBarHeight
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.UstadDetailField
+import com.ustadmobile.mui.components.UstadQuickActionButton
 import com.ustadmobile.mui.components.UstadRawHtml
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
@@ -32,6 +33,7 @@ import react.*
 //DO NOT import mui.icons.material.[*] - this will lead to severe performance issues.
 import mui.icons.material.Group
 import mui.icons.material.Event
+import mui.icons.material.Lock
 import mui.icons.material.Login
 import react.router.useLocation
 
@@ -41,6 +43,8 @@ external interface ClazzDetailOverviewProps : Props {
     var uiState: ClazzDetailOverviewUiState
 
     var onClickClassCode: (String) -> Unit
+
+    var onClickPermissions: () -> Unit
 
     var onClickCourseBlock: (CourseBlock) -> Unit
 
@@ -73,6 +77,8 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
     )
 
 
+
+
     VirtualList{
         style = jso {
             height = "calc(100vh - ${tabAndAppBarHeight}px)".unsafeCast<Height>()
@@ -87,6 +93,11 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
                     direction = responsive(StackDirection.column)
                     spacing = responsive(10.px)
 
+                    UstadQuickActionButton{
+                        icon = Lock.create()
+                        text = strings[MessageID.permissions]
+                        onClick = { props.onClickPermissions() }
+                    }
 
                     Typography{
                         UstadRawHtml {
@@ -189,6 +200,7 @@ val ClazzDetailOverviewScreen = FC<Props> {
     ClazzDetailOverviewComponent2 {
         uiState = uiStateVal
         onClickCourseBlock = viewModel::onClickCourseBlock
+        onClickPermissions = viewModel::onClickPermissions
     }
 }
 
