@@ -90,10 +90,10 @@ class LanguageListFragment(): UstadListViewFragment<Language, Language>(),
         setHasOptionsMenu(true)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        menu.findItem(R.id.menu_search).isVisible = true
-    }
+//    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+//        super.onCreateOptionsMenu(menu, inflater)
+//        menu.findItem(R.id.menu_search).isVisible = true
+//    }
 
     /**
      * OnClick function that will handle when the user clicks to create a new item

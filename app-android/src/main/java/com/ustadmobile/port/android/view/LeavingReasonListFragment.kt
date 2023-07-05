@@ -74,10 +74,10 @@ class LeavingReasonListFragment(): UstadListViewFragment<LeavingReason, LeavingR
         setHasOptionsMenu(true)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        menu.findItem(R.id.menu_search).isVisible = false
-    }
+//    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+//        super.onCreateOptionsMenu(menu, inflater)
+//        menu.findItem(R.id.menu_search).isVisible = false
+//    }
 
     /**
      * OnClick function that will handle when the user clicks to create a new item
