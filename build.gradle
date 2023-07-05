@@ -5,6 +5,7 @@ buildscript {
     ext.version_kotlin = '1.8.10'
     ext.version_shadow = "7.1.2"
     ext.atomicfu_version = '0.19.0'
+    ext.version_ktor = "2.2.3"
 
     repositories {
         google()

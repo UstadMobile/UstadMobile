@@ -3,10 +3,12 @@ package com.ustadmobile.core.db.dao
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission.Companion.MIN_SUBMITTER_UID_FOR_PERSON
 import kotlinx.coroutines.flow.Flow
 import kotlin.js.JsName
 
@@ -93,6 +95,54 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
     """)
     abstract fun getAllSubmissionsFromSubmitter(assignmentUid: Long, submitterUid: Long)
             : DataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>
+
+    @Query("""
+         SELECT CourseAssignmentSubmission.*, CourseAssignmentSubmissionAttachment.*
+          FROM CourseAssignmentSubmission
+               LEFT JOIN CourseAssignmentSubmissionAttachment
+                    ON CourseAssignmentSubmissionAttachment.casaSubmissionUid = CourseAssignmentSubmission.casUid
+         WHERE casSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
+    """)
+    abstract fun getAllSubmissionsForUser(
+        accountPersonUid: Long,
+        assignmentUid: Long,
+    ): Flow<List<CourseAssignmentSubmissionWithAttachment>>
+
+    @Query("""
+        SELECT CourseAssignmentSubmission.*
+          FROM CourseAssignmentSubmission
+         WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
+           AND CourseAssignmentSubmission.casSubmitterUid = :submitterUid
+      ORDER BY CourseAssignmentSubmission.casTimestamp DESC      
+    """)
+    abstract fun getAllSubmissionsFromSubmitterAsFlow(
+        submitterUid: Long,
+        assignmentUid: Long,
+    ): Flow<List<CourseAssignmentSubmission>>
+
+    @Query("""
+        SELECT CourseAssignmentSubmission.*
+          FROM CourseAssignmentSubmission
+         WHERE casSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
+      ORDER BY casTimestamp DESC
+         LIMIT 1
+    """)
+    abstract suspend fun getLatestSubmissionForUserAsync(
+        accountPersonUid: Long,
+        assignmentUid: Long
+    ): CourseAssignmentSubmission?
+
+    @Query("""
+        SELECT EXISTS
+               (SELECT CourseAssignmentSubmission.casUid
+                  FROM CourseAssignmentSubmission
+                 WHERE casSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL))
+    """)
+    abstract suspend fun doesUserHaveSubmissions(
+        accountPersonUid: Long,
+        assignmentUid: Long,
+    ): Boolean
+
 
     @Query("""
         SELECT Count(casUid)

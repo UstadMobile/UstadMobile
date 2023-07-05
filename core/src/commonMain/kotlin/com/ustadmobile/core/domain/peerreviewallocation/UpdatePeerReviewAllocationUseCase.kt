@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.PeerReviewerAllocation
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 
@@ -43,26 +44,26 @@ class UpdatePeerReviewAllocationUseCase(
         numReviewsPerSubmission: Int,
         allocateRemaining: Boolean,
     ) : List<PeerReviewerAllocation>{
-        val submitterUids = db.clazzAssignmentDao.getSubmitterListForAssignmentList(
-            groupUid = groupUid,
+        val submitterUids = db.clazzAssignmentDao.getSubmitterUidsByClazzOrGroupSetUid(
             clazzUid = clazzUid,
-            group = systemImpl.getString(MessageID.group_number).replace("%1\$s","")
+            groupSetUid = groupUid,
+            time = systemTimeInMillis(),
         )
 
         val allocationsForEachSubmitter: Map<Long, List<PeerReviewerAllocation>> = submitterUids.map { submitterToMarkUid ->
             val existingAllocationsForSubmitter = existingAllocations.filter {
-                it.praToMarkerSubmitterUid == submitterToMarkUid.submitterUid
+                it.praToMarkerSubmitterUid == submitterToMarkUid
             }
             .truncate(numReviewsPerSubmission)
             .padEnd(numReviewsPerSubmission) {
                 PeerReviewerAllocation().apply {
                     praUid = db.doorPrimaryKeyManager.nextIdAsync(PeerReviewerAllocation.TABLE_ID)
-                    praToMarkerSubmitterUid = submitterToMarkUid.submitterUid
+                    praToMarkerSubmitterUid = submitterToMarkUid
                     praAssignmentUid = assignmentUid
                 }
             }
 
-            submitterToMarkUid.submitterUid to existingAllocationsForSubmitter
+            submitterToMarkUid to existingAllocationsForSubmitter
         }.toMap()
 
         val allocationList = allocationsForEachSubmitter.flatMap { it.value }.toMutableList()
@@ -70,13 +71,13 @@ class UpdatePeerReviewAllocationUseCase(
         if(allocateRemaining) {
             //put into bucket: each submitter uid n times, n = reviewsPerSubmission - count assignments
             //This is essentially like pulling names out of a hat, where fromBucket is the hat.
-            val fromBucket = submitterUids.flatMap { submitter ->
+            val fromBucket = submitterUids.flatMap { submitterUid ->
                 val numToMarkAlreadyAssignedToSubmitter = allocationList.count {
-                    it.praMarkerSubmitterUid == submitter.submitterUid
+                    it.praMarkerSubmitterUid == submitterUid
                 }
 
                 (0 until (numReviewsPerSubmission - numToMarkAlreadyAssignedToSubmitter)).map {
-                    submitter.submitterUid
+                    submitterUid
                 }
             }.shuffled().toMutableList()
 

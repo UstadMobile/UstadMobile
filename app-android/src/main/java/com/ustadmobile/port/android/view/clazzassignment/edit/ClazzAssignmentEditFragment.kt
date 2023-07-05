@@ -110,7 +110,9 @@ private fun ClazzAssignmentEditScreen(
                 .fillMaxWidth()
                 .defaultItemPadding()
                 .testTag("cgsName"),
-            value = uiState.groupSet?.cgsName ?: "",
+            value = uiState.entity?.assignmentCourseGroupSetName?.let {
+                "${stringResource(R.string.groups)}: $it"
+            } ?: stringResource(R.string.individual_submission),
             label = { Text(stringResource(id = R.string.submission_type)) },
             enabled = uiState.groupSetEnabled,
             onClick = onClickSubmissionType,

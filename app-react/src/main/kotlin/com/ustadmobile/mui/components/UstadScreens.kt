@@ -221,8 +221,7 @@ val ustadScreensLoader: LoaderFunction = {
         }
 
 
-        val apiUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
-        val ustadConfigHref = URL("ustad-config.json", apiUrl).href
+        val ustadConfigHref = URL("ustad-config.json", location.href).href
         val configJson: Map<String, String> = httpClient.get(ustadConfigHref).body()
 
         val di = ustadJsDi(

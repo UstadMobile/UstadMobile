@@ -13,13 +13,11 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.mockLifecycleOwner
-import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
-import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.door.lifecycle.DoorState
-import com.ustadmobile.door.lifecycle.LifecycleObserver
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -28,7 +26,6 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
-import org.junit.Test
 import org.kodein.di.*
 import java.lang.Thread.sleep
 
@@ -124,7 +121,7 @@ class ContentEntryDetailOverviewPresenterTest {
 
         val testNavController: UstadNavController = di.direct.instance()
 
-        verify(testNavController).navigate(eq(ContentEntryEdit2View.VIEW_NAME),
+        verify(testNavController).navigate(eq(ContentEntryEditViewModel.DEST_NAME),
             eq(mapOf(ARG_ENTITY_UID to createdEntry?.contentEntryUid.toString(),
             UstadView.ARG_LEAF to true.toString())), any())
 

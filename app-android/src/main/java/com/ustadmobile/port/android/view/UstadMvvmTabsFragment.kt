@@ -5,9 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import com.toughra.ustadmobile.databinding.FragmentClazzDetailBinding
+import com.toughra.ustadmobile.databinding.FragmentMvvmTabsBinding
 import com.ustadmobile.core.impl.appstate.TabItem
 import com.ustadmobile.port.android.view.util.TabItemFragmentStateAdapter
 
@@ -24,11 +26,13 @@ abstract class UstadMvvmTabsFragment(
     private val viewNameToFragmentMap: Map<String, Class<out Fragment>>
 ): UstadBaseMvvmFragment() {
 
-    private var mBinding: FragmentClazzDetailBinding? = null
+    private var mBinding: FragmentMvvmTabsBinding? = null
 
     private var mPagerAdapter: TabItemFragmentStateAdapter? = null
 
     private var mediator: TabLayoutMediator? = null
+
+    private var mInitialTabSet = false
 
     protected var mTabs: List<TabItem> = emptyList()
         set(value) {
@@ -37,17 +41,40 @@ abstract class UstadMvvmTabsFragment(
 
             field = value
             mPagerAdapter?.setItems(value)
+            if(!mInitialTabSet) {
+                val currentTabVal = currentTab
+                if(currentTabVal < mTabs.size) {
+                    mBinding?.fragmentClazzDetailViewpager?.setCurrentItem(currentTabVal, false)
+                    mInitialTabSet = true
+                }
+            }
+
         }
 
     private val tabConfigStrategy = TabLayoutMediator.TabConfigurationStrategy { tab, position ->
         tab.text = mTabs[position].label
     }
 
+    private var currentTab: Int
+        get() {
+            return findNavController().currentBackStackEntry?.savedStateHandle?.get<Int>(
+                KEY_SAVED_STATE_CURRENT_TAB
+            ) ?: 0
+        }
+        set(value) {
+            findNavController().currentBackStackEntry?.savedStateHandle?.set(
+                KEY_SAVED_STATE_CURRENT_TAB, value
+            )
+        }
+
+
+
+    private var pageChangeCallback: OnPageChangeCallback? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val rootView: View
 
-        mBinding = FragmentClazzDetailBinding.inflate(inflater, container, false).also {
+        mBinding = FragmentMvvmTabsBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.fragmentClazzTabs.tabs.tabGravity = TabLayout.GRAVITY_FILL
 
@@ -55,6 +82,14 @@ abstract class UstadMvvmTabsFragment(
                 childFragmentManager, lifecycle, viewNameToFragmentMap
             )
             it.fragmentClazzDetailViewpager.adapter = mPagerAdapter
+
+            pageChangeCallback = object: OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    currentTab = position
+                }
+            }.also { pageCallback ->
+                it.fragmentClazzDetailViewpager.registerOnPageChangeCallback(pageCallback)
+            }
 
             mediator = TabLayoutMediator(
                 it.fragmentClazzTabs.tabs, it.fragmentClazzDetailViewpager, tabConfigStrategy
@@ -68,12 +103,23 @@ abstract class UstadMvvmTabsFragment(
 
     override fun onDestroyView() {
         mediator?.detach()
+        pageChangeCallback?.also {
+            mBinding?.fragmentClazzDetailViewpager?.unregisterOnPageChangeCallback(it)
+        }
+        pageChangeCallback = null
         mBinding?.fragmentClazzDetailViewpager?.adapter = null
         mPagerAdapter = null
         mBinding = null
         mediator = null
-
+        mTabs = emptyList()
+        mInitialTabSet = false
         super.onDestroyView()
+    }
+
+    companion object {
+
+        const val KEY_SAVED_STATE_CURRENT_TAB = "tabIndex"
+
     }
 
 }

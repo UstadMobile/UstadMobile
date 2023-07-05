@@ -6,6 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageIdMap
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJs
@@ -46,6 +47,8 @@ internal fun ustadJsDi(
     configMap: Map<String, String>
 ) = DI {
 
+    import(commonDomainDiModule(EndpointScope.Default))
+
     val messageIdMapFlipped: Map<String, Int> by lazy {
         MessageIdMap.idMap.entries.associate { (k, v) -> v to k }
     }
@@ -53,6 +56,7 @@ internal fun ustadJsDi(
     val xppFactory = XmlPullParserFactory.newInstance()
 
     val apiUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
+    console.log("Api URL = $apiUrl (location.href = ${location.href}")
 
     bind<StringsXml>(tag = JsStringXml.DEFAULT) with singleton {
         val defaultXpp = xppFactory.newPullParser()

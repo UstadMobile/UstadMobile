@@ -17,15 +17,14 @@ import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
 import react.Props
 import react.FC
 import com.ustadmobile.wrappers.quill.QuillDemo
-import com.ustadmobile.view.timezonelist.TimeZoneListScreen
-import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
+import com.ustadmobile.view.timezone.TimeZoneListScreen
+import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListViewModel
 import com.ustadmobile.view.clazzassignment.edit.ClazzAssignmentEditScreen
 import com.ustadmobile.view.courseterminology.list.CourseTerminologyListScreen
 import com.ustadmobile.view.clazz.detail.ClazzDetailScreen
 import com.ustadmobile.view.clazz.list.ClazzListScreen
 import com.ustadmobile.view.clazz.detailoverview.ClazzDetailOverviewScreen
-import com.ustadmobile.view.clazzgroupset.ClazzGroupSetDummy
 import com.ustadmobile.view.person.detail.PersonDetailPreview
 import com.ustadmobile.view.person.detail.PersonDetailScreen
 import com.ustadmobile.view.person.edit.PersonEditScreen
@@ -33,11 +32,51 @@ import com.ustadmobile.view.person.edit.PersonEditScreenPreview
 import com.ustadmobile.view.person.list.PersonListScreen
 import com.ustadmobile.view.person.list.PersonListScreenPreview
 import com.ustadmobile.view.clazzassignment.detail.ClazzAssignmentDetailScreen
-import com.ustadmobile.view.clazzassignment.detailsubmissionstab.ClazzAssignmentDetailSubmissionsTab
+import com.ustadmobile.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewScreenPreview
+import com.ustadmobile.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewScreen
+import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewViewModel
+import com.ustadmobile.view.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabScreen
+import com.ustadmobile.view.clazzenrolment.clazzmemberlist.ClazzMemberListScreen
 import com.ustadmobile.view.courseterminology.edit.CourseTerminologyEditScreen
 import com.ustadmobile.view.login.LoginScreen
 import com.ustadmobile.view.schedule.edit.ScheduleEditScreen
 import com.ustadmobile.view.siteenterlink.SiteEnterLinkScreen
+import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
+import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
+import com.ustadmobile.view.clazzenrolment.edit.ClazzEnrolmentEditScreen
+import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
+import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
+import com.ustadmobile.view.clazzenrolment.list.ClazzEnrolmentListScreen
+import com.ustadmobile.view.clazzlog.attendancelist.ClazzLogListAttendanceScreen
+import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
+import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
+import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
+import com.ustadmobile.view.clazzlog.edit.ClazzLogEditScreen
+import com.ustadmobile.view.clazzlog.editattendance.ClazzLogEditAttendanceScreen
+import com.ustadmobile.view.contententry.list.ContentEntryListScreen
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.view.contententry.UstadContentEntryListItemPreview
+import com.ustadmobile.view.contententry.edit.ContentEntryEditScreen
+import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
+import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
+import com.ustadmobile.view.coursegroupset.list.CourseGroupSetListScreen
+import com.ustadmobile.view.coursegroupset.edit.CourseGroupSetEditScreen
+import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditViewModel
+import com.ustadmobile.view.coursegroupset.detail.CourseGroupSetDetailScreen
+import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
+import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabViewModel
+import com.ustadmobile.view.discussionpost.coursediscussiondetail.CourseDiscussionDetailScreen
+import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
+import com.ustadmobile.view.discussionpost.detail.DiscussionPostDetailPreview
+import com.ustadmobile.view.discussionpost.detail.DiscussionPostDetailScreen
+import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
+import com.ustadmobile.view.discussionpost.edit.DiscussionPostEditPreview
+import com.ustadmobile.view.discussionpost.edit.DiscussionPostEditScreen
+import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
+import com.ustadmobile.view.clazzassignment.UstadCommentListItemPreview
+import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
+import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreenPreview
+import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -73,8 +112,11 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         SettingsPreview),
     UstadScreen(InviteViaLinkView.VIEW_NAME, "Invite Via Link Preview",
         InviteViaLinkPreview),
-    UstadScreen(ClazzEnrolmentEditView.VIEW_NAME, "ClazzEnrolmentEdit Preview",
-        ClazzEnrolmentEditScreenPreview),
+    UstadScreen(ClazzEnrolmentEditViewModel.DEST_NAME, "ClazzEnrolmentEdit",
+        ClazzEnrolmentEditScreen
+    ),
+    UstadScreen(ClazzEnrolmentListViewModel.DEST_NAME, "ClazzEnrolmentsList",
+        ClazzEnrolmentListScreen),
     UstadScreen(SiteTermsDetailView.VIEW_NAME, "SiteTermsDetail Preview",
         SiteTermsDetailScreenPreview),
     UstadScreen(RegisterMinorWaitForParentView.VIEW_NAME, "RegisterMinorWaitForParent Preview",
@@ -82,8 +124,9 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ScheduleEditView.VIEW_NAME, "ScheduleEdit",
         ScheduleEditScreen
     ),
-    UstadScreen(ContentEntryEdit2View.VIEW_NAME, "ContentEntryEdit Preview",
-        ContentEntryEditScreenPreview),
+    UstadScreen(ContentEntryEditViewModel.DEST_NAME, "ContentEntryEdit Preview",
+        ContentEntryEditScreen
+    ),
     UstadScreen(SiteDetailView.VIEW_NAME, name = "Site Detail Preview", SiteDetailPreview),
     UstadScreen(SiteEditView.VIEW_NAME, name = "Site Edit Preview", SiteEditPreview),
     UstadScreen(SchoolDetailOverviewView.VIEW_NAME, "SchoolDetailOverview Preview",
@@ -120,14 +163,18 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         "UstadListFilterChipsHeaderPreview Preview", UstadListFilterChipsHeaderPreview),
     UstadScreen("UstadListSortHeader",
         "UstadListSortHeader", UstadListSortHeaderPreview),
-    UstadScreen(ClazzLogEditView.VIEW_NAME, "ClazzLogEdit Preview",
-        ClazzLogEditScreenPreview),
-    UstadScreen(CourseGroupSetEditView.VIEW_NAME, "CourseGroupSetEdit Preview",
-        CourseGroupSetEditScreenPreview),
+    UstadScreen(
+        ClazzLogEditViewModel.DEST_NAME, "ClazzLogEdit Preview",
+        ClazzLogEditScreen
+    ),
+    UstadScreen(CourseGroupSetEditViewModel.DEST_NAME, "CourseGroupSetEdit Preview",
+        CourseGroupSetEditScreen),
     UstadScreen("UstadContentEntryListItem", "UstadContentEntryListItem Preview",
-        UstadContentEntryListItemPreview),
-    UstadScreen(CourseGroupSetDetailView.VIEW_NAME, "CourseGroupSetDetail Preview",
-        CourseGroupSetDetailScreenPreview),
+        UstadContentEntryListItemPreview
+    ),
+    UstadScreen(CourseGroupSetDetailViewModel.DEST_NAME, "CourseGroupSetDetail Preview",
+        CourseGroupSetDetailScreen
+    ),
     UstadScreen("UstadClazzAssignmentListItem", "UstadClazzAssignmentListItem Preview",
         UstadClazzAssignmentListItemPreview),
     UstadScreen(HolidayCalendarListView.VIEW_NAME, "HolidayCalendarList Preview",
@@ -139,17 +186,22 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(NAVHOST_CLEARSTACK_VIEWNAME, "Clear Stack", NavHostClearStackPlaceholder),
     UstadScreen("UstadAddListItem", "UstadAddListItem Preview",
         UstadAddListItemPreview),
-    UstadScreen(ClazzLogEditAttendanceView.VIEW_NAME, name = "ClazzLogEditAttendance Preview",
-        ClazzLogEditAttendanceScreenPreview),
+    UstadScreen(
+        ClazzLogEditAttendanceViewModel.DEST_NAME, name = "ClazzLogEditAttendance Preview",
+        ClazzLogEditAttendanceScreen
+    ),
     UstadScreen(JoinWithCodeView.VIEW_NAME, "JoinWithCode Preview",
         JoinWithCodeScreenPreview),
-    UstadScreen(ClazzLogListAttendanceView.VIEW_NAME, "ClazzLogListAttendance Preview",
-        ClazzLogListAttendanceScreenPreview),
-    UstadScreen(ContentEntryList2View.VIEW_NAME, "ContentEntryList Preview",
-        ContentEntryListScreenPreview),
+    UstadScreen(ClazzLogListAttendanceViewModel.DEST_NAME, "ClazzLogListAttendance Preview",
+        ClazzLogListAttendanceScreen
+    ),
+    UstadScreen(ContentEntryListViewModel.DEST_NAME, "ContentEntryList Preview",
+        ContentEntryListScreen
+    ),
     UstadScreen(AccountListView.VIEW_NAME, "AccountList Preview", AccountListScreenPreview),
-    UstadScreen(ClazzMemberListView.VIEW_NAME, "ClazzMemberList Preview",
-        ClazzMemberListScreenPreview),
+    UstadScreen(
+        ClazzMemberListViewModel.DEST_NAME, "ClazzMemberList Preview", ClazzMemberListScreen
+    ),
     UstadScreen(ClazzList2View.VIEW_NAME, "Clazz List",ClazzListScreen),
     UstadScreen(ClazzList2View.VIEW_NAME_HOME, "ClazzListHome", ClazzListScreen),
     UstadScreen("VirtualListPreview", "Virtual List Preview",
@@ -160,7 +212,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("UstadCourseAssignmentMarkListItem", "UstadCourseAssignmentMarkListItem Preview",
         UstadCourseAssignmentMarkListItemPreview),
     UstadScreen("UstadCommentListItem", "UstadCommentListItem Preview",
-        UstadCommentListItemPreview),
+        UstadCommentListItemPreview
+    ),
     UstadScreen("UstadAddCommentListItem", "UstadAddCommentListItem Preview",
         UstadAddCommentListItemPreview),
     UstadScreen("UstadAssignmentFileSubmissionListItem",
@@ -188,18 +241,43 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         ClazzAssignmentEditScreen
     ),
     UstadScreen("DateTimeEdit", "Date Time Edit", DateTimeEditFieldPreview),
-    UstadScreen(ClazzDetailView.VIEW_NAME, "Clazz Detail", ClazzDetailScreen),
+    UstadScreen(ClazzDetailViewModel.DEST_NAME, "Clazz Detail", ClazzDetailScreen),
     UstadScreen(ClazzDetailOverviewView.VIEW_NAME, "Clazz Detail Overview",
         ClazzDetailOverviewScreen
     ),
-    UstadScreen(CourseGroupSetListView.VIEW_NAME, "Clazz Groups",ClazzGroupSetDummy),
+    UstadScreen(CourseDiscussionDetailViewModel.DEST_NAME, "Course Discussion Detail Preview",
+        CourseDiscussionDetailScreen
+    ),
+    UstadScreen("DiscussionPostDetailViewDemo", name = "Course Discussion Post Detail",
+        DiscussionPostDetailPreview
+    ),
+    UstadScreen(DiscussionPostDetailViewModel.DEST_NAME, name = "Real Course Discussion Post Detail",
+        DiscussionPostDetailScreen
+    ),
+    UstadScreen(DiscussionPostEditViewModel.DEST_NAME, name = "Discussion Post Edit",
+        DiscussionPostEditScreen
+    ),
+    UstadScreen("DiscussionPostEditViewDemo", name = "Discussion Post Edit Preview",
+        DiscussionPostEditPreview
+    ),
     UstadScreen(ClazzAssignmentDetailView.VIEW_NAME, "ClazzAssignmentDetail",
         ClazzAssignmentDetailScreen),
-    UstadScreen(ClazzAssignmentDetailOverviewView.VIEW_NAME, "ClazzAssignmentDetailOverview",
-        ClazzAssignmentDetailOverviewScreenPreview),
-    UstadScreen(ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME,
+    UstadScreen("ClazzAssignmentDetailOverviewPreview", "ClazzAssignmentDetailOverview",
+        ClazzAssignmentDetailOverviewScreenPreview
+    ),
+    UstadScreen(ClazzAssignmentDetailOverviewViewModel.DEST_NAME, "ClazzAssignmentDetailOverview",
+        ClazzAssignmentDetailOverviewScreen
+    ),
+    UstadScreen(ClazzAssignmentDetailSubmissionsTabViewModel.DEST_NAME,
         "ClazzAssignmentDetailStudentProgressOverviewList",
-        ClazzAssignmentDetailSubmissionsTab),
+        ClazzAssignmentDetailSubmissionsTabScreen),
+    UstadScreen(CourseGroupSetListViewModel.DEST_NAME, "CourseGroupSetList",
+        CourseGroupSetListScreen
+    ),
+    UstadScreen("CourseAssignmentSubmitterDetailPreview", "CourseAssignmentSubmitterDetailPreview",
+        ClazzAssignmentSubmitterDetailScreenPreview),
+    UstadScreen(ClazzAssignmentSubmitterDetailViewModel.DEST_NAME, "CourseAssignmentSubmitterDetail",
+        ClazzAssignmentSubmitterDetailScreen),
 )
 
 

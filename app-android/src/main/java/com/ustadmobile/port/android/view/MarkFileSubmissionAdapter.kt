@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemMarkFileSubmissionBinding
 import com.ustadmobile.lib.db.entities.AverageCourseAssignmentMark
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
+import com.ustadmobile.port.android.view.clazzassignment.submitterdetail.ClazzAssignmentDetailStudentProgressFragmentEventHandler
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
 class MarkFileSubmissionAdapter(val eventHandler: ClazzAssignmentDetailStudentProgressFragmentEventHandler): SingleItemRecyclerViewAdapter<

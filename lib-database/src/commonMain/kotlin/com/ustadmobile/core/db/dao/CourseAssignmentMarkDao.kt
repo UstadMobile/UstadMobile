@@ -2,11 +2,14 @@ package com.ustadmobile.core.db.dao
 
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL
 import com.ustadmobile.core.db.dao.CourseAssignmentMarkDaoCommon.ARG_FILTER_ALL_SCORES
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
+import kotlinx.coroutines.flow.Flow
 
 @DoorDao
 @Repository
@@ -103,10 +106,65 @@ expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
          SELECT COALESCE(averageScore, -1) AS averageScore, COALESCE(averagePenalty, -1) AS averagePenalty
            FROM ScoreByMarker
     """)
+    @Deprecated("Will switch to using flow")
     abstract fun getMarkOfAssignmentForSubmitterLiveData(
         assignmentUid: Long,
         submitterUid: Long,
     ): LiveData<AverageCourseAssignmentMark?>
+
+    @Query("""
+         WITH ScoreByMarker (averageScore, averagePenalty) AS (
+                 SELECT AVG(camMark), AVG(camPenalty)
+                   FROM courseAssignmentMark
+                        JOIN ClazzAssignment
+                             ON caUid = courseAssignmentMark.camAssignmentUid         
+                    AND camAssignmentUid = :assignmentUid
+                    AND camSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
+                  WHERE camLct = (SELECT MAX(mark.camLct) 
+                                    FROM CourseAssignmentMark As mark
+                                    WHERE mark.camAssignmentUid = :assignmentUid
+                                     AND mark.camSubmitterUid = :accountPersonUid
+                                     AND (ClazzAssignment.caMarkingType = ${ClazzAssignment.MARKED_BY_COURSE_LEADER}
+                                       OR mark.camMarkerSubmitterUid = courseAssignmentMark.camMarkerSubmitterUid))
+                )
+         SELECT COALESCE(averageScore, -1) AS averageScore, COALESCE(averagePenalty, -1) AS averagePenalty
+           FROM ScoreByMarker
+    """)
+    abstract fun getAverageMarkForUserAsFlow(
+        accountPersonUid: Long,
+        assignmentUid: Long
+    ): Flow<AverageCourseAssignmentMark>
+
+    @Query("""
+        SELECT CourseAssignmentMark.*,
+               Person.firstNames AS markerFirstNames,
+               Person.lastName AS markerLastName
+          FROM CourseAssignmentMark
+               LEFT JOIN Person
+                         ON Person.personUid = CourseAssignmentMark.camMarkerPersonUid
+         WHERE ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL) > 0
+           AND CourseAssignmentMark.camAssignmentUid = :assignmentUid
+           AND CourseAssignmentMark.camSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
+    """)
+    abstract fun getAllMarksForUserAsFlow(
+        accountPersonUid: Long,
+        assignmentUid: Long
+    ): Flow<List<CourseAssignmentMarkAndMarkerName>>
+
+    @Query("""
+        SELECT CourseAssignmentMark.*,
+               Person.firstNames AS markerFirstNames,
+               Person.lastName AS markerLastName
+          FROM CourseAssignmentMark
+               LEFT JOIN Person
+                         ON Person.personUid = CourseAssignmentMark.camMarkerPersonUid
+         WHERE CourseAssignmentMark.camAssignmentUid = :assignmentUid
+           AND CourseAssignmentMark.camSubmitterUid = :submitterUid                         
+    """)
+    abstract fun getAllMarksForSubmitterAsFlow(
+        submitterUid: Long,
+        assignmentUid: Long,
+    ): Flow<List<CourseAssignmentMarkAndMarkerName>>
 
     @Query("""
           WITH ScoreByMarker AS (

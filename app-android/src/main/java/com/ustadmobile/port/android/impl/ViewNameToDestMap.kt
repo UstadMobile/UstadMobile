@@ -8,9 +8,22 @@ import com.ustadmobile.core.impl.UstadDestination
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
+import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.core.viewmodel.QRCodeScannerViewModel
 import com.ustadmobile.core.viewmodel.TimeZoneListViewModel
 import com.ustadmobile.port.android.view.PanicButtonSettingsView
+import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
+import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
+import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
+import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
+import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
+import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
+import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
+import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
+import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 
 @Keep
 class ViewNameToDestMap: DestinationProvider {
@@ -21,7 +34,7 @@ class ViewNameToDestMap: DestinationProvider {
                     hideBottomNavigation = true),
             ClazzList2View.VIEW_NAME_HOME to UstadDestination(R.id.home_clazzlist_dest),
             ClazzList2View.VIEW_NAME to UstadDestination(R.id.clazz_list_dest),
-            ClazzDetailView.VIEW_NAME to UstadDestination(R.id.clazz_detail_dest),
+            ClazzDetailViewModel.DEST_NAME to UstadDestination(R.id.clazz_detail_dest),
             HolidayEditView.VIEW_NAME to UstadDestination(R.id.holiday_edit_dest,
                     hideBottomNavigation = true),
             HolidayCalendarListView.VIEW_NAME to UstadDestination(R.id.holidaycalendar_list_dest),
@@ -51,20 +64,12 @@ class ViewNameToDestMap: DestinationProvider {
             ModuleCourseBlockEditView.VIEW_NAME to UstadDestination(R.id.module_course_block_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
                     hideBottomNavigation = true),
-            CourseDiscussionEditView.VIEW_NAME to UstadDestination(R.id.course_discussion_course_block_edit_dest,
-                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
-                    hideBottomNavigation = true),
-            DiscussionTopicEditView.VIEW_NAME to UstadDestination(R.id.course_discussion_topic_edit_dest,
-                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
-                    hideBottomNavigation = true),
-            DiscussionTopicDetailView.VIEW_NAME to UstadDestination(R.id.discussion_topic_detail_dest,
+            CourseDiscussionDetailViewModel.DEST_NAME to UstadDestination(R.id.course_discussion_detail_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
-            CourseDiscussionDetailView.VIEW_NAME to UstadDestination(R.id.course_discussion_detail_dest,
-                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
-            DiscussionPostEditView.VIEW_NAME to UstadDestination(R.id.discussion_post_edit_dest,
+            DiscussionPostEditViewModel.DEST_NAME to UstadDestination(R.id.discussion_post_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
                     hideBottomNavigation = true),
-            DiscussionPostDetailView.VIEW_NAME to UstadDestination(R.id.discussion_post_detail_dest,
+            DiscussionPostDetailViewModel.DEST_NAME to UstadDestination(R.id.discussion_post_detail_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             CourseTerminologyListView.VIEW_NAME to UstadDestination(R.id.course_terminology_list_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
@@ -73,16 +78,17 @@ class ViewNameToDestMap: DestinationProvider {
                     hideBottomNavigation = true),
             PeerReviewerAllocationEditView.VIEW_NAME to UstadDestination(R.id.assignment_peer_allocation_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
-            CourseGroupSetListView.VIEW_NAME to UstadDestination(R.id.course_group_set_list,
+            CourseGroupSetListViewModel.DEST_NAME to UstadDestination(R.id.course_group_set_list,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
-            CourseGroupSetEditView.VIEW_NAME to UstadDestination(R.id.course_group_set_edit,
+            CourseGroupSetEditViewModel.DEST_NAME to UstadDestination(R.id.course_group_set_edit,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
                     hideBottomNavigation = true),
-            CourseGroupSetDetailView.VIEW_NAME to UstadDestination(R.id.course_group_set_detail,
+            CourseGroupSetDetailViewModel.DEST_NAME to UstadDestination(R.id.course_group_set_detail,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             ClazzAssignmentDetailView.VIEW_NAME to UstadDestination(R.id.clazz_assignment_detail_dest),
-            ClazzAssignmentDetailStudentProgressView.VIEW_NAME to UstadDestination(R.id.clazz_assignment_detail_student_progress),
-            ContentEntryEdit2View.VIEW_NAME to UstadDestination(R.id.content_entry_edit_dest,
+            ClazzAssignmentSubmitterDetailViewModel.DEST_NAME to
+                UstadDestination(R.id.clazz_assignment_submitter_detail_dest),
+            ContentEntryEditViewModel.DEST_NAME to UstadDestination(R.id.content_entry_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
                     hideBottomNavigation = true),
             ContentEntryList2View.VIEW_NAME to UstadDestination(R.id.content_entry_list_dest),
@@ -93,9 +99,9 @@ class ViewNameToDestMap: DestinationProvider {
             ContentEntryDetailAttemptsListView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_attempt_dest),
             SessionListView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_session_list_dest),
             StatementListView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_session_detail_list_dest),
-            ClazzLogEditAttendanceView.VIEW_NAME to UstadDestination(R.id.clazz_log_edit_attendance_dest,
+            ClazzLogEditAttendanceViewModel.DEST_NAME to UstadDestination(R.id.clazz_log_edit_attendance_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
-            ClazzEnrolmentListView.VIEW_NAME to UstadDestination(R.id.clazz_enrolment_list),
+            ClazzEnrolmentListViewModel.DEST_NAME to UstadDestination(R.id.clazz_enrolment_list),
             ClazzEnrolmentEditView.VIEW_NAME to UstadDestination(R.id.clazz_enrolment_edit,
                     hideAccountIcon = true, hideBottomNavigation = true),
             LeavingReasonListView.VIEW_NAME to UstadDestination(R.id.leaving_reason_list),
@@ -141,9 +147,7 @@ class ViewNameToDestMap: DestinationProvider {
             JoinWithCodeView.VIEW_NAME to UstadDestination(R.id.join_with_code_dest),
             LearnerGroupMemberListView.VIEW_NAME to UstadDestination(R.id.learner_group_member_list_dest),
             TimeZoneListView.VIEW_NAME to UstadDestination(R.id.time_zone_list_dest),
-            ClazzLogEditView.VIEW_NAME to UstadDestination(R.id.clazz_log_edit_dest,
-                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
-                    hideBottomNavigation = true),
+            ClazzLogEditViewModel.DEST_NAME to UstadDestination(R.id.clazz_log_edit_dest),
             SiteDetailView.VIEW_NAME to UstadDestination(R.id.site_detail_dest),
             SiteEditView.VIEW_NAME to UstadDestination(R.id.site_edit_dest,
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
@@ -151,13 +155,7 @@ class ViewNameToDestMap: DestinationProvider {
             SiteTermsEditView.VIEW_NAME to UstadDestination(R.id.site_terms_edit_dest,
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true,
                 hideAccountIcon = true),
-            TextAssignmentEditView.VIEW_NAME to UstadDestination(R.id.text_assignment_edit_dest,
-                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true,
-                    hideAccountIcon = true),
             HtmlTextViewDetailView.VIEW_NAME to UstadDestination(R.id.text_html_view_detail_dest,
-                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true,
-                    hideAccountIcon = true),
-            TextCourseBlockEditView.VIEW_NAME to UstadDestination(R.id.text_course_block_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true,
                     hideAccountIcon = true),
             SiteTermsDetailView.VIEW_NAME to UstadDestination(R.id.site_terms_detail_dest),

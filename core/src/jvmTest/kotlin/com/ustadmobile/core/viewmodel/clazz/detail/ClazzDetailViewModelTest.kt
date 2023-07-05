@@ -4,8 +4,8 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.grantScopedPermission
-import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
 import kotlin.test.Test
@@ -35,7 +35,7 @@ class ClazzDetailViewModelTest {
 
             viewModel.uiState.assertItemReceived(timeout = 5.seconds) {state ->
                 state.tabs.any {
-                    it.viewName == ClazzLogListAttendanceView.VIEW_NAME &&
+                    it.viewName == ClazzLogListAttendanceViewModel.DEST_NAME &&
                         it.args[UstadView.ARG_CLAZZUID] == testClazz.clazzUid.toString()
                 }
             }
@@ -63,7 +63,7 @@ class ClazzDetailViewModelTest {
             viewModel.uiState.assertItemReceived(timeout = 5.seconds) {state ->
                 state.tabs.isNotEmpty() &&
                 !state.tabs.any {
-                    it.viewName == ClazzLogListAttendanceView.VIEW_NAME &&
+                    it.viewName == ClazzLogListAttendanceViewModel.DEST_NAME &&
                         it.args[UstadView.ARG_CLAZZUID] == testClazz.clazzUid.toString()
                 }
             }

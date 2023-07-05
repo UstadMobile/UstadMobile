@@ -15,12 +15,6 @@ android {
             consumerProguardFiles 'proguard-rules.pro'
         }
     }
-    packagingOptions {
-        resources {
-            excludes += ['META-INF/INDEX.LIST', '**/*.kotlin_metadata', 'META-INF/*.kotlin_module', 'licenses/**.TXT']
-        }
-    }
-
 
     defaultConfig {
         minSdkVersion 21
@@ -28,18 +22,17 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/INDEX.LIST', '**/*.kotlin_metadata', 'META-INF/*.kotlin_module', 'licenses/**.TXT']
+        }
+    }
+
     compileOptions {
         sourceCompatibility = '17'
         targetCompatibility = '17'
     }
-    testOptions {
-        unitTests {
-            returnDefaultValues = true
-        }
-    }
-    lint {
-        abortOnError false
-    }
+
     namespace 'com.ustadmobile.port.sharedse'
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {

@@ -4,11 +4,13 @@ import com.ustadmobile.core.db.dao.PersonDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.core.viewmodel.UstadListViewModel
+import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED
 import com.ustadmobile.door.paging.*
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
@@ -125,13 +127,29 @@ class PersonListViewModel(
     }
 
     override fun onClickAdd() {
-        navigateToCreateNew(PersonEditView.VIEW_NAME)
+        navigateToCreateNew(PersonEditView.VIEW_NAME, savedStateHandle[ARG_GO_TO_ON_PERSON_SELECTED]?.let {
+            mapOf(ARG_GO_TO_ON_PERSON_SELECTED to it)
+        } ?: emptyMap())
     }
 
     fun onClickEntry(entry: Person) {
-        navigateOnItemClicked(PersonDetailView.VIEW_NAME, entry.personUid, entry)
+        val goToOnPersonSelected = savedStateHandle[ARG_GO_TO_ON_PERSON_SELECTED]
+
+        if(goToOnPersonSelected != null) {
+            val args = UMFileUtil.parseURLQueryString(goToOnPersonSelected) +
+                mapOf(UstadView.ARG_PERSON_UID to entry.personUid.toString())
+            val goToDestName = goToOnPersonSelected.substringBefore("?")
+            navController.navigate(goToDestName, args)
+        }else {
+            navigateOnItemClicked(PersonDetailView.VIEW_NAME, entry.personUid, entry)
+        }
     }
 
+    companion object {
+
+        const val DEST_NAME = "People"
+
+    }
 
 }
 

@@ -23,20 +23,14 @@ class ClazzDetailOverviewPresenter(
     view: ClazzDetailOverviewView,
     di: DI,
     lifecycleOwner: LifecycleOwner,
-    val contentEntryListItemListener: DefaultContentEntryListItemListener =
-        DefaultContentEntryListItemListener(
-            view = view,
-            context = context,
-            di = di,
-            clazzUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-        )
+
 ) : UstadDetailPresenter<ClazzDetailOverviewView, ClazzWithDisplayDetails>(
     context,
     arguments,
     view,
     di,
     lifecycleOwner
-), ContentEntryListItemListener by contentEntryListItemListener {
+) {
 
 
     var collapsedList: MutableSet<Long> = mutableSetOf()
@@ -124,17 +118,6 @@ class ClazzDetailOverviewPresenter(
         ustadNavController?.navigate(ScopedGrantListView.VIEW_NAME,
             mapOf(ScopedGrantListView.ARG_FILTER_TABLE_ID to Clazz.TABLE_ID.toString(),
                 ScopedGrantListView.ARG_FILTER_ENTITY_UID to (arguments[ARG_ENTITY_UID] ?: "0")))
-    }
-
-    /**
-     * Goes to CourseDiscussion's Detail screen not edit
-     */
-    fun handleClickCourseDiscussion(courseDiscussion: CourseDiscussion){
-        ustadNavController?.navigate(
-            CourseDiscussionDetailView.VIEW_NAME,
-            mapOf(ARG_ENTITY_UID to courseDiscussion.courseDiscussionUid.toString(),
-                ARG_CLAZZUID to courseDiscussion.courseDiscussionClazzUid.toString())
-        )
     }
 
 

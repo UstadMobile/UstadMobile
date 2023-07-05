@@ -27,7 +27,7 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
         //Used to make the item on the home screen seen as a different screen
         const val VIEW_NAME_HOME = "ContentEntryListHome"
 
-        const val VIEW_NAME = "ContentEntryListView"
+        const val VIEW_NAME = "ContentEntries"
 
         const val FOLDER_VIEW_NAME = "ContentEntryListFolderView"
 

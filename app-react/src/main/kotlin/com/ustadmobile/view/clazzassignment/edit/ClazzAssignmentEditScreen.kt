@@ -100,7 +100,9 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     }
                 }
                 variant = FormControlVariant.outlined
-                value = props.uiState.groupSet?.cgsName ?: strings[MessageID.individual]
+                value = props.uiState.entity?.assignmentCourseGroupSetName?.let {
+                    "${strings[MessageID.groups]}: $it"
+                } ?: strings[MessageID.individual_submission]
                 label = ReactNode(strings[MessageID.submission_type])
                 disabled = !props.uiState.groupSetEnabled
                 inputProps = jso {

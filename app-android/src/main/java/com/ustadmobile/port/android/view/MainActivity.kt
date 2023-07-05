@@ -9,7 +9,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.Toast
-import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -87,8 +86,6 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
     private val impl : UstadMobileSystemImpl by instance()
 
     private val accountManager: UstadAccountManager by instance()
-
-    private var searchView: SearchView? = null
 
     private val destinationProvider: DestinationProvider by instance()
 
@@ -178,7 +175,10 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
         val scrollFlags = ustadDestination?.actionBarScrollBehavior ?:
             (AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL)
         (mBinding.mainCollapsingToolbar.collapsingToolbar.layoutParams as? AppBarLayout.LayoutParams)?.scrollFlags = scrollFlags
+        hideSoftKeyboard()
+    }
 
+    fun hideSoftKeyboard(){
         //Hide the soft keyboard if showing when moving to the next screen
         val currentFocusView = currentFocus
         if(currentFocusView != null) {
@@ -219,10 +219,7 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
         menu.findItem(R.id.menu_share_offline).isVisible = mainScreenItemsVisible
 
         //Should be hidden when they are on the accounts page (only)
-        val currentDestination = destinationProvider.lookupDestinationById(currentFrag)
         menu.findItem(R.id.menu_main_profile).isVisible = (mAccountIconVisible ?: false)
-
-        searchView = menu.findItem(R.id.menu_search).actionView as SearchView
 
         setUserProfile(menu.findItem(R.id.menu_main_profile))
 
@@ -294,29 +291,6 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
 
 
         }
-    }
-
-    override fun onBackPressed() {
-        val fragment = supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.fragments?.get(0)
-        when {
-            searchView?.isIconified == false -> {
-                searchView?.setQuery("",true)
-                searchView?.isIconified = true
-                return
-            }
-            (fragment as? FragmentBackHandler)?.onHostBackPressed() == true -> {
-                return
-            }
-            else -> {
-                super.onBackPressed()
-            }
-        }
-
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        searchView = null
     }
 
     /**

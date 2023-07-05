@@ -77,25 +77,6 @@ expect abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoi
 
 
     @Query("""
-        SELECT DiscussionTopic.*,
-                ( 
-                    SELECT COUNT(*) 
-                      FROM DiscussionPost 
-                     WHERE DiscussionPost.discussionPostDiscussionTopicUid = DiscussionTopic.discussionTopicUid
-                ) as numPosts,
-                (
-                    0
-                )as lastActiveTimestamp
-          FROM DiscussionTopic     
-         WHERE DiscussionTopic.discussionTopicCourseDiscussionUid = :discussionUid 
-           AND CAST(DiscussionTopic.discussionTopicVisible AS INTEGER) = 1
-           AND CAST(DiscussionTopic.discussionTopicArchive AS INTEGER) = 0
-      ORDER BY DiscussionTopic.discussionTopicIndex
-    """)
-    abstract fun getListOfTopicsByDiscussion(discussionUid: Long)
-        : DataSourceFactory<Int, DiscussionTopicListDetail>
-
-    @Query("""
         SELECT DiscussionTopic.*
           FROM DiscussionTopic
          WHERE DiscussionTopic.discussionTopicCourseDiscussionUid IN 

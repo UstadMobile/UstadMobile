@@ -323,33 +323,6 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
                 Stack {
                     direction = responsive(StackDirection.row)
 
-                    LensRounded {
-                        color = colorForAttendanceStatus(
-                            props.clazzItem?.attendanceAverage ?: 0.toFloat()
-                        )
-                        sx {
-                            width = 15.px
-                            height = 15.px
-
-                            // To align with List Item Button
-                            padding = Padding(
-                                top = 5.px,
-                                bottom = 0.px,
-                                right = 0.px,
-                                left = 0.px,
-                            )
-                        }
-                    }
-
-                    Typography {
-                        + strings[MessageID.x_percent_attended].replace("%1.0f%",
-                            round((props.clazzItem?.attendanceAverage ?: 0.toFloat()) * 100).toString())
-                    }
-
-                    Box{
-                        sx { width = 10.px }
-                    }
-
                     + People.create()
 
                     Typography {

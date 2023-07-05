@@ -25,7 +25,9 @@ external interface UstadSelectFieldProps<T: Any>: Props {
 
     var enabled: Boolean?
 
-    var error: String?
+    var error: Boolean?
+
+    var helperText: ReactNode?
 
 }
 
@@ -52,6 +54,7 @@ private val UstadSelectFieldFC = FC<UstadSelectFieldProps<Any>> { props ->
             label = ReactNode(props.label)
             disabled = !(props.enabled ?: true)
             fullWidth = props.fullWidth
+            error = props.error
             onChange = { event, _ ->
                 val selectedVal = ("" + event.target.value)
                 val selectedItem = props.options.first { props.itemValue(it) ==  selectedVal }
@@ -66,12 +69,17 @@ private val UstadSelectFieldFC = FC<UstadSelectFieldProps<Any>> { props ->
             }
         }
 
-        val helperText = props.error
-        if(helperText != null) {
+        props.helperText?.also {
             FormHelperText {
-                +helperText
+                +it
             }
         }
+//        val helperText = props.error
+//        if(helperText != null) {
+//            FormHelperText {
+//                +helperText
+//            }
+//        }
     }
 
 }

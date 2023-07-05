@@ -4,6 +4,7 @@ import com.ustadmobile.hooks.URI_NOT_READY
 import com.ustadmobile.hooks.collectAttachmentUriSrc
 import com.ustadmobile.hooks.useActiveDatabase
 import mui.material.Avatar
+import mui.material.Icon
 import react.FC
 import react.Props
 import react.useMemo
@@ -15,6 +16,7 @@ external interface UstadPersonAvatarProps: Props {
 }
 
 val UstadPersonAvatar = FC<UstadPersonAvatarProps> { props ->
+    /* Disabled until update to MVVM. Query cancellation might cause issues
     val db = useActiveDatabase()
     val personFlow = useMemo(props.personUid) {
         db.personPictureDao.findByPersonUidAsFlow(props.personUid)
@@ -36,6 +38,9 @@ val UstadPersonAvatar = FC<UstadPersonAvatarProps> { props ->
         Avatar {
             src = personPictureUri?.toString()
         }
+    }*/
+    Avatar {
+
     }
 
 }

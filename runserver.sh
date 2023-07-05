@@ -55,7 +55,7 @@ if [ "$NOBUILD" != "true" ] && [ "$STOP" != "true" ]; then
     exit 2
   fi
 
-  ./gradlew $SERVER_BUILD_ARGS app-ktor-server:shadowJar
+  ./gradlew $SERVER_BUILD_ARGS app-ktor-server:buildFatJar
   if [ "$?" != "0" ]; then
     echo "Error compiling server"
     exit 2
@@ -63,7 +63,7 @@ if [ "$NOBUILD" != "true" ] && [ "$STOP" != "true" ]; then
 fi
 
 if [ ! -e $BASEDIR/app-ktor-server/build/libs/ustad-server-all.jar ]; then
-  echo "Please build the server jar: ./gradlew app-ktor-server:shadowJar"
+  echo "Please build the server jar: ./gradlew app-ktor-server:buildFatJar"
   exit 1
 fi
 
@@ -82,6 +82,11 @@ if [ "$NCRESULT" == "0" ]; then
 fi
 
 echo "Starting Ustad HTTP/REST server on port 8087 - Use [Ctrl+C] to stop."
+echo " "
+echo "You can use this to run/connect the Android client as per README.md ."
+echo "If you want to use the web client in a browser, you must run "
+echo "./gradlew app-react:run and then open http://localhost:8087/ in your browser."
+echo "See README.md for more details."
 java $DEBUGARGS -jar build/libs/ustad-server-all.jar -P:ktor.ustad.jsDevServer=http://localhost:8080/ $SERVERARGS
 
 # Go back to wherever we started from

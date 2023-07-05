@@ -23,10 +23,12 @@ class AddOrUpdateCourseBlockUseCase {
         addOrUpdateBlock: CourseBlock,
         assignment: ClazzAssignment? = null,
         assignmentPeerReviewAllocations: List<PeerReviewerAllocation>? = null,
+        assignmentCourseGroupSetName: String? = null,
     ) : List<CourseBlockWithEntity> {
         val courseBlockWithEntity = addOrUpdateBlock.asCourseBlockWithEntity(
             assignment = assignment,
             assignmentPeerReviewAllocations = assignmentPeerReviewAllocations,
+            assignmentCourseGroupSetName = assignmentCourseGroupSetName,
         )
         val currentIndex = currentList.indexOfFirst {
             it.cbUid == addOrUpdateBlock.cbUid

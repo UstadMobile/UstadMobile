@@ -2,8 +2,11 @@ package com.ustadmobile.core.db.dao
 
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.PagingSource
+import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.lib.db.entities.CommentsWithPerson
 import com.ustadmobile.lib.db.entities.UserSession
@@ -131,34 +134,6 @@ expect abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments
             DataSourceFactory<Int, CommentsWithPerson>
 
 
-    /*
-       SELECT Comments.*, Person.* FROM Comments
-        LEFT JOIN Person ON Person.personUid = Comments.commentsPersonUid
-        WHERE Comments.commentsEntityType = :entityType
-        AND Comments.commentsEntityUid = :entityUid
-        AND CAST(Comments.commentsFlagged AS INTEGER) = 0
-        AND CAST(Comments.commentsInActive AS INTEGER) = 0
-        AND CAST(Comments.commentsPublic AS INTEGER) = 0
-        AND Comments.commentsPersonUid = :personFrom
-        OR (:personTo = 0 OR Comments.commentsToPersonUid = :personFrom)
-        ORDER BY Comments.commentsDateTimeAdded DESC
-     */
-    @Query("""
-        SELECT Comments.*, Person.* FROM Comments
-        LEFT JOIN Person ON Person.personUid = Comments.commentsPersonUid 
-        WHERE Comments.commentsEntityType = :entityType 
-        AND Comments.commentsEntityUid = :entityUid
-        AND CAST(Comments.commentsFlagged AS INTEGER) = 0
-        AND CAST(Comments.commentsInActive AS INTEGER) = 0
-        AND CAST(Comments.commentsPublic AS INTEGER) = 0
-        AND (Comments.commentsToPersonUid = :personFrom 
-         OR Comments.commentsPersonUid = :personFrom)
-        ORDER BY Comments.commentsDateTimeAdded DESC 
-    """)
-    abstract fun findPrivateCommentsByEntityTypeAndUidAndPersonAndPersonToLive(
-            entityType: Int, entityUid: Long, personFrom: Long):
-            DataSourceFactory<Int, CommentsWithPerson>
-
     @Query("""
         SELECT Comments.*, Person.* FROM Comments
         LEFT JOIN Person ON Person.personUid = Comments.commentsPersonUid 
@@ -187,9 +162,55 @@ expect abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments
         changeTime: Long
     )
 
-//    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
-//        uidList.forEach {
-//            updateInActiveByCommentUid(it, true, changeTime)
-//        }
-//    }
+    @Query("""
+        SELECT Comments.*,
+               Person.firstNames AS firstNames, 
+               Person.lastName AS lastName
+          FROM Comments
+               LEFT JOIN Person 
+                    ON Person.personUid = Comments.commentsPersonUid
+         WHERE Comments.commentSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
+           AND Comments.commentSubmitterUid != 0
+           AND Comments.commentsEntityUid = :assignmentUid
+           AND CAST(Comments.commentsInActive AS INTEGER) = 0
+      ORDER BY Comments.commentsDateTimeAdded DESC     
+    """)
+    abstract fun findPrivateCommentsForUserByAssignmentUid(
+        accountPersonUid: Long,
+        assignmentUid: Long,
+    ): PagingSource<Int, CommentsAndName>
+
+    @Query("""
+        SELECT Comments.*,
+               Person.firstNames AS firstNames, 
+               Person.lastName AS lastName
+          FROM Comments
+               LEFT JOIN Person 
+                    ON Person.personUid = Comments.commentsPersonUid
+         WHERE Comments.commentSubmitterUid = :submitterUid
+           AND Comments.commentsEntityUid = :assignmentUid
+           AND NOT Comments.commentsInActive
+      ORDER BY Comments.commentsDateTimeAdded DESC        
+    """)
+    abstract fun findPrivateCommentsForSubmitterByAssignmentUid(
+        submitterUid: Long,
+        assignmentUid: Long,
+    ): PagingSource<Int, CommentsAndName>
+
+    @Query("""
+        SELECT Comments.*,
+               Person.firstNames AS firstNames, 
+               Person.lastName AS lastName
+          FROM Comments
+               LEFT JOIN Person 
+                    ON Person.personUid = Comments.commentsPersonUid
+         WHERE Comments.commentsEntityUid = :assignmentUid
+           AND Comments.commentSubmitterUid = 0
+      ORDER BY Comments.commentsDateTimeAdded DESC     
+    """)
+    abstract fun findCourseCommentsByAssignmentUid(
+        assignmentUid: Long
+    ): PagingSource<Int, CommentsAndName>
+
+
 }

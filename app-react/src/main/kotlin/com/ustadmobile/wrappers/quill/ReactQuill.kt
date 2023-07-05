@@ -20,6 +20,7 @@ external interface ReactQuillProps : Props {
     var id: String?
     var className: String?
     var placeholder: String?
+    var readOnly: Boolean?
 
 }
 

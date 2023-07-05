@@ -20,6 +20,7 @@ val CourseBlockWithEntity.editIconId: Int
 fun CourseBlock.asCourseBlockWithEntity(
     assignment: ClazzAssignment? = null,
     assignmentPeerReviewAllocations: List<PeerReviewerAllocation>? = null,
+    assignmentCourseGroupSetName: String? = null,
 ): CourseBlockWithEntity {
     return CourseBlockWithEntity().also {
         it.cbUid = cbUid
@@ -44,5 +45,6 @@ fun CourseBlock.asCourseBlockWithEntity(
 
         it.assignment = assignment
         it.assignmentPeerAllocations = assignmentPeerReviewAllocations
+        it.assignmentCourseGroupSetName = assignmentCourseGroupSetName
     }
 }
