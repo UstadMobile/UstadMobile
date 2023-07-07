@@ -1,9 +1,22 @@
 # Ustad Mobile
 
-Ustad Mobile enables users to teach, learn, and share: online or offline. It is a learning
-management system (LMS) built from the ground up to work with or without connectivity.
+![Ustad Mobile app screenshots](img/readme/readme-screenshots.png)
 
-Ustad Mobile is licensed under the AGPLv3 license: please see the LICENSE file for details.
+Ustad Mobile enables users to teach, learn, and share: online or offline. It is a learning
+management system (LMS) built from the ground up to work with or without connectivity. Features 
+include:
+
+* Online and offline usage of eLearning content with support for Experience API (xAPI), H5P, ePub, 
+  PDF, and videos.
+* Assignments where students can submit work to be marked by their teacher or other students (peer
+  marking). 
+* Discussion boards
+* Attendance and enrolment tracking
+* Course structuring for course authors to structure content, assignments, discussion boards, text, 
+  and (optionally) assign points for completion.
+* Offline sync that works via any Internet connection or via nearby devices (e.g. from teacher device
+  to student device etc). With a class of 30 students this reduces bandwidth consumption 97%+ whilst
+  supporting data sync to the Internet when a connection is available.
 
 ## Installing on a server (self-hosting)
 
