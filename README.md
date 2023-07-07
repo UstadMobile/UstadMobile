@@ -39,6 +39,13 @@ See the [CONTRIBUTING.md](CONTRIBUTING.md) for details. If you're unsure
 about anything, please join our [discord server](https://discord.gg/WHe35Sbsg4) or create an issue
 here on GitHub and label it as a question.
 
+## Documentation for users
+
+The documentation here on Github is intended for those who are contributing to the project (inc 
+translation, software development, bug reporting, testing, etc) and technical users (e.g. developers, 
+server admins). If you want documentation for end users, please see the manual on ReadTheDocs at 
+[https://ustadmobile.readthedocs.org/](https://ustadmobile.readthedocs.org/)
+
 ## Installing on a server (self-hosting)
 
 See [INSTALL.md](INSTALL.md) for instructions for installation on your own server using binary 
@@ -110,6 +117,13 @@ This multi-module Gradle project built using Kotlin Multiplatform. It builds for
 
 * Android (app-android)
 * KTOR Server (JVM) (app-ktor-server)
+
+Additional information on coding structure is available as follows:
+
+* [ARCHITECTURE.md](ARCHITECTURE.md) - architecture overview of the tech stack.
+* [CODING-STYLE.md](CODING-STYLE.md) - coding style including how MVVM is applied using Kotlin 
+  Multiplatform.
+* [DBSCHEMA.md](DBSCHEMA.md) - Database schema of the database tables used by the app.
 
 Code is contained (mostly) in the following modules:
 
