@@ -1,5 +1,7 @@
 # Ustad Mobile
 
+Note: most of our development is happening in the soon to be released [dev-mvvm-primary branch](https://github.com/UstadMobile/UstadMobile/tree/dev-mvvm-primary).
+
 Ustad Mobile enables users to teach, learn, and share: online or offline. It is a learning
 management system (LMS) built from the ground up to work with or without connectivity.
 
