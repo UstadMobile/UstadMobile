@@ -18,6 +18,27 @@ include:
   to student device etc). With a class of 30 students this reduces bandwidth consumption 97%+ whilst
   supporting data sync to the Internet when a connection is available.
 
+Want to collaborate on development? Join us on discord: [https://discord.gg/WHe35Sbsg4](https://discord.gg/WHe35Sbsg4).  
+
+## Translations
+
+Ustad Mobile is currently available in English, Dari, Pashto, and Tajik. Translation is done using 
+on our [Weblate project](https://hosted.weblate.org/projects/ustad-mobile/). You do not need to be a
+programmer! Please register on Weblate and then [create an issue](https://github.com/UstadMobile/UstadMobile/issues/new)
+with the subject "Localization - language name" and let us know what language you would like to
+translate into. We can then give you permission to start translating!
+
+Translations are stored as Android strings XML resource files in [core/locale/main](core/locale/main).
+If adding a new language it should be added to the constant in in 
+[SupportedLanguagesConfig.kt](core/src/commonMain/kotlin/com/ustadmobile/core/impl/config/SupportedLanguagesConfig.kt). 
+
+## Contributing
+
+Contributions are welcome, there are many ways to contribute as a developer, translator, or user. 
+See the [CONTRIBUTING.md](CONTRIBUTING.md) for details. If you're unsure
+about anything, please join our [discord server](https://discord.gg/WHe35Sbsg4) or create an issue
+here on GitHub and label it as a question.
+
 ## Installing on a server (self-hosting)
 
 See [INSTALL.md](INSTALL.md) for instructions for installation on your own server using binary 
@@ -82,21 +103,6 @@ web client app itself. To use the web client app in the browser, you must build/
 * __Step 5: Build/run the Android and/or web client version__ : see [app-android](app-android/) for the
 Android app, [app-react](app-react/) for the web app.
 
-## Contributing
-
-Contributions are welcome! If you're unsure about anything, please create an issue and label it as
-a question.
-
-* __Localization__ - Localization is done using on our [Weblate project](https://hosted.weblate.org/projects/ustad-mobile/).
- Please register on Weblate and then [create an issue](https://github.com/UstadMobile/UstadMobile/issues/new) 
- with the subject "Localization - language name" and let us know what language you would like to 
- translate into. We can then give you permission to start translating!
-* __Feature requests__ - Let us know what features you would like to see. [Create an issue](https://github.com/UstadMobile/UstadMobile/issues/new)
- and label it as a feature request.
- * __Bug reports__ - this project is written primarily in Kotlin as a Kotlin Multiplatform. You can 
- [create an issue](https://github.com/UstadMobile/UstadMobile/issues/new) or even send us a pull request.
- * __Code contributions__ - we welcome pull requests. Please ensure your contribution is readable,
- follows existing patterns and provides the required tests.
 
 ### Code structure
 
@@ -120,3 +126,8 @@ Code is contained (mostly) in the following modules:
 
 To build / run versions for any given platform please see the README in the module for that platform.
 
+## Legal and license
+
+Copyright 2015-2023 UstadMobile FZ-LLC.
+Documentation: [CC-BY](https://creativecommons.org/licenses/by/4.0/) license.
+Code and all other works: [AGPLv3](LICENSE) license.
