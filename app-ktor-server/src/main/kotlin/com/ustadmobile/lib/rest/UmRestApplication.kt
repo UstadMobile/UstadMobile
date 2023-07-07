@@ -13,15 +13,12 @@ import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
-import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.*
-import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.io.UploadSessionManager
-import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.rest.ext.*
 import com.ustadmobile.lib.rest.messaging.MailProperties
 import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
@@ -39,14 +36,11 @@ import kotlinx.coroutines.runBlocking
 import org.kodein.di.*
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
-import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.nio.file.Files
 import javax.naming.InitialContext
 import com.ustadmobile.door.util.NodeIdAuthCache
-import com.ustadmobile.core.db.PermissionManagementIncomingReplicationListener
 import com.ustadmobile.core.contentjob.DummyContentPluginUploader
-import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.db.ext.preload
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.di.commonDomainDiModule
@@ -68,6 +62,7 @@ import com.ustadmobile.lib.rest.logging.LogbackAntiLog
 
 const val TAG_UPLOAD_DIR = 10
 
+@Suppress("unused")
 const val CONF_DBMODE_VIRTUALHOST = "virtualhost"
 
 const val CONF_DBMODE_SINGLETON = "singleton"
@@ -95,7 +90,7 @@ val KTOR_SERVER_ROUTES = listOf(
  * Returns an identifier that is used as a subdirectory for data storage (e.g. attachments,
  * containers, etc).
  */
-private fun Endpoint.identifier(
+fun Endpoint.identifier(
     dbMode: String,
     singletonName: String = CONF_DBMODE_SINGLETON
 ) = if(dbMode == CONF_DBMODE_SINGLETON) {
@@ -107,7 +102,6 @@ private fun Endpoint.identifier(
 @Suppress("unused") // This is used as the KTOR server main module via application.conf
 fun Application.umRestApplication(
     dbModeOverride: String? = null,
-    singletonDbName: String = "UmAppDatabase"
 ) {
     val appConfig = environment.config
 
@@ -194,20 +188,8 @@ fun Application.umRestApplication(
             }
         }
 
-        bind<File>(tag = TAG_CONTEXT_DATA_ROOT) with scoped(EndpointScope.Default).singleton {
-            File(dataDirPath, context.identifier(dbMode)).also {
-                it.takeIf { !it.exists() }?.mkdirs()
-            }
-        }
-
         bind<ContainerStorageManager>() with scoped(EndpointScope.Default).singleton {
             ContainerStorageManager(listOf(instance<File>(tag = TAG_CONTEXT_DATA_ROOT)))
-        }
-
-        bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
-            val systemImpl: UstadMobileSystemImpl = instance()
-            val contextIdentifier: String = context.identifier(dbMode)
-            systemImpl.getOrGenerateNodeIdAndAuth(contextIdentifier, Any())
         }
 
         bind<NodeIdAuthCache>() with scoped(EndpointScope.Default).singleton {
@@ -352,16 +334,6 @@ fun Application.umRestApplication(
             Pbkdf2Params(numIterations, keyLength)
         }
 
-        bind<AuthManager>() with scoped(EndpointScope.Default).singleton {
-            AuthManager(context, di).also { authManager ->
-                val repo: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_REPO)
-                runBlocking {
-                    repo.initAdminUser(context, authManager, di,
-                        appConfig.propertyOrNull("ktor.ustad.adminpass")?.getString())
-                }
-            }
-
-        }
 
         bind<UploadSessionManager>() with scoped(EndpointScope.Default).singleton {
             UploadSessionManager(context, di)

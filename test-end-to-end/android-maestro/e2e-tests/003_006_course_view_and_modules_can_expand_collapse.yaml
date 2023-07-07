@@ -22,8 +22,9 @@ env:
     file: "../common/add_new_student_inside_course.yaml"
     env:
       TESTCOURSENAME: "Course view Test"
-      STUDENTFIRSTNAME: "Muhammed"
-      STUDENTLASTNAME: "Khan"
+      STUDENTFIRSTNAME: "Student"
+      STUDENTLASTNAME: "1"
+      USERNAME:  "s1"
       GENDER: "Male"
       PASSWORD: "test"
 - repeat:
@@ -43,7 +44,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "Muhammed"
+      USERNAME: "s1"
       PASSWORD: "test"
 - tapOn: "courses"
 - tapOn: "Course view Test"
