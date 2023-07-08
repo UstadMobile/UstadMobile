@@ -1618,4 +1618,14 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     -->
     <string name="too_high">Too high!</string>
 
+    <string name="invite_students">Invite students</string>
+
+    <string name="invite">Invite</string>
+
+    <string name="add_recipient">Add recipient</string>
+
+    <string name="phone_or_email">Phone or email address</string>
+
+    <string name="duplicate">Duplicate</string>
+
 </resources>

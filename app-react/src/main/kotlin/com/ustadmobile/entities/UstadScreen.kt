@@ -75,8 +75,10 @@ import com.ustadmobile.view.discussionpost.edit.DiscussionPostEditScreen
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.view.clazzassignment.UstadCommentListItemPreview
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
+import com.ustadmobile.core.viewmodel.person.invitestudents.InviteStudentsViewModel
 import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreenPreview
 import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreen
+import com.ustadmobile.view.person.invitestudents.InviteStudentsScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -278,6 +280,10 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         ClazzAssignmentSubmitterDetailScreenPreview),
     UstadScreen(ClazzAssignmentSubmitterDetailViewModel.DEST_NAME, "CourseAssignmentSubmitterDetail",
         ClazzAssignmentSubmitterDetailScreen),
+    UstadScreen(
+        InviteStudentsViewModel.DEST_NAME, "InviteStudents",
+        InviteStudentsScreen
+    )
 )
 
 

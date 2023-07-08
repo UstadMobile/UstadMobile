@@ -452,4 +452,9 @@
         android:id="@+id/html_edit_dest"
         android:name="com.ustadmobile.port.android.view.HtmlEditFragment"/>
 
+    <fragment
+        android:id="@+id/invite_students_dest"
+        android:name="com.ustadmobile.port.android.view.person.invitestudents.InviteStudentsFragment"
+        android:label="@string/invite_students"/>
+
 </navigation>

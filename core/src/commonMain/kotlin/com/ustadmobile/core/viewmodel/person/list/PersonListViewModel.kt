@@ -9,6 +9,7 @@ import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
+import com.ustadmobile.core.viewmodel.person.invitestudents.InviteStudentsViewModel
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED
 import com.ustadmobile.door.paging.*
@@ -18,6 +19,8 @@ import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
 
 data class PersonListUiState(
@@ -145,12 +148,22 @@ class PersonListViewModel(
         }
     }
 
+    fun onClickAddRecipient() {
+        navigateForResult(
+            InviteStudentsViewModel.DEST_NAME,
+            key = RESULT_KEY_INVITE_STUDENTS,
+            currentValue = emptyList(),
+            serializer = ListSerializer(String.serializer())
+        )
+    }
+
     companion object {
 
         const val DEST_NAME = "People"
 
-    }
+        const val RESULT_KEY_INVITE_STUDENTS = "inviteStudents"
 
+    }
 }
 
 

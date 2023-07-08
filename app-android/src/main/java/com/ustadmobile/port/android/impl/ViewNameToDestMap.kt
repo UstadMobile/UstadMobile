@@ -9,6 +9,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
+import com.ustadmobile.core.viewmodel.person.invitestudents.InviteStudentsViewModel
 import com.ustadmobile.port.android.view.PanicButtonSettingsView
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
@@ -189,7 +190,8 @@ class ViewNameToDestMap: DestinationProvider {
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             HtmlEditViewModel.DEST_NAME to UstadDestination(R.id.html_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
-            TimeZoneListViewModel.DEST_NAME to UstadDestination(R.id.time_zone_list_dest)
+            TimeZoneListViewModel.DEST_NAME to UstadDestination(R.id.time_zone_list_dest),
+            InviteStudentsViewModel.DEST_NAME to UstadDestination(R.id.invite_students_dest)
     )
 
     override val navControllerViewId: Int

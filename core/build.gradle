@@ -125,6 +125,10 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+
+
+                implementation "com.googlecode.libphonenumber:libphonenumber:$version_libphonenumber"
+
                 compileOnly "net.sf.kxml:kxml2:$version_kxml"
             }
         }
@@ -371,6 +375,7 @@ publishing {
     }
 
     repositories {
+        mavenCentral()
         maven {
             url rootProject.ext.buildConfigProperties['repo.dir']
         }
