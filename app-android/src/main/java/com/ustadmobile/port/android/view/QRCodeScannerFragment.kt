@@ -1,20 +1,26 @@
 package com.ustadmobile.port.android.view
 
+import android.R
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
+import com.google.zxing.BarcodeFormat
+import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import com.ustadmobile.core.viewmodel.QRCodeScannerViewModel
+
 
 class QRCodeScannerFragment : UstadBaseMvvmFragment() {
 
@@ -65,8 +71,19 @@ private fun BarcodeScannerScreen(
         }
     }
 
+    val options = ScanOptions()
+    options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+    options.setPrompt("")
+    options.setCameraId(0) // Use a specific camera of the device
+
+    options.setBeepEnabled(true)
+    options.setBarcodeImageEnabled(true)
+    options.setOrientationLocked(true)
+
+
+    options.setBarcodeImageEnabled(true)
     LaunchedEffect(Unit) {
-        barcodeLauncher.launch(ScanOptions())
+        barcodeLauncher.launch(options)
     }
 }
 
