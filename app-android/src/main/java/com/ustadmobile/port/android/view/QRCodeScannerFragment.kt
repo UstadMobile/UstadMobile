@@ -1,13 +1,18 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Intent
 import android.graphics.PointF
 import android.graphics.RectF
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.ExperimentalGetImage
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
@@ -61,7 +66,6 @@ class QRCodeScannerFragment: UstadBaseMvvmFragment(){
 }
 
 @Composable
-@androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
 private fun QRCodeScannerScreen(viewModel: QRCodeScannerViewModel) {
 
     BarcodeScannerScreen(
@@ -93,8 +97,9 @@ fun BarcodeScannerScreen(
 
     options.setBeepEnabled(false)
     options.setBarcodeImageEnabled(true)
-    barcodeLauncher.launch(ScanOptions())
+//    barcodeLauncher.launch(ScanOptions())
 
+    startCamera()
 //    Box(
 //        modifier = Modifier
 //            .fillMaxSize()
@@ -182,6 +187,24 @@ fun BarcodeScannerScreen(
 //            },
 //        )
 //    }
+}
+
+@Composable
+internal fun startCamera() {
+
+
+    val context = LocalContext.current
+    // Register the launcher and result handler
+    val barcodeLauncher:ActivityResultLauncher<ScanOptions> = rememberLauncherForActivityResult(
+        ScanContract()
+    ) { result ->
+        if(result.contents == null) {
+            Toast.makeText(context, "Cancelled", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(context, "Scanned: " + result.contents, Toast.LENGTH_LONG).show();
+        }
+    }
+    barcodeLauncher.launch(ScanOptions())
 }
 
 //class BarcodeResultBoundaryAnalyzer {
