@@ -35,8 +35,6 @@ import com.ustadmobile.port.android.view.composable.UstadErrorText
 import android.Manifest
 import androidx.compose.material.Button
 import androidx.compose.material.Text
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberPermissionState
 
 class SiteEnterLinkFragment : UstadBaseMvvmFragment() {
 
@@ -61,7 +59,6 @@ class SiteEnterLinkFragment : UstadBaseMvvmFragment() {
 
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun SiteEnterLinkScreen(
     uiState: SiteEnterLinkUiState = SiteEnterLinkUiState(),
