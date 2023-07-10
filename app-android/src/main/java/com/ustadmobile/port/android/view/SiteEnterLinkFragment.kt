@@ -71,8 +71,6 @@ private fun SiteEnterLinkScreen(
     onEditTextValueChange: (String) -> Unit = {},
 ) {
 
-    val cameraPermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -104,10 +102,7 @@ private fun SiteEnterLinkScreen(
             trailingIcon = {
                 IconButton(
                     onClick = {
-                        cameraPermissionState.launchPermissionRequest()
-                        if (cameraPermissionState.hasPermission){
-                            onClickQRCodeScan()
-                        }
+                        onClickQRCodeScan()
                     },
                 ) {
                     Icon(
