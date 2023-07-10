@@ -32,8 +32,6 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.port.android.view.composable.UstadErrorText
-import androidx.compose.material.Button
-import androidx.compose.material.Text
 
 class SiteEnterLinkFragment : UstadBaseMvvmFragment() {
 
