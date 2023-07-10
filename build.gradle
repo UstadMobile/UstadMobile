@@ -251,7 +251,6 @@ ext {
     version_pdfbox_apache = "3.0.0-RC1"
     version_pdfview_android = "1.1.0"
 
-    version_camerax_compose = "1.3.0-alpha06"
     version_barcode_compose = "4.3.0"
 }
 
