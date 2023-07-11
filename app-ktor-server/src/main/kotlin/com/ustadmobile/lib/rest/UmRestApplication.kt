@@ -163,21 +163,10 @@ fun Application.umRestApplication(
     val dbMode = dbModeOverride ?:
         appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
 
-    //When this is running through the start script created by Gradle, app_home will be set, and we
-    // will use this as the base directory for any relative path. If not, we will use the working
-    // directory as the base path.
-    val baseDir = System.getProperty("app_home")?.let { File(it) } ?: File(System.getProperty("user.dir"))
-    val dataDirPropValue = environment.config.propertyOrNull("ktor.ustad.datadir")?.getString() ?: "data"
-    val dataDirConf = File(dataDirPropValue)
-
-    val dataDirPath = if(dataDirConf.isAbsolute) {
-        dataDirConf
-    }else {
-        File(baseDir, dataDirPropValue)
-    }
+    val dataDirPath = environment.config.absoluteDataDir()
 
     fun String.replaceDbUrlVars(): String {
-        return replace("\${datadir}", dataDirPath.absolutePath)
+        return replace("(datadir)", dataDirPath.absolutePath)
     }
 
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
@@ -270,7 +259,7 @@ fun Application.umRestApplication(
 
         bind<Scheduler>() with singleton {
             val dbProperties = environment.config.databasePropertiesFromSection("quartz",
-                "jdbc:sqlite:\${datadir}/quartz.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
+                "jdbc:sqlite:(datadir)/quartz.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
             dbProperties.setProperty("url", dbProperties.getProperty("url").replaceDbUrlVars())
 
             InitialContext().apply {
@@ -435,5 +424,10 @@ fun Application.umRestApplication(
             }
         }
     }
+
+    //Tell anyone looking that the server is up/running and where to find logs
+    // As per logback.xml
+    val logDir = System.getProperty("logs_dir") ?: "./log/"
+    println("Ustad server is running: Logging to $logDir ")
 }
 

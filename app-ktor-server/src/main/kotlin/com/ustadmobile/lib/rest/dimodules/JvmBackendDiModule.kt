@@ -28,6 +28,7 @@ import kotlinx.coroutines.runBlocking
 import org.kodein.di.*
 import java.io.File
 import com.ustadmobile.door.ext.addIncomingReplicationListener
+import com.ustadmobile.lib.rest.ext.absoluteDataDir
 import org.xmlpull.v1.XmlPullParserFactory
 
 /**
@@ -39,8 +40,7 @@ fun makeJvmBackendDiModule(
     syncEnabled: Boolean = true,
     contextScope: EndpointScope = EndpointScope.Default,
 ) = DI.Module("JvmBackendDiModule") {
-    val dataDirPath = File(config.propertyOrNull("ktor.ustad.datadir")?.getString() ?: "data")
-    dataDirPath.takeIf { !it.exists() }?.mkdirs()
+    val dataDirPath = config.absoluteDataDir()
 
     val dbMode = config.dbModeProperty()
 
@@ -79,6 +79,7 @@ fun makeJvmBackendDiModule(
             UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
         val dbUrl = config.property("ktor.database.url").getString()
             .replace("(hostname)", dbHostName)
+            .replace("(datadir)", config.absoluteDataDir().absolutePath)
         if(dbUrl.startsWith("jdbc:postgresql"))
             Class.forName("org.postgresql.Driver")
 

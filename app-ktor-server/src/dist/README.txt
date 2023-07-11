@@ -8,5 +8,9 @@ data/singleton/admin.txt
 The configuration (ustad-server.conf) can be used to change the database (Postgres, SQLite),
 listening port, and other options.
 
+For further information on installing / configuration please see:
+
+https://github.com/UstadMobile/UstadMobile/blob/dev-mvvm-primary/INSTALL.md
+
 
 
