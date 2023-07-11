@@ -71,6 +71,7 @@ private fun BarcodeScannerScreen(
     options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
     options.setPrompt("")
     options.setBeepEnabled(true)
+    options.setOrientationLocked(false)
     LaunchedEffect(Unit) {
         barcodeLauncher.launch(options)
     }
