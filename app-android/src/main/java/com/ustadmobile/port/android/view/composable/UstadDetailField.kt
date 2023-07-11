@@ -74,13 +74,19 @@ fun UstadDetailField(
         onClick = onClick,
         secondaryActionContent = secondaryActionContent,
         icon = {
-            Image(
-                painter = painterResource(id = imageId),
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(
-                    color = contentColorFor(backgroundColor = MaterialTheme.colors.background)),
-                modifier = Modifier
-                    .size(24.dp))
+            if(imageId != 0) {
+                Image(
+                    painter = painterResource(id = imageId),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(
+                        color = contentColorFor(backgroundColor = MaterialTheme.colors.background)),
+                    modifier = Modifier
+                        .size(24.dp))
+            }else {
+                Spacer(
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     )
 }
