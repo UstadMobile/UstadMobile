@@ -18,8 +18,35 @@ import kotlinx.serialization.Serializable
          on = Trigger.On.RECEIVEVIEW,
          events = [Trigger.Event.INSERT],
          sqlStatements = [
-             "REPLACE INTO Site(siteUid, sitePcsn, siteLcsn, siteLcb, siteLct, siteName, guestLogin, registrationAllowed, authSalt) VALUES (NEW.siteUid, NEW.sitePcsn, NEW.siteLcsn, NEW.siteLcb, NEW.siteLct, NEW.siteName, NEW.guestLogin, NEW.registrationAllowed, NEW.authSalt) " +
-             "/*psql ON CONFLICT (siteUid) DO UPDATE SET sitePcsn = EXCLUDED.sitePcsn, siteLcsn = EXCLUDED.siteLcsn, siteLcb = EXCLUDED.siteLcb, siteLct = EXCLUDED.siteLct, siteName = EXCLUDED.siteName, guestLogin = EXCLUDED.guestLogin, registrationAllowed = EXCLUDED.registrationAllowed, authSalt = EXCLUDED.authSalt*/"
+             """
+                 REPLACE INTO Site(siteUid, sitePcsn, siteLcsn, siteLcb, siteLct, siteName, guestLogin, registrationAllowed, authSalt)   
+                 SELECT NEW.siteUid AS siteUid,
+                        NEW.sitePcsn AS sitePcsn,
+                        NEW.siteLcsn AS siteLcsn,
+                        NEW.siteLcb AS siteLcb,
+                        NEW.siteLct AS siteLct,
+                        NEW.siteName AS siteName,
+                        NEW.guestLogin AS guestLogin,
+                        NEW.registrationAllowed AS registrationAllowed,
+                        NEW.authSalt AS authSalt
+                  WHERE (
+                          (SELECT COUNT(*) FROM Site) = 0
+                        )   
+                     OR (
+                          NEW.siteUid = 
+                              (SELECT Site.siteUid
+                                 FROM Site
+                                LIMIT 1)
+                          AND NEW.authSalt = 
+                              (SELECT Site.authSalt
+                                 FROM Site
+                                LIMIT 1)
+                        )
+                 /*psql
+                 ON CONFLICT (siteUid) DO UPDATE
+                 SET sitePcsn = EXCLUDED.sitePcsn, siteLcsn = EXCLUDED.siteLcsn, siteLcb = EXCLUDED.siteLcb, siteLct = EXCLUDED.siteLct, siteName = EXCLUDED.siteName, guestLogin = EXCLUDED.guestLogin, registrationAllowed = EXCLUDED.registrationAllowed, authSalt = EXCLUDED.authSalt
+                 */              
+             """
          ]
      )
 ))
