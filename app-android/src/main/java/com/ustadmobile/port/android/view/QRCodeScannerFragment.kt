@@ -70,7 +70,7 @@ private fun BarcodeScannerScreen(
     }
 
     val options = ScanOptions()
-    options.setDesiredBarcodeFormats(ScanOptions.ONE_D_CODE_TYPES)
+    options.setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES)
     options.setPrompt("")
     options.setBeepEnabled(true)
     options.setOrientationLocked(false)
