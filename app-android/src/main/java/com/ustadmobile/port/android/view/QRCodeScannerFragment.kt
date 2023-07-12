@@ -4,17 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.view.GravityCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.journeyapps.barcodescanner.ScanContract
@@ -68,27 +64,20 @@ private fun BarcodeScannerScreen(
     ) { result ->
         if(result.contents != null) {
             onQRCodeDetected(result.contents)
-        } else if(result.contents == null){
-
+        } else {
+            onQRCodeDetected("")
         }
     }
 
     val options = ScanOptions()
-    options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+    options.setDesiredBarcodeFormats(ScanOptions.ONE_D_CODE_TYPES)
     options.setPrompt("")
     options.setBeepEnabled(true)
     options.setOrientationLocked(false)
 
     LaunchedEffect(Unit) {
         barcodeLauncher.launch(options)
-        barcodeLauncher.apply {
-
-        }
     }
-
-    BackHandler(enabled = true, onBack = {
-        barcodeLauncher.launch(options)
-    })
 }
 
 
