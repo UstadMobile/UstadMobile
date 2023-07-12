@@ -47,62 +47,13 @@ import org.kodein.di.instance
 
 class SettingsFragment : UstadBaseMvvmFragment(){
 
-//    var mPresenter: SettingsPresenter? = null
     private val viewModel: SettingsViewModel by ustadViewModels(::SettingsViewModel)
 
-//    private var mBinding: FragmentSettingsBinding? = null
-
-//    override val di: LazyDI
-//        get() = super<UstadBaseMvvmFragment>.di
-
-//    override var displayLanguage: String?
-//        get() = mBinding?.displayLanguage
-//        set(value) {
-//            mBinding?.displayLanguage = value
-//        }
-//
-//    override var workspaceSettingsVisible: Boolean = false
-//        set(value) {
-//            field = value
-//            mBinding?.workspaceSettingsVisible = value
-//        }
-//    override var holidayCalendarVisible: Boolean = false
-//        set(value) {
-//            field = value
-//            mBinding?.holidayCalendarVisible = value
-//        }
-//
-//    override var reasonLeavingVisible: Boolean = false
-//        set(value) {
-//            field = value
-//            mBinding?.reasonLeavingVisible = value
-//        }
-//
-//    override var langListVisible: Boolean = false
-//        set(value) {
-//            field = value
-//            mBinding?.langListVisible = value
-//        }
-//
-////    val uiState = SettingsUiState()
-//
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-//        super.onCreateView(inflater, container, savedInstanceState)
-//
-//        mBinding = FragmentSettingsBinding.inflate(inflater, container, false).also {
-//
-//        }
-//
-//        mPresenter = SettingsPresenter(requireContext(), arguments.toStringMap(),
-//                this, di).withViewLifecycle()
-//        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
-//
-//        mBinding?.presenter = mPresenter
-//        mBinding?.fragmentEventListener = this
 
         viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
         viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
@@ -119,35 +70,6 @@ class SettingsFragment : UstadBaseMvvmFragment(){
             }
         }
     }
-
-//    override fun onClickAppLanguage() {
-//        val supportedLangConfig : SupportedLanguagesConfig by instance()
-//        val langList = supportedLangConfig.supportedUiLanguagesAndSysDefault(
-//            requireContext().getString(R.string.use_device_language)
-//        )
-//
-//        val systemImpl: UstadMobileSystemImpl by instance()
-//        MaterialAlertDialogBuilder(requireContext())
-//            .setTitle(R.string.app_language)
-//            .setItems(langList.map { it.langDisplay }.toTypedArray()) { _, which ->
-//                val lang = langList[which].langCode
-//                systemImpl.setLocale(lang)
-//                activity?.recreate()
-//            }
-//            .show()
-//    }
-//
-//    override fun onClickPanicButton() {
-//        findNavController().navigate(R.id.panic_button_settings_dest)
-//    }
-//
-//    override fun onDestroyView() {
-//        super.onDestroyView()
-//        mBinding?.presenter = null
-//        mBinding?.fragmentEventListener = null
-//        mBinding = null
-//        mPresenter = null
-//    }
 
 }
 @Composable
