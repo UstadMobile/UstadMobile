@@ -6,7 +6,7 @@
     <data>
         <import type="com.ustadmobile.lib.db.entities.Language"/>
         <import type="com.ustadmobile.port.android.view.LanguageListFragment"/>
-        <import type="com.ustadmobile.port.android.view.LanguageListFragment.LanguageListRecyclerAdapter"/>
+<!--        <import type="com.ustadmobile.port.android.view.LanguageListFragment.LanguageListRecyclerAdapter"/>-->
 
         <variable
             name="language"
@@ -15,16 +15,14 @@
             name="presenter"
             type="com.ustadmobile.core.controller.LanguageListPresenter" />
 
-        <variable
-            name="selectablePagedListAdapter"
-            type="LanguageListRecyclerAdapter" />
+<!--        <variable-->
+<!--            name="selectablePagedListAdapter"-->
+<!--            type="LanguageListRecyclerAdapter" />-->
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:selectableViewHelper="@{selectablePagedListAdapter}"
-        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, language)}"
         app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(language)}"
         android:background="@drawable/bg_listitem"
         >
