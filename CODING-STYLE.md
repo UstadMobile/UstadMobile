@@ -1,9 +1,5 @@
 
-### Architecture
-
-The project uses Kotlin Multiplatform to provide an Android App (using Kotlin / Jetpack compose),
-web client app (using Kotlin/JS wrappers for React and MUI), and an http server backend (using KTOR). 
-Door (Room for Kotlin Multiplatform) is used to provide a Kotlin Multiplatform database and sync.
+### Coding pattern
 
 The app follows an MVVM pattern as follows:
 
