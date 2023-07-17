@@ -1,7 +1,7 @@
 ## Contributing
 
 We welcome contributions! There are many ways you can help, even if you're not a developer! We
-welcome developers, translators, bug reports, and feature suggestions. You an always reach us on
+welcome developers, translators, bug reports, and feature suggestions. You can always reach us on
 Discord here: [https://discord.gg/WHe35Sbsg4](https://discord.gg/WHe35Sbsg4).
 
 ## For developers
