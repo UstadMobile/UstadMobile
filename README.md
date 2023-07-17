@@ -53,6 +53,8 @@ downloads.
 
 ## Development environment setup:
 
+These instructions are intended for developers who wish to build/run from source code. 
+
 This is a Kotlin Multiplatform project. This repository contains the Android app, web app, and
 backend server source code in its modules. Android Studio is the development environment for the 
 entire project. 
