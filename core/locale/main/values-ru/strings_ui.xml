@@ -171,7 +171,6 @@
     <string name="exams">Экзамены</string>
     <string name="reports">Отчеты</string>
     <string name="onboarding_offline_sharing_subheading">Делитесь контентом на высокой скорости с любым другим пользователем поблизости.</string>
-    <string name="location_permission_message">Этому приложению требуется разрешение на местоположение, чтобы обеспечить высокоскоростной автономный обмен с ближайшими пользователями.</string>
     <string name="xapi_options_report_title">Заголовок отчета</string>
     <string name="xapi_options_visual_type">Тип визуализации</string>
     <string name="xapi_options_data_set">Набор данных</string>
@@ -931,7 +930,7 @@
     <string name="module">Модуль</string>
     <string name="add_course_block_content_desc">Добавляйте аудио, видео, электронные книги или интерактивный контент (H5P, xAPI и т.д.) из файлов или ссылок</string>
     <string name="add_assignment_block_content_desc">Задание для участников курса</string>
-    <string name="discussion_board">Доска обсуждений</string>
+    <string name="discussion_board">Обсуждение</string>
     <string name="add_discussion_board_desc">Организованное обсуждение с темами и разделами</string>
     <string name="new_module">Новый модуль</string>
     <string name="edit_module">Редактировать модуль</string>
@@ -1011,4 +1010,12 @@
     </plurals>
     <string name="pdf">PDF</string>
     <string name="app_language">Язык приложения</string>
+    <string name="panic_button_app">Тревожная кнопка</string>
+    <string name="panic_button_explanation">%1$s может автоматически выходить, очищать данные, хранящиеся на этом устройстве, и скрываться при запуске любым приложением кнопки паники, которое поддерживает стандарт PanicKit (например, Ripple). Нажмите, чтобы загрузить Ripple.</string>
+    <string name="hide_app_explanation">Показать код: %2$s
+\nЕсли скрыть приложение включено, то %1$s будет скрыто и заменено поддельным приложением блокнота при срабатывании тревожной кнопки. Вам нужно будет ввести приведенный выше код отображения ( %2$s ) в фальшивое приложение блокнота, чтобы отобразить %1$s.</string>
+    <string name="actions_to_be_taken_in_case_of_emergency">Действия, необходимые в чрезвычайной ситуации</string>
+    <string name="exit_app">Выйти из приложения</string>
+    <string name="delete_app_data_from_device">Удалить данные приложения с устройства</string>
+    <string name="hide_app">Скрыть приложение</string>
 </resources>
