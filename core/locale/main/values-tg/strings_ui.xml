@@ -25,7 +25,7 @@
     <string name="new_tab">Намоиш дар варақаи нав</string>
     <string name="loading">Боргузорӣ</string>
     <string name="deleting">Несткунӣ</string>
-    <string name="logout">Баромад</string>
+    <string name="logout">Баромадан</string>
     <string name="error_opening_file">Хатогии кушодани файл:</string>
     <string name="about">Дар бораи</string>
     <string name="download_all">Ҳамаро боргирӣ кунед</string>
@@ -78,7 +78,7 @@
     <string name="preparing">Ҳолати омода шавӣ аст</string>
     <string name="field_required_prompt">Ин бахш ҳатмист</string>
     <string name="field_password_error_min">Парол бояд на камтар аз 5 аломат бошад</string>
-    <string name="filed_password_no_match">Парол мувофиқат намекунад, бори дигар кӯшиш кунед</string>
+    <string name="filed_password_no_match">Паролҳо мувофиқ нестанд. Бори дигар кӯшиш кунед.</string>
     <string name="update">Навсозӣ кунед</string>
     <string name="profile">Профил</string>
     <string name="dialog_download_from_playstore_message">Мундариҷаи таълимиро офлайн дастрас намоед ва мубодила кунед</string>
@@ -91,7 +91,7 @@
     <string name="onboarding_offline_sharing_subheading">Бо мубодилаи фаврии офлайн вақт ва маълумотро сарфа кунед</string>
     <string name="download_continue_stacked_label">Ба боргирӣ идома диҳед</string>
     <string name="download_continue_btn_label">Идома диҳед</string>
-    <string name="download_wifi_only">Танҳо WiFi</string>
+    <string name="download_wifi_only">Танҳо Wi-Fi</string>
     <string name="download_calculating">Ҳисоб карда истодааст …</string>
     <string name="download_state_download"><b>Боргирӣ</b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$sи захирахагоҳи дастгоҳи шуморо истифода хоҳанд кард.</string>
     <string name="schools">Муассисаҳои таълимӣ</string>
@@ -102,7 +102,7 @@
     <string name="download_pause_download">Таваққуф намоед</string>
     <string name="assignments">Супоришҳо</string>
     <string name="download_locally_availability">Дар наздикӣ дастрас аст</string>
-    <string name="download_cloud_availability">Дар абр дастрас аст</string>
+    <string name="download_cloud_availability">Дар абри рақамӣ дастраст</string>
     <string name="download_entry_state_paused">Таваққуф карда шуд</string>
     <string name="get_app">Барномаро дастрас намоед</string>
     <string name="entry_details_author">Муаллиф</string>
@@ -1002,4 +1002,12 @@
     <string name="unassigned_error">Пешниҳод карда наметавонед: шумо дар курс номнавис шудаед, аммо ба гурӯҳе таъин нашудаед Невозможно отправить: вы зачислены на курс, но не назначены в группу</string>
     <string name="pdf">PDF</string>
     <string name="app_language">Забони барнома</string>
+    <string name="panic_button_app">Тугмаи ҳушдор</string>
+    <string name="panic_button_explanation">%1$s метавонад ба таври худкор берун шавад, маълумоти дар ин дастгоҳ захирашударо тоза кунад ва ҳангоми оғоз кардани ягон барномаи тугмаи ҳушдор, ки стандарти PanicKit-ро дастгирӣ мекунад (ба монанди Ripple) худро пинҳон кунад. Барои зеркашии Ripple зер кунед.</string>
+    <string name="hide_app_explanation">Намоиши код: %2$s
+\nАгар барномаи пинҳонкунӣ фаъол бошад, пас ҳангоми фаъол шудани тугмаи ҳушдор %1$s пинҳон карда мешавад ва бо замимаи блокнотҳои қалбакӣ иваз карда мешавад. Барои нишон додани %1$s ба шумо лозим меояд, ки рамзи намоиши болоро ( %2$s ) ба барномаи блокнотҳои қалбакӣ ворид кунед.</string>
+    <string name="actions_to_be_taken_in_case_of_emergency">Чорабиниҳо дар ҳолати фавқулодда</string>
+    <string name="exit_app">Аз барнома баромадан</string>
+    <string name="delete_app_data_from_device">Маълумоти барномаро аз дастгоҳ нест кардан</string>
+    <string name="hide_app">Пинҳон кардани барнома</string>
 </resources>
