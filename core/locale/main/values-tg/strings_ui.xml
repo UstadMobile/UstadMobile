@@ -11,7 +11,7 @@
     <string name="register_incorrect_email">Суроғаи почтаи электронии нодуруст</string>
     <string name="wrong_user_pass_combo">Номи корбар/парол нодуруст: бори дигар кӯшиш кунед.</string>
     <string name="login_network_error">Хатогии шабака: лутфан тафтиш кунед, ки шумо онлайн ҳастед.</string>
-    <string name="download">Боргирӣ</string>
+    <string name="download">Зеркашӣ кардан</string>
     <string name="downloaded" value="81">Боргир шудааст</string>
     <string name="recycled">Аз нав коркардшуда</string>
     <string name="libraries">Китобхонаҳо</string>
@@ -949,13 +949,13 @@
     <string name="onboarding_stay_organized_headline">Муташаккил бимонед</string>
     <string name="connect">пайваст кунед</string>
     <string name="upload">Бор кардан</string>
-    <string name="selected_file_summary">Интихобшуда</string>
-    <string name="drag_and_drop_or_click_to_add_file">Файлро интихоб намуда ба ҷои лозимӣ гузоред.</string>
+    <string name="selected_file_summary">Интихобшуда %1$s (%2$s)</string>
+    <string name="drag_and_drop_or_click_to_add_file">Файлро интихоб намуда ба ҷои лозимӣ гузоред</string>
     <string name="course">Курс</string>
     <string name="currently_enroled">Айниҳол ба қайд гирифташуда</string>
     <string name="past_enrolments">Қайдшуда</string>
     <string name="standard">Стандарт</string>
-    <string name="group_number" formatted="false">Гурӯҳ</string>
+    <string name="group_number" formatted="false">Гурӯҳ %1$s</string>
     <string name="course_code">Рамзи дастрасӣ ба курс</string>
     <string name="edit_group">Муҳаррирон</string>
     <string name="extra_active_tab_warning">Якбора бо як чанд ҷадвал кор кардан ғайри имкон аст, якеро интихоб намоед.</string>
@@ -977,28 +977,28 @@
     <string name="unassigned">Номнавис нашуда</string>
     <string name="error_too_long_text">Матни аз ҳад зиёд</string>
     <string name="individual_submission">Пешниҳоди инфиродӣ</string>
-    <string name="managed_enrolment">"Интихобшуда бояд  огоҳ бошад"</string>
+    <string name="managed_enrolment">Интихобшуда бояд огоҳ бошад</string>
     <string name="text_file_submission_error">матн ва/ё файли пешниҳодшударо бояд истифода бурд</string>
     <string name="submit_all_at_once_submission_policy">Cупоришҳои анҷомёфта бояд сари вақт фиристода шаванд</string>
     <string name="multiple_submission_allowed_submission_policy">Таҳрири такрори мумкин аст</string>
-    <string name="enrolment_policy">"Қоидаҳои  бақайдгирӣ"</string>
-    <string name="submission_policy">"Қоидаҳои қабули супоришҳои  анҷомёфта"</string>
-    <string name="grade_out_of_range">"Баҳои ниҳоӣ  набояд аз 0 ва % 1$s баланд бошад"</string>
+    <string name="enrolment_policy">Қоидаҳои бақайдгирӣ</string>
+    <string name="submission_policy">Қоидаҳои қабули супоришҳои анҷомёфта</string>
+    <string name="grade_out_of_range">Баҳои ниҳоӣ набояд аз 0 ва %1$s баланд бошад</string>
     <string name="update_grade">Эълони баҳо</string>
-    <string name="update_grade_and_mark_next">"Баъд аз эълони  баҳо  супориши дигарро таъин намоед"</string>
-    <string name="submission_already_made">"Муҳлати қабули супоришҳо  ба анҷом расид"</string>
+    <string name="update_grade_and_mark_next">Баъд аз эълони баҳо супориши дигарро таъин намоед</string>
+    <string name="submission_already_made">Муҳлати қабули супоришҳо ба анҷом расид</string>
     <string name="from_my_courses">Аз курсҳои ман Из моих курсов</string>
     <string name="points">Холҳо</string>
-    <string name="edit_discussion">Муҳокимаро таҳрир кунед. Изменить обсуждение.</string>
+    <string name="edit_discussion">Муҳокимаро таҳрир кунед</string>
     <string name="add_discussion">Илова кардани муҳокима. Добавить обсуждение</string>
     <string name="type_here">Дар ин ҷо нависед… Введите здесь…</string>
     <string name="deadline_has_passed">Мӯҳлати ниҳоӣ гузашт Крайний срок прошел</string>
-    <string name="enabled">Фаъол. Активный.</string>
+    <string name="enabled">Фаъол</string>
     <string name="disabled">Ғайрифаъол Oтключенный</string>
-    <string name="assign_reviewers">Баррасикунандагонро таъин кунед Назначьте рецензентов.</string>
-    <string name="reviews_per_user_group">Баррасиҳо барои як корбар ё гурӯҳ. Отзывы для каждого пользователя или группы.</string>
-    <string name="assign_random_reviewers">Баррасиҳои тасодуфиро таъин кунед. Назначьте случайных рецензентов.</string>
-    <string name="reviewer">Баррасикунанда #%1$s. Рецензент #%1$s.</string>
+    <string name="assign_reviewers">Баррасикунандагонро таъин кунед</string>
+    <string name="reviews_per_user_group">Баррасиҳо барои як корбар ё гурӯҳ</string>
+    <string name="assign_random_reviewers">Баррасиҳои тасодуфиро таъин кунед</string>
+    <string name="reviewer">Баррасикунанда #%1$s</string>
     <string name="unassigned_error">Пешниҳод карда наметавонед: шумо дар курс номнавис шудаед, аммо ба гурӯҳе таъин нашудаед Невозможно отправить: вы зачислены на курс, но не назначены в группу</string>
     <string name="pdf">PDF</string>
     <string name="app_language">Забони барнома</string>
