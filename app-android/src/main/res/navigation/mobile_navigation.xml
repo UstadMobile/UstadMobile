@@ -452,5 +452,4 @@
         android:id="@+id/html_edit_dest"
         android:name="com.ustadmobile.port.android.view.HtmlEditFragment"/>
 
-
 </navigation>
