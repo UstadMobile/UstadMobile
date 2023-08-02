@@ -11,12 +11,10 @@ import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.SiteEnterLinkView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
-import com.ustadmobile.core.viewmodel.QRCodeScannerViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import io.ktor.client.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.encodeToString
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -54,20 +52,6 @@ class SiteEnterLinkViewModel(
 
         viewModelScope.launch {
 
-            launch {
-                resultReturner.filteredResultFlowForKey(RESULT_KEY_SITE_LINK).collect { result ->
-                    val returnedSiteLink = result.result as? String ?: return@collect
-
-                    _uiState.update { prev ->
-                        prev.copy(
-                            siteLink = returnedSiteLink
-                        )
-                    }
-
-                    onClickNext()
-                }
-            }
-
             _uiState.update { prev ->
                 prev.copy(fieldsEnabled = true)
             }
@@ -76,17 +60,14 @@ class SiteEnterLinkViewModel(
         }
     }
 
-    fun onClickQRCodeScan() {
-        _uiState.update {
-            it.copy(fieldsEnabled = false)
+    fun onQRCodeDetected(qrCode: String){
+        _uiState.update { prev ->
+            prev.copy(
+                siteLink = qrCode
+            )
         }
 
-        navigateForResult(
-            QRCodeScannerViewModel.DEST_NAME,
-            key = RESULT_KEY_SITE_LINK,
-            currentValue = _uiState.value.siteLink,
-            serializer = String.serializer()
-        )
+        onClickNext()
     }
 
     fun onClickNext() {
@@ -140,7 +121,6 @@ class SiteEnterLinkViewModel(
 
         val ARGS_TO_PASS_THROUGH = listOf(UstadView.ARG_NEXT, UstadView.ARG_INTENT_MESSAGE)
 
-        const val RESULT_KEY_SITE_LINK = "siteLink"
 
     }
 

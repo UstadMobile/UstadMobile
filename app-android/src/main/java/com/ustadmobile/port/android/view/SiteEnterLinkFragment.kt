@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
@@ -28,6 +30,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
@@ -60,10 +64,24 @@ class SiteEnterLinkFragment : UstadBaseMvvmFragment() {
 private fun SiteEnterLinkScreen(
     uiState: SiteEnterLinkUiState = SiteEnterLinkUiState(),
     onClickNext: () -> Unit = {},
-    onClickQRCodeScan: () -> Unit = {},
+    onQRCodeDetected: (String) -> Unit = {},
     onClickNewLearningEnvironment: () -> Unit = {},
     onEditTextValueChange: (String) -> Unit = {},
 ) {
+
+    val barcodeLauncher: ActivityResultLauncher<ScanOptions> = rememberLauncherForActivityResult(
+        ScanContract()
+    ) { result ->
+        if(result.contents != null) {
+            onQRCodeDetected(result.contents)
+        }
+    }
+
+    val options = ScanOptions()
+    options.setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES)
+    options.setPrompt("")
+    options.setBeepEnabled(true)
+    options.setOrientationLocked(false)
 
     Column(
         modifier = Modifier
@@ -96,7 +114,7 @@ private fun SiteEnterLinkScreen(
             trailingIcon = {
                 IconButton(
                     onClick = {
-                        onClickQRCodeScan()
+                        barcodeLauncher.launch(options)
                     },
                 ) {
                     Icon(
@@ -178,7 +196,7 @@ private fun SiteEnterLinkScreenForViewModel(
     SiteEnterLinkScreen(
         uiState = uiState,
         onClickNext = viewModel::onClickNext,
-        onClickQRCodeScan = viewModel::onClickQRCodeScan,
+        onQRCodeDetected = viewModel::onQRCodeDetected,
         onClickNewLearningEnvironment = { },
         onEditTextValueChange = viewModel::onSiteLinkUpdated,
     )
