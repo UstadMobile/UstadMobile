@@ -902,7 +902,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="we_sent_a_message_to_your_parent">We sent a message to your parent ( %1$s ) so they can approve your registration. You can login using the username and password you set after your parent approves.</string>
     <string name="toggle_visibility">Toggle visibility</string>
     <string name="parental_consent">Parental consent</string>
-    <string name="qr_code_scan">QR code scan</string>
     <!--
     When a child registers (without using a link provided by a teacher), then a message is sent to
     the parent with a link allowing them to approve or reject the request.
