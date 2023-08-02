@@ -50,14 +50,6 @@ class SiteEnterLinkViewModel(
             )
         }
 
-        viewModelScope.launch {
-
-            _uiState.update { prev ->
-                prev.copy(fieldsEnabled = true)
-            }
-
-            loadingState = LoadingUiState.NOT_LOADING
-        }
     }
 
     fun onQRCodeDetected(qrCode: String){
