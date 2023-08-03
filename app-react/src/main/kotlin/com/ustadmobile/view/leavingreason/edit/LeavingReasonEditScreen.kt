@@ -1,9 +1,12 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.leavingreason.edit
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.LeavingReasonEditUiState
+import com.ustadmobile.core.viewmodel.LeavingReasonEditViewModel
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadTextEditField
@@ -20,7 +23,7 @@ external interface LeavingReasonEditScreenProps: Props {
 
 }
 
-val LeavingReasonEditScreen = FC<LeavingReasonEditScreenProps> { props ->
+val LeavingReasonEditScreenComponent = FC<LeavingReasonEditScreenProps> { props ->
 
     val strings: StringsXml = useStringsXml()
 
@@ -43,6 +46,8 @@ val LeavingReasonEditScreen = FC<LeavingReasonEditScreenProps> { props ->
         }
     }
 }
+
+
 val LeavingReasonEditScreenPreview = FC<Props> {
     var uiStateVar by useState {
         LeavingReasonEditUiState(
@@ -51,10 +56,23 @@ val LeavingReasonEditScreenPreview = FC<Props> {
             }
         )
     }
-    LeavingReasonEditScreen {
+    LeavingReasonEditScreenComponent {
         uiState = uiStateVar
         onLeavingReasonChange = {
             uiStateVar = uiStateVar.copy(leavingReason = it)
         }
+    }
+}
+
+val LeavingReasonEditScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        LeavingReasonEditViewModel(di, savedStateHandle)
+    }
+
+    val uiStateVal by viewModel.uiState.collectAsState(LeavingReasonEditUiState())
+
+    LeavingReasonEditScreenComponent {
+        uiState = uiStateVal
+        onLeavingReasonChange = viewModel::onEntityChanged
     }
 }

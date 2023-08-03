@@ -19,7 +19,7 @@ data class LeavingReasonEditUiState(
 class LeavingReasonEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
-): UstadEditViewModel(di, savedStateHandle) {
+): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(LeavingReasonEditUiState(fieldsEnabled = false))
 
@@ -36,6 +36,7 @@ class LeavingReasonEditViewModel(
                         leavingReasonTitle = ""
                     }
                 },
+                serializer = LeavingReason.serializer(),
                 uiUpdate = {
                     _uiState.update { prev ->
                         prev.copy(leavingReason = it)
@@ -53,7 +54,12 @@ class LeavingReasonEditViewModel(
         _uiState.update { prev ->
             prev.copy(leavingReason = leavingReason)
         }
-        scheduleEntityCommitToSavedState(leavingReason)
+
+        scheduleEntityCommitToSavedState(
+            entity = leavingReason,
+            serializer = LeavingReason.serializer(),
+            commitDelay = 200,
+        )
     }
 
     fun onClickSave() {
@@ -70,6 +76,11 @@ class LeavingReasonEditViewModel(
                 activeDb.leavingReasonDao.updateAsync(leavingReason)
             }
         }
+    }
+
+    companion object {
+
+        const val DEST_NAME = "LeavingReasonEdit"
     }
 
 }

@@ -2,10 +2,10 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.safeStringify
-import com.ustadmobile.core.view.LeavingReasonEditView
 import com.ustadmobile.core.view.LeavingReasonListView
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.LeavingReasonEditViewModel
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.LeavingReason
@@ -38,7 +38,7 @@ class LeavingReasonListPresenter(context: Any, arguments: Map<String, String>, v
         navigateForResult(
             NavigateForResultOptions(this,
                 null,
-                LeavingReasonEditView.VIEW_NAME,
+                LeavingReasonEditViewModel.DEST_NAME,
                 LeavingReason::class,
                 LeavingReason.serializer())
         )
@@ -54,7 +54,7 @@ class LeavingReasonListPresenter(context: Any, arguments: Map<String, String>, v
                 ListSerializer(LeavingReason.serializer()), listOf(leavingReason)))
             ListViewMode.BROWSER -> navigateForResult(
                 NavigateForResultOptions(this,
-                    leavingReason, LeavingReasonEditView.VIEW_NAME,
+                    leavingReason, LeavingReasonEditViewModel.DEST_NAME,
                     LeavingReason::class,
                     LeavingReason.serializer(),
                     arguments = mapOf(
