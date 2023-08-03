@@ -5,17 +5,16 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.Toast
-import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
@@ -27,40 +26,44 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityMainBinding
-import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.DbPreloadWorker
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.NavControllerAdapter
 import com.ustadmobile.core.impl.nav.UstadNavController
-import com.ustadmobile.core.view.AccountListView
-import com.ustadmobile.core.view.SettingsView
-import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
 import com.ustadmobile.port.android.view.binding.imageForeignKeyPlaceholder
 import com.ustadmobile.port.android.view.binding.setImageForeignKey
 import com.ustadmobile.port.android.view.binding.setImageForeignKeyAdapter
 import com.ustadmobile.port.android.view.util.UstadActivityWithProgressBar
-import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.*
 import org.kodein.di.DIAware
-import org.kodein.di.direct
 import org.kodein.di.instance
-import org.kodein.di.on
 import java.io.*
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.BrowserLinkOpener
+import com.ustadmobile.core.util.ext.navigateToLink
+import com.ustadmobile.core.view.*
+import com.ustadmobile.port.android.impl.nav.NavHostTempFileRegistrar
+import com.ustadmobile.port.android.util.ext.registerDestinationTempFile
+import com.ustadmobile.port.android.view.person.detail.PersonDetailFragment
+import com.ustadmobile.port.android.view.util.UstadActivityWithBottomNavigation
 
 
-class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
+class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
         UstadActivityWithProgressBar,
+        UstadActivityWithBottomNavigation,
         NavController.OnDestinationChangedListener,
+        NavHostTempFileRegistrar,
         DIAware{
+
+    private val browserLinkOpener = BrowserLinkOpener { url ->
+
+    }
 
     private lateinit var appBarConfiguration: AppBarConfiguration
 
@@ -73,13 +76,16 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         //Note: do not use mBinding here because it might not be ready for the first fragment
         get() = findViewById(R.id.main_progress_bar)
 
+
+    override val bottomNavigationView: BottomNavigationView
+        get() = mBinding.bottomNavView
+
+
     private lateinit var mBinding: ActivityMainBinding
 
     private val impl : UstadMobileSystemImpl by instance()
 
     private val accountManager: UstadAccountManager by instance()
-
-    private var searchView: SearchView? = null
 
     private val destinationProvider: DestinationProvider by instance()
 
@@ -87,16 +93,19 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private lateinit var ustadNavController: UstadNavController
 
+    private var mAccountIconVisible: Boolean? = null
+        set(value) {
+            if(field == value)
+                return
+
+            field = value
+            invalidateOptionsMenu()
+        }
+
     private val userProfileDrawable: Drawable? by lazy(LazyThreadSafetyMode.NONE) {
         ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_24dp)?.also {
             it.setTint(ContextCompat.getColor(this, R.color.onPrimaryColor))
         }
-    }
-
-    //Check contentonly mode. See appconfig.properties for details. When enabled, the bottom nav
-    // is only visible as admin (e.g. normal users only see content)
-    private val contentOnlyForNonAdmin: Boolean by lazy {
-        impl.getAppConfigBoolean(AppConfig.KEY_CONTENT_ONLY_MODE, this)
     }
 
     //This is actually managed by the underlying fragments.
@@ -107,10 +116,15 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
-        val uri = intent?.data?.toString()
+        val uri = intent?.data?.toString() ?: intent?.getStringExtra(UstadView.ARG_OPEN_LINK)
+        val argAccountName = intent?.getStringExtra(UstadView.ARG_ACCOUNT_NAME)
 
         if(uri != null){
-            impl.goToDeepLink(uri, accountManager, this)
+            lifecycleScope.launchWhenResumed {
+                ustadNavController.navigateToLink(uri, accountManager, browserLinkOpener,
+                    forceAccountSelection = true,
+                    accountName = argAccountName)
+            }
         }
     }
 
@@ -161,14 +175,20 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         val scrollFlags = ustadDestination?.actionBarScrollBehavior ?:
             (AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL)
         (mBinding.mainCollapsingToolbar.collapsingToolbar.layoutParams as? AppBarLayout.LayoutParams)?.scrollFlags = scrollFlags
+        hideSoftKeyboard()
+    }
 
-        val userHasBottomNav = !contentOnlyForNonAdmin || accountManager.activeAccount.admin
-        mBinding.bottomNavView.visibility = if(!userHasBottomNav || ustadDestination?.hideBottomNavigation == true) {
-            View.GONE
-        } else {
-            slideBottomNavigation(true)
-            View.VISIBLE
+    fun hideSoftKeyboard(){
+        //Hide the soft keyboard if showing when moving to the next screen
+        val currentFocusView = currentFocus
+        if(currentFocusView != null) {
+            ContextCompat.getSystemService(this, InputMethodManager::class.java)
+                ?.hideSoftInputFromWindow(currentFocusView.windowToken, 0)
         }
+    }
+
+    override fun registerNavDestinationTemporaryFile(file: File) {
+        navController.registerDestinationTempFile(this, file)
     }
 
     fun onAppBarExpand(expand: Boolean){
@@ -199,10 +219,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         menu.findItem(R.id.menu_share_offline).isVisible = mainScreenItemsVisible
 
         //Should be hidden when they are on the accounts page (only)
-        val currentDestination = destinationProvider.lookupDestinationById(currentFrag)
-        menu.findItem(R.id.menu_main_profile).isVisible = currentDestination?.hideAccountIcon != true
-
-        searchView = menu.findItem(R.id.menu_search).actionView as SearchView
+        menu.findItem(R.id.menu_main_profile).isVisible = (mAccountIconVisible ?: false)
 
         setUserProfile(menu.findItem(R.id.menu_main_profile))
 
@@ -274,31 +291,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
 
         }
-    }
-
-    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
-
-    override fun onBackPressed() {
-        val fragment = supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.fragments?.get(0)
-        when {
-            searchView?.isIconified == false -> {
-                searchView?.setQuery("",true)
-                searchView?.isIconified = true
-                return
-            }
-            (fragment as? FragmentBackHandler)?.onHostBackPressed() == true -> {
-                return
-            }
-            else -> {
-                super.onBackPressed()
-            }
-        }
-
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        searchView = null
     }
 
     /**

@@ -15,22 +15,14 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
 - runFlow:
-    file: "../common/add_course.yaml"
+    file: "../common/create_course_with_1teacher_1student.yaml"
     env:
       TESTCOURSENAME: "Test Course"
-- runFlow:
-    file: "../common/add_new_teacher_inside_course.yaml"
-    env:
-      TESTCOURSENAME: "Test Course"
-      TEACHERFIRSTNAME: "edna"
-      TEACHERLASTNAME: "krabappel"
-      GENDER: "Female"
-      PASSWORD: "test"
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "edna"
+      USERNAME: "t1"
       PASSWORD: "test"
 - tapOn: "courses"

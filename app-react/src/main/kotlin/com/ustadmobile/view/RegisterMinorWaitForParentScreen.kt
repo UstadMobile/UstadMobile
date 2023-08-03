@@ -12,10 +12,7 @@ import mui.icons.material.VisibilityOff
 import mui.material.*
 import mui.material.Button
 import mui.system.responsive
-import react.FC
-import react.Props
-import react.create
-import react.useState
+import react.*
 
 external interface RegisterMinorWaitForParentScreenProps : Props {
 
@@ -41,13 +38,13 @@ val RegisterMinorWaitForParentComponent2 = FC<RegisterMinorWaitForParentScreenPr
             spacing = responsive(20.px)
 
             UstadDetailField {
-                valueText = props.uiState.username
+                valueText = ReactNode(props.uiState.username)
                 labelText = strings[MessageID.username]
                 icon = AccountCircle.create()
             }
 
             UstadDetailField {
-                valueText = password
+                valueText = ReactNode(password)
                 labelText = strings[MessageID.password]
                 icon = Key.create()
 

@@ -6,7 +6,6 @@ import com.ustadmobile.door.migration.DoorMigrationStatementList
 import com.ustadmobile.lib.util.ext.fixTincan
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.migration.DoorMigration
-import com.ustadmobile.door.migration.DoorMigrationSync
 
 val MIGRATION_92_93 = DoorMigrationStatementList(92, 93) { db ->
     if(db.dbType() == DoorDbType.SQLITE) {
@@ -1324,11 +1323,102 @@ val MIGRATION_106_107 = DoorMigrationStatementList(106, 107) {db ->
     }
 }
 
+val MIGRATION_107_108 = DoorMigrationStatementList(107, 108) { db ->
+    val stmtList = mutableListOf<String>()
+    stmtList += "ALTER TABLE CourseAssignmentMark ADD COLUMN camMarkerComment TEXT"
+    stmtList += "ALTER TABLE ClazzAssignment ADD COLUMN caPeerReviewerCount  INTEGER  NOT NULL  DEFAULT 0"
+    if (db.dbType() == DoorDbType.SQLITE) {
+
+        stmtList += "ALTER TABLE CourseAssignmentMark ADD COLUMN camMarkerSubmitterUid  INTEGER  NOT NULL  DEFAULT 0"
+        stmtList += "ALTER TABLE CourseAssignmentMark ADD COLUMN camMarkerPersonUid  INTEGER  NOT NULL  DEFAULT 0"
+
+        stmtList += "CREATE TABLE IF NOT EXISTS PeerReviewerAllocation (`praUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `praMarkerSubmitterUid` INTEGER NOT NULL, `praToMarkerSubmitterUid` INTEGER NOT NULL, `praAssignmentUid` INTEGER NOT NULL, `praActive` INTEGER NOT NULL, `praLct` INTEGER NOT NULL)"
+        stmtList += "CREATE TABLE IF NOT EXISTS PeerReviewerAllocationReplicate (`prarPk` INTEGER NOT NULL, `prarVersionId` INTEGER NOT NULL DEFAULT 0, `prarDestination` INTEGER NOT NULL, `prarPending` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`prarPk`, `prarDestination`))"
+        stmtList += "CREATE INDEX IF NOT EXISTS `index_PeerReviewerAllocationReplicate_prarPk_prarDestination_prarVersionId` ON PeerReviewerAllocationReplicate (`prarPk`, `prarDestination`, `prarVersionId`)"
+        stmtList += "CREATE INDEX IF NOT EXISTS `index_PeerReviewerAllocationReplicate_prarDestination_prarPending` ON PeerReviewerAllocationReplicate (`prarDestination`, `prarPending`)"
+
+
+        stmtList +=
+            " CREATE TRIGGER ch_ins_140 AFTER INSERT ON PeerReviewerAllocation BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 140 AS chTableId, NEW.praUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 140 AND chEntityPk = NEW.praUid); END "
+        stmtList +=
+            " CREATE TRIGGER ch_upd_140 AFTER UPDATE ON PeerReviewerAllocation BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 140 AS chTableId, NEW.praUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 140 AND chEntityPk = NEW.praUid); END "
+        stmtList +=
+            " CREATE TRIGGER ch_del_140 AFTER DELETE ON PeerReviewerAllocation BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 140 AS chTableId, OLD.praUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 140 AND chEntityPk = OLD.praUid); END "
+        stmtList +=
+            "CREATE VIEW PeerReviewerAllocation_ReceiveView AS  SELECT PeerReviewerAllocation.*, ClazzAssignmentReplicate.* FROM PeerReviewerAllocation LEFT JOIN ClazzAssignmentReplicate ON ClazzAssignmentReplicate.caPk = PeerReviewerAllocation.praUid "
+        stmtList +=
+            " CREATE TRIGGER peerreviewerallocation_remote_insert_ins INSTEAD OF INSERT ON PeerReviewerAllocation_ReceiveView FOR EACH ROW BEGIN REPLACE INTO PeerReviewerAllocation(praUid, praMarkerSubmitterUid, praToMarkerSubmitterUid, praAssignmentUid, praActive, praLct) VALUES (NEW.praUid, NEW.praMarkerSubmitterUid, NEW.praToMarkerSubmitterUid, NEW.praAssignmentUid, NEW.praActive, NEW.praLct) /*psql ON CONFLICT (praUid) DO UPDATE SET praMarkerSubmitterUid = EXCLUDED.praMarkerSubmitterUid, praToMarkerSubmitterUid = EXCLUDED.praToMarkerSubmitterUid, praAssignmentUid = EXCLUDED.praAssignmentUid, praActive = EXCLUDED.praActive, praLct = EXCLUDED.praLct */; END "
+
+
+    }else{
+        stmtList += "ALTER TABLE CourseAssignmentMark ADD COLUMN camMarkerSubmitterUid  BIGINT  NOT NULL  DEFAULT 0"
+        stmtList += "ALTER TABLE CourseAssignmentMark ADD COLUMN camMarkerPersonUid  BIGINT  NOT NULL  DEFAULT 0"
+
+        stmtList +=
+            "CREATE TABLE IF NOT EXISTS PeerReviewerAllocation (  praMarkerSubmitterUid  BIGINT  NOT NULL , praToMarkerSubmitterUid  BIGINT  NOT NULL , praAssignmentUid  BIGINT  NOT NULL , praActive  BOOL  NOT NULL , praLct  BIGINT  NOT NULL , praUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+        stmtList +=
+            "CREATE TABLE IF NOT EXISTS PeerReviewerAllocationReplicate (  prarPk  BIGINT  NOT NULL , prarVersionId  BIGINT  NOT NULL  DEFAULT 0 , prarDestination  BIGINT  NOT NULL , prarPending  BOOL  NOT NULL  DEFAULT true, PRIMARY KEY (prarPk, prarDestination) )"
+        stmtList +=
+            "CREATE INDEX index_PeerReviewerAllocationReplicate_prarPk_prarDestination_prarVersionId ON PeerReviewerAllocationReplicate (prarPk, prarDestination, prarVersionId)"
+        stmtList +=
+            "CREATE INDEX index_PeerReviewerAllocationReplicate_prarDestination_prarPending ON PeerReviewerAllocationReplicate (prarDestination, prarPending)"
+        stmtList +=
+            " CREATE OR REPLACE FUNCTION ch_upd_140_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (140, NEW.praUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+        stmtList +=
+            " CREATE TRIGGER ch_upd_140_trig AFTER UPDATE OR INSERT ON PeerReviewerAllocation FOR EACH ROW EXECUTE PROCEDURE ch_upd_140_fn(); "
+        stmtList +=
+            " CREATE OR REPLACE FUNCTION ch_del_140_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (140, OLD.praUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+        stmtList +=
+            " CREATE TRIGGER ch_del_140_trig AFTER DELETE ON PeerReviewerAllocation FOR EACH ROW EXECUTE PROCEDURE ch_del_140_fn(); "
+        stmtList +=
+            "CREATE VIEW PeerReviewerAllocation_ReceiveView AS  SELECT PeerReviewerAllocation.*, ClazzAssignmentReplicate.* FROM PeerReviewerAllocation LEFT JOIN ClazzAssignmentReplicate ON ClazzAssignmentReplicate.caPk = PeerReviewerAllocation.praUid "
+        stmtList +=
+            "CREATE OR REPLACE FUNCTION peerreviewerallocation_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO PeerReviewerAllocation(praUid, praMarkerSubmitterUid, praToMarkerSubmitterUid, praAssignmentUid, praActive, praLct) VALUES (NEW.praUid, NEW.praMarkerSubmitterUid, NEW.praToMarkerSubmitterUid, NEW.praAssignmentUid, NEW.praActive, NEW.praLct) ON CONFLICT (praUid) DO UPDATE SET praMarkerSubmitterUid = EXCLUDED.praMarkerSubmitterUid, praToMarkerSubmitterUid = EXCLUDED.praToMarkerSubmitterUid, praAssignmentUid = EXCLUDED.praAssignmentUid, praActive = EXCLUDED.praActive, praLct = EXCLUDED.praLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        stmtList +=
+            " CREATE TRIGGER peerreviewerallocation_remote_insert_trig INSTEAD OF INSERT ON PeerReviewerAllocation_ReceiveView FOR EACH ROW EXECUTE PROCEDURE peerreviewerallocation_remote_insert_fn() "
+
+
+
+    }
+
+    stmtList
+
+}
+
+val MIGRATION_108_109 = DoorMigrationStatementList(108, 109) { db ->
+    val stmtList = mutableListOf<String>()
+    if (db.dbType() == DoorDbType.SQLITE) {
+        stmtList += "CREATE TABLE IF NOT EXISTS ExternalAppPermission (  eapPersonUid  INTEGER  NOT NULL , eapPackageId  TEXT , eapStartTime  INTEGER  NOT NULL , eapExpireTime  INTEGER  NOT NULL , eapAuthToken  TEXT , eapAndroidAccountName  TEXT , eapUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )"
+    } else {
+        stmtList += "CREATE TABLE IF NOT EXISTS ExternalAppPermission (  eapPersonUid  BIGINT  NOT NULL , eapPackageId  TEXT , eapStartTime  BIGINT  NOT NULL , eapExpireTime  BIGINT  NOT NULL , eapAuthToken  TEXT , eapAndroidAccountName  TEXT , eapUid  SERIAL  PRIMARY KEY  NOT NULL )"
+    }
+
+    stmtList
+}
+
+/**
+ * Work In Progress:
+ * Rename DiscussionPost.discussionPostDiscussionTopicUid to discussionPostDiscussionBlockUid
+ * Remove DiscussionTopic
+ *
+ */
+val MIGRATION_109_110 = DoorMigrationStatementList(109, 110) {db ->
+    val stmtList = mutableListOf<String>()
+    if (db.dbType() == DoorDbType.SQLITE) {
+
+    } else {
+
+    }
+
+    stmtList
+}
+
 fun migrationList() = listOf<DoorMigration>(
     UmAppDatabaseReplicationMigration91_92, MIGRATION_92_93, MIGRATION_93_94, MIGRATION_94_95,
     MIGRATION_95_96, MIGRATION_96_97, MIGRATION_97_98, MIGRATION_98_99,
     MIGRATION_99_100, MIGRATION_100_101, MIGRATION_101_102, MIGRATION_102_103,
-    MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107
+    MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
+    MIGRATION_107_108, MIGRATION_108_109,
 )
 
 

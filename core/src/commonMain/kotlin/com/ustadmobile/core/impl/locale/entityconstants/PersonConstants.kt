@@ -12,4 +12,7 @@ object PersonConstants {
         MessageIdOption2(MessageID.other, Person.GENDER_OTHER),
     )
 
+    val GENDER_MESSAGE_IDS_AND_UNSET =
+        listOf(MessageIdOption2(0, Person.GENDER_UNSET)) + GENDER_MESSAGE_IDS
+
 }

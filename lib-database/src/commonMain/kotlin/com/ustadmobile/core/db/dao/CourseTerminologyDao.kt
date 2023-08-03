@@ -1,10 +1,13 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.lib.db.entities.UserSession
 import kotlin.js.JsName
@@ -63,7 +66,7 @@ expect abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
          FROM CourseTerminology
      ORDER BY ctTitle   
     """)
-    abstract fun findAllCourseTerminology(): DataSourceFactory<Int, CourseTerminology>
+    abstract fun findAllCourseTerminologyPagingSource(): PagingSource<Int, CourseTerminology>
 
     @Query("""
         SELECT *
@@ -83,6 +86,18 @@ expect abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
     abstract suspend fun getTerminologyForClazz(clazzUid: Long): CourseTerminology?
 
 
+    @Query("""
+        SELECT CourseTerminology.*
+          FROM ClazzAssignment
+               JOIN Clazz 
+                    ON Clazz.clazzUid = ClazzAssignment.caClazzUid
+               JOIN CourseTerminology
+                    ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
+         WHERE ClazzAssignment.caUid = :assignmentUid 
+         LIMIT 1
+    """)
+    abstract suspend fun getTerminologyForAssignment(assignmentUid: Long): CourseTerminology?
+
     @JsName("findByUid")
     @Query("""
         SELECT * 
@@ -93,5 +108,8 @@ expect abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
 
     @Update
     abstract suspend fun updateAsync(entity: CourseTerminology): Int
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertAsync(entity: CourseTerminology): Long
 
 }

@@ -30,9 +30,6 @@
  */
 package com.ustadmobile.core.view
 
-import kotlinx.coroutines.Runnable
-import kotlin.js.JsName
-
 enum class GetResultMode {
     EDITORNEW, FROMLIST
 }
@@ -53,13 +50,6 @@ interface UstadView {
      */
     fun showSnackBar(message: String, action: () -> Unit = {}, actionMessageId: Int = 0)
 
-    /**
-     * Most UI platforms require that all UI changes are done in a particular thread. This method
-     * simply wraps those implementations.
-     *
-     * @param r Runnable to run on system's UI thread
-     */
-    fun runOnUiThread(r: Runnable?)
     companion object {
 
 
@@ -107,13 +97,33 @@ interface UstadView {
 
         const val ARG_PERSON_UID = "personUid"
 
+        /**
+         * Somewhere to go after the given Screen is completed e.g. after a login, regisrtation, etc.
+         */
         const val ARG_NEXT = "next"
 
         const val ARG_SITE = "site"
 
-        const val ARG_SERVER_URL = "serverUrl"
+        /**
+         * The argument is the Api Url (e.g. the endpoint).
+         */
+        const val ARG_API_URL = "serverUrl"
 
-        const val ARG_DEEPLINK = "argIntent"
+        /**
+         * Can be used with any Android intent to provide a link to open within the app.
+         * The link can be in the form of:
+         *
+         * https://endpoint.server/umapp/#/ViewName?arg=value
+         * ViewName?arg=value
+         */
+        const val ARG_OPEN_LINK = "openLink"
+
+        /**
+         * Used together with the AccountManager
+         */
+        const val ARG_ACCOUNT_NAME = "account"
+
+        const val ARG_ACCOUNT_ENDPOINT = "accountEndpoint"
 
         const val ARG_SNACK_MESSAGE = "snack_message"
 
@@ -205,7 +215,6 @@ interface UstadView {
          */
         const val ARG_MAX_DATE_OF_BIRTH = "maxDob"
 
-        @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
         const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
 
     }

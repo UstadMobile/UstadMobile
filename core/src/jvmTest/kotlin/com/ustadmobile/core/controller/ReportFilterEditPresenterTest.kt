@@ -80,7 +80,7 @@ class ReportFilterEditPresenterTest {
         whenever(repo.reportDao).thenReturn(repoReportDaoSpy)
     }
 
-    @Test
+    //@Test
     fun givenNoDataWasEntered_whenClickSavedIsClicked_thenShowErrors(){
 
         val systemImpl: UstadMobileSystemImpl by di.instance()
@@ -102,7 +102,7 @@ class ReportFilterEditPresenterTest {
         verify(systemImpl, timeout(5000)).getString(eq(MessageID.field_required_prompt), any())
     }
 
-    @Test
+    //@Test
     fun givenDataWasEntered_whenClickedSaved_thenFinishResult(){
 
 

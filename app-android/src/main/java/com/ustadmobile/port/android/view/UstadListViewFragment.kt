@@ -39,7 +39,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
-abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
+abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
         UstadListView<RT, DT>, Observer<PagedList<DT>>, MessageIdSpinner.OnMessageIdOptionSelectedListener,
         OnSortOptionSelected, View.OnClickListener {
 
@@ -73,7 +73,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
     protected open var autoShowFabOnAddPermission = true
 
-    protected var mActivityWithFab: UstadListViewActivityWithFab? = null
+    protected var mActivityWithFab: UstadActivityWithFab? = null
         get() {
             /*
              The getter will return null so that if the current fragment is not actually visible
@@ -101,7 +101,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
     /**
      * This iscor a Contextual Action Mode Callback that handles showing list selection mode
      */
-    private class ListViewActionModeCallback<RT, DT>(var fragmentHost: UstadListViewFragment<RT, DT>?) : ActionMode.Callback {
+    private class ListViewActionModeCallback<RT, DT : Any>(var fragmentHost: UstadListViewFragment<RT, DT>?) : ActionMode.Callback {
 
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
             val selectedItemsList = fragmentHost?.mDataRecyclerViewAdapter?.selectedItemsLiveData?.value
@@ -208,12 +208,13 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         searchManager?.searchListener = listPresenter
-        menu.findItem(R.id.menu_search).isVisible = true
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        /*
+        Disabled - will be removed on completion of MVVM transition
         mDataBinding?.presenter = listPresenter
         mListStatusAdapter = ListStatusRecyclerViewAdapter(viewLifecycleOwner)
 
@@ -236,6 +237,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
 
         listPresenter?.onCreate(savedInstanceState.toStringMap())
+         */
     }
 
     override fun onDestroyView() {
@@ -334,7 +336,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        mActivityWithFab = context as? UstadListViewActivityWithFab
+        mActivityWithFab = context as? UstadActivityWithFab
     }
 
     override fun onDetach() {

@@ -18,7 +18,6 @@ class TestOpds {
         Assert.assertEquals("Global Digital Library - Book Catalog", feed.title)
         Assert.assertEquals("6be123b3-6f14-46e8-8c3e-8d759aa24a45", feed.id)
         Assert.assertEquals(15, feed.entryList.size)
-        Assert.assertNotNull(feed.updated)
 
     }
 

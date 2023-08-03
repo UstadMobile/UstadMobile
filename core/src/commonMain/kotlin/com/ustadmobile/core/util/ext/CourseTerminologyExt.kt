@@ -26,14 +26,23 @@ fun CourseTerminology?.toTermMap(
 /**
  * Read the Json map on the CourseTerminology entity and return a list of TerminologyEntry. If the
  * entry is not present, then use the default value from strings xml.
+ *
+ * @param json Kotlinx Json used to decode string
+ * @param systemImpl if not null, then lookup the default for the term if it is not specified
  */
 fun CourseTerminology?.toTerminologyEntries(
     json: Json,
-    systemImpl: UstadMobileSystemImpl,
+    systemImpl: UstadMobileSystemImpl?,
 ): List<TerminologyEntry> {
     val termMap =  this?.ctTerminology?.let { json.decodeStringMapFromString(it) } ?: mapOf()
 
     return TerminologyKeys.TERMINOLOGY_ENTRY_MESSAGE_ID.map {
-        TerminologyEntry(it.key, it.value, termMap[it.key] ?: systemImpl.getString(it.value))
+        TerminologyEntry(it.key, it.value, termMap[it.key] ?: systemImpl?.getString(it.value))
     }
+}
+
+fun List<TerminologyEntry>.encodeToStringMap(
+    json: Json
+): String {
+    return json.encodeStringMapToString(map { it.id to (it.term ?: "") }.toMap())
 }

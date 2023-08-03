@@ -2,189 +2,79 @@
 
 The Ustad Mobile server runs as a standalone Java JAR file (powered by KTOR and Netty) It. can be
 connected to an SQLite or PostgreSQL database. It is recommended to use Apache or Nginx as a proxy.
-The server should run fine on any JVM platform, but has been tested most extensively on Linux
-(Ubuntu 20.04).
+The server should run fine on any platform that supports JVM (Linux, Windows, Mac, etc), but it has
+been most extensively tested on Ubuntu Linux.
 
-## Create a user, directory, and copy files
+## Quickstart
 
-Create a user (optional) and a directory where the server and its data will be stored.
-```
-$ adduser ustad
-$ sudo -u ustad -s
-$ mkdir /home/ustad/server
+### 1. Download ustad-server.zip and app-android-release.apk from GitHub release
+See releases on [https://www.github.com/UstadMobile/UstadMobile/releases](https://www.github.com/UstadMobile/UstadMobile/releases)
 
-# Copy the server JAR
-$ cp /my/Download/ustad-server-all.jar /home/ustad/ustad-server-all.jar
+### 2. Install server requirements:
 
-# Install java (on Ubuntu)
-$ apt-get install openjdk-11-jre ffmpeg
-```
-
-# Install FFMPEG (required)
-
-FFMPEG is required for media conversion purposes. If ffmpeg and ffprobe are in the path, they
-will be found automatically.
+The server requires JDK17+. The __java__ command should be in the PATH or the JAVA_HOME variable should
+be set (this is done automatically by default when you install Java from an installer package e.g. 
+using apt-get on Ubuntu or MSI/EXE for Windows).
 
 On Ubuntu:
 ```
-apt-get install ffmpeg
+apt-get install openjdk-18-jdk
 ```
+Note: if you have other Java versions, make sure you run the server jar using JDK17+. You can use ``sudo update-alternatives --config java``
+to set the default java version to run.
 
 On Windows:
-* Download [FFMPEG Windows Build](https://www.gyan.dev/ffmpeg/builds/)
-* Copy the binaries to the working directory (e.g. the same directory where ustad-server-all.jar is)
-* Alternatively, place the ffmpeg binaries anywhere you wish, then set the path in application.conf
-  (see section below)
+* Download and install Java (JDK17+) if not already installed from the Java site [https://www.oracle.com/java/technologies/downloads/#jdk17-windows](https://www.oracle.com/java/technologies/downloads/#jdk17-windows)
 
+### 3. Unzip ustad-server.zip and start server
 
+Unzip ustad-server.zip, then start the server using the built-in start script:
 
-## Install HTTPS Certificate (recommended)
+Linux/MacOS:
+```
+cd /path/to/unzipped/ustad-server/
+./bin/ustad-server
+```
+Where /path/to/unzipped/ is where you unzipped ustad-server.zip
 
-It is strongly recommended to use https and HTTP2 in production. Install a certificate for your
-server using [EFF Certbot](https://certbot.eff.org/).
+Windows
+```
+cd C:\User\me\path\to\unzipped\ustad-server
+.\bin\ustad-server
+```
+Where C:\User\me\path\to\unzipped\ is where you unzipped ustad-server.zip
 
-Request a certificate as follows if a certificate has not already been generated. Turn off any
- server running on port 80 when requesting the certificate.
+This starts the server on the default port (8087). You can now open a browser, and enter port 8087
+e.g. http://localhost:8087 to access the web version.
+
+A random admin password will be generated automatically. It will be placed in
+**data/singleton/admin.txt**.
+
+### 4. Install the APK and connect to server
+
+Drag and drop the APK onto the emulator, or use the command:
 
 ```
-export DOMAIN=mydomain.com
-export EMAIL=me@mydomain.com
-export ALIAS=myalias
-certbot certonly -n -d $DOMAIN --email "$EMAIL" --agree-tos --standalone --preferred-challenges http
+adb install app-android-launcher-release.apk
 ```
 
-Convert the letsencrypt (or other) certificate to a jks (as per [KTOR https setup instructions](https://ktor.io/docs/ssl.html#ktor))
-```
-openssl pkcs12 -export -out /etc/letsencrypt/live/$DOMAIN/keystore.p12 -inkey /etc/letsencrypt/live/$DOMAIN/privkey.pem -in /etc/letsencrypt/live/$DOMAIN/fullchain.pem -name $ALIAS
-# Provide a password
-
-keytool -importkeystore -alias $ALIAS -destkeystore /etc/letsencrypt/live/$DOMAIN/keystore.jks -srcstoretype PKCS12 -srckeystore /etc/letsencrypt/live/$DOMAIN/keystore.p12
-```
-
-## Configure the server:
-
-Unzip the example config file and edit it as required:
-```
-unzip ustad-server-all.jar application.conf
-```
-
-Edit the server config file as required to enable HTTPS/SSL and set the database url:
-```
-ktor {
-    deployment {
-        port = 8087
-
-        # Uncomment this to enable SSL. If this is enabled, a certificate must be provided (see
-        # security section below)
-        sslPort = 8889
-
-    }
-
-    application {
-        modules = [ com.ustadmobile.lib.rest.UmRestApplicationKt.umRestApplication ]
-    }
-
-    ustad {
-        # dbmode can be singleton or virtualhost .  If the dbmode is virtualhost, then multiple
-        # instances can run using the same server.
-        dbmode = singleton
-        datadir = data
-
-        # The app download link for Android users. Users will be redirected here if they select
-        # to download the app
-        androidDownloadHref = "https://play.google.com/store/apps/details?id=com.toughra.ustadmobile"
-
-        paths {
-            # These are external commands that are required. Normally they will be automatically
-            # detected in the path, and there is no need to specify them manually
-
-            # If they are not in the path or default location, then specify them below
-
-            # FFMPEG is used for media compression
-            # ffmpeg = /usr/bin/ffmpeg
-            # ffprobe = /usr/bin/ffprobe
-        }
-    }
-
-    database {
-        #Change to org.postgresql.Driver to use Postgres. Postgres is recommended for production
-        #use
-        driver = "org.sqlite.JDBC"
-
-        # If you are using the virtualhost dbmode, then you will need to add the (hostname)
-        # variable to the database url e.g.
-        #   url=jdbc:postgres:///ustad_(hostname)
-        # Any non alphanumeric characters in hostname (e.g. ., -, etc) will be replaced with _
-        #
-        # If you are simply running a single instance (e.g. no virtual hosting), just enter the JDBC
-        # database url here.
-        url = "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000"
-
-        # Enter the Postgres database username and password here if using Postgres. If using SQLite,
-        # these can be left blank
-        user = ""
-        password = ""
-    }
-
-    security {
-        # It is strongly recommended to configure SSL here so the app can use HTTP2. See INSTALL.md
-        # for instructions. This applies even when the app is used behind a reverse proxy (because
-        # HTTP2 defacto requires SSL).
-        ssl {
-             keyStore = /etc/letsencrypt/live/mydomain.com/keystore.jks
-             keyAlias = myalias
-             keyStorePassword = password
-             privateKeyPassword = password
-        }
-    }
-}
-```
-
-## Run the server
-
-Run the server using the Java command:
-
-```
-java -jar ustad-server-all.jar -config=application.conf
-```
-
-## Configure Apache HTTP Proxy (optional)
-
-Enable the required modules:
-```
-sudo a2enmod proxy_http2 http2
-```
+When the app prompts you for a link, you should enter the link using the IP address of the server
+e.g. http://192.168.0.10:8087/ where 192.168.0.10 is the IP address of the PC running the server.
+Using localhost on an Android device or emulator will **NOT** work. If you are using an Android
+emulator, you can use 10.0.2.2 which always points to the Android emulator host device.
 
 
-Add the following to your Apache virtual host:
-```
-Protocols h2 http/1.1
-ProxyPass /ustad/ h2://your.server.name:8889/
-ProxyPassReverse /ustad/ https://your.server.name:8889/
-SSLProxyEngine On
+## Customize server configuration (optional)
 
-TimeOut 600
-ProxyTimeout 600
-RequestReadTimeout body=10,MinRate=1000
-```
+You may create a update the configuration in ustad-server.conf to set the database, directory where
+server data is stored, and other options. 
 
-HTTP2 requires Apache mpm-event and will not work with mpm-prefork and the normal vanilla php.
-The FastCGI php version must be used instead if PHP is required.
+## Production recommendations
 
-```
-a2dismod mpm_prefork
-a2enmod mpm_event
+* Use an HTTP server such as Apache or Nginx with a reverse proxy. Apache or Nginx
+  should be used to provide https support e.g. as per [Apache Reverse Proxy Guide](https://httpd.apache.org/docs/2.4/howto/reverse_proxy.html).
 
-#If PHP is also required on the same Apache server:
-apt-get install php7.4-fpm
-a2enmod proxy_fcgi setenvif
-a2enconf php7.4-fpm
-a2dismod php7.4
-```
+* Setup a Postgres database and use this instead of the default (embedded) SQLite.
 
-## Connect using the Ustad app
+* Run the server using a script on startup or use the screen command.
 
-Open the Ustad app, and enter the address of your site. The admin password will be saved to
-data/singleton/admin.txt
-
-You can now login to the app with the username admin and the password contained in admin.txt

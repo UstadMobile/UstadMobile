@@ -56,7 +56,7 @@ open class ContentEntry() {
 
     var publisher: String? = null
 
-    var licenseType: Int = 0
+    var licenseType: Int = LICENSE_TYPE_UNSPECIFIED
 
     var licenseName: String? = null
 
@@ -156,6 +156,8 @@ open class ContentEntry() {
     companion object {
 
         const val TABLE_ID = 42
+
+        const val LICENSE_TYPE_UNSPECIFIED = 0
 
         const val LICENSE_TYPE_CC_BY = 1
 

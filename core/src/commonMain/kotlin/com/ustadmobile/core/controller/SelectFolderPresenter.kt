@@ -3,9 +3,9 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.util.safeStringify
-import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.SelectFolderView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
@@ -27,7 +27,7 @@ class SelectFolderPresenter(
                         it,true)
                 }
             }
-            (arguments[UstadView.ARG_RESULT_DEST_VIEWNAME] == ContentEntryEdit2View.VIEW_NAME) -> {
+            (arguments[UstadView.ARG_RESULT_DEST_VIEWNAME] == ContentEntryEditViewModel.DEST_NAME) -> {
                 finishWithResult(
                     safeStringify(di,
                         ListSerializer(String.serializer()),
@@ -36,13 +36,13 @@ class SelectFolderPresenter(
             }
             else -> {
                 val args = mutableMapOf<String, String>()
-                args[ContentEntryEdit2View.ARG_URI] = uri
+                args[ContentEntryEditViewModel.ARG_URI] = uri
                 args.putFromOtherMapIfPresent(arguments, UstadView.ARG_LEAF)
                 args.putFromOtherMapIfPresent(arguments, UstadView.ARG_PARENT_ENTRY_UID)
 
                 navigateForResult(NavigateForResultOptions(
                     this, null,
-                    ContentEntryEdit2View.VIEW_NAME,
+                    ContentEntryEditViewModel.DEST_NAME,
                     ContentEntry::class,
                     ContentEntry.serializer(),
                     arguments = args)

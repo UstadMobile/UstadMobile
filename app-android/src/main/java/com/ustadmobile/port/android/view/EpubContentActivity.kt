@@ -29,8 +29,6 @@ import com.ustadmobile.port.android.view.ext.adjustHeightToWrapContent
 import com.ustadmobile.core.util.ext.dpAsPx
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.port.android.view.ext.scrollToAnchor
-import com.ustadmobile.sharedse.network.NetworkManagerBle
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -177,8 +175,6 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
 
         return super.onOptionsItemSelected(item)
     }
-
-    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
 
     private inner class ContainerTocListAdapter(private val rootItem: EpubNavItem) : TocListView.TocListViewAdapter() {
 

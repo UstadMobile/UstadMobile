@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/home_clazzlist_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzListFragment"
+        android:name="com.ustadmobile.port.android.view.clazz.list.ClazzListFragment"
         android:label="@string/courses" />
 
     <fragment
@@ -47,12 +47,12 @@
 
     <fragment
         android:id="@+id/clazz_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzEditFragment" />
+        android:name="com.ustadmobile.port.android.view.clazz.edit.ClazzEditFragment" />
 
     <fragment
 
         android:id="@+id/clazz_list_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzListFragment" />
+        android:name="com.ustadmobile.port.android.view.clazz.list.ClazzListFragment" />
 
     <fragment
         android:id="@+id/chat_detail_dest"
@@ -60,7 +60,7 @@
 
     <fragment
         android:id="@+id/clazz_detail_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzDetailFragment" />
+        android:name="com.ustadmobile.port.android.view.clazz.detail.ClazzDetailFragment" />
 
     <fragment
         android:id="@+id/clazz_log_edit_attendance_dest"
@@ -69,7 +69,7 @@
 
     <fragment
         android:id="@+id/person_edit_dest"
-        android:name="com.ustadmobile.port.android.view.PersonEditFragment" />
+        android:name="com.ustadmobile.port.android.view.person.edit.PersonEditFragment" />
 
     <!--
      This is repeated so that it can be explicitly recognized for purposes of controlling
@@ -77,15 +77,15 @@
      -->
     <fragment
         android:id="@+id/person_edit_register_dest"
-        android:name="com.ustadmobile.port.android.view.PersonEditFragment"/>
+        android:name="com.ustadmobile.port.android.view.person.edit.PersonEditFragment"/>
 
     <fragment
         android:id="@+id/person_detail_dest"
-        android:name="com.ustadmobile.port.android.view.PersonDetailFragment" />
+        android:name="com.ustadmobile.port.android.view.person.detail.PersonDetailFragment" />
 
     <fragment
         android:id="@+id/schedule_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ScheduleEditFragment" />
+        android:name="com.ustadmobile.port.android.view.schedule.edit.ScheduleEditFragment" />
 
     <fragment
         android:id="@+id/report_edit_dest"
@@ -136,31 +136,21 @@
 
     <fragment
         android:id="@+id/course_group_set_list"
-        android:name="com.ustadmobile.port.android.view.CourseGroupSetListFragment" />
+        android:name="com.ustadmobile.port.android.view.coursegroupset.list.CourseGroupSetListFragment" />
 
     <fragment
         android:id="@+id/course_group_set_edit"
-        android:name="com.ustadmobile.port.android.view.CourseGroupSetEditFragment" />
+        android:name="com.ustadmobile.port.android.view.coursegroupset.edit.CourseGroupSetEditFragment" />
 
     <fragment
         android:id="@+id/course_group_set_detail"
-        android:name="com.ustadmobile.port.android.view.CourseGroupSetDetailFragment" />
+        android:name="com.ustadmobile.port.android.view.coursegroupset.detail.CourseGroupSetDetailFragment" />
 
     <fragment
         android:id="@+id/module_course_block_edit_dest"
         android:name="com.ustadmobile.port.android.view.ModuleCourseBlockEditFragment" />
 
-    <fragment
-        android:id="@+id/course_discussion_course_block_edit_dest"
-        android:name="com.ustadmobile.port.android.view.CourseDiscussionEditFragment" />
 
-  <fragment
-        android:id="@+id/course_discussion_topic_edit_dest"
-        android:name="com.ustadmobile.port.android.view.DiscussionTopicEditFragment" />
-
-<fragment
-        android:id="@+id/discussion_topic_detail_dest"
-        android:name="com.ustadmobile.port.android.view.DiscussionTopicDetailFragment" />
 
 
     <fragment
@@ -173,37 +163,41 @@
 
     <fragment
         android:id="@+id/clazz_assignment_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzAssignmentEditFragment" />
+        android:name="com.ustadmobile.port.android.view.clazzassignment.edit.ClazzAssignmentEditFragment" />
+
+    <fragment
+        android:id="@+id/assignment_peer_allocation_edit_dest"
+        android:name="com.ustadmobile.port.android.view.PeerReviewerAllocationEditFragment" />
 
     <fragment
         android:id="@+id/course_discussion_detail_dest"
-        android:name="com.ustadmobile.port.android.view.CourseDiscussionDetailFragment" />
+        android:name="com.ustadmobile.port.android.view.discussionpost.coursediscussiondetail.CourseDiscussionDetailFragment" />
 
  <fragment
         android:id="@+id/discussion_post_edit_dest"
-        android:name="com.ustadmobile.port.android.view.DiscussionPostEditFragment" />
+        android:name="com.ustadmobile.port.android.view.discussionpost.edit.DiscussionPostEditFragment" />
 
  <fragment
         android:id="@+id/discussion_post_detail_dest"
-        android:name="com.ustadmobile.port.android.view.DiscussionPostDetailFragment" />
+        android:name="com.ustadmobile.port.android.view.discussionpost.detail.DiscussionPostDetailFragment" />
 
     <fragment
         android:id="@+id/clazz_assignment_detail_dest"
         android:name="com.ustadmobile.port.android.view.ClazzAssignmentDetailFragment"/>
 
     <fragment
-        android:id="@+id/clazz_assignment_detail_student_progress"
-        android:name="com.ustadmobile.port.android.view.ClazzAssignmentDetailStudentProgressFragment"/>
+        android:id="@+id/clazz_assignment_submitter_detail_dest"
+        android:name="com.ustadmobile.port.android.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailFragment"/>
 
     <fragment
         android:id="@+id/content_entry_list_dest"
-        android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment"
+        android:name="com.ustadmobile.port.android.view.contententry.list.ContentEntryList2Fragment"
         android:label="@string/content">
     </fragment>
-
+2
     <fragment
         android:id="@+id/content_entry_list_home_dest"
-        android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment"
+        android:name="com.ustadmobile.port.android.view.contententry.list.ContentEntryList2Fragment"
         android:label="@string/library"/>
 
     <fragment
@@ -213,12 +207,12 @@
 
     <fragment
         android:id="@+id/content_entry_list_select_folder"
-        android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment" />
+        android:name="com.ustadmobile.port.android.view.contententry.list.ContentEntryList2Fragment" />
 
 
     <fragment
         android:id="@+id/content_entry_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ContentEntryEdit2Fragment"
+        android:name="com.ustadmobile.port.android.view.contententry.edit.ContentEntryEdit2Fragment"
         android:label="@string/content" />
 
     <fragment
@@ -307,7 +301,7 @@
 
     <fragment
         android:id="@+id/login_dest"
-        android:name="com.ustadmobile.port.android.view.Login2Fragment"
+        android:name="com.ustadmobile.port.android.view.login.Login2Fragment"
         android:label="@string/login"
         />
 
@@ -370,12 +364,12 @@
 
     <fragment
         android:id="@+id/time_zone_list_dest"
-        android:name="com.ustadmobile.port.android.view.TimeZoneListFragment"
+        android:name="com.ustadmobile.port.android.view.timezone.TimeZoneListFragment"
         android:label="@string/timezone"/>
 
     <fragment
         android:id="@+id/clazz_log_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzLogEditFragment"
+        android:name="com.ustadmobile.port.android.view.clazzlog.edit.ClazzLogEditFragment"
         android:label="@string/add_a_new_occurrence"/>
 
     <fragment
@@ -402,14 +396,6 @@
         android:id="@+id/site_terms_edit_dest"
         android:name="com.ustadmobile.port.android.view.SiteTermsEditFragment"
         android:label="@string/edit_terms_and_policies"/>
-
-    <fragment
-        android:id="@+id/text_assignment_edit_dest"
-        android:name="com.ustadmobile.port.android.view.TextAssignmentEditFragment" />
-
-    <fragment
-        android:id="@+id/text_course_block_edit_dest"
-        android:name="com.ustadmobile.port.android.view.TextCourseBlockEditFragment" />
 
     <fragment
         android:id="@+id/text_html_view_detail_dest"
@@ -453,5 +439,17 @@
         android:name="com.ustadmobile.port.android.view.PanicButtonSettingsFragment"
         android:label="@string/settings"/>
 
+
+    <fragment
+        android:id="@+id/grant_app_permission_dest"
+        android:name="com.ustadmobile.port.android.view.GrantAppPermissionFragment"/>
+
+    <fragment
+        android:id="@+id/course_block_edit_dest"
+        android:name="com.ustadmobile.port.android.view.CourseBlockEditFragment"/>
+
+    <fragment
+        android:id="@+id/html_edit_dest"
+        android:name="com.ustadmobile.port.android.view.HtmlEditFragment"/>
 
 </navigation>

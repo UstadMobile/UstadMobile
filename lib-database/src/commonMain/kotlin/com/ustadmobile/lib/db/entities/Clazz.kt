@@ -111,9 +111,7 @@ open class Clazz() {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other == null || this::class != other::class) return false
-
-        other as Clazz
+        if (other !is Clazz) return false
 
         if (clazzUid != other.clazzUid) return false
         if (clazzName != other.clazzName) return false
@@ -127,6 +125,8 @@ open class Clazz() {
         if (clazzEndTime != other.clazzEndTime) return false
         if (clazzFeatures != other.clazzFeatures) return false
         if (clazzSchoolUid != other.clazzSchoolUid) return false
+        if (clazzEnrolmentPolicy != other.clazzEnrolmentPolicy) return false
+        if (clazzTerminologyUid != other.clazzTerminologyUid) return false
         if (clazzMasterChangeSeqNum != other.clazzMasterChangeSeqNum) return false
         if (clazzLocalChangeSeqNum != other.clazzLocalChangeSeqNum) return false
         if (clazzLastChangedBy != other.clazzLastChangedBy) return false
@@ -154,6 +154,8 @@ open class Clazz() {
         result = 31 * result + clazzEndTime.hashCode()
         result = 31 * result + clazzFeatures.hashCode()
         result = 31 * result + clazzSchoolUid.hashCode()
+        result = 31 * result + clazzEnrolmentPolicy
+        result = 31 * result + clazzTerminologyUid.hashCode()
         result = 31 * result + clazzMasterChangeSeqNum.hashCode()
         result = 31 * result + clazzLocalChangeSeqNum.hashCode()
         result = 31 * result + clazzLastChangedBy

@@ -3,7 +3,6 @@ plugins {
     id 'org.jetbrains.kotlin.multiplatform'
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.android.library'
-    id 'maven-publish'
     id "com.google.devtools.ksp" version "$version_kotlin-$version_ksp"
 }
 
@@ -11,8 +10,8 @@ plugins {
 group rootProject.group
 version rootProject.version
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility = '17'
+targetCompatibility = '17'
 
 group rootProject.group
 version rootProject.version
@@ -37,13 +36,13 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = '1.8'
-        targetCompatibility = '1.8'
+        sourceCompatibility = '17'
+        targetCompatibility = '17'
     }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
         kotlinOptions {
-            jvmTarget = "1.8"
+            jvmTarget = "17"
         }
     }
 
@@ -73,12 +72,11 @@ kotlin {
         }
     }
 
-    js(LEGACY) {
+    js(IR) {
         browser {
             testTask {
                 useKarma {
                     useChromeHeadless() //change to useChrome to run the actual browser
-                    webpackConfig.cssSupport.enabled = true
                 }
             }
         }
@@ -98,7 +96,7 @@ kotlin {
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation "io.github.aakira:napier:$version_napier"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
-                compileOnly "com.github.UstadMobile.door:door-annotations:$version_door"
+                compileOnly "com.github.UstadMobile.door:room-annotations:$version_door"
  
             }
         }
@@ -113,6 +111,7 @@ kotlin {
 
             dependencies {
                 implementation "androidx.room:room-runtime:$version_android_room"
+                implementation "androidx.room:room-paging:$version_android_room"
                 implementation "androidx.room:room-ktx:$version_android_room"
                 implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
                 implementation "androidx.paging:paging-runtime:$version_androidx_paging"
@@ -170,20 +169,4 @@ dependencies {
     kspAndroid "com.github.UstadMobile.door:door-compiler:$version_door"
     kspAndroid "androidx.room:room-compiler:$version_android_room"
     kspAndroid "com.github.UstadMobile.door:door-shallowcopy:$version_door"
-}
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId rootProject.group
-            artifactId project.name
-            version rootProject.version
-        }
-    }
-
-    repositories {
-        maven {
-            url rootProject.ext.buildConfigProperties['repo.dir']
-        }
-    }
 }

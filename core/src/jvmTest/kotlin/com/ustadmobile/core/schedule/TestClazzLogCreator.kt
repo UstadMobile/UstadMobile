@@ -13,7 +13,6 @@ import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.util.test.checkJndiSetup
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
@@ -42,7 +41,6 @@ class TestClazzLogCreator {
 
     @Before
     fun setup() {
-        checkJndiSetup()
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(), randomUuid().toString())
         db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
                 "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite")

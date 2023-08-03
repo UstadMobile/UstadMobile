@@ -28,6 +28,7 @@ import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementSerializer
 import com.ustadmobile.core.db.ext.preload
+import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import io.ktor.client.*
@@ -43,9 +44,7 @@ import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.nio.file.Files
-import javax.naming.InitialContext
 import kotlin.random.Random
-import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.gson.*
 import kotlinx.coroutines.runBlocking
@@ -103,6 +102,7 @@ class UstadTestRule: TestWatcher() {
 
         diModule = DI.Module("UstadTestRule") {
             bind<UstadMobileSystemImpl>() with singleton { systemImplSpy }
+            bind<ApiUrlConfig>() with singleton { ApiUrlConfig(null) }
             bind<UstadAccountManager>() with singleton {
                 UstadAccountManager(instance(), Any(), di)
             }
@@ -113,7 +113,6 @@ class UstadTestRule: TestWatcher() {
             bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope!!).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
-                InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
                 spy(DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite:build/tmp/$dbName.sqlite")
                     .addSyncCallback(nodeIdAndAuth)
                     .build()

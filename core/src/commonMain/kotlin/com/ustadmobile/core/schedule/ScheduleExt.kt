@@ -1,31 +1,34 @@
 package com.ustadmobile.core.schedule
 
-import com.soywiz.klock.*
+import com.ustadmobile.core.util.ext.toLocalMidnight
 import com.ustadmobile.lib.db.entities.Schedule
-import com.ustadmobile.lib.util.getSystemTimeInMillis
+import kotlinx.datetime.*
 
-fun DateTimeTz.nextDayOfWeek(dayOfWeek: DayOfWeek): DateTimeTz {
+fun LocalDateTime.nextDayOfWeek(dayOfWeek: DayOfWeek, timeZone: TimeZone) : LocalDateTime{
     var dateTimeTmp = this
 
     while(dateTimeTmp.dayOfWeek != dayOfWeek) {
-        dateTimeTmp += 1.days
+        dateTimeTmp = dateTimeTmp.toInstant(timeZone)
+            .plus(1, DateTimeUnit.DAY, TimeZone.UTC)
+            .toLocalDateTime(timeZone)
     }
 
     return dateTimeTmp
 }
 
-fun Schedule.nextOccurence(timezoneName: String, after: Long = getSystemTimeInMillis()): DateTimeRange {
+fun Schedule.nextOccurenceX(timeZone: TimeZone, fromTime: LocalDateTime): Pair<Instant, Instant> {
     //Set the time to 2am: this will ensure that it remains the same day - even if daylight savings
     // time is taking effect in between
-    val rawTzOffset = getRawTimezoneOffset(timezoneName)
-    val dateTimeStart = DateTime.fromUnix(after).toOffset(TimezoneOffset(rawTzOffset.toDouble())).localMidnight +
-            2.hours
 
-    val nextOccurenceDay = dateTimeStart.nextDayOfWeek(DayOfWeek.get(scheduleDay))
+    val startDateTime = LocalDateTime(fromTime.date, LocalTime(2, 0, 0))
 
-    val daylightSavingsDelta = rawTzOffset - getTimezoneOffset(timezoneName, nextOccurenceDay.utc.unixMillisLong)
-    val occurenceDayLocalMidnight = nextOccurenceDay.localMidnight
+    //Kotlinx DateTime uses ISO
+    val nextOccurenceDay = startDateTime.nextDayOfWeek(DayOfWeek(scheduleDay), timeZone)
 
-    return (occurenceDayLocalMidnight.utc + sceduleStartTime.milliseconds + daylightSavingsDelta.milliseconds) until
-            (occurenceDayLocalMidnight.utc + scheduleEndTime.milliseconds + daylightSavingsDelta.milliseconds)
+    val occurenceStartInstant = nextOccurenceDay.toLocalMidnight()
+        .toInstant(timeZone).plus(sceduleStartTime, DateTimeUnit.MILLISECOND, timeZone)
+    val occurenceFinishInstant = occurenceStartInstant.plus(
+        scheduleEndTime - sceduleStartTime, DateTimeUnit.MILLISECOND, timeZone)
+
+    return occurenceStartInstant to occurenceFinishInstant
 }

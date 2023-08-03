@@ -24,20 +24,5 @@ actual open class NetworkManagerBle actual constructor(context: Any, di: DI, sin
     actual override fun openBluetoothSettings() {
     }
 
-    actual override fun setWifiEnabled(enabled: Boolean): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    actual override fun connectToWiFi(ssid: String, passphrase: String, timeout: Int) {
-    }
-
-    actual override fun restoreWifi() {
-    }
-
-    actual override fun awaitWifiDirectGroupReady(timeout: Long): WiFiDirectGroupBle {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-
 
 }

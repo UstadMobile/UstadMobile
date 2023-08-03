@@ -28,7 +28,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentReportFilterEditBinding
 import com.toughra.ustadmobile.databinding.ItemUidlabelFilterListBinding
@@ -48,6 +48,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
+import com.ustadmobile.port.android.view.composable.UstadInputFieldLayout
 
 
 interface ReportFilterEditFragmentEventHandler {
@@ -312,51 +313,71 @@ private fun ReportFilterEditScreen(
     )  {
 
         item {
-            UstadMessageIdOptionExposedDropDownMenuField(
-                value = uiState.reportFilter?.reportFilterField ?: 0,
-                label = stringResource(R.string.report_filter_edit_field),
-                options = FieldConstants.FIELD_MESSAGE_IDS,
-                error = uiState.fieldError,
-                enabled = uiState.fieldsEnabled,
-                onOptionSelected = {
-                    onReportFilterChanged(uiState.reportFilter?.shallowCopy{
-                        reportFilterField = it.value
-                    })
-                },
-            )
+            UstadInputFieldLayout(
+                modifier = Modifier.fillMaxWidth(),
+                errorText = uiState.fieldError,
+            ) {
+                UstadMessageIdOptionExposedDropDownMenuField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = uiState.reportFilter?.reportFilterField ?: 0,
+                    label = stringResource(R.string.report_filter_edit_field),
+                    options = FieldConstants.FIELD_MESSAGE_IDS,
+                    isError = uiState.fieldError != null,
+                    enabled = uiState.fieldsEnabled,
+                    onOptionSelected = {
+                        onReportFilterChanged(uiState.reportFilter?.shallowCopy{
+                            reportFilterField = it.value
+                        })
+                    },
+                )
+            }
+
         }
 
         item {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(5.dp)
             ) {
-                UstadMessageIdOptionExposedDropDownMenuField(
-                    modifier = Modifier.weight(0.5F),
-                    value = uiState.reportFilter?.reportFilterCondition ?: 0,
-                    label = stringResource(R.string.report_filter_edit_condition),
-                    options = ConditionConstants.CONDITION_MESSAGE_IDS,
-                    error = uiState.conditionsError,
-                    enabled = uiState.fieldsEnabled,
-                    onOptionSelected = {
-                        onReportFilterChanged(uiState.reportFilter?.shallowCopy{
-                            reportFilterCondition = it.value
-                        })
-                    },
-                )
 
-                UstadMessageIdOptionExposedDropDownMenuField(
-                    modifier = Modifier.weight(0.5F),
-                    value = uiState.reportFilter?.reportFilterDropDownValue ?: 0,
-                    label = stringResource(R.string.report_filter_edit_values),
-                    options = ContentCompletionStatusConstants.CONTENT_COMPLETION_STATUS_MESSAGE_IDS,
-                    error = uiState.valuesError,
-                    enabled = uiState.fieldsEnabled,
-                    onOptionSelected = {
-                        onReportFilterChanged(uiState.reportFilter?.shallowCopy{
-                            reportFilterDropDownValue = it.value
-                        })
-                    },
-                )
+                UstadInputFieldLayout(
+                    modifier = Modifier.fillMaxWidth(),
+                    errorText = uiState.conditionsError,
+                ) {
+                    UstadMessageIdOptionExposedDropDownMenuField(
+                        modifier = Modifier.weight(0.5F),
+                        value = uiState.reportFilter?.reportFilterCondition ?: 0,
+                        label = stringResource(R.string.report_filter_edit_condition),
+                        options = ConditionConstants.CONDITION_MESSAGE_IDS,
+                        isError = uiState.conditionsError != null,
+                        enabled = uiState.fieldsEnabled,
+                        onOptionSelected = {
+                            onReportFilterChanged(uiState.reportFilter?.shallowCopy{
+                                reportFilterCondition = it.value
+                            })
+                        },
+                    )
+                }
+
+
+                UstadInputFieldLayout(
+                    modifier = Modifier.fillMaxWidth(),
+                    errorText = uiState.valuesError,
+                ) {
+                    UstadMessageIdOptionExposedDropDownMenuField(
+                        modifier = Modifier.weight(0.5F),
+                        value = uiState.reportFilter?.reportFilterDropDownValue ?: 0,
+                        label = stringResource(R.string.report_filter_edit_values),
+                        options = ContentCompletionStatusConstants.CONTENT_COMPLETION_STATUS_MESSAGE_IDS,
+                        isError = uiState.valuesError != null,
+                        enabled = uiState.fieldsEnabled,
+                        onOptionSelected = {
+                            onReportFilterChanged(uiState.reportFilter?.shallowCopy{
+                                reportFilterDropDownValue = it.value
+                            })
+                        },
+                    )
+                }
+
             }
         }
 

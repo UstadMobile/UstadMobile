@@ -15,6 +15,7 @@ import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.view.ContainerMounter
@@ -45,9 +46,7 @@ import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.nio.file.Files
-import javax.naming.InitialContext
 import kotlin.random.Random
-import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.gson.*
 import kotlinx.serialization.json.Json
@@ -120,6 +119,9 @@ class UstadTestRule(
 
         diModule = DI.Module("UstadTestRule") {
             bind<UstadMobileSystemImpl>() with singleton { systemImplSpy }
+            bind<ApiUrlConfig>() with singleton {
+                ApiUrlConfig(presetApiUrl = null)
+            }
             bind<UstadAccountManager>() with singleton {
                 UstadAccountManager(instance(), Any(), di)
             }
@@ -134,7 +136,6 @@ class UstadTestRule(
 
             bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
-                InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
                 val attachmentsDir = File(tempFolder.siteDataSubDir(this@singleton.context),
                         UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()

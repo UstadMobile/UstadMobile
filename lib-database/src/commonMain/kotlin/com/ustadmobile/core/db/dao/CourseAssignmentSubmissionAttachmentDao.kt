@@ -84,4 +84,20 @@ expect abstract class CourseAssignmentSubmissionAttachmentDao : BaseDao<CourseAs
     abstract suspend fun insertListAsync(entityList: List<CourseAssignmentSubmissionAttachment>)
 
 
+    @Query("""
+        SELECT CourseAssignmentSubmissionAttachment.*
+          FROM CourseAssignmentSubmissionAttachment 
+         WHERE CourseAssignmentSubmissionAttachment.casaSubmissionUid = 
+               COALESCE((SELECT CourseAssignmentSubmission.casUid
+                           FROM CourseAssignmentSubmission
+                          WHERE casSubmitterUid = (${ClazzAssignmentDaoCommon.SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL})
+                       ORDER BY casTimestamp DESC
+                          LIMIT 1), -1)
+    """)
+    abstract suspend fun getLatestSubmissionAttachmentsForUserAsync(
+        accountPersonUid: Long,
+        assignmentUid: Long
+    ): List<CourseAssignmentSubmissionAttachment>
+
+
 }

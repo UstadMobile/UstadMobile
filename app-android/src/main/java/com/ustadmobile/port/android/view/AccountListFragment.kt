@@ -33,7 +33,6 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.controller.AccountListPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.viewmodel.AccountListUiState
@@ -44,6 +43,7 @@ import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.composable.UstadAddListItem
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
+import kotlinx.datetime.Instant
 import org.kodein.di.instance
 
 class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickListener {
@@ -202,11 +202,11 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
 
         mBinding?.accountListRecycler?.layoutManager = LinearLayoutManager(requireContext())
         val impl: UstadMobileSystemImpl by instance()
-        mPresenter = AccountListPresenter(requireContext(),arguments.toStringMap(),this, di,
-            viewLifecycleOwner).withViewLifecycle()
+        mPresenter = AccountListPresenter(requireContext(),arguments.toStringMap(),this, di
+        ).withViewLifecycle()
 
         val versionText = impl.getVersion(requireContext()) + " - " +
-                UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(requireContext()))
+            Instant.fromEpochMilliseconds(impl.getBuildTimestamp(requireContext())).toString()
         activeAccountAdapter = AccountAdapter(mPresenter, isActiveAccount = true)
         otherAccountsAdapter = AccountAdapter(mPresenter, isActiveAccount = false)
         aboutItemAdapter = AboutItemAdapter(versionText,mPresenter)

@@ -5,7 +5,9 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.InviteViaLinkUiState
 import com.ustadmobile.util.ext.format
 import csstype.px
-import mui.icons.material.*
+//WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
+import mui.icons.material.Attachment
+import mui.icons.material.ContentCopy
 import mui.material.*
 import mui.system.Stack
 import mui.system.StackDirection

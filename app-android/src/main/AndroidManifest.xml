@@ -42,6 +42,11 @@
         android:required="false" />
 
     <!--
+    Aztec is used for HTML WYSIWYG editing. This is only be available on SDK24+
+    -->
+    <uses-sdk tools:overrideLibrary="org.wordpress.aztec"/>
+
+    <!--
     Required to find PanicKit responders.
     -->
     <queries>
@@ -56,19 +61,52 @@
     </queries>
 
     <application
-        android:supportsRtl="true"
+        android:name="com.ustadmobile.port.android.impl.UstadApp"
+        android:allowBackup="false"
+        android:icon="@drawable/ic_launcher_icon"
+        android:roundIcon="@drawable/ic_launcher_icon"
+        android:label="@string/app_name"
+        android:usesCleartextTraffic="true"
         android:theme="@style/UmTheme.App"
-        android:usesCleartextTraffic="true">
+        android:supportsRtl="true"
+        tools:ignore="GoogleAppIndexingWarning"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        >
 
-        <activity
-            android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
-            android:exported="false"
-            android:noHistory="true"
-            android:theme="@style/UmTheme.App">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
+        <!--
+        The list of available UI languages as a comma separated list. See
+        com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+
+        Uncomment if you to reduce the number of languages displayed.
+
+        <meta-data android:name="com.ustadmobile.uilanguages"
+            android:value="en,fa,ps,ar,tg,bn,ne,my"/>
+
+        -->
+
+        <!--
+        The API url endpoint can be explicitly specified by uncommenting the metadata key here. If
+        it is not specified, the user will be prompted to enter the link.
+
+        <meta-data android:name="com.ustadmobile.apiurl"
+            android:value="https://myserver.domain.com/"/>
+        -->
+
+        <!--
+        When the app APK itself is shared locally (eg. using the share app menu which
+        triggers nearby share), then we can set the filename of the APK as the user sees it.
+        The name will be basename-version.apk.
+
+        If not set, then the basename will be "ustad"
+        <meta-data android:name="com.ustadmobile.shareappbasename"
+            android:value="ustad"/>
+
+        -->
+
+        <!--
+        The MainActivity containing fragments/navigation
+        -->
         <activity
             android:name="com.ustadmobile.port.android.view.MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
@@ -91,6 +129,89 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
+            android:exported="true"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:label="@string/app_name"
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--
+        PanicKit responder that will respond to a panic trigger app e.g. Ripple
+        -->
+        <activity
+            android:exported="true"
+            android:name="com.ustadmobile.port.android.panic.PanicResponderActivity"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.NoDisplay"
+            >
+
+            <!-- this can never have launchMode singleTask or singleInstance! -->
+            <intent-filter>
+                <action android:name="info.guardianproject.panic.action.TRIGGER" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- Exit Activity used by PanicResponder to force exit and clear activity stack -->
+        <activity
+            android:name="com.ustadmobile.port.android.panic.ExitActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.NoDisplay"
+            />
+
+        <!--
+        Shell activity that can be launched by PanicKit trigger apps (e.g. Ripple) to
+        bring the user to the panic response configuration screen.
+        -->
+        <activity
+            android:exported="true"
+            android:name="com.ustadmobile.port.android.panic.PanicConfigActivity">
+
+            <intent-filter>
+                <action android:name="info.guardianproject.panic.action.CONNECT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+        </activity>
+
+        <activity
+            android:exported="true"
+            android:name="com.ustadmobile.port.android.panic.NotepadActivity"
+            android:label="Notepad"
+            android:icon="@drawable/ic_baseline_edit_24"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:enabled="false">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+
+
+
+        <activity
+            android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
+            android:exported="false"
+            android:noHistory="true"
+            android:theme="@style/UmTheme.App">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+
+
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
@@ -110,18 +231,19 @@
             android:name="com.ustadmobile.port.android.view.AboutActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:exported="true" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:noHistory="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
+        <activity
+            android:name="com.ustadmobile.port.android.authenticator.AuthenticatorActivity"
+            android:exported="true">
+
+            <intent-filter>
+                <data android:host="*" android:pathPattern=".*" android:scheme="local-auth" />
+                <action android:name="com.ustadmobile.AUTH_GET_TOKEN"/>
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        
+        
     </application>
 
 </manifest>

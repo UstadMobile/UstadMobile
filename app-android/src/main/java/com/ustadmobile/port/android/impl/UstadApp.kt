@@ -2,15 +2,16 @@ package com.ustadmobile.port.android.impl
 
 import android.app.Application
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Bundle
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
+import com.toughra.ustadmobile.BuildConfig
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.assignment.ClazzAssignmentIncomingReplicationListener
 import com.ustadmobile.core.catalog.contenttype.*
-import com.ustadmobile.core.contentformats.xapi.ContextActivity
-import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentjob.ContentJobManager
@@ -19,8 +20,6 @@ import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
-import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_ITERATIONS
-import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_KEYLENGTH
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_COROUTINE_CONTEXT
@@ -43,9 +42,6 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
-import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
-import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
-import com.ustadmobile.core.contentformats.xapi.StatementSerializer
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
@@ -63,12 +59,37 @@ import java.io.File
 import java.net.URI
 import java.util.concurrent.Executors
 import com.ustadmobile.core.db.dao.commitLiveConnectivityStatus
+import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
+import org.acra.config.httpSender
+import org.acra.data.StringFormat
+import org.acra.ktx.initAcra
+import org.acra.sender.HttpSender
 
-open class UstadApp : Application(), DIAware {
+class UstadApp : Application(), DIAware {
+
+    private val Context.appMetaData: Bundle?
+        get() = this.applicationContext.packageManager.getApplicationInfo(
+            applicationContext.packageName, PackageManager.GET_META_DATA
+        ).metaData
 
     val diModule = DI.Module("UstadApp-Android") {
         import(CommonJvmDiModule)
+        import(commonDomainDiModule(EndpointScope.Default))
+
+        bind<SupportedLanguagesConfig>() with singleton {
+            applicationContext.appMetaData?.getString(METADATA_KEY_SUPPORTED_LANGS)?.let { langCodeList ->
+                SupportedLanguagesConfig(langCodeList)
+            } ?: SupportedLanguagesConfig()
+        }
+
+        bind<ApiUrlConfig>() with singleton {
+            ApiUrlConfig(
+                presetApiUrl = applicationContext.appMetaData?.getString(METADATA_KEY_API_URL)
+            )
+        }
 
         bind<UstadMobileSystemImpl>() with singleton {
             UstadMobileSystemImpl(applicationContext)
@@ -214,9 +235,6 @@ open class UstadApp : Application(), DIAware {
 
         bind<Gson>() with singleton {
             val builder = GsonBuilder()
-            builder.registerTypeAdapter(Statement::class.java, StatementSerializer())
-            builder.registerTypeAdapter(Statement::class.java, StatementDeserializer())
-            builder.registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
             builder.create()
         }
 
@@ -255,11 +273,8 @@ open class UstadApp : Application(), DIAware {
 
 
         bind<Pbkdf2Params>() with singleton {
-            val systemImpl: UstadMobileSystemImpl = instance()
-            val numIterations = systemImpl.getAppConfigInt(KEY_PBKDF2_ITERATIONS,
-                UstadMobileConstants.PBKDF2_ITERATIONS, applicationContext)
-            val keyLength = systemImpl.getAppConfigInt(KEY_PBKDF2_KEYLENGTH,
-                UstadMobileConstants.PBKDF2_KEYLENGTH, applicationContext)
+            val numIterations = UstadMobileConstants.PBKDF2_ITERATIONS
+            val keyLength = UstadMobileConstants.PBKDF2_KEYLENGTH
 
             Pbkdf2Params(numIterations, keyLength)
         }
@@ -311,6 +326,27 @@ open class UstadApp : Application(), DIAware {
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
+        if(BuildConfig.ACRA_HTTP_URI.isNotBlank()) {
+            initAcra {
+                reportFormat = StringFormat.JSON
+                httpSender {
+                    uri = BuildConfig.ACRA_HTTP_URI
+                    basicAuthLogin = BuildConfig.ACRA_BASIC_LOGIN
+                    basicAuthPassword = BuildConfig.ACRA_BASIC_PASS
+                    httpMethod = HttpSender.Method.POST
+                }
+            }
+        }
+    }
+
+    companion object {
+
+        const val METADATA_KEY_SUPPORTED_LANGS = "com.ustadmobile.uilanguages"
+
+        const val METADATA_KEY_API_URL = "com.ustadmobile.apiurl"
+
+        const val METADATA_KEY_SHARE_BASENAME = "com.ustadmobile.shareappbasename"
+
     }
 
 }

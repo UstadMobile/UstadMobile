@@ -18,13 +18,11 @@ actual class HarContentPresenter actual constructor(context: Any, arguments: Map
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        GlobalScope.launch {
+        presenterScope.launch {
             containerDeferred.await()
-            view.runOnUiThread(kotlinx.coroutines.Runnable {
-                  harWebViewClient = HarWebViewClient(harContainer)
-                  (view as HarAndroidView).setChromeClient(harWebViewClient)
-              })
-        }
 
+            harWebViewClient = HarWebViewClient(harContainer)
+            (view as HarAndroidView).setChromeClient(harWebViewClient)
+        }
     }
 }

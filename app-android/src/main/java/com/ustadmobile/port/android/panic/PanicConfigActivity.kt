@@ -7,7 +7,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.navigation.findNavController
 import androidx.navigation.navOptions
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.ActivityPanicConfigBinding
+import com.toughra.ustadmobile.databinding.ActivityWithNavhostBinding
 
 /**
  * Basic wrapper activity that will simply show the PanicButtonSettings fragment (only). This is
@@ -19,8 +19,8 @@ class PanicConfigActivity: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val mBinding = DataBindingUtil.setContentView<ActivityPanicConfigBinding>(this,
-            R.layout.activity_panic_config)
+        val mBinding = DataBindingUtil.setContentView<ActivityWithNavhostBinding>(this,
+            R.layout.activity_with_navhost)
 
         setSupportActionBar(mBinding.mainCollapsingToolbar.toolbar)
     }

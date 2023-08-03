@@ -10,9 +10,8 @@ import com.ustadmobile.lib.db.entities.Person.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 /**
- * Created by mike on 3/8/18.
+ * Represents an actual person in the system. May or may not have a user account.
  */
-
 @Entity
 @ReplicateEntity(tableId = TABLE_ID, tracker = PersonReplicate::class)
  @Triggers(arrayOf(
@@ -21,6 +20,20 @@ import kotlinx.serialization.Serializable
          order = Trigger.Order.INSTEAD_OF,
          on = Trigger.On.RECEIVEVIEW,
          events = [Trigger.Event.INSERT],
+         //Temporary check to avoid other instances (e.g. previous versions on same url) interfering.
+         conditionSql = """
+             SELECT (
+                    NEW.username IS NULL
+                 OR (SELECT NOT EXISTS(
+                            SELECT Person.personUid
+                              FROM Person
+                             WHERE Person.username = NEW.username))  
+                 OR NEW.personUid = 
+                    (SELECT Person.personUid
+                       FROM Person
+                      WHERE Person.username = NEW.username) 
+             )
+         """,
          sqlStatements = [
              """REPLACE INTO Person(personUid, username, firstNames, lastName, emailAddr, phoneNum, gender, active, admin, personNotes, fatherName, fatherNumber, motherName, motherNum, dateOfBirth, personAddress, personOrgId, personGroupUid, personMasterChangeSeqNum, personLocalChangeSeqNum, personLastChangedBy, personLct, personCountry, personType) 
              VALUES (NEW.personUid, NEW.username, NEW.firstNames, NEW.lastName, NEW.emailAddr, NEW.phoneNum, NEW.gender, NEW.active, NEW.admin, NEW.personNotes, NEW.fatherName, NEW.fatherNumber, NEW.motherName, NEW.motherNum, NEW.dateOfBirth, NEW.personAddress, NEW.personOrgId, NEW.personGroupUid, NEW.personMasterChangeSeqNum, NEW.personLocalChangeSeqNum, NEW.personLastChangedBy, NEW.personLct, NEW.personCountry, NEW.personType) 
