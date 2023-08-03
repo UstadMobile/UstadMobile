@@ -24,13 +24,17 @@ adding from device, test downloading from another device.
 
 1.7 Content that is set to not publicly available is not visible for guest users, but is visible for logged in users.
 
-### 2: Course creation, enrolment, attendance
+1.8 H5P and video content can be automatically compressed using high, medium, and low quality presets. 
+
+### 2: Course creation, enrolment, attendance, progress
 
 2.1 Admin can create a new course, add a new teacher, and create an account for that teacher.
 
 2.2 Teacher can login. Students can join class using class code or link. **Failing as of 5/Jan/23**
 
 2.3 Teacher can record attendance. Teacher can edit attendance after recordings
+
+2.4 Teacher can view progress report showing each students' result for each block in the course.
 
 ### 3: Course block editing
 
@@ -105,10 +109,33 @@ adding from device, test downloading from another device.
 
 6.6 Admin can enable/disable guest login. If enabled, then users can connect as guest
 
+6.7 Teacher (course leader) or admin can send an invitation to a list of users by providing phone numbers (SMS) or email addresses. User can open the invitation, create a new account if this is allowed by admin policy and they don't have an existing account, and join a course. 
+
+6.8 If a user is logged into the Ustad app, they can use an api consumer (e.g. UstadApiConsumerDemo), use the single sign-on, see a list of logged in accounts, select their account, click approve, and receive an auth token.
+
+6.9 If no user is logged into the Ustad app, they can use an api consumer (e.g. UstadApiConsumerDemo), use the single sign-on, enter the site link, login with their username/password, then click approve, and receive an auth token.
+
 ### 7 App panic response (Android only)
 
 7.1 When a panic trigger app is installed and selected, when the app is set to delete all data on panic trigger and the panic app is triggered, then all local data is deleted and the user is logged out.
 
 7.2 When a panic trigger app is installed and selected, when the app is set to hide on panic trigger, the app launch disappears from the home screen. A notepad app is visible instead. The app is restored by entering the code into the notepad.
 
+### 8 Peer-to-peer (Android and desktop only)
 
+8.1 Users who do not have an Internet connection can connect via a nearby device with the app installed to login and use the platform (e.g. open course, view course members, etc) via bluetooth. This will work if the nearby device has synced the data required by the user without an Internet connection. Both devices must have Bluetooth enabled. 
+
+8.2 Users who do not have an Internet connection can download content via a nearby device from the device itself instead of from the Internet via bluetooth or local network WiFi. This will work if the nearby device has synced the data required by the user without an Internet connection. Both devices must have Bluetooth enabled.
+
+
+### 9 Accessibility
+
+9.1 Video content can have subtitles added using an SRT file. The subtitles will be displayed with the video if uploaded.
+
+9.2 Screens support the use of text-to-speech as provided by the operating system (e.g. Windows, Android). Image buttons are labeled appropriately for speech readers.
+
+### 10 Administration
+
+10.1 Server can be installed via script.
+
+10.2 Server data can be backed up via script.
