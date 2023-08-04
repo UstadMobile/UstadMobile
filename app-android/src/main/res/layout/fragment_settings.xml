@@ -12,10 +12,6 @@
             type="com.ustadmobile.core.controller.SettingsPresenter" />
 
         <variable
-            name="fragmentEventListener"
-            type="com.ustadmobile.port.android.view.SettingsFragmentEventListener" />
-
-        <variable
             name="displayLanguage"
             type="String" />
 
@@ -55,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:background="?android:selectableItemBackground"
-                android:onClick="@{() -> fragmentEventListener.onClickAppLanguage()}">
+                >
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/activity_settings2_displaylang_iv"
@@ -104,7 +100,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:background="?android:selectableItemBackground"
-                android:onClick="@{() -> fragmentEventListener.onClickPanicButton()}">
+                >
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/activity_settings2_panicbutton_iv"
