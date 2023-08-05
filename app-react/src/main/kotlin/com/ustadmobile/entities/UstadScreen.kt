@@ -77,7 +77,7 @@ import com.ustadmobile.view.clazzassignment.UstadCommentListItemPreview
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
 import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreenPreview
 import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreen
-import com.ustadmobile.core.viewmodel.LeavingReasonEditViewModel
+import com.ustadmobile.core.viewmodel.leavingreason.edit.LeavingReasonEditViewModel
 import com.ustadmobile.view.leavingreason.edit.LeavingReasonEditScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1

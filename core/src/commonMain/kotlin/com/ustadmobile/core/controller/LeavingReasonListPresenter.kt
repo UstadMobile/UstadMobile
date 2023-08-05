@@ -5,7 +5,7 @@ import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.LeavingReasonListView
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.viewmodel.LeavingReasonEditViewModel
+import com.ustadmobile.core.viewmodel.leavingreason.edit.LeavingReasonEditViewModel
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.LeavingReason
