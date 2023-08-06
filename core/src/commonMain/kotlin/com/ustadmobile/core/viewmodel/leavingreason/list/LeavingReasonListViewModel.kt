@@ -4,9 +4,9 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
+import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.LeavingReason
-import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
+import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 
 data class LeavingReasonListUiState(
@@ -22,8 +22,31 @@ class LeavingReasonListViewModel(
     di, savedStateHandle, LeavingReasonListUiState(), DEST_NAME
 ) {
 
-    init {
+    private var lastPagingSource: PagingSource<Int, LeavingReason>? = null
 
+    private val pagingSourceFactory: () -> PagingSource<Int, LeavingReason> = {
+        activeRepo.leavingReasonDao.findAllReasonsAsPagingSource().also {
+            lastPagingSource?.invalidate()
+            lastPagingSource = it
+        }
+    }
+
+
+    init {
+        _uiState.update { prev ->
+            prev.copy(
+                leavingReasonList = pagingSourceFactory,
+            )
+        }
+    }
+
+
+    override fun onUpdateSearchResult(searchText: String) {
+        // do nothing
+    }
+
+    override fun onClickAdd() {
+        lastPagingSource?.invalidate()
     }
 
     companion object {
@@ -31,13 +54,4 @@ class LeavingReasonListViewModel(
         const val DEST_NAME = "LeavingReasonList"
 
     }
-
-    override fun onUpdateSearchResult(searchText: String) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onClickAdd() {
-        TODO("Not yet implemented")
-    }
-
 }
