@@ -23,6 +23,7 @@ import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditView
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
+import com.ustadmobile.core.viewmodel.leavingreason.list.LeavingReasonListViewModel
 
 @Keep
 class ViewNameToDestMap: DestinationProvider {
@@ -190,7 +191,8 @@ class ViewNameToDestMap: DestinationProvider {
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             HtmlEditViewModel.DEST_NAME to UstadDestination(R.id.html_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
-            TimeZoneListViewModel.DEST_NAME to UstadDestination(R.id.time_zone_list_dest)
+            TimeZoneListViewModel.DEST_NAME to UstadDestination(R.id.time_zone_list_dest),
+            LeavingReasonListViewModel.DEST_NAME to UstadDestination(R.id.leaving_reason_list)
     )
 
     override val navControllerViewId: Int
