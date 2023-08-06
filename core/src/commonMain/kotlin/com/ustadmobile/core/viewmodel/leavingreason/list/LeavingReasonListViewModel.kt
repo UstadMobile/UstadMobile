@@ -49,6 +49,10 @@ class LeavingReasonListViewModel(
         lastPagingSource?.invalidate()
     }
 
+    fun onClickLeavingReason(leavingReason: LeavingReason) {
+
+    }
+
     companion object {
 
         const val DEST_NAME = "LeavingReasonList"
