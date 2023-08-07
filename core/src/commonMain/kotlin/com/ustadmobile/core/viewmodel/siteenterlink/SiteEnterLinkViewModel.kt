@@ -49,6 +49,17 @@ class SiteEnterLinkViewModel(
                 navigationVisible = false,
             )
         }
+
+    }
+
+    fun onQRCodeDetected(qrCode: String){
+        _uiState.update { prev ->
+            prev.copy(
+                siteLink = qrCode
+            )
+        }
+
+        onClickNext()
     }
 
     fun onClickNext() {

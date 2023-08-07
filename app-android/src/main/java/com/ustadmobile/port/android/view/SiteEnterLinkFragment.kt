@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
@@ -11,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,6 +30,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
@@ -59,9 +64,19 @@ class SiteEnterLinkFragment : UstadBaseMvvmFragment() {
 private fun SiteEnterLinkScreen(
     uiState: SiteEnterLinkUiState = SiteEnterLinkUiState(),
     onClickNext: () -> Unit = {},
+    onQRCodeDetected: (String) -> Unit = {},
     onClickNewLearningEnvironment: () -> Unit = {},
     onEditTextValueChange: (String) -> Unit = {},
 ) {
+
+    val barcodeLauncher: ActivityResultLauncher<ScanOptions> = rememberLauncherForActivityResult(
+        ScanContract()
+    ) { result ->
+        if(result.contents != null) {
+            onQRCodeDetected(result.contents)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -90,6 +105,23 @@ private fun SiteEnterLinkScreen(
             isError = uiState.linkError != null,
             enabled = uiState.fieldsEnabled,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
+            trailingIcon = {
+                IconButton(
+                    onClick = {
+                        val options = ScanOptions()
+                        options.setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES)
+                        options.setPrompt("")
+                        options.setBeepEnabled(true)
+                        options.setOrientationLocked(false)
+                        barcodeLauncher.launch(options)
+                    },
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.QrCodeScanner,
+                        contentDescription = stringResource(R.string.scan_qr_code),
+                    )
+                }
+            },
             keyboardActions = KeyboardActions(
                 onGo = {
                     onClickNext()
@@ -163,6 +195,7 @@ private fun SiteEnterLinkScreenForViewModel(
     SiteEnterLinkScreen(
         uiState = uiState,
         onClickNext = viewModel::onClickNext,
+        onQRCodeDetected = viewModel::onQRCodeDetected,
         onClickNewLearningEnvironment = { },
         onEditTextValueChange = viewModel::onSiteLinkUpdated,
     )

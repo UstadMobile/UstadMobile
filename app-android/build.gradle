@@ -427,6 +427,9 @@ dependencies {
 
     implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
 
+    //Barcode
+    implementation "com.journeyapps:zxing-android-embedded:${version_barcode_compose}"
+
     //LeakCanary - detect memory leaks
     //debugImplementation "com.squareup.leakcanary:leakcanary-android:$version_android_leakcanary"
 
