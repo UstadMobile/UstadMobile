@@ -4,11 +4,14 @@ import com.ustadmobile.core.db.dao.LanguageDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.LanguageListView
 import com.ustadmobile.lib.db.entities.Language
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 data class LanguageListUiState(
@@ -56,7 +59,17 @@ class LanguageListViewModel(
     val uiState: Flow<LanguageListUiState> = _uiState.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            _uiState.whenSubscribed {
+                val languages = activeRepo.languageDao.findLanguagesList()
 
+                _uiState.update {prev ->
+                    prev.copy(
+                        languageList = languages
+                    )
+                }
+            }
+        }
     }
 
     fun onListItemClick(language: Language) {
