@@ -77,12 +77,6 @@ private fun SiteEnterLinkScreen(
         }
     }
 
-    val options = ScanOptions()
-    options.setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES)
-    options.setPrompt("")
-    options.setBeepEnabled(true)
-    options.setOrientationLocked(false)
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -114,12 +108,17 @@ private fun SiteEnterLinkScreen(
             trailingIcon = {
                 IconButton(
                     onClick = {
+                        val options = ScanOptions()
+                        options.setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES)
+                        options.setPrompt("")
+                        options.setBeepEnabled(true)
+                        options.setOrientationLocked(false)
                         barcodeLauncher.launch(options)
                     },
                 ) {
                     Icon(
                         imageVector = Icons.Filled.QrCodeScanner,
-                        contentDescription = "",
+                        contentDescription = stringResource(R.string.scan_qr_code),
                     )
                 }
             },
