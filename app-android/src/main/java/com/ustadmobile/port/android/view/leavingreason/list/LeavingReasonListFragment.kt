@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
@@ -29,8 +30,10 @@ import com.ustadmobile.core.viewmodel.leavingreason.list.LeavingReasonListViewMo
 import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
+import com.ustadmobile.port.android.view.composable.UstadAddListItem
+import com.toughra.ustadmobile.R
 
-class LeavingReasonListFragment() : UstadBaseMvvmFragment() {
+class LeavingReasonListFragment : UstadBaseMvvmFragment() {
 
     private val viewModel: LeavingReasonListViewModel by ustadViewModels(::LeavingReasonListViewModel)
 
@@ -64,7 +67,9 @@ fun LeavingReasonListScreen(
     val uiState by viewModel.uiState.collectAsState(LeavingReasonListUiState())
 
     LeavingReasonListScreen(
-        uiState = uiState
+        uiState = uiState,
+        onClickLeavingReason = viewModel::onClickLeavingReason,
+        onClickAddLeavingReason = viewModel::onClickAdd,
     )
 }
 
@@ -72,6 +77,7 @@ fun LeavingReasonListScreen(
 fun LeavingReasonListScreen(
     uiState: LeavingReasonListUiState = LeavingReasonListUiState(),
     onClickLeavingReason: (LeavingReason) -> Unit = {},
+    onClickAddLeavingReason: () -> Unit = {},
 ) {
 
     val leavingReasonListPager = remember(uiState.leavingReasonList) {
@@ -89,6 +95,11 @@ fun LeavingReasonListScreen(
             .defaultScreenPadding()
     ) {
 
+        item {
+            UstadAddListItem(
+                text = stringResource(R.string.add_leaving_reason)
+            )
+        }
 
         items(
             items = leavingReasonListItems,

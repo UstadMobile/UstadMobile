@@ -35,6 +35,8 @@ external interface LeavingReasonListScreenProps: Props {
 
     var onClickLeavingReason: (LeavingReason) -> Unit
 
+    var onClickAddLeavingReason: () -> Unit
+
 }
 
 val LeavingReasonListScreenComponent = FC<LeavingReasonListScreenProps> { props ->
@@ -59,8 +61,8 @@ val LeavingReasonListScreenComponent = FC<LeavingReasonListScreenProps> { props 
 
             item {
                 UstadAddListItem.create {
-                    text = strings[MessageID.add_a_new_person]
-                    onClickAdd = {  }
+                    text = strings[MessageID.add_leaving_reason]
+                    onClickAdd = props.onClickAddLeavingReason
                 }
             }
 
@@ -109,5 +111,6 @@ val LeavingReasonListScreen = FC<Props> {
     LeavingReasonListScreenComponent {
         uiState = uiStateVal
         onClickLeavingReason = viewModel::onClickLeavingReason
+        onClickAddLeavingReason = viewModel::onClickAdd
     }
 }
