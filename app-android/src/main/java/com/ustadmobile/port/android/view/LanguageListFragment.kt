@@ -14,12 +14,18 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.accompanist.themeadapter.material.MdcTheme
@@ -35,8 +41,11 @@ import com.ustadmobile.core.view.LanguageListView
 import com.ustadmobile.core.viewmodel.LanguageListUiState
 import com.ustadmobile.core.viewmodel.LanguageListViewModel
 import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.port.android.util.ext.defaultAvatarSize
+import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.composable.UstadListSortHeader
+import com.ustadmobile.port.android.view.composable.UstadPersonAvatar
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -73,10 +82,20 @@ private fun LanguageListScreenForViewModel(
     viewModel: LanguageListViewModel
 ){
     val uiState: LanguageListUiState by viewModel.uiState.collectAsState(initial = LanguageListUiState())
+    val context = LocalContext.current
+
     LanguageListScreen(
         uiState = uiState,
         onListItemClick = viewModel::onListItemClick,
-        onClickSort = viewModel::onClickSort
+        onClickSort = {
+            SortBottomSheetFragment(
+                sortOptions = uiState.sortOptions,
+                selectedSort = uiState.sortOrder,
+                onSortOptionSelected = {
+                    viewModel.onClickSort(it)
+                }
+            ).show(context.getContextSupportFragmentManager(), "SortOptions")
+        }
     )
 }
 
@@ -87,6 +106,16 @@ fun LanguageListScreen(
     onListItemClick: (Language) -> Unit = {},
     onClickSort: () -> Unit = {}
 ){
+
+    val pager = remember(uiState.languageList) {
+        Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
+            pagingSourceFactory = uiState.languageList
+        )
+    }
+
+    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
@@ -101,18 +130,16 @@ fun LanguageListScreen(
         }
 
         items(
-            uiState.languageList,
-            key = {
-                it.langUid
-            }
-        ){  language ->
+            items = lazyPagingItems,
+            key = { it.langUid },
+        ) {  language ->
             ListItem(
                 modifier = Modifier
                     .clickable {
-                        onListItemClick(language)
+                        language?.also { onListItemClick(it) }
                     },
-                text = { Text(text = language.name ?: "")},
-                secondaryText = { Text(text = "${language.iso_639_1_standard} / ${language.iso_639_2_standard}")}
+                text = { Text(text = "${language?.name}")},
+                secondaryText = { Text(text = "${language?.iso_639_1_standard} / ${language?.iso_639_2_standard}")},
             )
         }
     }

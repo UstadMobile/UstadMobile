@@ -6,7 +6,10 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.LanguageListView
+import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
+import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,29 +18,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 data class LanguageListUiState(
-    val languageList: List<Language> = listOf(
-        Language().apply {
-            name = "فارسی"
-            langUid = Language.PERSIAN_LANG_UID
-            iso_639_1_standard = "fa"
-            iso_639_2_standard = "per"
-            iso_639_3_standard = "fas"
-        },
-        Language().apply{
-            name = "English"
-            langUid = Language.ENGLISH_LANG_UID
-            iso_639_1_standard = "en"
-            iso_639_2_standard = "eng"
-            iso_639_3_standard = "eng"
-        },
-        Language().apply{
-            name = "العربية"
-            langUid = Language.ARABIC_LANG_UID
-            iso_639_1_standard = "ar"
-            iso_639_2_standard = "ara"
-            iso_639_3_standard = "ara"
-        }
-    ),
+    val languageList: () -> PagingSource<Int, Language> = { EmptyPagingSource() },
     val sortOptions: List<SortOrderOption> = listOf(
         SortOrderOption(MessageID.name, LanguageDaoCommon.SORT_LANGNAME_ASC, true),
         SortOrderOption(MessageID.name, LanguageDaoCommon.SORT_LANGNAME_DESC, false),
@@ -52,21 +33,26 @@ data class LanguageListUiState(
 class LanguageListViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
-) : UstadViewModel(di, savedStateHandle, LanguageListView.VIEW_NAME) {
+) : UstadListViewModel<LanguageListUiState>(di, savedStateHandle, LanguageListUiState(), "LanguageList") {
 
-    private val _uiState = MutableStateFlow(LanguageListUiState())
+    private val pagingSourceFactory: () -> PagingSource<Int, Language> = {
+        activeRepo.languageDao.findLanguageListAsPagingSource().also {
+            lastPagingSource?.invalidate()
+            lastPagingSource = it
+        }
+    }
 
-    val uiState: Flow<LanguageListUiState> = _uiState.asStateFlow()
+    private var lastPagingSource: PagingSource<Int, Language>? = null
 
     init {
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                val languages = activeRepo.languageDao.findLanguagesList()
-
-                _uiState.update {prev ->
-                    prev.copy(
-                        languageList = languages
-                    )
+                launch {
+                    _uiState.update { prev ->
+                        prev.copy(
+                            languageList = pagingSourceFactory
+                        )
+                    }
                 }
             }
         }
@@ -76,8 +62,21 @@ class LanguageListViewModel(
 
     }
 
-    fun onClickSort() {
+    fun onClickSort(sortOption: SortOrderOption) {
+        _uiState.update { prev ->
+            prev.copy(
+                sortOrder = sortOption
+            )
+        }
+        lastPagingSource?.invalidate()
+    }
 
+    override fun onUpdateSearchResult(searchText: String) {
+        lastPagingSource?.invalidate()
+    }
+
+    override fun onClickAdd() {
+        TODO("Not yet implemented")
     }
 
 }

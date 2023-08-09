@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.dao.LanguageDaoCommon.SORT_TWO_LETTER_ASC
 import com.ustadmobile.core.db.dao.LanguageDaoCommon.SORT_TWO_LETTER_DESC
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 
@@ -86,6 +87,9 @@ expect abstract class LanguageDao : BaseDao<Language> {
 
     @Query("""SELECT * FROM Language""")
     abstract fun findLanguagesList(): List<Language>
+
+    @Query("""SELECT * FROM Language""")
+    abstract fun findLanguageListAsPagingSource(): PagingSource<Int, Language>
 
     @Query("SELECT * FROM Language WHERE name = :name LIMIT 1")
     abstract fun findByName(name: String): Language?
