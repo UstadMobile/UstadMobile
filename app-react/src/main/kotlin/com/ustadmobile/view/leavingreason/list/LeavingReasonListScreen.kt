@@ -92,12 +92,11 @@ val LeavingReasonListScreenComponent = FC<LeavingReasonListScreenProps> { props 
 }
 
 val LeavingReasonListScreenPreview = FC<Props> {
-    var uiStateVar by useState {
+    val uiStateVar by useState {
         LeavingReasonListUiState()
     }
     LeavingReasonListScreenComponent {
         uiState = uiStateVar
-        onClickLeavingReason = {}
     }
 }
 

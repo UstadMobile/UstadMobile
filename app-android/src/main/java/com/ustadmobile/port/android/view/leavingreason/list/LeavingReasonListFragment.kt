@@ -102,8 +102,7 @@ fun LeavingReasonListScreen(
         }
 
         items(
-            items = leavingReasonListItems,
-            key = { it.leavingReasonUid }
+            items = leavingReasonListItems
         ){ pendingStudent ->
             LeavingReasonListItem(
                 leavingReason = pendingStudent,
