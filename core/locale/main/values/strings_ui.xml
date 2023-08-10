@@ -183,7 +183,7 @@
     <string name="content_creation_folder_update_message">Folder was successfully updated</string>
     <string name="error_message_load_page">Failed to load the page</string>
     <string name="error_message_update_document">Failed to update document</string>
-    <string name="supported_files">Supported files: <b>Video, Audio, EPUB, Xapi Zip,H5P</b></string>
+    <string name="supported_files">Supported files: Video, Audio, EPUB, Xapi Zip,H5P</string>
     <string name="content_editor_save_error">Error while saving, try again</string>
     <string name="content_entry_export_inprogress">Exporting</string>
     <string name="content_entry_export_message">You are about to export %1$s to your device storage. Would you like to continue?</string>
@@ -240,7 +240,7 @@
     <string name="xapi_options_did">Did</string>
     <string name="xapi_options_what">What</string>
     <string name="xapi_options_when">When</string>
-    <string name="xapi_options_where">Where</string>&gt;
+    <string name="xapi_options_where">Where</string>
     <string name="time_range_all">Everything</string>
     <string name="report_filter_edit_field">Field</string>
     <string name="report_filter_edit_condition">Condition</string>
