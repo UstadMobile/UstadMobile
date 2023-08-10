@@ -194,7 +194,7 @@
         android:name="com.ustadmobile.port.android.view.contententry.list.ContentEntryList2Fragment"
         android:label="@string/content">
     </fragment>
-2
+
     <fragment
         android:id="@+id/content_entry_list_home_dest"
         android:name="com.ustadmobile.port.android.view.contententry.list.ContentEntryList2Fragment"
@@ -261,7 +261,7 @@
 
     <fragment
         android:id="@+id/leaving_reason_list"
-        android:name="com.ustadmobile.port.android.view.LeavingReasonListFragment"
+        android:name="com.ustadmobile.port.android.view.leavingreason.list.LeavingReasonListFragment"
         />
 
     <fragment

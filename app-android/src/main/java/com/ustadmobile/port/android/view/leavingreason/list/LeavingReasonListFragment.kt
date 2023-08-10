@@ -4,12 +4,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.ListItem
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -19,6 +24,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -52,7 +58,7 @@ class LeavingReasonListFragment : UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    LeavingReasonListScreen(viewModel)
+                    LeavingReasonList(viewModel)
                 }
             }
         }
@@ -61,7 +67,7 @@ class LeavingReasonListFragment : UstadBaseMvvmFragment() {
 }
 
 @Composable
-fun LeavingReasonListScreen(
+fun LeavingReasonList(
     viewModel: LeavingReasonListViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState(LeavingReasonListUiState())
@@ -97,15 +103,17 @@ fun LeavingReasonListScreen(
 
         item {
             UstadAddListItem(
-                text = stringResource(R.string.add_leaving_reason)
+                text = stringResource(R.string.add_leaving_reason),
+                onClickAdd = onClickAddLeavingReason
             )
         }
 
         items(
-            items = leavingReasonListItems
-        ){ pendingStudent ->
+            items = leavingReasonListItems,
+            key = { it.leavingReasonUid },
+        ){ pendingLeavingReason ->
             LeavingReasonListItem(
-                leavingReason = pendingStudent,
+                leavingReason = pendingLeavingReason,
                 onClick = onClickLeavingReason
             )
         }
@@ -120,11 +128,21 @@ fun LeavingReasonListItem(
 ){
 
     ListItem (
-        modifier = Modifier.clickable {
-            leavingReason?.also(onClick)
+        icon = {
+            Spacer(modifier = Modifier.width(24.dp))
         },
         text = {
             Text(text = leavingReason?.leavingReasonTitle ?: "")
+        },
+        trailing = {
+            IconButton(
+                onClick = { leavingReason?.also { onClick(it) } }
+            ){
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = stringResource(R.string.edit_leaving_reason)
+                )
+            }
         }
     )
 }

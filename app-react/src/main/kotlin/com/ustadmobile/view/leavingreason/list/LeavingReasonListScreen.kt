@@ -11,6 +11,7 @@ import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.mui.components.UstadAddListItem
+import com.ustadmobile.view.components.UstadBlankIcon
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
@@ -21,6 +22,7 @@ import csstype.pct
 import js.core.jso
 import mui.material.ListItem
 import mui.material.ListItemButton
+import mui.material.ListItemIcon
 import mui.material.ListItemText
 import mui.system.Container
 import react.FC
@@ -74,6 +76,10 @@ val LeavingReasonListScreenComponent = FC<LeavingReasonListScreenProps> { props 
                     ListItemButton{
                         onClick = {
                             leavingReason?.also { props.onClickLeavingReason(it) }
+                        }
+
+                        ListItemIcon {
+                            UstadBlankIcon()
                         }
 
                         ListItemText {

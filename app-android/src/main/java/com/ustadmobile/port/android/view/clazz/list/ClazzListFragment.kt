@@ -9,10 +9,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.contentColorFor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Lens
@@ -153,6 +156,7 @@ private fun ClazzListScreen(viewModel: ClazzListViewModel) {
     ClazzListScreen(
         uiState = uiState,
         onClickClazz = viewModel::onClickEntry,
+        onClickLeavingReason = viewModel::onClickLeavingReason,
         onClickSort =  {
             SortBottomSheetFragment(
                 sortOptions = uiState.sortOptions,
@@ -173,6 +177,7 @@ private fun ClazzListScreen(
     uiState: ClazzListUiState = ClazzListUiState(),
     onClickClazz: (Clazz) -> Unit = {},
     onClickSort: () -> Unit = {},
+    onClickLeavingReason: () -> Unit = {},
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
 ) {
 
@@ -202,6 +207,23 @@ private fun ClazzListScreen(
                 enabled = uiState.fieldsEnabled,
                 onClickSort = onClickSort
             )
+        }
+
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            Button(
+                onClick = onClickLeavingReason,
+                enabled = uiState.fieldsEnabled,
+                modifier = Modifier.defaultItemPadding(),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = colorResource(id = R.color.secondaryColor)
+                )
+            ) {
+                Text(stringResource(R.string.leaving_reasons).uppercase(),
+                    color = contentColorFor(
+                        colorResource(id = R.color.secondaryColor)
+                    )
+                )
+            }
         }
 
         item(span = { GridItemSpan(maxLineSpan) }) {
