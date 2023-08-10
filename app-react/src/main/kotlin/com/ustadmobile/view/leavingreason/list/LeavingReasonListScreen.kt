@@ -4,6 +4,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
+import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.leavingreason.list.LeavingReasonListUiState
 import com.ustadmobile.core.viewmodel.leavingreason.list.LeavingReasonListViewModel
 import com.ustadmobile.hooks.useMuiAppState
@@ -17,14 +18,17 @@ import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import csstype.Contain
 import csstype.Height
+import csstype.Margin
 import csstype.Overflow
 import csstype.pct
+import csstype.px
 import js.core.jso
+import mui.material.IconButton
 import mui.material.ListItem
-import mui.material.ListItemButton
 import mui.material.ListItemIcon
 import mui.material.ListItemText
 import mui.system.Container
+import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
@@ -73,23 +77,31 @@ val LeavingReasonListScreenComponent = FC<LeavingReasonListScreenProps> { props 
                 items = infiniteQueryResult,
                 key = { it.leavingReasonUid.toString() }
             ) { leavingReason ->
+
+
                 ListItem.create {
 
-                    ListItemIcon {
-                        UstadBlankIcon()
+                    ListItemIcon{
+                        sx {
+                            margin = Margin(
+                                left = 12.px,
+                                right = 0.px,
+                                top = 0.px,
+                                bottom = 0.px,
+                            )
+                        }
+                        + UstadBlankIcon.create()
                     }
 
                     ListItemText {
                         primary = ReactNode(leavingReason?.leavingReasonTitle)
                     }
 
-                    ListItemButton {
-                        onClick = {
+                    secondaryAction = IconButton.create {
+                        onClick = {_ ->
                             leavingReason?.also { props.onClickLeavingReason(it) }
                         }
-                        ListItemIcon {
-                            EditIcon()
-                        }
+                        + EditIcon.create()
                     }
                 }
             }
@@ -104,7 +116,22 @@ val LeavingReasonListScreenComponent = FC<LeavingReasonListScreenProps> { props 
 
 val LeavingReasonListScreenPreview = FC<Props> {
     val uiStateVar by useState {
-        LeavingReasonListUiState()
+        LeavingReasonListUiState(
+            leavingReasonList = { ListPagingSource(listOf(
+                LeavingReason().apply {
+                    leavingReasonUid = 0
+                    leavingReasonTitle = "Moved"
+                },
+                LeavingReason().apply {
+                    leavingReasonUid = 1
+                    leavingReasonTitle = "Medical"
+                },
+                LeavingReason().apply {
+                    leavingReasonUid = 2
+                    leavingReasonTitle = "Transportation problem"
+                }
+            )) }
+        )
     }
     LeavingReasonListScreenComponent {
         uiState = uiStateVar
