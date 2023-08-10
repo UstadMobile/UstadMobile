@@ -30,6 +30,7 @@ import react.Props
 import react.ReactNode
 import react.useState
 import react.create
+import mui.icons.material.Edit as EditIcon
 
 external interface LeavingReasonListScreenProps: Props {
 
@@ -73,17 +74,21 @@ val LeavingReasonListScreenComponent = FC<LeavingReasonListScreenProps> { props 
                 key = { it.leavingReasonUid.toString() }
             ) { leavingReason ->
                 ListItem.create {
-                    ListItemButton{
+
+                    ListItemIcon {
+                        UstadBlankIcon()
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(leavingReason?.leavingReasonTitle)
+                    }
+
+                    ListItemButton {
                         onClick = {
                             leavingReason?.also { props.onClickLeavingReason(it) }
                         }
-
                         ListItemIcon {
-                            UstadBlankIcon()
-                        }
-
-                        ListItemText {
-                            primary = ReactNode(leavingReason?.leavingReasonTitle)
+                            EditIcon()
                         }
                     }
                 }

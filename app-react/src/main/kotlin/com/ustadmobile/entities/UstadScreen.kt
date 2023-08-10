@@ -283,7 +283,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ClazzAssignmentSubmitterDetailViewModel.DEST_NAME, "CourseAssignmentSubmitterDetail",
         ClazzAssignmentSubmitterDetailScreen),
     UstadScreen(LeavingReasonEditViewModel.DEST_NAME, "LeavingReasonEdit", LeavingReasonEditScreen),
-    UstadScreen(LeavingReasonListViewModel.DEST_NAME, "LeavingReasonList", LeavingReasonListScreen),
+    UstadScreen(LeavingReasonListView.VIEW_NAME, "LeavingReasonList", LeavingReasonListScreen),
 )
 
 
