@@ -2,13 +2,10 @@ package com.ustadmobile.core.viewmodel.leavingreason.list
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.LeavingReasonListView
-import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
-import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
 import com.ustadmobile.core.viewmodel.leavingreason.edit.LeavingReasonEditViewModel
-import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
@@ -46,7 +43,6 @@ class LeavingReasonListViewModel(
             )
         }
     }
-
 
     override fun onUpdateSearchResult(searchText: String) {
         // do nothing
