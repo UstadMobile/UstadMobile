@@ -8,7 +8,6 @@ import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.leavingreason.edit.LeavingReasonEditViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.paging.PagingSource
-import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.lib.db.entities.LeavingReason
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
