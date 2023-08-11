@@ -78,10 +78,8 @@ import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssig
 import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreenPreview
 import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreen
 import com.ustadmobile.core.viewmodel.leavingreason.edit.LeavingReasonEditViewModel
-import com.ustadmobile.core.viewmodel.leavingreason.list.LeavingReasonListViewModel
 import com.ustadmobile.view.leavingreason.edit.LeavingReasonEditScreen
 import com.ustadmobile.view.leavingreason.list.LeavingReasonListScreen
-import com.ustadmobile.view.leavingreason.list.LeavingReasonListScreenPreview
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -284,7 +282,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ClazzAssignmentSubmitterDetailViewModel.DEST_NAME, "CourseAssignmentSubmitterDetail",
         ClazzAssignmentSubmitterDetailScreen),
     UstadScreen(LeavingReasonEditViewModel.DEST_NAME, "LeavingReasonEdit", LeavingReasonEditScreen),
-    UstadScreen(LeavingReasonListView.VIEW_NAME, "LeavingReasonList", LeavingReasonListScreenPreview),
+    UstadScreen(LeavingReasonListView.VIEW_NAME, "LeavingReasonList", LeavingReasonListScreen),
 )
 
 
