@@ -190,7 +190,7 @@ class ViewNameToDestMap: DestinationProvider {
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             HtmlEditViewModel.DEST_NAME to UstadDestination(R.id.html_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
-            TimeZoneListViewModel.DEST_NAME to UstadDestination(R.id.time_zone_list_dest),
+            TimeZoneListViewModel.DEST_NAME to UstadDestination(R.id.time_zone_list_dest)
     )
 
     override val navControllerViewId: Int
