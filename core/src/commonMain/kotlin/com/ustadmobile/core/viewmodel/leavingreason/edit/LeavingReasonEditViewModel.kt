@@ -1,7 +1,8 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.leavingreason.edit
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.lib.db.entities.LeavingReason
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

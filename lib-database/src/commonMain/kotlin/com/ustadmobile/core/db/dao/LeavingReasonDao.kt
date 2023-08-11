@@ -4,6 +4,7 @@ import com.ustadmobile.door.paging.DataSourceFactory
 import androidx.room.*
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 
@@ -58,6 +59,9 @@ expect abstract class LeavingReasonDao : BaseDao<LeavingReason> {
 
     @Query("""SELECT * FROM LeavingReason""")
     abstract fun findAllReasons(): DataSourceFactory<Int, LeavingReason>
+
+    @Query("""SELECT * FROM LeavingReason""")
+    abstract fun findAllReasonsAsPagingSource(): PagingSource<Int, LeavingReason>
 
     @Query("SELECT * FROM LeavingReason")
     abstract fun findAllReasonsLive(): List<LeavingReason>

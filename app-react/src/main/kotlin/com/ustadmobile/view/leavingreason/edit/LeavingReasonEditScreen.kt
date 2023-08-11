@@ -4,8 +4,8 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
-import com.ustadmobile.core.viewmodel.LeavingReasonEditUiState
-import com.ustadmobile.core.viewmodel.LeavingReasonEditViewModel
+import com.ustadmobile.core.viewmodel.leavingreason.edit.LeavingReasonEditUiState
+import com.ustadmobile.core.viewmodel.leavingreason.edit.LeavingReasonEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
