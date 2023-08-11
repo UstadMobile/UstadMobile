@@ -10,7 +10,6 @@ import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.UstadListViewModel
-import com.ustadmobile.core.viewmodel.leavingreason.list.LeavingReasonListViewModel
 import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Clazz
@@ -19,8 +18,6 @@ import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
 
 
@@ -159,11 +156,9 @@ class ClazzListViewModel(
     }
 
     fun onClickLeavingReason(){
-        navigateForResult(
+        navController.navigate(
             LeavingReasonListView.VIEW_NAME,
-            key = "RESULT_KEY_INVITE_STUDENTS",
-            currentValue = emptyList(),
-            serializer = ListSerializer(String.serializer())
+            emptyMap()
         )
     }
 

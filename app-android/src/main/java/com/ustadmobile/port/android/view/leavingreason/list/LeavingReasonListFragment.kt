@@ -58,7 +58,7 @@ class LeavingReasonListFragment : UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    LeavingReasonList(viewModel)
+                    LeavingReasonListScreen(viewModel)
                 }
             }
         }
@@ -67,14 +67,14 @@ class LeavingReasonListFragment : UstadBaseMvvmFragment() {
 }
 
 @Composable
-fun LeavingReasonList(
+fun LeavingReasonListScreen(
     viewModel: LeavingReasonListViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState(LeavingReasonListUiState())
 
     LeavingReasonListScreen(
         uiState = uiState,
-        onClickLeavingReason = viewModel::onClickLeavingReason,
+        onEditLeavingReason = viewModel::onEditLeavingReason,
         onClickAddLeavingReason = viewModel::onClickAdd,
     )
 }
@@ -82,7 +82,7 @@ fun LeavingReasonList(
 @Composable
 fun LeavingReasonListScreen(
     uiState: LeavingReasonListUiState = LeavingReasonListUiState(),
-    onClickLeavingReason: (LeavingReason) -> Unit = {},
+    onEditLeavingReason: (LeavingReason) -> Unit = {},
     onClickAddLeavingReason: () -> Unit = {},
 ) {
 
@@ -114,7 +114,7 @@ fun LeavingReasonListScreen(
         ){ pendingLeavingReason ->
             LeavingReasonListItem(
                 leavingReason = pendingLeavingReason,
-                onClick = onClickLeavingReason
+                onEditLeavingReason = onEditLeavingReason
             )
         }
     }
@@ -124,7 +124,7 @@ fun LeavingReasonListScreen(
 @Composable
 fun LeavingReasonListItem(
     leavingReason: LeavingReason?,
-    onClick: (LeavingReason) -> Unit,
+    onEditLeavingReason: (LeavingReason) -> Unit,
 ){
 
     ListItem (
@@ -136,7 +136,7 @@ fun LeavingReasonListItem(
         },
         trailing = {
             IconButton(
-                onClick = { leavingReason?.also { onClick(it) } }
+                onClick = { leavingReason?.also { onEditLeavingReason(it) } }
             ){
                 Icon(
                     Icons.Default.Edit,

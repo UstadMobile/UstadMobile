@@ -56,7 +56,7 @@ class LeavingReasonListViewModel(
         navigateToCreateNew(LeavingReasonEditViewModel.DEST_NAME, emptyMap())
     }
 
-    fun onClickLeavingReason(leavingReason: LeavingReason) {
+    fun onEditLeavingReason(leavingReason: LeavingReason) {
         navigateForResult(
             nextViewName = LeavingReasonEditViewModel.DEST_NAME,
             key = "",

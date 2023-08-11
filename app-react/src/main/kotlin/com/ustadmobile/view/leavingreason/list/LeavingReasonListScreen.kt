@@ -40,7 +40,7 @@ external interface LeavingReasonListScreenProps: Props {
 
     var uiState : LeavingReasonListUiState
 
-    var onClickLeavingReason: (LeavingReason) -> Unit
+    var onEditLeavingReason: (LeavingReason) -> Unit
 
     var onClickAddLeavingReason: () -> Unit
 
@@ -99,7 +99,7 @@ val LeavingReasonListScreenComponent = FC<LeavingReasonListScreenProps> { props 
 
                     secondaryAction = IconButton.create {
                         onClick = {_ ->
-                            leavingReason?.also { props.onClickLeavingReason(it) }
+                            leavingReason?.also { props.onEditLeavingReason(it) }
                         }
                         + EditIcon.create()
                     }
@@ -147,7 +147,7 @@ val LeavingReasonListScreen = FC<Props> {
 
     LeavingReasonListScreenComponent {
         uiState = uiStateVal
-        onClickLeavingReason = viewModel::onClickLeavingReason
+        onEditLeavingReason = viewModel::onEditLeavingReason
         onClickAddLeavingReason = viewModel::onClickAdd
     }
 }
