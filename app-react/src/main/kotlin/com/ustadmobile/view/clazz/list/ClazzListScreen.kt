@@ -102,8 +102,6 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
 
     val muiAppState = useMuiAppState()
 
-    val strings = useStringsXml()
-
     VirtualList {
         style = jso {
             height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
