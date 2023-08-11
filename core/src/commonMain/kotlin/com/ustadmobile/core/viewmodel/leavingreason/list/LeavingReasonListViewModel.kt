@@ -57,7 +57,7 @@ class LeavingReasonListViewModel(
             nextViewName = LeavingReasonEditViewModel.DEST_NAME,
             key = "",
             currentValue = null,
-            serializer = ClazzEnrolmentWithLeavingReason.serializer(),
+            serializer = LeavingReason.serializer(),
             args = mapOf(UstadView.ARG_ENTITY_UID to leavingReason.leavingReasonUid.toString()),
             overwriteDestination = true,
         )
