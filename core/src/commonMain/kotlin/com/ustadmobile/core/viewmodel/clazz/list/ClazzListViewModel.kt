@@ -155,13 +155,6 @@ class ClazzListViewModel(
         lastPagingSource?.invalidate()
     }
 
-    fun onClickLeavingReason(){
-        navController.navigate(
-            LeavingReasonListView.VIEW_NAME,
-            emptyMap()
-        )
-    }
-
     fun onClickFilterChip(filterOption: MessageIdOption2) {
         _uiState.update { prev ->
             prev.copy(

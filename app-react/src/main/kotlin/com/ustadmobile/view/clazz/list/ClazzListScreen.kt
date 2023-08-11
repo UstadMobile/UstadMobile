@@ -53,8 +53,6 @@ external interface ClazzListScreenProps : Props {
 
     var onClickSort: (SortOrderOption) -> Unit
 
-    var onClickLeavingReason: () -> Unit
-
     var onClickFilterChip: (MessageIdOption2) -> Unit
 
 }
@@ -125,16 +123,6 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
             }
 
             item {
-                Button.create {
-                    id = "leaving_reason_button"
-                    onClick = { props.onClickLeavingReason() }
-                    variant = ButtonVariant.contained
-                    + strings[MessageID.leaving_reasons].uppercase()
-                }
-            }
-
-
-            item {
                 UstadListFilterChipsHeader.create {
                     filterOptions = props.uiState.filterOptions
                     selectedChipId = props.uiState.selectedChipId
@@ -195,7 +183,6 @@ val ClazzListScreen = FC<Props> { props ->
         this.uiState = uiState
         onClickClazz = viewModel::onClickEntry
         onClickSort = viewModel::onSortOrderChanged
-        onClickLeavingReason = viewModel::onClickLeavingReason
         onClickFilterChip = viewModel::onClickFilterChip
     }
 
