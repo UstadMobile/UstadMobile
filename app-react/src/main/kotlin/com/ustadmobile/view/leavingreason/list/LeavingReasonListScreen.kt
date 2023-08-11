@@ -84,7 +84,7 @@ val LeavingReasonListScreenComponent = FC<LeavingReasonListScreenProps> { props 
                     ListItemIcon{
                         sx {
                             margin = Margin(
-                                left = 12.px,
+                                left = 16.px,
                                 right = 0.px,
                                 top = 0.px,
                                 bottom = 0.px,
