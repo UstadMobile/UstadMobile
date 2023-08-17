@@ -221,6 +221,11 @@
         android:label="@string/select_language" />
 
     <fragment
+        android:id="@+id/language_detail_dest"
+        android:name="com.ustadmobile.port.android.view.LanguageDetailFragment"
+        android:label="@string/select_language" />
+
+    <fragment
         android:id="@+id/language_edit_dest"
         android:name="com.ustadmobile.port.android.view.LanguageEditFragment" />
 

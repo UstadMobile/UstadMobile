@@ -12,6 +12,7 @@ import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.flow.Flow
 import kotlin.js.JsName
 
 @DoorDao
@@ -111,6 +112,9 @@ expect abstract class LanguageDao : BaseDao<Language> {
 
     @Query("SELECT *  FROM LANGUAGE where langUid = :primaryLanguageUid LIMIT 1")
     abstract fun findByUid(primaryLanguageUid: Long): Language?
+
+    @Query("SELECT *  FROM LANGUAGE where langUid = :primaryLanguageUid LIMIT 1")
+    abstract fun findByUidAsFlow(primaryLanguageUid: Long): Flow<Language?>
 
     @Query("SELECT *  FROM LANGUAGE where langUid = :primaryLanguageUid LIMIT 1")
     abstract suspend fun findByUidAsync(primaryLanguageUid: Long): Language?

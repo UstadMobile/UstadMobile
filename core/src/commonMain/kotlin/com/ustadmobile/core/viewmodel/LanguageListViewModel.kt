@@ -2,10 +2,13 @@ package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.db.dao.LanguageDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.whenSubscribed
+import com.ustadmobile.core.view.LanguageDetailView
 import com.ustadmobile.core.view.LanguageListView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.entities.Language
@@ -46,6 +49,14 @@ class LanguageListViewModel(
 
     init {
         viewModelScope.launch {
+
+            _appUiState.update { prev ->
+                prev.copy(
+                    title = "App Language" ?: "",
+                    loadingState = LoadingUiState.NOT_LOADING
+                )
+            }
+
             _uiState.whenSubscribed {
                 launch {
                     _uiState.update { prev ->
@@ -55,11 +66,15 @@ class LanguageListViewModel(
                     }
                 }
             }
+
         }
     }
 
     fun onListItemClick(language: Language) {
-
+        navController.navigate(
+            LanguageDetailView.VIEW_NAME,
+            mapOf(UstadView.ARG_ENTITY_UID to language.langUid.toString())
+        )
     }
 
     fun onClickSort(sortOption: SortOrderOption) {

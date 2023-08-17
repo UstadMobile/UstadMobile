@@ -139,6 +139,7 @@ class ViewNameToDestMap: DestinationProvider {
                     hideBottomNavigation = true),
             InviteViaLinkView.VIEW_NAME to UstadDestination(R.id.invite_via_link_dest),
             LanguageListView.VIEW_NAME to UstadDestination(R.id.language_list_dest),
+            LanguageDetailView.VIEW_NAME to UstadDestination(R.id.language_detail_dest),
             LanguageEditView.VIEW_NAME to UstadDestination(R.id.language_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
                     hideBottomNavigation = true),
