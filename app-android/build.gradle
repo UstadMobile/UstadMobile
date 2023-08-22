@@ -247,7 +247,8 @@ task generateCoreStringToAndroidResMap {
         outFile.setText(genSrcHeader + genSrcBody + genSrcFooter, "UTF-8")
     }
 }
-tasks.whenTaskAdded { task ->
+
+tasks.configureEach { task ->
     if (task.name.startsWith("compile") || task.name.startsWith("assemble")) {
         task.dependsOn(generateCoreStringToAndroidResMap)
     }
