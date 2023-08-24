@@ -176,7 +176,7 @@ kotlin {
 
                 implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
 
-                implementation "net.bytebuddy:byte-buddy:1.12.18"
+                implementation "net.bytebuddy:byte-buddy:$version_byte_buddy"
                 implementation "app.cash.turbine:turbine:$version_turbine"
             }
         }
@@ -340,7 +340,6 @@ afterEvaluate {
     compileDebugKotlinAndroid.dependsOn(prepareLocale)
     sourcesJar.dependsOn(prepareLocale)
     assemble.dependsOn(prepareLocale)
-    compileCommonMainKotlinMetadata.dependsOn(prepareLocale)
 }
 
 task copyStringValuesToWebAssets {

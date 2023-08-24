@@ -168,8 +168,8 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
             mBinding?.schoolCodeVisible = value
         }
 
-    override fun onChanged(t: PagedList<ClazzWithListDisplayDetails>?) {
-        clazzRecyclerAdapter?.submitList(t)
+    override fun onChanged(value: PagedList<ClazzWithListDisplayDetails>) {
+        clazzRecyclerAdapter?.submitList(value)
     }
 
     override val detailPresenter: UstadDetailPresenter<*, *>?

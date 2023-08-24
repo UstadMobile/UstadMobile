@@ -1,14 +1,14 @@
 package com.ustadmobile.mui.common
 
-import csstype.Cursor
-import csstype.Display
-import csstype.JustifyContent
+import web.cssom.Cursor
+import web.cssom.JustifyContent
 import csstype.PropertiesBuilder
 import js.core.jso
 import mui.material.*
 import muix.pickers.*
 import react.ReactNode
 import kotlin.js.Date
+import web.cssom.Display
 
 //As per MissedWrappers on MUI-Showcase
 // TODO: Remove when it will be implemented in MUI wrappers

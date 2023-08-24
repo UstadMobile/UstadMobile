@@ -25,9 +25,11 @@ import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_CLOUD
 /**
  * This RecyclerViewAdapter is intended to be placed in a MergeAdapter at the end. It
  */
-class ListStatusRecyclerViewAdapter<T: Any>(var lifecycleOwner: LifecycleOwner?,
-        val emptyStateString: String? = null,
-        val emptyStateDrawableId: Int = R.drawable.ic_empty): ListAdapter<RepositoryLoadHelper.RepoLoadStatus, ListStatusRecyclerViewAdapter.StatusViewHolder>(LOAD_STATUS_DIFF_UTIL),
+class ListStatusRecyclerViewAdapter<T: Any>(
+    var lifecycleOwner: LifecycleOwner?,
+    val emptyStateString: String? = null,
+    val emptyStateDrawableId: Int = R.drawable.ic_empty
+): ListAdapter<RepositoryLoadHelper.RepoLoadStatus, ListStatusRecyclerViewAdapter.StatusViewHolder>(LOAD_STATUS_DIFF_UTIL),
         Observer<RepositoryLoadHelper.RepoLoadStatus> {
 
     private inner class ListStatusMediatorLiveData: MediatorLiveData<RepositoryLoadHelper.RepoLoadStatus>() {
@@ -98,9 +100,9 @@ class ListStatusRecyclerViewAdapter<T: Any>(var lifecycleOwner: LifecycleOwner?,
         mediatorLiveData = null
     }
 
-    override fun onChanged(t: RepositoryLoadHelper.RepoLoadStatus?) {
-        if(t != null && t.loadStatus != STATUS_LOADED_WITHDATA) {
-            submitList(listOf(t))
+    override fun onChanged(value: RepositoryLoadHelper.RepoLoadStatus) {
+        if(value.loadStatus != STATUS_LOADED_WITHDATA) {
+            submitList(listOf(value))
         }else {
             submitList(emptyList())
         }

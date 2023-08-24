@@ -154,22 +154,22 @@ abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
     private var numItemsSelected = 0
 
     protected val selectionObserver = object : Observer<List<DT>> {
-        override fun onChanged(t: List<DT>?) {
+        override fun onChanged(value: List<DT>) {
             val actionModeVal = actionMode
 
-            if (!t.isNullOrEmpty() && actionModeVal == null) {
+            if (!value.isNullOrEmpty() && actionModeVal == null) {
                 val actionModeCallbackVal =
                         ListViewActionModeCallback(this@UstadListViewFragment).also {
                             this@UstadListViewFragment.actionModeCallback = it
                         }
                 actionMode = (activity as? AppCompatActivity)?.startSupportActionMode(
                         actionModeCallbackVal)
-                listPresenter?.handleSelectionOptionChanged(t)
-            } else if (actionModeVal != null && t.isNullOrEmpty()) {
+                listPresenter?.handleSelectionOptionChanged(value)
+            } else if (actionModeVal != null && value.isNullOrEmpty()) {
                 actionModeVal.finish()
             }
 
-            val listSize = t?.size ?: 0
+            val listSize = value.size
             if (listSize > 0) {
                 actionMode?.title = requireContext().getString(R.string.items_selected, listSize)
             }
@@ -290,8 +290,8 @@ abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
             field = value
         }
 
-    override fun onChanged(t: PagedList<DT>?) {
-        mDataRecyclerViewAdapter?.submitList(t)
+    override fun onChanged(value: PagedList<DT>) {
+        mDataRecyclerViewAdapter?.submitList(value)
     }
 
     override fun onMessageIdOptionSelected(view: AdapterView<*>?,

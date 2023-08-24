@@ -153,8 +153,8 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
                 field = value
             }
 
-        override fun onChanged(t: PagedList<StatementEntityWithDisplayDetails>?) {
-            statementAdapter.submitList(t)
+        override fun onChanged(value: PagedList<StatementEntityWithDisplayDetails>) {
+            statementAdapter.submitList(value)
         }
 
     }

@@ -52,8 +52,8 @@ class ScopedGrantEditFragment: UstadEditFragment<ScopedGrant>(), ScopedGrantEdit
             field?.observe(viewLifecycleOwner, this)
         }
 
-    override fun onChanged(t: List<BitmaskFlag>?) {
-        mRecyclerAdapter?.submitList(t)
+    override fun onChanged(value: List<BitmaskFlag>) {
+        mRecyclerAdapter?.submitList(value)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
