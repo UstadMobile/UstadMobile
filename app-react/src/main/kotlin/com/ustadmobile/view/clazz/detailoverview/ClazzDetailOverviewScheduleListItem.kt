@@ -5,8 +5,8 @@ import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
 import com.ustadmobile.hooks.useFormattedTime
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.view.components.UstadBlankIcon
-import csstype.Padding
-import csstype.px
+import web.cssom.Padding
+import web.cssom.px
 import mui.material.ListItem
 import mui.material.ListItemText
 import mui.system.sx

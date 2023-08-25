@@ -4,7 +4,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditUiState
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
-import csstype.ClassName
+import web.cssom.ClassName
 import js.core.jso
 import mui.icons.material.MoreVert
 import mui.material.IconButton

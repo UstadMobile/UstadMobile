@@ -1,9 +1,9 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.impl.appstate.TabItem
-import csstype.Position
-import csstype.pct
-import csstype.px
+import web.cssom.Position
+import web.cssom.pct
+import web.cssom.px
 import mui.lab.TabContext
 import mui.material.Box
 import mui.material.Tab

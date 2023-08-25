@@ -14,8 +14,8 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.common.xs
-import csstype.TextAlign
-import csstype.px
+import web.cssom.TextAlign
+import web.cssom.px
 import mui.material.*
 import mui.material.List
 import mui.material.StackDirection

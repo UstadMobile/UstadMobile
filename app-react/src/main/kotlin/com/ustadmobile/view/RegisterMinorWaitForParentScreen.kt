@@ -4,7 +4,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.RegisterMinorWaitForParentUiState
 import com.ustadmobile.mui.components.UstadDetailField
-import csstype.px
+import web.cssom.px
 import mui.icons.material.AccountCircle
 import mui.icons.material.Key
 import mui.icons.material.Visibility

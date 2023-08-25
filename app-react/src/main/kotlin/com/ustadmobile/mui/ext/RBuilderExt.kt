@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.ext
 
-import csstype.ClassName
+import web.cssom.ClassName
 import react.ComponentType
 import react.PropsWithClassName
 import react.RBuilder

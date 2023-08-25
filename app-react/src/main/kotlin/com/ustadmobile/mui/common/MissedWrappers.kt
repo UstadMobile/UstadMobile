@@ -5,6 +5,7 @@ import web.cssom.JustifyContent
 import csstype.PropertiesBuilder
 import js.core.jso
 import mui.material.*
+import mui.system.BoxProps
 import muix.pickers.*
 import react.ReactNode
 import kotlin.js.Date

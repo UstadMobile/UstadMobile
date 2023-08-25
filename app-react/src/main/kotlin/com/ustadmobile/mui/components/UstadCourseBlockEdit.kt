@@ -8,12 +8,10 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.util.ext.addOptionalSuffix
-import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.onTextChange
-import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.view.components.UstadSelectField
 import com.ustadmobile.wrappers.quill.ReactQuill
-import csstype.px
+import web.cssom.px
 import js.core.jso
 import kotlinx.datetime.TimeZone
 import mui.material.*
@@ -111,7 +109,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             if (props.uiState.minScoreVisible){
                 UstadNumberTextField {
                     id = "cbMinPoints"
-                    value = (props.uiState.courseBlock?.cbMinPoints ?: 0).toFloat()
+                    numValue = (props.uiState.courseBlock?.cbMinPoints ?: 0).toFloat()
                     asDynamic().InputProps = jso<InputBaseProps> {
                         endAdornment = InputAdornment.create {
                             position = InputAdornmentPosition.end
@@ -132,7 +130,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
         if(props.uiState.maxPointsVisible) {
             UstadNumberTextField {
                 id = "cbMaxPoints"
-                value = (props.uiState.courseBlock?.cbMaxPoints ?: 0).toFloat()
+                numValue = (props.uiState.courseBlock?.cbMaxPoints ?: 0).toFloat()
                 label = ReactNode(strings[MessageID.maximum_points])
                 error = (props.uiState.caMaxPointsError != null)
                 helperText = props.uiState.caMaxPointsError?.let { ReactNode(it) }
@@ -187,7 +185,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
         if(props.uiState.latePenaltyVisible) {
             UstadNumberTextField {
                 id = "cbLateSubmissionPenalty"
-                value = (props.uiState.courseBlock?.cbLateSubmissionPenalty ?: 0).toFloat()
+                numValue = (props.uiState.courseBlock?.cbLateSubmissionPenalty ?: 0).toFloat()
                 label = ReactNode(strings[MessageID.late_submission_penalty])
                 disabled = !props.uiState.fieldsEnabled
                 helperText = ReactNode(strings[MessageID.penalty_label])

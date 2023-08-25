@@ -1,8 +1,8 @@
 package com.ustadmobile.view.components
 
 import com.ustadmobile.core.impl.appstate.FabUiState
-import csstype.Position
-import csstype.px
+import web.cssom.Position
+import web.cssom.px
 import mui.icons.material.Add
 import mui.icons.material.Edit
 import mui.material.Fab

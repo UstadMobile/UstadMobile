@@ -1,6 +1,6 @@
 package com.ustadmobile.view.components
 
-import csstype.*
+import web.cssom.*
 import js.core.jso
 import mui.material.*
 import react.FC

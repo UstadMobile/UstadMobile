@@ -4,8 +4,8 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.entities.*
-import csstype.Padding
-import csstype.px
+import web.cssom.Padding
+import web.cssom.px
 import kotlinx.datetime.TimeZone
 import mui.icons.material.BookOutlined
 import mui.icons.material.Delete

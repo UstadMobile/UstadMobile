@@ -5,7 +5,7 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.SiteDetailUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.UstadDetailField
-import csstype.px
+import web.cssom.px
 import mui.material.*
 import mui.material.styles.TypographyVariant
 import mui.system.Stack

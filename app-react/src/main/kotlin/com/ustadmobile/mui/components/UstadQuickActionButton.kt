@@ -1,8 +1,8 @@
 package com.ustadmobile.mui.components
 
-import csstype.AlignContent
-import csstype.Display
-import csstype.px
+import web.cssom.AlignContent
+import web.cssom.Display
+import web.cssom.px
 import mui.material.*
 import mui.system.Stack
 import mui.system.StackDirection

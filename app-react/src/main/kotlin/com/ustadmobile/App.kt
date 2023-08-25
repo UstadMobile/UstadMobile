@@ -23,7 +23,7 @@ import kotlinext.js.require
 
 fun main() {
     //As per Quill wrapper (and demo). Css loader must be enabled.
-    require("react-quill/dist/quill.snow.css")
+    require<dynamic>("react-quill/dist/quill.snow.css")
 
     // As per https://github.com/Kotlin/kotlinx-datetime/issues/178
     //Avoid joda time timezones being DCE'd out

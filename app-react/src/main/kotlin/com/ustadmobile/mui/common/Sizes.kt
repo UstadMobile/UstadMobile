@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.common
 
-import csstype.px
+import web.cssom.px
 
 object Sizes {
     object Header {

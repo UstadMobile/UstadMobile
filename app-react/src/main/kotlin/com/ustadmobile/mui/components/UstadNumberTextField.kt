@@ -14,7 +14,7 @@ import kotlin.random.Random
  */
 external interface UstadNumberTextFieldProps : TextFieldProps {
 
-    override var value: Float
+    var numValue: Float
 
     var onChange: (Float) -> Unit
 
@@ -23,13 +23,13 @@ external interface UstadNumberTextFieldProps : TextFieldProps {
 val UstadNumberTextField = FC<UstadNumberTextFieldProps> { props ->
 
     var rawValue by useState {
-        if(props.value != 0.toFloat()) props.value.toString() else ""
+        if(props.numValue != 0.toFloat()) props.numValue.toString() else ""
     }
 
     //If props change to something other than what we have set, change rawValue
-    useEffect(props.value) {
-        if(props.value != (rawValue.toIntOrNull()?.toFloat() ?: 0)) {
-            rawValue = props.value.toString()
+    useEffect(props.numValue) {
+        if(props.numValue != (rawValue.toIntOrNull()?.toFloat() ?: 0)) {
+            rawValue = props.numValue.toString()
         }
     }
 
@@ -67,7 +67,7 @@ val UstadNumberTextFieldPreview = FC<Props> {
         spacing = responsive (3)
 
         UstadNumberTextField {
-            value = aNumber
+            numValue = aNumber
             id = "numberfield"
             label = ReactNode("Phone")
             placeholder = "Phone"

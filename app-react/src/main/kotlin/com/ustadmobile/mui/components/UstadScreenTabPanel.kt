@@ -2,9 +2,9 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.entities.USTAD_SCREENS
 import com.ustadmobile.hooks.useMuiAppState
-import csstype.Height
-import csstype.Overflow
-import csstype.px
+import web.cssom.Height
+import web.cssom.Overflow
+import web.cssom.px
 import js.core.tupleOf
 import mui.lab.TabPanel
 import mui.material.Box

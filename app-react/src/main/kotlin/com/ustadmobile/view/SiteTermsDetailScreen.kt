@@ -2,7 +2,7 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.viewmodel.SiteTermsDetailUiState
 import com.ustadmobile.lib.db.entities.SiteTerms
-import csstype.px
+import web.cssom.px
 import js.core.jso
 import mui.material.Container
 import mui.system.Stack

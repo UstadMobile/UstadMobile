@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.common
 
-import csstype.ident
+import web.cssom.ident
 
 object Area {
     val Header = ident("header")

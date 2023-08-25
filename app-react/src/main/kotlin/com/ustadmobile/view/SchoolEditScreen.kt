@@ -7,7 +7,7 @@ import com.ustadmobile.core.viewmodel.SchoolEditUiState
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadTextEditField
-import csstype.px
+import web.cssom.px
 import mui.material.Box
 import mui.material.Container
 import mui.material.Stack

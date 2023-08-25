@@ -6,7 +6,7 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.view.clazzassignment.detailoverview.ASSIGNMENT_STATUS_MAP
-import csstype.rgba
+import web.cssom.rgb
 import js.core.jso
 import mui.icons.material.Done
 import mui.icons.material.EmojiEvents
@@ -56,15 +56,15 @@ val UstadAssignmentSubmissionHeader = FC<UstadAssignmentSubmissionHeaderProps> {
                 + " "
 
                 if (props.uiState.latePenaltyVisible) {
-                    span { style = jso {
-                        color = rgba(255, 0,0, 1.0)
-                    }
-                        child(ReactNode(
-                            strings[MessageID.late_penalty]
-                                .replace("%1\$s", (
-                                        props.uiState.block?.cbLateSubmissionPenalty ?: 0)
-                                    .toString())
-                        ))
+                    span {
+                        style = jso {
+                            color = rgb(255, 0,0, 1.0)
+                        }
+
+                        + (strings[MessageID.late_penalty]
+                            .replace("%1\$s", (
+                                props.uiState.block?.cbLateSubmissionPenalty ?: 0)
+                                .toString()))
                     }
                 }
             }

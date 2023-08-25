@@ -21,7 +21,7 @@ import com.ustadmobile.view.components.UstadEditHeader
 import com.ustadmobile.view.components.UstadSwitchField
 import com.ustadmobile.wrappers.reacteasysort.LockAxis
 import com.ustadmobile.wrappers.reacteasysort.SortableList
-import csstype.pct
+import web.cssom.pct
 import mui.icons.material.Add
 import mui.material.*
 import mui.material.List
@@ -29,7 +29,7 @@ import mui.system.responsive
 import mui.system.sx
 import react.*
 import com.ustadmobile.util.ext.onTextChange
-import csstype.Cursor
+import web.cssom.Cursor
 import js.core.jso
 import com.ustadmobile.mui.common.inputCursor
 import com.ustadmobile.wrappers.quill.ReactQuill

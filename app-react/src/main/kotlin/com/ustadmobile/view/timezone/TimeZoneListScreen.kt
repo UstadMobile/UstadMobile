@@ -10,10 +10,10 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
-import csstype.Contain
-import csstype.Height
-import csstype.Overflow
-import csstype.pct
+import web.cssom.Contain
+import web.cssom.Height
+import web.cssom.Overflow
+import web.cssom.pct
 import js.core.jso
 import kotlinx.datetime.TimeZone
 import mui.material.Container

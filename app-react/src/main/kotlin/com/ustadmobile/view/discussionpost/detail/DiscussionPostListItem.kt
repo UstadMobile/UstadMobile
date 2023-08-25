@@ -8,9 +8,9 @@ import mui.material.ListItemIcon
 import react.FC
 import react.Props
 import com.ustadmobile.view.components.UstadPersonAvatar
-import csstype.Display
-import csstype.JustifyContent
-import csstype.pct
+import web.cssom.Display
+import web.cssom.JustifyContent
+import web.cssom.pct
 import kotlinx.datetime.TimeZone
 import mui.material.Box
 import mui.material.ListItemAlignItems

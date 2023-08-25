@@ -8,9 +8,9 @@ import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadNumberTextField
 import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.util.ext.onTextChange
-import csstype.Display
-import csstype.JustifyContent
-import csstype.pct
+import web.cssom.Display
+import web.cssom.JustifyContent
+import web.cssom.pct
 import js.core.jso
 import mui.material.Box
 import mui.material.Button
@@ -82,7 +82,7 @@ val CourseAssignmentMarkEdit = FC<CourseAssignmentMarkEditProps> { props ->
                 sx {
                     marginRight = theme.spacing(1)
                 }
-                value = props.draftMark.camMark
+                numValue = props.draftMark.camMark
                 label = ReactNode(strings[MessageID.mark])
                 onChange = {
                     props.onChangeDraftMark(props.draftMark.shallowCopy {

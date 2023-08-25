@@ -15,11 +15,11 @@ import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
-import csstype.Contain
-import csstype.Height
-import csstype.Overflow
-import csstype.pct
-import csstype.px
+import web.cssom.Contain
+import web.cssom.Height
+import web.cssom.Overflow
+import web.cssom.pct
+import web.cssom.px
 import js.core.jso
 import mui.icons.material.AccountCircle
 import mui.material.*

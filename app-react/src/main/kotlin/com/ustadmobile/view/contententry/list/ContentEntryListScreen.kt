@@ -19,7 +19,7 @@ import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
-import csstype.*
+import web.cssom.*
 import js.core.jso
 import mui.material.*
 import mui.material.List

@@ -1,6 +1,7 @@
 package com.ustadmobile.mui.components
 
-import csstype.*
+import csstype.PropertiesBuilder
+import web.cssom.*
 import emotion.react.css
 import js.core.jso
 import mui.icons.material.Search
@@ -10,7 +11,7 @@ import mui.system.sx
 import react.dom.html.ReactHTML.div
 import web.html.HTMLInputElement
 import react.*
-
+import web.cssom.rgb
 
 external interface AppBarSearchProps: Props {
     var searchText: String
@@ -41,7 +42,7 @@ val AppBarSearch = FC<AppBarSearchProps> {props ->
         css {
             position = Position.relative
             borderRadius = theme.shape.borderRadius
-            backgroundColor = rgba(255, 255, 255, 0.15)
+            backgroundColor = rgb(255, 255, 255, 0.15)
             marginLeft = 0.px
             width = Auto.auto
         }

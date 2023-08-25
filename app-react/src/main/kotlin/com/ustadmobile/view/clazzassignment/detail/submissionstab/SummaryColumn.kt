@@ -2,11 +2,11 @@ package com.ustadmobile.view.clazzassignment.detail.submissionstab
 
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.mui.components.ThemeContext
-import csstype.Border
-import csstype.LineStyle
-import csstype.Padding
-import csstype.TextAlign
-import csstype.px
+import web.cssom.Border
+import web.cssom.LineStyle
+import web.cssom.Padding
+import web.cssom.TextAlign
+import web.cssom.px
 import mui.material.Stack
 import mui.material.Typography
 import mui.material.styles.TypographyVariant

@@ -4,9 +4,9 @@ import com.ustadmobile.core.db.dao.ClazzDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.util.SortOrderOption
-import csstype.JustifyContent
-import csstype.pct
-import csstype.px
+import web.cssom.JustifyContent
+import web.cssom.pct
+import web.cssom.px
 import mui.icons.material.ArrowDownward
 import mui.icons.material.ArrowUpward
 import mui.material.*

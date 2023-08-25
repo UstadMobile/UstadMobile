@@ -15,7 +15,7 @@ import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
-import csstype.px
+import web.cssom.px
 import kotlinx.datetime.TimeZone
 import mui.material.*
 import mui.system.responsive
@@ -27,8 +27,8 @@ import react.create
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState as UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.mui.components.UstadCourseAssignmentMarkListItem
 import com.ustadmobile.wrappers.quill.ReactQuill
-import csstype.Height
-import csstype.pct
+import web.cssom.Height
+import web.cssom.pct
 import js.core.jso
 import mui.icons.material.Done as DoneIcon
 import mui.icons.material.DoneAll as DoneAllIcon
@@ -45,6 +45,8 @@ import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
 import com.ustadmobile.view.clazzassignment.UstadCommentListItem
 import com.ustadmobile.view.components.UstadDetailHeader
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
+import web.cssom.Contain
+import web.cssom.Overflow
 
 val ASSIGNMENT_STATUS_MAP = mapOf(
     CourseAssignmentSubmission.NOT_SUBMITTED to DoneIcon,
@@ -110,8 +112,8 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
         style = jso {
             height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
             width = 100.pct
-            contain = csstype.Contain.strict
-            overflowY = csstype.Overflow.scroll
+            contain = Contain.strict
+            overflowY = Overflow.scroll
         }
 
         content = virtualListContent {

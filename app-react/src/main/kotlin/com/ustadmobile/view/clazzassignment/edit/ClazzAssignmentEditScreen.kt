@@ -4,7 +4,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.*
-import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditUiState
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants.TextLimitType
@@ -25,8 +24,8 @@ import com.ustadmobile.mui.components.UstadNumberTextField
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.view.components.UstadSelectField
 import com.ustadmobile.view.components.UstadSwitchField
-import csstype.Cursor
-import csstype.px
+import web.cssom.Cursor
+import web.cssom.px
 import js.core.jso
 import mui.material.*
 import mui.system.responsive
@@ -143,7 +142,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 UstadNumberTextField {
                     id = "caSizeLimit"
                     variant = FormControlVariant.outlined
-                    value = (props.uiState.entity?.assignment?.caSizeLimit ?: 0).toFloat()
+                    numValue = (props.uiState.entity?.assignment?.caSizeLimit ?: 0).toFloat()
                     label = ReactNode(strings[MessageID.size_limit])
                     disabled = !props.uiState.fieldsEnabled
                     onChange = {
@@ -158,7 +157,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 UstadNumberTextField {
                     id = "caNumberOfFiles"
                     variant = FormControlVariant.outlined
-                    value = (props.uiState.entity?.assignment?.caNumberOfFiles ?: 0).toFloat()
+                    numValue = (props.uiState.entity?.assignment?.caNumberOfFiles ?: 0).toFloat()
                     label = ReactNode(strings[MessageID.number_of_files])
                     disabled = props.uiState.fieldsEnabled
                     onChange = {
@@ -206,7 +205,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
 
                 UstadNumberTextField {
                     id = "caTextLimit"
-                    value = (props.uiState.entity?.assignment?.caTextLimit ?: 0).toFloat()
+                    numValue = (props.uiState.entity?.assignment?.caTextLimit ?: 0).toFloat()
                     label = ReactNode(strings[MessageID.maximum])
                     placeholder = strings[MessageID.maximum]
                     disabled = !props.uiState.fieldsEnabled
@@ -271,7 +270,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                         id = "caPeerReviewerCount"
                         fullWidth = true
                         variant = FormControlVariant.outlined
-                        value = (props.uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toFloat()
+                        numValue = (props.uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toFloat()
                         label = ReactNode(strings[MessageID.reviews_per_user_group])
                         disabled = !props.uiState.fieldsEnabled
                         error = props.uiState.reviewerCountError != null

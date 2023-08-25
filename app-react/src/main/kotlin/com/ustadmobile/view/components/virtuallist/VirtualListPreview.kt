@@ -5,13 +5,15 @@ import com.ustadmobile.door.paging.LoadResult
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
-import csstype.*
+import web.cssom.*
 import js.core.jso
 import mui.material.Container
 import mui.material.ListItem
 import mui.material.ListItemText
 import mui.material.Typography
 import react.*
+import web.cssom.Contain
+import web.cssom.Overflow
 
 val demoPersonList = (0..100).map {
     PersonWithDisplayDetails().apply {
@@ -35,8 +37,8 @@ val VirtualListPreview = FC<Props> {
         style = jso {
             height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
             width = 100.pct
-            contain = csstype.Contain.strict
-            overflowY = csstype.Overflow.scroll
+            contain = Contain.strict
+            overflowY = Overflow.scroll
         }
 
         content = virtualListContent {

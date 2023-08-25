@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.PersonParentJoinWithMinorPerson
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.view.components.UstadMessageIdSelectField
-import csstype.px
+import web.cssom.px
 import js.core.jso
 import mui.material.*
 import mui.material.styles.TypographyVariant

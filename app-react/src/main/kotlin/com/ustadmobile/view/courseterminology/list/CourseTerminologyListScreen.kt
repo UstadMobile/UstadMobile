@@ -10,8 +10,8 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.view.components.UstadBlankIcon
-import csstype.Height
-import csstype.pct
+import web.cssom.Height
+import web.cssom.pct
 import js.core.jso
 import react.FC
 import react.Props
@@ -24,6 +24,8 @@ import react.ReactNode
 import react.create
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.core.generated.locale.MessageID
+import web.cssom.Contain
+import web.cssom.Overflow
 
 
 external interface CourseTerminologyListProps: Props {
@@ -50,8 +52,8 @@ val CourseTerminologyListComponent = FC<CourseTerminologyListProps> { props ->
         style = jso {
             height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
             width = 100.pct
-            contain = csstype.Contain.strict
-            overflowY = csstype.Overflow.scroll
+            contain = Contain.strict
+            overflowY = Overflow.scroll
         }
 
         content = virtualListContent {

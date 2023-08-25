@@ -6,7 +6,7 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.listItemUiState
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.view.clazzassignment.detailoverview.ASSIGNMENT_STATUS_MAP
-import csstype.px
+import web.cssom.px
 import mui.icons.material.AccountCircle as AccountCircleIcon
 import mui.icons.material.Comment as CommentIcon
 import mui.icons.material.Done as DoneIcon

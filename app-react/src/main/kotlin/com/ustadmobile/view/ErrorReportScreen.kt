@@ -5,7 +5,7 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.ErrorReportUiState
 import com.ustadmobile.lib.db.entities.ErrorReport
-import csstype.px
+import web.cssom.px
 import mui.icons.material.CopyAll
 import mui.icons.material.Share
 import mui.material.*
@@ -16,6 +16,7 @@ import react.FC
 import react.Props
 import react.dom.aria.ariaLabel
 import react.dom.html.ReactHTML.img
+import web.cssom.JustifyContent
 
 external interface ErrorReportProps: Props {
     var uiState: ErrorReportUiState
@@ -61,7 +62,7 @@ val ErrorReportComponent2 = FC<ErrorReportProps> { props ->
                 spacing = responsive(20.px)
 
                 sx {
-                    justifyContent = csstype.JustifyContent.spaceBetween
+                    justifyContent = JustifyContent.spaceBetween
                 }
 
                 Stack{

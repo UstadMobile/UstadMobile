@@ -12,9 +12,9 @@ import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.common.md
 import com.ustadmobile.mui.common.xs
 import com.ustadmobile.mui.components.UstadQuickActionButton
-import csstype.*
-import csstype.Padding
-import csstype.PlaceContent.Companion.end
+import web.cssom.*
+import web.cssom.Padding
+import web.cssom.PlaceContent.Companion.end
 import mui.material.*
 import mui.material.Badge
 import mui.material.List

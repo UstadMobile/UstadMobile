@@ -6,7 +6,7 @@ import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.mui.common.md
 import com.ustadmobile.mui.common.xs
 import com.ustadmobile.view.components.UstadBlankIcon
-import csstype.*
+import web.cssom.*
 import js.core.jso
 import mui.icons.material.AccountCircle
 import mui.icons.material.CalendarToday
@@ -182,9 +182,9 @@ val UstadDetailFieldPreview = FC<Props> {
             UstadDetailField {
                 valueText = span.create {
                     style = jso {
-                        color = rgba(255, 0, 0, 1.0)
+                        color = rgb(255, 0, 0, 1.0)
                     }
-                    child(ReactNode("Span Text"))
+                    + "Simple Text"
                 }
                 labelText = "Simple Text"
                 icon = AccountCircle.create()

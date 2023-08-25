@@ -3,7 +3,7 @@ package com.ustadmobile.view.discussionpost.detail
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.wrappers.quill.ReactQuill
-import csstype.px
+import web.cssom.px
 import mui.material.Button
 import mui.material.ButtonVariant
 import mui.system.sx

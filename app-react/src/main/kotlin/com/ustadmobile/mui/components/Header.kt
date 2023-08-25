@@ -4,7 +4,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.mui.common.Area
-import csstype.*
+import web.cssom.*
 import mui.system.sx
 import mui.material.*
 import mui.material.styles.TypographyVariant.Companion.h6

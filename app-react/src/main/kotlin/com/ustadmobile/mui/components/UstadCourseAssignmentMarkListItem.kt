@@ -8,11 +8,11 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
-import csstype.Display
-import csstype.JustifyContent
-import csstype.pct
-import csstype.px
-import csstype.rgba
+import web.cssom.Display
+import web.cssom.JustifyContent
+import web.cssom.pct
+import web.cssom.px
+import web.cssom.rgb
 import js.core.jso
 import kotlinx.datetime.TimeZone
 import mui.icons.material.EmojiEvents
@@ -106,7 +106,7 @@ val UstadCourseAssignmentMarkListItem = FC<UstadCourseAssignmentMarkListItemProp
                     if (props.uiState.camPenaltyVisible) {
                         span {
                             style = jso {
-                                color = rgba(255, 0,0, 1.0)
+                                color = rgb(255, 0,0, 1.0)
                             }
 
                             +strings[MessageID.late_penalty]

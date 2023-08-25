@@ -15,7 +15,7 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.mui.components.UstadQuickActionButton
 import com.ustadmobile.view.components.UstadFab
-import csstype.ObjectFit
+import web.cssom.ObjectFit
 import mui.material.List
 //WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
 import mui.material.*
@@ -38,7 +38,7 @@ import mui.system.Stack
 import mui.system.StackDirection
 import react.*
 import kotlin.js.Date
-import csstype.px
+import web.cssom.px
 import emotion.react.css
 
 val PersonDetailScreen = FC<Props> {

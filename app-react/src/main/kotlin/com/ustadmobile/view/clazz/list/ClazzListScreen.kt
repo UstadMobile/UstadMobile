@@ -25,7 +25,7 @@ import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
-import csstype.*
+import web.cssom.*
 import js.core.jso
 import mui.icons.material.Add
 import mui.icons.material.LensRounded
@@ -37,7 +37,7 @@ import mui.system.responsive
 import mui.system.sx
 import react.*
 import react.router.useLocation
-import web.dom.css.getComputedStyle
+import web.dom.getComputedStyle
 import web.events.Event
 import web.events.EventHandler
 import web.html.HTMLElement
@@ -264,9 +264,7 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
 
     Card {
         key = props.clazzItem?.clazzUid?.toString()
-        onClick = {
-            props.clazzItem?.also { props.onClickClazz(it) }
-        }
+
         sx {
             margin = 10.px
             width = (props.width - 20).px
@@ -276,6 +274,10 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
         CardActionArea {
             sx {
                 padding = 15.px
+            }
+
+            onClick = {
+                props.clazzItem?.also { props.onClickClazz(it) }
             }
 
             Stack {

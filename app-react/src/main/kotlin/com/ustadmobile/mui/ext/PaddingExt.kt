@@ -1,7 +1,7 @@
 package com.ustadmobile.mui.ext
 
-import csstype.Padding
-import csstype.px
+import web.cssom.Padding
+import web.cssom.px
 import mui.material.GridProps
 
 fun paddingCourseBlockIndent(

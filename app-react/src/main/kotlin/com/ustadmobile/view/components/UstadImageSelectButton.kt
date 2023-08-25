@@ -2,7 +2,7 @@ package com.ustadmobile.view.components
 
 import com.ustadmobile.hooks.useAttachmentUriSrc
 import com.ustadmobile.mui.components.ThemeContext
-import csstype.*
+import web.cssom.*
 import emotion.react.css
 import js.core.jso
 import mui.icons.material.AddAPhoto

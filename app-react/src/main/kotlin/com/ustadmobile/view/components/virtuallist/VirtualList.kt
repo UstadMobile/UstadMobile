@@ -1,7 +1,7 @@
 package com.ustadmobile.view.components.virtuallist
 
 import com.ustadmobile.door.paging.LoadResult
-import csstype.*
+import web.cssom.*
 import js.core.jso
 import react.*
 import react.dom.html.ReactHTML.div

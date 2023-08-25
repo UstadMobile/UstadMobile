@@ -4,7 +4,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.HolidayCalendarListUiState
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
-import csstype.px
+import web.cssom.px
 import mui.material.*
 import mui.system.responsive
 import react.FC

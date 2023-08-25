@@ -5,8 +5,8 @@ import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.view.CONTENT_ENTRY_TYPE_ICON_MAP
 import com.ustadmobile.wrappers.reacteasysort.SortableItem
-import csstype.number
-import csstype.px
+import web.cssom.number
+import web.cssom.px
 import mui.icons.material.SvgIconComponent
 import mui.icons.material.Folder
 import mui.icons.material.Article

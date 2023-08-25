@@ -2,10 +2,10 @@
 
 package com.ustadmobile.view.components.virtuallist
 
-import csstype.Position
-import csstype.pct
-import csstype.px
-import csstype.translatey
+import web.cssom.Position
+import web.cssom.pct
+import web.cssom.px
+import web.cssom.translatey
 import js.core.jso
 import react.*
 import react.dom.html.ReactHTML

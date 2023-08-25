@@ -1,6 +1,6 @@
 package com.ustadmobile.view.components
 
-import csstype.number
+import web.cssom.number
 import mui.icons.material.CheckBoxOutlineBlank
 import mui.system.sx
 import react.FC

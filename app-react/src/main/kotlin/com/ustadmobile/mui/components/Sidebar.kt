@@ -9,9 +9,9 @@ import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewMode
 import com.ustadmobile.entities.USTAD_SCREENS
 import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
-import csstype.Color
-import csstype.Display
-import csstype.None
+import web.cssom.Color
+import web.cssom.Display
+import web.cssom.None
 import mui.material.*
 import mui.icons.material.School
 import mui.icons.material.LibraryBooks

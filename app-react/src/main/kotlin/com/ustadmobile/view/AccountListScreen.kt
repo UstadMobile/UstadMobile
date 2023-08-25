@@ -8,7 +8,7 @@ import com.ustadmobile.core.viewmodel.AccountListUiState
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UserSession
 import com.ustadmobile.mui.components.UstadAddListItem
-import csstype.px
+import web.cssom.px
 //WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
 import mui.icons.material.Delete
 import mui.icons.material.AccountCircle
@@ -31,7 +31,7 @@ external interface AccountListProps: Props {
     var onLogoutClick: () -> Unit
 }
 
-interface AccountListItemContentProps: Props{
+external interface AccountListItemContentProps: Props{
     var account: UserSessionWithPersonAndEndpoint?
     var onDeleteListItemClick: ((UserSessionWithPersonAndEndpoint?) -> Unit)?
 }

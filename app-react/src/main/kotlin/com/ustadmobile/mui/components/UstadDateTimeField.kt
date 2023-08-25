@@ -1,7 +1,7 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.util.ext.chopOffSeconds
-import csstype.px
+import web.cssom.px
 import js.core.jso
 import kotlinx.datetime.*
 import mui.material.TextField

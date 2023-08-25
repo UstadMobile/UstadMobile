@@ -1,9 +1,9 @@
 package com.ustadmobile.mui.components
 
-import csstype.Overflow
-import csstype.TextOverflow
-import csstype.WhiteSpace
-import csstype.pct
+import web.cssom.Overflow
+import web.cssom.TextOverflow
+import web.cssom.WhiteSpace
+import web.cssom.pct
 import mui.material.Typography
 import mui.material.styles.TypographyVariant
 import mui.system.PropsWithSx

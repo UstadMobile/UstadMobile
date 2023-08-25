@@ -14,7 +14,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadNumberTextField
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadSelectField
-import csstype.px
+import web.cssom.px
 import mui.icons.material.AccountCircle
 import mui.material.*
 import mui.system.responsive
@@ -59,7 +59,7 @@ val CourseGroupSetEditComponent2 = FC<CourseGroupSetEditProps> { props ->
 
             UstadNumberTextField {
                 id = "cgs_total_groups"
-                value = (props.uiState.courseGroupSet?.cgsTotalGroups ?: 2).toFloat()
+                numValue = (props.uiState.courseGroupSet?.cgsTotalGroups ?: 2).toFloat()
                 label = ReactNode(strings[MessageID.number_of_groups])
                 helperText = props.uiState.numOfGroupsError?.let { ReactNode(it) }
                 error = props.uiState.numOfGroupsError != null
