@@ -20,3 +20,5 @@ include ':app-android',
 
 rootProject.name = "UstadMobile"
 
+include ':app-desktop'
+include ':lib-ui-compose'
