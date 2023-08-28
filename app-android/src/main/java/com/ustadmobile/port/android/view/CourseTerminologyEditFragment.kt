@@ -28,7 +28,7 @@ import com.ustadmobile.port.android.util.compose.messageIdResource
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.testTag
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
-import com.ustadmobile.port.android.view.composable.UstadErrorText
+import com.ustadmobile.libuicompose.components.UstadErrorText
 
 class CourseTerminologyEditFragment: UstadBaseMvvmFragment() {
 

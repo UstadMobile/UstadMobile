@@ -48,7 +48,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
-import com.ustadmobile.port.android.view.composable.UstadInputFieldLayout
+import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 
 
 interface ReportFilterEditFragmentEventHandler {

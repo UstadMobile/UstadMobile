@@ -6,6 +6,15 @@ pluginManagement {
     }
 }
 
+//As per https://docs.gradle.org/current/userguide/platforms.html
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            library("kodein-di", "org.kodein.di:kodein-di:7.20.2")
+        }
+    }
+}
+
 
 include ':app-android',
         ':app-ktor-server',

@@ -1,10 +1,9 @@
-package com.ustadmobile.port.android.view.composable
+package com.ustadmobile.libuicompose.components
 
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun UstadErrorText(
@@ -19,7 +18,6 @@ fun UstadErrorText(
 }
 
 @Composable
-@Preview
 private fun UstadErrorTextPreview() {
     UstadErrorText(
         error = "Email is not valid"

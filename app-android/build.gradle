@@ -5,6 +5,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'org.jetbrains.kotlin.kapt'
     id 'kotlin-parcelize'
+    id 'org.jetbrains.compose' version "1.4.3"
 }
 
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
@@ -44,7 +45,6 @@ kapt {
 android {
     buildFeatures {
         dataBinding true
-        compose true
     }
 
     //APK splitting would interfere with sideloading the app between different targets and the size
@@ -61,10 +61,6 @@ android {
         abi {
             enableSplit = false
         }
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.2"
     }
 
     kotlinOptions {
@@ -277,6 +273,7 @@ dependencies {
 
     implementation project(':core')
     implementation project(':sharedse')
+    implementation project(':lib-ui-compose')
 
     implementation "com.github.UstadMobile.door:door-runtime:$version_door"
     implementation project(':lib-database')

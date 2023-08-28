@@ -34,7 +34,7 @@ import com.ustadmobile.port.android.util.compose.courseTerminologyEntryResource
 import com.ustadmobile.port.android.util.compose.rememberCourseTerminologyEntries
 import com.ustadmobile.port.android.view.composable.UstadDateField
 import com.ustadmobile.port.android.view.composable.UstadExposedDropDownMenuField
-import com.ustadmobile.port.android.view.composable.UstadInputFieldLayout
+import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 
 

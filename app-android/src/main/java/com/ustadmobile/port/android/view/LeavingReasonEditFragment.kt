@@ -25,7 +25,7 @@ import com.ustadmobile.core.viewmodel.LeavingReasonEditViewModel
 import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
-import com.ustadmobile.port.android.view.composable.UstadInputFieldLayout
+import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 
 
 class LeavingReasonEditFragment: UstadBaseMvvmFragment() {
