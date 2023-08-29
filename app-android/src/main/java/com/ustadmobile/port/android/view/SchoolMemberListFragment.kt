@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemSchoolmemberListItemBinding
 import com.toughra.ustadmobile.databinding.ItemSchoolmemberPendingListItemBinding
-import com.ustadmobile.core.controller.PersonListPresenter
 import com.ustadmobile.core.controller.SchoolMemberListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -24,6 +23,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.core.view.SchoolMemberListView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
@@ -206,7 +206,7 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
         if (v?.id == R.id.item_createnew_layout)
             mPresenter?.handleClickAddNewItem(
                 arguments.toStringMap(),
-                PersonListPresenter.RESULT_PERSON_KEY)
+                PersonListViewModel.RESULT_PERSON_KEY)
         else {
             super.onClick(v)
         }

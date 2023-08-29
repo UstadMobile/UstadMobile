@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.SchoolEditUiState
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
@@ -31,7 +31,7 @@ external interface SchoolEditScreenProps : Props {
 
 val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
 
-    val strings: StringsXml = useStringsXml()
+    val strings: StringsXml = useStringProvider()
 
     Container {
         maxWidth = "lg"
@@ -41,7 +41,7 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.entity?.schoolName ?: ""
-                label = strings[MessageID.name]
+                label = strings[MR.strings.name]
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
                     props.onSchoolChanged(props.uiState.entity?.shallowCopy {
@@ -52,7 +52,7 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.entity?.schoolDesc ?: ""
-                label = strings[MessageID.description]
+                label = strings[MR.strings.description]
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
                     props.onSchoolChanged(props.uiState.entity?.shallowCopy {
@@ -63,7 +63,7 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.entity?.schoolTimeZone ?: ""
-                label = strings[MessageID.timezone]
+                label = strings[MR.strings.timezone]
                 enabled = props.uiState.fieldsEnabled
                 readOnly = true
                 onClick = props.onClickTimeZone
@@ -72,7 +72,7 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.entity?.holidayCalendar?.umCalendarName ?: ""
-                label = strings[MessageID.holiday_calendar]
+                label = strings[MR.strings.holiday_calendar]
                 enabled = props.uiState.fieldsEnabled
                 readOnly = true
                 onClick = props.onClickHolidayCalendar
@@ -81,7 +81,7 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.entity?.schoolAddress ?: ""
-                label = strings[MessageID.address]
+                label = strings[MR.strings.address]
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
                     props.onSchoolChanged(props.uiState.entity?.shallowCopy {
@@ -92,7 +92,7 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.entity?.schoolPhoneNumber ?: ""
-                label = strings[MessageID.phone_number]
+                label = strings[MR.strings.phone_number]
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
                     props.onSchoolChanged(props.uiState.entity?.shallowCopy {
@@ -103,7 +103,7 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.entity?.schoolEmailAddress ?: ""
-                label = strings[MessageID.email]
+                label = strings[MR.strings.email]
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
                     props.onSchoolChanged(props.uiState.entity?.shallowCopy {

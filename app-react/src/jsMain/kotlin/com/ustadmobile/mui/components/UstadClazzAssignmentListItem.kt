@@ -1,8 +1,8 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.controller.SubmissionConstants
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.entities.*
@@ -104,7 +104,7 @@ private val DateAndPointRow = FC<UstadClazzAssignmentListItemProps> { props ->
 //                Typography {
 //                    + ("${assignment.mark?.camMark ?: 0}/" +
 //                            "${props.courseBlock.cbMaxPoints} " +
-//                            strings[MessageID.points])
+//                            strings[MR.strings.points])
 //                }
             }
         }
@@ -114,7 +114,7 @@ private val DateAndPointRow = FC<UstadClazzAssignmentListItemProps> { props ->
 
 private val SecondaryContent = FC<UstadClazzAssignmentListItemProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     val courseBlockUiState = props.courseBlock.listItemUiState
 
@@ -155,25 +155,25 @@ private val SecondaryContent = FC<UstadClazzAssignmentListItemProps> { props ->
 
         if (assignmentUiState?.progressTextVisible == true){
             Typography {
-                + (strings[MessageID.three_num_items_with_name_with_comma]
+                + (strings[MR.strings.three_num_items_with_name_with_comma]
 
                     .replace("%1\$d",
                         (assignment.progressSummary
                             ?.calculateNotSubmittedStudents() ?: 0).toString())
 
-                    .replace("%2\$s", strings[MessageID.not_submitted_cap])
+                    .replace("%2\$s", strings[MR.strings.not_submitted_cap])
 
                     .replace("%3\$d",
                         (assignment.progressSummary
                             ?.submittedStudents ?: 0).toString())
 
-                    .replace("%4\$s", strings[MessageID.submitted_cap])
+                    .replace("%4\$s", strings[MR.strings.submitted_cap])
 
                     .replace("%5\$d",
                         (assignment.progressSummary
                             ?.markedStudents ?: 0).toString())
 
-                    .replace("%6\$s", strings[MessageID.marked]))
+                    .replace("%6\$s", strings[MR.strings.marked_key]))
             }
         }
     }

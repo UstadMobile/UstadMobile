@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.schedule.edit
 
 import app.cash.turbine.test
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.ext.awaitItemWhere
@@ -39,7 +39,7 @@ class ScheduleEditViewModelTest {
                 viewModel.onClickSave()
 
                 val updatedState = awaitItemWhere { it.fromTimeError != null }
-                assertEquals(systemImpl.getString(MessageID.field_required_prompt),
+                assertEquals(systemImpl.getString(MR.strings.field_required_prompt),
                     updatedState.fromTimeError)
 
                 cancelAndIgnoreRemainingEvents()
@@ -64,7 +64,7 @@ class ScheduleEditViewModelTest {
                 viewModel.onClickSave()
 
                 val updatedState = awaitItemWhere { it.toTimeError != null }
-                assertEquals(systemImpl.getString(MessageID.field_required_prompt),
+                assertEquals(systemImpl.getString(MR.strings.field_required_prompt),
                     updatedState.toTimeError)
 
                 cancelAndIgnoreRemainingEvents()
@@ -89,7 +89,7 @@ class ScheduleEditViewModelTest {
                 viewModel.onClickSave()
 
                 val updatedState = awaitItemWhere { it.toTimeError != null }
-                assertEquals(systemImpl.getString(MessageID.end_is_before_start_error),
+                assertEquals(systemImpl.getString(MR.strings.end_is_before_start_error),
                     updatedState.toTimeError)
 
                 cancelAndIgnoreRemainingEvents()

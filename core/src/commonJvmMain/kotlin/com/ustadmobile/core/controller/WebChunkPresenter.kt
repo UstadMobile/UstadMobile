@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.WebChunkView
 import org.kodein.di.DI
@@ -16,7 +16,7 @@ actual class WebChunkPresenter actual constructor(context: Any, arguments: Map<S
         val result = repo.containerDao.findByUidAsync(containerUid ?: 0L)
         if (result == null) {
             view.showSnackBar(
-                systemImpl.getString(MessageID.error_opening_file, this)
+                systemImpl.getString(MR.strings.error_opening_file)
             )
             return
         }

@@ -3,7 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.har.HarContainer
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ContentEntryOpener
@@ -70,7 +70,7 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
             } catch (e: Exception) {
                 presenterScope.launch {
                     view.showSnackBar(
-                        systemImpl.getString(MessageID.error_opening_file, context))
+                        systemImpl.getString(MR.strings.error_opening_file))
                 }
             }
         }
@@ -92,8 +92,8 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
                             noIframe = arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false, clazzUid = clazzUid)
                 } catch (e: Exception) {
                     if (e is NoAppFoundException) {
-                        view.showErrorWithAction(systemImpl.getString(MessageID.no_app_found, context),
-                                MessageID.get_app,
+                        view.showErrorWithAction(systemImpl.getString(MR.strings.no_app_found),
+                                MR.strings.get_app,
                                 e.mimeType ?: "")
                     } else {
                         view.showSnackBar(e.message ?: "")

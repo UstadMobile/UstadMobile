@@ -1,8 +1,8 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.db.dao.ClazzDaoCommon
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.util.SortOrderOption
 import web.cssom.JustifyContent
 import web.cssom.pct
@@ -30,7 +30,7 @@ external interface UstadListSortHeaderProps : Props {
 
 val UstadListSortHeader = FC<UstadListSortHeaderProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     val sortIcon = if(props.activeSortOrderOption.order)
         ArrowDownward.create()
@@ -79,9 +79,9 @@ val UstadListSortHeader = FC<UstadListSortHeaderProps> { props ->
 
                 + strings[option.fieldMessageId]
                 val orderLabel = if(option.order) {
-                    strings[MessageID.ascending]
+                    strings[MR.strings.ascending]
                 }else {
-                    strings[MessageID.descending]
+                    strings[MR.strings.descending]
                 }
                 +" ($orderLabel)"
             }
@@ -94,7 +94,7 @@ val UstadListSortHeaderPreview = FC<Props> {
 
     UstadListSortHeader {
         activeSortOrderOption = SortOrderOption(
-                MessageID.name,
+                MR.strings.name,
                 ClazzDaoCommon.SORT_CLAZZNAME_ASC,
                 true
             )

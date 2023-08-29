@@ -1,7 +1,7 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.PersonListView
@@ -9,6 +9,7 @@ import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewMode
 import com.ustadmobile.entities.USTAD_SCREENS
 import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
+import dev.icerock.moko.resources.StringResource
 import web.cssom.Color
 import web.cssom.Display
 import web.cssom.None
@@ -31,18 +32,18 @@ external interface SidebarProps: Props {
 
 data class RootScreen(
     val key: String,
-    val nameMessageId: Int,
+    val nameMessageId: StringResource,
     val icon: FC<*>? = null,
 )
 
 val ROOT_SCREENS = listOf(
-    RootScreen(ClazzList2View.VIEW_NAME, MessageID.courses, School),
-    RootScreen(ContentEntryListViewModel.DEST_NAME, MessageID.library, LibraryBooks),
-    RootScreen(PersonListView.VIEW_NAME, MessageID.people, Person)
+    RootScreen(ClazzList2View.VIEW_NAME, MR.strings.courses, School),
+    RootScreen(ContentEntryListViewModel.DEST_NAME, MR.strings.library, LibraryBooks),
+    RootScreen(PersonListView.VIEW_NAME, MR.strings.people, Person)
 )
 
 val Sidebar = FC<SidebarProps> { props ->
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Box {
         component = nav

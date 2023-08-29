@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.PersonAccountEditUiState
 import com.ustadmobile.core.viewmodel.PersonUsernameAndPasswordModel
 import com.ustadmobile.mui.components.UstadTextEditField
@@ -23,7 +23,7 @@ external interface PersonAccountEditScreenProps : Props {
 
 val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container {
         Stack {
@@ -32,7 +32,7 @@ val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
             if (props.uiState.usernameVisible){
                 UstadTextEditField {
                     value = props.uiState.personUsernameAndPassword.username
-                    label = strings[MessageID.username]
+                    label = strings[MR.strings.username]
                     error = props.uiState.usernameError
                     enabled = props.uiState.fieldsEnabled
                     onChange = {
@@ -48,7 +48,7 @@ val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
             if (props.uiState.currentPasswordVisible){
                 UstadTextEditField {
                     value = props.uiState.personUsernameAndPassword.currentPassword
-                    label = strings[MessageID.current_password]
+                    label = strings[MR.strings.current_password]
                     error = props.uiState.currentPasswordError
                     enabled = props.uiState.fieldsEnabled
                     password = true
@@ -62,7 +62,7 @@ val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.personUsernameAndPassword.newPassword
-                label = strings[MessageID.new_password]
+                label = strings[MR.strings.new_password]
                 error = props.uiState.newPasswordError
                 enabled = props.uiState.fieldsEnabled
                 password = true
@@ -75,7 +75,7 @@ val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.personUsernameAndPassword.passwordConfirmed
-                label = strings[MessageID.confirm_password]
+                label = strings[MR.strings.confirm_password]
                 error = props.uiState.passwordConfirmedError
                 enabled = props.uiState.fieldsEnabled
                 password = true

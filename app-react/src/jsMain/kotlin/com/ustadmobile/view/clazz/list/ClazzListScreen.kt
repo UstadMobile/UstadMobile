@@ -1,8 +1,8 @@
 package com.ustadmobile.view.clazz.list
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -20,7 +20,6 @@ import com.ustadmobile.mui.common.*
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.mui.components.UstadListSortHeader
 import com.ustadmobile.mui.components.UstadRawHtml
-import com.ustadmobile.util.colorForAttendanceStatus
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -28,7 +27,6 @@ import com.ustadmobile.view.components.virtuallist.virtualListContent
 import web.cssom.*
 import js.core.jso
 import mui.icons.material.Add
-import mui.icons.material.LensRounded
 import mui.icons.material.Login
 import mui.icons.material.People
 import mui.material.*
@@ -43,7 +41,6 @@ import web.events.EventHandler
 import web.html.HTMLElement
 import web.window.RESIZE
 import web.window.window
-import kotlin.math.round
 
 external interface ClazzListScreenProps : Props {
 
@@ -163,7 +160,7 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
 }
 
 val ClazzListScreen = FC<Props> { props ->
-    val strings = useStringsXml()
+    val strings = useStringProvider()
     val location = useLocation()
     var addDialogVisible: Boolean by useState { false }
 
@@ -212,7 +209,7 @@ val ClazzListScreen = FC<Props> { props ->
                         }
 
                         ListItemText {
-                            primary = ReactNode(strings[MessageID.add_a_new_course])
+                            primary = ReactNode(strings[MR.strings.add_a_new_course])
                         }
 
 
@@ -232,7 +229,7 @@ val ClazzListScreen = FC<Props> { props ->
                     }
 
                     ListItemText {
-                        primary = ReactNode(strings[MessageID.join_existing_class])
+                        primary = ReactNode(strings[MR.strings.join_existing_class])
                     }
 
 
@@ -257,10 +254,10 @@ external interface ClazzListItemProps : Props {
 
 private val ClazzListItem = FC<ClazzListItemProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
     val role = RoleConstants.ROLE_MESSAGE_IDS.find {
         it.value == props.clazzItem?.clazzActiveEnrolment?.clazzEnrolmentRole
-    }?.messageId
+    }?.stringResource
 
     Card {
         key = props.clazzItem?.clazzUid?.toString()
@@ -328,7 +325,7 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
                     + People.create()
 
                     Typography {
-                        + strings[MessageID.x_teachers_y_students]
+                        + strings[MR.strings.x_teachers_y_students]
                             .replace("%1\$d", props.clazzItem?.numTeachers.toString())
                             .replace("%2\$d", props.clazzItem?.numStudents.toString())
                     }

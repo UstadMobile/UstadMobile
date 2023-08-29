@@ -90,6 +90,7 @@ ext {
     version_atomicfu = "0.22.0"
     version_kotlinx_html = "0.8.0"
     version_kotlinx_datetime = "0.4.0"
+    version_moko_resources = "0.23.0"
 
 
     version_turbine = "1.0.0"

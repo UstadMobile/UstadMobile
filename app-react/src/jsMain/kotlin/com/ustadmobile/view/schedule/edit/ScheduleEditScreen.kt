@@ -1,8 +1,8 @@
 package com.ustadmobile.view.schedule.edit
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditUiState
@@ -30,7 +30,7 @@ external interface ScheduleEditScreenProps : Props{
 
 val ScheduleEditComponent2 = FC <ScheduleEditScreenProps> { props ->
 
-    val strings: StringsXml = useStringsXml()
+    val strings: StringsXml = useStringProvider()
 
     Container {
         maxWidth = "lg"
@@ -41,7 +41,7 @@ val ScheduleEditComponent2 = FC <ScheduleEditScreenProps> { props ->
             UstadMessageIdSelectField {
                 value = props.uiState.entity?.scheduleDay ?: 0
                 options = ScheduleConstants.DAY_MESSAGE_IDS
-                label = strings[MessageID.day]
+                label = strings[MR.strings.day]
                 enabled = props.uiState.fieldsEnabled
                 id = "day_field"
                 onChange = {
@@ -59,7 +59,7 @@ val ScheduleEditComponent2 = FC <ScheduleEditScreenProps> { props ->
 
                 UstadTimeField {
                     timeInMillis = (props.uiState.entity?.sceduleStartTime ?: 0).toInt()
-                    label = ReactNode(strings[MessageID.from])
+                    label = ReactNode(strings[MR.strings.from])
                     helperText = props.uiState.fromTimeError?.let { ReactNode(it) }
                     disabled = !props.uiState.fieldsEnabled
                     error = props.uiState.fromTimeError != null
@@ -75,7 +75,7 @@ val ScheduleEditComponent2 = FC <ScheduleEditScreenProps> { props ->
 
                 UstadTimeField {
                     timeInMillis = (props.uiState.entity?.scheduleEndTime ?: 0).toInt()
-                    label = ReactNode(strings[MessageID.to])
+                    label = ReactNode(strings[MR.strings.to_key])
                     helperText = props.uiState.toTimeError?.let { ReactNode(it) }
                     disabled = !props.uiState.fieldsEnabled
                     error = props.uiState.toTimeError != null

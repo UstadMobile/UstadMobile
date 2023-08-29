@@ -1,7 +1,7 @@
 package com.ustadmobile.view.contententry
 
 import com.ustadmobile.core.entityconstants.ProgressConstants
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.ContentEntryTypeLabelConstants
 import com.ustadmobile.core.util.ext.progressBadge
 import com.ustadmobile.core.viewmodel.contententry.list.listItemUiState
@@ -19,8 +19,6 @@ import mui.icons.material.CheckCircle
 import mui.icons.material.Folder
 import mui.icons.material.Cancel
 import mui.icons.material.TextSnippet
-import mui.icons.material.EmojiEvents
-import mui.icons.material.Download
 import mui.material.*
 import mui.system.responsive
 import mui.system.sx
@@ -28,7 +26,6 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
-import mui.material.Badge
 
 external interface UstadContentEntryListItemProps : Props {
 
@@ -148,7 +145,7 @@ private external interface SecondaryContentProps: Props {
 
 private val SecondaryContent = FC<SecondaryContentProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
     val uiState = props.contentEntryItem?.listItemUiState
 
     Stack {
@@ -175,7 +172,7 @@ private val SecondaryContent = FC<SecondaryContentProps> { props ->
                     ?: ContentEntry.TYPE_DOCUMENT
                 Typography {
                     + (strings[ContentEntryTypeLabelConstants
-                        .TYPE_LABEL_MESSAGE_IDS[contentType].messageId]
+                        .TYPE_LABEL_MESSAGE_IDS[contentType].stringResource]
                         )
                 }
 

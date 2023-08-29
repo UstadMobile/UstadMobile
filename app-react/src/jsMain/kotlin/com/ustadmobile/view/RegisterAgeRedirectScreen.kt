@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.viewmodel.RegisterAgeRedirectUiState
 import com.ustadmobile.mui.components.UstadDateField
@@ -39,7 +39,7 @@ val RegisterAgeRedirectPreview = FC<Props> {
 
 val RegisterAgeRedirectComponent2 = FC<RegisterAgeRedirectProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container {
         maxWidth = "lg"
@@ -49,13 +49,13 @@ val RegisterAgeRedirectComponent2 = FC<RegisterAgeRedirectProps> { props ->
             spacing = responsive(15.px)
 
             Typography {
-                + strings[MessageID.what_is_your_date_of_birth]
+                + strings[MR.strings.what_is_your_date_of_birth]
             }
 
             UstadDateField {
                 timeInMillis = props.uiState.dateOfBirth
                 timeZoneId = UstadMobileConstants.UTC
-                label = ReactNode(strings[MessageID.birthday])
+                label = ReactNode(strings[MR.strings.birthday])
                 onChange = { props.onSetDate(it) }
             }
 
@@ -63,7 +63,7 @@ val RegisterAgeRedirectComponent2 = FC<RegisterAgeRedirectProps> { props ->
                 variant = ButtonVariant.contained
                 onClick = { props.onClickNext }
 
-                + strings[MessageID.next].uppercase()
+                + strings[MR.strings.next].uppercase()
             }
         }
     }

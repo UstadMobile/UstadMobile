@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.PersonParentJoinConstants
 import com.ustadmobile.core.viewmodel.ParentalConsentManagementUiState
 import com.ustadmobile.lib.db.entities.Person
@@ -38,7 +38,7 @@ external interface ParentalConsentManagementScreenProps : Props {
 
 val ParentalConsentManagementComponent2 = FC<ParentalConsentManagementScreenProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container {
         Stack {
@@ -46,7 +46,7 @@ val ParentalConsentManagementComponent2 = FC<ParentalConsentManagementScreenProp
             spacing = responsive(10.px)
 
             Typography {
-                + strings[MessageID.parent_consent_explanation]
+                + strings[MR.strings.parent_consent_explanation]
             }
 
             if (props.uiState.relationshipVisible){
@@ -54,7 +54,7 @@ val ParentalConsentManagementComponent2 = FC<ParentalConsentManagementScreenProp
                 UstadMessageIdSelectField {
                     value = props.uiState.personParentJoin?.ppjRelationship ?: 0
                     options = PersonParentJoinConstants.RELATIONSHIP_MESSAGE_IDS
-                    label = strings[MessageID.relationship]
+                    label = strings[MR.strings.relationship]
                     onChange = {
                         props.onChangeRelation(
                             props.uiState.personParentJoin?.shallowCopy {
@@ -66,7 +66,7 @@ val ParentalConsentManagementComponent2 = FC<ParentalConsentManagementScreenProp
 
             Typography {
                 variant = TypographyVariant.h6
-                + strings[MessageID.terms_and_policies]
+                + strings[MR.strings.terms_and_policies]
             }
 
 
@@ -82,7 +82,7 @@ val ParentalConsentManagementComponent2 = FC<ParentalConsentManagementScreenProp
                     variant = ButtonVariant.contained
                     disabled = !props.uiState.fieldsEnabled
 
-                    + strings[MessageID.i_consent].uppercase()
+                    + strings[MR.strings.i_consent].uppercase()
                 }
             }
 
@@ -92,16 +92,16 @@ val ParentalConsentManagementComponent2 = FC<ParentalConsentManagementScreenProp
                     variant = ButtonVariant.outlined
                     disabled = !props.uiState.fieldsEnabled
 
-                    + strings[MessageID.i_do_not_consent].uppercase()
+                    + strings[MR.strings.i_do_not_consent].uppercase()
                 }
             }
 
             if (props.uiState.changeConsentVisible){
                 val changeConsentText: Int =
                     if (props.uiState.personParentJoin?.ppjStatus == PersonParentJoin.STATUS_APPROVED)
-                        MessageID.revoke_consent
+                        MR.strings.revoke_consent
                     else
-                        MessageID.restore_consent
+                        MR.strings.restore_consent
 
                 Button {
                     onClick = { props.onClickChangeConsent }

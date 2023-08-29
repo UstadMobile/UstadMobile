@@ -11,7 +11,7 @@
     <string name="first_name">Имя</string>
     <string name="register_now">Зарегистрироваться</string>
     <string name="phone_memory">Память телефона</string>
-    <string name="name">Имя</string>
+    <string name="name_key">Имя</string>
     <string name="email">Электронное письмо</string>
     <string name="other">Другой</string>
     <string name="add_new_language">Добавить новый язык</string>

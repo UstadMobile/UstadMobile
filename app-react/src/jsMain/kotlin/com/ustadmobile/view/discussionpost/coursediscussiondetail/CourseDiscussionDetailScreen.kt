@@ -1,8 +1,8 @@
 package com.ustadmobile.view.discussionpost.coursediscussiondetail
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailUiState
@@ -38,7 +38,7 @@ external interface CourseDiscussionDetailProps: Props {
 
 val CourseDiscussionDetailComponent = FC<CourseDiscussionDetailProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     val infiniteQueryResult = usePagingSource(
         pagingSourceFactory = props.uiState.posts,

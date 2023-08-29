@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.OUTCOME_TO_MESSAGE_ID_MAP
@@ -13,6 +13,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -28,48 +29,48 @@ class ReportFilterEditPresenter(
     di: DI,
     lifecycleOwner: LifecycleOwner
 ) : UstadEditPresenter<ReportFilterEditView, ReportFilter>(context, arguments, view, di, lifecycleOwner) {
-    private val fieldRequiredText = systemImpl.getString(MessageID.field_required_prompt, context)
+    private val fieldRequiredText = systemImpl.getString(MR.strings.field_required_prompt)
 
     private val uidhelperDeferred = CompletableDeferred<Boolean>()
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON
 
-    enum class FieldOption(val optionVal: Int, val messageId: Int) {
-        PERSON_GENDER(ReportFilter.FIELD_PERSON_GENDER, MessageID.field_person_gender),
-        PERSON_AGE(ReportFilter.FIELD_PERSON_AGE, MessageID.field_person_age),
-        CONTENT_COMPLETION(ReportFilter.FIELD_CONTENT_COMPLETION, MessageID.field_content_completion),
-        CONTENT_ENTRY(ReportFilter.FIELD_CONTENT_ENTRY, MessageID.field_content_entry),
-        CONTENT_PROGRESS(ReportFilter.FIELD_CONTENT_PROGRESS, MessageID.field_content_progress),
-        ATTENDANCE_PERCENTAGE(ReportFilter.FIELD_ATTENDANCE_PERCENTAGE, MessageID.field_attendance_percentage),
-        ENROLMENT_OUTCOME(ReportFilter.FIELD_CLAZZ_ENROLMENT_OUTCOME, MessageID.class_enrolment_outcome),
-        ENROLMENT_LEAVING_REASON(ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON, MessageID.class_enrolment_leaving)
+    enum class FieldOption(val optionVal: Int, val stringResource: StringResource) {
+        PERSON_GENDER(ReportFilter.FIELD_PERSON_GENDER, MR.strings.field_person_gender),
+        PERSON_AGE(ReportFilter.FIELD_PERSON_AGE, MR.strings.field_person_age),
+        CONTENT_COMPLETION(ReportFilter.FIELD_CONTENT_COMPLETION, MR.strings.field_content_completion),
+        CONTENT_ENTRY(ReportFilter.FIELD_CONTENT_ENTRY, MR.strings.field_content_entry),
+        CONTENT_PROGRESS(ReportFilter.FIELD_CONTENT_PROGRESS, MR.strings.field_content_progress),
+        ATTENDANCE_PERCENTAGE(ReportFilter.FIELD_ATTENDANCE_PERCENTAGE, MR.strings.field_attendance_percentage),
+        ENROLMENT_OUTCOME(ReportFilter.FIELD_CLAZZ_ENROLMENT_OUTCOME, MR.strings.class_enrolment_outcome),
+        ENROLMENT_LEAVING_REASON(ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON, MR.strings.class_enrolment_leaving)
     }
 
     class FieldMessageIdOption(day: FieldOption, context: Any, di: DI)
-        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
+        : MessageIdOption(day.stringResource, context, day.optionVal, di = di)
 
-    enum class ConditionOption(val optionVal: Int, val messageId: Int) {
-        IS_CONDITION(ReportFilter.CONDITION_IS, MessageID.condition_is),
-        IS_NOT_CONDITION(ReportFilter.CONDITION_IS_NOT, MessageID.condition_is_not),
-        GREATER_THAN_CONDITION(ReportFilter.CONDITION_GREATER_THAN, MessageID.condition_greater_than),
-        LESS_THAN_CONDITION(ReportFilter.CONDITION_LESS_THAN, MessageID.condition_less_than),
-        BETWEEN_CONDITION(ReportFilter.CONDITION_BETWEEN, MessageID.condition_between),
-        IN_LIST_CONDITION(ReportFilter.CONDITION_IN_LIST, MessageID.condition_in_list),
-        NOT_IN_LIST_CONDITION(ReportFilter.CONDITION_NOT_IN_LIST, MessageID.condition_not_in_list)
+    enum class ConditionOption(val optionVal: Int, val stringResource: StringResource) {
+        IS_CONDITION(ReportFilter.CONDITION_IS, MR.strings.condition_is),
+        IS_NOT_CONDITION(ReportFilter.CONDITION_IS_NOT, MR.strings.condition_is_not),
+        GREATER_THAN_CONDITION(ReportFilter.CONDITION_GREATER_THAN, MR.strings.condition_greater_than),
+        LESS_THAN_CONDITION(ReportFilter.CONDITION_LESS_THAN, MR.strings.condition_less_than),
+        BETWEEN_CONDITION(ReportFilter.CONDITION_BETWEEN, MR.strings.condition_between),
+        IN_LIST_CONDITION(ReportFilter.CONDITION_IN_LIST, MR.strings.condition_in_list),
+        NOT_IN_LIST_CONDITION(ReportFilter.CONDITION_NOT_IN_LIST, MR.strings.condition_not_in_list)
     }
 
     class ConditionMessageIdOption(day: ConditionOption, context: Any, di: DI)
-        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
+        : MessageIdOption(day.stringResource, context, day.optionVal, di = di)
 
-    enum class ContentCompletionStatusOption(val optionVal: Int, val messageId: Int) {
-        COMPLETED(StatementEntity.CONTENT_COMPLETE, MessageID.completed),
-        PASSED(StatementEntity.CONTENT_PASSED, MessageID.passed),
-        FAILED(StatementEntity.CONTENT_FAILED, MessageID.failed)
+    enum class ContentCompletionStatusOption(val optionVal: Int, val stringResource: StringResource) {
+        COMPLETED(StatementEntity.CONTENT_COMPLETE, MR.strings.completed),
+        PASSED(StatementEntity.CONTENT_PASSED, MR.strings.passed),
+        FAILED(StatementEntity.CONTENT_FAILED, MR.strings.failed)
     }
 
     class ContentCompletionStatusMessageIdOption(day: ContentCompletionStatusOption, context: Any, di: DI)
-        : MessageIdOption(day.messageId, context, day.optionVal, di)
+        : MessageIdOption(day.stringResource, context, day.optionVal, di)
 
 
     enum class FilterValueType {
@@ -188,7 +189,7 @@ class ReportFilterEditPresenter(
                 view.conditionsOptions = listOf(ConditionOption.IN_LIST_CONDITION,
                         ConditionOption.NOT_IN_LIST_CONDITION).map { ConditionMessageIdOption(it, context, di) }
                 view.valueType = FilterValueType.LIST
-                view.createNewFilter = systemImpl.getString(MessageID.add_content_filter, context)
+                view.createNewFilter = systemImpl.getString(MR.strings.add_content_filter)
 
             }
             ReportFilter.FIELD_ATTENDANCE_PERCENTAGE, ReportFilter.FIELD_CONTENT_PROGRESS -> {
@@ -208,7 +209,7 @@ class ReportFilterEditPresenter(
                 view.conditionsOptions = listOf(ConditionOption.IN_LIST_CONDITION,
                         ConditionOption.NOT_IN_LIST_CONDITION).map { ConditionMessageIdOption(it, context, di) }
                 view.valueType = FilterValueType.LIST
-                view.createNewFilter = systemImpl.getString(MessageID.add_leaving_reason, context)
+                view.createNewFilter = systemImpl.getString(MR.strings.add_leaving_reason)
             }
         }
 

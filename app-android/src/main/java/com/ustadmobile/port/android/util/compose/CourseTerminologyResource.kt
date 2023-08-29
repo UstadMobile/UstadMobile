@@ -5,7 +5,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.ustadmobile.core.util.ext.toTerminologyEntries
 import com.ustadmobile.lib.db.entities.CourseTerminology
-import com.ustadmobile.lib.db.entities.TerminologyEntry
+import com.ustadmobile.core.impl.locale.TerminologyEntry
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import org.kodein.di.direct
@@ -63,6 +63,6 @@ fun courseTerminologyEntryResource(
     terminologyEntries: List<TerminologyEntry>,
     messageId: Int
 ): String {
-    return terminologyEntries.firstOrNull { it.messageId ==  messageId }?.term
+    return terminologyEntries.firstOrNull { it.stringResource ==  messageId }?.term
         ?: messageIdResource(messageId)
 }

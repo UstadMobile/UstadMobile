@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.SiteEditUiState
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.Site
@@ -30,7 +30,7 @@ external interface SiteEditProps: Props {
 
 val SiteEditComponent2 = FC<SiteEditProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container {
         maxWidth = "lg"
@@ -41,7 +41,7 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.site?.siteName ?: ""
-                label = strings[MessageID.first_names]
+                label = strings[MR.strings.first_key_names]
                 error = props.uiState.siteNameError
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
@@ -53,7 +53,7 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
             }
 
             UstadSwitchField{
-                label = strings[MessageID.guest_login_enabled]
+                label = strings[MR.strings.guest_login_enabled]
                 checked = props.uiState.site?.guestLogin ?: true
                 onChanged = {
                     props.onSiteChanged(props.uiState.site?.shallowCopy{
@@ -63,7 +63,7 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
             }
 
             UstadSwitchField{
-                label = strings[MessageID.registration_allowed]
+                label = strings[MR.strings.registration_allowed]
                 checked = props.uiState.site?.registrationAllowed ?: true
                 onChanged = {
                     props.uiState.site?.shallowCopy {
@@ -74,7 +74,7 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
 
             Typography {
                 variant = TypographyVariant.h6
-                + strings[MessageID.terms_and_policies]
+                + strings[MR.strings.terms_and_policies]
             }
 
             List{
@@ -91,7 +91,7 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
                         }
 
                         ListItemText {
-                            + (strings[MessageID.terms_and_policies])
+                            + (strings[MR.strings.terms_and_policies])
                         }
                     }
                 }

@@ -1,7 +1,7 @@
 package com.ustadmobile.view.clazz.edit
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
 import com.ustadmobile.hooks.useFormattedTime
 import com.ustadmobile.lib.db.entities.Schedule
@@ -26,7 +26,7 @@ external interface ScheduleListItemProps : Props {
 
 val ScheduleListItem = FC<ScheduleListItemProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     val fromTimeFormatted = useFormattedTime(
         timeInMillisSinceMidnight = props.schedule.sceduleStartTime.toInt(),
@@ -43,7 +43,7 @@ val ScheduleListItem = FC<ScheduleListItemProps> { props ->
     ListItem{
         secondaryAction = IconButton.create {
             onClick = { props.onClickDeleteSchedule(props.schedule) }
-            ariaLabel = strings[MessageID.delete]
+            ariaLabel = strings[MR.strings.delete]
             Delete { }
         }
 

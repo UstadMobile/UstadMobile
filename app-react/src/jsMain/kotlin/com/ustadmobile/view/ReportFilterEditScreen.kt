@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.ConditionConstants
 import com.ustadmobile.core.impl.locale.entityconstants.ContentCompletionStatusConstants
 import com.ustadmobile.core.impl.locale.entityconstants.FieldConstants
@@ -56,7 +56,7 @@ val ReportFilterEditScreenPreview = FC<Props> {
 
 private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container {
         maxWidth = "lg"
@@ -67,7 +67,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
 
             UstadMessageIdSelectField {
                 value = props.uiState.reportFilter?.reportFilterField ?: 0
-                label = strings[MessageID.report_filter_edit_field]
+                label = strings[MR.strings.report_filter_edit_field]
                 options = FieldConstants.FIELD_MESSAGE_IDS
                 error = props.uiState.fieldError
                 enabled = props.uiState.fieldsEnabled
@@ -85,7 +85,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
 
                 UstadMessageIdSelectField {
                     value = props.uiState.reportFilter?.reportFilterCondition ?: 0
-                    label = strings[MessageID.report_filter_edit_condition]
+                    label = strings[MR.strings.report_filter_edit_condition]
                     options = ConditionConstants.CONDITION_MESSAGE_IDS
                     error = props.uiState.conditionsError
                     enabled = props.uiState.fieldsEnabled
@@ -99,7 +99,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
 
                 UstadMessageIdSelectField {
                     value = props.uiState.reportFilter?.reportFilterDropDownValue ?: 0
-                    label = strings[MessageID.report_filter_edit_values]
+                    label = strings[MR.strings.report_filter_edit_values]
                     options = ContentCompletionStatusConstants.CONTENT_COMPLETION_STATUS_MESSAGE_IDS
                     error = props.uiState.valuesError
                     enabled = props.uiState.fieldsEnabled
@@ -115,7 +115,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
             if (props.uiState.reportFilterValueVisible){
                 UstadTextEditField {
                     value = props.uiState.reportFilter?.reportFilterValue ?: ""
-                    label = strings[MessageID.report_filter_edit_values]
+                    label = strings[MR.strings.report_filter_edit_values]
                     error = props.uiState.valuesError
                     enabled = props.uiState.fieldsEnabled
                     inputProps = {
@@ -137,7 +137,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
 
                      UstadTextEditField {
                          value = props.uiState.reportFilter?.reportFilterValueBetweenX ?: ""
-                         label = strings[MessageID.from]
+                         label = strings[MR.strings.from]
                          error = props.uiState.valuesError
                          enabled = props.uiState.fieldsEnabled
                          fullWidth = true
@@ -154,7 +154,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
 
                      UstadTextEditField {
                          value = props.uiState.reportFilter?.reportFilterValueBetweenY ?: ""
-                         label = strings[MessageID.toC]
+                         label = strings[MR.strings.to_keyC]
                          error = props.uiState.valuesError
                          enabled = props.uiState.fieldsEnabled
                          fullWidth = true
@@ -206,7 +206,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                                 }
                             }
                             secondaryAction = IconButton.create {
-                                ariaLabel = strings[MessageID.delete]
+                                ariaLabel = strings[MR.strings.delete]
                                 Delete {}
                                 onClick = {
                                     props.onClickRemoveFilter(uidAndLabel)

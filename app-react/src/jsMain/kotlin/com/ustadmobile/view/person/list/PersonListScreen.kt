@@ -1,8 +1,8 @@
 package com.ustadmobile.view.person.list
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -41,7 +41,7 @@ external interface PersonListProps: Props {
 }
 
 val PersonListComponent2 = FC<PersonListProps> { props ->
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     val infiniteQueryResult = usePagingSource(
         props.uiState.personList, true, 50
@@ -71,7 +71,7 @@ val PersonListComponent2 = FC<PersonListProps> { props ->
             if(props.uiState.showAddItem) {
                 item {
                     UstadAddListItem.create {
-                        text = strings[MessageID.add_a_new_person]
+                        text = strings[MR.strings.add_a_new_person]
                         onClickAdd = props.onClickAddItem
                     }
                 }

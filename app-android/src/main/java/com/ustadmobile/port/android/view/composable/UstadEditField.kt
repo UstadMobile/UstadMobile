@@ -13,7 +13,6 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -24,7 +23,6 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.util.StringAndSerialNum
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.port.android.util.compose.messageIdResource
-import com.ustadmobile.port.android.util.compose.rememberFormattedDate
 import java.util.*
 
 @Composable
@@ -270,7 +268,7 @@ fun UstadMessageIdOptionExposedDropDownMenuField(
         label = label,
         options = options,
         onOptionSelected = onOptionSelected,
-        itemText = { messageIdResource(id = it.messageId) },
+        itemText = { messageIdResource(id = it.stringResource) },
         modifier = modifier,
         isError = isError,
         enabled = enabled,

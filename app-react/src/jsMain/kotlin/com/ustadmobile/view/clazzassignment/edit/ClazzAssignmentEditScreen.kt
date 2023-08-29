@@ -1,8 +1,8 @@
 package com.ustadmobile.view.clazzassignment.edit
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.*
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditUiState
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
@@ -76,7 +76,7 @@ val ClazzAssignmentEditScreenPreview = FC<Props> {
 
 private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     val terminologyEntries = useCourseTerminologyEntries(props.uiState.courseTerminology)
 
@@ -100,9 +100,9 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 }
                 variant = FormControlVariant.outlined
                 value = props.uiState.entity?.assignmentCourseGroupSetName?.let {
-                    "${strings[MessageID.groups]}: $it"
-                } ?: strings[MessageID.individual_submission]
-                label = ReactNode(strings[MessageID.submission_type])
+                    "${strings[MR.strings.groups]}: $it"
+                } ?: strings[MR.strings.individual_submission]
+                label = ReactNode(strings[MR.strings.submission_type])
                 disabled = !props.uiState.groupSetEnabled
                 inputProps = jso {
                     readOnly = true
@@ -112,7 +112,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
 
             UstadSwitchField {
                 id = "caRequireFileSubmission"
-                label = strings[MessageID.require_file_submission]
+                label = strings[MR.strings.require_file_submission]
                 checked = props.uiState.entity?.assignment?.caRequireFileSubmission ?: false
                 error = props.uiState.submissionRequiredError
                 onChanged = {
@@ -127,7 +127,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 UstadMessageIdSelectField {
                     id = "caFileType"
                     value = props.uiState.entity?.assignment?.caFileType ?: 0
-                    label = strings[MessageID.file_type]
+                    label = strings[MR.strings.file_type]
                     options = FileTypeConstants.FILE_TYPE_MESSAGE_IDS
                     enabled = props.uiState.fieldsEnabled
                     onChange = {
@@ -143,7 +143,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     id = "caSizeLimit"
                     variant = FormControlVariant.outlined
                     numValue = (props.uiState.entity?.assignment?.caSizeLimit ?: 0).toFloat()
-                    label = ReactNode(strings[MessageID.size_limit])
+                    label = ReactNode(strings[MR.strings.size_limit])
                     disabled = !props.uiState.fieldsEnabled
                     onChange = {
                         props.onAssignmentChanged(
@@ -158,7 +158,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     id = "caNumberOfFiles"
                     variant = FormControlVariant.outlined
                     numValue = (props.uiState.entity?.assignment?.caNumberOfFiles ?: 0).toFloat()
-                    label = ReactNode(strings[MessageID.number_of_files])
+                    label = ReactNode(strings[MR.strings.number_of_files])
                     disabled = props.uiState.fieldsEnabled
                     onChange = {
                         props.onAssignmentChanged(
@@ -172,7 +172,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
 
             UstadSwitchField {
                 id = "caRequireTextSubmission"
-                label = strings[MessageID.require_text_submission]
+                label = strings[MR.strings.require_text_submission]
                 checked = props.uiState.entity?.assignment?.caRequireTextSubmission ?: false
                 error = props.uiState.submissionRequiredError
                 onChanged = {
@@ -191,8 +191,8 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                         it.value == props.uiState.entity?.assignment?.caTextLimitType
                     } ?: TextLimitType.LIMIT_WORDS
                     itemValue = { it.value.toString() }
-                    itemLabel = { ReactNode(strings[it.messageId]) }
-                    label = strings[MessageID.limit]
+                    itemLabel = { ReactNode(strings[it.stringResource]) }
+                    label = strings[MR.strings.limit]
                     enabled = props.uiState.fieldsEnabled
                     onChange = {
                         props.onAssignmentChanged(
@@ -206,8 +206,8 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 UstadNumberTextField {
                     id = "caTextLimit"
                     numValue = (props.uiState.entity?.assignment?.caTextLimit ?: 0).toFloat()
-                    label = ReactNode(strings[MessageID.maximum])
-                    placeholder = strings[MessageID.maximum]
+                    label = ReactNode(strings[MR.strings.maximum])
+                    placeholder = strings[MR.strings.maximum]
                     disabled = !props.uiState.fieldsEnabled
 
                     onChange = {
@@ -224,7 +224,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 id = "caSubmissionPolicy"
                 value = props.uiState.entity?.assignment?.caSubmissionPolicy
                     ?: ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
-                label = strings[MessageID.submission_policy]
+                label = strings[MR.strings.submission_policy]
                 options = SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
@@ -239,14 +239,14 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
             UstadSelectField<MarkingType> {
                 id = "caMarkingType"
                 value = MarkingType.valueOf(props.uiState.entity?.assignment?.caMarkingType ?: 0)
-                label = strings[MessageID.marked_by]
+                label = strings[MR.strings.marked_key_by]
                 options = MarkingType.values().toList()
                 enabled = props.uiState.markingTypeEnabled
                 itemLabel = { markingType ->
                     val text = if(markingType == MarkingType.PEERS){
-                        strings[MessageID.peers]
+                        strings[MR.strings.peers]
                     }else {
-                        courseTerminologyResource(terminologyEntries, strings, MessageID.teacher)
+                        courseTerminologyResource(terminologyEntries, strings, MR.strings.teacher)
                     }
 
                     ReactNode(text)
@@ -271,7 +271,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                         fullWidth = true
                         variant = FormControlVariant.outlined
                         numValue = (props.uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toFloat()
-                        label = ReactNode(strings[MessageID.reviews_per_user_group])
+                        label = ReactNode(strings[MR.strings.reviews_per_user_group])
                         disabled = !props.uiState.fieldsEnabled
                         error = props.uiState.reviewerCountError != null
                         helperText = props.uiState.reviewerCountError?.let { ReactNode(it) }
@@ -290,14 +290,14 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                         onClick = { props.onClickAssignReviewers() }
                         disabled = !props.uiState.fieldsEnabled
                         variant = ButtonVariant.outlined
-                        + strings[MessageID.assign_reviewers]
+                        + strings[MR.strings.assign_reviewers]
                     }
                 }
             }
 
             UstadSwitchField {
                 id = "caClassCommentEnabled"
-                label = strings[MessageID.allow_class_comments]
+                label = strings[MR.strings.allow_class_comments]
                 checked = props.uiState.entity?.assignment?.caClassCommentEnabled ?: false
                 onChanged = {
                     props.onAssignmentChanged(props.uiState.entity?.assignment?.shallowCopy {
@@ -309,7 +309,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
 
             UstadSwitchField {
                 id = "caPrivateCommentsEnabled"
-                label = strings[MessageID.allow_private_comments_from_students]
+                label = strings[MR.strings.allow_private_comments_from_students]
                 checked = props.uiState.entity?.assignment?.caPrivateCommentsEnabled ?: false
                 onChanged = {
                     props.onAssignmentChanged(props.uiState.entity?.assignment?.shallowCopy {

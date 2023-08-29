@@ -1,9 +1,9 @@
 package com.ustadmobile.view.clazzenrolment.edit
 
 import com.ustadmobile.core.db.UNSET_DISTANT_FUTURE
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.OutcomeConstants
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditUiState
@@ -37,7 +37,7 @@ external interface ClazzEnrolmentEditScreenProps : Props {
 
 val ClazzEnrolmentEditScreenComponent = FC<ClazzEnrolmentEditScreenProps> { props ->
 
-    val strings: StringsXml = useStringsXml()
+    val strings: StringsXml = useStringProvider()
 
     val terminologyEntries = useCourseTerminologyEntries(props.uiState.courseTerminology)
 
@@ -49,7 +49,7 @@ val ClazzEnrolmentEditScreenComponent = FC<ClazzEnrolmentEditScreenProps> { prop
             UstadSelectField<Int> {
                 id = "enrolment_role"
                 value = props.uiState.clazzEnrolment?.clazzEnrolmentRole ?: ClazzEnrolment.ROLE_STUDENT
-                label = strings[MessageID.role]
+                label = strings[MR.strings.role]
                 options = props.uiState.roleOptions
                 error = props.uiState.roleSelectedError != null
                 helperText = props.uiState.roleSelectedError?.let { ReactNode(it) }
@@ -57,8 +57,8 @@ val ClazzEnrolmentEditScreenComponent = FC<ClazzEnrolmentEditScreenProps> { prop
                 itemValue = { "$it" }
                 itemLabel = {
                     val messageId = when(it) {
-                        ClazzEnrolment.ROLE_TEACHER -> MessageID.teacher
-                        else -> MessageID.student
+                        ClazzEnrolment.ROLE_TEACHER -> MR.strings.teacher
+                        else -> MR.strings.student
                     }
 
                     ReactNode(courseTerminologyResource(terminologyEntries, strings, messageId))
@@ -75,7 +75,7 @@ val ClazzEnrolmentEditScreenComponent = FC<ClazzEnrolmentEditScreenProps> { prop
             UstadDateField {
                 id = "date_joined"
                 timeInMillis = props.uiState.clazzEnrolment?.clazzEnrolmentDateJoined ?: 0
-                label = ReactNode(strings[MessageID.start_date])
+                label = ReactNode(strings[MR.strings.start_date])
                 disabled = !props.uiState.fieldsEnabled
                 error = props.uiState.startDateError != null
                 helperText = props.uiState.startDateError?.let { ReactNode(it) }
@@ -91,7 +91,7 @@ val ClazzEnrolmentEditScreenComponent = FC<ClazzEnrolmentEditScreenProps> { prop
             UstadDateField {
                 id = "date_left"
                 timeInMillis = props.uiState.clazzEnrolment?.clazzEnrolmentDateLeft ?: 0
-                label = ReactNode(strings[MessageID.end_date])
+                label = ReactNode(strings[MR.strings.end_date])
                 disabled = !props.uiState.fieldsEnabled
                 error = props.uiState.endDateError != null
                 helperText = props.uiState.endDateError?.let { ReactNode(it) }
@@ -110,7 +110,7 @@ val ClazzEnrolmentEditScreenComponent = FC<ClazzEnrolmentEditScreenProps> { prop
                 id = "outcome"
                 value = props.uiState.clazzEnrolment?.clazzEnrolmentOutcome
                     ?: ClazzEnrolment.OUTCOME_IN_PROGRESS
-                label = strings[MessageID.outcome]
+                label = strings[MR.strings.outcome]
                 options = OutcomeConstants.OUTCOME_MESSAGE_IDS
                 enabled = props.uiState.fieldsEnabled
                 onChange = {

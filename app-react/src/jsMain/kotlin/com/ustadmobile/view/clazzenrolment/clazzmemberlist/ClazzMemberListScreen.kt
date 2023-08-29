@@ -1,8 +1,8 @@
 package com.ustadmobile.view.clazzenrolment.clazzmemberlist
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.SortOrderOption
@@ -58,7 +58,7 @@ external interface ClazzMemberListScreenProps : Props {
 
 private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     val tabAndAppBarHeight = useTabAndAppBarHeight()
 
@@ -99,8 +99,8 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
             item {
                 ListItem.create {
                     ListItemText {
-                        + (props.uiState.terminologyStrings?.get(MessageID.teachers_literal)
-                            ?: strings[MessageID.teachers_literal])
+                        + (props.uiState.terminologyStrings?.get(MR.strings.teachers_literal)
+                            ?: strings[MR.strings.teachers_literal])
                     }
                 }
             }
@@ -108,8 +108,8 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
             if (props.uiState.addTeacherVisible){
                 item {
                     UstadAddListItem.create {
-                        text = props.uiState.terminologyStrings?.get(MessageID.add_a_teacher)
-                            ?: strings[MessageID.add_a_teacher]
+                        text = props.uiState.terminologyStrings?.get(MR.strings.add_a_teacher)
+                            ?: strings[MR.strings.add_a_teacher]
                         enabled = props.uiState.fieldsEnabled
                         icon = PersonAdd.create()
                         onClickAdd = { props.onClickAddNewMember(ClazzEnrolment.ROLE_TEACHER) }
@@ -139,8 +139,8 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
             item {
                 ListItem.create {
                     ListItemText {
-                        + (props.uiState.terminologyStrings?.get(MessageID.students)
-                            ?: strings[MessageID.students])
+                        + (props.uiState.terminologyStrings?.get(MR.strings.students)
+                            ?: strings[MR.strings.students])
                     }
                 }
             }
@@ -148,8 +148,8 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
             if (props.uiState.addStudentVisible){
                 item {
                     UstadAddListItem.create {
-                        text = props.uiState.terminologyStrings?.get(MessageID.add_a_student)
-                            ?: strings[MessageID.add_a_student]
+                        text = props.uiState.terminologyStrings?.get(MR.strings.add_a_student)
+                            ?: strings[MR.strings.add_a_student]
                         enabled = props.uiState.fieldsEnabled
                         icon = PersonAdd.create()
                         onClickAdd = { props.onClickAddNewMember(ClazzEnrolment.ROLE_STUDENT) }
@@ -171,7 +171,7 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
                 item {
                     ListItem.create {
                         ListItemText {
-                            + strings[MessageID.pending_requests]
+                            + strings[MR.strings.pending_requests]
                         }
                     }
                 }

@@ -1,9 +1,9 @@
 package com.ustadmobile.view.contententry.edit
 
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.locale.entityconstants.LicenceConstants
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditUiState
@@ -60,7 +60,7 @@ val ContentEntryEditScreen = FC<Props> {
 }
 
 val ContentEntryEditScreenPreview = FC<Props> {
-    val strings = useStringsXml()
+    val strings = useStringProvider()
     ContentEntryEditScreenComponent {
         uiState = ContentEntryEditUiState(
             entity = ContentEntryWithBlockAndLanguage().apply {
@@ -97,12 +97,12 @@ val ContentEntryEditScreenPreview = FC<Props> {
 
 private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
     val updateContentText =
         if (!props.uiState.importError.isNullOrBlank())
-            strings[MessageID.file_required_prompt]
+            strings[MR.strings.file_required_prompt]
         else
-            strings[MessageID.file_selected]
+            strings[MR.strings.file_selected]
 
     Container {
         maxWidth = "lg"
@@ -115,7 +115,7 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
                     onClick = { props.onClickUpdateContent }
                     variant = ButtonVariant.contained
 
-                    + strings[MessageID.update_content].uppercase()
+                    + strings[MR.strings.up_keydate_content].uppercase()
                 }
 
                 Typography {
@@ -125,14 +125,14 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
 
             if (props.uiState.entity?.leaf == true){
                 Typography {
-                    + strings[MessageID.supported_files]
+                    + strings[MR.strings.supported_files]
                 }
             }
 
             UstadTextEditField {
                 value = props.uiState.entity?.title ?: ""
                 id = "content_title"
-                label = strings[MessageID.title]
+                label = strings[MR.strings.title]
                 error = props.uiState.titleError
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
@@ -147,7 +147,7 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
             UstadTextEditField {
                 value = props.uiState.entity?.description ?: ""
                 id = "content_description"
-                label = strings[MessageID.description]
+                label = strings[MR.strings.description]
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
                     props.onContentEntryChanged(
@@ -167,7 +167,7 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
 
             UstadTextEditField {
                 value = props.uiState.entity?.author ?: ""
-                label = strings[MessageID.entry_details_author]
+                label = strings[MR.strings.entry_key_details_author]
                 id = "content_author"
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
@@ -181,7 +181,7 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
 
             UstadTextEditField {
                 value = props.uiState.entity?.publisher ?: ""
-                label = strings[MessageID.entry_details_publisher]
+                label = strings[MR.strings.entry_key_details_publisher]
                 id = "content_publisher"
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
@@ -196,7 +196,7 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
             UstadMessageIdSelectField {
                 value = props.uiState.entity?.licenseType ?: ContentEntry.LICENSE_TYPE_UNSPECIFIED
                 options = LicenceConstants.LICENSE_MESSAGE_IDS
-                label = strings[MessageID.licence]
+                label = strings[MR.strings.licence]
                 id = "content_license"
                 onChange = {
                     props.onContentEntryChanged(
@@ -212,7 +212,7 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
                     id = "content_compression_enabled"
                     checked= props.uiState.compressionEnabled ?: false
                     onChanged = { props.onChangeCompress(it) }
-                    label = strings[MessageID.compress]
+                    label = strings[MR.strings.compress]
                     enabled = props.uiState.fieldsEnabled
                 }
             }
@@ -221,14 +221,14 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
                 id = "content_publik"
                 checked= props.uiState.entity?.publik ?: false
                 onChanged = { props.onChangePubliclyAccessible(it) }
-                label = strings[MessageID.publicly_accessible]
+                label = strings[MR.strings.publicly_accessible]
                 enabled = props.uiState.fieldsEnabled
             }
 
             UstadTextEditField {
                 id = "content_language"
                 value = props.uiState.entity?.language?.name ?: ""
-                label = strings[MessageID.language]
+                label = strings[MR.strings.language]
                 readOnly = true
                 enabled = props.uiState.fieldsEnabled
                 onClick = props.onClickLanguage

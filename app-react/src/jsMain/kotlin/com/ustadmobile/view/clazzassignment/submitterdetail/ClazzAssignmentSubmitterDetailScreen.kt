@@ -1,8 +1,8 @@
 package com.ustadmobile.view.clazzassignment.submitterdetail
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
@@ -61,7 +61,7 @@ external interface ClazzAssignmentSubmitterDetailProps : Props {
 
 val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailProps> { props ->
 
-    val strings: StringsXml = useStringsXml()
+    val strings: StringsXml = useStringProvider()
 
     val muiAppState = useMuiAppState()
 
@@ -92,7 +92,7 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
                                 map = SUBMISSION_STAUTUS_MESSAGE_ID
                             ).capitalizeFirstLetter()
                         )
-                        secondary = ReactNode(strings[MessageID.status])
+                        secondary = ReactNode(strings[MR.strings.status])
                     }
                 }
             }
@@ -104,8 +104,8 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
                             EmojiEventsIcon { }
                         }
                         ListItemText {
-                            primary = ReactNode("${props.uiState.averageScore} ${strings[MessageID.points]}")
-                            secondary = ReactNode(strings[MessageID.score])
+                            primary = ReactNode("${props.uiState.averageScore} ${strings[MR.strings.points]}")
+                            secondary = ReactNode(strings[MR.strings.score])
                         }
                     }
                 }
@@ -113,7 +113,7 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
 
             item(key = "submissionheader") {
                 UstadDetailHeader.create {
-                    header = ReactNode(strings[MessageID.submissions])
+                    header = ReactNode(strings[MR.strings.submissions])
                 }
             }
 
@@ -131,7 +131,7 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
 
             item(key = "gradesheader") {
                 UstadDetailHeader.create {
-                    header = ReactNode(strings[MessageID.grades_scoring])
+                    header = ReactNode(strings[MR.strings.grades_scoring])
                 }
             }
 
@@ -171,14 +171,14 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
 
             item(key = "private_comment_header") {
                 UstadDetailHeader.create {
-                    header = ReactNode(strings[MessageID.private_comments])
+                    header = ReactNode(strings[MR.strings.private_comments])
                 }
             }
 
             item(key = "new_private_comment") {
                 AssignmentCommentTextFieldListItem.create {
                     onChange = props.onChangePrivateComment
-                    label = ReactNode(strings[MessageID.add_private_comment])
+                    label = ReactNode(strings[MR.strings.add_private_comment])
                     value = props.uiState.newPrivateCommentText
                     activeUserPersonUid = props.uiState.activeUserPersonUid
                     textFieldId = "course_comment_textfield"

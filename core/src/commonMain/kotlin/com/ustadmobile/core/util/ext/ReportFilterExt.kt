@@ -1,7 +1,7 @@
 package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.core.controller.ReportFilterEditPresenter
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.ReportFilter
 
@@ -11,8 +11,8 @@ fun ReportFilter.toDisplayString(systemImpl: UstadMobileSystemImpl, context: Any
     val conditionOption = ReportFilterEditPresenter.ConditionOption.values()
             .find { it.optionVal == reportFilterCondition } ?: return ""
 
-    val fieldValue = systemImpl.getString(fieldOption.messageId, context)
-    val conditionValue = systemImpl.getString(conditionOption.messageId, context)
+    val fieldValue = systemImpl.getString(fieldOption.stringResource)
+    val conditionValue = systemImpl.getString(conditionOption.stringResource)
 
     var valueString = reportFilterValue
     when {
@@ -22,23 +22,23 @@ fun ReportFilter.toDisplayString(systemImpl: UstadMobileSystemImpl, context: Any
                 it.key == reportFilterDropDownValue
             }
             valueString = systemImpl.getString(
-                    selectedOption?.component2() ?: 0, context)
+                    selectedOption?.component2() ?: MR.strings.unset)
         }
         ReportFilter.FIELD_CLAZZ_ENROLMENT_OUTCOME == reportFilterField -> {
             val selectedOption = OUTCOME_TO_MESSAGE_ID_MAP.entries.find {
                 it.key == reportFilterDropDownValue
             }
             valueString = systemImpl.getString(
-                    selectedOption?.component2() ?: 0, context)
+                    selectedOption?.component2() ?: MR.strings.unset)
         }
         ReportFilter.FIELD_CONTENT_COMPLETION == reportFilterField -> {
             val selectedOption = ReportFilterEditPresenter.ContentCompletionStatusOption.values()
                     .find { it.optionVal == reportFilterDropDownValue }
             valueString = systemImpl.getString(
-                    selectedOption?.messageId ?: 0, context)
+                    selectedOption?.stringResource ?: MR.strings.unset)
         }
         reportFilterCondition == ReportFilter.CONDITION_BETWEEN -> {
-            valueString = """$reportFilterValueBetweenX ${systemImpl.getString(MessageID.and, context)} $reportFilterValueBetweenY"""
+            valueString = """$reportFilterValueBetweenX ${systemImpl.getString(MR.strings.and_key)} $reportFilterValueBetweenY"""
         }
         reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY || reportFilterField == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON -> {
            valueString = "..."

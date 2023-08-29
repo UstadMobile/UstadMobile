@@ -1,8 +1,8 @@
 package com.ustadmobile.view.contententry.list
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
@@ -77,7 +77,7 @@ val ContentEntryListScreenPreview = FC<Props> {
 
 val ContentEntryListScreen = FC<Props> {
     val location = useLocation()
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     val viewModel = useUstadViewModel { di, savedStateHandle ->
         ContentEntryListViewModel(di, savedStateHandle, location.ustadViewName)
@@ -120,7 +120,7 @@ val ContentEntryListScreen = FC<Props> {
                     }
 
                     ListItemText {
-                        primary = ReactNode(strings[MessageID.content_editor_create_new_category])
+                        primary = ReactNode(strings[MR.strings.content_editor_create_new_category])
                     }
                 }
             }

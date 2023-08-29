@@ -2,7 +2,6 @@ package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.port.sharedse.impl.http.*
 import com.ustadmobile.core.util.UMFileUtil
@@ -25,6 +24,7 @@ import java.io.File
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
 import java.util.zip.GZIPInputStream
+import com.ustadmobile.core.MR
 
 fun Route.ContainerMountRoute() {
 
@@ -91,7 +91,7 @@ fun Route.ContainerMountRoute() {
                     videoPath = result[0].cePath!!
                 }
 
-                srtLangList.add(0, systemImpl.getString(MessageID.no_subtitle, context))
+                srtLangList.add(0, systemImpl.getString(MR.strings.no_subtitle))
                 if (defaultLangName.isNotEmpty()) srtLangList.add(1, defaultLangName)
 
                 call.respond(HttpStatusCode.OK, VideoContentPresenterCommon.VideoParams(videoPath, audioEntry, srtLangList, srtMap))

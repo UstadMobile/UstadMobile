@@ -148,7 +148,7 @@ fun ClazzAssignmentDetailOverviewScreen(
 
     val policyMessageId = SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS.firstOrNull {
         it.value == uiState.assignment?.caSubmissionPolicy
-    }?.messageId ?: MessageID.submit_all_at_once_submission_policy
+    }?.stringResource ?: MessageID.submit_all_at_once_submission_policy
 
 
     val caFileType = messageIdMapResource(

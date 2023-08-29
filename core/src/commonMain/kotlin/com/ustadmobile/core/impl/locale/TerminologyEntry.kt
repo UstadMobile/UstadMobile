@@ -1,20 +1,19 @@
-package com.ustadmobile.lib.db.entities
+package com.ustadmobile.core.impl.locale
 
-import kotlinx.serialization.Serializable
+import dev.icerock.moko.resources.StringResource
 
 /**
  * Represents a Term Entry in CourseTerminology
  */
-@Serializable
 data class TerminologyEntry(
     /**
      * The key used in the json as per TerminologyKeys
      */
     val id: String,
     /**
-     * The MessageID default e.g. MessageID.student etc.
+     * The StringResource default e.g. MR.student etc.
      */
-    val messageId: Int,
+    val stringResource: StringResource,
 
     /**
      * The string to show the user e.g. "Student"

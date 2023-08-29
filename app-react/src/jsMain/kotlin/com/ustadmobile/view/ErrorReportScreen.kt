@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.ErrorReportUiState
 import com.ustadmobile.lib.db.entities.ErrorReport
@@ -27,7 +27,7 @@ external interface ErrorReportProps: Props {
 
 val ErrorReportComponent2 = FC<ErrorReportProps> { props ->
 
-    val strings: StringsXml = useStringsXml()
+    val strings: StringsXml = useStringProvider()
 
     Container{
 
@@ -44,7 +44,7 @@ val ErrorReportComponent2 = FC<ErrorReportProps> { props ->
             }
 
             Typography {
-                + strings[MessageID.sorry_something_went_wrong]
+                + strings[MR.strings.sorry_something_went_wrong]
                 variant = TypographyVariant.body2
             }
 
@@ -52,7 +52,7 @@ val ErrorReportComponent2 = FC<ErrorReportProps> { props ->
                 onClick = { props.onTakeMeHomeClick }
                 variant = ButtonVariant.contained
 
-                + strings[MessageID.take_me_home]
+                + strings[MR.strings.take_me_home]
             }
 
             Divider { orientation = Orientation.horizontal }
@@ -74,7 +74,7 @@ val ErrorReportComponent2 = FC<ErrorReportProps> { props ->
                     }
 
                     Typography {
-                        + strings[MessageID.incident_id]
+                        + strings[MR.strings.incident_id]
                         variant = TypographyVariant.body2
                     }
                 }
@@ -83,7 +83,7 @@ val ErrorReportComponent2 = FC<ErrorReportProps> { props ->
                     direction = responsive(StackDirection.row)
 
                     IconButton{
-                        ariaLabel = strings[MessageID.copy_code]
+                        ariaLabel = strings[MR.strings.copy_code]
                         onClick = {
                             props.onCopyIconClick()
                         }
@@ -92,7 +92,7 @@ val ErrorReportComponent2 = FC<ErrorReportProps> { props ->
                     }
 
                     IconButton{
-                        ariaLabel = strings[MessageID.share]
+                        ariaLabel = strings[MR.strings.share]
                         onClick = {
                             props.onShareIconClick()
                         }
@@ -110,7 +110,7 @@ val ErrorReportComponent2 = FC<ErrorReportProps> { props ->
 
 
                 Typography {
-                    + strings[MessageID.error_code].replace("%1\$s",
+                    + strings[MR.strings.error_code].replace("%1\$s",
                         props.uiState.errorReport?.errorCode.toString())
                     variant = TypographyVariant.body1
                 }

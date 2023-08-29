@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.HolidayCalendarListUiState
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 import web.cssom.px
@@ -18,7 +18,7 @@ external interface HolidayCalendarListProps: Props{
 
 val HolidayCalendarListComponent2 = FC<HolidayCalendarListProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container {
         maxWidth = "lg"
@@ -40,7 +40,7 @@ val HolidayCalendarListComponent2 = FC<HolidayCalendarListProps> { props ->
 
                             ListItemText{
                                 primary = ReactNode(holidayCalendar.umCalendarName ?: "")
-                                secondary = ReactNode(strings[MessageID.num_holidays].replace("%1\$s",
+                                secondary = ReactNode(strings[MR.strings.num_holidays].replace("%1\$s",
                                     holidayCalendar.numEntries.toString()))
                             }
                         }

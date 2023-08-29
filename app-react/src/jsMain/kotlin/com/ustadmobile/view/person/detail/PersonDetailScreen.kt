@@ -3,9 +3,9 @@ package com.ustadmobile.view.person.detail
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailUiState
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
 import com.ustadmobile.core.controller.PersonConstants
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
@@ -109,7 +109,7 @@ val PersonDetailPreview = FC<Props> {
 
 val PersonDetailComponent2 = FC<PersonDetailProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container {
         maxWidth = "lg"
@@ -144,7 +144,7 @@ val PersonDetailComponent2 = FC<PersonDetailProps> { props ->
 
             Typography {
                 variant = TypographyVariant.h6
-                + strings[MessageID.basic_details]
+                + strings[MR.strings.basic_details]
             }
 
             DetailFeilds{
@@ -155,7 +155,7 @@ val PersonDetailComponent2 = FC<PersonDetailProps> { props ->
 
             Typography {
                 variant = TypographyVariant.h6
-                + strings[MessageID.contact_details]
+                + strings[MR.strings.contact_details]
             }
 
             ContactDetails{
@@ -166,7 +166,7 @@ val PersonDetailComponent2 = FC<PersonDetailProps> { props ->
 
             Typography {
                 variant = TypographyVariant.h6
-                + strings[MessageID.classes]
+                + strings[MR.strings.classes]
             }
 
             Classes{
@@ -178,7 +178,7 @@ val PersonDetailComponent2 = FC<PersonDetailProps> { props ->
 
 private val QuickActionBar = FC<PersonDetailProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Stack {
         direction = responsive(StackDirection.row)
@@ -186,7 +186,7 @@ private val QuickActionBar = FC<PersonDetailProps> { props ->
         if (props.uiState.phoneNumVisible) {
             UstadQuickActionButton {
                 icon = Call.create()
-                text = strings[MessageID.call]
+                text = strings[MR.strings.call]
                 onClick = { props.onClickDial }
             }
         }
@@ -194,7 +194,7 @@ private val QuickActionBar = FC<PersonDetailProps> { props ->
         if (props.uiState.emailVisible) {
             UstadQuickActionButton {
                 icon = Email.create()
-                text = strings[MessageID.email]
+                text = strings[MR.strings.email]
                 onClick = { props.onClickEmail }
             }
         }
@@ -202,7 +202,7 @@ private val QuickActionBar = FC<PersonDetailProps> { props ->
         if (props.uiState.showCreateAccountVisible) {
             UstadQuickActionButton {
                 icon = Person.create()
-                text = strings[MessageID.create_account]
+                text = strings[MR.strings.create_account]
                 onClick = { props.onClickCreateAccount }
             }
         }
@@ -210,7 +210,7 @@ private val QuickActionBar = FC<PersonDetailProps> { props ->
         if (props.uiState.changePasswordVisible) {
             UstadQuickActionButton {
                 icon = Key.create()
-                text = strings[MessageID.change_password]
+                text = strings[MR.strings.change_password]
                 onClick = { props.onClickChangePassword }
             }
         }
@@ -218,7 +218,7 @@ private val QuickActionBar = FC<PersonDetailProps> { props ->
         if (props.uiState.manageParentalConsentVisible) {
             UstadQuickActionButton {
                 icon = SupervisedUserCircle.create()
-                text = strings[MessageID.manage_parental_consent]
+                text = strings[MR.strings.manage_parental_consent]
                 onClick = { props.onClickManageParentalConsent }
             }
         }
@@ -226,7 +226,7 @@ private val QuickActionBar = FC<PersonDetailProps> { props ->
         if (props.uiState.chatVisible) {
             UstadQuickActionButton {
                 icon = Chat.create()
-                text = strings[MessageID.chat]
+                text = strings[MR.strings.chat]
                 onClick = { props.onClickChat }
             }
         }
@@ -235,7 +235,7 @@ private val QuickActionBar = FC<PersonDetailProps> { props ->
 
 private val DetailFeilds = FC<PersonDetailProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     val birthdayFormatted = useMemo(dependencies = arrayOf(props.uiState.person?.dateOfBirth)) {
         Date(props.uiState.person?.dateOfBirth ?: 0L).toLocaleDateString()
@@ -244,7 +244,7 @@ private val DetailFeilds = FC<PersonDetailProps> { props ->
     if (props.uiState.dateOfBirthVisible){
         UstadDetailField {
             icon = CalendarToday.create()
-            labelText = strings[MessageID.birthday]
+            labelText = strings[MR.strings.birthday]
             valueText = ReactNode(birthdayFormatted)
         }
     }
@@ -258,7 +258,7 @@ private val DetailFeilds = FC<PersonDetailProps> { props ->
 
         UstadDetailField {
             icon = null
-            labelText = strings[MessageID.gender_literal]
+            labelText = strings[MR.strings.gender_literal]
             valueText = ReactNode(gender ?: "")
         }
     }
@@ -266,7 +266,7 @@ private val DetailFeilds = FC<PersonDetailProps> { props ->
     if (props.uiState.personOrgIdVisible){
         UstadDetailField {
             icon = Badge.create()
-            labelText = strings[MessageID.organization_id]
+            labelText = strings[MR.strings.organization_id]
             valueText = ReactNode(props.uiState.person?.personOrgId ?: "")
         }
     }
@@ -274,7 +274,7 @@ private val DetailFeilds = FC<PersonDetailProps> { props ->
     if (props.uiState.personUsernameVisible){
         UstadDetailField {
             icon = AccountCircle.create()
-            labelText = strings[MessageID.username]
+            labelText = strings[MR.strings.username]
             valueText = ReactNode(props.uiState.person?.username ?: "")
         }
     }
@@ -282,12 +282,12 @@ private val DetailFeilds = FC<PersonDetailProps> { props ->
 
 private val ContactDetails = FC<PersonDetailProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     if (props.uiState.phoneNumVisible){
         UstadDetailField{
             valueText = ReactNode(props.uiState.person?.phoneNum ?: "")
-            labelText = strings[MessageID.phone]
+            labelText = strings[MR.strings.phone]
             icon = Call.create()
         }
     }
@@ -295,7 +295,7 @@ private val ContactDetails = FC<PersonDetailProps> { props ->
     if (props.uiState.emailVisible){
         UstadDetailField {
             icon = Email.create()
-            labelText = strings[MessageID.email]
+            labelText = strings[MR.strings.email]
             valueText = ReactNode(props.uiState.person?.emailAddr ?: "")
         }
     }
@@ -303,7 +303,7 @@ private val ContactDetails = FC<PersonDetailProps> { props ->
     if (props.uiState.personAddressVisible){
         UstadDetailField {
             icon = LocationOn.create()
-            labelText = strings[MessageID.address]
+            labelText = strings[MR.strings.address]
             valueText = ReactNode(props.uiState.person?.personAddress ?: "")
         }
     }

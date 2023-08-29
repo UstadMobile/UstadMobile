@@ -1,8 +1,8 @@
 package com.ustadmobile.view.clazzlog.edit
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditUiState
 import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
@@ -29,7 +29,7 @@ external interface ClazzLogEditScreenProps : Props {
 
 private val ClazzLogEditScreenComponent2 = FC<ClazzLogEditScreenProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container {
         maxWidth = "lg"
@@ -39,7 +39,7 @@ private val ClazzLogEditScreenComponent2 = FC<ClazzLogEditScreenProps> { props -
 
             UstadDateTimeField {
                 timeInMillis = props.uiState.clazzLog?.logDate ?: 0
-                label = ReactNode(strings[MessageID.date])
+                label = ReactNode(strings[MR.strings.date])
                 disabled = !props.uiState.fieldsEnabled
                 helperText = props.uiState.dateError?.let { ReactNode(it) }
                 error = props.uiState.dateError != null

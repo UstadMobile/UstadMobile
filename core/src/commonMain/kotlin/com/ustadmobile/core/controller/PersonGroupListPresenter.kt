@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.safeStringify
@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.PersonGroup
 import com.ustadmobile.lib.db.entities.UmAccount
+import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
@@ -21,16 +22,16 @@ class PersonGroupListPresenter(context: Any, arguments: Map<String, String>, vie
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
 
-    enum class SortOrder(val messageId: Int) {
-        ORDER_NAME_ASC(MessageID.sort_by_name_asc),
-        ORDER_NAME_DSC(MessageID.sort_by_name_desc)
+    enum class SortOrder(val stringResource: StringResource) {
+        ORDER_NAME_ASC(MR.strings.sort_by_name_asc),
+        ORDER_NAME_DSC(MR.strings.sort_by_name_desc)
     }
 
     class PersonGroupListSortOption(
         val sortOrder: SortOrder,
         context: Any,
         di: DI
-    ) : MessageIdOption(sortOrder.messageId, context, di = di)
+    ) : MessageIdOption(sortOrder.stringResource, context, di = di, code = 42)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)

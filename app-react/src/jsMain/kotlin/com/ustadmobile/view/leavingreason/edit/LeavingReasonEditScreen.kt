@@ -1,8 +1,8 @@
 package com.ustadmobile.view.leavingreason.edit
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.LeavingReasonEditUiState
 import com.ustadmobile.core.viewmodel.LeavingReasonEditViewModel
@@ -25,7 +25,7 @@ external interface LeavingReasonEditScreenProps: Props {
 
 val LeavingReasonEditScreenComponent = FC<LeavingReasonEditScreenProps> { props ->
 
-    val strings: StringsXml = useStringsXml()
+    val strings: StringsXml = useStringProvider()
 
     Container {
         Stack {
@@ -33,7 +33,7 @@ val LeavingReasonEditScreenComponent = FC<LeavingReasonEditScreenProps> { props 
 
             UstadTextEditField {
                 value = props.uiState.leavingReason?.leavingReasonTitle ?: ""
-                label = strings[MessageID.description]
+                label = strings[MR.strings.description]
                 error = props.uiState.reasonTitleError
                 enabled = props.uiState.fieldsEnabled
                 onChange = {

@@ -27,6 +27,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.testTag
+import com.ustadmobile.core.impl.locale.TerminologyEntry
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.view.composable.UstadErrorText
 
@@ -102,7 +103,7 @@ private fun CourseTerminologyEditScreen(
                         .defaultItemPadding()
                         .fillMaxWidth(),
                     value = terminologyTerm.term ?: "",
-                    label = { Text(messageIdResource(id = terminologyTerm.messageId)) },
+                    label = { Text(messageIdResource(id = terminologyTerm.stringResource)) },
                     enabled = uiState.fieldsEnabled,
                     onValueChange = {
                         onTerminologyTermChanged(terminologyTerm.copy(
@@ -140,17 +141,17 @@ fun CourseTerminologyEditScreenPreview() {
             TerminologyEntry(
                 id = "1",
                 term = "First",
-                messageId = MessageID.teacher
+                stringResource = MessageID.teacher
             ),
             TerminologyEntry(
                 id = "2",
                 term = "Second",
-                messageId = MessageID.student
+                stringResource = MessageID.student
             ),
             TerminologyEntry(
                 id = "3",
                 term = "Third",
-                messageId = MessageID.add_a_teacher
+                stringResource = MessageID.add_a_teacher
             )
         )
     )

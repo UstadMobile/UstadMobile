@@ -1,14 +1,14 @@
 package com.ustadmobile.view.courseterminology.edit
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditUiState
 import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.CourseTerminology
-import com.ustadmobile.lib.db.entities.TerminologyEntry
+import com.ustadmobile.core.impl.locale.TerminologyEntry
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.util.ext.onTextChange
 import mui.material.TextField
@@ -33,7 +33,7 @@ external interface CourseTerminologyEditScreenProps : Props {
 
 val CourseTerminologyEditScreenComponent2 = FC <CourseTerminologyEditScreenProps> { props ->
 
-    val strings: StringsXml = useStringsXml()
+    val strings: StringsXml = useStringProvider()
 
     Container {
         maxWidth = "lg"
@@ -45,7 +45,7 @@ val CourseTerminologyEditScreenComponent2 = FC <CourseTerminologyEditScreenProps
             TextField {
                 id = "terms_title"
                 value = props.uiState.entity?.ctTitle ?: ""
-                label = ReactNode(strings[MessageID.name])
+                label = ReactNode(strings[MR.strings.name])
                 error = props.uiState.titleError != null
                 helperText = props.uiState.titleError?.let { ReactNode(it) }
                 disabled = !props.uiState.fieldsEnabled
@@ -57,13 +57,13 @@ val CourseTerminologyEditScreenComponent2 = FC <CourseTerminologyEditScreenProps
                 }
             }
 
-            + strings[MessageID.your_words_for]
+            + strings[MR.strings.your_words_for]
 
             props.uiState.terminologyTermList.forEach { terminologyTerm ->
                 TextField {
                     fullWidth = true
                     value = terminologyTerm.term ?: ""
-                    label = ReactNode(strings[terminologyTerm.messageId])
+                    label = ReactNode(strings[terminologyTerm.stringResource])
                     error = terminologyTerm.errorMessage != null
                     disabled = !props.uiState.fieldsEnabled
                     id = terminologyTerm.id
@@ -88,17 +88,17 @@ val CourseTerminologyEditScreenPreview = FC<Props> {
                 TerminologyEntry(
                     id = "1",
                     term = "First",
-                    messageId = MessageID.teacher
+                    stringResource = MR.strings.teacher
                 ),
                 TerminologyEntry(
                     id = "2",
                     term = "Second",
-                    messageId = MessageID.student
+                    stringResource = MR.strings.student
                 ),
                 TerminologyEntry(
                     id = "3",
                     term = "Third",
-                    messageId = MessageID.add_a_teacher
+                    stringResource = MR.strings.add_a_teacher
                 )
             )
         )

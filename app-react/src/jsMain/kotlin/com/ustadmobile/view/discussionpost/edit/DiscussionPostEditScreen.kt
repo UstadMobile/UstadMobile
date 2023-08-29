@@ -1,8 +1,8 @@
 package com.ustadmobile.view.discussionpost.edit
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditUiState
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
@@ -29,7 +29,7 @@ external interface DiscussionPostEditProps: Props {
 
 val DiscussionPostEditComponent2 = FC<DiscussionPostEditProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     val theme by useRequiredContext(ThemeContext)
 
@@ -43,7 +43,7 @@ val DiscussionPostEditComponent2 = FC<DiscussionPostEditProps> { props ->
             TextField {
                 value = props.uiState.discussionPost?.discussionPostTitle ?: ""
                 id = "discussion_post_title"
-                label = ReactNode(strings[MessageID.title])
+                label = ReactNode(strings[MR.strings.title])
                 error = props.uiState.discussionPostTitleError != null
                 helperText = props.uiState.discussionPostTitleError?.let { ReactNode(it) }
                 disabled = !props.uiState.fieldsEnabled

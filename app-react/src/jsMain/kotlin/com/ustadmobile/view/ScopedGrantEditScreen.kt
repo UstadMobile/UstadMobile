@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.viewmodel.ScopedGrantEditUiState
 import mui.material.*
@@ -17,7 +17,7 @@ external interface ScopedGrantEditScreenProps : Props {
 
 val ScopedGrantEditScreenComponent2 = FC<ScopedGrantEditScreenProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container {
 
@@ -33,7 +33,7 @@ val ScopedGrantEditScreenComponent2 = FC<ScopedGrantEditScreenProps> { props ->
                             }
 
                             ListItemText {
-                                primary = ReactNode(strings[bitmask.messageId])
+                                primary = ReactNode(strings[bitmask.stringResource])
                             }
 
                             Switch {
@@ -52,11 +52,11 @@ val ScopedGrantEditScreenPreview = FC<Props> {
         ScopedGrantEditUiState(
             bitmaskList = listOf(
                 BitmaskFlag(
-                    messageId = MessageID.permission_person_insert,
+                    stringResource = MR.strings.permission_key_person_insert,
                     flagVal = 0
                 ),
                 BitmaskFlag(
-                    messageId = MessageID.permission_person_update,
+                    stringResource = MR.strings.permission_key_person_update,
                     flagVal = 0
                 )
             )

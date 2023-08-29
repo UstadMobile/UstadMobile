@@ -1,9 +1,9 @@
 package com.ustadmobile.view.clazzassignment.detailoverview
 
 import com.ustadmobile.core.controller.SubmissionConstants
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
@@ -80,7 +80,7 @@ external interface ClazzAssignmentDetailOverviewScreenProps : Props {
 
 private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDetailOverviewScreenProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     val formattedDateTime = useFormattedDateAndTime(
         timeInMillis = props.uiState.courseBlock?.cbDeadlineDate ?: 0,
@@ -88,13 +88,13 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
     )
 
     val policyMessageId = SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS
-        .firstOrNull { it.value == props.uiState.assignment?.caSubmissionPolicy }?.messageId
-        ?: MessageID.submit_all_at_once_submission_policy
+        .firstOrNull { it.value == props.uiState.assignment?.caSubmissionPolicy }?.stringResource
+        ?: MR.strings.submit_all_at_once_submission_policy
 
 
     val caFileType = strings[
         SubmissionConstants.FILE_TYPE_MAP[
-            props.uiState.assignment?.caFileType] ?: MessageID.document
+            props.uiState.assignment?.caFileType] ?: MR.strings.document
     ]
 
     val muiAppState = useMuiAppState()
@@ -131,7 +131,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                             valueText = ReactNode(
                                 "$formattedDateTime (${TimeZone.currentSystemDefault().id})"
                             )
-                            labelText = strings[MessageID.deadline]
+                            labelText = strings[MR.strings.deadline]
                             icon = EventAvailableIcon.create()
                             onClick = { }
                         }
@@ -139,7 +139,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
 
                     UstadDetailField {
                         valueText = ReactNode(strings[policyMessageId])
-                        labelText = strings[MessageID.submission_policy]
+                        labelText = strings[MR.strings.submission_policy]
                         icon = (ASSIGNMENT_STATUS_MAP[
                             props.uiState.assignment?.caSubmissionPolicy] ?: DoneIcon).create()
                         onClick = { }
@@ -164,7 +164,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
             if(props.uiState.activeUserIsSubmitter) {
                 item {
                     UstadDetailHeader.create {
-                        header = ReactNode(strings[MessageID.your_submission])
+                        header = ReactNode(strings[MR.strings.your_submission])
                     }
                 }
 
@@ -182,9 +182,9 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
 
                             props.uiState.currentSubmissionLength?.also { submissionLength ->
                                 val limitTypeMessageId = if(props.uiState.assignment?.caTextLimitType == ClazzAssignment.TEXT_CHAR_LIMIT) {
-                                    MessageID.characters
+                                    MR.strings.characters
                                 }else {
-                                    MessageID.words
+                                    MR.strings.words
                                 }
                                 + "${strings[limitTypeMessageId]}: $submissionLength / "
                                 + "${props.uiState.assignment?.caTextLimit} "
@@ -208,10 +208,10 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
 
                                 ListItemText {
                                     primary =
-                                        ReactNode(strings[MessageID.add_file].uppercase())
+                                        ReactNode(strings[MR.strings.add_file].uppercase())
                                     secondary = ReactNode(
-                                        "${strings[MessageID.file_type_chosen]} $caFileType " +
-                                            strings[MessageID.max_number_of_files]
+                                        "${strings[MR.strings.file_type_chosen]} $caFileType " +
+                                            strings[MR.strings.max_number_of_files]
                                                 .replace(
                                                     "%1\$s",
                                                     (props.uiState.assignment?.caNumberOfFiles
@@ -251,7 +251,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                             variant = ButtonVariant.contained
                             fullWidth = true
 
-                            +strings[MessageID.submit].uppercase()
+                            +strings[MR.strings.submit].uppercase()
                         }
                     }
 
@@ -260,7 +260,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 //List of grades awarded
                 item {
                     UstadDetailHeader.create {
-                        header = ReactNode(strings[MessageID.grades_class_age])
+                        header = ReactNode(strings[MR.strings.grades_class_age])
                     }
                 }
 
@@ -291,7 +291,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
             item {
                 ListItem.create {
                     ListItemText {
-                        primary = ReactNode(strings[MessageID.class_comments])
+                        primary = ReactNode(strings[MR.strings.class_comments])
                     }
                 }
             }
@@ -299,7 +299,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
             item {
                 AssignmentCommentTextFieldListItem.create {
                     onChange = props.onChangeCourseComment
-                    label = ReactNode(strings[MessageID.add_class_comment])
+                    label = ReactNode(strings[MR.strings.add_class_comment])
                     value = props.uiState.newCourseCommentText
                     activeUserPersonUid = props.uiState.activeUserPersonUid
                     textFieldId = "course_comment_textfield"
@@ -321,7 +321,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 item {
                     ListItem.create {
                         ListItemText {
-                            primary = ReactNode(strings[MessageID.private_comments])
+                            primary = ReactNode(strings[MR.strings.private_comments])
                         }
                     }
                 }
@@ -329,7 +329,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 item {
                     AssignmentCommentTextFieldListItem.create {
                         onChange = props.onChangePrivateComment
-                        label = ReactNode(strings[MessageID.add_private_comment])
+                        label = ReactNode(strings[MR.strings.add_private_comment])
                         value = props.uiState.newPrivateCommentText
                         activeUserPersonUid = props.uiState.activeUserPersonUid
                         textFieldId = "private_comment_textfield"

@@ -1,7 +1,7 @@
 package com.ustadmobile.view.clazz.edit
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditUiState
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import web.cssom.ClassName
@@ -46,7 +46,7 @@ private data class Point(
 
 val PopUpMenu = FC<PopUpMenuProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     var point by useState<Point>()
 
@@ -71,7 +71,7 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
         IconButton{
             disabled = !(props.fieldsEnabled)
             onClick = handleContextMenu
-            ariaLabel = strings[MessageID.more_options]
+            ariaLabel = strings[MR.strings.more_options]
             className = ClassName("courseblockpopup")
 
             + MoreVert.create()
@@ -97,7 +97,7 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
                         props.onClickHideBlockPopupMenu(props.uiState.courseBlock)
                         point = null
                     }
-                    + strings[MessageID.hide]
+                    + strings[MR.strings.hide]
                 }
             }
 
@@ -107,7 +107,7 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
                         props.onClickUnHideBlockPopupMenu(props.uiState.courseBlock)
                         point = null
                     }
-                    + strings[MessageID.unhide]
+                    + strings[MR.strings.unhide]
                 }
             }
 
@@ -117,7 +117,7 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
                         props.onClickIndentBlockPopupMenu(props.uiState.courseBlock)
                         point = null
                     }
-                    + strings[MessageID.indent]
+                    + strings[MR.strings.indent]
                 }
             }
 
@@ -127,7 +127,7 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
                         props.onClickUnIndentBlockPopupMenu(props.uiState.courseBlock)
                         point = null
                     }
-                    + strings[MessageID.unindent]
+                    + strings[MR.strings.unindent]
                 }
             }
 
@@ -136,7 +136,7 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
                     props.onClickDeleteBlockPopupMenu(props.uiState.courseBlock)
                     point = null
                 }
-                + strings[MessageID.delete]
+                + strings[MR.strings.delete]
             }
         }
     }

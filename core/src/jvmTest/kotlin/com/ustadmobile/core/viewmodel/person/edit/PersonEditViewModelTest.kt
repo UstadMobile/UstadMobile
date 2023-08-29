@@ -6,7 +6,7 @@ import com.soywiz.klock.years
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
@@ -67,7 +67,7 @@ class PersonEditViewModelTest {
                 viewModel.onClickSave()
 
                 val systemImpl: UstadMobileSystemImpl = di.direct.instance()
-                val expectedErrMsg = systemImpl.getString(MessageID.field_required_prompt)
+                val expectedErrMsg = systemImpl.getString(MR.strings.field_required_prompt)
 
                 val stateAfterSave = awaitItemWhere { it.usernameError != null }
                 assertEquals(expectedErrMsg, stateAfterSave.usernameError,
@@ -100,7 +100,7 @@ class PersonEditViewModelTest {
                 viewModel.onClickSave()
 
                 val systemImpl: UstadMobileSystemImpl = di.direct.instance()
-                val expectedErrMsg = systemImpl.getString(MessageID.field_required_prompt)
+                val expectedErrMsg = systemImpl.getString(MR.strings.field_required_prompt)
 
                 val stateAfterSave = awaitItemWhere { it.dateOfBirthError != null }
 
@@ -298,7 +298,7 @@ class PersonEditViewModelTest {
 
                 viewModel.onClickSave()
 
-                val fieldRequiredErr = systemImpl.getString(MessageID.field_required_prompt)
+                val fieldRequiredErr = systemImpl.getString(MR.strings.field_required_prompt)
                 val stateWithError = awaitItemWhere { it.fieldsEnabled && it.parentContactError != null }
                 assertEquals(fieldRequiredErr, stateWithError.parentContactError,
                     "When registering as a minor and contact field is blank, then field" +

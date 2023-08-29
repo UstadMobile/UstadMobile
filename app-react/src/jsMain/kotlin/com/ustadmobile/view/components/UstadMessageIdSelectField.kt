@@ -1,7 +1,7 @@
 package com.ustadmobile.view.components
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.EnrolmentPolicyConstants
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.lib.db.entities.Clazz
@@ -11,7 +11,7 @@ import react.ReactNode
 import react.useState
 
 
-external interface MessageIDSelectFieldProps: Props {
+external interface MR.strings.electFieldProps: Props {
     /**
      * The currently selected value. If there is no such value in the list, the selection will be blank
      */
@@ -51,8 +51,8 @@ external interface MessageIDSelectFieldProps: Props {
     var fullWidth: Boolean
 }
 
-val UstadMessageIdSelectField = FC<MessageIDSelectFieldProps> { props ->
-    val strings = useStringsXml()
+val UstadMessageIdSelectField = FC<MR.strings.electFieldProps> { props ->
+    val strings = useStringProvider()
 
     UstadSelectField<MessageIdOption2> {
         value = props.options.firstOrNull { it.value == props.value }
@@ -60,7 +60,7 @@ val UstadMessageIdSelectField = FC<MessageIDSelectFieldProps> { props ->
         label = props.label
         options = props.options
         fullWidth = props.fullWidth
-        itemLabel = { ReactNode(if(it.messageId == 0) "" else strings[it.messageId]) }
+        itemLabel = { ReactNode(if(it.stringResource == 0) "" else strings[it.stringResource]) }
         itemValue = { it.value.toString() }
         onChange = {
             props.onChange(it)

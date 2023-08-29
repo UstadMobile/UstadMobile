@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.ContentEntryImportLinkUiState
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadTextEditField
@@ -22,7 +22,7 @@ external interface ContentEntryImportLinkProps: Props {
 
 val ContentEntryImportLinkComponent2 = FC<ContentEntryImportLinkProps> {props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container{
         maxWidth = "lg"
@@ -33,7 +33,7 @@ val ContentEntryImportLinkComponent2 = FC<ContentEntryImportLinkProps> {props ->
 
             UstadTextEditField {
                 value = props.uiState.url.toString()
-                label = strings[MessageID.enter_url]
+                label = strings[MR.strings.enter_url]
                 error = props.uiState.linkError
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
@@ -47,7 +47,7 @@ val ContentEntryImportLinkComponent2 = FC<ContentEntryImportLinkProps> {props ->
                     paddingRight = 16.px
                 }
                 variant = TypographyVariant.body2
-                + strings[MessageID.supported_link]
+                + strings[MR.strings.supported_link]
             }
 
             Button {
@@ -55,7 +55,7 @@ val ContentEntryImportLinkComponent2 = FC<ContentEntryImportLinkProps> {props ->
                 onClick = { props.onClickNext }
                 variant = ButtonVariant.contained
 
-                + strings[MessageID.next]
+                + strings[MR.strings.next]
             }
 
         }

@@ -1,7 +1,7 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.entities.*
 import web.cssom.Padding
@@ -37,7 +37,7 @@ val UstadAssignmentSubmissionListItem = FC<UstadAssignmentSubmissionListItemProp
         timezoneId = TimeZone.currentSystemDefault().id
     )
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     ListItem{
         ListItemButton{
@@ -60,7 +60,7 @@ val UstadAssignmentSubmissionListItem = FC<UstadAssignmentSubmissionListItemProp
                 if (props.submission.casTimestamp.isSetDate()){
 
                     secondary = ReactNode(
-                        "${strings[MessageID.submitted_cap]}: $formattedDateTime")
+                        "${strings[MR.strings.submitted_cap]}: $formattedDateTime")
 
                 }
             }
@@ -69,7 +69,7 @@ val UstadAssignmentSubmissionListItem = FC<UstadAssignmentSubmissionListItemProp
         val onClickDeleteSubmission = props.onClickDeleteSubmission
         if (onClickDeleteSubmission != null) {
             secondaryAction = IconButton.create {
-                ariaLabel = strings[MessageID.delete]
+                ariaLabel = strings[MR.strings.delete]
                 onClick = {
                     onClickDeleteSubmission(props.submission)
                 }

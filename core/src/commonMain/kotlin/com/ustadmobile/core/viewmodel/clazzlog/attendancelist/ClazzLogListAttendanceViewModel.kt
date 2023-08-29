@@ -1,6 +1,6 @@
 package com.ustadmobile.core.viewmodel.clazzlog.attendancelist
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -15,6 +15,7 @@ import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttend
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.Role
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -44,9 +45,9 @@ data class ClazzLogListAttendanceUiState(
     val selectedChipId: Int = 7,
 
     val viewIdToNumDays: List<MessageIdOption2> = listOf(
-        MessageIdOption2(MessageID.last_week, 7),
-        MessageIdOption2(MessageID.last_month, 30),
-        MessageIdOption2(MessageID.last_three_months, 90)
+        MessageIdOption2(MR.strings.last_week, 7),
+        MessageIdOption2(MR.strings.last_month, 30),
+        MessageIdOption2(MR.strings.last_three_months, 90)
     ),
 )
 
@@ -66,9 +67,9 @@ class ClazzLogListAttendanceViewModel(
     di, savedStateHandle, ClazzLogListAttendanceUiState(), ClazzDetailViewModel.DEST_NAME,
 ) {
 
-    enum class RecordAttendanceOption(val commandId: Int,val messageId: Int ) {
-        RECORD_ATTENDANCE_MOST_RECENT_SCHEDULE(1, MessageID.record_attendance_for_most_recent_occurrence),
-        RECORD_ATTENDANCE_NEW_SCHEDULE(2, MessageID.add_a_new_occurrence);
+    enum class RecordAttendanceOption(val commandId: Int,val stringResource: StringResource ) {
+        RECORD_ATTENDANCE_MOST_RECENT_SCHEDULE(1, MR.strings.record_attendance_for_most_recent_occurrence),
+        RECORD_ATTENDANCE_NEW_SCHEDULE(2, MR.strings.add_a_new_occurrence);
 
         companion object {
 
@@ -157,7 +158,7 @@ class ClazzLogListAttendanceViewModel(
                             prev.copy(
                                 fabState = FabUiState(
                                     visible = options.isNotEmpty(),
-                                    text = systemImpl.getString(MessageID.record_attendance),
+                                    text = systemImpl.getString(MR.strings.record_attendance),
                                     icon = FabUiState.FabIcon.ADD,
                                 )
                             )

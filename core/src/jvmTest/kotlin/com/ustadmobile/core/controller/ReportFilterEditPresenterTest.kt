@@ -3,7 +3,7 @@ package com.ustadmobile.core.controller
 import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ReportDao
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadBackStackEntry
 import com.ustadmobile.core.impl.nav.UstadNavController
@@ -99,7 +99,7 @@ class ReportFilterEditPresenterTest {
 
         presenter.handleClickSave(initialEntity)
 
-        verify(systemImpl, timeout(5000)).getString(eq(MessageID.field_required_prompt), any())
+        verify(systemImpl, timeout(5000)).getString(eq(MR.strings.field_required_prompt), any())
     }
 
     //@Test

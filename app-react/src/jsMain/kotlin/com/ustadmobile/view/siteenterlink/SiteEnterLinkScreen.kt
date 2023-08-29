@@ -1,8 +1,8 @@
 package com.ustadmobile.view.siteenterlink
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
@@ -46,7 +46,7 @@ val SiteEnterLinkScreen = FC<Props> {
 
 val SiteEnterLinkComponent2 = FC <SiteEnterLinkProps> { props ->
 
-    val strings: StringsXml = useStringsXml()
+    val strings: StringsXml = useStringProvider()
 
     Container {
         Stack {
@@ -60,13 +60,13 @@ val SiteEnterLinkComponent2 = FC <SiteEnterLinkProps> { props ->
             }
 
             Typography {
-                + strings[MessageID.please_enter_the_linK]
+                + strings[MR.strings.please_enter_the_linK]
             }
 
             TextField {
                 id = "sitelink_textfield"
                 value = props.uiState.siteLink
-                label = ReactNode(strings[MessageID.site_link])
+                label = ReactNode(strings[MR.strings.site_link])
                 helperText = props.uiState.linkError?.let { ReactNode(it) }
                 error = helperText != null
                 disabled = !props.uiState.fieldsEnabled
@@ -87,12 +87,12 @@ val SiteEnterLinkComponent2 = FC <SiteEnterLinkProps> { props ->
                 variant = ButtonVariant.contained
                 disabled = !props.uiState.fieldsEnabled
 
-                + strings[MessageID.next]
+                + strings[MR.strings.next]
             }
 
             Typography {
                 align = TypographyAlign.center
-                + strings[MessageID.or].uppercase()
+                + strings[MR.strings.or].uppercase()
             }
 
             Button {
@@ -102,7 +102,7 @@ val SiteEnterLinkComponent2 = FC <SiteEnterLinkProps> { props ->
 
                 startIcon = Add.create()
 
-                + strings[MessageID.create_a_new_learning_env].uppercase()
+                + strings[MR.strings.create_a_new_learning_env].uppercase()
             }
         }
     }

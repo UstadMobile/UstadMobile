@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.SiteDetailUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.UstadDetailField
@@ -29,7 +29,7 @@ external interface SiteDetailProps : Props {
 
 val SiteDetailComponent2 = FC<SiteDetailProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container {
         maxWidth = "lg"
@@ -40,25 +40,25 @@ val SiteDetailComponent2 = FC<SiteDetailProps> { props ->
 
             UstadDetailField {
                 icon = AccountBalanceRounded.create()
-                labelText = strings[MessageID.name]
+                labelText = strings[MR.strings.name]
                 valueText = ReactNode(props.uiState.site?.siteName.toString())
             }
 
             UstadDetailField {
                 icon = ManageSearchOutlined.create()
-                labelText = strings[MessageID.guest_login_enabled]
+                labelText = strings[MR.strings.guest_login_enabled]
                 valueText = ReactNode(props.uiState.site?.guestLogin.toString())
             }
 
             UstadDetailField {
                 icon = HowToRegRounded.create()
-                labelText = strings[MessageID.registration_allowed]
+                labelText = strings[MR.strings.registration_allowed]
                 valueText = ReactNode(props.uiState.site?.registrationAllowed.toString())
             }
 
             Typography {
                 variant = TypographyVariant.h6
-                + strings[MessageID.terms_and_policies]
+                + strings[MR.strings.terms_and_policies]
             }
 
             List {

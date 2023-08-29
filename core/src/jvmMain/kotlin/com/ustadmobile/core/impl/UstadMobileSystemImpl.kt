@@ -127,6 +127,10 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
         })
     }
 
+    fun getString(stringResource: StringResource, localeCode: String ) : String{
+        return stringResource.localized(Locale(localeCode))
+    }
+
     fun getString(localeCode: String, messageId: Int, context: Any? = null): String {
         val localeCodeLower = localeCode.toLowerCase(Locale.ROOT)
 

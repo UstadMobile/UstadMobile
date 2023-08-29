@@ -2,8 +2,8 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.AccountListUiState
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UserSession
@@ -149,7 +149,7 @@ val AccountListItem = FC<AccountListItemProps> {    props ->
 
 val AccountListComponent2 = FC<AccountListProps> {  props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container{
         maxWidth = "lg"
@@ -173,13 +173,13 @@ val AccountListComponent2 = FC<AccountListProps> {  props ->
                 Button {
                     onClick = { props.onMyProfileClick() }
                     variant = ButtonVariant.outlined
-                    + strings[MessageID.my_profile].uppercase()
+                    + strings[MR.strings.my_profile].uppercase()
                 }
 
                 Button {
                     onClick = { props.onLogoutClick() }
                     variant = ButtonVariant.outlined
-                    + strings[MessageID.logout].uppercase()
+                    + strings[MR.strings.logout].uppercase()
                 }
             }
 
@@ -203,7 +203,7 @@ val AccountListComponent2 = FC<AccountListProps> {  props ->
                 }
 
                 UstadAddListItem {
-                    text = strings[MessageID.add_another_account]
+                    text = strings[MR.strings.add_another_account]
                     onClickAdd = props.onAddItem
                 }
             }
@@ -218,7 +218,7 @@ val AccountListComponent2 = FC<AccountListProps> {  props ->
                     }
 
                     ListItemText{
-                        primary = ReactNode(strings[MessageID.account])
+                        primary = ReactNode(strings[MR.strings.account])
                         secondary = ReactNode(props.uiState.version)
                     }
                 }

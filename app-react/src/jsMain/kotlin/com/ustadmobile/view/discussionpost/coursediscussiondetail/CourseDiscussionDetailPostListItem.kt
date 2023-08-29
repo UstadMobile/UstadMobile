@@ -1,7 +1,7 @@
 package com.ustadmobile.view.discussionpost.coursediscussiondetail
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.util.ext.htmlToPlainText
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
@@ -50,7 +50,7 @@ val CourseDiscussionDetailPostListItem = FC<CourseDiscussionDetailPostListItemPr
             ?: props.discussionPost?.discussionPostMessage ?: ""
         text.htmlToPlainText()
     }
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     val formattedDateTime = useFormattedDateAndTime(
         timeInMillis = props.discussionPost?.discussionPostStartDate ?: 0L,
@@ -133,7 +133,7 @@ val CourseDiscussionDetailPostListItem = FC<CourseDiscussionDetailPostListItemPr
 
                     Typography {
                         variant = TypographyVariant.body2
-                        +(strings[MessageID.num_replies].replace("%1\$d",
+                        +(strings[MR.strings.num_replies].replace("%1\$d",
                             props.discussionPost?.postRepliesCount?.toString() ?: "0"))
                     }
                 }

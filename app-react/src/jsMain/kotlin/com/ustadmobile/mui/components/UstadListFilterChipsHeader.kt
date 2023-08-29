@@ -1,8 +1,8 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.db.dao.ClazzDaoCommon
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.util.MessageIdOption2
 import web.cssom.Margin
 import web.cssom.px
@@ -26,7 +26,7 @@ external interface UstadListFilterChipsHeaderProps: Props {
 
 val UstadListFilterChipsHeader = FC<UstadListFilterChipsHeaderProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Box {
         props.filterOptions.forEach { filterOption ->
@@ -45,7 +45,7 @@ val UstadListFilterChipsHeader = FC<UstadListFilterChipsHeaderProps> { props ->
                 onClick = {
                     props.onClickFilterChip(filterOption)
                 }
-                label = ReactNode(strings[filterOption.messageId])
+                label = ReactNode(strings[filterOption.stringResource])
             }
         }
     }
@@ -55,9 +55,9 @@ val UstadListFilterChipsHeaderPreview = FC<Props> {
     UstadListFilterChipsHeader {
         onClickFilterChip = { }
         filterOptions = listOf(
-            MessageIdOption2(MessageID.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
-            MessageIdOption2(MessageID.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
-            MessageIdOption2(MessageID.all, 0)
+            MessageIdOption2(MR.strings.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
+            MessageIdOption2(MR.strings.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
+            MessageIdOption2(MR.strings.all, 0)
         )
         selectedChipId = ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED
 

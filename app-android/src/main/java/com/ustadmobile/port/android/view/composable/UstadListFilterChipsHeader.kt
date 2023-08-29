@@ -39,7 +39,7 @@ fun UstadListFilterChipsHeader(
                         end = if(index == filterOptions.size - 1) 16.dp else 8.dp
                     ),
             ) {
-                Text(messageIdResource(id = filterOption.messageId))
+                Text(messageIdResource(id = filterOption.stringResource))
             }
         }
     }

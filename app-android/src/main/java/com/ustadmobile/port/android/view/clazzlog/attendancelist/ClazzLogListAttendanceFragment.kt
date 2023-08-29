@@ -64,7 +64,7 @@ class ClazzLogListAttendanceFragment(): UstadBaseMvvmFragment() {
         val systemImpl : UstadMobileSystemImpl = direct.instance()
         return BottomSheetOption(
             RECORD_ATTENDANCE_OPTIONS_ICON[this] ?: 0,
-            systemImpl.getString(this.messageId, requireContext()), this.commandId)
+            systemImpl.getString(this.stringResource, requireContext()), this.commandId)
     }
 
     override fun onCreateView(

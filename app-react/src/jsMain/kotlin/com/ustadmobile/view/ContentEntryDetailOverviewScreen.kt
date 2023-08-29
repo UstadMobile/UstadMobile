@@ -1,8 +1,9 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.entityconstants.ProgressConstants
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.progressBadge
@@ -75,7 +76,7 @@ external interface ContentEntryDetailOverviewScreenProps : Props {
 
 val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenProps> { props ->
 
-    val strings: StringsXml = useStringsXml()
+    val strings = useStringProvider()
 
     Container {
         Stack {
@@ -90,7 +91,7 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
                     variant = ButtonVariant.contained
                     onClick = { props.onClickDownload }
 
-                    + strings[MessageID.download].uppercase()
+                    + strings[MR.strings.download].uppercase()
                 }
             }
 
@@ -99,7 +100,7 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
                     onClick = { props.onClickOpen }
                     variant = ButtonVariant.contained
 
-                    + strings[MessageID.open].uppercase()
+                    + strings[MR.strings.open].uppercase()
                 }
             }
 
@@ -128,7 +129,7 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
 
             if (props.uiState.translationVisibile){
                 Typography{
-                    + strings[MessageID.also_available_in]
+                    + strings[MR.strings.also_available_in]
                 }
 
                 Grid {
@@ -222,7 +223,7 @@ private val ContentDetailLeftColumn = FC <ContentEntryDetailOverviewScreenProps>
 
 private val ContentDetailRightColumn = FC <ContentEntryDetailOverviewScreenProps> { props ->
 
-    val strings: StringsXml = useStringsXml()
+    val strings: StringProvider = useStringProvider()
 
     Stack {
         direction = responsive(StackDirection.column)
@@ -254,7 +255,7 @@ private val ContentDetailRightColumn = FC <ContentEntryDetailOverviewScreenProps
                 }
 
                 Typography{
-                    + strings[MessageID.entry_details_license]
+                    + strings[MR.strings.entry_key_details_license]
                 }
 
                 Typography {
@@ -336,7 +337,7 @@ private val ContentJobList = FC <ContentEntryDetailOverviewScreenProps> { props 
 
 private val LocallyAvailableRow = FC <ContentEntryDetailOverviewScreenProps> {
 
-    val strings: StringsXml = useStringsXml()
+    val strings: StringsXml = useStringProvider()
 
     Stack {
         direction = responsive(StackDirection.row)
@@ -345,14 +346,14 @@ private val LocallyAvailableRow = FC <ContentEntryDetailOverviewScreenProps> {
         + LocationOnOutlined.create()
 
         Typography{
-            +strings[MessageID.download_locally_availability]
+            +strings[MR.strings.down_keyload_locally_availability]
         }
     }
 }
 
 private val QuickActionBarsRow = FC <ContentEntryDetailOverviewScreenProps> { props ->
 
-    val strings: StringsXml = useStringsXml()
+    val strings: StringsXml = useStringProvider()
 
     Stack {
         direction = responsive(StackDirection.row)
@@ -364,14 +365,14 @@ private val QuickActionBarsRow = FC <ContentEntryDetailOverviewScreenProps> { pr
         if (props.uiState.markCompleteVisible){
             UstadQuickActionButton {
                 icon = CheckBoxOutlined.create()
-                text = strings[MessageID.mark_complete].uppercase()
+                text = strings[MR.strings.mark_complete].uppercase()
                 onClick = { props.onClickMarkComplete }
             }
         }
 
         if (props.uiState.contentEntryButtons?.showDeleteButton == true){
             UstadQuickActionButton {
-                text = strings[MessageID.delete].uppercase()
+                text = strings[MR.strings.delete].uppercase()
                 icon = Delete.create()
                 onClick = { props.onClickDelete }
             }
@@ -379,7 +380,7 @@ private val QuickActionBarsRow = FC <ContentEntryDetailOverviewScreenProps> { pr
 
         if (props.uiState.contentEntryButtons?.showManageDownloadButton == true){
             UstadQuickActionButton {
-                text = strings[MessageID.manage_download].uppercase()
+                text = strings[MR.strings.manage_download].uppercase()
                 icon = Download.create()
                 onClick = { props.onClickManageDownload }
             }

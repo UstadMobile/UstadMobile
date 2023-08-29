@@ -139,7 +139,7 @@ fun ScopedGrantDetailScreen(
         ) { bitmask ->
             ListItem(
                 text = {
-                    Text(messageIdResource(id = bitmask.messageId))
+                    Text(messageIdResource(id = bitmask.stringResource))
                 },
                 trailing = {
                     Icon(
@@ -162,12 +162,12 @@ fun ScopedGrantDetailScreenPreview(){
         uiState = ScopedGrantDetailUiState(
             bitmaskList = listOf(
                 BitmaskFlag(
-                    messageId = MessageID.permission_person_update,
+                    stringResource = MessageID.permission_person_update,
                     flagVal = 1,
                     enabled = true
                 ),
                 BitmaskFlag(
-                    messageId = MessageID.permission_person_insert,
+                    stringResource = MessageID.permission_person_insert,
                     flagVal = 2,
                     enabled = false
                 )

@@ -25,7 +25,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.nav.UstadBackStackEntry
@@ -387,7 +387,7 @@ abstract class UstadBaseController<V : UstadView>(
                     AccountListView.VIEW_NAME,
                     mapOf(
                         AccountListView.ARG_ACTIVE_ACCOUNT_MODE to AccountListView.ACTIVE_ACCOUNT_MODE_INLIST,
-                        UstadView.ARG_TITLE to impl.getString(MessageID.select_account, context),
+                        UstadView.ARG_TITLE to impl.getString(MR.strings.select_account),
                         UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString()),
                     context, goOptions)
             }

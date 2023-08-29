@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.impl.locale.TerminologyEntry
 import com.ustadmobile.core.impl.locale.entityconstants.ClazzEnrolmentListConstants
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListItemUiState
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListUiState
@@ -145,10 +146,10 @@ private fun ClazzEnrolmentListItem(
 
     val itemPrimaryText = buildString {
         val roleMessageId = ClazzEnrolmentListConstants
-            .ROLE_TO_MESSAGE_ID_MAP[enrolment.clazzEnrolmentRole]
+            .ROLE_TO_STRING_RESOURCE_MAP[enrolment.clazzEnrolmentRole]
             ?: ClazzEnrolment.ROLE_STUDENT
         val outcomeMessageId = ClazzEnrolmentListConstants
-            .OUTCOME_TO_MESSAGE_ID_MAP[enrolment.clazzEnrolmentOutcome] ?: 0
+            .OUTCOME_TO_STRING_RESOURCE_MAP[enrolment.clazzEnrolmentOutcome] ?: 0
 
         append(courseTerminologyEntryResource(terminologyEntries, roleMessageId))
         append(" - ")

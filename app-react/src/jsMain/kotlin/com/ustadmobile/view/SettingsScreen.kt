@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.SettingsUiState
 import com.ustadmobile.mui.components.UstadDetailField
 import web.cssom.px
@@ -54,7 +54,7 @@ val SettingsPreview = FC<Props> {
 
 val SettingsComponent2 = FC<SettingsProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container {
         maxWidth = "lg"
@@ -66,15 +66,15 @@ val SettingsComponent2 = FC<SettingsProps> { props ->
             UstadDetailField {
                 icon = Language.create()
                 labelText = "English"
-                valueText = ReactNode(strings[MessageID.app_language])
+                valueText = ReactNode(strings[MR.strings.app_language])
                 onClick = props.onClickAppLanguage
             }
 
             if (props.uiState.holidayCalendarVisible){
                 UstadDetailField {
                     icon = CalendarMonth.create()
-                    labelText = strings[MessageID.holiday_calendars_desc]
-                    valueText = ReactNode(strings[MessageID.holiday_calendars])
+                    labelText = strings[MR.strings.holiday_calendars_desc]
+                    valueText = ReactNode(strings[MR.strings.holiday_calendars])
                     onClick = props.onClickGoToHolidayCalendarList
                 }
             }
@@ -82,8 +82,8 @@ val SettingsComponent2 = FC<SettingsProps> { props ->
             if (props.uiState.workspaceSettingsVisible){
                 UstadDetailField {
                     icon = AccountBalance.create()
-                    labelText = strings[MessageID.manage_site_settings]
-                    valueText = ReactNode(strings[MessageID.site])
+                    labelText = strings[MR.strings.manage_site_settings]
+                    valueText = ReactNode(strings[MR.strings.site])
                     onClick = props.onClickWorkspace
                 }
             }
@@ -91,8 +91,8 @@ val SettingsComponent2 = FC<SettingsProps> { props ->
             if (props.uiState.reasonLeavingVisible){
                 UstadDetailField {
                     icon = ExitToApp.create()
-                    labelText = strings[MessageID.leaving_reason_manage]
-                    valueText = ReactNode(strings[MessageID.leaving_reason])
+                    labelText = strings[MR.strings.leaving_reason_manage]
+                    valueText = ReactNode(strings[MR.strings.leaving_reason])
                     onClick = props.onClickLeavingReason
                 }
             }
@@ -100,8 +100,8 @@ val SettingsComponent2 = FC<SettingsProps> { props ->
             if (props.uiState.langListVisible){
                 UstadDetailField {
                     icon = Language.create()
-                    labelText = strings[MessageID.languages_description]
-                    valueText = ReactNode(strings[MessageID.languages])
+                    labelText = strings[MR.strings.languages_description]
+                    valueText = ReactNode(strings[MR.strings.languages])
                     onClick = props.onClickLangList
                 }
             }

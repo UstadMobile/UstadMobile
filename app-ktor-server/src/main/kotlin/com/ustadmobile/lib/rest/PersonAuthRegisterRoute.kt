@@ -5,7 +5,6 @@ import com.ustadmobile.core.account.AuthResult
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.RegisterRequest
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.LINK_ENDPOINT_VIEWNAME_DIVIDER
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -30,6 +29,7 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.ktor.closestDI
 import kotlin.IllegalStateException
+import com.ustadmobile.core.MR
 
 fun Route.personAuthRegisterRoute() {
 
@@ -115,19 +115,20 @@ fun Route.personAuthRegisterRoute() {
                 mParentJoinVal.ppjUid = repo.personParentJoinDao.insertAsync(mParentJoinVal)
 
                 val systemImpl: UstadMobileSystemImpl by closestDI().instance()
-                val appName = systemImpl.getString(mLangCode, MessageID.app_name, Any())
+                val appName = systemImpl.getString(MR.strings.app_name, mLangCode)
                 val linkArgs : Map<String, String> = mapOf(UstadView.ARG_ENTITY_UID to
                         mParentJoinVal.ppjUid.toString())
                 val linkUrl = (UMFileUtil.joinPaths(registerRequest.endpointUrl,
                     LINK_ENDPOINT_VIEWNAME_DIVIDER) + ParentalConsentManagementView.VIEW_NAME)
                     .appendQueryArgs(linkArgs.toQueryString())
 
-                val emailText = systemImpl.getString(mLangCode, MessageID.parent_child_register_message, Any())
+                val emailText = systemImpl.getString(MR.strings.parent_child_register_message,
+                        mLangCode)
                     .replace("%1\$s", mPerson.fullName())
                     .replace("%2\$s", appName)
                     .replace("%3\$s", linkUrl)
-                val subjectText = systemImpl.getString(mLangCode,
-                    MessageID.parent_child_register_message_subject, Any())
+                val subjectText = systemImpl.getString(
+                    MR.strings.parent_child_register_message_subject, mLangCode)
                     .replace("%1\$s", appName)
 
                 val notificationSender: NotificationSender by closestDI().instance()

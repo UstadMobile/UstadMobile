@@ -1,8 +1,8 @@
 package com.ustadmobile.view.person.edit
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.locale.StringsXml
@@ -37,7 +37,7 @@ external interface PersonEditScreenProps : Props{
 
 val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
 
-    val strings: StringsXml = useStringsXml()
+    val strings: StringsXml = useStringProvider()
 
     Container {
         Stack {
@@ -52,7 +52,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.person?.firstNames ?: ""
-                label = strings[MessageID.first_names]
+                label = strings[MR.strings.first_key_names]
                 error = props.uiState.firstNameError
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
@@ -65,7 +65,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.person?.lastName ?: ""
-                label = strings[MessageID.last_name]
+                label = strings[MR.strings.last_key_name]
                 error = props.uiState.lastNameError
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
@@ -79,7 +79,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
             UstadMessageIdSelectField {
                 value = props.uiState.person?.gender ?: Person.GENDER_UNSET
                 options = GENDER_MESSAGE_IDS_AND_UNSET
-                label = strings[MessageID.gender_literal]
+                label = strings[MR.strings.gender_literal]
                 id = "gender"
                 onChange = { messageIdOpt ->
                     props.onPersonChanged(
@@ -92,7 +92,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
             if (props.uiState.parentalEmailVisible){
                 UstadTextEditField {
                     value = props.uiState.approvalPersonParentJoin?.ppjEmail ?: ""
-                    label = strings[MessageID.parents_email_address]
+                    label = strings[MR.strings.parents_email_address]
                     error = props.uiState.parentContactError
                     enabled = props.uiState.fieldsEnabled
                     onChange = {
@@ -106,7 +106,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
 
             UstadDateField {
                 timeInMillis = props.uiState.person?.dateOfBirth ?: 0
-                label = ReactNode(strings[MessageID.birthday])
+                label = ReactNode(strings[MR.strings.birthday])
                 timeZoneId = UstadMobileConstants.UTC
                 onChange = {
                     props.onPersonChanged(
@@ -119,7 +119,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
             UstadTextEditField {
                 error = props.uiState.parentContactError
                 enabled = props.uiState.fieldsEnabled
-                label = strings[MessageID.parents_email_address]
+                label = strings[MR.strings.parents_email_address]
                 onChange = {
                     props.onApprovalPersonParentJoinChanged(
                         props.uiState.approvalPersonParentJoin?.shallowCopy {
@@ -130,7 +130,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.person?.phoneNum ?: ""
-                label = strings[MessageID.phone_number]
+                label = strings[MR.strings.phone_number]
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
                     props.onPersonChanged(
@@ -142,7 +142,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.person?.emailAddr ?: ""
-                label = strings[MessageID.email]
+                label = strings[MR.strings.email]
                 error = props.uiState.emailError
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
@@ -155,7 +155,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.person?.personAddress ?: ""
-                label = strings[MessageID.address]
+                label = strings[MR.strings.address]
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
                     props.onPersonChanged(
@@ -168,7 +168,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
             if (props.uiState.usernameVisible){
                 UstadTextEditField {
                     value = props.uiState.person?.username ?: ""
-                    label = strings[MessageID.username]
+                    label = strings[MR.strings.username]
                     enabled = props.uiState.fieldsEnabled
                     onChange = {
                         props.onPersonChanged(
@@ -182,7 +182,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
             if (props.uiState.passwordVisible){
                 UstadTextEditField {
                     value = props.uiState.person?.newPassword ?: ""
-                    label = strings[MessageID.password]
+                    label = strings[MR.strings.password]
                     enabled = props.uiState.fieldsEnabled
                     onChange = {
                         props.onPersonChanged(

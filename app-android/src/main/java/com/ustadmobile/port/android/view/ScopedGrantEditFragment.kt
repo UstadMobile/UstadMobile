@@ -123,7 +123,7 @@ fun ScopedGrantEditScreen(
                         onChangedBitmask(bitmask.copy(enabled = it))
                     }
                 ),
-                text = { Text(messageIdResource(id = bitmask.messageId)) },
+                text = { Text(messageIdResource(id = bitmask.stringResource)) },
                 trailing =  {
                     Switch(
                         onCheckedChange = {},
@@ -141,12 +141,12 @@ fun ScopedGrantEditScreenPreview() {
     val uiState = ScopedGrantEditUiState(
         bitmaskList = listOf(
             BitmaskFlag(
-                messageId = MessageID.permission_person_insert,
+                stringResource = MessageID.permission_person_insert,
                 flagVal = 1,
                 enabled = true,
             ),
             BitmaskFlag(
-                messageId = MessageID.permission_person_update,
+                stringResource = MessageID.permission_person_update,
                 flagVal = 2
             )
         )

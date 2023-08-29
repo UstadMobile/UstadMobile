@@ -39,7 +39,7 @@ ContentEntryOpenerTest {
     }
 
     private val context = mock<LifecycleOwner>() {
-        on { getLifecycle() }.thenReturn(mockLifecycle)
+        on { lifecycle }.thenReturn(mockLifecycle)
     } as Any
 
     @JvmField

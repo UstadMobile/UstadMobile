@@ -1,7 +1,7 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.util.ext.penaltyPercentage
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -35,14 +35,14 @@ external interface UstadCourseAssignmentMarkListItemProps : Props {
 
 val UstadCourseAssignmentMarkListItem = FC<UstadCourseAssignmentMarkListItemProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     val theme by useRequiredContext(ThemeContext)
 
     var text = props.uiState.markerName
 
     if (props.uiState.markerGroupNameVisible){
-        text += "  (${strings[MessageID.group_number]
+        text += "  (${strings[MR.strings.group_number]
             .replace("%1\$s", props.uiState.peerGroupNumber.toString())})"
     }
 
@@ -100,7 +100,7 @@ val UstadCourseAssignmentMarkListItem = FC<UstadCourseAssignmentMarkListItemProp
                     variant = TypographyVariant.caption
                     + "${props.uiState.mark.courseAssignmentMark?.camMark}"
                     + "/${props.uiState.mark.courseAssignmentMark?.camMaxMark}"
-                    + " ${strings[MessageID.points]}"
+                    + " ${strings[MR.strings.points]}"
                     + " "
 
                     if (props.uiState.camPenaltyVisible) {
@@ -109,7 +109,7 @@ val UstadCourseAssignmentMarkListItem = FC<UstadCourseAssignmentMarkListItemProp
                                 color = rgb(255, 0,0, 1.0)
                             }
 
-                            +strings[MessageID.late_penalty]
+                            +strings[MR.strings.late_penalty]
                                 .replace(
                                     oldValue = "%1\$s",
                                     newValue = props.uiState.mark.courseAssignmentMark?.penaltyPercentage().toString()

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.lib.db.entities.ContentEntry
+import dev.icerock.moko.resources.StringResource
 import kotlin.js.JsName
 
 interface HarView : UstadView {
@@ -11,7 +12,7 @@ interface HarView : UstadView {
     fun loadUrl(url: String)
 
     @JsName("showErrorWithAction")
-    fun showErrorWithAction(message: String, actionMessageId: Int, mimeType: String)
+    fun showErrorWithAction(message: String, actionMessageId: StringResource, mimeType: String)
 
     companion object {
 

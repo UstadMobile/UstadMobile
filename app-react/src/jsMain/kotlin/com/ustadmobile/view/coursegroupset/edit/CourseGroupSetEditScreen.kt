@@ -1,8 +1,8 @@
 package com.ustadmobile.view.coursegroupset.edit
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditUiState
 import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.edit.appendGroupNumIfNotInList
@@ -32,7 +32,7 @@ external interface CourseGroupSetEditProps: Props{
 
 val CourseGroupSetEditComponent2 = FC<CourseGroupSetEditProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container{
         maxWidth = "lg"
@@ -44,7 +44,7 @@ val CourseGroupSetEditComponent2 = FC<CourseGroupSetEditProps> { props ->
             TextField {
                 id = "cgs_name"
                 value = props.uiState.courseGroupSet?.cgsName ?: ""
-                label = ReactNode(strings[MessageID.title])
+                label = ReactNode(strings[MR.strings.title])
                 error = props.uiState.courseTitleError != null
                 helperText = props.uiState.courseTitleError?.let { ReactNode(it) }
                 disabled = !props.uiState.fieldsEnabled
@@ -60,7 +60,7 @@ val CourseGroupSetEditComponent2 = FC<CourseGroupSetEditProps> { props ->
             UstadNumberTextField {
                 id = "cgs_total_groups"
                 numValue = (props.uiState.courseGroupSet?.cgsTotalGroups ?: 2).toFloat()
-                label = ReactNode(strings[MessageID.number_of_groups])
+                label = ReactNode(strings[MR.strings.number_of_groups])
                 helperText = props.uiState.numOfGroupsError?.let { ReactNode(it) }
                 error = props.uiState.numOfGroupsError != null
                 disabled = !props.uiState.fieldsEnabled
@@ -78,13 +78,13 @@ val CourseGroupSetEditComponent2 = FC<CourseGroupSetEditProps> { props ->
                 onClick = { props.onClickAssignRandomly() }
                 variant = ButtonVariant.contained
 
-                + strings[MessageID.assign_to_random_groups]
+                + strings[MR.strings.assign_to_random_groups]
             }
 
             val groupOptions = (0..(props.uiState.courseGroupSet?.cgsTotalGroups ?: 1)).toList()
             val itemLabelFn: (Int) -> ReactNode = {
                 ReactNode(
-                    if(it == 0) strings[MessageID.unassigned] else "${strings[MessageID.group]} $it"
+                    if(it == 0) strings[MR.strings.unassigned] else "${strings[MR.strings.group]} $it"
                 )
             }
 

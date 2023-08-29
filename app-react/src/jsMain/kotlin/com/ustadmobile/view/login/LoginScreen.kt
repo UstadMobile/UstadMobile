@@ -15,7 +15,6 @@ import mui.system.responsive
 import mui.system.sx
 import react.*
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.components.DIContext
 import com.ustadmobile.core.hooks.useStringProvider
 
 
@@ -115,7 +114,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                 id = "create_account_button"
                 onClick = { props.onClickCreateAccount() }
                 variant = ButtonVariant.outlined
-                + strings[MessageID.create_account].uppercase()
+                + strings[MR.strings.create_account].uppercase()
             }
 
             Box{
@@ -128,7 +127,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                 id = "connect_as_guest_button"
                 onClick = { props.onClickConnectAsGuest() }
                 variant = ButtonVariant.outlined
-                + strings[MessageID.connect_as_guest].uppercase()
+                + strings[MR.strings.connect_as_guest].uppercase()
             }
 
             Box{

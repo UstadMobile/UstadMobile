@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.LanguageDetailUiState
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.mui.components.UstadDetailField
@@ -20,7 +20,7 @@ external interface LanguageDetailProps : Props {
 
 val LanguageDetailComponent2 = FC<LanguageDetailProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container {
         maxWidth = "lg"
@@ -30,17 +30,17 @@ val LanguageDetailComponent2 = FC<LanguageDetailProps> { props ->
             spacing = responsive(10.px)
 
             UstadDetailField {
-                labelText = strings[MessageID.name]
+                labelText = strings[MR.strings.name]
                 valueText = ReactNode(props.uiState.language?.name.toString())
             }
 
             UstadDetailField {
-                labelText = strings[MessageID.two_letter_code]
+                labelText = strings[MR.strings.two_letter_code]
                 valueText = ReactNode(props.uiState.language?.iso_639_1_standard.toString())
             }
 
             UstadDetailField {
-                labelText = strings[MessageID.three_letter_code]
+                labelText = strings[MR.strings.three_letter_code]
                 valueText = ReactNode(props.uiState.language?.iso_639_2_standard.toString())
             }
         }

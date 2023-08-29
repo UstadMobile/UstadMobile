@@ -1,7 +1,7 @@
 package com.ustadmobile.view.clazzassignment.submitterdetail
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.ThemeContext
@@ -50,7 +50,7 @@ external interface CourseAssignmentMarkEditProps: Props {
 
 val CourseAssignmentMarkEdit = FC<CourseAssignmentMarkEditProps> { props ->
     val theme by useRequiredContext(ThemeContext)
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Stack {
         spacing = responsive(theme.spacing(1))
@@ -60,7 +60,7 @@ val CourseAssignmentMarkEdit = FC<CourseAssignmentMarkEditProps> { props ->
 
         TextField {
             id = "marker_comment"
-            label = ReactNode(strings[MessageID.mark_comment].addOptionalSuffix(strings))
+            label = ReactNode(strings[MR.strings.mark_comment].addOptionalSuffix(strings))
             value = props.draftMark.camMarkerComment ?: ""
             onTextChange = {
                 props.onChangeDraftMark(props.draftMark.shallowCopy {
@@ -83,7 +83,7 @@ val CourseAssignmentMarkEdit = FC<CourseAssignmentMarkEditProps> { props ->
                     marginRight = theme.spacing(1)
                 }
                 numValue = props.draftMark.camMark
-                label = ReactNode(strings[MessageID.mark])
+                label = ReactNode(strings[MR.strings.mark])
                 onChange = {
                     props.onChangeDraftMark(props.draftMark.shallowCopy {
                         camMark = it
@@ -95,7 +95,7 @@ val CourseAssignmentMarkEdit = FC<CourseAssignmentMarkEditProps> { props ->
                 asDynamic().InputProps = jso<InputBaseProps> {
                     endAdornment = InputAdornment.create {
                         position = InputAdornmentPosition.end
-                        + "/${props.maxPoints} ${strings[MessageID.points]}"
+                        + "/${props.maxPoints} ${strings[MR.strings.points]}"
                     }
                 }
                 fullWidth = true

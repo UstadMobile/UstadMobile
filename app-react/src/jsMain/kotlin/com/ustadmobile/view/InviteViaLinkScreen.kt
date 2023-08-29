@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.InviteViaLinkUiState
 import com.ustadmobile.util.ext.format
 import web.cssom.px
@@ -24,10 +24,10 @@ external interface InviteViaLinkProps : Props {
 }
 
 val InviteViaLinkPreview = FC<Props> {
-    val strings = useStringsXml()
+    val strings = useStringProvider()
     InviteViaLinkComponent2 {
         uiState = InviteViaLinkUiState(
-            entityName = strings[MessageID.invite_link_desc],
+            entityName = strings[MR.strings.invite_link_desc],
             inviteLink = "http://wwww.ustadmobile.com/ClazzJoin?code=12ASDncd",
         )
     }
@@ -35,14 +35,14 @@ val InviteViaLinkPreview = FC<Props> {
 
 private val InviteViaLinkComponent2 = FC<InviteViaLinkProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container {
         maxWidth = "lg"
 
         Stack {
             Typography {
-                + (strings[MessageID.invite_link_desc])
+                + (strings[MR.strings.invite_link_desc])
                     .format(props.uiState.entityName)
             }
 
@@ -78,7 +78,7 @@ private val InviteViaLinkComponent2 = FC<InviteViaLinkProps> { props ->
 
                 startIcon = ContentCopy.create()
 
-                + strings[MessageID.copy_link].uppercase()
+                + strings[MR.strings.copy_link].uppercase()
             }
 
             Box{

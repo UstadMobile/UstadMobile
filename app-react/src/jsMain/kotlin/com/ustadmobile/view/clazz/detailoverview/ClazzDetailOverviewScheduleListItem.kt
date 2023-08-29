@@ -1,6 +1,6 @@
 package com.ustadmobile.view.clazz.detailoverview
 
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
 import com.ustadmobile.hooks.useFormattedTime
 import com.ustadmobile.lib.db.entities.Schedule
@@ -21,7 +21,7 @@ external interface ClazzDetailOverviewScheduleListItemProps: Props {
 }
 
 val ClazzDetailOverviewScheduleListItem = FC<ClazzDetailOverviewScheduleListItemProps> { props ->
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     val fromTimeFormatted = useFormattedTime(
         timeInMillisSinceMidnight = props.schedule.sceduleStartTime.toInt(),

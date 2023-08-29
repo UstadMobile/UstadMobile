@@ -1,8 +1,8 @@
 package com.ustadmobile.view.clazzassignment.detail.submissionstab
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabUiState
@@ -92,7 +92,7 @@ private val ClazzAssignmentDetailSubmissionsTabComponent = FC<ClazzAssignmentDet
 
     val courseTerminologyEntries = useCourseTerminologyEntries(props.uiState.courseTerminology)
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     VirtualList {
         style = jso {
@@ -110,12 +110,12 @@ private val ClazzAssignmentDetailSubmissionsTabComponent = FC<ClazzAssignmentDet
                     ClazzAssignmentSummaryColumn {
                         total = props.uiState.progressSummary?.totalStudents
                         label = if(props.uiState.progressSummary?.isGroupAssignment == true) {
-                            strings[MessageID.groups]
+                            strings[MR.strings.groups]
                         }else {
                             courseTerminologyResource(
                                 terminologyEntries = courseTerminologyEntries,
                                 stringsXml = strings,
-                                messageId = MessageID.students,
+                                messageId = MR.strings.students,
                             )
                         }
                         showDivider = true
@@ -123,13 +123,13 @@ private val ClazzAssignmentDetailSubmissionsTabComponent = FC<ClazzAssignmentDet
 
                     ClazzAssignmentSummaryColumn {
                         total = props.uiState.progressSummary?.submittedStudents
-                        label = strings[MessageID.submitted_cap]
+                        label = strings[MR.strings.submitted_key_cap]
                         showDivider = true
                     }
 
                     ClazzAssignmentSummaryColumn {
                         total = props.uiState.progressSummary?.markedStudents
-                        label = strings[MessageID.marked]
+                        label = strings[MR.strings.marked_key]
                     }
                 }
             }

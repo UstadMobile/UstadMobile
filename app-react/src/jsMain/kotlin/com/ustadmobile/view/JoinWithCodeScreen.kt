@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.JoinWithCodeUiState
 import com.ustadmobile.mui.components.UstadTextEditField
 import web.cssom.px
@@ -33,7 +33,7 @@ val JoinWithCodeScreenPreview = FC<Props> {
 
 private val JoinWithCodeScreenComponent2 = FC<JoinWithCodeScreenProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container {
         maxWidth = "lg"
@@ -43,12 +43,12 @@ private val JoinWithCodeScreenComponent2 = FC<JoinWithCodeScreenProps> { props -
             spacing = responsive(10.px)
 
             Typography {
-                + strings[MessageID.join_code_instructions]
+                + strings[MR.strings.join_code_instructions]
             }
 
             UstadTextEditField {
                 value = props.uiState.code
-                label = strings[MessageID.entity_code]
+                label = strings[MR.strings.entity_code]
                     .replace("%1\$s", props.uiState.entityType)
                 error = props.uiState.codeError
                 enabled = props.uiState.fieldsEnabled

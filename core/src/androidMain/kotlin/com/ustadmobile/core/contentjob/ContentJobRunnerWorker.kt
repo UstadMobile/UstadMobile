@@ -15,7 +15,7 @@ import com.ustadmobile.core.R
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.RateLimitedLiveData
 import com.ustadmobile.core.util.ext.toStatusString
@@ -115,7 +115,7 @@ class ContentJobRunnerWorker(
                 .setAutoCancel(true)
                 .setSmallIcon(R.drawable.ic_file_download_white_24dp)
                 .addAction(android.R.drawable.ic_delete,
-                        systemImpl.getString(MessageID.cancel, applicationContext),
+                        systemImpl.getString(MR.strings.cancel),
                         intent)
     }
 

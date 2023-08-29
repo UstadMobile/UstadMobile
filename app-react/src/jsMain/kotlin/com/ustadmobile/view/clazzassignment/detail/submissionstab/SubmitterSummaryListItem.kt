@@ -1,8 +1,8 @@
 package com.ustadmobile.view.clazzassignment.detail.submissionstab
 
 import com.ustadmobile.core.controller.SubmissionConstants
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.listItemUiState
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.view.clazzassignment.detailoverview.ASSIGNMENT_STATUS_MAP
@@ -34,7 +34,7 @@ external interface SubmitterSummaryListItemProps : Props {
 
 val SubmitterSummaryListItem = FC<SubmitterSummaryListItemProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     val personUiState = props.submitterSummary?.listItemUiState
 
@@ -92,7 +92,7 @@ val SubmitterSummaryListItem = FC<SubmitterSummaryListItemProps> { props ->
             Typography {
                 + (" "+strings[SubmissionConstants.STATUS_MAP[
                     props.submitterSummary?.fileSubmissionStatus]
-                    ?: MessageID.not_submitted_cap])
+                    ?: MR.strings.not_submitted_cap])
             }
 
         }

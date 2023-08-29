@@ -1,7 +1,7 @@
 package com.ustadmobile.view.clazz.edit
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.lib.db.entities.CourseBlock
 import mui.material.*
 import mui.icons.material.Folder
@@ -24,7 +24,7 @@ external interface AddCourseDialogProps: Props {
 
 
 val AddCourseBlockDialog = FC<AddCourseDialogProps> { props ->
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Dialog {
         open = props.open
@@ -42,8 +42,8 @@ val AddCourseBlockDialog = FC<AddCourseDialogProps> { props ->
                     }
 
                     ListItemText {
-                        primary = ReactNode(strings[MessageID.module])
-                        secondary = ReactNode(strings[MessageID.course_module])
+                        primary = ReactNode(strings[MR.strings.module])
+                        secondary = ReactNode(strings[MR.strings.course_module])
                     }
                 }
             }
@@ -58,8 +58,8 @@ val AddCourseBlockDialog = FC<AddCourseDialogProps> { props ->
                     }
 
                     ListItemText {
-                        primary = ReactNode(strings[MessageID.text])
-                        secondary = ReactNode(strings[MessageID.formatted_text_to_show_to_course_participants])
+                        primary = ReactNode(strings[MR.strings.text])
+                        secondary = ReactNode(strings[MR.strings.formatted_text_to_show_to_course_participants])
                     }
                 }
             }
@@ -74,8 +74,8 @@ val AddCourseBlockDialog = FC<AddCourseDialogProps> { props ->
                     }
 
                     ListItemText {
-                        primary = ReactNode(strings[MessageID.content])
-                        secondary = ReactNode(strings[MessageID.add_course_block_content_desc])
+                        primary = ReactNode(strings[MR.strings.content])
+                        secondary = ReactNode(strings[MR.strings.add_course_block_content_desc])
                     }
                 }
             }
@@ -90,8 +90,8 @@ val AddCourseBlockDialog = FC<AddCourseDialogProps> { props ->
                     }
 
                     ListItemText {
-                        primary = ReactNode(strings[MessageID.assignments])
-                        secondary = ReactNode(strings[MessageID.add_assignment_block_content_desc])
+                        primary = ReactNode(strings[MR.strings.assignments])
+                        secondary = ReactNode(strings[MR.strings.add_assignment_block_content_desc])
                     }
                 }
             }
@@ -106,8 +106,8 @@ val AddCourseBlockDialog = FC<AddCourseDialogProps> { props ->
                     }
 
                     ListItemText {
-                        primary = ReactNode(strings[MessageID.discussion_board])
-                        secondary = ReactNode(strings[MessageID.add_discussion_board_desc])
+                        primary = ReactNode(strings[MR.strings.discussion_board])
+                        secondary = ReactNode(strings[MR.strings.add_discussion_board_desc])
                     }
                 }
             }

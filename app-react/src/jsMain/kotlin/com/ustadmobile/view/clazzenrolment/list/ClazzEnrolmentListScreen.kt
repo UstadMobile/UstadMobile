@@ -1,8 +1,8 @@
 package com.ustadmobile.view.clazzenrolment.list
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.ClazzEnrolmentListConstants
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListItemUiState
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListUiState
@@ -13,7 +13,7 @@ import com.ustadmobile.hooks.useFormattedDateRange
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.lib.db.entities.LeavingReason
-import com.ustadmobile.lib.db.entities.TerminologyEntry
+import com.ustadmobile.core.impl.locale.TerminologyEntry
 import com.ustadmobile.mui.components.UstadQuickActionButton
 import web.cssom.px
 import mui.icons.material.Edit as EditIcon
@@ -35,7 +35,7 @@ external interface ClazzEnrolmentListProps: Props{
 
 val ClazzEnrolmentListComponent2 = FC<ClazzEnrolmentListProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     val terminologyEntriesList = useCourseTerminologyEntries(props.uiState.courseTerminology)
 
@@ -49,14 +49,14 @@ val ClazzEnrolmentListComponent2 = FC<ClazzEnrolmentListProps> { props ->
             UstadQuickActionButton {
                 icon = PersonIcon.create()
                 id = "profile_button"
-                text = strings[MessageID.view_profile]
+                text = strings[MR.strings.view_profile]
                 onClick = { props.onViewProfileClick() }
             }
 
             Divider()
 
             Typography{
-                + strings[MessageID.person_enrolment_in_class].replace("%1\$s",
+                + strings[MR.strings.person_enrolment_in_class].replace("%1\$s",
                 props.uiState.personName ?: "").replace("%2\$s", props.uiState.courseName ?: "")
                 variant = TypographyVariant.body1
             }
@@ -83,7 +83,7 @@ private external interface ClazzenrolmentListItemProps: Props {
 }
 
 private val ClazzEnrolmentListItem = FC<ClazzenrolmentListItemProps> { props ->
-    val strings = useStringsXml()
+    val strings = useStringProvider()
     val enrolment = props.uiState.enrolment
 
     val joinedLeftDate = useFormattedDateRange(enrolment.clazzEnrolmentDateJoined,
@@ -91,9 +91,9 @@ private val ClazzEnrolmentListItem = FC<ClazzenrolmentListItemProps> { props ->
 
     val itemPrimaryText = buildString {
         append(courseTerminologyResource(props.terminologyEntries, strings,
-            ClazzEnrolmentListConstants.ROLE_TO_MESSAGE_ID_MAP[enrolment.clazzEnrolmentRole] ?: 0))
+            ClazzEnrolmentListConstants.ROLE_TO_STRING_RESOURCE_MAP[enrolment.clazzEnrolmentRole] ?: 0))
         append(" - ")
-        append(strings[ClazzEnrolmentListConstants.OUTCOME_TO_MESSAGE_ID_MAP[enrolment.clazzEnrolmentOutcome] ?: 0])
+        append(strings[ClazzEnrolmentListConstants.OUTCOME_TO_STRING_RESOURCE_MAP[enrolment.clazzEnrolmentOutcome] ?: 0])
 
         if (enrolment.leavingReason != null){
             append("(${enrolment.leavingReason?.leavingReasonTitle})")
@@ -104,7 +104,7 @@ private val ClazzEnrolmentListItem = FC<ClazzenrolmentListItemProps> { props ->
         if(props.uiState.canEdit) {
             ListItemSecondaryAction {
                 IconButton {
-                    ariaLabel = strings[MessageID.edit]
+                    ariaLabel = strings[MR.strings.edit]
                     onClick = {
                         props.onClickEdit(enrolment)
                     }

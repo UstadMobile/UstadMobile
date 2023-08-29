@@ -1,7 +1,7 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.mui.common.Area
 import web.cssom.*
@@ -23,17 +23,17 @@ external interface HeaderProps: Props {
 val Header = FC<HeaderProps> { props ->
     val theme by useRequiredContext(ThemeContext)
     val appBarRef = useRef<HTMLElement>(null)
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     var appBarTitle by useState {
-        strings[MessageID.app_name]
+        strings[MR.strings.app_name]
     }
 
     val appUiStateTitle = props.appUiState.title
     useEffect(appUiStateTitle) {
         if(appUiStateTitle != null && appUiStateTitle != appBarTitle) {
             appBarTitle = appUiStateTitle
-            document.title = "${strings[MessageID.app_name]} : $appUiStateTitle"
+            document.title = "${strings[MR.strings.app_name]} : $appUiStateTitle"
         }
     }
 

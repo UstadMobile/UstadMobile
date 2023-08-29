@@ -1,8 +1,8 @@
 package com.ustadmobile.view.coursegroupset.list
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListUiState
@@ -47,7 +47,7 @@ external interface CourseGroupSetListComponentProps: Props {
 val CourseGroupSetListComponent = FC<CourseGroupSetListComponentProps> { props ->
 
     val tabAndAppBarHeight = useTabAndAppBarHeight()
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     val infiniteQueryResult = usePagingSource(
         pagingSourceFactory = props.uiState.courseGroupSets,
@@ -84,7 +84,7 @@ val CourseGroupSetListComponent = FC<CourseGroupSetListComponentProps> { props -
             if(props.uiState.showAddItem) {
                 item(key = "new") {
                     UstadAddListItem.create {
-                        text = strings[MessageID.add_new_groups]
+                        text = strings[MR.strings.add_new_groups]
                         onClickAdd = props.onClickAddItem
                     }
                 }

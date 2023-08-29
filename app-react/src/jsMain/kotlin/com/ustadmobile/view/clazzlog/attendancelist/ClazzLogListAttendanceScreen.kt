@@ -1,8 +1,8 @@
 package com.ustadmobile.view.clazzlog.attendancelist
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.schedule.totalAttendeeStatusRecorded
@@ -48,7 +48,7 @@ external interface ClazzLogListAttendanceScreenProps : Props {
 }
 
 val ClazzLogListAttendanceScreen = FC<Props> {
-    val strings = useStringsXml()
+    val strings = useStringProvider()
     val viewModel = useUstadViewModel { di, savedStateHandle ->
         ClazzLogListAttendanceViewModel(di, savedStateHandle)
     }
@@ -91,7 +91,7 @@ val ClazzLogListAttendanceScreen = FC<Props> {
                             viewModel.onClickRecordAttendance(option)
                         }
                         ListItemText {
-                            primary = ReactNode(strings[option.messageId])
+                            primary = ReactNode(strings[option.stringResource])
                         }
                     }
                 }
@@ -188,7 +188,7 @@ val ClazzLogListItem = FC<ClazzLogListItemProps> { props ->
         timeInMillis = props.clazzLog?.logDate ?: 0,
         timezoneId = props.timeZoneId
     )
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     ListItem{
         ListItemButton {
@@ -226,16 +226,16 @@ val ClazzLogListItem = FC<ClazzLogListItemProps> { props ->
 
                     Typography {
                         props.clazzLog?.also { clazzLog ->
-                            + (strings[MessageID.three_num_items_with_name_with_comma]
+                            + (strings[MR.strings.three_num_items_with_name_with_comma]
                                 .replace("%1\$d",
                                     (clazzLog.clazzLogNumPresent).toString())
-                                .replace("%2\$s", strings[MessageID.present])
+                                .replace("%2\$s", strings[MR.strings.present])
                                 .replace("%3\$d",
                                     (clazzLog.clazzLogNumPartial).toString())
-                                .replace("%4\$s", strings[MessageID.partial])
+                                .replace("%4\$s", strings[MR.strings.partial])
                                 .replace("%5\$d",
                                     (clazzLog.clazzLogNumAbsent).toString())
-                                .replace("%6\$s", strings[MessageID.absent]))
+                                .replace("%6\$s", strings[MR.strings.absent]))
                         }
                     }
                 }

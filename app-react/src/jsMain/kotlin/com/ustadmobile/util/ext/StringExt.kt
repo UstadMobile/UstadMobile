@@ -1,6 +1,7 @@
 package com.ustadmobile.util.ext
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringsXml
 
 /**
@@ -48,6 +49,6 @@ fun String.wordBreakLimit(numOfWords: Int = 10): String{
  * Shorthand to add (optional) to a field title
  * e.g. "FieldName" -> "Field name (optional)"
  */
-fun String.addOptionalSuffix(stringsXml: StringsXml): String {
-    return "$this (${stringsXml.get(MessageID.optional)})"
+fun String.addOptionalSuffix(stringProvider: StringProvider): String {
+    return "$this (${stringProvider.get(MR.strings.optional)})"
 }

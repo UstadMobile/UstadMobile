@@ -8,7 +8,7 @@ import org.kodein.di.instance
 
 /**
  * Utility extension function to convert a list of pairs to a ListFilterIdOption by resolving
- * the MessageID to a string
+ * the MR.strings.to a string
  *
  * @receiver a list of Pairs where the first item is an Int representing the message id, and the second
  * item is an int representing the optionId

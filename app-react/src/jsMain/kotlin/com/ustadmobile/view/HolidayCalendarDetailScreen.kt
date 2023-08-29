@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.HolidayCalendarDetailUIState
 import com.ustadmobile.hooks.useFormattedDate
@@ -21,14 +21,14 @@ external interface HolidayCalendarDetailProps: Props{
 
 val HolidayCalendarDetailComponent2 = FC<HolidayCalendarDetailProps> { props ->
 
-    val strings: StringsXml = useStringsXml()
+    val strings: StringsXml = useStringProvider()
 
     Container{
         Stack{
             spacing = responsive(2)
 
             UstadDetailField{
-                labelText = strings[MessageID.name]
+                labelText = strings[MR.strings.name]
                 valueText = ReactNode(props.uiState.holidayCalendar?.umCalendarName ?: "")
                 icon = CalendarToday.create()
             }

@@ -4,7 +4,7 @@ import org.mockito.kotlin.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDao
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
@@ -150,7 +150,7 @@ class JoinWithCodePresenterTest {
         presenter.handleClickDone("wrong")
 
         verify(mockView, timeout(10000)).errorText =
-                systemImpl.getString(MessageID.invalid_register_code, context)
+                systemImpl.getString(MR.strings.invalid_register_code)
     }
 
     //@Test
@@ -162,7 +162,7 @@ class JoinWithCodePresenterTest {
         presenter.onStart()
 
         verify(mockView, timeout(5000)).errorText =
-            systemImpl.getString(MessageID.invalid_register_code, context)
+            systemImpl.getString(MR.strings.invalid_register_code)
     }
 
 

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
@@ -61,7 +61,7 @@ class SiteTermsEditPresenter(context: Any,
             editEntity = safeParse(di, SiteTermsWithLanguage.serializer(), entityJsonStr)
         }else {
             editEntity = SiteTermsWithLanguage().apply {
-                termsHtml = systemImpl.getString(MessageID.terms_and_policies_text, context)
+                termsHtml = systemImpl.getString(MR.strings.terms_and_policies_text)
             }
 
             presenterScope.launch {
@@ -106,7 +106,7 @@ class SiteTermsEditPresenter(context: Any,
         view.languageError = null
 
         if(entity.stLanguage == null) {
-            view.languageError = systemImpl.getString(MessageID.field_required_prompt, context)
+            view.languageError = systemImpl.getString(MR.strings.field_required_prompt)
             return
         }
 

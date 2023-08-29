@@ -1,7 +1,7 @@
 package com.ustadmobile.view.discussionpost.detail
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.wrappers.quill.ReactQuill
 import web.cssom.px
 import mui.material.Button
@@ -23,13 +23,13 @@ external interface DiscussionPostReplyProps: Props {
 }
 
 val DiscussionPostReply = FC<DiscussionPostReplyProps> { props ->
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     ReactQuill {
         id = "discussion_reply"
         onChange = props.onReplyChanged
         value = props.reply
-        placeholder = strings[MessageID.add_a_reply]
+        placeholder = strings[MR.strings.add_a_reply]
         readOnly = props.disabled
     }
 
@@ -46,6 +46,6 @@ val DiscussionPostReply = FC<DiscussionPostReplyProps> { props ->
         variant = ButtonVariant.outlined
         disabled = (props.reply.isEmpty() || props.disabled)
 
-        +strings[MessageID.post]
+        +strings[MR.strings.post]
     }
 }

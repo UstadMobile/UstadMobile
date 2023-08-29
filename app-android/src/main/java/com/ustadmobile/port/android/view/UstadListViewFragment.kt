@@ -26,7 +26,6 @@ import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.view.SelectionOption
 import com.ustadmobile.core.view.UstadListView
@@ -123,7 +122,7 @@ abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
                 (fragmentHost as? UstadListViewFragment<*, *>)?.systemImpl ?: return false
 
             fragmentHost?.selectionOptions?.forEachIndexed { index, item ->
-                val optionText = systemImpl.getString(item.messageId, fragmentContext)
+                val optionText = systemImpl.getString(item.stringResource, fragmentContext)
                 menu.add(0, item.commandId, index, optionText).apply {
                     setIcon(SELECTION_ICONS_MAP[item] ?: R.drawable.ic_delete_black_24dp)
                 }

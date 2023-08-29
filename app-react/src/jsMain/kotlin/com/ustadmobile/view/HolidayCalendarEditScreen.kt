@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.HolidayCalendarEditUiState
 import com.ustadmobile.hooks.useFormattedDate
 import com.ustadmobile.lib.db.entities.Holiday
@@ -30,7 +30,7 @@ external interface HolidayCalendarEditProps: Props {
 
 val HolidayCalendarEditComponent2 = FC<HolidayCalendarEditProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container{
         maxWidth = "lg"
@@ -41,7 +41,7 @@ val HolidayCalendarEditComponent2 = FC<HolidayCalendarEditProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.holidayCalendar?.umCalendarName ?: ""
-                label = strings[MessageID.name]
+                label = strings[MR.strings.name]
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
                     props.onHolidayCalendarChange(
@@ -61,7 +61,7 @@ val HolidayCalendarEditComponent2 = FC<HolidayCalendarEditProps> { props ->
                     }
 
                     ListItemText{
-                        primary = ReactNode((strings[MessageID.add_a_holiday]))
+                        primary = ReactNode((strings[MR.strings.add_a_holiday]))
                     }
 
                     onClick = {

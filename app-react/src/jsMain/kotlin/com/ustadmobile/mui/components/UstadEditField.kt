@@ -1,7 +1,7 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -97,7 +97,7 @@ val UstadTextEditField = FC<UstadEditFieldProps> { props ->
 
     var passwordVisible by useState { false }
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     TextField {
         label = ReactNode(props.label ?: "")
@@ -141,7 +141,7 @@ val UstadTextEditField = FC<UstadEditFieldProps> { props ->
                 endAdornment = InputAdornment.create {
                     position = InputAdornmentPosition.end
                     IconButton {
-                        ariaLabel = strings[MessageID.toggle_visibility]
+                        ariaLabel = strings[MR.strings.to_keyggle_visibility]
                         onClick = {
                             passwordVisible = !passwordVisible
                         }

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.ext.assignRandomly
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
@@ -67,7 +67,7 @@ class PeerReviewerAllocationEditPresenter(context: Any,
             val listOfSubmitters = repo.clazzAssignmentDao.getSubmitterListForAssignmentList(
                 groupUid,
                 clazzUid,
-                systemImpl.getString(MessageID.group_number, context).replace("%1\$s","")
+                systemImpl.getString(MR.strings.group_number, context).replace("%1\$s","")
             )
 
             val groupedAllocations = editEntity.allocations?.groupBy { it.praToMarkerSubmitterUid }

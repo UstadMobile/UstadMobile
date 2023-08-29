@@ -1,17 +1,15 @@
 package com.ustadmobile.core.viewmodel
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationStrategy
 import org.kodein.di.DI
 
@@ -96,15 +94,15 @@ abstract class UstadEditViewModel(
      * an existing entity and another message id for the title if creating a new entity.
      */
     protected fun createEditTitle(
-        newEntityMessageId: Int,
-        editEntityMessageId: Int,
+        newEntityStringResource: StringResource,
+        editEntityStringResource: StringResource,
     ): String {
         val isEditing = entityUidArg != 0L || ARG_ENTITY_JSON in savedStateHandle.keys
         return systemImpl.getString(
             if(isEditing) {
-                editEntityMessageId
+                editEntityStringResource
             }else {
-                newEntityMessageId
+                newEntityStringResource
             }
         )
     }

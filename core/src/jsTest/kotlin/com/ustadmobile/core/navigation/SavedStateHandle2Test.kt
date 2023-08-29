@@ -9,10 +9,10 @@ class SavedStateHandle2Test {
 
     @Test
     fun givenStateSavedToHistory_whenNewHandleCreated_thenValueShouldBeRestored() {
-        val stateHandle = SavedStateHandle2(window.history, URLSearchParams())
+        val stateHandle = SavedStateHandle2(window.history, URLSearchParams(""))
         stateHandle["test"] = "42"
 
-        val restoredHandle = SavedStateHandle2(window.history, URLSearchParams())
+        val restoredHandle = SavedStateHandle2(window.history, URLSearchParams(""))
         assertEquals("42", restoredHandle["test"])
 
     }

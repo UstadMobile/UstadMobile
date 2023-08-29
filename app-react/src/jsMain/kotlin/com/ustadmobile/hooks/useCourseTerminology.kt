@@ -4,7 +4,7 @@ import com.ustadmobile.core.components.DIContext
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.util.ext.toTerminologyEntries
 import com.ustadmobile.lib.db.entities.CourseTerminology
-import com.ustadmobile.lib.db.entities.TerminologyEntry
+import com.ustadmobile.core.impl.locale.TerminologyEntry
 import org.kodein.di.direct
 import org.kodein.di.instance
 import react.useMemo
@@ -17,7 +17,7 @@ import react.useRequiredContext
  *
  * val terminologyEntries = useCourseTerminologyEntries(courseTerminology)
  * Typography {
- *    + courseTerminologyResource(terminologyEntries, stringsXml, MessageID.teacher)
+ *    + courseTerminologyResource(terminologyEntries, stringsXml, MR.strings.teacher)
  * }
  * @param courseTerminology the CourseTerminology entity
  */
@@ -41,13 +41,13 @@ fun useCourseTerminologyEntries(
  *
  * @param terminologyEntries the list of Terminology Entries as per useCourseTerminologyEntries
  * @param stringsXml the StringsXml being used
- * @param messageId The MessageID e.g. MessageID.teacher, MessageID.student etc.
+ * @param messageId The MR.strings.e.g. MR.strings.teacher, MR.strings.student etc.
  */
 fun courseTerminologyResource(
     terminologyEntries: List<TerminologyEntry>,
     stringsXml: StringsXml,
     messageId: Int
 ): String {
-    return terminologyEntries.firstOrNull { it.messageId ==  messageId }?.term
+    return terminologyEntries.firstOrNull { it.stringResource ==  messageId }?.term
         ?: stringsXml[messageId]
 }

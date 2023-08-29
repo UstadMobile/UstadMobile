@@ -1,8 +1,8 @@
 package com.ustadmobile.view.clazz.detailoverview
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
@@ -53,9 +53,9 @@ external interface ClazzDetailOverviewProps : Props {
 
 val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
-    val numMembers = strings[MessageID.x_teachers_y_students]
+    val numMembers = strings[MR.strings.x_teachers_y_students]
         .replace("%1\$d", (props.uiState.clazz?.numTeachers ?: 0).toString())
         .replace("%2\$d", (props.uiState.clazz?.numStudents ?: 0).toString())
 
@@ -97,14 +97,14 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
                     UstadDetailField {
                         icon = Group.create()
                         valueText = ReactNode(numMembers)
-                        labelText = strings[MessageID.members]
+                        labelText = strings[MR.strings.member_keys_key_key]
                     }
 
                     if (props.uiState.clazzCodeVisible) {
                         UstadDetailField {
                             icon = Login.create()
                             valueText = ReactNode(props.uiState.clazz?.clazzCode ?: "")
-                            labelText = strings[MessageID.class_code]
+                            labelText = strings[MR.strings.class_code]
                             onClick = {
                                 props.onClickClassCode(props.uiState.clazz?.clazzCode ?: "")
                             }
@@ -122,7 +122,7 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
                         UstadDetailField {
                             icon = Event.create()
                             valueText = ReactNode(clazzDateRangeFormatted)
-                            labelText = "${strings[MessageID.start_date]} - ${strings[MessageID.end_date]}"
+                            labelText = "${strings[MR.strings.start_date]} - ${strings[MR.strings.end_date]}"
                         }
                     }
 

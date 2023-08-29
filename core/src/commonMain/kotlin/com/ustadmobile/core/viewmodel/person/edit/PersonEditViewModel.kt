@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.person.edit
 
 import com.ustadmobile.core.account.AccountRegisterOptions
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -107,13 +107,13 @@ class PersonEditViewModel(
     init {
         loadingState = LoadingUiState.INDETERMINATE
 
-        val title = if(entityUid == 0L) systemImpl.getString(MessageID.add_a_new_person) else systemImpl.getString(MessageID.edit_person)
+        val title = if(entityUid == 0L) systemImpl.getString(MR.strings.add_a_new_person) else systemImpl.getString(MR.strings.edit_person)
         _appUiState.update {
             AppUiState(
                 title = title,
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
-                    text = systemImpl.getString(MessageID.save),
+                    text = systemImpl.getString(MR.strings.save),
                     onClick = this::onClickSave
                 )
             )
@@ -223,14 +223,14 @@ class PersonEditViewModel(
         loadingState = LoadingUiState.INDETERMINATE
         _uiState.update { prev -> prev.copy(fieldsEnabled = false) }
         val savePerson = _uiState.value.person ?: return
-        val requiredFieldMessage = systemImpl.getString(MessageID.field_required_prompt)
+        val requiredFieldMessage = systemImpl.getString(MR.strings.field_required_prompt)
 
         _uiState.update { prev ->
             prev.copy(
                 usernameError = null,
                 passwordError = null,
                 emailError = if(savePerson.emailAddr.let { !it.isNullOrBlank() && !it.validEmail() })
-                    systemImpl.getString(MessageID.invalid_email)
+                    systemImpl.getString(MR.strings.invalid_email)
                 else
                     null,
                 confirmError = null,
@@ -267,7 +267,7 @@ class PersonEditViewModel(
                             !registrationModeFlags.hasFlag(REGISTER_MODE_MINOR) -> null
                             parentJoin?.ppjEmail.isNullOrEmpty() -> requiredFieldMessage
                             parentJoin?.ppjEmail?.let { it.validEmail() } != true -> {
-                                systemImpl.getString(MessageID.invalid_email)
+                                systemImpl.getString(MR.strings.invalid_email)
                             }
                             else -> null
                         },
@@ -313,11 +313,11 @@ class PersonEditViewModel(
                 } catch (e: Exception) {
                     if (e is IllegalStateException) {
                         _uiState.update { prev ->
-                            prev.copy(usernameError = systemImpl.getString(MessageID.person_exists))
+                            prev.copy(usernameError = systemImpl.getString(MR.strings.person_exists))
                         }
                     } else {
                         snackDispatcher.showSnackBar(
-                            Snack(systemImpl.getString(MessageID.login_network_error))
+                            Snack(systemImpl.getString(MR.strings.login_network_error))
                         )
                     }
 

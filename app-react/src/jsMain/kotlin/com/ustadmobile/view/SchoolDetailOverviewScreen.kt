@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.SchoolDetailOverviewUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.UstadDetailField
@@ -77,7 +77,7 @@ val SchoolDetailOverviewScreenPreview = FC<Props> {
 
 val SchoolDetailOverviewScreenComponent2 = FC<SchoolDetailOverviewProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container {
         maxWidth = "lg"
@@ -97,7 +97,7 @@ val SchoolDetailOverviewScreenComponent2 = FC<SchoolDetailOverviewProps> { props
             if (props.uiState.schoolCodeLayoutVisible){
                 UstadDetailField {
                     valueText = ReactNode(props.uiState.entity?.schoolCode ?: "")
-                    labelText = strings[MessageID.school_code]
+                    labelText = strings[MR.strings.school_code]
                     icon = ExitToApp.create()
                     onClick = props.onClickSchoolCode
                 }
@@ -106,7 +106,7 @@ val SchoolDetailOverviewScreenComponent2 = FC<SchoolDetailOverviewProps> { props
             if (props.uiState.schoolAddressVisible){
                 UstadDetailField {
                     valueText = ReactNode(props.uiState.entity?.schoolAddress ?: "")
-                    labelText = strings[MessageID.address]
+                    labelText = strings[MR.strings.address]
                     icon = LocationOn.create()
                 }
             }
@@ -114,7 +114,7 @@ val SchoolDetailOverviewScreenComponent2 = FC<SchoolDetailOverviewProps> { props
             if (props.uiState.schoolPhoneNumberVisible){
                 UstadDetailField {
                     valueText = ReactNode(props.uiState.entity?.schoolPhoneNumber ?: "")
-                    labelText = strings[MessageID.phone_number]
+                    labelText = strings[MR.strings.phone_number]
                     icon = Call.create()
                     onClick = props.onClickSchoolPhoneNumber
                 }
@@ -123,7 +123,7 @@ val SchoolDetailOverviewScreenComponent2 = FC<SchoolDetailOverviewProps> { props
             if (props.uiState.calendarUidVisible){
                 UstadDetailField {
                     valueText = ReactNode(props.uiState.entity?.holidayCalendar?.umCalendarName ?: "")
-                    labelText = strings[MessageID.holiday_calendar]
+                    labelText = strings[MR.strings.holiday_calendar]
                     icon = CalendarMonth.create()
                 }
             }
@@ -131,7 +131,7 @@ val SchoolDetailOverviewScreenComponent2 = FC<SchoolDetailOverviewProps> { props
             if (props.uiState.schoolEmailAddressVisible){
                 UstadDetailField {
                     valueText = ReactNode(props.uiState.entity?.schoolAddress ?: "")
-                    labelText = strings[MessageID.email]
+                    labelText = strings[MR.strings.email]
                     icon = Email.create()
                     onClick = props.onClickEmail
                 }
@@ -140,7 +140,7 @@ val SchoolDetailOverviewScreenComponent2 = FC<SchoolDetailOverviewProps> { props
             if (props.uiState.schoolTimeZoneVisible){
                 UstadDetailField {
                     valueText = ReactNode(props.uiState.entity?.schoolTimeZone ?: "")
-                    labelText = strings[MessageID.timezone]
+                    labelText = strings[MR.strings.timezone]
                     icon = Language.create()
                 }
             }
@@ -148,7 +148,7 @@ val SchoolDetailOverviewScreenComponent2 = FC<SchoolDetailOverviewProps> { props
             Typography {
                 variant = TypographyVariant.h6
 
-                + strings[MessageID.classes]
+                + strings[MR.strings.classes]
             }
 
             Clazzes {

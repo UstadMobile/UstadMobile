@@ -1,8 +1,8 @@
 package com.ustadmobile.view.coursegroupset.detail
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailUiState
 import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
@@ -36,7 +36,7 @@ external interface CourseGroupSetDetailProps: Props {
 
 val CourseGroupSetDetailComponent = FC<CourseGroupSetDetailProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     val muiAppState = useMuiAppState()
 
@@ -61,7 +61,7 @@ val CourseGroupSetDetailComponent = FC<CourseGroupSetDetailProps> { props ->
                                 paddingLeft = 16.px
                             }
 
-                            + "${strings[MessageID.group]} $groupNum"
+                            + "${strings[MR.strings.group]} $groupNum"
                             variant = TypographyVariant.body1
                         }
                     }

@@ -1,8 +1,8 @@
 package com.ustadmobile.view.clazzlog.editattendance
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceUiState
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
@@ -110,7 +110,7 @@ val ClazzLogEditAttendanceScreen = FC<Props> {
 
 private val ClazzLogEditAttendanceScreenComponent = FC<ClazzLogEditAttendanceScreenProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container {
         maxWidth = "lg"
@@ -139,7 +139,7 @@ private val ClazzLogEditAttendanceScreenComponent = FC<ClazzLogEditAttendanceScr
                         }
 
                         ListItemText {
-                            primary = ReactNode(strings[MessageID.mark_all_absent])
+                            primary = ReactNode(strings[MR.strings.mark_all_absent])
                         }
                     }
                 }
@@ -155,7 +155,7 @@ private val ClazzLogEditAttendanceScreenComponent = FC<ClazzLogEditAttendanceScr
                         }
 
                         ListItemText {
-                            primary = ReactNode(strings[MessageID.mark_all_absent])
+                            primary = ReactNode(strings[MR.strings.mark_all_absent])
                         }
                     }
                 }
@@ -190,7 +190,7 @@ external interface PagerViewProps : Props {
 
 private val PagerView = FC<PagerViewProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     val dateTime = useFormattedDateAndTime(
         timeInMillis = props.list.getOrNull(props.currentIndex)?.logDate ?: 0L,
@@ -207,7 +207,7 @@ private val PagerView = FC<PagerViewProps> { props ->
             IconButton {
                 disabled = props.currentIndex <= 0
                 id = "prev_day_button"
-                ariaLabel = strings[MessageID.previous]
+                ariaLabel = strings[MR.strings.previous]
                 onClick = {
                     val prevLog = props.list.getOrNull(props.currentIndex - 1)
                     if(prevLog != null) {
@@ -238,7 +238,7 @@ private val PagerView = FC<PagerViewProps> { props ->
             IconButton {
                 disabled = props.currentIndex >= props.list.size -1
                 id = "next_day_button"
-                ariaLabel = strings[MessageID.next]
+                ariaLabel = strings[MR.strings.next]
                 onClick = {
                     val nextLog = props.list.getOrNull(props.currentIndex + 1)
                     if(nextLog != null) {
@@ -270,14 +270,14 @@ data class StatusIconAndLabel(
 )
 
 private val STATUS_AND_ICONS = listOf(
-    StatusIconAndLabel(ClazzLogAttendanceRecord.STATUS_ATTENDED, Done, MessageID.present),
-    StatusIconAndLabel(ClazzLogAttendanceRecord.STATUS_ABSENT, Close, MessageID.absent),
-    StatusIconAndLabel(ClazzLogAttendanceRecord.STATUS_PARTIAL, AccessTime, MessageID.partial)
+    StatusIconAndLabel(ClazzLogAttendanceRecord.STATUS_ATTENDED, Done, MR.strings.present),
+    StatusIconAndLabel(ClazzLogAttendanceRecord.STATUS_ABSENT, Close, MR.strings.absent),
+    StatusIconAndLabel(ClazzLogAttendanceRecord.STATUS_PARTIAL, AccessTime, MR.strings.partial)
 )
 
 
 private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     ListItem{
 

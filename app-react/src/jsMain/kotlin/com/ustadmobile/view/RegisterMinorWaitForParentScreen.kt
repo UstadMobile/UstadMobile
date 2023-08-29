@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.RegisterMinorWaitForParentUiState
 import com.ustadmobile.mui.components.UstadDetailField
 import web.cssom.px
@@ -24,7 +24,7 @@ external interface RegisterMinorWaitForParentScreenProps : Props {
 
 val RegisterMinorWaitForParentComponent2 = FC<RegisterMinorWaitForParentScreenProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     var passwordVisible: Boolean by useState { false }
 
@@ -39,13 +39,13 @@ val RegisterMinorWaitForParentComponent2 = FC<RegisterMinorWaitForParentScreenPr
 
             UstadDetailField {
                 valueText = ReactNode(props.uiState.username)
-                labelText = strings[MessageID.username]
+                labelText = strings[MR.strings.username]
                 icon = AccountCircle.create()
             }
 
             UstadDetailField {
                 valueText = ReactNode(password)
-                labelText = strings[MessageID.password]
+                labelText = strings[MR.strings.password]
                 icon = Key.create()
 
                 secondaryActionContent = IconButton.create {
@@ -62,14 +62,14 @@ val RegisterMinorWaitForParentComponent2 = FC<RegisterMinorWaitForParentScreenPr
             }
 
             Typography {
-                + strings[MessageID.we_sent_a_message_to_your_parent]
+                + strings[MR.strings.we_sent_a_message_to_your_parent]
             }
 
             Button {
                 variant = ButtonVariant.contained
                 onClick = { props.onClickOk }
 
-                + strings[MessageID.ok]
+                + strings[MR.strings.ok]
             }
         }
     }

@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.LanguageEditUiState
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
@@ -19,7 +19,7 @@ external interface LanguageEditProps : Props {
 
 val LanguageEditComponent2 = FC<LanguageEditProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container {
         maxWidth = "lg"
@@ -30,7 +30,7 @@ val LanguageEditComponent2 = FC<LanguageEditProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.language?.name ?: ""
-                label = strings[MessageID.name]
+                label = strings[MR.strings.name]
                 error = props.uiState.languageNameError
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
@@ -44,7 +44,7 @@ val LanguageEditComponent2 = FC<LanguageEditProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.language?.iso_639_1_standard ?: ""
-                label = strings[MessageID.two_letter_code]
+                label = strings[MR.strings.two_letter_code]
                 error = props.uiState.languageNameError
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
@@ -58,7 +58,7 @@ val LanguageEditComponent2 = FC<LanguageEditProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.language?.iso_639_2_standard ?: ""
-                label = strings[MessageID.three_letter_code]
+                label = strings[MR.strings.three_letter_code]
                 error = props.uiState.languageNameError
                 enabled = props.uiState.fieldsEnabled
                 onChange = {

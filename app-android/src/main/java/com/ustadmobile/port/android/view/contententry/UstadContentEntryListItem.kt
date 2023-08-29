@@ -153,7 +153,7 @@ private fun SecondaryContent(
                 Text(
                     messageIdResource(id = ContentEntryTypeLabelConstants
                         .TYPE_LABEL_MESSAGE_IDS[contentTypeFlagVal]
-                        .messageId)
+                        .stringResource)
                 )
             }
 

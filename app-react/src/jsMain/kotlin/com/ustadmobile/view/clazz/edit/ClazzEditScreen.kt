@@ -1,8 +1,8 @@
 package com.ustadmobile.view.clazz.edit
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.lib.db.entities.Schedule.Companion.SCHEDULE_FREQUENCY_WEEKLY
@@ -78,19 +78,19 @@ external interface ClazzEditScreenProps : Props {
 
 val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
 
-    val strings: StringsXml = useStringsXml()
+    val strings: StringsXml = useStringProvider()
 
     Container {
         Stack {
             spacing = responsive(2)
 
             UstadEditHeader {
-                + strings[MessageID.basic_details]
+                + strings[MR.strings.basic_details]
             }
 
             TextField {
                 value = props.uiState.entity?.clazzName ?: ""
-                label = ReactNode(strings[MessageID.name])
+                label = ReactNode(strings[MR.strings.name])
                 id = "clazz_name"
                 disabled = !props.uiState.fieldsEnabled
                 onTextChange = {
@@ -105,7 +105,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
             ReactQuill {
                 value = props.uiState.entity?.clazzDesc ?: ""
                 id = "clazz_desc"
-                placeholder = strings[MessageID.description]
+                placeholder = strings[MR.strings.description]
                 onChange = {
                     props.onClazzChanged(props.uiState.entity?.shallowCopy {
                         clazzDesc = it
@@ -124,7 +124,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 UstadDateField {
                     timeInMillis = props.uiState.entity?.clazzStartTime ?: 0
                     timeZoneId = props.uiState.timeZone
-                    label = ReactNode(strings[MessageID.start_date])
+                    label = ReactNode(strings[MR.strings.start_date])
                     error = props.uiState.clazzStartDateError != null
                     helperText = props.uiState.clazzStartDateError?.let { ReactNode(it) }
                     disabled = !props.uiState.fieldsEnabled
@@ -142,7 +142,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 UstadDateField {
                     timeInMillis = props.uiState.entity?.clazzEndTime ?: 0
                     timeZoneId = props.uiState.timeZone
-                    label = ReactNode(strings[MessageID.end_date].addOptionalSuffix(strings))
+                    label = ReactNode(strings[MR.strings.end_date].addOptionalSuffix(strings))
                     error = props.uiState.clazzEndDateError != null
                     helperText = props.uiState.clazzEndDateError?.let { ReactNode(it) }
                     disabled = !props.uiState.fieldsEnabled
@@ -161,7 +161,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
             }
 
             UstadEditHeader {
-                + strings[MessageID.course_blocks]
+                + strings[MR.strings.course_blocks]
             }
 
             List {
@@ -174,7 +174,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                             + Add.create()
                         }
                         ListItemText {
-                            primary = ReactNode(strings[MessageID.add_block])
+                            primary = ReactNode(strings[MR.strings.add_block])
                         }
                     }
                 }
@@ -204,7 +204,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
             }
 
             UstadEditHeader {
-                + strings[MessageID.schedule]
+                + strings[MR.strings.schedule]
             }
 
             List{
@@ -222,7 +222,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                         }
 
                         ListItemText {
-                            primary = ReactNode(strings[MessageID.add_a_schedule])
+                            primary = ReactNode(strings[MR.strings.add_a_schedule])
                         }
                     }
 
@@ -239,7 +239,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
             }
 
             UstadEditHeader {
-                + strings[MessageID.course_setup]
+                + strings[MR.strings.course_setup]
             }
 
             TextField {
@@ -250,7 +250,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 }
                 value = props.uiState.entity?.clazzTimeZone ?: ""
                 id = "clazz_timezone"
-                label = ReactNode(strings[MessageID.timezone])
+                label = ReactNode(strings[MR.strings.timezone])
                 disabled = !props.uiState.fieldsEnabled
                 onClick = { props.onClickTimezone() }
                 inputProps = jso {
@@ -259,7 +259,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
             }
 
             UstadSwitchField {
-                label = strings[MessageID.attendance]
+                label = strings[MR.strings.attendance]
                 checked = props.uiState.clazzEditAttendanceChecked
                 id = "clazz_attendance_switch"
                 onChanged = props.onCheckedAttendanceChanged
@@ -271,7 +271,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                     inputCursor = Cursor.pointer
                 }
                 value = props.uiState.entity?.terminology?.ctTitle ?: ""
-                label = ReactNode(strings[MessageID.terminology])
+                label = ReactNode(strings[MR.strings.terminology])
                 disabled = !props.uiState.fieldsEnabled
                 id = "clazz_terminology"
                 onClick = {

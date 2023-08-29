@@ -3,20 +3,15 @@ package com.ustadmobile.port.android.view.binding
 import android.annotation.SuppressLint
 import android.graphics.Typeface
 import android.text.format.DateFormat
-import android.text.format.DateUtils
-import android.text.util.Linkify
 import android.view.Gravity
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
 import com.google.android.material.chip.Chip
-import com.soywiz.klock.DateTime
 import com.soywiz.klock.DateTimeTz
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.contentformats.xapi.Statement
-import com.ustadmobile.core.controller.ChatDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.model.BitmaskMessageId
@@ -27,9 +22,6 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.VerbEntity.Companion.VERB_ANSWERED_UID
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toLocalDateTime
-import me.saket.bettermovementmethod.BetterLinkMovementMethod
-import java.text.SimpleDateFormat
-import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlinx.datetime.TimeZone as KxTimeZone
@@ -102,7 +94,7 @@ fun TextView.setBitmaskListText(textBitmaskValue: Long?, textBitmaskFlags: List<
         return
 
     text = textBitmaskFlags.filter { (it.flagVal and textBitmaskValue) == it.flagVal }
-            .joinToString { systemImpl.getString(it.messageId, context) }
+            .joinToString { systemImpl.getString(it.stringResource, context) }
 }
 
 @BindingAdapter(value = ["bitmaskValue", "flagMessageIds"], requireAll = false)
@@ -114,7 +106,7 @@ fun TextView.setBitmaskListTextFromMap(bitmaskValue: Long?, flagMessageIds: List
 
     text = flagMessageIds.map { it.toBitmaskFlag(bitmaskValue) }
         .filter { it.enabled }
-        .joinToString { impl.getString(it.messageId, context) }
+        .joinToString { impl.getString(it.stringResource, context) }
 }
 
 /**
@@ -179,7 +171,7 @@ private fun TextView.updateFromTextMessageIdOptions() {
 @BindingAdapter(value= ["textMessageIdOptionSelected","textMessageIdOptions"], requireAll = true)
 fun TextView.setTextFromMessageIdList(textMessageIdOptionSelected: Int, textMessageIdOptions: List<MessageIdOption>) {
     text = systemImpl.getString(textMessageIdOptions
-            ?.firstOrNull { it.code == textMessageIdOptionSelected }?.messageId ?: 0, context)
+            ?.firstOrNull { it.code == textMessageIdOptionSelected }?.stringResource ?: 0, context)
 }
 
 @BindingAdapter(value = ["textCustomFieldValue", "textCustomFieldValueOptions"])

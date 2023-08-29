@@ -23,5 +23,5 @@ fun messageIdOptionListResource(
     options: List<MessageIdOption2>,
     key: Int
 ): String {
-    return messageIdResource(options.firstOrNull { it.value == key }?.messageId ?: MessageID.error)
+    return messageIdResource(options.firstOrNull { it.value == key }?.stringResource ?: MessageID.error)
 }

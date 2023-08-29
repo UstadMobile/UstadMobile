@@ -1,7 +1,7 @@
 package com.ustadmobile.view.clazzassignment
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadPersonAvatar
 import js.core.jso
@@ -29,7 +29,7 @@ external interface AssignmentCommentTextFieldListItemProps: Props {
 }
 
 val AssignmentCommentTextFieldListItem = FC<AssignmentCommentTextFieldListItemProps> { props ->
-    val strings = useStringsXml()
+    val strings = useStringProvider()
     ListItem {
         ListItemIcon {
             UstadPersonAvatar {
@@ -53,7 +53,7 @@ val AssignmentCommentTextFieldListItem = FC<AssignmentCommentTextFieldListItemPr
                             onClick = {
                                 props.onClickSubmit()
                             }
-                            ariaLabel = strings[MessageID.send]
+                            ariaLabel = strings[MR.strings.send]
                             SendIcon {  }
                         }
                     }

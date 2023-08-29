@@ -1,7 +1,7 @@
 package com.ustadmobile.hooks
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.MS_PER_MIN
 import react.useMemo
@@ -14,7 +14,7 @@ import react.useMemo
  * @return formatted string e.g. 1 hour 49 minutes
  */
 fun useFormattedDuration(timeInMillis: Long): String {
-    val stringsXml = useStringsXml()
+    val stringsXml = useStringProvider()
 
     return useMemo(dependencies = arrayOf(timeInMillis)) {
         val hours = (timeInMillis / MS_PER_HOUR)
@@ -22,10 +22,10 @@ fun useFormattedDuration(timeInMillis: Long): String {
 
         var str = ""
         if(hours > 0)
-            str += "$hours ${stringsXml[MessageID.xapi_hours]} "
+            str += "$hours ${stringsXml[MR.strings.xapi_hours]} "
 
         if(mins > 0)
-            str += "$mins ${stringsXml[MessageID.xapi_minutes]}"
+            str += "$mins ${stringsXml[MR.strings.xapi_minutes]}"
 
         str
     }

@@ -7,7 +7,7 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.view.components.UstadBlankIcon
 import web.cssom.Height
@@ -23,7 +23,7 @@ import mui.icons.material.Add
 import react.ReactNode
 import react.create
 import com.ustadmobile.view.components.UstadFab
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import web.cssom.Contain
 import web.cssom.Overflow
 
@@ -46,7 +46,7 @@ val CourseTerminologyListComponent = FC<CourseTerminologyListProps> { props ->
 
     val muiAppState = useMuiAppState()
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     VirtualList {
         style = jso {
@@ -70,7 +70,7 @@ val CourseTerminologyListComponent = FC<CourseTerminologyListProps> { props ->
                             }
 
                             ListItemText {
-                                primary = ReactNode(strings[MessageID.add_new_terminology])
+                                primary = ReactNode(strings[MR.strings.add_new_terminology])
                             }
                         }
                     }

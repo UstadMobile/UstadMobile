@@ -1,8 +1,8 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.controller.SubmissionConstants
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.view.clazzassignment.detailoverview.ASSIGNMENT_STATUS_MAP
@@ -29,7 +29,7 @@ external interface UstadAssignmentSubmissionHeaderProps: Props {
 val UstadAssignmentSubmissionHeader = FC<UstadAssignmentSubmissionHeaderProps> {
         props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Stack{
 
@@ -41,8 +41,8 @@ val UstadAssignmentSubmissionHeader = FC<UstadAssignmentSubmissionHeaderProps> {
             }
             ListItemText {
                 primary = ReactNode(strings[SubmissionConstants.STATUS_MAP
-                        [props.uiState.assignmentStatus] ?: MessageID.not_submitted_cap])
-                secondary = ReactNode(strings[MessageID.status])
+                        [props.uiState.assignmentStatus] ?: MR.strings.not_submitted_cap])
+                secondary = ReactNode(strings[MR.strings.status])
             }
         }
 
@@ -52,7 +52,7 @@ val UstadAssignmentSubmissionHeader = FC<UstadAssignmentSubmissionHeaderProps> {
                 + (props.uiState.assignmentMark?.averageScore?.toString() ?: "")
                 + "/"
                 + (props.uiState.block?.cbMaxPoints?.toString() ?: "")
-                + strings[MessageID.points]
+                + strings[MR.strings.points]
                 + " "
 
                 if (props.uiState.latePenaltyVisible) {
@@ -61,7 +61,7 @@ val UstadAssignmentSubmissionHeader = FC<UstadAssignmentSubmissionHeaderProps> {
                             color = rgb(255, 0,0, 1.0)
                         }
 
-                        + (strings[MessageID.late_penalty]
+                        + (strings[MR.strings.late_penalty]
                             .replace("%1\$s", (
                                 props.uiState.block?.cbLateSubmissionPenalty ?: 0)
                                 .toString()))
@@ -71,7 +71,7 @@ val UstadAssignmentSubmissionHeader = FC<UstadAssignmentSubmissionHeaderProps> {
 
             UstadDetailField{
                 valueText = pointsElement
-                labelText = strings[MessageID.xapi_result_header]
+                labelText = strings[MR.strings.xapi_result_header]
                 icon = EmojiEvents.create()
             }
         }

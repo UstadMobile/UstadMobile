@@ -5,7 +5,7 @@ import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.createTemporaryDir
@@ -105,7 +105,7 @@ abstract class SelectExtractFilePresenterCommon(
             }catch (e: Exception){
                 view.loading = false
                 view.unSupportedFileError = systemImpl.getString(
-                    MessageID.import_link_content_not_supported, context)
+                    MR.strings.import_link_content_not_supported)
                 Napier.e("Error extracting metadata: "+ e.message, e)
                 repo.errorReportDao.logErrorReport(ErrorReport.SEVERITY_ERROR, e,
                     this@SelectExtractFilePresenterCommon)

@@ -94,7 +94,7 @@ fun UstadCourseBlockEdit(
                         uiState.courseBlock?.cbCompletionCriteria ?: 0
                     ),
                     label = stringResource(R.string.completion_criteria),
-                    itemText = { messageIdResource(it.messageId) },
+                    itemText = { messageIdResource(it.stringResource) },
                     options = uiState.completionCriteriaOptions,
                     onOptionSelected = {
                         onCourseBlockChange(uiState.courseBlock?.shallowCopy{

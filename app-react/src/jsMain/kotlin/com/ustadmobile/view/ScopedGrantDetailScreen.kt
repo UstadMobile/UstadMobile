@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.viewmodel.ScopedGrantDetailUiState
 import mui.icons.material.Check
@@ -20,16 +20,16 @@ val ScopedGrantDetailComponent2 = FC<ScopedGrantDetailProps> { props ->
 
     Container{
 
-        val strings = useStringsXml()
+        val strings = useStringProvider()
 
         props.uiState.bitmaskList.forEach { bitmask ->
             ListItem{
                 ListItemSecondaryAction {
                     Icon {
                         ariaLabel = if(bitmask.enabled) {
-                            strings[MessageID.enabled]
+                            strings[MR.strings.enabled]
                         }else {
-                            strings[MessageID.disabled]
+                            strings[MR.strings.disabled]
                         }
 
                         if (bitmask.enabled) Check() else Close()
@@ -37,7 +37,7 @@ val ScopedGrantDetailComponent2 = FC<ScopedGrantDetailProps> { props ->
                 }
 
                 ListItemText {
-                    primary = ReactNode(strings[bitmask.messageId])
+                    primary = ReactNode(strings[bitmask.stringResource])
                 }
             }
         }
@@ -51,12 +51,12 @@ val ScopedGrantDetailScreenPreview = FC<Props> {
         uiState = ScopedGrantDetailUiState(
             bitmaskList = listOf(
                 BitmaskFlag(
-                    messageId = MessageID.incident_id,
+                    stringResource = MR.strings.incident_id,
                     flagVal = 0,
                     enabled = true
                 ),
                 BitmaskFlag(
-                    messageId = MessageID.message,
+                    stringResource = MR.strings.message,
                     flagVal = 0,
                     enabled = false
                 )

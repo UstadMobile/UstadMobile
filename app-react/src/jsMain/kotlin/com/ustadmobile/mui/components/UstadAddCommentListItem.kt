@@ -1,7 +1,7 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import js.core.jso
 import mui.icons.material.AccountCircle
 import mui.icons.material.Send
@@ -33,7 +33,7 @@ external interface UstadAddCommentListItemProps: Props {
 
 val UstadAddCommentListItem = FC<UstadAddCommentListItemProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     ListItem {
 
@@ -61,7 +61,7 @@ val UstadAddCommentListItem = FC<UstadAddCommentListItemProps> { props ->
                         position = InputAdornmentPosition.end
 
                         IconButton {
-                            ariaLabel =  strings[MessageID.submit]
+                            ariaLabel =  strings[MR.strings.submit]
                             id = "${props.id}_submit"
                             onClick = {
                                 props.onClickSubmit()
