@@ -24,7 +24,6 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ReportDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportDetailView
@@ -44,7 +43,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import kotlin.math.abs
-
+import com.ustadmobile.core.R as CR
 
 interface ReportDetailFragmentEventHandler {
     fun onClickAddToDashboard(report: ReportWithSeriesWithFilters)
@@ -292,7 +291,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
                 chartView?.chartView?.chartBitmap))
                 type = "image/png"
             }
-            startActivity(Intent.createChooser(intent, requireContext().getString(R.string.export)))
+            startActivity(Intent.createChooser(intent, requireContext().getString(CR.string.export)))
         }
     }
 
@@ -309,7 +308,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
                     "${context?.packageName}.provider", file)
 
         } catch (e: IOException) {
-            showSnackBar(requireContext().getString(R.string.error))
+            showSnackBar(requireContext().getString(CR.string.error))
             e.printStackTrace()
         }
         return bmpUri
@@ -317,7 +316,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
 
     override fun onClickAddAsTemplate(report: ReportWithSeriesWithFilters) {
         mPresenter?.handleOnClickAddAsTemplate(report)
-        showSnackBar(requireContext().getString(R.string.added))
+        showSnackBar(requireContext().getString(CR.string.added))
     }
 
 

@@ -26,8 +26,9 @@ import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListItemUiSt
 import com.ustadmobile.core.viewmodel.contententry.list.listItemUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
-import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.view.ContentEntryDetailOverviewFragment.Companion.CONTENT_ENTRY_TYPE_ICON_MAP
+import dev.icerock.moko.resources.compose.stringResource as mrStringResource
+import com.ustadmobile.core.R as CR
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -151,7 +152,7 @@ private fun SecondaryContent(
                 )
 
                 Text(
-                    messageIdResource(id = ContentEntryTypeLabelConstants
+                    mrStringResource(resource = ContentEntryTypeLabelConstants
                         .TYPE_LABEL_MESSAGE_IDS[contentTypeFlagVal]
                         .stringResource)
                 )
@@ -191,7 +192,7 @@ private fun SecondaryAction(
 
         Icon(
             Icons.Filled.FileDownload,
-            contentDescription = stringResource(R.string.download)
+            contentDescription = stringResource(CR.string.download)
         )
     }
 }

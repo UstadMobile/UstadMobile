@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <!-- plurals are used to handle different languages that require special treatment
+    e.g number 0 in arabic
+    possible quantities: zero, one, two, few, many, and other.-->
+    <plural name="number_of_attempts">
+        <item quantity="one">%d attempt</item>
+        <item quantity="other">%d attempts</item>
+    </plural>
+    <plural name="duration_hours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plural>
+    <plural name="duration_minutes">
+        <item quantity="one">%d min</item>
+        <item quantity="other">%d mins</item>
+    </plural>
+    <plural name="duration_seconds">
+        <item quantity="one">%d sec</item>
+        <item quantity="other">%d secs</item>
+    </plural>
+</resources>

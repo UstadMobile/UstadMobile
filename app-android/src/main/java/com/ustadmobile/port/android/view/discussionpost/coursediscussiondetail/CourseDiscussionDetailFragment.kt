@@ -43,6 +43,7 @@ import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.port.android.view.composable.HtmlText
 import com.ustadmobile.port.android.view.composable.UstadListSpacerItem
+import com.ustadmobile.core.R as CR
 
 class CourseDiscussionDetailFragment: UstadBaseMvvmFragment() {
 
@@ -119,7 +120,7 @@ private fun CourseDiscussionDetailScreen(
         }
 
         item{
-            Text(stringResource(R.string.posts),
+            Text(stringResource(CR.string.posts),
                 style = Typography.h4,
                 modifier = Modifier.padding(8.dp))
         }
@@ -189,7 +190,7 @@ private fun CourseDiscussionDetailScreen(
                             )
 
                             Text(
-                                text = stringResource(R.string.num_replies,
+                                text = stringResource(CR.string.num_replies,
                                     discussionPostItem?.postRepliesCount ?: 0)
                             )
                         }

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -28,7 +27,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.google.accompanist.themeadapter.material.MdcTheme
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabUiState
@@ -39,13 +37,14 @@ import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import androidx.paging.compose.items
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.port.android.util.compose.courseTerminologyEntryResource
 import com.ustadmobile.port.android.util.compose.rememberCourseTerminologyEntries
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
 import com.ustadmobile.port.android.view.SortBottomSheetFragment
 import com.ustadmobile.port.android.view.composable.UstadListSortHeader
 import com.ustadmobile.port.android.view.composable.UstadListSpacerItem
+import com.ustadmobile.core.R as CR
+import com.ustadmobile.core.MR
 
 
 class ClazzAssignmentDetailSubmissionsTabFragment: UstadBaseMvvmFragment(){
@@ -118,11 +117,11 @@ private fun ClazzAssignmentDetailSubmissionsTabScreen(
         courseTerminology = uiState.courseTerminology
     )
     val submittersLabel: String = if(uiState.progressSummary?.isGroupAssignment == true) {
-        stringResource(R.string.groups)
+        stringResource(CR.string.groups)
     }else {
         courseTerminologyEntryResource(
             terminologyEntries = courseTerminologyEntries,
-            messageId = MessageID.students
+            stringResource = MR.strings.students
         )
     }
 
@@ -145,13 +144,13 @@ private fun ClazzAssignmentDetailSubmissionsTabScreen(
 
                 ClazzAssignmentSummaryColumn(
                     number = uiState.progressSummary?.submittedStudents ?: 0,
-                    label = stringResource(R.string.submitted).capitalizeFirstLetter(),
+                    label = stringResource(CR.string.submitted_key).capitalizeFirstLetter(),
                     addDividerToEnd = true,
                 )
 
                 ClazzAssignmentSummaryColumn(
                     number = uiState.progressSummary?.markedStudents ?: 0,
-                    label = stringResource(R.string.marked).capitalizeFirstLetter(),
+                    label = stringResource(CR.string.marked_key).capitalizeFirstLetter(),
                 )
             }
         }

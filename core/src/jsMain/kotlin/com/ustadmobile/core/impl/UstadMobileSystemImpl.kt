@@ -25,28 +25,11 @@ import org.w3c.dom.HTMLAnchorElement
  *        if the display locale is not English.
  */
 actual open class UstadMobileSystemImpl(
-    private val defaultStringsXml: StringsXml,
-    private val displayLocaleStringsXml: StringsXml?,
     private val jsStringProvider: JsStringProvider,
 ): UstadMobileSystemCommon() {
 
-    private val messageIdMapFlipped: Map<String, Int> by lazy {
-        MessageIdMap.idMap.entries.associate { (k, v) -> v to k }
-    }
-
-    /**
-     * Get a string for use in the UI
-     */
-    actual override fun getString(messageCode: Int, context: Any): String {
-        return (displayLocaleStringsXml ?: defaultStringsXml)[messageCode]
-    }
-
     override fun getString(stringResource: StringResource): String {
         return stringResource.localized(provider = jsStringProvider, locale = displayedLocale)
-    }
-
-    actual override fun getString(messageCode: Int): String {
-        return (displayLocaleStringsXml ?: defaultStringsXml)[messageCode]
     }
 
     /**

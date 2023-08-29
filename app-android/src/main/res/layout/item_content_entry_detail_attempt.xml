@@ -72,6 +72,10 @@
             />
 
         <!-- Line 2-->
+        <!--
+        Text was "@{@plurals/number_of_attempts(person.attempts, person.attempts)}"
+        To be updated on MVVM conversion
+        -->
         <TextView
             android:paddingStart="@dimen/dimen_5dp"
             android:paddingEnd="@dimen/dimen_5dp"
@@ -79,7 +83,7 @@
             android:id="@+id/item_person_line2_text"
             android:layout_width="@dimen/dimen_0dp"
             android:layout_height="wrap_content"
-            android:text="@{@plurals/number_of_attempts(person.attempts, person.attempts)}"
+            android:text=""
             app:layout_constraintStart_toStartOf="@+id/item_person_text"
             app:layout_constraintTop_toBottomOf="@+id/item_person_text"
             app:layout_constraintEnd_toStartOf="@id/item_person_duration"

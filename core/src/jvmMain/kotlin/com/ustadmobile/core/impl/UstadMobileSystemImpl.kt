@@ -107,19 +107,6 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
 
     }
 
-    /**
-     * Get a string for use in the UI
-     */
-    actual override fun getString(messageCode: Int, context: Any): String{
-        //This is really only used in tests, so we just want to be sure that it is returning
-        //something that is distinct
-        return getString(getDisplayedLocale(), messageCode, context)
-    }
-
-    actual override fun getString(messageCode: Int): String {
-        return getString(getDisplayedLocale(), messageCode)
-    }
-
     override fun getString(stringResource: StringResource): String {
         val displayLang = getDisplayedLocale()
         return stringResource.localized(locale = localeCache.getOrPut(displayLang) {

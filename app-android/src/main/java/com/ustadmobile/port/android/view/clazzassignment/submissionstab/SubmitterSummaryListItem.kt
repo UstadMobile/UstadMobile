@@ -14,12 +14,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SubmissionConstants
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.listItemUiState
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
-import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewFragment
-
+import dev.icerock.moko.resources.compose.stringResource as mrStringResource
+import com.ustadmobile.core.MR
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -70,9 +69,9 @@ fun SubmitterSummaryListItem (
                 }
 
                 Text(
-                    messageIdResource(
+                    mrStringResource(
                     SubmissionConstants.STATUS_MAP[submitterSummary?.fileSubmissionStatus]
-                        ?: MessageID.not_submitted_cap
+                        ?: MR.strings.not_submitted_cap
                 )
                 )
 

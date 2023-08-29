@@ -21,6 +21,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.view.ext.createTabLayoutStrategy
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
+import com.ustadmobile.core.R as CR
 
 
 class ContentEntryDetailFragment: UstadDetailFragment<ContentEntry>(), ContentEntryDetailView {
@@ -111,8 +112,8 @@ class ContentEntryDetailFragment: UstadDetailFragment<ContentEntry>(), ContentEn
         )
 
         val viewNameToTitleMap = mapOf(
-                ContentEntryDetailOverviewView.VIEW_NAME to R.string.overview,
-                ContentEntryDetailAttemptsListView.VIEW_NAME to R.string.attempts
+                ContentEntryDetailOverviewView.VIEW_NAME to CR.string.overview,
+                ContentEntryDetailAttemptsListView.VIEW_NAME to CR.string.attempts
         )
 
         @JvmStatic

@@ -34,10 +34,11 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.port.android.view.ext.repoLoadingStatus
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import dev.icerock.moko.resources.StringResource
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-
+import com.ustadmobile.core.R as CR
 abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
         UstadListView<RT, DT>, Observer<PagedList<DT>>, MessageIdSpinner.OnMessageIdOptionSelectedListener,
         OnSortOptionSelected, View.OnClickListener {
@@ -122,7 +123,7 @@ abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
                 (fragmentHost as? UstadListViewFragment<*, *>)?.systemImpl ?: return false
 
             fragmentHost?.selectionOptions?.forEachIndexed { index, item ->
-                val optionText = systemImpl.getString(item.stringResource, fragmentContext)
+                val optionText = systemImpl.getString(item.stringResource)
                 menu.add(0, item.commandId, index, optionText).apply {
                     setIcon(SELECTION_ICONS_MAP[item] ?: R.drawable.ic_delete_black_24dp)
                 }
@@ -170,7 +171,7 @@ abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
 
             val listSize = value.size
             if (listSize > 0) {
-                actionMode?.title = requireContext().getString(R.string.items_selected, listSize)
+                actionMode?.title = requireContext().getString(CR.string.items_selected, listSize)
             }
         }
     }
@@ -329,7 +330,7 @@ abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
         }
     }
 
-    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: StringResource?) {
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
     }
 

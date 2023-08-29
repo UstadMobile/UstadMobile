@@ -41,7 +41,6 @@
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:textMessageId="@{sortOption.fieldMessageId}"
             tools:text="Name" />
 
         <TextView

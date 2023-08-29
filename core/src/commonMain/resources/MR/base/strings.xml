@@ -615,25 +615,7 @@
     <!-- used to show when an assignment (or other work item) was started by the assignee. The
     %1$s% will be replaced with the date that they started.-->
     <string name="started_date" formatted="false">Started %1$s</string>
-    <!-- plurals are used to handle different languages that require special treatment
-    e.g number 0 in arabic
-    possible quantities: zero, one, two, few, many, and other.-->
-    <plurals name="number_of_attempts">
-        <item quantity="one">%d attempt</item>
-        <item quantity="other">%d attempts</item>
-    </plurals>
-    <plurals name="duration_hours">
-        <item quantity="one">%d hour</item>
-        <item quantity="other">%d hours</item>
-    </plurals>
-    <plurals name="duration_minutes">
-        <item quantity="one">%d min</item>
-        <item quantity="other">%d mins</item>
-    </plurals>
-    <plurals name="duration_seconds">
-        <item quantity="one">%d sec</item>
-        <item quantity="other">%d secs</item>
-    </plurals>
+
     <!-- Used to indicate that something (e.g. an assigment) has been started -->
     <string name="started">Started</string>
     <!-- E.g. for a mixed gender school which has both boys and girls-->

@@ -8,7 +8,6 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemReportTemplateListBinding
 import com.ustadmobile.core.controller.ReportTemplateListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportTemplateListView
 import com.ustadmobile.lib.db.entities.Report
@@ -27,6 +26,9 @@ import com.ustadmobile.lib.db.entities.Report.Companion.CONTENT_COMPLETION_DESC
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import com.ustadmobile.core.MR
+import dev.icerock.moko.resources.StringResource
+import com.ustadmobile.core.R as CR
 
 
 class ReportTemplateListFragment(): UstadListViewFragment<Report, Report>(),
@@ -65,7 +67,7 @@ class ReportTemplateListFragment(): UstadListViewFragment<Report, Report>(),
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        ustadFragmentTitle = getString(R.string.choose_template, context)
+        ustadFragmentTitle = getString(CR.string.choose_template)
 
         mPresenter = ReportTemplateListPresenter(requireContext(), arguments.toStringMap(), this,
                 di, viewLifecycleOwner).withViewLifecycle()
@@ -77,7 +79,7 @@ class ReportTemplateListFragment(): UstadListViewFragment<Report, Report>(),
 
     override fun onResume() {
         super.onResume()
-        ustadFragmentTitle = getString(R.string.choose_template, context)
+        ustadFragmentTitle = getString(CR.string.choose_template)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,19 +100,19 @@ class ReportTemplateListFragment(): UstadListViewFragment<Report, Report>(),
     companion object {
 
 
-        val REPORT_TITLE_TO_ID : HashMap<Int, Int> = hashMapOf(
-            BLANK_REPORT to MessageID.blank_report,
-            BLANK_REPORT_DESC to MessageID.start_from_scratch ,
-            CONTENT_USAGE_OVER_TIME to MessageID.content_usage_over_time,
-            CONTENT_USAGE_OVER_TIME_DESC to MessageID.total_content_usage_duration_class ,
-            UNIQUE_CONTENT_USERS_OVER_TIME to MessageID.unique_content_users_over_time,
-            UNIQUE_CONTENT_USERS_OVER_TIME_DESC to MessageID.number_of_active_users_over_time ,
-            ATTENDANCE_OVER_TIME_BY_CLASS to MessageID.attendance_over_time_by_class,
-            ATTENDANCE_OVER_TIME_BY_CLASS_DESC to MessageID.percentage_of_students_attending_over_time ,
-            CONTENT_USAGE_BY_CLASS to MessageID.content_usage_by_class,
-            CONTENT_USAGE_BY_CLASS_DESC to MessageID.total_content_usage_duration_class ,
-            CONTENT_COMPLETION to MessageID.content_completion,
-            CONTENT_COMPLETION_DESC to MessageID.number_of_students_completed_time
+        val REPORT_TITLE_TO_ID : HashMap<Int, StringResource> = hashMapOf(
+            BLANK_REPORT to MR.strings.blank_report,
+            BLANK_REPORT_DESC to MR.strings.start_from_scratch ,
+            CONTENT_USAGE_OVER_TIME to MR.strings.content_usage_over_time,
+            CONTENT_USAGE_OVER_TIME_DESC to MR.strings.total_content_usage_duration_class ,
+            UNIQUE_CONTENT_USERS_OVER_TIME to MR.strings.unique_content_users_over_time,
+            UNIQUE_CONTENT_USERS_OVER_TIME_DESC to MR.strings.number_of_active_users_over_time ,
+            ATTENDANCE_OVER_TIME_BY_CLASS to MR.strings.attendance_over_time_by_class,
+            ATTENDANCE_OVER_TIME_BY_CLASS_DESC to MR.strings.percentage_of_students_attending_over_time ,
+            CONTENT_USAGE_BY_CLASS to MR.strings.content_usage_by_class,
+            CONTENT_USAGE_BY_CLASS_DESC to MR.strings.total_content_usage_duration_class ,
+            CONTENT_COMPLETION to MR.strings.content_completion,
+            CONTENT_COMPLETION_DESC to MR.strings.number_of_students_completed_time
         )
 
 

@@ -32,7 +32,6 @@ import androidx.paging.compose.items
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SubmissionConstants
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
@@ -43,8 +42,6 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.util.compose.messageIdMapResource
-import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
@@ -58,7 +55,10 @@ import com.ustadmobile.port.android.view.clazzassignment.UstadAssignmentSubmissi
 import com.ustadmobile.port.android.view.clazzassignment.UstadCourseAssignmentMarkListItem
 import com.ustadmobile.port.android.view.composable.*
 import java.util.*
-
+import com.ustadmobile.core.R as CR
+import com.ustadmobile.core.MR
+import com.ustadmobile.port.android.util.compose.stringIdMapResource
+import dev.icerock.moko.resources.compose.stringResource as mrStringResource
 
 interface ClazzAssignmentDetailOverviewFragmentEventHandler {
 
@@ -148,10 +148,10 @@ fun ClazzAssignmentDetailOverviewScreen(
 
     val policyMessageId = SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS.firstOrNull {
         it.value == uiState.assignment?.caSubmissionPolicy
-    }?.stringResource ?: MessageID.submit_all_at_once_submission_policy
+    }?.stringResource ?: MR.strings.submit_all_at_once_submission_policy
 
 
-    val caFileType = messageIdMapResource(
+    val caFileType = stringIdMapResource(
         map = SubmissionConstants.FILE_TYPE_MAP,
         key = uiState.assignment?.caFileType ?: ClazzAssignment.FILE_TYPE_DOC
     )
@@ -174,7 +174,7 @@ fun ClazzAssignmentDetailOverviewScreen(
             item {
                 UstadDetailField(
                     valueText = "$formattedDateTime (${TimeZone.getDefault().id})",
-                    labelText = stringResource(id = R.string.deadline),
+                    labelText = stringResource(id = CR.string.deadline),
                     imageId = R.drawable.ic_event_available_black_24dp,
                     onClick = {  }
                 )
@@ -183,8 +183,8 @@ fun ClazzAssignmentDetailOverviewScreen(
 
         item {
             UstadDetailField(
-                valueText = messageIdResource(policyMessageId),
-                labelText = stringResource(id = R.string.submission_policy),
+                valueText = mrStringResource(policyMessageId),
+                labelText = stringResource(id = CR.string.submission_policy),
                 imageId = SUBMISSION_POLICY_MAP[uiState.assignment?.caSubmissionPolicy]
                     ?: R.drawable.ic_baseline_task_alt_24,
                 onClick = {  }
@@ -199,7 +199,7 @@ fun ClazzAssignmentDetailOverviewScreen(
 
         if(uiState.activeUserIsSubmitter) {
             item {
-                UstadEditHeader(text = stringResource(R.string.your_submission))
+                UstadEditHeader(text = stringResource(CR.string.your_submission))
             }
 
             item {
@@ -209,7 +209,7 @@ fun ClazzAssignmentDetailOverviewScreen(
                             .testTag("submission_text_field")
                             .fillMaxWidth(),
                         html = uiState.latestSubmission?.casText ?: "",
-                        label = stringResource(R.string.text),
+                        label = stringResource(CR.string.text),
                         onClick = onClickEditSubmission
                     )
                 }else {
@@ -226,11 +226,11 @@ fun ClazzAssignmentDetailOverviewScreen(
                 item {
                     ListItem(
                         modifier = Modifier.testTag("add_file"),
-                        text = { Text(stringResource(R.string.add_file)) },
+                        text = { Text(stringResource(CR.string.add_file)) },
                         secondaryText = {
                             Text(
-                                "${stringResource(R.string.file_type_chosen)} $caFileType" +
-                                stringResource(R.string.max_number_of_files,
+                                "${stringResource(CR.string.file_type_chosen)} $caFileType" +
+                                stringResource(CR.string.max_number_of_files,
                                     uiState.assignment?.caNumberOfFiles ?: 0),
                             )
                         },
@@ -273,7 +273,7 @@ fun ClazzAssignmentDetailOverviewScreen(
                         backgroundColor = colorResource(id = R.color.secondaryColor)
                     )
                 ) {
-                    Text(stringResource(R.string.submit).uppercase(),
+                    Text(stringResource(CR.string.submit).uppercase(),
                         color = contentColorFor(
                             colorResource(id = R.color.secondaryColor)
                         )
@@ -286,7 +286,7 @@ fun ClazzAssignmentDetailOverviewScreen(
         if(uiState.activeUserIsSubmitter) {
             item {
                 ListItem(
-                    text = { Text(stringResource(R.string.grades_class_age)) }
+                    text = { Text(stringResource(CR.string.grades_class_age)) }
                 )
             }
 
@@ -313,13 +313,13 @@ fun ClazzAssignmentDetailOverviewScreen(
 
         item {
             ListItem(
-                text = {Text(stringResource(R.string.class_comments))}
+                text = {Text(stringResource(CR.string.class_comments))}
             )
         }
 
         item {
             UstadAddCommentListItem(
-                text = stringResource(id = R.string.add_class_comment),
+                text = stringResource(id = CR.string.add_class_comment),
                 enabled = uiState.fieldsEnabled,
                 personUid = 0,
                 onClickAddComment = { onClickNewPublicComment() }
@@ -336,13 +336,13 @@ fun ClazzAssignmentDetailOverviewScreen(
         if(uiState.activeUserIsSubmitter) {
             item {
                 ListItem(
-                    text = {Text(stringResource(R.string.private_comments))}
+                    text = {Text(stringResource(CR.string.private_comments))}
                 )
             }
 
             item {
                 UstadAddCommentListItem(
-                    text = stringResource(id = R.string.add_private_comment),
+                    text = stringResource(id = CR.string.add_private_comment),
                     enabled = uiState.fieldsEnabled,
                     personUid = 0,
                     onClickAddComment = { onClickNewPrivateComment() }
@@ -372,8 +372,8 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
     val uiState by viewModel.uiState.collectAsState(initial = ClazzAssignmentDetailOverviewUiState())
 
     val localContext = LocalContext.current
-    val newCourseCommentHint = stringResource(id = R.string.add_class_comment)
-    val newPrivateCommentHint = stringResource(id = R.string.add_private_comment)
+    val newCourseCommentHint = stringResource(id = CR.string.add_class_comment)
+    val newPrivateCommentHint = stringResource(id = CR.string.add_private_comment)
 
     ClazzAssignmentDetailOverviewScreen(
         uiState = uiState,

@@ -78,7 +78,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dimen_8dp"
-            android:text="@string/members"
+            android:text="@string/members_key"
             android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_detail_overview_num_members"
             app:layout_constraintStart_toEndOf="@+id/fragment_clazz_detail_overview_membersicon"/>

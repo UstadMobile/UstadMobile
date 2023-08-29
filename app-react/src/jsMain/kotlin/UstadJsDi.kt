@@ -7,7 +7,6 @@ import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.di.commonDomainDiModule
-import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJs
 import com.ustadmobile.core.util.ContentEntryOpener
@@ -19,7 +18,6 @@ import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.XmlSerializer
-import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.ktor.client.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -27,7 +25,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
-import com.ustadmobile.core.impl.locale.JsStringXml
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJs
 import com.ustadmobile.util.resolveEndpoint
@@ -43,8 +40,6 @@ import web.url.URLSearchParams
 internal fun ustadJsDi(
     dbBuilt: UmAppDatabase,
     dbNodeIdAndAuth: NodeIdAndAuth,
-    defaultStringsXmlStr: String,
-    displayLocaleStringsXmlStr: String?,
     json: Json,
     httpClient: HttpClient,
     configMap: Map<String, String>,
@@ -72,22 +67,6 @@ internal fun ustadJsDi(
         StringProviderJs(systemImpl.getDisplayedLocale(), jsStringProvider)
     }
 
-    bind<StringsXml>(tag = JsStringXml.DEFAULT) with singleton {
-        val defaultXpp = xppFactory.newPullParser()
-        defaultXpp.setInputString(defaultStringsXmlStr)
-        StringsXml(defaultXpp, xppFactory, messageIdMapFlipped, "en")
-    }
-
-    if(displayLocaleStringsXmlStr != null) {
-        bind<StringsXml>(tag = JsStringXml.DISPLAY) with singleton{
-            val foreignXpp = xppFactory.newPullParser()
-            foreignXpp.setInputString(displayLocaleStringsXmlStr)
-            val defaultStringsXml = instance<StringsXml>(tag = JsStringXml.DEFAULT)
-            StringsXml(foreignXpp, xppFactory, messageIdMapFlipped,
-                UstadMobileSystemImpl.displayedLocale, defaultStringsXml)
-        }
-    }
-
     bind<SupportedLanguagesConfig>() with singleton {
         configMap["com.ustadmobile.uilanguages"]?.let {languageList ->
             SupportedLanguagesConfig(languageList)
@@ -101,8 +80,6 @@ internal fun ustadJsDi(
     bind<UstadMobileSystemImpl>() with singleton {
         val jsStringProvider: JsStringProvider = instance()
         UstadMobileSystemImpl(
-            instance(tag = JsStringXml.DEFAULT),
-            instanceOrNull(tag = JsStringXml.DISPLAY),
             jsStringProvider,
         )
     }

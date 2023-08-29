@@ -798,19 +798,9 @@
     <string name="add_activity_literal">Добавить активность</string>
     <string name="frequency">Частота</string>
     <string name="reject">Отклонять</string>
-    <plurals name="number_of_attempts">
-        <item quantity="one">%d попытка</item>
-        <item quantity="few">%d попыток</item>
-        <item quantity="many">%d попыток</item>
-        <item quantity="other">%d попыток</item>
-    </plurals>
+
     <string name="onboarding_stay_organized_subheading">Образовательный контент, задания, классы и посещаемость — все в одном месте</string>
-    <plurals name="duration_hours">
-        <item quantity="one">%d час(а)</item>
-        <item quantity="few">%d часов</item>
-        <item quantity="many">%d часов</item>
-        <item quantity="other">%d часов</item>
-    </plurals>
+
     <string name="store_description_full">"Ustad Mobile — это приложение с открытым исходным кодом, которое позволяет пользователям получать доступ к широкому спектру открытых образовательных ресурсов онлайн или офлайн. Приложением и контентом можно обмениваться между устройствами в автономном режиме.
         \n
         \n  Ustad Mobile предлагает контент с открытой лицензией с некоторых ведущих сайтов Интернета с открытыми образовательными ресурсами (ООР):
@@ -1000,18 +990,6 @@
     <string name="reviews_per_user_group">Количество отзывов на пользователя или группу</string>
     <string name="assign_random_reviewers">Назначьте случайных проверяющих</string>
     <string name="reviewer">Проверяющий #%1$s</string>
-    <plurals name="duration_minutes">
-        <item quantity="one">%d минут(а)</item>
-        <item quantity="few">%d минут</item>
-        <item quantity="many">%d минут</item>
-        <item quantity="other">%d минут</item>
-    </plurals>
-    <plurals name="duration_seconds">
-        <item quantity="one">%d сек.</item>
-        <item quantity="few">%d секунд</item>
-        <item quantity="many">%d секунд</item>
-        <item quantity="other">%d секунд</item>
-    </plurals>
     <string name="pdf">PDF</string>
     <string name="app_language">Язык приложения</string>
 </resources>

@@ -25,7 +25,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.google.accompanist.themeadapter.material.MdcTheme
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants
@@ -34,7 +33,6 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.clazzassignment.ClazzAssignmentConstants.SUBMISSION_STATUS_ICON_MAP
@@ -45,9 +43,10 @@ import com.ustadmobile.port.android.view.composable.*
 import androidx.paging.compose.items
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
+import com.ustadmobile.port.android.util.compose.stringIdMapResource
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
-import com.ustadmobile.port.android.view.PersonListScreen
 import com.ustadmobile.port.android.view.clazzassignment.CommentsBottomSheet
+import com.ustadmobile.core.R as CR
 
 interface ClazzAssignmentDetailStudentProgressFragmentEventHandler {
 
@@ -87,7 +86,7 @@ fun ClazzAssignmentDetailStudentProgressScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState(ClazzAssignmentSubmitterDetailUiState())
 
-    val newCommentHintText = stringResource(R.string.add_private_comment)
+    val newCommentHintText = stringResource(CR.string.add_private_comment)
 
     val localContext = LocalContext.current
 
@@ -149,14 +148,14 @@ fun ClazzAssignmentDetailStudentProgressScreen(
                 },
                 text = {
                     Text(
-                        text = messageIdMapResource(
+                        text = stringIdMapResource(
                             map = ClazzAssignmentViewModelConstants.SUBMISSION_STAUTUS_MESSAGE_ID,
                             key = uiState.submissionStatus
                         ).capitalizeFirstLetter()
                     )
                 },
                 secondaryText = {
-                    Text(stringResource(R.string.status))
+                    Text(stringResource(CR.string.status))
                 }
             )
         }
@@ -171,10 +170,10 @@ fun ClazzAssignmentDetailStudentProgressScreen(
                         )
                     },
                     text = {
-                        Text("${uiState.averageScore} ${stringResource(R.string.points)}")
+                        Text("${uiState.averageScore} ${stringResource(CR.string.points)}")
                     },
                     secondaryText = {
-                        Text(stringResource(R.string.score))
+                        Text(stringResource(CR.string.score))
                     }
                 )
             }
@@ -182,7 +181,7 @@ fun ClazzAssignmentDetailStudentProgressScreen(
 
         item(key = "submissionheader") {
             UstadDetailHeader {
-                Text(stringResource(R.string.submissions))
+                Text(stringResource(CR.string.submissions))
             }
         }
 
@@ -200,7 +199,7 @@ fun ClazzAssignmentDetailStudentProgressScreen(
 
         item(key = "gradesheader") {
             UstadDetailHeader {
-                Text(stringResource(R.string.grades_scoring))
+                Text(stringResource(CR.string.grades_scoring))
             }
         }
 
@@ -240,13 +239,13 @@ fun ClazzAssignmentDetailStudentProgressScreen(
 
         item(key = "private_comment_header") {
             UstadDetailHeader {
-                Text(stringResource(R.string.private_comments))
+                Text(stringResource(CR.string.private_comments))
             }
         }
 
         item(key = "new_private_comment") {
             UstadAddCommentListItem(
-                text = stringResource(id = R.string.add_private_comment),
+                text = stringResource(id = CR.string.add_private_comment),
                 enabled = uiState.fieldsEnabled,
                 personUid = uiState.activeUserPersonUid,
                 onClickAddComment =  onClickNewPrivateComment,

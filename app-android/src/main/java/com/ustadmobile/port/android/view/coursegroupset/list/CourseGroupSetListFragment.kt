@@ -39,6 +39,7 @@ import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
 import com.ustadmobile.port.android.view.SortBottomSheetFragment
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.UstadAddListItem
+import com.ustadmobile.core.R as CR
 
 class CourseGroupSetListFragment(): UstadBaseMvvmFragment(){
 
@@ -135,7 +136,7 @@ fun CourseGroupSetListScreen(
         if(uiState.showAddItem) {
             item(key = "additem") {
                 UstadAddListItem(
-                    text = stringResource(R.string.add_new_groups),
+                    text = stringResource(CR.string.add_new_groups),
                     onClickAdd = onClickNewItem,
                 )
             }

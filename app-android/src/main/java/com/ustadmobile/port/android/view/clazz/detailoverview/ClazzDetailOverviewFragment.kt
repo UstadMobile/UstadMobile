@@ -30,7 +30,6 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.*
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.util.ext.htmlToPlainText
@@ -38,7 +37,6 @@ import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateRange
 import com.ustadmobile.port.android.util.compose.rememberFormattedTime
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
@@ -47,6 +45,10 @@ import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.clazzassignment.UstadClazzAssignmentListItem
 import com.ustadmobile.port.android.view.composable.*
 import com.ustadmobile.port.android.view.contententry.UstadContentEntryListItem
+import com.ustadmobile.core.viewmodel.clazz.ClazzScheduleConstants.DAY_STRING_RESOURCES
+import com.ustadmobile.core.viewmodel.clazz.ClazzScheduleConstants.SCHEDULE_FREQUENCY_STRING_RESOURCES
+import com.ustadmobile.port.android.util.compose.stringIdMapResource
+import com.ustadmobile.core.R as CR
 
 interface ClazzDetailOverviewEventListener {
     fun onClickClassCode(code: String?)
@@ -123,7 +125,7 @@ private fun ClazzDetailOverviewScreen(
 
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
-    val numMembers = stringResource(R.string.x_teachers_y_students,
+    val numMembers = stringResource(CR.string.x_teachers_y_students,
         uiState.clazz?.numTeachers ?: 0,
         uiState.clazz?.numStudents ?: 0)
 
@@ -152,7 +154,7 @@ private fun ClazzDetailOverviewScreen(
                     .defaultItemPadding(),
                 imageId = R.drawable.ic_group_black_24dp,
                 valueText = numMembers,
-                labelText = stringResource(R.string.members)
+                labelText = stringResource(CR.string.members_key)
             )
         }
 
@@ -164,7 +166,7 @@ private fun ClazzDetailOverviewScreen(
                         .defaultItemPadding(),
                     imageId = R.drawable.ic_login_24px,
                     valueText = uiState.clazz?.clazzCode ?: "",
-                    labelText = stringResource(R.string.class_code),
+                    labelText = stringResource(CR.string.class_code),
                     onClick = {
                         onClickClassCode(uiState.clazz?.clazzCode ?: "")
                     }
@@ -193,7 +195,7 @@ private fun ClazzDetailOverviewScreen(
                         .defaultItemPadding(),
                     imageId = R.drawable.ic_event_black_24dp,
                     valueText = clazzDateRange,
-                    labelText = "${stringResource(R.string.start_date)} - ${stringResource(R.string.end_date)}",
+                    labelText = "${stringResource(CR.string.start_date)} - ${stringResource(CR.string.end_date)}",
                 )
             }
         }
@@ -206,7 +208,7 @@ private fun ClazzDetailOverviewScreen(
                         .defaultItemPadding(),
                     imageId = R.drawable.ic_event_black_24dp,
                     valueText = uiState.clazz?.clazzHolidayCalendar?.umCalendarName ?: "",
-                    labelText = stringResource(R.string.holiday_calendar),
+                    labelText = stringResource(CR.string.holiday_calendar),
                 )
             }
         }
@@ -221,7 +223,7 @@ private fun ClazzDetailOverviewScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .defaultItemPadding(),
-                    text = stringResource(id = R.string.schedule)
+                    text = stringResource(id = CR.string.schedule)
                 )
             }
         }
@@ -236,9 +238,19 @@ private fun ClazzDetailOverviewScreen(
             val toTimeFormatted = rememberFormattedTime(
                 timeInMs = schedule.scheduleEndTime.toInt()
             )
-            val text = "${messageIdResource(id = schedule.scheduleFrequency)} " +
-                    " ${messageIdResource(schedule.scheduleDay)} " +
-                    " $fromTimeFormatted - $toTimeFormatted "
+            val text = buildString {
+                append(stringIdMapResource(
+                    map = SCHEDULE_FREQUENCY_STRING_RESOURCES,
+                    key = schedule.scheduleFrequency)
+                )
+                append(" ")
+                append(stringIdMapResource(
+                    map = DAY_STRING_RESOURCES,
+                    key = schedule.scheduleDay
+                ))
+                append(" $fromTimeFormatted - $toTimeFormatted ")
+
+            }
 
             ListItem(
                 text = { Text(text) },
@@ -398,15 +410,15 @@ fun ClazzDetailOverviewScreenPreview() {
                 scheduleUid = 1
                 sceduleStartTime = 0
                 scheduleEndTime = 0
-                scheduleFrequency = MessageID.yearly
-                scheduleDay = MessageID.sunday
+                scheduleFrequency = Schedule.SCHEDULE_FREQUENCY_WEEKLY
+                scheduleDay = Schedule.DAY_SUNDAY
             },
             Schedule().apply {
                 scheduleUid = 2
                 sceduleStartTime = 0
                 scheduleEndTime = 0
-                scheduleFrequency = MessageID.yearly
-                scheduleDay = MessageID.sunday
+                scheduleFrequency = Schedule.SCHEDULE_FREQUENCY_WEEKLY
+                scheduleDay = Schedule.DAY_MONDAY
             }
         ),
         courseBlockList = {

@@ -13,14 +13,13 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemListStatusBinding
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.door.RepositoryLoadHelper
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_FAILED_CONNECTION_ERR
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_FAILED_NOCONNECTIVITYORPEERS
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_NODATA
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_WITHDATA
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_CLOUD
-
+import com.ustadmobile.core.R as CR
 
 /**
  * This RecyclerViewAdapter is intended to be placed in a MergeAdapter at the end. It
@@ -124,7 +123,7 @@ class ListStatusRecyclerViewAdapter<T: Any>(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StatusViewHolder {
         val viewHolder = StatusViewHolder(ItemListStatusBinding.inflate(LayoutInflater.from(parent.context),
             parent, false).also {
-            it.emptyStateMessage = emptyStateString ?: parent.context.getString(R.string.nothing_here)
+            it.emptyStateMessage = emptyStateString ?: parent.context.getString(CR.string.nothing_here)
             it.emptyStateDrawableId = emptyStateDrawableId
         })
 
@@ -148,12 +147,6 @@ class ListStatusRecyclerViewAdapter<T: Any>(
 
         val STATUSES_TO_HIDE_IF_LOCALDATA_LOADED = listOf(STATUS_FAILED_CONNECTION_ERR,
             STATUS_FAILED_NOCONNECTIVITYORPEERS, STATUS_LOADED_NODATA)
-
-        @JvmField
-        val MAP_STATUS_STRINGS = mapOf(
-                STATUS_LOADING_CLOUD to MessageID.repo_loading_status_loading_cloud,
-                STATUS_FAILED_CONNECTION_ERR to MessageID.repo_loading_status_failed_connection_error,
-                STATUS_FAILED_NOCONNECTIVITYORPEERS to MessageID.repo_loading_status_failed_noconnection)
 
         @JvmField
         val MAP_ICON_IMAGEIDS = mapOf(

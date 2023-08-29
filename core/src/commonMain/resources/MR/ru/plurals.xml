@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <plural name="number_of_attempts">
+        <item quantity="one">%d попытка</item>
+        <item quantity="few">%d попыток</item>
+        <item quantity="many">%d попыток</item>
+        <item quantity="other">%d попыток</item>
+    </plural>
+
+    <plural name="duration_hours">
+        <item quantity="one">%d час(а)</item>
+        <item quantity="few">%d часов</item>
+        <item quantity="many">%d часов</item>
+        <item quantity="other">%d часов</item>
+    </plural>
+
+    <plural name="duration_minutes">
+        <item quantity="one">%d минут(а)</item>
+        <item quantity="few">%d минут</item>
+        <item quantity="many">%d минут</item>
+        <item quantity="other">%d минут</item>
+    </plural>
+
+    <plural name="duration_seconds">
+        <item quantity="one">%d сек.</item>
+        <item quantity="few">%d секунд</item>
+        <item quantity="many">%d секунд</item>
+        <item quantity="other">%d секунд</item>
+    </plural>
+
+</resources>

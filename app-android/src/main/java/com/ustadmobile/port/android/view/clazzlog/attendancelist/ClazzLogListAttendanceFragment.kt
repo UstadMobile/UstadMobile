@@ -53,7 +53,7 @@ import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.max
-
+import com.ustadmobile.core.R as CR
 
 class ClazzLogListAttendanceFragment(): UstadBaseMvvmFragment() {
 
@@ -64,7 +64,7 @@ class ClazzLogListAttendanceFragment(): UstadBaseMvvmFragment() {
         val systemImpl : UstadMobileSystemImpl = direct.instance()
         return BottomSheetOption(
             RECORD_ATTENDANCE_OPTIONS_ICON[this] ?: 0,
-            systemImpl.getString(this.stringResource, requireContext()), this.commandId)
+            systemImpl.getString(this.stringResource), this.commandId)
     }
 
     override fun onCreateView(
@@ -144,7 +144,7 @@ private fun LineChart.updateLineData(graphData: AttendanceGraphData) {
             val colorId = if(index == 0) R.color.successColor else R.color.secondaryColor
             val seriesColor = context?.let { ContextCompat.getColor(context, colorId) } ?: Color.BLACK
             addDataSet(LineDataSet(list.map { Entry(it.first.toFloat(), it.second * 100) },
-                context.getString(R.string.attendance)).apply {
+                context.getString(CR.string.attendance)).apply {
                 color = seriesColor
                 valueTextColor = Color.BLACK
                 lineWidth = 1f
@@ -317,13 +317,13 @@ private fun ClazzLogListItem(
                 }
 
                 Text(text = stringResource(
-                    id = R.string.three_num_items_with_name_with_comma,
+                    id = CR.string.three_num_items_with_name_with_comma,
                     clazzLog?.clazzLogNumPresent ?: 0,
-                    stringResource(R.string.present),
+                    stringResource(CR.string.present),
                     clazzLog?.clazzLogNumPartial ?: 0,
-                    stringResource(R.string.partial),
+                    stringResource(CR.string.partial),
                     clazzLog?.clazzLogNumAbsent ?: 0,
-                    stringResource(R.string.absent)
+                    stringResource(CR.string.absent)
                 ))
             }
         }

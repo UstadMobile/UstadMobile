@@ -17,6 +17,7 @@ import com.ustadmobile.core.util.LongWrapper
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.BitmaskEditView
+import com.ustadmobile.core.R as CR
 
 interface BitmaskEditFragmentEventHandler {
 
@@ -75,7 +76,7 @@ class BitmaskEditFragment: UstadEditFragment<LongWrapper>(), BitmaskEditView,
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.features_enabled, R.string.features_enabled)
+        setEditFragmentTitle(CR.string.features_enabled, CR.string.features_enabled)
     }
 
     override fun onDestroyView() {

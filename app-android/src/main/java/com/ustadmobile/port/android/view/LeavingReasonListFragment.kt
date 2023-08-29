@@ -14,7 +14,7 @@ import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
-
+import com.ustadmobile.core.R as CR
 
 class LeavingReasonListFragment(): UstadListViewFragment<LeavingReason, LeavingReason>(),
         LeavingReasonListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
@@ -56,7 +56,7 @@ class LeavingReasonListFragment(): UstadListViewFragment<LeavingReason, LeavingR
                 this, di, viewLifecycleOwner).withViewLifecycle()
 
         mDataRecyclerViewAdapter = LeavingReasonListRecyclerAdapter(mPresenter)
-        val createNewText = requireContext().getString(R.string.add_leaving_reason)
+        val createNewText = requireContext().getString(CR.string.add_leaving_reason)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
                 createNewText)
 
@@ -65,8 +65,8 @@ class LeavingReasonListFragment(): UstadListViewFragment<LeavingReason, LeavingR
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        ustadFragmentTitle = requireContext().getString(R.string.select_leaving_reason)
-        fabManager?.text = requireContext().getText(R.string.leaving_reason)
+        ustadFragmentTitle = requireContext().getString(CR.string.select_leaving_reason)
+        fabManager?.text = requireContext().getText(CR.string.leaving_reason)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

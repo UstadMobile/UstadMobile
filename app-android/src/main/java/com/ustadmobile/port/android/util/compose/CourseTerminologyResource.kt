@@ -6,11 +6,12 @@ import androidx.compose.ui.platform.LocalContext
 import com.ustadmobile.core.util.ext.toTerminologyEntries
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.core.impl.locale.TerminologyEntry
+import dev.icerock.moko.resources.StringResource
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import org.kodein.di.direct
 import org.kodein.di.instance
-
+import dev.icerock.moko.resources.compose.stringResource
 /**
  * CourseTerminology is used to provide alternative words for student, teacher etc. See CourseTerminology
  *
@@ -55,14 +56,14 @@ fun rememberCourseTerminologyEntries(
  * string will be used.
  *
  * @param terminologyEntries terminology entries e.g. as per rememberCourseTerminologyEntries
- * @param messageId the MessageID to lookup e.g. MessageID.teacher MessageID.student etc.
+ * @param stringResource the MessageID to lookup e.g. MessageID.teacher MessageID.student etc.
  *
  */
 @Composable
 fun courseTerminologyEntryResource(
     terminologyEntries: List<TerminologyEntry>,
-    messageId: Int
+    stringResource: StringResource
 ): String {
-    return terminologyEntries.firstOrNull { it.stringResource ==  messageId }?.term
-        ?: messageIdResource(messageId)
+    return terminologyEntries.firstOrNull { it.stringResource ==  stringResource }?.term
+        ?: stringResource(resource = stringResource)
 }

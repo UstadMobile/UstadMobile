@@ -21,21 +21,20 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentScopedGrantDetailBinding
 import com.toughra.ustadmobile.databinding.ItemBitmaskflagBinding
 import com.ustadmobile.core.controller.ScopedGrantDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.ext.toBitmaskFlagList
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ScopedGrantDetailView
 import com.ustadmobile.core.viewmodel.ScopedGrantDetailUiState
 import com.ustadmobile.lib.db.entities.ScopedGrantWithName
-import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-
+import com.ustadmobile.core.R as CR
+import dev.icerock.moko.resources.compose.stringResource as mrStringResource
+import com.ustadmobile.core.MR
 
 interface ScopedGrantDetailFragmentEventHandler {
 
@@ -106,7 +105,7 @@ class ScopedGrantDetailFragment: UstadDetailFragment<ScopedGrantWithName>(
         set(value) {
             field = value
             mRecyclerAdapter?.submitList(entity?.toBitmaskFlagList())
-            ustadFragmentTitle = entity?.name ?: context?.getString(R.string.permission)
+            ustadFragmentTitle = entity?.name ?: context?.getString(CR.string.permission_key)
             mBinding?.scopedGrant = value
         }
 
@@ -139,13 +138,13 @@ fun ScopedGrantDetailScreen(
         ) { bitmask ->
             ListItem(
                 text = {
-                    Text(messageIdResource(id = bitmask.stringResource))
+                    Text(mrStringResource(resource = bitmask.stringResource))
                 },
                 trailing = {
                     Icon(
                         imageVector = if (bitmask.enabled) Icons.Filled.Check else Icons.Filled.Close,
                         contentDescription = stringResource(
-                            if(bitmask.enabled) R.string.enabled else R.string.disabled
+                            if(bitmask.enabled) CR.string.enabled else CR.string.disabled
                         )
                     )
                 }
@@ -162,12 +161,12 @@ fun ScopedGrantDetailScreenPreview(){
         uiState = ScopedGrantDetailUiState(
             bitmaskList = listOf(
                 BitmaskFlag(
-                    stringResource = MessageID.permission_person_update,
+                    stringResource = MR.strings.permission_person_update,
                     flagVal = 1,
                     enabled = true
                 ),
                 BitmaskFlag(
-                    stringResource = MessageID.permission_person_insert,
+                    stringResource = MR.strings.permission_person_insert,
                     flagVal = 2,
                     enabled = false
                 )

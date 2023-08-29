@@ -250,17 +250,6 @@ abstract class UstadMobileSystemCommon {
         return locale?.substring(0, 2) ?: "en"
     }
 
-    /**
-     * Get a string for use in the UI using a constant int from MessageID
-     */
-    @JsName("getString")
-    abstract fun getString(messageCode: Int, context: Any): String
-
-    /**
-     * Get a string for use in the UI (without requiring context)
-     */
-    abstract fun getString(messageCode: Int): String
-
     abstract fun getString(stringResource: StringResource): String
 
     /**

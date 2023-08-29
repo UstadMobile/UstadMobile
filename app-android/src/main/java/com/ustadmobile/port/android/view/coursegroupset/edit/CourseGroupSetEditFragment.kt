@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -22,7 +21,6 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
@@ -37,6 +35,7 @@ import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.UstadExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadInputFieldLayout
 import com.ustadmobile.port.android.view.composable.UstadNumberTextField
+import com.ustadmobile.core.R as CR
 
 
 class CourseGroupSetEditFragment: UstadBaseMvvmFragment(){
@@ -108,7 +107,7 @@ fun CourseGroupSetEditScreen(
                             cgsName = it
                         })
                     },
-                    label = { Text(stringResource(R.string.title)) },
+                    label = { Text(stringResource(CR.string.title)) },
                     isError = uiState.courseTitleError != null,
 
                 )
@@ -128,7 +127,7 @@ fun CourseGroupSetEditScreen(
                         .fillMaxWidth(),
                     enabled = uiState.fieldsEnabled,
                     value = uiState.courseGroupSet?.cgsTotalGroups?.toFloat() ?: 0f,
-                    label = { Text(stringResource(id = R.string.number_of_groups)) },
+                    label = { Text(stringResource(id = CR.string.number_of_groups)) },
                     isError = uiState.numOfGroupsError != null,
                     onValueChange = {
                         onCourseGroupSetChange(uiState.courseGroupSet?.shallowCopy{
@@ -151,7 +150,7 @@ fun CourseGroupSetEditScreen(
                     backgroundColor = colorResource(id = R.color.secondaryColor)
                 )
             ) {
-                Text(stringResource(R.string.assign_to_random_groups).uppercase())
+                Text(stringResource(CR.string.assign_to_random_groups).uppercase())
             }
         }
 
@@ -159,9 +158,9 @@ fun CourseGroupSetEditScreen(
 
         val itemTextFn: @Composable (groupNum: Int) -> String = {
             if(it == 0) {
-                stringResource(R.string.unassigned)
+                stringResource(CR.string.unassigned)
             }else {
-                "${stringResource(R.string.group)} $it"
+                "${stringResource(CR.string.group)} $it"
             }
         }
 

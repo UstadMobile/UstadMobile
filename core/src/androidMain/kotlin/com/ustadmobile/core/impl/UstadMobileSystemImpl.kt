@@ -76,7 +76,6 @@ actual open class UstadMobileSystemImpl(
 
     private var appPreferences: SharedPreferences? = null
 
-    var messageIdMap: Map<Int, Int> = mapOf()
 
     /**
      * This should be used only for testing. This will use the given navcontroller instead of
@@ -269,23 +268,6 @@ actual open class UstadMobileSystemImpl(
         }
 
         navController.popBackStack(popBackDestId, popUpInclusive)
-    }
-
-
-    /**
-     * Get a string for use in the UI
-     */
-    actual override fun getString(messageCode: Int, context: Any): String {
-        val androidId = messageIdMap[messageCode]
-        return if (androidId != null) {
-            (context as Context).resources.getString(androidId)
-        } else {
-            return ""
-        }
-    }
-
-    actual override fun getString(messageCode: Int): String {
-        return messageIdMap[messageCode]?.let { applicationContext.getString(it) } ?: ""
     }
 
     override fun getString(stringResource: StringResource): String {

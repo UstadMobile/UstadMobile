@@ -86,7 +86,7 @@
                 android:layout_height="@dimen/dimen_16dp"
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
-                android:contentDescription="@string/members"
+                android:contentDescription="@string/members_key"
                 app:layout_constraintStart_toEndOf="@+id/imageView10"
                 app:layout_constraintTop_toBottomOf="@+id/barrierMemberDetails"
                 app:srcCompat="@drawable/ic_people_black_24dp" />

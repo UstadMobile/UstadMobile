@@ -40,7 +40,6 @@ import com.ustadmobile.door.ext.addIncomingReplicationListener
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
@@ -320,8 +319,6 @@ class UstadApp : Application(), DIAware {
 
     override fun onCreate() {
         super.onCreate()
-        val systemImpl: UstadMobileSystemImpl = di.direct.instance()
-        systemImpl.messageIdMap = MessageIDMap.ID_MAP
         Napier.base(DebugAntilog())
     }
 

@@ -30,6 +30,7 @@ import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import com.ustadmobile.core.R as CR
 
 class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMemberWithPerson>(),
         SchoolMemberListView, View.OnClickListener {
@@ -129,9 +130,9 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
         filterByRole = arguments?.get(UstadView.ARG_FILTER_BY_ROLE)?.toString()?.toInt() ?: 0
 
         addNewStringId = if (filterByRole == Role.ROLE_SCHOOL_STAFF_UID) {
-            R.string.teacher
+            CR.string.teacher
         } else {
-            R.string.student
+            CR.string.student
         }
 
         filterBySchoolUid = arguments?.getString(UstadView.ARG_FILTER_BY_SCHOOLUID)?.toLong() ?: 0
@@ -141,7 +142,7 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
                 this, di, viewLifecycleOwner).withViewLifecycle()
 
         mDataRecyclerViewAdapter = SchoolMemberListRecyclerAdapter(mPresenter)
-        val createNewText = requireContext().getString(R.string.add_new,
+        val createNewText = requireContext().getString(CR.string.add_new,
                 requireContext().getString(addNewStringId))
 
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this, createNewText,
@@ -149,7 +150,7 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
 
         mPendingStudentListRecyclerViewAdapter = PendingSchoolMemberListRecyclerAdapter(mPresenter)
         mPendingStudentsHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(null,
-                "", R.string.pending_requests, headerLayoutId = 0)
+                "", CR.string.pending_requests, headerLayoutId = 0)
 
         mMergeRecyclerViewAdapter = ConcatAdapter(mUstadListHeaderRecyclerViewAdapter,
                 mDataRecyclerViewAdapter, mPendingStudentsHeaderRecyclerViewAdapter,
@@ -180,9 +181,9 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
         filterByRole = arguments?.get(UstadView.ARG_FILTER_BY_ROLE)?.toString()?.toInt() ?: 0
 
         addNewStringId = if (filterByRole == Role.ROLE_SCHOOL_STAFF_UID) {
-            R.string.teacher
+            CR.string.teacher
         } else {
-            R.string.student
+            CR.string.student
         }
 
         mActivityWithFab?.activityFloatingActionButton?.text =

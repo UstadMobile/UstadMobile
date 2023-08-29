@@ -20,6 +20,7 @@ import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
+import com.ustadmobile.core.R as CR
 
 class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
 
@@ -91,13 +92,13 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         mediator = TabLayoutMediator(tabList, pager) { tab, position ->
             tab.text = when (position) {
                 0 -> {
-                    getText(R.string.overview).toString()
+                    getText(CR.string.overview).toString()
                 }
                 1 -> {
-                    getText(R.string.staff).toString()
+                    getText(CR.string.staff).toString()
                 }
                 2 -> {
-                    getText(R.string.students).toString()
+                    getText(CR.string.students).toString()
                 }
                 else -> ""
             }

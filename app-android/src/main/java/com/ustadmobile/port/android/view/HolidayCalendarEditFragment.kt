@@ -43,6 +43,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.compose.rememberFormattedDate
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
+import com.ustadmobile.core.R as CR
 
 class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), HolidayCalendarEditView{
 
@@ -106,7 +107,7 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.add_a_new_holiday_calendar, R.string.edit_holiday_calendar)
+        setEditFragmentTitle(CR.string.add_a_new_holiday_calendar, CR.string.edit_holiday_calendar)
         val navController = findNavController()
 
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
@@ -186,7 +187,7 @@ fun HolidayCalendarEditScreen(
 
         UstadTextEditField(
             value = uiState.holidayCalendar?.umCalendarName ?: "",
-            label = stringResource(id = R.string.name),
+            label = stringResource(id = CR.string.name_key),
             enabled = uiState.fieldsEnabled,
             onValueChange = {
                 onHolidayCalendarChange(uiState.holidayCalendar?.shallowCopy {
@@ -205,7 +206,7 @@ fun HolidayCalendarEditScreen(
                     contentDescription = null
                 )
             },
-            text = { Text(stringResource(id = R.string.add_a_holiday)) }
+            text = { Text(stringResource(id = CR.string.add_a_holiday)) }
         )
 
         uiState.holidayList?.forEach { holiday ->
@@ -231,7 +232,7 @@ fun HolidayCalendarEditScreen(
                     }) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
-                            contentDescription = stringResource(R.string.delete)
+                            contentDescription = stringResource(CR.string.delete)
                         )
                     }
                 }

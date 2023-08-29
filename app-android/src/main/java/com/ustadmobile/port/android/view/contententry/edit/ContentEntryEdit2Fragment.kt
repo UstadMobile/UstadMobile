@@ -31,6 +31,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.*
+import com.ustadmobile.core.R as CR
 
 
 interface ContentEntryEdit2FragmentEventHandler {
@@ -100,9 +101,9 @@ private fun ContentEntryEditScreen(
 
         val updateContentText =
             if (!uiState.importError.isNullOrBlank())
-                stringResource(id = R.string.file_required_prompt)
+                stringResource(id = CR.string.file_required_prompt)
             else
-                stringResource(id = R.string.file_selected)
+                stringResource(id = CR.string.file_selected)
 
         if (uiState.updateContentVisible){
 
@@ -114,7 +115,7 @@ private fun ContentEntryEditScreen(
                     backgroundColor = colorResource(id = R.color.secondaryColor)
                 )
             ) {
-                Text(stringResource(R.string.update_content).uppercase(),
+                Text(stringResource(CR.string.update_content).uppercase(),
                     color = contentColorFor(
                         colorResource(id = R.color.secondaryColor))
                 )
@@ -128,14 +129,14 @@ private fun ContentEntryEditScreen(
         Spacer(modifier = Modifier.height(15.dp))
 
         if (uiState.entity?.leaf == true){
-            Text(text = stringResource(id = R.string.supported_files))
+            Text(text = stringResource(id = CR.string.supported_files))
         }
 
         Spacer(modifier = Modifier.height(15.dp))
 
         UstadTextEditField(
             value = uiState.entity?.title ?: "",
-            label = stringResource(id = R.string.title),
+            label = stringResource(id = CR.string.title),
             error = uiState.titleError,
             enabled = uiState.fieldsEnabled,
             onValueChange = {
@@ -150,7 +151,7 @@ private fun ContentEntryEditScreen(
 
         UstadTextEditField(
             value = uiState.entity?.description ?: "",
-            label = stringResource(id = R.string.description),
+            label = stringResource(id = CR.string.description),
             enabled = uiState.fieldsEnabled,
             onValueChange = {
                 onContentEntryChanged(uiState.entity?.shallowCopy {
@@ -174,7 +175,7 @@ private fun ContentEntryEditScreen(
 
         UstadTextEditField(
             value = uiState.entity?.author ?: "",
-            label = stringResource(id = R.string.entry_details_author),
+            label = stringResource(id = CR.string.entry_details_author),
             enabled = uiState.fieldsEnabled,
             onValueChange = {
                 onContentEntryChanged(uiState.entity?.shallowCopy {
@@ -188,7 +189,7 @@ private fun ContentEntryEditScreen(
 
         UstadTextEditField(
             value = uiState.entity?.publisher ?: "",
-            label = stringResource(id = R.string.entry_details_publisher),
+            label = stringResource(id = CR.string.entry_details_publisher),
             enabled = uiState.fieldsEnabled,
             onValueChange = {
                 onContentEntryChanged(uiState.entity?.shallowCopy {
@@ -203,7 +204,7 @@ private fun ContentEntryEditScreen(
         UstadMessageIdOptionExposedDropDownMenuField(
             value = uiState.entity?.licenseType ?: 0,
             options = LicenceConstants.LICENSE_MESSAGE_IDS,
-            label = stringResource(id = R.string.licence),
+            label = stringResource(id = CR.string.licence),
             enabled = uiState.fieldsEnabled,
             onOptionSelected = {
                 onContentEntryChanged(uiState.entity?.shallowCopy {
@@ -218,7 +219,7 @@ private fun ContentEntryEditScreen(
         if (uiState.containerStorageOptionVisible){
             UstadExposedDropDownMenuField(
                 value = uiState.selectedContainerStorageDir,
-                label = stringResource(R.string.content_creation_storage_option_title),
+                label = stringResource(CR.string.content_creation_storage_option_title),
                 options = uiState.storageOptions,
                 onOptionSelected = { onSelectContainerStorageDir(it as ContainerStorageDir) },
                 itemText = { (it as ContainerStorageDir).name ?: "" },
@@ -231,7 +232,7 @@ private fun ContentEntryEditScreen(
         if (uiState.contentCompressVisible){
             UstadSwitchField(
                 checked = uiState.compressionEnabled,
-                label = stringResource(id = R.string.compress),
+                label = stringResource(id = CR.string.compress),
                 enabled = uiState.fieldsEnabled,
                 onChange = {
                     onChangeCompress(it)
@@ -243,7 +244,7 @@ private fun ContentEntryEditScreen(
 
         UstadSwitchField(
             checked = uiState.entity?.publik ?: false,
-            label = stringResource(id = R.string.publicly_accessible),
+            label = stringResource(id = CR.string.publicly_accessible),
             enabled = uiState.fieldsEnabled,
             onChange = {
                 onChangePubliclyAccessible(it)
@@ -254,7 +255,7 @@ private fun ContentEntryEditScreen(
 
         UstadTextEditField(
             value = uiState.entity?.language?.name ?: "",
-            label = stringResource(id = R.string.language),
+            label = stringResource(id = CR.string.language),
             readOnly = true,
             enabled = uiState.fieldsEnabled,
             onClick = onClickLanguage,

@@ -53,6 +53,7 @@ import com.ustadmobile.port.android.view.composable.UstadListSortHeader
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import com.ustadmobile.core.R as CR
 
 
 class ClazzListFragment(): UstadBaseMvvmFragment() {
@@ -97,14 +98,14 @@ class ClazzListFragment(): UstadBaseMvvmFragment() {
             val optionList = if(uiState.canAddNewCourse) {
                 listOf(
                     BottomSheetOption(R.drawable.ic_add_black_24dp,
-                        requireContext().getString(R.string.add_a_new_course), NEW_CLAZZ
+                        requireContext().getString(CR.string.add_a_new_course), NEW_CLAZZ
                     )
                 )
             }else {
                 listOf()
             } + listOf(
                 BottomSheetOption(R.drawable.ic_login_24px,
-                requireContext().getString(R.string.join_existing_course), JOIN_CLAZZ
+                requireContext().getString(CR.string.join_existing_course), JOIN_CLAZZ
                 )
             )
 
@@ -289,7 +290,7 @@ fun ClazzListItem(
                 )
                 Text(
                     text = stringResource(
-                        R.string.x_teachers_y_students,
+                        CR.string.x_teachers_y_students,
                         clazz?.numTeachers ?: 0, clazz?.numStudents ?: 0,
                     )
                 )
