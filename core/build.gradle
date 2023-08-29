@@ -7,6 +7,7 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.android.library'
     id 'maven-publish'
+    id 'dev.icerock.mobile.multiplatform-resources'
 }
 
 
@@ -92,6 +93,7 @@ kotlin {
             kotlin.srcDirs += "build/generated/source/umlocale/"
             kotlin.srcDirs += "build/generated/source/umlocale-namemap"
             dependencies {
+                api "dev.icerock.moko:resources:0.23.0"
                 implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
@@ -231,6 +233,8 @@ kotlin {
         }
 
         jsMain {
+            dependsOn commonMain
+
             dependencies {
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-json-js:$version_ktor"
@@ -281,9 +285,9 @@ task prepareLocale {
 
         String messageIdMap = """package com.ustadmobile.core.generated.locale\n\n
         object MessageIdMap {
-        
+
             private val strMap = mapOf(
-                
+
         """
 
         Map<String, Integer> messageIds = new HashMap<>()
@@ -318,9 +322,9 @@ task prepareLocale {
 
         messageIdMap += """)
         operator fun get(messageId: Int) = strMap[messageId]
-        
+
         val idMap: Map<Int, String> = strMap.toMap()
-        
+
         }"""
         File messageIdMapFile = project.file("build/generated/source/umlocale-namemap/com/ustadmobile/core/generated/locale/MessageIdMap.kt")
         if(!messageIdMapFile.parentFile.exists()) {
@@ -332,6 +336,10 @@ task prepareLocale {
 }
 
 afterEvaluate {
+//    tasks.findByName("jsProcessResources").dependsOn("generateMRcommonMain")
+//    tasks.findByName("compileKotlinJs").dependsOn("generateMRcommonMain")
+    //jsProcessResources.mustRunAfter(":generateMRcommonMain")
+
     compileKotlinJs.dependsOn(prepareLocale)
     compileKotlinJvm.dependsOn(prepareLocale)
     jvmSourcesJar.dependsOn(prepareLocale)
@@ -342,23 +350,23 @@ afterEvaluate {
     assemble.dependsOn(prepareLocale)
 }
 
-task copyStringValuesToWebAssets {
-    File outDir = project.file("${reactLocaleOutPath}/locales/")
-    if(!outDir.exists()){
-        outDir.mkdirs()
-    }
-    rootProject.fileTree(dir: "core/locale/main").each() { File file ->
-        def localeCode = "en"
-
-        def pathString = file.absolutePath.substring(file.absolutePath.lastIndexOf("values"))
-        if(pathString.split("-").size() > 1){
-            localeCode = file.getParent().substring(file.getParent().lastIndexOf("-") + 1)
-        }
-        FileWriter writer = new FileWriter(project.file("${outDir.absolutePath}/${localeCode}.xml").absolutePath)
-        writer.write(file.getText())
-        writer.flush()
-    }
-}
+//task copyStringValuesToWebAssets {
+//    File outDir = project.file("${reactLocaleOutPath}/locales/")
+//    if(!outDir.exists()){
+//        outDir.mkdirs()
+//    }
+//    rootProject.fileTree(dir: "core/locale/main").each() { File file ->
+//        def localeCode = "en"
+//
+//        def pathString = file.absolutePath.substring(file.absolutePath.lastIndexOf("values"))
+//        if(pathString.split("-").size() > 1){
+//            localeCode = file.getParent().substring(file.getParent().lastIndexOf("-") + 1)
+//        }
+//        FileWriter writer = new FileWriter(project.file("${outDir.absolutePath}/${localeCode}.xml").absolutePath)
+//        writer.write(file.getText())
+//        writer.flush()
+//    }
+//}
 
 publishing {
     publications {
@@ -374,4 +382,10 @@ publishing {
             url rootProject.ext.buildConfigProperties['repo.dir']
         }
     }
+}
+
+
+
+multiplatformResources {
+    multiplatformResourcesPackage = "com.ustadmobile.core"
 }

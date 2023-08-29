@@ -14,6 +14,7 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
+import com.ustadmobile.core.MR
 
 /**
  * AuthManager is a simple clearing house for authenticating users. This can support rate limiting
@@ -37,7 +38,6 @@ class AuthManager(
         password: String,
         fallbackToOldPersonAuth: Boolean = false
     ): AuthResult {
-
         val site: Site = repo.siteDao.getSiteAsync() ?: throw IllegalStateException("No site!")
         val authSalt = site.authSalt ?: throw IllegalStateException("No auth salt!")
 

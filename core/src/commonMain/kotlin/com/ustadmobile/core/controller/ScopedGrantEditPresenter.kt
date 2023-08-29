@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.model.BitmaskMessageId
 import com.ustadmobile.core.util.ext.combinedFlagValue
 import com.ustadmobile.core.util.ext.foldWithBinaryOr
@@ -23,7 +22,7 @@ import com.ustadmobile.lib.db.entities.ScopedGrant
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
-
+import com.ustadmobile.core.generated.locale.MessageID
 
 class ScopedGrantEditPresenter(
     context: Any,
@@ -130,7 +129,7 @@ class ScopedGrantEditPresenter(
          * List of all permission flags and the respective message ID
          */
         val PERMISSION_MESSAGE_ID_LIST = listOf(
-            BitmaskMessageId(Role.PERMISSION_PERSON_DELEGATE, MessageID.permission_person_delegate),
+            BitmaskMessageId(Role.PERMISSION_PERSON_DELEGATE, MessageID.view_school),
             BitmaskMessageId(Role.PERMISSION_SCHOOL_SELECT, MessageID.view_school),
             BitmaskMessageId(Role.PERMISSION_SCHOOL_UPDATE, MessageID.edit_school),
             BitmaskMessageId(Role.PERMISSION_CLAZZ_ADD_STUDENT, MessageID.enrol_and_unenrol_students),

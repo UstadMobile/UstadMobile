@@ -73,7 +73,7 @@ class StringsXmlTest {
         val locales = supportedLanguagesConfig.availableLanguagesConfig
         locales.split(",").filter { it != "en" }.forEach { locale ->
             try {
-                val stringsXml = loadStringsFromResource("/values-$locale/strings_ui.xml", map,
+                val stringsXml = loadStringsFromResource("/values-$locale/strings.xml", map,
                     defaultStringsXml)
                 Assert.assertNotNull(stringsXml)
             }catch(e: Exception) {

@@ -1,8 +1,6 @@
 package com.ustadmobile.view.login
 
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.viewmodel.login.LoginUiState
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
@@ -16,6 +14,10 @@ import mui.system.StackDirection
 import mui.system.responsive
 import mui.system.sx
 import react.*
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.components.DIContext
+import com.ustadmobile.core.hooks.useStringProvider
+
 
 external interface LoginProps : Props {
     var uiState: LoginUiState
@@ -45,7 +47,7 @@ val LoginScreen = FC<Props> {
 
 private val LoginComponent2 = FC<LoginProps> { props ->
 
-    val strings = useStringsXml()
+    val strings = useStringProvider()
 
     Container {
         maxWidth = "lg"
@@ -62,7 +64,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
             TextField {
                 id = "username"
                 value = props.uiState.username
-                label = ReactNode(strings[MessageID.username])
+                label = ReactNode(strings[MR.strings.username])
                 onTextChange = {
                     props.onUsernameValueChange(it)
                 }
@@ -74,7 +76,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
             UstadTextEditField {
                 id = "password"
                 value = props.uiState.password
-                label = strings[MessageID.password]
+                label = strings[MR.strings.password]
                 onChange = {
                     props.onPasswordValueChange(it)
                 }
@@ -98,7 +100,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                 id = "login_button"
                 onClick = { props.onClickLogin() }
                 variant = ButtonVariant.contained
-                + strings[MessageID.login].uppercase()
+                + strings[MR.strings.login].uppercase()
             }
 
             Box{

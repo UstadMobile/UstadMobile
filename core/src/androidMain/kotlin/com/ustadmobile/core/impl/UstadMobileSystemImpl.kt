@@ -51,6 +51,7 @@ import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toFile
+import dev.icerock.moko.resources.StringResource
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import org.kodein.di.direct
@@ -285,6 +286,10 @@ actual open class UstadMobileSystemImpl(
 
     actual override fun getString(messageCode: Int): String {
         return messageIdMap[messageCode]?.let { applicationContext.getString(it) } ?: ""
+    }
+
+    override fun getString(stringResource: StringResource): String {
+        return stringResource.getString(applicationContext)
     }
 
     /**

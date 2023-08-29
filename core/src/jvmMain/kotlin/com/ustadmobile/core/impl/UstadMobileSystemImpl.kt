@@ -37,6 +37,8 @@ import com.ustadmobile.core.generated.locale.MessageIdMap
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.impl.locale.getStringsXmlResource
 import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.ext.concurrentSafeMapOf
+import dev.icerock.moko.resources.StringResource
 import org.xmlpull.v1.XmlPullParserFactory
 import java.util.concurrent.ConcurrentHashMap
 
@@ -60,6 +62,8 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
             }
         }
     }
+
+    private val localeCache = concurrentSafeMapOf<String, Locale>()
 
     private val messageIdMapFlipped: Map<String, Int> by lazy {
         MessageIdMap.idMap.entries.associate { (k, v) -> v to k }
@@ -116,6 +120,13 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
         return getString(getDisplayedLocale(), messageCode)
     }
 
+    override fun getString(stringResource: StringResource): String {
+        val displayLang = getDisplayedLocale()
+        return stringResource.localized(locale = localeCache.getOrPut(displayLang) {
+            Locale(displayLang)
+        })
+    }
+
     fun getString(localeCode: String, messageId: Int, context: Any? = null): String {
         val localeCodeLower = localeCode.toLowerCase(Locale.ROOT)
 
@@ -123,7 +134,7 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
             defaultStringsXml
         }else {
             foreignStringsXml.computeIfAbsent(localeCodeLower.substring(0, 2)) {
-                this::class.java.getStringsXmlResource("/values-$it/strings_ui.xml", xppFactory,
+                this::class.java.getStringsXmlResource("/values-$it/strings.xml", xppFactory,
                     messageIdMapFlipped, defaultStringsXml)
             }
         }

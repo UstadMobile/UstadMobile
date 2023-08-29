@@ -72,9 +72,9 @@ class PrototypeLocalizer {
 
         val messageIdMapFlipped = MessageIdMap.idMap.entries.associate { (k, v) -> v to k }
         val englishStrings = UstadMobileSystemImpl::class.java.getStringsXmlResource(
-            "/values/strings_ui.xml", xppFactory, messageIdMapFlipped)
+            "/values/strings.xml", xppFactory, messageIdMapFlipped)
         val foreignStrings = UstadMobileSystemImpl::class.java.getStringsXmlResource(
-            "/values-$lang/strings_ui.xml", xppFactory, messageIdMapFlipped,
+            "/values-$lang/strings.xml", xppFactory, messageIdMapFlipped,
             englishStrings)
 
         TarArchiveInputStream(GZIPInputStream(FileInputStream(inEpgzFile))).extractToDir(tmpDir)

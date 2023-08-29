@@ -47,6 +47,8 @@ import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.db.ext.preload
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.di.commonDomainDiModule
+import com.ustadmobile.core.impl.locale.StringProvider
+import com.ustadmobile.core.impl.locale.StringProviderJvm
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.rest.dimodules.makeJvmBackendDiModule
 import io.ktor.server.response.*
@@ -177,6 +179,7 @@ fun Application.umRestApplication(
         import(CommonJvmDiModule)
         import(makeJvmBackendDiModule(environment.config))
         bind<SupportedLanguagesConfig>() with singleton { SupportedLanguagesConfig() }
+        bind<StringProvider>() with singleton { StringProviderJvm(Locale.getDefault()) }
 
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {
             File(tmpRootDir, context.identifier(dbMode)).also {

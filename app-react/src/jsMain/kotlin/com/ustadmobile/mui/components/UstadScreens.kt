@@ -54,6 +54,7 @@ import web.location.location
 import web.url.URL
 import web.url.URLSearchParams
 import kotlin.random.Random
+import com.ustadmobile.core.MR
 
 //Roughly as per components/Showcases on MUI-showcase #d71c6d1
 
@@ -223,6 +224,7 @@ val ustadScreensLoader: LoaderFunction = {
 
         val ustadConfigHref = URL("ustad-config.json", location.href).href
         val configJson: Map<String, String> = httpClient.get(ustadConfigHref).body()
+        val jsStringsProvider = MR.stringsLoader.getOrLoad()
 
         val di = ustadJsDi(
             dbBuilt = dbBuilt,
@@ -232,6 +234,7 @@ val ustadScreensLoader: LoaderFunction = {
             json = json,
             httpClient = httpClient,
             configMap = configJson,
+            stringsProvider = jsStringsProvider,
         )
 
         UstadScreensLoaderData(di)

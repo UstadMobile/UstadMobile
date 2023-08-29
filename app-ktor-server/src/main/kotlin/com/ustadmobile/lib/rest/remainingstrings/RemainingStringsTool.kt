@@ -37,10 +37,10 @@ class RemainingStringsTool {
         val messageIdMapFlipped = MessageIdMap.idMap.entries.associate { (k, v) -> v to k }
 
         val englishStrings = UstadMobileSystemImpl::class.java.getStringsXmlResource(
-            "/values/strings_ui.xml", xppFactory, messageIdMapFlipped, null,
+            "/values/strings.xml", xppFactory, messageIdMapFlipped, null,
             true, true)
         val foreignStrings = UstadMobileSystemImpl::class.java.getStringsXmlResource(
-            "/values-$lang/strings_ui.xml", xppFactory, messageIdMapFlipped)
+            "/values-$lang/strings.xml", xppFactory, messageIdMapFlipped)
 
         val remainingStringList = mutableListOf<RemainingString>()
         englishStrings.messageIdOrder.forEach { messageId ->
@@ -58,7 +58,7 @@ class RemainingStringsTool {
     }
 
     fun serializeRemainingStrings(remainingStrings: List<RemainingString>, destDir: File) {
-        val outputFile = File(destDir, "strings_ui.xml")
+        val outputFile = File(destDir, "strings.xml")
         if(!destDir.exists())
             destDir.mkdirs()
 

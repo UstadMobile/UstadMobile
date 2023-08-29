@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -259,6 +260,8 @@ abstract class UstadMobileSystemCommon {
      * Get a string for use in the UI (without requiring context)
      */
     abstract fun getString(messageCode: Int): String
+
+    abstract fun getString(stringResource: StringResource): String
 
     /**
      * Return the mime type for the given extension

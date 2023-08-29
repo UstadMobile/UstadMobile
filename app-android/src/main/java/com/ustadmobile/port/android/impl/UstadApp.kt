@@ -62,6 +62,8 @@ import com.ustadmobile.core.db.dao.commitLiveConnectivityStatus
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.di.commonDomainDiModule
+import com.ustadmobile.core.impl.locale.StringProvider
+import com.ustadmobile.core.impl.locale.StringProviderAndroid
 import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
 import org.acra.config.httpSender
 import org.acra.data.StringFormat
@@ -93,6 +95,10 @@ class UstadApp : Application(), DIAware {
 
         bind<UstadMobileSystemImpl>() with singleton {
             UstadMobileSystemImpl(applicationContext)
+        }
+
+        bind<StringProvider>() with singleton {
+            StringProviderAndroid(applicationContext)
         }
 
         bind<UstadAccountManager>() with singleton {

@@ -28,7 +28,10 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import com.ustadmobile.core.impl.locale.JsStringXml
+import com.ustadmobile.core.impl.locale.StringProvider
+import com.ustadmobile.core.impl.locale.StringProviderJs
 import com.ustadmobile.util.resolveEndpoint
+import dev.icerock.moko.resources.provider.JsStringProvider
 import web.location.location
 import web.url.URLSearchParams
 
@@ -44,7 +47,8 @@ internal fun ustadJsDi(
     displayLocaleStringsXmlStr: String?,
     json: Json,
     httpClient: HttpClient,
-    configMap: Map<String, String>
+    configMap: Map<String, String>,
+    stringsProvider: JsStringProvider,
 ) = DI {
 
     import(commonDomainDiModule(EndpointScope.Default))
@@ -57,6 +61,16 @@ internal fun ustadJsDi(
 
     val apiUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
     console.log("Api URL = $apiUrl (location.href = ${location.href}")
+
+    bind<JsStringProvider>() with singleton {
+        stringsProvider
+    }
+
+    bind<StringProvider>() with singleton {
+        val systemImpl: UstadMobileSystemImpl = instance()
+        val jsStringProvider: JsStringProvider = instance()
+        StringProviderJs(systemImpl.getDisplayedLocale(), jsStringProvider)
+    }
 
     bind<StringsXml>(tag = JsStringXml.DEFAULT) with singleton {
         val defaultXpp = xppFactory.newPullParser()
@@ -85,8 +99,11 @@ internal fun ustadJsDi(
     }
 
     bind<UstadMobileSystemImpl>() with singleton {
+        val jsStringProvider: JsStringProvider = instance()
         UstadMobileSystemImpl(
-            instance(tag = JsStringXml.DEFAULT), instanceOrNull(tag = JsStringXml.DISPLAY)
+            instance(tag = JsStringXml.DEFAULT),
+            instanceOrNull(tag = JsStringXml.DISPLAY),
+            jsStringProvider,
         )
     }
 

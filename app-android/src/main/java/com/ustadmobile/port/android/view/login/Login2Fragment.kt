@@ -17,14 +17,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
-import com.toughra.ustadmobile.R
+import com.ustadmobile.core.R
 import com.ustadmobile.core.viewmodel.login.LoginUiState
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
@@ -93,7 +92,7 @@ private fun LoginScreen(
 
         UstadTextEditField(
             value = uiState.username,
-            label = stringResource(id = R.string.username),
+            label = stringResource(R.string.username),
             onValueChange = {
                 onUsernameValueChange(it)
             },
@@ -127,12 +126,12 @@ private fun LoginScreen(
             modifier = Modifier
                 .fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = colorResource(id = R.color.secondaryColor)
+                backgroundColor = MaterialTheme.colors.secondary
             )
         ) {
-            Text(stringResource(R.string.login).uppercase(),
-                color = contentColorFor(
-                    colorResource(id = R.color.secondaryColor))
+            Text(
+                text = stringResource(R.string.login).uppercase(),
+                color = contentColorFor(MaterialTheme.colors.secondary)
             )
         }
 
