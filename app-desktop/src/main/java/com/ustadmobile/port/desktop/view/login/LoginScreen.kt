@@ -1,4 +1,4 @@
-package com.ustadmobile.port.desktop
+package com.ustadmobile.port.desktop.view.login
 
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.mutableStateOf
@@ -7,9 +7,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
-import com.ustadmobile.libuicompose.view.helloworld.HelloWorld
+import com.ustadmobile.libuicompose.view.login.LoginScreen
 
-//As per https://github.com/JetBrains/compose-multiplatform-desktop-template#readme
 fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
@@ -18,7 +17,7 @@ fun main() = application {
     ) {
         val count = remember { mutableStateOf(0) }
         MaterialTheme {
-            HelloWorld()
+            LoginScreen()
         }
     }
 }

@@ -281,6 +281,7 @@ dependencies {
     implementation "com.github.UstadMobile.door:door-runtime:$version_door"
     implementation project(':lib-database')
     implementation project(':lib-util')
+    implementation project(':lib-ui-compose')
 
     implementation "io.github.aakira:napier:$version_napier"
     implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"

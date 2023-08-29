@@ -14,6 +14,7 @@ plugins {
 dependencies {
     implementation(compose.desktop.currentOs)
     implementation(project(":lib-ui-compose"))
+    implementation(project(":core"))
 }
 
 compose.desktop {
