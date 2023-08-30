@@ -73,7 +73,7 @@
 
         <!-- Line 2-->
         <!--
-        Text was "@{@plurals/number_of_attempts(person.attempts, person.attempts)}"
+        Text was "@{@plurals.xml/number_of_attempts(person.attempts, person.attempts)}"
         To be updated on MVVM conversion
         -->
         <TextView

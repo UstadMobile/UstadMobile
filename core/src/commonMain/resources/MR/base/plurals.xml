@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
-    <!-- plurals are used to handle different languages that require special treatment
+    <!--
+    plurals are used to handle different languages that require special treatment
     e.g number 0 in arabic
-    possible quantities: zero, one, two, few, many, and other.-->
+    possible quantities: zero, one, two, few, many, and other.
+
+    Note: this uses plural NOT plural(s) as per Moko resources docs
+    -->
+
+
     <plural name="number_of_attempts">
         <item quantity="one">%d attempt</item>
         <item quantity="other">%d attempts</item>

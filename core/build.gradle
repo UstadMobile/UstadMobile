@@ -92,8 +92,6 @@ kotlin {
     sourceSets {
 
         commonMain {
-            kotlin.srcDirs += "build/generated/source/umlocale/"
-            kotlin.srcDirs += "build/generated/source/umlocale-namemap"
             dependencies {
                 api "dev.icerock.moko:resources:$version_moko_resources"
                 implementation kotlin('stdlib-common')
@@ -142,7 +140,7 @@ kotlin {
 
         jvmMain {
             dependsOn commonJvmMain
-            resources.srcDirs += ["locale/main", "src/main/assets"]
+            resources.srcDirs += ["src/main/assets"]
 
             dependencies {
                 implementation "org.apache.pdfbox:pdfbox:$version_pdfbox_apache"

@@ -28,9 +28,13 @@ programmer! Please register on Weblate and then [create an issue](https://github
 with the subject "Localization - language name" and let us know what language you would like to
 translate into. We can then give you permission to start translating!
 
-Translations are stored as Android strings XML resource files in [core/locale/main](core/locale/main).
+Translations are stored as Android strings XML resource files in [core/src/commonMain/resources/MR](core/src/commonMain/resources/MR).
+The project uses [Moko-Resources](https://github.com/icerockdev/moko-resources) to make strings 
+available on all platforms (including JVM and Javascript).
+
 If adding a new language it should be added to the constant in in 
-[SupportedLanguagesConfig.kt](core/src/commonMain/kotlin/com/ustadmobile/core/impl/config/SupportedLanguagesConfig.kt). 
+[SupportedLanguagesConfig.kt](core/src/commonMain/kotlin/com/ustadmobile/core/impl/config/SupportedLanguagesConfig.kt)
+ and app-android/build.gradle resConfigs should be updated.
 
 ## Contributing
 
