@@ -139,6 +139,7 @@ kotlin {
         }
 
         jvmMain {
+            dependsOn commonMain
             dependsOn commonJvmMain
             resources.srcDirs += ["src/main/assets"]
 
@@ -290,4 +291,5 @@ publishing {
 
 multiplatformResources {
     multiplatformResourcesPackage = "com.ustadmobile.core"
+    iosBaseLocalizationRegion = "en"
 }
