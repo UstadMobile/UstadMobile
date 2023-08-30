@@ -30,7 +30,7 @@ val LanguageEditComponent2 = FC<LanguageEditProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.language?.name ?: ""
-                label = strings[MR.strings.name]
+                label = strings[MR.strings.name_key]
                 error = props.uiState.languageNameError
                 enabled = props.uiState.fieldsEnabled
                 onChange = {

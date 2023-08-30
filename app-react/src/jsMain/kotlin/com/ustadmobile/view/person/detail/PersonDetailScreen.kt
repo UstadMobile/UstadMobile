@@ -8,6 +8,7 @@ import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.locale.mapLookup
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.hooks.useAttachmentUriSrc
 import com.ustadmobile.lib.db.entities.Clazz
@@ -251,15 +252,13 @@ private val DetailFeilds = FC<PersonDetailProps> { props ->
 
     if (props.uiState.personGenderVisible){
 
-        val gender = strings.mapLookup(
-            props.uiState.person?.gender ?: 1,
-            PersonConstants.GENDER_MESSAGE_ID_MAP
-        )
-
         UstadDetailField {
             icon = null
             labelText = strings[MR.strings.gender_literal]
-            valueText = ReactNode(gender ?: "")
+            valueText = ReactNode(strings.mapLookup(
+                props.uiState.person?.gender ?: 1,
+                PersonConstants.GENDER_MESSAGE_ID_MAP
+            ))
         }
     }
 

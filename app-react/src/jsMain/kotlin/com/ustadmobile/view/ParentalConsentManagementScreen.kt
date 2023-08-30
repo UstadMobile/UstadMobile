@@ -10,6 +10,7 @@ import com.ustadmobile.lib.db.entities.PersonParentJoinWithMinorPerson
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.view.components.UstadMessageIdSelectField
+import dev.icerock.moko.resources.StringResource
 import web.cssom.px
 import js.core.jso
 import mui.material.*
@@ -97,7 +98,7 @@ val ParentalConsentManagementComponent2 = FC<ParentalConsentManagementScreenProp
             }
 
             if (props.uiState.changeConsentVisible){
-                val changeConsentText: Int =
+                val changeConsentText: StringResource =
                     if (props.uiState.personParentJoin?.ppjStatus == PersonParentJoin.STATUS_APPROVED)
                         MR.strings.revoke_consent
                     else

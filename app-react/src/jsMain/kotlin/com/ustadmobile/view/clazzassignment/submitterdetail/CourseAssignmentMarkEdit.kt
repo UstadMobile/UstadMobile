@@ -8,6 +8,7 @@ import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadNumberTextField
 import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.util.ext.onTextChange
+import dev.icerock.moko.resources.StringResource
 import web.cssom.Display
 import web.cssom.JustifyContent
 import web.cssom.pct
@@ -42,9 +43,9 @@ external interface CourseAssignmentMarkEditProps: Props {
 
     var onClickSubmitGradeAndMarkNext: () -> Unit
 
-    var submitButtonLabelMessageId: Int
+    var submitButtonLabelStringResource: StringResource
 
-    var submitGradeButtonAndGoNextMessageId: Int
+    var submitGradeButtonAndGoNextStringResource: StringResource
 
 }
 
@@ -109,7 +110,7 @@ val CourseAssignmentMarkEdit = FC<CourseAssignmentMarkEditProps> { props ->
                 }
                 fullWidth = true
 
-                + strings[props.submitButtonLabelMessageId]
+                + strings[props.submitButtonLabelStringResource]
             }
         }
 

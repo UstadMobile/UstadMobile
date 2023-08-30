@@ -52,11 +52,11 @@ val ScopedGrantEditScreenPreview = FC<Props> {
         ScopedGrantEditUiState(
             bitmaskList = listOf(
                 BitmaskFlag(
-                    stringResource = MR.strings.permission_key_person_insert,
+                    stringResource = MR.strings.permission_person_insert,
                     flagVal = 0
                 ),
                 BitmaskFlag(
-                    stringResource = MR.strings.permission_key_person_update,
+                    stringResource = MR.strings.permission_person_update,
                     flagVal = 0
                 )
             )

@@ -4,7 +4,7 @@ import com.ustadmobile.core.db.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.impl.locale.StringsXml
+import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.OutcomeConstants
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditUiState
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
@@ -37,7 +37,7 @@ external interface ClazzEnrolmentEditScreenProps : Props {
 
 val ClazzEnrolmentEditScreenComponent = FC<ClazzEnrolmentEditScreenProps> { props ->
 
-    val strings: StringsXml = useStringProvider()
+    val strings: StringProvider = useStringProvider()
 
     val terminologyEntries = useCourseTerminologyEntries(props.uiState.courseTerminology)
 

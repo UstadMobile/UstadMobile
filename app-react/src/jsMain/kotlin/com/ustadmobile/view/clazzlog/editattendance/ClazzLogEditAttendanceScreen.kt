@@ -14,6 +14,7 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.common.xs
+import dev.icerock.moko.resources.StringResource
 import web.cssom.TextAlign
 import web.cssom.px
 import mui.material.*
@@ -266,7 +267,7 @@ external interface ClazzLogItemViewProps : Props {
 data class StatusIconAndLabel(
     val status: Int,
     val icon: SvgIconComponent,
-    val labelMessageId: Int,
+    val labelStringResource: StringResource,
 )
 
 private val STATUS_AND_ICONS = listOf(

@@ -239,7 +239,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
             UstadSelectField<MarkingType> {
                 id = "caMarkingType"
                 value = MarkingType.valueOf(props.uiState.entity?.assignment?.caMarkingType ?: 0)
-                label = strings[MR.strings.marked_key_by]
+                label = strings[MR.strings.marked_by]
                 options = MarkingType.values().toList()
                 enabled = props.uiState.markingTypeEnabled
                 itemLabel = { markingType ->

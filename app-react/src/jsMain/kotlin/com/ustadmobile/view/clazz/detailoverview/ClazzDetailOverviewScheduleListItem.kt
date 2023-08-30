@@ -31,10 +31,17 @@ val ClazzDetailOverviewScheduleListItem = FC<ClazzDetailOverviewScheduleListItem
         timeInMillisSinceMidnight = props.schedule.scheduleEndTime.toInt(),
     )
 
-    val text = "${strings[ScheduleConstants
-        .SCHEDULE_FREQUENCY_MESSAGE_ID_MAP[props.schedule.scheduleFrequency] ?: 0]} " +
-        " ${strings[ScheduleConstants
-            .DAY_MESSAGE_ID_MAP[props.schedule.scheduleDay] ?: 0]  } " +
+
+    val frequencyStr = ScheduleConstants
+        .SCHEDULE_FREQUENCY_MESSAGE_ID_MAP[props.schedule.scheduleFrequency]?.let {
+            strings[it]
+    } ?: ""
+
+    val dayStr = ScheduleConstants.DAY_MESSAGE_ID_MAP[props.schedule.scheduleDay]?.let {
+        strings[it]
+    } ?: ""
+
+    val text = "$frequencyStr - $dayStr\n" +
         " $fromTimeFormatted - $toTimeFormatted "
 
     ListItem{

@@ -3,6 +3,7 @@ package com.ustadmobile.view.clazz.edit
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
+import com.ustadmobile.core.impl.locale.mapLookup
 import com.ustadmobile.hooks.useFormattedTime
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.view.components.UstadBlankIcon
@@ -36,10 +37,14 @@ val ScheduleListItem = FC<ScheduleListItemProps> { props ->
         timeInMillisSinceMidnight = props.schedule.scheduleEndTime.toInt(),
     )
 
-    val text = "${strings[ScheduleConstants.SCHEDULE_FREQUENCY_MESSAGE_ID_MAP[props.schedule.scheduleFrequency] ?: 0]} " +
-        " ${strings[ScheduleConstants.DAY_MESSAGE_ID_MAP[props.schedule.scheduleDay] ?: 0]  } " +
-        " $fromTimeFormatted - $toTimeFormatted "
-
+    val text = strings.mapLookup(
+        props.schedule.scheduleFrequency,
+        ScheduleConstants.SCHEDULE_FREQUENCY_MESSAGE_ID_MAP
+    ) + " " + strings.mapLookup(
+        props.schedule.scheduleDay,
+        ScheduleConstants.DAY_MESSAGE_ID_MAP
+    ) + " $fromTimeFormatted - $toTimeFormatted "
+    
     ListItem{
         secondaryAction = IconButton.create {
             onClick = { props.onClickDeleteSchedule(props.schedule) }

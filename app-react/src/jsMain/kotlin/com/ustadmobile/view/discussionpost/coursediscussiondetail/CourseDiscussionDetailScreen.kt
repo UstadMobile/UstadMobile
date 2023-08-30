@@ -1,8 +1,6 @@
 package com.ustadmobile.view.discussionpost.coursediscussiondetail
 
-import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailUiState
@@ -14,7 +12,6 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.components.UstadFab
-import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
@@ -24,11 +21,7 @@ import web.cssom.Overflow
 import web.cssom.pct
 import js.core.jso
 import mui.material.*
-import mui.icons.material.Chat as ChatIcon
-import mui.icons.material.ReplyAll as ReplyAllIcon
 import mui.material.List
-import mui.material.styles.TypographyVariant
-import mui.system.responsive
 import react.*
 
 external interface CourseDiscussionDetailProps: Props {
@@ -37,8 +30,6 @@ external interface CourseDiscussionDetailProps: Props {
 }
 
 val CourseDiscussionDetailComponent = FC<CourseDiscussionDetailProps> { props ->
-
-    val strings = useStringProvider()
 
     val infiniteQueryResult = usePagingSource(
         pagingSourceFactory = props.uiState.posts,

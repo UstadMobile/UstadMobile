@@ -114,8 +114,8 @@ private val ClazzAssignmentDetailSubmissionsTabComponent = FC<ClazzAssignmentDet
                         }else {
                             courseTerminologyResource(
                                 terminologyEntries = courseTerminologyEntries,
-                                stringsXml = strings,
-                                messageId = MR.strings.students,
+                                stringProvider = strings,
+                                stringResource = MR.strings.students,
                             )
                         }
                         showDivider = true
@@ -123,7 +123,7 @@ private val ClazzAssignmentDetailSubmissionsTabComponent = FC<ClazzAssignmentDet
 
                     ClazzAssignmentSummaryColumn {
                         total = props.uiState.progressSummary?.submittedStudents
-                        label = strings[MR.strings.submitted_key_cap]
+                        label = strings[MR.strings.submitted_cap]
                         showDivider = true
                     }
 

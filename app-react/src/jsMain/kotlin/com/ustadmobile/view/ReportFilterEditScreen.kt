@@ -154,7 +154,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
 
                      UstadTextEditField {
                          value = props.uiState.reportFilter?.reportFilterValueBetweenY ?: ""
-                         label = strings[MR.strings.to_keyC]
+                         label = strings[MR.strings.to_key]
                          error = props.uiState.valuesError
                          enabled = props.uiState.fieldsEnabled
                          fullWidth = true

@@ -1,10 +1,11 @@
 package com.ustadmobile.hooks
 
 import com.ustadmobile.core.components.DIContext
-import com.ustadmobile.core.impl.locale.StringsXml
+import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.util.ext.toTerminologyEntries
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.core.impl.locale.TerminologyEntry
+import dev.icerock.moko.resources.StringResource
 import org.kodein.di.direct
 import org.kodein.di.instance
 import react.useMemo
@@ -40,14 +41,18 @@ fun useCourseTerminologyEntries(
  * TerminologyEntries, then it will be used. If not, this function will fallback to the default term.
  *
  * @param terminologyEntries the list of Terminology Entries as per useCourseTerminologyEntries
- * @param stringsXml the StringsXml being used
- * @param messageId The MR.strings.e.g. MR.strings.teacher, MR.strings.student etc.
+ * @param stringProvider the StringProvider being used
+ * @param stringResource The MR.strings string resource constant e.g. MR.strings.teacher,
+ * MR.strings.student etc. If this is null (e.g. because the value has not been looked up yet etc)
+ * then the fallbackValue will be used
+ * @param fallbackValue the string to use if the stringResource is null
  */
 fun courseTerminologyResource(
     terminologyEntries: List<TerminologyEntry>,
-    stringsXml: StringsXml,
-    messageId: Int
+    stringProvider: StringProvider,
+    stringResource: StringResource?,
+    fallbackValue: String = "",
 ): String {
-    return terminologyEntries.firstOrNull { it.stringResource ==  messageId }?.term
-        ?: stringsXml[messageId]
+    return terminologyEntries.firstOrNull { it.stringResource ==  stringResource }?.term
+        ?: stringResource?.let { stringProvider[it] } ?: fallbackValue
 }

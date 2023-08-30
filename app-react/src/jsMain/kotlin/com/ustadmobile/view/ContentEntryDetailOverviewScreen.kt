@@ -4,7 +4,6 @@ import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.StringProvider
-import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.progressBadge
 import com.ustadmobile.core.viewmodel.ContentEntryDetailOverviewUiState
@@ -255,7 +254,7 @@ private val ContentDetailRightColumn = FC <ContentEntryDetailOverviewScreenProps
                 }
 
                 Typography{
-                    + strings[MR.strings.entry_key_details_license]
+                    + strings[MR.strings.entry_details_license]
                 }
 
                 Typography {
@@ -337,7 +336,7 @@ private val ContentJobList = FC <ContentEntryDetailOverviewScreenProps> { props 
 
 private val LocallyAvailableRow = FC <ContentEntryDetailOverviewScreenProps> {
 
-    val strings: StringsXml = useStringProvider()
+    val strings: StringProvider = useStringProvider()
 
     Stack {
         direction = responsive(StackDirection.row)
@@ -346,14 +345,14 @@ private val LocallyAvailableRow = FC <ContentEntryDetailOverviewScreenProps> {
         + LocationOnOutlined.create()
 
         Typography{
-            +strings[MR.strings.down_keyload_locally_availability]
+            +strings[MR.strings.download_locally_availability]
         }
     }
 }
 
 private val QuickActionBarsRow = FC <ContentEntryDetailOverviewScreenProps> { props ->
 
-    val strings: StringsXml = useStringProvider()
+    val strings: StringProvider = useStringProvider()
 
     Stack {
         direction = responsive(StackDirection.row)

@@ -97,7 +97,7 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
                     UstadDetailField {
                         icon = Group.create()
                         valueText = ReactNode(numMembers)
-                        labelText = strings[MR.strings.member_keys_key_key]
+                        labelText = strings[MR.strings.members_key]
                     }
 
                     if (props.uiState.clazzCodeVisible) {
@@ -239,8 +239,8 @@ val ClazzDetailOverviewScreenPreview = FC<Props> {
                             cbDescription = "Description"
                             cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
                             cbIndentLevel = 0
+                            cbTitle = "Assignment"
                             assignment = ClazzAssignmentWithMetrics().apply {
-                                caTitle = "Assignment"
                                 fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
                                 progressSummary = AssignmentProgressSummary().apply {
                                     submittedStudents = 5

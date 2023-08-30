@@ -1,6 +1,5 @@
 package com.ustadmobile.view.components
 
-import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.EnrolmentPolicyConstants
 import com.ustadmobile.core.util.MessageIdOption2
@@ -11,7 +10,7 @@ import react.ReactNode
 import react.useState
 
 
-external interface MR.strings.electFieldProps: Props {
+external interface UstadMessageIdSelectFieldProps: Props {
     /**
      * The currently selected value. If there is no such value in the list, the selection will be blank
      */
@@ -51,7 +50,7 @@ external interface MR.strings.electFieldProps: Props {
     var fullWidth: Boolean
 }
 
-val UstadMessageIdSelectField = FC<MR.strings.electFieldProps> { props ->
+val UstadMessageIdSelectField = FC<UstadMessageIdSelectFieldProps> { props ->
     val strings = useStringProvider()
 
     UstadSelectField<MessageIdOption2> {
@@ -60,7 +59,7 @@ val UstadMessageIdSelectField = FC<MR.strings.electFieldProps> { props ->
         label = props.label
         options = props.options
         fullWidth = props.fullWidth
-        itemLabel = { ReactNode(if(it.stringResource == 0) "" else strings[it.stringResource]) }
+        itemLabel = { ReactNode(strings[it.stringResource]) }
         itemValue = { it.value.toString() }
         onChange = {
             props.onChange(it)

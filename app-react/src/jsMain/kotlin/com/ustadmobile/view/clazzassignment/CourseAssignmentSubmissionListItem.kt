@@ -33,7 +33,7 @@ val CourseAssignmentSubmissionListItem = FC<CourseAssignmentSubmissionListItemPr
         props.submission.casText?.htmlToPlainText()
     }
     val submittedFormattedDateTime = useFormattedDateAndTime(
-        timeInMillis = props.submission.casTimestamp ?: 0L,
+        timeInMillis = props.submission.casTimestamp,
         timezoneId = TimeZone.currentSystemDefault().id
     )
 

@@ -5,7 +5,7 @@ import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.UstadMobileConstants
-import com.ustadmobile.core.impl.locale.StringsXml
+import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants.GENDER_MESSAGE_IDS_AND_UNSET
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditUiState
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
@@ -37,7 +37,7 @@ external interface PersonEditScreenProps : Props{
 
 val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
 
-    val strings: StringsXml = useStringProvider()
+    val strings: StringProvider = useStringProvider()
 
     Container {
         Stack {
@@ -52,7 +52,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.person?.firstNames ?: ""
-                label = strings[MR.strings.first_key_names]
+                label = strings[MR.strings.first_names]
                 error = props.uiState.firstNameError
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
@@ -65,7 +65,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.person?.lastName ?: ""
-                label = strings[MR.strings.last_key_name]
+                label = strings[MR.strings.last_name]
                 error = props.uiState.lastNameError
                 enabled = props.uiState.fieldsEnabled
                 onChange = {

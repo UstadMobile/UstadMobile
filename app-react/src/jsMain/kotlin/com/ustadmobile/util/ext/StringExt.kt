@@ -2,7 +2,6 @@ package com.ustadmobile.util.ext
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.locale.StringProvider
-import com.ustadmobile.core.impl.locale.StringsXml
 
 /**
  * Format string as equivalent to String.format in android

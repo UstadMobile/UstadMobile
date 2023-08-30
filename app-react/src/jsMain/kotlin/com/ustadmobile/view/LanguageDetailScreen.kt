@@ -30,7 +30,7 @@ val LanguageDetailComponent2 = FC<LanguageDetailProps> { props ->
             spacing = responsive(10.px)
 
             UstadDetailField {
-                labelText = strings[MR.strings.name]
+                labelText = strings[MR.strings.name_key]
                 valueText = ReactNode(props.uiState.language?.name.toString())
             }
 

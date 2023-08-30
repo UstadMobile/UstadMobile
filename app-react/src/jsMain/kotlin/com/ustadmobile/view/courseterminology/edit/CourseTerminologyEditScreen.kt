@@ -3,7 +3,7 @@ package com.ustadmobile.view.courseterminology.edit
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.impl.locale.StringsXml
+import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditUiState
 import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
@@ -33,7 +33,7 @@ external interface CourseTerminologyEditScreenProps : Props {
 
 val CourseTerminologyEditScreenComponent2 = FC <CourseTerminologyEditScreenProps> { props ->
 
-    val strings: StringsXml = useStringProvider()
+    val strings: StringProvider = useStringProvider()
 
     Container {
         maxWidth = "lg"
@@ -45,7 +45,7 @@ val CourseTerminologyEditScreenComponent2 = FC <CourseTerminologyEditScreenProps
             TextField {
                 id = "terms_title"
                 value = props.uiState.entity?.ctTitle ?: ""
-                label = ReactNode(strings[MR.strings.name])
+                label = ReactNode(strings[MR.strings.name_key])
                 error = props.uiState.titleError != null
                 helperText = props.uiState.titleError?.let { ReactNode(it) }
                 disabled = !props.uiState.fieldsEnabled

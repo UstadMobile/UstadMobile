@@ -141,7 +141,7 @@ val UstadTextEditField = FC<UstadEditFieldProps> { props ->
                 endAdornment = InputAdornment.create {
                     position = InputAdornmentPosition.end
                     IconButton {
-                        ariaLabel = strings[MR.strings.to_keyggle_visibility]
+                        ariaLabel = strings[MR.strings.toggle_visibility]
                         onClick = {
                             passwordVisible = !passwordVisible
                         }

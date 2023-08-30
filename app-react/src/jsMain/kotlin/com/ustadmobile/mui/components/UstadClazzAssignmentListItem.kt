@@ -3,6 +3,7 @@ package com.ustadmobile.mui.components
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.impl.locale.mapLookup
 import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.entities.*
@@ -148,7 +149,7 @@ private val SecondaryContent = FC<UstadClazzAssignmentListItemProps> { props ->
                     + (strings.mapLookup(
                         assignment.fileSubmissionStatus,
                         SubmissionConstants.STATUS_MAP
-                    ) ?: "")
+                    ))
                 }
             }
         }

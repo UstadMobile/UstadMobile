@@ -3,11 +3,11 @@ package com.ustadmobile.view.clazzassignment.submitterdetail
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.impl.locale.StringsXml
+import com.ustadmobile.core.impl.locale.StringProvider
+import com.ustadmobile.core.impl.locale.mapLookup
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
-import com.ustadmobile.core.util.ext.mapLookupOrBlank
 import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants.SUBMISSION_STAUTUS_MESSAGE_ID
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
@@ -61,7 +61,7 @@ external interface ClazzAssignmentSubmitterDetailProps : Props {
 
 val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailProps> { props ->
 
-    val strings: StringsXml = useStringProvider()
+    val strings: StringProvider = useStringProvider()
 
     val muiAppState = useMuiAppState()
 
@@ -87,7 +87,7 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
 
                     ListItemText {
                         primary = ReactNode(
-                            strings.mapLookupOrBlank(
+                            strings.mapLookup(
                                 key = props.uiState.submissionStatus,
                                 map = SUBMISSION_STAUTUS_MESSAGE_ID
                             ).capitalizeFirstLetter()
@@ -163,8 +163,8 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
                         onChangeDraftMark = props.onChangeDraftMark
                         onClickSubmitGrade = props.onClickSubmitGrade
                         onClickSubmitGradeAndMarkNext = props.onClickSubmitGradeAndMarkNext
-                        submitButtonLabelMessageId = props.uiState.submitGradeButtonMessageId
-                        submitGradeButtonAndGoNextMessageId = props.uiState.submitGradeButtonAndGoNextMessageId
+                        submitButtonLabelStringResource = props.uiState.submitGradeButtonMessageId
+                        submitGradeButtonAndGoNextStringResource = props.uiState.submitGradeButtonAndGoNextMessageId
                     }
                 }
             }

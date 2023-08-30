@@ -40,7 +40,7 @@ val SiteDetailComponent2 = FC<SiteDetailProps> { props ->
 
             UstadDetailField {
                 icon = AccountBalanceRounded.create()
-                labelText = strings[MR.strings.name]
+                labelText = strings[MR.strings.name_key]
                 valueText = ReactNode(props.uiState.site?.siteName.toString())
             }
 

@@ -3,7 +3,7 @@ package com.ustadmobile.view.leavingreason.edit
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.impl.locale.StringsXml
+import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.viewmodel.LeavingReasonEditUiState
 import com.ustadmobile.core.viewmodel.LeavingReasonEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
@@ -25,7 +25,7 @@ external interface LeavingReasonEditScreenProps: Props {
 
 val LeavingReasonEditScreenComponent = FC<LeavingReasonEditScreenProps> { props ->
 
-    val strings: StringsXml = useStringProvider()
+    val strings: StringProvider = useStringProvider()
 
     Container {
         Stack {

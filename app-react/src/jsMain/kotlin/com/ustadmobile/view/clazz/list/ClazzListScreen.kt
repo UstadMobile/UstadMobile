@@ -128,7 +128,7 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
 
             infiniteQueryItemsIndexed(
                 infiniteQueryResult = infiniteQueryResult,
-                itemToKey = { item, index ->
+                itemToKey = { _, index ->
                     index.toString()
                 },
                 dataPagesToItems = { pages ->

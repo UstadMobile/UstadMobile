@@ -2,7 +2,7 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.impl.locale.StringsXml
+import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.viewmodel.SchoolEditUiState
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
@@ -31,7 +31,7 @@ external interface SchoolEditScreenProps : Props {
 
 val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
 
-    val strings: StringsXml = useStringProvider()
+    val strings: StringProvider = useStringProvider()
 
     Container {
         maxWidth = "lg"
@@ -41,7 +41,7 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.entity?.schoolName ?: ""
-                label = strings[MR.strings.name]
+                label = strings[MR.strings.name_key]
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
                     props.onSchoolChanged(props.uiState.entity?.shallowCopy {

@@ -94,7 +94,7 @@ val UstadListSortHeaderPreview = FC<Props> {
 
     UstadListSortHeader {
         activeSortOrderOption = SortOrderOption(
-                MR.strings.name,
+                MR.strings.name_key,
                 ClazzDaoCommon.SORT_CLAZZNAME_ASC,
                 true
             )

@@ -2,7 +2,6 @@
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.RepSubscriptionInitListener
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageIdMap
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
@@ -20,9 +19,7 @@ import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.XmlSerializer
 import io.ktor.client.*
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import com.ustadmobile.core.impl.locale.StringProvider
@@ -47,12 +44,6 @@ internal fun ustadJsDi(
 ) = DI {
 
     import(commonDomainDiModule(EndpointScope.Default))
-
-    val messageIdMapFlipped: Map<String, Int> by lazy {
-        MessageIdMap.idMap.entries.associate { (k, v) -> v to k }
-    }
-
-    val xppFactory = XmlPullParserFactory.newInstance()
 
     val apiUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
     console.log("Api URL = $apiUrl (location.href = ${location.href}")
@@ -90,11 +81,6 @@ internal fun ustadJsDi(
 
     bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
         dbNodeIdAndAuth
-    }
-
-
-    bind<CoroutineScope>(DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with provider {
-        GlobalScope
     }
 
     bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {

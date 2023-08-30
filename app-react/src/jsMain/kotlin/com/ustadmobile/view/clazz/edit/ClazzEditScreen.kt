@@ -4,7 +4,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.hooks.useUstadViewModel
-import com.ustadmobile.core.impl.locale.StringsXml
+import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.lib.db.entities.Schedule.Companion.SCHEDULE_FREQUENCY_WEEKLY
 import com.ustadmobile.lib.db.entities.Schedule.Companion.DAY_MONDAY
 import com.ustadmobile.core.util.MS_PER_HOUR
@@ -78,7 +78,7 @@ external interface ClazzEditScreenProps : Props {
 
 val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
 
-    val strings: StringsXml = useStringProvider()
+    val strings: StringProvider = useStringProvider()
 
     Container {
         Stack {
@@ -90,7 +90,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
 
             TextField {
                 value = props.uiState.entity?.clazzName ?: ""
-                label = ReactNode(strings[MR.strings.name])
+                label = ReactNode(strings[MR.strings.name_key])
                 id = "clazz_name"
                 disabled = !props.uiState.fieldsEnabled
                 onTextChange = {

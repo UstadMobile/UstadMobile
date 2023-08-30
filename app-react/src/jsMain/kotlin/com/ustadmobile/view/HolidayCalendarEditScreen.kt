@@ -41,7 +41,7 @@ val HolidayCalendarEditComponent2 = FC<HolidayCalendarEditProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.holidayCalendar?.umCalendarName ?: ""
-                label = strings[MR.strings.name]
+                label = strings[MR.strings.name_key]
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
                     props.onHolidayCalendarChange(

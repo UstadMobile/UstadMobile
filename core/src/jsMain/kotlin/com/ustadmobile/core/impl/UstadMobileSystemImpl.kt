@@ -1,7 +1,5 @@
 package com.ustadmobile.core.impl
 
-import com.ustadmobile.core.generated.locale.MessageIdMap
-import com.ustadmobile.core.impl.locale.StringsXml
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlin.js.Date

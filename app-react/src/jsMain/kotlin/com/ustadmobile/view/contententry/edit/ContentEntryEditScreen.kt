@@ -60,7 +60,7 @@ val ContentEntryEditScreen = FC<Props> {
 }
 
 val ContentEntryEditScreenPreview = FC<Props> {
-    val strings = useStringProvider()
+
     ContentEntryEditScreenComponent {
         uiState = ContentEntryEditUiState(
             entity = ContentEntryWithBlockAndLanguage().apply {
@@ -115,7 +115,7 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
                     onClick = { props.onClickUpdateContent }
                     variant = ButtonVariant.contained
 
-                    + strings[MR.strings.up_keydate_content].uppercase()
+                    + strings[MR.strings.update_content].uppercase()
                 }
 
                 Typography {
@@ -167,7 +167,7 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
 
             UstadTextEditField {
                 value = props.uiState.entity?.author ?: ""
-                label = strings[MR.strings.entry_key_details_author]
+                label = strings[MR.strings.entry_details_author]
                 id = "content_author"
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
@@ -181,7 +181,7 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
 
             UstadTextEditField {
                 value = props.uiState.entity?.publisher ?: ""
-                label = strings[MR.strings.entry_key_details_publisher]
+                label = strings[MR.strings.entry_details_publisher]
                 id = "content_publisher"
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
@@ -201,7 +201,7 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
                 onChange = {
                     props.onContentEntryChanged(
                         props.uiState.entity?.shallowCopy {
-                            licenseType = it.value ?: 0
+                            licenseType = it.value
                         }
                     )
                 }
@@ -210,7 +210,7 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
             if (props.uiState.contentCompressVisible){
                 UstadSwitchField {
                     id = "content_compression_enabled"
-                    checked= props.uiState.compressionEnabled ?: false
+                    checked= props.uiState.compressionEnabled
                     onChanged = { props.onChangeCompress(it) }
                     label = strings[MR.strings.compress]
                     enabled = props.uiState.fieldsEnabled

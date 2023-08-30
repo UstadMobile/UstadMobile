@@ -2,7 +2,7 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.impl.locale.StringsXml
+import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.viewmodel.ErrorReportUiState
 import com.ustadmobile.lib.db.entities.ErrorReport
 import web.cssom.px
@@ -27,7 +27,7 @@ external interface ErrorReportProps: Props {
 
 val ErrorReportComponent2 = FC<ErrorReportProps> { props ->
 
-    val strings: StringsXml = useStringProvider()
+    val strings: StringProvider = useStringProvider()
 
     Container{
 

@@ -3,7 +3,7 @@ package com.ustadmobile.view.schedule.edit
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.impl.locale.StringsXml
+import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditUiState
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
@@ -30,7 +30,7 @@ external interface ScheduleEditScreenProps : Props{
 
 val ScheduleEditComponent2 = FC <ScheduleEditScreenProps> { props ->
 
-    val strings: StringsXml = useStringProvider()
+    val strings: StringProvider = useStringProvider()
 
     Container {
         maxWidth = "lg"

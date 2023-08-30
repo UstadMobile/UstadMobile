@@ -41,7 +41,7 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.site?.siteName ?: ""
-                label = strings[MR.strings.first_key_names]
+                label = strings[MR.strings.first_names]
                 error = props.uiState.siteNameError
                 enabled = props.uiState.fieldsEnabled
                 onChange = {

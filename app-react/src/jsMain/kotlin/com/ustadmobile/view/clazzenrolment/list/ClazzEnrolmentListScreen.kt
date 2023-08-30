@@ -14,6 +14,7 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.core.impl.locale.TerminologyEntry
+import com.ustadmobile.core.impl.locale.mapLookup
 import com.ustadmobile.mui.components.UstadQuickActionButton
 import web.cssom.px
 import mui.icons.material.Edit as EditIcon
@@ -91,9 +92,10 @@ private val ClazzEnrolmentListItem = FC<ClazzenrolmentListItemProps> { props ->
 
     val itemPrimaryText = buildString {
         append(courseTerminologyResource(props.terminologyEntries, strings,
-            ClazzEnrolmentListConstants.ROLE_TO_STRING_RESOURCE_MAP[enrolment.clazzEnrolmentRole] ?: 0))
+            ClazzEnrolmentListConstants.ROLE_TO_STRING_RESOURCE_MAP[enrolment.clazzEnrolmentRole]))
         append(" - ")
-        append(strings[ClazzEnrolmentListConstants.OUTCOME_TO_STRING_RESOURCE_MAP[enrolment.clazzEnrolmentOutcome] ?: 0])
+        append(strings.mapLookup(enrolment.clazzEnrolmentOutcome,
+            ClazzEnrolmentListConstants.OUTCOME_TO_STRING_RESOURCE_MAP))
 
         if (enrolment.leavingReason != null){
             append("(${enrolment.leavingReason?.leavingReasonTitle})")
