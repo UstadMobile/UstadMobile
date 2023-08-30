@@ -20,6 +20,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_SNACK_MESSAGE
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.*
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.CoroutineScope
 import org.kodein.di.*
 import org.kodein.di.android.x.closestDI
@@ -97,52 +98,8 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
             titleLifecycleObserver?.title = value
         }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
 
-        /*
-        Disabled - will be removed upon completion of MVVM transition
-        titleLifecycleObserver = TitleLifecycleObserver(null, (activity as? AppCompatActivity)?.supportActionBar).also {
-            viewLifecycleOwner.lifecycle.addObserver(it)
-        }
-
-        if(fabManagementEnabled) {
-            fabManager = FabManagerLifecycleObserver(
-                    (activity as? UstadActivityWithFab)?.activityFloatingActionButton,
-                false, 0, null).also {
-                viewLifecycleOwner.lifecycle.addObserver(it)
-            }
-        }
-
-        searchManager = SearchViewManagerLifecycleObserver(searchView).also {
-            viewLifecycleOwner.lifecycle.addObserver(it)
-        }
-
-        progressBarManager = ProgressBarLifecycleObserver(
-                (activity as? UstadActivityWithProgressBar)?.activityProgressBar,
-                View.INVISIBLE).also {
-            viewLifecycleOwner.lifecycle.addObserver(it)
-        }
-
-        val savedStateHandle = findNavController().currentBackStackEntry?.savedStateHandle
-        savedStateHandle?.getLiveData<String>(ARG_SNACK_MESSAGE)?.observe(
-                viewLifecycleOwner) {
-            showSnackBar(it)
-        }
-
-        arguments?.getString(ARG_SNACK_MESSAGE)?.also { snackBarMsg ->
-            val snackbarShown: String? = savedStateHandle?.get(KEY_ARG_SNACKBAR_SHOWN)
-            if(snackbarShown?.toBoolean() != true) {
-                showSnackBar(snackBarMsg)
-                savedStateHandle?.set(KEY_ARG_SNACKBAR_SHOWN, true.toString())
-            }
-        }
-         */
-
-    }
-
-
-    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: StringResource?) {
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
     }
 

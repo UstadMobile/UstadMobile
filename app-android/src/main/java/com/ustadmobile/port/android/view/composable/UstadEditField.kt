@@ -13,19 +13,17 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.util.StringAndSerialNum
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.port.android.util.compose.messageIdResource
-import com.ustadmobile.port.android.util.compose.rememberFormattedDate
 import java.util.*
+import com.ustadmobile.core.R as CR
+import dev.icerock.moko.resources.compose.stringResource as mrStringResource
 
 @Composable
 fun UstadEditField(
@@ -130,7 +128,7 @@ fun UstadTextEditField(
                         }
                         Icon(
                             imageVector = icon,
-                            contentDescription = stringResource(R.string.toggle_visibility)
+                            contentDescription = stringResource(CR.string.toggle_visibility)
                         )
                     }
                 }
@@ -270,7 +268,7 @@ fun UstadMessageIdOptionExposedDropDownMenuField(
         label = label,
         options = options,
         onOptionSelected = onOptionSelected,
-        itemText = { messageIdResource(id = it.messageId) },
+        itemText = { mrStringResource(resource = it.stringResource) },
         modifier = modifier,
         isError = isError,
         enabled = enabled,

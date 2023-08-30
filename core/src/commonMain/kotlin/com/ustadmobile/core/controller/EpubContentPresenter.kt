@@ -38,7 +38,7 @@ import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.storeProgressStatement
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UMFileUtil
@@ -278,8 +278,7 @@ class EpubContentPresenter(context: Any,
                 epubContentView.scrollToSpinePosition(hrefIndex,
                         navItem.href?.substringAfterLast("#", ""))
             }else {
-                epubContentView.showSnackBar(systemImpl.getString(MessageID.error_message_load_page,
-                    context))
+                epubContentView.showSnackBar(systemImpl.getString(MR.strings.error_message_load_page))
             }
         }
     }

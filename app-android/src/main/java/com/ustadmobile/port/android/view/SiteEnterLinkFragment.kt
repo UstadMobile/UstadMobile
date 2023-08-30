@@ -31,6 +31,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.port.android.view.composable.UstadErrorText
+import com.ustadmobile.core.R as CR
 
 class SiteEnterLinkFragment : UstadBaseMvvmFragment() {
 
@@ -76,14 +77,14 @@ private fun SiteEnterLinkScreen(
             modifier = Modifier
                 .height(200.dp))
 
-        Text(stringResource(R.string.please_enter_the_linK))
+        Text(stringResource(CR.string.please_enter_the_linK))
 
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("site_link_text"),
             value = uiState.siteLink,
-            label = { Text(stringResource(id = R.string.site_link)) },
+            label = { Text(stringResource(id = CR.string.site_link)) },
             onValueChange = {
                 onEditTextValueChange(it)
             },
@@ -114,7 +115,7 @@ private fun SiteEnterLinkScreen(
                 backgroundColor = colorResource(id = R.color.secondaryColor)
             )
         ) {
-            Text(stringResource(R.string.next).uppercase(),
+            Text(stringResource(CR.string.next).uppercase(),
                 color = contentColorFor(
                     colorResource(id = R.color.secondaryColor)
                 )
@@ -123,7 +124,7 @@ private fun SiteEnterLinkScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(stringResource(R.string.or).uppercase())
+        Text(stringResource(CR.string.or).uppercase())
 
         Button(
             onClick = onClickNewLearningEnvironment,
@@ -145,7 +146,7 @@ private fun SiteEnterLinkScreen(
 
             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
 
-            Text(stringResource(R.string.create_a_new_learning_env)
+            Text(stringResource(CR.string.create_a_new_learning_env)
                 .uppercase()
             )
         }

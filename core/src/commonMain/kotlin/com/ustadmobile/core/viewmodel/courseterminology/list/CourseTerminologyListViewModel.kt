@@ -1,6 +1,6 @@
 package com.ustadmobile.core.viewmodel.courseterminology.list
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.CourseTerminologyEditView
 import com.ustadmobile.core.view.CourseTerminologyListView
@@ -33,7 +33,7 @@ class CourseTerminologyListViewModel(
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = listTitle(MessageID.terminology, MessageID.select_terminology)
+                title = listTitle(MR.strings.terminology, MR.strings.select_terminology)
             )
 
         }
@@ -48,7 +48,7 @@ class CourseTerminologyListViewModel(
                 hasPermissionFlow = {
                     flowOf(true)
                 },
-                fabMessageId = MessageID.terminology,
+                fabStringResource = MR.strings.terminology,
                 onSetAddListItemVisibility = {
                     _uiState.update { prev -> prev.copy(showAddItemInList = it) }
                 }

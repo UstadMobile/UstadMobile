@@ -8,7 +8,6 @@ import com.ustadmobile.core.contentjob.ContentPluginIds.DELETE_CONTENT_ENTRY_PLU
 import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.RateLimitedLiveData
@@ -28,6 +27,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.lifecycle.Observer
+import com.ustadmobile.core.MR
 
 
 class DownloadDialogPresenter(
@@ -113,12 +113,10 @@ class DownloadDialogPresenter(
                 view.setCalculatingViewVisible(false)
                 view.setStackOptionsVisible(false)
                 view.setBottomButtonsVisible(true)
-                statusMessage = impl.getString(MessageID.download_state_downloaded,
-                        context)
-                view.setBottomButtonPositiveText(impl.getString(
-                        MessageID.delete, context))
+                statusMessage = impl.getString(MR.strings.download_state_downloaded)
+                view.setBottomButtonPositiveText(impl.getString(MR.strings.delete))
                 view.setBottomButtonNegativeText(impl.getString(
-                        MessageID.cancel, context))
+                        MR.strings.cancel))
                 view.setWifiOnlyOptionVisible(false)
             }
             currentContentJobItemStatus.isStatusActiveOrQueued() -> {
@@ -126,22 +124,18 @@ class DownloadDialogPresenter(
                 deleteFileOptions = false
                 view.setStackOptionsVisible(true)
                 view.setBottomButtonsVisible(false)
-                val optionTexts = STACKED_TEXT_MESSAGE_IDS.map {impl.getString(it, context)}.toTypedArray()
-                statusMessage = impl.getString(MessageID.download_state_downloading,
-                        context)
+                val optionTexts = STACKED_TEXT_MESSAGE_IDS.map { impl.getString(it) }.toTypedArray()
+                statusMessage = impl.getString(MR.strings.download_state_downloading)
                 view.setStackedOptions(STACKED_OPTIONS, optionTexts)
                 view.setWifiOnlyOptionVisible(true)
             }
             else -> {
                 deleteFileOptions = false
-                statusMessage = impl.getString(MessageID.download_state_download,
-                        context)
+                statusMessage = impl.getString(MR.strings.download_state_download)
                 view.setStackOptionsVisible(false)
                 view.setBottomButtonsVisible(true)
-                view.setBottomButtonPositiveText(impl.getString(
-                        MessageID.download, context))
-                view.setBottomButtonNegativeText(impl.getString(
-                        MessageID.cancel, context))
+                view.setBottomButtonPositiveText(impl.getString(MR.strings.download))
+                view.setBottomButtonNegativeText(impl.getString(MR.strings.cancel))
                 view.setWifiOnlyOptionVisible(true)
             }
         }
@@ -160,8 +154,7 @@ class DownloadDialogPresenter(
                         view.setCalculatingViewVisible(false)
                         view.setWarningTextVisible(true)
                         view.setWifiOnlyOptionVisible(false)
-                        view.setWarningText(impl.getString(MessageID.repo_loading_status_failed_noconnection,
-                                context))
+                        view.setWarningText(impl.getString(MR.strings.repo_loading_status_failed_noconnection))
                     }
 
                 }finally {
@@ -193,7 +186,7 @@ class DownloadDialogPresenter(
                 && selectedStorageDirVal != null) {
             if(jobSizeTotalsVal.totalSize > selectedStorageDirVal.usableSpace) {
                 view.setWarningTextVisible(true)
-                view.setWarningText(impl.getString(MessageID.insufficient_space, context))
+                view.setWarningText(impl.getString(MR.strings.insufficient_space))
                 view.setBottomPositiveButtonEnabled(false)
             }else {
                 view.setWarningTextVisible(false)
@@ -213,7 +206,7 @@ class DownloadDialogPresenter(
         val job = ContentJob().apply {
             toUri = selectedStorageDir?.dirUri
             cjIsMeteredAllowed = !isWifiOnlyChecked
-            cjNotificationTitle = impl.getString(MessageID.downloading_content, context)
+            cjNotificationTitle = impl.getString(MR.strings.downloading_content)
                     .replace("%1\$s",entry?.title ?: "")
             cjUid = appDatabase.contentJobDao.insertAsync(this)
         }
@@ -261,7 +254,7 @@ class DownloadDialogPresenter(
         val container = appDatabaseRepo.containerDao
                 .getMostRecentDownloadedContainerForContentEntryAsync(contentEntryUid)
         val job = ContentJob().apply {
-            cjNotificationTitle = impl.getString(MessageID.deleting_content, context)
+            cjNotificationTitle = impl.getString(MR.strings.deleting_content)
                     .replace("%1\$s",entry?.title ?: "")
             cjUid = appDatabase.contentJobDao.insertAsync(this)
         }
@@ -335,7 +328,6 @@ class DownloadDialogPresenter(
 
         val STACKED_OPTIONS = intArrayOf(STACKED_BUTTON_CANCEL)
 
-        val STACKED_TEXT_MESSAGE_IDS = listOf(
-                MessageID.download_cancel_label)
+        val STACKED_TEXT_MESSAGE_IDS = listOf(MR.strings.download_cancel_label)
     }
 }

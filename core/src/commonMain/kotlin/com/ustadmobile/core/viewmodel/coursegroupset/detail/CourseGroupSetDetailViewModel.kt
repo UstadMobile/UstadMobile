@@ -1,6 +1,6 @@
 package com.ustadmobile.core.viewmodel.coursegroupset.detail
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.whenSubscribed
@@ -78,7 +78,7 @@ class CourseGroupSetDetailViewModel(
                                 prev.copy(
                                     fabState = FabUiState(
                                         visible = hasEditPermission,
-                                        text = systemImpl.getString(MessageID.edit),
+                                        text = systemImpl.getString(MR.strings.edit),
                                         icon = FabUiState.FabIcon.EDIT,
                                         onClick = this@CourseGroupSetDetailViewModel::onClickEdit
                                     )

@@ -2,7 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.LanguageDao
 import com.ustadmobile.core.db.dao.LanguageDaoCommon
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
@@ -98,14 +98,14 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
                 SelectionOption.HIDE -> {
                     repo.languageDao.toggleVisibilityLanguage(true,
                             selectedItem.map { it.langUid }, getSystemTimeInMillis())
-                    view.showSnackBar(systemImpl.getString(MessageID.action_hidden, context), {
+                    view.showSnackBar(systemImpl.getString(MR.strings.action_hidden), {
 
                         GlobalScope.launch(doorMainDispatcher()){
                             repo.languageDao.toggleVisibilityLanguage(false,
                                     selectedItem.map { it.langUid }, getSystemTimeInMillis())
                         }
 
-                    }, MessageID.undo)
+                    }, MR.strings.undo)
                 }
                 else -> {
                     // do nothing
@@ -116,12 +116,12 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
 
     companion object {
         val SORT_OPTIONS = listOf(
-                SortOrderOption(MessageID.name, LanguageDaoCommon.SORT_LANGNAME_ASC, true),
-                SortOrderOption(MessageID.name, LanguageDaoCommon.SORT_LANGNAME_DESC, false),
-                SortOrderOption(MessageID.two_letter_code, LanguageDaoCommon.SORT_TWO_LETTER_ASC, true),
-                SortOrderOption(MessageID.two_letter_code, LanguageDaoCommon.SORT_TWO_LETTER_DESC, false),
-                SortOrderOption(MessageID.three_letter_code, LanguageDaoCommon.SORT_THREE_LETTER_ASC, true),
-                SortOrderOption(MessageID.three_letter_code, LanguageDaoCommon.SORT_THREE_LETTER_DESC, false))
+                SortOrderOption(MR.strings.name_key, LanguageDaoCommon.SORT_LANGNAME_ASC, true),
+                SortOrderOption(MR.strings.name_key, LanguageDaoCommon.SORT_LANGNAME_DESC, false),
+                SortOrderOption(MR.strings.two_letter_code, LanguageDaoCommon.SORT_TWO_LETTER_ASC, true),
+                SortOrderOption(MR.strings.two_letter_code, LanguageDaoCommon.SORT_TWO_LETTER_DESC, false),
+                SortOrderOption(MR.strings.three_letter_code, LanguageDaoCommon.SORT_THREE_LETTER_ASC, true),
+                SortOrderOption(MR.strings.three_letter_code, LanguageDaoCommon.SORT_THREE_LETTER_DESC, false))
 
         const val SAVEDSTATE_KEY_LANGUAGE = "Language"
     }

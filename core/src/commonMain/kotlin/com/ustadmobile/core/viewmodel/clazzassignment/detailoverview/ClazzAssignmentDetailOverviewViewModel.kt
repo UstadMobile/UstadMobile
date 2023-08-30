@@ -2,7 +2,7 @@ package com.ustadmobile.core.viewmodel.clazzassignment.detailoverview
 
 import com.ustadmobile.core.db.dao.CourseAssignmentMarkDaoCommon
 import com.ustadmobile.core.domain.assignment.submitassignment.SubmitAssignmentUseCase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -67,8 +67,8 @@ data class ClazzAssignmentDetailOverviewUiState(
     val selectedChipId: Int = CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES,
 
     val gradeFilterChips: List<MessageIdOption2> = listOf(
-        MessageIdOption2(MessageID.most_recent, CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES),
-        MessageIdOption2(MessageID.all, CourseAssignmentMarkDaoCommon.ARG_FILTER_ALL_SCORES)
+        MessageIdOption2(MR.strings.most_recent, CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES),
+        MessageIdOption2(MR.strings.all, CourseAssignmentMarkDaoCommon.ARG_FILTER_ALL_SCORES)
     ),
 
     val submissionHeaderUiState: UstadAssignmentSubmissionHeaderUiState =
@@ -236,7 +236,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                                 courseBlock = assignmentData?.courseBlock,
                                 submitterUid = assignmentData?.submitterUid ?: 0,
                                 unassignedError = if(isEnrolledButNotInGroup) {
-                                    systemImpl.getString(MessageID.unassigned_error)
+                                    systemImpl.getString(MR.strings.unassigned_error)
                                 }else {
                                     null
                                 }
@@ -468,7 +468,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                     )
                 }
 
-                snackDispatcher.showSnackBar(Snack(systemImpl.getString(MessageID.submitted)))
+                snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.submitted_key)))
             }catch(e: Exception) {
                 _uiState.update { prev ->
                     prev.copy(submissionError = e.message)

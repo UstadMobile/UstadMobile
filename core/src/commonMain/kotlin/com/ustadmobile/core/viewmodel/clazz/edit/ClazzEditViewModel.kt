@@ -3,7 +3,7 @@ package com.ustadmobile.core.viewmodel.clazz.edit
 import com.ustadmobile.core.db.dao.deactivateByUids
 import com.ustadmobile.core.domain.courseblockupdate.AddOrUpdateCourseBlockUseCase
 import com.ustadmobile.core.domain.courseblockupdate.UpdateCourseBlocksOnReorderOrCommitUseCase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -120,13 +120,13 @@ class ClazzEditViewModel(
     val uiState: Flow<ClazzEditUiState> = _uiState.asStateFlow()
 
     init {
-        val title = createEditTitle(MessageID.add_a_new_course, MessageID.edit_course)
+        val title = createEditTitle(MR.strings.add_a_new_course, MR.strings.edit_course)
         _appUiState.update {
             AppUiState(
                 title = title,
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
-                    text = systemImpl.getString(MessageID.save),
+                    text = systemImpl.getString(MR.strings.save),
                     onClick = this::onClickSave
                 ),
                 loadingState = LoadingUiState.INDETERMINATE,
@@ -414,14 +414,14 @@ class ClazzEditViewModel(
         if (initEntity.clazzStartTime == 0L) {
             _uiState.update { prev ->
                 prev.copy(
-                    clazzStartDateError = systemImpl.getString(MessageID.field_required_prompt)
+                    clazzStartDateError = systemImpl.getString(MR.strings.field_required_prompt)
                 )
             }
         }
 
         if(initEntity.clazzEndTime <= initEntity.clazzStartTime) {
             _uiState.update { prev ->
-                prev.copy(clazzEndDateError = systemImpl.getString(MessageID.end_is_before_start))
+                prev.copy(clazzEndDateError = systemImpl.getString(MR.strings.end_is_before_start))
             }
         }
 

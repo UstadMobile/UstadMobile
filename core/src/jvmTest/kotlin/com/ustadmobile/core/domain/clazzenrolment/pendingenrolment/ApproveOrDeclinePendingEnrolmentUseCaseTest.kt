@@ -16,6 +16,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.Person
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.runBlocking
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -51,7 +52,7 @@ class ApproveOrDeclinePendingEnrolmentUseCaseTest {
         }
 
         val mockSystemImpl = mock<UstadMobileSystemImpl> {
-            on { getString(any<Int>()) }.thenReturn("")
+            on { getString(any<StringResource>()) }.thenReturn("")
         }
 
         runBlocking {

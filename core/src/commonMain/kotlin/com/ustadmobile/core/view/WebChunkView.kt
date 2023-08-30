@@ -1,6 +1,7 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.lib.db.entities.ContentEntry
+import dev.icerock.moko.resources.StringResource
 
 interface WebChunkView : UstadView {
 
@@ -8,7 +9,7 @@ interface WebChunkView : UstadView {
 
     var url: String
 
-    fun showNoAppFoundError(message: String, actionMessageId: Int, mimeType: String)
+    fun showNoAppFoundError(message: String, actionMessageId: StringResource, mimeType: String)
 
     companion object {
 

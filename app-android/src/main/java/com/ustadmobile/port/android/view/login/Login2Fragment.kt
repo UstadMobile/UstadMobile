@@ -9,9 +9,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
+import com.ustadmobile.core.R
 import com.ustadmobile.core.viewmodel.login.LoginUiState
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
@@ -57,6 +60,98 @@ private fun LoginScreenForViewModel(
         onUsernameValueChange = viewModel::onUsernameChanged,
         onPasswordValueChange = viewModel::onPasswordChanged,
     )
+}
+
+@Composable
+private fun LoginScreen(
+    uiState: LoginUiState = LoginUiState(),
+    onClickLogin: () -> Unit = {},
+    onClickCreateAccount: () -> Unit = {},
+    onClickConnectAsGuest: () -> Unit = {},
+    onUsernameValueChange: (String) -> Unit = {},
+    onPasswordValueChange: (String) -> Unit = {},
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
+    )  {
+
+        Text(text = uiState.loginIntentMessage ?: "")
+
+        UstadTextEditField(
+            value = uiState.username,
+            label = stringResource(R.string.username),
+            onValueChange = {
+                onUsernameValueChange(it)
+            },
+            error = uiState.usernameError,
+            enabled = uiState.fieldsEnabled,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        )
+
+        UstadTextEditField(
+            value = uiState.password,
+            label = stringResource(id = R.string.password),
+            onValueChange = {
+                onPasswordValueChange(it)
+            },
+            error = uiState.passwordError,
+            enabled = uiState.fieldsEnabled,
+            password = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(
+                onDone = { onClickLogin() }
+            )
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(text = uiState.errorMessage ?: "")
+
+        Button(
+            onClick = onClickLogin,
+            enabled = uiState.fieldsEnabled,
+            modifier = Modifier
+                .fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = MaterialTheme.colors.secondary
+            )
+        ) {
+            Text(
+                text = stringResource(R.string.login).uppercase(),
+                color = contentColorFor(MaterialTheme.colors.secondary)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        OutlinedButton(
+            onClick = onClickCreateAccount,
+            modifier = Modifier
+                .fillMaxWidth(),
+            enabled = uiState.fieldsEnabled,
+        ) {
+            Text(stringResource(R.string.create_account).uppercase())
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        OutlinedButton(
+            onClick = onClickConnectAsGuest,
+            modifier = Modifier
+                .fillMaxWidth(),
+            enabled = uiState.fieldsEnabled,
+        ) {
+            Text(stringResource(R.string.connect_as_guest).uppercase())
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(uiState.versionInfo)
+    }
 }
 
 @Composable

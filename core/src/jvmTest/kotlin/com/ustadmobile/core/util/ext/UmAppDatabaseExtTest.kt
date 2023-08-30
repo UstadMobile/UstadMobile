@@ -12,6 +12,7 @@ import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
+import dev.icerock.moko.resources.StringResource
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
@@ -65,7 +66,7 @@ class UmAppDatabaseExtTest {
             nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient))
 
         mockSystemImpl = mock {
-            on { getString(any<Int>(), any())}.thenAnswer {
+            on { getString(any())}.thenAnswer {
                 "${it.arguments[0]}"
             }
         }

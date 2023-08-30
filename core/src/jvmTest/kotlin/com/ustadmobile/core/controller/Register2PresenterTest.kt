@@ -3,7 +3,7 @@
 //import com.sun.net.httpserver.HttpServer
 //import com.ustadmobile.core.CoreTestConfig
 //import com.ustadmobile.core.db.UmAppDatabase
-//import com.ustadmobile.core.generated.locale.MessageID
+//import com.ustadmobile.core.MR
 //import com.ustadmobile.core.impl.UmAccountManager
 //import com.ustadmobile.core.impl.UstadMobileSystemImpl
 //import com.ustadmobile.core.view.Register2View
@@ -91,7 +91,7 @@
 //        presenter.handleClickRegister(testPerson!!, VALID_PASS, TEST_URI)
 //
 //        val expectedErrorMsg = UstadMobileSystemImpl.instance.getString(
-//                MessageID.err_registering_new_user, Any())
+//                MR.strings.err_registering_new_user, Any())
 //        verify<Register2View>(mockView, timeout(5000)).setErrorMessageView(expectedErrorMsg)
 //    }
 //
@@ -127,7 +127,7 @@
 //        presenter.handleClickRegister(testPerson!!, VALID_PASS, TEST_URI)
 //
 //        val expectedErrorMsg = UstadMobileSystemImpl.instance.getString(
-//                MessageID.login_network_error, Any())
+//                MR.strings.login_network_error, Any())
 //        verify<Register2View>(mockView, timeout(5000)).setErrorMessageView(expectedErrorMsg)
 //    }
 //

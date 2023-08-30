@@ -11,7 +11,7 @@ import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.core.db.dao.PersonParentJoinDao
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.door.lifecycle.LifecycleObserver
 import com.ustadmobile.lib.db.entities.PersonParentJoin
@@ -163,7 +163,7 @@ class ParentalConsentManagementPresenterTest {
 
         val systemImpl: UstadMobileSystemImpl by di.instance()
         verify(mockView, timeout(5000 ).atLeastOnce()).relationshipFieldError =
-            eq(systemImpl.getString(MessageID.field_required_prompt, context))
+            eq(systemImpl.getString(MR.strings.field_required_prompt))
     }
 
 

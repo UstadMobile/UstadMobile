@@ -35,6 +35,7 @@ import com.ustadmobile.lib.db.entities.ScopedGrantAndName
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
+import com.ustadmobile.core.R as CR
 
 class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), SchoolEditView{
 
@@ -70,7 +71,7 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.add_a_new_school, R.string.edit_school)
+        setEditFragmentTitle(CR.string.add_a_new_school, CR.string.edit_school)
         val navController = findNavController()
 
         mPresenter = SchoolEditPresenter(requireContext(), arguments.toStringMap(), this,
@@ -100,7 +101,7 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
 
     override fun onResume() {
         super.onResume()
-        setEditFragmentTitle(R.string.add_a_new_school, R.string.edit_school)
+        setEditFragmentTitle(CR.string.add_a_new_school, CR.string.edit_school)
     }
 
     override var entity: SchoolWithHolidayCalendar? = null
@@ -146,7 +147,7 @@ private fun SchoolEditScreen(
         item {
             UstadTextEditField(
                 value = uiState.entity?.schoolName ?: "",
-                label = stringResource(id = R.string.name),
+                label = stringResource(id = CR.string.name_key),
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
                     onSchoolChanged(uiState.entity?.shallowCopy{
@@ -159,7 +160,7 @@ private fun SchoolEditScreen(
         item {
             UstadTextEditField(
                 value = uiState.entity?.schoolDesc ?: "",
-                label = stringResource(id = R.string.description),
+                label = stringResource(id = CR.string.description),
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
                     onSchoolChanged(uiState.entity?.shallowCopy{
@@ -173,7 +174,7 @@ private fun SchoolEditScreen(
         item {
             UstadTextEditField(
                 value = uiState.entity?.schoolTimeZone ?: "",
-                label = stringResource(id = R.string.timezone),
+                label = stringResource(id = CR.string.timezone),
                 enabled = uiState.fieldsEnabled,
                 readOnly = true,
                 onClick = onClickTimeZone,
@@ -184,7 +185,7 @@ private fun SchoolEditScreen(
         item {
             UstadTextEditField(
                 value = uiState.entity?.holidayCalendar?.umCalendarName ?: "",
-                label = stringResource(id = R.string.holiday_calendar),
+                label = stringResource(id = CR.string.holiday_calendar),
                 enabled = uiState.fieldsEnabled,
                 readOnly = true,
                 onClick = onClickHolidayCalendar,
@@ -195,7 +196,7 @@ private fun SchoolEditScreen(
         item {
             UstadTextEditField(
                 value = uiState.entity?.schoolAddress ?: "",
-                label = stringResource(id = R.string.address),
+                label = stringResource(id = CR.string.address),
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
                     onSchoolChanged(uiState.entity?.shallowCopy{
@@ -212,7 +213,7 @@ private fun SchoolEditScreen(
         item {
             UstadTextEditField(
                 value = uiState.entity?.schoolPhoneNumber ?: "",
-                label = stringResource(id = R.string.phone_number),
+                label = stringResource(id = CR.string.phone_number),
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
                     onSchoolChanged(uiState.entity?.shallowCopy{
@@ -225,7 +226,7 @@ private fun SchoolEditScreen(
         item {
             UstadTextEditField(
                 value = uiState.entity?.schoolEmailAddress ?: "",
-                label = stringResource(id = R.string.email),
+                label = stringResource(id = CR.string.email),
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
                     onSchoolChanged(uiState.entity?.shallowCopy{

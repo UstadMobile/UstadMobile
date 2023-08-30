@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_GO_TO_COMPLETE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
+import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.Chat
 import com.ustadmobile.lib.db.entities.ChatWithLatestMessageAndCount
@@ -61,7 +62,7 @@ class ChatListPresenter(context: Any, arguments: Map<String, String>, view: Chat
 
         val args: Map<String, String>? = mapOf(
             ARG_GO_TO_COMPLETE to ChatDetailView.VIEW_NAME,
-            PersonListPresenter.ARG_HIDE_PERSON_ADD to "true",
+            PersonListViewModel.ARG_HIDE_PERSON_ADD to "true",
             PersonListView.ARG_EXCLUDE_PERSONUIDS_LIST to loggedInPersonUid.toString()
         )
         navigateForResult(

@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.coursegroupset.list
 
 import com.ustadmobile.core.db.dao.CourseGroupSetDaoConstants
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
@@ -37,8 +37,8 @@ data class CourseGroupSetListUiState(
     companion object {
 
         val DEFAULT_SORT_OPTIONS = listOf(
-            SortOrderOption(MessageID.name, CourseGroupSetDaoConstants.SORT_NAME_ASC, true),
-            SortOrderOption(MessageID.name, CourseGroupSetDaoConstants.SORT_NAME_DESC, false),
+            SortOrderOption(MR.strings.name_key, CourseGroupSetDaoConstants.SORT_NAME_ASC, true),
+            SortOrderOption(MR.strings.name_key, CourseGroupSetDaoConstants.SORT_NAME_DESC, false),
         )
 
     }
@@ -73,7 +73,7 @@ class CourseGroupSetListViewModel(
                 individualSubmissionOption = if(savedStateHandle[ARG_SHOW_INDIVIDUAL_OPTION]?.toBoolean() == true) {
                     CourseGroupSet().apply {
                         cgsUid = 0
-                        cgsName = systemImpl.getString(MessageID.individual_submission)
+                        cgsName = systemImpl.getString(MR.strings.individual_submission)
                     }
                 }else {
                     null
@@ -101,7 +101,7 @@ class CourseGroupSetListViewModel(
                                 activeUserPersonUid, clazzUid, Role.PERMISSION_CLAZZ_UPDATE
                             )
                         },
-                        fabMessageId = MessageID.groups,
+                        fabStringResource = MR.strings.groups,
                         onSetAddListItemVisibility = { visible ->
                             _uiState.update { prev -> prev.copy(showAddItem = visible) }
                         }

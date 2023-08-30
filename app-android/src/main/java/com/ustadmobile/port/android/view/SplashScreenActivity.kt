@@ -28,6 +28,7 @@ import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import org.kodein.di.direct
 import org.kodein.di.instance
+import com.ustadmobile.core.R as CR
 
 class SplashScreenActivity : ComponentActivity() {
 
@@ -92,7 +93,7 @@ private fun SplashScreen(){
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
 
-            Text(text = stringResource(R.string.created_partnership),
+            Text(text = stringResource(CR.string.created_partnership),
                 style = Typography.body1,
                 color = Color.DarkGray)
 

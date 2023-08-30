@@ -16,11 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.dao.ClazzDaoCommon
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.port.android.util.compose.messageIdResource
+import dev.icerock.moko.resources.compose.stringResource as mrStringResource
+import com.ustadmobile.core.R as CR
+import com.ustadmobile.core.MR
 
 @Composable
 fun UstadListSortHeader(
@@ -38,7 +38,7 @@ fun UstadListSortHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
 
-        Text(messageIdResource(id = activeSortOrderOption.fieldMessageId))
+        Text(mrStringResource(resource = activeSortOrderOption.fieldMessageId))
 
         Spacer(Modifier.width(8.dp))
 
@@ -48,9 +48,9 @@ fun UstadListSortHeader(
             else
                 Icons.Default.ArrowUpward,
             contentDescription = stringResource(if(activeSortOrderOption.order) {
-                R.string.ascending
+                CR.string.ascending
             }else {
-                R.string.descending
+                CR.string.descending
             }),
             modifier = Modifier.size(16.dp)
         )
@@ -63,7 +63,7 @@ fun UstadListSortHeader(
 private fun UstadListSortHeaderPreview() {
     UstadListSortHeader(
         activeSortOrderOption = SortOrderOption(
-        MessageID.name,
+        MR.strings.name_key,
         ClazzDaoCommon.SORT_CLAZZNAME_ASC,
         true
     ))

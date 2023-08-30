@@ -24,7 +24,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailUiState
 import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
 import com.ustadmobile.lib.db.entities.CourseGroupMember
@@ -32,6 +31,7 @@ import com.ustadmobile.lib.db.entities.CourseGroupMemberAndName
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
+import com.ustadmobile.core.R as CR
 
 
 class CourseGroupSetDetailFragment: UstadBaseMvvmFragment() {
@@ -87,7 +87,7 @@ fun CourseGroupSetDetailScreen(
                     Text(
                         modifier = Modifier
                             .padding(horizontal = 16.dp),
-                        text = "${stringResource(id = R.string.group)} $groupNum",
+                        text = "${stringResource(id = CR.string.group)} $groupNum",
                         style = Typography.body1
                     )
                 }

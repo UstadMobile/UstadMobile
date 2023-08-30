@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.person.detail
 
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.INDETERMINATE
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.NOT_LOADING
@@ -91,7 +91,7 @@ class PersonDetailViewModel(
                 loadingState = INDETERMINATE,
                 fabState = FabUiState(
                     visible = false,
-                    text = systemImpl.getString(MessageID.edit),
+                    text = systemImpl.getString(MR.strings.edit),
                     icon = FabUiState.FabIcon.EDIT,
                     onClick = this::onClickEdit,
                 )
@@ -139,7 +139,7 @@ class PersonDetailViewModel(
                                 fabState = if(hasEditPermission) {
                                     FabUiState(
                                         visible = true,
-                                        text = systemImpl.getString(MessageID.edit),
+                                        text = systemImpl.getString(MR.strings.edit),
                                         icon = FabUiState.FabIcon.EDIT,
                                         onClick = this@PersonDetailViewModel::onClickEdit
                                     )

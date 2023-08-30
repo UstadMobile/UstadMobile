@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.RegisterAgeRedirectView
 import com.ustadmobile.core.view.SiteTermsDetailView
+import dev.icerock.moko.resources.StringResource
 import org.junit.Before
 import org.junit.Test
 import org.kodein.di.DI
@@ -24,7 +25,7 @@ class RegisterAgeRedirectPresenterTest {
     @Before
     fun setup() {
         mockSystemImpl = mock {
-            on { getString(any<Int>(), any())}.thenAnswer {
+            on { getString(any<StringResource>())}.thenAnswer {
                 it.arguments[0].toString()
             }
 

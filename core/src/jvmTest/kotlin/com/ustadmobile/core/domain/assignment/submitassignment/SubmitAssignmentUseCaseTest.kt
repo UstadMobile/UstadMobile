@@ -20,6 +20,7 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.Person
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.mockito.kotlin.any
@@ -56,7 +57,7 @@ class SubmitAssignmentUseCaseTest {
             .build()
             .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
         val systemImpl: UstadMobileSystemImpl = mock {
-            on { getString(any())}.thenAnswer { it.arguments.first().toString() }
+            on { getString(any<StringResource>())}.thenAnswer { it.arguments.first().toString() }
         }
 
         try {

@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.impl.locale.TerminologyEntry
 import com.ustadmobile.core.impl.locale.entityconstants.ClazzEnrolmentListConstants
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListItemUiState
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListUiState
@@ -28,10 +29,12 @@ import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListView
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.util.compose.courseTerminologyEntryResource
-import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberCourseTerminologyEntries
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateRange
 import com.ustadmobile.port.android.view.composable.UstadQuickActionButton
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.R as CR
+import dev.icerock.moko.resources.compose.stringResource as mrStringResource
 
 
 class ClazzEnrolmentListFragment(): UstadBaseMvvmFragment() {
@@ -89,7 +92,7 @@ fun ClazzEnrolmentListScreen(
 
         item{
             UstadQuickActionButton(
-                labelText = stringResource(id = R.string.view_profile),
+                labelText = stringResource(id = CR.string.view_profile),
                 imageId = R.drawable.ic_person_black_24dp,
                 onClick = onViewProfileClick
             )
@@ -104,7 +107,7 @@ fun ClazzEnrolmentListScreen(
 
         item{
             Text(
-                text = stringResource(id = R.string.person_enrolment_in_class,
+                text = stringResource(id = CR.string.person_enrolment_in_class,
                     uiState.personName ?: "", uiState.courseName ?: ""),
                 style = Typography.body1,
                 modifier = Modifier
@@ -145,14 +148,14 @@ private fun ClazzEnrolmentListItem(
 
     val itemPrimaryText = buildString {
         val roleMessageId = ClazzEnrolmentListConstants
-            .ROLE_TO_MESSAGE_ID_MAP[enrolment.clazzEnrolmentRole]
-            ?: ClazzEnrolment.ROLE_STUDENT
+            .ROLE_TO_STRING_RESOURCE_MAP[enrolment.clazzEnrolmentRole]
+            ?: MR.strings.student
         val outcomeMessageId = ClazzEnrolmentListConstants
-            .OUTCOME_TO_MESSAGE_ID_MAP[enrolment.clazzEnrolmentOutcome] ?: 0
+            .OUTCOME_TO_STRING_RESOURCE_MAP[enrolment.clazzEnrolmentOutcome] ?: MR.strings.in_progress
 
         append(courseTerminologyEntryResource(terminologyEntries, roleMessageId))
         append(" - ")
-        append(messageIdResource(id =  outcomeMessageId))
+        append(mrStringResource(resource = outcomeMessageId))
         if (enrolment.leavingReason != null){
             append(" (")
             append(enrolment.leavingReason?.leavingReasonTitle ?: "")
@@ -175,7 +178,7 @@ private fun ClazzEnrolmentListItem(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_edit_white_24dp),
-                        contentDescription = stringResource(id = R.string.edit)
+                        contentDescription = stringResource(id = CR.string.edit)
                     )
                 }
             }

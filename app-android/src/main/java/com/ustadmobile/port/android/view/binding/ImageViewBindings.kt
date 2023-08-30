@@ -22,6 +22,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import kotlinx.coroutines.*
 import org.kodein.di.*
+import com.ustadmobile.core.R as CR
 
 @BindingAdapter(value=["imageUri", "fallbackDrawable"], requireAll = false)
 fun ImageView.setImageFilePath(imageFilePath: String?, fallbackDrawable: Drawable?) {
@@ -244,7 +245,7 @@ fun ImageView.setIconOnProgressFlag(progress: ContentEntryStatementScoreProgress
 @BindingAdapter(value = ["scopedGrantEnabledIcon"])
 fun ImageView.setScopedGrantEnabledIcon(enabled: Boolean) {
     setImageResource(if(enabled) R.drawable.ic_done_white_24dp else R.drawable.ic_close_black_24dp)
-    contentDescription = context.getString(if(enabled) R.string.enabled else R.string.disabled)
+    contentDescription = context.getString(if(enabled) CR.string.enabled else CR.string.disabled)
 }
 
 @Suppress("UNCHECKED_CAST")
@@ -286,7 +287,7 @@ fun ImageView.isContentCompleteImage(person: PersonWithSessionsDisplay){
         }
     }else{
         setImageDrawable(null)
-        context.getString(R.string.incomplete)
+        context.getString(CR.string.incomplete)
         visibility = View.INVISIBLE
     }
 }

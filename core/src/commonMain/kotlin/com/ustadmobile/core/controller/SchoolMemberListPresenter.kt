@@ -2,7 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.SchoolMemberDao
 import com.ustadmobile.core.db.dao.SchoolMemberDaoCommon
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.approvePendingSchoolMember
@@ -147,10 +147,10 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
     companion object {
 
         val SORT_OPTIONS = listOf(
-                SortOrderOption(MessageID.first_name, SchoolMemberDaoCommon.SORT_FIRST_NAME_ASC, true),
-                SortOrderOption(MessageID.first_name, SchoolMemberDaoCommon.SORT_FIRST_NAME_DESC, false),
-                SortOrderOption(MessageID.last_name, SchoolMemberDaoCommon.SORT_LAST_NAME_ASC, true),
-                SortOrderOption(MessageID.last_name, SchoolMemberDaoCommon.SORT_LAST_NAME_DESC, false)
+                SortOrderOption(MR.strings.first_name, SchoolMemberDaoCommon.SORT_FIRST_NAME_ASC, true),
+                SortOrderOption(MR.strings.first_name, SchoolMemberDaoCommon.SORT_FIRST_NAME_DESC, false),
+                SortOrderOption(MR.strings.last_name, SchoolMemberDaoCommon.SORT_LAST_NAME_ASC, true),
+                SortOrderOption(MR.strings.last_name, SchoolMemberDaoCommon.SORT_LAST_NAME_DESC, false)
         )
 
     }

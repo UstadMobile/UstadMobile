@@ -1,7 +1,7 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.lib.db.entities.CourseTerminology
-import com.ustadmobile.lib.db.entities.TerminologyEntry
+import com.ustadmobile.core.impl.locale.TerminologyEntry
 
 
 interface CourseTerminologyEditView: UstadEditView<CourseTerminology> {

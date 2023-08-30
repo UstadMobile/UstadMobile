@@ -1,7 +1,8 @@
 plugins {
-    id 'org.jetbrains.kotlin.js'
+    id 'org.jetbrains.kotlin.multiplatform'
 
     id 'org.jetbrains.kotlin.plugin.serialization'
+    id 'dev.icerock.mobile.multiplatform-resources'
 }
 
 group = rootProject.group
@@ -37,55 +38,73 @@ kotlin {
 
         binaries.executable()
     }
+
+    sourceSets {
+        commonMain {
+
+        }
+
+        jsMain {
+            dependsOn commonMain
+            dependencies {
+                implementation project(":core")
+                implementation project(":lib-util")
+                implementation project(":lib-database")
+                api "dev.icerock.moko:resources:$version_moko_resources"
+
+                implementation enforcedPlatform("org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom:$kotlinWrappersVersion")
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-react"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-react-dom"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-styled"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-redux"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-react-redux"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-mui"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-mui-icons"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-emotion"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-query-core"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-react-query"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-virtual-core"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-react-virtual"
+                implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
+                implementation npm("@js-joda/timezone", "$version_npm_joda_timezone")
+
+                implementation npm("@date-io/moment","$version_npm_mement_io")
+                implementation npm("@mui/lab","$version_npm_mui_lab")
+                implementation npm("@mui/styles","$version_npm_mui_styles")
+                implementation npm("@mui/material","$version_npm_mui_material")
+                implementation npm("@mui/icons-material","$version_npm_mui_icons")
+                implementation npm("@mui/x-date-pickers", "$version_npm_mui_x_date_pickers")
+                implementation npm("date-fns","$version_npm_date_fns")
+                implementation npm("html-to-image","$version_npm_html_to_image")
+                implementation "com.github.UstadMobile.door:room-annotations:$version_door"
+                implementation "org.kodein.di:kodein-di:$version_kodein_di"
+                implementation npm("react-google-charts","$version_npm_google_charts")
+                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
+                implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
+                implementation "io.ktor:ktor-client-js:$version_ktor"
+                implementation "io.ktor:ktor-serialization-kotlinx-json:$version_ktor"
+                implementation npm("timezones.json","$version_npm_timezones")
+                implementation npm("striptags","$version_npm_striptags")
+                implementation npm("mime-matcher","$version_npm_mime_matcher")
+                implementation npm("react-quill", "$version_npm_react_quill")
+                implementation npm("react-easy-sort","$version_npm_react_easy_sort")
+                implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
+                implementation "io.github.aakira:napier:$version_napier"
+                implementation npm("linkifyjs", "$version_linkify_js")
+                implementation npm("linkify-react", "$version_linkify_react")
+            }
+        }
+
+        jsTest {
+            dependencies {
+                implementation 'org.jetbrains.kotlin:kotlin-test'
+            }
+        }
+    }
 }
 
-dependencies {
-    implementation project(":core")
-    implementation project(":lib-util")
-    implementation project(":lib-database")
 
-    testImplementation 'org.jetbrains.kotlin:kotlin-test'
-    implementation enforcedPlatform("org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom:$kotlinWrappersVersion")
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-react"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-react-dom"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-styled"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-redux"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-react-redux"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-mui"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-mui-icons"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-emotion"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-query-core"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-react-query"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-virtual-core"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-react-virtual"
-    implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
-    implementation npm("@js-joda/timezone", "$version_npm_joda_timezone")
-
-    implementation npm("@date-io/moment","$version_npm_mement_io")
-    implementation npm("@mui/lab","$version_npm_mui_lab")
-    implementation npm("@mui/styles","$version_npm_mui_styles")
-    implementation npm("@mui/material","$version_npm_mui_material")
-    implementation npm("@mui/icons-material","$version_npm_mui_icons")
-    implementation npm("@mui/x-date-pickers", "$version_npm_mui_x_date_pickers")
-    implementation npm("date-fns","$version_npm_date_fns")
-    implementation npm("html-to-image","$version_npm_html_to_image")
-    implementation "com.github.UstadMobile.door:room-annotations:$version_door"
-    implementation "org.kodein.di:kodein-di:$version_kodein_di"
-    implementation npm("react-google-charts","$version_npm_google_charts")
-    implementation "com.github.UstadMobile.door:door-runtime:$version_door"
-    implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
-    implementation "io.ktor:ktor-client-js:$version_ktor"
-    implementation "io.ktor:ktor-serialization-kotlinx-json:$version_ktor"
-    implementation npm("timezones.json","$version_npm_timezones")
-    implementation npm("striptags","$version_npm_striptags")
-    implementation npm("mime-matcher","$version_npm_mime_matcher")
-    implementation npm("react-quill", "$version_npm_react_quill")
-    implementation npm("react-easy-sort","$version_npm_react_easy_sort")
-    implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
-    implementation "io.github.aakira:napier:$version_napier"
-    implementation npm("linkifyjs", "$version_linkify_js")
-    implementation npm("linkify-react", "$version_linkify_react")
+multiplatformResources {
+    multiplatformResourcesPackage = "com.ustadmobile.appreact"
 }
-
-

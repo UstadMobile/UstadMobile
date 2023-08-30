@@ -73,12 +73,6 @@ android {
         freeCompilerArgs += "-Xopt-in=kotlinx.serialization.InternalSerializationApi"
     }
 
-    sourceSets {
-        main.assets.srcDirs += "../core/src/main/assets/"
-        main.res.srcDirs += "../core/locale/main/"
-        main.java.srcDirs += "build/generated/source/umlocale/"
-    }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -180,79 +174,7 @@ android {
     }
 }
 
-task generateCoreStringToAndroidResMap {
-    inputs.files("../core/locale/main/values/*.xml")
-    onlyIf {
-        /*
-         Only run this task if the input files have been updated since the task was last run.
-         upToDateWhen was not having the expected effect.
-         */
-        long inputLastModified = 0L
-
-        rootProject.fileTree(dir: "core/locale/main", include: "values/*.xml").each() { File file ->
-            if (file.lastModified() > inputLastModified)
-                inputLastModified = file.lastModified()
-        }
-
-        File outputFile = project.file("build/generated/source/umlocale/com/ustadmobile/port/android/generated/MessageIDMap.kt")
-        return outputFile.lastModified() < inputLastModified;
-    }
-
-    doLast {
-        Map<String, String> messageIds = new HashMap<>()
-
-        String genSrcHeader, genSrcFooter
-        String genSrcBody = ""
-
-        genSrcHeader = "package com.ustadmobile.port.android.generated\n"
-        genSrcHeader += "import com.ustadmobile.core.generated.locale.MessageID\n"
-        genSrcHeader += "import com.toughra.ustadmobile.R\n"
-        genSrcHeader += "import java.util.HashMap\n"
-        genSrcHeader += "object MessageIDMap {\n"
-        genSrcHeader += "\tval ID_MAP = HashMap<Int, Int>()\n"
-        genSrcHeader += "\tinit {\n"
-
-        System.out.println("Looking in: core/locale/main")
-        rootProject.fileTree(dir: "core/locale/main", include: "values/*.xml").each() { File file ->
-            System.out.println("Found: " + file.getAbsolutePath())
-            def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
-            xmlDoc.string.each() { str ->
-                String msgName = str.@name
-                if (!messageIds.containsKey(msgName)) {
-                    messageIds.put(msgName, msgName)
-                }
-            }
-        }
-
-        Iterator<String> nameIterator = messageIds.keySet().iterator();
-        while (nameIterator.hasNext()) {
-            String strName = nameIterator.next()
-            genSrcBody += "\tID_MAP[MessageID." + strName + "] = R.string." + strName + "\n"
-        }
-
-        genSrcFooter = "\t}\n"
-        genSrcFooter += "}\n"
-
-        File oldMessageIdFile = project.file("build/generated/source/umlocale/com/ustadmobile/port/android/generated/MessageIDMap.kt")
-        if (oldMessageIdFile.exists()) {
-            oldMessageIdFile.delete()
-        }
-
-        File outDir = project.file("build/generated/source/umlocale/com/ustadmobile/port/android/generated")
-        if (!outDir.isDirectory()) {
-            outDir.mkdirs()
-        }
-
-        File outFile = new File(outDir, "MessageIDMap.kt")
-        outFile.setText(genSrcHeader + genSrcBody + genSrcFooter, "UTF-8")
-    }
-}
-
 tasks.configureEach { task ->
-    if (task.name.startsWith("compile") || task.name.startsWith("assemble")) {
-        task.dependsOn(generateCoreStringToAndroidResMap)
-    }
-
     // TODO remove after merge with replication
     if (task.name.equals("lint")) {
         task.enabled = false
@@ -282,6 +204,8 @@ dependencies {
     implementation project(':lib-database')
     implementation project(':lib-util')
     implementation project(':lib-ui-compose')
+
+    api "dev.icerock.moko:resources:$version_moko_resources"
 
     implementation "io.github.aakira:napier:$version_napier"
     implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
@@ -353,6 +277,8 @@ dependencies {
     implementation "com.google.accompanist:accompanist-pager-indicators:$version_compose_accompanist"
     implementation "org.burnoutcrew.composereorderable:reorderable:$version_composereorderable"
     implementation "com.google.accompanist:accompanist-flowlayout:$version_compose_accompanist"
+
+    implementation "dev.icerock.moko:resources-compose:0.23.0"
 
     //Image loading library
     implementation "com.squareup.picasso:picasso:$version_android_picasso"

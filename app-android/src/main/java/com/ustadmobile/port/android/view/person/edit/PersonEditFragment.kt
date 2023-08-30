@@ -34,6 +34,7 @@ import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.*
+import com.ustadmobile.core.R as CR
 
 class PersonEditFragment: UstadBaseMvvmFragment() {
 
@@ -85,7 +86,7 @@ fun PersonEditScreen(
 
         UstadTextEditField(
             value = uiState.person?.firstNames ?: "",
-            label = stringResource(id = R.string.first_names),
+            label = stringResource(id = CR.string.first_names),
             error = uiState.firstNameError,
             enabled = uiState.fieldsEnabled,
             onValueChange = {
@@ -97,7 +98,7 @@ fun PersonEditScreen(
 
         UstadTextEditField(
             value = uiState.person?.lastName ?: "",
-            label = stringResource(id = R.string.last_name),
+            label = stringResource(id = CR.string.last_name),
             error = uiState.lastNameError,
             enabled = uiState.fieldsEnabled,
             onValueChange = {
@@ -116,7 +117,7 @@ fun PersonEditScreen(
                 modifier = Modifier
                     .testTag("gender")
                     .fillMaxWidth(),
-                label = stringResource(R.string.gender_literal),
+                label = stringResource(CR.string.gender_literal),
                 options = GENDER_MESSAGE_IDS,
                 onOptionSelected = {
                     onPersonChanged(uiState.person?.shallowCopy{
@@ -132,7 +133,7 @@ fun PersonEditScreen(
         if (uiState.parentalEmailVisible){
             UstadTextEditField(
                 value = uiState.approvalPersonParentJoin?.ppjEmail ?: "",
-                label = stringResource(id = R.string.parents_email_address),
+                label = stringResource(id = CR.string.parents_email_address),
                 error = uiState.parentContactError,
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
@@ -149,7 +150,7 @@ fun PersonEditScreen(
         ) {
             UstadDateField(
                 value = uiState.person?.dateOfBirth ?: 0,
-                label = { Text(stringResource(id = R.string.birthday)) },
+                label = { Text(stringResource(id = CR.string.birthday)) },
                 isError = uiState.dateOfBirthError != null,
                 enabled = uiState.fieldsEnabled,
                 timeZoneId = UstadMobileConstants.UTC,
@@ -164,7 +165,7 @@ fun PersonEditScreen(
 
         UstadTextEditField(
             value = uiState.person?.phoneNum ?: "",
-            label = stringResource(id = R.string.phone_number),
+            label = stringResource(id = CR.string.phone_number),
             enabled = uiState.fieldsEnabled,
             onValueChange = {
                 onPersonChanged(uiState.person?.shallowCopy{
@@ -175,7 +176,7 @@ fun PersonEditScreen(
 
         UstadTextEditField(
             value = uiState.person?.emailAddr ?: "",
-            label = stringResource(id = R.string.email),
+            label = stringResource(id = CR.string.email),
             error = uiState.emailError,
             enabled = uiState.fieldsEnabled,
             onValueChange = {
@@ -187,7 +188,7 @@ fun PersonEditScreen(
 
         UstadTextEditField(
             value = uiState.person?.personAddress ?: "",
-            label = stringResource(id = R.string.address),
+            label = stringResource(id = CR.string.address),
             enabled = uiState.fieldsEnabled,
             onValueChange = {
                 onPersonChanged(uiState.person?.shallowCopy{
@@ -199,7 +200,7 @@ fun PersonEditScreen(
         if (uiState.usernameVisible){
             UstadTextEditField(
                 value = uiState.person?.username ?: "",
-                label = stringResource(id = R.string.username),
+                label = stringResource(id = CR.string.username),
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
                     onPersonChanged(uiState.person?.shallowCopy{
@@ -212,7 +213,7 @@ fun PersonEditScreen(
         if (uiState.passwordVisible){
             UstadTextEditField(
                 value = uiState.person?.newPassword ?: "",
-                label = stringResource(id = R.string.password),
+                label = stringResource(id = CR.string.password),
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
                     onPersonChanged(uiState.person?.shallowCopy{

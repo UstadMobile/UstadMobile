@@ -1,7 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.AppErrorCode
 import com.ustadmobile.core.impl.ErrorCodeException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -46,9 +46,9 @@ class ParentalConsentManagementPresenter(context: Any,
         super.onCreate(savedState)
 
         view.relationshipFieldOptions = listOf(
-            MessageIdOption(MessageID.mother, context, PersonParentJoin.RELATIONSHIP_MOTHER, di),
-            MessageIdOption(MessageID.father, context, PersonParentJoin.RELATIONSHIP_FATHER, di),
-            MessageIdOption(MessageID.other_legal_guardian, context, PersonParentJoin.RELATIONSHIP_OTHER, di)
+            MessageIdOption(MR.strings.mother, context, PersonParentJoin.RELATIONSHIP_MOTHER, di),
+            MessageIdOption(MR.strings.father, context, PersonParentJoin.RELATIONSHIP_FATHER, di),
+            MessageIdOption(MR.strings.other_legal_guardian, context, PersonParentJoin.RELATIONSHIP_OTHER, di)
         )
     }
 
@@ -97,19 +97,19 @@ class ParentalConsentManagementPresenter(context: Any,
         view.siteTerms = db.siteTermsDao.findSiteTerms(systemImpl.getDisplayedLocale())
 
         if(personParentJoin.ppjParentPersonUid == 0L) {
-            view.infoText = systemImpl.getString(MessageID.parent_consent_explanation, context)
+            view.infoText = systemImpl.getString(MR.strings.parent_consent_explanation)
                 .replace("%1\$s", minorPerson?.fullName() ?: "")
                 .replace("%2\$s", minorPerson?.dateOfBirth?.formatDate(context) ?: "")
-                .replace("%3\$s", systemImpl.getString(MessageID.app_name, context))
+                .replace("%3\$s", systemImpl.getString(MR.strings.app_name))
         }else if(db is DoorDatabaseRepository && personParentJoin.ppjParentPersonUid != 0L) {
             if(personParentJoin.ppjParentPersonUid == accountManager.activeAccount.personUid) {
                 val messageId = if(personParentJoin.ppjStatus == PersonParentJoin.STATUS_APPROVED) {
-                    MessageID.status_consent_granted
+                    MR.strings.status_consent_granted
                 }else {
-                    MessageID.status_consent_denied
+                    MR.strings.status_consent_denied
                 }
 
-                view.infoText = systemImpl.getString(messageId, context)
+                view.infoText = systemImpl.getString(messageId)
                     .replace("%1\$s", personParentJoin.ppjApprovalTiemstamp.formatDate(context))
             }else {
                 throw IllegalStateException("Active user is not the parent!")
@@ -141,8 +141,7 @@ class ParentalConsentManagementPresenter(context: Any,
             view.relationshipFieldError = null
 
             if(entity.ppjRelationship == 0) {
-                view.relationshipFieldError = systemImpl.getString(MessageID.field_required_prompt,
-                    context)
+                view.relationshipFieldError = systemImpl.getString(MR.strings.field_required_prompt)
                 return@launch
             }
 

@@ -37,6 +37,7 @@ import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
 import com.ustadmobile.core.viewmodel.PersonAccountEditUiState
+import com.ustadmobile.core.R as CR
 
 
 class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonAccountEditView {
@@ -225,7 +226,7 @@ private fun PersonAccountEditScreen(
         if (uiState.usernameVisible){
             UstadTextEditField(
                 value = uiState.personUsernameAndPassword.username,
-                label = stringResource(id = R.string.username),
+                label = stringResource(id = CR.string.username),
                 onValueChange = {
                     uiState.personUsernameAndPassword.copy(
                         username = it
@@ -239,7 +240,7 @@ private fun PersonAccountEditScreen(
         if (uiState.currentPasswordVisible){
             UstadTextEditField(
                 value = uiState.personUsernameAndPassword.currentPassword,
-                label = stringResource(id = R.string.current_password),
+                label = stringResource(id = CR.string.current_password),
                 onValueChange = {
                     uiState.personUsernameAndPassword.copy(
                         currentPassword = it
@@ -253,7 +254,7 @@ private fun PersonAccountEditScreen(
 
         UstadTextEditField(
             value = uiState.personUsernameAndPassword.newPassword,
-            label = stringResource(id = R.string.new_password),
+            label = stringResource(id = CR.string.new_password),
             onValueChange = {
                 uiState.personUsernameAndPassword.copy(
                     newPassword = it
@@ -266,7 +267,7 @@ private fun PersonAccountEditScreen(
 
         UstadTextEditField(
             value = uiState.personUsernameAndPassword.passwordConfirmed,
-            label = stringResource(id = R.string.confirm_password),
+            label = stringResource(id = CR.string.confirm_password),
             onValueChange = {
                 uiState.personUsernameAndPassword.copy(
                     passwordConfirmed = it

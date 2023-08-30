@@ -19,7 +19,6 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListUiState
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
@@ -28,6 +27,8 @@ import com.ustadmobile.port.android.view.BottomSheetOption
 import com.ustadmobile.port.android.view.OptionsBottomSheetFragment
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.contententry.UstadContentEntryListItem
+import com.ustadmobile.core.R as CR
+import com.ustadmobile.core.MR
 
 class ContentEntryList2Fragment : UstadBaseMvvmFragment() {
 
@@ -70,7 +71,7 @@ class ContentEntryList2Fragment : UstadBaseMvvmFragment() {
         val optionList = listOf(
             BottomSheetOption(
                 R.drawable.ic_folder_black_24dp,
-                requireContext().getString(R.string.content_editor_create_new_category),
+                requireContext().getString(CR.string.content_editor_create_new_category),
                 42
             )
         )
@@ -100,13 +101,13 @@ class ContentEntryList2Fragment : UstadBaseMvvmFragment() {
 
         @JvmField
         val CONTENT_ENTRY_TYPE_LABEL_MAP = mapOf(
-                ContentEntry.TYPE_EBOOK to MessageID.ebook,
-                ContentEntry.TYPE_VIDEO to MessageID.video,
-                ContentEntry.TYPE_DOCUMENT to MessageID.document,
-                ContentEntry.TYPE_ARTICLE to MessageID.article,
-                ContentEntry.TYPE_COLLECTION to MessageID.collection,
-                ContentEntry.TYPE_INTERACTIVE_EXERCISE to MessageID.interactive,
-                ContentEntry.TYPE_AUDIO to MessageID.audio
+                ContentEntry.TYPE_EBOOK to MR.strings.ebook,
+                ContentEntry.TYPE_VIDEO to MR.strings.video,
+                ContentEntry.TYPE_DOCUMENT to MR.strings.document,
+                ContentEntry.TYPE_ARTICLE to MR.strings.article,
+                ContentEntry.TYPE_COLLECTION to MR.strings.collection,
+                ContentEntry.TYPE_INTERACTIVE_EXERCISE to MR.strings.interactive,
+                ContentEntry.TYPE_AUDIO to MR.strings.audio
         )
 
     }

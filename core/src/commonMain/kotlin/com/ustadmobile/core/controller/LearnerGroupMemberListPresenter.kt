@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.view.LearnerGroupMemberListView
@@ -75,7 +75,7 @@ class LearnerGroupMemberListPresenter(context: Any, arguments: Map<String, Strin
                         arguments[UstadView.ARG_NO_IFRAMES]?.toBoolean() ?: false, learnerGroupUid, clazzUid)
             } catch (e: Exception) {
                 if (e is NoAppFoundException) {
-                    view.showSnackBar(systemImpl.getString(MessageID.no_app_found, context))
+                    view.showSnackBar(systemImpl.getString(MR.strings.no_app_found))
                 } else {
                     val message = e.message
                     if (message != null) {

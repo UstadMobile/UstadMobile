@@ -1,6 +1,6 @@
 package com.ustadmobile.core.impl.config
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -35,7 +35,7 @@ data class SupportedLanguagesConfig (
     fun supportedUiLanguagesAndSysDefault(
         systemImpl: UstadMobileSystemImpl
     ) : List<UstadMobileSystemCommon.UiLanguage>{
-        return supportedUiLanguagesAndSysDefault(systemImpl.getString(MessageID.use_device_language))
+        return supportedUiLanguagesAndSysDefault(systemImpl.getString(MR.strings.use_device_language))
     }
 
     companion object {

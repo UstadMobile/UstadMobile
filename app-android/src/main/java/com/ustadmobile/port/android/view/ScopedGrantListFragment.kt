@@ -14,7 +14,7 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.toughra.ustadmobile.R
 import com.ustadmobile.lib.db.entities.ScopedGrantWithName
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
-
+import com.ustadmobile.core.R as CR
 
 class ScopedGrantListFragment(
 ): UstadListViewFragment<ScopedGrant, ScopedGrantWithName>(),
@@ -38,9 +38,9 @@ class ScopedGrantListFragment(
 
         mDataRecyclerViewAdapter = ScopedGrantListRecyclerAdapter(mPresenter)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
-            requireContext().getString(R.string.add))
+            requireContext().getString(CR.string.add))
         super.onViewCreated(view, savedInstanceState)
-        fabManager?.text = requireContext().getString(R.string.permission)
+        fabManager?.text = requireContext().getString(CR.string.permission_key)
     }
 
     override fun onDestroyView() {

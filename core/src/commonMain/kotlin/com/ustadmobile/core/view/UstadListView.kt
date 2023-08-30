@@ -1,9 +1,10 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.door.paging.DataSourceFactory
+import dev.icerock.moko.resources.StringResource
 
 enum class ListViewMode(val mode: String) {
     BROWSER("browser"),
@@ -19,12 +20,12 @@ enum class ListViewAddMode {
 /**
  * Options that can be shown when the user makes selections in a list.
  */
-enum class SelectionOption(val messageId: Int, val commandId: Int) {
-    EDIT(MessageID.edit, 1),
-    DELETE(MessageID.delete, 2),
-    MOVE(MessageID.move,3),
-    HIDE(MessageID.hide, 4),
-    UNHIDE(MessageID.unhide, 5)
+enum class SelectionOption(val stringResource: StringResource, val commandId: Int) {
+    EDIT(MR.strings.edit, 1),
+    DELETE(MR.strings.delete, 2),
+    MOVE(MR.strings.move,3),
+    HIDE(MR.strings.hide, 4),
+    UNHIDE(MR.strings.unhide, 5)
 }
 
 /**

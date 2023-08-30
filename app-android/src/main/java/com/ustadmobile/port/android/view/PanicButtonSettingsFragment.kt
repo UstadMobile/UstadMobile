@@ -10,13 +10,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPanicButtonSettingsBinding
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.port.android.presenter.PanicButtonSettingsPresenter
 import com.ustadmobile.port.android.presenter.PanicTriggerApp
 import org.kodein.di.instance
+import com.ustadmobile.core.R as CR
 
 interface PanicButtonSettingsFragmentEventListener {
     fun onClickSelectPanicTriggerApp()
@@ -104,7 +104,7 @@ class PanicButtonSettingsFragment: UstadBaseFragment(), PanicButtonSettingsView,
 
     override fun onClickSelectPanicTriggerApp() {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.panic_button_app)
+            .setTitle(CR.string.panic_button_app)
             .setItems(panicTriggerAppList.map { it.simpleName }.toTypedArray()) {_, which ->
                 mPresenter?.onSelectTriggerApp(panicTriggerAppList[which])
             }
@@ -121,7 +121,7 @@ class PanicButtonSettingsFragment: UstadBaseFragment(), PanicButtonSettingsView,
         val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE)
             as? ClipboardManager
         clipboard?.setPrimaryClip(ClipData(ClipData.newPlainText("text", unhideCode)))
-        showSnackBar(requireContext().getString(R.string.copied_to_clipboard))
+        showSnackBar(requireContext().getString(CR.string.copied_to_clipboard))
     }
 
     companion object {

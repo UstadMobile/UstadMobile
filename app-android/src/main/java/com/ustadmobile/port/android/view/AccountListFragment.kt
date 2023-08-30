@@ -45,6 +45,7 @@ import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 import kotlinx.datetime.Instant
 import org.kodein.di.instance
+import com.ustadmobile.core.R as CR
 
 class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickListener {
 
@@ -212,8 +213,8 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         aboutItemAdapter = AboutItemAdapter(versionText,mPresenter)
 
         ustadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
-                createNewText = String.format(getString(R.string.add_another),
-                        getString(R.string.account).lowercase()))
+                createNewText = String.format(getString(CR.string.add_another),
+                        getString(CR.string.account).lowercase()))
         ustadListHeaderRecyclerViewAdapter?.newItemVisible = true
         mIntentMessageAdapter = IntentMessageAdapter()
 
@@ -353,7 +354,7 @@ fun AccountListScreen(
                 OutlinedButton(
                     onClick = onMyProfileClick,
                 ) {
-                    Text(stringResource(R.string.my_profile).uppercase())
+                    Text(stringResource(CR.string.my_profile).uppercase())
                 }
 
                 OutlinedButton(
@@ -361,7 +362,7 @@ fun AccountListScreen(
                         .padding(start = 10.dp),
                     onClick = onLogoutClick,
                 ) {
-                    Text(stringResource(R.string.logout).uppercase())
+                    Text(stringResource(CR.string.logout).uppercase())
                 }
 
             }
@@ -390,7 +391,7 @@ fun AccountListScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
-                            contentDescription = stringResource(id = R.string.delete),
+                            contentDescription = stringResource(id = CR.string.delete),
                         )
                     }
                 },
@@ -399,7 +400,7 @@ fun AccountListScreen(
 
         item {
             UstadAddListItem(
-                text = stringResource(id = R.string.add_another_account),
+                text = stringResource(id = CR.string.add_another_account),
                 onClickAdd = onAddItem,
             )
         }

@@ -3,7 +3,7 @@ package com.ustadmobile.core.viewmodel.login
 import com.ustadmobile.core.account.AdultAccountRequiredException
 import com.ustadmobile.core.account.ConsentNotGrantedException
 import com.ustadmobile.core.account.UnauthorizedException
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -78,7 +78,7 @@ class LoginViewModel(
 
         val baseAppUiState = AppUiState(
             navigationVisible = false,
-            title = impl.getString(MessageID.login),
+            title = impl.getString(MR.strings.login),
         )
 
         serverUrl = serverUrl.requirePostfix("/")
@@ -105,7 +105,7 @@ class LoginViewModel(
                         Napier.w("Could not load site object for $serverUrl", e)
                         _uiState.update { prev ->
                             prev.copy(
-                                errorMessage = impl.getString(MessageID.login_network_error)
+                                errorMessage = impl.getString(MR.strings.login_network_error)
                             )
                         }
                         delay(10000)
@@ -176,13 +176,13 @@ class LoginViewModel(
                         savedStateHandle[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong() ?: 0L)
                     goToNextDestAfterLoginOrGuestSelected()
                 }catch(e: AdultAccountRequiredException) {
-                    errorMessage = impl.getString(MessageID.adult_account_required)
+                    errorMessage = impl.getString(MR.strings.adult_account_required)
                 } catch(e: UnauthorizedException) {
-                    errorMessage = impl.getString(MessageID.wrong_user_pass_combo)
+                    errorMessage = impl.getString(MR.strings.wrong_user_pass_combo)
                 } catch(e: ConsentNotGrantedException) {
-                    errorMessage =  impl.getString(MessageID.your_account_needs_approved)
+                    errorMessage =  impl.getString(MR.strings.your_account_needs_approved)
                 }catch(e: Exception) {
-                    errorMessage = impl.getString(MessageID.login_network_error)
+                    errorMessage = impl.getString(MR.strings.login_network_error)
                 }finally {
                     loadingState = LoadingUiState.NOT_LOADING
                     _uiState.update { prev ->
@@ -199,12 +199,12 @@ class LoginViewModel(
                 prev.copy(
                     fieldsEnabled = true,
                     usernameError = if(prev.username.isEmpty()) {
-                        impl.getString(MessageID.field_required_prompt)
+                        impl.getString(MR.strings.field_required_prompt)
                     } else {
                         null
                     },
                     passwordError = if(prev.password.isEmpty()) {
-                        impl.getString(MessageID.field_required_prompt)
+                        impl.getString(MR.strings.field_required_prompt)
                     }else {
                         null
                     }

@@ -22,7 +22,6 @@ import com.toughra.ustadmobile.databinding.ItemLanguageListBinding
 import com.ustadmobile.core.controller.LanguageListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.dao.ClazzDaoCommon
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.view.LanguageListView
@@ -33,6 +32,7 @@ import com.ustadmobile.port.android.view.composable.UstadListSortHeader
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import com.ustadmobile.core.R as CR
 
 class LanguageListFragment(): UstadListViewFragment<Language, Language>(),
         LanguageListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
@@ -73,7 +73,7 @@ class LanguageListFragment(): UstadListViewFragment<Language, Language>(),
 
         mDataRecyclerViewAdapter = LanguageListRecyclerAdapter(mPresenter)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
-            requireContext().getString(R.string.add_a_new_language),
+            requireContext().getString(CR.string.add_a_new_language),
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
         return view
     }
@@ -81,8 +81,8 @@ class LanguageListFragment(): UstadListViewFragment<Language, Language>(),
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fabManager?.text = requireContext().getText(R.string.language)
-        ustadFragmentTitle = requireContext().getString(R.string.languages)
+        fabManager?.text = requireContext().getText(CR.string.language)
+        ustadFragmentTitle = requireContext().getString(CR.string.languages)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
