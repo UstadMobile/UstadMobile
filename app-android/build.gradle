@@ -201,7 +201,8 @@ dependencies {
     implementation project(':lib-database')
     implementation project(':lib-util')
 
-    api "dev.icerock.moko:resources:$version_moko_resources"
+    api libs.moko.resources
+    api libs.moko.resources.compose
 
     implementation "io.github.aakira:napier:$version_napier"
     implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
@@ -273,8 +274,6 @@ dependencies {
     implementation "com.google.accompanist:accompanist-pager-indicators:$version_compose_accompanist"
     implementation "org.burnoutcrew.composereorderable:reorderable:$version_composereorderable"
     implementation "com.google.accompanist:accompanist-flowlayout:$version_compose_accompanist"
-
-    implementation "dev.icerock.moko:resources-compose:0.23.0"
 
     //Image loading library
     implementation "com.squareup.picasso:picasso:$version_android_picasso"

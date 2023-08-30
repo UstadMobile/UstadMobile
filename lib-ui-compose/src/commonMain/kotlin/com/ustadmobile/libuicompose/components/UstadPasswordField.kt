@@ -16,6 +16,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import com.ustadmobile.core.MR
+import dev.icerock.moko.resources.compose.stringResource
+
 
 @Composable
 fun UstadPasswordField(
@@ -53,7 +56,7 @@ fun UstadPasswordField(
                     }else {
                         Icons.Filled.Visibility
                     },
-                    contentDescription = "Toggle"//stringResource(R.string.toggle_visibility)
+                    contentDescription = stringResource(MR.strings.toggle_visibility)
                 )
             }
         },

@@ -10,7 +10,11 @@ pluginManagement {
 dependencyResolutionManagement {
     versionCatalogs {
         libs {
+            version("version-moko-resources", "0.23.0")
+
             library("kodein-di", "org.kodein.di:kodein-di:7.20.2")
+            library("moko-resources", "dev.icerock.moko", "resources").versionRef("version-moko-resources")
+            library("moko-resources-compose", "dev.icerock.moko", "resources-compose").versionRef("version-moko-resources")
         }
     }
 }

@@ -16,6 +16,7 @@ import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.core.R as CR
 import dev.icerock.moko.resources.compose.stringResource as mrStringResource

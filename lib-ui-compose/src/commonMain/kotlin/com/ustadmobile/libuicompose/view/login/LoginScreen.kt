@@ -22,19 +22,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.viewmodel.login.LoginUiState
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.components.UstadPasswordField
-import com.ustadmobile.libuicompose.locale.LocalStringResources
-import com.ustadmobile.libuicompose.locale.localStringResources
-
+import com.ustadmobile.core.MR
+import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
-private fun LoginScreenForViewModel(
+fun LoginScreenForViewModel(
     viewModel: LoginViewModel
 ) {
     val uiState: LoginUiState by viewModel.uiState.collectAsState(LoginUiState())
@@ -57,8 +56,6 @@ private fun LoginScreen(
     onUsernameValueChange: (String) -> Unit = {},
     onPasswordValueChange: (String) -> Unit = {},
 ) {
-    val stringResources = localStringResources()
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -70,10 +67,12 @@ private fun LoginScreen(
         Text(text = uiState.loginIntentMessage ?: "")
 
         UstadInputFieldLayout(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier.padding(vertical = 8.dp)
+                .fillMaxWidth(),
             errorText = uiState.usernameError
         ) {
             OutlinedTextField(
+                modifier = Modifier.testTag("username").fillMaxWidth(),
                 value = uiState.username,
                 onValueChange = onUsernameValueChange,
                 enabled = uiState.fieldsEnabled,
@@ -83,14 +82,15 @@ private fun LoginScreen(
         }
 
         UstadInputFieldLayout(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier.padding(vertical = 8.dp).fillMaxWidth(),
             errorText = uiState.passwordError
         ) {
             UstadPasswordField(
+                modifier = Modifier.testTag("password").fillMaxWidth(),
                 value = uiState.password,
                 onValueChange = onPasswordValueChange,
                 label = {
-                    Text("Password")
+                    stringResource(MR.strings.password)
                 },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(
@@ -112,7 +112,7 @@ private fun LoginScreen(
                 backgroundColor = MaterialTheme.colors.secondary
             )
         ) {
-            Text(stringResources[MessageID.login].uppercase(),
+            Text(stringResource(MR.strings.login).uppercase(),
                 color = contentColorFor(MaterialTheme.colors.secondary)
             )
         }
@@ -125,7 +125,7 @@ private fun LoginScreen(
                 .fillMaxWidth(),
             enabled = uiState.fieldsEnabled,
         ) {
-            Text(stringResources[MessageID.create_account].uppercase())
+            Text(stringResource(MR.strings.create_account).uppercase())
         }
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -136,7 +136,7 @@ private fun LoginScreen(
                 .fillMaxWidth(),
             enabled = uiState.fieldsEnabled,
         ) {
-            Text(stringResources[MessageID.connect_as_guest].uppercase())
+            Text(stringResource(MR.strings.connect_as_guest).uppercase())
         }
 
         Spacer(modifier = Modifier.height(10.dp))

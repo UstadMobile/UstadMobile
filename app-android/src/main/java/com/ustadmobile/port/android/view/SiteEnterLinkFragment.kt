@@ -30,7 +30,7 @@ import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
-import com.ustadmobile.port.android.view.composable.UstadErrorText
+import com.ustadmobile.libuicompose.components.UstadErrorText
 import com.ustadmobile.core.R as CR
 
 class SiteEnterLinkFragment : UstadBaseMvvmFragment() {

@@ -112,7 +112,7 @@ dependencies {
     implementation "net.sourceforge.argparse4j:argparse4j:$version_argparse4j"
     implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
 
-    api "dev.icerock.moko:resources:$version_moko_resources"
+    api libs.moko.resources
 
     //test
     testImplementation project(":lib-test-common")

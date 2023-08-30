@@ -93,7 +93,7 @@ kotlin {
 
         commonMain {
             dependencies {
-                api "dev.icerock.moko:resources:$version_moko_resources"
+                api libs.moko.resources
                 implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
                 implementation "io.ktor:ktor-client-core:$version_ktor"

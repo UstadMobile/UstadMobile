@@ -18,7 +18,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditUiState
 import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditViewModel
 import com.ustadmobile.lib.db.entities.*
@@ -27,7 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.testTag
 import com.ustadmobile.core.impl.locale.TerminologyEntry
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
-import com.ustadmobile.port.android.view.composable.UstadErrorText
+import com.ustadmobile.libuicompose.components.UstadErrorText
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.R as CR
 import dev.icerock.moko.resources.compose.stringResource as mrStringResource
