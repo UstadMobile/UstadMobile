@@ -33,14 +33,10 @@ package com.ustadmobile.core.impl
 
 import java.io.*
 import java.util.*
-import com.ustadmobile.core.generated.locale.MessageIdMap
-import com.ustadmobile.core.impl.locale.StringsXml
-import com.ustadmobile.core.impl.locale.getStringsXmlResource
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.concurrentSafeMapOf
 import dev.icerock.moko.resources.StringResource
 import org.xmlpull.v1.XmlPullParserFactory
-import java.util.concurrent.ConcurrentHashMap
 
 
 /**
@@ -51,8 +47,9 @@ import java.util.concurrent.ConcurrentHashMap
  * @author mike, kileha3
  * @param xppFactory - XmlPullParser factory that
  */
-actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
-                                        private val dataRoot: File
+actual open class UstadMobileSystemImpl(
+    val xppFactory: XmlPullParserFactory,
+    private val dataRoot: File
 ) : UstadMobileSystemCommon(){
 
     private val appConfig: Properties by lazy {
@@ -64,17 +61,6 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
     }
 
     private val localeCache = concurrentSafeMapOf<String, Locale>()
-
-    private val messageIdMapFlipped: Map<String, Int> by lazy {
-        MessageIdMap.idMap.entries.associate { (k, v) -> v to k }
-    }
-
-    private val defaultStringsXml: StringsXml by lazy {
-        this::class.java.getStringsXmlResource("/values/strings_ui.xml", xppFactory,
-            messageIdMapFlipped)
-    }
-
-    private val foreignStringsXml: MutableMap<String, StringsXml> = ConcurrentHashMap()
 
     private val appPrefs : Properties by lazy {
         Properties().apply {
@@ -117,22 +103,6 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
     fun getString(stringResource: StringResource, localeCode: String ) : String{
         return stringResource.localized(Locale(localeCode))
     }
-
-    fun getString(localeCode: String, messageId: Int, context: Any? = null): String {
-        val localeCodeLower = localeCode.toLowerCase(Locale.ROOT)
-
-        val stringsXml = if(localeCodeLower.startsWith("en")) {
-            defaultStringsXml
-        }else {
-            foreignStringsXml.computeIfAbsent(localeCodeLower.substring(0, 2)) {
-                this::class.java.getStringsXmlResource("/values-$it/strings.xml", xppFactory,
-                    messageIdMapFlipped, defaultStringsXml)
-            }
-        }
-
-        return stringsXml[messageId]
-    }
-
 
     /**
      * Provides a list of paths to removable storage (e.g. sd card) directories

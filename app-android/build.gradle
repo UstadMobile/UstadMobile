@@ -204,7 +204,7 @@ dependencies {
     implementation project(':lib-database')
     implementation project(':lib-util')
 
-    api "dev.icerock.moko:resources:0.23.0"
+    api "dev.icerock.moko:resources:$version_moko_resources"
 
     implementation "io.github.aakira:napier:$version_napier"
     implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"

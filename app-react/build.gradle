@@ -50,7 +50,7 @@ kotlin {
                 implementation project(":core")
                 implementation project(":lib-util")
                 implementation project(":lib-database")
-                api "dev.icerock.moko:resources:0.23.0"
+                api "dev.icerock.moko:resources:$version_moko_resources"
 
                 implementation enforcedPlatform("org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom:$kotlinWrappersVersion")
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-react"
