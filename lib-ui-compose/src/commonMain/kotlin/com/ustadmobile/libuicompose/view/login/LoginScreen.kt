@@ -74,6 +74,9 @@ private fun LoginScreen(
             OutlinedTextField(
                 modifier = Modifier.testTag("username").fillMaxWidth(),
                 value = uiState.username,
+                label = {
+                    Text(stringResource(MR.strings.username))
+                },
                 onValueChange = onUsernameValueChange,
                 enabled = uiState.fieldsEnabled,
                 isError = uiState.usernameError != null,
@@ -90,7 +93,7 @@ private fun LoginScreen(
                 value = uiState.password,
                 onValueChange = onPasswordValueChange,
                 label = {
-                    stringResource(MR.strings.password)
+                    Text(stringResource(MR.strings.password))
                 },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(
