@@ -33,6 +33,7 @@ import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
 import com.ustadmobile.port.android.view.composable.UstadAddListItem
 import com.ustadmobile.port.android.view.composable.UstadPersonAvatar
+import com.ustadmobile.core.R as CR
 
 interface InviteWithLinkHandler{
     fun handleClickInviteWithLink()
@@ -135,7 +136,7 @@ fun PersonListScreen(
             item {
                 UstadAddListItem(
                     modifier = Modifier.testTag("add_new_person"),
-                    text = stringResource(R.string.add_a_new_person),
+                    text = stringResource(CR.string.add_a_new_person),
                     onClickAdd = onClickAddNew
                 )
             }

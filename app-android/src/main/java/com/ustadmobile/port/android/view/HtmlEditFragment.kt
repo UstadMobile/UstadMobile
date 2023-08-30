@@ -23,10 +23,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.HtmlEditUiState
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.port.android.view.composable.AztecEditor
+import com.ustadmobile.core.R as CR
 
 class HtmlEditFragment: UstadBaseMvvmFragment() {
 
@@ -69,8 +69,8 @@ fun HtmlEditScreen(
 
 
         if(uiState.wordLimit != null || uiState.charLimit != null) {
-            val words = stringResource(R.string.words)
-            val characters = stringResource(R.string.characters)
+            val words = stringResource(CR.string.words)
+            val characters = stringResource(CR.string.characters)
             val errorColor = MaterialTheme.colors.error
             val annotatedStr = remember(
                 uiState.wordCount, uiState.wordLimit, uiState.charCount, uiState.charLimit

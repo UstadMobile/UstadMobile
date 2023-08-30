@@ -18,6 +18,7 @@ import com.ustadmobile.core.util.mimeTypeToPlayStoreIdMap
 import com.ustadmobile.core.view.HarAndroidView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -82,7 +83,7 @@ class HarContentFragment : UstadBaseFragment(), HarAndroidView, FragmentBackHand
         }
     }
 
-    override fun showErrorWithAction(message: String, actionMessageId: Int, mimeType: String) {
+    override fun showErrorWithAction(message: String, actionMessageId: StringResource, mimeType: String) {
         showSnackBar(message, {
             var appPackageName = mimeTypeToPlayStoreIdMap[mimeType]
             if (appPackageName == null) {

@@ -82,8 +82,6 @@
             android:layout_marginVertical="@dimen/dimen_8dp"
             android:layout_marginStart="@dimen/dimen_8dp"
             android:visibility="@{addFileVisible ? View.VISIBLE : View.GONE}"
-            app:textMessageIdLookupKey="@{assignment.caFileType}"
-            app:textMessageIdLookupMap="@{SubmissionConstants.FILE_TYPE_MAP}"
             app:layout_constraintStart_toEndOf="@id/item_file_type_label"
             app:layout_constraintTop_toBottomOf="@id/submission_add_file_button"
 

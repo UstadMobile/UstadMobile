@@ -1,10 +1,10 @@
 package com.ustadmobile.core.impl.locale
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toTerminologyEntries
 import com.ustadmobile.lib.db.entities.CourseTerminology
-import com.ustadmobile.lib.db.entities.TerminologyEntry
+import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.json.Json
 
 /**
@@ -19,12 +19,11 @@ import kotlinx.serialization.json.Json
  * val terminologyStrings = CourseTerminologyStrings(courseTerminology, systemImpl, json)
  *
  * Get the string to use for students (if overriden):
- *  uiState.terminologyStrings[MessageID.students] ?: stringResource(R.string.students)
+ *  uiState.terminologyStrings[MR.strings.students] ?: stringResource(R.string.students)
  *
  * This is valid for the Message ID listed in TerminologyKeys
  *
  */
-@kotlinx.serialization.Serializable
 class CourseTerminologyStrings(
     private val terminologyEntries: List<TerminologyEntry>
 ) {
@@ -36,8 +35,8 @@ class CourseTerminologyStrings(
     ) : this(courseTerminology.toTerminologyEntries(json, systemImpl))
 
 
-    operator fun get(messageId: Int) : String? {
-        return terminologyEntries.firstOrNull { it.messageId == messageId }?.term
+    operator fun get(messageId: StringResource) : String? {
+        return terminologyEntries.firstOrNull { it.stringResource == messageId }?.term
     }
 
     override fun equals(other: Any?): Boolean {

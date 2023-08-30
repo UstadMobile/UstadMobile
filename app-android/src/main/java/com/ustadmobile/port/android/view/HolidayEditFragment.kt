@@ -13,6 +13,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.HolidayEditView
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
+import com.ustadmobile.core.R as CR
 
 class HolidayEditFragment(): UstadEditFragment<Holiday>(), HolidayEditView {
 
@@ -35,7 +36,7 @@ class HolidayEditFragment(): UstadEditFragment<Holiday>(), HolidayEditView {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setEditFragmentTitle(R.string.add_a_holiday, R.string.edit_holiday)
+        setEditFragmentTitle(CR.string.add_a_holiday, CR.string.edit_holiday)
 
         mPresenter = HolidayEditPresenter(requireContext(), arguments.toStringMap(), this,
                 di, viewLifecycleOwner).withViewLifecycle()

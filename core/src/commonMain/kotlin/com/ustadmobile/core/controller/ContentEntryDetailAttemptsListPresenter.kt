@@ -2,7 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.StatementDao
 import com.ustadmobile.core.db.dao.StatementDaoCommon
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ContentEntryDetailAttemptsListView
@@ -76,12 +76,12 @@ class ContentEntryDetailAttemptsListPresenter(context: Any, arguments: Map<Strin
     companion object {
 
         val SORT_OPTIONS = listOf(
-                SortOrderOption(MessageID.first_name, StatementDaoCommon.SORT_FIRST_NAME_ASC, true),
-                SortOrderOption(MessageID.first_name, StatementDaoCommon.SORT_FIRST_NAME_DESC, false),
-                SortOrderOption(MessageID.last_name, StatementDaoCommon.SORT_LAST_NAME_ASC, true),
-                SortOrderOption(MessageID.last_name, StatementDaoCommon.SORT_LAST_NAME_DESC, false),
-                SortOrderOption(MessageID.last_active, StatementDaoCommon.SORT_LAST_ACTIVE_ASC, true),
-                SortOrderOption(MessageID.last_active, StatementDaoCommon.SORT_LAST_ACTIVE_DESC, false)
+                SortOrderOption(MR.strings.first_name, StatementDaoCommon.SORT_FIRST_NAME_ASC, true),
+                SortOrderOption(MR.strings.first_name, StatementDaoCommon.SORT_FIRST_NAME_DESC, false),
+                SortOrderOption(MR.strings.last_name, StatementDaoCommon.SORT_LAST_NAME_ASC, true),
+                SortOrderOption(MR.strings.last_name, StatementDaoCommon.SORT_LAST_NAME_DESC, false),
+                SortOrderOption(MR.strings.last_active, StatementDaoCommon.SORT_LAST_ACTIVE_ASC, true),
+                SortOrderOption(MR.strings.last_active, StatementDaoCommon.SORT_LAST_ACTIVE_DESC, false)
         )
 
     }

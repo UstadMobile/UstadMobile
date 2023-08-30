@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <plurals name="number_of_attempts">
+        <item quantity="one">%d кӯшишҳо</item>
+        <item quantity="other"/>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">%d соатҳо</item>
+        <item quantity="other"/>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">%d дақиқаҳо</item>
+        <item quantity="other"/>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">%d сонияҳо</item>
+        <item quantity="other"/>
+    </plurals>
+</resources>

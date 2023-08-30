@@ -25,8 +25,8 @@ import com.ustadmobile.core.viewmodel.LeavingReasonEditViewModel
 import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
-import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
-
+import com.ustadmobile.port.android.view.composable.UstadInputFieldLayout
+import com.ustadmobile.core.R as CR
 
 class LeavingReasonEditFragment: UstadBaseMvvmFragment() {
 
@@ -67,7 +67,7 @@ fun LeavingReasonEditScreen(
             errorText = uiState.reasonTitleError,
         ) {
             OutlinedTextField(
-                label = { Text(stringResource(R.string.description)) },
+                label = { Text(stringResource(CR.string.description)) },
                 value = uiState.leavingReason?.leavingReasonTitle ?: "",
                 onValueChange = {
                     onLeavingReasonChanged(uiState.leavingReason?.shallowCopy{

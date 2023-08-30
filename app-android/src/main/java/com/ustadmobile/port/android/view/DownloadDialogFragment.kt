@@ -13,7 +13,6 @@ import androidx.appcompat.app.AlertDialog
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
@@ -28,6 +27,8 @@ import kotlinx.coroutines.launch
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.util.*
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.R as CR
 
 //It would be nice to move this to proguard-rules.pro and allow obfuscation of the contents of the class
 @Keep
@@ -73,8 +74,8 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
 
 
         val builder = AlertDialog.Builder(requireContext())
-        builder.setPositiveButton(R.string.ok, this)
-        builder.setNegativeButton(R.string.cancel, this)
+        builder.setPositiveButton(CR.string.ok, this)
+        builder.setNegativeButton(CR.string.cancel, this)
         builder.setView(rootView)
 
         mDialog = builder.create()
@@ -106,8 +107,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
         val storageOptions = containerStorageManager.storageList
         this.storageDirs = storageOptions
         val optionLabels = storageOptions.map { umStorageDir ->
-            String.format(impl.getString(
-                    MessageID.download_storage_option_device, requireContext()),
+            String.format(impl.getString(MR.strings.download_storage_option_device),
                     umStorageDir.name,
                     UMFileUtil.formatFileSize(umStorageDir.usableSpace))
         }

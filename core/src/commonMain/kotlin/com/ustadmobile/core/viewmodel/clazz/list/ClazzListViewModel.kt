@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.clazz.list
 
 import com.ustadmobile.core.db.dao.ClazzDaoCommon
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.SortOrderOption
@@ -38,19 +38,19 @@ data class ClazzListUiState(
     val canAddNewCourse: Boolean = false,
 
     val filterOptions: List<MessageIdOption2> = listOf(
-        MessageIdOption2(MessageID.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
-        MessageIdOption2(MessageID.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
-        MessageIdOption2(MessageID.all, 0)
+        MessageIdOption2(MR.strings.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
+        MessageIdOption2(MR.strings.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
+        MessageIdOption2(MR.strings.all, 0)
     ),
 
     ) {
     companion object {
 
         val DEFAULT_SORT_OTIONS = listOf(
-            SortOrderOption(MessageID.name, ClazzDaoCommon.SORT_CLAZZNAME_ASC, true),
-            SortOrderOption(MessageID.name, ClazzDaoCommon.SORT_CLAZZNAME_DESC, false),
-            SortOrderOption(MessageID.attendance, ClazzDaoCommon.SORT_ATTENDANCE_ASC, true),
-            SortOrderOption(MessageID.attendance, ClazzDaoCommon.SORT_ATTENDANCE_DESC, false)
+            SortOrderOption(MR.strings.name_key, ClazzDaoCommon.SORT_CLAZZNAME_ASC, true),
+            SortOrderOption(MR.strings.name_key, ClazzDaoCommon.SORT_CLAZZNAME_DESC, false),
+            SortOrderOption(MR.strings.attendance, ClazzDaoCommon.SORT_ATTENDANCE_ASC, true),
+            SortOrderOption(MR.strings.attendance, ClazzDaoCommon.SORT_ATTENDANCE_DESC, false)
         )
 
     }
@@ -99,8 +99,8 @@ class ClazzListViewModel(
             prev.copy(
                 navigationVisible = true,
                 searchState = createSearchEnabledState(),
-                title = listTitle(MessageID.courses, MessageID.courses),
-                fabState = createFabState(true, MessageID.course)
+                title = listTitle(MR.strings.courses, MR.strings.courses),
+                fabState = createFabState(true, MR.strings.course)
             )
         }
 

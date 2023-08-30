@@ -1,11 +1,11 @@
 package com.ustadmobile.core.impl
 
-import com.ustadmobile.core.generated.locale.MessageIdMap
-import com.ustadmobile.core.impl.locale.StringsXml
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlin.js.Date
 import com.ustadmobile.door.DoorUri
+import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.provider.JsStringProvider
 import kotlinx.browser.document
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -17,29 +17,17 @@ import org.w3c.dom.HTMLAnchorElement
  *
  *
  * @author mike, kileha3
- * @param defaultStringsXmlStr The string of the strings_ui.xml file for English (must be loaded
+ * @param defaultStringsXmlStr The string of the strings.xml file for English (must be loaded
  *        (asynchronously in advance)
- * @param displayLocaleStringsXmlStr The String of the strings_ui.xml file for the display locale
+ * @param displayLocaleStringsXmlStr The String of the strings.xml file for the display locale
  *        if the display locale is not English.
  */
 actual open class UstadMobileSystemImpl(
-    private val defaultStringsXml: StringsXml,
-    private val displayLocaleStringsXml: StringsXml?
+    private val jsStringProvider: JsStringProvider,
 ): UstadMobileSystemCommon() {
 
-    private val messageIdMapFlipped: Map<String, Int> by lazy {
-        MessageIdMap.idMap.entries.associate { (k, v) -> v to k }
-    }
-
-    /**
-     * Get a string for use in the UI
-     */
-    actual override fun getString(messageCode: Int, context: Any): String {
-        return (displayLocaleStringsXml ?: defaultStringsXml)[messageCode]
-    }
-
-    actual override fun getString(messageCode: Int): String {
-        return (displayLocaleStringsXml ?: defaultStringsXml)[messageCode]
+    override fun getString(stringResource: StringResource): String {
+        return stringResource.localized(provider = jsStringProvider, locale = displayedLocale)
     }
 
     /**

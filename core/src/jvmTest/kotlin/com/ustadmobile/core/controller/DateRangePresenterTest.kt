@@ -4,7 +4,7 @@ package com.ustadmobile.core.controller
 
 import org.mockito.kotlin.*
 import com.soywiz.klock.DateTime
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadBackStackEntry
 import com.ustadmobile.core.impl.nav.UstadNavController
@@ -119,8 +119,7 @@ class DateRangePresenterTest {
 
         presenter.handleClickSave(initialEntity)
 
-        verify(mockView, timeout(5000)).fromFixedDateMissing = eq(impl.getString(
-                MessageID.field_required_prompt, context))
+        verify(mockView, timeout(5000)).fromFixedDateMissing = eq(impl.getString(MR.strings.field_required_prompt))
 
     }
 

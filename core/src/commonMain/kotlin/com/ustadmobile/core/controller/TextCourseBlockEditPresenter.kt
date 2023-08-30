@@ -1,7 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.toLocalMidnight
 import com.ustadmobile.core.util.safeParse
@@ -98,7 +98,7 @@ class TextCourseBlockEditPresenter(context: Any, args: Map<String, String>, view
         view.fieldsEnabled = false
         presenterScope.launch {
             if(entity.cbTitle.isNullOrEmpty()){
-                view.blockTitleError = systemImpl.getString(MessageID.field_required_prompt, context)
+                view.blockTitleError = systemImpl.getString(MR.strings.field_required_prompt)
                 view.fieldsEnabled = true
                 return@launch
             }

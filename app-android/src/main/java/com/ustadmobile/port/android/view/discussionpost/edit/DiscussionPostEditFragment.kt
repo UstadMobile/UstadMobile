@@ -26,8 +26,9 @@ import com.ustadmobile.lib.db.entities.DiscussionPost
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.AztecEditor
-import com.ustadmobile.libuicompose.components.UstadErrorText
-import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
+import com.ustadmobile.port.android.view.composable.UstadErrorText
+import com.ustadmobile.port.android.view.composable.UstadInputFieldLayout
+import com.ustadmobile.core.R as CR
 
 class DiscussionPostEditFragment: UstadBaseMvvmFragment(){
 
@@ -105,7 +106,7 @@ private fun DiscussionPostEditScreen(
             OutlinedTextField(
                 value = uiState.discussionPost?.discussionPostTitle ?: "",
                 modifier = Modifier.testTag("discussion_post_title").fillMaxWidth(),
-                label = { Text(stringResource(id = R.string.title)) },
+                label = { Text(stringResource(id = CR.string.title)) },
                 isError = uiState.discussionPostTitleError != null,
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {

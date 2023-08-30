@@ -1,20 +1,21 @@
 package com.ustadmobile.core.viewmodel.clazzassignment
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
+import dev.icerock.moko.resources.StringResource
 
 object ClazzAssignmentViewModelConstants {
 
     val SUBMISSION_STAUTUS_MESSAGE_ID = mapOf(
-        CourseAssignmentSubmission.SUBMITTED to MessageID.submitted,
-        CourseAssignmentSubmission.MARKED to MessageID.marked,
-        CourseAssignmentSubmission.NOT_SUBMITTED to MessageID.not_submitted,
+        CourseAssignmentSubmission.SUBMITTED to MR.strings.submitted_key,
+        CourseAssignmentSubmission.MARKED to MR.strings.marked_key,
+        CourseAssignmentSubmission.NOT_SUBMITTED to MR.strings.not_submitted,
     )
 
-    enum class TextLimitType(val messageId: Int, val value: Int) {
-        LIMIT_WORDS(MessageID.words, ClazzAssignment.TEXT_WORD_LIMIT),
-        LIMIT_CHARS(MessageID.characters, ClazzAssignment.TEXT_CHAR_LIMIT),
+    enum class TextLimitType(val stringResource: StringResource, val value: Int) {
+        LIMIT_WORDS(MR.strings.words, ClazzAssignment.TEXT_WORD_LIMIT),
+        LIMIT_CHARS(MR.strings.characters, ClazzAssignment.TEXT_CHAR_LIMIT),
     }
 
     enum class MarkingType(val value: Int) {

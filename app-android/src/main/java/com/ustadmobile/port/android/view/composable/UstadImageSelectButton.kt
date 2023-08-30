@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view.composable
 
 import android.content.DialogInterface
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -39,12 +38,13 @@ import com.ustadmobile.port.android.impl.nav.NavHostTempFileRegistrar
 import com.ustadmobile.port.android.util.compose.rememberActiveDatabase
 import com.ustadmobile.port.android.util.ext.getActivityContext
 import java.io.File
+import com.ustadmobile.core.R as CR
 
 
 private val OPTIONS_STRING_IDS = arrayOf(
-    R.string.remove_photo,
-    R.string.take_new_photo_from_camera,
-    R.string.select_new_photo_from_gallery
+    CR.string.remove_photo,
+    CR.string.take_new_photo_from_camera,
+    CR.string.select_new_photo_from_gallery
 )
 
 @Composable
@@ -101,7 +101,7 @@ fun UstadImageSelectButton(
 
     fun showMenuDialog() {
         MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.change_photo)
+            .setTitle(CR.string.change_photo)
             .setItems(OPTIONS_STRING_IDS.map { context.getString(it) }.toTypedArray(), listener)
             .show()
     }
@@ -119,7 +119,7 @@ fun UstadImageSelectButton(
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_add_a_photo_24),
-                contentDescription = stringResource(R.string.change_photo),
+                contentDescription = stringResource(CR.string.change_photo),
                 colorFilter = ColorFilter.tint(MaterialTheme.colors.onSecondary),
                 modifier = Modifier.size(48.dp)
             )

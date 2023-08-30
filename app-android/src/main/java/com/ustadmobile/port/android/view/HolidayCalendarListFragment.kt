@@ -30,7 +30,7 @@ import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
-
+import com.ustadmobile.core.R as CR
 
 class HolidayCalendarListFragment()
     : UstadListViewFragment<HolidayCalendar, HolidayCalendarWithNumEntries>(),
@@ -75,13 +75,13 @@ class HolidayCalendarListFragment()
                 this,  di, viewLifecycleOwner).withViewLifecycle()
         mDataRecyclerViewAdapter = HolidayCalendarListRecyclerAdapter(mPresenter)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
-                requireContext().getString(R.string.add_a_new_holiday_calendar))
+                requireContext().getString(CR.string.add_a_new_holiday_calendar))
         return view
     }
 
     override fun onResume() {
         super.onResume()
-        mActivityWithFab?.activityFloatingActionButton?.text = requireContext().getString(R.string.holiday_calendar)
+        mActivityWithFab?.activityFloatingActionButton?.text = requireContext().getString(CR.string.holiday_calendar)
     }
 
     override fun onClick(view: View?) {
@@ -107,7 +107,7 @@ class HolidayCalendarListFragment()
 
             override fun areContentsTheSame(oldItem: HolidayCalendarWithNumEntries,
                                             newItem: HolidayCalendarWithNumEntries): Boolean {
-                return oldItem == newItem
+                return oldItem.umCalendarName == newItem.umCalendarName && oldItem.numEntries == newItem.numEntries
             }
         }
 
@@ -138,7 +138,7 @@ fun HolidayCalendarListScreen(
                     Text(text = holidayCalendar.umCalendarName ?: "")
                 },
                 secondaryText = {
-                    Text(text = stringResource(id = R.string.num_holidays, holidayCalendar.numEntries))
+                    Text(text = stringResource(id = CR.string.num_holidays, holidayCalendar.numEntries))
                 }
             )
         }

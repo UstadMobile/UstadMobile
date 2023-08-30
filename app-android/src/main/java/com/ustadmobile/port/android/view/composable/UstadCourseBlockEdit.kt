@@ -10,16 +10,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.viewmodel.courseblock.CourseBlockViewModelConstants.CompletionCriteria
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
-import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
+import com.ustadmobile.core.R as CR
+import dev.icerock.moko.resources.compose.stringResource as mrStringResource
 
 @Composable
 fun UstadCourseBlockEdit(
@@ -43,7 +42,7 @@ fun UstadCourseBlockEdit(
                     .testTag("title")
                     .defaultItemPadding(),
                 value = uiState.courseBlock?.cbTitle ?: "",
-                label = { Text(stringResource(R.string.title)) },
+                label = { Text(stringResource(CR.string.title)) },
                 isError = uiState.caTitleError != null,
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
@@ -56,7 +55,7 @@ fun UstadCourseBlockEdit(
 
         HtmlClickableTextField(
             html = uiState.courseBlock?.cbDescription ?: "",
-            label = stringResource(R.string.description),
+            label = stringResource(CR.string.description),
             onClick = onClickEditDescription,
             modifier = Modifier
                 .fillMaxWidth()
@@ -71,8 +70,8 @@ fun UstadCourseBlockEdit(
                 value = uiState.courseBlock?.cbHideUntilDate ?: 0,
                 modifier = Modifier
                     .testTag("hide_until_date"),
-                dateLabel = { Text(stringResource(R.string.dont_show_before).addOptionalSuffix()) },
-                timeLabel = { Text(stringResource(R.string.time)) },
+                dateLabel = { Text(stringResource(CR.string.dont_show_before).addOptionalSuffix()) },
+                timeLabel = { Text(stringResource(CR.string.time)) },
                 timeZoneId = uiState.timeZone,
                 onValueChange = {
                     onCourseBlockChange(uiState.courseBlock?.shallowCopy {
@@ -94,8 +93,8 @@ fun UstadCourseBlockEdit(
                     value = CompletionCriteria.valueOf(
                         uiState.courseBlock?.cbCompletionCriteria ?: 0
                     ),
-                    label = stringResource(R.string.completion_criteria),
-                    itemText = { messageIdResource(it.messageId) },
+                    label = stringResource(CR.string.completion_criteria),
+                    itemText = { mrStringResource(it.stringResource) },
                     options = uiState.completionCriteriaOptions,
                     onOptionSelected = {
                         onCourseBlockChange(uiState.courseBlock?.shallowCopy{
@@ -115,11 +114,11 @@ fun UstadCourseBlockEdit(
                         .weight(0.5F)
                         .defaultItemPadding(start = 0.dp),
                     value = (uiState.courseBlock?.cbMinPoints?.toFloat() ?: 0f),
-                    label = { Text(stringResource(R.string.points)) },
+                    label = { Text(stringResource(CR.string.points)) },
                     enabled = uiState.fieldsEnabled,
                     trailingIcon = {
                         Text(
-                            text = stringResource(R.string.points),
+                            text = stringResource(CR.string.points),
                             modifier = Modifier.padding(end = 16.dp)
                         )
                     },
@@ -143,10 +142,10 @@ fun UstadCourseBlockEdit(
                         .testTag("cbMaxPoints")
                         .fillMaxWidth(),
                     value = (uiState.courseBlock?.cbMaxPoints?.toFloat() ?: 0f),
-                    label = { Text(stringResource(id = R.string.maximum_points)) },
+                    label = { Text(stringResource(id = CR.string.maximum_points)) },
                     trailingIcon = {
                         Text(
-                            text = stringResource(R.string.points),
+                            text = stringResource(CR.string.points),
                             modifier = Modifier.padding(end = 16.dp)
                         )
                     },
@@ -172,8 +171,8 @@ fun UstadCourseBlockEdit(
                     value = uiState.courseBlock?.cbDeadlineDate ?: 0,
                     isError = uiState.caDeadlineError != null,
                     unsetDefault = UNSET_DISTANT_FUTURE,
-                    dateLabel = { Text(stringResource(id = R.string.deadline).addOptionalSuffix()) },
-                    timeLabel = { stringResource(id = R.string.time) },
+                    dateLabel = { Text(stringResource(id = CR.string.deadline).addOptionalSuffix()) },
+                    timeLabel = { stringResource(id = CR.string.time) },
                     timeZoneId = uiState.timeZone,
                     onValueChange = {
                         onCourseBlockChange(uiState.courseBlock?.shallowCopy {
@@ -194,8 +193,8 @@ fun UstadCourseBlockEdit(
                     modifier = Modifier.testTag("cbGracePeriodDate"),
                     value = uiState.courseBlock?.cbGracePeriodDate ?: 0,
                     unsetDefault = UNSET_DISTANT_FUTURE,
-                    dateLabel = { Text(stringResource(id = R.string.end_of_grace_period)) },
-                    timeLabel = { stringResource(id = R.string.time) },
+                    dateLabel = { Text(stringResource(id = CR.string.end_of_grace_period)) },
+                    timeLabel = { stringResource(id = CR.string.time) },
                     timeZoneId = uiState.timeZone,
                     onValueChange = {
                         onCourseBlockChange(uiState.courseBlock?.shallowCopy {
@@ -213,7 +212,7 @@ fun UstadCourseBlockEdit(
                     .fillMaxWidth()
                     .testTag("cbLateSubmissionPenalty"),
                 value = (uiState.courseBlock?.cbLateSubmissionPenalty?.toFloat() ?: 0f),
-                label = { Text(stringResource(id = R.string.late_submission_penalty)) },
+                label = { Text(stringResource(id = CR.string.late_submission_penalty)) },
                 enabled = uiState.fieldsEnabled,
                 trailingIcon = {
                     Text(text = "%", modifier = Modifier.padding(end = 16.dp))
@@ -229,7 +228,7 @@ fun UstadCourseBlockEdit(
             Text(
                 modifier = Modifier.padding(start = 32.dp, bottom = 8.dp),
                 style = MaterialTheme.typography.caption,
-                text = stringResource(id = R.string.penalty_label)
+                text = stringResource(id = CR.string.penalty_label)
             )
         }
     }

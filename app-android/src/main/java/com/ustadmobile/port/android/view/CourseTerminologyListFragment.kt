@@ -32,11 +32,11 @@ import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.google.accompanist.themeadapter.material.MdcTheme
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListUiState
 import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListViewModel
 import com.ustadmobile.lib.db.entities.CourseTerminology
+import com.ustadmobile.core.R as CR
 
 class CourseTerminologyListFragment: UstadBaseMvvmFragment() {
 
@@ -90,7 +90,7 @@ fun CourseTerminologyListScreen(
                     modifier = Modifier.clickable {
                         onClickAddNewItem()
                     },
-                    text = { Text(stringResource(R.string.add_new_terminology)) },
+                    text = { Text(stringResource(CR.string.add_new_terminology)) },
                     icon = {
                         Icon(imageVector = Icons.Filled.Add, contentDescription = null)
                     }

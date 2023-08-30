@@ -7,6 +7,8 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.UstadDetailView
+import dev.icerock.moko.resources.StringResource
+import com.ustadmobile.core.R as CR
 
 abstract class UstadDetailFragment<T: Any>: UstadBaseFragment(), UstadDetailView<T> {
 
@@ -26,7 +28,7 @@ abstract class UstadDetailFragment<T: Any>: UstadBaseFragment(), UstadDetailView
         mActivityWithFab = (context as? UstadActivityWithFab)
     }
 
-    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: StringResource?) {
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
     }
 
@@ -37,7 +39,7 @@ abstract class UstadDetailFragment<T: Any>: UstadBaseFragment(), UstadDetailView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fabManager?.text = requireContext().getString(R.string.edit)
+        fabManager?.text = requireContext().getString(CR.string.edit)
         fabManager?.icon = R.drawable.ic_edit_white_24dp
         fabManager?.onClickListener = {
             detailPresenter?.handleClickEdit()

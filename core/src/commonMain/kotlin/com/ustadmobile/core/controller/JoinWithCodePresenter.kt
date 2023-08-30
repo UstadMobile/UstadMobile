@@ -2,7 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.AlreadyEnroledInClassException
@@ -37,9 +37,9 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
         val codeArg = arguments[UstadView.ARG_CODE] ?:""
         view.code = codeArg
         view.buttonLabel = if(tableId == Clazz.TABLE_ID) {
-            systemImpl.getString(MessageID.join_class, context)
+            systemImpl.getString(MR.strings.join_class)
         }else {
-            systemImpl.getString(MessageID.join_school, context)
+            systemImpl.getString(MR.strings.join_school)
         }
 
         entityTableId = tableId ?: 0
@@ -68,7 +68,7 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
 
     fun handleClickDone(code: String) {
         if(code.isEmpty()){
-            view.errorText = systemImpl.getString(MessageID.field_required_prompt, context)
+            view.errorText = systemImpl.getString(MR.strings.field_required_prompt)
             return
         }
 
@@ -96,19 +96,18 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                         Napier.d { "JoinWithCode: enroling into course "}
                         dbRepo.enrolPersonIntoClazzAtLocalTimezone(personToEnrol,
                             clazzToJoin.clazzUid, ClazzEnrolment.ROLE_STUDENT_PENDING)
-                        val message = systemImpl.getString(MessageID.please_wait_for_approval, context)
+                        val message = systemImpl.getString(MR.strings.please_wait_for_approval)
                         systemImpl.go(ClazzList2View.VIEW_NAME,
                             mapOf(ARG_SNACK_MESSAGE to message), context,
                             UstadMobileSystemCommon.UstadGoOptions(popUpToViewName = UstadView.CURRENT_DEST,
                                 popUpToInclusive = true))
                     }else {
                         view.loading = false
-                        view.errorText = systemImpl.getString(MessageID.invalid_register_code,
-                            context)
+                        view.errorText = systemImpl.getString(MR.strings.invalid_register_code)
                     }
                 }catch(e: AlreadyEnroledInClassException) {
                     view.loading = false
-                    view.errorText = systemImpl.getString(MessageID.you_are_already_in_class, context)
+                    view.errorText = systemImpl.getString(MR.strings.you_are_already_in_class)
                         .replace("%1\$s", clazzToJoin?.clazzName ?: "")
                 }
             }else if(entityTableId == School.TABLE_ID){
@@ -128,26 +127,24 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                     if(schoolToJoin  != null && personToEnrol != null) {
                         dbRepo.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol,
                             schoolToJoin.schoolUid, Role.ROLE_SCHOOL_STUDENT_PENDING_UID)
-                        val message = systemImpl.getString(MessageID.please_wait_for_approval,
-                            context)
+                        val message = systemImpl.getString(MR.strings.please_wait_for_approval)
                         systemImpl.go(SchoolListView.VIEW_NAME,
                             mapOf(ARG_SNACK_MESSAGE to message), context,
                             UstadMobileSystemCommon.UstadGoOptions(popUpToViewName = UstadView.CURRENT_DEST,
                                 popUpToInclusive = true))
                     }else {
                         view.loading = false
-                        view.errorText = systemImpl.getString(MessageID.invalid_register_code,
-                            context)
+                        view.errorText = systemImpl.getString(MR.strings.invalid_register_code)
                     }
                 }catch(e: AlreadyEnroledInSchoolException) {
                     view.loading = false
-                    view.errorText = systemImpl.getString(MessageID.you_are_already_in_school, context)
+                    view.errorText = systemImpl.getString(MR.strings.you_are_already_in_school)
                         .replace("%1\$s", schoolToJoin?.schoolName ?: "")
                 }
 
             }else {
                 view.loading = false
-                view.errorText = systemImpl.getString(MessageID.invalid_register_code, context)
+                view.errorText = systemImpl.getString(MR.strings.invalid_register_code)
             }
 
         }

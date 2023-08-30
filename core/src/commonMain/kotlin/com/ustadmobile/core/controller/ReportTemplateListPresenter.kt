@@ -2,7 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.core.db.dao.ReportDaoCommon
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ReportEditView
@@ -61,13 +61,13 @@ class ReportTemplateListPresenter(context: Any, arguments: Map<String, String>, 
                     if(listToHide.isNotEmpty()) {
                         repo.reportDao.toggleVisibilityReportItems(true, listToHide,
                             systemTimeInMillis())
-                        view.showSnackBar(systemImpl.getString(MessageID.action_hidden, context),
+                        view.showSnackBar(systemImpl.getString(MR.strings.action_hidden),
                                 {
                                     GlobalScope.launch(doorMainDispatcher()) {
                                         repo.reportDao.toggleVisibilityReportItems(false,
                                                 listToHide, systemTimeInMillis())
                                     }
-                                }, MessageID.undo)
+                                }, MR.strings.undo)
                     }
                 }
                 else -> {

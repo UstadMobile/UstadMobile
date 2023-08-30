@@ -23,8 +23,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
-import com.toughra.ustadmobile.R
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.locale.entityconstants.*
 import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants.MarkingType
 import com.ustadmobile.lib.db.entities.ClazzAssignment
@@ -41,14 +39,15 @@ import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.*
-
+import com.ustadmobile.core.R as CR
+import com.ustadmobile.core.MR
 
 class ClazzAssignmentEditFragment: UstadBaseMvvmFragment(){
 
     private val viewModel: ClazzAssignmentEditViewModel by
         ustadViewModels(::ClazzAssignmentEditViewModel)
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
         viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
 
@@ -112,9 +111,9 @@ private fun ClazzAssignmentEditScreen(
                 .defaultItemPadding()
                 .testTag("cgsName"),
             value = uiState.entity?.assignmentCourseGroupSetName?.let {
-                "${stringResource(R.string.groups)}: $it"
-            } ?: stringResource(R.string.individual_submission),
-            label = { Text(stringResource(id = R.string.submission_type)) },
+                "${stringResource(CR.string.groups)}: $it"
+            } ?: stringResource(CR.string.individual_submission),
+            label = { Text(stringResource(id = CR.string.submission_type)) },
             enabled = uiState.groupSetEnabled,
             onClick = onClickSubmissionType,
             onValueChange = {}
@@ -127,7 +126,7 @@ private fun ClazzAssignmentEditScreen(
             UstadSwitchField(
                 modifier = Modifier
                     .testTag("caRequireFileSubmission"),
-                label = stringResource(id = R.string.require_file_submission),
+                label = stringResource(id = CR.string.require_file_submission),
                 checked = uiState.entity?.assignment?.caRequireFileSubmission ?: false,
                 onChange = {
                     onChangeAssignment(
@@ -146,7 +145,7 @@ private fun ClazzAssignmentEditScreen(
                     .defaultItemPadding()
                     .testTag("caFileType"),
                 value = uiState.entity?.assignment?.caFileType ?: 0,
-                label = stringResource(R.string.file_type),
+                label = stringResource(CR.string.file_type),
                 options = FileTypeConstants.FILE_TYPE_MESSAGE_IDS,
                 enabled = uiState.fieldsEnabled,
                 onOptionSelected = {
@@ -164,7 +163,7 @@ private fun ClazzAssignmentEditScreen(
                     .fillMaxWidth()
                     .testTag("caSizeLimit"),
                 value = (uiState.entity?.assignment?.caSizeLimit ?: 0).toFloat(),
-                label = { Text(stringResource(id = R.string.size_limit)) },
+                label = { Text(stringResource(id = CR.string.size_limit)) },
                 enabled = uiState.fieldsEnabled,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
@@ -184,7 +183,7 @@ private fun ClazzAssignmentEditScreen(
                     .fillMaxWidth()
                     .testTag("caNumberOfFiles"),
                 value = (uiState.entity?.assignment?.caNumberOfFiles ?: 0).toFloat(),
-                label = { Text(stringResource(id = R.string.number_of_files)) },
+                label = { Text(stringResource(id = CR.string.number_of_files)) },
                 enabled = uiState.fieldsEnabled,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number
@@ -206,7 +205,7 @@ private fun ClazzAssignmentEditScreen(
             UstadSwitchField(
                 modifier = Modifier
                     .testTag("caRequireTextSubmission"),
-                label = stringResource(id = R.string.require_text_submission),
+                label = stringResource(id = CR.string.require_text_submission),
                 checked = uiState.entity?.assignment?.caRequireTextSubmission ?: false,
                 onChange = {
                     onChangeAssignment(
@@ -227,7 +226,7 @@ private fun ClazzAssignmentEditScreen(
                     .fillMaxWidth()
                     .testTag("caTextLimitType"),
                 value = uiState.entity?.assignment?.caTextLimitType ?: 0,
-                label = stringResource(R.string.limit),
+                label = stringResource(CR.string.limit),
                 options = TextLimitTypeConstants.TEXT_LIMIT_TYPE_MESSAGE_IDS,
                 enabled = uiState.fieldsEnabled,
                 onOptionSelected = {
@@ -245,7 +244,7 @@ private fun ClazzAssignmentEditScreen(
                     .fillMaxWidth()
                     .testTag("caTextLimit"),
                 value = (uiState.entity?.assignment?.caTextLimit ?: 0).toFloat(),
-                label = { Text(stringResource(id = R.string.maximum)) },
+                label = { Text(stringResource(id = CR.string.maximum)) },
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
                     onChangeAssignment(
@@ -263,7 +262,7 @@ private fun ClazzAssignmentEditScreen(
                 .defaultItemPadding()
                 .testTag("caSubmissionPolicy"),
             value = uiState.entity?.assignment?.caSubmissionPolicy ?: 0,
-            label = stringResource(R.string.submission_policy),
+            label = stringResource(CR.string.submission_policy),
             options = SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS,
             enabled = uiState.fieldsEnabled,
             onOptionSelected = {
@@ -280,16 +279,16 @@ private fun ClazzAssignmentEditScreen(
                 .defaultItemPadding()
                 .testTag("caMarkingType"),
             value = MarkingType.valueOf(uiState.entity?.assignment?.caMarkingType ?: 0),
-            label = stringResource(R.string.marked_by),
+            label = stringResource(CR.string.marked_by),
             options = MarkingType.values().toList(),
             enabled = uiState.markingTypeEnabled,
             itemText = { markingType ->
                 if(markingType == MarkingType.PEERS) {
-                    stringResource(R.string.peers)
+                    stringResource(CR.string.peers)
                 }else {
                     courseTerminologyEntryResource(
                         terminologyEntries = terminologyEntries,
-                        messageId = MessageID.teacher
+                        stringResource = MR.strings.teacher,
                     )
                 }
             },
@@ -316,7 +315,7 @@ private fun ClazzAssignmentEditScreen(
                         modifier = Modifier
                             .testTag("caPeerReviewerCount"),
                         value = (uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toFloat(),
-                        label = { Text(stringResource(id = R.string.reviews_per_user_group)) },
+                        label = { Text(stringResource(id = CR.string.reviews_per_user_group)) },
                         enabled = uiState.fieldsEnabled,
                         isError = uiState.reviewerCountError != null,
                         onValueChange = {
@@ -337,7 +336,7 @@ private fun ClazzAssignmentEditScreen(
                         .testTag("buttonAssignReviewers"),
                     enabled = uiState.fieldsEnabled,
                 ) {
-                    Text(stringResource(R.string.assign_reviewers))
+                    Text(stringResource(CR.string.assign_reviewers))
                 }
             }
         }
@@ -346,7 +345,7 @@ private fun ClazzAssignmentEditScreen(
             modifier = Modifier
                 .defaultItemPadding()
                 .testTag("caClassCommentEnabled"),
-            label = stringResource(id = R.string.allow_class_comments),
+            label = stringResource(id = CR.string.allow_class_comments),
             checked = uiState.entity?.assignment?.caClassCommentEnabled ?: false,
             onChange = {
                 onChangeAssignment(uiState.entity?.assignment?.shallowCopy {
@@ -360,7 +359,7 @@ private fun ClazzAssignmentEditScreen(
             modifier = Modifier
                 .defaultItemPadding()
                 .testTag("caPrivateCommentsEnabled"),
-            label = stringResource(id = R.string.allow_private_comments_from_students),
+            label = stringResource(id = CR.string.allow_private_comments_from_students),
             checked = uiState.entity?.assignment?.caPrivateCommentsEnabled ?: false,
             onChange = {
                 onChangeAssignment(uiState.entity?.assignment?.shallowCopy {

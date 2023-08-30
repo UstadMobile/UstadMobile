@@ -16,6 +16,7 @@ import com.ustadmobile.lib.db.entities.ChatWithLatestMessageAndCount
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import com.ustadmobile.core.R as CR
 
 class ChatListFragment : UstadListViewFragment<Chat, ChatWithLatestMessageAndCount>(),
         ChatListView, View.OnClickListener,
@@ -61,19 +62,19 @@ class ChatListFragment : UstadListViewFragment<Chat, ChatWithLatestMessageAndCou
 
         mDataRecyclerViewAdapter = ChatListRecyclerAdapter(mPresenter)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
-                requireContext().getString(R.string.new_chat))
+                requireContext().getString(CR.string.new_chat))
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fabManager?.text = requireContext().getText(R.string.chat)
+        fabManager?.text = requireContext().getText(CR.string.chat)
         //override this to show our own bottom sheet
         fabManager?.onClickListener = {
             val optionList =
                 listOf(
                     BottomSheetOption(R.drawable.ic_add_black_24dp,
-                        requireContext().getString(R.string.new_chat), NEW_CHAT)
+                        requireContext().getString(CR.string.new_chat), NEW_CHAT)
                 )
 
             val sheet = OptionsBottomSheetFragment(optionList, this)
@@ -94,7 +95,7 @@ class ChatListFragment : UstadListViewFragment<Chat, ChatWithLatestMessageAndCou
     override fun onResume() {
         super.onResume()
         mActivityWithFab?.activityFloatingActionButton?.text =
-                requireContext().getString(R.string.chat)
+                requireContext().getString(CR.string.chat)
     }
 
     /**

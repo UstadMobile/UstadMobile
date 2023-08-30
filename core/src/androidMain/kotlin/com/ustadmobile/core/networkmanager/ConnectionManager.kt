@@ -20,9 +20,7 @@ class ConnectionManager(
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             cm.registerDefaultNetworkCallback(networkCallback)
         } else {
-            cm.registerNetworkCallback(
-                    builder.build(), networkCallback
-            )
+            cm.registerNetworkCallback(builder.build(), networkCallback)
         }
     }
 

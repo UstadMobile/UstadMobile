@@ -9,14 +9,14 @@ import androidx.compose.ui.text.*
 import androidx.compose.ui.tooling.preview.Preview
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SubmissionConstants
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
-import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewFragment
 import com.ustadmobile.port.android.view.composable.UstadDetailField
-
+import dev.icerock.moko.resources.compose.stringResource as mrStringResource
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.R as CR
 
 @Composable
 fun UstadAssignmentSubmissionHeader(
@@ -37,9 +37,9 @@ fun UstadAssignmentSubmissionHeader(
 
         UstadDetailField(
             modifier = Modifier.defaultItemPadding(),
-            valueText = messageIdResource(SubmissionConstants.STATUS_MAP
-                    [uiState.assignmentStatus] ?: MessageID.not_submitted_cap),
-            labelText = stringResource(R.string.status),
+            valueText = mrStringResource(SubmissionConstants.STATUS_MAP
+                    [uiState.assignmentStatus] ?: MR.strings.not_submitted_cap),
+            labelText = stringResource(CR.string.status),
             imageId = imageId,
         )
 
@@ -49,13 +49,13 @@ fun UstadAssignmentSubmissionHeader(
             val pointsString : AnnotatedString = buildAnnotatedString {
                 append((uiState.assignmentMark?.averageScore?.toString() ?: "") +
                         "/${uiState.block?.cbMaxPoints ?: 0}" +
-                        stringResource(R.string.points)
+                        stringResource(CR.string.points)
                 )
 
 
                 if (uiState.latePenaltyVisible){
                     withStyle(style = SpanStyle(color = Color.Red)) {
-                        append(" "+stringResource(R.string.late_penalty,
+                        append(" "+stringResource(CR.string.late_penalty,
                             uiState.block?.cbLateSubmissionPenalty ?: 0))
                     }
                 }
@@ -65,7 +65,7 @@ fun UstadAssignmentSubmissionHeader(
                 modifier = Modifier.defaultItemPadding(),
                 valueText = pointsString,
                 labelText = buildAnnotatedString {
-                    append(stringResource(R.string.xapi_result_header))
+                    append(stringResource(CR.string.xapi_result_header))
                 },
                 imageId = R.drawable.ic_baseline_emoji_events_24,
             )

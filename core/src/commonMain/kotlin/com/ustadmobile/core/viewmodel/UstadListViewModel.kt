@@ -8,6 +8,7 @@ import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.paging.PagingSource
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 import org.kodein.di.DI
@@ -75,13 +76,13 @@ abstract class UstadListViewModel<S>(
 
     private fun setAddNewItemUiState(
         hasAddPermission: Boolean,
-        fabMessageId: Int,
+        fabStringResource: StringResource,
         onSetAddItemVisibility: (Boolean) -> Unit,
     ) {
         val fabState = if(hasAddPermission && listMode == ListViewMode.BROWSER) {
             FabUiState(
                 visible = true,
-                text = systemImpl.getString(fabMessageId),
+                text = systemImpl.getString(fabStringResource),
                 icon = FabUiState.FabIcon.ADD,
                 onClick = this@UstadListViewModel::onClickAdd
             )
@@ -115,12 +116,12 @@ abstract class UstadListViewModel<S>(
 
     suspend fun collectHasPermissionFlowAndSetAddNewItemUiState(
         hasPermissionFlow: () -> Flow<Boolean>,
-        fabMessageId: Int,
+        fabStringResource: StringResource,
         onSetAddListItemVisibility: (Boolean) -> Unit,
     ) {
         _uiState.whenSubscribed {
             hasPermissionFlow().distinctUntilChanged().collect { hasAddPermission ->
-                setAddNewItemUiState(hasAddPermission, fabMessageId, onSetAddListItemVisibility)
+                setAddNewItemUiState(hasAddPermission, fabStringResource, onSetAddListItemVisibility)
             }
         }
     }
@@ -129,13 +130,13 @@ abstract class UstadListViewModel<S>(
      */
     protected fun createFabState(
         hasAddPermission: Boolean,
-        messageId: Int,
+        stringResource: StringResource,
         onClick: () -> Unit = this::onClickAdd
     ) : FabUiState{
         return if(hasAddPermission && listMode == ListViewMode.BROWSER) {
             FabUiState(
                 visible = true,
-                text = systemImpl.getString(messageId),
+                text = systemImpl.getString(stringResource),
                 icon = FabUiState.FabIcon.ADD,
                 onClick = onClick,
             )
@@ -190,13 +191,13 @@ abstract class UstadListViewModel<S>(
     }
 
     protected fun listTitle(
-        browseMessageId: Int, selectMessageId: Int
+        browseStringResource: StringResource, selectStringResource: StringResource
     ): String {
         return systemImpl.getString(
             if(listMode == ListViewMode.BROWSER){
-                browseMessageId
+                browseStringResource
             }else {
-                selectMessageId
+                selectStringResource
             }
         )
     }

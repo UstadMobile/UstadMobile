@@ -42,6 +42,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import kotlinx.coroutines.launch
 import java.util.*
+import com.ustadmobile.core.R as CR
 
 class ClazzLogEditAttendanceFragment: UstadBaseMvvmFragment() {
 
@@ -107,7 +108,7 @@ private fun ClazzLogEditAttendanceScreen(
                 modifier = Modifier.clickable {
                     onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ATTENDED)
                 },
-                text = { Text(stringResource(id = R.string.mark_all_present)) },
+                text = { Text(stringResource(id = CR.string.mark_all_present)) },
                 icon = {
                     Icon(
                         Icons.Outlined.LibraryAddCheck,
@@ -122,7 +123,7 @@ private fun ClazzLogEditAttendanceScreen(
                 modifier = Modifier.clickable {
                     onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ABSENT)
                 },
-                text = { Text(stringResource(id = R.string.mark_all_absent)) },
+                text = { Text(stringResource(id = CR.string.mark_all_absent)) },
                 icon = {
                     Icon(
                         Icons.Outlined.CheckBox,
@@ -189,7 +190,7 @@ private fun PagerView(
         ) {
             Icon(
                 Icons.Default.ArrowBack,
-                contentDescription = stringResource(R.string.previous),
+                contentDescription = stringResource(CR.string.previous),
             )
         }
 
@@ -220,7 +221,7 @@ private fun PagerView(
         ) {
             Icon(
                 Icons.Default.ArrowForward,
-                contentDescription = stringResource(R.string.next),
+                contentDescription = stringResource(CR.string.next),
             )
         }
     }
@@ -242,7 +243,7 @@ private fun ClazzLogItemView(
 
     ListItem(
         text = {
-            Text(text = clazzLog.person?.personFullName() ?: "",)
+            Text(text = clazzLog.person?.personFullName() ?: "")
         },
         icon = {
             Icon(

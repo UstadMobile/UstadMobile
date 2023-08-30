@@ -15,13 +15,14 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.toughra.ustadmobile.R
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.port.android.util.compose.messageIdResource
-import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
+import com.ustadmobile.port.android.view.composable.UstadInputFieldLayout
 import com.ustadmobile.port.android.view.composable.UstadNumberTextField
+import dev.icerock.moko.resources.StringResource
+import com.ustadmobile.core.R as CR
+import com.ustadmobile.core.MR
+import dev.icerock.moko.resources.compose.stringResource as mrStringResource
 
 @Composable
 fun CourseAssignmentMarkEdit(
@@ -31,8 +32,8 @@ fun CourseAssignmentMarkEdit(
     onChangeDraftMark: (CourseAssignmentMark) -> Unit,
     onClickSubmitGrade: () -> Unit,
     onClickSubmitGradeAndMarkNext: () -> Unit,
-    submitGradeButtonMessageId: Int,
-    submitGradeButtonAndGoNextMessageId: Int,
+    submitGradeButtonMessageId: StringResource,
+    submitGradeButtonAndGoNextMessageId: StringResource,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -43,7 +44,7 @@ fun CourseAssignmentMarkEdit(
                 .testTag("marker_comment")
                 .padding(vertical = 8.dp, horizontal = 16.dp)
                 .fillMaxWidth(),
-            label = { Text(stringResource(R.string.mark_comment)) },
+            label = { Text(stringResource(CR.string.mark_comment)) },
             value = draftMark.camMarkerComment ?: "",
             onValueChange = {
                 onChangeDraftMark(draftMark.shallowCopy {
@@ -62,7 +63,7 @@ fun CourseAssignmentMarkEdit(
             ) {
                 UstadNumberTextField(
                     value = draftMark.camMark,
-                    label = { Text(stringResource(R.string.mark)) },
+                    label = { Text(stringResource(CR.string.mark)) },
                     modifier = Modifier
                         .testTag("marker_mark")
                         .padding(end = 8.dp),
@@ -89,7 +90,7 @@ fun CourseAssignmentMarkEdit(
                     .padding(top = 8.dp, start = 8.dp),
                 onClick = onClickSubmitGrade,
             ) {
-                Text(messageIdResource(submitGradeButtonMessageId))
+                Text(mrStringResource(submitGradeButtonMessageId))
             }
         }
 
@@ -102,7 +103,7 @@ fun CourseAssignmentMarkEdit(
                 .testTag("submit_and_mark_next"),
             onClick = onClickSubmitGradeAndMarkNext,
         ) {
-            Text(stringResource(R.string.return_and_mark_next))
+            Text(stringResource(CR.string.return_and_mark_next))
         }
          */
     }
@@ -120,8 +121,8 @@ private fun CourseAssignmentMarkEditPreview() {
         scoreError = null,
         onChangeDraftMark = { },
         onClickSubmitGrade = { },
-        submitGradeButtonMessageId = MessageID.submit,
-        submitGradeButtonAndGoNextMessageId = MessageID.submit_grade_and_mark_next,
+        submitGradeButtonMessageId = MR.strings.submit,
+        submitGradeButtonAndGoNextMessageId = MR.strings.submit_grade_and_mark_next,
         onClickSubmitGradeAndMarkNext = { }
     )
 }

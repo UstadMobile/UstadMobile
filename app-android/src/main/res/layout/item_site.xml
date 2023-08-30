@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:text="@string/name"
+            android:text="@string/name_key"
             app:layout_constraintStart_toEndOf="@+id/site_name_icon"
             app:layout_constraintTop_toBottomOf="@+id/site_name_text" />
 

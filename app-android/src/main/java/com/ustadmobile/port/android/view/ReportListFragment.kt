@@ -28,6 +28,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
+import com.ustadmobile.core.R as CR
 
 class ReportListFragment() : UstadListViewFragment<Report, Report>(),
         ReportListView, View.OnClickListener {
@@ -90,7 +91,7 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
                 this, di, viewLifecycleOwner).withViewLifecycle()
 
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
-                requireContext().getString(R.string.create_a_new_report),
+                requireContext().getString(CR.string.create_a_new_report),
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
         mDataRecyclerViewAdapter = ReportListRecyclerAdapter(mPresenter, dbRepo, di)
 
@@ -99,7 +100,7 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fabManager?.text = requireContext().getText(R.string.report)
+        fabManager?.text = requireContext().getText(CR.string.report)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

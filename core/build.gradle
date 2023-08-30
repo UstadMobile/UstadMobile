@@ -1,12 +1,11 @@
 
-import java.util.concurrent.atomic.AtomicInteger
-
 plugins {
     id 'org.jetbrains.kotlin.multiplatform'
     id 'org.jetbrains.kotlin.plugin.atomicfu'
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.android.library'
     id 'maven-publish'
+    id 'dev.icerock.mobile.multiplatform-resources'
 }
 
 
@@ -45,6 +44,10 @@ android {
         kotlinOptions {
             jvmTarget = "17"
         }
+    }
+
+    lintOptions {
+        disable 'MissingTranslation', 'ExtraTranslation'
     }
 }
 
@@ -89,9 +92,8 @@ kotlin {
     sourceSets {
 
         commonMain {
-            kotlin.srcDirs += "build/generated/source/umlocale/"
-            kotlin.srcDirs += "build/generated/source/umlocale-namemap"
             dependencies {
+                api "dev.icerock.moko:resources:$version_moko_resources"
                 implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
@@ -138,7 +140,7 @@ kotlin {
 
         jvmMain {
             dependsOn commonJvmMain
-            resources.srcDirs += ["locale/main", "src/main/assets"]
+            resources.srcDirs += ["src/main/assets"]
 
             dependencies {
                 implementation "org.apache.pdfbox:pdfbox:$version_pdfbox_apache"
@@ -231,6 +233,10 @@ kotlin {
         }
 
         jsMain {
+            //Note: if dependsOn commonMain is not explicitly added below, MokoResources will not
+            // generate string resources for JS as required.
+            dependsOn commonMain
+
             dependencies {
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-json-js:$version_ktor"
@@ -259,105 +265,9 @@ kotlin {
 
     }
 }
-/*
- * Generate a class with constant integer flags for each string message ID. See localization docs
- * for further information.
- */
-task prepareLocale {
-    inputs.files(fileTree(dir: project.file("locale")).matching { include '**/*.xml' })
-    outputs.file("build/generated/source/umlocale/com/ustadmobile/core/generated/locale/MessageID.kt")
-
-    doFirst {
-        File messageIdFile = project.file("build/generated/source/umlocale/com/ustadmobile/core/generated/locale/MessageID.kt")
-
-        if(!messageIdFile.parentFile.exists()) {
-            messageIdFile.parentFile.mkdirs()
-        }
-
-        messageIdFile.text = ''
-        messageIdFile << 'package com.ustadmobile.core.generated.locale\n\n'
-        messageIdFile << '/** DO NOT EDIT. GENERATED CODE */\n'
-        messageIdFile << 'object MessageID{\n\n'
-
-        String messageIdMap = """package com.ustadmobile.core.generated.locale\n\n
-        object MessageIdMap {
-        
-            private val strMap = mapOf(
-                
-        """
-
-        Map<String, Integer> messageIds = new HashMap<>()
-        AtomicInteger messageIdGenerator = new AtomicInteger(2000)
-
-        rootProject.fileTree(dir: "core/locale/main/values", include: "*.xml").each() { File file ->
-            def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
-            xmlDoc.string.each() { str ->
-                String msgName = str.@name
-
-                if (!messageIds.containsKey(msgName)) {
-                    messageIds.put(msgName, new Integer(messageIdGenerator.getAndIncrement()))
-                }
-            }
-        }
-
-        Iterator<String> nameIterator = messageIds.keySet().iterator()
-
-        boolean first = true
-        while (nameIterator.hasNext()) {
-            String strName = nameIterator.next()
-            Integer value = messageIds.get(strName)
-            messageIdFile << '    const val ' + strName + ' = ' + String.valueOf(value) + '\n\n'
-            if(!first) {
-                messageIdMap += ",\n"
-            }
-
-            messageIdMap += String.valueOf(value) + ' to "' + strName + '"'
-            first = false
-        }
-        messageIdFile << '}'
-
-        messageIdMap += """)
-        operator fun get(messageId: Int) = strMap[messageId]
-        
-        val idMap: Map<Int, String> = strMap.toMap()
-        
-        }"""
-        File messageIdMapFile = project.file("build/generated/source/umlocale-namemap/com/ustadmobile/core/generated/locale/MessageIdMap.kt")
-        if(!messageIdMapFile.parentFile.exists()) {
-            messageIdMapFile.parentFile.mkdirs()
-        }
-
-        messageIdMapFile.text = messageIdMap
-    }
-}
 
 afterEvaluate {
-    compileKotlinJs.dependsOn(prepareLocale)
-    compileKotlinJvm.dependsOn(prepareLocale)
-    jvmSourcesJar.dependsOn(prepareLocale)
-    jsSourcesJar.dependsOn(prepareLocale)
-    compileReleaseKotlinAndroid.dependsOn(prepareLocale)
-    compileDebugKotlinAndroid.dependsOn(prepareLocale)
-    sourcesJar.dependsOn(prepareLocale)
-    assemble.dependsOn(prepareLocale)
-}
 
-task copyStringValuesToWebAssets {
-    File outDir = project.file("${reactLocaleOutPath}/locales/")
-    if(!outDir.exists()){
-        outDir.mkdirs()
-    }
-    rootProject.fileTree(dir: "core/locale/main").each() { File file ->
-        def localeCode = "en"
-
-        def pathString = file.absolutePath.substring(file.absolutePath.lastIndexOf("values"))
-        if(pathString.split("-").size() > 1){
-            localeCode = file.getParent().substring(file.getParent().lastIndexOf("-") + 1)
-        }
-        FileWriter writer = new FileWriter(project.file("${outDir.absolutePath}/${localeCode}.xml").absolutePath)
-        writer.write(file.getText())
-        writer.flush()
-    }
 }
 
 publishing {
@@ -374,4 +284,10 @@ publishing {
             url rootProject.ext.buildConfigProperties['repo.dir']
         }
     }
+}
+
+
+
+multiplatformResources {
+    multiplatformResourcesPackage = "com.ustadmobile.core"
 }

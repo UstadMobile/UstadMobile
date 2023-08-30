@@ -28,6 +28,7 @@ import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import java.util.TimeZone
+import com.ustadmobile.core.R as CR
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -39,7 +40,7 @@ fun UstadCourseAssignmentMarkListItem(
     var text = uiState.markerName
 
     if (uiState.markerGroupNameVisible){
-        text += "  (${stringResource(R.string.group_number, uiState.peerGroupNumber)})"
+        text += "  (${stringResource(CR.string.group_number, uiState.peerGroupNumber)})"
     }
 
     val formattedTime = rememberFormattedDateTime(
@@ -70,14 +71,14 @@ fun UstadCourseAssignmentMarkListItem(
                         buildAnnotatedString {
                             append("${uiState.mark.courseAssignmentMark?.camMark?.roundTo(2)}")
                             append("/${uiState.mark.courseAssignmentMark?.camMaxMark?.roundTo(2)}")
-                            append(" ${stringResource(R.string.points)}")
+                            append(" ${stringResource(CR.string.points)}")
 
                             if (uiState.camPenaltyVisible){
                                 withStyle(style = SpanStyle(color = colorResource(R.color.errorColor)))
                                 {
                                     append(" ")
                                     append(
-                                        stringResource(R.string.late_penalty,
+                                        stringResource(CR.string.late_penalty,
                                             uiState.mark.courseAssignmentMark?.penaltyPercentage() ?: 0)
                                     )
                                 }

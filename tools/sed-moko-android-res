@@ -1,0 +1,16 @@
+s/string\/first"/string\/first_key"/g
+s/string\/name"/string\/name_key"/g
+s/string\/last"/string\/last_key"/g
+s/string\/question"/string\/question_key"/g
+s/string\/to"/string\/to_key"/g
+s/string\/up"/string\/up_key"/g
+s/string\/down"/string\/down_key"/g
+s/string\/over"/string\/over_key"/g
+s/string\/entry"/string\/entry_key"/g
+s/string\/permission"/string\/permission_key"/g
+s/string\/members"/string\/members_key"/g
+s/string\/member"/string\/member_key"/g
+s/string\/None"/string\/none_key"/g
+s/string\/marked"/string\/marked_key"/g
+s/string\/submitted"/string\/submitted_key"/g
+

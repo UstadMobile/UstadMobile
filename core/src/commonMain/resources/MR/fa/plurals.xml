@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <plural name="number_of_attempts">
+        <item quantity="one">%d تلاش</item>
+        <item quantity="other">%d تلاشها</item>
+    </plural>
+    <plural name="duration_minutes">
+        <item quantity="one">%d دقیقه</item>
+        <item quantity="other">%d دقایق</item>
+    </plural>
+    <plural name="duration_seconds">
+        <item quantity="one">%d ثانیه</item>
+        <item quantity="other">%d ثانیه ها</item>
+    </plural>
+
+    <plural name="duration_hours">
+        <item quantity="one">%d ساعت</item>
+        <item quantity="other">%d ساعتها</item>
+    </plural>
+</resources>

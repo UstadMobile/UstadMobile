@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemSchoolmemberListItemBinding
 import com.toughra.ustadmobile.databinding.ItemSchoolmemberPendingListItemBinding
-import com.ustadmobile.core.controller.PersonListPresenter
 import com.ustadmobile.core.controller.SchoolMemberListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -24,12 +23,14 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.core.view.SchoolMemberListView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import com.ustadmobile.core.R as CR
 
 class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMemberWithPerson>(),
         SchoolMemberListView, View.OnClickListener {
@@ -129,9 +130,9 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
         filterByRole = arguments?.get(UstadView.ARG_FILTER_BY_ROLE)?.toString()?.toInt() ?: 0
 
         addNewStringId = if (filterByRole == Role.ROLE_SCHOOL_STAFF_UID) {
-            R.string.teacher
+            CR.string.teacher
         } else {
-            R.string.student
+            CR.string.student
         }
 
         filterBySchoolUid = arguments?.getString(UstadView.ARG_FILTER_BY_SCHOOLUID)?.toLong() ?: 0
@@ -141,7 +142,7 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
                 this, di, viewLifecycleOwner).withViewLifecycle()
 
         mDataRecyclerViewAdapter = SchoolMemberListRecyclerAdapter(mPresenter)
-        val createNewText = requireContext().getString(R.string.add_new,
+        val createNewText = requireContext().getString(CR.string.add_new,
                 requireContext().getString(addNewStringId))
 
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this, createNewText,
@@ -149,7 +150,7 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
 
         mPendingStudentListRecyclerViewAdapter = PendingSchoolMemberListRecyclerAdapter(mPresenter)
         mPendingStudentsHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(null,
-                "", R.string.pending_requests, headerLayoutId = 0)
+                "", CR.string.pending_requests, headerLayoutId = 0)
 
         mMergeRecyclerViewAdapter = ConcatAdapter(mUstadListHeaderRecyclerViewAdapter,
                 mDataRecyclerViewAdapter, mPendingStudentsHeaderRecyclerViewAdapter,
@@ -180,9 +181,9 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
         filterByRole = arguments?.get(UstadView.ARG_FILTER_BY_ROLE)?.toString()?.toInt() ?: 0
 
         addNewStringId = if (filterByRole == Role.ROLE_SCHOOL_STAFF_UID) {
-            R.string.teacher
+            CR.string.teacher
         } else {
-            R.string.student
+            CR.string.student
         }
 
         mActivityWithFab?.activityFloatingActionButton?.text =
@@ -206,7 +207,7 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
         if (v?.id == R.id.item_createnew_layout)
             mPresenter?.handleClickAddNewItem(
                 arguments.toStringMap(),
-                PersonListPresenter.RESULT_PERSON_KEY)
+                PersonListViewModel.RESULT_PERSON_KEY)
         else {
             super.onClick(v)
         }

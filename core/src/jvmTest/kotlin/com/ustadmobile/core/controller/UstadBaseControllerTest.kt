@@ -100,7 +100,7 @@ class UstadBaseControllerTest {
                 }
 
                 mock {
-                    on { getLifecycle() }.thenReturn(mockLifecycle)
+                    on { lifecycle }.thenReturn(mockLifecycle)
                 }
             }
 

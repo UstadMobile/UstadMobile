@@ -35,6 +35,7 @@ import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.UstadExposedDropDownMenuField
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.port.android.view.composable.UstadNumberTextField
+import com.ustadmobile.core.R as CR
 
 
 class CourseGroupSetEditFragment: UstadBaseMvvmFragment(){
@@ -106,7 +107,7 @@ fun CourseGroupSetEditScreen(
                             cgsName = it
                         })
                     },
-                    label = { Text(stringResource(R.string.title)) },
+                    label = { Text(stringResource(CR.string.title)) },
                     isError = uiState.courseTitleError != null,
 
                 )
@@ -126,7 +127,7 @@ fun CourseGroupSetEditScreen(
                         .fillMaxWidth(),
                     enabled = uiState.fieldsEnabled,
                     value = uiState.courseGroupSet?.cgsTotalGroups?.toFloat() ?: 0f,
-                    label = { Text(stringResource(id = R.string.number_of_groups)) },
+                    label = { Text(stringResource(id = CR.string.number_of_groups)) },
                     isError = uiState.numOfGroupsError != null,
                     onValueChange = {
                         onCourseGroupSetChange(uiState.courseGroupSet?.shallowCopy{
@@ -149,7 +150,7 @@ fun CourseGroupSetEditScreen(
                     backgroundColor = colorResource(id = R.color.secondaryColor)
                 )
             ) {
-                Text(stringResource(R.string.assign_to_random_groups).uppercase())
+                Text(stringResource(CR.string.assign_to_random_groups).uppercase())
             }
         }
 
@@ -157,9 +158,9 @@ fun CourseGroupSetEditScreen(
 
         val itemTextFn: @Composable (groupNum: Int) -> String = {
             if(it == 0) {
-                stringResource(R.string.unassigned)
+                stringResource(CR.string.unassigned)
             }else {
-                "${stringResource(R.string.group)} $it"
+                "${stringResource(CR.string.group)} $it"
             }
         }
 

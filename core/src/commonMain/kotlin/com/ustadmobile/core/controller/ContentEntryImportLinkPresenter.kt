@@ -2,7 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
@@ -86,7 +86,7 @@ class ContentEntryImportLinkPresenter(
                 }
             } catch (e: Exception) {
                 view.inProgress = false
-                view.showSnackBar(systemImpl.getString(MessageID.import_link_error, context))
+                view.showSnackBar(systemImpl.getString(MR.strings.import_link_error))
                 Napier.e("Exception attempting to input import link url", e)
             }
         }

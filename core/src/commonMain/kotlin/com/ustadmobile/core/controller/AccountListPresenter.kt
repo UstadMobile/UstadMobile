@@ -2,7 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
@@ -78,7 +78,7 @@ class AccountListPresenter(
 
         nextDest = arguments[ARG_NEXT] ?: impl.getDefaultFirstDest()
         view.intentMessage = arguments[ARG_INTENT_MESSAGE]
-        view.title = arguments[ARG_TITLE] ?: impl.getString(MessageID.accounts, context)
+        view.title = arguments[ARG_TITLE] ?: impl.getString(MR.strings.accounts)
     }
 
     fun handleClickAddAccount(){
@@ -126,7 +126,7 @@ class AccountListPresenter(
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
             arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.ROOT_DEST,
             false)
-        val snackMsg = impl.getString(MessageID.logged_in_as, context)
+        val snackMsg = impl.getString(MR.strings.logged_in_as)
             .replace("%1\$s", session.person.username ?: "")
             .replace("%2\$s", session.endpoint.url)
         val dest = nextDest.appendQueryArgs(

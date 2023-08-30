@@ -6,6 +6,7 @@ import androidx.databinding.BindingAdapter
 import com.toughra.ustadmobile.R
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
+import com.ustadmobile.core.R as CR
 
 @BindingAdapter(value = ["onClickEditPopupMenu", "onClickDeletePopupMenu"], requireAll = false)
 fun View.setOnPopupMenuItemClickListener(onClickEditPopupMenu: View.OnClickListener?, onClickDeletePopupMenu: View.OnClickListener?) {
@@ -56,7 +57,7 @@ fun View.setOnBlockPopupMenuItemClickListener(
             popupMenu.menu.findItem(R.id.block_unindent).isVisible = false
         }
         if(block?.cbHidden == true){
-            popupMenu.menu.findItem(R.id.block_hide).setTitle(R.string.unhide)
+            popupMenu.menu.findItem(R.id.block_hide).setTitle(CR.string.unhide)
         }
         popupMenu.show()
     }
