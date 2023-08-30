@@ -13,6 +13,7 @@ plugins {
 
 dependencies {
     implementation(compose.desktop.currentOs)
+    implementation("com.arkivanov.essenty:lifecycle:1.1.0")
     implementation(project(":lib-ui-compose"))
     implementation(project(":core"))
 }
