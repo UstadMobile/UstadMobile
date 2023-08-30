@@ -51,12 +51,12 @@ fun rememberCourseTerminologyEntries(
 }
 
 /**
- * Get the correct string to use for a given CourseTerminology and MessageID. If the string is
+ * Get the correct string to use for a given CourseTerminology and StringResource. If the string is
  * set in the CourseTerminology the CourseTerminology will be used, otherwise the default
  * string will be used.
  *
  * @param terminologyEntries terminology entries e.g. as per rememberCourseTerminologyEntries
- * @param stringResource the MessageID to lookup e.g. MessageID.teacher MessageID.student etc.
+ * @param stringResource the StringResource to lookup e.g. MR.strings.teacher MR.strings.student etc.
  *
  */
 @Composable
