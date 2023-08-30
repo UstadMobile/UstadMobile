@@ -5,7 +5,7 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.android.library'
     id 'maven-publish'
-    id 'dev.icerock.mobile.multiplatform-resources'
+    alias(libs.plugins.moko.resources.plugin)
 }
 
 
@@ -198,7 +198,7 @@ kotlin {
                 implementation "androidx.room:room-runtime:$version_android_room"
                 implementation "com.google.code.gson:gson:$version_gson"
 
-                implementation "androidx.appcompat:appcompat:$version_androidx_appcompat"
+                implementation libs.androidx.appcompat
                 implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy"
 
                 //Seems to fix things when we put a specific dependency here

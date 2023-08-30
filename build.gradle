@@ -30,6 +30,7 @@ plugins {
     id 'dev.icerock.mobile.multiplatform-resources' version "$version_moko_resources" apply false
     id "com.github.ben-manes.versions" version "0.47.0"
     id 'org.jetbrains.kotlin.jvm' version '1.9.0' apply false
+    alias(libs.plugins.jetbrains.compose) apply false
 }
 
 

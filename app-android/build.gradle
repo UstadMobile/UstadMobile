@@ -5,7 +5,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'org.jetbrains.kotlin.kapt'
     id 'kotlin-parcelize'
-    id 'org.jetbrains.compose' version "1.4.3"
+    alias(libs.plugins.jetbrains.compose)
 }
 
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
@@ -228,7 +228,7 @@ dependencies {
     // Room (annotation processing takes place only on lib-database to improve build times)
     implementation "androidx.room:room-runtime:$version_android_room"
 
-    implementation "androidx.core:core-ktx:$version_androidx_core"
+    implementation libs.androidx.core.ktx
 
     // Paging
     implementation "androidx.paging:paging-runtime:$version_androidx_paging"
@@ -252,7 +252,7 @@ dependencies {
 
 
     implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_legacy"
-    implementation "androidx.appcompat:appcompat:$version_androidx_appcompat"
+    implementation libs.androidx.appcompat
     implementation "androidx.cardview:cardview:$version_androidx_cardview"
     implementation "com.google.android.material:material:$version_android_material"
     implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy"
@@ -267,7 +267,9 @@ dependencies {
     implementation "androidx.compose.material:material"
     implementation "androidx.compose.ui:ui-tooling-preview"
     debugImplementation "androidx.compose.ui:ui-tooling"
-    implementation "androidx.activity:activity-compose:$version_activity_compose"
+
+    //implementation "androidx.activity:activity-compose:$version_activity_compose"
+    implementation libs.activity.compose
     implementation "androidx.compose.material:material-icons-extended"
     implementation "com.google.accompanist:accompanist-themeadapter-material:$version_compose_theme_adapter"
     implementation "com.google.accompanist:accompanist-pager:$version_compose_accompanist"

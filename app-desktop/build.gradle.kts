@@ -8,7 +8,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
-    id("org.jetbrains.compose") version "1.4.3"
+    alias(libs.plugins.jetbrains.compose)
 }
 
 kotlin {

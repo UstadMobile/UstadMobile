@@ -23,7 +23,6 @@ import java.util.Locale
  * and select debug.
  */
 fun main() = application {
-    println("System Locale = ${Locale.getDefault()}")
     Window(
         onCloseRequest = ::exitApplication,
         title = stringResource(MR.strings.app_name),
