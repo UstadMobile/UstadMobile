@@ -42,6 +42,7 @@ kotlin {
         val desktopMain by getting {
             dependencies {
                 implementation(compose.desktop.common)
+                implementation(compose.desktop.currentOs)
             }
         }
     }
@@ -58,7 +59,7 @@ android {
 
     defaultConfig {
         minSdk = 21
-        targetSdk =33
+        targetSdk = 33
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

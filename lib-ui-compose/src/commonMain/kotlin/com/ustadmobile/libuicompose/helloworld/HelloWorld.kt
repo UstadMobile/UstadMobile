@@ -1,5 +1,6 @@
 package com.ustadmobile.libuicompose.helloworld
 
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +16,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 
 @Composable
+@Preview
 fun HelloWorld() {
     val count = remember { mutableStateOf(0) }
     val helloWorldStr = stringResource(MR.strings.login)

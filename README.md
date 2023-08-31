@@ -134,11 +134,13 @@ Additional information on coding structure is available as follows:
 Code is contained (mostly) in the following modules:
 
 * [app-android](app-android/): Contains the Android app
+* [app-desktop](app-desktop/): Work in progress: contains Desktop app based on [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/).
 * [app-react](app-react/): Contains the web app (written in Kotlin, using React via kotlin-wrappers)
 * [app-ktor-server](app-ktor-server/): Contains the HTTP rest server (implemented using KTOR)
 * [core](core/) : Contains view models, ui state, core business logic.
 * [sharedse](sharedse/): Contains some shared implementations for operating systems with a disk (JVM/Android)
 * [lib-database](lib-database/): contains the database: DAOs (e.g. SQL queries), and entity classes.
+* [lib-ui-compose](lib-ui-compose/): contains Compose multiplatform UI code used by app-android and app-desktop
 * [lib-util](lib-util/): Small utility functions
 * [test-end-to-end](test-end-to-end/) End-to-end tests that run the app and server.
 * [testserver-controller](testserver-controller/) An HTTP server that can control starting and 

@@ -1,5 +1,6 @@
 package com.ustadmobile.libuicompose.view.login
 
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -74,6 +75,9 @@ private fun LoginScreen(
             OutlinedTextField(
                 modifier = Modifier.testTag("username").fillMaxWidth(),
                 value = uiState.username,
+                label = {
+                    Text(stringResource(MR.strings.username))
+                },
                 onValueChange = onUsernameValueChange,
                 enabled = uiState.fieldsEnabled,
                 isError = uiState.usernameError != null,
@@ -90,7 +94,7 @@ private fun LoginScreen(
                 value = uiState.password,
                 onValueChange = onPasswordValueChange,
                 label = {
-                    stringResource(MR.strings.password)
+                    Text(stringResource(MR.strings.password))
                 },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(
@@ -143,4 +147,12 @@ private fun LoginScreen(
 
         Text(uiState.versionInfo)
     }
+}
+
+@Composable
+@Preview
+fun LoginScreenPreview() {
+    LoginScreen(
+        uiState = LoginUiState()
+    )
 }
