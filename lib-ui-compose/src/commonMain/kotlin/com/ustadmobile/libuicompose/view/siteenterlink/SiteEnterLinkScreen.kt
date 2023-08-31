@@ -73,11 +73,11 @@ private fun SiteEnterLinkScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
 
-        Image(
-            painter = painterResource(id = image),
-            contentDescription = null,
-            modifier = Modifier
-                .height(200.dp))
+//        Image(
+//            painter = painterResource(id = image),
+//            contentDescription = null,
+//            modifier = Modifier
+//                .height(200.dp))
 
         Text(stringResource(MR.strings.please_enter_the_linK))
 
