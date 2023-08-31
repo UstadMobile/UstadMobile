@@ -35,7 +35,9 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.libuicompose.components.UstadErrorText
+import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.stringResource
+import dev.icerock.moko.resources.getImageByFileName
 
 @Composable
 fun SiteEnterLinkScreenForViewModel(
@@ -60,6 +62,9 @@ private fun SiteEnterLinkScreen(
     onClickNewLearningEnvironment: () -> Unit = {},
     onEditTextValueChange: (String) -> Unit = {},
 ) {
+
+    val image: ImageResource? = MR.images.getImageByFileName("illustration_connect")
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -69,7 +74,7 @@ private fun SiteEnterLinkScreen(
     )  {
 
         Image(
-            painter = painterResource(id = R.drawable.illustration_connect),
+            painter = painterResource(id = image),
             contentDescription = null,
             modifier = Modifier
                 .height(200.dp))
