@@ -1,6 +1,6 @@
 package com.ustadmobile.libuicompose.view.siteenterlink
 
-import androidx.compose.foundation.Image
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,16 +28,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.libuicompose.components.UstadErrorText
-import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.stringResource
-import dev.icerock.moko.resources.getImageByFileName
 
 @Composable
 fun SiteEnterLinkScreenForViewModel(
@@ -62,9 +59,6 @@ private fun SiteEnterLinkScreen(
     onClickNewLearningEnvironment: () -> Unit = {},
     onEditTextValueChange: (String) -> Unit = {},
 ) {
-
-    val image: ImageResource? = MR.images.getImageByFileName("illustration_connect")
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -74,7 +68,7 @@ private fun SiteEnterLinkScreen(
     )  {
 
 //        Image(
-//            painter = painterResource(id = image),
+//            painter = painterResource(MR.images.illustration_connect),
 //            contentDescription = null,
 //            modifier = Modifier
 //                .height(200.dp))
@@ -152,4 +146,12 @@ private fun SiteEnterLinkScreen(
             )
         }
     }
+}
+
+@Composable
+@Preview
+fun SiteEnterLinkScreenPreview() {
+    SiteEnterLinkScreen(
+        uiState = SiteEnterLinkUiState()
+    )
 }
