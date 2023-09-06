@@ -1,6 +1,5 @@
 package com.ustadmobile.libuicompose.view.login
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -49,7 +48,7 @@ fun LoginScreenForViewModel(
 }
 
 @Composable
-private fun LoginScreen(
+fun LoginScreen(
     uiState: LoginUiState = LoginUiState(),
     onClickLogin: () -> Unit = {},
     onClickCreateAccount: () -> Unit = {},
@@ -147,12 +146,4 @@ private fun LoginScreen(
 
         Text(uiState.versionInfo)
     }
-}
-
-@Composable
-@Preview
-fun LoginScreenPreview() {
-    LoginScreen(
-        uiState = LoginUiState()
-    )
 }
