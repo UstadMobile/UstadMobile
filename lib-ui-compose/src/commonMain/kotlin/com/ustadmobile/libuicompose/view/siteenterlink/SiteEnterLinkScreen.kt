@@ -1,5 +1,6 @@
 package com.ustadmobile.libuicompose.view.siteenterlink
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -33,6 +35,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.libuicompose.components.UstadErrorText
+import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
@@ -66,11 +69,9 @@ fun SiteEnterLinkScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
 
-//        Image(
-//            painter = painterResource(MR.images.illustration_connect),
-//            contentDescription = null,
-//            modifier = Modifier
-//                .height(200.dp))
+        Image(
+            painter = painterResource(MR.images.illustration_connect),
+            contentDescription = null,)
 
         Text(stringResource(MR.strings.please_enter_the_linK))
 
