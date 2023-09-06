@@ -58,16 +58,6 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
     fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any)
 
     /**
-     * Get a string for use in the UI
-     */
-    override fun getString(messageCode: Int, context: Any): String
-
-    /**
-     *
-     */
-    override fun getString(messageCode: Int): String
-
-    /**
      * Must provide the system's default locale (e.g. en_US.UTF-8)
      *
      * @return System locale

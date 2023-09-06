@@ -16,6 +16,7 @@ import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import java.util.*
+import com.ustadmobile.core.R as CR
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -48,7 +49,7 @@ fun UstadAssignmentSubmissionListItem(
         text = { Text(submission.displayTitle) },
         secondaryText = {
             if (submission.casTimestamp.isDateSet()){
-                Text("${stringResource(R.string.submitted_cap)}: $formattedDateTime")
+                Text("${stringResource(CR.string.submitted_cap)}: $formattedDateTime")
             }
         },
         trailing = {
@@ -58,7 +59,7 @@ fun UstadAssignmentSubmissionListItem(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Delete,
-                        contentDescription = stringResource(R.string.delete),
+                        contentDescription = stringResource(CR.string.delete),
                     )
                 }
             }

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.viewmodel.discussionpost.detail
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.DetailViewModel
@@ -98,8 +98,8 @@ class DiscussionPostDetailViewModel(
             currentValue = _uiState.value.replyText,
             resultKey = RESULT_KEY_REPLY_TEXT,
             extraArgs = mapOf(
-                HtmlEditViewModel.ARG_DONE_STR to systemImpl.getString(MessageID.post),
-                HtmlEditViewModel.ARG_TITLE to systemImpl.getString(MessageID.add_a_reply),
+                HtmlEditViewModel.ARG_DONE_STR to systemImpl.getString(MR.strings.post),
+                HtmlEditViewModel.ARG_TITLE to systemImpl.getString(MR.strings.add_a_reply),
             )
         )
     }

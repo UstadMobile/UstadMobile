@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.UstadDestination
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
+import com.ustadmobile.core.viewmodel.LeavingReasonEditViewModel
 import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.port.android.view.PanicButtonSettingsView
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
@@ -59,9 +60,6 @@ class ViewNameToDestMap: DestinationProvider {
             ClazzAssignmentEditView.VIEW_NAME to UstadDestination(R.id.clazz_assignment_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
                     hideBottomNavigation = true),
-            ModuleCourseBlockEditView.VIEW_NAME to UstadDestination(R.id.module_course_block_edit_dest,
-                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
-                    hideBottomNavigation = true),
             CourseDiscussionDetailViewModel.DEST_NAME to UstadDestination(R.id.course_discussion_detail_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             DiscussionPostEditViewModel.DEST_NAME to UstadDestination(R.id.discussion_post_edit_dest,
@@ -103,7 +101,7 @@ class ViewNameToDestMap: DestinationProvider {
             ClazzEnrolmentEditView.VIEW_NAME to UstadDestination(R.id.clazz_enrolment_edit,
                     hideAccountIcon = true, hideBottomNavigation = true),
             LeavingReasonListView.VIEW_NAME to UstadDestination(R.id.leaving_reason_list),
-            LeavingReasonEditView.VIEW_NAME to UstadDestination(R.id.leaving_reason_edit,
+            LeavingReasonEditViewModel.DEST_NAME to UstadDestination(R.id.leaving_reason_edit,
                     hideAccountIcon = true, hideBottomNavigation = true),
             SelectFileView.VIEW_NAME to UstadDestination(R.id.select_file_view),
             SelectExtractFileView.VIEW_NAME to UstadDestination(R.id.select_extract_file_view),

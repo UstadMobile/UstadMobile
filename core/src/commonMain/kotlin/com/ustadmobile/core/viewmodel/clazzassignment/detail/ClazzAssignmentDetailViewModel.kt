@@ -1,6 +1,6 @@
 package com.ustadmobile.core.viewmodel.clazzassignment.detail
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.TabItem
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
@@ -45,11 +45,11 @@ class ClazzAssignmentDetailViewModel(
             )
             val tabs = mutableListOf(
                 TabItem(ClazzAssignmentDetailOverviewView.VIEW_NAME, tabArgs,
-                    systemImpl.getString(MessageID.clazz_assignment))
+                    systemImpl.getString(MR.strings.clazz_assignment))
             )
             if(hasSubmissionsTab) {
                 tabs.add(TabItem(ClazzAssignmentDetailSubmissionsTabViewModel.DEST_NAME,
-                    tabArgs, systemImpl.getString(MessageID.submissions)))
+                    tabArgs, systemImpl.getString(MR.strings.submissions)))
             }
 
             ClazzAssignmentDetailUiState(tabs = tabs.toList())

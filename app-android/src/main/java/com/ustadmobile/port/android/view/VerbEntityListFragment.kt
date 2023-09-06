@@ -16,6 +16,7 @@ import com.ustadmobile.lib.db.entities.VerbDisplay
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import com.ustadmobile.core.R as CR
 
 class VerbEntityListFragment() : UstadListViewFragment<VerbDisplay, VerbDisplay>(),
         VerbEntityListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener {
@@ -55,7 +56,7 @@ class VerbEntityListFragment() : UstadListViewFragment<VerbDisplay, VerbDisplay>
                 this, di, viewLifecycleOwner).withViewLifecycle()
         mDataRecyclerViewAdapter = VerbEntityListRecyclerAdapter(mPresenter)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
-                requireContext().getString(R.string.add_a_new_verb))
+                requireContext().getString(CR.string.add_a_new_verb))
         return view
     }
 

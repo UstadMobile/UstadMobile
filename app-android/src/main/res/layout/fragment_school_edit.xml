@@ -61,7 +61,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/name"
+                    android:hint="@string/name_key"
                     android:text="@={school.schoolName}"
                     tools:text="School A" />
             </com.google.android.material.textfield.TextInputLayout>

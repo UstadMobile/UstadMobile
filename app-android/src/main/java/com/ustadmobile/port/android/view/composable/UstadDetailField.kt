@@ -15,7 +15,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.toughra.ustadmobile.R
-
+import com.ustadmobile.core.R as CR
 
 /**
  * Main field layout for detail fields in DetailViews
@@ -74,13 +74,19 @@ fun UstadDetailField(
         onClick = onClick,
         secondaryActionContent = secondaryActionContent,
         icon = {
-            Image(
-                painter = painterResource(id = imageId),
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(
-                    color = contentColorFor(backgroundColor = MaterialTheme.colors.background)),
-                modifier = Modifier
-                    .size(24.dp))
+            if(imageId != 0) {
+                Image(
+                    painter = painterResource(id = imageId),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(
+                        color = contentColorFor(backgroundColor = MaterialTheme.colors.background)),
+                    modifier = Modifier
+                        .size(24.dp))
+            }else {
+                Spacer(
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     )
 }
@@ -186,7 +192,7 @@ private fun DetailFieldWithSecondaryActionPreview() {
             ) {
                 Icon(
                     imageVector = Icons.Filled.Message,
-                    contentDescription = stringResource(id = R.string.message),
+                    contentDescription = stringResource(id = CR.string.message),
                 )
             }
         }

@@ -26,6 +26,7 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
+import com.ustadmobile.core.R as CR
 
 class LanguageEditFragment: UstadEditFragment<Language>(), LanguageEditView {
 
@@ -50,7 +51,7 @@ class LanguageEditFragment: UstadEditFragment<Language>(), LanguageEditView {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.add_new_language, R.string.edit_language)
+        setEditFragmentTitle(CR.string.add_new_language, CR.string.edit_language)
 
 
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
@@ -101,7 +102,7 @@ fun LanguageEditScreen(
 
         UstadTextEditField(
             value = uiState.language?.name ?: "",
-            label = stringResource(id = R.string.name),
+            label = stringResource(id = CR.string.name_key),
             error = uiState.languageNameError,
             enabled = uiState.fieldsEnabled,
             onValueChange = {
@@ -113,7 +114,7 @@ fun LanguageEditScreen(
 
         UstadTextEditField(
             value = uiState.language?.iso_639_1_standard ?: "",
-            label = stringResource(id = R.string.two_letter_code),
+            label = stringResource(id = CR.string.two_letter_code),
             error = uiState.twoLettersCodeError,
             enabled = uiState.fieldsEnabled,
             onValueChange = {
@@ -125,7 +126,7 @@ fun LanguageEditScreen(
 
         UstadTextEditField(
             value = uiState.language?.iso_639_2_standard ?: "",
-            label = stringResource(id = R.string.three_letter_code),
+            label = stringResource(id = CR.string.three_letter_code),
             error = uiState.threeLettersCodeError,
             enabled = uiState.fieldsEnabled,
             onValueChange = {

@@ -1,7 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
@@ -55,7 +55,7 @@ class LanguageEditPresenter(context: Any,
     override fun handleClickSave(entity: Language) {
         GlobalScope.launch(doorMainDispatcher()) {
             if(entity.name.isNullOrEmpty()){
-                view.langNameError = systemImpl.getString(MessageID.field_required_prompt, context)
+                view.langNameError = systemImpl.getString(MR.strings.field_required_prompt)
                 return@launch
             }
 

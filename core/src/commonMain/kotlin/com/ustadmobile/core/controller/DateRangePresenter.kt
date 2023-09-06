@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.toFixedDatePair
@@ -12,6 +12,7 @@ import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.DateRangeMoment
 import com.ustadmobile.lib.db.entities.Moment
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,27 +30,27 @@ class DateRangePresenter(context: Any,
         get() = PersistenceMode.JSON
 
 
-    enum class RelUnitOption(val optionVal: Int, val messageId: Int) {
+    enum class RelUnitOption(val optionVal: Int, val stringResource: StringResource) {
         DAY(Moment.DAYS_REL_UNIT,
-                MessageID.day),
+                MR.strings.day),
         WEEK(Moment.WEEKS_REL_UNIT,
-                MessageID.xapi_week),
+                MR.strings.xapi_week),
         MONTH(Moment.MONTHS_REL_UNIT,
-                MessageID.xapi_month),
+                MR.strings.xapi_month),
         YEAR(Moment.YEARS_REL_UNIT,
-                MessageID.year)
+                MR.strings.year)
     }
 
     class RelUnitMessageIdOption(day: RelUnitOption, context: Any, di: DI)
-        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
+        : MessageIdOption(day.stringResource, context, day.optionVal, di = di)
 
 
-    enum class RelToOption(val optionVal: Int, val messageId: Int) {
-        DAY(Moment.TODAY_REL_TO, MessageID.today),
+    enum class RelToOption(val optionVal: Int, val stringResource: StringResource) {
+        DAY(Moment.TODAY_REL_TO, MR.strings.today),
     }
 
     class RelToMessageIdOption(day: RelToOption, context: Any, di: DI)
-        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
+        : MessageIdOption(day.stringResource, context, day.optionVal, di = di)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -79,7 +80,7 @@ class DateRangePresenter(context: Any,
         when(entity.fromMoment.typeFlag){
             Moment.TYPE_FLAG_FIXED -> {
                 if(entity.fromMoment.fixedTime == 0L){
-                    view.fromFixedDateMissing =  systemImpl.getString(MessageID.field_required_prompt, context)
+                    view.fromFixedDateMissing =  systemImpl.getString(MR.strings.field_required_prompt)
                     return
                 }else{
                     view.fromFixedDateMissing = null
@@ -91,13 +92,11 @@ class DateRangePresenter(context: Any,
             Moment.TYPE_FLAG_FIXED -> {
                 when {
                     entity.toMoment.fixedTime == 0L -> {
-                        view.toFixedDateMissing =  systemImpl.getString(MessageID.field_required_prompt,
-                                context)
+                        view.toFixedDateMissing =  systemImpl.getString(MR.strings.field_required_prompt)
                         return
                     }
                     datePair.second <= datePair.first -> {
-                        view.toFixedDateMissing = systemImpl.getString(MessageID.end_is_before_start_error,
-                                context)
+                        view.toFixedDateMissing = systemImpl.getString(MR.strings.end_is_before_start_error)
                         return
                     }
                     else -> {
@@ -107,8 +106,7 @@ class DateRangePresenter(context: Any,
             }
             Moment.TYPE_FLAG_RELATIVE ->{
                 if(datePair.second <= datePair.first){
-                    view.toRelativeDateInvalid = systemImpl.getString(MessageID.end_is_before_start_error,
-                            context)
+                    view.toRelativeDateInvalid = systemImpl.getString(MR.strings.end_is_before_start_error)
                     return
                 }else{
                     view.toRelativeDateInvalid = null

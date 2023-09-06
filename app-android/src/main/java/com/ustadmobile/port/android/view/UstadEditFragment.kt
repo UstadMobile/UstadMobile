@@ -13,6 +13,7 @@ import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.port.android.util.ext.saveStateToCurrentBackStackStateHandle
+import dev.icerock.moko.resources.StringResource
 
 abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> {
 
@@ -53,7 +54,7 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
         return super.onOptionsItemSelected(item)
     }
 
-    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: StringResource?) {
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
     }
 

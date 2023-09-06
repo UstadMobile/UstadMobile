@@ -30,6 +30,8 @@
  */
 package com.ustadmobile.core.view
 
+import dev.icerock.moko.resources.StringResource
+
 enum class GetResultMode {
     EDITORNEW, FROMLIST
 }
@@ -48,7 +50,7 @@ interface UstadView {
      *
      * @param message message to show
      */
-    fun showSnackBar(message: String, action: () -> Unit = {}, actionMessageId: Int = 0)
+    fun showSnackBar(message: String, action: () -> Unit = {}, actionMessageId: StringResource? = null)
 
     companion object {
 

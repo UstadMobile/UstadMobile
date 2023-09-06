@@ -39,13 +39,14 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
-import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.compose.rememberResolvedAttachmentUri
+import com.ustadmobile.port.android.util.compose.stringIdMapResource
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.composable.UstadQuickActionButton
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import java.util.*
+import com.ustadmobile.core.R as CR
 
 class PersonDetailFragment : UstadBaseMvvmFragment(){
 
@@ -129,7 +130,7 @@ private fun PersonDetailScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(stringResource(R.string.basic_details),
+        Text(stringResource(CR.string.basic_details),
             style = Typography.h4,
             modifier = Modifier.padding(8.dp))
 
@@ -139,7 +140,7 @@ private fun PersonDetailScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(stringResource(R.string.contact_details),
+        Text(stringResource(CR.string.contact_details),
             style = Typography.h4,
             modifier = Modifier.padding(8.dp))
 
@@ -152,7 +153,7 @@ private fun PersonDetailScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(stringResource(R.string.classes),
+        Text(stringResource(CR.string.classes),
             style = Typography.h4,
             modifier = Modifier.padding(8.dp))
 
@@ -178,13 +179,13 @@ private fun QuickActionBar(
         if (uiState.phoneNumVisible){
 
             UstadQuickActionButton(
-                labelText = stringResource(R.string.call),
+                labelText = stringResource(CR.string.call),
                 imageId = R.drawable.ic_call_bcd4_24dp,
                 onClick = onClickDial
             )
 
             UstadQuickActionButton(
-                labelText = stringResource(R.string.text),
+                labelText = stringResource(CR.string.text),
                 imageId = R.drawable.ic_baseline_sms_24,
                 onClick = onClickSms
             )
@@ -192,7 +193,7 @@ private fun QuickActionBar(
 
         if (uiState.emailVisible){
             UstadQuickActionButton(
-                labelText = stringResource(R.string.email),
+                labelText = stringResource(CR.string.email),
                 imageId = R.drawable.ic_email_black_24dp,
                 onClick = onClickEmail
             )
@@ -200,7 +201,7 @@ private fun QuickActionBar(
 
         if(uiState.showCreateAccountVisible){
             UstadQuickActionButton(
-                labelText = stringResource(R.string.create_account),
+                labelText = stringResource(CR.string.create_account),
                 imageId = R.drawable.ic_person_black_24dp,
                 onClick = onClickCreateAccount
             )
@@ -208,7 +209,7 @@ private fun QuickActionBar(
 
         if(uiState.changePasswordVisible){
             UstadQuickActionButton(
-                labelText = stringResource(R.string.change_password),
+                labelText = stringResource(CR.string.change_password),
                 imageId = R.drawable.person_with_key,
                 onClick = onClickChangePassword
             )
@@ -216,7 +217,7 @@ private fun QuickActionBar(
 
         if (uiState.manageParentalConsentVisible){
             UstadQuickActionButton(
-                labelText = stringResource(R.string.manage_parental_consent),
+                labelText = stringResource(CR.string.manage_parental_consent),
                 imageId = R.drawable.ic_baseline_supervised_user_circle_24,
                 onClick = onClickManageParentalConsent
             )
@@ -224,7 +225,7 @@ private fun QuickActionBar(
 
         if (uiState.chatVisible){
             UstadQuickActionButton(
-                labelText = stringResource(R.string.chat),
+                labelText = stringResource(CR.string.chat),
                 imageId = R.drawable.ic_baseline_chat_24,
                 onClick = onClickChat
             )
@@ -239,7 +240,7 @@ private fun DetailFields(uiState: PersonDetailUiState){
         modifier = Modifier.padding(8.dp)
     ){
 
-        val gender = messageIdMapResource(
+        val gender = stringIdMapResource(
             map = PersonConstants.GENDER_MESSAGE_ID_MAP,
             key = uiState.person?.gender ?: 1)
 
@@ -250,7 +251,7 @@ private fun DetailFields(uiState: PersonDetailUiState){
             UstadDetailField(
                 imageId = R.drawable.ic_date_range_black_24dp,
                 valueText = dateOfBirth,
-                labelText = stringResource(R.string.birthday))
+                labelText = stringResource(CR.string.birthday))
         }
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -258,7 +259,7 @@ private fun DetailFields(uiState: PersonDetailUiState){
         if (uiState.personGenderVisible){
             UstadDetailField(
                 valueText = gender,
-                labelText = stringResource(R.string.gender_literal),
+                labelText = stringResource(CR.string.gender_literal),
                 imageId = 0,
             )
         }
@@ -269,7 +270,7 @@ private fun DetailFields(uiState: PersonDetailUiState){
             UstadDetailField(
                 imageId = R.drawable.ic_badge_24dp,
                 valueText = uiState.person?.personOrgId ?: "",
-                labelText = stringResource(R.string.organization_id)
+                labelText = stringResource(CR.string.organization_id)
             )
         }
 
@@ -279,7 +280,7 @@ private fun DetailFields(uiState: PersonDetailUiState){
             UstadDetailField(
                 imageId = R.drawable.ic_account_circle_black_24dp,
                 valueText = uiState.person?.username ?: "",
-                labelText = stringResource(R.string.username))
+                labelText = stringResource(CR.string.username))
         }
     }
 }
@@ -298,7 +299,7 @@ private fun ContactDetails(
         if (uiState.phoneNumVisible){
             UstadDetailField(
                 valueText = uiState.person?.phoneNum ?: "",
-                labelText = stringResource(R.string.phone),
+                labelText = stringResource(CR.string.phone),
                 imageId = R.drawable.ic_phone_black_24dp,
                 onClick = onClickDial,
                 secondaryActionContent = {
@@ -307,7 +308,7 @@ private fun ContactDetails(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Message,
-                            contentDescription = stringResource(id = R.string.message),
+                            contentDescription = stringResource(id = CR.string.message),
                         )
                     }
                 }
@@ -318,7 +319,7 @@ private fun ContactDetails(
             UstadDetailField(
                 imageId = R.drawable.ic_email_black_24dp,
                 valueText = uiState.person?.emailAddr ?: "",
-                labelText = stringResource(R.string.email),
+                labelText = stringResource(CR.string.email),
                 onClick = onClickEmail)
         }
 
@@ -326,7 +327,7 @@ private fun ContactDetails(
             UstadDetailField(
                 imageId = R.drawable.ic_location_pin_24dp,
                 valueText = uiState.person?.personAddress ?: "",
-                labelText = stringResource(R.string.address))
+                labelText = stringResource(CR.string.address))
         }
     }
 }

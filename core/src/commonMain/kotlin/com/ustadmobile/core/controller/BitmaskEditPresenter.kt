@@ -1,7 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.LongWrapper
 import com.ustadmobile.core.util.ext.putEntityAsJson
@@ -14,10 +14,7 @@ import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
 
 
 class BitmaskEditPresenter(context: Any, arguments: Map<String, String>, view: BitmaskEditView,
@@ -56,7 +53,7 @@ class BitmaskEditPresenter(context: Any, arguments: Map<String, String>, view: B
         }
 
         view.bitmaskList = MutableLiveData(
-                FLAGS_AVAILABLE.map { BitmaskFlag(it.flagVal, it.messageId,
+                FLAGS_AVAILABLE.map { BitmaskFlag(it.flagVal, it.stringResource,
                 (longWrapper.longValue and it.flagVal) == it.flagVal) })
 
         return longWrapper
@@ -82,8 +79,8 @@ class BitmaskEditPresenter(context: Any, arguments: Map<String, String>, view: B
 
 
         val FLAGS_AVAILABLE = listOf(
-                BitmaskFlag(Clazz.CLAZZ_FEATURE_ATTENDANCE, MessageID.attendance, false),
-                BitmaskFlag(Clazz.CLAZZ_FEATURE_CLAZZ_ASSIGNMENT, MessageID.assignments, false)
+                BitmaskFlag(Clazz.CLAZZ_FEATURE_ATTENDANCE, MR.strings.attendance, false),
+                BitmaskFlag(Clazz.CLAZZ_FEATURE_CLAZZ_ASSIGNMENT, MR.strings.assignments, false)
         )
     }
 

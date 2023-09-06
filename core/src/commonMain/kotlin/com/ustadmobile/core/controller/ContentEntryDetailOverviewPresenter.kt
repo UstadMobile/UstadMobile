@@ -7,7 +7,7 @@ import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentPluginIds
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
@@ -157,7 +157,7 @@ class ContentEntryDetailOverviewPresenter(
                 }
             } catch (e: Exception) {
                 if (e is NoAppFoundException) {
-                    view.showSnackBar(systemImpl.getString(MessageID.no_app_found, context))
+                    view.showSnackBar(systemImpl.getString(MR.strings.no_app_found))
                 } else {
                     val message = e.message
                     if (message != null) {
@@ -182,7 +182,7 @@ class ContentEntryDetailOverviewPresenter(
         presenterScope.launch {
             val job = db.withDoorTransactionAsync { txDb ->
                 val job = ContentJob().apply {
-                    cjNotificationTitle = systemImpl.getString(MessageID.deleting_content, context)
+                    cjNotificationTitle = systemImpl.getString(MR.strings.deleting_content)
                         .replace("%1\$s",entity?.title ?: "")
                     cjUid = txDb.contentJobDao.insertAsync(this)
                 }

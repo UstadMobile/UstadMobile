@@ -13,7 +13,6 @@ class InsertDefaultSiteCallback: DoorDatabaseCallbackSync {
         val createSiteSql = """INSERT INTO Site(siteUid, sitePcsn, siteLcsn, siteLcb, siteLct, siteName, guestLogin, registrationAllowed, authSalt) 
                       VALUES(1, 0, 0, 0, ${systemTimeInMillis()}, 'My site', $falseStr, $falseStr, '${randomString(20)}')
             """.trimMargin()
-        println(createSiteSql)
         db.execSQL(createSiteSql)
     }
 

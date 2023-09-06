@@ -8,7 +8,7 @@ been most extensively tested on Ubuntu Linux.
 ## Quickstart
 
 ### 1. Download ustad-server.zip and app-android-release.apk from GitHub release
-See releases on [https://www.github.com/UstadMobile/UstadMobile](https://www.github.com/UstadMobile/UstadMobile)
+See releases on [https://www.github.com/UstadMobile/UstadMobile/releases](https://www.github.com/UstadMobile/UstadMobile/releases)
 
 ### 2. Install server requirements:
 

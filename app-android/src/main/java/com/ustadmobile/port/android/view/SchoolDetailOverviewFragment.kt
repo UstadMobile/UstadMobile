@@ -49,6 +49,7 @@ import com.ustadmobile.core.viewmodel.SchoolDetailOverviewUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.view.composable.UstadDetailField
+import com.ustadmobile.core.R as CR
 
 interface SchoolDetailOverviewEventListener {
     fun onClickSchoolCode(code: String?)
@@ -168,8 +169,8 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
             mBinding?.schoolCodeVisible = value
         }
 
-    override fun onChanged(t: PagedList<ClazzWithListDisplayDetails>?) {
-        clazzRecyclerAdapter?.submitList(t)
+    override fun onChanged(value: PagedList<ClazzWithListDisplayDetails>) {
+        clazzRecyclerAdapter?.submitList(value)
     }
 
     override val detailPresenter: UstadDetailPresenter<*, *>?
@@ -179,7 +180,7 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
         val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE)
                 as? ClipboardManager
         clipboard?.setPrimaryClip(ClipData(ClipData.newPlainText("link", code)))
-        showSnackBar(requireContext().getString(R.string.copied_to_clipboard))
+        showSnackBar(requireContext().getString(CR.string.copied_to_clipboard))
     }
 
     companion object{
@@ -223,7 +224,7 @@ private fun SchoolDetailOverviewScreen(
             item {
                 UstadDetailField(
                     valueText = uiState.entity?.schoolCode ?: "",
-                    labelText = stringResource(id = R.string.school_code),
+                    labelText = stringResource(id = CR.string.school_code),
                     imageId = R.drawable.ic_login_24px,
                     onClick = onClickSchoolCode
                 )
@@ -234,7 +235,7 @@ private fun SchoolDetailOverviewScreen(
             item {
                 UstadDetailField(
                     valueText = uiState.entity?.schoolAddress ?: "",
-                    labelText = stringResource(id = R.string.address),
+                    labelText = stringResource(id = CR.string.address),
                     imageId = R.drawable.ic_location_pin_24dp
                 )
             }
@@ -244,7 +245,7 @@ private fun SchoolDetailOverviewScreen(
             item {
                 UstadDetailField(
                     valueText = uiState.entity?.schoolPhoneNumber ?: "",
-                    labelText = stringResource(id = R.string.phone_number),
+                    labelText = stringResource(id = CR.string.phone_number),
                     imageId = R.drawable.ic_call_bcd4_24dp,
                     onClick = onClickSchoolPhoneNumber,
                     secondaryActionContent = {
@@ -253,7 +254,7 @@ private fun SchoolDetailOverviewScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Message,
-                                contentDescription = stringResource(id = R.string.message),
+                                contentDescription = stringResource(id = CR.string.message),
                             )
                         }
                     }
@@ -265,7 +266,7 @@ private fun SchoolDetailOverviewScreen(
             item {
                 UstadDetailField(
                     valueText = uiState.entity?.holidayCalendar?.umCalendarName ?: "",
-                    labelText = stringResource(id = R.string.holiday_calendar),
+                    labelText = stringResource(id = CR.string.holiday_calendar),
                     imageId = R.drawable.ic_perm_contact_calendar_black_24dp
                 )
             }
@@ -275,7 +276,7 @@ private fun SchoolDetailOverviewScreen(
             item {
                 UstadDetailField(
                     valueText = uiState.entity?.schoolAddress ?: "",
-                    labelText = stringResource(id = R.string.email),
+                    labelText = stringResource(id = CR.string.email),
                     imageId = R.drawable.ic_email_black_24dp,
                     onClick = onClickEmail
                 )
@@ -286,14 +287,14 @@ private fun SchoolDetailOverviewScreen(
             item {
                 UstadDetailField(
                     valueText = uiState.entity?.schoolTimeZone ?: "",
-                    labelText = stringResource(id = R.string.timezone),
+                    labelText = stringResource(id = CR.string.timezone),
                     imageId = R.drawable.ic_language_blue_grey_600_24dp,
                 )
             }
         }
 
         item {
-            Text(text = stringResource(id = R.string.courses),
+            Text(text = stringResource(id = CR.string.courses),
                 style = Typography.h6
             )
         }

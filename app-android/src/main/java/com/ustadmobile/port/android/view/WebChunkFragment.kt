@@ -20,6 +20,7 @@ import com.ustadmobile.core.view.WebChunkView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.impl.WebChunkWebViewClient
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.launch
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -92,7 +93,7 @@ class WebChunkFragment : UstadBaseFragment(), WebChunkView, FragmentBackHandler 
         webView = null
     }
 
-    override fun showNoAppFoundError(message: String, actionMessageId: Int, mimeType: String) {
+    override fun showNoAppFoundError(message: String, actionMessageId: StringResource, mimeType: String) {
         showSnackBar(message, {
             var appPackageName = mimeTypeToPlayStoreIdMap[mimeType]
             if (appPackageName == null) {

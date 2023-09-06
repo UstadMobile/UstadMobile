@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <plural name="number_of_attempts">
+        <item quantity="zero">%d محاولات</item>
+        <item quantity="one">%d محاولة</item>
+        <item quantity="two">%d محاولات</item>
+        <item quantity="few">%d محاولات</item>
+        <item quantity="many">%d محاولات</item>
+        <item quantity="other">%d محاولات</item>
+    </plural>
+    <plural name="duration_minutes">
+    <item quantity="zero">%d دقائق</item>
+    <item quantity="one">%d دقيقة</item>
+    <item quantity="two">%d دقائق</item>
+    <item quantity="few">%d دقائق</item>
+    <item quantity="many">%d دقائق</item>
+    <item quantity="other">%d دقائق</item>
+    </plural>
+    <plural name="duration_seconds">
+    <item quantity="zero">%d ثواني</item>
+    <item quantity="one">%d ثانية</item>
+    <item quantity="two">%d ثواني</item>
+    <item quantity="few">%d ثواني</item>
+    <item quantity="many">%d ثواني</item>
+    <item quantity="other">%d ثواني</item>
+    </plural>
+    <plural name="duration_hours">
+    <item quantity="zero">%d ساعات</item>
+    <item quantity="one">%d ساعة</item>
+    <item quantity="two">%d ساعات</item>
+    <item quantity="few">%d ساعات</item>
+    <item quantity="many">%d ساعات</item>
+    <item quantity="other">%d ساعات</item>
+    </plural>
+</resources>

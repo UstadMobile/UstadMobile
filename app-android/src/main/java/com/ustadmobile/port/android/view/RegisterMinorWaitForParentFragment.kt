@@ -29,6 +29,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.RegisterMinorWaitForParentView
 import com.ustadmobile.core.viewmodel.RegisterMinorWaitForParentUiState
 import com.ustadmobile.port.android.view.composable.UstadDetailField
+import com.ustadmobile.core.R as CR
 
 class RegisterMinorWaitForParentFragment: UstadBaseFragment(), RegisterMinorWaitForParentView {
 
@@ -114,7 +115,7 @@ private fun RegisterMinorWaitForParentScreen(
 
         UstadDetailField(
             valueText = uiState.username, 
-            labelText = stringResource(id = R.string.username), 
+            labelText = stringResource(id = CR.string.username),
             imageId = R.drawable.ic_account_circle_black_24dp
         )
 
@@ -122,7 +123,7 @@ private fun RegisterMinorWaitForParentScreen(
 
         UstadDetailField(
             valueText = password,
-            labelText = stringResource(R.string.password),
+            labelText = stringResource(CR.string.password),
             imageId = R.drawable.ic_baseline_vpn_key_24,
             secondaryActionContent = {
                 IconButton(
@@ -136,7 +137,7 @@ private fun RegisterMinorWaitForParentScreen(
                         }else {
                             Icons.Filled.VisibilityOff
                         },
-                        contentDescription = stringResource(id = R.string.toggle_visibility),
+                        contentDescription = stringResource(id = CR.string.toggle_visibility),
                     )
                 }
             }
@@ -145,7 +146,7 @@ private fun RegisterMinorWaitForParentScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = stringResource(id = R.string.we_sent_a_message_to_your_parent,
+            text = stringResource(id = CR.string.we_sent_a_message_to_your_parent,
                 uiState.parentContact)
         )
 
@@ -159,7 +160,7 @@ private fun RegisterMinorWaitForParentScreen(
                 backgroundColor = colorResource(id = R.color.secondaryColor)
             )
         ) {
-            Text(stringResource(R.string.ok).uppercase(),
+            Text(stringResource(CR.string.ok).uppercase(),
                 color = contentColorFor(
                     colorResource(id = R.color.secondaryColor)
                 )

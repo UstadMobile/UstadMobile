@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.contententry.edit
 
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -74,7 +74,7 @@ class ContentEntryEditViewModel(
                 hideBottomNavigation = true,
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
-                    text = systemImpl.getString(MessageID.save),
+                    text = systemImpl.getString(MR.strings.save),
                     onClick = this::onClickSave,
                 )
             )
@@ -112,13 +112,13 @@ class ContentEntryEditViewModel(
             val isLeaf = _uiState.value.entity?.leaf == true
 
             val titleMessageId = if(entityUidArg == 0L && !isLeaf) {
-                MessageID.content_editor_create_new_category
+                MR.strings.content_editor_create_new_category
             }else if(entityUidArg == 0L) {
-                MessageID.add_new_content
+                MR.strings.add_new_content
             }else if(entityUidArg != 0L && !isLeaf){
-                MessageID.edit_folder
+                MR.strings.edit_folder
             }else {
-                MessageID.edit_content
+                MR.strings.edit_content
             }
 
             _appUiState.update { prev ->

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.whenSubscribed
@@ -44,7 +44,7 @@ class CourseDiscussionDetailViewModel(
             prev.copy(
                 fabState = FabUiState(
                     visible = true,
-                    text = systemImpl.getString(MessageID.post),
+                    text = systemImpl.getString(MR.strings.post),
                     icon = FabUiState.FabIcon.ADD,
                     onClick = this::onClickAdd
                 )

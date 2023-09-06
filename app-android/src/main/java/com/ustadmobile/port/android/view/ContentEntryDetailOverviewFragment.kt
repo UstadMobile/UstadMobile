@@ -67,6 +67,7 @@ import com.ustadmobile.port.android.view.composable.UstadQuickActionButton
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import com.ustadmobile.core.R as CR
 
 
 interface ContentEntryDetailFragmentEventHandler {
@@ -160,10 +161,10 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
 
     override fun handleOnClickDeleteButton() {
         MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.confirm)
-                .setPositiveButton(R.string.delete) { _, _ -> mPresenter?.handleOnClickConfirmDelete() }
-                .setNegativeButton(R.string.cancel) { dialog, _ ->  dialog.cancel() }
-                .setMessage(R.string.confirm_delete_message)
+                .setTitle(CR.string.confirm)
+                .setPositiveButton(CR.string.delete) { _, _ -> mPresenter?.handleOnClickConfirmDelete() }
+                .setNegativeButton(CR.string.cancel) { dialog, _ ->  dialog.cancel() }
+                .setMessage(CR.string.confirm_delete_message)
                 .show()
     }
 
@@ -430,7 +431,7 @@ private fun ContentEntryDetailOverviewScreen(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    Text(stringResource(R.string.download).uppercase())
+                    Text(stringResource(CR.string.download).uppercase())
                 }
             }
         }
@@ -442,7 +443,7 @@ private fun ContentEntryDetailOverviewScreen(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    Text(stringResource(R.string.open).uppercase())
+                    Text(stringResource(CR.string.open).uppercase())
                 }
             }
         }
@@ -487,7 +488,7 @@ private fun ContentEntryDetailOverviewScreen(
 
         if (uiState.translationVisibile){
             item {
-                Text(text = stringResource(id = R.string.also_available_in))
+                Text(text = stringResource(id = CR.string.also_available_in))
             }
 
             item {
@@ -588,7 +589,7 @@ fun ContentDetailRightColumn(
         if (uiState.licenseNameVisible){
             Row{
 
-                Text(text = stringResource(id = R.string.entry_details_license))
+                Text(text = stringResource(id = CR.string.entry_details_license))
 
                 Spacer(modifier = Modifier.width(5.dp))
 
@@ -673,7 +674,7 @@ fun LocallyAvailableRow(){
 
         Spacer(modifier = Modifier.width(10.dp))
 
-        Text(text = stringResource(id = R.string.download_locally_availability))
+        Text(text = stringResource(id = CR.string.download_locally_availability))
     }
 }
 
@@ -687,7 +688,7 @@ fun QuickActionBarsRow(
     Row {
         if (uiState.markCompleteVisible){
             UstadQuickActionButton(
-                labelText = stringResource(id = R.string.mark_complete).uppercase(),
+                labelText = stringResource(id = CR.string.mark_complete).uppercase(),
                 imageId = R.drawable.ic_checkbox_multiple_marked,
                 onClick = onClickMarkComplete
             )
@@ -695,7 +696,7 @@ fun QuickActionBarsRow(
 
         if (uiState.contentEntryButtons?.showDeleteButton == true){
             UstadQuickActionButton(
-                labelText = stringResource(id = R.string.delete).uppercase(),
+                labelText = stringResource(id = CR.string.delete).uppercase(),
                 imageId = R.drawable.ic_delete_black_24dp,
                 onClick = onClickDelete
             )
@@ -703,7 +704,7 @@ fun QuickActionBarsRow(
 
         if (uiState.contentEntryButtons?.showManageDownloadButton == true){
             UstadQuickActionButton(
-                labelText = stringResource(id = R.string.manage_download).uppercase(),
+                labelText = stringResource(id = CR.string.manage_download).uppercase(),
                 imageId = R.drawable.ic_file_download_black_24dp,
                 onClick = onClickManageDownload
             )

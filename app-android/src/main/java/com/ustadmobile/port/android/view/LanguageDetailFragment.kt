@@ -28,7 +28,7 @@ import com.ustadmobile.core.viewmodel.LanguageDetailUiState
 import com.ustadmobile.core.viewmodel.LanguageDetailViewModel
 import com.ustadmobile.core.viewmodel.LanguageListViewModel
 import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.port.android.view.composable.UstadDetailField
+import com.ustadmobile.core.R as CR
 
 class LanguageDetailFragment: UstadBaseMvvmFragment() {
 
@@ -82,7 +82,7 @@ fun LanguageDetailScreen(
         ListItem(
             modifier = Modifier,
 //                .clickable(onClick = onClickAppLanguage),
-            text = { Text(stringResource(id = R.string.name)) },
+            text = { Text(stringResource(id = CR.string.name)) },
             secondaryText = { uiState.language?.name ?: "" },
 //            icon = {
 //                Icon(
@@ -92,12 +92,12 @@ fun LanguageDetailScreen(
         )
 
         ListItem(
-            text = {Text(stringResource(id = R.string.two_letter_code))},
+            text = {Text(stringResource(id = CR.string.two_letter_code))},
             secondaryText = { uiState.language?.iso_639_1_standard ?: "" }
         )
 
         ListItem(
-            text = {Text(stringResource(id = R.string.three_letter_code))},
+            text = {Text(stringResource(id = CR.string.three_letter_code))},
             secondaryText = { uiState.language?.iso_639_2_standard ?: "" }
         )
     }

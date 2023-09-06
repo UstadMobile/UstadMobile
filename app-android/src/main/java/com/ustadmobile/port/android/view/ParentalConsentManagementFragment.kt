@@ -35,9 +35,9 @@ import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.util.compose.rememberFormattedDate
 import com.ustadmobile.port.android.view.binding.loadHtmlData
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
-import com.ustadmobile.port.android.view.composable.UstadInputFieldLayout
+import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
-
+import com.ustadmobile.core.R as CR
 
 interface ParentAccountLandingFragmentEventHandler {
     fun onClickConsent()
@@ -174,7 +174,7 @@ private fun ParentalConsentManagementScreen(
             timeInMillis = uiState.personParentJoin?.minorPerson?.dateOfBirth ?: 0,
             timeZoneId = UstadMobileConstants.UTC,
         )
-        Text(stringResource(id = R.string.parent_consent_explanation,
+        Text(stringResource(id = CR.string.parent_consent_explanation,
             uiState.personParentJoin?.minorPerson?.fullName() ?: "",
             minorDateOfBirth, uiState.appName))
 
@@ -188,7 +188,7 @@ private fun ParentalConsentManagementScreen(
                 UstadMessageIdOptionExposedDropDownMenuField(
                     modifier = Modifier.fillMaxWidth(),
                     value = uiState.personParentJoin?.ppjRelationship ?: 0,
-                    label = stringResource(R.string.relationship),
+                    label = stringResource(CR.string.relationship),
                     options = PersonParentJoinConstants.RELATIONSHIP_MESSAGE_IDS,
                     onOptionSelected = {
                         onChangeRelation(uiState.personParentJoin?.shallowCopy{
@@ -204,7 +204,7 @@ private fun ParentalConsentManagementScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(stringResource(id = R.string.terms_and_policies),
+        Text(stringResource(id = CR.string.terms_and_policies),
             style = Typography.h4
         )
 
@@ -240,7 +240,7 @@ private fun ParentalConsentManagementScreen(
                     backgroundColor = colorResource(id = R.color.secondaryColor)
                 )
             ) {
-                Text(stringResource(R.string.i_consent).uppercase(),
+                Text(stringResource(CR.string.i_consent).uppercase(),
                     color = contentColorFor(
                         colorResource(id = R.color.secondaryColor)
                     )
@@ -255,15 +255,15 @@ private fun ParentalConsentManagementScreen(
                     .fillMaxWidth(),
                 enabled = uiState.fieldsEnabled,
             ) {
-                Text(stringResource(R.string.i_do_not_consent).uppercase())
+                Text(stringResource(CR.string.i_do_not_consent).uppercase())
             }
         }
         if (uiState.changeConsentVisible){
             val changeConsentText: Int =
                 if (uiState.personParentJoin?.ppjStatus == PersonParentJoin.STATUS_APPROVED)
-                    R.string.revoke_consent
+                    CR.string.revoke_consent
                 else
-                    R.string.restore_consent
+                    CR.string.restore_consent
 
             Button(
                 onClick = onClickChangeConsent,

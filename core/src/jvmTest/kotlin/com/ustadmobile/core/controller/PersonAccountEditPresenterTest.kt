@@ -2,7 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UstadTestRule
@@ -156,7 +156,7 @@ class PersonAccountEditPresenterTest  {
 
         presenter.handleClickSave(person)
 
-        val expectedMessage = impl.getString(MessageID.field_required_prompt, context)
+        val expectedMessage = impl.getString(MR.strings.field_required_prompt)
 
         verify(mockView, timeout(defaultTimeOut).atLeastOnce()).usernameError = eq(expectedMessage)
     }
@@ -171,7 +171,7 @@ class PersonAccountEditPresenterTest  {
         verify(mockView, timeout(defaultTimeOut).atLeastOnce()).entity = any()
         presenter.handleClickSave(person)
 
-        val expectedMessage = impl.getString(MessageID.field_required_prompt, context)
+        val expectedMessage = impl.getString(MR.strings.field_required_prompt)
         argumentCaptor<String>{
             verify(mockView, timeout(defaultTimeOut).atLeastOnce()).currentPasswordError = capture()
             assertEquals("Current password field error was shown", expectedMessage, firstValue)
@@ -187,7 +187,7 @@ class PersonAccountEditPresenterTest  {
 
         verify(mockView, timeout(defaultTimeOut).atLeastOnce()).entity = any()
         presenter.handleClickSave(person)
-        val expectedMessage = impl.getString(MessageID.field_required_prompt, context)
+        val expectedMessage = impl.getString(MR.strings.field_required_prompt)
         verify(mockView, timeout(defaultTimeOut).atLeastOnce()).newPasswordError = eq(expectedMessage)
     }
 
@@ -256,7 +256,7 @@ class PersonAccountEditPresenterTest  {
         verify(mockView, timeout(defaultTimeOut).atLeastOnce()).entity = any()
 
         presenter.handleClickSave(person.apply { username = "username" })
-        val expectedMessage = impl.getString(MessageID.filed_password_no_match, context)
+        val expectedMessage = impl.getString(MR.strings.filed_password_no_match)
         verify(mockView, timeout(defaultTimeOut).atLeastOnce()).noPasswordMatchError = eq(expectedMessage)
     }
 

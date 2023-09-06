@@ -26,7 +26,6 @@ import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.view.SelectionOption
 import com.ustadmobile.core.view.UstadListView
@@ -35,10 +34,11 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.port.android.view.ext.repoLoadingStatus
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import dev.icerock.moko.resources.StringResource
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-
+import com.ustadmobile.core.R as CR
 abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
         UstadListView<RT, DT>, Observer<PagedList<DT>>, MessageIdSpinner.OnMessageIdOptionSelectedListener,
         OnSortOptionSelected, View.OnClickListener {
@@ -123,7 +123,7 @@ abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
                 (fragmentHost as? UstadListViewFragment<*, *>)?.systemImpl ?: return false
 
             fragmentHost?.selectionOptions?.forEachIndexed { index, item ->
-                val optionText = systemImpl.getString(item.messageId, fragmentContext)
+                val optionText = systemImpl.getString(item.stringResource)
                 menu.add(0, item.commandId, index, optionText).apply {
                     setIcon(SELECTION_ICONS_MAP[item] ?: R.drawable.ic_delete_black_24dp)
                 }
@@ -154,24 +154,24 @@ abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
     private var numItemsSelected = 0
 
     protected val selectionObserver = object : Observer<List<DT>> {
-        override fun onChanged(t: List<DT>?) {
+        override fun onChanged(value: List<DT>) {
             val actionModeVal = actionMode
 
-            if (!t.isNullOrEmpty() && actionModeVal == null) {
+            if (!value.isNullOrEmpty() && actionModeVal == null) {
                 val actionModeCallbackVal =
                         ListViewActionModeCallback(this@UstadListViewFragment).also {
                             this@UstadListViewFragment.actionModeCallback = it
                         }
                 actionMode = (activity as? AppCompatActivity)?.startSupportActionMode(
                         actionModeCallbackVal)
-                listPresenter?.handleSelectionOptionChanged(t)
-            } else if (actionModeVal != null && t.isNullOrEmpty()) {
+                listPresenter?.handleSelectionOptionChanged(value)
+            } else if (actionModeVal != null && value.isNullOrEmpty()) {
                 actionModeVal.finish()
             }
 
-            val listSize = t?.size ?: 0
+            val listSize = value.size
             if (listSize > 0) {
-                actionMode?.title = requireContext().getString(R.string.items_selected, listSize)
+                actionMode?.title = requireContext().getString(CR.string.items_selected, listSize)
             }
         }
     }
@@ -290,8 +290,8 @@ abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
             field = value
         }
 
-    override fun onChanged(t: PagedList<DT>?) {
-        mDataRecyclerViewAdapter?.submitList(t)
+    override fun onChanged(value: PagedList<DT>) {
+        mDataRecyclerViewAdapter?.submitList(value)
     }
 
     override fun onMessageIdOptionSelected(view: AdapterView<*>?,
@@ -330,7 +330,7 @@ abstract class UstadListViewFragment<RT, DT: Any> : UstadBaseFragment(),
         }
     }
 
-    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: StringResource?) {
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
     }
 

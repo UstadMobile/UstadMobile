@@ -9,5 +9,5 @@ fun mockLifecycleOwner(state: DoorState) = mock<LifecycleOwner>{
     val mockLifecycle = mock<Lifecycle> {
         on { realCurrentDoorState }.thenReturn(state)
     }
-    on { getLifecycle() }.thenReturn(mockLifecycle)
+    on { lifecycle }.thenReturn(mockLifecycle)
 }

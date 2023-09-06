@@ -31,7 +31,6 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.VideoContentPresenter
 import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.io.ext.openEntryInputStream
 import com.ustadmobile.core.util.ext.toNullableStringMap
@@ -47,7 +46,8 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.IOException
-
+import com.ustadmobile.core.R as CR
+import com.ustadmobile.core.MR
 
 interface VideoContentFragmentEventHandler {
 
@@ -176,14 +176,14 @@ class VideoContentFragment : UstadBaseFragment(), VideoContentView, VideoContent
 
                 subtitles?.setOnClickListener {
                     val builderSingle = AlertDialog.Builder(requireContext())
-                    builderSingle.setTitle(R.string.select_subtitle_video)
+                    builderSingle.setTitle(CR.string.select_subtitle_video)
                     builderSingle.setSingleChoiceItems(arrayAdapter, subtitleSelection) { dialogInterface, position ->
                         subtitleSelection = position
                         val srtName = arrayAdapter.getItem(position)
                         setSubtitle(srtMap[srtName], mediaSource)
                         dialogInterface.cancel()
                     }
-                    builderSingle.setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
+                    builderSingle.setNegativeButton(CR.string.cancel) { dialog, _ -> dialog.dismiss() }
                     builderSingle.show()
 
                 }
@@ -238,8 +238,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoContentView, VideoContent
     }
 
     fun showError() {
-        showSnackBar(systemImpl.getString(MessageID.no_video_file_found,
-                requireContext()), {}, 0)
+        showSnackBar(systemImpl.getString(MR.strings.no_video_file_found), {}, null)
     }
 
     private var videoListener = object : Player.EventListener {

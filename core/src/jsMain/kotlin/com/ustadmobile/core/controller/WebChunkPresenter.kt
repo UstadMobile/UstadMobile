@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContainerMounter
@@ -24,7 +24,7 @@ actual class WebChunkPresenter actual constructor(context: Any, arguments: Map<S
     actual override suspend fun handleMountChunk() {
         val container = repo.containerDao.findByUidAsync(containerUid ?: 0L)
         if (container == null) {
-            view.showSnackBar(systemImpl.getString(MessageID.error_opening_file, this))
+            view.showSnackBar(systemImpl.getString(MR.strings.error_opening_file))
             return
         }
         val baseMountUrl = mountHandler.mountContainer(accountManager.activeAccount.endpointUrl,containerUid ?: 0)

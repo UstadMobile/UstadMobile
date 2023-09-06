@@ -23,12 +23,12 @@ url encoded as normal).
 
 Linux/MacOS
 ```
-$ ./gradlew app-react:run
+$ ./gradlew app-react:jsRun
 ```
 Windows:
 
 ```
-$ gradlew app-react:run
+$ gradlew app-react:jsRun
 ```
 See [Kotlin/JS docs](https://kotlinlang.org/docs/running-kotlin-js.html#run-the-browser-target) for
 further info on Gradle commands if required.

@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.DialogResultListener
 import com.ustadmobile.core.view.DismissableDialog
 import com.ustadmobile.core.view.UstadView
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.CoroutineScope
 import org.kodein.di.*
 import org.kodein.di.android.x.closestDI
@@ -38,7 +39,7 @@ open class UstadDialogFragment : DialogFragment(), DismissableDialog, UstadView,
             field = value
         }
 
-    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: StringResource?) {
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
     }
 

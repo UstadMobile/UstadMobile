@@ -2,7 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
@@ -92,13 +92,13 @@ class PersonAccountEditPresenter(context: Any,
             || entity.confirmedPassword != entity.newPassword
 
         if(hasErrors){
-            val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
+            val requiredFieldMessage = impl.getString(MR.strings.field_required_prompt)
 
             view.usernameError = if(entity.username.isNullOrEmpty())
                 requiredFieldMessage else null
             view.noPasswordMatchError = if(entity.confirmedPassword != entity.newPassword
                 && !entity.confirmedPassword.isNullOrEmpty() && !entity.newPassword.isNullOrEmpty())
-                impl.getString(MessageID.filed_password_no_match, context) else null
+                impl.getString(MR.strings.filed_password_no_match) else null
 
             view.currentPasswordError = if(entity.currentPassword.isNullOrEmpty()
                 && !activeUserHasPasswordResetPermission && !createAccount)
@@ -125,8 +125,7 @@ class PersonAccountEditPresenter(context: Any,
 
                 if(!authManager.authenticate(entityUsername, currentPassword).success) {
                     //current password is wrong
-                    view.currentPasswordError = impl.getString(MessageID.incorrect_current_password,
-                        context)
+                    view.currentPasswordError = impl.getString(MR.strings.incorrect_current_password)
                     return@launch
                 }
             }
@@ -138,7 +137,7 @@ class PersonAccountEditPresenter(context: Any,
                 if(repo.personDao.findByUsernameCount(entityUsername) == 0) {
                     repo.personDao.updateAsync(entity)
                 }else {
-                    view.usernameError = impl.getString(MessageID.person_exists, context)
+                    view.usernameError = impl.getString(MR.strings.person_exists)
                     return@launch
                 }
             }

@@ -14,8 +14,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Badge
-import androidx.compose.material.icons.filled.Lens
 import androidx.compose.material.icons.filled.People
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -26,9 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
@@ -45,7 +41,6 @@ import com.ustadmobile.core.viewmodel.clazz.list.ClazzListUiState
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
-import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
 import com.ustadmobile.port.android.view.BottomSheetOption
@@ -56,9 +51,9 @@ import com.ustadmobile.port.android.view.composable.HtmlText
 import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
 import com.ustadmobile.port.android.view.composable.UstadListSortHeader
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
-import com.ustadmobile.port.android.view.util.colorForAttendanceStatus
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import com.ustadmobile.core.R as CR
 
 
 class ClazzListFragment(): UstadBaseMvvmFragment() {
@@ -103,14 +98,14 @@ class ClazzListFragment(): UstadBaseMvvmFragment() {
             val optionList = if(uiState.canAddNewCourse) {
                 listOf(
                     BottomSheetOption(R.drawable.ic_add_black_24dp,
-                        requireContext().getString(R.string.add_a_new_course), NEW_CLAZZ
+                        requireContext().getString(CR.string.add_a_new_course), NEW_CLAZZ
                     )
                 )
             }else {
                 listOf()
             } + listOf(
                 BottomSheetOption(R.drawable.ic_login_24px,
-                requireContext().getString(R.string.join_existing_course), JOIN_CLAZZ
+                requireContext().getString(CR.string.join_existing_course), JOIN_CLAZZ
                 )
             )
 
@@ -242,7 +237,7 @@ fun ClazzListItem(
 
     val role = RoleConstants.ROLE_MESSAGE_IDS.find {
         it.value == clazz?.clazzActiveEnrolment?.clazzEnrolmentRole
-    }?.messageId
+    }?.stringResource
 
     Card(
         modifier = Modifier
@@ -295,7 +290,7 @@ fun ClazzListItem(
                 )
                 Text(
                     text = stringResource(
-                        R.string.x_teachers_y_students,
+                        CR.string.x_teachers_y_students,
                         clazz?.numTeachers ?: 0, clazz?.numStudents ?: 0,
                     )
                 )

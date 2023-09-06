@@ -1,7 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.putEntityAsJson
@@ -20,6 +20,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Moment.Companion.MONTHS_REL_UNIT
 import com.ustadmobile.lib.db.entities.Moment.Companion.TYPE_FLAG_RELATIVE
 import com.ustadmobile.lib.db.entities.Moment.Companion.WEEKS_REL_UNIT
+import dev.icerock.moko.resources.StringResource
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -42,44 +43,44 @@ class ReportEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    enum class VisualTypeOptions(val optionVal: Int, val messageId: Int) {
+    enum class VisualTypeOptions(val optionVal: Int, val stringResource: StringResource) {
         BAR_CHART(ReportSeries.BAR_CHART,
-                MessageID.bar_chart),
+                MR.strings.bar_chart),
         LINE_GRAPH(ReportSeries.LINE_GRAPH,
-                MessageID.line_chart)
+                MR.strings.line_chart)
     }
 
     class VisualTypeMessageIdOption(day: VisualTypeOptions, context: Any, di: DI)
-        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
+        : MessageIdOption(day.stringResource, context, day.optionVal, di = di)
 
-    enum class XAxisOptions(val optionVal: Int, val messageId: Int) {
+    enum class XAxisOptions(val optionVal: Int, val stringResource: StringResource) {
         DAY(Report.DAY,
-                MessageID.day),
+                MR.strings.day),
         WEEK(Report.WEEK,
-                MessageID.xapi_week),
+                MR.strings.xapi_week),
         MONTH(Report.MONTH,
-                MessageID.xapi_month),
+                MR.strings.xapi_month),
         CONTENT_ENTRY(Report.CONTENT_ENTRY,
-                MessageID.xapi_content_entry),
+                MR.strings.xapi_content_entry),
         GENDER(Report.GENDER,
-                MessageID.gender_literal),
+                MR.strings.gender_literal),
         CLASS(Report.CLASS,
-                MessageID.clazz),
+                MR.strings.clazz),
         ENROLMENT_OUTCOME(Report.ENROLMENT_OUTCOME,
-                MessageID.class_enrolment_outcome),
+                MR.strings.class_enrolment_outcome),
         ENROLMENT_LEAVING(Report.ENROLMENT_LEAVING_REASON,
-                MessageID.class_enrolment_leaving)
+                MR.strings.class_enrolment_leaving)
     }
 
     class XAxisMessageIdOption(day: XAxisOptions, context: Any, di: DI)
-        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
+        : MessageIdOption(day.stringResource, context, day.optionVal, di = di)
 
-    enum class DateRangeOptions(val code: Int, val messageId: Int,
+    enum class DateRangeOptions(val code: Int, val stringResource: StringResource,
                                 var dateRange: DateRangeMoment?) {
-        EVERYTHING(Report.EVERYTHING, MessageID.time_range_all,
+        EVERYTHING(Report.EVERYTHING, MR.strings.time_range_all,
                 DateRangeMoment(Moment(), Moment())),
         LAST_WEEK(Report.LAST_WEEK_DATE,
-                MessageID.last_week_date_range,
+                MR.strings.last_week_date_range,
                 DateRangeMoment(
                         Moment().apply {
                             typeFlag = TYPE_FLAG_RELATIVE
@@ -89,7 +90,7 @@ class ReportEditPresenter(context: Any,
                     typeFlag = TYPE_FLAG_RELATIVE
                 })),
         LAST_TWO_WEEKS(Report.LAST_TWO_WEEKS_DATE,
-                MessageID.last_two_week_date_range,
+                MR.strings.last_two_week_date_range,
                 DateRangeMoment(
                         Moment().apply {
                             typeFlag = TYPE_FLAG_RELATIVE
@@ -99,7 +100,7 @@ class ReportEditPresenter(context: Any,
                     typeFlag = TYPE_FLAG_RELATIVE
                 })),
         LAST_MONTH(Report.LAST_MONTH_DATE,
-                MessageID.last_month_date_range,
+                MR.strings.last_month_date_range,
                 DateRangeMoment(
                         Moment().apply {
                             typeFlag = TYPE_FLAG_RELATIVE
@@ -109,7 +110,7 @@ class ReportEditPresenter(context: Any,
                     typeFlag = TYPE_FLAG_RELATIVE
                 })),
         LAST_THREE_MONTHS(Report.LAST_THREE_MONTHS_DATE,
-                MessageID.last_three_months_date_range,
+                MR.strings.last_three_months_date_range,
                 DateRangeMoment(
                         Moment().apply {
                             typeFlag = TYPE_FLAG_RELATIVE
@@ -119,9 +120,9 @@ class ReportEditPresenter(context: Any,
                     typeFlag = TYPE_FLAG_RELATIVE
                 })),
         CUSTOM_RANGE(Report.CUSTOM_RANGE,
-                MessageID.selected_custom_range, null),
+                MR.strings.selected_custom_range, null),
         NEW_CUSTOM_RANGE(Report.NEW_CUSTOM_RANGE_DATE,
-                MessageID.new_custom_date_range,
+                MR.strings.new_custom_date_range,
                 DateRangeMoment(
                         Moment().apply {
                             typeFlag = TYPE_FLAG_RELATIVE
@@ -131,65 +132,65 @@ class ReportEditPresenter(context: Any,
                 })),
     }
 
-    enum class SubGroupOptions(val optionVal: Int, val messageId: Int) {
+    enum class SubGroupOptions(val optionVal: Int, val stringResource: StringResource) {
         NONE(ReportSeries.NONE,
-                MessageID.None),
+                MR.strings.none_key),
         DAY(Report.DAY,
-                MessageID.day),
+                MR.strings.day),
         WEEK(Report.WEEK,
-                MessageID.xapi_week),
+                MR.strings.xapi_week),
         MONTH(Report.MONTH,
-                MessageID.xapi_month),
+                MR.strings.xapi_month),
         CONTENT_ENTRY(Report.CONTENT_ENTRY,
-                MessageID.xapi_content_entry),
+                MR.strings.xapi_content_entry),
         GENDER(Report.GENDER,
-                MessageID.gender_literal),
+                MR.strings.gender_literal),
         CLASS(Report.CLASS,
-                MessageID.clazz),
+                MR.strings.clazz),
         ENROLMENT_OUTCOME(Report.ENROLMENT_OUTCOME,
-                MessageID.class_enrolment_outcome),
+                MR.strings.class_enrolment_outcome),
         ENROLMENT_LEAVING(Report.ENROLMENT_LEAVING_REASON,
-                MessageID.class_enrolment_leaving)
+                MR.strings.class_enrolment_leaving)
     }
 
     class SubGroupByMessageIdOption(day: SubGroupOptions, context: Any, di: DI)
-        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
+        : MessageIdOption(day.stringResource, context, day.optionVal, di = di)
 
-    enum class YAxisOptions(val optionVal: Int, val messageId: Int) {
+    enum class YAxisOptions(val optionVal: Int, val stringResource: StringResource) {
         TOTAL_DURATION(ReportSeries.TOTAL_DURATION,
-                MessageID.content_total_duration),
+                MR.strings.content_total_duration),
         AVERAGE_DURATION(ReportSeries.AVERAGE_DURATION,
-                MessageID.content_average_duration),
+                MR.strings.content_average_duration),
         NUMBER_SESSIONS(ReportSeries.NUMBER_SESSIONS,
-                MessageID.count_session),
+                MR.strings.count_session),
         INTERACTIONS_RECORDED(ReportSeries.INTERACTIONS_RECORDED,
-                MessageID.interaction_recorded),
+                MR.strings.interaction_recorded),
         NUMBER_ACTIVE_USERS(ReportSeries.NUMBER_ACTIVE_USERS,
-                MessageID.number_active_users),
+                MR.strings.number_active_users),
         AVERAGE_USAGE_TIME_PER_USER(ReportSeries.AVERAGE_USAGE_TIME_PER_USER,
-                MessageID.average_usage_time_per_user),
+                MR.strings.average_usage_time_per_user),
         NUMBER_STUDENTS_COMPLETED(ReportSeries.NUMBER_OF_STUDENTS_COMPLETED_CONTENT,
-                MessageID.number_students_completed),
+                MR.strings.number_students_completed),
         PERCENT_STUDENTS_COMPLETED(ReportSeries.PERCENT_OF_STUDENTS_COMPLETED_CONTENT,
-                MessageID.percent_students_completed),
+                MR.strings.percent_students_completed),
         TOTAL_ATTENDANCE(ReportSeries.TOTAL_ATTENDANCE,
-                MessageID.total_attendances),
+                MR.strings.total_attendances),
         TOTAL_ABSENCES(ReportSeries.TOTAL_ABSENCES,
-                MessageID.total_absences),
+                MR.strings.total_absences),
         TOTAL_LATES(ReportSeries.TOTAL_LATES,
-                MessageID.total_lates),
+                MR.strings.total_lates),
         PERCENT_STUDENTS_ATTENDED(ReportSeries.PERCENTAGE_STUDENTS_ATTENDED,
-                MessageID.percent_students_attended),
+                MR.strings.percent_students_attended),
         PERCENT_STUDENTS_ATTENDED_OR_LATE(ReportSeries.PERCENTAGE_STUDENTS_ATTENDED_OR_LATE,
-                MessageID.percent_students_attended_or_late),
+                MR.strings.percent_students_attended_or_late),
         TOTAL_CLASSES(ReportSeries.TOTAL_CLASSES,
-                MessageID.total_number_of_classes),
+                MR.strings.total_number_of_classes),
         UNIQUE_STUDENTS_ATTENDING(ReportSeries.NUMBER_UNIQUE_STUDENTS_ATTENDING,
-                MessageID.number_unique_students_attending)
+                MR.strings.number_unique_students_attending)
     }
 
     class YAxisMessageIdOption(data: YAxisOptions, context: Any, di: DI)
-        : MessageIdOption(data.messageId, context, data.optionVal, di = di)
+        : MessageIdOption(data.stringResource, context, data.optionVal, di = di)
 
 
     override fun onCreate(savedState: Map<String, String>?) {
@@ -199,7 +200,7 @@ class ReportEditPresenter(context: Any,
         view.xAxisOptions = XAxisOptions.values().map { XAxisMessageIdOption(it, context, di) }
         view.yAxisOptions = YAxisOptions.values().map { YAxisMessageIdOption(it, context, di) }
         view.dateRangeOptions = DateRangeOptions.values().filter { it.dateRange != null }
-                .map {  ObjectMessageIdOption(it.messageId, context, it.code, it.dateRange, di) }
+                .map {  ObjectMessageIdOption(it.stringResource, context, it.code, it.dateRange, di) }
     }
 
     override fun onLoadDataComplete() {
@@ -351,7 +352,7 @@ class ReportEditPresenter(context: Any,
 
     fun handleAddCustomRange(dateRangeMoment: DateRangeMoment) {
         view.dateRangeOptions = DateRangeOptions.values().map {
-            ObjectMessageIdOption(it.messageId, context, it.code, it.dateRange ?: dateRangeMoment,
+            ObjectMessageIdOption(it.stringResource, context, it.code, it.dateRange ?: dateRangeMoment,
                     di, if(it.dateRange != null) null else dateRangeMoment.toDisplayString())
         }
         view.selectedDateRangeMoment = dateRangeMoment
@@ -435,7 +436,7 @@ class ReportEditPresenter(context: Any,
 
     override fun handleClickSave(entity: ReportWithSeriesWithFilters) {
         if (entity.reportTitle.isNullOrEmpty()) {
-            view.titleErrorText = systemImpl.getString(MessageID.field_required_prompt, context)
+            view.titleErrorText = systemImpl.getString(MR.strings.field_required_prompt)
             return
         } else {
             view.titleErrorText = null

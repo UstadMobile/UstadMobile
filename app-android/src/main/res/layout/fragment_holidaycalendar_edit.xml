@@ -46,7 +46,7 @@
                 android:layout_height="wrap_content"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_margin="@dimen/dimen_16dp"
-                android:hint="@string/name"
+                android:hint="@string/name_key"
                 app:hintEnabled="true"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent">

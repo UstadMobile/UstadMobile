@@ -24,6 +24,7 @@ import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import com.ustadmobile.core.R as CR
 
 class LearnerGroupMemberListFragment : UstadListViewFragment<LearnerGroupMember, LearnerGroupMemberWithPerson>(), LearnerGroupMemberListView {
 
@@ -73,8 +74,8 @@ class LearnerGroupMemberListFragment : UstadListViewFragment<LearnerGroupMember,
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        ustadFragmentTitle = getString(R.string.select_group_members)
-        fabManager?.text = requireContext().getText(R.string.member)
+        ustadFragmentTitle = getString(CR.string.select_group_members)
+        fabManager?.text = requireContext().getText(CR.string.member_key)
 
         fabManager?.onClickListener = {
 

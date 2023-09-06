@@ -17,8 +17,8 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
+import com.ustadmobile.core.R as CR
 
 /**
  * This LifecycleObserver is used to support two-way viewbinding for an image uri on PersonPicture
@@ -79,7 +79,7 @@ class ImageViewLifecycleObserver2(
     fun showOptionsDialog() {
         val viewVal = view ?: return
         MaterialAlertDialogBuilder(viewVal.context)
-            .setTitle(R.string.change_photo)
+            .setTitle(CR.string.change_photo)
             .setItems(OPTIONS_STRING_IDS.map { viewVal.context.getString(it) }.toTypedArray(), this)
             .show()
 
@@ -87,9 +87,9 @@ class ImageViewLifecycleObserver2(
 
     override fun onClick(dialog: DialogInterface?, which: Int) {
         when(OPTIONS_STRING_IDS[which]) {
-            R.string.remove_photo -> onPictureTakenOrSelected(null)
-            R.string.take_new_photo_from_camera -> takePicture()
-            R.string.select_new_photo_from_gallery -> openPicture()
+            CR.string.remove_photo -> onPictureTakenOrSelected(null)
+            CR.string.take_new_photo_from_camera -> takePicture()
+            CR.string.select_new_photo_from_gallery -> openPicture()
         }
     }
 
@@ -130,8 +130,8 @@ class ImageViewLifecycleObserver2(
 
         val PREFIX_URI_KEY = "galleryFileUri_"
 
-        val OPTIONS_STRING_IDS = arrayOf(R.string.remove_photo, R.string.take_new_photo_from_camera,
-                    R.string.select_new_photo_from_gallery)
+        val OPTIONS_STRING_IDS = arrayOf(CR.string.remove_photo, CR.string.take_new_photo_from_camera,
+                    CR.string.select_new_photo_from_gallery)
     }
 
 }

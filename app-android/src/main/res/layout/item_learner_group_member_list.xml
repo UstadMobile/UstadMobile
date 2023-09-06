@@ -54,8 +54,6 @@
             android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:textMessageIdLookupKey="@{learnerGroupMember.learnerGroupMemberRole}"
-            app:textMessageIdLookupMap="@{LearnerGroupMemberConstants.ROLE_MESSAGE_ID_OPTIONS}"
             app:layout_constraintStart_toStartOf="@+id/item_learnergroupmember_name"
             app:layout_constraintTop_toBottomOf="@+id/item_learnergroupmember_name" />
 

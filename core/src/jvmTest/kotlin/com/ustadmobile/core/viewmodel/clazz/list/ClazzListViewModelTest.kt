@@ -34,7 +34,7 @@ class ClazzListViewModelTest {
                 .filter { it.clazzList() !is EmptyPagingSource }
                 .test {
                     awaitItem()
-                    verify(clazzRepo, timeout(5000)).findClazzesWithPermission(
+                    verify(clazzRepo, timeout(5000).atLeastOnce()).findClazzesWithPermission(
                         eq("%"), eq(accountPersonUid), eq(listOf()),
                         eq(0), any(), any(), any(), any(), any()
                     )

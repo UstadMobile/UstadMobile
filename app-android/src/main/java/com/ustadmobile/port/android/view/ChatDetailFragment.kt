@@ -121,8 +121,8 @@ class ChatDetailFragment: UstadBaseFragment(), ChatDetailView, ChatDetailFragmen
         }
 
 
-    override fun onChanged(t: PagedList<MessageWithPerson>?) {
-        messagesRecyclerAdapter?.submitList(t)
+    override fun onChanged(value: PagedList<MessageWithPerson>) {
+        messagesRecyclerAdapter?.submitList(value)
     }
 
     override var messageList: DataSource.Factory<Int, MessageWithPerson>? = null

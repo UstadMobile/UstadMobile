@@ -31,7 +31,6 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/dimen_8dp"
             android:gravity="center_vertical"
-            app:textMessageId="@{sortOption.fieldMessageId}"
             android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             android:textSize="12sp"
             android:textColor="?android:textColorPrimary"

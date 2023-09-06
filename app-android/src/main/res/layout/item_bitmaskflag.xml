@@ -30,8 +30,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
-            tools:text="Permission name"
-            app:textMessageId="@{bitmaskFlag.messageId}"/>
+            tools:text="Permission name"/>
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 </layout>

@@ -27,6 +27,7 @@ import com.ustadmobile.lib.db.entities.ReportFilter
 import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.core.R as CR
 
 
 interface ReportEditFragmentEventHandler {
@@ -158,7 +159,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.create_a_new_report, R.string.edit_report)
+        setEditFragmentTitle(CR.string.create_a_new_report, CR.string.edit_report)
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
     }
 
@@ -184,7 +185,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
 
     override fun onResume() {
         super.onResume()
-        setEditFragmentTitle(R.string.create_a_new_report, R.string.edit_report)
+        setEditFragmentTitle(CR.string.create_a_new_report, CR.string.edit_report)
     }
 
     override var entity: ReportWithSeriesWithFilters? = null

@@ -2,7 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.SchoolDao
 import com.ustadmobile.core.db.dao.SchoolDaoCommon
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
@@ -99,8 +99,8 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
         const val SCHOOL_RESULT_KEY = "School"
 
         val SORT_OPTIONS = listOf(
-                SortOrderOption(MessageID.name, SchoolDaoCommon.SORT_NAME_ASC, true),
-                SortOrderOption(MessageID.name, SchoolDaoCommon.SORT_NAME_DESC, false)
+                SortOrderOption(MR.strings.name_key, SchoolDaoCommon.SORT_NAME_ASC, true),
+                SortOrderOption(MR.strings.name_key, SchoolDaoCommon.SORT_NAME_DESC, false)
         )
 
     }

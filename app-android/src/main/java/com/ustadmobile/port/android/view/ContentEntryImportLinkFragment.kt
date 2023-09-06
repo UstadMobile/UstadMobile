@@ -31,6 +31,7 @@ import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.viewmodel.ContentEntryImportLinkUiState
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
+import com.ustadmobile.core.R as CR
 
 class ContentEntryImportLinkFragment : UstadBaseFragment(), ContentEntryImportLinkView {
 
@@ -49,7 +50,7 @@ class ContentEntryImportLinkFragment : UstadBaseFragment(), ContentEntryImportLi
     override var validLink: Boolean = false
         set(value) {
             mBinding?.entryImportLinkTextInput?.isErrorEnabled = value
-            mBinding?.entryImportLinkTextInput?.error = if(value) null else getString(R.string.invalid_link)
+            mBinding?.entryImportLinkTextInput?.error = if(value) null else getString(CR.string.invalid_link)
             field = value
         }
 
@@ -72,7 +73,7 @@ class ContentEntryImportLinkFragment : UstadBaseFragment(), ContentEntryImportLi
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        ustadFragmentTitle = getString(R.string.enter_url)
+        ustadFragmentTitle = getString(CR.string.enter_url)
         setHasOptionsMenu(true)
 
         mPresenter = ContentEntryImportLinkPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
@@ -121,7 +122,7 @@ fun ContentEntryImportLinkScreen(
             modifier = Modifier
                 .padding(horizontal = 8.dp),
             value = uiState.url.toString(),
-            label = stringResource(id = R.string.enter_url),
+            label = stringResource(id = CR.string.enter_url),
             error = uiState.linkError,
             enabled = uiState.fieldsEnabled,
             onValueChange = {
@@ -130,7 +131,7 @@ fun ContentEntryImportLinkScreen(
         )
 
         Text(
-            stringResource(R.string.supported_link),
+            stringResource(CR.string.supported_link),
             style = Typography.body2,
             modifier = Modifier
                 .padding(horizontal = 16.dp)
@@ -147,7 +148,7 @@ fun ContentEntryImportLinkScreen(
             )
         ) {
             Text(
-                stringResource(R.string.next).uppercase(),
+                stringResource(CR.string.next).uppercase(),
                 color = contentColorFor(
                     colorResource(id = R.color.secondaryColor)
                 ),

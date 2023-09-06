@@ -2,7 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ContentEntryOpener
@@ -79,7 +79,7 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
                 val result = repo.contentEntryDao.getContentByUuidAsync(entryUuid)
                 view.entry = result
             } catch (e: Exception) {
-                view.showSnackBar(systemImpl.getString(MessageID.error_opening_file, context))
+                view.showSnackBar(systemImpl.getString(MR.strings.error_opening_file))
             }
 
             handleMountChunk()
@@ -104,8 +104,8 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
                         true, arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false, clazzUid = clazzUid)
                 } catch (e: Exception) {
                     if (e is NoAppFoundException) {
-                        view.showNoAppFoundError(systemImpl.getString(MessageID.no_app_found, context),
-                                MessageID.get_app,
+                        view.showNoAppFoundError(systemImpl.getString(MR.strings.no_app_found),
+                                MR.strings.get_app,
                                 e.mimeType ?: "")
                     } else {
                         view.showSnackBar(e.message ?: "")

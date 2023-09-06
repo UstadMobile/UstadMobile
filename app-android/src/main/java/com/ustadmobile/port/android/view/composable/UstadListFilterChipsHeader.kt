@@ -9,9 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.db.dao.ClazzDaoCommon
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.port.android.util.compose.messageIdResource
+import com.ustadmobile.core.MR
+import dev.icerock.moko.resources.compose.stringResource as mrStringResource
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -39,7 +39,7 @@ fun UstadListFilterChipsHeader(
                         end = if(index == filterOptions.size - 1) 16.dp else 8.dp
                     ),
             ) {
-                Text(messageIdResource(id = filterOption.messageId))
+                Text(mrStringResource(resource = filterOption.stringResource))
             }
         }
     }
@@ -50,9 +50,9 @@ fun UstadListFilterChipsHeader(
 private fun UstadListFilterChipsHeaderPreview() {
     UstadListFilterChipsHeader(
         filterOptions = listOf(
-            MessageIdOption2(MessageID.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
-            MessageIdOption2(MessageID.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
-            MessageIdOption2(MessageID.all, 0),
+            MessageIdOption2(MR.strings.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
+            MessageIdOption2(MR.strings.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
+            MessageIdOption2(MR.strings.all, 0),
         ),
         selectedChipId = ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED
     )

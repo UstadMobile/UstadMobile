@@ -11,7 +11,6 @@ import com.toughra.ustadmobile.databinding.FragmentPdfContentBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.PDFContentPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
@@ -23,6 +22,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import com.ustadmobile.core.R as CR
 
 class PDFContentFragment : UstadBaseFragment(), PDFContentView {
 
@@ -37,8 +37,6 @@ class PDFContentFragment : UstadBaseFragment(), PDFContentView {
     private var db: UmAppDatabase? = null
 
     private var containerUid: Long = 0
-
-    private val systemImpl: UstadMobileSystemImpl by instance()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -126,13 +124,11 @@ class PDFContentFragment : UstadBaseFragment(), PDFContentView {
         }
 
     private fun showError() {
-        showSnackBar(systemImpl.getString(MessageID.error_opening_file,
-                requireContext()), {}, 0)
+        showSnackBar(requireContext().getString(CR.string.error))
     }
 
     fun showOpenError(message: String?) {
-        showSnackBar(systemImpl.getString(MessageID.error_opening_file,
-                requireContext()) + " " + message, {}, 0)
+        showSnackBar(requireContext().getString(CR.string.error_opening_file) + ": $message")
     }
 
 

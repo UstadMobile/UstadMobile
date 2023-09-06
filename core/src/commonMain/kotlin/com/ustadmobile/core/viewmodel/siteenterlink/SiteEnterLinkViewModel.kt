@@ -1,6 +1,6 @@
 package com.ustadmobile.core.viewmodel.siteenterlink
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -45,7 +45,7 @@ class SiteEnterLinkViewModel(
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = impl.getString(MessageID.enter_link),
+                title = impl.getString(MR.strings.enter_link),
                 navigationVisible = false,
             )
         }
@@ -85,7 +85,7 @@ class SiteEnterLinkViewModel(
                     previous.copy(
                         validLink = false,
                         fieldsEnabled = true,
-                        linkError = impl.getString(MessageID.invalid_link)
+                        linkError = impl.getString(MR.strings.invalid_link)
                     )
                 }
             }

@@ -13,6 +13,7 @@ import com.ustadmobile.core.view.AboutView
 import kotlinx.coroutines.launch
 import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
+import com.ustadmobile.core.R as CR
 
 class AboutActivity : UstadBaseActivity(), AboutView, DIAware {
 
@@ -29,7 +30,7 @@ class AboutActivity : UstadBaseActivity(), AboutView, DIAware {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_about)
         setUMToolbar(R.id.toolbar)
-        setTitle(R.string.about)
+        setTitle(CR.string.about)
         mAboutPresenter = AboutPresenter(this,
                 bundleToMap(intent.extras),
                 this, di)

@@ -19,7 +19,6 @@
         android:layout_height="wrap_content"
         android:layout_marginVertical="@dimen/dimen_16dp"
         android:layout_marginHorizontal="@dimen/dimen_16dp"
-        app:textMessageId="@{bitmaskFlag.messageId}"
         android:checked="@={bitmaskFlag.enabled}"
         tools:text="Message ID"/>
 

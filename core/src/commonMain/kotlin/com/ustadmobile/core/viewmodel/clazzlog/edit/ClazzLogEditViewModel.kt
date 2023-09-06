@@ -1,6 +1,6 @@
 package com.ustadmobile.core.viewmodel.clazzlog.edit
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.schedule.generateUid
@@ -44,10 +44,10 @@ class ClazzLogEditViewModel(
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = systemImpl.getString(MessageID.add_a_new_occurrence),
+                title = systemImpl.getString(MR.strings.add_a_new_occurrence),
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
-                    text = systemImpl.getString(MessageID.next),
+                    text = systemImpl.getString(MR.strings.next),
                     onClick = this::onClickSave
                 )
             )
@@ -99,7 +99,7 @@ class ClazzLogEditViewModel(
         if(!clazzLog.logDate.isDateSet()) {
             _uiState.update { prev ->
                 prev.copy(
-                    dateError = systemImpl.getString(MessageID.field_required_prompt)
+                    dateError = systemImpl.getString(MR.strings.field_required_prompt)
                 )
             }
 

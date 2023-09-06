@@ -1,6 +1,6 @@
 package com.ustadmobile.core.impl.config
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -10,11 +10,11 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
  * DI.
  *
  * @param availableLanguagesConfig comma separated list of languages. Specify as follows:
- *   Android: Set via meta-data supported-languages
+ *   Android: Set via meta-data supported-languages (see
  *   Web: languages.json
  */
 data class SupportedLanguagesConfig (
-    val availableLanguagesConfig: String = "en,fa,ps,ar,tg,bn,ne,my",
+    val availableLanguagesConfig: String = DEFAULT_SUPPORTED_LANGUAGES,
 ) {
 
     val supportedUiLanguages: List<UstadMobileSystemCommon.UiLanguage>
@@ -35,7 +35,12 @@ data class SupportedLanguagesConfig (
     fun supportedUiLanguagesAndSysDefault(
         systemImpl: UstadMobileSystemImpl
     ) : List<UstadMobileSystemCommon.UiLanguage>{
-        return supportedUiLanguagesAndSysDefault(systemImpl.getString(MessageID.use_device_language))
+        return supportedUiLanguagesAndSysDefault(systemImpl.getString(MR.strings.use_device_language))
+    }
+
+    companion object {
+
+        const val DEFAULT_SUPPORTED_LANGUAGES = "en,fa,ps,ar,tg,bn,ne,my"
     }
 
 }

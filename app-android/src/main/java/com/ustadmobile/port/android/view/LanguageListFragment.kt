@@ -34,7 +34,6 @@ import com.toughra.ustadmobile.databinding.ItemLanguageListBinding
 import com.ustadmobile.core.controller.LanguageListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.dao.ClazzDaoCommon
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.view.LanguageListView
@@ -49,6 +48,7 @@ import com.ustadmobile.port.android.view.composable.UstadPersonAvatar
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import com.ustadmobile.core.R as CR
 
 class LanguageListFragment: UstadBaseMvvmFragment() {
 
@@ -58,7 +58,7 @@ class LanguageListFragment: UstadBaseMvvmFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
         viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)

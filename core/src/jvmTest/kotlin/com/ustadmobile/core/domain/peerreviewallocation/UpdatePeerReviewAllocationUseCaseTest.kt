@@ -1,7 +1,7 @@
 package com.ustadmobile.core.domain.peerreviewallocation
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
@@ -18,7 +18,7 @@ import kotlin.math.min
 class UpdatePeerReviewAllocationUseCaseTest {
 
     val systemImpl = mock<UstadMobileSystemImpl> {
-        on { getString(MessageID.group_number) }.thenReturn("Group %1\$s")
+        on { getString(MR.strings.group_number) }.thenReturn("Group %1\$s")
     }
 
     private fun assertAllocationsAreValid(

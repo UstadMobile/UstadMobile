@@ -28,6 +28,7 @@ import com.ustadmobile.core.viewmodel.RegisterAgeRedirectUiState
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.composable.DatePickerSpinner
+import com.ustadmobile.core.R as CR
 
 class RegisterAgeRedirectFragment() : UstadBaseFragment(), RegisterAgeRedirectView {
 
@@ -89,7 +90,7 @@ private fun RegisterAgeRedirectScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
 
-        Text(text = stringResource(id = R.string.what_is_your_date_of_birth))
+        Text(text = stringResource(id = CR.string.what_is_your_date_of_birth))
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -107,7 +108,7 @@ private fun RegisterAgeRedirectScreen(
             )
         ) {
             Text(
-                stringResource(R.string.next).uppercase(),
+                stringResource(CR.string.next).uppercase(),
                 color = contentColorFor(
                     colorResource(id = R.color.secondaryColor)
                 )

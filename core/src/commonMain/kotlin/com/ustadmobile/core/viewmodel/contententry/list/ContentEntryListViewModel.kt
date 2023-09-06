@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.contententry.list
 
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.SortOrderOption
@@ -46,8 +46,8 @@ data class ContentEntryListUiState(
     companion object {
 
         val DEFAULT_SORT_OPTIONS = listOf(
-            SortOrderOption(MessageID.title, ContentEntryDaoCommon.SORT_TITLE_ASC, true),
-            SortOrderOption(MessageID.title, ContentEntryDaoCommon.SORT_TITLE_DESC, false),
+            SortOrderOption(MR.strings.title, ContentEntryDaoCommon.SORT_TITLE_ASC, true),
+            SortOrderOption(MR.strings.title, ContentEntryDaoCommon.SORT_TITLE_DESC, false),
         )
 
     }
@@ -106,10 +106,10 @@ class ContentEntryListViewModel(
         }
         _appUiState.update { prev ->
             prev.copy(
-                title = systemImpl.getString(MessageID.library),
+                title = systemImpl.getString(MR.strings.library),
                 fabState = FabUiState(
                     visible = false,
-                    text = systemImpl.getString(MessageID.content),
+                    text = systemImpl.getString(MR.strings.content),
                     icon = FabUiState.FabIcon.ADD,
                 )
             )

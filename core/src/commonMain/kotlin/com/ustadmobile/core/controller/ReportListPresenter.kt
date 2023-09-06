@@ -2,7 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.core.db.dao.ReportDaoCommon
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
@@ -93,14 +93,14 @@ class ReportListPresenter(context: Any, arguments: Map<String, String>, view: Re
                 SelectionOption.HIDE -> {
                     repo.reportDao.toggleVisibilityReportItems(true,
                             selectedItem.map { it.reportUid }, systemTimeInMillis())
-                    view.showSnackBar(systemImpl.getString(MessageID.action_hidden, context), {
+                    view.showSnackBar(systemImpl.getString(MR.strings.action_hidden), {
 
                         GlobalScope.launch(doorMainDispatcher()){
                             repo.reportDao.toggleVisibilityReportItems(false,
                                     selectedItem.map { it.reportUid }, systemTimeInMillis())
                         }
 
-                    }, MessageID.undo)
+                    }, MR.strings.undo)
                 }
                 else -> {
                     // Do nothing
@@ -114,8 +114,8 @@ class ReportListPresenter(context: Any, arguments: Map<String, String>, view: Re
         const val REPORT_RESULT_KEY = "Report"
 
         val SORT_OPTIONS = listOf(
-                SortOrderOption(MessageID.title, ReportDaoCommon.SORT_TITLE_ASC, true),
-                SortOrderOption(MessageID.title, ReportDaoCommon.SORT_TITLE_DESC, false)
+                SortOrderOption(MR.strings.title, ReportDaoCommon.SORT_TITLE_ASC, true),
+                SortOrderOption(MR.strings.title, ReportDaoCommon.SORT_TITLE_DESC, false)
         )
 
     }

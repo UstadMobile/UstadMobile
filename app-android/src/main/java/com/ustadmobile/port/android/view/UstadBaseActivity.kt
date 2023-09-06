@@ -23,11 +23,13 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.port.android.impl.UserFeedbackException
 import com.ustadmobile.port.android.util.ext.getUstadLocaleSetting
+import dev.icerock.moko.resources.StringResource
 import org.acra.ACRA
 import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
 import org.kodein.di.instance
 import java.util.*
+import com.ustadmobile.core.R as CR
 
 /**
  * Base activity to handle interacting with UstadMobileSystemImpl
@@ -76,17 +78,17 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadView, ShakeDetector
 
         feedbackDialogVisible = true
         val builder = AlertDialog.Builder(this)
-        builder.setTitle(R.string.send_feedback)
+        builder.setTitle(CR.string.send_feedback)
         val inflater = layoutInflater
         val dialogView = inflater.inflate(R.layout.view_feedback_layout, null)
         val editText = dialogView.findViewById<TextInputEditText>(R.id.feedback_edit_comment)
         builder.setView(dialogView)
-        builder.setPositiveButton(R.string.send) { dialogInterface, whichButton ->
+        builder.setPositiveButton(CR.string.send) { dialogInterface, whichButton ->
             ACRA.errorReporter.handleSilentException(UserFeedbackException(editText.text.toString()))
-            Toast.makeText(this, R.string.feedback_thanks, Toast.LENGTH_LONG).show()
+            Toast.makeText(this, CR.string.feedback_thanks, Toast.LENGTH_LONG).show()
             dialogInterface.cancel()
         }
-        builder.setNegativeButton(R.string.cancel) { dialogInterface, i -> dialogInterface.cancel() }
+        builder.setNegativeButton(CR.string.cancel) { dialogInterface, i -> dialogInterface.cancel() }
         builder.setOnDismissListener { feedbackDialogVisible = false }
         builder.setOnCancelListener { feedbackDialogVisible = false }
         val dialog = builder.create()
@@ -123,10 +125,10 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadView, ShakeDetector
         super.onDestroy()
     }
 
-    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: StringResource?) {
         val snackBar = Snackbar.make(findViewById(R.id.coordinator_layout), message, Snackbar.LENGTH_LONG)
-        if (actionMessageId != 0) {
-            snackBar.setAction(systemImpl.getString(actionMessageId, this)) { action() }
+        if (actionMessageId != null) {
+            snackBar.setAction(systemImpl.getString(actionMessageId)) { action() }
             snackBar.setActionTextColor(ContextCompat.getColor(this, R.color.secondaryColor))
         }
 

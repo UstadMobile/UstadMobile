@@ -61,8 +61,6 @@
             android:layout_marginTop="8dp"
             android:contentDescription="@string/school"
             android:textStyle="bold"
-            app:textMessageIdLookupKey="@{assignmentStatus}"
-            app:textMessageIdLookupMap="@{SubmissionConstants.STATUS_MAP}"
             app:layout_constraintStart_toEndOf="@+id/submission_status_icon"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Marked" />

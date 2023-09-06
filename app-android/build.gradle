@@ -5,6 +5,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'org.jetbrains.kotlin.kapt'
     id 'kotlin-parcelize'
+    alias(libs.plugins.jetbrains.compose)
 }
 
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
@@ -44,7 +45,6 @@ kapt {
 android {
     buildFeatures {
         dataBinding true
-        compose true
     }
 
     //APK splitting would interfere with sideloading the app between different targets and the size
@@ -63,20 +63,10 @@ android {
         }
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.2"
-    }
-
     kotlinOptions {
         // Setup the Kotlin compiler options for the 'main' compilation:
         jvmTarget = "$version_kotlin_jvmTarget"
         freeCompilerArgs += "-Xopt-in=kotlinx.serialization.InternalSerializationApi"
-    }
-
-    sourceSets {
-        main.assets.srcDirs += "../core/src/main/assets/"
-        main.res.srcDirs += "../core/locale/main/"
-        main.java.srcDirs += "build/generated/source/umlocale/"
     }
 
     compileOptions {
@@ -107,7 +97,7 @@ android {
     }
 
 
-    compileSdkVersion rootProject.ext.version_android_compile_sdk
+    compileSdk rootProject.ext.version_android_compile_sdk
 
     defaultConfig {
         applicationId "com.toughra.ustadmobile"
@@ -163,7 +153,7 @@ android {
     //See  Compose to Kotlin Compatibility Map
     // https://developer.android.com/jetpack/androidx/releases/compose-kotlin
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.2"
+        kotlinCompilerExtensionVersion = "1.5.2"
     }
     packagingOptions {
         resources {
@@ -180,78 +170,7 @@ android {
     }
 }
 
-task generateCoreStringToAndroidResMap {
-    inputs.files("../core/locale/main/values/*.xml")
-    onlyIf {
-        /*
-         Only run this task if the input files have been updated since the task was last run.
-         upToDateWhen was not having the expected effect.
-         */
-        long inputLastModified = 0L
-
-        rootProject.fileTree(dir: "core/locale/main", include: "values/*.xml").each() { File file ->
-            if (file.lastModified() > inputLastModified)
-                inputLastModified = file.lastModified()
-        }
-
-        File outputFile = project.file("build/generated/source/umlocale/com/ustadmobile/port/android/generated/MessageIDMap.kt")
-        return outputFile.lastModified() < inputLastModified;
-    }
-
-    doLast {
-        Map<String, String> messageIds = new HashMap<>()
-
-        String genSrcHeader, genSrcFooter
-        String genSrcBody = ""
-
-        genSrcHeader = "package com.ustadmobile.port.android.generated\n"
-        genSrcHeader += "import com.ustadmobile.core.generated.locale.MessageID\n"
-        genSrcHeader += "import com.toughra.ustadmobile.R\n"
-        genSrcHeader += "import java.util.HashMap\n"
-        genSrcHeader += "object MessageIDMap {\n"
-        genSrcHeader += "\tval ID_MAP = HashMap<Int, Int>()\n"
-        genSrcHeader += "\tinit {\n"
-
-        System.out.println("Looking in: core/locale/main")
-        rootProject.fileTree(dir: "core/locale/main", include: "values/*.xml").each() { File file ->
-            System.out.println("Found: " + file.getAbsolutePath())
-            def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
-            xmlDoc.string.each() { str ->
-                String msgName = str.@name
-                if (!messageIds.containsKey(msgName)) {
-                    messageIds.put(msgName, msgName)
-                }
-            }
-        }
-
-        Iterator<String> nameIterator = messageIds.keySet().iterator();
-        while (nameIterator.hasNext()) {
-            String strName = nameIterator.next()
-            genSrcBody += "\tID_MAP[MessageID." + strName + "] = R.string." + strName + "\n"
-        }
-
-        genSrcFooter = "\t}\n"
-        genSrcFooter += "}\n"
-
-        File oldMessageIdFile = project.file("build/generated/source/umlocale/com/ustadmobile/port/android/generated/MessageIDMap.kt")
-        if (oldMessageIdFile.exists()) {
-            oldMessageIdFile.delete()
-        }
-
-        File outDir = project.file("build/generated/source/umlocale/com/ustadmobile/port/android/generated")
-        if (!outDir.isDirectory()) {
-            outDir.mkdirs()
-        }
-
-        File outFile = new File(outDir, "MessageIDMap.kt")
-        outFile.setText(genSrcHeader + genSrcBody + genSrcFooter, "UTF-8")
-    }
-}
-tasks.whenTaskAdded { task ->
-    if (task.name.startsWith("compile") || task.name.startsWith("assemble")) {
-        task.dependsOn(generateCoreStringToAndroidResMap)
-    }
-
+tasks.configureEach { task ->
     // TODO remove after merge with replication
     if (task.name.equals("lint")) {
         task.enabled = false
@@ -276,10 +195,14 @@ dependencies {
 
     implementation project(':core')
     implementation project(':sharedse')
+    implementation project(':lib-ui-compose')
 
     implementation "com.github.UstadMobile.door:door-runtime:$version_door"
     implementation project(':lib-database')
     implementation project(':lib-util')
+
+    api libs.moko.resources
+    api libs.moko.resources.compose
 
     implementation "io.github.aakira:napier:$version_napier"
     implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
@@ -305,7 +228,7 @@ dependencies {
     // Room (annotation processing takes place only on lib-database to improve build times)
     implementation "androidx.room:room-runtime:$version_android_room"
 
-    implementation "androidx.core:core-ktx:$version_androidx_core"
+    implementation libs.androidx.core.ktx
 
     // Paging
     implementation "androidx.paging:paging-runtime:$version_androidx_paging"
@@ -329,7 +252,7 @@ dependencies {
 
 
     implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_legacy"
-    implementation "androidx.appcompat:appcompat:$version_androidx_appcompat"
+    implementation libs.androidx.appcompat
     implementation "androidx.cardview:cardview:$version_androidx_cardview"
     implementation "com.google.android.material:material:$version_android_material"
     implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy"
@@ -344,7 +267,9 @@ dependencies {
     implementation "androidx.compose.material:material"
     implementation "androidx.compose.ui:ui-tooling-preview"
     debugImplementation "androidx.compose.ui:ui-tooling"
-    implementation "androidx.activity:activity-compose:$version_activity_compose"
+
+    //implementation "androidx.activity:activity-compose:$version_activity_compose"
+    implementation libs.activity.compose
     implementation "androidx.compose.material:material-icons-extended"
     implementation "com.google.accompanist:accompanist-themeadapter-material:$version_compose_theme_adapter"
     implementation "com.google.accompanist:accompanist-pager:$version_compose_accompanist"

@@ -15,6 +15,7 @@ import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import com.ustadmobile.core.R as CR
 
 class SchoolListFragment : UstadListViewFragment<School, SchoolWithMemberCountAndLocation>(),
         SchoolListView, View.OnClickListener,
@@ -61,23 +62,23 @@ class SchoolListFragment : UstadListViewFragment<School, SchoolWithMemberCountAn
 
         mDataRecyclerViewAdapter = SchoolListRecyclerAdapter(mPresenter)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
-                requireContext().getString(R.string.add_a_new_school),
+                requireContext().getString(CR.string.add_a_new_school),
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fabManager?.text = requireContext().getText(R.string.school)
+        fabManager?.text = requireContext().getText(CR.string.school)
         //override this to show our own bottom sheet
         fabManager?.onClickListener = {
             val optionList = if(newSchoolListOptionVisible) {
                 listOf(BottomSheetOption(R.drawable.ic_add_black_24dp,
-                        requireContext().getString(R.string.add_a_new_school), NEW_SCHOOL))
+                        requireContext().getString(CR.string.add_a_new_school), NEW_SCHOOL))
             }else {
                 listOf()
             } + listOf(BottomSheetOption(R.drawable.ic_login_24px,
-                    requireContext().getString(R.string.join_existing_school), JOIN_SCHOOL))
+                    requireContext().getString(CR.string.join_existing_school), JOIN_SCHOOL))
 
             val sheet = OptionsBottomSheetFragment(optionList, this)
             sheet.show(childFragmentManager, sheet.tag)
@@ -97,7 +98,7 @@ class SchoolListFragment : UstadListViewFragment<School, SchoolWithMemberCountAn
     override fun onResume() {
         super.onResume()
         mActivityWithFab?.activityFloatingActionButton?.text =
-                requireContext().getString(R.string.school)
+                requireContext().getString(CR.string.school)
     }
 
     /**

@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.db.dao.LanguageDaoCommon
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.SortOrderOption
@@ -23,12 +23,12 @@ import org.kodein.di.DI
 data class LanguageListUiState(
     val languageList: () -> PagingSource<Int, Language> = { EmptyPagingSource() },
     val sortOptions: List<SortOrderOption> = listOf(
-        SortOrderOption(MessageID.name, LanguageDaoCommon.SORT_LANGNAME_ASC, true),
-        SortOrderOption(MessageID.name, LanguageDaoCommon.SORT_LANGNAME_DESC, false),
-        SortOrderOption(MessageID.two_letter_code, LanguageDaoCommon.SORT_TWO_LETTER_ASC, true),
-        SortOrderOption(MessageID.two_letter_code, LanguageDaoCommon.SORT_TWO_LETTER_DESC, false),
-        SortOrderOption(MessageID.three_letter_code, LanguageDaoCommon.SORT_THREE_LETTER_ASC, true),
-        SortOrderOption(MessageID.three_letter_code, LanguageDaoCommon.SORT_THREE_LETTER_DESC, false)
+        SortOrderOption(MR.strings.name_key, LanguageDaoCommon.SORT_LANGNAME_ASC, true),
+        SortOrderOption(MR.strings.name_key, LanguageDaoCommon.SORT_LANGNAME_DESC, false),
+        SortOrderOption(MR.strings.two_letter_code, LanguageDaoCommon.SORT_TWO_LETTER_ASC, true),
+        SortOrderOption(MR.strings.two_letter_code, LanguageDaoCommon.SORT_TWO_LETTER_DESC, false),
+        SortOrderOption(MR.strings.three_letter_code, LanguageDaoCommon.SORT_THREE_LETTER_ASC, true),
+        SortOrderOption(MR.strings.three_letter_code, LanguageDaoCommon.SORT_THREE_LETTER_DESC, false)
     ),
     val sortOrder: SortOrderOption = sortOptions.first()
 )

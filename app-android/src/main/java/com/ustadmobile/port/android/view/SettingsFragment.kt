@@ -24,7 +24,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSettingsBinding
 import com.ustadmobile.core.controller.SettingsPresenter
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.util.ext.toNullableStringMap
@@ -34,6 +33,7 @@ import com.ustadmobile.core.viewmodel.SettingsUiState
 import com.ustadmobile.core.viewmodel.SettingsViewModel
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 import org.kodein.di.instance
+import com.ustadmobile.core.R as CR
 
 class SettingsFragment : UstadBaseMvvmFragment() {
 
@@ -90,7 +90,7 @@ private fun SettingsScreen(
 
         UstadDetailField(
             imageId = R.drawable.ic_language_blue_grey_600_24dp,
-            valueText = stringResource(R.string.app_language),
+            valueText = stringResource(CR.string.app_language),
             labelText = "English",
             onClick = onClickAppLanguage
         )
@@ -99,8 +99,8 @@ private fun SettingsScreen(
 
         if (uiState.holidayCalendarVisible){
             UstadDetailField(
-                valueText = stringResource(R.string.holiday_calendars),
-                labelText = stringResource(id = R.string.holiday_calendars_desc),
+                valueText = stringResource(CR.string.holiday_calendars),
+                labelText = stringResource(id = CR.string.holiday_calendars_desc),
                 imageId = 0,
                 onClick = onClickGoToHolidayCalendarList,
             )
@@ -111,8 +111,8 @@ private fun SettingsScreen(
         if (uiState.workspaceSettingsVisible){
             UstadDetailField(
                 imageId = R.drawable.workspace_join_24px,
-                valueText = stringResource(R.string.site),
-                labelText = stringResource(id = R.string.manage_site_settings),
+                valueText = stringResource(CR.string.site),
+                labelText = stringResource(id = CR.string.manage_site_settings),
                 onClick = onClickWorkspace
             )
         }
@@ -122,8 +122,8 @@ private fun SettingsScreen(
         if (uiState.reasonLeavingVisible){
             UstadDetailField(
                 imageId = R.drawable.ic_baseline_logout_24,
-                valueText = stringResource(R.string.leaving_reason),
-                labelText = stringResource(id = R.string.leaving_reason_manage),
+                valueText = stringResource(CR.string.leaving_reason),
+                labelText = stringResource(id = CR.string.leaving_reason_manage),
                 onClick = onClickLeavingReason
             )
         }
@@ -133,8 +133,8 @@ private fun SettingsScreen(
         if (uiState.langListVisible){
             UstadDetailField(
                 imageId = R.drawable.ic_language_blue_grey_600_24dp,
-                valueText = stringResource(R.string.languages),
-                labelText = stringResource(id = R.string.languages_description),
+                valueText = stringResource(CR.string.languages),
+                labelText = stringResource(id = CR.string.languages_description),
                 onClick = onClickLangList
             )
         }

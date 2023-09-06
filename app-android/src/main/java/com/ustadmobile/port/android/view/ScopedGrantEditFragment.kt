@@ -19,14 +19,14 @@ import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.databinding.FragmentScopedGrantEditBinding
 import com.ustadmobile.core.controller.ScopedGrantEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ScopedGrantEditView
 import com.ustadmobile.core.viewmodel.ScopedGrantEditUiState
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.ScopedGrant
-import com.ustadmobile.port.android.util.compose.messageIdResource
+import dev.icerock.moko.resources.compose.stringResource as mrStringResource
+import com.ustadmobile.core.MR
 
 
 interface ScopedGrantEditFragmentEventHandler {
@@ -52,8 +52,8 @@ class ScopedGrantEditFragment: UstadEditFragment<ScopedGrant>(), ScopedGrantEdit
             field?.observe(viewLifecycleOwner, this)
         }
 
-    override fun onChanged(t: List<BitmaskFlag>?) {
-        mRecyclerAdapter?.submitList(t)
+    override fun onChanged(value: List<BitmaskFlag>) {
+        mRecyclerAdapter?.submitList(value)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -123,7 +123,7 @@ fun ScopedGrantEditScreen(
                         onChangedBitmask(bitmask.copy(enabled = it))
                     }
                 ),
-                text = { Text(messageIdResource(id = bitmask.messageId)) },
+                text = { Text(mrStringResource(bitmask.stringResource)) },
                 trailing =  {
                     Switch(
                         onCheckedChange = {},
@@ -141,12 +141,12 @@ fun ScopedGrantEditScreenPreview() {
     val uiState = ScopedGrantEditUiState(
         bitmaskList = listOf(
             BitmaskFlag(
-                messageId = MessageID.permission_person_insert,
+                stringResource = MR.strings.permission_person_insert,
                 flagVal = 1,
                 enabled = true,
             ),
             BitmaskFlag(
-                messageId = MessageID.permission_person_update,
+                stringResource = MR.strings.permission_person_update,
                 flagVal = 2
             )
         )

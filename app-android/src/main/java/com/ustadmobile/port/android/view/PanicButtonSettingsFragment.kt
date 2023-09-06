@@ -1,5 +1,8 @@
 package com.ustadmobile.port.android.view
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -7,18 +10,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPanicButtonSettingsBinding
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.port.android.presenter.PanicButtonSettingsPresenter
 import com.ustadmobile.port.android.presenter.PanicTriggerApp
 import org.kodein.di.instance
+import com.ustadmobile.core.R as CR
 
 interface PanicButtonSettingsFragmentEventListener {
     fun onClickSelectPanicTriggerApp()
 
     fun onClickExplanation()
+
+    fun onClickUnhideCode()
 }
 
 
@@ -99,7 +104,7 @@ class PanicButtonSettingsFragment: UstadBaseFragment(), PanicButtonSettingsView,
 
     override fun onClickSelectPanicTriggerApp() {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.panic_button_app)
+            .setTitle(CR.string.panic_button_app)
             .setItems(panicTriggerAppList.map { it.simpleName }.toTypedArray()) {_, which ->
                 mPresenter?.onSelectTriggerApp(panicTriggerAppList[which])
             }
@@ -110,6 +115,13 @@ class PanicButtonSettingsFragment: UstadBaseFragment(), PanicButtonSettingsView,
         val intent = Intent(Intent.ACTION_VIEW)
         intent.setData(Uri.parse("https://play.google.com/store/apps/details?id=info.guardianproject.ripple"))
         startActivity(intent)
+    }
+
+    override fun onClickUnhideCode() {
+        val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE)
+            as? ClipboardManager
+        clipboard?.setPrimaryClip(ClipData(ClipData.newPlainText("text", unhideCode)))
+        showSnackBar(requireContext().getString(CR.string.copied_to_clipboard))
     }
 
     companion object {

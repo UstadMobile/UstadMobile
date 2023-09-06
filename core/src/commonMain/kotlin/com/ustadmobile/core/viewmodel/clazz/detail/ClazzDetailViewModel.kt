@@ -1,6 +1,6 @@
 package com.ustadmobile.core.viewmodel.clazz.detail
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.TabItem
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.hasFlag
@@ -34,12 +34,12 @@ class ClazzDetailViewModel(
             TabItem(
                 viewName = ClazzDetailOverviewView.VIEW_NAME,
                 args = mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString()),
-                label = systemImpl.getString(MessageID.course),
+                label = systemImpl.getString(MR.strings.course),
             ),
             TabItem(
                 viewName = ClazzMemberListViewModel.DEST_NAME,
                 args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
-                label = systemImpl.getString(MessageID.members),
+                label = systemImpl.getString(MR.strings.members_key),
             )
         )
 
@@ -48,7 +48,7 @@ class ClazzDetailViewModel(
                 TabItem(
                     viewName = ClazzLogListAttendanceViewModel.DEST_NAME,
                     args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
-                    label = systemImpl.getString(MessageID.attendance),
+                    label = systemImpl.getString(MR.strings.attendance),
                 )
             )
         }
@@ -56,7 +56,7 @@ class ClazzDetailViewModel(
             TabItem(
                 viewName = CourseGroupSetListViewModel.DEST_NAME,
                 args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
-                label = systemImpl.getString(MessageID.groups),
+                label = systemImpl.getString(MR.strings.groups),
             )
         )
 

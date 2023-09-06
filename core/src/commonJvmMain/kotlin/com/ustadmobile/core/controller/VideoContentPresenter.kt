@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.VideoContentView
 import com.ustadmobile.lib.db.entities.Container
@@ -24,7 +24,7 @@ actual class VideoContentPresenter actual constructor(context: Any, arguments: M
 
                 val containerResult = db.containerDao.findByUidAsync(containerUid)
                 if (containerResult == null) {
-                    view.showSnackBar(systemImpl.getString(MessageID.no_video_file_found, context), {}, 0)
+                    view.showSnackBar(systemImpl.getString(MR.strings.no_video_file_found), {})
                     view.loading = false
                     return@launch
                 }
@@ -63,7 +63,7 @@ actual class VideoContentPresenter actual constructor(context: Any, arguments: M
                     }
                 })
 
-                srtLangList.add(0, systemImpl.getString(MessageID.no_subtitle, context))
+                srtLangList.add(0, systemImpl.getString(MR.strings.no_subtitle))
                 if (defaultLangName.isNotEmpty()) srtLangList.add(1, defaultLangName)
 
             }

@@ -48,8 +48,8 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
-import com.ustadmobile.port.android.view.composable.UstadInputFieldLayout
-
+import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
+import com.ustadmobile.core.R as CR
 
 interface ReportFilterEditFragmentEventHandler {
 
@@ -223,7 +223,7 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.edit_filters, R.string.edit_filters)
+        setEditFragmentTitle(CR.string.edit_filters, CR.string.edit_filters)
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
         uidAndLabelFilterItemRecyclerAdapter?.presenter = mPresenter
 
@@ -241,7 +241,7 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
 
     override fun onResume() {
         super.onResume()
-        setEditFragmentTitle(R.string.edit_filters, R.string.edit_filters)
+        setEditFragmentTitle(CR.string.edit_filters, CR.string.edit_filters)
     }
 
     override fun onDestroyView() {
@@ -320,7 +320,7 @@ private fun ReportFilterEditScreen(
                 UstadMessageIdOptionExposedDropDownMenuField(
                     modifier = Modifier.fillMaxWidth(),
                     value = uiState.reportFilter?.reportFilterField ?: 0,
-                    label = stringResource(R.string.report_filter_edit_field),
+                    label = stringResource(CR.string.report_filter_edit_field),
                     options = FieldConstants.FIELD_MESSAGE_IDS,
                     isError = uiState.fieldError != null,
                     enabled = uiState.fieldsEnabled,
@@ -346,7 +346,7 @@ private fun ReportFilterEditScreen(
                     UstadMessageIdOptionExposedDropDownMenuField(
                         modifier = Modifier.weight(0.5F),
                         value = uiState.reportFilter?.reportFilterCondition ?: 0,
-                        label = stringResource(R.string.report_filter_edit_condition),
+                        label = stringResource(CR.string.report_filter_edit_condition),
                         options = ConditionConstants.CONDITION_MESSAGE_IDS,
                         isError = uiState.conditionsError != null,
                         enabled = uiState.fieldsEnabled,
@@ -366,7 +366,7 @@ private fun ReportFilterEditScreen(
                     UstadMessageIdOptionExposedDropDownMenuField(
                         modifier = Modifier.weight(0.5F),
                         value = uiState.reportFilter?.reportFilterDropDownValue ?: 0,
-                        label = stringResource(R.string.report_filter_edit_values),
+                        label = stringResource(CR.string.report_filter_edit_values),
                         options = ContentCompletionStatusConstants.CONTENT_COMPLETION_STATUS_MESSAGE_IDS,
                         isError = uiState.valuesError != null,
                         enabled = uiState.fieldsEnabled,
@@ -385,7 +385,7 @@ private fun ReportFilterEditScreen(
             item {
                 UstadTextEditField(
                     value = uiState.reportFilter?.reportFilterValue ?: "",
-                    label = stringResource(id = R.string.report_filter_edit_values),
+                    label = stringResource(id = CR.string.report_filter_edit_values),
                     error = uiState.valuesError,
                     enabled = uiState.fieldsEnabled,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -406,7 +406,7 @@ private fun ReportFilterEditScreen(
                     UstadTextEditField(
                         modifier = Modifier.weight(0.5F),
                         value = uiState.reportFilter?.reportFilterValueBetweenX ?: "",
-                        label = stringResource(id = R.string.from),
+                        label = stringResource(id = CR.string.from),
                         error = uiState.valuesError,
                         enabled = uiState.fieldsEnabled,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -420,7 +420,7 @@ private fun ReportFilterEditScreen(
                     UstadTextEditField(
                         modifier = Modifier.weight(0.5F),
                         value = uiState.reportFilter?.reportFilterValueBetweenY ?: "",
-                        label = stringResource(id = R.string.toC),
+                        label = stringResource(id = CR.string.toC),
                         error = uiState.valuesError,
                         enabled = uiState.fieldsEnabled,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -463,7 +463,7 @@ private fun ReportFilterEditScreen(
                         IconButton(onClick = { onClickRemoveFilter(uidAndLabel) }) {
                             Icon(
                                 imageVector = Icons.Filled.Delete,
-                                contentDescription = stringResource(id = R.string.delete),
+                                contentDescription = stringResource(id = CR.string.delete),
                             )
                         }
                     }

@@ -2,7 +2,7 @@ package com.ustadmobile.core.navigation
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.door.lifecycle.MutableLiveData
-import js.core.toSet
+import js.iterable.toSet
 import kotlinext.js.getOwnPropertyNames
 import org.w3c.dom.History
 import web.url.URLSearchParams

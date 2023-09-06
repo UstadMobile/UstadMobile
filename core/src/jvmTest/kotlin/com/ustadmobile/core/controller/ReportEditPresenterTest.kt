@@ -5,7 +5,7 @@ import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.core.db.waitUntil
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.captureLastEntityValue
@@ -94,7 +94,7 @@ class ReportEditPresenterTest {
 
         presenter.handleClickSave(initialEntity)
 
-        verify(systemImpl, timeout(5000)).getString(eq(MessageID.field_required_prompt), any())
+        verify(systemImpl, timeout(5000)).getString(eq(MR.strings.field_required_prompt), any())
 
         // verify its never called because view would show as error
         verify(systemImpl, never()).go(eq(ReportDetailView.VIEW_NAME),

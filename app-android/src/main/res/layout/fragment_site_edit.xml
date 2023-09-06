@@ -54,7 +54,7 @@
                     android:inputType="text"
                     android:text="@={site.siteName}"
                     tools:text="Site Name"
-                    android:hint="@string/name" />
+                    android:hint="@string/name_key" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.switchmaterial.SwitchMaterial

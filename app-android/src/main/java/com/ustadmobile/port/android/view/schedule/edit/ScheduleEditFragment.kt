@@ -19,7 +19,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditUiState
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
@@ -28,6 +27,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadTimeEditTextField
+import com.ustadmobile.core.R as CR
 
 class ScheduleEditFragment: UstadBaseMvvmFragment() {
 
@@ -71,7 +71,7 @@ private fun ScheduleEditScreen(
 
         UstadMessageIdOptionExposedDropDownMenuField(
             value = uiState.entity?.scheduleDay ?: 0,
-            label = stringResource(R.string.day),
+            label = stringResource(CR.string.day),
             options = ScheduleConstants.DAY_MESSAGE_IDS,
             onOptionSelected = {
                 onScheduleChanged(uiState.entity?.shallowCopy{
@@ -88,7 +88,7 @@ private fun ScheduleEditScreen(
             UstadTimeEditTextField(
                 modifier = Modifier.weight(0.5F),
                 value = (uiState.entity?.sceduleStartTime ?: 0).toInt(),
-                label = stringResource(id = R.string.from),
+                label = stringResource(id = CR.string.from),
                 error = uiState.fromTimeError,
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
@@ -103,7 +103,7 @@ private fun ScheduleEditScreen(
             UstadTimeEditTextField(
                 modifier = Modifier.weight(0.5F),
                 value = (uiState.entity?.scheduleEndTime ?: 0).toInt(),
-                label = stringResource(id = R.string.to),
+                label = stringResource(id = CR.string.to_key),
                 error = uiState.toTimeError,
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {

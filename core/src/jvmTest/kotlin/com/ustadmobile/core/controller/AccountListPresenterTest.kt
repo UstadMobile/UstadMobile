@@ -5,7 +5,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import org.mockito.kotlin.*
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -29,11 +29,13 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.singleton
 import com.ustadmobile.core.db.waitUntil
+import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.mockLifecycleOwner
 import com.ustadmobile.door.lifecycle.*
 import com.ustadmobile.util.test.rules.CoroutineDispatcherRule
 import com.ustadmobile.util.test.rules.bindPresenterCoroutineRule
+import dev.icerock.moko.resources.StringResource
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.gson.*
 import org.junit.Assert
@@ -105,9 +107,9 @@ class AccountListPresenterTest {
         mockView = mock { }
         impl = mock{
             on { getDefaultFirstDest() }.thenReturn(ContentEntryList2View.VIEW_NAME)
-            on { getString(any<Int>(), any()) }.thenAnswer {
-                val messageId = it.getArgument<Int>(0)
-                if(messageId == MessageID.logged_in_as) {
+            on { getString(any<StringResource>() ) }.thenAnswer {
+                val messageId = it.getArgument<StringResource>(0)
+                if(messageId == MR.strings.logged_in_as) {
                     "Logged in as  %1\$s on %2\$s"
                 }else {
                     messageId.toString()

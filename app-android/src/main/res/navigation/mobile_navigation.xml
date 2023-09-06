@@ -146,12 +146,6 @@
         android:id="@+id/course_group_set_detail"
         android:name="com.ustadmobile.port.android.view.coursegroupset.detail.CourseGroupSetDetailFragment" />
 
-    <fragment
-        android:id="@+id/module_course_block_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ModuleCourseBlockEditFragment" />
-
-
-
 
     <fragment
         android:id="@+id/course_terminology_list_dest"
@@ -194,7 +188,7 @@
         android:name="com.ustadmobile.port.android.view.contententry.list.ContentEntryList2Fragment"
         android:label="@string/content">
     </fragment>
-2
+
     <fragment
         android:id="@+id/content_entry_list_home_dest"
         android:name="com.ustadmobile.port.android.view.contententry.list.ContentEntryList2Fragment"
@@ -433,7 +427,7 @@
     <fragment
         android:id="@+id/scoped_grant_list_dest"
         android:name="com.ustadmobile.port.android.view.ScopedGrantListFragment"
-        android:label="@string/permissions"/>
+        android:label="@string/permission_key"/>
 
     <fragment
         android:id="@+id/scoped_grant_detail_dest"

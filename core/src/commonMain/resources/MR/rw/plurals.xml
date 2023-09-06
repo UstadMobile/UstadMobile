@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <plurals name="number_of_attempts">
+        <item quantity="one">%d Icyagerageje gukorwaho</item>
+        <item quantity="other">%dIbyagerageje gukorwaho</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">%dUmunota</item>
+        <item quantity="other">%dIminota</item>
+    </plurals>
+    <string name="started">Cyatangiye</string>
+    <string name="share_offline_dialog_message">Ushobora gusangiza abandi izi nyigisho udafite murandasi. Ku gikoresho ushaka kuyisangizaho:
+        \n1. Fungura igenamiterere&gt; Igenamiterere ry\'inziramugozi.
+        \n2. Banza umenye neza niba icyo gikoresho kiri kugarara.</string>
+    <plurals name="duration_seconds">
+        <item quantity="one">%d Isegona</item>
+        <item quantity="other">%d Amasegonda</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">%dIsaha</item>
+        <item quantity="other">%dAmasaha</item>
+    </plurals>
+</resources>
