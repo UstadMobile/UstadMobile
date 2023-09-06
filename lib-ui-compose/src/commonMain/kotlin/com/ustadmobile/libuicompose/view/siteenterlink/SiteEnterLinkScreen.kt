@@ -1,6 +1,5 @@
 package com.ustadmobile.libuicompose.view.siteenterlink
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -53,7 +52,7 @@ fun SiteEnterLinkScreenForViewModel(
 }
 
 @Composable
-private fun SiteEnterLinkScreen(
+fun SiteEnterLinkScreen(
     uiState: SiteEnterLinkUiState = SiteEnterLinkUiState(),
     onClickNext: () -> Unit = {},
     onClickNewLearningEnvironment: () -> Unit = {},
@@ -146,12 +145,4 @@ private fun SiteEnterLinkScreen(
             )
         }
     }
-}
-
-@Composable
-@Preview
-fun SiteEnterLinkScreenPreview() {
-    SiteEnterLinkScreen(
-        uiState = SiteEnterLinkUiState()
-    )
 }
