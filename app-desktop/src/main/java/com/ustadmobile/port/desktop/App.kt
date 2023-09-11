@@ -2,6 +2,7 @@ package com.ustadmobile.port.desktop
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +20,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -38,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -130,14 +133,16 @@ fun main() = application {
                             )
 
                             TextField(
-                                modifier = Modifier.testTag("searchBox").fillMaxWidth(),
+                                modifier = Modifier
+                                    .weight(1.0f)
+                                    .testTag("searchBox"),
                                 value = appUiState.searchState.searchText,
                                 placeholder = {
-                                    Text(text = "Search...", style = TextStyle(
-                                        color = androidx.compose.ui.graphics.Color.LightGray
-                                    )
-                                    )
+                                    Text(text = "Search...")
                                 },
+                                colors = TextFieldDefaults.textFieldColors(
+                                    backgroundColor = MaterialTheme.colors.primary,
+                                ),
                                 onValueChange = appUiState.searchState.onSearchTextChanged,
                             )
 
