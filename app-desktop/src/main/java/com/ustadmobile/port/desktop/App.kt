@@ -78,7 +78,6 @@ private val screens = listOf(
     "People"
 )
 
-@OptIn(ExperimentalAnimationApi::class, ExperimentalComposeUiApi::class)
 fun main() = application {
 
     val appUiState by remember { mutableStateOf(AppUiState(
