@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ExtendedFloatingActionButton
 import androidx.compose.material.FabPosition
@@ -15,6 +14,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -53,8 +53,9 @@ import com.ustadmobile.core.impl.appstate.AppBarSearchUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.libuicompose.helloworld.HelloWorld
-import com.ustadmobile.libuicompose.view.siteenterlink.SiteEnterLinkScreenForViewModel
 import dev.icerock.moko.resources.compose.painterResource
+import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 //Roughly as per https://github.com/JetBrains/compose-multiplatform-desktop-template#readme
@@ -86,6 +87,9 @@ fun main() = application {
         FabUiState.FabIcon.EDIT to Icons.Default.Edit,
     )
 
+    val scaffoldState = rememberScaffoldState()
+    val coroutineScope = rememberCoroutineScope()
+
     Window(
         onCloseRequest = ::exitApplication,
         title = appUiState.title ?: "",
@@ -94,61 +98,9 @@ fun main() = application {
 
 
         MaterialTheme {
-            val scaffoldState = rememberScaffoldState()
-            val coroutineScope = rememberCoroutineScope()
 
             Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = {
-                            Text(appUiState.title ?: "")
-                        },
-                        navigationIcon = {
-                            IconButton(onClick = {
-                                coroutineScope.launch {
-                                    scaffoldState.drawerState.open()
-                                }},
-                                contentDescription = "",
-                                icon = Icons.Outlined.Menu
-                            )
-                        },
-
-                        actions = {
-
-                            IconButton(
-                                onClick = {},
-                                contentDescription = "",
-                                icon = Icons.Outlined.KeyboardArrowLeft
-                            )
-
-                            IconButton(
-                                onClick = {},
-                                contentDescription = "",
-                                icon = Icons.Outlined.KeyboardArrowRight
-                            )
-
-                            TextField(
-                                modifier = Modifier
-                                    .weight(1.0f)
-                                    .testTag("searchBox"),
-                                value = appUiState.searchState.searchText,
-                                placeholder = {
-                                    Text(text = "Search...")
-                                },
-                                colors = TextFieldDefaults.textFieldColors(
-                                    backgroundColor = MaterialTheme.colors.primary,
-                                ),
-                                onValueChange = appUiState.searchState.onSearchTextChanged,
-                            )
-
-                            IconButton(
-                                onClick = { },
-                                contentDescription = "icn_search_clear_content_description",
-                                icon = Icons.Filled.AccountCircle)
-
-                        }
-                    )
-                },
+                topBar = { TopAppBar(appUiState, scaffoldState, coroutineScope) },
                 drawerShape = NavShape(400.dp, 0f),
                 drawerContent = {
                     Drawer(
@@ -185,6 +137,69 @@ fun main() = application {
             )
         }
     }
+}
+
+@Composable
+private fun TopAppBar(
+    appUiState: AppUiState,
+    scaffoldState: ScaffoldState,
+    coroutineScope: CoroutineScope
+){
+
+    TopAppBar(
+        title = { Text(appUiState.title ?: "") },
+        navigationIcon = {
+            IconButton(onClick = {
+                coroutineScope.launch {
+                    scaffoldState.drawerState.open()
+                }},
+                contentDescription = "drawer_button",
+                icon = Icons.Outlined.Menu
+            )
+        },
+
+        actions = {
+
+            IconButton(
+                onClick = {},
+                contentDescription = stringResource(MR.strings.back),
+                icon = Icons.Outlined.KeyboardArrowLeft
+            )
+
+            IconButton(
+                onClick = {},
+                contentDescription = stringResource(MR.strings.next),
+                icon = Icons.Outlined.KeyboardArrowRight
+            )
+
+            if (appUiState.searchState.visible){
+                TextField(
+                    modifier = Modifier
+                        .weight(1.0f)
+                        .testTag("searchBox"),
+                    value = appUiState.searchState.searchText,
+                    placeholder = { Text(text = "Search...") },
+                    colors = TextFieldDefaults.textFieldColors(
+                        backgroundColor = MaterialTheme.colors.primary,
+                    ),
+                    onValueChange = appUiState.searchState.onSearchTextChanged,
+                )
+            }
+
+            if (appUiState.userAccountIconVisible){
+                IconButton(
+                    onClick = {  },
+                    contentDescription = stringResource(MR.strings.account),
+                    icon = Icons.Filled.AccountCircle)
+            } else {
+                IconButton(
+                    onClick = appUiState.actionBarButtonState.onClick,
+                    contentDescription = "action_button",
+                    icon = Icons.Filled.AccountCircle)
+            }
+
+        }
+    )
 }
 
 @Composable
