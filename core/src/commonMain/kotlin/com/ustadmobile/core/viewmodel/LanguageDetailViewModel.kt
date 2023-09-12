@@ -21,20 +21,18 @@ data class LanguageDetailUiState(
 class LanguageDetailViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-): UstadViewModel(di, savedStateHandle, LanguageDetailView.VIEW_NAME) {
+): DetailViewModel<Language>(di, savedStateHandle, LanguageDetailView.VIEW_NAME) {
 
     private val _uiState = MutableStateFlow(LanguageDetailUiState())
 
     val uiState: Flow<LanguageDetailUiState> = _uiState.asStateFlow()
 
     init {
-        val temp = savedStateHandle[UstadView.ARG_ENTITY_UID]
-
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    if (temp != null) {
-                        activeDb.languageDao.findByUidAsFlow(temp.toLong()).collect { lang ->
+                    if (entityUidArg != null) {
+                        activeDb.languageDao.findByUidAsFlow(entityUidArg).collect { lang ->
                             _uiState.update { prev ->
                                 prev.copy(
                                     language = lang

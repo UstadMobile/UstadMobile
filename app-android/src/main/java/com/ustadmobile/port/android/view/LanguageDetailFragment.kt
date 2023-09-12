@@ -80,25 +80,19 @@ fun LanguageDetailScreen(
     ){
 
         ListItem(
-            modifier = Modifier,
-//                .clickable(onClick = onClickAppLanguage),
-            text = { Text(stringResource(id = CR.string.name)) },
-            secondaryText = { uiState.language?.name ?: "" },
-//            icon = {
-//                Icon(
-//                    painter = painterResource(id = R.drawable.ic_language_blue_grey_600_24dp),
-//                    contentDescription = "")
-//            }
+            text = { Text(uiState.language?.name ?: "") },
+            secondaryText = { Text(stringResource(id = CR.string.name)) },
         )
 
         ListItem(
-            text = {Text(stringResource(id = CR.string.two_letter_code))},
-            secondaryText = { uiState.language?.iso_639_1_standard ?: "" }
+            text = { Text(uiState.language?.iso_639_1_standard ?: "") },
+            secondaryText = {Text(stringResource(id = CR.string.two_letter_code))}
         )
 
         ListItem(
-            text = {Text(stringResource(id = CR.string.three_letter_code))},
-            secondaryText = { uiState.language?.iso_639_2_standard ?: "" }
+
+            text = { Text(uiState.language?.iso_639_2_standard ?: "") },
+            secondaryText = {Text(stringResource(id = CR.string.three_letter_code))}
         )
     }
 }
