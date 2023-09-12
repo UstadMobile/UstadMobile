@@ -6,9 +6,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ExtendedFloatingActionButton
 import androidx.compose.material.FabPosition
 import androidx.compose.material.Icon
@@ -17,9 +20,11 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.contentColorFor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
@@ -51,6 +56,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppBarSearchUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.FabUiState
@@ -81,7 +87,9 @@ fun main() = application {
 
     val appUiState by remember { mutableStateOf(AppUiState(
         fabState = FabUiState(visible = true, icon = FabUiState.FabIcon.EDIT, text = "Edit"),
-        searchState = AppBarSearchUiState(visible = true)
+        searchState = AppBarSearchUiState(visible = true),
+        userAccountIconVisible = false,
+        actionBarButtonState = ActionBarButtonUiState(visible = true)
     )) }
 
     val FAB_ICON_MAP = mapOf(
@@ -195,11 +203,16 @@ private fun TopAppBar(
                     onClick = {  },
                     contentDescription = stringResource(MR.strings.account),
                     icon = Icons.Filled.AccountCircle)
-            } else {
-                IconButton(
+            } else if (appUiState.actionBarButtonState.visible){
+                TextButton(
                     onClick = appUiState.actionBarButtonState.onClick,
-                    contentDescription = "action_button",
-                    icon = Icons.Filled.AccountCircle)
+                    enabled = appUiState.actionBarButtonState.enabled,
+                    modifier = Modifier.testTag("action_button"),
+                ) {
+                    Text(appUiState.actionBarButtonState.text ?: "",
+                        color = contentColorFor(MaterialTheme.colors.secondary)
+                    )
+                }
             }
 
         }
