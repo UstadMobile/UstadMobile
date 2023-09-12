@@ -16,6 +16,9 @@ kotlin {
 
     sourceSets {
         val commonMain by getting {
+
+            val version_voyager = "1.0.0-rc05"
+
             dependencies {
                 api(project(":core"))
                 api(project(":lib-database"))
@@ -28,6 +31,10 @@ kotlin {
                 implementation(libs.kodein.di)
                 implementation(libs.moko.resources)
                 implementation(libs.moko.resources.compose)
+
+                // Compose Multiplatform Navigator
+                implementation("cafe.adriel.voyager:voyager-navigator:$version_voyager")
+
             }
         }
 
