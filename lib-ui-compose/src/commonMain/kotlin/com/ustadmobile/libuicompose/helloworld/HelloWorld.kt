@@ -88,17 +88,8 @@ data class HelloWorldScreen(
                 )
             ) {
 
-                Icon(
-                    Icons.Filled.Add,
-                    contentDescription = "",
-                    modifier = Modifier.size(ButtonDefaults.IconSize)
-                )
+                Text("Next screen")
 
-                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-
-                Text(stringResource(MR.strings.create_a_new_learning_env)
-                    .uppercase()
-                )
             }
 
         }
