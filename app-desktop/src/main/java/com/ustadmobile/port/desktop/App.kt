@@ -58,6 +58,7 @@ import com.ustadmobile.core.impl.appstate.AppBarSearchUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.libuicompose.helloworld.HelloWorld
+import com.ustadmobile.libuicompose.view.siteenterlink.SiteEnterLinkScreenForViewModel
 import dev.icerock.moko.resources.compose.painterResource
 import kotlinx.coroutines.launch
 
@@ -164,7 +165,7 @@ fun main() = application {
                 scaffoldState = scaffoldState,
                 drawerContentColor = MaterialTheme.colors.onBackground,
                 content = {
-                          HelloWorld()
+                    SiteEnterLinkScreenForViewModel(null)
                 },
                 floatingActionButtonPosition = FabPosition.End,
                 floatingActionButton = {

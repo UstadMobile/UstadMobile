@@ -50,19 +50,17 @@ import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
 fun SiteEnterLinkScreenForViewModel(
-    viewModel: SiteEnterLinkViewModel
+    viewModel: SiteEnterLinkViewModel?
 ) {
-    val uiState: SiteEnterLinkUiState by viewModel.uiState.collectAsState(
-        initial = SiteEnterLinkUiState()
-    )
-
+//    val uiState: SiteEnterLinkUiState by viewModel?.uiState?.collectAsState(
+//        initial = SiteEnterLinkUiState()
+//    )
 
     Navigator(
         screen = SiteEnterLinkScreen(
-            uiState = uiState,
-            onClickNext = viewModel::onClickNext,
+            onClickNext = {  },
             onClickNewLearningEnvironment = { },
-            onEditTextValueChange = viewModel::onSiteLinkUpdated,
+            onEditTextValueChange = {  },
         ),
         onBackPressed = { currentScreen ->
             true
