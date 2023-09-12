@@ -39,6 +39,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -51,6 +52,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.AppBarSearchUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.FabUiState
+import com.ustadmobile.libuicompose.helloworld.HelloWorld
 import com.ustadmobile.libuicompose.view.siteenterlink.SiteEnterLinkScreenForViewModel
 import dev.icerock.moko.resources.compose.painterResource
 import kotlinx.coroutines.launch
@@ -158,7 +160,7 @@ fun main() = application {
                 scaffoldState = scaffoldState,
                 drawerContentColor = MaterialTheme.colors.onBackground,
                 content = {
-                    SiteEnterLinkScreenForViewModel(null)
+                    HelloWorld()
                 },
                 floatingActionButtonPosition = FabPosition.End,
                 floatingActionButton = {
@@ -233,9 +235,9 @@ fun Drawer(
 
 
         Image(
-            painter = painterResource(MR.images.illustration_connect),
+            painter = painterResource(MR.images.ustad_logo),
             contentDescription = null,
-            modifier = Modifier.size(90.dp),
+            contentScale = ContentScale.Fit,
         )
 
         screens.forEach { screen ->
