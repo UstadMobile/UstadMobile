@@ -45,7 +45,10 @@ import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppBarSearchUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.FabUiState
+import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.libuicompose.helloworld.HelloWorld
+import com.ustadmobile.libuicompose.view.siteenterlink.SiteEnterLinkScreen
+import com.ustadmobile.libuicompose.view.siteenterlink.SiteEnterLinkScreenForViewModel
 import dev.icerock.moko.resources.compose.stringResource
 
 //Roughly as per https://github.com/JetBrains/compose-multiplatform-desktop-template#readme
@@ -75,11 +78,9 @@ fun main() = application {
         Pair(stringResource(MR.strings.people), Icons.Filled.Person)
     )
 
-
-    // stringResource is a Composable so we cannot call it inside remember
-    // instead we can use variable and set it to title
     val appName = stringResource(MR.strings.app_name)
-    val appUiState by remember { mutableStateOf(AppUiState(
+    val appUiState by remember {
+        mutableStateOf(AppUiState(
         fabState = FabUiState(visible = true, icon = FabUiState.FabIcon.EDIT, text = "Edit"),
         searchState = AppBarSearchUiState(visible = true),
         title = appName,
