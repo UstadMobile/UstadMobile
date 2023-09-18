@@ -1,25 +1,20 @@
 package com.ustadmobile.port.desktop
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
-import androidx.compose.material.ExtendedFloatingActionButton
-import androidx.compose.material.FabPosition
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.LibraryBooks
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.outlined.KeyboardArrowLeft
-import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,13 +22,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.Button
+import androidx.compose.material.ExtendedFloatingActionButton
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.KeyboardArrowLeft
+import androidx.compose.material.icons.outlined.KeyboardArrowRight
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PermanentDrawerSheet
 import androidx.compose.material3.PermanentNavigationDrawer
+import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -65,19 +66,23 @@ val FAB_ICON_MAP = mapOf(
     FabUiState.FabIcon.EDIT to Icons.Default.Edit,
 )
 
-
 fun main() = application {
 
 
     val screens = listOf(
-        Pair(stringResource(MR.strings.courses), Icons.Outlined.DateRange),
-        Pair(stringResource(MR.strings.library), Icons.Filled.Favorite),
-        Pair(stringResource(MR.strings.people), Icons.Default.Person)
+        Pair(stringResource(MR.strings.courses), Icons.Default.School),
+        Pair(stringResource(MR.strings.library), Icons.Filled.LibraryBooks),
+        Pair(stringResource(MR.strings.people), Icons.Filled.Person)
     )
 
+
+    // stringResource is a Composable so we cannot call it inside remember
+    // instead we can use variable and set it to title
+    val appName = stringResource(MR.strings.app_name)
     val appUiState by remember { mutableStateOf(AppUiState(
         fabState = FabUiState(visible = true, icon = FabUiState.FabIcon.EDIT, text = "Edit"),
         searchState = AppBarSearchUiState(visible = true),
+        title = appName,
         userAccountIconVisible = false,
         actionBarButtonState = ActionBarButtonUiState(visible = true, text = "Save", enabled = true)
     )) }
@@ -102,9 +107,7 @@ fun main() = application {
                                 icon = { Icon(pair.second, contentDescription = null) },
                                 label = { Text(pair.first) },
                                 selected = pair == selectedItem,
-                                onClick = {
-                                    selectedItem = pair
-                                },
+                                onClick = { selectedItem = pair },
                                 modifier = Modifier.padding(horizontal = 12.dp)
                             )
                         }
@@ -113,7 +116,6 @@ fun main() = application {
                 content = {
                     Scaffold(
                         topBar = { TopAppBar(appUiState) },
-                        floatingActionButtonPosition = FabPosition.End,
                         floatingActionButton = {
                             if (appUiState.fabState.visible){
                                 ExtendedFloatingActionButton(
@@ -129,8 +131,8 @@ fun main() = application {
                                     },
                                 )
                             }
-                        },
-                    ) { contentPadding ->
+                        }
+                    ) { _ ->
                         HelloWorld()
                     }
                 }
@@ -139,25 +141,35 @@ fun main() = application {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopAppBar(
     appUiState: AppUiState,
 ){
 
     TopAppBar(
+        colors = topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            titleContentColor = MaterialTheme.colorScheme.primary,
+        ),
         title = { Text(appUiState.title ?: "") },
         navigationIcon = {
-            IconButton(
-                onClick = {},
-                contentDescription = stringResource(MR.strings.back),
-                icon = Icons.Outlined.KeyboardArrowLeft
-            )
+            Row {
 
-            IconButton(
-                onClick = {},
-                contentDescription = stringResource(MR.strings.next),
-                icon = Icons.Outlined.KeyboardArrowRight
-            )
+                IconButton(onClick = {  }) {
+                    Icon(
+                        imageVector = Icons.Outlined.KeyboardArrowLeft,
+                        contentDescription = stringResource(MR.strings.back)
+                    )
+                }
+
+                IconButton(onClick = {  }) {
+                    Icon(
+                        imageVector = Icons.Outlined.KeyboardArrowRight,
+                        contentDescription = stringResource(MR.strings.next)
+                    )
+                }
+            }
         },
 
         actions = {
@@ -165,22 +177,31 @@ private fun TopAppBar(
             if (appUiState.searchState.visible){
                 OutlinedTextField(
                     modifier = Modifier
-                        .weight(1.0f)
                         .testTag("searchBox"),
+                    singleLine = true,
+                    trailingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                     value = appUiState.searchState.searchText,
                     placeholder = { Text(text = stringResource(MR.strings.search)) },
                     onValueChange = appUiState.searchState.onSearchTextChanged,
                 )
-            } else {
-                Box(modifier = Modifier.weight(1.0f))
             }
 
+            Spacer(Modifier.width(10.dp))
+
             if (appUiState.userAccountIconVisible){
+
                 IconButton(
-                    onClick = {  },
-                    contentDescription = stringResource(MR.strings.account),
-                    icon = Icons.Filled.AccountCircle)
+                    modifier = Modifier.testTag("account_button"),
+                    onClick = {  }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.AccountCircle,
+                        contentDescription = stringResource(MR.strings.account)
+                    )
+                }
+
             } else if (appUiState.actionBarButtonState.visible){
+
                 Button(
                     onClick = appUiState.actionBarButtonState.onClick,
                     enabled = appUiState.actionBarButtonState.enabled,
@@ -192,18 +213,4 @@ private fun TopAppBar(
 
         }
     )
-}
-
-@Composable
-private fun IconButton(
-    onClick: () -> Unit,
-    contentDescription: String,
-    icon: ImageVector
-) {
-    IconButton(onClick = onClick) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription
-        )
-    }
 }

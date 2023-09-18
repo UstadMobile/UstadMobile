@@ -27,6 +27,7 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":lib-ui-compose"))
     implementation(compose.material3)
+    implementation(compose.materialIconsExtended)
     api(libs.moko.resources)
     api(libs.moko.resources.compose)
 
