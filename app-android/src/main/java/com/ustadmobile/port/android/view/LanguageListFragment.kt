@@ -30,7 +30,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.ItemLanguageListBinding
 import com.ustadmobile.core.controller.LanguageListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.dao.ClazzDaoCommon
