@@ -3,9 +3,9 @@ package com.ustadmobile.libuicompose.view.person.edit
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -14,8 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.ustadmobile.core.impl.UstadMobileConstants
-import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditUiState
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.lib.db.entities.PersonParentJoin
@@ -50,94 +48,118 @@ fun PersonEditScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        UstadImageSelectButton(
-            imageUri = uiState.personPicture?.personPictureUri,
-            onImageUriChanged = onPersonPictureUriChanged,
-            modifier = Modifier.size(60.dp),
-        )
+//        UstadImageSelectButton(
+//            imageUri = uiState.personPicture?.personPictureUri,
+//            onImageUriChanged = onPersonPictureUriChanged,
+//            modifier = Modifier.size(60.dp),
+//        )
 
-        UstadTextEditField(
-            value = uiState.person?.firstNames ?: "",
-            label = stringResource(MR.strings.first_names),
-            error = uiState.firstNameError,
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onPersonChanged(uiState.person?.shallowCopy{
-                    firstNames = it
-                })
-            }
-        )
+        UstadInputFieldLayout(
+            modifier = Modifier.padding(vertical = 8.dp)
+                .fillMaxWidth(),
+            errorText = uiState.firstNameError
+        ) {
+            OutlinedTextField(
+                modifier = Modifier.testTag("firstNames").fillMaxWidth(),
+                value = uiState.person?.firstNames ?: "",
+                label = { Text(stringResource(MR.strings.first_names)) },
+                isError = uiState.firstNameError != null,
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onPersonChanged(uiState.person?.shallowCopy{
+                        firstNames = it
+                    })
+                }
+            )
+        }
 
-        UstadTextEditField(
-            value = uiState.person?.lastName ?: "",
-            label = stringResource(MR.strings.last_name),
-            error = uiState.lastNameError,
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onPersonChanged(uiState.person?.shallowCopy{
-                    lastName = it
-                })
-            }
-        )
+        UstadInputFieldLayout(
+            modifier = Modifier.padding(vertical = 8.dp)
+                .fillMaxWidth(),
+            errorText = uiState.lastNameError
+        ) {
+            OutlinedTextField(
+                modifier = Modifier.testTag("lastName").fillMaxWidth(),
+                value = uiState.person?.lastName ?: "",
+                label = { Text(stringResource(MR.strings.last_name)) },
+                isError = uiState.lastNameError != null,
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onPersonChanged(uiState.person?.shallowCopy{
+                        lastName = it
+                    })
+                }
+            )
+        }
+
 
         UstadInputFieldLayout(
             modifier = Modifier.fillMaxWidth(),
             errorText = uiState.genderError,
         ) {
-            UstadMessageIdOptionExposedDropDownMenuField(
-                value = uiState.person?.gender ?: 0,
-                modifier = Modifier
-                    .testTag("gender")
-                    .fillMaxWidth(),
-                label = stringResource(MR.strings.gender_literal),
-                options = PersonConstants.GENDER_MESSAGE_IDS,
-                onOptionSelected = {
-                    onPersonChanged(uiState.person?.shallowCopy{
-                        gender = it.value
-                    })
-                },
-                isError = uiState.genderError != null,
-                enabled = uiState.fieldsEnabled,
-            )
+//            UstadMessageIdOptionExposedDropDownMenuField(
+//                value = uiState.person?.gender ?: 0,
+//                modifier = Modifier
+//                    .testTag("gender")
+//                    .fillMaxWidth(),
+//                label = stringResource(MR.strings.gender_literal),
+//                options = PersonConstants.GENDER_MESSAGE_IDS,
+//                onOptionSelected = {
+//                    onPersonChanged(uiState.person?.shallowCopy{
+//                        gender = it.value
+//                    })
+//                },
+//                isError = uiState.genderError != null,
+//                enabled = uiState.fieldsEnabled,
+//            )
         }
 
 
         if (uiState.parentalEmailVisible){
-            UstadTextEditField(
-                value = uiState.approvalPersonParentJoin?.ppjEmail ?: "",
-                label = stringResource(MR.strings.parents_email_address),
-                error = uiState.parentContactError,
-                enabled = uiState.fieldsEnabled,
-                onValueChange = {
-                    onApprovalPersonParentJoinChanged(
-                        uiState.approvalPersonParentJoin?.shallowCopy {
-                            ppjEmail = it
-                        })
-                }
-            )
+            UstadInputFieldLayout(
+                modifier = Modifier.padding(vertical = 8.dp)
+                    .fillMaxWidth(),
+                errorText = uiState.parentContactError
+            ) {
+                OutlinedTextField(
+                    modifier = Modifier.testTag("ppjEmail").fillMaxWidth(),
+                    value = uiState.approvalPersonParentJoin?.ppjEmail ?: "",
+                    label = { Text(stringResource(MR.strings.parents_email_address)) },
+                    isError = uiState.parentContactError != null,
+                    enabled = uiState.fieldsEnabled,
+                    onValueChange = {
+                        onApprovalPersonParentJoinChanged(
+                            uiState.approvalPersonParentJoin?.shallowCopy {
+                                ppjEmail = it
+                            })
+                    }
+                )
+            }
         }
 
         UstadInputFieldLayout(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            errorText = uiState.dateOfBirthError
         ) {
-            UstadDateField(
-                value = uiState.person?.dateOfBirth ?: 0,
-                label = { Text(stringResource(MR.strings.birthday)) },
-                isError = uiState.dateOfBirthError != null,
-                enabled = uiState.fieldsEnabled,
-                timeZoneId = UstadMobileConstants.UTC,
-                onValueChange = {
-                    onPersonChanged(uiState.person?.shallowCopy{
-                        dateOfBirth = it
-                    })
-                }
-            )
+//            UstadDateField(
+//                value = uiState.person?.dateOfBirth ?: 0,
+//                label = { Text(stringResource(MR.strings.birthday)) },
+//                isError = uiState.dateOfBirthError != null,
+//                enabled = uiState.fieldsEnabled,
+//                timeZoneId = UstadMobileConstants.UTC,
+//                onValueChange = {
+//                    onPersonChanged(uiState.person?.shallowCopy{
+//                        dateOfBirth = it
+//                    })
+//                }
+//            )
         }
 
 
-        UstadTextEditField(
+        OutlinedTextField(
+            modifier = Modifier.testTag("phoneNum").fillMaxWidth(),
             value = uiState.person?.phoneNum ?: "",
-            label = stringResource(MR.strings.phone_number),
+            label = { Text(stringResource(MR.strings.phone_number)) },
             enabled = uiState.fieldsEnabled,
             onValueChange = {
                 onPersonChanged(uiState.person?.shallowCopy{
@@ -146,21 +168,29 @@ fun PersonEditScreen(
             }
         )
 
-        UstadTextEditField(
-            value = uiState.person?.emailAddr ?: "",
-            label = stringResource(MR.strings.email),
-            error = uiState.emailError,
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onPersonChanged(uiState.person?.shallowCopy{
-                    emailAddr = it
-                })
-            }
-        )
+        UstadInputFieldLayout(
+            modifier = Modifier.fillMaxWidth(),
+            errorText = uiState.dateOfBirthError
+        ) {
+            OutlinedTextField(
+                modifier = Modifier.testTag("emailAddr").fillMaxWidth(),
+                value = uiState.person?.emailAddr ?: "",
+                label = { Text(stringResource(MR.strings.email)) },
+                isError = uiState.emailError != null,
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onPersonChanged(uiState.person?.shallowCopy{
+                        emailAddr = it
+                    })
+                }
+            )
 
-        UstadTextEditField(
+        }
+
+        OutlinedTextField(
+            modifier = Modifier.testTag("personAddress").fillMaxWidth(),
             value = uiState.person?.personAddress ?: "",
-            label = stringResource(MR.strings.address),
+            label = { Text(stringResource(MR.strings.address)) },
             enabled = uiState.fieldsEnabled,
             onValueChange = {
                 onPersonChanged(uiState.person?.shallowCopy{
@@ -170,9 +200,10 @@ fun PersonEditScreen(
         )
 
         if (uiState.usernameVisible){
-            UstadTextEditField(
+            OutlinedTextField(
+                modifier = Modifier.testTag("username").fillMaxWidth(),
                 value = uiState.person?.username ?: "",
-                label = stringResource(MR.strings.username),
+                label = { Text(stringResource(MR.strings.username)) },
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
                     onPersonChanged(uiState.person?.shallowCopy{
@@ -183,9 +214,10 @@ fun PersonEditScreen(
         }
 
         if (uiState.passwordVisible){
-            UstadTextEditField(
+            OutlinedTextField(
+                modifier = Modifier.testTag("newPassword").fillMaxWidth(),
                 value = uiState.person?.newPassword ?: "",
-                label = stringResource(MR.strings.password),
+                label = { Text(stringResource(MR.strings.password)) },
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
                     onPersonChanged(uiState.person?.shallowCopy{
