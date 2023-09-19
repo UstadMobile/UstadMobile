@@ -23,6 +23,7 @@ import com.google.accompanist.themeadapter.material.MdcTheme
 import com.ustadmobile.core.util.ext.formattedString
 import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.core.viewmodel.timezone.TimezoneListUiState
+import com.ustadmobile.libuicompose.view.timezone.TimeZoneListScreenForViewModel
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import kotlinx.datetime.Clock
 import java.util.*
@@ -48,52 +49,10 @@ class TimeZoneListFragment : UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    TimeZoneListScreen(viewModel)
+                    TimeZoneListScreenForViewModel(viewModel)
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
-
-@Composable
-fun TimeZoneListScreen(
-    uiState: TimezoneListUiState,
-    onListItemClick: (TimeZoneKt) -> Unit,
-) {
-
-    val timeNow = Clock.System.now()
-
-    LazyColumn(
-        modifier = Modifier
-            .padding(vertical = 8.dp)
-            .fillMaxWidth()
-    ){
-        items(
-            items = uiState.timeZoneList,
-            key = { it.id },
-        ) { timeZone ->
-            val timeZoneFormatted: String = remember(timeZone.id) {
-                timeZone.formattedString(timeNow)
-            }
-
-            ListItem(
-                modifier = Modifier
-                    .clickable {  onListItemClick(timeZone) } ,
-                text = { Text(timeZoneFormatted) }
-            )
-        }
-    }
-}
-
-@Composable
-fun TimeZoneListScreen(
-    viewModel: TimeZoneListViewModel
-) {
-    val uiState: TimezoneListUiState by viewModel.uiState.collectAsState(TimezoneListUiState())
-    TimeZoneListScreen(
-        uiState = uiState,
-        onListItemClick = viewModel::onClickEntry
-    )
-}
