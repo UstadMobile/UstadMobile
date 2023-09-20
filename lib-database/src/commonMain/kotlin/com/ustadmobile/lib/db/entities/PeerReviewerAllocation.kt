@@ -6,7 +6,10 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
-@ReplicateEntity(tableId = PeerReviewerAllocation.TABLE_ID, tracker = PeerReviewerAllocationReplicate::class)
+@ReplicateEntity(
+    tableId = PeerReviewerAllocation.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
 @Triggers(arrayOf(
     Trigger(
         name = "peerreviewerallocation_remote_insert",
@@ -14,11 +17,7 @@ import kotlinx.serialization.Serializable
         on = Trigger.On.RECEIVEVIEW,
         events = [Trigger.Event.INSERT],
         sqlStatements = [
-            """REPLACE INTO PeerReviewerAllocation(praUid, praMarkerSubmitterUid, praToMarkerSubmitterUid, praAssignmentUid, praActive, praLct) 
-         VALUES (NEW.praUid, NEW.praMarkerSubmitterUid, NEW.praToMarkerSubmitterUid, NEW.praAssignmentUid, NEW.praActive, NEW.praLct) 
-         /*psql ON CONFLICT (praUid) DO UPDATE 
-         SET praMarkerSubmitterUid = EXCLUDED.praMarkerSubmitterUid, praToMarkerSubmitterUid = EXCLUDED.praToMarkerSubmitterUid, praAssignmentUid = EXCLUDED.praAssignmentUid, praActive = EXCLUDED.praActive, praLct = EXCLUDED.praLct
-         */"""
+            TRIGGER_UPSERT_WHERE_NEWER
         ]
     )
 ))
@@ -38,8 +37,8 @@ class PeerReviewerAllocation {
 
     var praActive: Boolean = true
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var praLct: Long = 0
 
     override fun equals(other: Any?): Boolean {

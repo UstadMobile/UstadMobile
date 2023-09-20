@@ -52,8 +52,8 @@ class ContentEntryParentChildJoin(
     @LastChangedBy
     var cepcjLastChangedBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var cepcjLct: Long = 0
 
     constructor(parentEntry: ContentEntry, childEntry: ContentEntry, index: Int) : this(){

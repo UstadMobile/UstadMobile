@@ -77,8 +77,8 @@ open class School() {
     @LastChangedBy
     var schoolLastChangedBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var schoolLct: Long = 0
 
 

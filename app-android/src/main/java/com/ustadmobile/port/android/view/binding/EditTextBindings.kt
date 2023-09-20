@@ -53,29 +53,6 @@ fun TextView.setTimeZoneText(timeZone: TimeZone) {
 }
 
 
-@SuppressLint("SetTextI18n")
-@BindingAdapter("entityRoleText")
-fun TextView.setTimeZoneTextEntity(entityRole: EntityRoleWithNameAndRole?) {
-
-    val scopeText = when (entityRole?.erTableId) {
-        Clazz.TABLE_ID -> {
-            " (" + context.getString(CR.string.clazz) + ")"
-        }
-        School.TABLE_ID -> {
-            " (" + context.getString(CR.string.school) + ")"
-        }
-        Person.TABLE_ID -> {
-            " (" + context.getString(CR.string.person) + ")"
-        }
-        else -> {
-            ""
-        }
-    }
-    text = entityRole?.entityRoleScopeName?:"" + scopeText
-}
-
-
-
 @BindingAdapter(value = ["createNewFormatText", "createNewFormatArg"], requireAll = true)
 fun TextView.setCreateNewItemText(formatTextId: Int, formatArg: String) {
     text = context.resources.getString(formatTextId, formatArg)

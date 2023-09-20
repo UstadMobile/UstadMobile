@@ -141,7 +141,6 @@ class ViewNameToDestMap: DestinationProvider {
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
                     hideBottomNavigation = true),
             JoinWithCodeView.VIEW_NAME to UstadDestination(R.id.join_with_code_dest),
-            LearnerGroupMemberListView.VIEW_NAME to UstadDestination(R.id.learner_group_member_list_dest),
             TimeZoneListView.VIEW_NAME to UstadDestination(R.id.time_zone_list_dest),
             ClazzLogEditViewModel.DEST_NAME to UstadDestination(R.id.clazz_log_edit_dest),
             SiteDetailView.VIEW_NAME to UstadDestination(R.id.site_detail_dest),

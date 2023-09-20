@@ -6,11 +6,9 @@ import com.ustadmobile.core.contentformats.xapi.endpoints.storeCompletedStatemen
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.tincan.UmAccountActor
-import com.ustadmobile.core.tincan.UmAccountGroupActor
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.util.ext.toXapiActorJsonObject
-import com.ustadmobile.core.util.ext.toXapiGroupJsonObject
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.XapiPackageContentView
@@ -25,7 +23,6 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
@@ -104,15 +101,9 @@ class XapiPackageContentPresenter(
                 tinCanXml = TinCanXML.loadFromXML(xpp)
                 val launchHref = tinCanXml?.launchActivity?.launchUrl
                 Napier.d { "XapiPackageContentPresenter: Launch HREF = $launchHref" }
-                val actorJsonStr: String = if (learnerGroupUid == 0L) {
-                    Json.encodeToString(UmAccountActor.serializer(),
+                val actorJsonStr =Json.encodeToString(UmAccountActor.serializer(),
                             accountManager.activeAccount.toXapiActorJsonObject(context))
-                } else {
-                    val memberList = repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntryList(
-                            learnerGroupUid, contentEntryUid)
-                    Json.encodeToString(UmAccountGroupActor.serializer(),
-                            accountManager.activeAccount.toXapiGroupJsonObject(memberList))
-                }
+
 
                 val endpointPart = "xapi/$contentEntryUid/$clazzUid/"
                 val xapiEndPoint = if(UmPlatformUtil.isWeb){

@@ -9,7 +9,10 @@ import kotlinx.serialization.Serializable
 
 @Entity(indices = arrayOf(Index(name = "cnt_uid_to_most_recent",
         value = ["containerContentEntryUid", "cntLastModified"])))
-@ReplicateEntity(tableId = Container.TABLE_ID, tracker = ContainerReplicate::class)
+@ReplicateEntity(
+    tableId = Container.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
 @Triggers(arrayOf(
  Trigger(
      name = "container_remote_insert",
@@ -17,16 +20,7 @@ import kotlinx.serialization.Serializable
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
      sqlStatements = [
-         """REPLACE INTO Container(containerUid, cntLocalCsn, cntMasterCsn, cntLastModBy, cntLct, fileSize, containerContentEntryUid, cntLastModified, mimeType, remarks, mobileOptimized, cntNumEntries)
-         SELECT NEW.containerUid, NEW.cntLocalCsn, NEW.cntMasterCsn, NEW.cntLastModBy, NEW.cntLct, NEW.fileSize, NEW.containerContentEntryUid, NEW.cntLastModified, NEW.mimeType, NEW.remarks, NEW.mobileOptimized, NEW.cntNumEntries 
-          WHERE NEW.cntLct > 
-                (SELECT COALESCE(
-                        (SELECT ContainerInt.cntLct
-                           FROM Container ContainerInt
-                          WHERE ContainerInt.containerUid = NEW.containerUid), 0))
-         /*psql ON CONFLICT (containerUid) DO UPDATE 
-         SET cntLocalCsn = EXCLUDED.cntLocalCsn, cntMasterCsn = EXCLUDED.cntMasterCsn, cntLastModBy = EXCLUDED.cntLastModBy, cntLct = EXCLUDED.cntLct, fileSize = EXCLUDED.fileSize, containerContentEntryUid = EXCLUDED.containerContentEntryUid, cntLastModified = EXCLUDED.cntLastModified, mimeType = EXCLUDED.mimeType, remarks = EXCLUDED.remarks, mobileOptimized = EXCLUDED.mobileOptimized, cntNumEntries = EXCLUDED.cntNumEntries
-         */"""
+         TRIGGER_UPSERT_WHERE_NEWER
      ]
  )
 ))
@@ -45,8 +39,8 @@ open class Container() {
     @LastChangedBy
     var cntLastModBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var cntLct: Long = 0
 
     var fileSize: Long = 0

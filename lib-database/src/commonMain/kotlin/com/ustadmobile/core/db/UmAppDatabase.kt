@@ -18,7 +18,7 @@ import com.ustadmobile.lib.db.entities.*
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
     ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
     Language::class, LanguageVariant::class, AccessToken::class, PersonAuth::class, Role::class,
-    EntityRole::class, PersonGroup::class, PersonGroupMember::class,
+    PersonGroup::class, PersonGroupMember::class,
     PersonPicture::class,
     ScrapeQueueItem::class, ScrapeRun::class, ConnectivityStatus::class,
     Container::class, ContainerEntry::class, ContainerEntryFile::class,
@@ -29,10 +29,9 @@ import com.ustadmobile.lib.db.entities.*
     School::class,
     SchoolMember::class, Comments::class,
     Report::class,
-    Site::class, ContainerImportJob::class,
-    LearnerGroup::class, LearnerGroupMember::class,
-    GroupLearningSession::class,
-    SiteTerms::class, ClazzContentJoin::class,
+    Site::class,
+    ContainerImportJob::class,
+    SiteTerms::class,
     PersonParentJoin::class,
     ScopedGrant::class,
     ErrorReport::class,
@@ -48,88 +47,91 @@ import com.ustadmobile.lib.db.entities.*
     //Door Helper entities
 //    SqliteChangeSeqNums::class,
 //    UpdateNotification::class,
-    ChangeLog::class,
-    ZombieAttachmentData::class,
     DoorNode::class,
     ReplicationStatus::class,
 
-    ClazzLogReplicate::class,
-    ClazzLogAttendanceRecordReplicate::class,
-    CourseAssignmentSubmissionReplicate::class,
-    CourseAssignmentSubmissionAttachmentReplicate::class,
-    CourseAssignmentMarkReplicate::class,
-    CourseBlockReplicate::class,
-    CourseTerminologyReplicate::class,
-    CourseGroupSetReplicate::class,
-    CourseGroupMemberReplicate::class,
-    ScheduleReplicate::class,
-    HolidayCalendarReplicate::class,
-    HolidayReplicate::class,
-    PersonReplicate::class,
-    ClazzReplicate::class,
-    ClazzEnrolmentReplicate::class,
-    LeavingReasonReplicate::class,
-    ContentEntryReplicate::class,
-    ContentEntryContentCategoryJoinReplicate::class,
-    ContentEntryParentChildJoinReplicate::class,
-    ContentEntryRelatedEntryJoinReplicate::class,
-    ContentCategorySchemaReplicate::class,
-    ContentCategoryReplicate::class,
-    LanguageReplicate::class,
-    LanguageVariantReplicate::class,
-    PersonGroupReplicate::class,
-    PersonGroupMemberReplicate::class,
-    PersonPictureReplicate::class,
-    ContainerReplicate::class,
-    VerbEntityReplicate::class,
-    XObjectEntityReplicate::class,
-    StatementEntityReplicate::class,
-    ContextXObjectStatementJoinReplicate::class,
-    AgentEntityReplicate::class,
-    StateEntityReplicate::class,
-    StateContentEntityReplicate::class,
-    XLangMapEntryReplicate::class,
-    SchoolReplicate::class,
-    SchoolMemberReplicate::class,
-    CommentsReplicate::class,
-    ReportReplicate::class,
-    SiteReplicate::class,
-    LearnerGroupReplicate::class,
-    LearnerGroupMemberReplicate::class,
-    GroupLearningSessionReplicate::class,
-    SiteTermsReplicate::class,
-    ClazzContentJoinReplicate::class,
-    PersonParentJoinReplicate::class,
-    ScopedGrantReplicate::class,
-    ErrorReportReplicate::class,
-    ClazzAssignmentReplicate::class,
-    ClazzAssignmentContentJoinReplicate::class,
-    PersonAuth2Replicate::class,
-    UserSessionReplicate::class,
-    CoursePicture::class,
-    CoursePictureReplicate::class,
-    ContentEntryPicture::class,
-    ContentEntryPictureReplicate::class,
-    PeerReviewerAllocationReplicate::class,
-    Chat::class,
-    ChatMember::class,
-    Message::class,
-    MessageReplicate::class,
-    ChatReplicate::class,
-    ChatMemberReplicate::class,
-    MessageRead::class,
-    MessageReadReplicate::class,
-    CourseDiscussion::class,
-    CourseDiscussionReplicate::class,
-    DiscussionTopic::class,
-    DiscussionTopicReplicate::class,
-    DiscussionPost::class,
-    DiscussionPostReplicate::class,
-    ExternalAppPermission::class,
 
 
-], version = 109)
-@MinReplicationVersion(60)
+
+], version = 120)
+@MinReplicationVersion(120)
+/*
+ Replicate entities (e.g. trackers) to drop:
+     ClazzLogReplicate
+    ClazzLogAttendanceRecordReplicate
+    CourseAssignmentSubmissionReplicate
+    CourseAssignmentSubmissionAttachmentReplicate
+    CourseAssignmentMarkReplicate
+    CourseBlockReplicate
+    CourseTerminologyReplicate
+    CourseGroupSetReplicate
+    CourseGroupMemberReplicate
+    ScheduleReplicate
+    HolidayCalendarReplicate
+    HolidayReplicate
+    PersonReplicate
+    ClazzReplicate
+    ClazzEnrolmentReplicate
+    LeavingReasonReplicate
+    ContentEntryReplicate
+    ContentEntryContentCategoryJoinReplicate
+    ContentEntryParentChildJoinReplicate
+    ContentEntryRelatedEntryJoinReplicate
+    ContentCategorySchemaReplicate
+    ContentCategoryReplicate
+    LanguageReplicate
+    LanguageVariantReplicate
+    PersonGroupReplicate
+    PersonGroupMemberReplicate
+    PersonPictureReplicate
+    ContainerReplicate
+    VerbEntityReplicate
+    XObjectEntityReplicate
+    StatementEntityReplicate
+    ContextXObjectStatementJoinReplicate
+    AgentEntityReplicate
+    StateEntityReplicate
+    StateContentEntityReplicate
+    XLangMapEntryReplicate
+    SchoolReplicate
+    SchoolMemberReplicate
+    CommentsReplicate
+    ReportReplicate
+    SiteReplicate
+    LearnerGroupReplicate
+    LearnerGroupMemberReplicate
+    GroupLearningSessionReplicate
+    SiteTermsReplicate
+    ClazzContentJoinReplicate
+    PersonParentJoinReplicate
+    ScopedGrantReplicate
+    ErrorReportReplicate
+    ClazzAssignmentReplicate
+    ClazzAssignmentContentJoinReplicate
+    PersonAuth2Replicate
+    UserSessionReplicate
+    CoursePictureReplicate
+    ContentEntryPictureReplicate
+    PeerReviewerAllocationReplicate
+    MessageReplicate
+    ChatReplicate
+    ChatMemberReplicate
+    MessageReadReplicate
+    CourseDiscussionReplicate
+    DiscussionTopicReplicate
+    DiscussionPostReplicate
+
+    Others to Drop
+    ClazzContentJoin
+    DiscussionTopic
+    GroupLearningSession
+    LearnerGroup
+    LearnerGroupMember
+    ChangeLog
+    ZombieAttachmentData
+    EntityRole
+
+ */
 expect abstract class UmAppDatabase : RoomDatabase {
 
     /*
@@ -176,8 +178,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val contentEntryParentChildJoinDao: ContentEntryParentChildJoinDao
 
     abstract val contentEntryRelatedEntryJoinDao: ContentEntryRelatedEntryJoinDao
-
-    abstract val clazzContentJoinDao: ClazzContentJoinDao
 
     // abstract val syncStatusDao: SyncStatusDao
 
@@ -228,12 +228,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val stateContentDao: StateContentDao
 
     abstract val agentDao: AgentDao
-
-    abstract val learnerGroupDao: LearnerGroupDao
-
-    abstract val learnerGroupMemberDao: LearnerGroupMemberDao
-
-    abstract val groupLearningSessionDao: GroupLearningSessionDao
 
     abstract val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao
     abstract val clazzLogDao: ClazzLogDao
@@ -299,8 +293,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val courseDiscussionDao: CourseDiscussionDao
 
     abstract val peerReviewerAllocationDao: PeerReviewerAllocationDao
-
-    abstract val discussionTopicDao: DiscussionTopicDao
 
     abstract val discussionPostDao: DiscussionPostDao
 

@@ -48,8 +48,8 @@ class ClazzAssignmentContentJoin {
     @LastChangedBy
     var cacjLCB: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var cacjLct: Long = 0
 
     companion object {

@@ -17,12 +17,10 @@ import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.toDeepLink
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.core.view.ContentEntryDetailView
-import com.ustadmobile.core.view.LearnerGroupMemberListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
-import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.door.DoorDatabaseRepository
@@ -201,30 +199,6 @@ class ContentEntryDetailOverviewPresenter(
             }
             val contentJobManager : ContentJobManager = di.direct.instance()
             contentJobManager.enqueueContentJob(accountManager.activeEndpoint, job.cjUid)
-        }
-    }
-
-    fun handleOnClickGroupActivityButton() {
-        presenterScope.launch(doorMainDispatcher()) {
-            val learnerGroup = LearnerGroup().apply {
-                learnerGroupUid = repo.learnerGroupDao.insertAsync(this)
-            }
-            GroupLearningSession().apply {
-                groupLearningSessionContentUid = contentEntryUid
-                groupLearningSessionLearnerGroupUid = learnerGroup.learnerGroupUid
-                groupLearningSessionLearnerGroupUid = repo.groupLearningSessionDao.insertAsync(this)
-            }
-            LearnerGroupMember().apply {
-                learnerGroupMemberRole = LearnerGroupMember.PRIMARY_ROLE
-                learnerGroupMemberLgUid = learnerGroup.learnerGroupUid
-                learnerGroupMemberPersonUid = accountManager.activeAccount.personUid
-                learnerGroupMemberUid = repo.learnerGroupMemberDao.insertAsync(this)
-            }
-            systemImpl.go(LearnerGroupMemberListView.VIEW_NAME,
-                    mapOf(ARG_CONTENT_ENTRY_UID to contentEntryUid.toString(),
-                            ARG_LEARNER_GROUP_UID to learnerGroup.learnerGroupUid.toString(),
-                            ARG_CLAZZUID to clazzUid.toString()),
-                    context)
         }
     }
 

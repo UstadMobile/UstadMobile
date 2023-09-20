@@ -50,8 +50,8 @@ class PersonAuth2 {
     @LastChangedBy
     var pauthLcb: Long = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var pauthLct: Long = 0
 
     companion object {

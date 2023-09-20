@@ -41,8 +41,8 @@ class UserSession {
     @LastChangedBy
     var usLcb: Int = 0
 
-    @ReplicationVersionId
-    @LastChangedTime
+    @ReplicateEtag
+    @ReplicateLastModified
     var usLct: Long = 0
 
     var usPersonUid: Long = 0

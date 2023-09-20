@@ -25,8 +25,8 @@ open class SchoolPicture() {
     @LastChangedBy
     var schoolPictureLastChangedBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var schoolPictureLct: Long = 0
 
     var schoolPictureFileSize : Long = 0

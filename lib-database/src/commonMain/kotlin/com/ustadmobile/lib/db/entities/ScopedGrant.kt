@@ -15,24 +15,17 @@ import kotlinx.serialization.Serializable
     Index(value = ["sgTableId", "sgEntityUid", "sgPermissions", "sgGroupUid"], name = "idx_entity_to_group")]
 )
 
-@ReplicateEntity(tableId = TABLE_ID, tracker = ScopedGrantReplicate::class,
-    priority = ReplicateEntity.HIGHEST_PRIORITY)
+@ReplicateEntity(
+    tableId = TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
 @Triggers(arrayOf(
     Trigger(name = "sg_remote_insert",
         order = Trigger.Order.INSTEAD_OF,
         on = Trigger.On.RECEIVEVIEW,
         events = [Trigger.Event.INSERT],
         sqlStatements = [
-            """
-                REPLACE INTO ScopedGrant(sgUid, sgPcsn, sgLcsn, sgLcb, sgLct, sgTableId, sgEntityUid, 
-                         sgPermissions, sgGroupUid, sgIndex, sgFlags)
-                  VALUES (NEW.sgUid, NEW.sgPcsn, NEW.sgLcsn, NEW.sgLcb, NEW.sgLct, NEW.sgTableId,
-                         NEW.sgEntityUid, NEW.sgPermissions, NEW.sgGroupUid, NEW.sgIndex, NEW.sgFlags)
-                  /*psql ON CONFLICT(sgUid) DO UPDATE
-                     SET sgLct = EXCLUDED.sgLct,
-                         sgPermissions = EXCLUDED.sgPermissions 
-                  */
-            """
+            TRIGGER_UPSERT_WHERE_NEWER,
         ])
 ))
 @Serializable
@@ -50,8 +43,8 @@ open class ScopedGrant {
     @LastChangedBy
     var sgLcb: Int = 0
 
-    @ReplicationVersionId
-    @LastChangedTime
+    @ReplicateEtag
+    @ReplicateLastModified
     var sgLct: Long = 0
 
     //The table id that this grant is form, or ALL_TABLES to indicate it is for all tables (eg. superadmin)

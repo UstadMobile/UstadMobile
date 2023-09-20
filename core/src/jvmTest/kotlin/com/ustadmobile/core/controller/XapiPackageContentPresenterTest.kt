@@ -45,7 +45,6 @@ import kotlin.collections.set
 
 class XapiPackageContentPresenterTest {
 
-    private lateinit var learnerGroup: LearnerGroup
     private lateinit var context: Any
 
     lateinit var userPerson: Person
@@ -115,18 +114,6 @@ class XapiPackageContentPresenterTest {
             repo.clazzDao.insert(this)
         }
 
-        learnerGroup = LearnerGroup().apply {
-            learnerGroupUid = 1
-            learnerGroupName = "Test"
-            repo.learnerGroupDao.insert(this)
-        }
-
-        LearnerGroupMember().apply {
-            learnerGroupMemberLgUid = learnerGroup.learnerGroupUid
-            learnerGroupMemberPersonUid = userPerson.personUid
-            learnerGroupMemberRole = LearnerGroupMember.PRIMARY_ROLE
-            repo.learnerGroupMemberDao.insert(this)
-        }
 
         Person().apply {
             personUid = 1
@@ -137,19 +124,6 @@ class XapiPackageContentPresenterTest {
             repo.personDao.insert(this)
         }
 
-        LearnerGroupMember().apply {
-            learnerGroupMemberLgUid = learnerGroup.learnerGroupUid
-            learnerGroupMemberPersonUid = 1
-            learnerGroupMemberRole = LearnerGroupMember.PARTICIPANT_ROLE
-            repo.learnerGroupMemberDao.insert(this)
-        }
-
-        GroupLearningSession().apply {
-            groupLearningSessionUid = 1
-            groupLearningSessionContentUid = contentEntryUid
-            groupLearningSessionLearnerGroupUid = learnerGroup.learnerGroupUid
-            repo.groupLearningSessionDao.insert(this)
-        }
 
     }
 
@@ -210,8 +184,6 @@ class XapiPackageContentPresenterTest {
         val args = Hashtable<String, String>()
         Assert.assertNotNull(xapiContainer)
         args[UstadView.ARG_CONTAINER_UID] = xapiContainer.containerUid.toString()
-        args[ARG_LEARNER_GROUP_UID] = learnerGroup.learnerGroupUid.toString()
-        args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
         args[ARG_CLAZZUID] = clazz.clazzUid.toString()
 
         val xapiPresenter = XapiPackageContentPresenter(context, args, mockedView, di)
@@ -227,8 +199,6 @@ class XapiPackageContentPresenterTest {
                 paramsProvided["actor"]!!)
             Assert.assertEquals("Actor object type is group",
                     umAccountGroupActor.objectType, "Group")
-            Assert.assertEquals("Actor account name is groupUid",
-                    "group:${learnerGroup.learnerGroupUid}",   umAccountGroupActor.account.name)
             Assert.assertEquals("Actor member list is 2",
                    2,  umAccountGroupActor.members.size)
             val expectedEndpoint = UMFileUtil.resolveLink(firstValue, "/${UMURLEncoder.encodeUTF8(endpoint.url)}/xapi/$contentEntryUid/${clazz.clazzUid}/")

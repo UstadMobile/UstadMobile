@@ -105,7 +105,7 @@ fun PersonListScreen(
 
     // As per
     // https://developer.android.com/reference/kotlin/androidx/paging/compose/package-summary#collectaslazypagingitems
-    // Must provide a factory to pagingSourceFactory that will
+    // Must provide a factory to pagingSourceFactory that will stay constant
     // https://issuetracker.google.com/issues/241124061
     val pager = remember(uiState.personList) {
         Pager(

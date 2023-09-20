@@ -6,7 +6,10 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
-@ReplicateEntity(tableId = CourseGroupMember.TABLE_ID, tracker = CourseGroupMemberReplicate::class)
+@ReplicateEntity(
+    tableId = CourseGroupMember.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
 @Triggers(arrayOf(
     Trigger(
         name = "coursegroupmember_remote_insert",
@@ -14,11 +17,7 @@ import kotlinx.serialization.Serializable
         on = Trigger.On.RECEIVEVIEW,
         events = [Trigger.Event.INSERT],
         sqlStatements = [
-            """REPLACE INTO CourseGroupMember(cgmUid, cgmSetUid, cgmGroupNumber, cgmPersonUid, cgmLct) 
-         VALUES (NEW.cgmUid, NEW.cgmSetUid, NEW.cgmGroupNumber, NEW.cgmPersonUid, NEW.cgmLct) 
-         /*psql ON CONFLICT (cgmUid) DO UPDATE 
-         SET cgmSetUid = EXCLUDED.cgmSetUid, cgmGroupNumber = EXCLUDED.cgmGroupNumber, cgmPersonUid = EXCLUDED.cgmPersonUid, cgmLct = EXCLUDED.cgmLct
-         */"""
+            TRIGGER_UPSERT_WHERE_NEWER
         ]
     )
 ))
@@ -35,8 +34,8 @@ class CourseGroupMember {
 
     var cgmPersonUid: Long = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var cgmLct: Long = 0
 
     companion object {

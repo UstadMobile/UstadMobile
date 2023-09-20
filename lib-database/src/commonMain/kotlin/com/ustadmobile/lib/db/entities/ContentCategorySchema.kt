@@ -26,7 +26,10 @@ import kotlinx.serialization.Serializable
          ]
      )
  ))
-@ReplicateEntity(tableId = TABLE_ID, tracker = ContentCategorySchemaReplicate::class)
+@ReplicateEntity(
+    tableId = TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
 @Serializable
 class ContentCategorySchema() {
 
@@ -46,8 +49,8 @@ class ContentCategorySchema() {
     @LastChangedBy
     var contentCategorySchemaLastChangedBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var contentCategorySchemaLct: Long = 0
 
     override fun equals(other: Any?): Boolean {
