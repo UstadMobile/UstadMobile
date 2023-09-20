@@ -40,8 +40,9 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        view.newSchoolListOptionVisible =  db.entityRoleDao.userHasTableLevelPermission(account?.personUid ?: 0,
-            Role.PERMISSION_SCHOOL_INSERT)
+        view.newSchoolListOptionVisible =  db.scopedGrantDao.userHasSystemLevelPermission(
+            personUid = account?.personUid ?: 0,
+            permission = Role.PERMISSION_SCHOOL_INSERT)
         return true
     }
 

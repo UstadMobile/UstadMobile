@@ -164,12 +164,6 @@ private fun ImageView.updateImageFromForeignKey() {
     }
 }
 
-@BindingAdapter("customFieldIcon")
-fun ImageView.setCustomFieldIcon(customField: CustomField?) {
-    val drawableId = ICON_ID_MAP[customField?.customFieldIconId ?: 0] ?: android.R.color.transparent
-    setImageDrawable(ContextCompat.getDrawable(context, drawableId))
-}
-
 @BindingAdapter("attendanceTint")
 fun ImageView.setAttendanceTint(attendancePercentage: Float) {
     val color = when {
@@ -290,14 +284,6 @@ fun ImageView.isContentCompleteImage(person: PersonWithSessionsDisplay){
         context.getString(CR.string.incomplete)
         visibility = View.INVISIBLE
     }
-}
-
-private val ICON_ID_MAP : Map<Int, Int> by lazy {
-    mapOf(CustomField.ICON_PHONE to R.drawable.ic_phone_black_24dp,
-        CustomField.ICON_PERSON to R.drawable.ic_person_black_24dp,
-        CustomField.ICON_CALENDAR to R.drawable.ic_event_black_24dp,
-        CustomField.ICON_EMAIL to R.drawable.ic_email_black_24dp,
-        CustomField.ICON_ADDRESS to R.drawable.ic_location_pin_24dp)
 }
 
 @BindingAdapter("imageResIdInt")

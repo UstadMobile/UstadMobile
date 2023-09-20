@@ -12,8 +12,8 @@ import com.ustadmobile.core.db.dao.StatementDaoCommon.SORT_LAST_NAME_ASC
 import com.ustadmobile.core.db.dao.StatementDaoCommon.SORT_LAST_NAME_DESC
 import com.ustadmobile.door.*
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.door.lifecycle.LiveData
-import com.ustadmobile.door.paging.DataSourceFactory
+import kotlinx.coroutines.flow.Flow
+import app.cash.paging.PagingSource
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 
@@ -21,87 +21,12 @@ import kotlin.js.JsName
 @Repository
 expect abstract class StatementDao : BaseDao<StatementEntity> {
 
-    @Query("""
-     REPLACE INTO StatementEntityReplicate(sePk, seDestination)
-      SELECT DISTINCT StatementEntity.statementUid AS sePk,
-             :newNodeId AS seDestination
-        FROM UserSession
-             JOIN PersonGroupMember
-                  ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-             JOIN ScopedGrant
-                  ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-                     AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
-             JOIN StatementEntity
-                 ON ${StatementEntity.FROM_SCOPEDGRANT_TO_STATEMENT_JOIN_ON_CLAUSE}
-       WHERE UserSession.usClientNodeId = :newNodeId
-         AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-         -- Temporary measure to prevent admin user getting clogged up
-         -- Restrict to the last 30 days of data
-         AND StatementEntity.timestamp > ( 
-       --notpsql
-       strftime('%s', 'now') * 1000
-       --endnotpsql
-       /*psql
-       ROUND(EXTRACT(epoch from NOW())*1000)
-       */
-       - (30 * CAST(86400000 AS BIGINT)))
-       --notpsql
-         AND StatementEntity.statementLct != COALESCE(
-             (SELECT seVersionId
-                FROM StatementEntityReplicate
-               WHERE sePk = StatementEntity.statementUid
-                 AND seDestination = UserSession.usClientNodeId), 0)
-       --endnotpsql           
-      /*psql ON CONFLICT(sePk, seDestination) DO UPDATE
-             SET sePending = (SELECT StatementEntity.statementLct
-            FROM StatementEntity
-           WHERE StatementEntity.statementUid = EXCLUDED.sePk ) 
-                 != StatementEntityReplicate.seVersionId
-      */       
-    """)
-    @ReplicationRunOnNewNode
-    @ReplicationCheckPendingNotificationsFor([StatementEntity::class])
-    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
-
-    @Query("""
- REPLACE INTO StatementEntityReplicate(sePk, seDestination)
-  SELECT DISTINCT StatementEntity.statementUid AS seUid,
-         UserSession.usClientNodeId AS seDestination
-    FROM ChangeLog
-         JOIN StatementEntity
-               ON ChangeLog.chTableId = ${StatementEntity.TABLE_ID}
-                  AND ChangeLog.chEntityPk = StatementEntity.statementUid
-         JOIN ScopedGrant
-              ON ${StatementEntity.FROM_STATEMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE}
-                 AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
-         JOIN PersonGroupMember
-              ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-         JOIN UserSession
-              ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-                 AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-   WHERE UserSession.usClientNodeId != (
-         SELECT nodeClientId
-           FROM SyncNode
-          LIMIT 1)
-     AND StatementEntity.statementLct != COALESCE(
-         (SELECT seVersionId
-            FROM StatementEntityReplicate
-           WHERE sePk = StatementEntity.statementUid
-             AND seDestination = UserSession.usClientNodeId), 0)
- /*psql ON CONFLICT(sePk, seDestination) DO UPDATE
-     SET sePending = true
-  */
-    """)
-    @ReplicationRunOnChange([StatementEntity::class])
-    @ReplicationCheckPendingNotificationsFor([StatementEntity::class])
-    abstract suspend fun replicateOnChange()
-
     @JsName("insertListAsync")
     @Insert
     abstract suspend fun insertListAsync(entityList: List<StatementEntity>)
 
     @Query("SELECT * From StatementEntity LIMIT 1")
-    abstract fun getOneStatement(): LiveData<StatementEntity?>
+    abstract fun getOneStatement(): Flow<StatementEntity?>
 
     @Query("SELECT * FROM StatementEntity WHERE statementId = :id LIMIT 1")
     abstract fun findByStatementId(id: String): StatementEntity?
@@ -114,7 +39,7 @@ expect abstract class StatementDao : BaseDao<StatementEntity> {
 
     @RawQuery(observedEntities = [StatementEntity::class, Person::class, XLangMapEntry::class])
     @QueryLiveTables(["StatementEntity", "Person", "XLangMapEntry"])
-    abstract fun getListResults(query: DoorQuery): DataSourceFactory<Int, StatementEntityWithDisplayDetails>
+    abstract fun getListResults(query: DoorQuery): PagingSource<Int, StatementEntityWithDisplayDetails>
 
 
     // This is required because of above raw query
@@ -202,7 +127,7 @@ expect abstract class StatementDao : BaseDao<StatementEntity> {
     @SqliteOnly //This would need a considered group by to work on postgres
     abstract fun findPersonsWithContentEntryAttempts(contentEntryUid: Long, accountPersonUid: Long,
                                                      searchText: String, sortOrder: Int)
-            : DataSourceFactory<Int, PersonWithAttemptsSummary>
+            : PagingSource<Int, PersonWithAttemptsSummary>
 
 
     @Query("""
@@ -331,7 +256,7 @@ expect abstract class StatementDao : BaseDao<StatementEntity> {
          """)
     @SqliteOnly
     abstract fun findSessionsForPerson(contentEntryUid: Long, accountPersonUid: Long, personUid: Long)
-            : DataSourceFactory<Int, PersonWithSessionsDisplay>
+            : PagingSource<Int, PersonWithSessionsDisplay>
 
 
     @Query("""
@@ -358,7 +283,7 @@ expect abstract class StatementDao : BaseDao<StatementEntity> {
          """)
     abstract fun findSessionDetailForPerson(contentEntryUid: Long, accountPersonUid: Long,
                                             personUid: Long, contextRegistration: String)
-            : DataSourceFactory<Int, StatementWithSessionDetailDisplay>
+            : PagingSource<Int, StatementWithSessionDetailDisplay>
 
 
     @Query("""

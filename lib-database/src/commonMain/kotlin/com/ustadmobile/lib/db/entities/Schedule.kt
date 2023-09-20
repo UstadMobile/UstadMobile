@@ -75,7 +75,7 @@ class Schedule {
 
     @ReplicateLastModified
     @ReplicateEtag
-    var scheduleReplicateLastModified: Long = 0
+    var scheduleLastChangedTime: Long = 0
 
     //active or removed
     var scheduleActive: Boolean = true

@@ -3,7 +3,7 @@ package com.ustadmobile.core.db.dao
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
-import com.ustadmobile.door.lifecycle.LiveData
+import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.PostgresQuery
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContentJob
@@ -33,7 +33,7 @@ expect abstract class ContentJobDao {
           FROM ContentJob
          WHERE cjUid = :cjUid
     """)
-    abstract fun findLiveDataByUid(cjUid: Long): LiveData<ContentJob?>
+    abstract fun findLiveDataByUid(cjUid: Long): Flow<ContentJob?>
 
     @Query("""
         UPDATE ContentJob
@@ -55,7 +55,7 @@ expect abstract class ContentJobDao {
          WHERE cjUid = :contentJobId
          LIMIT 1), FALSE)
     """)
-    abstract fun findMeteredAllowedLiveData(contentJobId: Long): LiveData<Boolean>
+    abstract fun findMeteredAllowedLiveData(contentJobId: Long): Flow<Boolean>
 
     @Query("""
         UPDATE ContentJob 

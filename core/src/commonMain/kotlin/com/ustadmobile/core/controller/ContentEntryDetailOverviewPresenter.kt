@@ -172,8 +172,8 @@ class ContentEntryDetailOverviewPresenter(
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
-        return db.contentEntryDao.personHasPermissionWithContentEntry(accountManager.activeAccount.personUid,
-                arguments[ARG_ENTITY_UID]?.toLong() ?: 0, Role.PERMISSION_CONTENT_UPDATE)
+        return false//db.contentEntryDao.personHasPermissionWithContentEntry(accountManager.activeAccount.personUid,
+                //arguments[ARG_ENTITY_UID]?.toLong() ?: 0, Role.PERMISSION_CONTENT_UPDATE)
     }
 
     fun handleOnClickConfirmDelete() {

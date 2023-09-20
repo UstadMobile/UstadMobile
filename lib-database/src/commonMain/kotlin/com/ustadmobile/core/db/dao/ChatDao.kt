@@ -4,7 +4,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.door.paging.DataSourceFactory
+import app.cash.paging.PagingSource
 import com.ustadmobile.lib.db.entities.*
 
 @DoorDao
@@ -120,7 +120,7 @@ expect abstract class ChatDao: BaseDao<Chat>{
          ORDER BY latestMessageTimestamp DESC
     """)
     abstract fun findAllChatsForUser(searchBit: String, personUid: Long)
-        : DataSourceFactory<Int, ChatWithLatestMessageAndCount>
+        : PagingSource<Int, ChatWithLatestMessageAndCount>
 
 
     @Query("""

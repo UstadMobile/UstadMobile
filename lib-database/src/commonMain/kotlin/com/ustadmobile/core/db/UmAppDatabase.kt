@@ -10,9 +10,7 @@ import com.ustadmobile.lib.db.entities.*
 
 @DoorDatabase(entities = [NetworkNode::class,
     ClazzLog::class, ClazzLogAttendanceRecord::class,
-    Schedule::class, DateRange::class, HolidayCalendar::class, Holiday::class,
-    ScheduledCheck::class,
-    AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
+    Schedule::class, HolidayCalendar::class, Holiday::class,
     Person::class,
     Clazz::class, ClazzEnrolment::class, LeavingReason::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
@@ -43,12 +41,21 @@ import com.ustadmobile.lib.db.entities.*
     UserSession::class,
     ContentJob::class, ContentJobItem::class, CourseBlock::class, CourseTerminology::class,
     CourseGroupSet::class, CourseGroupMember::class,
+    Chat::class,
+    ContentEntryPicture::class,
 
     //Door Helper entities
 //    SqliteChangeSeqNums::class,
 //    UpdateNotification::class,
     DoorNode::class,
     ReplicationStatus::class,
+    CourseDiscussion::class,
+    CoursePicture::class,
+    DiscussionPost::class,
+    ExternalAppPermission::class,
+    ChatMember::class,
+    Message::class,
+    MessageRead::class,
 
 
 
@@ -130,7 +137,11 @@ import com.ustadmobile.lib.db.entities.*
     ChangeLog
     ZombieAttachmentData
     EntityRole
-
+    AuditLog
+    CustomField
+    CustomFieldValue
+    CustomFieldValueOption
+    DateRange
  */
 expect abstract class UmAppDatabase : RoomDatabase {
 
@@ -197,8 +208,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract val personGroupMemberDao: PersonGroupMemberDao
 
-    abstract val entityRoleDao: EntityRoleDao
-
     abstract val personPictureDao: PersonPictureDao
 
     abstract val connectivityStatusDao: ConnectivityStatusDao
@@ -245,8 +254,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val schoolMemberDao: SchoolMemberDao
 
     abstract val clazzAssignmentDao: ClazzAssignmentDao
-
-    abstract val clazzAssignmentContentJoinDao: ClazzAssignmentContentJoinDao
 
     abstract val clazzAssignmentRollUpDao: ClazzAssignmentRollUpDao
 

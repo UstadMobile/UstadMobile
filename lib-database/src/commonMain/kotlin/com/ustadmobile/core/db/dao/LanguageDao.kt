@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.paging.DataSourceFactory
+import app.cash.paging.PagingSource
 import androidx.room.*
 import com.ustadmobile.core.db.dao.LanguageDaoCommon.SORT_LANGNAME_ASC
 import com.ustadmobile.core.db.dao.LanguageDaoCommon.SORT_LANGNAME_DESC
@@ -8,60 +8,14 @@ import com.ustadmobile.core.db.dao.LanguageDaoCommon.SORT_THREE_LETTER_ASC
 import com.ustadmobile.core.db.dao.LanguageDaoCommon.SORT_THREE_LETTER_DESC
 import com.ustadmobile.core.db.dao.LanguageDaoCommon.SORT_TWO_LETTER_ASC
 import com.ustadmobile.core.db.dao.LanguageDaoCommon.SORT_TWO_LETTER_DESC
-import com.ustadmobile.door.lifecycle.LiveData
+import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
-import kotlin.js.JsName
 
 @DoorDao
 @Repository
 expect abstract class LanguageDao : BaseDao<Language> {
 
-    @Query("""
-     REPLACE INTO LanguageReplicate(languagePk, languageDestination)
-      SELECT DISTINCT Language.langUid AS languagePk,
-             :newNodeId AS languageDestination
-        FROM Language
-       WHERE Language.langLct != COALESCE(
-             (SELECT languageVersionId
-                FROM LanguageReplicate
-               WHERE languagePk = Language.langUid
-                 AND languageDestination = :newNodeId), 0) 
-      /*psql ON CONFLICT(languagePk, languageDestination) DO UPDATE
-             SET languagePending = true
-      */       
-    """)
-    @ReplicationRunOnNewNode
-    @ReplicationCheckPendingNotificationsFor([Language::class])
-    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
-
-    @Query("""
- REPLACE INTO LanguageReplicate(languagePk, languageDestination)
-  SELECT DISTINCT Language.langUid AS languageUid,
-         UserSession.usClientNodeId AS languageDestination
-    FROM ChangeLog
-         JOIN Language
-             ON ChangeLog.chTableId = ${Language.TABLE_ID}
-                AND ChangeLog.chEntityPk = Language.langUid
-         JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-   WHERE UserSession.usClientNodeId != (
-         SELECT nodeClientId 
-           FROM SyncNode
-          LIMIT 1)
-     AND Language.langLct != COALESCE(
-         (SELECT languageVersionId
-            FROM LanguageReplicate
-           WHERE languagePk = Language.langUid
-             AND languageDestination = UserSession.usClientNodeId), 0)
- /*psql ON CONFLICT(languagePk, languageDestination) DO UPDATE
-     SET languagePending = true
-  */               
-    """)
-    @ReplicationRunOnChange([Language::class])
-    @ReplicationCheckPendingNotificationsFor([Language::class])
-    abstract suspend fun replicateOnChange()
-
-    @JsName("insertListAsync")
     @Insert
     abstract suspend fun insertListAsync(languageList: List<Language>)
 
@@ -82,7 +36,7 @@ expect abstract class LanguageDao : BaseDao<Language> {
             ELSE ''
         END DESC
     """)
-    abstract fun findLanguagesAsSource(sortOrder: Int, searchText: String): DataSourceFactory<Int, Language>
+    abstract fun findLanguagesAsSource(sortOrder: Int, searchText: String): PagingSource<Int, Language>
 
     @Query("""SELECT * FROM Language""")
     abstract fun findLanguagesList(): List<Language>
@@ -115,9 +69,8 @@ expect abstract class LanguageDao : BaseDao<Language> {
     abstract suspend fun updateAsync(entity: Language): Int
 
     @Query("SELECT * FROM LANGUAGE")
-    abstract fun findAllLanguageLive(): LiveData<List<Language>>
+    abstract fun findAllLanguageLive(): Flow<List<Language>>
 
-    @JsName("findByUidList")
     @Query("SELECT langUid FROM LANGUAGE WHERE langUid IN (:uidList)")
     abstract fun findByUidList(uidList: List<Long>): List<Long>
 
@@ -133,7 +86,6 @@ expect abstract class LanguageDao : BaseDao<Language> {
         updateTime: Long
     )
 
-    @JsName("replaceList")
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entityList: List<Language>)
 

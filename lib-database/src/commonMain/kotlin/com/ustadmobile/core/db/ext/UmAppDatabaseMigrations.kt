@@ -1,6 +1,5 @@
 package com.ustadmobile.core.db.ext
 
-import com.ustadmobile.core.db.UmAppDatabaseReplicationMigration91_92
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.migration.DoorMigrationStatementList
 import com.ustadmobile.door.DoorDbType
@@ -1175,9 +1174,7 @@ val MIGRATION_109_110 = DoorMigrationStatementList(109, 110) {db ->
 }
 
 fun migrationList() = listOf<DoorMigration>(
-    UmAppDatabaseReplicationMigration91_92, MIGRATION_92_93, MIGRATION_93_94, MIGRATION_94_95,
-    MIGRATION_95_96, MIGRATION_96_97, MIGRATION_97_98, MIGRATION_98_99,
-    MIGRATION_99_100, MIGRATION_100_101, MIGRATION_101_102, MIGRATION_102_103,
+    MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
 )

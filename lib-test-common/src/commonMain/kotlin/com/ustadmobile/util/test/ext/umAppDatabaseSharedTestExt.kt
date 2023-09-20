@@ -105,11 +105,6 @@ fun UmAppDatabase.insertTestClazzAssignment(admin: Boolean = false, endpoint: St
     clazzAssignmentDao.update(clazzAssignment)
 
 
-    ClazzAssignmentContentJoin().apply {
-        cacjContentUid = contentEntry.contentEntryUid
-        cacjAssignmentUid = clazzAssignment.caUid
-        cacjUid = clazzAssignmentContentJoinDao.insert(this)
-    }
 
     val cacheClazzAssignment = ClazzAssignmentRollUp().apply {
         this.cacheClazzAssignmentUid = clazzAssignment.caUid

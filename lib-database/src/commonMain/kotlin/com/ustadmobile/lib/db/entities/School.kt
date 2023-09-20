@@ -13,7 +13,10 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-@ReplicateEntity(tableId = School.TABLE_ID, tracker = SchoolReplicate::class)
+@ReplicateEntity(
+    tableId = School.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
 @Triggers(arrayOf(
  Trigger(
      name = "school_remote_insert",

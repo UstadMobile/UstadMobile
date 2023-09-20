@@ -4,65 +4,10 @@ import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.StateEntity
-import com.ustadmobile.lib.db.entities.UserSession
 
 @DoorDao
 @Repository
 expect abstract class StateDao : BaseDao<StateEntity> {
-
-    @Query("""
-     REPLACE INTO StateEntityReplicate(sePk, seDestination)
-      SELECT DISTINCT StateEntity.stateUid AS sePk,
-             :newNodeId AS seDestination
-        FROM StateEntity
-             JOIN AgentEntity
-                  ON StateEntity.agentUid = AgentEntity.agentUid
-             JOIN UserSession
-                  ON AgentEntity.agentPersonUid = UserSession.usPersonUid
-       WHERE UserSession.usClientNodeId = :newNodeId
-         AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-         AND StateEntity.stateLct != COALESCE(
-             (SELECT seVersionId
-                FROM StateEntityReplicate
-               WHERE sePk = StateEntity.stateUid
-                 AND seDestination = :newNodeId), 0) 
-      /*psql ON CONFLICT(sePk, seDestination) DO UPDATE
-             SET sePending = true
-      */       
- """)
-    @ReplicationRunOnNewNode
-    @ReplicationCheckPendingNotificationsFor([StateEntity::class])
-    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
-
-    @Query("""
- REPLACE INTO StateEntityReplicate(sePk, seDestination)
-  SELECT DISTINCT StateEntity.stateUid AS seUid,
-         UserSession.usClientNodeId AS seDestination
-    FROM ChangeLog
-         JOIN StateEntity
-              ON ChangeLog.chTableId = ${StateEntity.TABLE_ID}
-                 AND ChangeLog.chEntityPk = StateEntity.stateUid
-         JOIN AgentEntity
-              ON StateEntity.agentUid = AgentEntity.agentUid
-         JOIN UserSession
-              ON AgentEntity.agentPersonUid = UserSession.usPersonUid
-                 AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-   WHERE UserSession.usClientNodeId != (
-         SELECT nodeClientId 
-           FROM SyncNode
-          LIMIT 1)
-     AND StateEntity.stateLct != COALESCE(
-         (SELECT seVersionId
-            FROM StateEntityReplicate
-           WHERE sePk = StateEntity.stateUid
-             AND seDestination = UserSession.usClientNodeId), 0)
- /*psql ON CONFLICT(sePk, seDestination) DO UPDATE
-     SET sePending = true
-  */               
-    """)
-    @ReplicationRunOnChange([StateEntity::class])
-    @ReplicationCheckPendingNotificationsFor([StateEntity::class])
-    abstract suspend fun replicateOnChange()
 
     @Query("SELECT * FROM StateEntity WHERE stateId = :id AND agentUid = :agentUid AND activityId = :activityId AND registration = :registration AND isIsactive LIMIT 1")
     abstract fun findByStateId(id: String?, agentUid: Long, activityId: String?, registration: String?): StateEntity?

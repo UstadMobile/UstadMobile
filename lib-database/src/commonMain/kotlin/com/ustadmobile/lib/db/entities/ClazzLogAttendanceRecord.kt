@@ -7,8 +7,10 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.FROM_C
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.FROM_SCOPEDGRANT_TO_CLAZZLOGATTENDANCERECORD_JOIN_ON_CLAUSE
 import kotlinx.serialization.Serializable
 
-@ReplicateEntity(tableId = ClazzLogAttendanceRecord.TABLE_ID,
-    tracker = ClazzLogAttendanceRecordReplicate::class)
+@ReplicateEntity(
+    tableId = ClazzLogAttendanceRecord.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
 @Entity
 @Serializable
 @Triggers(arrayOf(
@@ -18,11 +20,7 @@ import kotlinx.serialization.Serializable
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
      sqlStatements = [
-         """REPLACE INTO ClazzLogAttendanceRecord(clazzLogAttendanceRecordUid, clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordPersonUid, attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy, clazzLogAttendanceRecordReplicateLastModified) 
-         VALUES (NEW.clazzLogAttendanceRecordUid, NEW.clazzLogAttendanceRecordClazzLogUid, NEW.clazzLogAttendanceRecordPersonUid, NEW.attendanceStatus, NEW.clazzLogAttendanceRecordMasterChangeSeqNum, NEW.clazzLogAttendanceRecordLocalChangeSeqNum, NEW.clazzLogAttendanceRecordLastChangedBy, NEW.clazzLogAttendanceRecordReplicateLastModified) 
-         /*psql ON CONFLICT (clazzLogAttendanceRecordUid) DO UPDATE 
-         SET clazzLogAttendanceRecordClazzLogUid = EXCLUDED.clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordPersonUid = EXCLUDED.clazzLogAttendanceRecordPersonUid, attendanceStatus = EXCLUDED.attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum = EXCLUDED.clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum = EXCLUDED.clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy = EXCLUDED.clazzLogAttendanceRecordLastChangedBy, clazzLogAttendanceRecordReplicateLastModified = EXCLUDED.clazzLogAttendanceRecordReplicateLastModified
-         */"""
+         TRIGGER_UPSERT_WHERE_NEWER
      ]
  )
 ))
@@ -48,7 +46,7 @@ open class ClazzLogAttendanceRecord {
 
     @ReplicateLastModified
     @ReplicateEtag
-    var clazzLogAttendanceRecordReplicateLastModified: Long = 0
+    var clazzLogAttendanceRecordLastChangedTime: Long = 0
 
 
     override fun equals(other: Any?): Boolean {
