@@ -19,6 +19,11 @@ import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import app.cash.paging.PagingSource
+import app.cash.paging.PagingSourceLoadParams
+import app.cash.paging.PagingSourceLoadResult
+import app.cash.paging.PagingSourceLoadResultPage
+import app.cash.paging.PagingState
 
 data class PersonListUiState(
     val personList: () -> PagingSource<Int, PersonWithDisplayDetails> = { EmptyPagingSource() },
@@ -38,10 +43,12 @@ class EmptyPagingSource<Key: Any, Value: Any>(): PagingSource<Key, Value>() {
         return null
     }
 
-    override suspend fun load(params: LoadParams<Key>): LoadResult<Key, Value> {
-        return DoorLoadResult.Page<Key, Value>(
-            emptyList(), null, null
-        ).toLoadResult()
+
+
+    @Suppress("CAST_NEVER_SUCCEEDS")
+    override suspend fun load(params: PagingSourceLoadParams<Key>): PagingSourceLoadResult<Key, Value> {
+        return PagingSourceLoadResultPage<Key, Value>(emptyList(), null, null)
+            as PagingSourceLoadResult<Key, Value>
     }
 }
 

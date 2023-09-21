@@ -7,7 +7,7 @@ import com.ustadmobile.core.util.EventCollator2
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.paging.PagingSource
+import app.cash.paging.PagingSource
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*

@@ -7,15 +7,12 @@ import com.ustadmobile.core.db.dao.commitProgressUpdates
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.io.ext.deleteRecursively
 import com.ustadmobile.core.io.ext.emptyRecursively
-import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.util.EventCollator
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.core.util.ext.decodeStringMapFromString
 import com.ustadmobile.core.util.ext.deleteZombieContainerEntryFiles
-import com.ustadmobile.door.lifecycle.Observer
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.*
 import com.ustadmobile.door.util.TransactionMode
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -33,7 +30,7 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
-import kotlin.jvm.Volatile
+import kotlin.concurrent.Volatile
 import kotlin.math.min
 
 /**
@@ -45,8 +42,7 @@ class ContentJobRunner(
     override val di: DI,
     val numProcessors: Int = DEFAULT_NUM_PROCESSORS,
     val maxItemAttempts: Int = DEFAULT_NUM_RETRIES
-) : DIAware, ContentJobProgressListener, Observer<Pair<Int, Boolean>?>,
-    ContentJobItemTransactionRunner {
+) : DIAware, ContentJobProgressListener, ContentJobItemTransactionRunner {
 
     data class ContentJobResult(val status: Int)
 
@@ -64,8 +60,6 @@ class ContentJobRunner(
 
     private val eventCollator = EventCollator(500, this::commitProgressUpdates)
 
-    private val connectivityLiveData: ConnectivityLiveData by on(endpoint).instance()
-
     private val logPrefix: String
         get() = "ContentJobRunner@$doorIdentityHashCode Job#${jobId} :"
 
@@ -75,17 +69,16 @@ class ContentJobRunner(
 
     private val containerStorageManager: ContainerStorageManager by on(endpoint).instance()
 
-    private val jobConnectivityLiveData = JobConnectivityLiveData(connectivityLiveData,
-        db.contentJobDao.findMeteredAllowedLiveData(jobId))
+
+    @Volatile
+    private var jobItemProducer : ReceiveChannel<ContentJobItemAndContentJob>? = null
+
 
     @ExperimentalCoroutinesApi
     private fun CoroutineScope.produceJobs() = produce<ContentJobItemAndContentJob> {
         var done = false
         try {
             Napier.d("$logPrefix connectivity observer forever")
-            withContext(doorMainDispatcher()) {
-                jobConnectivityLiveData.observeForever(this@ContentJobRunner)
-            }
 
             do {
                 Napier.d("$logPrefix waiting for signal to check queue")
@@ -126,9 +119,6 @@ class ContentJobRunner(
         }catch(e: Exception) {
             Napier.d(e.stackTraceToString(), e)
         }finally {
-            withContext(NonCancellable + doorMainDispatcher()) {
-                jobConnectivityLiveData.removeObserver(this@ContentJobRunner)
-            }
             Napier.d("$logPrefix close produce job")
             close()
         }
@@ -154,7 +144,6 @@ class ContentJobRunner(
 
             var processResult: ProcessResult? = null
             var processException: Throwable? = null
-            var mediatorObserver: Observer<Pair<Int, Boolean>>?= null
 
             try {
                 val cjiUid = item.contentJobItem?.cjiUid
@@ -210,22 +199,6 @@ class ContentJobRunner(
                     }
                 }
 
-                mediatorObserver = Observer {
-                    val state = it.first
-                    val isMeteredAllowed = it.second
-
-                    if(item.contentJobItem?.cjiConnectivityNeeded == true
-                        && (state == ConnectivityStatus.STATE_DISCONNECTED ||
-                            !isMeteredAllowed && state == ConnectivityStatus.STATE_METERED)){
-                        jobResult.cancel(ConnectivityCancellationException("connectivity not acceptable"))
-                    }
-
-                }
-
-                withContext(doorMainDispatcher()){
-                    jobConnectivityLiveData.observeForever(mediatorObserver)
-                }
-
 
                 processResult = jobResult.await()
 
@@ -257,7 +230,6 @@ class ContentJobRunner(
                             JobStatus.FAILED
                         }
                         processException is ContentTypeNotSupportedException -> JobStatus.COMPLETE
-                        processException is ConnectivityCancellationException -> JobStatus.QUEUED
                         processException is CancellationException -> JobStatus.CANCELED
                         (item.contentJobItem?.cjiAttemptCount ?: maxItemAttempts) >= maxItemAttempts -> JobStatus.FAILED
                         else -> {
@@ -285,11 +257,6 @@ class ContentJobRunner(
                         "finishing with #${item.contentJobItem?.cjiUid}")
                 }
 
-                withContext(NonCancellable + doorMainDispatcher()) {
-                    mediatorObserver?.let { jobConnectivityLiveData.removeObserver(it) }
-                }
-
-
                 if(processException is CancellationException &&
                     processException !is ConnectivityCancellationException)
                     throw processException as CancellationException
@@ -298,10 +265,6 @@ class ContentJobRunner(
             }
         }
     }
-
-    @ExperimentalCoroutinesApi
-    @Volatile
-    private var jobItemProducer : ReceiveChannel<ContentJobItemAndContentJob>? = null
 
     /**
      * Concurrent updates to ContentJobItem can cause a transaction deadlock on postgres. Therefor
@@ -380,28 +343,8 @@ class ContentJobRunner(
             checkQueueSignalChannel.send(true)
         }
 
-        //Now remove any Zombies (e.g. where the same md5 was downloaded multiple times due when
-        // downloads were running concurrently
-        db.withDoorTransactionAsync { txDb ->
-            //TODO here: for all downloaded containers, set the containerentry to use the first
-            // downloaded containerentryfile (in case multiple copies of the same md5 were downloaded)
-
-            txDb.containerEntryFileDao.deleteZombieContainerEntryFiles(db.dbType())
-        }
-
-
 
         return ContentJobResult(JobStatus.COMPLETE)
-    }
-
-    //Connectivity and/or the setting for metered data allowed has been changed, so we should check
-    //the queue
-    override fun onChanged(t: Pair<Int, Boolean>?) {
-        GlobalScope.launch {
-            if(t != null){
-                checkQueueSignalChannel.send(true)
-            }
-        }
     }
 
     companion object {

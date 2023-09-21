@@ -38,8 +38,7 @@ include ':app-android',
         ':sharedse',
         ':lib-util',
         ':testserver-controller',
-        ':lib-database',
-        ':lib-content-scrapers'
+        ':lib-database'
 
 rootProject.name = "UstadMobile"
 

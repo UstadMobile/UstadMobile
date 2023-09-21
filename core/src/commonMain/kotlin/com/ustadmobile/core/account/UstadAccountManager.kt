@@ -6,14 +6,11 @@ import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.util.ext.encryptWithPbkdf2
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.toUmAccount
+import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.util.ext.withEndpoint
-import com.ustadmobile.core.util.safeParse
-import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.door.*
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.*
-import com.ustadmobile.door.lifecycle.LiveData
-import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_GUESTPERSON
@@ -23,14 +20,20 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import kotlinx.atomicfu.AtomicRef
-import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 import org.kodein.di.DI
@@ -42,92 +45,128 @@ class UstadAccountManager(
     private val systemImpl: UstadMobileSystemImpl,
     private val appContext: Any,
     val di: DI
-) : IncomingReplicationListener {
+)  {
 
-   fun interface EndpointFilter {
+    /**
+     * The account that is currently the selected account on screen
+     */
+    private val _currentUserSession : MutableStateFlow<UserSessionWithPersonAndEndpoint>
+
+    /**
+     * Endpoint urls that have active sessions that are on the device. This is stored in preferences
+     * so that we know what databases we need to collect from
+     */
+    private val _endpointsWithActiveSessions: MutableStateFlow<List<Endpoint>>
+
+    /**
+     * Flow that can be accessed to access all active accounts (e.g. the current user session AND
+     * all accounts that are stored on this device that the user could switch to).
+     */
+    private val _allActiveAccounts: MutableStateFlow<List<UserSessionWithPersonAndEndpoint>>
+
+    fun interface EndpointFilter {
 
        fun filterEndpoint(endpointUrl: String): Boolean
 
-   }
+    }
 
     data class ResponseWithAccount(val statusCode: Int, val umAccount: UmAccount?)
 
-    private inner class UserSessionMediator: DoorMediatorLiveData<List<UserSessionWithPersonAndEndpoint>>() {
 
-        private val endpointSessionsListMap = mutableMapOf<Endpoint, List<UserSessionWithPersonAndEndpoint>>()
+    val activeUserSessionsLive: Flow<List<UserSessionWithPersonAndEndpoint>>
+        get() = _allActiveAccounts.asStateFlow()
 
-        private val endpointSessionsLiveDataMap = mutableMapOf<Endpoint, LiveData<List<UserSessionAndPerson>>>()
-
-        fun addEndpoint(endpoint: Endpoint) {
-            val db: UmAppDatabase = di.direct.on(endpoint).instance(tag = DoorTag.TAG_DB)
-            val liveData = db.userSessionDao.findAllLocalSessionsLive()
-            endpointSessionsLiveDataMap[endpoint] = liveData
-
-            addSource(liveData) { endpointSessionList ->
-                endpointSessionsListMap[endpoint] = endpointSessionList.map { it.withEndpoint(endpoint) }
-                setValue(endpointSessionsListMap.values.flatten())
-            }
-        }
-
-        fun removeEndpoint(endpoint: Endpoint) {
-            val liveData = endpointSessionsLiveDataMap[endpoint] ?: return
-            removeSource(liveData)
-        }
-    }
-
-    private val userSessionLiveDataMediator = UserSessionMediator()
-
-    val activeUserSessionsLive: LiveData<List<UserSessionWithPersonAndEndpoint>>
-        get() = userSessionLiveDataMediator
-
-    private val _activeUserSession: AtomicRef<UserSessionWithPersonAndEndpoint?>
-
-    private val _activeUserSessionLive = MutableLiveData<UserSessionWithPersonAndEndpoint?>()
-
-    val activeUserSessionLive: LiveData<UserSessionWithPersonAndEndpoint?>
-        get() = _activeUserSessionLive
-
-    private val _activeEndpoint: AtomicRef<Endpoint>
-
-    private val _activeAccountLive = MutableLiveData<UmAccount>()
+    val activeUserSessionLive: Flow<UserSessionWithPersonAndEndpoint?>
+        get() = _currentUserSession.asStateFlow()
 
     private val httpClient: HttpClient by di.instance()
 
-    private val endpointsWithActiveSessions = concurrentSafeListOf<Endpoint>()
+    //private val endpointsWithActiveSessions = concurrentSafeListOf<Endpoint>()
 
     private val json: Json by di.instance()
 
     private val apiUrlConfig: ApiUrlConfig by di.instance()
 
+    private val scope = CoroutineScope(Dispatchers.Main + Job())
+
     init {
-        val activeUserSessionFromJson = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY)?.let {
-            safeParse(di, UserSessionWithPersonAndEndpoint.serializer(), it)
-        }
+        val currentEndpointStr = systemImpl.getAppPref(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY)
+            ?: apiUrlConfig.presetApiUrl ?: MANIFEST_URL_FALLBACK
+        val currentDb: UmAppDatabase = di.direct.instance(tag = DoorTag.TAG_DB)
 
-        _activeUserSession = atomic(activeUserSessionFromJson)
-        _activeUserSessionLive.postValue(activeUserSessionFromJson)
+        val initUserSession: UserSessionWithPersonAndEndpoint = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY)?.let {
+            json.decodeFromString(it)
+        } ?: makeNewTempGuestSession(currentEndpointStr,  currentDb)
+        _currentUserSession = MutableStateFlow(initUserSession)
+        val initEndpoints: List<String> = systemImpl.getAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION)?.let {
+            json.decodeFromString(ListSerializer(String.serializer()), it)
+        } ?: listOf(currentEndpointStr)
+        _endpointsWithActiveSessions = MutableStateFlow(initEndpoints.map { Endpoint(it) })
 
-        systemImpl.getAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION)?.also { endpointJson ->
-            val endpointStrs = safeParseList(di, ListSerializer(String.serializer()), String::class,
-                endpointJson)
-            val allEndpoints = endpointStrs.map { Endpoint(it) }
-            endpointsWithActiveSessions.addAll(allEndpoints)
+        _allActiveAccounts = MutableStateFlow(listOf(initUserSession))
 
-            GlobalScope.launch(doorMainDispatcher()) {
-                allEndpoints.forEach {
-                    addActiveEndpoint(it)
+        //Note: might need to collect all active endpoints and use that to watch for any session
+        //invalidations
+
+        /**
+         * Provide a flow (as/when required) of all active sessions. This requires using flows
+         * from multiple different databases. The database flows will only be collected if/when the
+         * all active accounts flow is being collected.
+         */
+        scope.launch {
+            _allActiveAccounts.whenSubscribed {
+                _endpointsWithActiveSessions.collectLatest { endpointsWithSessions ->
+                    endpointsWithSessions.forEach { endpoint ->
+                        scope.launch {
+                            val endpointDb: UmAppDatabase = di.on(endpoint).direct
+                                .instance(tag = DoorTag.TAG_DB)
+                            endpointDb.userSessionDao.findAllLocalSessionsLive().collect { endpointSessions ->
+                                _allActiveAccounts.update { prev ->
+                                    prev.filter {
+                                        it.endpoint != endpoint
+                                    } +  endpointSessions.map {
+                                        UserSessionWithPersonAndEndpoint(
+                                            userSession = it.userSession ?: UserSession(),
+                                            person = it.person ?: Person(),
+                                            endpoint = endpoint
+                                        )
+                                    }.sortedBy { it.displayName }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
+    }
 
-
-        val activeEndpointStr = systemImpl.getAppPref(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY)
-            ?: apiUrlConfig.presetApiUrl ?: MANIFEST_URL_FALLBACK
-
-        _activeEndpoint = atomic(Endpoint(activeEndpointStr))
-
-        _activeAccountLive.postValue(_activeUserSession.value?.toUmAccount()
-            ?: GUEST_PERSON.toUmAccount(activeEndpointStr))
+    /**
+     * Note: Guest sessions can be:
+     *
+     * Temporary: e.g. auto-created when there is no other account. This will not be sent to the server,
+     * will not be displayed on the account list, etc.
+     *
+     * Selected: when a user clicks login as guest on a site that allows guest login. The guest
+     * session is then converted from temporary to selected. It will then be sent to the server
+     * (e.g. to be included in statistics on total number of users etc).
+     */
+    private fun makeNewTempGuestSession(
+        endpointUrl: String,
+        currentDb: UmAppDatabase
+    ): UserSessionWithPersonAndEndpoint {
+        return UserSessionWithPersonAndEndpoint(
+            userSession = UserSession().apply {
+                usUid = currentDb.doorPrimaryKeyManager.nextId(UserSession.TABLE_ID)
+                usClientNodeId = currentDb.doorWrapperNodeId
+                usStartTime = systemTimeInMillis()
+            },
+            person = GUEST_PERSON,
+            endpoint = Endpoint(endpointUrl),
+        ).also {
+            scope.launch {
+                currentDb.userSessionDao.insertSession(it.userSession)
+            }
+        }
     }
 
     /**
@@ -136,7 +175,7 @@ class UstadAccountManager(
     suspend fun activeSessionsList(
         endpointFilter: EndpointFilter = EndpointFilter { true }
     ): List<UserSessionWithPersonAndEndpoint> {
-        return endpointsWithActiveSessions.filter { endpointFilter.filterEndpoint(it.url) }.flatMap { endpoint ->
+        return _endpointsWithActiveSessions.value.filter { endpointFilter.filterEndpoint(it.url) }.flatMap { endpoint ->
             val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
             db.userSessionDao.findAllLocalSessionsAsync().map { userSession ->
                 userSession.withEndpoint(endpoint)
@@ -148,7 +187,7 @@ class UstadAccountManager(
         maxDateOfBirth: Long = 0,
         endpointFilter: EndpointFilter = EndpointFilter { true }
     ): Int {
-        return endpointsWithActiveSessions.filter { endpointFilter.filterEndpoint(it.url) }.fold(0) { total, endpoint ->
+        return _endpointsWithActiveSessions.value.filter { endpointFilter.filterEndpoint(it.url) }.fold(0) { total, endpoint ->
             val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
             total + db.userSessionDao.countAllLocalSessionsAsync(maxDateOfBirth)
         }
@@ -156,43 +195,22 @@ class UstadAccountManager(
 
     //This is the older way of doing things now.
     val activeAccount: UmAccount
-        get() = _activeUserSession.value?.toUmAccount()
-            ?: GUEST_PERSON.toUmAccount(_activeEndpoint.value.url)
+        get() = _currentUserSession.value.toUmAccount()
 
-    var activeSession: UserSessionWithPersonAndEndpoint?
-        get() = _activeUserSession.value
+    var activeSession: UserSessionWithPersonAndEndpoint
+        get() = _currentUserSession.value
         set(value) {
-            _activeUserSession.value = value
-            _activeUserSessionLive.postValue(value)
+            _currentUserSession.value = value
 
-            val activeAccountJson = value?.let {
-                json.encodeToString(it)
-            }
-
-            if(value != null){
-                _activeEndpoint.value = value.endpoint
-            }
-
+            val activeAccountJson = json.encodeToString(value)
             systemImpl.setAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, activeAccountJson)
-
         }
 
-    var activeEndpoint: Endpoint
-        get() = _activeEndpoint.value
-        set(value){
-            _activeEndpoint.value = value
-            systemImpl.setAppPref(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY, value.url)
-        }
+    val activeEndpoint: Endpoint
+        get() = _currentUserSession.value.endpoint
 
-    val activeAccountLive: LiveData<UmAccount>
-        get() = _activeAccountLive
-
-    val storedAccountsLive: LiveData<List<UmAccount>> = DoorMediatorLiveData<List<UmAccount>>().apply {
-        addSource(userSessionLiveDataMediator) { userSessionList ->
-            setValue(userSessionList.map { it.toUmAccount() })
-        }
-    }
-
+    val activeAccountLive: Flow<UmAccount>
+        get() = _currentUserSession.map { it.toUmAccount() }
 
     suspend fun register(
         person: PersonWithAccount,
@@ -229,6 +247,7 @@ class UstadAccountManager(
         }
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
     suspend fun addSession(
         person: Person,
         endpointUrl: String,
@@ -238,7 +257,7 @@ class UstadAccountManager(
         val endpointRepo: UmAppDatabase = di.on(endpoint).direct
             .instance(tag = DoorTag.TAG_REPO)
 
-        if(endpoint !in endpointsWithActiveSessions) {
+        if(endpoint !in _endpointsWithActiveSessions.value) {
             addActiveEndpoint(endpoint, commit = false)
             commitActiveEndpointsToPref()
         }
@@ -267,61 +286,54 @@ class UstadAccountManager(
         return UserSessionWithPersonAndEndpoint(userSession, person, endpoint)
     }
 
+    @Suppress("RedundantSuspendModifier") // Reserved for use if required as per previous api
     private suspend fun addActiveEndpoint(endpoint: Endpoint, commit: Boolean = true) {
-        endpointsWithActiveSessions += endpoint
+        _endpointsWithActiveSessions.update { prev ->
+            prev + listOf(endpoint)
+        }
+
         if(commit)
             commitActiveEndpointsToPref()
-
-        withContext(doorMainDispatcher()) {
-            val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
-            db.addIncomingReplicationListener(this@UstadAccountManager)
-
-            userSessionLiveDataMediator.addEndpoint(endpoint)
-        }
     }
 
     private suspend fun removeActiveEndpoint(endpoint: Endpoint, commit: Boolean = true) {
-        endpointsWithActiveSessions -= endpoint
+        _endpointsWithActiveSessions.update { prev ->
+            prev.filter { it != endpoint }
+        }
         if(commit)
             commitActiveEndpointsToPref()
-
-        withContext(doorMainDispatcher()) {
-            val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
-            db.removeIncomingReplicationListener(this@UstadAccountManager)
-
-            userSessionLiveDataMediator.removeEndpoint(endpoint)
-        }
     }
 
     private fun commitActiveEndpointsToPref() {
         val json = Json.encodeToString(ListSerializer(String.serializer()),
-            endpointsWithActiveSessions.toSet().map { it.url }.toList())
+            _endpointsWithActiveSessions.value.toSet().map { it.url }.toList())
         systemImpl.setAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION, json)
     }
 
     //When sync data comes in, check to see if a change has been actioned that has ended our active
     // session
-    override suspend fun onIncomingReplicationProcessed(
-        incomingReplicationEvent: IncomingReplicationEvent
-    ) {
-        if(incomingReplicationEvent.tableId != UserSession.TABLE_ID)
-            return
+//    override suspend fun onIncomingReplicationProcessed(
+//        incomingReplicationEvent: IncomingReplicationEvent
+//    ) {
+//        if(incomingReplicationEvent.tableId != UserSession.TABLE_ID)
+//            return
+//
+//        val activeSessionUid = activeSession?.userSession?.usUid ?: return
+//
+//        val activeSessionUpdate = incomingReplicationEvent.incomingReplicationData.firstOrNull {
+//            it.jsonObject["usUid"]?.jsonPrimitive?.longOrNull == activeSessionUid
+//        } ?: return
+//
+//        val activeSessionStatus = activeSessionUpdate.jsonObject["usStatus"]?.jsonPrimitive?.intOrNull
+//        if(activeSessionStatus != UserSession.STATUS_ACTIVE) {
+//            activeSession = null
+//        }
+//    }
 
-        val activeSessionUid = activeSession?.userSession?.usUid ?: return
-
-        val activeSessionUpdate = incomingReplicationEvent.incomingReplicationData.firstOrNull {
-            it.jsonObject["usUid"]?.jsonPrimitive?.longOrNull == activeSessionUid
-        } ?: return
-
-        val activeSessionStatus = activeSessionUpdate.jsonObject["usStatus"]?.jsonPrimitive?.intOrNull
-        if(activeSessionStatus != UserSession.STATUS_ACTIVE) {
-            activeSession = null
-        }
-    }
-
-    suspend fun endSession(session: UserSessionWithPersonAndEndpoint,
-                           endStatus: Int = UserSession.STATUS_LOGGED_OUT,
-                           endReason: Int = UserSession.REASON_LOGGED_OUT
+    suspend fun endSession(
+        session: UserSessionWithPersonAndEndpoint,
+        endStatus: Int = UserSession.STATUS_LOGGED_OUT,
+        endReason: Int = UserSession.REASON_LOGGED_OUT
     ) {
         val endpointRepo: UmAppDatabase = di.on(session.endpoint)
             .direct.instance(tag = DoorTag.TAG_REPO)
@@ -329,9 +341,9 @@ class UstadAccountManager(
             session.userSession.usUid, endStatus, endReason)
 
         //check if the active session has been ended.
-        if(activeSession?.userSession?.usUid == session.userSession.usUid
-            && activeSession?.endpoint == session.endpoint) {
-            activeSession = null
+        if(activeSession.userSession.usUid == session.userSession.usUid
+            && activeSession.endpoint == session.endpoint) {
+            activeSession = makeNewTempGuestSession(session.endpoint.url, endpointRepo)
         }
 
 
@@ -393,7 +405,7 @@ class UstadAccountManager(
 
         val newSession = addSession(personInDb, endpointUrl, password)
 
-        activeEndpoint = Endpoint(endpointUrl)
+        //activeEndpoint = Endpoint(endpointUrl)
         activeSession = newSession
 
         //This should not be needed - as responseAccount can be smartcast, but will not otherwise compile

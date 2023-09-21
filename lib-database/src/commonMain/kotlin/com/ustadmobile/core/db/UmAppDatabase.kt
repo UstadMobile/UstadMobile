@@ -36,7 +36,6 @@ import com.ustadmobile.lib.db.entities.*
     ClazzAssignment::class, ClazzAssignmentContentJoin::class, CourseAssignmentSubmission::class,
     CourseAssignmentSubmissionAttachment::class, CourseAssignmentMark::class,
     PeerReviewerAllocation::class,
-    ClazzAssignmentRollUp::class,
     PersonAuth2::class,
     UserSession::class,
     ContentJob::class, ContentJobItem::class, CourseBlock::class, CourseTerminology::class,
@@ -142,6 +141,7 @@ import com.ustadmobile.lib.db.entities.*
     CustomFieldValue
     CustomFieldValueOption
     DateRange
+    ClazzAssignmentRollUp
  */
 expect abstract class UmAppDatabase : RoomDatabase {
 
@@ -254,8 +254,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val schoolMemberDao: SchoolMemberDao
 
     abstract val clazzAssignmentDao: ClazzAssignmentDao
-
-    abstract val clazzAssignmentRollUpDao: ClazzAssignmentRollUpDao
 
     abstract val courseAssignmentSubmissionDao: CourseAssignmentSubmissionDao
 

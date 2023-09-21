@@ -4,7 +4,6 @@ import com.ustadmobile.core.contentformats.har.HarInterceptor.Companion.intercep
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.getStringFromContainerEntry
 import com.ustadmobile.core.util.ext.isTextContent
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -12,6 +11,7 @@ import com.ustadmobile.lib.util.parseRangeRequestHeader
 import io.ktor.client.*
 import io.ktor.utils.io.errors.*
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -41,7 +41,7 @@ class HarContainer(val containerUid: Long, val entry: ContentEntry,
             throw Exception()
         }
 
-        GlobalScope.launch(doorMainDispatcher()){
+        GlobalScope.launch(Dispatchers.Main){
 
             val harContentData = indexEntry.containerEntryFile?.getStringFromContainerEntry() ?: throw Exception()
 

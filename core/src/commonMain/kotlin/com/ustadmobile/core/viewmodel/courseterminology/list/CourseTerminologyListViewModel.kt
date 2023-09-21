@@ -6,7 +6,7 @@ import com.ustadmobile.core.view.CourseTerminologyEditView
 import com.ustadmobile.core.view.CourseTerminologyListView
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import com.ustadmobile.door.paging.PagingSource
+import app.cash.paging.PagingSource
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update

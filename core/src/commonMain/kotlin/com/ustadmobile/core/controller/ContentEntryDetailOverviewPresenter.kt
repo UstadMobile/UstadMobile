@@ -12,8 +12,6 @@ import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.util.ContentEntryOpener
-import com.ustadmobile.core.util.RateLimitedLiveData
-import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.toDeepLink
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.core.view.ContentEntryDetailView
@@ -95,6 +93,7 @@ class ContentEntryDetailOverviewPresenter(
         }
 
         if (db !is DoorDatabaseRepository) {
+            /*
             RateLimitedLiveData(db, listOf("Container", "ContentEntry", "ContentJobItem")) {
                 db.contentEntryDao.buttonsToShowForContentEntry(entityUid, isPlatformDownloadEnabled)
             }.observeWithLifecycleOwner(lifecycleOwner) {
@@ -112,7 +111,7 @@ class ContentEntryDetailOverviewPresenter(
             }.observeWithLifecycleOwner(lifecycleOwner){
                 val progress = it ?: return@observeWithLifecycleOwner
                 view.activeContentJobItems = progress
-            }
+            }*/
         }
 
         return entity

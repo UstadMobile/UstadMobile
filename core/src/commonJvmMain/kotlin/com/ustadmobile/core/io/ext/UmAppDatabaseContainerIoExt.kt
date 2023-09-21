@@ -1,10 +1,12 @@
+@file:OptIn(ExperimentalStdlibApi::class)
+
 package com.ustadmobile.core.io.ext
 
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.ext.*
+import com.ustadmobile.core.ext.*
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContainerEntry
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
@@ -25,6 +27,11 @@ import kotlinx.coroutines.NonCancellable
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.core.db.dao.findExistingMd5SumsByMd5SumsSafe
 import com.ustadmobile.core.io.*
+import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.ext.toFile
+import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.door.ext.writeToFile
+import com.ustadmobile.door.ext.writeToFileAndGetMd5
 import com.ustadmobile.lib.db.entities.Container
 import java.io.FileInputStream
 import java.util.*
@@ -53,7 +60,7 @@ actual suspend fun UmAppDatabase.addFileToContainer(
     fileUri: DoorUri,
     pathInContainer: String,
     context: Any,
-    di: org.kodein.di.DI,
+    di: DI,
     addOptions: ContainerAddOptions
 ) {
     val repo = this as? DoorDatabaseRepository
@@ -68,15 +75,15 @@ actual suspend fun UmAppDatabase.addFileToContainer(
 }
 
 
-fun File.toContainerEntryFile(totalSize: Long, md5Sum: ByteArray, gzipped: Boolean) = com.ustadmobile.lib.db.entities.ContainerEntryFile().also {
+fun File.toContainerEntryFile(totalSize: Long, md5Sum: ByteArray, gzipped: Boolean) = ContainerEntryFile().also {
     it.ceCompressedSize  = this.length()
     it.ceTotalSize = totalSize
     it.cefMd5 = md5Sum.encodeBase64()
     it.cefPath = this.absolutePath
     it.compression = if(gzipped) {
-        com.ustadmobile.lib.db.entities.ContainerEntryFile.COMPRESSION_GZIP
+        ContainerEntryFile.COMPRESSION_GZIP
     }else {
-        com.ustadmobile.lib.db.entities.ContainerEntryFile.COMPRESSION_NONE
+        ContainerEntryFile.COMPRESSION_NONE
     }
 }
 
@@ -201,7 +208,7 @@ private suspend fun UmAppDatabase.insertOrLookupContainerEntryFile(
     return containerFile
 }
 
-suspend fun UmAppDatabase.addContainerFromUri(containerUid: Long, uri: com.ustadmobile.door.DoorUri,
+suspend fun UmAppDatabase.addContainerFromUri(containerUid: Long, uri: DoorUri,
                                               context: Any, di: DI, nameInContainer: String,
                                               addOptions: ContainerAddOptions){
     val inputStream = uri.openInputStream(context) ?: throw IOException("resource not found: ${uri.getFileName(context)}")
@@ -312,13 +319,13 @@ suspend fun UmAppDatabase.addEntriesToContainerFromZip(
         }
 
 
-        db.withDoorTransactionAsync { txDb: UmAppDatabase ->
-            txDb.containerEntryFileDao.insertListAsync(containerEntryFilesToInsert)
+        db.withDoorTransactionAsync {
+            db.containerEntryFileDao.insertListAsync(containerEntryFilesToInsert)
             zipFilesToAdd.forEach {
-                txDb.containerEntryDao.insertWithMd5SumsAsync(containerUid, it.pathInContainer,
+                db.containerEntryDao.insertWithMd5SumsAsync(containerUid, it.pathInContainer,
                     it.md5Base64)
             }
-            txDb.containerDao.takeIf { addOptions.updateContainer }
+            db.containerDao.takeIf { addOptions.updateContainer }
                 ?.updateContainerSizeAndNumEntriesAsync(containerUid, getSystemTimeInMillis())
         }
     }
@@ -326,7 +333,7 @@ suspend fun UmAppDatabase.addEntriesToContainerFromZip(
 
 actual suspend fun UmAppDatabase.addEntriesToContainerFromZip(
     containerUid: Long,
-    zipUri: com.ustadmobile.door.DoorUri,
+    zipUri: DoorUri,
     addOptions: ContainerAddOptions,
     context: Any
 ) {
