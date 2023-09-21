@@ -21,27 +21,6 @@
         android:label="@string/people" />
 
     <fragment
-        android:id="@+id/verb_list_dest"
-        android:name="com.ustadmobile.port.android.view.VerbEntityListFragment"
-        android:label="@string/verb" />
-
-    <fragment
-        android:id="@+id/report_list_dest"
-        android:name="com.ustadmobile.port.android.view.ReportListFragment"
-        android:label="@string/reports" />
-
-
-    <fragment
-        android:id="@+id/home_schoollist_dest"
-        android:name="com.ustadmobile.port.android.view.SchoolListFragment"
-        android:label="@string/schools" />
-
-    <fragment
-        android:id="@+id/schoollist_dest"
-        android:name="com.ustadmobile.port.android.view.SchoolListFragment"
-        android:label="@string/schools" />
-
-    <fragment
         android:id="@+id/personlist_dest"
         android:name="com.ustadmobile.port.android.view.PersonListFragment" />
 
@@ -54,9 +33,6 @@
         android:id="@+id/clazz_list_dest"
         android:name="com.ustadmobile.port.android.view.clazz.list.ClazzListFragment" />
 
-    <fragment
-        android:id="@+id/chat_detail_dest"
-        android:name="com.ustadmobile.port.android.view.ChatDetailFragment"/>
 
     <fragment
         android:id="@+id/clazz_detail_dest"
@@ -87,13 +63,6 @@
         android:id="@+id/schedule_edit_dest"
         android:name="com.ustadmobile.port.android.view.schedule.edit.ScheduleEditFragment" />
 
-    <fragment
-        android:id="@+id/report_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ReportEditFragment" />
-
-    <fragment
-        android:id="@+id/report_template_list_dest"
-        android:name="com.ustadmobile.port.android.view.ReportTemplateListFragment" />
 
     <fragment
         android:id="@+id/report_filter_edit_dest"
@@ -111,9 +80,6 @@
         android:id="@+id/holiday_edit_dest"
         android:name="com.ustadmobile.port.android.view.HolidayEditFragment" />
 
-    <fragment
-        android:id="@+id/bitmask_edit_dest"
-        android:name="com.ustadmobile.port.android.view.BitmaskEditFragment" />
 
     <fragment
         android:id="@+id/settings_list_dest"
@@ -129,10 +95,6 @@
     <fragment
         android:id="@+id/school_detail_overview_dest"
         android:name="com.ustadmobile.port.android.view.SchoolDetailOverviewFragment" />
-    <fragment
-        android:id="@+id/schoolmember_list_dest"
-        android:name="com.ustadmobile.port.android.view.SchoolMemberListFragment" />
-
 
     <fragment
         android:id="@+id/course_group_set_list"
@@ -194,10 +156,6 @@
         android:name="com.ustadmobile.port.android.view.contententry.list.ContentEntryList2Fragment"
         android:label="@string/library"/>
 
-    <fragment
-        android:id="@+id/chat_list_home_dest"
-        android:name="com.ustadmobile.port.android.view.ChatListFragment"
-        android:label="@string/messages"/>
 
     <fragment
         android:id="@+id/content_entry_list_select_folder"
@@ -229,11 +187,6 @@
         android:label="" />
 
     <fragment
-        android:id="@+id/content_entry_detail_session_list_dest"
-        android:name="com.ustadmobile.port.android.view.SessionListFragment"
-        android:label="" />
-
-    <fragment
         android:id="@+id/content_entry_detail_session_detail_list_dest"
         android:name="com.ustadmobile.port.android.view.StatementListViewFragment"
         android:label="" />
@@ -254,34 +207,16 @@
         />
 
     <fragment
-        android:id="@+id/leaving_reason_list"
-        android:name="com.ustadmobile.port.android.view.LeavingReasonListFragment"
-        />
-
-    <fragment
         android:id="@+id/leaving_reason_edit"
         android:name="com.ustadmobile.port.android.view.LeavingReasonEditFragment"
         />
 
-    <fragment
-        android:id="@+id/report_detail_dest"
-        android:name="com.ustadmobile.port.android.view.ReportDetailFragment"
-        />
-
-    <fragment
-        android:id="@+id/date_range_dest"
-        android:name="com.ustadmobile.port.android.view.DateRangeFragment"
-        />
 
     <fragment
         android:id="@+id/content_xapi_dest"
         android:name="com.ustadmobile.port.android.view.XapiPackageContentFragment"
         android:label="" />
 
-    <fragment
-        android:id="@+id/video_content"
-        android:name="com.ustadmobile.port.android.view.VideoContentFragment"
-        android:label="" />
     <fragment
         android:id="@+id/pdf_content"
         android:name="com.ustadmobile.port.android.view.PDFContentFragment"
@@ -316,10 +251,6 @@
         android:label=""
         />
 
-    <fragment
-        android:id="@+id/select_file_view"
-        android:name="com.ustadmobile.port.android.view.SelectFileFragment"
-        />
 
     <fragment
         android:id="@+id/select_extract_file_view"
@@ -330,11 +261,6 @@
         android:id="@+id/select_folder_view"
         android:name="com.ustadmobile.port.android.view.SelectFolderFragment"/>
 
-
-    <fragment
-        android:id="@+id/webchunk_view"
-        android:name="com.ustadmobile.port.android.view.WebChunkFragment"
-        android:label="" />
 
     <fragment
         android:id="@+id/person_account_edit_dest"
@@ -420,9 +346,6 @@
         android:name="com.ustadmobile.port.android.view.ScopedGrantListFragment"
         android:label="@string/permission_key"/>
 
-    <fragment
-        android:id="@+id/scoped_grant_detail_dest"
-        android:name="com.ustadmobile.port.android.view.ScopedGrantDetailFragment"/>
 
     <fragment
         android:id="@+id/panic_button_settings_dest"

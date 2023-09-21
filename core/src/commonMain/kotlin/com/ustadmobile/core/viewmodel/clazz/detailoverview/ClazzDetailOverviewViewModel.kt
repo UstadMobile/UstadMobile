@@ -6,14 +6,14 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.core.util.ext.toggle
 import com.ustadmobile.core.util.ext.whenSubscribed
-import com.ustadmobile.core.view.ClazzAssignmentDetailView
-import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
+import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
@@ -136,7 +136,7 @@ class ClazzDetailOverviewViewModel(
                 lastCourseBlockPagingSource?.invalidate()
             }
             CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
-                navController.navigate(ClazzAssignmentDetailView.VIEW_NAME,
+                navController.navigate(ClazzAssignmentDetailViewModel.DEST_NAME,
                     mapOf(ARG_ENTITY_UID to courseBlock.cbEntityUid.toString()))
             }
             CourseBlock.BLOCK_DISCUSSION_TYPE -> {
@@ -149,7 +149,13 @@ class ClazzDetailOverviewViewModel(
     }
 
     fun onClickEdit() {
-        navController.navigate(ClazzEdit2View.VIEW_NAME,
+        navController.navigate(ClazzEditViewModel.DEST_NAME,
             mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString()))
+    }
+
+    companion object {
+
+        const val DEST_NAME = "CourseDetailOverviewView"
+
     }
 }

@@ -7,11 +7,9 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
-import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.util.*
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
@@ -163,11 +161,6 @@ class TestContentJobRunner {
                         }
                     }
                 }
-            }
-
-            bind<ConnectivityLiveData>() with scoped(ustadTestRule.endpointScope).singleton {
-                val db : UmAppDatabase = on(context).instance(tag = DoorTag.TAG_DB)
-                ConnectivityLiveData(db.connectivityStatusDao.statusLive())
             }
         }
         json = di.direct.instance()

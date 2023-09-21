@@ -1,6 +1,5 @@
 
 import com.ustadmobile.core.account.*
-import com.ustadmobile.core.db.RepSubscriptionInitListener
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.ApiUrlConfig
@@ -94,7 +93,7 @@ internal fun ustadJsDi(
             this,context.url+"UmAppDatabase/",  nodeIdAndAuth.auth,
             nodeIdAndAuth.nodeId, instance(), instance()
         ){
-            replicationSubscriptionInitListener = RepSubscriptionInitListener()
+
         }
         db.asRepository(repositoryConfig)
     }

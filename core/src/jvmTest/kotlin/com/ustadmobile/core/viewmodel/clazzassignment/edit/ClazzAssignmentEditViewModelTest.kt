@@ -6,9 +6,9 @@ import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
-import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
@@ -33,7 +33,7 @@ class ClazzAssignmentEditViewModelTest {
         testViewModel<ClazzAssignmentEditViewModel> {
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_RESULT_DEST_KEY] = "key"
-                savedStateHandle[UstadView.ARG_RESULT_DEST_VIEWNAME] = ClazzEdit2View.VIEW_NAME
+                savedStateHandle[UstadView.ARG_RESULT_DEST_VIEWNAME] = ClazzEditViewModel.DEST_NAME
 
                 ClazzAssignmentEditViewModel(di, savedStateHandle)
             }

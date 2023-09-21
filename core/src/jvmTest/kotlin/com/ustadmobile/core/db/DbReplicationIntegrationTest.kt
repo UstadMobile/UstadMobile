@@ -123,7 +123,6 @@ class DbReplicationIntegrationTest {
                 .addCallback(ContentJobItemTriggersCallback())
                 .build().also { db ->
                     db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
-                    db.addIncomingReplicationListener(PermissionManagementIncomingReplicationListener(db))
                 }
         }
 
@@ -149,10 +148,7 @@ class DbReplicationIntegrationTest {
                 doorNode.nodeId, doorNode.auth, instance(), instance()
             ) {
                 useReplicationSubscription = clientMode
-                if(clientMode)
-                    replicationSubscriptionInitListener = RepSubscriptionInitListener()
 
-                attachmentsDir = tempFolder.newFolder().absolutePath
             }).also {
                 if(clientMode) {
                     it.siteDao.insert(Site().apply {

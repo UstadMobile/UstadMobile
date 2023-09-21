@@ -9,7 +9,7 @@ import io.ktor.server.testing.*
 import org.junit.Test
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.util.ext.*
-import com.ustadmobile.core.view.ParentalConsentManagementView
+import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.*
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -130,7 +130,7 @@ class PersonAuthRegisterRouteTest {
 
         verifyBlocking(mockNotificationSender) {
             sendEmail(eq("parent@email.com"), any(), argWhere {
-                it.contains("https://org.ustadmobile.app/umapp/#/${ParentalConsentManagementView.VIEW_NAME}")
+                it.contains("https://org.ustadmobile.app/umapp/#/${ParentalConsentManagementViewModel.DEST_NAME}")
             })
         }
     }

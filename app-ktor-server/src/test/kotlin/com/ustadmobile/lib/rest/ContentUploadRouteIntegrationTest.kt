@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.door.ext.DoorTag
 import io.ktor.server.application.*
 import io.ktor.serialization.gson.*
 import io.ktor.http.*
@@ -25,10 +24,8 @@ import java.io.FileInputStream
 import kotlinx.serialization.json.Json
 import org.junit.Assert
 import org.kodein.di.*
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.ContainerStorageManager
-import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.toDoorUri
 import org.mockito.kotlin.mock
@@ -83,11 +80,6 @@ class ContentUploadRouteIntegrationTest {
                 ContentPluginManager(listOf(
                     EpubTypePluginCommonJvm(Any(), context, di,
                         DummyContentPluginUploader())))
-            }
-
-            bind<ConnectivityLiveData>() with scoped(EndpointScope.Default).singleton {
-                val db: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_DB)
-                ConnectivityLiveData(db.connectivityStatusDao.statusLive())
             }
 
             bind<File>(tag = DiTag.TAG_FILE_UPLOAD_TMP_DIR) with scoped(EndpointScope.Default).singleton {

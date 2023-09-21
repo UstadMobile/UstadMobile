@@ -4,6 +4,9 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+/**
+ * ContentJobItem represents one content item to process e.g. a URL, file, etc.
+ */
 @Entity(indices = [Index(value = ["cjiContentEntryUid", "cjiFinishTime"],
         unique = false)])
 data class ContentJobItem(
@@ -34,7 +37,7 @@ data class ContentJobItem(
      */
     var cjiContentEntryUid: Long = 0,
 
-        /**
+    /**
      * The ParentContentEntryUid can be set when the ContentEntryUid is 0. The job runner will
      * then create a ContentEntryParentChildJoin to the specified parent when it creates the
      * ContentEntry itself.

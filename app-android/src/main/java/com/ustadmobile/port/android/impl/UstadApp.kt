@@ -134,7 +134,6 @@ class UstadApp : Application(), DIAware {
                     instance(), instance()
             ) {
                 useReplicationSubscription = true
-                replicationSubscriptionInitListener = RepSubscriptionInitListener()
             }).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
             }
@@ -150,11 +149,6 @@ class UstadApp : Application(), DIAware {
             val containerFolder = File(URI(uri))
             containerFolder.mkdirs()
             containerFolder
-        }
-
-        bind<ConnectivityLiveData>() with scoped(EndpointScope.Default).singleton {
-            val db: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_DB)
-            ConnectivityLiveData(db.connectivityStatusDao.statusLive())
         }
 
         bind<EmbeddedHTTPD>() with singleton {

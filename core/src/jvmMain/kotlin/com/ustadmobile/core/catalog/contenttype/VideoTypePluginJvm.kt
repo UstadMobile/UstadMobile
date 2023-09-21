@@ -11,7 +11,7 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ShrinkUtils
 import com.ustadmobile.core.util.ext.fitWithin
 import com.ustadmobile.core.util.ext.requirePostfix
-import com.ustadmobile.core.view.VideoContentView
+import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toFile
@@ -36,7 +36,7 @@ class VideoTypePluginJvm(
 ): ContentImportContentPlugin(endpoint, context, uploader) {
 
     val viewName: String
-        get() = VideoContentView.VIEW_NAME
+        get() = VideoContentViewModel.DEST_NAME
 
     override val supportedMimeTypes: List<String>
         get() = VIDEO_MIME_MAP.keys.toList()

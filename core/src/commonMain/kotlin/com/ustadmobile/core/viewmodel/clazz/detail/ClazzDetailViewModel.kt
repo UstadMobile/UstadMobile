@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.DetailViewModel
+import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
@@ -23,7 +24,7 @@ data class ClazzDetailUiState(
 class ClazzDetailViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-): DetailViewModel<Clazz>(di, savedStateHandle, ClazzDetailView.VIEW_NAME) {
+): DetailViewModel<Clazz>(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(ClazzDetailUiState())
 
@@ -32,7 +33,7 @@ class ClazzDetailViewModel(
     private fun createTabList(showAttendance: Boolean): List<TabItem> {
         val tabs = mutableListOf(
             TabItem(
-                viewName = ClazzDetailOverviewView.VIEW_NAME,
+                viewName = ClazzDetailOverviewViewModel.DEST_NAME,
                 args = mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString()),
                 label = systemImpl.getString(MR.strings.course),
             ),

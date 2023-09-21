@@ -10,7 +10,6 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT_MESSAGE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.doorMainDispatcher
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -20,6 +19,9 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.serialization.KSerializer
 import kotlin.js.JsName
+import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
+import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.login.LoginViewModel
 
 /**
  * Class has all the shared function across all supported platforms
@@ -95,7 +97,7 @@ abstract class UstadMobileSystemCommon {
      * selecting to continue as a guest.
      */
     fun getDefaultFirstDest(): String {
-        return ClazzList2View.VIEW_NAME_HOME
+        return ClazzListViewModel.DEST_NAME_HOME
     }
 
     fun goToDeepLink(deepLink: String, accountManager: UstadAccountManager, context: Any) {
@@ -108,7 +110,7 @@ abstract class UstadMobileSystemCommon {
             val intentMessage = getString(MR.strings.opening_link)
                 .replace("%1\$s", deepLink)
 
-            val maxDateOfBirth = if(viewUri.startsWith(ParentalConsentManagementView.VIEW_NAME)) {
+            val maxDateOfBirth = if(viewUri.startsWith(ParentalConsentManagementViewModel.DEST_NAME)) {
                 Clock.System.now()
                     .minus(UstadMobileConstants.ADULT_AGE_THRESHOLD, DateTimeUnit.YEAR, TimeZone.UTC)
                     .toEpochMilliseconds()
@@ -119,7 +121,7 @@ abstract class UstadMobileSystemCommon {
             //if there are any accounts that match endpoint url the user wants to work with,
             // then go to the accountmanager list in picker mode, otherwise go directly to the login
             // screen for that particular server.
-            GlobalScope.launch(doorMainDispatcher()) {
+            GlobalScope.launch(kotlinx.coroutines.Dispatchers.Main) {
                 if(accountManager.activeSessionCount(maxDateOfBirth) { it == endpointUrl } > 0) {
                     val args = mapOf(ARG_NEXT to viewUri,
                         AccountListView.ARG_FILTER_BY_ENDPOINT to endpointUrl,
@@ -133,7 +135,7 @@ abstract class UstadMobileSystemCommon {
                     val args = mapOf(ARG_NEXT to viewUri,
                         ARG_INTENT_MESSAGE to intentMessage,
                         ARG_API_URL to endpointUrl)
-                    go(Login2View.VIEW_NAME, args, context)
+                    go(LoginViewModel.DEST_NAME, args, context)
                 }
 
             }

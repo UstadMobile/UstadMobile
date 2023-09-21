@@ -7,7 +7,7 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryDetailView
-import com.ustadmobile.core.view.VideoContentView
+import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.lifecycle.DoorState
 import com.ustadmobile.door.lifecycle.Lifecycle
@@ -23,8 +23,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
-class
-ContentEntryOpenerTest {
+class ContentEntryOpenerTest {
 
     private lateinit var umAppDatabase: UmAppDatabase
 
@@ -94,7 +93,7 @@ ContentEntryOpenerTest {
         runBlocking {
             ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                 true, false, false)
-            verify(impl).go(eq(VideoContentView.VIEW_NAME), any(), any(), any())
+            verify(impl).go(eq(VideoContentViewModel.DEST_NAME), any(), any(), any())
         }
     }
 
@@ -130,7 +129,7 @@ ContentEntryOpenerTest {
         runBlocking {
             ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                     false, true, false)
-            verify(impl).go(eq(VideoContentView.VIEW_NAME), any(), any(), any())
+            verify(impl).go(eq(VideoContentViewModel.DEST_NAME), any(), any(), any())
         }
     }
 
@@ -139,7 +138,7 @@ ContentEntryOpenerTest {
         runBlocking {
             ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                     false, true, false)
-            verify(impl).go(eq(VideoContentView.VIEW_NAME), any(), any(), any())
+            verify(impl).go(eq(VideoContentViewModel.DEST_NAME), any(), any(), any())
         }
     }
 

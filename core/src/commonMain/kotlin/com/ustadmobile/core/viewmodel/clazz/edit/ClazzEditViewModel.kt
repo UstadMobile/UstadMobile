@@ -14,7 +14,10 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListViewModel
 import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
+import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
+import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -113,7 +116,7 @@ class ClazzEditViewModel(
         AddOrUpdateCourseBlockUseCase(),
     private val updateCourseBlocksOnReorderOrCommitUseCase: UpdateCourseBlocksOnReorderOrCommitUseCase =
         UpdateCourseBlocksOnReorderOrCommitUseCase(),
-): UstadEditViewModel(di, savedStateHandle, ClazzEdit2View.VIEW_NAME) {
+): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(ClazzEditUiState())
 
@@ -346,13 +349,13 @@ class ClazzEditViewModel(
     }
 
     fun onClickAddSchedule(){
-        navigateForResult(ScheduleEditView.VIEW_NAME, "Schedule", currentValue = null,
+        navigateForResult(ScheduleEditViewModel.DEST_NAME, "Schedule", currentValue = null,
             serializer = Schedule.serializer())
     }
 
     fun onClickEditSchedule(schedule: Schedule) {
         navigateForResult(
-            nextViewName = ScheduleEditView.VIEW_NAME,
+            nextViewName = ScheduleEditViewModel.DEST_NAME,
             key = RESULT_KEY_SCHEDULE,
             currentValue = schedule,
             serializer = Schedule.serializer()
@@ -386,7 +389,7 @@ class ClazzEditViewModel(
             CourseBlock.BLOCK_MODULE_TYPE ->
                 CourseBlockEditViewModel.DEST_NAME to RESULT_KEY_COURSEBLOCK
             CourseBlock.BLOCK_ASSIGNMENT_TYPE ->
-                ClazzAssignmentEditView.VIEW_NAME to RESULT_KEY_COURSEBLOCK
+                ClazzAssignmentEditViewModel.DEST_NAME to RESULT_KEY_COURSEBLOCK
             else -> return
         }
 
@@ -502,7 +505,7 @@ class ClazzEditViewModel(
             }
             loadingState = LoadingUiState.NOT_LOADING
 
-            finishWithResult(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity)
+            finishWithResult(ClazzDetailViewModel.DEST_NAME, entity.clazzUid, entity)
         }
     }
 
@@ -595,7 +598,7 @@ class ClazzEditViewModel(
             }
             CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
                 navigateForResult(
-                    nextViewName = ClazzAssignmentEditView.VIEW_NAME,
+                    nextViewName = ClazzAssignmentEditViewModel.DEST_NAME,
                     key = RESULT_KEY_COURSEBLOCK,
                     serializer = CourseBlockWithEntity.serializer(),
                     currentValue = block,
@@ -605,6 +608,8 @@ class ClazzEditViewModel(
     }
 
     companion object {
+
+        const val DEST_NAME = "CourseEdit"
 
         const val RESULT_KEY_SCHEDULE = "Schedule"
 

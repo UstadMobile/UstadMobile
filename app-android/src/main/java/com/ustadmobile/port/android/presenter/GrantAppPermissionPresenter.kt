@@ -4,7 +4,6 @@ import android.accounts.AccountManager
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import androidx.core.os.bundleOf
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -12,7 +11,6 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.account.UstadAccountManager.Companion.KEY_PREFIX_EAPUID
-import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.view.GrantAppPermissionView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.port.android.util.ext.getActivityContext

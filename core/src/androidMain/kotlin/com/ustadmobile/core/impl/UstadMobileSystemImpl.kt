@@ -49,6 +49,7 @@ import com.ustadmobile.core.io.ext.isGzipped
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toFile
 import dev.icerock.moko.resources.StringResource
@@ -86,8 +87,7 @@ actual open class UstadMobileSystemImpl(
 
     private val viewNameToAndroidImplMap = mapOf<String, String>(
             "DownloadDialog" to "${PACKAGE_NAME}DownloadDialogFragment",
-            SplashScreenView.VIEW_NAME to "${PACKAGE_NAME}SplashScreenActivity",
-            OnBoardingView.VIEW_NAME to "${PACKAGE_NAME}OnBoardingActivity",
+            OnBoardingViewModel.DEST_NAME to "${PACKAGE_NAME}OnBoardingActivity",
             EpubContentView.VIEW_NAME to "${PACKAGE_NAME}EpubContentActivity",
             AboutView.VIEW_NAME to "${PACKAGE_NAME}AboutActivity",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",

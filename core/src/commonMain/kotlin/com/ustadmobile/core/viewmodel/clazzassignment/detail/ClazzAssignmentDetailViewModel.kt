@@ -3,12 +3,11 @@ package com.ustadmobile.core.viewmodel.clazzassignment.detail
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.TabItem
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
-import com.ustadmobile.core.view.ClazzAssignmentDetailView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabViewModel
+import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewViewModel
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.flow.Flow
@@ -22,7 +21,7 @@ data class ClazzAssignmentDetailUiState(
 class ClazzAssignmentDetailViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
-): DetailViewModel<ClazzAssignment>(di, savedStateHandle, ClazzAssignmentDetailView.VIEW_NAME) {
+): DetailViewModel<ClazzAssignment>(di, savedStateHandle, DEST_NAME) {
 
     val uiState: Flow<ClazzAssignmentDetailUiState>
 
@@ -44,7 +43,7 @@ class ClazzAssignmentDetailViewModel(
                 ARG_CLAZZUID to (clazzAssignment?.caClazzUid ?: 0).toString()
             )
             val tabs = mutableListOf(
-                TabItem(ClazzAssignmentDetailOverviewView.VIEW_NAME, tabArgs,
+                TabItem(ClazzAssignmentDetailOverviewViewModel.DEST_NAME, tabArgs,
                     systemImpl.getString(MR.strings.clazz_assignment))
             )
             if(hasSubmissionsTab) {

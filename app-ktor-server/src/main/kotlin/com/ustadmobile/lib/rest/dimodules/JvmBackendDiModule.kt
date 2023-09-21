@@ -5,7 +5,6 @@ import com.ustadmobile.core.account.EndSessionPersonAuth2IncomingReplicationList
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
-import com.ustadmobile.core.db.PermissionManagementIncomingReplicationListener
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
@@ -75,8 +74,6 @@ fun makeJvmBackendDiModule(
         Napier.d("creating database for context: ${context.url}")
         val dbHostName = context.identifier(dbMode, "UmAppDatabase")
         val nodeIdAndAuth: NodeIdAndAuth = instance()
-        val attachmentsDir = File(instance<File>(tag = DiTag.TAG_CONTEXT_DATA_ROOT),
-            UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
         val dbUrl = config.property("ktor.database.url").getString()
             .replace("(hostname)", dbHostName)
             .replace("(datadir)", config.absoluteDataDir().absolutePath)
@@ -87,7 +84,7 @@ fun makeJvmBackendDiModule(
             dbUrl = dbUrl,
             dbUsername = config.propertyOrNull("ktor.database.user")?.getString(),
             dbPassword = config.propertyOrNull("ktor.database.password")?.getString(),
-            attachmentDir = attachmentsDir)
+            )
             .addSyncCallback(nodeIdAndAuth)
             .addCallback(ContentJobItemTriggersCallback())
             .addCallback(InsertDefaultSiteCallback())
@@ -95,7 +92,6 @@ fun makeJvmBackendDiModule(
             .build()
 
         if(syncEnabled) {
-            db.addIncomingReplicationListener(PermissionManagementIncomingReplicationListener(db))
 
             //Add listener that will end sessions when authentication has been updated
             db.addIncomingReplicationListener(EndSessionPersonAuth2IncomingReplicationListener(db))

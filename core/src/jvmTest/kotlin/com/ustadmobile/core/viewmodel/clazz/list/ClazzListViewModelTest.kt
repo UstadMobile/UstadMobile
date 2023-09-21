@@ -4,8 +4,8 @@ import app.cash.turbine.test
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.grantScopedPermission
-import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
@@ -68,7 +68,7 @@ class ClazzListViewModelTest {
 
             viewModel.navCommandFlow.test {
                 val navCommand = awaitItem() as NavigateNavCommand
-                assertEquals( ClazzDetailView.VIEW_NAME, navCommand.viewName)
+                assertEquals( ClazzDetailViewModel.DEST_NAME, navCommand.viewName)
                 assertEquals(testEntity.clazzUid.toString(),
                     navCommand.args[UstadView.ARG_ENTITY_UID])
                 cancelAndIgnoreRemainingEvents()

@@ -11,6 +11,8 @@ import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
+import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
+import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
@@ -63,7 +65,7 @@ suspend fun UstadNavController.navigateToLink(
         }
     }
 
-    val maxDateOfBirth = if(viewUri?.startsWith(ParentalConsentManagementView.VIEW_NAME) == true) {
+    val maxDateOfBirth = if(viewUri?.startsWith(ParentalConsentManagementViewModel.DEST_NAME) == true) {
         Clock.System.now().minus(UstadMobileConstants.ADULT_AGE_THRESHOLD, DateTimeUnit.YEAR, TimeZone.UTC)
             .toEpochMilliseconds()
     }else {
@@ -111,7 +113,7 @@ suspend fun UstadNavController.navigateToLink(
             if(endpointUrl != null)
                 args[ARG_API_URL] = endpointUrl
 
-            navigate(Login2View.VIEW_NAME, args.toMap(), goOptions)
+            navigate(LoginViewModel.DEST_NAME, args.toMap(), goOptions)
         }
         //If there are no accounts, the endpoint url is not specified, and the user can select the server, go to EnterLink
         endpointUrl == null && accountManager.activeSessionCount(maxDateOfBirth) == 0 && userCanSelectServer -> {

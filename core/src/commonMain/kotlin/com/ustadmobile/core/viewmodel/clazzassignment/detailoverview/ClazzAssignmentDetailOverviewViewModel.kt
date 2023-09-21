@@ -11,7 +11,6 @@ import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.core.util.ext.textLength
 import com.ustadmobile.core.util.ext.whenSubscribed
-import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
@@ -187,7 +186,7 @@ class ClazzAssignmentDetailOverviewViewModel(
     savedStateHandle: UstadSavedStateHandle,
     private val submitAssignmentUseCase: SubmitAssignmentUseCase = SubmitAssignmentUseCase(),
 ) : DetailViewModel<ClazzAssignment>(
-    di, savedStateHandle, ClazzAssignmentDetailOverviewView.VIEW_NAME
+    di, savedStateHandle, DEST_NAME
 ){
 
     private val _uiState = MutableStateFlow(ClazzAssignmentDetailOverviewUiState())

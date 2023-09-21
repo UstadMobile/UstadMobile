@@ -15,7 +15,6 @@ import com.ustadmobile.lib.db.entities.*
 import io.ktor.http.HttpStatusCode
 import org.kodein.di.instance
 import org.kodein.di.on
-import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.rest.ext.callEndpoint
 import io.ktor.client.*
@@ -30,6 +29,7 @@ import org.kodein.di.direct
 import org.kodein.di.ktor.closestDI
 import kotlin.IllegalStateException
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
 
 fun Route.personAuthRegisterRoute() {
 
@@ -119,7 +119,7 @@ fun Route.personAuthRegisterRoute() {
                 val linkArgs : Map<String, String> = mapOf(UstadView.ARG_ENTITY_UID to
                         mParentJoinVal.ppjUid.toString())
                 val linkUrl = (UMFileUtil.joinPaths(registerRequest.endpointUrl,
-                    LINK_ENDPOINT_VIEWNAME_DIVIDER) + ParentalConsentManagementView.VIEW_NAME)
+                    LINK_ENDPOINT_VIEWNAME_DIVIDER) + ParentalConsentManagementViewModel.DEST_NAME)
                     .appendQueryArgs(linkArgs.toQueryString())
 
                 val emailText = systemImpl.getString(MR.strings.parent_child_register_message,

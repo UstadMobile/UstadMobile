@@ -8,9 +8,7 @@ import com.ustadmobile.core.contentjob.ContentJobManagerJvm
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
-import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
-import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.*
@@ -41,15 +39,10 @@ import java.nio.file.Files
 import javax.naming.InitialContext
 import com.ustadmobile.door.util.NodeIdAuthCache
 import com.ustadmobile.core.contentjob.DummyContentPluginUploader
-import com.ustadmobile.core.db.ContentJobItemTriggersCallback
-import com.ustadmobile.core.db.PermissionManagementIncomingReplicationListener
-import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.db.ext.preload
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
-import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJvm
-import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.rest.dimodules.makeJvmBackendDiModule
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
@@ -66,7 +59,6 @@ import io.ktor.websocket.*
 import org.kodein.di.ktor.di
 import java.util.*
 import com.ustadmobile.lib.rest.logging.LogbackAntiLog
-import org.xmlpull.v1.XmlPullParserFactory
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -272,11 +264,6 @@ fun Application.umRestApplication(
             StdSchedulerFactory.getDefaultScheduler().also {
                 it.context.put("di", di)
             }
-        }
-
-        bind<ConnectivityLiveData>() with scoped(EndpointScope.Default).singleton {
-            val db: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_DB)
-            ConnectivityLiveData(db.connectivityStatusDao.statusLive())
         }
 
         bind<UploadSessionManager>() with scoped(EndpointScope.Default).singleton {

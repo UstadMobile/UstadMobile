@@ -3,7 +3,6 @@ package com.ustadmobile.core.util.ext
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.Pbkdf2Params
-import com.ustadmobile.core.controller.ReportFilterEditPresenter.Companion.genderMap
 import com.ustadmobile.core.controller.TerminologyKeys
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.findEntriesByMd5SumsSafeAsync
@@ -336,8 +335,12 @@ fun UmAppDatabase.insertPersonOnlyAndGroup(entity: Person): Person{
 
 }
 
-suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
-                                            context: Any, impl: UstadMobileSystemImpl, loggedInPersonUid: Long): ChartData{
+suspend fun UmAppDatabase.generateChartData(
+    report: ReportWithSeriesWithFilters,
+    context: Any,
+    impl: UstadMobileSystemImpl,
+    loggedInPersonUid: Long
+): ChartData{
 
     val queries = report.generateSql(loggedInPersonUid, dbType())
     val seriesDataList = mutableListOf<SeriesData>()
@@ -363,11 +366,12 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
                         .map { it.uid to it.labelName }.toMap()
                 UidAndLabelFormatter(clazzLabelList)
             }
-            Report.GENDER -> {
-                MessageIdFormatter(
-                        genderMap.mapKeys { it.key.toString() },
-                        impl, context)
-            }
+//must be handled when reports are brought back
+//            Report.GENDER -> {
+//                MessageIdFormatter(
+//                        genderMap.mapKeys { it.key.toString() },
+//                        impl, context)
+//            }
             Report.CONTENT_ENTRY ->{
                 val listOfUids = reportList.mapNotNull { it.subgroup?.toLong() }.toSet().toList()
                 val entryLabelList = contentEntryDao.getContentEntryFromUids(listOfUids)
@@ -398,11 +402,12 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
                     .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
             UidAndLabelFormatter(clazzLabelList)
         }
-        Report.GENDER -> {
-            MessageIdFormatter(
-                    genderMap.mapKeys { it.key.toString() },
-                    impl, context)
-        }
+//Must be handled when reporting is brought back
+//        Report.GENDER -> {
+//            MessageIdFormatter(
+//                    genderMap.mapKeys { it.key.toString() },
+//                    impl, context)
+//        }
         Report.CONTENT_ENTRY ->{
             val entryLabelList = contentEntryDao.getContentEntryFromUids(xAxisList
                     .map { it.toLong() }).map { it.uid to it.labelName }.toMap()

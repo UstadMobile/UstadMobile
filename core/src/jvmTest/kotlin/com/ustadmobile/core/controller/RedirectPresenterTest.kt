@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UserSession
 import com.ustadmobile.util.test.rules.CoroutineDispatcherRule
@@ -93,7 +94,7 @@ class RedirectPresenterTest {
                 mockedView, di)
         mPresenter.onCreate(null)
         verify(mockNavController, timeout(5000)).navigate(
-            eq(ContentEntryList2View.VIEW_NAME_HOME), any(), any())
+            eq(ContentEntryListViewModel.DEST_NAME), any(), any())
     }
 
     ////@Test

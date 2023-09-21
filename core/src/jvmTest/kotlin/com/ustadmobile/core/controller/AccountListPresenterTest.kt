@@ -32,6 +32,9 @@ import com.ustadmobile.core.db.waitUntil
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.mockLifecycleOwner
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.door.lifecycle.*
 import com.ustadmobile.util.test.rules.CoroutineDispatcherRule
 import com.ustadmobile.util.test.rules.bindPresenterCoroutineRule
@@ -106,7 +109,7 @@ class AccountListPresenterTest {
 
         mockView = mock { }
         impl = mock{
-            on { getDefaultFirstDest() }.thenReturn(ContentEntryList2View.VIEW_NAME)
+            on { getDefaultFirstDest() }.thenReturn(ContentEntryListViewModel.DEST_NAME)
             on { getString(any<StringResource>() ) }.thenAnswer {
                 val messageId = it.getArgument<StringResource>(0)
                 if(messageId == MR.strings.logged_in_as) {
@@ -222,7 +225,7 @@ class AccountListPresenterTest {
 
         argumentCaptor<String>{
             verify(impl).go(capture(), any(), any())
-            assertTrue("Login screen was opened", Login2View.VIEW_NAME == firstValue)
+            assertTrue("Login screen was opened", LoginViewModel.DEST_NAME == firstValue)
         }
     }
 
@@ -300,7 +303,7 @@ class AccountListPresenterTest {
             }, any(), any())
         }
 
-        verify(impl, timeout(5000)).go(eq(Login2View.VIEW_NAME), any(), any(),
+        verify(impl, timeout(5000)).go(eq(LoginViewModel.DEST_NAME), any(), any(),
             any())
     }
 
@@ -352,7 +355,7 @@ class AccountListPresenterTest {
             it.userSession.usUid == secondAccountList[0].userSession.usUid
         }
 
-        verify(mockNavController).navigate(eq(ContentEntryList2View.VIEW_NAME), any(),
+        verify(mockNavController).navigate(eq(ContentEntryListViewModel.DEST_NAME), any(),
             argWhere {
                 it.popUpToViewName == UstadView.ROOT_DEST && !it.popUpToInclusive
             })
@@ -368,7 +371,7 @@ class AccountListPresenterTest {
         presenter.handleClickProfile(42L)
 
         argumentCaptor<Map<String,String>>{
-            verify(impl).go(eq(PersonDetailView.VIEW_NAME), capture(), any())
+            verify(impl).go(eq(PersonDetailViewModel.DEST_NAME), capture(), any())
             assertEquals("Person details view was opened with right person id",
                     42L, firstValue[ARG_ENTITY_UID]?.toLong())
         }
@@ -438,7 +441,7 @@ class AccountListPresenterTest {
             }
         }
 
-        verify(impl, timeout(5000)).go(eq(Login2View.VIEW_NAME), argWhere { argMap ->
+        verify(impl, timeout(5000)).go(eq(LoginViewModel.DEST_NAME), argWhere { argMap ->
             argMap[ARG_API_URL] == activeEndpointArg
         }, any())
     }

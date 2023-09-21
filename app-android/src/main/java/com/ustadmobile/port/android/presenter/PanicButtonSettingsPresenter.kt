@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable
 import androidx.appcompat.content.res.AppCompatResources
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.R as CR
-import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.port.android.panic.HidingManager
 import com.ustadmobile.port.android.util.ext.getActivityContext

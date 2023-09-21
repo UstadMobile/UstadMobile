@@ -4,9 +4,9 @@ import org.mockito.kotlin.*
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.years
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.RegisterAgeRedirectView
 import com.ustadmobile.core.view.SiteTermsDetailView
+import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import dev.icerock.moko.resources.StringResource
 import org.junit.Before
 import org.junit.Test
@@ -49,8 +49,8 @@ class RegisterAgeRedirectPresenterTest {
 
         presenter.handleClickNext()
         verify(mockSystemImpl, timeout(5000))
-                .go(eq(PersonEditView.VIEW_NAME_REGISTER),
-                        argWhere { it[PersonEditView.ARG_DATE_OF_BIRTH]?.toLong() == dateOfBirthMillis },
+                .go(eq(PersonEditViewModel.DEST_NAME_REGISTER),
+                        argWhere { it[PersonEditViewModel.ARG_DATE_OF_BIRTH]?.toLong() == dateOfBirthMillis },
                         any())
     }
 
@@ -69,7 +69,7 @@ class RegisterAgeRedirectPresenterTest {
 
         verify(mockSystemImpl, timeout(5000))
                 .go(eq(SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS),
-                        argWhere { it[PersonEditView.ARG_DATE_OF_BIRTH]?.toLong() == dateOfBirthMillis },
+                        argWhere { it[PersonEditViewModel.ARG_DATE_OF_BIRTH]?.toLong() == dateOfBirthMillis },
                         any())
     }
 

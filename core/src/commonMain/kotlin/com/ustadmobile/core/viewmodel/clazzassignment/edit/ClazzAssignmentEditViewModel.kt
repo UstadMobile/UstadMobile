@@ -11,7 +11,6 @@ import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.asCourseBlockWithEntity
 import com.ustadmobile.core.util.ext.whenSubscribed
-import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
@@ -80,7 +79,7 @@ class ClazzAssignmentEditViewModel(
         -> UpdatePeerReviewAllocationUseCase = { db, systemImpl ->
         UpdatePeerReviewAllocationUseCase(db, systemImpl)
     }
-): UstadEditViewModel(di, savedStateHandle, ClazzAssignmentEditView.VIEW_NAME) {
+): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(ClazzAssignmentEditUiState())
 
@@ -425,6 +424,8 @@ class ClazzAssignmentEditViewModel(
     companion object {
 
         const val RESULT_KEY_GROUPSET = "groupSet"
+
+        const val DEST_NAME = "CourseAssignmentEdit"
 
     }
 }

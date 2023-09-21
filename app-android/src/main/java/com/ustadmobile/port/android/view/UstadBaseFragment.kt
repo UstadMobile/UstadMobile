@@ -11,7 +11,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.impl.nav.NavControllerAdapter
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.DiTag
@@ -101,11 +100,6 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: StringResource?) {
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
-    }
-
-    fun <T : UstadBaseController<*>> T.withViewLifecycle(): T {
-        viewLifecycleOwner.lifecycle.addObserver(PresenterViewLifecycleObserver(this))
-        return this
     }
 
     companion object {

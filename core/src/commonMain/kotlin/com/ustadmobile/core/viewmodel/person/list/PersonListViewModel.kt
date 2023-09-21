@@ -7,8 +7,6 @@ import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
-import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED
 import com.ustadmobile.door.paging.*
@@ -24,6 +22,8 @@ import app.cash.paging.PagingSourceLoadParams
 import app.cash.paging.PagingSourceLoadResult
 import app.cash.paging.PagingSourceLoadResultPage
 import app.cash.paging.PagingState
+import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
+import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 
 data class PersonListUiState(
     val personList: () -> PagingSource<Int, PersonWithDisplayDetails> = { EmptyPagingSource() },
@@ -58,7 +58,7 @@ class EmptyPagingSource<Key: Any, Value: Any>(): PagingSource<Key, Value>() {
 class PersonListViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-    destinationName: String = PersonListView.VIEW_NAME,
+    destinationName: String = DEST_NAME,
 ): UstadListViewModel<PersonListUiState>(
     di, savedStateHandle, PersonListUiState(), destinationName
 ) {
@@ -67,7 +67,7 @@ class PersonListViewModel(
 
     private val filterExcludeMemberOfSchool = savedStateHandle[ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
 
-    private val filterAlreadySelectedList = savedStateHandle[PersonListView.ARG_EXCLUDE_PERSONUIDS_LIST]
+    private val filterAlreadySelectedList = savedStateHandle[ARG_EXCLUDE_PERSONUIDS_LIST]
         ?.split(",")?.filter { it.isNotEmpty() }?.map { it.trim().toLong() }
         ?: listOf()
 
@@ -134,7 +134,7 @@ class PersonListViewModel(
     }
 
     override fun onClickAdd() {
-        navigateToCreateNew(PersonEditView.VIEW_NAME, savedStateHandle[ARG_GO_TO_ON_PERSON_SELECTED]?.let {
+        navigateToCreateNew(PersonEditViewModel.DEST_NAME, savedStateHandle[ARG_GO_TO_ON_PERSON_SELECTED]?.let {
             mapOf(ARG_GO_TO_ON_PERSON_SELECTED to it)
         } ?: emptyMap())
     }
@@ -148,7 +148,7 @@ class PersonListViewModel(
             val goToDestName = goToOnPersonSelected.substringBefore("?")
             navController.navigate(goToDestName, args)
         }else {
-            navigateOnItemClicked(PersonDetailView.VIEW_NAME, entry.personUid, entry)
+            navigateOnItemClicked(PersonDetailViewModel.DEST_NAME, entry.personUid, entry)
         }
     }
 
@@ -156,9 +156,22 @@ class PersonListViewModel(
 
         const val DEST_NAME = "People"
 
+        const val DEST_NAME_HOME = "PersonListHome"
+
         const val RESULT_PERSON_KEY = "Person"
 
         const val ARG_HIDE_PERSON_ADD = "ArgHidePersonAdd"
+
+        /**
+         * Exclude those who are already in the given class. This is useful for
+         * the add to class picker (e.g. to avoid showing people who are already in the
+         * given class)
+         */
+        const val ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ = "exlcudeFromClazz"
+
+        const val ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL = "excludeFromSchool"
+
+        const val ARG_EXCLUDE_PERSONUIDS_LIST = "excludeAlreadySelectedList"
 
 
     }

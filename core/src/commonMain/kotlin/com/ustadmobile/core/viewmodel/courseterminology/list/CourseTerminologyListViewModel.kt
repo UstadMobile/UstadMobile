@@ -2,11 +2,10 @@ package com.ustadmobile.core.viewmodel.courseterminology.list
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.view.CourseTerminologyEditView
-import com.ustadmobile.core.view.CourseTerminologyListView
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditViewModel
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
@@ -23,7 +22,7 @@ class CourseTerminologyListViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
 ): UstadListViewModel<CourseTerminologyListUiState>(
-    di, savedStateHandle, CourseTerminologyListUiState(), CourseTerminologyListView.VIEW_NAME,
+    di, savedStateHandle, CourseTerminologyListUiState(), DEST_NAME,
 ) {
 
     private val pagingSourceFactory: () -> PagingSource<Int, CourseTerminology> = {
@@ -57,11 +56,11 @@ class CourseTerminologyListViewModel(
     }
 
     override fun onClickAdd() {
-        navigateToCreateNew(CourseTerminologyEditView.VIEW_NAME)
+        navigateToCreateNew(CourseTerminologyEditViewModel.DEST_NAME)
     }
 
     fun onClickEntry(entry: CourseTerminology) {
-        navigateOnItemClicked(CourseTerminologyEditView.VIEW_NAME, entry.ctUid, entry)
+        navigateOnItemClicked(CourseTerminologyEditViewModel.DEST_NAME, entry.ctUid, entry)
     }
 
     override fun onUpdateSearchResult(searchText: String) {

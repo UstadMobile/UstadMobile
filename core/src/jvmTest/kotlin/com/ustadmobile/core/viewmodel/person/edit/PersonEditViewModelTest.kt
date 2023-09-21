@@ -12,9 +12,8 @@ import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
-import com.ustadmobile.core.view.PersonEditView
-import com.ustadmobile.core.view.PersonEditView.Companion.ARG_DATE_OF_BIRTH
-import com.ustadmobile.core.view.PersonEditView.Companion.ARG_REGISTRATION_MODE
+import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_DATE_OF_BIRTH
+import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_REGISTRATION_MODE
 import com.ustadmobile.core.view.RegisterMinorWaitForParentView
 import com.ustadmobile.core.view.RegisterMinorWaitForParentView.Companion.ARG_PARENT_CONTACT
 import com.ustadmobile.core.view.RegisterMinorWaitForParentView.Companion.ARG_USERNAME
@@ -50,7 +49,7 @@ class PersonEditViewModelTest {
     fun givenPresenterCreatedInRegistrationMode_whenUsernameAndPasswordNotFilledClickSave_shouldShowErrors() {
         testViewModel<PersonEditViewModel> {
             viewModelFactory {
-                savedStateHandle[ARG_REGISTRATION_MODE] = PersonEditView.REGISTER_MODE_ENABLED.toString()
+                savedStateHandle[ARG_REGISTRATION_MODE] = PersonEditViewModel.REGISTER_MODE_ENABLED.toString()
                 PersonEditViewModel(di, savedStateHandle)
             }
 
@@ -83,7 +82,7 @@ class PersonEditViewModelTest {
     fun givenPresenterCreatedInRegistrationMode_whenDateOfBirthNotFilledClickSave_shouldShowErrors() {
         testViewModel<PersonEditViewModel> {
             viewModelFactory {
-                savedStateHandle[ARG_REGISTRATION_MODE] = PersonEditView.REGISTER_MODE_ENABLED.toString()
+                savedStateHandle[ARG_REGISTRATION_MODE] = PersonEditViewModel.REGISTER_MODE_ENABLED.toString()
                 PersonEditViewModel(di, savedStateHandle)
             }
 
@@ -125,7 +124,7 @@ class PersonEditViewModelTest {
             }
 
             viewModelFactory {
-                savedStateHandle[ARG_REGISTRATION_MODE] = PersonEditView.REGISTER_MODE_ENABLED.toString()
+                savedStateHandle[ARG_REGISTRATION_MODE] = PersonEditViewModel.REGISTER_MODE_ENABLED.toString()
                 savedStateHandle[ARG_API_URL] = serverUrl
                 PersonEditViewModel(di, savedStateHandle)
             }
@@ -202,7 +201,7 @@ class PersonEditViewModelTest {
 
             viewModelFactory {
                 savedStateHandle[ARG_REGISTRATION_MODE] =
-                    (PersonEditView.REGISTER_MODE_ENABLED or PersonEditView.REGISTER_MODE_MINOR).toString()
+                    (PersonEditViewModel.REGISTER_MODE_ENABLED or PersonEditViewModel.REGISTER_MODE_MINOR).toString()
                 savedStateHandle[ARG_API_URL] = activeEndpoint.url
                 savedStateHandle[ARG_DATE_OF_BIRTH] = minorDateOfBirth.toString()
                 PersonEditViewModel(di, savedStateHandle)
@@ -269,7 +268,7 @@ class PersonEditViewModelTest {
 
             viewModelFactory {
                 savedStateHandle[ARG_REGISTRATION_MODE] =
-                    (PersonEditView.REGISTER_MODE_ENABLED or PersonEditView.REGISTER_MODE_MINOR).toString()
+                    (PersonEditViewModel.REGISTER_MODE_ENABLED or PersonEditViewModel.REGISTER_MODE_MINOR).toString()
                 savedStateHandle[ARG_API_URL] = activeEndpoint.url
                 savedStateHandle[ARG_DATE_OF_BIRTH] = minorDateOfBirth.toString()
                 PersonEditViewModel(di, savedStateHandle)

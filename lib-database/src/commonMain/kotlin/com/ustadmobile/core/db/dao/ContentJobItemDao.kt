@@ -85,6 +85,15 @@ expect abstract class ContentJobItemDao {
     abstract fun findRootJobItemByJobId(jobUid: Long): ContentJobItem?
 
     @Query("""
+        SELECT * 
+          FROM ContentJobItem
+         WHERE cjiJobUid = :jobUid 
+           AND cjiParentCjiUid = 0 
+         LIMIT 1
+    """)
+    abstract fun findRootJobItemByJobIdAsFlow(jobUid: Long): Flow<ContentJobItem?>
+
+    @Query("""
         UPDATE ContentJobItem
            SET cjiItemProgress = :cjiProgress,
                cjiItemTotal = :cjiTotal

@@ -1,21 +1,8 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
-import com.ustadmobile.door.lifecycle.LiveData
 
-interface AccountListView : UstadView {
-
-    var accountListLive: LiveData<List<UserSessionWithPersonAndEndpoint>>?
-
-    var activeAccountLive: LiveData<UserSessionWithPersonAndEndpoint?>?
-
-    var title: String?
-
-    /**
-     * A message that appears above the list of accounts. This is useful to explain to the user
-     * what they are doing and why we are asking them to select an account
-     */
-    var intentMessage: String?
+interface AccountListView{
 
     companion object {
 

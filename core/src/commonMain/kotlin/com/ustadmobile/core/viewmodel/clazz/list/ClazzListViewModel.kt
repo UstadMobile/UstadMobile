@@ -11,6 +11,9 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
+import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
+import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
@@ -60,17 +63,17 @@ data class ClazzListUiState(
 class ClazzListViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-    destinationName: String = ClazzList2View.VIEW_NAME,
+    destinationName: String = DEST_NAME,
 ): UstadListViewModel<ClazzListUiState>(
     di, savedStateHandle, ClazzListUiState(), destinationName
 ) {
 
-    private val filterAlreadySelectedList = savedStateHandle[ClazzList2View.ARG_FILTER_EXCLUDE_SELECTED_CLASS_LIST]
+    private val filterAlreadySelectedList = savedStateHandle[ARG_FILTER_EXCLUDE_SELECTED_CLASS_LIST]
         ?.split(",")?.filter { it.isNotEmpty() }?.map { it.trim().toLong() }
         ?: listOf()
 
     private val filterExcludeMembersOfSchool =
-        savedStateHandle[PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
+        savedStateHandle[PersonListViewModel.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
 
     private val filterByPermission = savedStateHandle[UstadView.ARG_FILTER_BY_PERMISSION]?.toLong()
         ?: Role.PERMISSION_CLAZZ_SELECT
@@ -133,7 +136,7 @@ class ClazzListViewModel(
     }
 
     override fun onClickAdd() {
-        navigateToCreateNew(ClazzEdit2View.VIEW_NAME)
+        navigateToCreateNew(ClazzEditViewModel.DEST_NAME)
     }
 
     fun onClickJoinExistingClazz() {
@@ -143,7 +146,7 @@ class ClazzListViewModel(
     }
 
     fun onClickEntry(entry: Clazz) {
-        navigateOnItemClicked(ClazzDetailView.VIEW_NAME, entry.clazzUid, entry)
+        navigateOnItemClicked(ClazzDetailViewModel.DEST_NAME, entry.clazzUid, entry)
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {
@@ -165,5 +168,17 @@ class ClazzListViewModel(
         lastPagingSource?.invalidate()
     }
 
+
+
+    companion object {
+
+        const val DEST_NAME = "CourseList"
+
+        const val DEST_NAME_HOME = "CourseListHome"
+
+        const val ARG_FILTER_EXCLUDE_SELECTED_CLASS_LIST = "excludeAlreadySelectedClazzList"
+
+
+    }
 
 }

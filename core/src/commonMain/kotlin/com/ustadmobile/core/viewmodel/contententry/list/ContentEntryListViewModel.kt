@@ -170,6 +170,8 @@ class ContentEntryListViewModel(
 
         const val DEST_NAME = "ContentEntries"
 
+        const val DEST_NAME_HOME = "ContentEntryListHome"
+
         /**
          * Note: Because picker mode may involve more than one step in the back stack, we need a
          * different destination/view name so that popupTo will work

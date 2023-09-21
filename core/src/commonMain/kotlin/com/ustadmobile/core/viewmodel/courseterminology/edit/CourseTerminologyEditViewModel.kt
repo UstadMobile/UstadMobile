@@ -7,7 +7,6 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.encodeToStringMap
 import com.ustadmobile.core.util.ext.replace
 import com.ustadmobile.core.util.ext.toTerminologyEntries
-import com.ustadmobile.core.view.CourseTerminologyEditView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.CourseTerminology
@@ -35,7 +34,7 @@ data class CourseTerminologyEditUiState(
 class CourseTerminologyEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-): UstadEditViewModel(di, savedStateHandle, CourseTerminologyEditView.VIEW_NAME) {
+): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(CourseTerminologyEditUiState(fieldsEnabled = false))
 
@@ -124,6 +123,11 @@ class CourseTerminologyEditViewModel(
             //There is no terminology detail view
             finishWithResult(terminology)
         }
+    }
+
+    companion object {
+
+        const val DEST_NAME = "CourseTerminologyEdit"
     }
 
 }

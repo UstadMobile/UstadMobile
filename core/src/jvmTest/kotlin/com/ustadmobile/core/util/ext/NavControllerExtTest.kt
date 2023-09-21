@@ -8,8 +8,8 @@ import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.view.AccountListView
-import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UserSession
 import kotlinx.coroutines.runBlocking
@@ -170,7 +170,7 @@ class NavControllerExtTest {
             mockNavController.navigateToLink(link, mockAccountManager, mockBrowserLinkOpener)
         }
 
-        verify(mockNavController).navigate(eq(Login2View.VIEW_NAME), argWhere { args ->
+        verify(mockNavController).navigate(eq(LoginViewModel.DEST_NAME), argWhere { args ->
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"
@@ -192,7 +192,7 @@ class NavControllerExtTest {
                 userCanSelectServer = false, forceAccountSelection = true)
         }
 
-        verify(mockNavController).navigate(eq(Login2View.VIEW_NAME), argWhere { args->
+        verify(mockNavController).navigate(eq(LoginViewModel.DEST_NAME), argWhere { args->
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"

@@ -9,7 +9,6 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
-import com.ustadmobile.core.db.RepSubscriptionInitListener
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
@@ -74,7 +73,6 @@ fun DI.directActiveRepoInstance() = onActiveAccountDirect().instance<UmAppDataba
  */
 class UstadTestRule(
     val repoReplicationSubscriptionEnabled: Boolean = false,
-    val repSubscriptionInitListener: RepSubscriptionInitListener? = null
 ): TestWatcher() {
 
     lateinit var coroutineDispatcher: ExecutorCoroutineDispatcher
@@ -157,7 +155,6 @@ class UstadTestRule(
                 ) {
                     attachmentsDir = File(tempFolder, "attachments").absolutePath
                     this.useReplicationSubscription = repoReplicationSubscriptionEnabled
-                    this.replicationSubscriptionInitListener = repSubscriptionInitListener
                 })
                 ).also {
                     it.siteDao.insert(Site().apply {

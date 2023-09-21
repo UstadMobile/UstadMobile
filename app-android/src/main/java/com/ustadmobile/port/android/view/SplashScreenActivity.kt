@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.OnBoardingView
+import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.ui.theme.ui.theme.UstadMobileTheme
 import kotlinx.coroutines.delay
@@ -40,7 +40,7 @@ class SplashScreenActivity : ComponentActivity() {
         lifecycleScope.launchWhenCreated {
             delay(2000L)
             val systemImpl: UstadMobileSystemImpl = di.direct.instance()
-            val activityClass = if(systemImpl.getAppPref(OnBoardingView.PREF_TAG, "false").toBoolean()) {
+            val activityClass = if(systemImpl.getAppPref(OnBoardingViewModel.PREF_TAG, "false").toBoolean()) {
                 MainActivity::class.java
             }else {
                 OnBoardingActivity::class.java

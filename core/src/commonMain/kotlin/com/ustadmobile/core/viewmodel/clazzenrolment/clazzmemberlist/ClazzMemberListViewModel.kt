@@ -12,7 +12,6 @@ import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
@@ -221,7 +220,7 @@ class ClazzMemberListViewModel(
             ))
 
         val args = mutableMapOf(
-            PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to clazzUid.toString(),
+            PersonListViewModel.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to clazzUid.toString(),
             UstadView.ARG_LISTMODE to ListViewMode.PICKER.mode,
             PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED to goToOnPersonSelectedArg,
         )

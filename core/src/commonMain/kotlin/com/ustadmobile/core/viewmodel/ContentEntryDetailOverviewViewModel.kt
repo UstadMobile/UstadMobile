@@ -42,3 +42,13 @@ data class ContentEntryDetailOverviewUiState(
         get() = scoreProgress != null
 
 }
+
+class ContentEntryDetailOverviewViewModel {
+
+    companion object {
+
+        const val DEST_NAME = "ContentEntryDetailOverviewView"
+
+    }
+
+}
