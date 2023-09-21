@@ -48,49 +48,49 @@ fun ScheduleEditScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
 
-        UstadMessageIdOptionExposedDropDownMenuField(
-            value = uiState.entity?.scheduleDay ?: 0,
-            label = stringResource(MR.strings.day),
-            options = ScheduleConstants.DAY_MESSAGE_IDS,
-            onOptionSelected = {
-                onScheduleChanged(uiState.entity?.shallowCopy{
-                    scheduleDay = it.value
-                })
-            },
-            enabled = uiState.fieldsEnabled,
-        )
+//        UstadMessageIdOptionExposedDropDownMenuField(
+//            value = uiState.entity?.scheduleDay ?: 0,
+//            label = stringResource(MR.strings.day),
+//            options = ScheduleConstants.DAY_MESSAGE_IDS,
+//            onOptionSelected = {
+//                onScheduleChanged(uiState.entity?.shallowCopy{
+//                    scheduleDay = it.value
+//                })
+//            },
+//            enabled = uiState.fieldsEnabled,
+//        )
 
         Spacer(modifier = Modifier.height(10.dp))
 
         Row {
 
-            UstadTimeEditTextField(
-                modifier = Modifier.weight(0.5F),
-                value = (uiState.entity?.sceduleStartTime ?: 0).toInt(),
-                label = stringResource(MR.strings.from),
-                error = uiState.fromTimeError,
-                enabled = uiState.fieldsEnabled,
-                onValueChange = {
-                    onScheduleChanged(uiState.entity?.shallowCopy{
-                        sceduleStartTime = it.toLong()
-                    })
-                }
-            )
+//            UstadTimeEditTextField(
+//                modifier = Modifier.weight(0.5F),
+//                value = (uiState.entity?.sceduleStartTime ?: 0).toInt(),
+//                label = stringResource(MR.strings.from),
+//                error = uiState.fromTimeError,
+//                enabled = uiState.fieldsEnabled,
+//                onValueChange = {
+//                    onScheduleChanged(uiState.entity?.shallowCopy{
+//                        sceduleStartTime = it.toLong()
+//                    })
+//                }
+//            )
 
             Spacer(modifier = Modifier.width(10.dp))
 
-            UstadTimeEditTextField(
-                modifier = Modifier.weight(0.5F),
-                value = (uiState.entity?.scheduleEndTime ?: 0).toInt(),
-                label = stringResource(MR.strings.to_key),
-                error = uiState.toTimeError,
-                enabled = uiState.fieldsEnabled,
-                onValueChange = {
-                    onScheduleChanged(uiState.entity?.shallowCopy{
-                        scheduleEndTime = it.toLong()
-                    })
-                }
-            )
+//            UstadTimeEditTextField(
+//                modifier = Modifier.weight(0.5F),
+//                value = (uiState.entity?.scheduleEndTime ?: 0).toInt(),
+//                label = stringResource(MR.strings.to_key),
+//                error = uiState.toTimeError,
+//                enabled = uiState.fieldsEnabled,
+//                onValueChange = {
+//                    onScheduleChanged(uiState.entity?.shallowCopy{
+//                        scheduleEndTime = it.toLong()
+//                    })
+//                }
+//            )
         }
     }
 }

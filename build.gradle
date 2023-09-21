@@ -2,7 +2,7 @@
 import org.apache.tools.ant.filters.*
 
 buildscript {
-    ext.version_kotlin = '1.9.0'
+    ext.version_kotlin = '1.9.10'
     ext.version_shadow = "8.1.1"
     ext.atomicfu_version = '0.22.0'
     ext.version_ktor = "2.3.3"

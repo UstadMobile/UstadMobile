@@ -17,16 +17,19 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.util.ext.formattedString
 import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.core.viewmodel.timezone.TimezoneListUiState
+import java.time.Clock
+//import kotlinx.datetime.TimeZone
+import java.util.TimeZone as TimeZoneKt
 
 @Composable
 fun TimeZoneListScreenForViewModel(
     viewModel: TimeZoneListViewModel
 ) {
     val uiState: TimezoneListUiState by viewModel.uiState.collectAsState(TimezoneListUiState())
-    TimeZoneListScreen(
-        uiState = uiState,
-        onListItemClick = viewModel::onClickEntry
-    )
+//    TimeZoneListScreen(
+//        uiState = uiState,
+//        onListItemClick = viewModel::onClickEntry
+//    )
 }
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -35,26 +38,26 @@ fun TimeZoneListScreen(
     onListItemClick: (TimeZoneKt) -> Unit,
 ) {
 
-    val timeNow = Clock.System.now()
+//    val timeNow = Clock.System.now()
 
     LazyColumn(
         modifier = Modifier
             .padding(vertical = 8.dp)
             .fillMaxWidth()
     ){
-        items(
-            items = uiState.timeZoneList,
-            key = { it.id },
-        ) { timeZone ->
-            val timeZoneFormatted: String = remember(timeZone.id) {
-                timeZone.formattedString(timeNow)
-            }
+//        items(
+//            items = uiState.timeZoneList,
+//            key = { it.id },
+//        ) { timeZone ->
+//            val timeZoneFormatted: String = remember(timeZone.id) {
+//                timeZone.formattedString(timeNow)
+//            }
 
-            ListItem(
-                modifier = Modifier
-                    .clickable {  onListItemClick(timeZone) } ,
-                text = { Text(timeZoneFormatted) }
-            )
-        }
+//            ListItem(
+//                modifier = Modifier
+//                    .clickable {  onListItemClick(timeZone) } ,
+//                text = { Text(timeZoneFormatted) }
+//            )
+//        }
     }
 }

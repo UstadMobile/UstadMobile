@@ -11,12 +11,12 @@ dependencyResolutionManagement {
     versionCatalogs {
         libs {
             version("version-moko-resources", "0.23.0")
-            version("jetbrains-compose", "1.5.0")
+            version("jetbrains-compose", "1.5.1")
             version("version_activity_compose", "1.7.2")
             version("version_androidx_appcompat", "1.6.1")
             version("version_androidx_core", "1.9.0")
 
-            plugin("jetbrains-compose", "org.jetbrains.compose").version("1.5.0")
+            plugin("jetbrains-compose", "org.jetbrains.compose").version("1.5.1")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
 
             library("kodein-di", "org.kodein.di:kodein-di:7.20.2")
