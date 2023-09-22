@@ -23,7 +23,6 @@ import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.util.test.nav.TestUstadSavedStateHandle
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
@@ -132,8 +131,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
-            val sanitizedName = sanitizeDbNameFromUrl(context.url)
-            val dbUrl = "jdbc:sqlite:build/tmp/$sanitizedName.sqlite"
+            val dbUrl = "jdbc:sqlite::memory:"
             val nodeIdAndAuth: NodeIdAndAuth = instance()
             spy(
                 DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl,

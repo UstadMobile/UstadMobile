@@ -1,13 +1,11 @@
 package com.ustadmobile.core.util.test
 
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
+import kotlin.concurrent.Volatile
 import kotlin.test.BeforeTest
 
 /**
@@ -19,18 +17,28 @@ import kotlin.test.BeforeTest
  */
 abstract class AbstractMainDispatcherTest {
 
-    private lateinit var mainThreadSurrogate: CoroutineDispatcher
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @DelicateCoroutinesApi
+    @OptIn(DelicateCoroutinesApi::class)
     @BeforeTest
     fun setupMainDispatcher(){
-        mainThreadSurrogate = newSingleThreadContext("UI Thread")
-        Dispatchers.setMain(mainThreadSurrogate)
+        setupMainDispatcherIfNeeded()
     }
 
-    @AfterTest
-    fun tearDownMainDispatcher() {
-        mainThreadSurrogate.cancel()
+    companion object {
+
+        @Volatile
+        private var mainDispatcherSet = false
+
+        @OptIn(ExperimentalCoroutinesApi::class)
+        @DelicateCoroutinesApi
+        fun setupMainDispatcherIfNeeded() {
+            if(mainDispatcherSet)
+                return
+
+            val mainDispatcher = newSingleThreadContext("UI Thread")
+            Dispatchers.setMain(mainDispatcher)
+            mainDispatcherSet = true
+        }
+
     }
+
 }
