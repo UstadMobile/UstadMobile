@@ -8,6 +8,7 @@ import com.ustadmobile.core.contentjob.DummyContentJobItemTransactionRunner
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
@@ -21,7 +22,7 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
 
-class XapiContentTypePluginTest {
+class XapiContentTypePluginTest : AbstractMainDispatcherTest(){
 
     @JvmField
     @Rule

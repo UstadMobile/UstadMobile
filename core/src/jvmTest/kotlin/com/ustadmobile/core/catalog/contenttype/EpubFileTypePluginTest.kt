@@ -8,6 +8,7 @@ import com.ustadmobile.core.contentjob.DummyContentJobItemTransactionRunner
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
@@ -23,7 +24,7 @@ import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
 import java.io.File
 
-class EpubFileTypePluginTest {
+class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
 
     @JvmField
     @Rule
@@ -69,7 +70,7 @@ class EpubFileTypePluginTest {
     fun givenValidEpubFormatFile_whenExtractEntryMetaDataFromFile_thenDataShouldMatch() {
 
         val inputStream = this::class.java.getResourceAsStream(
-                "/com/ustadmobile/core/contenttype/childrens-literature.epub")
+                "/com/ustadmobile/core/contenttype/childrens-literature.epub")!!
         val tempEpubFile = tmpFolder.newFile()
         tempEpubFile.copyInputStreamToFile(inputStream)
 

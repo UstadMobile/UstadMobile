@@ -9,6 +9,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.util.test.initNapierLog
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
@@ -27,7 +28,7 @@ import java.io.File
 import java.util.zip.GZIPInputStream
 import java.util.zip.ZipFile
 
-class H5PTypePluginTest {
+class H5PTypePluginTest : AbstractMainDispatcherTest() {
 
     private lateinit var h5pPlugin: H5PTypePluginCommonJvm
 
