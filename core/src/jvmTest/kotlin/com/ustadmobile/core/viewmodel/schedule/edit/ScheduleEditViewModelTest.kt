@@ -5,6 +5,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.ext.awaitItemWhere
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.lib.db.entities.Schedule
@@ -17,7 +18,7 @@ import kotlin.time.Duration.Companion.seconds
 
 
 @Suppress("RemoveExplicitTypeArguments")
-class ScheduleEditViewModelTest {
+class ScheduleEditViewModelTest : AbstractMainDispatcherTest() {
 
     @Test
     fun givenScheduleHasNoStartTime_whenClickSave_thenShouldShowError() {

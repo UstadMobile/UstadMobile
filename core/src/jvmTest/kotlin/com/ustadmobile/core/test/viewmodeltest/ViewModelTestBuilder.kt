@@ -135,11 +135,10 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
             val sanitizedName = sanitizeDbNameFromUrl(context.url)
             val dbUrl = "jdbc:sqlite:build/tmp/$sanitizedName.sqlite"
-            val attachmentsDir = File(tempDir, "attachments-$testStartTime")
             val nodeIdAndAuth: NodeIdAndAuth = instance()
             spy(
                 DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl,
-                    attachmentsDir.absolutePath)
+                    nodeId = nodeIdAndAuth.nodeId)
                 .addSyncCallback(nodeIdAndAuth)
                 .addCallback(ContentJobItemTriggersCallback())
                 .addMigrations(*migrationList().toTypedArray())
@@ -226,7 +225,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         db.withDoorTransactionAsync {
             val personInDb = db.insertPersonAndGroup(person)
             val session = accountManager.addSession(personInDb, endpoint.url, "dummypassword")
-            accountManager.activeSession = session
+            accountManager.currentSession = session
         }
 
         return person

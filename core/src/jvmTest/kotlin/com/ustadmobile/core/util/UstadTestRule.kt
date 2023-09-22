@@ -2,7 +2,6 @@ package com.ustadmobile.core.util
 
 import com.google.gson.Gson
 import com.ustadmobile.core.account.*
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
@@ -31,7 +30,6 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.util.test.nav.TestUstadNavController
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
@@ -138,7 +136,7 @@ class UstadTestRule(
                         UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 spy(DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
-                        "jdbc:sqlite:build/tmp/$dbName.sqlite", attachmentDir = attachmentsDir)
+                        "jdbc:sqlite:build/tmp/$dbName.sqlite", nodeId = nodeIdAndAuth.nodeId)
                     .addMigrations(*migrationList().toTypedArray())
                     .addSyncCallback(nodeIdAndAuth)
                     .addCallback(ContentJobItemTriggersCallback())
@@ -153,8 +151,7 @@ class UstadTestRule(
                     Any(), UMFileUtil.joinPaths(context.url, "UmAppDatabase/"), nodeIdAndAuth.nodeId,
                     nodeIdAndAuth.auth, instance(), instance()
                 ) {
-                    attachmentsDir = File(tempFolder, "attachments").absolutePath
-                    this.useReplicationSubscription = repoReplicationSubscriptionEnabled
+
                 })
                 ).also {
                     it.siteDao.insert(Site().apply {
@@ -169,12 +166,6 @@ class UstadTestRule(
                 val nodeId = (repo as? DoorDatabaseRepository)?.config?.nodeId
                     ?: throw IllegalStateException("Could not open repo for endpoint ${context.url}")
                 ClientId(nodeId.toInt())
-            }
-
-            bind<NetworkManagerBle>() with singleton {
-                mock {
-                    on { connectivityStatus }.thenReturn(mock {})
-                }
             }
 
             bind<ContainerMounter>() with singleton { EmbeddedHTTPD(0, di).also { it.start() } }

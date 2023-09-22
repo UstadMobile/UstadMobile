@@ -9,6 +9,7 @@ import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.loadFirstList
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
@@ -24,7 +25,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
 
-class ClazzAssignmentDetailSubmissionsTabViewModelTest {
+class ClazzAssignmentDetailSubmissionsTabViewModelTest : AbstractMainDispatcherTest()  {
 
     private val studentNameList = listOf(
         "Bart Simpson",

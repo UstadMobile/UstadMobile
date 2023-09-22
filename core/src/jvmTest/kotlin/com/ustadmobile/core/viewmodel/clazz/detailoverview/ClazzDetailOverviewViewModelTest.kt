@@ -6,6 +6,7 @@ import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
 import com.ustadmobile.core.util.ext.grantScopedPermission
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.lib.db.entities.Clazz
@@ -13,7 +14,7 @@ import com.ustadmobile.lib.db.entities.Role
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 
-class ClazzDetailOverviewViewModelTest {
+class ClazzDetailOverviewViewModelTest : AbstractMainDispatcherTest() {
 
     @Test
     fun givenClazzExists_whenOnCreateCalled_thenClazzIsSetOnView() {

@@ -26,7 +26,6 @@ import io.ktor.server.config.*
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.*
 import java.io.File
-import com.ustadmobile.door.ext.addIncomingReplicationListener
 import com.ustadmobile.lib.rest.ext.absoluteDataDir
 import org.xmlpull.v1.XmlPullParserFactory
 
@@ -80,30 +79,17 @@ fun makeJvmBackendDiModule(
         if(dbUrl.startsWith("jdbc:postgresql"))
             Class.forName("org.postgresql.Driver")
 
-        val db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
-            dbUrl = dbUrl,
-            dbUsername = config.propertyOrNull("ktor.database.user")?.getString(),
-            dbPassword = config.propertyOrNull("ktor.database.password")?.getString(),
+        DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
+                dbUrl = dbUrl,
+                dbUsername = config.propertyOrNull("ktor.database.user")?.getString(),
+                dbPassword = config.propertyOrNull("ktor.database.password")?.getString(),
+                nodeId = nodeIdAndAuth.nodeId,
             )
             .addSyncCallback(nodeIdAndAuth)
             .addCallback(ContentJobItemTriggersCallback())
             .addCallback(InsertDefaultSiteCallback())
             .addMigrations(*migrationList().toTypedArray())
             .build()
-
-        if(syncEnabled) {
-
-            //Add listener that will end sessions when authentication has been updated
-            db.addIncomingReplicationListener(EndSessionPersonAuth2IncomingReplicationListener(db))
-            runBlocking {
-                db.connectivityStatusDao.insertAsync(ConnectivityStatus().apply {
-                    connectivityState = ConnectivityStatus.STATE_UNMETERED
-                    connectedOrConnecting = true
-                })
-            }
-        }
-
-        db
     }
 
     bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {

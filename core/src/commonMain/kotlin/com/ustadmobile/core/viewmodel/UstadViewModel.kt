@@ -52,7 +52,7 @@ abstract class UstadViewModel(
      * Shorthand to get the person uid of the active user (if any).
      */
     protected val activeUserPersonUid: Long
-        get() = accountManager.activeSession?.person?.personUid ?: 0
+        get() = accountManager.currentSession?.person?.personUid ?: 0
 
     protected val activeDb: UmAppDatabase by on(accountManager.activeEndpoint)
         .instance(tag = DoorTag.TAG_DB)

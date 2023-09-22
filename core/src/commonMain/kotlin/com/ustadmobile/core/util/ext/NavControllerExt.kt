@@ -85,7 +85,7 @@ suspend fun UstadNavController.navigateToLink(
                     it.person.username == accountName.substringBefore("@")
                 }
             if(session != null) {
-                accountManager.activeSession = session
+                accountManager.currentSession = session
                 navigateToViewUri(viewUri, goOptions)
             }
         }
@@ -94,7 +94,7 @@ suspend fun UstadNavController.navigateToLink(
         //specified, then go directly to the given view (unless the force account selection option
         //is set)
         !forceAccountSelection
-            && accountManager.activeSession != null
+            && accountManager.currentSession != null
             && (endpointUrl == null || accountManager.activeEndpoint.url == endpointUrl) ->
         {
             navigateToViewUri(viewUri, goOptions)

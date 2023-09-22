@@ -2,7 +2,9 @@ package com.ustadmobile.core.contentformats
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.account.UstadAccountManager.Companion.GUEST_PERSON
 import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.contentjob.ContentJobProcessContext
@@ -83,8 +85,11 @@ class TestApacheIndexer {
         mockWebServer.dispatcher = globalDisptacher
 
         accountManager = di.direct.instance()
-        accountManager.activeEndpoint = Endpoint(mockWebServer.url("/").toString())
-
+        accountManager.currentSession = UserSessionWithPersonAndEndpoint(
+            userSession = UserSession(),
+            person = GUEST_PERSON,
+            endpoint = Endpoint(mockWebServer.url("/").toString())
+        )
 
         db = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
 

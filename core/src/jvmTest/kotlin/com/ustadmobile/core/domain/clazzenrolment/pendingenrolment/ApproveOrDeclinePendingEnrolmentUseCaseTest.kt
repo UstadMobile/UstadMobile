@@ -21,6 +21,7 @@ import kotlinx.coroutines.runBlocking
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import kotlin.random.Random
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -40,12 +41,12 @@ class ApproveOrDeclinePendingEnrolmentUseCaseTest {
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
 
         database = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
-            "jdbc:sqlite:build/tmp/approveordeclineusecase_${systemTimeInMillis()}.sqlite")
+            "jdbc:sqlite:build/tmp/approveordeclineusecase_${systemTimeInMillis()}.sqlite",
+                nodeId = nodeIdAndAuth.nodeId)
             .addSyncCallback(nodeIdAndAuth)
             .addCallback(ContentJobItemTriggersCallback())
             .addMigrations(*migrationList().toTypedArray())
             .build()
-            .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
 
         clazz = Clazz().apply {
             clazzName = "Test clazz"
@@ -62,6 +63,11 @@ class ApproveOrDeclinePendingEnrolmentUseCaseTest {
                 lastName = "User"
             })
         }
+    }
+
+    @AfterTest
+    fun tearDown() {
+        database.close()
     }
 
     @Test

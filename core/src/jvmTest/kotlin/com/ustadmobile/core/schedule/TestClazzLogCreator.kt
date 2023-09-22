@@ -43,7 +43,7 @@ class TestClazzLogCreator {
     fun setup() {
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(), randomUuid().toString())
         db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
-                "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite")
+                "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite", nodeId = 1L)
             .addSyncCallback(nodeIdAndAuth)
             .build()
             .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)

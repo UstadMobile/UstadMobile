@@ -17,7 +17,6 @@ import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
-import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
@@ -85,7 +84,7 @@ class PersonDetailViewModel(
     init {
         val accountManager: UstadAccountManager by instance()
 
-        val currentUserUid = accountManager.activeSession?.userSession?.usPersonUid ?: 0
+        val currentUserUid = accountManager.currentSession?.userSession?.usPersonUid ?: 0
 
         val entityUid: Long = savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0
 

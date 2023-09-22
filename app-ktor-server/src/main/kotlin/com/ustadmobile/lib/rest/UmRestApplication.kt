@@ -43,6 +43,7 @@ import com.ustadmobile.core.db.ext.preload
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJvm
+import com.ustadmobile.door.http.DoorHttpServerConfig
 import com.ustadmobile.lib.rest.dimodules.makeJvmBackendDiModule
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
@@ -59,6 +60,7 @@ import io.ktor.websocket.*
 import org.kodein.di.ktor.di
 import java.util.*
 import com.ustadmobile.lib.rest.logging.LogbackAntiLog
+import org.kodein.di.ktor.closestDI
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -107,6 +109,10 @@ fun Application.umRestApplication(
     val appConfig = environment.config
 
     val devMode = environment.config.propertyOrNull("ktor.ustad.devmode")?.getString().toBoolean()
+
+    val json = Json {
+        encodeDefaults = true
+    }
 
     //Check for required external commands
     REQUIRED_EXTERNAL_COMMANDS.forEach { command ->
@@ -240,18 +246,6 @@ fun Application.umRestApplication(
                     di.on(context).direct.instance<ApacheIndexerPlugin>()))
         }
 
-        bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
-            val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
-            val doorNode = instance<NodeIdAndAuth>()
-            db.asRepository(repositoryConfig(Any(), "http://localhost/",
-                doorNode.nodeId, doorNode.auth, instance(), instance()) {
-                useReplicationSubscription = false
-            }).also { repo ->
-                runBlocking { repo.preload() }
-                repo.ktorInitRepo(di)
-            }
-        }
-
         bind<Scheduler>() with singleton {
             val dbProperties = environment.config.databasePropertiesFromSection("quartz",
                 "jdbc:sqlite:(datadir)/quartz.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
@@ -275,7 +269,7 @@ fun Application.umRestApplication(
         }
 
         bind<Json>() with singleton {
-            Json { encodeDefaults = true }
+            json
         }
 
         bind<File>(tag = DiTag.TAG_FILE_FFMPEG) with singleton {
@@ -382,7 +376,10 @@ fun Application.umRestApplication(
         ContainerMountRoute()
         ContainerUploadRoute2()
         route("UmAppDatabase") {
-            UmAppDatabase_KtorRoute()
+            UmAppDatabase_KtorRoute(DoorHttpServerConfig(json = json)) { call ->
+                val di: DI by call.closestDI()
+                di.on(call).direct.instance(tag = DoorTag.TAG_DB)
+            }
         }
         SiteRoute()
         ContentEntryLinkImporter()

@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.lib.db.entities.Site
 import kotlinx.coroutines.flow.filter
@@ -17,7 +18,7 @@ import org.mockito.kotlin.*
 import kotlin.test.assertNotNull
 
 @Suppress("RemoveExplicitTypeArguments")
-class SiteEnterLinkViewModelTest {
+class SiteEnterLinkViewModelTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenValidLinkEntered_whenOnClickNextCalled_thenShouldNavigateToNextScreen(

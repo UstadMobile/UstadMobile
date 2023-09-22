@@ -12,6 +12,7 @@ import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_DATE_OF_BIRTH
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_REGISTRATION_MODE
 import com.ustadmobile.core.view.RegisterMinorWaitForParentView
@@ -35,7 +36,7 @@ import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
 @Suppress("RemoveExplicitTypeArguments") // This is incorrect for using testViewModel
-class PersonEditViewModelTest {
+class PersonEditViewModelTest : AbstractMainDispatcherTest(){
 
     @Suppress("SameParameterValue")
     private fun createMockAccountManager(serverUrl: String) : UstadAccountManager {

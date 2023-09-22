@@ -1,18 +1,19 @@
 package com.ustadmobile.core.viewmodel.courseterminology.list
 
+import app.cash.paging.PagingSourceLoadParamsRefresh
 import app.cash.turbine.test
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
+import com.ustadmobile.core.util.ext.loadFirstList
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import com.ustadmobile.door.paging.LoadParams
-import com.ustadmobile.door.paging.LoadResult
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import kotlinx.coroutines.flow.filter
 import org.mockito.kotlin.*
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 
-class CourseTerminologyListViewModelTest {
+class CourseTerminologyListViewModelTest : AbstractMainDispatcherTest() {
 
     @Test
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
@@ -27,7 +28,7 @@ class CourseTerminologyListViewModelTest {
             }
 
             viewModel.uiState
-                .filter { it.terminologyList() !is EmptyPagingSource }
+                .filter { it.terminologyList() !is EmptyPagingSource<*, *> }
                 .test {
                     awaitItem()
                     verify(terminologyRepo, timeout(5000)).findAllCourseTerminologyPagingSource()
@@ -52,12 +53,10 @@ class CourseTerminologyListViewModelTest {
                 CourseTerminologyListViewModel(di, savedStateHandle)
             }
 
-            viewModel.uiState.filter { it.terminologyList() !is EmptyPagingSource }
+            viewModel.uiState.filter { it.terminologyList() !is EmptyPagingSource<*, *> }
                 .test(timeout = 5.seconds) {
                     val item = awaitItem()
-                    val loadResult = item.terminologyList().load(
-                        LoadParams.Refresh(0, 50, true))
-                    val firstEntry = (loadResult as LoadResult.Page).data.first()
+                    val firstEntry =  item.terminologyList().loadFirstList().first()
                     viewModel.onClickEntry(firstEntry)
                     cancelAndIgnoreRemainingEvents()
                 }

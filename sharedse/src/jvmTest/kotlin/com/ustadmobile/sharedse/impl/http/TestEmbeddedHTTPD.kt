@@ -2,7 +2,6 @@ package com.ustadmobile.sharedse.impl.http
 
 import org.mockito.kotlin.*
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-import com.ustadmobile.sharedse.network.NetworkManagerBle
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import io.ktor.client.HttpClient
@@ -14,8 +13,6 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.kodein.di.DI
-import org.kodein.di.bind
-import org.kodein.di.singleton
 import java.io.IOException
 
 /**

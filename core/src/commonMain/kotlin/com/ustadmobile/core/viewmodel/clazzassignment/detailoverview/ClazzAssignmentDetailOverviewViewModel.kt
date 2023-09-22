@@ -25,7 +25,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
@@ -290,14 +289,14 @@ class ClazzAssignmentDetailOverviewViewModel(
                         loadFromStateKeys = listOf(STATE_LATEST_SUBMISSION),
                         onLoadFromDb = { db ->
                             db.courseAssignmentSubmissionDao.getLatestSubmissionForUserAsync(
-                                accountManager.activeSession?.person?.personUid ?: 0L,
+                                accountManager.currentSession?.person?.personUid ?: 0L,
                                 assignmentUid = entityUidArg,
                             )
                         },
                         makeDefault = {
                             CourseAssignmentSubmission().apply {
                                 casAssignmentUid = entityUidArg
-                                casSubmitterPersonUid = accountManager.activeSession?.person?.personUid ?: 0L
+                                casSubmitterPersonUid = accountManager.currentSession?.person?.personUid ?: 0L
                             }
                         },
                         uiUpdate = {
@@ -315,7 +314,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                         loadFromStateKeys = listOf(STATE_LATEST_SUBMISSION_ATTACHMENTS),
                         onLoadFromDb = { db ->
                             db.courseAssignmentSubmissionAttachmentDao.getLatestSubmissionAttachmentsForUserAsync(
-                                accountPersonUid = accountManager.activeSession?.person?.personUid ?: 0L,
+                                accountPersonUid = accountManager.currentSession?.person?.personUid ?: 0L,
                                 assignmentUid = entityUidArg
                             )
                         },
@@ -456,7 +455,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                     db = activeDb,
                     systemImpl = systemImpl,
                     assignmentUid = entityUidArg,
-                    accountPersonUid = accountManager.activeSession?.person?.personUid ?: 0L,
+                    accountPersonUid = accountManager.currentSession?.person?.personUid ?: 0L,
                     submission = submission
                 )
 

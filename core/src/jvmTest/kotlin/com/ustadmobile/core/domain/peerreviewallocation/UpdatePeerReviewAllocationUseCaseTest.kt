@@ -52,7 +52,8 @@ class UpdatePeerReviewAllocationUseCaseTest {
     @Test
     fun givenNoSubmitters_whenInvoked_thenShouldReturnEmptyList() {
         val db = DatabaseBuilder.databaseBuilder(
-            UmAppDatabase::class, dbUrl = "jdbc:sqlite::memory:"
+            UmAppDatabase::class, dbUrl = "jdbc:sqlite::memory:",
+            nodeId = 1L
         ).build()
 
         val updatePraUseCase = UpdatePeerReviewAllocationUseCase(db, systemImpl)
@@ -83,7 +84,8 @@ class UpdatePeerReviewAllocationUseCaseTest {
     @Test
     fun givenClazzWithSubmittersWithNoExistingAllocations_whenInvoked_thenShouldAllocate() {
         val db = DatabaseBuilder.databaseBuilder(
-            UmAppDatabase::class, dbUrl = "jdbc:sqlite::memory:"
+            UmAppDatabase::class, dbUrl = "jdbc:sqlite::memory:",
+            nodeId = 1L
         ).build()
 
         val clazzUid = 42L
@@ -103,7 +105,8 @@ class UpdatePeerReviewAllocationUseCaseTest {
     @Test
     fun givenClazzWithSubmittersWithExistingAllocations_whenNumReviewersReduced_thenShouldTruncateList() {
         val db = DatabaseBuilder.databaseBuilder(
-            UmAppDatabase::class, dbUrl = "jdbc:sqlite::memory:"
+            UmAppDatabase::class, dbUrl = "jdbc:sqlite::memory:",
+            nodeId = 1L
         ).build()
 
         val clazzUid = 42L
@@ -136,7 +139,8 @@ class UpdatePeerReviewAllocationUseCaseTest {
     @Test
     fun givenClazzWithSubmittersWithExistingAllocations_whenNumReviewersIncreased_thenShouldAllocateRemainder() {
         val db = DatabaseBuilder.databaseBuilder(
-            UmAppDatabase::class, dbUrl = "jdbc:sqlite::memory:"
+            UmAppDatabase::class, dbUrl = "jdbc:sqlite::memory:",
+            nodeId = 1L
         ).build()
 
         val clazzUid = 42L
@@ -165,7 +169,7 @@ class UpdatePeerReviewAllocationUseCaseTest {
     @Test
     fun givenClazzWithSubmitters_whenTooManyReviewsSet_thenShouldRunThroughWithSomeAllocationsEmpty() {
         val db = DatabaseBuilder.databaseBuilder(
-            UmAppDatabase::class, dbUrl = "jdbc:sqlite::memory:"
+            UmAppDatabase::class, dbUrl = "jdbc:sqlite::memory:", nodeId = 1L,
         ).build()
 
         val clazzUid = 42L

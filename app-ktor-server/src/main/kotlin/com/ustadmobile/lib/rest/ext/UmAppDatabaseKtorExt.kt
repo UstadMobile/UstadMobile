@@ -9,10 +9,8 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.doublePbkdf2Hash
 import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
-import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.requireDbAndRepo
-import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.randomString

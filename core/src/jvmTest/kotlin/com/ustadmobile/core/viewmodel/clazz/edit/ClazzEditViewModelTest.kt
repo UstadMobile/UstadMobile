@@ -7,6 +7,7 @@ import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.flow.doorFlow
@@ -22,7 +23,7 @@ import org.mockito.kotlin.mock
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 
-class ClazzEditViewModelTest {
+class ClazzEditViewModelTest : AbstractMainDispatcherTest() {
 
     @Test
     fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalled_thenShouldSaveToDatabase() {

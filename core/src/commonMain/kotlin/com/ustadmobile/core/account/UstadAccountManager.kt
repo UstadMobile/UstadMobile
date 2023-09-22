@@ -5,7 +5,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.util.ext.encryptWithPbkdf2
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
-import com.ustadmobile.core.util.ext.toUmAccount
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.util.ext.withEndpoint
 import com.ustadmobile.door.*
@@ -33,7 +32,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 import org.kodein.di.DI
@@ -92,7 +90,7 @@ class UstadAccountManager(
     init {
         val currentEndpointStr = systemImpl.getAppPref(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY)
             ?: apiUrlConfig.presetApiUrl ?: MANIFEST_URL_FALLBACK
-        val currentDb: UmAppDatabase = di.direct.instance(tag = DoorTag.TAG_DB)
+        val currentDb: UmAppDatabase = di.direct.on(Endpoint(currentEndpointStr)).instance(tag = DoorTag.TAG_DB)
 
         val initUserSession: UserSessionWithPersonAndEndpoint = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY)?.let {
             json.decodeFromString(it)
@@ -197,7 +195,7 @@ class UstadAccountManager(
     val activeAccount: UmAccount
         get() = _currentUserSession.value.toUmAccount()
 
-    var activeSession: UserSessionWithPersonAndEndpoint
+    var currentSession: UserSessionWithPersonAndEndpoint
         get() = _currentUserSession.value
         set(value) {
             _currentUserSession.value = value
@@ -236,7 +234,7 @@ class UstadAccountManager(
         if(status == 200 && registeredPerson != null && newPassword != null) {
             if(accountRegisterOptions.makeAccountActive){
                 val session = addSession(registeredPerson, endpointUrl, newPassword)
-                activeSession = session
+                currentSession = session
             }
 
             registeredPerson
@@ -341,9 +339,9 @@ class UstadAccountManager(
             session.userSession.usUid, endStatus, endReason)
 
         //check if the active session has been ended.
-        if(activeSession.userSession.usUid == session.userSession.usUid
-            && activeSession.endpoint == session.endpoint) {
-            activeSession = makeNewTempGuestSession(session.endpoint.url, endpointRepo)
+        if(currentSession.userSession.usUid == session.userSession.usUid
+            && currentSession.endpoint == session.endpoint) {
+            currentSession = makeNewTempGuestSession(session.endpoint.url, endpointRepo)
         }
 
 
@@ -406,7 +404,7 @@ class UstadAccountManager(
         val newSession = addSession(personInDb, endpointUrl, password)
 
         //activeEndpoint = Endpoint(endpointUrl)
-        activeSession = newSession
+        currentSession = newSession
 
         //This should not be needed - as responseAccount can be smartcast, but will not otherwise compile
         responseAccount
@@ -442,7 +440,7 @@ class UstadAccountManager(
 
         getSiteFromDbOrLoadFromHttp(endpointUrl, repo)
 
-        activeSession = addSession(guestPerson, endpointUrl, null)
+        currentSession = addSession(guestPerson, endpointUrl, null)
     }
 
 

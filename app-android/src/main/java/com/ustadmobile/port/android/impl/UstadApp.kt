@@ -120,10 +120,7 @@ class UstadApp : Application(), DIAware {
                 .addCallback(ContentJobItemTriggersCallback())
                 .addMigrations(*migrationList().toTypedArray())
                 .build()
-                .also {
-                    val networkManager: NetworkManagerBle = di.direct.instance()
-                    it.connectivityStatusDao.commitLiveConnectivityStatus(networkManager.connectivityStatus)
-                }
+
         }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
@@ -134,9 +131,7 @@ class UstadApp : Application(), DIAware {
                     instance(), instance()
             ) {
                 useReplicationSubscription = true
-            }).also {
-                (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
-            }
+            })
         }
 
         bind<ContainerStorageManager> () with scoped(EndpointScope.Default).singleton{
@@ -159,12 +154,6 @@ class UstadApp : Application(), DIAware {
             }
         }
 
-        bind<NetworkManagerBle>() with singleton {
-            val coroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
-            NetworkManagerBle(applicationContext, di, coroutineDispatcher).also {
-                it.onCreate()
-            }
-        }
 
         bind<ContainerMounter>() with singleton { instance<EmbeddedHTTPD>() }
 
@@ -287,7 +276,6 @@ class UstadApp : Application(), DIAware {
         registerContextTranslator { call: NanoHttpdCall -> Endpoint(call.urlParams["endpoint"] ?: "notfound")}
 
         onReady {
-            instance<NetworkManagerBle>()
             instance<EmbeddedHTTPD>()
             instance<ConnectionManager>().start()
 

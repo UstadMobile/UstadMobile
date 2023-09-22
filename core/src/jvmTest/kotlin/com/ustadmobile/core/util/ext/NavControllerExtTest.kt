@@ -45,7 +45,7 @@ class NavControllerExtTest {
     fun givenPlainViewUri_whenNavigateToLinkIsCalledWithoutForceAccountSelect_thenShouldNavigateToLinkDirectly() {
         val link = "ContentEntryList?parentUid=1234"
         mockAccountManager.stub {
-            on { activeSession }.thenReturn(UserSessionWithPersonAndEndpoint(
+            on { currentSession }.thenReturn(UserSessionWithPersonAndEndpoint(
                 userSession = UserSession(),
                 endpoint = Endpoint("http://localhost:8087/"),
                 person = Person()
@@ -84,7 +84,7 @@ class NavControllerExtTest {
         val link = "${endpointUrl}umapp/#/ContentEntryList?parentUid=1234"
         mockAccountManager.stub {
             on { activeEndpoint }.thenReturn(Endpoint(endpointUrl))
-            on { activeSession }.thenReturn(UserSessionWithPersonAndEndpoint(
+            on { currentSession }.thenReturn(UserSessionWithPersonAndEndpoint(
                 userSession = UserSession(),
                 endpoint = Endpoint(endpointUrl),
                 person = Person()
@@ -106,7 +106,7 @@ class NavControllerExtTest {
         val link = "${endpointUrl}umapp/#/ContentEntryList?parentUid=1234"
         mockAccountManager.stub {
             on { activeEndpoint }.thenReturn(Endpoint(endpointUrl))
-            on { activeSession }.thenReturn(UserSessionWithPersonAndEndpoint(
+            on { currentSession }.thenReturn(UserSessionWithPersonAndEndpoint(
                 userSession = UserSession(),
                 endpoint = Endpoint(endpointUrl),
                 person = Person()

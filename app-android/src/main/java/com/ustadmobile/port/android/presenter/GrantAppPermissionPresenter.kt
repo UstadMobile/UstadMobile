@@ -100,8 +100,8 @@ class GrantAppPermissionPresenter(
 
             val authToken = extAccessPermission.eapAuthToken
             if(packageId != null && authToken != null) {
-                val activeAccountName = ustadAccountManager.activeSession?.displayName ?: "ERR"
-                extAccessPermission.eapPersonUid = ustadAccountManager.activeSession?.person?.personUid ?: 0
+                val activeAccountName = ustadAccountManager.currentSession?.displayName ?: "ERR"
+                extAccessPermission.eapPersonUid = ustadAccountManager.currentSession?.person?.personUid ?: 0
                 extAccessPermission.eapStartTime = systemTimeInMillis()
                 extAccessPermission.eapExpireTime = Long.MAX_VALUE
 

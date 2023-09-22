@@ -20,7 +20,6 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import com.ustadmobile.door.ext.openInputStream
 import org.kodein.di.DI
-import com.ustadmobile.core.contentformats.har.HarEntry
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.ext.maxQueryParamListSize
 import kotlinx.coroutines.NonCancellable
@@ -373,38 +372,6 @@ suspend fun UmAppDatabase.addEntryToContainerFromResource(containerUid: Long, ja
     }
 }
 
-
-suspend fun UmAppDatabase.addHarEntryToContainer(containerUid: Long, harEntry: HarEntry,
-                                                 pathInContainer: String,
-                                                 addOptions: ContainerAddOptions) {
-
-    val harResponse = harEntry.response ?: throw IllegalArgumentException("HarEntry being added" +
-            " as $pathInContainer to $containerUid must have a response!")
-    val harContent = harResponse.content ?: throw IllegalArgumentException("HarEntry being added" +
-            " as $pathInContainer to $containerUid must have response content!")
-    val harContentText = harContent.text ?: throw IllegalArgumentException("HarEntry being added" +
-            " as $pathInContainer to $containerUid must have response content text!")
-
-    withContext(Dispatchers.IO) {
-        val storageDir = addOptions.storageDirUri.toFile()
-        val tmpFile = File(storageDir, "${systemTimeInMillis()}.tmp")
-        val harInputStream = if(harContent.encoding == "base64") {
-            ByteArrayInputStream(Base64.getDecoder().decode(harContentText))
-        }else {
-            ByteArrayInputStream(harContentText.toByteArray())
-        }
-
-
-        val compress = addOptions.compressionFilter.shouldCompress(pathInContainer, null)
-
-        val entryMd5 = harInputStream.writeToFileAndGetMd5(tmpFile, compress)
-
-    }
-
-    containerDao.takeIf { addOptions.updateContainer }
-            ?.updateContainerSizeAndNumEntriesAsync(containerUid, getSystemTimeInMillis())
-
-}
 
 fun ContainerBuilder.addFile(
     pathInContainer: String,
