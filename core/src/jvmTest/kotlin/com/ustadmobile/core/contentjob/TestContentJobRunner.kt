@@ -25,9 +25,8 @@ import java.io.File
 import java.io.IOException
 import kotlin.test.Test
 import com.ustadmobile.core.util.ext.encodeStringMapToString
+import com.ustadmobile.util.test.initNapierLog
 import com.ustadmobile.door.ext.toFile
-import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
-import io.github.aakira.napier.Napier
 import org.junit.BeforeClass
 import kotlin.jvm.Volatile
 
@@ -496,7 +495,7 @@ class TestContentJobRunner {
         @BeforeClass
         @JvmStatic
         fun beforeClass() {
-            Napier.baseDebugIfNotEnabled()
+            initNapierLog()
         }
 
     }

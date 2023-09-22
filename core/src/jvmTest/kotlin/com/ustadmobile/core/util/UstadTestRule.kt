@@ -15,7 +15,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.nav.UstadNavController
-import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorDatabaseRepository
@@ -34,8 +33,6 @@ import com.ustadmobile.util.test.nav.TestUstadNavController
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
-import io.ktor.client.plugins.json.*
-import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
@@ -47,6 +44,7 @@ import kotlin.random.Random
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.gson.*
 import kotlinx.serialization.json.Json
+import java.util.concurrent.CopyOnWriteArrayList
 
 fun DI.onActiveAccount(): DI {
     val accountManager: UstadAccountManager by instance()
@@ -69,11 +67,7 @@ fun DI.directActiveRepoInstance() = onActiveAccountDirect().instance<UmAppDataba
  *
  * Simply override the built in bindings if required for specific tests
  */
-class UstadTestRule(
-    val repoReplicationSubscriptionEnabled: Boolean = false,
-): TestWatcher() {
-
-    lateinit var coroutineDispatcher: ExecutorCoroutineDispatcher
+class UstadTestRule(): TestWatcher() {
 
     lateinit var endpointScope: EndpointScope
 
@@ -91,8 +85,9 @@ class UstadTestRule(
         it.isNamespaceAware = true
     }
 
+    private val dbsToClose = CopyOnWriteArrayList<UmAppDatabase>()
 
-    override fun starting(description: Description?) {
+    override fun starting(description: Description) {
         tempFolder = Files.createTempDirectory("ustadtestrule").toFile()
 
         endpointScope = EndpointScope()
@@ -132,8 +127,6 @@ class UstadTestRule(
 
             bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
-                val attachmentsDir = File(tempFolder.siteDataSubDir(this@singleton.context),
-                        UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 spy(DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
                         "jdbc:sqlite:build/tmp/$dbName.sqlite", nodeId = nodeIdAndAuth.nodeId)
@@ -141,7 +134,9 @@ class UstadTestRule(
                     .addSyncCallback(nodeIdAndAuth)
                     .addCallback(ContentJobItemTriggersCallback())
                     .build()
-                    .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId))
+                    .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)).also {
+                        dbsToClose.add(it)
+                }
             }
 
 
@@ -158,6 +153,7 @@ class UstadTestRule(
                         siteName = "Test"
                         authSalt = randomString(16)
                     })
+                    dbsToClose.add(it)
                 }
             }
 
@@ -198,10 +194,6 @@ class UstadTestRule(
                 spy(TestUstadNavController())
             }
 
-            bind<CoroutineScope>(tag = DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with singleton {
-                GlobalScope
-            }
-
             bind<Pbkdf2Params>() with singleton {
                 Pbkdf2Params(iterations = 10000, keyLength = 512)
             }
@@ -210,10 +202,12 @@ class UstadTestRule(
         }
     }
 
-    override fun finished(description: Description?) {
+    override fun finished(description: Description) {
         httpClient.close()
-        //coroutineDispatcher.close()
         tempFolder.deleteRecursively()
+        dbsToClose.mapNotNull { it as? DoorDatabaseRepository }.forEach { it.close() }
+        dbsToClose.filter { it !is DoorDatabaseRepository }.forEach { it.close() }
+        dbsToClose.clear()
     }
 
 }

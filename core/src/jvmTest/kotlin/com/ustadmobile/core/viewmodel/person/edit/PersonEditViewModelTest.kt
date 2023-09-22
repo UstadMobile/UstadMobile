@@ -25,8 +25,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import io.github.aakira.napier.DebugAntilog
-import io.github.aakira.napier.Napier
+import com.ustadmobile.util.test.initNapierLog
 import kotlinx.coroutines.delay
 import org.kodein.di.*
 import org.mockito.kotlin.*
@@ -155,7 +154,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenPresenterCreatedInNonRegistrationMode_whenFormFilledAndClickSave_shouldSaveAPersonInDb() {
-        Napier.base(DebugAntilog())
+        initNapierLog()
         testViewModel<PersonEditViewModel>() {
             viewModelFactory {
                 PersonEditViewModel(di, savedStateHandle)

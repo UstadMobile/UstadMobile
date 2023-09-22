@@ -9,12 +9,11 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.util.test.initNapierLog
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
-import io.github.aakira.napier.DebugAntilog
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
@@ -36,8 +35,6 @@ class H5PTypePluginTest {
     @Rule
     val tmpFolder = TemporaryFolder()
 
-    private val context = Any()
-
     @JvmField
     @Rule
     var ustadTestRule = UstadTestRule()
@@ -55,7 +52,7 @@ class H5PTypePluginTest {
 
     @Before
     fun setup(){
-        Napier.base(DebugAntilog())
+        initNapierLog()
         endpointScope = EndpointScope()
         di = DI {
             import(ustadTestRule.diModule)

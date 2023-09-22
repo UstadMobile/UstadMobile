@@ -22,7 +22,6 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.randomUuid
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.util.test.nav.TestUstadSavedStateHandle
@@ -55,8 +54,6 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
     private lateinit var viewModelFactoryVar: TestViewModelFactory<T>
 
     private val endpointScope = EndpointScope()
-
-    private val testStartTime = systemTimeInMillis()
 
     private val xppFactory: XmlPullParserFactory by lazy {
         XmlPullParserFactory.newInstance().also {
@@ -101,6 +98,8 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
 
     val json: Json
         get() = di.direct.instance()
+
+    private val dbsToClose = mutableListOf<UmAppDatabase>()
 
     private var diVar = DI {
         import(CommonJvmDiModule)
@@ -152,7 +151,9 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
                         authSalt = randomString(20)
                     })
                 }
-            )
+            ).also {
+                dbsToClose.add(it)
+            }
         }
 
         if(repoConfig.useDbAsRepo) {
@@ -247,10 +248,15 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         if(this::mockWebServer.isLazyInitialized) {
             mockWebServer.shutdown()
         }
-        endpointScope.activeEndpointUrls.forEach {
 
+        dbsToClose.forEach {
+            try {
+                it.close()
+            }catch(e: Exception) {
+                //do nothing - can happen if there is any pending database stuff going on
+            }
         }
-
+        dbsToClose.clear()
     }
 
 }
