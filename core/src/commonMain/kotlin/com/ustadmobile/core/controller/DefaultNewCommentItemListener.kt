@@ -25,13 +25,13 @@ class DefaultNewCommentItemListener(
 
         val accountManager: UstadAccountManager by instance()
 
-        val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
+        val repo: UmAppDatabase by on(accountManager.currentAccount).instance(tag = DoorTag.TAG_REPO)
 
-        val commentObj = Comments(tableId, entityUid, accountManager.activeAccount.personUid,
+        val commentObj = Comments(tableId, entityUid, accountManager.currentAccount.personUid,
                 getSystemTimeInMillis(), text, isPublic)
         GlobalScope.launch {
             commentObj.commentSubmitterUid = commentOnSubmitterUid ?: repo.clazzAssignmentDao
-                                .getSubmitterUid(entityUid, accountManager.activeAccount.personUid)
+                                .getSubmitterUid(entityUid, accountManager.currentAccount.personUid)
 
             repo.commentsDao.insertAsync(commentObj)
         }

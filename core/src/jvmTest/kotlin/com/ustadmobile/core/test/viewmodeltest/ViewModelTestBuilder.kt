@@ -224,7 +224,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         db.withDoorTransactionAsync {
             val personInDb = db.insertPersonAndGroup(person)
             val session = accountManager.addSession(personInDb, endpoint.url, "dummypassword")
-            accountManager.currentSession = session
+            accountManager.currentUserSession = session
         }
 
         return person

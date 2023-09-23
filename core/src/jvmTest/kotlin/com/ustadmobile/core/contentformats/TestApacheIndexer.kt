@@ -85,7 +85,7 @@ class TestApacheIndexer {
         mockWebServer.dispatcher = globalDisptacher
 
         accountManager = di.direct.instance()
-        accountManager.currentSession = UserSessionWithPersonAndEndpoint(
+        accountManager.currentUserSession = UserSessionWithPersonAndEndpoint(
             userSession = UserSession(),
             person = GUEST_PERSON,
             endpoint = Endpoint(mockWebServer.url("/").toString())

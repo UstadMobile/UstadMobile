@@ -9,5 +9,5 @@ suspend fun UstadAccountManager.startLocalTestSessionAsync(
     password: String = ""
 ) {
     val userSession = addSession(person, endpointUrl, password)
-    currentSession = userSession
+    currentUserSession = userSession
 }

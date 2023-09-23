@@ -496,7 +496,7 @@ class ClazzEditViewModel(
             val clazzLogCreatorManager: ClazzLogCreatorManager by di.instance()
             clazzLogCreatorManager.requestClazzLogCreation(
                 entity.clazzUid,
-                accountManager.activeAccount.endpointUrl,
+                accountManager.currentAccount.endpointUrl,
                 fromLocalDate.toInstant(entityTimeZone).toEpochMilliseconds(),
                 fromLocalDate.toLocalEndOfDay().toInstant(entityTimeZone).toEpochMilliseconds()
             )

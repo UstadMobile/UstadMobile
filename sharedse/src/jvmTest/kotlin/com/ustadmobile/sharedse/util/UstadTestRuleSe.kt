@@ -54,10 +54,10 @@ import kotlin.random.Random
 
 fun DI.onActiveAccount(): DI {
     val accountManager: UstadAccountManager by instance()
-    return on(accountManager.activeAccount)
+    return on(accountManager.currentAccount)
 }
 
-fun DI.onActiveAccountDirect() = direct.on(direct.instance<UstadAccountManager>().activeAccount)
+fun DI.onActiveAccountDirect() = direct.on(direct.instance<UstadAccountManager>().currentAccount)
 
 fun DI.activeDbInstance() = onActiveAccount().instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
 

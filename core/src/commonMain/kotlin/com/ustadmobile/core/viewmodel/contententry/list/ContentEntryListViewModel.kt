@@ -118,7 +118,7 @@ class ContentEntryListViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
-                    accountManager.activeAccount.personUid, Role.PERMISSION_CONTENT_INSERT
+                    accountManager.currentAccount.personUid, Role.PERMISSION_CONTENT_INSERT
                 ).collect { hasNewContentPermission ->
                     _appUiState.update { prev ->
                         prev.copy(fabState = prev.fabState.copy(visible = hasNewContentPermission))

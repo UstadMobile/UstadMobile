@@ -224,7 +224,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                 launch {
                     activeRepo.clazzAssignmentDao.findAssignmentCourseBlockAndSubmitterUidAsFlow(
                         assignmentUid = entityUidArg,
-                        accountPersonUid = accountManager.activeAccount.personUid,
+                        accountPersonUid = accountManager.currentAccount.personUid,
                     ).collect { assignmentData ->
                         _uiState.update { prev ->
                             val isEnrolledButNotInGroup = assignmentData?.submitterUid ==
@@ -289,14 +289,14 @@ class ClazzAssignmentDetailOverviewViewModel(
                         loadFromStateKeys = listOf(STATE_LATEST_SUBMISSION),
                         onLoadFromDb = { db ->
                             db.courseAssignmentSubmissionDao.getLatestSubmissionForUserAsync(
-                                accountManager.currentSession?.person?.personUid ?: 0L,
+                                accountManager.currentUserSession?.person?.personUid ?: 0L,
                                 assignmentUid = entityUidArg,
                             )
                         },
                         makeDefault = {
                             CourseAssignmentSubmission().apply {
                                 casAssignmentUid = entityUidArg
-                                casSubmitterPersonUid = accountManager.currentSession?.person?.personUid ?: 0L
+                                casSubmitterPersonUid = accountManager.currentUserSession?.person?.personUid ?: 0L
                             }
                         },
                         uiUpdate = {
@@ -314,7 +314,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                         loadFromStateKeys = listOf(STATE_LATEST_SUBMISSION_ATTACHMENTS),
                         onLoadFromDb = { db ->
                             db.courseAssignmentSubmissionAttachmentDao.getLatestSubmissionAttachmentsForUserAsync(
-                                accountPersonUid = accountManager.currentSession?.person?.personUid ?: 0L,
+                                accountPersonUid = accountManager.currentUserSession?.person?.personUid ?: 0L,
                                 assignmentUid = entityUidArg
                             )
                         },
@@ -455,7 +455,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                     db = activeDb,
                     systemImpl = systemImpl,
                     assignmentUid = entityUidArg,
-                    accountPersonUid = accountManager.currentSession?.person?.personUid ?: 0L,
+                    accountPersonUid = accountManager.currentUserSession?.person?.personUid ?: 0L,
                     submission = submission
                 )
 

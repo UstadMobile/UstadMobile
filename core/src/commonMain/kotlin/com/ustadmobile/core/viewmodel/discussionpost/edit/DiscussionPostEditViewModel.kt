@@ -87,7 +87,7 @@ class DiscussionPostEditViewModel (
                                     .nextIdAsync(DiscussionPost.TABLE_ID)
                                 it.discussionPostCourseBlockUid = courseBlockUidArg
                                 it.discussionPostArchive = false
-                                it.discussionPostStartedPersonUid = accountManager.activeAccount.personUid
+                                it.discussionPostStartedPersonUid = accountManager.currentAccount.personUid
                                 it.discussionPostStartDate = systemTimeInMillis()
                             }
                         },

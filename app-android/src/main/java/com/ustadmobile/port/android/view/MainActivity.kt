@@ -306,7 +306,7 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
         val profileImgView: ImageView = menuItem.actionView?.findViewById(R.id.person_name_profilepic) ?: return
         userProfileDrawable?.also { profileImgView.imageForeignKeyPlaceholder(it) }
         profileImgView.setImageForeignKeyAdapter(PersonDetailFragment.FOREIGNKEYADAPTER_PERSON)
-        profileImgView.setImageForeignKey(accountManager.activeAccount.personUid)
+        profileImgView.setImageForeignKey(accountManager.currentAccount.personUid)
         profileImgView.setOnClickListener { impl.go(AccountListView.VIEW_NAME, mapOf(), this) }
     }
 

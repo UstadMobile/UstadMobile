@@ -29,7 +29,7 @@ fun ImageView.setImageFilePath(imageFilePath: String?, fallbackDrawable: Drawabl
     setTag(R.id.tag_imagefilepath, imageFilePath)
     val di: DI = (context.applicationContext as DIAware).di
     val accountManager: UstadAccountManager = di.direct.instance()
-    val repo: UmAppDatabase = di.direct.on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
+    val repo: UmAppDatabase = di.direct.on(accountManager.currentAccount).instance(tag = DoorTag.TAG_REPO)
     val uriResolved = imageFilePath?.let { repo.resolveAttachmentAndroidUri(it) }
 
     val drawable = fallbackDrawable?: ContextCompat.getDrawable(context,android.R.color.transparent)
@@ -121,7 +121,7 @@ private fun ImageView.updateImageFromForeignKey() {
 
         foreignKeyPropsVal.currentJob = GlobalScope.async {
             val accountManager : UstadAccountManager = di.direct.instance()
-            val endpointUrl = foreignKeyPropsVal.foreignKeyEndpoint ?: accountManager.activeAccount.endpointUrl
+            val endpointUrl = foreignKeyPropsVal.foreignKeyEndpoint ?: accountManager.currentAccount.endpointUrl
             val repo : UmAppDatabase = di.direct.on(Endpoint(endpointUrl)).instance(DoorTag.TAG_REPO)
             repo.onDbThenRepoWithTimeout(10000) { dbToUse: UmAppDatabase, lastResult: Uri? ->
                 val uri = withTimeoutOrNull(10000) {

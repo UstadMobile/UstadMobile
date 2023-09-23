@@ -97,7 +97,7 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
         val tempFolder = tmpFolder.newFolder("newFolder")
         val tempUri = DoorUri.parse(tempFolder.toURI().toString())
         val accountManager: UstadAccountManager by di.instance()
-        val repo: UmAppDatabase = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
+        val repo: UmAppDatabase = di.on(accountManager.currentAccount).direct.instance(tag = DoorTag.TAG_REPO)
         val endpoint = accountManager.activeEndpoint
 
         val epubPlugin = EpubTypePluginCommonJvm(Any(), endpoint, di)

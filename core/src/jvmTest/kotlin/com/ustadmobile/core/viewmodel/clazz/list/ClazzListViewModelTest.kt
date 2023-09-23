@@ -29,7 +29,7 @@ class ClazzListViewModelTest : AbstractMainDispatcherTest()  {
                 on { clazzDao }.thenReturn(clazzRepo)
             }
 
-            val accountPersonUid = accountManager.activeAccount.personUid
+            val accountPersonUid = accountManager.currentAccount.personUid
 
             viewModel.uiState
                 .filter { it.clazzList() !is EmptyPagingSource }

@@ -65,7 +65,7 @@ class ClazzDetailViewModel(
     }
 
     init {
-        val accountPersonUid = accountManager.activeAccount.personUid
+        val accountPersonUid = accountManager.currentAccount.personUid
         _uiState.update { prev ->
             prev.copy(tabs = createTabList(false))
         }

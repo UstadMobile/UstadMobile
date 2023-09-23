@@ -343,7 +343,7 @@ class PersonEditViewModel(
                         if(!approved) {
                             activeDb.personParentJoinDao.insertAsync(PersonParentJoin().apply {
                                 ppjMinorPersonUid = savePerson.personUid
-                                ppjParentPersonUid = accountManager.activeAccount.personUid
+                                ppjParentPersonUid = accountManager.currentAccount.personUid
                                 ppjStatus = PersonParentJoin.STATUS_APPROVED
                                 ppjApprovalTiemstamp = systemTimeInMillis()
                             })

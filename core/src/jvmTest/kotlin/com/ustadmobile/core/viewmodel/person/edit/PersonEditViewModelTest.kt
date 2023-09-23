@@ -41,7 +41,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
     private fun createMockAccountManager(serverUrl: String) : UstadAccountManager {
         return mock {
             on { activeEndpoint }.thenReturn(Endpoint(serverUrl))
-            on { activeAccount }.thenReturn(UmAccount(0L, "", "", serverUrl))
+            on { currentAccount }.thenReturn(UmAccount(0L, "", "", serverUrl))
         }
     }
 

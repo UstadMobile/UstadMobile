@@ -84,7 +84,7 @@ class PersonDetailViewModel(
     init {
         val accountManager: UstadAccountManager by instance()
 
-        val currentUserUid = accountManager.currentSession?.userSession?.usPersonUid ?: 0
+        val currentUserUid = accountManager.currentUserSession?.userSession?.usPersonUid ?: 0
 
         val entityUid: Long = savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0
 

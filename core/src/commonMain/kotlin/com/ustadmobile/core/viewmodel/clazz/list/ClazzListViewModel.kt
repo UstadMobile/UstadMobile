@@ -83,7 +83,7 @@ class ClazzListViewModel(
     private val pagingSourceFactory: () -> PagingSource<Int, ClazzWithListDisplayDetails> =  {
         activeRepo.clazzDao.findClazzesWithPermission(
             searchQuery =  _appUiState.value.searchState.searchText.toQueryLikeParam(),
-            accountPersonUid = accountManager.activeAccount.personUid,
+            accountPersonUid = accountManager.currentAccount.personUid,
             excludeSelectedClazzList = filterAlreadySelectedList,
             excludeSchoolUid = filterExcludeMembersOfSchool,
             sortOrder = _uiState.value.activeSortOrderOption.flag,
@@ -116,7 +116,7 @@ class ClazzListViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
-                    accountManager.activeAccount.personUid, Role.PERMISSION_CLAZZ_INSERT
+                    accountManager.currentAccount.personUid, Role.PERMISSION_CLAZZ_INSERT
                 ).distinctUntilChanged().collect { hasPermission ->
                     _uiState.update { prev ->
                         prev.copy(

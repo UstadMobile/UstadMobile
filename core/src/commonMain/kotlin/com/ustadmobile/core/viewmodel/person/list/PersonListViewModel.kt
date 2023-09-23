@@ -78,7 +78,7 @@ class PersonListViewModel(
         activeRepo.personDao.findPersonsWithPermissionAsPagingSource(
             getSystemTimeInMillis(), filterExcludeMembersOfClazz,
             filterExcludeMemberOfSchool, filterAlreadySelectedList,
-            accountManager.activeAccount.personUid, _uiState.value.sortOption.flag,
+            accountManager.currentAccount.personUid, _uiState.value.sortOption.flag,
             _appUiState.value.searchState.searchText.toQueryLikeParam()
         ).also {
             lastPagingSource?.invalidate()
@@ -107,7 +107,7 @@ class PersonListViewModel(
             collectHasPermissionFlowAndSetAddNewItemUiState(
                 hasPermissionFlow = {
                     activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
-                        accountManager.activeAccount.personUid, Role.PERMISSION_PERSON_INSERT
+                        accountManager.currentAccount.personUid, Role.PERMISSION_PERSON_INSERT
                     )
                 },
                 fabStringResource = MR.strings.person,

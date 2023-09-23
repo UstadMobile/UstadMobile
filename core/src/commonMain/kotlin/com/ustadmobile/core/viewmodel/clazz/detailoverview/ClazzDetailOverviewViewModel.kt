@@ -70,7 +70,7 @@ class ClazzDetailOverviewViewModel(
 
     private val pagingSourceFactory: () -> PagingSource<Int, CourseBlockWithCompleteEntity> = {
         activeRepo.courseBlockDao.findAllCourseBlockByClazzUidLive(
-                entityUidArg, accountManager.activeAccount.personUid,
+                entityUidArg, accountManager.currentAccount.personUid,
                 _uiState.value.collapsedBlockUids.toList(), systemTimeInMillis()
         ).also {
             lastCourseBlockPagingSource?.invalidate()
@@ -112,7 +112,7 @@ class ClazzDetailOverviewViewModel(
 
                 launch {
                     activeRepo.clazzDao.personHasPermissionWithClazzAsFlow(
-                        accountManager.activeAccount.personUid, entityUidArg, Role.PERMISSION_CLAZZ_UPDATE
+                        accountManager.currentAccount.personUid, entityUidArg, Role.PERMISSION_CLAZZ_UPDATE
                     ).collect { hasEditPermission ->
                         _appUiState.update { prev ->
                             prev.copy(

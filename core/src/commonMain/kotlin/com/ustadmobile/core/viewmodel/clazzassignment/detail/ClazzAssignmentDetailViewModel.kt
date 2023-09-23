@@ -29,7 +29,7 @@ class ClazzAssignmentDetailViewModel(
         val assignmentFlow = activeRepo.clazzAssignmentDao.findByUidAsFlow(entityUidArg)
         val permissionFlow = activeRepo.clazzAssignmentDao
             .personHasPermissionWithClazzByAssignmentUidAsFlow(
-                accountPersonUid = accountManager.activeAccount.personUid,
+                accountPersonUid = accountManager.currentAccount.personUid,
                 clazzAssignmentUid = entityUidArg,
                 permission = Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT
         )
