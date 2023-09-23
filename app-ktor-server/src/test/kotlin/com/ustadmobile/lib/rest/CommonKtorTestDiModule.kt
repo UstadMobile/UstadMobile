@@ -2,7 +2,6 @@ package com.ustadmobile.lib.rest
 
 import com.google.gson.Gson
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.randomUuid
@@ -14,7 +13,6 @@ import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.rest.ext.insertDefaultSite
@@ -61,16 +59,6 @@ fun commonTestKtorDiModule(
     bind<UstadMobileSystemImpl>() with singleton {
         UstadMobileSystemImpl(instance(tag = DiTag.XPP_FACTORY_NSAWARE),
             temporaryFolder.newFolder())
-    }
-
-    bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
-        val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
-        val nodeIdAndAuth: NodeIdAndAuth = instance()
-        db.asRepository(
-            RepositoryConfig.repositoryConfig(Any(), "http://localhost/", nodeIdAndAuth.nodeId,
-                nodeIdAndAuth.auth, instance(), instance()) {
-
-            })
     }
 
     bind<Pbkdf2Params>() with singleton {

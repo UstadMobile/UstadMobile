@@ -6,8 +6,6 @@ import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
@@ -48,8 +46,6 @@ class TestContainerDownloadRoute {
     private lateinit var server: ApplicationEngine
 
     private lateinit var db: UmAppDatabase
-
-    private lateinit var repo: UmAppDatabase
 
     private lateinit var nodeIdAndAuth: NodeIdAndAuth
 
@@ -94,12 +90,6 @@ class TestContainerDownloadRoute {
             }
         }
 
-        repo = db.asRepository(repositoryConfig(Any(), "http://localhost/",
-            nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient
-        ) {
-
-        })
-
         server = embeddedServer(Netty, port = 8097) {
             install(ContentNegotiation) {
                 gson {
@@ -113,9 +103,6 @@ class TestContainerDownloadRoute {
                     db
                 }
 
-                bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
-                    repo
-                }
 
                 registerContextTranslator { _: ApplicationCall ->
                     Endpoint("localhost")
@@ -129,10 +116,10 @@ class TestContainerDownloadRoute {
 
         containerTmpDir = temporaryFolder.newFolder("dlroutetestcontainerfiles")
         container = Container()
-        container.containerUid = repo.containerDao.insert(container)
+        container.containerUid = db.containerDao.insert(container)
 
         runBlocking {
-            repo.addEntriesToContainerFromZipResource(container.containerUid, repo::class.java,
+            db.addEntriesToContainerFromZipResource(container.containerUid, db::class.java,
                     "/testfiles/thelittlechicks.epub",
                     ContainerAddOptions(containerTmpDir.toDoorUri()))
         }

@@ -180,19 +180,19 @@ class PersonAuthRegisterRouteTest {
     fun givenValidCredentials_whenLoginCalled_thenShouldReturnAccount(
 
     )  = testPersonAuthRegisterApplication { client ->
-        val repo: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_REPO)
+        val db: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_DB)
         val pbkdf2Params: Pbkdf2Params by serverDi.instance()
         val httpClient: HttpClient by serverDi.instance()
 
         val person = runBlocking {
-            repo.insertPersonAndGroup(Person().apply {
+            db.insertPersonAndGroup(Person().apply {
                 username = "mary"
                 dateOfBirth = systemTimeInMillis() - (20 * 365 * 24 * 60 * 60 * 1000L)
             })
         }
 
         runBlocking {
-            repo.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params,
+            db.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params,
                 Endpoint("localhost"), httpClient)
         }
 
@@ -215,19 +215,19 @@ class PersonAuthRegisterRouteTest {
     fun givenInvalidCredentials_whenLoginCalled_thenShouldRespondForbidden(
 
     )  = testPersonAuthRegisterApplication { client ->
-        val repo: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_REPO)
+        val db: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_DB)
         val pbkdf2Params: Pbkdf2Params by serverDi.instance()
         val httpClient: HttpClient by serverDi.instance()
 
         val person = runBlocking {
-            repo.insertPersonAndGroup(Person().apply {
+            db.insertPersonAndGroup(Person().apply {
                 username = "mary"
                 dateOfBirth = systemTimeInMillis() - (20 * 365 * 24 * 60 * 60 * 1000L)
             })
         }
 
         runBlocking {
-            repo.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params,
+            db.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params,
                 Endpoint("localhost"), httpClient)
         }
 
@@ -244,21 +244,21 @@ class PersonAuthRegisterRouteTest {
     fun givenParentalConsentIsRequiredButNotGranted_whenLoginCalled_thenShouldRespondFailedDepdency(
 
     ) = testPersonAuthRegisterApplication {
-        val repo: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_REPO)
+        val db: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_DB)
         val pbkdf2Params: Pbkdf2Params by serverDi.instance()
         val httpClient: HttpClient by serverDi.instance()
 
         val person = runBlocking {
-            repo.insertPersonAndGroup(Person().apply {
+            db.insertPersonAndGroup(Person().apply {
                 username = "mary"
                 dateOfBirth = systemTimeInMillis() - (5 * 365 * 24 * 60 * 60 * 1000L)
             })
         }
 
         runBlocking {
-            repo.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params,
+            db.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params,
                 Endpoint("localhost"), httpClient)
-            repo.personParentJoinDao.insertAsync(PersonParentJoin().apply {
+            db.personParentJoinDao.insertAsync(PersonParentJoin().apply {
                 ppjMinorPersonUid = person.personUid
                 ppjStatus = PersonParentJoin.STATUS_UNSET
             })

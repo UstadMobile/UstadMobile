@@ -22,7 +22,6 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.util.pipeline.*
 import kotlinx.datetime.Instant
 import org.kodein.di.DI
 import org.kodein.di.direct
@@ -68,7 +67,6 @@ fun Route.personAuthRegisterRoute() {
         post("register"){
             val di: DI by closestDI()
             val db: UmAppDatabase by di.on(call).instance(tag = DoorTag.TAG_DB)
-            val repo: UmAppDatabase by di.on(call).instance(tag = DoorTag.TAG_REPO)
 
             val registerRequest: RegisterRequest = call.receive()
 
@@ -93,18 +91,17 @@ fun Route.personAuthRegisterRoute() {
             val existingPerson = if(mPerson.personUid != 0L) db.personDao.findByUid(mPerson.personUid)
             else db.personDao.findByUsername(mPerson.username)
 
-            if(existingPerson != null && (mPerson.personUid == 0L ||
-                            mPerson.personUid != 0L && mPerson.username == existingPerson.username)){
+            if(existingPerson != null && mPerson.username == existingPerson.username){
                 call.respond(HttpStatusCode.Conflict, "Person already exists, change username")
                 return@post
             }
 
             if(existingPerson == null) {
                 mPerson.apply {
-                    personUid = repo.insertPersonAndGroup(mPerson).personUid
+                    personUid = db.insertPersonAndGroup(mPerson).personUid
                 }
             } else {
-                repo.personDao.update(mPerson)
+                db.personDao.update(mPerson)
             }
 
             if(Instant.fromEpochMilliseconds(mPerson.dateOfBirth).ageInYears() < UstadMobileConstants.MINOR_AGE_THRESHOLD) {
@@ -112,7 +109,7 @@ fun Route.personAuthRegisterRoute() {
                 val mParentContactVal = mParentContact ?: throw IllegalStateException("Minor without parent contact")
 
                 mParentJoinVal.ppjMinorPersonUid = mPerson.personUid
-                mParentJoinVal.ppjUid = repo.personParentJoinDao.insertAsync(mParentJoinVal)
+                mParentJoinVal.ppjUid = db.personParentJoinDao.insertAsync(mParentJoinVal)
 
                 val systemImpl: UstadMobileSystemImpl by closestDI().instance()
                 val appName = systemImpl.getString(MR.strings.app_name, mLangCode)
@@ -138,7 +135,7 @@ fun Route.personAuthRegisterRoute() {
             val authParams: Pbkdf2Params = di.direct.instance()
             val httpClient: HttpClient = di.direct.instance()
 
-            repo.insertPersonAuthCredentials2(mPerson.personUid, newPassword, authParams,
+            db.insertPersonAuthCredentials2(mPerson.personUid, newPassword, authParams,
                 call.callEndpoint, httpClient)
 
             call.respond(HttpStatusCode.OK, mPerson)

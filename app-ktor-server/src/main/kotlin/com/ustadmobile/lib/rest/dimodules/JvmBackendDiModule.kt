@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.rest.dimodules
 
 import com.ustadmobile.core.account.AuthManager
-import com.ustadmobile.core.account.EndSessionPersonAuth2IncomingReplicationListener
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
@@ -9,14 +8,12 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.impl.UstadMobileConstants
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.rest.InsertDefaultSiteCallback
 import com.ustadmobile.lib.rest.ext.dbModeProperty
 import com.ustadmobile.lib.rest.ext.initAdminUser
@@ -27,6 +24,7 @@ import kotlinx.coroutines.runBlocking
 import org.kodein.di.*
 import java.io.File
 import com.ustadmobile.lib.rest.ext.absoluteDataDir
+import com.ustadmobile.lib.rest.ext.ktorInitDb
 import org.xmlpull.v1.XmlPullParserFactory
 
 /**
@@ -35,7 +33,6 @@ import org.xmlpull.v1.XmlPullParserFactory
  */
 fun makeJvmBackendDiModule(
     config: ApplicationConfig,
-    syncEnabled: Boolean = true,
     contextScope: EndpointScope = EndpointScope.Default,
 ) = DI.Module("JvmBackendDiModule") {
     val dataDirPath = config.absoluteDataDir()
@@ -54,9 +51,9 @@ fun makeJvmBackendDiModule(
 
     bind<AuthManager>() with scoped(contextScope).singleton {
         AuthManager(context, di).also { authManager ->
-            val repo: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_REPO)
+            val db: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_DB)
             runBlocking {
-                repo.initAdminUser(context, authManager, di,
+                db.initAdminUser(context, authManager, di,
                     config.propertyOrNull("ktor.ustad.adminpass")?.getString())
             }
         }
@@ -89,7 +86,9 @@ fun makeJvmBackendDiModule(
             .addCallback(ContentJobItemTriggersCallback())
             .addCallback(InsertDefaultSiteCallback())
             .addMigrations(*migrationList().toTypedArray())
-            .build()
+            .build().also {
+                it.ktorInitDb(di)
+            }
     }
 
     bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {

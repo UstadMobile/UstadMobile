@@ -2,7 +2,6 @@ package com.ustadmobile.lib.rest.clitools.passwordreset
 
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.rest.CONF_DBMODE_SINGLETON
@@ -65,11 +64,7 @@ fun main(args: Array<String>) {
     }
 
     val di = DI {
-        import(makeJvmBackendDiModule(conf, syncEnabled = false))
-
-        bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
-            instance(tag = DoorTag.TAG_DB)
-        }
+        import(makeJvmBackendDiModule(conf))
     }
 
 
