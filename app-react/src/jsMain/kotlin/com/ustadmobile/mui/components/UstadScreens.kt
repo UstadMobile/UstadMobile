@@ -189,25 +189,19 @@ val ustadScreensLoader: LoaderFunction = {
 
     val builderOptions = DatabaseBuilderOptions(
         UmAppDatabase::class,
-        UmAppDatabaseJsImplementations, dbUrl = dbUrl, webWorkerPath = "./worker.sql-wasm.js")
+        UmAppDatabaseJsImplementations, dbUrl = dbUrl,
+        nodeId = dbNodeIdAndAuth.nodeId,
+        webWorkerPath = "./worker.sql-wasm.js")
 
     val dbBuilder =  DatabaseBuilder.databaseBuilder(builderOptions)
         .addCallback(ContentJobItemTriggersCallback())
         .addSyncCallback(dbNodeIdAndAuth)
         .addMigrations(*migrationList().toTypedArray())
 
-    val defaultAssetPath = "locales/en.xml"
-
     @OptIn(DelicateCoroutinesApi::class)
     GlobalScope.promise {
         val dbBuilt = dbBuilder.build()
-        val defaultStringsXmlStr = Util.loadAssetsAsText(defaultAssetPath)
         val displayedLocale = UstadMobileSystemImpl.displayedLocale
-        val foreignStringXmlStr = if(displayedLocale != "en") {
-            Util.loadAssetsAsText("locales/$displayedLocale.xml")
-        }else {
-            null
-        }
 
         val json = Json {
             encodeDefaults = true

@@ -26,8 +26,8 @@ import web.cssom.pct
 import web.cssom.px
 import js.core.jso
 //WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
-import mui.icons.material.PersonAdd
-import mui.icons.material.AccountCircle
+import mui.icons.material.PersonAdd as PersonAddIcon
+import mui.icons.material.AccountCircle as AccountCircleIcon
 import mui.icons.material.LensRounded
 import mui.icons.material.Check
 import mui.icons.material.Close
@@ -111,7 +111,7 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
                         text = props.uiState.terminologyStrings?.get(MR.strings.add_a_teacher)
                             ?: strings[MR.strings.add_a_teacher]
                         enabled = props.uiState.fieldsEnabled
-                        icon = PersonAdd.create()
+                        icon = PersonAddIcon.create()
                         onClickAdd = { props.onClickAddNewMember(ClazzEnrolment.ROLE_TEACHER) }
                     }
                 }
@@ -126,7 +126,7 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
                         onClick = { person?.also { props.onClickEntry(it) } }
 
                         ListItemIcon {
-                            + AccountCircle.create()
+                            + AccountCircleIcon.create()
                         }
 
                         ListItemText {
@@ -151,7 +151,7 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
                         text = props.uiState.terminologyStrings?.get(MR.strings.add_a_student)
                             ?: strings[MR.strings.add_a_student]
                         enabled = props.uiState.fieldsEnabled
-                        icon = PersonAdd.create()
+                        icon = PersonAddIcon.create()
                         onClickAdd = { props.onClickAddNewMember(ClazzEnrolment.ROLE_STUDENT) }
                     }
                 }
@@ -230,7 +230,7 @@ private val StudentListItem = FC<StudentListItemProps> { props ->
             }
 
             ListItemIcon {
-                + AccountCircle.create()
+                + AccountCircleIcon.create()
             }
 
             ListItemText {
@@ -260,7 +260,7 @@ private val PendingStudentListItem = FC<PendingStudentListItemProps> { props ->
             onClick = { props.onClick }
 
             ListItemIcon {
-                + AccountCircle.create()
+                + AccountCircleIcon.create()
             }
 
             ListItemText {

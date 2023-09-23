@@ -1,5 +1,6 @@
 package com.ustadmobile.view.clazz.list
 
+import app.cash.paging.PagingSourceLoadResultPage
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
@@ -11,7 +12,6 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListUiState
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
-import com.ustadmobile.door.paging.LoadResult
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.entities.Clazz
@@ -132,7 +132,7 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
                     index.toString()
                 },
                 dataPagesToItems = { pages ->
-                    pages.mapNotNull { it as? LoadResult.Page<Int, ClazzWithListDisplayDetails> }.flatMap {
+                    pages.mapNotNull { it as? PagingSourceLoadResultPage<Int, ClazzWithListDisplayDetails> }.flatMap {
                         it.data
                     }.chunked(cardsPerRow)
                 },

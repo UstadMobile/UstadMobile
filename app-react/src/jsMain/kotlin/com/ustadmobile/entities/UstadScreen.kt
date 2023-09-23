@@ -97,6 +97,7 @@ import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.HolidayCalendarListViewModel
 import com.ustadmobile.core.viewmodel.LanguageListViewModel
+import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
@@ -180,7 +181,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(
         ScopedGrantEditViewModel.DEST_NAME,
         "ScopedGrantEdit Preview", ScopedGrantEditScreenPreview),
-    UstadScreen(CourseTerminologyEditViewModel.DEST_NAME,
+    UstadScreen(
+        CourseTerminologyEditViewModel.DEST_NAME,
         "CourseTerminologyEdit Preview", CourseTerminologyEditScreen
     ),
     UstadScreen("UstadListFilterChipsHeader",

@@ -1,7 +1,12 @@
 package com.ustadmobile.hooks
 
+import app.cash.paging.PagingSource
+import app.cash.paging.PagingSourceLoadParamsAppend
+import app.cash.paging.PagingSourceLoadParamsPrepend
+import app.cash.paging.PagingSourceLoadParamsRefresh
+import app.cash.paging.PagingSourceLoadResult
+import app.cash.paging.PagingSourceLoadResultPage
 import com.ustadmobile.core.hooks.useCoroutineScope
-import com.ustadmobile.door.paging.*
 import com.ustadmobile.door.util.systemTimeInMillis
 import js.core.jso
 import kotlinx.coroutines.promise
@@ -31,7 +36,7 @@ fun <Key: Any, Value: Any> usePagingSource(
     pagingSourceFactory: () -> PagingSource<Key, Value>,
     placeholdersEnabled: Boolean,
     loadSize: Int = 50,
-) : UseInfiniteQueryResult<LoadResult<Key, Value>, Throwable> {
+) : UseInfiniteQueryResult<PagingSourceLoadResult<Key, Value>, Throwable> {
     //If the factory itself changes, that will change the TanStack Query Key, forces reload
     val factoryQueryKey: String = useMemo(pagingSourceFactory) {
         ""+pagingSourceFactory.hashCode()
@@ -60,29 +65,29 @@ fun <Key: Any, Value: Any> usePagingSource(
 
     val coroutineScope = useCoroutineScope(dependencies = emptyArray())
 
-    val infiniteQueryResult = useInfiniteQuery<LoadResult<Key, Value>, Throwable, LoadResult<Key, Value>, QueryKey>(
+    val infiniteQueryResult = useInfiniteQuery<PagingSourceLoadResult<Key, Value>, Throwable, PagingSourceLoadResult<Key, Value>, QueryKey>(
         options = jso {
             queryKey = QueryKey(factoryQueryKey)
             queryFn = { queryContext: QueryFunctionContext<QueryKey, *> ->
                 val loadParams = when(queryContext.pageParam) {
-                    is LoadParams.Append<*> -> queryContext.pageParam.unsafeCast<LoadParams.Append<Key>>()
-                    is LoadParams.Prepend<*> -> queryContext.pageParam.unsafeCast<LoadParams.Prepend<Key>>()
-                    is LoadParams.Refresh<*> -> queryContext.pageParam.unsafeCast<LoadParams.Refresh<Key>>()
-                    else -> LoadParams.Refresh<Key>(null, loadSize, placeholdersEnabled)
+                    is PagingSourceLoadParamsAppend<*> -> queryContext.pageParam.unsafeCast<PagingSourceLoadParamsAppend<Key>>()
+                    is PagingSourceLoadParamsPrepend<*> -> queryContext.pageParam.unsafeCast<PagingSourceLoadParamsPrepend<Key>>()
+                    is PagingSourceLoadParamsRefresh<*> -> queryContext.pageParam.unsafeCast<PagingSourceLoadParamsRefresh<Key>>()
+                    else -> PagingSourceLoadParamsRefresh<Key>(null, loadSize, placeholdersEnabled)
                 }
 
                 coroutineScope.promise {
                     pagingSource.load(loadParams)
-                }.unsafeCast<Promise<LoadResult<Key, Value>>>()
+                }.unsafeCast<Promise<PagingSourceLoadResult<Key, Value>>>()
             }
-            getNextPageParam = { lastPage: LoadResult<Key, Value>, allPages ->
-                val nextKey = (lastPage as? LoadResult.Page<Key, Value>)?.nextKey
-                nextKey?.let { LoadParams.Append(it, loadSize, placeholdersEnabled) }
+            getNextPageParam = { lastPage: PagingSourceLoadResult<Key, Value>, allPages ->
+                val nextKey = (lastPage as? PagingSourceLoadResultPage<Key, Value>)?.nextKey
+                nextKey?.let { PagingSourceLoadParamsAppend(it, loadSize, placeholdersEnabled) }
                     ?: undefined.unsafeCast<Any>()
             }
             getPreviousPageParam = { firstPage, allPages ->
-                val prevKey = (firstPage as? LoadResult.Page<Key, Value>)?.prevKey
-                prevKey?.let { LoadParams.Prepend(it, loadSize, placeholdersEnabled)}
+                val prevKey = (firstPage as? PagingSourceLoadResultPage<Key, Value>)?.prevKey
+                prevKey?.let { PagingSourceLoadParamsPrepend(it, loadSize, placeholdersEnabled)}
                     ?: undefined.unsafeCast<Any>()
             }
         }
