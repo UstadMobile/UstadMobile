@@ -75,10 +75,12 @@ class TestContainerDownloadRoute {
 
         nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
 
-        db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite")
-            .build()
+        db = DatabaseBuilder.databaseBuilder(
+            UmAppDatabase::class, "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite",
+                nodeId = nodeIdAndAuth.nodeId
+        ).build()
+
         db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
-        val attachmentsDir = temporaryFolder.newFolder()
 
         okHttpClient = OkHttpClient()
 
@@ -95,7 +97,7 @@ class TestContainerDownloadRoute {
         repo = db.asRepository(repositoryConfig(Any(), "http://localhost/",
             nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient
         ) {
-            this.attachmentsDir = attachmentsDir.absolutePath
+
         })
 
         server = embeddedServer(Netty, port = 8097) {

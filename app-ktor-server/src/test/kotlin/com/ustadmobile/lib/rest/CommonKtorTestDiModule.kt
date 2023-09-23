@@ -33,7 +33,8 @@ fun commonTestKtorDiModule(
 
     bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
         val nodeIdAndAuth : NodeIdAndAuth = instance()
-        DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite")
+        DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
+            "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite", nodeId = nodeIdAndAuth.nodeId)
             .build().also { db ->
                 db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
                 db.insertDefaultSite()
@@ -68,7 +69,7 @@ fun commonTestKtorDiModule(
         db.asRepository(
             RepositoryConfig.repositoryConfig(Any(), "http://localhost/", nodeIdAndAuth.nodeId,
                 nodeIdAndAuth.auth, instance(), instance()) {
-                    useReplicationSubscription = false
+
             })
     }
 
