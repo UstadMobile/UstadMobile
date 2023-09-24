@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
 @Entity
 @Serializable
 @ReplicateEntity(
-    tableId = 189,
+    tableId = Site.TABLE_ID,
     remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
 )
 @Triggers(arrayOf(
@@ -60,5 +60,11 @@ open class Site {
     var registrationAllowed: Boolean = true
 
     var authSalt: String? = null
+
+    companion object {
+
+        const val TABLE_ID = 189
+
+    }
 
 }

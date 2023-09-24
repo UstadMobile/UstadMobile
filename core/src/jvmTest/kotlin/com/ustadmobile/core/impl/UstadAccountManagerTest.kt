@@ -14,6 +14,7 @@ import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.userAtServer
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.DoorConstants
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.ext.asRepository
@@ -91,10 +92,32 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
                 request.path?.startsWith("/UmAppDatabase/SiteDao/getSiteAsync") == true -> {
                     MockResponse()
-                        .setBody(Json.encodeToString(Site.serializer(), Site().apply {
-                            authSalt = randomString(20)
-                        }))
+                        .setBody(
+                            Json.encodeToString(
+                                DoorMessage.serializer(),
+                                DoorMessage(
+                                    what = DoorMessage.WHAT_REPLICATION,
+                                    fromNode = 1L,
+                                    toNode = 2L,
+                                    replications = listOf(
+                                        DoorReplicationEntity(
+                                            tableId = Site.TABLE_ID,
+                                            orUid = 1L,
+                                            entity = json.encodeToJsonElement(
+                                                Site.serializer(),
+                                                Site().apply {
+                                                    siteUid = 10042
+                                                    siteLct = systemTimeInMillis()
+                                                    authSalt = randomString(20)
+                                                }
+                                            ).jsonObject
+                                        )
+                                    )
+                                )
+                            )
+                        )
                         .setResponseCode(200)
+                        .addHeader(DoorConstants.HEADER_NODE_ID, "1")
                         .addHeader("Content-Type", "application/json; charset=utf-8")
                 }
 
@@ -172,7 +195,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
             bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
                 spy(instance<UmAppDatabase>(tag = DoorTag.TAG_DB).asRepository(
                     RepositoryConfig.repositoryConfig(
-                        Any(), context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
+                        Any(), "${context.url}UmAppDatabase/", nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
                         instance(), instance()
                     ) {
 
@@ -208,6 +231,8 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
         repo = di.on(Endpoint(mockServerUrl)).direct.instance(tag = DoorTag.TAG_REPO)
         repo.siteDao.insert(Site().apply {
+            siteUid = 10042
+            siteLct = systemTimeInMillis()
             authSalt = randomString(20)
         })
         db = di.on(Endpoint(mockServerUrl)).direct.instance(tag = DoorTag.TAG_DB)

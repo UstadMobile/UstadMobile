@@ -3,6 +3,7 @@ package com.ustadmobile.core.util.ext
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.account.UstadAccountManager.Companion.GUEST_PERSON
 import com.ustadmobile.core.impl.BrowserLinkOpener
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UMFileUtil
@@ -135,9 +136,18 @@ class NavControllerExtTest {
         mockAccountManager.stub {
             on { activeEndpoint }.thenReturn(Endpoint(activeEndpointUrl))
             onBlocking { activeSessionCount(any(), any()) }.thenAnswer {
-                val filter = it.arguments[1] as UstadAccountManager.EndpointFilter
-                listOf(activeEndpointUrl, linkEndpointUrl).count { filter.filterEndpoint(it) }
+                1
             }
+            on { currentUserSession }.thenReturn(
+                UserSessionWithPersonAndEndpoint(
+                    userSession = UserSession().apply {
+                        usSessionType= UserSession.TYPE_STANDARD
+                        usStatus = UserSession.STATUS_ACTIVE
+                    },
+                    person = GUEST_PERSON,
+                    endpoint = Endpoint(activeEndpointUrl),
+                )
+            )
         }
 
         runBlocking {
@@ -160,9 +170,17 @@ class NavControllerExtTest {
 
         mockAccountManager.stub {
             on { activeEndpoint }.thenReturn(Endpoint(activeEndpointUrl))
+            on { currentUserSession }.thenReturn(
+                UserSessionWithPersonAndEndpoint(
+                    userSession = UserSession().apply {
+                        usSessionType = UserSession.TYPE_TEMP_LOCAL or UserSession.TYPE_GUEST
+                    },
+                    person = GUEST_PERSON,
+                    endpoint = Endpoint(activeEndpointUrl)
+                )
+            )
             onBlocking { activeSessionCount(any(), any()) }.thenAnswer {
-                val filter = it.arguments[1] as UstadAccountManager.EndpointFilter
-                listOf(activeEndpointUrl).count { filter.filterEndpoint(it) }
+                0L
             }
         }
 

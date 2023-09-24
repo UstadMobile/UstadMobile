@@ -46,6 +46,8 @@ expect abstract class UserSessionDao {
      * Count sessions on this device. If maxDateOfBirth is non-zero, then this can be used to
      * provide a cut-off (e.g. to find only sessions for adults where their date of birth must be
      * before a cut-off)
+     *
+     * This will not include any temporary local sessions
      */
     @Query("""
         SELECT COUNT(*)
@@ -58,7 +60,8 @@ expect abstract class UserSessionDao {
                             FROM SyncNode
                            LIMIT 1), 0))
            AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}                
-           AND (:maxDateOfBirth = 0 OR Person.dateOfBirth < :maxDateOfBirth)                 
+           AND (:maxDateOfBirth = 0 OR Person.dateOfBirth < :maxDateOfBirth)
+           AND (UserSession.usSessionType & ${UserSession.TYPE_TEMP_LOCAL}) != ${UserSession.TYPE_TEMP_LOCAL}            
     """)
     abstract suspend fun countAllLocalSessionsAsync(maxDateOfBirth: Long): Int
 

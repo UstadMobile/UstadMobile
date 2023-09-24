@@ -90,11 +90,11 @@ suspend fun UstadNavController.navigateToLink(
             }
         }
 
-        //when the active account is already on the given endpoint, or there is no endpoint
+        //when the current account is already on the given endpoint, or there is no endpoint
         //specified, then go directly to the given view (unless the force account selection option
         //is set)
         !forceAccountSelection
-            && accountManager.currentUserSession != null
+            && !accountManager.currentUserSession.userSession.isTemporary()
             && (endpointUrl == null || accountManager.activeEndpoint.url == endpointUrl) ->
         {
             navigateToViewUri(viewUri, goOptions)

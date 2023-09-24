@@ -12,6 +12,7 @@ expect abstract class SiteDao {
     @Query("SELECT * FROM Site LIMIT 1")
     abstract fun getSite(): Site?
 
+    @HttpAccessible
     @Query("SELECT * FROM Site LIMIT 1")
     abstract suspend fun getSiteAsync(): Site?
 

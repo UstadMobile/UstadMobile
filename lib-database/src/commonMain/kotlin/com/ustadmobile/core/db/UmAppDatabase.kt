@@ -56,11 +56,14 @@ import com.ustadmobile.lib.db.entities.*
     Message::class,
     MessageRead::class,
 
+    //Door entities
+    OutgoingReplication::class,
+    ReplicationOperation::class,
+
 
 
 
 ], version = 120)
-@MinReplicationVersion(120)
 /*
  Replicate entities (e.g. trackers) to drop:
      ClazzLogReplicate
@@ -142,6 +145,10 @@ import com.ustadmobile.lib.db.entities.*
     CustomFieldValueOption
     DateRange
     ClazzAssignmentRollUp
+
+    Entities to add:
+    OutgoingReplication,
+    ReplicationOperation,
  */
 expect abstract class UmAppDatabase : RoomDatabase {
 

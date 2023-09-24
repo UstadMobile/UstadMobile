@@ -190,6 +190,8 @@ class UstadAccountManager(
                 usUid = currentDb.doorPrimaryKeyManager.nextId(UserSession.TABLE_ID)
                 usClientNodeId = currentDb.doorWrapperNodeId
                 usStartTime = systemTimeInMillis()
+                usSessionType = (UserSession.TYPE_TEMP_LOCAL or UserSession.TYPE_GUEST)
+                usStatus = UserSession.STATUS_ACTIVE
             },
             person = GUEST_PERSON,
             endpoint = Endpoint(endpointUrl),
@@ -214,6 +216,9 @@ class UstadAccountManager(
         }
     }
 
+    /**
+     *
+     */
     suspend fun activeSessionCount(
         maxDateOfBirth: Long = 0,
         endpointFilter: EndpointFilter = EndpointFilter { true }
@@ -430,16 +435,7 @@ class UstadAccountManager(
         val db = (repo as DoorDatabaseRepository).db as UmAppDatabase
         val siteInDb = db.siteDao.getSiteAsync()
         if(siteInDb == null) {
-            val siteResponse = httpClient.get {
-                doorNodeAndVersionHeaders(repo as DoorDatabaseRepository)
-                url("${endpointUrl.removeSuffix("/")}/UmAppDatabase/SiteDao/getSiteAsync")
-            }
-            if(siteResponse.status.value == 200) {
-                val siteObj = siteResponse.body<Site>()
-                repo.siteDao.replaceAsync(siteObj)
-            }else {
-                throw IllegalStateException("Internal error: no Site in database and could not fetch it from server")
-            }
+            repo.siteDao.getSiteAsync() ?: throw IllegalStateException("Internal error: no Site in database and could not fetch it from server")
         }
     }
 

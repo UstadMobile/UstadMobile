@@ -73,6 +73,14 @@ class UserSession {
         // so that findUnsentEntities will work as expected
         const val TYPE_UPSTREAM = 2
 
+        const val TYPE_GUEST = 4
+
+        /**
+         * This is a temporary local session that was auto created by the account manager. It will
+         * not be sent to the upstream server.
+         */
+        const val TYPE_TEMP_LOCAL = 8
+
         const val STATUS_ACTIVE = 1
 
         const val STATUS_NEEDS_REAUTH = 2
