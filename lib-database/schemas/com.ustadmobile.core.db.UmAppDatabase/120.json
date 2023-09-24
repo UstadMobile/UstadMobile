@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 120,
-    "identityHash": "3c5f48503aa3e227d05b7b2fae359e06",
+    "identityHash": "a5e329f7474999b8503125ca75587253",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -6172,12 +6172,89 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "OutgoingReplication",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`orUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `destNodeId` INTEGER NOT NULL, `orTableId` INTEGER NOT NULL, `orPk1` INTEGER NOT NULL, `orPk2` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "orUid",
+            "columnName": "orUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "destNodeId",
+            "columnName": "destNodeId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "orTableId",
+            "columnName": "orTableId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "orPk1",
+            "columnName": "orPk1",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "orPk2",
+            "columnName": "orPk2",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "orUid"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ReplicationOperation",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`repOpRemoteNodeId` INTEGER NOT NULL, `repOpTableId` INTEGER NOT NULL, `repOpStatus` INTEGER NOT NULL, PRIMARY KEY(`repOpRemoteNodeId`, `repOpTableId`))",
+        "fields": [
+          {
+            "fieldPath": "repOpRemoteNodeId",
+            "columnName": "repOpRemoteNodeId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "repOpTableId",
+            "columnName": "repOpTableId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "repOpStatus",
+            "columnName": "repOpStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "repOpRemoteNodeId",
+            "repOpTableId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3c5f48503aa3e227d05b7b2fae359e06')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a5e329f7474999b8503125ca75587253')"
     ]
   }
 }

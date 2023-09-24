@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.ScopedGrantDaoCommon.SQL_FIND_BY_TABLE_AND_EN
 import app.cash.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.composites.ScopedGrantAndGroupMember
 import com.ustadmobile.lib.db.entities.*
 
 @DoorDao
@@ -67,6 +68,14 @@ expect abstract class ScopedGrantDao {
     """)
     abstract fun findByUidLiveWithName(sgUid: Long): Flow<ScopedGrantWithName?>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findScopedGrantAndPersonGroupByPersonUidAndPermission",
+            ),
+        )
+    )
     @Query(
         """
         SELECT EXISTS(
@@ -84,6 +93,21 @@ expect abstract class ScopedGrantDao {
         permission: Long,
     ): Flow<Boolean>
 
+
+    @Query("""
+        SELECT PersonGroupMember.*, PersonGroup.*, ScopedGrant.*
+          FROM PersonGroupMember 
+               JOIN ScopedGrant
+                    ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+               JOIN PersonGroup
+                    ON PersonGroup.groupUid = PersonGroupMember.groupMemberGroupUid
+         WHERE PersonGroupMember.groupMemberPersonUid = :personUid
+           AND (ScopedGrant.sgPermissions & :permission) > 0    
+    """)
+    abstract suspend fun findScopedGrantAndPersonGroupByPersonUidAndPermission(
+        personUid: Long,
+        permission: Long
+    ): List<ScopedGrantAndGroupMember>
 
     @Query(
         """
