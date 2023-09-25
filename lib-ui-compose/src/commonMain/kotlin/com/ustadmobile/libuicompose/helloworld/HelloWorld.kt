@@ -13,13 +13,25 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogWindow
 import cafe.adriel.voyager.core.lifecycle.LifecycleEffect
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
@@ -27,6 +39,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
+import kotlinx.coroutines.launch
 
 @Composable
 fun HelloWorld() {
@@ -73,9 +86,75 @@ data class HelloWorldScreen(
 
             }
 
+            val dialogState = remember { mutableStateOf(false) }
+            Button(onClick = { dialogState.value = true }) {
+                Text("show dialog")
+            }
+            DialogWindow(
+                onCloseRequest = { dialogState.value = false },
+                visible = dialogState.value,
+                content =  {
+                    Text("dialog content")
+                })
+
+            DatePickerDialogSample()
         }
     }
 
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DatePickerDialogSample() {
+    // Decoupled snackbar host state from scaffold state for demo purposes.
+    val snackState = remember { SnackbarHostState() }
+    val snackScope = rememberCoroutineScope()
+    SnackbarHost(hostState = snackState, Modifier)
+    val openDialog = remember { mutableStateOf(true) }
+    // TODO demo how to read the selected date from the state.
+
+    Button(onClick = { openDialog.value = true }) {
+        Text("show date picker dialog")
+    }
+
+    if (openDialog.value) {
+        val datePickerState = rememberDatePickerState()
+        val confirmEnabled = derivedStateOf { datePickerState.selectedDateMillis != null }
+        DatePickerDialog(
+            onDismissRequest = {
+                // Dismiss the dialog when the user clicks outside the dialog or on the back
+                // button. If you want to disable that functionality, simply use an empty
+                // onDismissRequest.
+                openDialog.value = false
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        openDialog.value = false
+                        snackScope.launch {
+                            snackState.showSnackbar(
+                                "Selected date timestamp: ${datePickerState.selectedDateMillis}"
+                            )
+                        }
+                    },
+                    enabled = confirmEnabled.value
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        openDialog.value = false
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
 }
 
 data class BasicNavigationScreen(
