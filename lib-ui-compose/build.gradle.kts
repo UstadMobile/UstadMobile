@@ -18,6 +18,7 @@ kotlin {
         val commonMain by getting {
 
             val version_voyager = "1.0.0-rc05"
+            val version_kotlinx_datetime = "0.4.0"
 
             dependencies {
                 api(project(":core"))
@@ -33,8 +34,10 @@ kotlin {
                 implementation(libs.moko.resources)
                 implementation(libs.moko.resources.compose)
 
+
                 // Compose Multiplatform Navigator
                 implementation("cafe.adriel.voyager:voyager-navigator:$version_voyager")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime")
 
             }
         }
