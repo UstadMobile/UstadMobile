@@ -29,7 +29,6 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Schedule
-import com.ustadmobile.libuicompose.util.compose.TimePickerAdornment
 
 
 class TimeVisualTransformation: VisualTransformation {
@@ -136,7 +135,7 @@ fun UstadTimeField(
         trailingIcon = {
             IconButton(
                 onClick = {
-//                    TimePickerAdornment(onTimeSelected = { onValueChange(it) })
+                    UstadTimePickerAdornment(onTimeSelected = { onValueChange(it) })
                 },
             ) {
                 Icon(
