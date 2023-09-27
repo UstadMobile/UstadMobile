@@ -13,25 +13,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindow
 import cafe.adriel.voyager.core.lifecycle.LifecycleEffect
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
@@ -39,8 +31,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
-import com.ustadmobile.libuicompose.view.person.edit.PersonEditScreen
-import kotlinx.coroutines.launch
+import com.ustadmobile.libuicompose.components.UstadDateField
 
 @Composable
 fun HelloWorld() {
@@ -68,40 +59,40 @@ data class HelloWorldScreen(
 
         val navigator = LocalNavigator.currentOrThrow
 
-//        Column(Modifier.fillMaxSize(), Arrangement.spacedBy(5.dp)) {
-//
-//            Button(
-//                onClick = { navigator.push(BasicNavigationScreen(true)) },
-//                modifier = Modifier
-//                    .testTag("next_screen_button")
-//                    .fillMaxWidth(),
-//                elevation = null,
-//                enabled = uiState.fieldsEnabled,
-//                colors = ButtonDefaults.buttonColors(
-//                    backgroundColor = Color.Transparent,
-//                    contentColor = MaterialTheme.colors.primary,
-//                )
-//            ) {
-//
-//                Text("Next screen")
-//
-//            }
-//
-//
-//            val dialogState = remember { mutableStateOf(false) }
-//            Button(onClick = { dialogState.value = true }) {
-//                Text("show dialog")
-//            }
-//            DialogWindow(
-//                onCloseRequest = { dialogState.value = false },
-//                visible = dialogState.value,
-//                content =  {
-//                    Text("dialog content")
-//                })
-//
-//            DatePickerDialogSample()
-//        }
-        PersonEditScreen()
+        var date by remember {
+            mutableStateOf((0).toLong())
+        }
+
+        Column(Modifier.fillMaxSize(), Arrangement.spacedBy(5.dp)) {
+
+            Button(
+                onClick = { navigator.push(BasicNavigationScreen(true)) },
+                modifier = Modifier
+                    .testTag("next_screen_button")
+                    .fillMaxWidth(),
+                elevation = null,
+                enabled = uiState.fieldsEnabled,
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = Color.Transparent,
+                    contentColor = MaterialTheme.colors.primary,
+                )
+            ) {
+
+                Text("Next screen")
+
+            }
+
+
+            UstadDateField(
+                value = date,
+                label = { Text( "Date") },
+                timeZoneId = "UTC",
+                onValueChange = {
+                    date = it
+                }
+            )
+
+        }
     }
 
 }

@@ -202,7 +202,7 @@ fun UstadDateField(
                 title = {
                     Text(
                         modifier = Modifier.padding(16.dp),
-                        text = stringResource(MR.strings.date)
+                        text = stringResource(MR.strings.select_date)
                     )
                 },
                 state = datePickerState
