@@ -1,5 +1,6 @@
 package com.ustadmobile.libuicompose.components
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.util.ext.isDateSet
 import dev.icerock.moko.resources.compose.stringResource
 import java.text.SimpleDateFormat
@@ -173,18 +175,14 @@ fun UstadDateField(
 
     if (isDialogOpen) {
         DatePickerDialog(
-            onDismissRequest = {
-                isDialogOpen = false
-            },
+            onDismissRequest = { isDialogOpen = false },
             confirmButton = {
                 TextButton(
                     onClick = {
                         datePickerState.selectedDateMillis?.let { time ->
                             val offset = TimeZone.getTimeZone(timeZoneId).getOffset(time)
                             onValueChange(time + offset)
-                            rawValue = time.toDateString()
                         }
-
                         isDialogOpen = false
                     },
                     enabled = datePickerState.selectedDateMillis != null
@@ -194,15 +192,21 @@ fun UstadDateField(
             },
             dismissButton = {
                 TextButton(
-                    onClick = {
-                        isDialogOpen = false
-                    }
+                    onClick = { isDialogOpen = false }
                 ) {
                     Text(stringResource(MR.strings.cancel))
                 }
             }
         ) {
-            DatePicker(state = datePickerState)
+            DatePicker(
+                title = {
+                    Text(
+                        modifier = Modifier.padding(16.dp),
+                        text = stringResource(MR.strings.date)
+                    )
+                },
+                state = datePickerState
+            )
         }
     }
 
