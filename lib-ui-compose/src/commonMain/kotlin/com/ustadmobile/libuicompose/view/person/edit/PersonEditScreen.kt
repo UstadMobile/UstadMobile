@@ -21,6 +21,8 @@ import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.impl.UstadMobileConstants
+import com.ustadmobile.libuicompose.components.UstadDateField
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
@@ -141,18 +143,19 @@ fun PersonEditScreen(
             modifier = Modifier.fillMaxWidth(),
             errorText = uiState.dateOfBirthError
         ) {
-//            UstadDateField(
-//                value = uiState.person?.dateOfBirth ?: 0,
-//                label = { Text(stringResource(MR.strings.birthday)) },
-//                isError = uiState.dateOfBirthError != null,
-//                enabled = uiState.fieldsEnabled,
-//                timeZoneId = UstadMobileConstants.UTC,
-//                onValueChange = {
-//                    onPersonChanged(uiState.person?.shallowCopy{
-//                        dateOfBirth = it
-//                    })
-//                }
-//            )
+            UstadDateField(
+                modifier = Modifier.testTag("dateOfBirth").fillMaxWidth(),
+                value = uiState.person?.dateOfBirth ?: 0,
+                label = { Text(stringResource(MR.strings.birthday)) },
+                isError = uiState.dateOfBirthError != null,
+                enabled = uiState.fieldsEnabled,
+                timeZoneId = UstadMobileConstants.UTC,
+                onValueChange = {
+                    onPersonChanged(uiState.person?.shallowCopy{
+                        dateOfBirth = it
+                    })
+                }
+            )
         }
 
 

@@ -39,6 +39,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
+import com.ustadmobile.libuicompose.view.person.edit.PersonEditScreen
 import kotlinx.coroutines.launch
 
 @Composable
@@ -67,94 +68,42 @@ data class HelloWorldScreen(
 
         val navigator = LocalNavigator.currentOrThrow
 
-        Column(Modifier.fillMaxSize(), Arrangement.spacedBy(5.dp)) {
-
-            Button(
-                onClick = { navigator.push(BasicNavigationScreen(true)) },
-                modifier = Modifier
-                    .testTag("next_screen_button")
-                    .fillMaxWidth(),
-                elevation = null,
-                enabled = uiState.fieldsEnabled,
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Color.Transparent,
-                    contentColor = MaterialTheme.colors.primary,
-                )
-            ) {
-
-                Text("Next screen")
-
-            }
-
-            val dialogState = remember { mutableStateOf(false) }
-            Button(onClick = { dialogState.value = true }) {
-                Text("show dialog")
-            }
-            DialogWindow(
-                onCloseRequest = { dialogState.value = false },
-                visible = dialogState.value,
-                content =  {
-                    Text("dialog content")
-                })
-
-            DatePickerDialogSample()
-        }
+//        Column(Modifier.fillMaxSize(), Arrangement.spacedBy(5.dp)) {
+//
+//            Button(
+//                onClick = { navigator.push(BasicNavigationScreen(true)) },
+//                modifier = Modifier
+//                    .testTag("next_screen_button")
+//                    .fillMaxWidth(),
+//                elevation = null,
+//                enabled = uiState.fieldsEnabled,
+//                colors = ButtonDefaults.buttonColors(
+//                    backgroundColor = Color.Transparent,
+//                    contentColor = MaterialTheme.colors.primary,
+//                )
+//            ) {
+//
+//                Text("Next screen")
+//
+//            }
+//
+//
+//            val dialogState = remember { mutableStateOf(false) }
+//            Button(onClick = { dialogState.value = true }) {
+//                Text("show dialog")
+//            }
+//            DialogWindow(
+//                onCloseRequest = { dialogState.value = false },
+//                visible = dialogState.value,
+//                content =  {
+//                    Text("dialog content")
+//                })
+//
+//            DatePickerDialogSample()
+//        }
+        PersonEditScreen()
     }
 
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DatePickerDialogSample() {
-    // Decoupled snackbar host state from scaffold state for demo purposes.
-    val snackState = remember { SnackbarHostState() }
-    val snackScope = rememberCoroutineScope()
-    SnackbarHost(hostState = snackState, Modifier)
-    val openDialog = remember { mutableStateOf(true) }
-    // TODO demo how to read the selected date from the state.
-
-    Button(onClick = { openDialog.value = true }) {
-        Text("show date picker dialog")
-    }
-
-    if (openDialog.value) {
-        val datePickerState = rememberDatePickerState()
-        val confirmEnabled = derivedStateOf { datePickerState.selectedDateMillis != null }
-        DatePickerDialog(
-            onDismissRequest = {
-                // Dismiss the dialog when the user clicks outside the dialog or on the back
-                // button. If you want to disable that functionality, simply use an empty
-                // onDismissRequest.
-                openDialog.value = false
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        openDialog.value = false
-                        snackScope.launch {
-                            snackState.showSnackbar(
-                                "Selected date timestamp: ${datePickerState.selectedDateMillis}"
-                            )
-                        }
-                    },
-                    enabled = confirmEnabled.value
-                ) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        openDialog.value = false
-                    }
-                ) {
-                    Text("Cancel")
-                }
-            }
-        ) {
-            DatePicker(state = datePickerState)
-        }
-    }
 }
 
 data class BasicNavigationScreen(
