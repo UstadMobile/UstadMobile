@@ -3,7 +3,7 @@
     const path = require('path');
     const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-    const mokoResourcePath = path.resolve("/home/mike/StudioProjects/UstadMobile/app-react/build/generated/moko/jsMain/comustadmobileappreact/res");
+    const mokoResourcePath = path.resolve("/home/ustadmobile/mvvmStudioProject/app-react/build/generated/moko/jsMain/comustadmobileappreact/res");
 
     config.module.rules.push(
         {
