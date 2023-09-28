@@ -17,18 +17,9 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
-//import androidx.compose.ui.tooling.preview.Preview
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.MS_PER_MIN
 import kotlin.math.min
-//import androidx.compose.material.Text
-//import com.google.android.material.timepicker.MaterialTimePicker
-//import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
-import androidx.compose.material.IconButton
-//import androidx.compose.ui.platform.LocalContext
-import androidx.compose.material.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Schedule
 
 
 class TimeVisualTransformation: VisualTransformation {
@@ -133,16 +124,7 @@ fun UstadTimeField(
             }
         },
         trailingIcon = {
-            IconButton(
-                onClick = {
-                    UstadTimePickerAdornment(onTimeSelected = { onValueChange(it) })
-                },
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Schedule,
-                    contentDescription = "",
-                )
-            }
+            UstadTimePickerAdornment(onTimeSelected = { onValueChange(it) })
         },
         visualTransformation = TimeVisualTransformation(),
         singleLine = true,
@@ -150,23 +132,3 @@ fun UstadTimeField(
     )
 
 }
-
-
-//@Preview
-//@Composable
-//fun UstadTimeFieldPreview(){
-//
-//    var time: Int by remember {
-//        mutableStateOf(10 * MS_PER_HOUR)
-//    }
-//
-//    UstadTimeField(
-//        value = time,
-//        label = { Text("Time") },
-//        onValueChange = {
-//            time = it
-//        }
-//    )
-//
-//
-//}

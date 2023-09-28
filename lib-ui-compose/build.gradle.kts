@@ -47,11 +47,13 @@ kotlin {
                 api(libs.activity.compose)
                 api(libs.androidx.appcompat)
                 api(libs.androidx.core.ktx)
+                implementation("com.google.android.material:material:1.9.0")
             }
         }
 
         val desktopMain by getting {
             dependencies {
+                api(project(":core"))
                 api(compose.desktop.common)
                 implementation(compose.desktop.currentOs)
             }
