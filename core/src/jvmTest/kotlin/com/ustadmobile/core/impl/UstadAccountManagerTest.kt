@@ -96,7 +96,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
                             Json.encodeToString(
                                 DoorMessage.serializer(),
                                 DoorMessage(
-                                    what = DoorMessage.WHAT_REPLICATION,
+                                    what = DoorMessage.WHAT_REPLICATION_PULL,
                                     fromNode = 1L,
                                     toNode = 2L,
                                     replications = listOf(
@@ -591,7 +591,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
         runBlocking {
             accountManager.onIncomingMessageReceived(DoorMessage(
-                what = DoorMessage.WHAT_REPLICATION,
+                what = DoorMessage.WHAT_REPLICATION_PULL,
                 fromNode = 1L,
                 toNode = 2L,
                 replications = listOf(
