@@ -17,10 +17,10 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.plugins.json.*
 import io.ktor.serialization.gson.*
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
+import org.junit.After
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -43,7 +43,7 @@ class TestClazzLogCreator {
     fun setup() {
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(), randomUuid().toString())
         db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
-                "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite")
+                "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite", nodeId = 1L)
             .addSyncCallback(nodeIdAndAuth)
             .build()
             .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
@@ -62,6 +62,21 @@ class TestClazzLogCreator {
 
         repo = db.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
             nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient))
+    }
+
+    @After
+    fun tearDown() {
+        httpClient.close()
+        try {
+            repo.close()
+        }catch (e: Exception) {
+            //do nothing
+        }
+        try {
+            db.close()
+        }catch (e: Exception) {
+            //do nothing
+        }
     }
 
     private fun createClazzAndSchedule(clazzName: String, holidayCalendarUid: Long = 0,

@@ -22,13 +22,14 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import kotlinx.coroutines.*
 import org.kodein.di.*
+import com.ustadmobile.core.R as CR
 
 @BindingAdapter(value=["imageUri", "fallbackDrawable"], requireAll = false)
 fun ImageView.setImageFilePath(imageFilePath: String?, fallbackDrawable: Drawable?) {
     setTag(R.id.tag_imagefilepath, imageFilePath)
     val di: DI = (context.applicationContext as DIAware).di
     val accountManager: UstadAccountManager = di.direct.instance()
-    val repo: UmAppDatabase = di.direct.on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
+    val repo: UmAppDatabase = di.direct.on(accountManager.currentAccount).instance(tag = DoorTag.TAG_REPO)
     val uriResolved = imageFilePath?.let { repo.resolveAttachmentAndroidUri(it) }
 
     val drawable = fallbackDrawable?: ContextCompat.getDrawable(context,android.R.color.transparent)
@@ -120,7 +121,7 @@ private fun ImageView.updateImageFromForeignKey() {
 
         foreignKeyPropsVal.currentJob = GlobalScope.async {
             val accountManager : UstadAccountManager = di.direct.instance()
-            val endpointUrl = foreignKeyPropsVal.foreignKeyEndpoint ?: accountManager.activeAccount.endpointUrl
+            val endpointUrl = foreignKeyPropsVal.foreignKeyEndpoint ?: accountManager.currentAccount.endpointUrl
             val repo : UmAppDatabase = di.direct.on(Endpoint(endpointUrl)).instance(DoorTag.TAG_REPO)
             repo.onDbThenRepoWithTimeout(10000) { dbToUse: UmAppDatabase, lastResult: Uri? ->
                 val uri = withTimeoutOrNull(10000) {
@@ -161,12 +162,6 @@ private fun ImageView.updateImageFromForeignKey() {
             }
         }
     }
-}
-
-@BindingAdapter("customFieldIcon")
-fun ImageView.setCustomFieldIcon(customField: CustomField?) {
-    val drawableId = ICON_ID_MAP[customField?.customFieldIconId ?: 0] ?: android.R.color.transparent
-    setImageDrawable(ContextCompat.getDrawable(context, drawableId))
 }
 
 @BindingAdapter("attendanceTint")
@@ -244,7 +239,7 @@ fun ImageView.setIconOnProgressFlag(progress: ContentEntryStatementScoreProgress
 @BindingAdapter(value = ["scopedGrantEnabledIcon"])
 fun ImageView.setScopedGrantEnabledIcon(enabled: Boolean) {
     setImageResource(if(enabled) R.drawable.ic_done_white_24dp else R.drawable.ic_close_black_24dp)
-    contentDescription = context.getString(if(enabled) R.string.enabled else R.string.disabled)
+    contentDescription = context.getString(if(enabled) CR.string.enabled else CR.string.disabled)
 }
 
 @Suppress("UNCHECKED_CAST")
@@ -286,17 +281,9 @@ fun ImageView.isContentCompleteImage(person: PersonWithSessionsDisplay){
         }
     }else{
         setImageDrawable(null)
-        context.getString(R.string.incomplete)
+        context.getString(CR.string.incomplete)
         visibility = View.INVISIBLE
     }
-}
-
-private val ICON_ID_MAP : Map<Int, Int> by lazy {
-    mapOf(CustomField.ICON_PHONE to R.drawable.ic_phone_black_24dp,
-        CustomField.ICON_PERSON to R.drawable.ic_person_black_24dp,
-        CustomField.ICON_CALENDAR to R.drawable.ic_event_black_24dp,
-        CustomField.ICON_EMAIL to R.drawable.ic_email_black_24dp,
-        CustomField.ICON_ADDRESS to R.drawable.ic_location_pin_24dp)
 }
 
 @BindingAdapter("imageResIdInt")

@@ -31,6 +31,7 @@ import com.ustadmobile.lib.db.entities.DiscussionPost
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.UstadAddCommentListItem
 import com.ustadmobile.port.android.view.composable.UstadListSpacerItem
+import com.ustadmobile.core.R as CR
 
 
 class DiscussionPostDetailFragment: UstadBaseMvvmFragment() {
@@ -110,7 +111,7 @@ private fun DiscussionPostDetailFragmentScreen(
             //This is the root item - show add a reply here
             if(discussionPostItem?.discussionPost?.discussionPostReplyToPostUid == 0L) {
                 UstadAddCommentListItem(
-                    text = stringResource(R.string.add_a_reply),
+                    text = stringResource(CR.string.add_a_reply),
                     personUid = uiState.loggedInPersonUid,
                     onClickAddComment =  onClickAddReply,
                 )

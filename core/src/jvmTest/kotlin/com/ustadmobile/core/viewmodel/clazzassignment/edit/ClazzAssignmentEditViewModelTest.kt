@@ -1,14 +1,15 @@
 package com.ustadmobile.core.viewmodel.clazzassignment.edit
 
 import app.cash.turbine.test
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
-import com.ustadmobile.core.view.ClazzEdit2View
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
@@ -26,14 +27,14 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
 
-class ClazzAssignmentEditViewModelTest {
+class ClazzAssignmentEditViewModelTest  : AbstractMainDispatcherTest() {
 
     @Test
     fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalled_thenShouldReturnResult() {
         testViewModel<ClazzAssignmentEditViewModel> {
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_RESULT_DEST_KEY] = "key"
-                savedStateHandle[UstadView.ARG_RESULT_DEST_VIEWNAME] = ClazzEdit2View.VIEW_NAME
+                savedStateHandle[UstadView.ARG_RESULT_DEST_VIEWNAME] = ClazzEditViewModel.DEST_NAME
 
                 ClazzAssignmentEditViewModel(di, savedStateHandle)
             }
@@ -105,7 +106,7 @@ class ClazzAssignmentEditViewModelTest {
             }
 
             viewModel.uiState.assertItemReceived(timeout = 5.seconds) {
-                it.courseBlockEditUiState.caMaxPointsError == systemImpl.getString(MessageID.field_required_prompt)
+                it.courseBlockEditUiState.caMaxPointsError == systemImpl.getString(MR.strings.field_required_prompt)
             }
             verify(navResultReturner, times(0)).sendResult(any())
         }
@@ -130,7 +131,7 @@ class ClazzAssignmentEditViewModelTest {
             }
 
             viewModel.uiState.assertItemReceived {
-                it.courseBlockEditUiState.caDeadlineError == systemImpl.getString(MessageID.end_is_before_start_error)
+                it.courseBlockEditUiState.caDeadlineError == systemImpl.getString(MR.strings.end_is_before_start_error)
             }
         }
     }
@@ -155,7 +156,7 @@ class ClazzAssignmentEditViewModelTest {
             }
 
             viewModel.uiState.assertItemReceived {
-                it.courseBlockEditUiState.caGracePeriodError == systemImpl.getString(MessageID.after_deadline_date_error)
+                it.courseBlockEditUiState.caGracePeriodError == systemImpl.getString(MR.strings.after_deadline_date_error)
             }
         }
     }
@@ -199,7 +200,7 @@ class ClazzAssignmentEditViewModelTest {
 
             val mockSnackBarDispatcher = di.direct.instance<SnackBarDispatcher>()
             verify(mockSnackBarDispatcher, timeout(5000)).showSnackBar(argWhere {
-                it.message.startsWith(systemImpl.getString(MessageID.error))
+                it.message.startsWith(systemImpl.getString(MR.strings.error))
             })
         }
     }
@@ -242,7 +243,7 @@ class ClazzAssignmentEditViewModelTest {
 
             val mockSnackBarDispatcher = di.direct.instance<SnackBarDispatcher>()
             verify(mockSnackBarDispatcher, timeout(5000)).showSnackBar(argWhere {
-                it.message.startsWith(systemImpl.getString(MessageID.error))
+                it.message.startsWith(systemImpl.getString(MR.strings.error))
             })
         }
     }

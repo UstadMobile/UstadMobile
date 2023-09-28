@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <plural name="number_of_attempts">
+        <item quantity="one">%d tentative</item>
+        <item quantity="other">%d tentatives</item>
+    </plural>
+    <plural name="duration_hours">
+        <item quantity="one">%d heure</item>
+        <item quantity="other">%d heures</item>
+    </plural>
+    <plural name="duration_minutes">
+        <item quantity="one">%d min</item>
+        <item quantity="other">%d min</item>
+    </plural>
+    <plural name="duration_seconds">
+        <item quantity="one">%d sec</item>
+        <item quantity="other">%d sec</item>
+    </plural>
+</resources>

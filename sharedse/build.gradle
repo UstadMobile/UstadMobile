@@ -132,6 +132,7 @@ kotlin {
          work when running unit tests in the IDE.
          */
         androidMain {
+            dependsOn commonMain
             dependsOn commonJvmMain
 
             dependencies {
@@ -167,6 +168,7 @@ kotlin {
 
 
         jvmMain {
+            dependsOn commonMain
             dependsOn commonJvmMain
 
             dependencies {

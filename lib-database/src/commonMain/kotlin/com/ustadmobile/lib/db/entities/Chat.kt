@@ -9,24 +9,17 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-@ReplicateEntity(tableId = TABLE_ID , tracker = ChatReplicate::class,
-    priority = ReplicateEntity.HIGHEST_PRIORITY)
+@ReplicateEntity(
+    tableId = TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
 @Triggers(arrayOf(
     Trigger(
         name = "chat_remote_insert",
         order = Trigger.Order.INSTEAD_OF,
         on = Trigger.On.RECEIVEVIEW,
         events = [Trigger.Event.INSERT],
-        sqlStatements = [
-            """
-                REPLACE INTO Chat(chatUid, chatStartDate, chatTitle, chatGroup, chatLct)
-                VALUES(NEW.chatUid, NEW.chatStartDate, NEW.chatTitle, NEW.chatGroup, NEW.chatLct)
-                /*psql ON CONFLICT (chatUid) DO UPDATE 
-                SET chatStartDate = EXCLUDED.chatStartDate, chatTitle = EXCLUDED.chatTitle, 
-                chatGroup = EXCLUDED.chatGroup, chatLct = EXCLUDED.chatLct 
-                */
-            """
-        ]
+        sqlStatements = [TRIGGER_UPSERT_WHERE_NEWER]
     )
 ))
 open class Chat() {
@@ -52,8 +45,8 @@ open class Chat() {
         chatStartDate = systemTimeInMillis()
     }
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var chatLct: Long = 0
 
     companion object{

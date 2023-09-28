@@ -19,11 +19,12 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import com.ustadmobile.port.android.util.compose.stringIdMapResource
 import com.ustadmobile.port.android.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewFragment.Companion.ASSIGNMENT_STATUS_MAP
 import com.ustadmobile.port.android.view.composable.HtmlText
 import java.util.*
+import com.ustadmobile.core.R as CR
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -77,7 +78,7 @@ fun UstadClazzAssignmentListItem(
                     }
 
                     if (assignmentUiState?.submissionStatusVisible == true){
-                        Text(text = messageIdMapResource(
+                        Text(text = stringIdMapResource(
                             map = SubmissionConstants.STATUS_MAP,
                             key = assignment.fileSubmissionStatus)
                         )
@@ -86,17 +87,17 @@ fun UstadClazzAssignmentListItem(
                 
                 if (assignmentUiState?.progressTextVisible == true){
                     Text(text = stringResource(
-                        id = R.string.three_num_items_with_name_with_comma,
+                        id = CR.string.three_num_items_with_name_with_comma,
 
                         assignment.progressSummary
                             ?.calculateNotSubmittedStudents() ?: 0,
-                        stringResource(R.string.not_submitted_cap),
+                        stringResource(CR.string.not_submitted_cap),
 
                         assignment.progressSummary?.submittedStudents ?: 0,
-                        stringResource(R.string.submitted_cap),
+                        stringResource(CR.string.submitted_cap),
 
                         assignment.progressSummary?.markedStudents ?: 0,
-                        stringResource(R.string.marked)
+                        stringResource(CR.string.marked_key)
                     ))
                 }
             }

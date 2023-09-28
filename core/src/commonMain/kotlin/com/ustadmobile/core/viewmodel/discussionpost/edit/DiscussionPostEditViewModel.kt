@@ -1,6 +1,6 @@
 package com.ustadmobile.core.viewmodel.discussionpost.edit
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -55,16 +55,16 @@ class DiscussionPostEditViewModel (
         loadingState = LoadingUiState.INDETERMINATE
 
         val title = if(discussionPostUid == 0L)
-            systemImpl.getString(MessageID.add_new_post)
+            systemImpl.getString(MR.strings.add_new_post)
         else
-            systemImpl.getString(MessageID.edit)
+            systemImpl.getString(MR.strings.edit)
 
         _appUiState.update {
             AppUiState(
                 title = title,
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
-                    text = systemImpl.getString(MessageID.post),
+                    text = systemImpl.getString(MR.strings.post),
                     onClick = this::onClickSave
                 ),
                 hideBottomNavigation = true,
@@ -87,7 +87,7 @@ class DiscussionPostEditViewModel (
                                     .nextIdAsync(DiscussionPost.TABLE_ID)
                                 it.discussionPostCourseBlockUid = courseBlockUidArg
                                 it.discussionPostArchive = false
-                                it.discussionPostStartedPersonUid = accountManager.activeAccount.personUid
+                                it.discussionPostStartedPersonUid = accountManager.currentAccount.personUid
                                 it.discussionPostStartDate = systemTimeInMillis()
                             }
                         },
@@ -157,12 +157,12 @@ class DiscussionPostEditViewModel (
         _uiState.update { prev ->
             prev.copy(
                 discussionPostTitleError = if(post.discussionPostTitle.isNullOrEmpty()){
-                    systemImpl.getString(MessageID.field_required_prompt)
+                    systemImpl.getString(MR.strings.field_required_prompt)
                 }else{
                     null
                 },
                 discussionPostDescError =  if(post.discussionPostMessage.isNullOrEmpty()){
-                    systemImpl.getString(MessageID.field_required_prompt)
+                    systemImpl.getString(MR.strings.field_required_prompt)
                 }else{
                     null
                 }

@@ -33,6 +33,7 @@ import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
 import com.ustadmobile.port.android.view.composable.UstadAddListItem
 import com.ustadmobile.port.android.view.composable.UstadPersonAvatar
+import com.ustadmobile.core.R as CR
 
 interface InviteWithLinkHandler{
     fun handleClickInviteWithLink()
@@ -104,7 +105,7 @@ fun PersonListScreen(
 
     // As per
     // https://developer.android.com/reference/kotlin/androidx/paging/compose/package-summary#collectaslazypagingitems
-    // Must provide a factory to pagingSourceFactory that will
+    // Must provide a factory to pagingSourceFactory that will stay constant
     // https://issuetracker.google.com/issues/241124061
     val pager = remember(uiState.personList) {
         Pager(
@@ -135,7 +136,7 @@ fun PersonListScreen(
             item {
                 UstadAddListItem(
                     modifier = Modifier.testTag("add_new_person"),
-                    text = stringResource(R.string.add_a_new_person),
+                    text = stringResource(CR.string.add_a_new_person),
                     onClickAdd = onClickAddNew
                 )
             }

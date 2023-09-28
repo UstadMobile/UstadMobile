@@ -2,26 +2,35 @@
 import org.apache.tools.ant.filters.*
 
 buildscript {
-    ext.version_kotlin = '1.8.10'
-    ext.version_shadow = "7.1.2"
-    ext.atomicfu_version = '0.19.0'
-    ext.version_ktor = "2.2.3"
+    ext.version_kotlin = '1.9.0'
+    ext.version_shadow = "8.1.1"
+    ext.atomicfu_version = '0.22.0'
+    ext.version_ktor = "2.3.3"
+    ext.version_moko_resources = "0.23.0"
 
     repositories {
         google()
         mavenCentral()
         gradlePluginPortal()
+
+        //Compose multiplatform as per https://github.com/JetBrains/compose-multiplatform-desktop-template/#readme
+        maven {
+            url "https://maven.pkg.jetbrains.space/public/p/compose/dev"
+        }
     }
 
 }
 
 plugins {
-    id 'com.android.application' version '8.0.1' apply false
-    id 'com.android.library' version '8.0.1' apply false
+    id 'com.android.application' version '8.1.1' apply false
+    id 'com.android.library' version '8.1.1' apply false
     id 'org.jetbrains.kotlin.android' version "$version_kotlin" apply false
     id 'org.jetbrains.kotlin.plugin.serialization' version "$version_kotlin" apply false
     id 'org.jetbrains.kotlin.plugin.atomicfu' version "$version_kotlin" apply false
-    id "com.github.ben-manes.versions" version "0.45.0"
+    id 'dev.icerock.mobile.multiplatform-resources' version "$version_moko_resources" apply false
+    id "com.github.ben-manes.versions" version "0.47.0"
+    id 'org.jetbrains.kotlin.jvm' version '1.9.0' apply false
+    alias(libs.plugins.jetbrains.compose) apply false
 }
 
 
@@ -57,11 +66,16 @@ allprojects {
             url "https://repository.jboss.org/nexus/content/repositories/thirdparty-releases/"
         }
 
+        //Compose multiplatform
+        maven {
+            url "https://maven.pkg.jetbrains.space/public/p/compose/dev"
+        }
+
     }
 }
 
 //Major.minor.database version
-version = "0.4.4"
+version = "0.4.5"
 group = "com.ustadmobile.app"
 
 /**
@@ -73,79 +87,82 @@ ext {
     ustadVersion = project.version
     ustadVersionCode = 232
 
-    version_door = "0.0.63o10"
+    version_door = "0.70h"
     version_retriever = "0.0.1e"
-    version_xmlpullparserkmp = '0.0.23'
+    version_xmlpullparserkmp = '0.0.26'
 
     version_gradle_buildconfig_plugin = "1.1.7"
-    version_ksp = "1.0.9"
+    version_ksp = "1.0.13"
     version_jacoco_tool = "0.8.5"
     version_kotlin_jvmTarget = "17"
-    version_kotlinx_serialization = "1.5.0"
-    version_xmlutil = "0.84.3"
+    version_kotlinx_serialization = "1.6.0"
+    version_xmlutil = "0.86.1"
     version_klock = "2.4.13"
-    version_ktor = "2.2.3"
-    version_coroutines = "1.6.4"
-    version_atomicfu = "0.18.4"
+    version_ktor = "2.3.3"
+    version_coroutines = "1.7.3"
+    version_atomicfu = "0.22.0"
     version_kotlinx_html = "0.8.0"
     version_kotlinx_datetime = "0.4.0"
+    version_moko_resources = "0.23.0"
 
 
-    version_turbine = "0.12.1"
+    version_turbine = "1.0.0"
     version_junit = "4.13.2"
     version_nanohttpd = "2.3.1"
     version_kxml = "2.3.0"
-    version_json = "20220924"
+    version_json = "20230618"
+    version_byte_buddy = "1.14.6"
 
-    version_okhttp = "4.10.0"
-    version_commons_io = "2.11.0"
+    version_okhttp = "4.11.0"
+    version_commons_io = "2.13.0"
     version_gson = "2.10.1"
     version_apache_commons_cli = "1.5.0"
-    version_apache_commons_lang = "3.12.0"
+    version_apache_commons_lang = "3.13.0"
     version_apache_commons_text = "1.8"
     version_apache_commons_dbcp2 = "2.9.0"
-    version_apache_commons_compress = "1.22"
+    version_apache_commons_compress = "1.23.0"
     version_mpandroidchart = "v3.1.0"
 
     version_mockwebserver = "4.10.0"
     version_simple_jndi = "0.23.0"
-    version_sqlite_jdbc = "3.40.1.0"
+    version_sqlite_jdbc = "3.42.0.0"
     version_core_mockito = "4.8.0"
-    version_kotlin_mockito = "4.1.0"
+    version_kotlin_mockito = "5.1.0"
     version_compressor = "3.0.1"
     version_apache_commons_pool2 = "2.11.1"
-    version_jsoup = "1.15.3"
-    version_selenium = "4.8.0"
+    version_jsoup = "1.16.1"
+    version_selenium = "4.11.0"
     version_nv_lang = "1.29"
-    version_web_driver = "5.3.2"
-    version_postgres_jdbc = "42.5.3"
-    version_log4j = "2.19.0"
+    version_web_driver = "5.5.0"
+    version_postgres_jdbc = "42.6.0"
+    version_log4j = "2.20.0"
     version_exo_player = "2.14.0"
     version_napier = "2.6.1"
     version_browser_proxy = "2.1.5"
-    version_logback = "1.4.5"
-    version_kodein_di = "7.20.1"
-    version_netty_tcnative = "2.0.57.Final"
+    version_logback = "1.4.11"
+    version_kodein_di = "7.20.2"
+    version_netty_tcnative = "2.0.61.Final"
     version_quartz_scheduler = "2.3.2"
-    version_httpcomponents_core5 = "5.2.1"
+    version_httpcomponents_core5 = "5.2.2"
+    version_argparse4j = "0.9.0"
 
     version_android_buildtools = "30.0.2"
-    version_android_compile_sdk = 33
-    version_android_target_sdk = 33
+    version_android_compile_sdk = 34
+    version_android_target_sdk = 34
     version_android_min_sdk = 21
     version_android_picasso = "2.8"
-    version_android_desugar_jdk_libs = "1.1.5"
+    version_android_desugar_jdk_libs = "2.0.3"
 
     //Androidx versions as per https://developer.android.com/jetpack/androidx/versions
     version_androidx_annotation = "1.6.0-dev01"
 
-    version_android_material = "1.8.0"
+    version_android_material = "1.9.0"
     version_androidx_appcompat = "1.6.1"
 
-    version_compose_bom = "2022.12.00"
-    version_activity_compose = "1.5.1"
+    version_compose_bom = "2023.08.00"
+    version_activity_compose = "1.7.2"
 
-    version_compose_accompanist = "0.28.0"
+    version_compose_accompanist = "0.32.0"
 
     //As per https://github.com/material-components/material-components-android-compose-theme-adapter/releases
     version_compose_theme_adapter = "0.28.0"
@@ -154,18 +171,18 @@ ext {
     version_composereorderable = "0.9.6"
 
     version_androidx_legacy_support = "1.0.0"
-    version_androidx_activity = "1.6.1"
-    version_androidx_fragment = "1.5.5"
+    version_androidx_activity = "1.7.2"
+    version_androidx_fragment = "1.6.1"
     version_androidx_core = '1.9.0'
     version_androidx_cardview = "1.0.0"
     version_androidx_coordinatorlayout = "1.2.0"
-    version_androidx_lifecycle = "2.5.1"
+    version_androidx_lifecycle = "2.6.1"
     version_androidx_legacy = "1.0.0"
-    version_android_room = "2.5.0"
+    version_android_room = "2.5.2"
     version_androidx_arch = "2.1.0"
-    version_androidx_recyclerview = "1.2.1"
+    version_androidx_recyclerview = "1.3.1"
     version_android_multidex = "2.0.1"
-    version_android_workmanager = "2.8.0"
+    version_android_workmanager = "2.8.1"
     version_androidx_paging = "3.1.1"
     version_androidx_paging_compose = "1.0.0-alpha18"
     version_android_datastore = "1.0.0"
@@ -180,14 +197,14 @@ ext {
     version_androidx_test_ext_junit = "1.1.5" //see https://mvnrepository.com/artifact/androidx.test.ext/junit
     version_android_espresso_recyclerviewchildactions = "1.0"
     version_androidx_databinding = "7.0.4"
-    version_android_mockito = "5.1.1"
-    version_android_roboelectric = "4.9.2"
+    version_android_mockito = "5.5.0"
+    version_android_roboelectric = "4.10.3"
     version_android_uiautomator = "2.2.0"
     version_android_firebase_auth = "16.0.4"
     version_android_facebook_login = "4.37.0"
     version_android_twitter_login = "3.3.0"
     version_android_seismic = "1.0.3"
-    version_android_navigation = "2.5.3"
+    version_android_navigation = "2.7.1"
     version_play_core = "1.10.3"
     version_android_leakcanary = "2.10"
     version_android_play_services_safetynet = "17.0.0"
@@ -203,7 +220,7 @@ ext {
     version_android_panickit = "1.0"
 
     //Image loading library for Android
-    version_android_coil = "2.2.2"
+    version_android_coil = "2.4.0"
 
     version_js_node = "10.15.1"
     version_js_yarn="1.13.0"
@@ -214,7 +231,7 @@ ext {
     version_better_link_movement="2.2.0"
 
     /*Kotlin react web app*/
-    kotlinWrappersVersion = "1.0.0-pre.526"
+    kotlinWrappersVersion = "1.0.0-pre.619"
 
     version_npm_mement_io = "^2.14.0"
     version_npm_mui_lab = "5.0.0-alpha.89"
@@ -227,6 +244,7 @@ ext {
     version_npm_mui_icons = "5.10.2"
     version_npm_mui_material = "5.10.2"
 
+    //TODO: this could/should be removed
     version_npm_mui_x_date_pickers ="^5.0.4"
 
     version_npm_timezones = "^1.6.1"
@@ -248,7 +266,7 @@ ext {
     version_linkify_js = "^3.0.5"
     version_linkify_react = "^3.0.4"
     version_pdfview_android = "1.1.0"
-    version_pdfbox_apache = "3.0.0-RC1"
+    version_pdfbox_apache = "3.0.0"
     version_pdfview_android = "1.1.0"
 }
 

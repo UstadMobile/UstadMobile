@@ -17,7 +17,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditUiState
 import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
 import com.ustadmobile.lib.db.entities.ClazzLog
@@ -25,7 +24,8 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.UstadDateTimeField
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
-import com.ustadmobile.port.android.view.composable.UstadInputFieldLayout
+import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
+import com.ustadmobile.core.R as CR
 
 class ClazzLogEditFragment: UstadBaseMvvmFragment() {
 
@@ -74,8 +74,8 @@ private fun ClazzLogEditScreen(
                 .fillMaxWidth()
                 .testTag("log_datetime"),
             value = uiState.clazzLog?.logDate ?: 0L,
-            dateLabel = { Text(stringResource(id = R.string.date)) },
-            timeLabel = { Text(stringResource(R.string.time)) },
+            dateLabel = { Text(stringResource(id = CR.string.date)) },
+            timeLabel = { Text(stringResource(CR.string.time)) },
             timeZoneId = uiState.timeZone,
             onValueChange = {
                 onChangeClazzLog(uiState.clazzLog?.shallowCopy {

@@ -8,7 +8,10 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-@ReplicateEntity(tableId = TABLE_ID, tracker = PersonParentJoinReplicate::class)
+@ReplicateEntity(
+    tableId = TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
 @Triggers(arrayOf(
      Trigger(
          name = "personparentjoin_remote_insert",
@@ -38,8 +41,8 @@ open class PersonParentJoin {
     @LastChangedBy
     var ppjLcb: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var ppjLct: Long = 0
 
     /**

@@ -2,7 +2,7 @@ package com.ustadmobile.core.viewmodel.clazzassignment.edit
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.peerreviewallocation.UpdatePeerReviewAllocationUseCase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -11,7 +11,6 @@ import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.asCourseBlockWithEntity
 import com.ustadmobile.core.util.ext.whenSubscribed
-import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
@@ -80,7 +79,7 @@ class ClazzAssignmentEditViewModel(
         -> UpdatePeerReviewAllocationUseCase = { db, systemImpl ->
         UpdatePeerReviewAllocationUseCase(db, systemImpl)
     }
-): UstadEditViewModel(di, savedStateHandle, ClazzAssignmentEditView.VIEW_NAME) {
+): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(ClazzAssignmentEditUiState())
 
@@ -94,10 +93,10 @@ class ClazzAssignmentEditViewModel(
                 hideBottomNavigation = true,
                 userAccountIconVisible = false,
                 loadingState = LoadingUiState.INDETERMINATE,
-                title = createEditTitle(MessageID.new_assignment, MessageID.edit_assignment),
+                title = createEditTitle(MR.strings.new_assignment, MR.strings.edit_assignment),
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
-                    text = systemImpl.getString(MessageID.done),
+                    text = systemImpl.getString(MR.strings.done),
                     onClick = this::onClickSave,
                 )
             )
@@ -326,7 +325,7 @@ class ClazzAssignmentEditViewModel(
 
             if(!assignment.caRequireFileSubmission && !assignment.caRequireTextSubmission) {
                 _uiState.update { prev ->
-                    prev.copy(submissionRequiredError = systemImpl.getString(MessageID.text_file_submission_error))
+                    prev.copy(submissionRequiredError = systemImpl.getString(MR.strings.text_file_submission_error))
                 }
             }
 
@@ -334,7 +333,7 @@ class ClazzAssignmentEditViewModel(
                 _uiState.update { prev ->
                     prev.copy(
                         courseBlockEditUiState = prev.courseBlockEditUiState.copy(
-                            caMaxPointsError = systemImpl.getString(MessageID.field_required_prompt)
+                            caMaxPointsError = systemImpl.getString(MR.strings.field_required_prompt)
                         )
                     )
                 }
@@ -344,7 +343,7 @@ class ClazzAssignmentEditViewModel(
                 _uiState.update { prev ->
                     prev.copy(
                         courseBlockEditUiState = prev.courseBlockEditUiState.copy(
-                            caDeadlineError = systemImpl.getString(MessageID.end_is_before_start_error)
+                            caDeadlineError = systemImpl.getString(MR.strings.end_is_before_start_error)
                         )
                     )
                 }
@@ -354,7 +353,7 @@ class ClazzAssignmentEditViewModel(
                 _uiState.update { prev ->
                     prev.copy(
                         courseBlockEditUiState = prev.courseBlockEditUiState.copy(
-                            caGracePeriodError = systemImpl.getString(MessageID.after_deadline_date_error)
+                            caGracePeriodError = systemImpl.getString(MR.strings.after_deadline_date_error)
                         )
                     )
                 }
@@ -365,20 +364,20 @@ class ClazzAssignmentEditViewModel(
             if(initState.entity?.assignment?.caGroupUid != assignment.caGroupUid &&
                 !checkNoSubmissionsMade()
             ) {
-                errorSnack = systemImpl.getString(MessageID.error) + "Cannot change groups after submissions made"
+                errorSnack = systemImpl.getString(MR.strings.error) + "Cannot change groups after submissions made"
             }
 
             if(initState.entity?.assignment?.caMarkingType != assignment.caMarkingType &&
                 errorSnack == null && !checkNoSubmissionsMade()
             ) {
-                errorSnack = systemImpl.getString(MessageID.error) + "Cannot change marking type after submissions made"
+                errorSnack = systemImpl.getString(MR.strings.error) + "Cannot change marking type after submissions made"
             }
 
             if(assignment.caMarkingType == ClazzAssignment.MARKED_BY_PEERS &&
                 assignment.caPeerReviewerCount < 1
             ) {
                 _uiState.update { prev ->
-                    prev.copy(reviewerCountError = systemImpl.getString(MessageID.score_greater_than_zero))
+                    prev.copy(reviewerCountError = systemImpl.getString(MR.strings.score_greater_than_zero))
                 }
             }
 
@@ -425,6 +424,8 @@ class ClazzAssignmentEditViewModel(
     companion object {
 
         const val RESULT_KEY_GROUPSET = "groupSet"
+
+        const val DEST_NAME = "CourseAssignmentEdit"
 
     }
 }

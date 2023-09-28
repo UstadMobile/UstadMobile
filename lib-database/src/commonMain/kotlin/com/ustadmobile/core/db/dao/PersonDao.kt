@@ -2,75 +2,19 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.*
 import com.ustadmobile.core.db.dao.PersonDaoCommon.SQL_SELECT_LIST_WITH_PERMISSION
-import com.ustadmobile.door.paging.DataSourceFactory
-import com.ustadmobile.door.lifecycle.LiveData
+import app.cash.paging.PagingSource
+import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.door.paging.PagingSource
 import com.ustadmobile.lib.db.composites.PersonNames
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Person.Companion.FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
 import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
 import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
-import kotlinx.coroutines.flow.Flow
 
 
 @DoorDao
 @Repository
 expect abstract class PersonDao : BaseDao<Person> {
-
-    @Query("""
-     REPLACE INTO PersonReplicate(personPk, personDestination)
-      SELECT DISTINCT Person.personUid AS personUid,
-             :newNodeId AS personDestination
-        FROM UserSession
-             JOIN PersonGroupMember
-                ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-                   $JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
-                   ${Role.PERMISSION_PERSON_SELECT}
-                   $JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
-       WHERE Person.personType = ${Person.TYPE_NORMAL_PERSON}
-         AND UserSession.usClientNodeId = :newNodeId
-         AND Person.personLct != COALESCE(
-             (SELECT personVersionId
-                FROM PersonReplicate
-               WHERE personPk = Person.personUid
-                 AND personDestination = :newNodeId), 0)              
-      /*psql ON CONFLICT(personPk, personDestination) DO UPDATE
-             SET personPending = true
-      */       
-    """)
-    @ReplicationRunOnNewNode
-    @ReplicationCheckPendingNotificationsFor([Person::class])
-    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
-
-     @Query("""
- REPLACE INTO PersonReplicate(personPk, personDestination)
-  SELECT DISTINCT Person.personUid AS personUid,
-         UserSession.usClientNodeId AS personDestination
-    FROM ChangeLog
-         JOIN Person
-             ON ChangeLog.chTableId = 9
-                AND ChangeLog.chEntityPk = Person.personUid
-         ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-            ${Role.PERMISSION_PERSON_SELECT}
-            ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
-   WHERE Person.personType = ${Person.TYPE_NORMAL_PERSON}
-     AND UserSession.usClientNodeId != (
-         SELECT nodeClientId 
-           FROM SyncNode
-          LIMIT 1)
-     AND Person.personLct != COALESCE(
-         (SELECT personVersionId
-            FROM PersonReplicate
-           WHERE personPk = Person.personUid
-             AND personDestination = UserSession.usClientNodeId), 0)
- /*psql ON CONFLICT(personPk, personDestination) DO UPDATE
-     SET personPending = true
-  */               
- """)
-    @ReplicationRunOnChange([Person::class])
-    @ReplicationCheckPendingNotificationsFor([Person::class])
-    abstract suspend fun replicateOnChange()
 
     @Insert
     abstract suspend fun insertListAsync(entityList: List<Person>)
@@ -186,7 +130,7 @@ expect abstract class PersonDao : BaseDao<Person> {
     abstract suspend fun findPersonAccountByUid(uid: Long): PersonWithAccount?
 
     @Query("SELECT * From Person WHERE personUid = :uid")
-    abstract fun findByUidLive(uid: Long): LiveData<Person?>
+    abstract fun findByUidLive(uid: Long): Flow<Person?>
 
     @Query("SELECT * FROM Person WHERE personUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : Person?
@@ -207,7 +151,7 @@ expect abstract class PersonDao : BaseDao<Person> {
     @Query(SQL_SELECT_LIST_WITH_PERMISSION)
     abstract fun findPersonsWithPermission(timestamp: Long, excludeClazz: Long,
                                                  excludeSchool: Long, excludeSelected: List<Long>,
-                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): DataSourceFactory<Int, PersonWithDisplayDetails>
+                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): PagingSource<Int, PersonWithDisplayDetails>
 
     @Query(SQL_SELECT_LIST_WITH_PERMISSION)
     abstract fun findPersonsWithPermissionAsList(
@@ -243,7 +187,7 @@ expect abstract class PersonDao : BaseDao<Person> {
          WHERE Person.personUid = :personUid
         """)
     @QueryLiveTables(["Person", "PersonParentJoin"])
-    abstract fun findByUidWithDisplayDetailsLive(personUid: Long, activeUserPersonUid: Long): LiveData<PersonWithPersonParentJoin?>
+    abstract fun findByUidWithDisplayDetailsLive(personUid: Long, activeUserPersonUid: Long): Flow<PersonWithPersonParentJoin?>
 
 
     @Query("""
@@ -263,9 +207,6 @@ expect abstract class PersonDao : BaseDao<Person> {
         activeUserPersonUid: Long
     ): Flow<PersonWithPersonParentJoin?>
 
-
-    @Insert
-    abstract fun insertAuditLog(entity: AuditLog): Long
 
     @Query("SELECT * FROM Person")
     abstract fun getAllPerson(): List<Person>

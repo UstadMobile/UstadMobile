@@ -88,13 +88,12 @@ fun Route.ContentEntryLinkImporter() {
                 Napier.i("contentEntry from client: ${contentEntry.contentEntryUid}")
 
                 val db: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_DB)
-                val repo: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_REPO)
                 val containerFolder: File by closestDI().on(call).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
                 val entryFromDb = db.contentEntryDao.findByUid(contentEntry.contentEntryUid)
                 val endpoint = call.callEndpoint
                 if (entryFromDb == null) {
                     Napier.i("not synced so using contentEntry from db")
-                    repo.contentEntryDao.insertWithReplace(contentEntry)
+                    db.contentEntryDao.insertWithReplace(contentEntry)
                 }
 
                 val contentJobManager: ContentJobManager by closestDI().on(call).instance()

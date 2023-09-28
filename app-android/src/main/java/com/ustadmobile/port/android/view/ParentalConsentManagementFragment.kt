@@ -17,14 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.FragmentParentalConsentManagementBinding
-import com.ustadmobile.core.controller.ParentalConsentManagementPresenter
-import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.locale.entityconstants.PersonParentJoinConstants
-import com.ustadmobile.core.util.IdOption
-import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.core.viewmodel.ParentalConsentManagementUiState
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
@@ -35,9 +29,8 @@ import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.util.compose.rememberFormattedDate
 import com.ustadmobile.port.android.view.binding.loadHtmlData
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
-import com.ustadmobile.port.android.view.composable.UstadInputFieldLayout
-import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
-
+import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
+import com.ustadmobile.core.R as CR
 
 interface ParentAccountLandingFragmentEventHandler {
     fun onClickConsent()
@@ -45,114 +38,9 @@ interface ParentAccountLandingFragmentEventHandler {
     fun onClickChangeConsent()
 }
 
-class ParentalConsentManagementFragment: UstadEditFragment<PersonParentJoinWithMinorPerson>(), ParentalConsentManagementView, ParentAccountLandingFragmentEventHandler {
-
-    private var mBinding: FragmentParentalConsentManagementBinding? = null
-
-    private var mPresenter: ParentalConsentManagementPresenter? = null
-
-    override val mEditPresenter: UstadEditPresenter<*, PersonParentJoinWithMinorPerson>?
-        get() = mPresenter
+class ParentalConsentManagementFragment: UstadBaseMvvmFragment() {
 
 
-    override var infoText: String?
-        get() = mBinding?.infoText
-        set(value) {
-            mBinding?.infoText = value
-        }
-
-    override var siteTerms: SiteTerms?
-        get() = mBinding?.siteTerms
-        set(value) {
-            mBinding?.siteTerms = value
-        }
-
-    override var relationshipFieldOptions: List<IdOption>?
-        get() = mBinding?.relationshipFieldOptions
-        set(value) {
-            mBinding?.relationshipFieldOptions = value
-        }
-
-    override var relationshipFieldError: String?
-        get() = mBinding?.relationshipFieldError
-        set(value) {
-            mBinding?.relationshipFieldError = value
-        }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val rootView: View
-        mBinding = FragmentParentalConsentManagementBinding.inflate(inflater, container, false).also { binding ->
-            rootView = binding.root
-            binding.eventHandler = this
-            binding.relationshipValue.addTextChangedListener(ClearErrorTextWatcher {
-                binding.relationshipFieldError = null
-            })
-        }
-
-        mPresenter = ParentalConsentManagementPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di).withViewLifecycle()
-
-
-        return rootView
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        //do nothing: this descends from edit fragment, but does not use the done checkbox
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        mPresenter?.onCreate(backStackSavedState)
-    }
-
-    override fun onClickConsent() {
-        entity?.also {
-            it.ppjStatus = PersonParentJoin.STATUS_APPROVED
-            mPresenter?.handleClickSave(it)
-        }
-    }
-
-    override fun onClickDoNotConsent() {
-        entity?.also {
-            it.ppjStatus  = PersonParentJoin.STATUS_REJECTED
-            mPresenter?.handleClickSave(it)
-        }
-    }
-
-    override fun onClickChangeConsent() {
-        entity?.also {
-            it.ppjStatus = if(it.ppjStatus == PersonParentJoin.STATUS_APPROVED) {
-                PersonParentJoin.STATUS_REJECTED
-            }else {
-                PersonParentJoin.STATUS_APPROVED
-            }
-
-            mPresenter?.handleClickSave(it)
-        }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        mBinding?.eventHandler = null
-        mBinding = null
-        mPresenter = null
-        entity = null
-    }
-
-    override var entity: PersonParentJoinWithMinorPerson?
-        get() = mBinding?.personParentJoin
-        set(value) {
-            mBinding?.personParentJoin = value
-        }
-
-    override var fieldsEnabled: Boolean = false
-        get() = field
-        set(value) {
-            super.fieldsEnabled = value
-            field = value
-            mBinding?.fieldsEnabled = value
-        }
 }
 
 @Composable
@@ -174,7 +62,7 @@ private fun ParentalConsentManagementScreen(
             timeInMillis = uiState.personParentJoin?.minorPerson?.dateOfBirth ?: 0,
             timeZoneId = UstadMobileConstants.UTC,
         )
-        Text(stringResource(id = R.string.parent_consent_explanation,
+        Text(stringResource(id = CR.string.parent_consent_explanation,
             uiState.personParentJoin?.minorPerson?.fullName() ?: "",
             minorDateOfBirth, uiState.appName))
 
@@ -188,7 +76,7 @@ private fun ParentalConsentManagementScreen(
                 UstadMessageIdOptionExposedDropDownMenuField(
                     modifier = Modifier.fillMaxWidth(),
                     value = uiState.personParentJoin?.ppjRelationship ?: 0,
-                    label = stringResource(R.string.relationship),
+                    label = stringResource(CR.string.relationship),
                     options = PersonParentJoinConstants.RELATIONSHIP_MESSAGE_IDS,
                     onOptionSelected = {
                         onChangeRelation(uiState.personParentJoin?.shallowCopy{
@@ -204,7 +92,7 @@ private fun ParentalConsentManagementScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(stringResource(id = R.string.terms_and_policies),
+        Text(stringResource(id = CR.string.terms_and_policies),
             style = Typography.h4
         )
 
@@ -240,7 +128,7 @@ private fun ParentalConsentManagementScreen(
                     backgroundColor = colorResource(id = R.color.secondaryColor)
                 )
             ) {
-                Text(stringResource(R.string.i_consent).uppercase(),
+                Text(stringResource(CR.string.i_consent).uppercase(),
                     color = contentColorFor(
                         colorResource(id = R.color.secondaryColor)
                     )
@@ -255,15 +143,15 @@ private fun ParentalConsentManagementScreen(
                     .fillMaxWidth(),
                 enabled = uiState.fieldsEnabled,
             ) {
-                Text(stringResource(R.string.i_do_not_consent).uppercase())
+                Text(stringResource(CR.string.i_do_not_consent).uppercase())
             }
         }
         if (uiState.changeConsentVisible){
             val changeConsentText: Int =
                 if (uiState.personParentJoin?.ppjStatus == PersonParentJoin.STATUS_APPROVED)
-                    R.string.revoke_consent
+                    CR.string.revoke_consent
                 else
-                    R.string.restore_consent
+                    CR.string.restore_consent
 
             Button(
                 onClick = onClickChangeConsent,

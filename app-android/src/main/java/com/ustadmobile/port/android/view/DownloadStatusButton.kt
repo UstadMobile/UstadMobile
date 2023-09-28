@@ -10,6 +10,7 @@ import android.widget.RelativeLayout
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.util.ext.isStatusPaused
+import com.ustadmobile.core.R as CR
 
 /**
  * A button that shows the download status of an item. It consists of an icon (a download icon or
@@ -32,17 +33,17 @@ class DownloadStatusButton : RelativeLayout {
             when {
                 statusChanged && currentDownloadStatus.isStatusPaused() -> {
                     setImageResource(R.drawable.ic_baseline_pause_24)
-                    contentDescription = context.getString(R.string.download_entry_state_paused)
+                    contentDescription = context.getString(CR.string.download_entry_state_paused)
                 }
 
                 statusChanged && currentDownloadStatus == JobStatus.COMPLETE -> {
                     setImageResource(R.drawable.ic_baseline_offline_pin_24)
-                    contentDescription = context.getString(R.string.downloaded)
+                    contentDescription = context.getString(CR.string.downloaded)
                 }
 
                 statusChanged -> {
                     setImageResource(R.drawable.ic_file_download_black_24dp)
-                    contentDescription = context.getString(R.string.download)
+                    contentDescription = context.getString(CR.string.download)
                 }
             }
 

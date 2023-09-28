@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 class TestCase(
     val id: String,
     val name: String,
+    val classname: String? = null,
 
     val failure: List<Failure> = emptyList(),
 ) {

@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.ext.awaitItemWhere
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.flow.doorFlow
@@ -20,7 +21,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
-class CourseGroupSetEditViewModelTest {
+class CourseGroupSetEditViewModelTest : AbstractMainDispatcherTest()  {
 
 
     private data class TestContext(

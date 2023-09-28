@@ -1,17 +1,16 @@
 package com.ustadmobile.core.viewmodel.courseterminology.edit
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.encodeToStringMap
 import com.ustadmobile.core.util.ext.replace
 import com.ustadmobile.core.util.ext.toTerminologyEntries
-import com.ustadmobile.core.view.CourseTerminologyEditView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.CourseTerminology
-import com.ustadmobile.lib.db.entities.TerminologyEntry
+import com.ustadmobile.core.impl.locale.TerminologyEntry
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,7 +34,7 @@ data class CourseTerminologyEditUiState(
 class CourseTerminologyEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-): UstadEditViewModel(di, savedStateHandle, CourseTerminologyEditView.VIEW_NAME) {
+): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(CourseTerminologyEditUiState(fieldsEnabled = false))
 
@@ -44,10 +43,10 @@ class CourseTerminologyEditViewModel(
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = createEditTitle(MessageID.add_new_terminology, MessageID.edit_terminology),
+                title = createEditTitle(MR.strings.add_new_terminology, MR.strings.edit_terminology),
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
-                    text = systemImpl.getString(MessageID.save),
+                    text = systemImpl.getString(MR.strings.save),
                     onClick = this::onClickSave
                 ),
                 loadingState = LoadingUiState.INDETERMINATE
@@ -103,7 +102,7 @@ class CourseTerminologyEditViewModel(
         terminologyEntry: TerminologyEntry
     ) {
         val newTermList = _uiState.value.terminologyTermList.replace(terminologyEntry){
-            it.messageId == terminologyEntry.messageId
+            it.stringResource == terminologyEntry.stringResource
         }
 
         _uiState.update { prev ->
@@ -124,6 +123,11 @@ class CourseTerminologyEditViewModel(
             //There is no terminology detail view
             finishWithResult(terminology)
         }
+    }
+
+    companion object {
+
+        const val DEST_NAME = "CourseTerminologyEdit"
     }
 
 }

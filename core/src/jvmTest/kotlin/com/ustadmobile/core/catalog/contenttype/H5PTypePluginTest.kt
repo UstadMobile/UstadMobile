@@ -9,12 +9,12 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
+import com.ustadmobile.util.test.initNapierLog
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
-import io.github.aakira.napier.DebugAntilog
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
@@ -28,15 +28,13 @@ import java.io.File
 import java.util.zip.GZIPInputStream
 import java.util.zip.ZipFile
 
-class H5PTypePluginTest {
+class H5PTypePluginTest : AbstractMainDispatcherTest() {
 
     private lateinit var h5pPlugin: H5PTypePluginCommonJvm
 
     @JvmField
     @Rule
     val tmpFolder = TemporaryFolder()
-
-    private val context = Any()
 
     @JvmField
     @Rule
@@ -55,7 +53,7 @@ class H5PTypePluginTest {
 
     @Before
     fun setup(){
-        Napier.base(DebugAntilog())
+        initNapierLog()
         endpointScope = EndpointScope()
         di = DI {
             import(ustadTestRule.diModule)
@@ -112,8 +110,8 @@ class H5PTypePluginTest {
         val tempFolder = tmpFolder.newFolder("newFolder")
         val tempUri = DoorUri.parse(tempFolder.toURI().toString())
         val accountManager: UstadAccountManager by di.instance()
-        repo = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
-        db = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
+        repo = di.on(accountManager.currentAccount).direct.instance(tag = DoorTag.TAG_REPO)
+        db = di.on(accountManager.currentAccount).direct.instance(tag = DoorTag.TAG_DB)
 
         val inputStream = this::class.java.getResourceAsStream(
                 "/com/ustadmobile/core/contenttype/dialog-cards-620.h5p")

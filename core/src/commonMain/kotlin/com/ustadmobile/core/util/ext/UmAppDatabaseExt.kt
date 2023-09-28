@@ -1,18 +1,17 @@
 package com.ustadmobile.core.util.ext
 
+import app.cash.paging.PagingSource
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.Pbkdf2Params
-import com.ustadmobile.core.controller.ReportFilterEditPresenter.Companion.genderMap
 import com.ustadmobile.core.controller.TerminologyKeys
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.findEntriesByMd5SumsSafeAsync
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.graph.LabelValueFormatter
 import com.ustadmobile.core.util.graph.MessageIdFormatter
 import com.ustadmobile.core.util.graph.TimeFormatter
 import com.ustadmobile.core.util.graph.UidAndLabelFormatter
-import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.SimpleDoorQuery
@@ -45,10 +44,10 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(
             termMap[TerminologyKeys.STUDENTS_KEY]))
 
     clazz.clazzPendingStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
-            impl.getString(MessageID.pending_requests)))
+            impl.getString(MR.strings.pending_requests)))
 
     clazz.clazzParentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
-            impl.getString(MessageID.parent)))
+            impl.getString(MR.strings.parent)))
 
     clazz.takeIf { it.clazzCode == null }?.clazzCode = randomString(Clazz.CLAZZ_CODE_DEFAULT_LENGTH)
 
@@ -336,8 +335,12 @@ fun UmAppDatabase.insertPersonOnlyAndGroup(entity: Person): Person{
 
 }
 
-suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
-                                            context: Any, impl: UstadMobileSystemImpl, loggedInPersonUid: Long): ChartData{
+suspend fun UmAppDatabase.generateChartData(
+    report: ReportWithSeriesWithFilters,
+    context: Any,
+    impl: UstadMobileSystemImpl,
+    loggedInPersonUid: Long
+): ChartData{
 
     val queries = report.generateSql(loggedInPersonUid, dbType())
     val seriesDataList = mutableListOf<SeriesData>()
@@ -363,11 +366,12 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
                         .map { it.uid to it.labelName }.toMap()
                 UidAndLabelFormatter(clazzLabelList)
             }
-            Report.GENDER -> {
-                MessageIdFormatter(
-                        genderMap.mapKeys { it.key.toString() },
-                        impl, context)
-            }
+//must be handled when reports are brought back
+//            Report.GENDER -> {
+//                MessageIdFormatter(
+//                        genderMap.mapKeys { it.key.toString() },
+//                        impl, context)
+//            }
             Report.CONTENT_ENTRY ->{
                 val listOfUids = reportList.mapNotNull { it.subgroup?.toLong() }.toSet().toList()
                 val entryLabelList = contentEntryDao.getContentEntryFromUids(listOfUids)
@@ -398,11 +402,12 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
                     .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
             UidAndLabelFormatter(clazzLabelList)
         }
-        Report.GENDER -> {
-            MessageIdFormatter(
-                    genderMap.mapKeys { it.key.toString() },
-                    impl, context)
-        }
+//Must be handled when reporting is brought back
+//        Report.GENDER -> {
+//            MessageIdFormatter(
+//                    genderMap.mapKeys { it.key.toString() },
+//                    impl, context)
+//        }
         Report.CONTENT_ENTRY ->{
             val entryLabelList = contentEntryDao.getContentEntryFromUids(xAxisList
                     .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
@@ -415,7 +420,7 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
         Report.ENROLMENT_LEAVING_REASON -> {
             val reasonLabelList = leavingReasonDao.getReasonsFromUids(xAxisList
                     .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
-                    .plus(0L to impl.getString(MessageID.unset, context))
+                    .plus(0L to impl.getString(MR.strings.unset))
             UidAndLabelFormatter(reasonLabelList)
         }
         else ->{
@@ -427,10 +432,10 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
 }
 
 fun UmAppDatabase.generateStatementList(report: ReportWithSeriesWithFilters, loggedInPersonUid: Long):
-        List<DataSourceFactory<Int, StatementEntityWithDisplayDetails>> {
+        List<PagingSource<Int, StatementEntityWithDisplayDetails>> {
 
     val queries = report.generateSql(loggedInPersonUid, dbType())
-    val statementDataSourceList = mutableListOf<DataSourceFactory<Int, StatementEntityWithDisplayDetails>>()
+    val statementDataSourceList = mutableListOf<PagingSource<Int, StatementEntityWithDisplayDetails>>()
     queries.forEach {
         statementDataSourceList.add(statementDao.getListResults(SimpleDoorQuery(it.value.sqlListStr, it.value.queryParams)))
     }
@@ -458,15 +463,15 @@ suspend fun UmAppDatabase.createNewSchoolAndGroups(
 ) :Long {
     school.schoolTeachersPersonGroupUid = personGroupDao.insertAsync(
             PersonGroup("${school.schoolName} - " +
-                    impl.getString(MessageID.teachers_literal, context)))
+                    impl.getString(MR.strings.teachers_literal)))
 
     school.schoolStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup(
             "${school.schoolName} - " +
-            impl.getString(MessageID.students, context)))
+            impl.getString(MR.strings.students)))
 
     school.schoolPendingStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup(
             "${school.schoolName} - " +
-            impl.getString(MessageID.pending_requests, context)))
+            impl.getString(MR.strings.pending_requests)))
 
 
     school.takeIf { it.schoolCode == null }?.schoolCode = randomString(Clazz.CLAZZ_CODE_DEFAULT_LENGTH)

@@ -17,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -32,8 +31,7 @@ import com.ustadmobile.core.view.ErrorReportView
 import com.ustadmobile.core.viewmodel.ErrorReportUiState
 import com.ustadmobile.lib.db.entities.ErrorReport
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
-import kotlin.text.Typography
+import com.ustadmobile.core.R as CR
 
 interface ErrorReportFragmentEventHandler {
 
@@ -89,15 +87,15 @@ class ErrorReportFragment : UstadBaseFragment(), ErrorReportFragmentEventHandler
         val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE)
                 as? ClipboardManager
         clipboard?.setPrimaryClip(ClipData.newPlainText(
-            requireContext().getString(R.string.incident_id), id.toString() ?: "-1"))
-        showSnackBar(requireContext().getString(R.string.copied_to_clipboard))
+            requireContext().getString(CR.string.incident_id), id.toString()))
+        showSnackBar(requireContext().getString(CR.string.copied_to_clipboard))
     }
 
     override fun onClickShareIncidentId(id: Long) {
         val intent = Intent(Intent.ACTION_SEND)
         intent.type = "text/plain"
         intent.putExtra(Intent.EXTRA_TEXT, id.toString())
-        startActivity(Intent.createChooser(intent, getString(R.string.share)))
+        startActivity(Intent.createChooser(intent, getString(CR.string.share)))
     }
 }
 
@@ -126,7 +124,7 @@ fun ErrorReportScreen(
         Text(
             modifier = Modifier
                 .padding(horizontal = 16.dp),
-            text = stringResource(id = R.string.sorry_something_went_wrong)
+            text = stringResource(id = CR.string.sorry_something_went_wrong)
         )
 
         Button(
@@ -142,7 +140,7 @@ fun ErrorReportScreen(
             Text(
                 modifier = Modifier
                     .padding(10.dp),
-                text = stringResource(R.string.take_me_home).uppercase(),
+                text = stringResource(CR.string.take_me_home).uppercase(),
                 color = contentColorFor(
                     colorResource(id = R.color.secondaryColor)
                 )
@@ -163,7 +161,7 @@ fun ErrorReportScreen(
                     style = Typography.body1
                 )
                 Text(
-                    text = stringResource(id = R.string.incident_id),
+                    text = stringResource(id = CR.string.incident_id),
                     style = Typography.body2
                 )
             }
@@ -176,7 +174,7 @@ fun ErrorReportScreen(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_outline_file_copy_24),
-                        contentDescription = stringResource(R.string.copy_code)
+                        contentDescription = stringResource(CR.string.copy_code)
                     )
                 }
                 IconButton(
@@ -186,7 +184,7 @@ fun ErrorReportScreen(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_share_24),
-                        contentDescription = stringResource(R.string.share)
+                        contentDescription = stringResource(CR.string.share)
                     )
                 }
             }
@@ -195,7 +193,7 @@ fun ErrorReportScreen(
         Divider(thickness = 1.dp)
 
         Text(
-            text = stringResource(id = R.string.error_code,
+            text = stringResource(id = CR.string.error_code,
                 uiState.errorReport?.errorCode ?: ""),
             style = Typography.body1,
             modifier = Modifier

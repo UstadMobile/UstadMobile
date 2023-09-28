@@ -2,7 +2,7 @@ package com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist
 
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.IApproveOrDeclinePendingEnrolmentRequestUseCase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -12,7 +12,6 @@ import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
@@ -23,7 +22,7 @@ import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListView
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
-import com.ustadmobile.door.paging.PagingSource
+import app.cash.paging.PagingSource
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
@@ -49,16 +48,16 @@ data class ClazzMemberListUiState(
     val addStudentVisible: Boolean = false,
 
     val sortOptions: List<SortOrderOption> = listOf(
-        SortOrderOption(MessageID.first_name, ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_ASC, true),
-        SortOrderOption(MessageID.first_name, ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_DESC, false),
-        SortOrderOption(MessageID.last_name, ClazzEnrolmentDaoCommon.SORT_LAST_NAME_ASC, true),
-        SortOrderOption(MessageID.last_name, ClazzEnrolmentDaoCommon.SORT_LAST_NAME_DESC, false),
-        SortOrderOption(MessageID.attendance, ClazzEnrolmentDaoCommon.SORT_ATTENDANCE_ASC, true),
-        SortOrderOption(MessageID.attendance, ClazzEnrolmentDaoCommon.SORT_ATTENDANCE_DESC, false),
-        SortOrderOption(MessageID.date_enroll, ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_ASC, true),
-        SortOrderOption(MessageID.date_enroll, ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_DESC, false),
-        SortOrderOption(MessageID.date_left, ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_ASC, true),
-        SortOrderOption(MessageID.date_left, ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_DESC, false)
+        SortOrderOption(MR.strings.first_name, ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_ASC, true),
+        SortOrderOption(MR.strings.first_name, ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_DESC, false),
+        SortOrderOption(MR.strings.last_name, ClazzEnrolmentDaoCommon.SORT_LAST_NAME_ASC, true),
+        SortOrderOption(MR.strings.last_name, ClazzEnrolmentDaoCommon.SORT_LAST_NAME_DESC, false),
+        SortOrderOption(MR.strings.attendance, ClazzEnrolmentDaoCommon.SORT_ATTENDANCE_ASC, true),
+        SortOrderOption(MR.strings.attendance, ClazzEnrolmentDaoCommon.SORT_ATTENDANCE_DESC, false),
+        SortOrderOption(MR.strings.date_enroll, ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_ASC, true),
+        SortOrderOption(MR.strings.date_enroll, ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_DESC, false),
+        SortOrderOption(MR.strings.date_left, ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_ASC, true),
+        SortOrderOption(MR.strings.date_left, ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_DESC, false)
     ),
 
     val activeSortOrderOption: SortOrderOption = sortOptions.first(),
@@ -68,8 +67,8 @@ data class ClazzMemberListUiState(
     val selectedChipId: Int = ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY,
 
     val filterOptions: List<MessageIdOption2> = listOf(
-        MessageIdOption2(MessageID.active, ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY),
-        MessageIdOption2(MessageID.all, 0)
+        MessageIdOption2(MR.strings.active, ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY),
+        MessageIdOption2(MR.strings.all, 0)
     ),
 
     val terminologyStrings: CourseTerminologyStrings? = null
@@ -221,7 +220,7 @@ class ClazzMemberListViewModel(
             ))
 
         val args = mutableMapOf(
-            PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to clazzUid.toString(),
+            PersonListViewModel.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to clazzUid.toString(),
             UstadView.ARG_LISTMODE to ListViewMode.PICKER.mode,
             PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED to goToOnPersonSelectedArg,
         )

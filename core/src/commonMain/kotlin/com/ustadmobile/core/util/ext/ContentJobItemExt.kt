@@ -3,7 +3,7 @@ package com.ustadmobile.core.util.ext
 import com.ustadmobile.core.contentjob.ContentJobProgressListener
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.io.ext.getSize
 import com.ustadmobile.door.DoorUri
@@ -33,18 +33,18 @@ fun ContentJobItem?.isStatusPausedOrQueuedOrDownloading() = this?.cjiRecursiveSt
  */
 
 private val statusToMessageIdMap = mapOf(
-        JobStatus.PAUSED to MessageID.download_entry_state_paused,
-        JobStatus.QUEUED to MessageID.queued,
-        JobStatus.RUNNING to MessageID.in_progress,
-        JobStatus.WAITING_FOR_CONNECTION to MessageID.waiting,
-        JobStatus.CANCELED to MessageID.canceled,
-        JobStatus.COMPLETE to MessageID.completed,
-        JobStatus.FAILED to MessageID.failed)
+        JobStatus.PAUSED to MR.strings.download_entry_state_paused,
+        JobStatus.QUEUED to MR.strings.queued,
+        JobStatus.RUNNING to MR.strings.in_progress,
+        JobStatus.WAITING_FOR_CONNECTION to MR.strings.waiting,
+        JobStatus.CANCELED to MR.strings.canceled,
+        JobStatus.COMPLETE to MR.strings.completed,
+        JobStatus.FAILED to MR.strings.failed)
 
 private fun Int.downloadJobStatusStr(systemImpl: UstadMobileSystemImpl, context: Any): String {
     val messageId = statusToMessageIdMap[this]
     return if(messageId != null) {
-        systemImpl.getString(messageId, context)
+        systemImpl.getString(messageId)
     }else {
         ""
     }

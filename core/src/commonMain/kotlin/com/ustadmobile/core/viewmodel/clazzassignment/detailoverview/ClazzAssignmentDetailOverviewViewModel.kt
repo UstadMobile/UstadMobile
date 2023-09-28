@@ -2,7 +2,7 @@ package com.ustadmobile.core.viewmodel.clazzassignment.detailoverview
 
 import com.ustadmobile.core.db.dao.CourseAssignmentMarkDaoCommon
 import com.ustadmobile.core.domain.assignment.submitassignment.SubmitAssignmentUseCase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -11,11 +11,10 @@ import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.core.util.ext.textLength
 import com.ustadmobile.core.util.ext.whenSubscribed
-import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import com.ustadmobile.door.paging.PagingSource
+import app.cash.paging.PagingSource
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
@@ -26,7 +25,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
@@ -67,8 +65,8 @@ data class ClazzAssignmentDetailOverviewUiState(
     val selectedChipId: Int = CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES,
 
     val gradeFilterChips: List<MessageIdOption2> = listOf(
-        MessageIdOption2(MessageID.most_recent, CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES),
-        MessageIdOption2(MessageID.all, CourseAssignmentMarkDaoCommon.ARG_FILTER_ALL_SCORES)
+        MessageIdOption2(MR.strings.most_recent, CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES),
+        MessageIdOption2(MR.strings.all, CourseAssignmentMarkDaoCommon.ARG_FILTER_ALL_SCORES)
     ),
 
     val submissionHeaderUiState: UstadAssignmentSubmissionHeaderUiState =
@@ -187,7 +185,7 @@ class ClazzAssignmentDetailOverviewViewModel(
     savedStateHandle: UstadSavedStateHandle,
     private val submitAssignmentUseCase: SubmitAssignmentUseCase = SubmitAssignmentUseCase(),
 ) : DetailViewModel<ClazzAssignment>(
-    di, savedStateHandle, ClazzAssignmentDetailOverviewView.VIEW_NAME
+    di, savedStateHandle, DEST_NAME
 ){
 
     private val _uiState = MutableStateFlow(ClazzAssignmentDetailOverviewUiState())
@@ -226,7 +224,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                 launch {
                     activeRepo.clazzAssignmentDao.findAssignmentCourseBlockAndSubmitterUidAsFlow(
                         assignmentUid = entityUidArg,
-                        accountPersonUid = accountManager.activeAccount.personUid,
+                        accountPersonUid = accountManager.currentAccount.personUid,
                     ).collect { assignmentData ->
                         _uiState.update { prev ->
                             val isEnrolledButNotInGroup = assignmentData?.submitterUid ==
@@ -236,7 +234,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                                 courseBlock = assignmentData?.courseBlock,
                                 submitterUid = assignmentData?.submitterUid ?: 0,
                                 unassignedError = if(isEnrolledButNotInGroup) {
-                                    systemImpl.getString(MessageID.unassigned_error)
+                                    systemImpl.getString(MR.strings.unassigned_error)
                                 }else {
                                     null
                                 }
@@ -291,14 +289,14 @@ class ClazzAssignmentDetailOverviewViewModel(
                         loadFromStateKeys = listOf(STATE_LATEST_SUBMISSION),
                         onLoadFromDb = { db ->
                             db.courseAssignmentSubmissionDao.getLatestSubmissionForUserAsync(
-                                accountManager.activeSession?.person?.personUid ?: 0L,
+                                accountManager.currentUserSession?.person?.personUid ?: 0L,
                                 assignmentUid = entityUidArg,
                             )
                         },
                         makeDefault = {
                             CourseAssignmentSubmission().apply {
                                 casAssignmentUid = entityUidArg
-                                casSubmitterPersonUid = accountManager.activeSession?.person?.personUid ?: 0L
+                                casSubmitterPersonUid = accountManager.currentUserSession?.person?.personUid ?: 0L
                             }
                         },
                         uiUpdate = {
@@ -316,7 +314,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                         loadFromStateKeys = listOf(STATE_LATEST_SUBMISSION_ATTACHMENTS),
                         onLoadFromDb = { db ->
                             db.courseAssignmentSubmissionAttachmentDao.getLatestSubmissionAttachmentsForUserAsync(
-                                accountPersonUid = accountManager.activeSession?.person?.personUid ?: 0L,
+                                accountPersonUid = accountManager.currentUserSession?.person?.personUid ?: 0L,
                                 assignmentUid = entityUidArg
                             )
                         },
@@ -457,7 +455,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                     db = activeDb,
                     systemImpl = systemImpl,
                     assignmentUid = entityUidArg,
-                    accountPersonUid = accountManager.activeSession?.person?.personUid ?: 0L,
+                    accountPersonUid = accountManager.currentUserSession?.person?.personUid ?: 0L,
                     submission = submission
                 )
 
@@ -468,7 +466,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                     )
                 }
 
-                snackDispatcher.showSnackBar(Snack(systemImpl.getString(MessageID.submitted)))
+                snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.submitted_key)))
             }catch(e: Exception) {
                 _uiState.update { prev ->
                     prev.copy(submissionError = e.message)

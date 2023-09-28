@@ -1,19 +1,19 @@
 package com.ustadmobile.core.viewmodel.clazz.detailoverview
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.core.util.ext.toggle
 import com.ustadmobile.core.util.ext.whenSubscribed
-import com.ustadmobile.core.view.ClazzAssignmentDetailView
-import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import com.ustadmobile.door.paging.PagingSource
+import app.cash.paging.PagingSource
+import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
+import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
@@ -70,7 +70,7 @@ class ClazzDetailOverviewViewModel(
 
     private val pagingSourceFactory: () -> PagingSource<Int, CourseBlockWithCompleteEntity> = {
         activeRepo.courseBlockDao.findAllCourseBlockByClazzUidLive(
-                entityUidArg, accountManager.activeAccount.personUid,
+                entityUidArg, accountManager.currentAccount.personUid,
                 _uiState.value.collapsedBlockUids.toList(), systemTimeInMillis()
         ).also {
             lastCourseBlockPagingSource?.invalidate()
@@ -83,7 +83,7 @@ class ClazzDetailOverviewViewModel(
             prev.copy(
                 fabState = FabUiState(
                     visible = false,
-                    text = systemImpl.getString(MessageID.edit),
+                    text = systemImpl.getString(MR.strings.edit),
                     icon = FabUiState.FabIcon.EDIT,
                     onClick = this::onClickEdit
                 )
@@ -112,7 +112,7 @@ class ClazzDetailOverviewViewModel(
 
                 launch {
                     activeRepo.clazzDao.personHasPermissionWithClazzAsFlow(
-                        accountManager.activeAccount.personUid, entityUidArg, Role.PERMISSION_CLAZZ_UPDATE
+                        accountManager.currentAccount.personUid, entityUidArg, Role.PERMISSION_CLAZZ_UPDATE
                     ).collect { hasEditPermission ->
                         _appUiState.update { prev ->
                             prev.copy(
@@ -136,7 +136,7 @@ class ClazzDetailOverviewViewModel(
                 lastCourseBlockPagingSource?.invalidate()
             }
             CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
-                navController.navigate(ClazzAssignmentDetailView.VIEW_NAME,
+                navController.navigate(ClazzAssignmentDetailViewModel.DEST_NAME,
                     mapOf(ARG_ENTITY_UID to courseBlock.cbEntityUid.toString()))
             }
             CourseBlock.BLOCK_DISCUSSION_TYPE -> {
@@ -149,7 +149,13 @@ class ClazzDetailOverviewViewModel(
     }
 
     fun onClickEdit() {
-        navController.navigate(ClazzEdit2View.VIEW_NAME,
+        navController.navigate(ClazzEditViewModel.DEST_NAME,
             mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString()))
+    }
+
+    companion object {
+
+        const val DEST_NAME = "CourseDetailOverviewView"
+
     }
 }

@@ -16,7 +16,6 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.plugins.json.*
 import io.ktor.serialization.gson.*
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
@@ -44,7 +43,10 @@ class UmAppDatabaseExtTest {
     @Before
     fun setup() {
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(), randomUuid().toString())
-        db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite")
+        db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
+            "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite",
+                nodeId = nodeIdAndAuth.nodeId,
+            )
             .addSyncCallback(nodeIdAndAuth)
             .build()
             .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
@@ -65,7 +67,7 @@ class UmAppDatabaseExtTest {
             nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient))
 
         mockSystemImpl = mock {
-            on { getString(any<Int>(), any())}.thenAnswer {
+            on { getString(any())}.thenAnswer {
                 "${it.arguments[0]}"
             }
         }
@@ -74,6 +76,17 @@ class UmAppDatabaseExtTest {
     @After
     fun tearDown() {
         httpClient.close()
+        try {
+            repo.close()
+        }catch(e: Exception) {
+            //do nothing
+        }
+
+        try {
+            db.close()
+        }catch (e: Exception) {
+            //do nothing
+        }
     }
 
     @Test
@@ -84,7 +97,7 @@ class UmAppDatabaseExtTest {
 
         val clazzInDb = db.clazzDao.findByUid(testClazz.clazzUid)!!
         Assert.assertEquals("Stored class has same name", testClazz.clazzName,
-                clazzInDb?.clazzName)
+                clazzInDb.clazzName)
 
         val teacherGroup = db.personGroupDao.findByUid(clazzInDb.clazzTeachersPersonGroupUid)
         Assert.assertNotNull("Teacher PersonGroup created", teacherGroup)

@@ -310,37 +310,6 @@ class TestStatementEndpoint {
     }
 
 
-    //@Test
-    fun givenValidStatementWithLearnerGroup_whenParsed_thenDbAndStatementShouldMatch(){
-
-        val entry = ContentEntry().apply {
-            entryId = "http://demo.com/"
-            contentEntryUid = repo.contentEntryDao.insert(this)
-        }
-
-        val learnerGroup = LearnerGroup().apply{
-            learnerGroupUid = 1
-            repo.learnerGroupDao.insert(this)
-        }
-
-        val statement = gson.fromJson(javaClass.getResourceAsStream(statementWithLearnerGroup).readString(), Statement::class.java)
-        endpoint.storeStatements(listOf(statement), "", entry.contentEntryUid)
-
-        val entity = repo.statementDao.findByStatementId("442f1133-bcd0-42b5-957e-4ad36f9414e0")
-        val agent = repo.agentDao.getAgentByAnyId("", "", "group:1", "http://localhost/", "")
-
-        Assert.assertEquals("group registered as accountName ","group:1", agent?.agentAccountName)
-        Assert.assertEquals("entity has learnerGroupUid", learnerGroup.learnerGroupUid, entity!!.statementLearnerGroupUid)
-        Assert.assertEquals("Statement entity has progress set as per JSON",
-                17, entity?.extensionProgress)
-        Assert.assertEquals("Statement has preset Verb UID as expected",
-                VerbEntity.FIXED_UIDS["http://adlnet.gov/expapi/verbs/progressed"],
-                entity?.statementVerbUid)
-        Assert.assertEquals("Statement has contentEntryUid set", entry.contentEntryUid,
-                entity?.statementContentEntryUid)
-
-    }
-
 
     //@Test
     fun givenAgentEntity_daoReturnsTheCorrectAgent() {

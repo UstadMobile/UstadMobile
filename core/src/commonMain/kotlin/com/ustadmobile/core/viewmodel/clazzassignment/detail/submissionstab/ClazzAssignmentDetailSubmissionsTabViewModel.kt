@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab
 
 import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
@@ -12,7 +12,7 @@ import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import com.ustadmobile.door.paging.PagingSource
+import app.cash.paging.PagingSource
 import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
@@ -40,8 +40,8 @@ data class ClazzAssignmentDetailSubmissionsTabUiState(
     companion object {
 
         val DEFAULT_SORT_OPTIONS = listOf(
-            SortOrderOption(MessageID.name, ClazzAssignmentDaoCommon.SORT_NAME_ASC, true),
-            SortOrderOption(MessageID.name, ClazzAssignmentDaoCommon.SORT_NAME_DESC, false),
+            SortOrderOption(MR.strings.name_key, ClazzAssignmentDaoCommon.SORT_NAME_ASC, true),
+            SortOrderOption(MR.strings.name_key, ClazzAssignmentDaoCommon.SORT_NAME_DESC, false),
         )
 
     }
@@ -84,7 +84,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
         activeRepo.clazzAssignmentDao.getAssignmentSubmitterSummaryListForAssignment(
             assignmentUid = argEntityUid,
             accountPersonUid = activeUserPersonUid,
-            group = systemImpl.getString(MessageID.group),
+            group = systemImpl.getString(MR.strings.group),
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
             sortOption = _uiState.value.sortOption.flag,
         ).also {
@@ -122,7 +122,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
                     activeRepo.clazzAssignmentDao.getProgressSummaryForAssignment(
                         assignmentUid = argEntityUid,
                         accountPersonUid = activeUserPersonUid,
-                        group = systemImpl.getString(MessageID.group)
+                        group = systemImpl.getString(MR.strings.group)
                     ).collect {
                         _uiState.update { prev ->
                             prev.copy(

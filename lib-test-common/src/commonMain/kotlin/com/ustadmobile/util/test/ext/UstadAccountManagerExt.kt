@@ -1,6 +1,5 @@
 package com.ustadmobile.util.test.ext
 
-import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.lib.db.entities.Person
 
@@ -10,6 +9,5 @@ suspend fun UstadAccountManager.startLocalTestSessionAsync(
     password: String = ""
 ) {
     val userSession = addSession(person, endpointUrl, password)
-    activeEndpoint = Endpoint(endpointUrl)
-    activeSession = userSession
+    currentUserSession = userSession
 }

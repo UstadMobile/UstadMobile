@@ -3,7 +3,7 @@ package com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail
 import com.ustadmobile.core.db.dao.CourseAssignmentMarkDaoCommon
 import com.ustadmobile.core.db.dao.CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES
 import com.ustadmobile.core.domain.assignment.submitmark.SubmitMarkUseCase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ListFilterIdOption
@@ -13,11 +13,12 @@ import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import com.ustadmobile.door.paging.PagingSource
+import app.cash.paging.PagingSource
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.*
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -64,8 +65,8 @@ data class ClazzAssignmentSubmitterDetailUiState(
     val markListSelectedChipId: Int = CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES,
 
     val markListFilterOptions: List<MessageIdOption2> = listOf(
-        MessageIdOption2(MessageID.most_recent, CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES),
-        MessageIdOption2(MessageID.all, CourseAssignmentMarkDaoCommon.ARG_FILTER_ALL_SCORES)
+        MessageIdOption2(MR.strings.most_recent, CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES),
+        MessageIdOption2(MR.strings.all, CourseAssignmentMarkDaoCommon.ARG_FILTER_ALL_SCORES)
     ),
 
     val privateCommentsList: ListPagingSourceFactory<CommentsAndName> = { EmptyPagingSource() },
@@ -114,18 +115,18 @@ data class ClazzAssignmentSubmitterDetailUiState(
         )
     }
 
-    val submitGradeButtonMessageId: Int
+    val submitGradeButtonMessageId: StringResource
         get() = if(marks.any { it.courseAssignmentMark?.camMarkerSubmitterUid == activeUserSubmitterId }) {
-            MessageID.update_grade
+            MR.strings.update_grade
         }else {
-            MessageID.submit_grade
+            MR.strings.submit_grade
         }
 
-    val submitGradeButtonAndGoNextMessageId: Int
+    val submitGradeButtonAndGoNextMessageId: StringResource
         get() = if(marks.any { it.courseAssignmentMark?.camMarkerSubmitterUid == activeUserSubmitterId }) {
-            MessageID.update_grade_and_mark_next
+            MR.strings.update_grade_and_mark_next
         }else {
-            MessageID.submit_grade_and_mark_next
+            MR.strings.submit_grade_and_mark_next
         }
 
     val visibleMarks: List<CourseAssignmentMarkAndMarkerName>
@@ -193,7 +194,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
 
             launch {
                 val submitterName = if(submitterUid < CourseAssignmentSubmission.MIN_SUBMITTER_UID_FOR_PERSON) {
-                    systemImpl.getString(MessageID.group) + " " + submitterUid
+                    systemImpl.getString(MR.strings.group) + " " + submitterUid
                 }else {
                     activeRepo.personDao.getNamesByUid(submitterUid)?.let {
                         "${it.firstNames} ${it.lastName}"
@@ -309,12 +310,12 @@ class ClazzAssignmentSubmitterDetailViewModel(
 
         if(draftMark.camMark < 0) {
             _uiState.update { prev ->
-                prev.copy(submitMarkError = systemImpl.getString(MessageID.score_greater_than_zero))
+                prev.copy(submitMarkError = systemImpl.getString(MR.strings.score_greater_than_zero))
             }
             return
         }else if(draftMark.camMark > courseBlock.cbMaxPoints){
             _uiState.update { prev ->
-                prev.copy(submitMarkError = systemImpl.getString(MessageID.too_high))
+                prev.copy(submitMarkError = systemImpl.getString(MR.strings.too_high))
             }
             return
         }

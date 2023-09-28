@@ -1,17 +1,17 @@
 package com.ustadmobile.core.viewmodel.siteenterlink
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.requireHttpPrefix
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
-import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.SiteEnterLinkView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import io.ktor.client.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -45,7 +45,7 @@ class SiteEnterLinkViewModel(
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = impl.getString(MessageID.enter_link),
+                title = impl.getString(MR.strings.enter_link),
                 navigationVisible = false,
             )
         }
@@ -78,14 +78,14 @@ class SiteEnterLinkViewModel(
                     previous.copy(validLink =  true, linkError = null, fieldsEnabled = true)
                 }
 
-                navController.navigate(Login2View.VIEW_NAME, args)
+                navController.navigate(LoginViewModel.DEST_NAME, args)
             }catch(e: Throwable) {
                 _uiState.update { previous ->
                     loadingState = LoadingUiState.NOT_LOADING
                     previous.copy(
                         validLink = false,
                         fieldsEnabled = true,
-                        linkError = impl.getString(MessageID.invalid_link)
+                        linkError = impl.getString(MR.strings.invalid_link)
                     )
                 }
             }

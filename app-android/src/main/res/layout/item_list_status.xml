@@ -68,11 +68,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/icon_barrier"
-            tools:text="Loading"
-
-            app:textMessageIdLookupKey="@{loadingStatus.loadStatus}"
-            app:fallbackMessage="@{emptyStateMessage}"
-            app:textMessageIdLookupMap="@{ListStatusRecyclerViewAdapter.MAP_STATUS_STRINGS}" />
+            tools:text="Loading"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

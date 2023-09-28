@@ -27,6 +27,7 @@ import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
+import com.ustadmobile.core.R as CR
 
 class JoinWithCodeFragment: UstadBaseFragment(), JoinWithCodeView {
 
@@ -85,11 +86,11 @@ class JoinWithCodeFragment: UstadBaseFragment(), JoinWithCodeView {
 
         val tableId = arguments?.get(UstadView.ARG_CODE_TABLE).toString().toInt()
         ustadFragmentTitle = if(tableId == Clazz.TABLE_ID){
-            mBinding?.entityType = requireContext().getString(R.string.clazz)
-            requireContext().getString(R.string.join_existing_class)
+            mBinding?.entityType = requireContext().getString(CR.string.clazz)
+            requireContext().getString(CR.string.join_existing_class)
         }else if (tableId == School.TABLE_ID){
-            mBinding?.entityType = requireContext().getString(R.string.school)
-            requireContext().getString(R.string.join_existing_school)
+            mBinding?.entityType = requireContext().getString(CR.string.school)
+            requireContext().getString(CR.string.join_existing_school)
         }else{
             mBinding?.entityType = ""
             "ERR - Unknown entity type"
@@ -121,14 +122,14 @@ fun JoinWithCodeScreen(
     ){
 
        Text(
-           stringResource(id = R.string.join_code_instructions),
+           stringResource(id = CR.string.join_code_instructions),
            modifier = Modifier.defaultItemPadding()
        )
 
         UstadTextEditField(
             modifier = Modifier.defaultItemPadding(),
             value = uiState.code,
-            label = stringResource(id = R.string.entity_code, uiState.entityType),
+            label = stringResource(id = CR.string.entity_code, uiState.entityType),
             error = uiState.codeError,
             enabled = uiState.fieldsEnabled,
             onValueChange = {

@@ -5,7 +5,7 @@ import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.contentjob.ContentPluginIds.CONTAINER_DOWNLOAD_PLUGIN
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.util.ext.makeContentEntryDeepLink
-import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
@@ -34,7 +34,7 @@ class ContentEntryBranchDownloadPlugin(
         uri: DoorUri,
         process: ContentJobProcessContext
     ): MetadataResult? {
-        return extractMetadata(ContentEntryList2View.VIEW_NAME, uri)
+        return extractMetadata(ContentEntryListViewModel.DEST_NAME, uri)
     }
 
     override suspend fun processJob(

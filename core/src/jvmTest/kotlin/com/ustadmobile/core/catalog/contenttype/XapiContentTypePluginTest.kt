@@ -8,6 +8,7 @@ import com.ustadmobile.core.contentjob.DummyContentJobItemTransactionRunner
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
@@ -21,7 +22,7 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
 
-class XapiContentTypePluginTest {
+class XapiContentTypePluginTest : AbstractMainDispatcherTest(){
 
     @JvmField
     @Rule
@@ -90,7 +91,7 @@ class XapiContentTypePluginTest {
         val tempFolder = temporaryFolder.newFolder("newFolder")
         val tempUri = DoorUri.parse(tempFolder.toURI().toString())
         val accountManager: UstadAccountManager by di.instance()
-        val repo: UmAppDatabase = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
+        val repo: UmAppDatabase = di.on(accountManager.currentAccount).direct.instance(tag = DoorTag.TAG_REPO)
 
 
         val xapiPlugin = XapiTypePluginCommonJvm(Any(), accountManager.activeEndpoint, di)

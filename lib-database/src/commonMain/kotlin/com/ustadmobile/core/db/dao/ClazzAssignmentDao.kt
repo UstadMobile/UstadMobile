@@ -14,73 +14,15 @@ import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.HAS_LEARNINGRECORD_S
 import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SORT_NAME_ASC
 import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SORT_NAME_DESC
 import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SUBMITTER_LIST_CTE2_SQL
-import com.ustadmobile.door.lifecycle.LiveData
-import com.ustadmobile.door.annotation.*
-import com.ustadmobile.door.paging.PagingSource
-import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
+import com.ustadmobile.door.annotation.*
+import app.cash.paging.PagingSource
+import com.ustadmobile.lib.db.entities.*
 
 
 @DoorDao
 @Repository
 expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<ClazzAssignment> {
-
-    @Query("""
-     REPLACE INTO ClazzAssignmentReplicate(caPk, caDestination)
-      SELECT DISTINCT ClazzAssignment.caUid AS caUid,
-             :newNodeId AS caDestination
-        FROM UserSession
-             JOIN PersonGroupMember 
-                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-             ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_ASSIGNMENT_SELECT} 
-                    ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
-             JOIN ClazzAssignment
-                    ON ClazzAssignment.caClazzUid = Clazz.clazzUid
-       WHERE UserSession.usClientNodeId = :newNodeId
-         AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-         AND ClazzAssignment.caLct != COALESCE(
-             (SELECT caVersionId
-                FROM ClazzAssignmentReplicate
-               WHERE caPk = ClazzAssignment.caUid
-                 AND caDestination = :newNodeId), 0) 
-      /*psql ON CONFLICT(caPk, caDestination) DO UPDATE
-             SET caPending = true
-      */       
-    """)
-    @ReplicationRunOnNewNode
-    @ReplicationCheckPendingNotificationsFor([ClazzAssignment::class])
-    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
-
-    @Query("""
- REPLACE INTO ClazzAssignmentReplicate(caPk, caDestination)
-  SELECT DISTINCT ClazzAssignment.caUid AS caUid,
-         UserSession.usClientNodeId AS caDestination
-    FROM ChangeLog
-         JOIN ClazzAssignment
-             ON ChangeLog.chTableId = ${ClazzAssignment.TABLE_ID}
-                AND ChangeLog.chEntityPk = ClazzAssignment.caUid
-         JOIN Clazz 
-              ON Clazz.clazzUid = ClazzAssignment.caClazzUid 
-         ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-              ${Role.PERMISSION_ASSIGNMENT_SELECT}
-              ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}  
-   WHERE UserSession.usClientNodeId != (
-         SELECT nodeClientId 
-           FROM SyncNode
-          LIMIT 1)
-     AND ClazzAssignment.caLct != COALESCE(
-         (SELECT caVersionId
-            FROM ClazzAssignmentReplicate
-           WHERE caPk = ClazzAssignment.caUid
-             AND caDestination = UserSession.usClientNodeId), 0)
- /*psql ON CONFLICT(caPk, caDestination) DO UPDATE
-     SET caPending = true
-  */               
- """)
-    @ReplicationRunOnChange([ClazzAssignment::class])
-    @ReplicationCheckPendingNotificationsFor([ClazzAssignment::class])
-    abstract suspend fun replicateOnChange()
 
     @Query("""
         SELECT * 
@@ -348,7 +290,7 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
     @Query("""SELECT * 
                       FROM ClazzAssignment 
                      WHERE caUid = :uid""")
-    abstract fun findByUidLive(uid: Long): LiveData<ClazzAssignment?>
+    abstract fun findByUidLive(uid: Long): Flow<ClazzAssignment?>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

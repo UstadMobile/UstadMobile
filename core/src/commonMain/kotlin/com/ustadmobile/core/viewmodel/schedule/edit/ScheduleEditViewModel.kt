@@ -1,9 +1,8 @@
 package com.ustadmobile.core.viewmodel.schedule.edit
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.view.ScheduleEditView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.Schedule
@@ -31,7 +30,7 @@ data class ScheduleEditUiState(
 class ScheduleEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
-): UstadEditViewModel(di, savedStateHandle, ScheduleEditView.VIEW_NAME) {
+): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(ScheduleEditUiState(fieldsEnabled = false))
 
@@ -40,10 +39,10 @@ class ScheduleEditViewModel(
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = createEditTitle(MessageID.add_a_schedule, MessageID.edit_schedule),
+                title = createEditTitle(MR.strings.add_a_schedule, MR.strings.edit_schedule),
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
-                    text = systemImpl.getString(MessageID.done),
+                    text = systemImpl.getString(MR.strings.done),
                     onClick = this::onClickSave
                 )
             )
@@ -97,14 +96,14 @@ class ScheduleEditViewModel(
         _uiState.update { prev ->
             prev.copy(
                 fromTimeError =  if(schedule.sceduleStartTime == 0L) {
-                    systemImpl.getString(MessageID.field_required_prompt)
+                    systemImpl.getString(MR.strings.field_required_prompt)
                 }else {
                     null
                 },
                 toTimeError = if(schedule.scheduleEndTime == 0L) {
-                    systemImpl.getString(MessageID.field_required_prompt)
+                    systemImpl.getString(MR.strings.field_required_prompt)
                 }else if(schedule.scheduleEndTime <= schedule.sceduleStartTime) {
-                    systemImpl.getString(MessageID.end_is_before_start_error)
+                    systemImpl.getString(MR.strings.end_is_before_start_error)
                 }else {
                     null
                 }
@@ -117,5 +116,9 @@ class ScheduleEditViewModel(
     }
 
 
+    companion object {
+
+        const val DEST_NAME = "ScheduleEdit"
+    }
 
 }

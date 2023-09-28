@@ -18,18 +18,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
-import com.toughra.ustadmobile.R
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditUiState
 import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.port.android.util.compose.messageIdResource
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.testTag
+import com.ustadmobile.core.impl.locale.TerminologyEntry
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
-import com.ustadmobile.port.android.view.composable.UstadErrorText
-
+import com.ustadmobile.libuicompose.components.UstadErrorText
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.R as CR
+import dev.icerock.moko.resources.compose.stringResource as mrStringResource
 class CourseTerminologyEditFragment: UstadBaseMvvmFragment() {
 
     val viewModel: CourseTerminologyEditViewModel by ustadViewModels(::CourseTerminologyEditViewModel)
@@ -77,7 +77,7 @@ private fun CourseTerminologyEditScreen(
                             ctTitle = it
                         })
                     },
-                    label = { Text(stringResource(R.string.name)) },
+                    label = { Text(stringResource(CR.string.name_key)) },
                     enabled = uiState.fieldsEnabled,
                 )
 
@@ -88,7 +88,7 @@ private fun CourseTerminologyEditScreen(
         item {
             Text(
                 modifier = Modifier.padding(start = 20.dp),
-                text = stringResource(id = R.string.your_words_for)
+                text = stringResource(id = CR.string.your_words_for)
             )
         }
 
@@ -102,7 +102,7 @@ private fun CourseTerminologyEditScreen(
                         .defaultItemPadding()
                         .fillMaxWidth(),
                     value = terminologyTerm.term ?: "",
-                    label = { Text(messageIdResource(id = terminologyTerm.messageId)) },
+                    label = { Text(mrStringResource(terminologyTerm.stringResource)) },
                     enabled = uiState.fieldsEnabled,
                     onValueChange = {
                         onTerminologyTermChanged(terminologyTerm.copy(
@@ -140,17 +140,17 @@ fun CourseTerminologyEditScreenPreview() {
             TerminologyEntry(
                 id = "1",
                 term = "First",
-                messageId = MessageID.teacher
+                stringResource = MR.strings.teacher
             ),
             TerminologyEntry(
                 id = "2",
                 term = "Second",
-                messageId = MessageID.student
+                stringResource = MR.strings.student
             ),
             TerminologyEntry(
                 id = "3",
                 term = "Third",
-                messageId = MessageID.add_a_teacher
+                stringResource = MR.strings.add_a_teacher
             )
         )
     )

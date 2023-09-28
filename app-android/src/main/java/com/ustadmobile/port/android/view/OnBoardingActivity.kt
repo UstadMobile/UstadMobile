@@ -44,6 +44,7 @@ import kotlinx.coroutines.delay
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import java.util.*
+import com.ustadmobile.core.R as CR
 
 class OnBoardingActivity : ComponentActivity() {
 
@@ -83,7 +84,7 @@ class OnBoardingActivity : ComponentActivity() {
             owner: SavedStateRegistryOwner,
             defaultArgs: Bundle? = null,
         ): AbstractSavedStateViewModelFactory = object: AbstractSavedStateViewModelFactory(owner, defaultArgs) {
-            override fun <T : ViewModel?> create(
+            override fun <T : ViewModel> create(
                 key: String,
                 modelClass: Class<T>,
                 handle: SavedStateHandle
@@ -193,7 +194,7 @@ private fun SetLanguageMenu(
             readOnly = true,
             value = currentLanguage.langDisplay,
             onValueChange = { },
-            label = { stringResource(R.string.language) },
+            label = { stringResource(CR.string.language) },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(
                     expanded = expanded
@@ -244,12 +245,12 @@ data class OnboardingItem(
 private fun PagerView() {
 
     val onboardingItems: List<OnboardingItem> = remember {
-        listOf(OnboardingItem(R.string.onboarding_no_internet_headline,
-            R.string.onboarding_no_internet_subheadline, R.drawable.illustration_offline_usage),
-        OnboardingItem(R.string.onboarding_offline_sharing,
-            R.string.onboarding_offline_sharing_subheading, R.drawable.illustration_offline_sharing),
-        OnboardingItem(R.string.onboarding_stay_organized_headline,
-            R.string.onboarding_stay_organized_subheading, R.drawable.illustration_organized)
+        listOf(OnboardingItem(CR.string.onboarding_no_internet_headline,
+            CR.string.onboarding_no_internet_subheadline, R.drawable.illustration_offline_usage),
+        OnboardingItem(CR.string.onboarding_offline_sharing,
+            CR.string.onboarding_offline_sharing_subheading, R.drawable.illustration_offline_sharing),
+        OnboardingItem(CR.string.onboarding_stay_organized_headline,
+            CR.string.onboarding_stay_organized_subheading, R.drawable.illustration_organized)
         )
     }
 
@@ -334,12 +335,12 @@ private fun BottomRow(onClickNext: () -> Unit = { }){
         Button(
             onClick = onClickNext,
         ) {
-            Text(stringResource(R.string.onboarding_get_started_label))
+            Text(stringResource(CR.string.onboarding_get_started_label))
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(text = stringResource(R.string.created_partnership),
+        Text(text = stringResource(CR.string.created_partnership),
             style = Typography.body2,
             color = Color.DarkGray)
 

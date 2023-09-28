@@ -2,12 +2,11 @@ package com.ustadmobile.core.io.ext
 
 import com.ustadmobile.core.io.ConcatenatedEntry
 import com.ustadmobile.core.io.ConcatenatedOutputStream2
-import com.ustadmobile.door.ext.md5Sum
+import com.ustadmobile.core.ext.md5Sum
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
-import com.ustadmobile.core.io.ext.toConcatenatedEntry
 
 fun ConcatenatedOutputStream2.putFile(file: File, compression: Byte) {
     if(compression != 0.toByte())

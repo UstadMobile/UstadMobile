@@ -5,7 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import com.ustadmobile.core.db.JobStatus
-import com.ustadmobile.door.lifecycle.LiveData
+import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.lib.db.entities.*
 
 @DoorDao
@@ -83,6 +83,15 @@ expect abstract class ContentJobItemDao {
          LIMIT 1
     """)
     abstract fun findRootJobItemByJobId(jobUid: Long): ContentJobItem?
+
+    @Query("""
+        SELECT * 
+          FROM ContentJobItem
+         WHERE cjiJobUid = :jobUid 
+           AND cjiParentCjiUid = 0 
+         LIMIT 1
+    """)
+    abstract fun findRootJobItemByJobIdAsFlow(jobUid: Long): Flow<ContentJobItem?>
 
     @Query("""
         UPDATE ContentJobItem
@@ -190,7 +199,7 @@ expect abstract class ContentJobItemDao {
           FROM ContentJobItem
          WHERE cjiUid = :uid   
     """)
-    abstract fun getJobItemByUidLive(uid: Long): LiveData<ContentJobItem?>
+    abstract fun getJobItemByUidLive(uid: Long): Flow<ContentJobItem?>
 
     @Query("""
         SELECT cjiContainerUid

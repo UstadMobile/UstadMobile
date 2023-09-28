@@ -19,8 +19,8 @@ class NapierAntilogJvm(val logLevel: Level): Antilog() {
     }
 
     private val levelMap = mapOf(
-        LogLevel.DEBUG to Level.FINEST,
-        LogLevel.VERBOSE to Level.FINER,
+        LogLevel.VERBOSE to Level.FINEST,
+        LogLevel.DEBUG to Level.FINER,
         LogLevel.INFO to Level.INFO,
         LogLevel.WARNING to Level.WARNING,
         LogLevel.ERROR to Level.SEVERE,

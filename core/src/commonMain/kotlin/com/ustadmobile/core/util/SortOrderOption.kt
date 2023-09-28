@@ -1,10 +1,12 @@
 package com.ustadmobile.core.util
 
+import dev.icerock.moko.resources.StringResource
+
 data class SortOrderOption(
     /**
-     * MessageID constant for the field to be sorted by e.g. MessageID.firstNames
+     * MR.strings.constant for the field to be sorted by e.g. MR.strings.firstNames
      */
-    val fieldMessageId: Int,
+    val fieldMessageId: StringResource,
 
     /**
      * The flag value that is used by the DAO for this sort option e.g. PersonDao.SORT_FIRST_NAME_ASC

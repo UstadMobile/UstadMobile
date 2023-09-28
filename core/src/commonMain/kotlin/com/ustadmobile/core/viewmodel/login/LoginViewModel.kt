@@ -3,7 +3,7 @@ package com.ustadmobile.core.viewmodel.login
 import com.ustadmobile.core.account.AdultAccountRequiredException
 import com.ustadmobile.core.account.ConsentNotGrantedException
 import com.ustadmobile.core.account.UnauthorizedException
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -16,6 +16,8 @@ import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.lib.db.entities.Site
 import io.github.aakira.napier.Napier
 import io.ktor.client.*
@@ -25,7 +27,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.decodeFromString
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -45,7 +46,7 @@ data class LoginUiState(
 class LoginViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-) : UstadViewModel(di, savedStateHandle, Login2View.VIEW_NAME){
+) : UstadViewModel(di, savedStateHandle, DEST_NAME){
 
     private val _uiState = MutableStateFlow(LoginUiState())
 
@@ -64,7 +65,7 @@ class LoginViewModel(
     private var verifiedSite: Site? = null
 
     init {
-        nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzList2View.VIEW_NAME_HOME
+        nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
         serverUrl = savedStateHandle[UstadView.ARG_API_URL] ?: apiUrlConfig.presetApiUrl
             ?: "http://localhost"
@@ -78,7 +79,7 @@ class LoginViewModel(
 
         val baseAppUiState = AppUiState(
             navigationVisible = false,
-            title = impl.getString(MessageID.login),
+            title = impl.getString(MR.strings.login),
         )
 
         serverUrl = serverUrl.requirePostfix("/")
@@ -105,7 +106,7 @@ class LoginViewModel(
                         Napier.w("Could not load site object for $serverUrl", e)
                         _uiState.update { prev ->
                             prev.copy(
-                                errorMessage = impl.getString(MessageID.login_network_error)
+                                errorMessage = impl.getString(MR.strings.login_network_error)
                             )
                         }
                         delay(10000)
@@ -176,13 +177,13 @@ class LoginViewModel(
                         savedStateHandle[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong() ?: 0L)
                     goToNextDestAfterLoginOrGuestSelected()
                 }catch(e: AdultAccountRequiredException) {
-                    errorMessage = impl.getString(MessageID.adult_account_required)
+                    errorMessage = impl.getString(MR.strings.adult_account_required)
                 } catch(e: UnauthorizedException) {
-                    errorMessage = impl.getString(MessageID.wrong_user_pass_combo)
+                    errorMessage = impl.getString(MR.strings.wrong_user_pass_combo)
                 } catch(e: ConsentNotGrantedException) {
-                    errorMessage =  impl.getString(MessageID.your_account_needs_approved)
+                    errorMessage =  impl.getString(MR.strings.your_account_needs_approved)
                 }catch(e: Exception) {
-                    errorMessage = impl.getString(MessageID.login_network_error)
+                    errorMessage = impl.getString(MR.strings.login_network_error)
                 }finally {
                     loadingState = LoadingUiState.NOT_LOADING
                     _uiState.update { prev ->
@@ -199,12 +200,12 @@ class LoginViewModel(
                 prev.copy(
                     fieldsEnabled = true,
                     usernameError = if(prev.username.isEmpty()) {
-                        impl.getString(MessageID.field_required_prompt)
+                        impl.getString(MR.strings.field_required_prompt)
                     } else {
                         null
                     },
                     passwordError = if(prev.password.isEmpty()) {
-                        impl.getString(MessageID.field_required_prompt)
+                        impl.getString(MR.strings.field_required_prompt)
                     }else {
                         null
                     }
@@ -219,10 +220,10 @@ class LoginViewModel(
             SiteTermsDetailView.ARG_SHOW_ACCEPT_BUTTON to true.toString(),
             SiteTermsDetailView.ARG_USE_DISPLAY_LOCALE to true.toString(),
             UstadView.ARG_POPUPTO_ON_FINISH to
-                    (savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH] ?: Login2View.VIEW_NAME))
+                    (savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH] ?: DEST_NAME))
 
         args.putFromSavedStateIfPresent(savedStateHandle, UstadView.ARG_NEXT)
-        args.putFromSavedStateIfPresent(savedStateHandle, PersonEditView.REGISTER_VIA_LINK)
+        args.putFromSavedStateIfPresent(savedStateHandle, PersonEditViewModel.REGISTER_VIA_LINK)
 
         navController.navigate(RegisterAgeRedirectView.VIEW_NAME, args)
     }
@@ -232,6 +233,13 @@ class LoginViewModel(
 //            accountManager.startGuestSession(serverUrl)
 //            goToNextDestAfterLoginOrGuestSelected()
 //        }
+    }
+
+
+    companion object {
+
+        const val DEST_NAME = "Login"
+
     }
 
 }

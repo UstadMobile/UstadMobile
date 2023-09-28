@@ -1,6 +1,6 @@
 package com.ustadmobile.core.viewmodel.clazzenrolment.edit
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -11,11 +11,9 @@ import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
-import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchoolAndTerminology
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -60,12 +58,12 @@ class ClazzEnrolmentEditViewModel(
             prev.copy(
                 loadingState = LoadingUiState.INDETERMINATE,
                 title = createEditTitle(
-                    newEntityMessageId = MessageID.new_enrolment,
-                    editEntityMessageId = MessageID.edit_enrolment,
+                    newEntityStringResource = MR.strings.new_enrolment,
+                    editEntityStringResource = MR.strings.edit_enrolment,
                 ),
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
-                    text = systemImpl.getString(MessageID.save),
+                    text = systemImpl.getString(MR.strings.save),
                     onClick = this::onClickSave
                 )
             )
@@ -182,7 +180,7 @@ class ClazzEnrolmentEditViewModel(
         if(entity.clazzEnrolmentRole == 0) {
             _uiState.update { prev ->
                 prev.copy(
-                    roleSelectedError = systemImpl.getString(MessageID.field_required_prompt)
+                    roleSelectedError = systemImpl.getString(MR.strings.field_required_prompt)
                 )
             }
         }
@@ -190,7 +188,7 @@ class ClazzEnrolmentEditViewModel(
         if(entity.clazzEnrolmentDateJoined <= MS_PER_HOUR * 24) {
             _uiState.update { prev ->
                 prev.copy(
-                    startDateError = systemImpl.getString(MessageID.field_required_prompt)
+                    startDateError = systemImpl.getString(MR.strings.field_required_prompt)
                 )
             }
         }
@@ -198,7 +196,7 @@ class ClazzEnrolmentEditViewModel(
         if(entity.clazzEnrolmentDateLeft <= entity.clazzEnrolmentDateJoined) {
             _uiState.update { prev ->
                 prev.copy(
-                    endDateError = systemImpl.getString(MessageID.end_is_before_start_error)
+                    endDateError = systemImpl.getString(MR.strings.end_is_before_start_error)
                 )
             }
         }

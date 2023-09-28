@@ -15,10 +15,8 @@ import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_ASC
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_DESC
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_ASC
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_DESC
-import com.ustadmobile.door.paging.DataSourceFactory
-import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.door.paging.PagingSource
+import app.cash.paging.PagingSource
 import com.ustadmobile.lib.db.composites.CourseNameAndPersonName
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
@@ -27,63 +25,6 @@ import kotlinx.coroutines.flow.Flow
 @Repository
 @DoorDao
 expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
-
-    @Query("""
-     REPLACE INTO ClazzEnrolmentReplicate(cePk, ceDestination)
-      SELECT DISTINCT ClazzEnrolment.clazzEnrolmentUid AS ceUid,
-             :newNodeId AS ceDestination
-        FROM UserSession
-             JOIN PersonGroupMember 
-                   ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-             ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_PERSON_SELECT} 
-                    ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2} 
-             JOIN ClazzEnrolment 
-                   ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
-       WHERE UserSession.usClientNodeId = :newNodeId
-         AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-         AND ClazzEnrolment.clazzEnrolmentLct != COALESCE(
-             (SELECT ceVersionId
-                FROM ClazzEnrolmentReplicate
-               WHERE cePk = ClazzEnrolment.clazzEnrolmentUid
-                 AND ceDestination = :newNodeId), 0) 
-      /*psql ON CONFLICT(cePk, ceDestination) DO UPDATE
-             SET cePending = true
-      */       
-    """)
-    @ReplicationRunOnNewNode
-    @ReplicationCheckPendingNotificationsFor([ClazzEnrolment::class])
-    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
-
-     @Query("""
- REPLACE INTO ClazzEnrolmentReplicate(cePk, ceDestination)
-  SELECT DISTINCT ClazzEnrolment.clazzEnrolmentUid AS ceUid,
-         UserSession.usClientNodeId AS ceDestination
-    FROM ChangeLog
-         JOIN ClazzEnrolment
-             ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID}
-                AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-         JOIN Clazz
-             ON Clazz.clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
-         ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-             ${Role.PERMISSION_CLAZZ_SELECT}
-             ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
-   WHERE UserSession.usClientNodeId != (
-         SELECT nodeClientId 
-           FROM SyncNode
-          LIMIT 1)
-     AND ClazzEnrolment.clazzEnrolmentLct != COALESCE(
-         (SELECT ceVersionId
-            FROM ClazzEnrolmentReplicate
-           WHERE cePk = ClazzEnrolment.clazzEnrolmentUid
-             AND ceDestination = UserSession.usClientNodeId), 0)
- /*psql ON CONFLICT(cePk, ceDestination) DO UPDATE
-     SET cePending = true
-  */               
-    """)
-    @ReplicationRunOnChange([ClazzEnrolment::class])
-    @ReplicationCheckPendingNotificationsFor([ClazzEnrolment::class])
-    abstract suspend fun replicateClazzEnrolmentOnChange()
 
     /**
      * Note: When actually enroling into a class, use UmAppDatbaseExt#processEnrolmentIntoClass
@@ -213,7 +154,7 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     abstract suspend fun findByUid(uid: Long): ClazzEnrolment?
 
     @Query("SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentUid = :uid")
-    abstract fun findByUidLive(uid: Long): LiveData<ClazzEnrolment?>
+    abstract fun findByUidLive(uid: Long): Flow<ClazzEnrolment?>
 
     @Query("""
                 UPDATE ClazzEnrolment

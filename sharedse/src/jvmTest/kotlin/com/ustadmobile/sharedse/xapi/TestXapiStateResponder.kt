@@ -123,7 +123,7 @@ class TestXapiStateResponder {
         }
 
         accountManager = di.direct.instance()
-        db = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
+        db = di.on(accountManager.currentAccount).direct.instance(tag = DoorTag.TAG_DB)
 
         mockUriResource = mock<RouterNanoHTTPD.UriResource> {
             on { initParameter(0, DI::class.java) }.thenReturn(di)
@@ -144,7 +144,7 @@ class TestXapiStateResponder {
         val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
         mockSession = mock {
-            on { uri }.thenReturn("/${UMURLEncoder.encodeUTF8(accountManager.activeAccount.endpointUrl)}/xapi/activities/state")
+            on { uri }.thenReturn("/${UMURLEncoder.encodeUTF8(accountManager.currentAccount.endpointUrl)}/xapi/activities/state")
             on { queryParameterString }.thenReturn(content)
             on { headers }.thenReturn(mapOf("content-type" to "application/json"))
             on { parameters }.thenReturn(
@@ -157,7 +157,7 @@ class TestXapiStateResponder {
 
         val responder = XapiStateResponder()
         val response = responder.put(mockUriResource,
-                mutableMapOf(XapiStatementResponder.URI_PARAM_ENDPOINT to accountManager.activeAccount.endpointUrl), mockSession)
+                mutableMapOf(XapiStatementResponder.URI_PARAM_ENDPOINT to accountManager.currentAccount.endpointUrl), mockSession)
 
         Assert.assertEquals(NanoHTTPD.Response.Status.NO_CONTENT, response.status)
         val agentEntity = db!!.agentDao.getAgentByAnyId("", "", "123", "http://www.example.com/users/", "")
@@ -174,7 +174,7 @@ class TestXapiStateResponder {
         val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
         mockSession = mock {
-            on { uri }.thenReturn("/${UMURLEncoder.encodeUTF8(accountManager.activeAccount.endpointUrl)}/xapi/activities/state")
+            on { uri }.thenReturn("/${UMURLEncoder.encodeUTF8(accountManager.currentAccount.endpointUrl)}/xapi/activities/state")
             on { parseBody(any()) }.doAnswer {
                 val map = it.arguments[0] as MutableMap<String, String>
                 map["postData"] = content
@@ -191,7 +191,7 @@ class TestXapiStateResponder {
 
         val responder = XapiStateResponder()
         val response = responder.post(mockUriResource,
-                mutableMapOf(XapiStatementResponder.URI_PARAM_ENDPOINT to accountManager.activeAccount.endpointUrl), mockSession)
+                mutableMapOf(XapiStatementResponder.URI_PARAM_ENDPOINT to accountManager.currentAccount.endpointUrl), mockSession)
 
         Assert.assertEquals(NanoHTTPD.Response.Status.NO_CONTENT, response.status)
         val agentEntity = db!!.agentDao.getAgentByAnyId("", "", "123", "http://www.example.com/users/", "")
@@ -208,7 +208,7 @@ class TestXapiStateResponder {
         val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
         mockSession = mock {
-            on { uri }.thenReturn("/${UMURLEncoder.encodeUTF8(accountManager.activeAccount.endpointUrl)}/xapi/activities/state")
+            on { uri }.thenReturn("/${UMURLEncoder.encodeUTF8(accountManager.currentAccount.endpointUrl)}/xapi/activities/state")
             on { parseBody(any()) }.doAnswer {
                 val map = it.arguments[0] as MutableMap<String, String>
                 map["postData"] = content
@@ -225,7 +225,7 @@ class TestXapiStateResponder {
 
         val responder = XapiStateResponder()
         val response = responder.post(mockUriResource,
-                mutableMapOf(XapiStatementResponder.URI_PARAM_ENDPOINT to accountManager.activeAccount.endpointUrl), mockSession)
+                mutableMapOf(XapiStatementResponder.URI_PARAM_ENDPOINT to accountManager.currentAccount.endpointUrl), mockSession)
 
         Assert.assertEquals(NanoHTTPD.Response.Status.NO_CONTENT, response.status)
         val agentEntity = db!!.agentDao.getAgentByAnyId("", "", "123", "http://www.example.com/users/", "")
@@ -233,14 +233,14 @@ class TestXapiStateResponder {
         Assert.assertEquals("http://www.example.com/activities/1", stateEntity!!.activityId)
 
         val getResponse = responder.get(mockUriResource,
-                mutableMapOf(XapiStatementResponder.URI_PARAM_ENDPOINT to accountManager.activeAccount.endpointUrl), mockSession)
+                mutableMapOf(XapiStatementResponder.URI_PARAM_ENDPOINT to accountManager.currentAccount.endpointUrl), mockSession)
 
         val json = getResponse.data.readString()
         val contentMap = Gson().fromJson<HashMap<String, String>>(json, contentMapToken)
         Assert.assertEquals("Content matches", "Parthenon", contentMap["name"])
 
         val deleteResponse =  responder.delete(mockUriResource,
-                mutableMapOf(XapiStatementResponder.URI_PARAM_ENDPOINT to accountManager.activeAccount.endpointUrl), mockSession)
+                mutableMapOf(XapiStatementResponder.URI_PARAM_ENDPOINT to accountManager.currentAccount.endpointUrl), mockSession)
 
         Assert.assertEquals(NanoHTTPD.Response.Status.NO_CONTENT, deleteResponse.status)
         val deletedState = db!!.stateDao.findByStateId("http://www.example.com/states/1", agentEntity.agentUid, "http://www.example.com/activities/1", "")

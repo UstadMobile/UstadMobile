@@ -8,7 +8,10 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-@ReplicateEntity(tableId = TABLE_ID , tracker = CourseDiscussionReplicate::class)
+@ReplicateEntity(
+    tableId = TABLE_ID ,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
 @Triggers(arrayOf(
     Trigger(
         name = "coursediscussion_remote_insert",
@@ -16,21 +19,7 @@ import kotlinx.serialization.Serializable
         on = Trigger.On.RECEIVEVIEW,
         events = [Trigger.Event.INSERT],
         sqlStatements = [
-            """
-                REPLACE INTO CourseDiscussion(courseDiscussionUid, 
-                courseDiscussionActive, courseDiscussionTitle, 
-                courseDiscussionDesc, courseDiscussionClazzUid,  courseDiscussionLct)
-                VALUES(NEW.courseDiscussionUid, NEW.courseDiscussionActive,
-                NEW.courseDiscussionTitle, NEW.courseDiscussionDesc, NEW.courseDiscussionClazzUid,
-                 NEW.courseDiscussionLct)
-                /*psql ON CONFLICT (courseDiscussionUid) DO UPDATE 
-                SET courseDiscussionActive = EXCLUDED.courseDiscussionActive, 
-                courseDiscussionTitle = EXCLUDED.courseDiscussionTitle, 
-                courseDiscussionDesc = EXCLUDED.courseDiscussionDesc, 
-                courseDiscussionClazzUid = EXCLUDED.courseDiscussionClazzUid,
-                courseDiscussionLct = EXCLUDED.courseDiscussionLct 
-                */
-            """
+            TRIGGER_UPSERT_WHERE_NEWER
         ]
     )
 ))
@@ -47,8 +36,8 @@ open class CourseDiscussion() {
 
     var courseDiscussionActive: Boolean = true
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var courseDiscussionLct: Long = 0
 
     companion object{

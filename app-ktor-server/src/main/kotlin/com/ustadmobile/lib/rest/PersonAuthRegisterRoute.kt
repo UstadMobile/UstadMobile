@@ -5,7 +5,6 @@ import com.ustadmobile.core.account.AuthResult
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.RegisterRequest
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.LINK_ENDPOINT_VIEWNAME_DIVIDER
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -16,7 +15,6 @@ import com.ustadmobile.lib.db.entities.*
 import io.ktor.http.HttpStatusCode
 import org.kodein.di.instance
 import org.kodein.di.on
-import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.rest.ext.callEndpoint
 import io.ktor.client.*
@@ -24,12 +22,13 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.util.pipeline.*
 import kotlinx.datetime.Instant
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.ktor.closestDI
 import kotlin.IllegalStateException
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
 
 fun Route.personAuthRegisterRoute() {
 
@@ -68,7 +67,6 @@ fun Route.personAuthRegisterRoute() {
         post("register"){
             val di: DI by closestDI()
             val db: UmAppDatabase by di.on(call).instance(tag = DoorTag.TAG_DB)
-            val repo: UmAppDatabase by di.on(call).instance(tag = DoorTag.TAG_REPO)
 
             val registerRequest: RegisterRequest = call.receive()
 
@@ -93,18 +91,17 @@ fun Route.personAuthRegisterRoute() {
             val existingPerson = if(mPerson.personUid != 0L) db.personDao.findByUid(mPerson.personUid)
             else db.personDao.findByUsername(mPerson.username)
 
-            if(existingPerson != null && (mPerson.personUid == 0L ||
-                            mPerson.personUid != 0L && mPerson.username == existingPerson.username)){
+            if(existingPerson != null && mPerson.username == existingPerson.username){
                 call.respond(HttpStatusCode.Conflict, "Person already exists, change username")
                 return@post
             }
 
             if(existingPerson == null) {
                 mPerson.apply {
-                    personUid = repo.insertPersonAndGroup(mPerson).personUid
+                    personUid = db.insertPersonAndGroup(mPerson).personUid
                 }
             } else {
-                repo.personDao.update(mPerson)
+                db.personDao.update(mPerson)
             }
 
             if(Instant.fromEpochMilliseconds(mPerson.dateOfBirth).ageInYears() < UstadMobileConstants.MINOR_AGE_THRESHOLD) {
@@ -112,22 +109,23 @@ fun Route.personAuthRegisterRoute() {
                 val mParentContactVal = mParentContact ?: throw IllegalStateException("Minor without parent contact")
 
                 mParentJoinVal.ppjMinorPersonUid = mPerson.personUid
-                mParentJoinVal.ppjUid = repo.personParentJoinDao.insertAsync(mParentJoinVal)
+                mParentJoinVal.ppjUid = db.personParentJoinDao.insertAsync(mParentJoinVal)
 
                 val systemImpl: UstadMobileSystemImpl by closestDI().instance()
-                val appName = systemImpl.getString(mLangCode, MessageID.app_name, Any())
+                val appName = systemImpl.getString(MR.strings.app_name, mLangCode)
                 val linkArgs : Map<String, String> = mapOf(UstadView.ARG_ENTITY_UID to
                         mParentJoinVal.ppjUid.toString())
                 val linkUrl = (UMFileUtil.joinPaths(registerRequest.endpointUrl,
-                    LINK_ENDPOINT_VIEWNAME_DIVIDER) + ParentalConsentManagementView.VIEW_NAME)
+                    LINK_ENDPOINT_VIEWNAME_DIVIDER) + ParentalConsentManagementViewModel.DEST_NAME)
                     .appendQueryArgs(linkArgs.toQueryString())
 
-                val emailText = systemImpl.getString(mLangCode, MessageID.parent_child_register_message, Any())
+                val emailText = systemImpl.getString(MR.strings.parent_child_register_message,
+                        mLangCode)
                     .replace("%1\$s", mPerson.fullName())
                     .replace("%2\$s", appName)
                     .replace("%3\$s", linkUrl)
-                val subjectText = systemImpl.getString(mLangCode,
-                    MessageID.parent_child_register_message_subject, Any())
+                val subjectText = systemImpl.getString(
+                    MR.strings.parent_child_register_message_subject, mLangCode)
                     .replace("%1\$s", appName)
 
                 val notificationSender: NotificationSender by closestDI().instance()
@@ -137,7 +135,7 @@ fun Route.personAuthRegisterRoute() {
             val authParams: Pbkdf2Params = di.direct.instance()
             val httpClient: HttpClient = di.direct.instance()
 
-            repo.insertPersonAuthCredentials2(mPerson.personUid, newPassword, authParams,
+            db.insertPersonAuthCredentials2(mPerson.personUid, newPassword, authParams,
                 call.callEndpoint, httpClient)
 
             call.respond(HttpStatusCode.OK, mPerson)

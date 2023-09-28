@@ -109,11 +109,13 @@
                 android:text="@string/hide_app"/>
 
             <TextView
+                android:id="@+id/panic_button_settings_unhide_code"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingVertical="@dimen/dimen_8dp"
                 android:paddingHorizontal="16dp"
                 android:text="@{@string/hide_app_explanation(@string/app_name, unlockCode)}"
+                android:onClick="@{() -> eventListener.onClickUnhideCode()}"
                 tools:text="@string/hide_app_explanation"
                 />
 

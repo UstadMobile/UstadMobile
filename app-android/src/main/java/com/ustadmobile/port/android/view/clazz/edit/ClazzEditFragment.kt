@@ -28,17 +28,18 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
 import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.util.ext.editIconId
+import com.ustadmobile.core.viewmodel.clazz.ClazzScheduleConstants
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditUiState
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.port.android.util.compose.messageIdResource
-import com.ustadmobile.port.android.util.compose.messageIdOptionListResource
+import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.port.android.util.compose.rememberFormattedTime
+import com.ustadmobile.port.android.util.compose.stringIdMapResource
+import com.ustadmobile.port.android.util.compose.stringIdOptionListResource
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.composable.*
@@ -52,6 +53,7 @@ import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.clazz.edit.ClazzEditFragment.Companion.ADD_COURSE_BLOCK_OPTIONS
 import com.ustadmobile.port.android.view.clazz.edit.ClazzEditFragment.Companion.BLOCK_AND_ENTRY_ICON_MAP
 import kotlinx.parcelize.Parcelize
+import com.ustadmobile.core.R as CR
 
 class ClazzEditFragment : UstadBaseMvvmFragment() {
 
@@ -80,24 +82,24 @@ class ClazzEditFragment : UstadBaseMvvmFragment() {
 
         bottomSheetOptionList = listOf(
                 TitleDescBottomSheetOption(
-                        requireContext().getString(R.string.module),
-                        requireContext().getString(R.string.course_module),
+                        requireContext().getString(CR.string.module),
+                        requireContext().getString(CR.string.course_module),
                         CourseBlock.BLOCK_MODULE_TYPE),
                 TitleDescBottomSheetOption(
-                        requireContext().getString(R.string.text),
-                        requireContext().getString(R.string.formatted_text_to_show_to_course_participants),
+                        requireContext().getString(CR.string.text),
+                        requireContext().getString(CR.string.formatted_text_to_show_to_course_participants),
                         CourseBlock.BLOCK_TEXT_TYPE),
                 TitleDescBottomSheetOption(
-                        requireContext().getString(R.string.content),
-                        requireContext().getString(R.string.add_course_block_content_desc),
+                        requireContext().getString(CR.string.content),
+                        requireContext().getString(CR.string.add_course_block_content_desc),
                         CourseBlock.BLOCK_CONTENT_TYPE),
                 TitleDescBottomSheetOption(
-                        requireContext().getString(R.string.clazz_assignment),
-                        requireContext().getString(R.string.add_assignment_block_content_desc),
+                        requireContext().getString(CR.string.clazz_assignment),
+                        requireContext().getString(CR.string.add_assignment_block_content_desc),
                         CourseBlock.BLOCK_ASSIGNMENT_TYPE),
                 TitleDescBottomSheetOption(
-                        requireContext().getString(R.string.discussion_board),
-                        requireContext().getString(R.string.add_discussion_board_desc),
+                        requireContext().getString(CR.string.discussion_board),
+                        requireContext().getString(CR.string.add_discussion_board_desc),
                         CourseBlock.BLOCK_DISCUSSION_TYPE),
         )
 
@@ -121,24 +123,24 @@ class ClazzEditFragment : UstadBaseMvvmFragment() {
         val ADD_COURSE_BLOCK_OPTIONS: (Context) ->  List<TitleDescBottomSheetOption> = { context ->
             listOf(
                 TitleDescBottomSheetOption(
-                    context.getString(R.string.module),
-                    context.getString(R.string.course_module),
+                    context.getString(CR.string.module),
+                    context.getString(CR.string.course_module),
                     CourseBlock.BLOCK_MODULE_TYPE),
                 TitleDescBottomSheetOption(
-                    context.getString(R.string.text),
-                    context.getString(R.string.formatted_text_to_show_to_course_participants),
+                    context.getString(CR.string.text),
+                    context.getString(CR.string.formatted_text_to_show_to_course_participants),
                     CourseBlock.BLOCK_TEXT_TYPE),
                 TitleDescBottomSheetOption(
-                    context.getString(R.string.content),
-                    context.getString(R.string.add_course_block_content_desc),
+                    context.getString(CR.string.content),
+                    context.getString(CR.string.add_course_block_content_desc),
                     CourseBlock.BLOCK_CONTENT_TYPE),
                 TitleDescBottomSheetOption(
-                    context.getString(R.string.assignments),
-                    context.getString(R.string.add_assignment_block_content_desc),
+                    context.getString(CR.string.assignments),
+                    context.getString(CR.string.add_assignment_block_content_desc),
                     CourseBlock.BLOCK_ASSIGNMENT_TYPE),
                 TitleDescBottomSheetOption(
-                    context.getString(R.string.discussion_board),
-                    context.getString(R.string.add_discussion_board_desc),
+                    context.getString(CR.string.discussion_board),
+                    context.getString(CR.string.add_discussion_board_desc),
                     CourseBlock.BLOCK_DISCUSSION_TYPE),
             )
         }
@@ -222,7 +224,7 @@ private fun ClazzEditScreen(
 
         item {
             ReorderableItem(reorderableState = reorderLazyListState, key = 2) {
-                UstadEditHeader(stringResource(R.string.course_blocks))
+                UstadEditHeader(stringResource(CR.string.course_blocks))
             }
 
         }
@@ -239,7 +241,7 @@ private fun ClazzEditScreen(
                     modifier = Modifier.clickable {
                         onClickAddCourseBlock()
                     },
-                    text = { Text(stringResource(id = R.string.add_block)) },
+                    text = { Text(stringResource(id = CR.string.add_block)) },
                 )
             }
 
@@ -294,7 +296,7 @@ private fun ClazzEditScreen(
         }
 
         item {
-            UstadEditHeader(text = stringResource(id = R.string.schedule))
+            UstadEditHeader(text = stringResource(id = CR.string.schedule))
         }
 
         item {
@@ -302,7 +304,7 @@ private fun ClazzEditScreen(
                 modifier = Modifier.clickable {
                     onClickAddSchedule()
                 },
-                text = { Text(stringResource(id = R.string.add_a_schedule)) },
+                text = { Text(stringResource(id = CR.string.add_a_schedule)) },
                 icon = {
                     Icon(
                         imageVector = Icons.Filled.Add,
@@ -319,9 +321,13 @@ private fun ClazzEditScreen(
 
             val fromTimeFormatted = rememberFormattedTime(timeInMs = schedule.sceduleStartTime.toInt())
             val toTimeFormatted = rememberFormattedTime(timeInMs = schedule.scheduleEndTime.toInt())
-            val text = "${messageIdResource(id = MessageID.daily)} " +
-                    " ${messageIdOptionListResource(ScheduleConstants.DAY_MESSAGE_IDS, schedule.scheduleDay)} " +
-                    " $fromTimeFormatted - $toTimeFormatted "
+            val text = stringIdMapResource(
+                map = ClazzScheduleConstants.SCHEDULE_FREQUENCY_STRING_RESOURCES, 
+                key = schedule.scheduleFrequency
+            ) + " " + stringIdOptionListResource(
+                options = ScheduleConstants.DAY_MESSAGE_IDS,
+                key = schedule.scheduleDay
+            ) +  " $fromTimeFormatted - $toTimeFormatted "
 
             ListItem(
                 modifier = Modifier.clickable {
@@ -337,7 +343,7 @@ private fun ClazzEditScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
-                            contentDescription = stringResource(R.string.delete),
+                            contentDescription = stringResource(CR.string.delete),
                         )
                     }
                 }
@@ -345,7 +351,7 @@ private fun ClazzEditScreen(
         }
 
         item {
-            UstadEditHeader(text = stringResource(id = R.string.course_setup))
+            UstadEditHeader(text = stringResource(id = CR.string.course_setup))
         }
 
         item {
@@ -353,7 +359,7 @@ private fun ClazzEditScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultItemPadding(),
-                label = { Text(stringResource(id = R.string.timezone)) },
+                label = { Text(stringResource(id = CR.string.timezone)) },
                 value = uiState.entity?.clazzTimeZone ?: "",
                 onClick = onClickTimezone,
                 enabled = uiState.fieldsEnabled,
@@ -363,7 +369,7 @@ private fun ClazzEditScreen(
 
         item {
             UstadSwitchField(
-                label = stringResource(id = R.string.attendance),
+                label = stringResource(id = CR.string.attendance),
                 checked = uiState.clazzEditAttendanceChecked,
                 onChange = { onCheckedAttendance(it) },
                 enabled = uiState.fieldsEnabled,
@@ -374,7 +380,7 @@ private fun ClazzEditScreen(
         item {
             UstadClickableTextField(
                 value = uiState.entity?.terminology?.ctTitle ?: "",
-                label = { Text(stringResource(id = R.string.terminology)) },
+                label = { Text(stringResource(id = CR.string.terminology)) },
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {},
                 onClick = onClickTerminology,
@@ -397,14 +403,14 @@ private fun ClazzEditBasicDetails(
     Column(
         modifier = Modifier.defaultScreenPadding()
     ) {
-        UstadEditHeader(text = stringResource(id = R.string.basic_details))
+        UstadEditHeader(text = stringResource(id = CR.string.basic_details))
 
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultItemPadding(),
             value = uiState.entity?.clazzName ?: "",
-            label = { Text(stringResource( R.string.name )) },
+            label = { Text(stringResource( CR.string.name_key )) },
             enabled = uiState.fieldsEnabled,
             singleLine = true,
             onValueChange = {
@@ -418,7 +424,7 @@ private fun ClazzEditBasicDetails(
 
         HtmlClickableTextField(
             html = uiState.entity?.clazzDesc ?: "",
-            label = stringResource(R.string.description),
+            label = stringResource(CR.string.description),
             onClick = onClickEditDescription,
             modifier = Modifier
                 .fillMaxWidth()
@@ -435,7 +441,7 @@ private fun ClazzEditBasicDetails(
                 UstadDateField(
                     value = uiState.entity?.clazzStartTime ?: 0,
                     modifier = Modifier.testTag("start_date"),
-                    label = { Text(stringResource(id = R.string.start_date)) } ,
+                    label = { Text(stringResource(id = CR.string.start_date)) } ,
                     isError = uiState.clazzStartDateError != null,
                     enabled = uiState.fieldsEnabled,
                     timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
@@ -450,13 +456,15 @@ private fun ClazzEditBasicDetails(
             }
 
             UstadInputFieldLayout(
-                modifier = Modifier.weight(1f).defaultItemPadding(start = 8.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .defaultItemPadding(start = 8.dp),
                 errorText = uiState.clazzEndDateError
             ) {
                 UstadDateField(
                     value = uiState.entity?.clazzEndTime ?: 0,
                     modifier = Modifier.testTag("end_date"),
-                    label = { Text(stringResource(id = R.string.end_date).addOptionalSuffix()) },
+                    label = { Text(stringResource(id = CR.string.end_date).addOptionalSuffix()) },
                     isError = uiState.clazzEndDateError != null,
                     enabled = uiState.fieldsEnabled,
                     unsetDefault = UNSET_DISTANT_FUTURE,
@@ -494,7 +502,7 @@ private fun PopUpMenu(
             onClick = { expanded = true },
             enabled = enabled
         ) {
-            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more_options))
+            Icon(Icons.Default.MoreVert, contentDescription = stringResource(CR.string.more_options))
         }
         DropdownMenu(
             expanded = expanded,
@@ -504,7 +512,7 @@ private fun PopUpMenu(
                 DropdownMenuItem(
                     onClick = { onClickHideBlockPopupMenu(uiState.courseBlock) }
                 ) {
-                    Text(stringResource(id = R.string.hide))
+                    Text(stringResource(id = CR.string.hide))
                 }
             }
 
@@ -512,7 +520,7 @@ private fun PopUpMenu(
                 DropdownMenuItem(
                     onClick = { onClickUnHideBlockPopupMenu(uiState.courseBlock) }
                 ) {
-                    Text(stringResource(id = R.string.unhide))
+                    Text(stringResource(id = CR.string.unhide))
                 }
             }
 
@@ -520,7 +528,7 @@ private fun PopUpMenu(
                 DropdownMenuItem(
                     onClick = { onClickIndentBlockPopupMenu(uiState.courseBlock) }
                 ) {
-                    Text(stringResource(id = R.string.indent))
+                    Text(stringResource(id = CR.string.indent))
                 }
             }
 
@@ -529,13 +537,13 @@ private fun PopUpMenu(
                     DropdownMenuItem(
                         onClick = { onClickUnIndentBlockPopupMenu(uiState.courseBlock) }
                     ) {
-                        Text(stringResource(id = R.string.unindent))
+                        Text(stringResource(id = CR.string.unindent))
                     }
                 }
             }
 
             DropdownMenuItem(onClick = { onClickDeleteBlockPopupMenu(uiState.courseBlock) }) {
-                Text(stringResource(id = R.string.delete))
+                Text(stringResource(id = CR.string.delete))
             }
         }
     }
@@ -593,8 +601,8 @@ fun ClazzEditScreenPreview() {
                 Schedule().apply {
                     sceduleStartTime = 0
                     scheduleEndTime = 0
-                    scheduleFrequency = MessageID.yearly
-                    scheduleDay = MessageID.sunday
+                    scheduleFrequency = Schedule.SCHEDULE_FREQUENCY_WEEKLY
+                    scheduleDay = Schedule.DAY_SUNDAY
                 }
             ),
             courseBlockList = listOf(

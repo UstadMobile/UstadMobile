@@ -10,8 +10,10 @@ import kotlinx.serialization.Serializable
     Index(value = ["usPersonUid", "usStatus", "usClientNodeId"], name = "person_status_node_idx"),
     Index(value = ["usClientNodeId", "usStatus", "usPersonUid"], name = "node_status_person_idx")])
 @Serializable
-@ReplicateEntity(tableId = UserSession.TABLE_ID, tracker = UserSessionReplicate::class,
-    priority = ReplicateEntity.HIGHEST_PRIORITY)
+@ReplicateEntity(
+    tableId = UserSession.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
 @Triggers(arrayOf(
  Trigger(
      name = "usersession_remote_insert",
@@ -41,8 +43,8 @@ class UserSession {
     @LastChangedBy
     var usLcb: Int = 0
 
-    @ReplicationVersionId
-    @LastChangedTime
+    @ReplicateEtag
+    @ReplicateLastModified
     var usLct: Long = 0
 
     var usPersonUid: Long = 0
@@ -70,6 +72,14 @@ class UserSession {
         //Session that will not be synced, it is only added to allow an upstream node to have access
         // so that findUnsentEntities will work as expected
         const val TYPE_UPSTREAM = 2
+
+        const val TYPE_GUEST = 4
+
+        /**
+         * This is a temporary local session that was auto created by the account manager. It will
+         * not be sent to the upstream server.
+         */
+        const val TYPE_TEMP_LOCAL = 8
 
         const val STATUS_ACTIVE = 1
 

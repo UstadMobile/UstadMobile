@@ -1,6 +1,6 @@
 package com.ustadmobile.core.viewmodel.courseblock.edit
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.isDateSet
@@ -77,7 +77,7 @@ class CourseBlockEditViewModel(
                 userAccountIconVisible = false,
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
-                    text = systemImpl.getString(MessageID.done),
+                    text = systemImpl.getString(MR.strings.done),
                     onClick = this::onClickSave,
                 )
             )
@@ -109,11 +109,11 @@ class CourseBlockEditViewModel(
                 prev.copy(
                     title = when(_uiState.value.courseBlock?.cbType) {
                         CourseBlock.BLOCK_MODULE_TYPE ->
-                            createEditTitle(MessageID.add_module, MessageID.edit_module)
+                            createEditTitle(MR.strings.add_module, MR.strings.edit_module)
                         CourseBlock.BLOCK_TEXT_TYPE ->
-                            createEditTitle(MessageID.add_text, MessageID.edit_text)
+                            createEditTitle(MR.strings.add_text, MR.strings.edit_text)
                         CourseBlock.BLOCK_DISCUSSION_TYPE ->
-                            createEditTitle(MessageID.add_discussion, MessageID.edit_discussion)
+                            createEditTitle(MR.strings.add_discussion, MR.strings.edit_discussion)
                         else -> ""
                     }
                 )

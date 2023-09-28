@@ -17,7 +17,7 @@ group rootProject.group
 version rootProject.version
 
 android {
-    compileSdkVersion rootProject.ext.version_android_compile_sdk
+    compileSdk rootProject.ext.version_android_compile_sdk
     sourceSets.main.manifest.srcFile('src/androidMain/AndroidManifest.xml')
     defaultConfig {
         minSdkVersion 21
@@ -56,8 +56,8 @@ android {
 
 
 kotlin {
-    android {
-
+    androidTarget {
+        publishLibraryVariants("release", "debug")
     }
 
     jvm {

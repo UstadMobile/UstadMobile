@@ -16,6 +16,7 @@ import com.ustadmobile.core.view.PeerReviewerAllocationEditView
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterWithAllocations
 import com.ustadmobile.lib.db.entities.PeerReviewerAllocationList
+import com.ustadmobile.core.R as CR
 
 
 interface PeerReviewerAllocationEditFragmentEventHandler {
@@ -61,7 +62,7 @@ class PeerReviewerAllocationEditFragment: UstadEditFragment<PeerReviewerAllocati
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mPresenter?.onCreate(backStackSavedState)
-        ustadFragmentTitle = getString(R.string.assign_reviewers)
+        ustadFragmentTitle = getString(CR.string.assign_reviewers)
     }
 
     override fun handleAssignRandomAllocationClicked() {

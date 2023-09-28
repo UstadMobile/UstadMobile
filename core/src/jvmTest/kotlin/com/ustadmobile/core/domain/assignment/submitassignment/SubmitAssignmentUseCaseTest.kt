@@ -10,7 +10,6 @@ import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -20,6 +19,7 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.Person
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.mockito.kotlin.any
@@ -49,12 +49,11 @@ class SubmitAssignmentUseCaseTest {
 
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
         val db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
-            "jdbc:sqlite:build/tmp/submitusecase_${systemTimeInMillis()}.sqlite", attachmentDir = tmpDir)
+            "jdbc:sqlite:build/tmp/submitusecase_${systemTimeInMillis()}.sqlite", nodeId = nodeIdAndAuth.nodeId)
             .addSyncCallback(nodeIdAndAuth)
             .addCallback(ContentJobItemTriggersCallback())
             .addMigrations(*migrationList().toTypedArray())
             .build()
-            .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
         val systemImpl: UstadMobileSystemImpl = mock {
             on { getString(any())}.thenAnswer { it.arguments.first().toString() }
         }
@@ -89,7 +88,7 @@ class SubmitAssignmentUseCaseTest {
             }
         }finally {
             tmpDir.deleteRecursively()
-            //db.close()
+            db.close()
         }
     }
 

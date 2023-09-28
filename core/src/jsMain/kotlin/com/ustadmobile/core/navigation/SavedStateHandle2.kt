@@ -1,8 +1,7 @@
 package com.ustadmobile.core.navigation
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.door.lifecycle.MutableLiveData
-import js.core.toSet
+import js.iterable.toSet
 import kotlinext.js.getOwnPropertyNames
 import org.w3c.dom.History
 import web.url.URLSearchParams
@@ -58,11 +57,6 @@ class SavedStateHandle2(
             val searchParamKeys = searchParams.keys().toSet()
             return stateKeys + searchParamKeys
         }
-
-    @Deprecated("Should not be used anymore")
-    override fun <T> getLiveData(key: String): MutableLiveData<T> {
-        throw IllegalStateException("getLiveData not supported by SaveStateHandle2")
-    }
 
     companion object {
 

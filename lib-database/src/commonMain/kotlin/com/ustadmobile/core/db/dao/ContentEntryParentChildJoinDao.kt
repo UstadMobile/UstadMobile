@@ -4,59 +4,11 @@ import androidx.room.*
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
-import com.ustadmobile.lib.db.entities.UserSession
 import kotlin.js.JsName
-
-data class UmContentEntriesWithFileSize(var numEntries: Int = 0, var fileSize: Long = 0L)
 
 @Repository
 @DoorDao
 expect abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJoin> {
-
-    @Query("""
-     REPLACE INTO ContentEntryParentChildJoinReplicate(cepcjPk, cepcjDestination)
-      SELECT DISTINCT ContentEntryParentChildJoin.cepcjUid AS cepcjUid,
-             :newNodeId AS cepcjDestination
-        FROM ContentEntryParentChildJoin
-       WHERE ContentEntryParentChildJoin.cepcjLct != COALESCE(
-             (SELECT cepcjVersionId
-                FROM ContentEntryParentChildJoinReplicate
-               WHERE cepcjPk = ContentEntryParentChildJoin.cepcjUid
-                 AND cepcjDestination = :newNodeId), -1) 
-      /*psql ON CONFLICT(cepcjPk, cepcjDestination) DO UPDATE
-             SET cepcjPending = true
-      */       
-    """)
-    @ReplicationRunOnNewNode
-    @ReplicationCheckPendingNotificationsFor([ContentEntryParentChildJoin::class])
-    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
-
-    @Query("""
-    REPLACE INTO ContentEntryParentChildJoinReplicate(cepcjPk, cepcjDestination)
-    SELECT DISTINCT ContentEntryParentChildJoin.cepcjUid AS cepcjUid,
-         UserSession.usClientNodeId AS cepcjDestination
-    FROM ChangeLog
-         JOIN ContentEntryParentChildJoin
-             ON ChangeLog.chTableId = 7
-                AND ChangeLog.chEntityPk = ContentEntryParentChildJoin.cepcjUid
-         JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-    WHERE UserSession.usClientNodeId != (
-         SELECT nodeClientId 
-           FROM SyncNode
-          LIMIT 1)
-     AND ContentEntryParentChildJoin.cepcjLct != COALESCE(
-         (SELECT cepcjVersionId
-            FROM ContentEntryParentChildJoinReplicate
-           WHERE cepcjPk = ContentEntryParentChildJoin.cepcjUid
-             AND cepcjDestination = UserSession.usClientNodeId), 0)
-    /*psql ON CONFLICT(cepcjPk, cepcjDestination) DO UPDATE
-     SET cepcjPending = true
-    */               
-    """)
-    @ReplicationRunOnChange([ContentEntryParentChildJoin::class])
-    @ReplicationCheckPendingNotificationsFor([ContentEntryParentChildJoin::class])
-    abstract suspend fun replicateOnChange()
-
 
     @JsName("insertListAsync")
     @Insert

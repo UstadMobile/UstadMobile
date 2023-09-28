@@ -16,10 +16,13 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.viewmodel.SchoolDetailOverviewViewModel
+import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
+import com.ustadmobile.core.R as CR
 
 class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
 
@@ -66,18 +69,8 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         val commonArgs = mapOf(UstadView.ARG_NAV_CHILD to true.toString())
 
         val tabs = listOf(
-            SchoolDetailOverviewView.VIEW_NAME.appendQueryArgs(
+            SchoolDetailOverviewViewModel.DEST_NAME.appendQueryArgs(
                 commonArgs + mapOf(UstadView.ARG_ENTITY_UID to entityUidValue)
-            ),
-            SchoolMemberListView.VIEW_NAME.appendQueryArgs(
-                commonArgs + mapOf(
-                    UstadView.ARG_FILTER_BY_ROLE to Role.ROLE_SCHOOL_STAFF_UID.toString(),
-                    UstadView.ARG_FILTER_BY_SCHOOLUID to entityUidValue)
-            ),
-            SchoolMemberListView.VIEW_NAME.appendQueryArgs(
-                commonArgs + mapOf(
-                    UstadView.ARG_FILTER_BY_ROLE to Role.ROLE_SCHOOL_STUDENT_UID.toString(),
-                    UstadView.ARG_FILTER_BY_SCHOOLUID to entityUidValue)
             ),
         )
 
@@ -91,13 +84,13 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         mediator = TabLayoutMediator(tabList, pager) { tab, position ->
             tab.text = when (position) {
                 0 -> {
-                    getText(R.string.overview).toString()
+                    getText(CR.string.overview).toString()
                 }
                 1 -> {
-                    getText(R.string.staff).toString()
+                    getText(CR.string.staff).toString()
                 }
                 2 -> {
-                    getText(R.string.students).toString()
+                    getText(CR.string.students).toString()
                 }
                 else -> ""
             }
@@ -132,12 +125,10 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
     companion object{
         private val VIEW_NAME_TO_FRAGMENT_CLASS =
                 mapOf<String, Class<out Fragment>>(
-                SchoolDetailOverviewView.VIEW_NAME to
+                SchoolDetailOverviewViewModel.DEST_NAME to
                         SchoolDetailOverviewFragment::class.java,
-                PersonListView.VIEW_NAME to
+                PersonListViewModel.DEST_NAME to
                         PersonListFragment::class.java,
-                SchoolMemberListView.VIEW_NAME to
-                        SchoolMemberListFragment::class.java
         )
     }
 

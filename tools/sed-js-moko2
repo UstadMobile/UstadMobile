@@ -1,0 +1,3 @@
+s/val strings: StringsXml = useStringProvider()/val strings: StringProvider = useStringProvider()/g
+s/import com.ustadmobile.core.impl.locale.StringsXml/import com.ustadmobile.core.impl.locale.StringProvider/g
+ 

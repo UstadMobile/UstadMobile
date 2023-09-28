@@ -8,6 +8,7 @@ import com.ustadmobile.core.contentjob.DummyContentJobItemTransactionRunner
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.util.*
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
@@ -30,7 +31,7 @@ import org.kodein.di.*
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-class VideoTypePluginJvmTest {
+class VideoTypePluginJvmTest : AbstractMainDispatcherTest() {
 
 
     @JvmField

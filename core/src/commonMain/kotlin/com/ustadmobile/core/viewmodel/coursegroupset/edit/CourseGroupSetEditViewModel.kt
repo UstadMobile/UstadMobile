@@ -1,6 +1,6 @@
 package com.ustadmobile.core.viewmodel.coursegroupset.edit
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
@@ -50,8 +50,8 @@ class CourseGroupSetEditViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 title = createEditTitle(
-                    newEntityMessageId = MessageID.add_new_groups,
-                    editEntityMessageId = MessageID.edit_groups
+                    newEntityStringResource = MR.strings.add_new_groups,
+                    editEntityStringResource = MR.strings.edit_groups
                 ),
                 hideBottomNavigation = true,
                 loadingState = LoadingUiState.INDETERMINATE,
@@ -134,7 +134,7 @@ class CourseGroupSetEditViewModel(
                 prev.copy(
                     actionBarButtonState = ActionBarButtonUiState(
                         visible = true,
-                        text = systemImpl.getString(MessageID.save),
+                        text = systemImpl.getString(MR.strings.save),
                         enabled = true,
                         onClick = this@CourseGroupSetEditViewModel::onClickSave
                     ),
@@ -233,13 +233,13 @@ class CourseGroupSetEditViewModel(
 
         val hasInvalidAssignments = membersToSave.any { it.cgmGroupNumber > courseGroupSet.cgsTotalGroups }
         if(hasInvalidAssignments){
-            snackDispatcher.showSnackBar(Snack(systemImpl.getString(MessageID.error)))
+            snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.error)))
         }
 
         if(courseGroupSet.cgsName.isNullOrBlank()) {
             _uiState.update { prev ->
                 prev.copy(
-                    courseTitleError = systemImpl.getString(MessageID.field_required_prompt)
+                    courseTitleError = systemImpl.getString(MR.strings.field_required_prompt)
                 )
             }
         }
@@ -247,7 +247,7 @@ class CourseGroupSetEditViewModel(
         if(courseGroupSet.cgsTotalGroups < 1) {
             _uiState.update { prev ->
                 prev.copy(
-                    numOfGroupsError = systemImpl.getString(MessageID.score_greater_than_zero)
+                    numOfGroupsError = systemImpl.getString(MR.strings.score_greater_than_zero)
                 )
             }
         }

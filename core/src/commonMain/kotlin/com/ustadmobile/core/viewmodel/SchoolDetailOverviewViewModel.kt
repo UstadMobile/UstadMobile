@@ -37,3 +37,13 @@ data class SchoolDetailOverviewUiState(
         get() = !entity?.schoolTimeZone.isNullOrBlank()
 
 }
+
+class SchoolDetailOverviewViewModel  {
+
+    companion object {
+
+        const val DEST_NAME = "SchoolDetailOverview"
+
+    }
+
+}

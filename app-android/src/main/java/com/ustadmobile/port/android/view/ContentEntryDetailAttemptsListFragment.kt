@@ -10,15 +10,13 @@ import com.ustadmobile.core.controller.AttemptListListener
 import com.ustadmobile.core.controller.ContentEntryDetailAttemptsListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ContentEntryDetailAttemptsListView
 import com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 
-class ContentEntryDetailAttemptsListFragment(): UstadListViewFragment<PersonWithAttemptsSummary, PersonWithAttemptsSummary>(),
-        ContentEntryDetailAttemptsListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+class ContentEntryDetailAttemptsListFragment(): UstadBaseMvvmFragment() {
 
     private var mPresenter: ContentEntryDetailAttemptsListPresenter? = null
 

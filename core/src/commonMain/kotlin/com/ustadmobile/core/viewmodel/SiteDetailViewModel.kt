@@ -8,7 +8,15 @@ data class SiteDetailUiState(
     val site: Site? = null,
     val siteTerms: List<SiteTermsWithLanguage> = emptyList()
 
-    )
+)
+
+class SiteDetailViewModel  {
+
+    companion object {
+
+        const val DEST_NAME = "SiteDetail"
+    }
+}
 
 
 

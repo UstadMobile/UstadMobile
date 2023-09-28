@@ -4,11 +4,12 @@ import app.cash.turbine.test
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.RegisterAgeRedirectView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Site
@@ -32,7 +33,7 @@ import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
 @Suppress("RemoveExplicitTypeArguments")
-class LoginViewModelTest {
+class LoginViewModelTest : AbstractMainDispatcherTest(){
 
     private val json = Json {
         encodeDefaults = true
@@ -206,7 +207,7 @@ class LoginViewModelTest {
 
             val systemImpl: UstadMobileSystemImpl = di.direct.instance()
 
-            val expectedErrMsg = systemImpl.getString(MessageID.wrong_user_pass_combo)
+            val expectedErrMsg = systemImpl.getString(MR.strings.wrong_user_pass_combo)
 
             stateFlow.filter { it.errorMessage  == expectedErrMsg }.test(
                 name = "wait for expected error message"
@@ -243,7 +244,7 @@ class LoginViewModelTest {
 
             val stateFlow = stateInViewModelScope(viewModel.uiState)
             val systemImpl: UstadMobileSystemImpl by di.instance()
-            val expectedErr = systemImpl.getString(MessageID.login_network_error)
+            val expectedErr = systemImpl.getString(MR.strings.login_network_error)
 
             stateFlow.filter { it.errorMessage  == expectedErr }.test {
                 val state = awaitItem()

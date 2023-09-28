@@ -68,8 +68,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             tools:text="Result"
-            app:textMessageIdLookupKey="@{report.resultSuccess}"
-            app:textMessageIdLookupMap="@{StatementConstants.STATEMENT_RESULT_OPTIONS}"
             app:layout_constraintEnd_toStartOf="@+id/guideline_result"
             app:layout_constraintStart_toEndOf="@id/guideline_verb"
             app:layout_constraintTop_toTopOf="parent" />

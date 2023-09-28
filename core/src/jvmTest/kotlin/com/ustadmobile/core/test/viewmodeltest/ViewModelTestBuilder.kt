@@ -22,9 +22,7 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.randomUuid
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.util.test.nav.TestUstadSavedStateHandle
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
@@ -55,8 +53,6 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
     private lateinit var viewModelFactoryVar: TestViewModelFactory<T>
 
     private val endpointScope = EndpointScope()
-
-    private val testStartTime = systemTimeInMillis()
 
     private val xppFactory: XmlPullParserFactory by lazy {
         XmlPullParserFactory.newInstance().also {
@@ -102,6 +98,8 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
     val json: Json
         get() = di.direct.instance()
 
+    private val dbsToClose = mutableListOf<UmAppDatabase>()
+
     private var diVar = DI {
         import(CommonJvmDiModule)
 
@@ -133,13 +131,11 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
-            val sanitizedName = sanitizeDbNameFromUrl(context.url)
-            val dbUrl = "jdbc:sqlite:build/tmp/$sanitizedName.sqlite"
-            val attachmentsDir = File(tempDir, "attachments-$testStartTime")
+            val dbUrl = "jdbc:sqlite::memory:"
             val nodeIdAndAuth: NodeIdAndAuth = instance()
             spy(
                 DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl,
-                    attachmentsDir.absolutePath)
+                    nodeId = nodeIdAndAuth.nodeId)
                 .addSyncCallback(nodeIdAndAuth)
                 .addCallback(ContentJobItemTriggersCallback())
                 .addMigrations(*migrationList().toTypedArray())
@@ -153,7 +149,9 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
                         authSalt = randomString(20)
                     })
                 }
-            )
+            ).also {
+                dbsToClose.add(it)
+            }
         }
 
         if(repoConfig.useDbAsRepo) {
@@ -226,7 +224,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         db.withDoorTransactionAsync {
             val personInDb = db.insertPersonAndGroup(person)
             val session = accountManager.addSession(personInDb, endpoint.url, "dummypassword")
-            accountManager.activeSession = session
+            accountManager.currentUserSession = session
         }
 
         return person
@@ -248,10 +246,15 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         if(this::mockWebServer.isLazyInitialized) {
             mockWebServer.shutdown()
         }
-        endpointScope.activeEndpointUrls.forEach {
 
+        dbsToClose.forEach {
+            try {
+                it.close()
+            }catch(e: Exception) {
+                //do nothing - can happen if there is any pending database stuff going on
+            }
         }
-
+        dbsToClose.clear()
     }
 
 }

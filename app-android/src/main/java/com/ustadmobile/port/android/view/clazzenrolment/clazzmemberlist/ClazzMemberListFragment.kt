@@ -40,6 +40,9 @@ import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.UstadAddListItem
 import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
 import com.ustadmobile.port.android.view.composable.UstadListSortHeader
+import com.ustadmobile.core.R as CR
+import com.ustadmobile.core.MR
+
 
 class ClazzMemberListFragment() : UstadBaseMvvmFragment() {
 
@@ -157,8 +160,8 @@ fun ClazzMemberListScreen(
         item {
             ListItem(
                 text = {
-                    Text(text = uiState.terminologyStrings?.get(R.string.teachers_literal)
-                        ?: stringResource(R.string.teachers_literal))
+                    Text(text = uiState.terminologyStrings?.get(MR.strings.teachers_literal)
+                        ?: stringResource(CR.string.teachers_literal))
                 }
             )
         }
@@ -166,8 +169,8 @@ fun ClazzMemberListScreen(
         item {
             if (uiState.addTeacherVisible){
                 UstadAddListItem(
-                    text = uiState.terminologyStrings?.get(R.string.add_a_teacher)
-                        ?: stringResource(R.string.add_a_teacher),
+                    text = uiState.terminologyStrings?.get(MR.strings.add_a_teacher)
+                        ?: stringResource(CR.string.add_a_teacher),
                     enabled = uiState.fieldsEnabled,
                     icon = Icons.Filled.PersonAdd,
                     onClickAdd = {
@@ -200,8 +203,8 @@ fun ClazzMemberListScreen(
         item {
             ListItem(
                 text = {
-                    Text(text = uiState.terminologyStrings?.get(R.string.students)
-                        ?: stringResource(R.string.students))
+                    Text(text = uiState.terminologyStrings?.get(MR.strings.students)
+                        ?: stringResource(CR.string.students))
                 }
             )
         }
@@ -209,8 +212,8 @@ fun ClazzMemberListScreen(
         item {
             if (uiState.addStudentVisible){
                 UstadAddListItem(
-                    text = uiState.terminologyStrings?.get(R.string.add_a_student)
-                        ?: stringResource(R.string.add_a_student),
+                    text = uiState.terminologyStrings?.get(MR.strings.add_a_student)
+                        ?: stringResource(CR.string.add_a_student),
                     enabled = uiState.fieldsEnabled,
                     icon = Icons.Filled.PersonAdd,
                     onClickAdd = {
@@ -232,7 +235,7 @@ fun ClazzMemberListScreen(
 
         item {
             ListItem(
-                text = { Text(text = stringResource(id = R.string.pending_requests)) }
+                text = { Text(text = stringResource(id = CR.string.pending_requests)) }
             )
         }
         
@@ -296,7 +299,7 @@ fun PendingStudentListItem(
                 ) {
                     Icon(
                         painter = painterResource(id = com.google.android.exoplayer2.ui.R.drawable.exo_ic_check),
-                        contentDescription = stringResource(R.string.accept)
+                        contentDescription = stringResource(CR.string.accept)
                     )
                 }
                 IconButton(
@@ -306,7 +309,7 @@ fun PendingStudentListItem(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_close_black_24dp),
-                        contentDescription = stringResource(R.string.reject)
+                        contentDescription = stringResource(CR.string.reject)
                     )
                 }
             }

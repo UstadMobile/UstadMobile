@@ -52,7 +52,7 @@ import com.ustadmobile.port.android.impl.nav.NavHostTempFileRegistrar
 import com.ustadmobile.port.android.util.ext.registerDestinationTempFile
 import com.ustadmobile.port.android.view.person.detail.PersonDetailFragment
 import com.ustadmobile.port.android.view.util.UstadActivityWithBottomNavigation
-
+import com.ustadmobile.core.R as CR
 
 class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
         UstadActivityWithProgressBar,
@@ -242,7 +242,7 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
     private fun handleConfirmShareApp() {
         GlobalScope.launch(Dispatchers.IO) {
             val apkFile = File(applicationContext.applicationInfo.sourceDir)
-            val appName = applicationContext.getString(R.string.app_name).replace(" ", "_")
+            val appName = applicationContext.getString(CR.string.app_name).replace(" ", "_")
             val baseName = "$appName.apk"
 
             val outDir = File(applicationContext.filesDir, "external")
@@ -277,7 +277,7 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
                     applicationContext.startActivity(shareIntent)
                 }else {
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(applicationContext, R.string.error_this_device_doesnt_support_bluetooth_sharing,
+                        Toast.makeText(applicationContext, CR.string.error_this_device_doesnt_support_bluetooth_sharing,
                             Toast.LENGTH_LONG).show()
                     }
                 }
@@ -306,7 +306,7 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
         val profileImgView: ImageView = menuItem.actionView?.findViewById(R.id.person_name_profilepic) ?: return
         userProfileDrawable?.also { profileImgView.imageForeignKeyPlaceholder(it) }
         profileImgView.setImageForeignKeyAdapter(PersonDetailFragment.FOREIGNKEYADAPTER_PERSON)
-        profileImgView.setImageForeignKey(accountManager.activeAccount.personUid)
+        profileImgView.setImageForeignKey(accountManager.currentAccount.personUid)
         profileImgView.setOnClickListener { impl.go(AccountListView.VIEW_NAME, mapOf(), this) }
     }
 

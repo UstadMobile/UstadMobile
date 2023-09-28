@@ -9,7 +9,10 @@ import com.ustadmobile.door.annotation.*
  * and the mechanism.
  */
 @Entity
-@ReplicateEntity(tableId = PersonAuth2.TABLE_ID, tracker = PersonAuth2Replicate::class)
+@ReplicateEntity(
+    tableId = PersonAuth2.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
 @Triggers(arrayOf(
  Trigger(
      name = "personauth2_remote_insert",
@@ -17,11 +20,7 @@ import com.ustadmobile.door.annotation.*
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
      sqlStatements = [
-         """REPLACE INTO PersonAuth2(pauthUid, pauthMechanism, pauthAuth, pauthLcsn, pauthPcsn, pauthLcb, pauthLct) 
-         VALUES (NEW.pauthUid, NEW.pauthMechanism, NEW.pauthAuth, NEW.pauthLcsn, NEW.pauthPcsn, NEW.pauthLcb, NEW.pauthLct) 
-         /*psql ON CONFLICT (pauthUid) DO UPDATE 
-         SET pauthMechanism = EXCLUDED.pauthMechanism, pauthAuth = EXCLUDED.pauthAuth, pauthLcsn = EXCLUDED.pauthLcsn, pauthPcsn = EXCLUDED.pauthPcsn, pauthLcb = EXCLUDED.pauthLcb, pauthLct = EXCLUDED.pauthLct
-         */"""
+         TRIGGER_UPSERT_WHERE_NEWER
      ]
  )
 ))
@@ -50,8 +49,8 @@ class PersonAuth2 {
     @LastChangedBy
     var pauthLcb: Long = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var pauthLct: Long = 0
 
     companion object {

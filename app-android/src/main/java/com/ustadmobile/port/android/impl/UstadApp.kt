@@ -10,7 +10,6 @@ import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.BuildConfig
 import com.ustadmobile.core.account.*
-import com.ustadmobile.core.assignment.ClazzAssignmentIncomingReplicationListener
 import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
@@ -36,11 +35,9 @@ import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.addIncomingReplicationListener
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
@@ -62,6 +59,8 @@ import com.ustadmobile.core.db.dao.commitLiveConnectivityStatus
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.di.commonDomainDiModule
+import com.ustadmobile.core.impl.locale.StringProvider
+import com.ustadmobile.core.impl.locale.StringProviderAndroid
 import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
 import org.acra.config.httpSender
 import org.acra.data.StringFormat
@@ -95,6 +94,10 @@ class UstadApp : Application(), DIAware {
             UstadMobileSystemImpl(applicationContext)
         }
 
+        bind<StringProvider>() with singleton {
+            StringProviderAndroid(applicationContext)
+        }
+
         bind<UstadAccountManager>() with singleton {
             UstadAccountManager(instance(), applicationContext, di)
         }
@@ -117,10 +120,7 @@ class UstadApp : Application(), DIAware {
                 .addCallback(ContentJobItemTriggersCallback())
                 .addMigrations(*migrationList().toTypedArray())
                 .build()
-                .also {
-                    val networkManager: NetworkManagerBle = di.direct.instance()
-                    it.connectivityStatusDao.commitLiveConnectivityStatus(networkManager.connectivityStatus)
-                }
+
         }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
@@ -131,12 +131,7 @@ class UstadApp : Application(), DIAware {
                     instance(), instance()
             ) {
                 useReplicationSubscription = true
-                replicationSubscriptionInitListener = RepSubscriptionInitListener()
-            }).also {
-                (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
-                it.addIncomingReplicationListener(
-                    ClazzAssignmentIncomingReplicationListener(context, di))
-            }
+            })
         }
 
         bind<ContainerStorageManager> () with scoped(EndpointScope.Default).singleton{
@@ -151,11 +146,6 @@ class UstadApp : Application(), DIAware {
             containerFolder
         }
 
-        bind<ConnectivityLiveData>() with scoped(EndpointScope.Default).singleton {
-            val db: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_DB)
-            ConnectivityLiveData(db.connectivityStatusDao.statusLive())
-        }
-
         bind<EmbeddedHTTPD>() with singleton {
             EmbeddedHTTPD(0, di).also {
                 it.UmAppDatabase_AddUriMapping(false, "/:endpoint/UmAppDatabase", di)
@@ -164,12 +154,6 @@ class UstadApp : Application(), DIAware {
             }
         }
 
-        bind<NetworkManagerBle>() with singleton {
-            val coroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
-            NetworkManagerBle(applicationContext, di, coroutineDispatcher).also {
-                it.onCreate()
-            }
-        }
 
         bind<ContainerMounter>() with singleton { instance<EmbeddedHTTPD>() }
 
@@ -292,7 +276,6 @@ class UstadApp : Application(), DIAware {
         registerContextTranslator { call: NanoHttpdCall -> Endpoint(call.urlParams["endpoint"] ?: "notfound")}
 
         onReady {
-            instance<NetworkManagerBle>()
             instance<EmbeddedHTTPD>()
             instance<ConnectionManager>().start()
 
@@ -314,8 +297,6 @@ class UstadApp : Application(), DIAware {
 
     override fun onCreate() {
         super.onCreate()
-        val systemImpl: UstadMobileSystemImpl = di.direct.instance()
-        systemImpl.messageIdMap = MessageIDMap.ID_MAP
         Napier.base(DebugAntilog())
     }
 

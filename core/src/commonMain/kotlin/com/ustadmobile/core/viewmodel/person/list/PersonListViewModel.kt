@@ -1,14 +1,12 @@
 package com.ustadmobile.core.viewmodel.person.list
 
 import com.ustadmobile.core.db.dao.PersonDaoCommon
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
-import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED
 import com.ustadmobile.door.paging.*
@@ -19,14 +17,21 @@ import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import app.cash.paging.PagingSource
+import app.cash.paging.PagingSourceLoadParams
+import app.cash.paging.PagingSourceLoadResult
+import app.cash.paging.PagingSourceLoadResultPage
+import app.cash.paging.PagingState
+import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
+import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 
 data class PersonListUiState(
     val personList: () -> PagingSource<Int, PersonWithDisplayDetails> = { EmptyPagingSource() },
     val sortOptions: List<SortOrderOption> = listOf(
-        SortOrderOption(MessageID.first_name, PersonDaoCommon.SORT_FIRST_NAME_ASC, true),
-        SortOrderOption(MessageID.first_name, PersonDaoCommon.SORT_FIRST_NAME_DESC, false),
-        SortOrderOption(MessageID.last_name, PersonDaoCommon.SORT_LAST_NAME_ASC, true),
-        SortOrderOption(MessageID.last_name, PersonDaoCommon.SORT_LAST_NAME_DESC, false)
+        SortOrderOption(MR.strings.first_name, PersonDaoCommon.SORT_FIRST_NAME_ASC, true),
+        SortOrderOption(MR.strings.first_name, PersonDaoCommon.SORT_FIRST_NAME_DESC, false),
+        SortOrderOption(MR.strings.last_name, PersonDaoCommon.SORT_LAST_NAME_ASC, true),
+        SortOrderOption(MR.strings.last_name, PersonDaoCommon.SORT_LAST_NAME_DESC, false)
     ),
     val sortOption: SortOrderOption = sortOptions.first(),
     val showAddItem: Boolean = false,
@@ -38,10 +43,12 @@ class EmptyPagingSource<Key: Any, Value: Any>(): PagingSource<Key, Value>() {
         return null
     }
 
-    override suspend fun load(params: LoadParams<Key>): LoadResult<Key, Value> {
-        return DoorLoadResult.Page<Key, Value>(
-            emptyList(), null, null
-        ).toLoadResult()
+
+
+    @Suppress("CAST_NEVER_SUCCEEDS")
+    override suspend fun load(params: PagingSourceLoadParams<Key>): PagingSourceLoadResult<Key, Value> {
+        return PagingSourceLoadResultPage<Key, Value>(emptyList(), null, null)
+            as PagingSourceLoadResult<Key, Value>
     }
 }
 
@@ -51,7 +58,7 @@ class EmptyPagingSource<Key: Any, Value: Any>(): PagingSource<Key, Value>() {
 class PersonListViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-    destinationName: String = PersonListView.VIEW_NAME,
+    destinationName: String = DEST_NAME,
 ): UstadListViewModel<PersonListUiState>(
     di, savedStateHandle, PersonListUiState(), destinationName
 ) {
@@ -60,7 +67,7 @@ class PersonListViewModel(
 
     private val filterExcludeMemberOfSchool = savedStateHandle[ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
 
-    private val filterAlreadySelectedList = savedStateHandle[PersonListView.ARG_EXCLUDE_PERSONUIDS_LIST]
+    private val filterAlreadySelectedList = savedStateHandle[ARG_EXCLUDE_PERSONUIDS_LIST]
         ?.split(",")?.filter { it.isNotEmpty() }?.map { it.trim().toLong() }
         ?: listOf()
 
@@ -71,7 +78,7 @@ class PersonListViewModel(
         activeRepo.personDao.findPersonsWithPermissionAsPagingSource(
             getSystemTimeInMillis(), filterExcludeMembersOfClazz,
             filterExcludeMemberOfSchool, filterAlreadySelectedList,
-            accountManager.activeAccount.personUid, _uiState.value.sortOption.flag,
+            accountManager.currentAccount.personUid, _uiState.value.sortOption.flag,
             _appUiState.value.searchState.searchText.toQueryLikeParam()
         ).also {
             lastPagingSource?.invalidate()
@@ -86,7 +93,7 @@ class PersonListViewModel(
             prev.copy(
                 navigationVisible = true,
                 searchState = createSearchEnabledState(),
-                title = listTitle(MessageID.people, MessageID.select_person)
+                title = listTitle(MR.strings.people, MR.strings.select_person)
             )
         }
 
@@ -100,10 +107,10 @@ class PersonListViewModel(
             collectHasPermissionFlowAndSetAddNewItemUiState(
                 hasPermissionFlow = {
                     activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
-                        accountManager.activeAccount.personUid, Role.PERMISSION_PERSON_INSERT
+                        accountManager.currentAccount.personUid, Role.PERMISSION_PERSON_INSERT
                     )
                 },
-                fabMessageId = MessageID.person,
+                fabStringResource = MR.strings.person,
                 onSetAddListItemVisibility = { visible ->
                     _uiState.update { prev -> prev.copy(showAddItem = visible) }
                 }
@@ -127,7 +134,7 @@ class PersonListViewModel(
     }
 
     override fun onClickAdd() {
-        navigateToCreateNew(PersonEditView.VIEW_NAME, savedStateHandle[ARG_GO_TO_ON_PERSON_SELECTED]?.let {
+        navigateToCreateNew(PersonEditViewModel.DEST_NAME, savedStateHandle[ARG_GO_TO_ON_PERSON_SELECTED]?.let {
             mapOf(ARG_GO_TO_ON_PERSON_SELECTED to it)
         } ?: emptyMap())
     }
@@ -141,13 +148,31 @@ class PersonListViewModel(
             val goToDestName = goToOnPersonSelected.substringBefore("?")
             navController.navigate(goToDestName, args)
         }else {
-            navigateOnItemClicked(PersonDetailView.VIEW_NAME, entry.personUid, entry)
+            navigateOnItemClicked(PersonDetailViewModel.DEST_NAME, entry.personUid, entry)
         }
     }
 
     companion object {
 
         const val DEST_NAME = "People"
+
+        const val DEST_NAME_HOME = "PersonListHome"
+
+        const val RESULT_PERSON_KEY = "Person"
+
+        const val ARG_HIDE_PERSON_ADD = "ArgHidePersonAdd"
+
+        /**
+         * Exclude those who are already in the given class. This is useful for
+         * the add to class picker (e.g. to avoid showing people who are already in the
+         * given class)
+         */
+        const val ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ = "exlcudeFromClazz"
+
+        const val ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL = "excludeFromSchool"
+
+        const val ARG_EXCLUDE_PERSONUIDS_LIST = "excludeAlreadySelectedList"
+
 
     }
 

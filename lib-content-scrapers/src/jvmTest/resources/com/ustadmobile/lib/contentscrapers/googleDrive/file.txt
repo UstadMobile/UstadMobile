@@ -1,6 +1,0 @@
-{
- "id": "0B__cZKkvYaJvckpRSFEtSWFVRkk",
- "name": "My Own Scooter",
- "mimeType": "application/epub+zip",
- "modifiedTime": "2020-08-29T06:54:06.751Z"
-}

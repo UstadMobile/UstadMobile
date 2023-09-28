@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.contententry.list
 
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.SortOrderOption
@@ -13,7 +13,7 @@ import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel.Companion.FILTER_BY_PARENT_UID
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import com.ustadmobile.door.paging.PagingSource
+import app.cash.paging.PagingSource
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -46,8 +46,8 @@ data class ContentEntryListUiState(
     companion object {
 
         val DEFAULT_SORT_OPTIONS = listOf(
-            SortOrderOption(MessageID.title, ContentEntryDaoCommon.SORT_TITLE_ASC, true),
-            SortOrderOption(MessageID.title, ContentEntryDaoCommon.SORT_TITLE_DESC, false),
+            SortOrderOption(MR.strings.title, ContentEntryDaoCommon.SORT_TITLE_ASC, true),
+            SortOrderOption(MR.strings.title, ContentEntryDaoCommon.SORT_TITLE_DESC, false),
         )
 
     }
@@ -106,10 +106,10 @@ class ContentEntryListViewModel(
         }
         _appUiState.update { prev ->
             prev.copy(
-                title = systemImpl.getString(MessageID.library),
+                title = systemImpl.getString(MR.strings.library),
                 fabState = FabUiState(
                     visible = false,
-                    text = systemImpl.getString(MessageID.content),
+                    text = systemImpl.getString(MR.strings.content),
                     icon = FabUiState.FabIcon.ADD,
                 )
             )
@@ -118,7 +118,7 @@ class ContentEntryListViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
-                    accountManager.activeAccount.personUid, Role.PERMISSION_CONTENT_INSERT
+                    accountManager.currentAccount.personUid, Role.PERMISSION_CONTENT_INSERT
                 ).collect { hasNewContentPermission ->
                     _appUiState.update { prev ->
                         prev.copy(fabState = prev.fabState.copy(visible = hasNewContentPermission))
@@ -169,6 +169,8 @@ class ContentEntryListViewModel(
     companion object {
 
         const val DEST_NAME = "ContentEntries"
+
+        const val DEST_NAME_HOME = "ContentEntryListHome"
 
         /**
          * Note: Because picker mode may involve more than one step in the back stack, we need a

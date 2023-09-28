@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.appcompat.content.res.AppCompatResources
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.UstadBaseController
+import com.ustadmobile.core.R as CR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.port.android.panic.HidingManager
 import com.ustadmobile.port.android.util.ext.getActivityContext
@@ -38,7 +38,7 @@ class PanicButtonSettingsPresenter(
         val androidContext = (context as Context)
 
         val triggerAppNone = PanicTriggerApp(Panic.PACKAGE_NAME_NONE,
-            androidContext.getString(R.string.None),
+            androidContext.getString(CR.string.none_key),
             AppCompatResources.getDrawable(androidContext, R.drawable.ic_empty))
         val packageManager = androidContext.packageManager
         val triggerResponders = PanicResponder.resolveTriggerApps(packageManager)

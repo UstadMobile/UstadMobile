@@ -6,6 +6,29 @@ pluginManagement {
     }
 }
 
+//As per https://docs.gradle.org/current/userguide/platforms.html
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            version("version-moko-resources", "0.23.0")
+            version("jetbrains-compose", "1.5.0")
+            version("version_activity_compose", "1.7.2")
+            version("version_androidx_appcompat", "1.6.1")
+            version("version_androidx_core", "1.9.0")
+
+            plugin("jetbrains-compose", "org.jetbrains.compose").version("1.5.0")
+            plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
+
+            library("kodein-di", "org.kodein.di:kodein-di:7.20.2")
+            library("moko-resources", "dev.icerock.moko", "resources").versionRef("version-moko-resources")
+            library("moko-resources-compose", "dev.icerock.moko", "resources-compose").versionRef("version-moko-resources")
+            library("activity-compose", "androidx.activity", "activity-compose").versionRef("version_activity_compose")
+            library("androidx-appcompat", "androidx.appcompat", "appcompat").versionRef("version_androidx_appcompat")
+            library("androidx-core-ktx", "androidx.core", "core-ktx").versionRef("version_androidx_core")
+        }
+    }
+}
+
 
 include ':app-android',
         ':app-ktor-server',
@@ -15,8 +38,9 @@ include ':app-android',
         ':sharedse',
         ':lib-util',
         ':testserver-controller',
-        ':lib-database',
-        ':lib-content-scrapers'
+        ':lib-database'
 
 rootProject.name = "UstadMobile"
 
+include ':app-desktop'
+include ':lib-ui-compose'

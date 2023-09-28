@@ -1,6 +1,6 @@
 package com.ustadmobile.core.viewmodel
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -65,7 +65,7 @@ class HtmlEditViewModel(
                 title = argTitle,
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
-                    text = argDoneButtonLabel ?: systemImpl.getString(MessageID.done),
+                    text = argDoneButtonLabel ?: systemImpl.getString(MR.strings.done),
                     enabled = true,
                     onClick = this::onClickDone
                 )
@@ -99,7 +99,7 @@ class HtmlEditViewModel(
             _uiState.value.wordLimit?.let { it >= plainText.countWords() } == false ||
                 _uiState.value.charLimit?.let { it >= plainText.length } == false
         ) {
-            snackDispatcher.showSnackBar(Snack(message = systemImpl.getString(MessageID.error_too_long_text)))
+            snackDispatcher.showSnackBar(Snack(message = systemImpl.getString(MR.strings.error_too_long_text)))
             return
         }
 

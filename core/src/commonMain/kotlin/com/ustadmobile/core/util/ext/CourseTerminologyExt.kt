@@ -3,7 +3,7 @@ package com.ustadmobile.core.util.ext
 import com.ustadmobile.core.controller.TerminologyKeys
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.CourseTerminology
-import com.ustadmobile.lib.db.entities.TerminologyEntry
+import com.ustadmobile.core.impl.locale.TerminologyEntry
 import kotlinx.serialization.json.Json
 
 fun CourseTerminology?.toTermMap(

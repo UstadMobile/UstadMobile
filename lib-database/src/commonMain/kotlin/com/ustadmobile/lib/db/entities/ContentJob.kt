@@ -3,6 +3,10 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+/**
+ * Represents one job that the user created. One ContentJob can have one or more ContentJobItem(s),
+ * each of which will have a source URI.
+ */
 @Entity
 data class ContentJob(
 

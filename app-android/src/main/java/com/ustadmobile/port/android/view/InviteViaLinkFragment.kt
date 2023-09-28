@@ -29,6 +29,7 @@ import com.ustadmobile.core.controller.InviteViaLinkPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.InviteViaLinkView
 import com.ustadmobile.core.viewmodel.InviteViaLinkUiState
+import com.ustadmobile.core.R as CR
 
 
 interface InvitationLinkHandler{
@@ -83,7 +84,7 @@ class InviteViaLinkFragment: UstadBaseFragment(), InviteViaLinkView, InvitationL
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        ustadFragmentTitle = requireContext().getString(R.string.invite_with_link)
+        ustadFragmentTitle = requireContext().getString(CR.string.invite_with_link)
         mPresenter = InviteViaLinkPresenter(requireContext(), arguments.toStringMap(), this,
             di).withViewLifecycle()
         mPresenter?.onCreate(null)
@@ -99,21 +100,21 @@ class InviteViaLinkFragment: UstadBaseFragment(), InviteViaLinkView, InvitationL
         val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE)
                 as? ClipboardManager
         clipboard?.setPrimaryClip(ClipData(ClipData.newPlainText("link", link)))
-        showSnackBar(requireContext().getString(R.string.copied_to_clipboard))
+        showSnackBar(requireContext().getString(CR.string.copied_to_clipboard))
     }
 
     override fun handleClickCopyCode(code: String) {
         val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE)
                 as? ClipboardManager
         clipboard?.setPrimaryClip(ClipData(ClipData.newPlainText("link", code)))
-        showSnackBar(requireContext().getString(R.string.copied_to_clipboard))
+        showSnackBar(requireContext().getString(CR.string.copied_to_clipboard))
     }
 
     override fun handleClickShareLink(link: String) {
         val intent = Intent(Intent.ACTION_SEND)
         intent.type = "text/plain"
         intent.putExtra(Intent.EXTRA_TEXT, link)
-        startActivity(Intent.createChooser(intent, getString(R.string.share_link)))
+        startActivity(Intent.createChooser(intent, getString(CR.string.share_link)))
     }
 
 
@@ -133,7 +134,7 @@ private fun InviteViaLinkScreen(
     )  {
 
         Text(text = String.format(
-            stringResource(id = R.string.invite_link_desc),
+            stringResource(id = CR.string.invite_link_desc),
             uiState.entityName)
         )
 
@@ -167,7 +168,7 @@ private fun InviteViaLinkScreen(
         ) {
             Icon(Icons.Outlined.ContentCopy, contentDescription = null)
             Spacer(modifier = Modifier.width(12.dp))
-            Text(stringResource(R.string.copy_link).uppercase())
+            Text(stringResource(CR.string.copy_link).uppercase())
         }
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -178,7 +179,7 @@ private fun InviteViaLinkScreen(
         ) {
             Icon(Icons.Filled.Share, contentDescription = null)
             Spacer(modifier = Modifier.width(12.dp))
-            Text(stringResource(R.string.copy_link).uppercase())
+            Text(stringResource(CR.string.copy_link).uppercase())
         }
     }
 }
@@ -187,7 +188,7 @@ private fun InviteViaLinkScreen(
 @Preview
 fun  InviteViaLinkScreenPreview() {
     val uiStateVal = InviteViaLinkUiState(
-        entityName = stringResource(id = R.string.invite_link_desc),
+        entityName = stringResource(id = CR.string.invite_link_desc),
         inviteLink = "http://wwww.ustadmobile.com/ClazzJoin?code=12ASDncd",
     )
     

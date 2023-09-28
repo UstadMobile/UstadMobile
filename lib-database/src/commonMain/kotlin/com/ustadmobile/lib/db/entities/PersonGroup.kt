@@ -15,17 +15,16 @@ import kotlinx.serialization.Serializable
          on = Trigger.On.RECEIVEVIEW,
          events = [Trigger.Event.INSERT],
          sqlStatements = [
-             """REPLACE INTO PersonGroup(groupUid, groupMasterCsn, groupLocalCsn, groupLastChangedBy, groupLct, groupName, groupActive, personGroupFlag) 
-             VALUES (NEW.groupUid, NEW.groupMasterCsn, NEW.groupLocalCsn, NEW.groupLastChangedBy, NEW.groupLct, NEW.groupName, NEW.groupActive, NEW.personGroupFlag) 
-             /*psql ON CONFLICT (groupUid) DO UPDATE 
-             SET groupMasterCsn = EXCLUDED.groupMasterCsn, groupLocalCsn = EXCLUDED.groupLocalCsn, groupLastChangedBy = EXCLUDED.groupLastChangedBy, groupLct = EXCLUDED.groupLct, groupName = EXCLUDED.groupName, groupActive = EXCLUDED.groupActive, personGroupFlag = EXCLUDED.personGroupFlag
-             */"""
+            TRIGGER_UPSERT_WHERE_NEWER
          ]
      )
 ))
 @Entity
 @Serializable
-@ReplicateEntity(tableId = PersonGroup.TABLE_ID, tracker = PersonGroupReplicate::class)
+@ReplicateEntity(
+    tableId = PersonGroup.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
 open class PersonGroup() {
 
     @PrimaryKey(autoGenerate = true)
@@ -40,8 +39,8 @@ open class PersonGroup() {
     @LastChangedBy
     var groupLastChangedBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var groupLct: Long = 0
 
     var groupName: String? = null

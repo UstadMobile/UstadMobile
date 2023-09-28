@@ -3,7 +3,7 @@ package com.ustadmobile.core.viewmodel.clazz.edit
 import com.ustadmobile.core.db.dao.deactivateByUids
 import com.ustadmobile.core.domain.courseblockupdate.AddOrUpdateCourseBlockUseCase
 import com.ustadmobile.core.domain.courseblockupdate.UpdateCourseBlocksOnReorderOrCommitUseCase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -14,7 +14,10 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListViewModel
 import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
+import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
+import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -113,20 +116,20 @@ class ClazzEditViewModel(
         AddOrUpdateCourseBlockUseCase(),
     private val updateCourseBlocksOnReorderOrCommitUseCase: UpdateCourseBlocksOnReorderOrCommitUseCase =
         UpdateCourseBlocksOnReorderOrCommitUseCase(),
-): UstadEditViewModel(di, savedStateHandle, ClazzEdit2View.VIEW_NAME) {
+): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(ClazzEditUiState())
 
     val uiState: Flow<ClazzEditUiState> = _uiState.asStateFlow()
 
     init {
-        val title = createEditTitle(MessageID.add_a_new_course, MessageID.edit_course)
+        val title = createEditTitle(MR.strings.add_a_new_course, MR.strings.edit_course)
         _appUiState.update {
             AppUiState(
                 title = title,
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
-                    text = systemImpl.getString(MessageID.save),
+                    text = systemImpl.getString(MR.strings.save),
                     onClick = this::onClickSave
                 ),
                 loadingState = LoadingUiState.INDETERMINATE,
@@ -346,13 +349,13 @@ class ClazzEditViewModel(
     }
 
     fun onClickAddSchedule(){
-        navigateForResult(ScheduleEditView.VIEW_NAME, "Schedule", currentValue = null,
+        navigateForResult(ScheduleEditViewModel.DEST_NAME, "Schedule", currentValue = null,
             serializer = Schedule.serializer())
     }
 
     fun onClickEditSchedule(schedule: Schedule) {
         navigateForResult(
-            nextViewName = ScheduleEditView.VIEW_NAME,
+            nextViewName = ScheduleEditViewModel.DEST_NAME,
             key = RESULT_KEY_SCHEDULE,
             currentValue = schedule,
             serializer = Schedule.serializer()
@@ -386,7 +389,7 @@ class ClazzEditViewModel(
             CourseBlock.BLOCK_MODULE_TYPE ->
                 CourseBlockEditViewModel.DEST_NAME to RESULT_KEY_COURSEBLOCK
             CourseBlock.BLOCK_ASSIGNMENT_TYPE ->
-                ClazzAssignmentEditView.VIEW_NAME to RESULT_KEY_COURSEBLOCK
+                ClazzAssignmentEditViewModel.DEST_NAME to RESULT_KEY_COURSEBLOCK
             else -> return
         }
 
@@ -414,14 +417,14 @@ class ClazzEditViewModel(
         if (initEntity.clazzStartTime == 0L) {
             _uiState.update { prev ->
                 prev.copy(
-                    clazzStartDateError = systemImpl.getString(MessageID.field_required_prompt)
+                    clazzStartDateError = systemImpl.getString(MR.strings.field_required_prompt)
                 )
             }
         }
 
         if(initEntity.clazzEndTime <= initEntity.clazzStartTime) {
             _uiState.update { prev ->
-                prev.copy(clazzEndDateError = systemImpl.getString(MessageID.end_is_before_start))
+                prev.copy(clazzEndDateError = systemImpl.getString(MR.strings.end_is_before_start))
             }
         }
 
@@ -493,7 +496,7 @@ class ClazzEditViewModel(
             val clazzLogCreatorManager: ClazzLogCreatorManager by di.instance()
             clazzLogCreatorManager.requestClazzLogCreation(
                 entity.clazzUid,
-                accountManager.activeAccount.endpointUrl,
+                accountManager.currentAccount.endpointUrl,
                 fromLocalDate.toInstant(entityTimeZone).toEpochMilliseconds(),
                 fromLocalDate.toLocalEndOfDay().toInstant(entityTimeZone).toEpochMilliseconds()
             )
@@ -502,7 +505,7 @@ class ClazzEditViewModel(
             }
             loadingState = LoadingUiState.NOT_LOADING
 
-            finishWithResult(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity)
+            finishWithResult(ClazzDetailViewModel.DEST_NAME, entity.clazzUid, entity)
         }
     }
 
@@ -595,7 +598,7 @@ class ClazzEditViewModel(
             }
             CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
                 navigateForResult(
-                    nextViewName = ClazzAssignmentEditView.VIEW_NAME,
+                    nextViewName = ClazzAssignmentEditViewModel.DEST_NAME,
                     key = RESULT_KEY_COURSEBLOCK,
                     serializer = CourseBlockWithEntity.serializer(),
                     currentValue = block,
@@ -605,6 +608,8 @@ class ClazzEditViewModel(
     }
 
     companion object {
+
+        const val DEST_NAME = "CourseEdit"
 
         const val RESULT_KEY_SCHEDULE = "Schedule"
 

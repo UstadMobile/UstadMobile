@@ -1,10 +1,10 @@
 package com.ustadmobile.core.viewmodel.timezone
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.UstadListViewModel
-import com.ustadmobile.door.paging.PagingSource
+import app.cash.paging.PagingSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.update
@@ -36,7 +36,7 @@ class TimeZoneListViewModel(
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = systemImpl.getString(MessageID.timezone),
+                title = systemImpl.getString(MR.strings.timezone),
                 searchState = createSearchEnabledState()
             )
         }

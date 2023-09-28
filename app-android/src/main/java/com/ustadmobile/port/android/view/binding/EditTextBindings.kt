@@ -9,12 +9,11 @@ import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import com.google.android.material.textfield.TextInputEditText
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.util.ext.systemImpl
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.view.ReportTemplateListFragment.Companion.REPORT_TITLE_TO_ID
 import java.text.MessageFormat
 import java.util.*
+import com.ustadmobile.core.R as CR
 
 
 private val MS_PER_HOUR = 3600000
@@ -52,29 +51,6 @@ fun TextView.setTimeZoneText(timeZone: TimeZone) {
 }
 
 
-@SuppressLint("SetTextI18n")
-@BindingAdapter("entityRoleText")
-fun TextView.setTimeZoneTextEntity(entityRole: EntityRoleWithNameAndRole?) {
-
-    val scopeText = when (entityRole?.erTableId) {
-        Clazz.TABLE_ID -> {
-            " (" + context.getString(R.string.clazz) + ")"
-        }
-        School.TABLE_ID -> {
-            " (" + context.getString(R.string.school) + ")"
-        }
-        Person.TABLE_ID -> {
-            " (" + context.getString(R.string.person) + ")"
-        }
-        else -> {
-            ""
-        }
-    }
-    text = entityRole?.entityRoleScopeName?:"" + scopeText
-}
-
-
-
 @BindingAdapter(value = ["createNewFormatText", "createNewFormatArg"], requireAll = true)
 fun TextView.setCreateNewItemText(formatTextId: Int, formatArg: String) {
     text = context.resources.getString(formatTextId, formatArg)
@@ -83,7 +59,7 @@ fun TextView.setCreateNewItemText(formatTextId: Int, formatArg: String) {
 @BindingAdapter(value=["textDateRangeFrom", "textDateRangeTo"], requireAll = true)
 fun TextView.setTextDateRange(fromDate: Long, toDate: Long) {
     val dateFormatter = DateFormat.getDateFormat(context)
-    text = context.getString(R.string.from_to_date, dateFormatter.format(fromDate),
+    text = context.getString(CR.string.from_to_date, dateFormatter.format(fromDate),
         dateFormatter.format(toDate))
 }
 
@@ -123,7 +99,7 @@ fun EditText.setMinMax(min: Int, max: Int){
 fun TextView.setReportTitleText(report: Report) {
     val reportTitleId = report.reportTitleId
     text = REPORT_TITLE_TO_ID[reportTitleId]?.let {
-        systemImpl.getString(it, context)} ?: report.reportTitle
+        systemImpl.getString(it)} ?: report.reportTitle
 }
 
 @SuppressLint("SetTextI18n")
@@ -131,7 +107,7 @@ fun TextView.setReportTitleText(report: Report) {
 fun TextView.setReportDescText(report: Report) {
     val reportDescId = report.reportDescId
     text = REPORT_TITLE_TO_ID[reportDescId]?.let {
-        systemImpl.getString(it, context)} ?: report.reportDescription
+        systemImpl.getString(it)} ?: report.reportDescription
 }
 
 

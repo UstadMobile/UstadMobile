@@ -16,11 +16,11 @@ env:
     file: "../common/user_login.yaml"
 #---------Add Course with members------------------#
 - runFlow:
-    file: "../common/create_course_with_members.yaml"
+    file: "../common/create_course_with_1teacher_1student.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "Alex"
+      USERNAME: "s1"
       PASSWORD: "test"
 - runFlow: "../common/student_send_course_join_request_using_code.yaml"
 - runFlow:
@@ -35,6 +35,6 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "Alex"
+      USERNAME: "s1"
       PASSWORD: "test"
 - tapOn: "Courses"
