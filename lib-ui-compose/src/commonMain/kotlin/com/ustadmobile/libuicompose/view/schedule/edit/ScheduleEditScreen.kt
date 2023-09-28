@@ -22,6 +22,7 @@ import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
 
 @Composable
 fun ScheduleEditScreenForViewModel(
@@ -48,17 +49,17 @@ fun ScheduleEditScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
 
-//        UstadMessageIdOptionExposedDropDownMenuField(
-//            value = uiState.entity?.scheduleDay ?: 0,
-//            label = stringResource(MR.strings.day),
-//            options = ScheduleConstants.DAY_MESSAGE_IDS,
-//            onOptionSelected = {
-//                onScheduleChanged(uiState.entity?.shallowCopy{
-//                    scheduleDay = it.value
-//                })
-//            },
-//            enabled = uiState.fieldsEnabled,
-//        )
+        UstadMessageIdOptionExposedDropDownMenuField(
+            value = uiState.entity?.scheduleDay ?: 0,
+            label = stringResource(MR.strings.day),
+            options = ScheduleConstants.DAY_MESSAGE_IDS,
+            onOptionSelected = {
+                onScheduleChanged(uiState.entity?.shallowCopy{
+                    scheduleDay = it.value
+                })
+            },
+            enabled = uiState.fieldsEnabled,
+        )
 
         Spacer(modifier = Modifier.height(10.dp))
 

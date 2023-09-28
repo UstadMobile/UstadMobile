@@ -37,6 +37,7 @@ kotlin {
 
                 // Compose Multiplatform Navigator
                 implementation("cafe.adriel.voyager:voyager-navigator:$version_voyager")
+
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime")
 
             }
@@ -47,7 +48,7 @@ kotlin {
                 api(libs.activity.compose)
                 api(libs.androidx.appcompat)
                 api(libs.androidx.core.ktx)
-                implementation("com.google.android.material:material:1.9.0")
+                implementation(compose.material)
             }
         }
 

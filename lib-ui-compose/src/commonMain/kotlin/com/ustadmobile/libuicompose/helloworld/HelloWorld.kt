@@ -32,6 +32,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
 import com.ustadmobile.libuicompose.components.UstadDateField
+import com.ustadmobile.libuicompose.components.UstadExposedDropDownMenuField
 
 @Composable
 fun HelloWorld() {
@@ -92,6 +93,19 @@ data class HelloWorldScreen(
                 }
             )
 
+            var selectedOption by remember {
+                mutableStateOf("Coffee")
+            }
+
+            UstadExposedDropDownMenuField<String>(
+                value = selectedOption,
+                label = "Drink",
+                options = listOf("Coffee", "Tea"),
+                onOptionSelected = {
+                    selectedOption = it
+                },
+                itemText =  { it },
+            )
         }
     }
 
