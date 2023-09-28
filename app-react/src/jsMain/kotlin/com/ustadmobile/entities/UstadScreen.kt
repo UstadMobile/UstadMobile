@@ -101,6 +101,7 @@ import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEd
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
+import com.ustadmobile.view.dbexport.DbExportScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -306,6 +307,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ClazzAssignmentSubmitterDetailViewModel.DEST_NAME, "CourseAssignmentSubmitterDetail",
         ClazzAssignmentSubmitterDetailScreen),
     UstadScreen(LeavingReasonEditViewModel.DEST_NAME, "LeavingReasonEdit", LeavingReasonEditScreen),
+    UstadScreen("DbExport", "DbExport", DbExportScreen)
 )
 
 

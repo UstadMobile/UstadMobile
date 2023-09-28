@@ -13,10 +13,6 @@ import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import app.cash.paging.PagingSource
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
-import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
-import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1
-import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_TEACHER
 import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
@@ -82,6 +78,11 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
             : PagingSource<Int,Clazz>
 
 
+    @HttpAccessible(
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(functionName = "findClazzesWithPermission"),
+        )
+    )
     @Query("""
         SELECT Clazz.*, ClazzEnrolment.*,
                (SELECT COUNT(DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid) 

@@ -455,9 +455,9 @@ class ClazzEditViewModel(
                 if(entityUidArg == 0L) {
                     val termMap = activeDb.courseTerminologyDao.findByUidAsync(initEntity.clazzTerminologyUid)
                         .toTermMap(json, systemImpl)
-                    activeDb.createNewClazzAndGroups(initEntity, systemImpl, termMap)
+                    activeRepo.createNewClazzAndGroups(initEntity, systemImpl, termMap)
                 }else {
-                    activeDb.clazzDao.updateAsync(initEntity)
+                    activeRepo.clazzDao.updateAsync(initEntity)
                 }
 
                 val clazzUid = entity.clazzUid
@@ -466,8 +466,8 @@ class ClazzEditViewModel(
                     it.shallowCopy { scheduleClazzUid = clazzUid }
                 }
 
-                activeDb.scheduleDao.upsertListAsync(schedulesToCommit)
-                activeDb.scheduleDao.deactivateByUids(
+                activeRepo.scheduleDao.upsertListAsync(schedulesToCommit)
+                activeRepo.scheduleDao.deactivateByUids(
                     initState.clazzSchedules.findKeysNotInOtherList(schedulesToCommit) {
                         it.scheduleUid
                     }, systemTimeInMillis()
@@ -475,18 +475,18 @@ class ClazzEditViewModel(
 
                 val courseBlockModulesToCommit = updateCourseBlocksOnReorderOrCommitUseCase(
                     _uiState.value.courseBlockList)
-                activeDb.courseBlockDao.upsertListAsync(courseBlockModulesToCommit)
-                activeDb.courseBlockDao.deactivateByUids(
+                activeRepo.courseBlockDao.upsertListAsync(courseBlockModulesToCommit)
+                activeRepo.courseBlockDao.deactivateByUids(
                     initState.courseBlockList.findKeysNotInOtherList(courseBlockModulesToCommit) {
                         it.cbUid
                     }, systemTimeInMillis()
                 )
 
                 val assignmentsToUpsert = _uiState.value.courseBlockList.mapNotNull { it.assignment }
-                activeDb.clazzAssignmentDao.upsertListAsync(assignmentsToUpsert)
+                activeRepo.clazzAssignmentDao.upsertListAsync(assignmentsToUpsert)
                 val assignmentsToDeactivate = initState.courseBlockList.mapNotNull { it.assignment}
                     .findKeysNotInOtherList(assignmentsToUpsert) { it.caUid }
-                activeDb.clazzAssignmentDao.takeIf { assignmentsToDeactivate.isNotEmpty() }
+                activeRepo.clazzAssignmentDao.takeIf { assignmentsToDeactivate.isNotEmpty() }
                     ?.updateActiveByList(assignmentsToDeactivate, false, systemTimeInMillis())
             }
 
