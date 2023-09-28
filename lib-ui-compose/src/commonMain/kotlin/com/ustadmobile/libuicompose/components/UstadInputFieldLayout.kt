@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 fun UstadInputFieldLayout(
     modifier: Modifier = Modifier,
     errorText: String? = null,
+    captionIfNoError: @Composable () -> Unit = { },
     content: @Composable () -> Unit = { },
 ) {
     Column(
@@ -28,9 +29,12 @@ fun UstadInputFieldLayout(
                 modifier = Modifier.padding(start = 16.dp),
                 error = errorText
             )
+        }else  {
+            captionIfNoError()
         }
     }
 }
+
 
 @Composable
 fun UstadTextInputLayoutPreview() {
