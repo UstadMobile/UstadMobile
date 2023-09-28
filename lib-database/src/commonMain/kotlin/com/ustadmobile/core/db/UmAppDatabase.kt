@@ -47,7 +47,6 @@ import com.ustadmobile.lib.db.entities.*
 //    SqliteChangeSeqNums::class,
 //    UpdateNotification::class,
     DoorNode::class,
-    ReplicationStatus::class,
     CourseDiscussion::class,
     CoursePicture::class,
     DiscussionPost::class,
@@ -59,6 +58,7 @@ import com.ustadmobile.lib.db.entities.*
     //Door entities
     OutgoingReplication::class,
     ReplicationOperation::class,
+    PendingRepositorySession::class,
 
 
 
