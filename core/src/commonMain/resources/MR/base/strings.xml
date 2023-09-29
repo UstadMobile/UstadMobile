@@ -1603,4 +1603,10 @@
     <!-- Caption shown underneath required fields -->
     <string name="required">* Required</string>
 
+    <!-- Used as a caption for buttons that allow the user to expand something e.g. to show more details -->
+    <string name="expand">Expand</string>
+
+    <!-- Used as a caption for buttons that allow the user to collapse something e.g. hide details - opposite of expand -->
+    <string name="collapse">Collapse</string>
+
 </resources>

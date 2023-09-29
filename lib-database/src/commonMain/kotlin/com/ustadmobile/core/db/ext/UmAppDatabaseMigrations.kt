@@ -1173,10 +1173,32 @@ val MIGRATION_109_110 = DoorMigrationStatementList(109, 110) {db ->
     stmtList
 }
 
+/**
+ * Add StudentResult table
+ */
+val MIGRATION_120_121 = DoorMigrationStatementList(120, 121) { db ->
+    buildList {
+        when(db.dbType()) {
+            DoorDbType.SQLITE -> {
+                add(
+                    "CREATE TABLE IF NOT EXISTS StudentResult (  srSourcedId  TEXT , srCourseBlockUid  INTEGER  NOT NULL , srClazzUid  INTEGER  NOT NULL , srAssignmentUid  INTEGER  NOT NULL , srLineItemSourcedId  TEXT , srStatus  INTEGER  NOT NULL , srMetaData  TEXT , srStudentPersonUid  INTEGER  NOT NULL , srStudentGroupId  INTEGER  NOT NULL , srMarkerPersonUid  INTEGER  NOT NULL , srMarkerGroupId  INTEGER  NOT NULL , srScoreStatus  INTEGER  NOT NULL , srScore  REAl  NOT NULL , srScoreDate  INTEGER  NOT NULL , srLastModified  INTEGER  NOT NULL , srComment  TEXT , srAppId  TEXT , srActive  INTEGER  NOT NULL , srUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )"
+                )
+            }
+            DoorDbType.POSTGRES -> {
+                add(
+                    "CREATE TABLE IF NOT EXISTS StudentResult (  srSourcedId  TEXT , srCourseBlockUid  BIGINT  NOT NULL , srClazzUid  BIGINT  NOT NULL , srAssignmentUid  BIGINT  NOT NULL , srLineItemSourcedId  TEXT , srStatus  INTEGER  NOT NULL , srMetaData  TEXT , srStudentPersonUid  BIGINT  NOT NULL , srStudentGroupId  INTEGER  NOT NULL , srMarkerPersonUid  BIGINT  NOT NULL , srMarkerGroupId  INTEGER  NOT NULL , srScoreStatus  INTEGER  NOT NULL , srScore  FLOAT  NOT NULL , srScoreDate  BIGINT  NOT NULL , srLastModified  BIGINT  NOT NULL , srComment  TEXT , srAppId  TEXT , srActive  BOOL  NOT NULL , srUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+                )
+            }
+        }
+    }
+}
+
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
+    MIGRATION_120_121
 )
 
 

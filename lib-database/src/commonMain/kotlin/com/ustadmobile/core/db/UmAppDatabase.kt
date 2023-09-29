@@ -3,7 +3,6 @@ package com.ustadmobile.core.db
 import com.ustadmobile.door.annotation.DoorDatabase
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.SyncNode
-import com.ustadmobile.door.annotation.MinReplicationVersion
 import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.room.RoomDatabase
 import com.ustadmobile.lib.db.entities.*
@@ -54,6 +53,7 @@ import com.ustadmobile.lib.db.entities.*
     ChatMember::class,
     Message::class,
     MessageRead::class,
+    StudentResult::class,
 
     //Door entities
     OutgoingReplication::class,
@@ -63,7 +63,7 @@ import com.ustadmobile.lib.db.entities.*
 
 
 
-], version = 120)
+], version = 121)
 /*
  Replicate entities (e.g. trackers) to drop:
      ClazzLogReplicate
