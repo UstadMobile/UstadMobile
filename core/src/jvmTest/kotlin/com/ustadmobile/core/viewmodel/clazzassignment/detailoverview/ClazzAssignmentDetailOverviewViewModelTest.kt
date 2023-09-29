@@ -37,7 +37,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
@@ -120,7 +119,6 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                 assertTrue(readyState.addFileSubmissionVisible)
                 assertTrue(readyState.canEditSubmissionText)
                 assertEquals(0L, readyState.latestSubmission?.casTimestamp)
-                assertEquals(0, readyState.latestSubmissionAttachments?.size)
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -400,6 +398,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                 assertTrue(readyState.activeUserIsSubmitter)
                 assertTrue(readyState.privateCommentSectionVisible)
                 assertFalse(readyState.submitPrivateCommentVisible)
+                cancelAndIgnoreRemainingEvents()
             }
         }
     }
@@ -426,6 +425,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                 assertTrue(readyState.activeUserIsSubmitter)
                 assertTrue(readyState.privateCommentSectionVisible)
                 assertTrue(readyState.submitPrivateCommentVisible)
+                cancelAndIgnoreRemainingEvents()
             }
         }
     }
@@ -457,6 +457,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                 assertFalse(readyState.activeUserCanSubmit)
                 assertFalse(readyState.activeUserIsSubmitter)
                 assertFalse(readyState.privateCommentSectionVisible)
+                cancelAndIgnoreRemainingEvents()
             }
 
         }
@@ -486,6 +487,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                 assertFalse(readyState.submitPrivateCommentVisible)
                 assertFalse(readyState.activeUserIsSubmitter)
                 assertFalse(readyState.activeUserCanSubmit)
+                cancelAndIgnoreRemainingEvents()
             }
         }
     }

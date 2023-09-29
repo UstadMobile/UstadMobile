@@ -52,8 +52,6 @@ data class ClazzMemberListUiState(
         SortOrderOption(MR.strings.first_name, ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_DESC, false),
         SortOrderOption(MR.strings.last_name, ClazzEnrolmentDaoCommon.SORT_LAST_NAME_ASC, true),
         SortOrderOption(MR.strings.last_name, ClazzEnrolmentDaoCommon.SORT_LAST_NAME_DESC, false),
-        SortOrderOption(MR.strings.attendance, ClazzEnrolmentDaoCommon.SORT_ATTENDANCE_ASC, true),
-        SortOrderOption(MR.strings.attendance, ClazzEnrolmentDaoCommon.SORT_ATTENDANCE_DESC, false),
         SortOrderOption(MR.strings.date_enroll, ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_ASC, true),
         SortOrderOption(MR.strings.date_enroll, ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_DESC, false),
         SortOrderOption(MR.strings.date_left, ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_ASC, true),

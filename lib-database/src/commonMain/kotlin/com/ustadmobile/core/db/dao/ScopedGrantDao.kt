@@ -109,6 +109,23 @@ expect abstract class ScopedGrantDao {
         permission: Long
     ): List<ScopedGrantAndGroupMember>
 
+    /**
+     * Find all ScopedGrants for the given personUid
+     */
+    @Query("""
+        SELECT PersonGroupMember.*, PersonGroup.*, ScopedGrant.*
+          FROM PersonGroupMember 
+               JOIN ScopedGrant
+                    ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+               JOIN PersonGroup
+                    ON PersonGroup.groupUid = PersonGroupMember.groupMemberGroupUid
+         WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
+    """)
+    abstract suspend fun findScopedGrantAndPersonGroupByPersonUid(
+        accountPersonUid: Long
+    ): List<ScopedGrantAndGroupMember>
+
+
     @Query(
         """
         SELECT EXISTS(

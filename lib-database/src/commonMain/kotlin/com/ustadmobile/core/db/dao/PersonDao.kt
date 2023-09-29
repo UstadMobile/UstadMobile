@@ -8,8 +8,6 @@ import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.composites.PersonNames
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Person.Companion.FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
-import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
-import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
 
 
 @DoorDao
@@ -165,6 +163,15 @@ expect abstract class PersonDao : BaseDao<Person> {
     ): List<Person>
 
     @Query(SQL_SELECT_LIST_WITH_PERMISSION)
+    @HttpAccessible(
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findPersonsWithPermissionAsPagingSource"),
+            HttpServerFunctionCall(
+                functionDao = ScopedGrantDao::class,
+                functionName = "findScopedGrantAndPersonGroupByPersonUid"
+            )
+        )
+    )
     abstract fun findPersonsWithPermissionAsPagingSource(
         timestamp: Long,
         excludeClazz: Long,
