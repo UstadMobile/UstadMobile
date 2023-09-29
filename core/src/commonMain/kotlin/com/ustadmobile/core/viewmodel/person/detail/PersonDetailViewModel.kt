@@ -84,7 +84,7 @@ class PersonDetailViewModel(
     init {
         val accountManager: UstadAccountManager by instance()
 
-        val currentUserUid = accountManager.currentUserSession?.userSession?.usPersonUid ?: 0
+        val currentUserUid = accountManager.currentUserSession.userSession.usPersonUid
 
         val entityUid: Long = savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0
 
@@ -103,7 +103,7 @@ class PersonDetailViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeDb.personDao.findByUidWithDisplayDetailsFlow(entityUid,
+                    activeRepo.personDao.findByUidWithDisplayDetailsFlow(entityUid,
                         currentUserUid
                     ).collect { person ->
                         _uiState.update { prev -> prev.copy(person = person) }
@@ -117,7 +117,7 @@ class PersonDetailViewModel(
                 }
 
                 launch {
-                    activeDb.personPictureDao.findByPersonUidAsFlow(
+                    activeRepo.personPictureDao.findByPersonUidAsFlow(
                         entityUid
                     ).collect { personPicture ->
                         _uiState.update { prev -> prev.copy(personPicture = personPicture) }
@@ -125,7 +125,7 @@ class PersonDetailViewModel(
                 }
 
                 launch {
-                    activeDb.personDao.personHasPermissionFlow(currentUserUid,
+                    activeRepo.personDao.personHasPermissionFlow(currentUserUid,
                         entityUid, Role.PERMISSION_RESET_PASSWORD
                     ).collect {
                         _uiState.update { prev -> prev.copy(hasChangePasswordPermission = it) }

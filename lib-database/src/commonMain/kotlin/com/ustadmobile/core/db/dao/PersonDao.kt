@@ -200,15 +200,17 @@ expect abstract class PersonDao : BaseDao<Person> {
     @Query("""
         SELECT Person.*, PersonParentJoin.* 
           FROM Person
-     LEFT JOIN PersonParentJoin on ppjUid = (
-                SELECT ppjUid 
-                  FROM PersonParentJoin
-                 WHERE ppjMinorPersonUid = :personUid 
-                       AND ppjParentPersonUid = :activeUserPersonUid 
-                LIMIT 1)     
+               LEFT JOIN PersonParentJoin 
+                    ON ppjUid =
+                    (SELECT ppjUid 
+                       FROM PersonParentJoin
+                      WHERE ppjMinorPersonUid = :personUid 
+                        AND ppjParentPersonUid = :activeUserPersonUid 
+                      LIMIT 1)     
          WHERE Person.personUid = :personUid
         """)
     @QueryLiveTables(["Person", "PersonParentJoin"])
+    @HttpAccessible
     abstract fun findByUidWithDisplayDetailsFlow(
         personUid: Long,
         activeUserPersonUid: Long
