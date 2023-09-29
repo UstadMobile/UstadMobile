@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,9 +25,10 @@ import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditUiState
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
-import com.ustadmobile.port.android.view.composable.UstadTimeEditTextField
+import com.ustadmobile.port.android.view.composable.UstadTimeField
 import com.ustadmobile.core.R as CR
 
 class ScheduleEditFragment: UstadBaseMvvmFragment() {
@@ -84,34 +86,49 @@ private fun ScheduleEditScreen(
         Spacer(modifier = Modifier.height(10.dp))
 
         Row {
-
-            UstadTimeEditTextField(
+            UstadInputFieldLayout(
                 modifier = Modifier.weight(0.5F),
-                value = (uiState.entity?.sceduleStartTime ?: 0).toInt(),
-                label = stringResource(id = CR.string.from),
-                error = uiState.fromTimeError,
-                enabled = uiState.fieldsEnabled,
-                onValueChange = {
-                    onScheduleChanged(uiState.entity?.shallowCopy{
-                        sceduleStartTime = it.toLong()
-                    })
-                }
-            )
+                errorText = uiState.fromTimeError
+            ) {
+                UstadTimeField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = (uiState.entity?.sceduleStartTime ?: 0).toInt(),
+                    label = {
+                        Text(stringResource(id = CR.string.from))
+                    },
+                    isError = uiState.fromTimeError != null,
+                    enabled = uiState.fieldsEnabled,
+                    onValueChange = {
+                        onScheduleChanged(uiState.entity?.shallowCopy{
+                            sceduleStartTime = it.toLong()
+                        })
+                    }
+                )
+            }
+
 
             Spacer(modifier = Modifier.width(10.dp))
 
-            UstadTimeEditTextField(
+            UstadInputFieldLayout(
                 modifier = Modifier.weight(0.5F),
-                value = (uiState.entity?.scheduleEndTime ?: 0).toInt(),
-                label = stringResource(id = CR.string.to_key),
-                error = uiState.toTimeError,
-                enabled = uiState.fieldsEnabled,
-                onValueChange = {
-                    onScheduleChanged(uiState.entity?.shallowCopy{
-                        scheduleEndTime = it.toLong()
-                    })
-                }
-            )
+                errorText = uiState.toTimeError,
+            ) {
+                UstadTimeField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = (uiState.entity?.scheduleEndTime ?: 0).toInt(),
+                    label = {
+                        Text(stringResource(id = CR.string.to_key))
+                    },
+                    isError = uiState.toTimeError != null,
+                    enabled = uiState.fieldsEnabled,
+                    onValueChange = {
+                        onScheduleChanged(uiState.entity?.shallowCopy{
+                            scheduleEndTime = it.toLong()
+                        })
+                    }
+                )
+            }
+
         }
     }
 }
