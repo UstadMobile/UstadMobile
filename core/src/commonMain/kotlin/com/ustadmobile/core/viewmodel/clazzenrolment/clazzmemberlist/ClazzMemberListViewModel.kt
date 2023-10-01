@@ -106,21 +106,18 @@ class ClazzMemberListViewModel(
 
     private val teacherListPagingSource: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = {
         getMembersAsPagingSource(ClazzEnrolment.ROLE_TEACHER).also {
-            lastTeacherListPagingSource?.invalidate()
             lastTeacherListPagingSource = it
         }
     }
 
     private val studentListPagingSource: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = {
         getMembersAsPagingSource(ClazzEnrolment.ROLE_STUDENT).also {
-            lastStudentListPagingsource?.invalidate()
             lastStudentListPagingsource = it
         }
     }
 
     private val pendingStudentListPagingSource: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = {
         getMembersAsPagingSource(ClazzEnrolment.ROLE_STUDENT_PENDING).also {
-            lastPendingStudentListPagingSource?.invalidate()
             lastPendingStudentListPagingSource = it
         }
     }

@@ -41,8 +41,8 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     @Query(SELECT_ACTIVE_CLAZZES)
     abstract fun findAll(): List<Clazz>
 
-    @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
-    abstract suspend fun findByUidAsync(uid: Long) : Clazz?
+    @Query("SELECT * FROM Clazz WHERE clazzUid = :clazzUid")
+    abstract suspend fun findByUidAsync(clazzUid: Long) : Clazz?
 
     @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
     abstract fun findByUidAsFlow(uid: Long): Flow<Clazz?>
@@ -200,6 +200,15 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     abstract suspend fun updateClazzAttendanceAverageAsync(clazzUid: Long, timeChanged: Long)
 
     /** Check if a permission is present on a specific entity e.g. updateState/modify etc */
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionDao = ScopedGrantDao::class,
+                functionName = "findScopedGrantAndPersonGroupByPersonUidAndPermission"
+            )
+        )
+    )
     @Query("""
         SELECT EXISTS( 
                SELECT PrsGrpMbr.groupMemberPersonUid
@@ -317,6 +326,11 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     abstract fun getTitleByUidAsFlow(clazzUid: Long): Flow<String?>
 
 
+    @HttpAccessible(
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findByUidAsync")
+        ),
+    )
     @Query("""
         SELECT Clazz.clazzTimeZone
           FROM Clazz

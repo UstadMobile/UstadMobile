@@ -54,14 +54,24 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     abstract fun findAllEnrolmentsByPersonAndClazzUid(personUid: Long, clazzUid: Long):
             Flow<List<ClazzEnrolmentWithLeavingReason>>
 
-    @Query("""SELECT ClazzEnrolment.*, LeavingReason.*,
-         COALESCE(Clazz.clazzTimeZone, COALESCE(School.schoolTimeZone, 'UTC')) as timeZone
-         FROM ClazzEnrolment LEFT JOIN
-        LeavingReason ON LeavingReason.leavingReasonUid = ClazzEnrolment.clazzEnrolmentLeavingReasonUid
-        LEFT JOIN Clazz ON Clazz.clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
-        LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid
-        WHERE ClazzEnrolment.clazzEnrolmentUid = :enrolmentUid""")
-    abstract suspend fun findEnrolmentWithLeavingReason(enrolmentUid: Long): ClazzEnrolmentWithLeavingReason?
+
+    @HttpAccessible
+    @Query("""
+            SELECT ClazzEnrolment.*, 
+                   LeavingReason.*,
+                   COALESCE(Clazz.clazzTimeZone, COALESCE(School.schoolTimeZone, 'UTC')) AS timeZone
+              FROM ClazzEnrolment 
+                   LEFT JOIN LeavingReason 
+                             ON LeavingReason.leavingReasonUid = ClazzEnrolment.clazzEnrolmentLeavingReasonUid
+                   LEFT JOIN Clazz 
+                             ON Clazz.clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
+                   LEFT JOIN School 
+                             ON School.schoolUid = Clazz.clazzSchoolUid
+             WHERE ClazzEnrolment.clazzEnrolmentUid = :enrolmentUid
+             """)
+    abstract suspend fun findEnrolmentWithLeavingReason(
+        enrolmentUid: Long
+    ): ClazzEnrolmentWithLeavingReason?
 
     @Query("""
         UPDATE ClazzEnrolment 

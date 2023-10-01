@@ -83,13 +83,13 @@ expect abstract class ScopedGrantDao {
                   FROM PersonGroupMember 
                        JOIN ScopedGrant
                            ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-                 WHERE PersonGroupMember.groupMemberPersonUid = :personUid
+                 WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
                    AND (ScopedGrant.sgPermissions & :permission) > 0    
                )
         """
     )
     abstract fun userHasSystemLevelPermissionAsFlow(
-        personUid: Long,
+        accountPersonUid: Long,
         permission: Long,
     ): Flow<Boolean>
 
@@ -101,11 +101,11 @@ expect abstract class ScopedGrantDao {
                     ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
                JOIN PersonGroup
                     ON PersonGroup.groupUid = PersonGroupMember.groupMemberGroupUid
-         WHERE PersonGroupMember.groupMemberPersonUid = :personUid
+         WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
            AND (ScopedGrant.sgPermissions & :permission) > 0    
     """)
     abstract suspend fun findScopedGrantAndPersonGroupByPersonUidAndPermission(
-        personUid: Long,
+        accountPersonUid: Long,
         permission: Long
     ): List<ScopedGrantAndGroupMember>
 

@@ -81,7 +81,6 @@ class PersonListViewModel(
             accountManager.currentAccount.personUid, _uiState.value.sortOption.flag,
             _appUiState.value.searchState.searchText.toQueryLikeParam()
         ).also {
-            lastPagingSource?.invalidate()
             lastPagingSource = it
         }
     }
