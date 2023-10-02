@@ -14,13 +14,13 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 import com.ustadmobile.core.util.ext.whenSubscribed
-import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
+import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 
 data class PersonDetailUiState(
@@ -133,7 +133,7 @@ class PersonDetailViewModel(
                 }
 
                 launch {
-                    activeDb.personDao.personHasPermissionFlow(currentUserUid, entityUid,
+                    activeRepo.personDao.personHasPermissionFlow(currentUserUid, entityUid,
                         Role.PERMISSION_PERSON_UPDATE
                     ).collect { hasEditPermission ->
                         _appUiState.update { prev ->
@@ -188,7 +188,7 @@ class PersonDetailViewModel(
 
 
     private fun navigateToEditAccount() {
-        navController.navigate(PersonAccountEditView.VIEW_NAME,
+        navController.navigate(PersonAccountEditViewModel.DEST_NAME,
             mapOf(ARG_ENTITY_UID to personUid.toString()))
     }
 

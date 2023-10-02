@@ -1,8 +1,6 @@
 package com.ustadmobile.core.util.ext
 
 import app.cash.paging.PagingSource
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.controller.TerminologyKeys
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.findEntriesByMd5SumsSafeAsync
@@ -12,7 +10,6 @@ import com.ustadmobile.core.util.graph.LabelValueFormatter
 import com.ustadmobile.core.util.graph.MessageIdFormatter
 import com.ustadmobile.core.util.graph.TimeFormatter
 import com.ustadmobile.core.util.graph.UidAndLabelFormatter
-import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.ext.dbType
@@ -616,30 +613,6 @@ suspend fun UmAppDatabase.grantScopedPermission(toGroupUid: Long, permissions: L
 suspend fun UmAppDatabase.grantScopedPermission(toPerson: Person, permissions: Long,
                                                 scopeTableId: Int, scopeEntityUid: Long): ScopedGrantResult {
     return grantScopedPermission(toPerson.personGroupUid, permissions, scopeTableId, scopeEntityUid)
-}
-
-/**
- * Insert authentication credentials for the given person uid with the given password. This is fine
- * to use in tests etc, but for performance it is better to use AuthManager.setAuth
- */
-suspend fun UmAppDatabase.insertPersonAuthCredentials2(
-    personUid: Long,
-    password: String,
-    pbkdf2Params: Pbkdf2Params,
-    endpoint: Endpoint,
-    httpClient: HttpClient,
-) {
-    val db = (this as? DoorDatabaseRepository)?.db as? UmAppDatabase ?: this
-    db.withDoorTransactionAsync {
-        val authSalt = db.siteDao.getSiteAuthSaltAsync()
-            ?: throw IllegalStateException("insertAuthCredentials: No auth salt!")
-        db.personAuth2Dao.insertAsync(PersonAuth2().apply {
-            pauthUid = personUid
-            pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
-            pauthAuth = password.doublePbkdf2Hash(authSalt, pbkdf2Params,
-                endpoint, httpClient).encodeBase64()
-        })
-    }
 }
 
 /**

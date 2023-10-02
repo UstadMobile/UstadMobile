@@ -32,7 +32,6 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.gson.*
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.runBlocking
@@ -49,10 +48,8 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.kodein.di.*
-import java.io.ByteArrayOutputStream
 import kotlin.random.Random
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
 
@@ -174,6 +171,10 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
         di = DI {
             bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
                 nodeIdAndAuth
+            }
+
+            bind<AuthManager>() with scoped(endpointScope).singleton {
+                AuthManager(context, di)
             }
 
             bind<ApiUrlConfig>() with singleton { apiUrlConfig }

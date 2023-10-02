@@ -83,6 +83,7 @@ expect abstract class PersonDao : BaseDao<Person> {
         permission: Long
     ): Boolean
 
+
     @Query("""
         SELECT EXISTS(
                 SELECT 1
@@ -96,6 +97,15 @@ expect abstract class PersonDao : BaseDao<Person> {
                    AND PersonGroupMember.groupMemberPersonUid = :accountPersonUid
                  LIMIT 1)
     """)
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionDao = ScopedGrantDao::class,
+                functionName = "personPermissionsForPerson",
+            )
+        )
+    )
     abstract fun personHasPermissionFlow(
         accountPersonUid: Long,
         personUid: Long,
@@ -226,5 +236,14 @@ expect abstract class PersonDao : BaseDao<Person> {
          WHERE Person.personUid = :personUid  
     """)
     abstract suspend fun getNamesByUid(personUid: Long): PersonNames?
+
+
+    @Query("""
+        UPDATE Person
+           SET username = :username,
+               personLct = :currentTime
+         WHERE Person.personUid = :personUid  
+    """)
+    abstract suspend fun updateUsername(personUid: Long, username: String, currentTime: Long)
 
 }

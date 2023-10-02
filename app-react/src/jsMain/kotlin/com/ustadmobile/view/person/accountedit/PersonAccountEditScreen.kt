@@ -1,14 +1,16 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.person.accountedit
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.viewmodel.PersonAccountEditUiState
-import com.ustadmobile.core.viewmodel.PersonUsernameAndPasswordModel
+import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditUiState
+import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
+import com.ustadmobile.core.viewmodel.person.accountedit.PersonUsernameAndPasswordModel
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.UstadTextEditField
 import mui.material.Container
 import mui.material.Stack
 import mui.system.responsive
-import mui.system.sx
 import react.FC
 import react.Props
 import react.useState
@@ -17,7 +19,7 @@ external interface PersonAccountEditScreenProps : Props {
 
     var uiState: PersonAccountEditUiState
 
-    var onUsernameAndPasswordChanged: (PersonUsernameAndPasswordModel) -> Unit
+    var onAccountChanged: (PersonUsernameAndPasswordModel?) -> Unit
 
 }
 
@@ -31,13 +33,13 @@ val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
 
             if (props.uiState.usernameVisible){
                 UstadTextEditField {
-                    value = props.uiState.personUsernameAndPassword.username
+                    value = props.uiState.personAccount?.username ?: ""
                     label = strings[MR.strings.username]
                     error = props.uiState.usernameError
                     enabled = props.uiState.fieldsEnabled
                     onChange = {
-                        props.onUsernameAndPasswordChanged(
-                            props.uiState.personUsernameAndPassword.copy(
+                        props.onAccountChanged(
+                            props.uiState.personAccount?.copy(
                                 username = it
                             )
                         )
@@ -47,44 +49,36 @@ val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
 
             if (props.uiState.currentPasswordVisible){
                 UstadTextEditField {
-                    value = props.uiState.personUsernameAndPassword.currentPassword
+                    value = props.uiState.personAccount?.currentPassword ?: ""
                     label = strings[MR.strings.current_password]
                     error = props.uiState.currentPasswordError
                     enabled = props.uiState.fieldsEnabled
                     password = true
                     onChange = {
-                        props.uiState.personUsernameAndPassword.copy(
-                            currentPassword = it
+                        props.onAccountChanged(
+                            props.uiState.personAccount?.copy(
+                                currentPassword = it
+                            )
                         )
                     }
                 }
             }
 
             UstadTextEditField {
-                value = props.uiState.personUsernameAndPassword.newPassword
+                value = props.uiState.personAccount?.newPassword
                 label = strings[MR.strings.new_password]
                 error = props.uiState.newPasswordError
                 enabled = props.uiState.fieldsEnabled
                 password = true
                 onChange = {
-                    props.uiState.personUsernameAndPassword.copy(
-                        newPassword = it
+                    props.onAccountChanged(
+                        props.uiState.personAccount?.copy(
+                            newPassword = it
+                        )
                     )
                 }
             }
 
-            UstadTextEditField {
-                value = props.uiState.personUsernameAndPassword.passwordConfirmed
-                label = strings[MR.strings.confirm_password]
-                error = props.uiState.passwordConfirmedError
-                enabled = props.uiState.fieldsEnabled
-                password = true
-                onChange = {
-                    props.uiState.personUsernameAndPassword.copy(
-                        passwordConfirmed = it
-                    )
-                }
-            }
         }
     }
 }
@@ -93,25 +87,29 @@ val PersonAccountEditPreview = FC<Props> {
 
     var uiStateVar : PersonAccountEditUiState by useState {
         PersonAccountEditUiState(
-            personUsernameAndPassword = PersonUsernameAndPasswordModel(
-                username = "Bob12",
-                currentPassword = "current",
-                newPassword = "secret",
-                passwordConfirmed = "secret",
-            ),
-            usernameVisible = true,
-            currentPasswordVisible = true
+            personAccount = PersonUsernameAndPasswordModel(
+                username = "",
+                currentPassword = null,
+            )
         )
     }
 
     PersonAccountEditComponent2 {
         uiState = uiStateVar
-        onUsernameAndPasswordChanged = {
-            uiStateVar = uiStateVar.copy(
-                personUsernameAndPassword = it
-            )
+        onAccountChanged = {
+
         }
     }
 }
 
+val PersonAccountEditScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        PersonAccountEditViewModel(di, savedStateHandle)
+    }
 
+    var uiStateVar by viewModel.uiState.collectAsState(PersonAccountEditUiState())
+    PersonAccountEditComponent2 {
+        uiState = uiStateVar
+        onAccountChanged = viewModel::onEntityChanged
+    }
+}

@@ -170,8 +170,8 @@ class PersonAuthRegisterRouteTest {
             val personAuth2 = db.personAuth2Dao.findByPersonUid(createdAccount.personUid)
             val salt = db.siteDao.getSite()?.authSalt ?: throw IllegalStateException("No auth salt!")
             Assert.assertEquals("PersonAuth2 created with valid hashed password",
-                "secret23".doublePbkdf2Hash(salt, pbkdf2Params,
-                    Endpoint("https://org.ustadmobile.app/"), serverDi.direct.instance()).encodeBase64(),
+                "secret23".doubleEncryptWithPbkdf2V2(salt, pbkdf2Params.iterations, pbkdf2Params.keyLength)
+                    .encodeBase64(),
                 personAuth2?.pauthAuth)
         }
     }
@@ -192,8 +192,16 @@ class PersonAuthRegisterRouteTest {
         }
 
         runBlocking {
-            db.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params,
-                Endpoint("localhost"), httpClient)
+            val salt = db.siteDao.getSiteAuthSaltAsync()!!
+            db.personAuth2Dao.insertAsync(
+                PersonAuth2().apply {
+                    pauthUid = person.personUid
+                    pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
+                    pauthAuth = "secret23".doubleEncryptWithPbkdf2V2(
+                        salt, pbkdf2Params.iterations, pbkdf2Params.keyLength
+                    ).encodeBase64()
+                }
+            )
         }
 
         val httpResponse = runBlocking {
@@ -227,8 +235,16 @@ class PersonAuthRegisterRouteTest {
         }
 
         runBlocking {
-            db.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params,
-                Endpoint("localhost"), httpClient)
+            val salt = db.siteDao.getSiteAuthSaltAsync()!!
+            db.personAuth2Dao.insertAsync(
+                PersonAuth2().apply {
+                    pauthUid = person.personUid
+                    pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
+                    pauthAuth = "secret23".doubleEncryptWithPbkdf2V2(
+                        salt, pbkdf2Params.iterations, pbkdf2Params.keyLength
+                    ).encodeBase64()
+                }
+            )
         }
 
         val httpResponse = runBlocking {
@@ -256,8 +272,16 @@ class PersonAuthRegisterRouteTest {
         }
 
         runBlocking {
-            db.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params,
-                Endpoint("localhost"), httpClient)
+            val salt = db.siteDao.getSiteAuthSaltAsync()!!
+            db.personAuth2Dao.insertAsync(
+                PersonAuth2().apply {
+                    pauthUid = person.personUid
+                    pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
+                    pauthAuth = "secret23".doubleEncryptWithPbkdf2V2(
+                        salt, pbkdf2Params.iterations, pbkdf2Params.keyLength
+                    ).encodeBase64()
+                }
+            )
             db.personParentJoinDao.insertAsync(PersonParentJoin().apply {
                 ppjMinorPersonUid = person.personUid
                 ppjStatus = PersonParentJoin.STATUS_UNSET
