@@ -49,6 +49,9 @@ kotlin {
                 api(libs.androidx.appcompat)
                 api(libs.androidx.core.ktx)
                 implementation(compose.material)
+
+                val version_android_material = "1.9.0"
+                implementation("com.google.android.material:material:$version_android_material")
             }
         }
 
