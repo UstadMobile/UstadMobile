@@ -97,9 +97,11 @@ data class HelloWorldScreen(
                 mutableStateOf("Coffee")
             }
 
-            UstadExposedDropDownMenuField<String>(
+            UstadExposedDropDownMenuField(
+                modifier = Modifier.fillMaxWidth(),
                 value = selectedOption,
                 label = "Drink",
+                enabled = true,
                 options = listOf("Coffee", "Tea"),
                 onOptionSelected = {
                     selectedOption = it

@@ -1,18 +1,20 @@
 package com.ustadmobile.libuicompose.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.material.*
+import androidx.compose.material.IconButton
+import androidx.compose.material.Icon
+import androidx.compose.material.DropdownMenu
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.ustadmobile.core.util.MessageIdOption2
@@ -37,23 +39,20 @@ fun <T> UstadExposedDropDownMenuField(
         Icons.Filled.ArrowDropDown
     }
 
-    Box(
-        contentAlignment = Alignment.CenterStart,
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { expanded = !expanded },
-    ) {
+    Box(modifier = modifier) {
 
         OutlinedTextField(
+            modifier = modifier,
             value = value?.let { itemText(it) } ?: "",
-            modifier = Modifier.fillMaxWidth(),
             onValueChange = { },
             readOnly = true,
             label = { Text(label) },
             isError = isError,
             enabled = enabled,
             trailingIcon = {
-                IconButton(onClick = { expanded = !expanded }){
+                IconButton(
+                    enabled = enabled,
+                    onClick = { expanded = !expanded }){
                     Icon(
                         adornmentIcon, "contentDescription",
                         Modifier.align(Alignment.CenterEnd)
@@ -63,7 +62,6 @@ fun <T> UstadExposedDropDownMenuField(
         )
 
         DropdownMenu(
-            modifier = Modifier.width(IntrinsicSize.Max),
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
