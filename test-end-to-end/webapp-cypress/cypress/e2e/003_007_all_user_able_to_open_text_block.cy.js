@@ -15,7 +15,7 @@ describe('Ustad mobile course tests', () => {
     cy.contains("Courses").click()
     cy.contains("button","Course").click()
     cy.contains("Add a new course").click()
-    cy.get('input[id="clazz_name"]').type("New class")
+    cy.get('input[id="clazz_name"]').type("class 003_007")
     cy.get('div[data-placeholder="Description"]').type("simple class")
     // Add module block
     cy.contains("Add block").click()

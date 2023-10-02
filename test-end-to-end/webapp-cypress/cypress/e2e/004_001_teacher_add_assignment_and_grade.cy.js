@@ -7,6 +7,7 @@
 
     it('004_001_teacher_add_assignment_and_grade', () => {
     //cy.visit('http://localhost:8087/')
+      cy.wait(2000)
     cy.get('input[id="username"]').type("admin")
     cy.get('input[id="password"]').type("testpass")
     cy.get('button[id="login_button"]').click()
@@ -19,7 +20,7 @@
      cy.wait(4000)
      cy.contains("Add a new course").should('be.visible')
      cy.contains("Add a new course").click()
-     cy.get('input[id="clazz_name"]').type("New class")
+     cy.get('input[id="clazz_name"]').type("class 004_001")
      cy.get('div[data-placeholder="Description"]').type("simple class")
     // Add module block
      cy.contains("Add block").click()

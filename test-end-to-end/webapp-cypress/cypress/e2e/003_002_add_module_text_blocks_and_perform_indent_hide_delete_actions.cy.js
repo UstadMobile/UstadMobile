@@ -9,6 +9,7 @@ describe('Ustad mobile course tests', () => {
     //cy.visit('http://localhost:8087/')
    //cy.get('input[id="sitelink_textfield"]').type("http://localhost:8087/")
    //cy.get('button[id="next_button"]').click()
+     cy.wait(2000)
     cy.get('input[id="username"]').type("admin")
     cy.get('input[id="password"]').type("testpass")
     cy.get('button[id="login_button"]').click()
@@ -17,7 +18,7 @@ describe('Ustad mobile course tests', () => {
     cy.contains("Courses").click()
     cy.contains("button","Course").click()
     cy.contains("Add a new course").click()
-    cy.get('input[id="clazz_name"]').type("New class")
+    cy.get('input[id="clazz_name"]').type("Class 003_002")
     cy.get('div[data-placeholder="Description"]').type("simple class")
     // Add module block
     cy.contains("Add block").click()
