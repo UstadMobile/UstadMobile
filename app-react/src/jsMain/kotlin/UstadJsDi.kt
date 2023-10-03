@@ -21,7 +21,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
-import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJs
 import com.ustadmobile.util.resolveEndpoint
 import dev.icerock.moko.resources.provider.JsStringProvider
@@ -51,7 +50,7 @@ internal fun ustadJsDi(
         stringsProvider
     }
 
-    bind<StringProvider>() with singleton {
+    bind<StringProviderJs>() with singleton {
         val systemImpl: UstadMobileSystemImpl = instance()
         val jsStringProvider: JsStringProvider = instance()
         StringProviderJs(systemImpl.getDisplayedLocale(), jsStringProvider)

@@ -4,9 +4,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
-import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
-import com.ustadmobile.lib.db.entities.Person.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 /**
@@ -14,7 +11,7 @@ import kotlinx.serialization.Serializable
  */
 @Entity
 @ReplicateEntity(
-    tableId = TABLE_ID,
+    tableId = Person.TABLE_ID,
     remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
 )
  @Triggers(arrayOf(
@@ -25,17 +22,22 @@ import kotlinx.serialization.Serializable
          events = [Trigger.Event.INSERT],
          //Temporary check to avoid other instances (e.g. previous versions on same url) interfering.
          conditionSql = """
-             SELECT (
-                    NEW.username IS NULL
-                 OR (SELECT NOT EXISTS(
+             SELECT 
+                    ((NEW.username IS NULL
+                     OR (SELECT NOT EXISTS(
                             SELECT Person.personUid
                               FROM Person
                              WHERE Person.username = NEW.username))  
-                 OR NEW.personUid = 
-                    (SELECT Person.personUid
-                       FROM Person
-                      WHERE Person.username = NEW.username) 
-             )
+                     OR NEW.personUid = 
+                        (SELECT Person.personUid
+                           FROM Person
+                          WHERE Person.username = NEW.username)))
+                  AND CAST(NEW.personLct AS BIGINT) > 
+                         (SELECT COALESCE(
+                                  (SELECT Person.personLct
+                                     FROM Person
+                                    WHERE Person.personUid = CAST(NEW.personUid AS BIGINT)), 0))   
+                            
          """,
          sqlStatements = [
              TRIGGER_UPSERT_WHERE_NEWER

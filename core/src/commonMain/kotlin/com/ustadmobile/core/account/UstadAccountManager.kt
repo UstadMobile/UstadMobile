@@ -3,7 +3,6 @@ package com.ustadmobile.core.account
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
-import com.ustadmobile.core.util.ext.encryptWithPbkdf2
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.util.ext.withEndpoint
@@ -281,13 +280,9 @@ class UstadAccountManager(
             commitActiveEndpointsToPref()
         }
 
-        val pbkdf2Params: Pbkdf2Params = di.direct.instance()
+        val authManager: AuthManager = di.on(endpoint).direct.instance()
 
         val userSession = endpointRepo.withDoorTransactionAsync {
-            val authSalt = endpointRepo.onRepoWithFallbackToDb(2000) {
-                it.siteDao.getSiteAsync()?.authSalt
-            } ?: throw IllegalStateException("addSession: No auth salt!")
-
             val nodeId = di.on(endpoint).direct.instance<NodeIdAndAuth>().nodeId
             UserSession().apply {
                 usClientNodeId = nodeId
@@ -295,9 +290,7 @@ class UstadAccountManager(
                 usStartTime = systemTimeInMillis()
                 usSessionType = UserSession.TYPE_STANDARD
                 usStatus = UserSession.STATUS_ACTIVE
-                usAuth = password?.encryptWithPbkdf2(
-                    authSalt, pbkdf2Params, endpoint, httpClient
-                )?.toHexString()
+                usAuth = password?.let { authManager.encryptPbkdf2(it).toHexString() }
                 usUid = endpointRepo.userSessionDao.insertSession(this)
             }
         }

@@ -15,6 +15,7 @@ import app.cash.paging.PagingSource
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +30,7 @@ data class ClazzDetailOverviewUiState(
 
     val scheduleList: List<Schedule> = emptyList(),
 
-    val courseBlockList: () -> PagingSource<Int, CourseBlockWithCompleteEntity> = { EmptyPagingSource() },
+    val courseBlockList: () -> PagingSource<Int, CourseBlockAndDisplayDetails> = { EmptyPagingSource() },
 
     val clazzCodeVisible: Boolean = false,
 
@@ -61,17 +62,15 @@ class ClazzDetailOverviewViewModel(
     destinationName: String
 ): DetailViewModel<ClazzWithDisplayDetails>(di, savedStateHandle, destinationName) {
 
-
     private val _uiState = MutableStateFlow(ClazzDetailOverviewUiState())
 
     val uiState: Flow<ClazzDetailOverviewUiState> = _uiState.asStateFlow()
 
-    private var lastCourseBlockPagingSource: PagingSource<Int, CourseBlockWithCompleteEntity>? = null
+    private var lastCourseBlockPagingSource: PagingSource<Int, CourseBlockAndDisplayDetails>? = null
 
-    private val pagingSourceFactory: () -> PagingSource<Int, CourseBlockWithCompleteEntity> = {
-        activeRepo.courseBlockDao.findAllCourseBlockByClazzUidLive(
-                entityUidArg, accountManager.currentAccount.personUid,
-                _uiState.value.collapsedBlockUids.toList(), systemTimeInMillis()
+    private val pagingSourceFactory: () -> PagingSource<Int, CourseBlockAndDisplayDetails> = {
+        activeRepo.courseBlockDao.findAllCourseBlockByClazzUidAsPagingSource(
+            clazzUid = entityUidArg, collapseList = _uiState.value.collapsedBlockUids.toList()
         ).also {
             lastCourseBlockPagingSource?.invalidate()
             lastCourseBlockPagingSource = it

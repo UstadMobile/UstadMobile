@@ -10,6 +10,8 @@ import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.annotation.QueryLiveTables
 import app.cash.paging.PagingSource
+import com.ustadmobile.door.annotation.HttpAccessible
+import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.composites.CourseBlockUidAndClazzUid
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
@@ -273,6 +275,21 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         currentTime: Long
     ): PagingSource<Int, CourseBlockWithCompleteEntity>
 
+
+    @HttpAccessible
+    @Query("""
+        SELECT CourseBlock.*,
+               CourseBlock.cbUid NOT IN(:collapseList) AS expanded
+          FROM CourseBlock
+         WHERE CourseBlock.cbClazzUid = :clazzUid
+           AND CourseBlock.cbModuleParentBlockUid NOT IN(:collapseList)
+           AND CourseBlock.cbActive
+      ORDER BY CourseBlock.cbIndex       
+    """)
+    abstract fun findAllCourseBlockByClazzUidAsPagingSource(
+        clazzUid: Long,
+        collapseList: List<Long>,
+    ): PagingSource<Int, CourseBlockAndDisplayDetails>
 
     @Query("""
         UPDATE CourseBlock 

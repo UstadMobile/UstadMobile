@@ -325,9 +325,11 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
                     + People.create()
 
                     Typography {
-                        + strings[MR.strings.x_teachers_y_students]
-                            .replace("%1\$d", props.clazzItem?.numTeachers.toString())
-                            .replace("%2\$d", props.clazzItem?.numStudents.toString())
+                        + strings.format(
+                            MR.strings.x_teachers_y_students,
+                            props.clazzItem?.numTeachers ?: 0,
+                            props.clazzItem?.numStudents ?: 0
+                        )
                     }
 
                 }

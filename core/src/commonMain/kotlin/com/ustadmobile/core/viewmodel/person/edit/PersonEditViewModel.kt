@@ -326,28 +326,24 @@ class PersonEditViewModel(
                     _uiState.update { prev -> prev.copy(fieldsEnabled = true) }
                 }
             }else {
-                activeDb.withDoorTransactionAsync {
-                    if(savePerson.personUid == 0L) {
-                        val personWithGroup = activeDb.insertPersonAndGroup(savePerson)
+                activeRepo.withDoorTransactionAsync {
+                    if(entityUidArg == 0L) {
+                        val personWithGroup = activeRepo.insertPersonAndGroup(savePerson)
                         savePerson.personGroupUid = personWithGroup.personGroupUid
                         savePerson.personUid = personWithGroup.personUid
-                    }else {
-                        activeDb.personDao.updateAsync(savePerson)
-                    }
 
-                    if(Instant.fromEpochMilliseconds(savePerson.dateOfBirth).isDateOfBirthAMinor()) {
-                        //Mark this as approved by the current user
-                        val approved = activeDb.personParentJoinDao.isMinorApproved(
-                            savePerson.personUid)
-
-                        if(!approved) {
-                            activeDb.personParentJoinDao.insertAsync(PersonParentJoin().apply {
+                        if(Instant.fromEpochMilliseconds(savePerson.dateOfBirth).isDateOfBirthAMinor()) {
+                            activeRepo.personParentJoinDao.insertAsync(PersonParentJoin().apply {
                                 ppjMinorPersonUid = savePerson.personUid
                                 ppjParentPersonUid = accountManager.currentAccount.personUid
                                 ppjStatus = PersonParentJoin.STATUS_APPROVED
                                 ppjApprovalTiemstamp = systemTimeInMillis()
                             })
                         }
+
+                        savePerson.personUid
+                    }else {
+                        activeRepo.personDao.updateAsync(savePerson)
                     }
                 }
 
@@ -356,9 +352,9 @@ class PersonEditViewModel(
                     personPictureVal.personPicturePersonUid = savePerson.personUid
 
                     if(personPictureVal.personPictureUid == 0L) {
-                        activeDb.personPictureDao.insertAsync(personPictureVal)
+                        activeRepo.personPictureDao.insertAsync(personPictureVal)
                     }else {
-                        activeDb.personPictureDao.updateAsync(personPictureVal)
+                        activeRepo.personPictureDao.updateAsync(personPictureVal)
                     }
                 }
 

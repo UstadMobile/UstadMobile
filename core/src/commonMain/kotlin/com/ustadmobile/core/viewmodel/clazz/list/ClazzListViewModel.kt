@@ -92,7 +92,6 @@ class ClazzListViewModel(
             permission = filterByPermission,
             selectedSchool = 0,
         ).also {
-            lastPagingSource?.invalidate()
             lastPagingSource = it
         }
     }

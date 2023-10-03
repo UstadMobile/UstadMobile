@@ -7,7 +7,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabaseJsImplementations
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
@@ -20,8 +19,6 @@ import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
-import com.ustadmobile.util.Util
-import com.ustadmobile.util.resolveEndpoint
 import com.ustadmobile.view.Content
 import web.cssom.Display
 import mui.system.Box
@@ -52,9 +49,10 @@ import react.router.useLoaderData
 import ustadJsDi
 import web.location.location
 import web.url.URL
-import web.url.URLSearchParams
 import kotlin.random.Random
 import com.ustadmobile.core.MR
+import com.ustadmobile.util.ext.deleteDatabaseAsync
+import web.idb.indexedDB
 
 //Roughly as per components/Showcases on MUI-showcase #d71c6d1
 
@@ -73,9 +71,7 @@ class UstadScreenContextData(
     val muiAppState: StateInstance<MuiAppState>,
 
     val showSnackFunction: SnackBarDispatcher
-) {
-
-}
+)
 
 val UstadScreensContext = createContext<UstadScreenContextData>()
 
@@ -200,8 +196,19 @@ val ustadScreensLoader: LoaderFunction = {
 
     @OptIn(DelicateCoroutinesApi::class)
     GlobalScope.promise {
-        val dbBuilt = dbBuilder.build()
-        val displayedLocale = UstadMobileSystemImpl.displayedLocale
+        lateinit var dbBuilt: UmAppDatabase
+        @Suppress("LiftReturnOrAssignment") // We don't want the database to be closed after the block
+        try {
+            dbBuilt = dbBuilder.build()
+        }catch(e: Exception) {
+            Napier.w("Exception building database - trying to clear")
+            //Probably something with no migration path, clear and retry
+            indexedDB.deleteDatabaseAsync(dbName)
+            localStorage.clear()
+
+            //Try again
+            dbBuilt = dbBuilder.build()
+        }
 
         val json = Json {
             encodeDefaults = true

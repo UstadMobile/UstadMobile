@@ -5,8 +5,6 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY
-import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_ATTENDANCE_ASC
-import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_ATTENDANCE_DESC
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_ASC
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_DESC
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_ASC
@@ -56,14 +54,24 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     abstract fun findAllEnrolmentsByPersonAndClazzUid(personUid: Long, clazzUid: Long):
             Flow<List<ClazzEnrolmentWithLeavingReason>>
 
-    @Query("""SELECT ClazzEnrolment.*, LeavingReason.*,
-         COALESCE(Clazz.clazzTimeZone, COALESCE(School.schoolTimeZone, 'UTC')) as timeZone
-         FROM ClazzEnrolment LEFT JOIN
-        LeavingReason ON LeavingReason.leavingReasonUid = ClazzEnrolment.clazzEnrolmentLeavingReasonUid
-        LEFT JOIN Clazz ON Clazz.clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
-        LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid
-        WHERE ClazzEnrolment.clazzEnrolmentUid = :enrolmentUid""")
-    abstract suspend fun findEnrolmentWithLeavingReason(enrolmentUid: Long): ClazzEnrolmentWithLeavingReason?
+
+    @HttpAccessible
+    @Query("""
+            SELECT ClazzEnrolment.*, 
+                   LeavingReason.*,
+                   COALESCE(Clazz.clazzTimeZone, COALESCE(School.schoolTimeZone, 'UTC')) AS timeZone
+              FROM ClazzEnrolment 
+                   LEFT JOIN LeavingReason 
+                             ON LeavingReason.leavingReasonUid = ClazzEnrolment.clazzEnrolmentLeavingReasonUid
+                   LEFT JOIN Clazz 
+                             ON Clazz.clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
+                   LEFT JOIN School 
+                             ON School.schoolUid = Clazz.clazzSchoolUid
+             WHERE ClazzEnrolment.clazzEnrolmentUid = :enrolmentUid
+             """)
+    abstract suspend fun findEnrolmentWithLeavingReason(
+        enrolmentUid: Long
+    ): ClazzEnrolmentWithLeavingReason?
 
     @Query("""
         UPDATE ClazzEnrolment 
@@ -80,8 +88,6 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
      * for person detail).
      *
      * @param personUid
-     * @param date If this is not 0, then the query will ensure that the registration is current at
-     * the given
      */
     @Query("""SELECT ClazzEnrolment.*, Clazz.*, (SELECT ((CAST(COUNT(DISTINCT CASE WHEN 
         ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN 
@@ -172,75 +178,85 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     ): Int
 
 
+    /*
+     * Note: SELECT * FROM (Subquery) AS CourseMember is needed so that sorting by
+     * earliestJoinDate/latestDateLeft will work as expected on postgres.
+     *
+     * This query uses a permission check so that users will only see participants that they have
+     * permission to see (e.g. on some courses / MOOC style students might not have permission to
+     * see other students etc).
+     *
+     * This Query is used by ClazzMemberListViewModel.
+     */
     @Query("""
-        SELECT Person.*, 
-               (SELECT ((CAST(COUNT(DISTINCT 
-                        CASE WHEN ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED 
-                                  THEN ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid 
-                             ELSE NULL 
-                             END) 
-                        AS REAL) / 
-                        MAX(COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid),1)) * 100) 
-                   FROM ClazzLogAttendanceRecord 
-                        JOIN ClazzLog 
-                             ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid 
-                  WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid = Person.personUid 
-                    AND ClazzLog.clazzLogClazzUid = :clazzUid)  AS attendance, 
+        SELECT * 
+          FROM (SELECT Person.*, 
+                       (SELECT MIN(ClazzEnrolment.clazzEnrolmentDateJoined) 
+                          FROM ClazzEnrolment 
+                         WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS earliestJoinDate, 
         
-    	       (SELECT MIN(ClazzEnrolment.clazzEnrolmentDateJoined) 
-                  FROM ClazzEnrolment 
-                 WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS earliestJoinDate, 
+                       (SELECT MAX(ClazzEnrolment.clazzEnrolmentDateLeft) 
+                          FROM ClazzEnrolment 
+                         WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS latestDateLeft, 
         
-    	      (SELECT MAX(ClazzEnrolment.clazzEnrolmentDateLeft) 
-                 FROM ClazzEnrolment 
-                WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS latestDateLeft, 
+                       (SELECT clazzEnrolmentRole 
+                          FROM clazzEnrolment 
+                         WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid 
+                           AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
+                           AND ClazzEnrolment.clazzEnrolmentActive) AS enrolmentRole
+                  FROM PersonGroupMember
+                       ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
+                                ${Role.PERMISSION_PERSON_SELECT} 
+                                ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2} 
         
-              (SELECT clazzEnrolmentRole 
-                 FROM clazzEnrolment 
-                WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid 
-                  AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
-        AND ClazzEnrolment.clazzEnrolmentActive) AS enrolmentRole
-        FROM PersonGroupMember
-        ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2} 
-        
-         WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
-           AND PersonGroupMember.groupMemberActive 
-           AND Person.personUid IN (SELECT clazzEnrolmentPersonUid 
-                                      FROM ClazzEnrolment 
-                                     WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
-                                       AND ClazzEnrolment.clazzEnrolmentActive 
-                                       AND ClazzEnrolment.clazzEnrolmentRole = :roleId 
-                                       AND (:filter != $FILTER_ACTIVE_ONLY 
-                                        OR (:currentTime 
-                                            BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
-                                            AND ClazzEnrolment.clazzEnrolmentDateLeft))) 
-          AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
-     GROUP BY Person.personUid
-     ORDER BY CASE(:sortOrder)
-                WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
-                WHEN $SORT_LAST_NAME_ASC THEN Person.lastName
+                 WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
+                   AND PersonGroupMember.groupMemberActive 
+                   AND Person.personUid IN 
+                       (SELECT clazzEnrolmentPersonUid 
+                          FROM ClazzEnrolment 
+                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
+                           AND ClazzEnrolment.clazzEnrolmentActive 
+                           AND ClazzEnrolment.clazzEnrolmentRole = :roleId 
+                           AND (:filter != $FILTER_ACTIVE_ONLY 
+                                 OR (:currentTime 
+                                      BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
+                                      AND ClazzEnrolment.clazzEnrolmentDateLeft))) 
+                   AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
+               GROUP BY Person.personUid) AS CourseMember
+      ORDER BY CASE(:sortOrder)
+                WHEN $SORT_FIRST_NAME_ASC THEN CourseMember.firstNames
+                WHEN $SORT_LAST_NAME_ASC THEN CourseMember.lastName
                 ELSE ''
             END ASC,
             CASE(:sortOrder)
-                WHEN $SORT_FIRST_NAME_DESC THEN Person.firstNames
-                WHEN $SORT_LAST_NAME_DESC THEN Person.lastName
+                WHEN $SORT_FIRST_NAME_DESC THEN CourseMember.firstNames
+                WHEN $SORT_LAST_NAME_DESC THEN CourseMember.lastName
                 ELSE ''
             END DESC,
             CASE(:sortOrder)
-                WHEN $SORT_ATTENDANCE_ASC THEN attendance
-                WHEN $SORT_DATE_REGISTERED_ASC THEN earliestJoinDate
-                WHEN $SORT_DATE_LEFT_ASC THEN latestDateLeft
+                WHEN $SORT_DATE_REGISTERED_ASC THEN CourseMember.earliestJoinDate
+                WHEN $SORT_DATE_LEFT_ASC THEN CourseMember.latestDateLeft
                 ELSE 0
             END ASC,
             CASE(:sortOrder)
-                WHEN $SORT_ATTENDANCE_DESC THEN attendance
-                WHEN $SORT_DATE_REGISTERED_DESC THEN earliestJoinDate
-                WHEN $SORT_DATE_LEFT_DESC THEN latestDateLeft
+                WHEN $SORT_DATE_REGISTERED_DESC THEN CourseMember.earliestJoinDate
+                WHEN $SORT_DATE_LEFT_DESC THEN CourseMember.latestDateLeft
                 ELSE 0
             END DESC
     """)
     @QueryLiveTables(value = ["Clazz", "Person", "ClazzEnrolment", "PersonGroupMember", "ScopedGrant"])
-    @SqliteOnly
+    @HttpAccessible(
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findByClazzUidAndRole"),
+            HttpServerFunctionCall(
+                functionDao = ScopedGrantDao::class,
+                functionName = "findScopedGrantAndPersonGroupByPersonUid"
+            ),
+            HttpServerFunctionCall(
+                functionName = "findEnrolmentsByClazzUidAndRole"
+            )
+        )
+    )
     abstract fun findByClazzUidAndRole(
         clazzUid: Long,
         roleId: Int,
@@ -250,6 +266,30 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         accountPersonUid: Long,
         currentTime: Long
     ): PagingSource<Int, PersonWithClazzEnrolmentDetails>
+
+    @Query("""
+        SELECT ClazzEnrolment.*
+          FROM PersonGroupMember
+               ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
+                    ${Role.PERMISSION_PERSON_SELECT} 
+                    ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2} 
+               JOIN ClazzEnrolment
+                    ON ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+                       AND ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
+         WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
+           AND PersonGroupMember.groupMemberActive 
+           AND Person.personUid IN 
+               (SELECT clazzEnrolmentPersonUid 
+                  FROM ClazzEnrolment 
+                 WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
+                   AND ClazzEnrolment.clazzEnrolmentActive 
+                   AND ClazzEnrolment.clazzEnrolmentRole = :roleId)
+    """)
+    abstract suspend fun findEnrolmentsByClazzUidAndRole(
+        clazzUid: Long,
+        accountPersonUid: Long,
+        roleId: Int,
+    ): List<ClazzEnrolment>
 
     @Query("""
         UPDATE ClazzEnrolment 

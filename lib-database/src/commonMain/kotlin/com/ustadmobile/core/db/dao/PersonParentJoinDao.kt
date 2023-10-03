@@ -79,6 +79,7 @@ expect abstract class PersonParentJoinDao {
     @Update
     abstract suspend fun updateAsync(personParentJoin: PersonParentJoin)
 
+    @HttpAccessible
     @Query("""
         SELECT EXISTS(
                SELECT ppjUid

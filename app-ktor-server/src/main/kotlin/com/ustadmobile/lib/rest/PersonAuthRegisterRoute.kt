@@ -16,7 +16,6 @@ import io.ktor.http.HttpStatusCode
 import org.kodein.di.instance
 import org.kodein.di.on
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.rest.ext.callEndpoint
 import io.ktor.client.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -28,6 +27,7 @@ import org.kodein.di.direct
 import org.kodein.di.ktor.closestDI
 import kotlin.IllegalStateException
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.account.doubleEncryptWithPbkdf2V2
 import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
 
 fun Route.personAuthRegisterRoute() {
@@ -47,8 +47,7 @@ fun Route.personAuthRegisterRoute() {
             }
 
 
-            val authResult = authManager.authenticate(username, password,
-                fallbackToOldPersonAuth = true)
+            val authResult = authManager.authenticate(username, password)
             val authorizedPerson = authResult.authenticatedPerson
 
             if(authResult.success && authorizedPerson != null) {
@@ -132,11 +131,8 @@ fun Route.personAuthRegisterRoute() {
                 notificationSender.sendEmail(mParentContactVal, subjectText, emailText)
             }
 
-            val authParams: Pbkdf2Params = di.direct.instance()
-            val httpClient: HttpClient = di.direct.instance()
-
-            db.insertPersonAuthCredentials2(mPerson.personUid, newPassword, authParams,
-                call.callEndpoint, httpClient)
+            val authManager: AuthManager = di.direct.on(call).instance()
+            authManager.setAuth(mPerson.personUid, newPassword)
 
             call.respond(HttpStatusCode.OK, mPerson)
         }
@@ -169,9 +165,8 @@ fun Route.personAuthRegisterRoute() {
             val site: Site = db.siteDao.getSiteAsync() ?: throw IllegalStateException("No site!")
             val authSalt = site.authSalt ?: throw IllegalStateException("No auth salt!")
 
-            val passwordDoubleHashed = password.doublePbkdf2Hash(authSalt, pbkdf2Params,
-                    call.callEndpoint, httpClient)
-                .encodeBase64()
+            val passwordDoubleHashed = password.doubleEncryptWithPbkdf2V2(authSalt,
+                    pbkdf2Params.iterations, pbkdf2Params.keyLength).encodeBase64()
 
             call.respondText { "Hashed password = $passwordDoubleHashed" }
         }

@@ -102,6 +102,9 @@ import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.view.dbexport.DbExportScreen
+import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
+import com.ustadmobile.view.person.accountedit.PersonAccountEditPreview
+import com.ustadmobile.view.person.accountedit.PersonAccountEditScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -124,7 +127,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     ),
     UstadScreen(PersonEditViewModel.DEST_NAME, "PersonEdit", PersonEditScreen),
     UstadScreen(PersonAccountEditView.VIEW_NAME, "Person Account Edit Preview",
-        PersonAccountEditPreview),
+        PersonAccountEditPreview
+    ),
     UstadScreen(LoginViewModel.DEST_NAME, "Login Preview",
         LoginScreen
     ),
@@ -307,7 +311,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ClazzAssignmentSubmitterDetailViewModel.DEST_NAME, "CourseAssignmentSubmitterDetail",
         ClazzAssignmentSubmitterDetailScreen),
     UstadScreen(LeavingReasonEditViewModel.DEST_NAME, "LeavingReasonEdit", LeavingReasonEditScreen),
-    UstadScreen("DbExport", "DbExport", DbExportScreen)
+    UstadScreen("DbExport", "DbExport", DbExportScreen),
+    UstadScreen(PersonAccountEditViewModel.DEST_NAME, "PersonAccountEdit", PersonAccountEditScreen)
 )
 
 

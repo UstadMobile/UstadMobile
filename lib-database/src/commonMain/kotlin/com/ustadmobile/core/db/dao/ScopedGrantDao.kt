@@ -83,13 +83,13 @@ expect abstract class ScopedGrantDao {
                   FROM PersonGroupMember 
                        JOIN ScopedGrant
                            ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-                 WHERE PersonGroupMember.groupMemberPersonUid = :personUid
+                 WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
                    AND (ScopedGrant.sgPermissions & :permission) > 0    
                )
         """
     )
     abstract fun userHasSystemLevelPermissionAsFlow(
-        personUid: Long,
+        accountPersonUid: Long,
         permission: Long,
     ): Flow<Boolean>
 
@@ -101,13 +101,30 @@ expect abstract class ScopedGrantDao {
                     ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
                JOIN PersonGroup
                     ON PersonGroup.groupUid = PersonGroupMember.groupMemberGroupUid
-         WHERE PersonGroupMember.groupMemberPersonUid = :personUid
+         WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
            AND (ScopedGrant.sgPermissions & :permission) > 0    
     """)
     abstract suspend fun findScopedGrantAndPersonGroupByPersonUidAndPermission(
-        personUid: Long,
+        accountPersonUid: Long,
         permission: Long
     ): List<ScopedGrantAndGroupMember>
+
+    /**
+     * Find all ScopedGrants for the given personUid
+     */
+    @Query("""
+        SELECT PersonGroupMember.*, PersonGroup.*, ScopedGrant.*
+          FROM PersonGroupMember 
+               JOIN ScopedGrant
+                    ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+               JOIN PersonGroup
+                    ON PersonGroup.groupUid = PersonGroupMember.groupMemberGroupUid
+         WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
+    """)
+    abstract suspend fun findScopedGrantAndPersonGroupByPersonUid(
+        accountPersonUid: Long
+    ): List<ScopedGrantAndGroupMember>
+
 
     @Query(
         """
@@ -126,5 +143,30 @@ expect abstract class ScopedGrantDao {
         permission: Long
     ): Boolean
 
+
+    /**
+     * Get permissions entities for a given accountPersonUid (the person logged in) that apply to another person (e.g. a profile being viewed etc).
+     * accountPersonUid may equal personUid if someone is viewing their own profile etc.
+     *
+     * Same query structure as PersonDao.personHasPermissionFlow
+     */
+    @Query("""
+        SELECT PersonGroupMember.*, PersonGroup.*, ScopedGrant.*
+          FROM Person
+               JOIN ScopedGrant
+                    ON ${Person.FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE}
+               JOIN PersonGroupMember 
+                    ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+               JOIN PersonGroup
+                    ON PersonGroup.groupUid = PersonGroupMember.groupMemberGroupUid 
+         WHERE Person.personUid = :personUid
+           AND (ScopedGrant.sgPermissions & :permission) > 0
+           AND PersonGroupMember.groupMemberPersonUid = :accountPersonUid
+    """)
+    abstract suspend fun personPermissionsForPerson(
+        accountPersonUid: Long,
+        personUid: Long,
+        permission: Long
+    ): List<ScopedGrantAndGroupMember>
 
 }

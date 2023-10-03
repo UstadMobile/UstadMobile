@@ -10,22 +10,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.sharp.Lock
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.fragment.findNavController
 import com.google.accompanist.themeadapter.material.MdcTheme
-import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPersonAccountEditBinding
 import com.ustadmobile.core.controller.PersonAccountEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
@@ -36,7 +30,7 @@ import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
-import com.ustadmobile.core.viewmodel.PersonAccountEditUiState
+import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditUiState
 import com.ustadmobile.core.R as CR
 
 

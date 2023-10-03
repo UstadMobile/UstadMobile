@@ -8,8 +8,6 @@ import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.composites.PersonNames
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Person.Companion.FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
-import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
-import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
 
 
 @DoorDao
@@ -85,6 +83,7 @@ expect abstract class PersonDao : BaseDao<Person> {
         permission: Long
     ): Boolean
 
+
     @Query("""
         SELECT EXISTS(
                 SELECT 1
@@ -98,6 +97,15 @@ expect abstract class PersonDao : BaseDao<Person> {
                    AND PersonGroupMember.groupMemberPersonUid = :accountPersonUid
                  LIMIT 1)
     """)
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionDao = ScopedGrantDao::class,
+                functionName = "personPermissionsForPerson",
+            )
+        )
+    )
     abstract fun personHasPermissionFlow(
         accountPersonUid: Long,
         personUid: Long,
@@ -165,6 +173,15 @@ expect abstract class PersonDao : BaseDao<Person> {
     ): List<Person>
 
     @Query(SQL_SELECT_LIST_WITH_PERMISSION)
+    @HttpAccessible(
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findPersonsWithPermissionAsPagingSource"),
+            HttpServerFunctionCall(
+                functionDao = ScopedGrantDao::class,
+                functionName = "findScopedGrantAndPersonGroupByPersonUid"
+            )
+        )
+    )
     abstract fun findPersonsWithPermissionAsPagingSource(
         timestamp: Long,
         excludeClazz: Long,
@@ -193,15 +210,17 @@ expect abstract class PersonDao : BaseDao<Person> {
     @Query("""
         SELECT Person.*, PersonParentJoin.* 
           FROM Person
-     LEFT JOIN PersonParentJoin on ppjUid = (
-                SELECT ppjUid 
-                  FROM PersonParentJoin
-                 WHERE ppjMinorPersonUid = :personUid 
-                       AND ppjParentPersonUid = :activeUserPersonUid 
-                LIMIT 1)     
+               LEFT JOIN PersonParentJoin 
+                    ON ppjUid =
+                    (SELECT ppjUid 
+                       FROM PersonParentJoin
+                      WHERE ppjMinorPersonUid = :personUid 
+                        AND ppjParentPersonUid = :activeUserPersonUid 
+                      LIMIT 1)     
          WHERE Person.personUid = :personUid
         """)
     @QueryLiveTables(["Person", "PersonParentJoin"])
+    @HttpAccessible
     abstract fun findByUidWithDisplayDetailsFlow(
         personUid: Long,
         activeUserPersonUid: Long
@@ -217,5 +236,14 @@ expect abstract class PersonDao : BaseDao<Person> {
          WHERE Person.personUid = :personUid  
     """)
     abstract suspend fun getNamesByUid(personUid: Long): PersonNames?
+
+
+    @Query("""
+        UPDATE Person
+           SET username = :username,
+               personLct = :currentTime
+         WHERE Person.personUid = :personUid  
+    """)
+    abstract suspend fun updateUsername(personUid: Long, username: String, currentTime: Long)
 
 }

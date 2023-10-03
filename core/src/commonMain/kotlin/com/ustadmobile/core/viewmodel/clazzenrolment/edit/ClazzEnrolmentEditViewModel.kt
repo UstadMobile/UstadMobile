@@ -1,8 +1,10 @@
 package com.ustadmobile.core.viewmodel.clazzenrolment.edit
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
+import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.ext.processEnrolmentIntoClass
@@ -47,6 +49,7 @@ data class ClazzEnrolmentEditUiState(
 class ClazzEnrolmentEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
+    private val enrolIntoCourseUseCase: EnrolIntoCourseUseCase = EnrolIntoCourseUseCase(),
 ): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(ClazzEnrolmentEditUiState(fieldsEnabled = false))
@@ -171,6 +174,11 @@ class ClazzEnrolmentEditViewModel(
             return
 
         val entity = _uiState.value.clazzEnrolment ?: return
+        val timeZoneVal = entity.timeZone
+        if(timeZoneVal == null) {
+            snackDispatcher.showSnackBar(Snack(message = "Error: no time zone for course"))
+            return
+        }
 
         loadingState = LoadingUiState.INDETERMINATE
         _uiState.update { prev ->
@@ -212,7 +220,12 @@ class ClazzEnrolmentEditViewModel(
 
         viewModelScope.launch {
             if(entityUidArg == 0L) {
-                activeDb.processEnrolmentIntoClass(entity)
+                enrolIntoCourseUseCase(
+                    enrolment = entity,
+                    db = activeDb,
+                    repo = activeRepo,
+                    timeZoneId = timeZoneVal
+                )
             }else {
                 activeDb.clazzEnrolmentDao.updateAsync(entity)
             }
