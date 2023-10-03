@@ -26,7 +26,6 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.util.test.initNapierLog
-import kotlinx.coroutines.delay
 import org.kodein.di.*
 import org.mockito.kotlin.*
 import kotlin.test.Test
@@ -113,7 +112,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenPresenterCreatedInRegistrationMode_whenFormFilledAndClickSave_shouldRegisterAPerson() {
-        testViewModel<PersonEditViewModel>() {
+        testViewModel<PersonEditViewModel> {
             val serverUrl = "http://test.com/"
             val accountManager = createMockAccountManager(serverUrl)
 
@@ -155,7 +154,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
     @Test
     fun givenPresenterCreatedInNonRegistrationMode_whenFormFilledAndClickSave_shouldSaveAPersonInDb() {
         initNapierLog()
-        testViewModel<PersonEditViewModel>() {
+        testViewModel<PersonEditViewModel> {
             viewModelFactory {
                 PersonEditViewModel(di, savedStateHandle)
             }
@@ -175,8 +174,6 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
 
             val db = di.direct.on(activeEndpoint).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
 
-            //Should not be needed - issue is with doorFlow
-            delay(1000)
 
             db.doorFlow(arrayOf("Person")) {
                 db.personDao.getAllPerson()
