@@ -52,6 +52,8 @@ interface UstadCache {
 
     /**
      * Only on JVM for use with OKHttp
+     *
+     * Expect-SHA-256 is set, then we can search for the given sha-256.
      */
     suspend fun retrieve(
         request: String,//Actual request object
