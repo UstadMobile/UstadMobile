@@ -31,8 +31,11 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
+import com.ustadmobile.libuicompose.components.HtmlClickableTextField
 import com.ustadmobile.libuicompose.components.UstadDateField
 import com.ustadmobile.libuicompose.components.UstadExposedDropDownMenuField
+import dev.icerock.moko.resources.compose.stringResource
+import com.ustadmobile.core.MR
 
 @Composable
 fun HelloWorld() {
@@ -107,6 +110,16 @@ data class HelloWorldScreen(
                     selectedOption = it
                 },
                 itemText =  { it },
+            )
+
+            HtmlClickableTextField(
+                root = {},
+                html = "Complete your assignment or <b>else</b>",
+                label = stringResource(MR.strings.description),
+                onClick = {  },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("description")
             )
         }
     }

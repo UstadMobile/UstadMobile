@@ -4,6 +4,7 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -23,6 +24,7 @@ import com.ustadmobile.libuicompose.R
  */
 @Composable
 actual fun HtmlClickableTextField(
+    root: @Composable (() -> Unit),
     html: String,
     label: String,
     onClick: () -> Unit,
@@ -30,64 +32,68 @@ actual fun HtmlClickableTextField(
     maxHtmlLines: Int
 ) {
 
-    val clickListener = remember(onClick) {
-        View.OnClickListener {
-            onClick()
-        }
+    Box{
+
     }
 
-    fun TextView.updateHtml() {
-        val currentHtml = getTag(R.id.tag_textfield_html)
-        if(currentHtml != html) {
-            text = html.htmlTextToSpanned()
-            setTag(R.id.tag_textfield_html, html)
-        }
-
-        if(maxLines != maxHtmlLines) {
-            maxLines = maxHtmlLines
-            ellipsize = TextUtils.TruncateAt.END
-        }
-    }
-
-    fun TextInputLayout.updateHint() {
-        if(hint != label)
-            hint = label
-    }
-
-    fun TextInputEditText.updateText() {
-        val inputText = if(html.isEmpty()) "" else " "
-        if(text.toString() != inputText)
-            setText(inputText)
-    }
-
-    fun View.update() {
-        findViewById<TextInputLayout>(R.id.text_input_layout).updateHint()
-        findViewById<TextInputEditText>(R.id.text_input_edit_text).apply {
-            updateText()
-            setOnClickListener(clickListener)
-        }
-        findViewById<TextView>(R.id.text_input_layout_textview).updateHtml()
-    }
-
-
-
-    AndroidView(
-        modifier = modifier,
-        factory = { context ->
-            LayoutInflater.from(context).inflate(
-                R.layout.item_text_input_layout, null, false
-            ).apply {
-                update()
-                findViewById<TextInputEditText>(
-                    R.id.text_input_edit_text
-                ).setOnFocusChangeListener { v, hasFocus ->
-                    if(hasFocus)
-                        v.callOnClick()
-                }
-            }
-        },
-        update = {
-            it.update()
-        }
-    )
+//    val clickListener = remember(onClick) {
+//        View.OnClickListener {
+//            onClick()
+//        }
+//    }
+//
+//    fun TextView.updateHtml() {
+//        val currentHtml = getTag(R.id.tag_textfield_html)
+//        if(currentHtml != html) {
+//            text = html.htmlTextToSpanned()
+//            setTag(R.id.tag_textfield_html, html)
+//        }
+//
+//        if(maxLines != maxHtmlLines) {
+//            maxLines = maxHtmlLines
+//            ellipsize = TextUtils.TruncateAt.END
+//        }
+//    }
+//
+//    fun TextInputLayout.updateHint() {
+//        if(hint != label)
+//            hint = label
+//    }
+//
+//    fun TextInputEditText.updateText() {
+//        val inputText = if(html.isEmpty()) "" else " "
+//        if(text.toString() != inputText)
+//            setText(inputText)
+//    }
+//
+//    fun View.update() {
+//        findViewById<TextInputLayout>(R.id.text_input_layout).updateHint()
+//        findViewById<TextInputEditText>(R.id.text_input_edit_text).apply {
+//            updateText()
+//            setOnClickListener(clickListener)
+//        }
+//        findViewById<TextView>(R.id.text_input_layout_textview).updateHtml()
+//    }
+//
+//
+//
+//    AndroidView(
+//        modifier = modifier,
+//        factory = { context ->
+//            LayoutInflater.from(context).inflate(
+//                R.layout.item_text_input_layout, null, false
+//            ).apply {
+//                update()
+//                findViewById<TextInputEditText>(
+//                    R.id.text_input_edit_text
+//                ).setOnFocusChangeListener { v, hasFocus ->
+//                    if(hasFocus)
+//                        v.callOnClick()
+//                }
+//            }
+//        },
+//        update = {
+//            it.update()
+//        }
+//    )
 }
