@@ -60,6 +60,7 @@ kotlin {
                 api(project(":core"))
                 api(compose.desktop.common)
                 implementation(compose.desktop.currentOs)
+                implementation("com.mohamedrejeb.richeditor:richeditor-compose:1.0.0-beta03")
             }
         }
     }
