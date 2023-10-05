@@ -22,14 +22,6 @@ describe('Ustad mobile course tests', () => {
     cy.wait(2000)
     //cy.get('button[id="actionBarButton"]',{timeout:6000}).should('be.visible')
     cy.contains("button","Save").click().should('be.visible')
-   /* cy.contains("Teacher A").click()
-    cy.contains('View profile').click()
-    cy.contains('Create account').click()
-    cy.contains("label", "Username",{timeout:2000}).parent().find("input").clear().type("ta")
-    cy.contains("Teacher A").click()
-    cy.contains("label", "New Password",{timeout:2000}).parent().find("input").clear().type("test")
-    cy.wait(2000)
-    cy.contains("button","Save").click().should('be.visible')*/
 
      //Add a student
 
@@ -44,6 +36,30 @@ describe('Ustad mobile course tests', () => {
        // cy.contains("button","Save").should('be.visible')
         cy.contains("button","Save").click()
         cy.contains("button","members").should('be.visible')
+
+   //Add account for teacher
+       cy.contains("Teacher A").click()
+       cy.contains('View profile').click()
+       cy.contains('Create account').click()
+       cy.contains("label", "Username",{timeout:2000}).parent().find("input").clear().type("ta")
+ //      cy.contains("label", "New Password",{timeout:2000}).parent().find("input").clear().type("test")
+       cy.get('input[type="password"]').type("1234")
+       cy.wait(2000)
+       cy.contains("button","Save").click().should('be.visible')
+       cy.contains('Change Password').should('be.visible')
+       cy.go('back')
+       cy.go('back')
+
+     //Add account for student
+       cy.contains("Student A").click()
+       cy.contains('View profile').click()
+       cy.contains('Create account').click()
+       cy.contains("label", "Username",{timeout:2000}).parent().find("input").clear().type("sa")
+       cy.get('input[type="password"]').type("1234")
+       cy.wait(2000)
+       cy.contains("button","Save").click().should('be.visible')
+       cy.contains('Change Password').should('be.visible')
+
   })
 
 })
