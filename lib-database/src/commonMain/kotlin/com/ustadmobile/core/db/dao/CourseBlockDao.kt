@@ -341,6 +341,9 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         courseBlockUid: Long
     ): Long
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+    )
     @Query("""
         SELECT CourseBlock.*
           FROM CourseBlock

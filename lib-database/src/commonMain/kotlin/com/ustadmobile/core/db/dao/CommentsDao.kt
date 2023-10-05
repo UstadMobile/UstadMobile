@@ -8,7 +8,7 @@ import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.lib.db.entities.CommentsWithPerson
-import com.ustadmobile.lib.db.entities.UserSession
+import com.ustadmobile.lib.db.entities.Person
 
 @Repository
 @DoorDao
@@ -116,6 +116,24 @@ expect abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments
         changeTime: Long
     )
 
+
+    //Requires the Comment, Person for comment, ClazzEnrolment and CourseGroupMember (to determine
+    // the submitter id for the given accountPersonUid).
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(functionName = "findPrivateCommentsForUserByAssignmentUid"),
+            HttpServerFunctionCall(functionName = "findPrivateCommentsForUserByAssignmentUidPersons"),
+            HttpServerFunctionCall(
+                functionDao = ClazzAssignmentDao::class,
+                functionName = "findEnrolmentsByPersonUidAndAssignmentUid"
+            ),
+            HttpServerFunctionCall(
+                functionDao = ClazzAssignmentDao::class,
+                functionName = "findCourseGroupMembersByPersonUidAndAssignmentUid"
+            )
+        )
+    )
     @Query("""
         SELECT Comments.*,
                Person.firstNames AS firstNames, 
@@ -135,6 +153,30 @@ expect abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments
     ): PagingSource<Int, CommentsAndName>
 
     @Query("""
+        SELECT Person.*
+          FROM Person
+         WHERE Person.personUid IN
+               (SELECT DISTINCT Comments.commentsPersonUid
+                  FROM Comments
+                 WHERE Comments.commentSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
+                   AND Comments.commentSubmitterUid != 0
+                   AND Comments.commentsEntityUid = :assignmentUid
+                   AND CAST(Comments.commentsInActive AS INTEGER) = 0)
+    """)
+    abstract suspend fun findPrivateCommentsForUserByAssignmentUidPersons(
+        accountPersonUid: Long,
+        assignmentUid: Long
+    ): List<Person>
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findPrivateCommentsForSubmitterByAssignmentUid"),
+            HttpServerFunctionCall("findPrivateCommentsForSubmitterByAssignmentUidPersons"),
+            //Needs
+        )
+    )
+    @Query("""
         SELECT Comments.*,
                Person.firstNames AS firstNames, 
                Person.lastName AS lastName
@@ -152,6 +194,29 @@ expect abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments
     ): PagingSource<Int, CommentsAndName>
 
     @Query("""
+        SELECT Person.*
+          FROM Person
+         WHERE Person.personUid IN 
+               (SELECT Comments.commentsPersonUid
+                  FROM Comments
+                 WHERE Comments.commentSubmitterUid = :submitterUid
+                   AND Comments.commentsEntityUid = :assignmentUid
+                   AND NOT Comments.commentsInActive) 
+    """
+    )
+    abstract fun findPrivateCommentsForSubmitterByAssignmentUidPersons(
+        submitterUid: Long,
+        assignmentUid: Long
+    ): List<Person>
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(functionName = "findCourseCommentsByAssignmentUid"),
+            HttpServerFunctionCall(functionName = "findCourseCommentsByAssignmentUidPersons")
+        )
+    )
+    @Query("""
         SELECT Comments.*,
                Person.firstNames AS firstNames, 
                Person.lastName AS lastName
@@ -165,6 +230,21 @@ expect abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments
     abstract fun findCourseCommentsByAssignmentUid(
         assignmentUid: Long
     ): PagingSource<Int, CommentsAndName>
+
+    @Query("""
+        SELECT Person.*
+          FROM Person
+         WHERE Person.personUid IN
+               (SELECT DISTINCT Comments.commentsPersonUid
+                  FROM Comments
+                       LEFT JOIN Person 
+                            ON Person.personUid = Comments.commentsPersonUid
+                 WHERE Comments.commentsEntityUid = :assignmentUid
+                   AND Comments.commentSubmitterUid = 0)
+    """)
+    abstract suspend fun findCourseCommentsByAssignmentUidPersons(
+        assignmentUid: Long
+    ): List<Person>
 
 
 }

@@ -17,6 +17,9 @@ import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SUBMITTER_LIST_CTE2_
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SELECT_ASSIGNMENT_IS_PEERMARKED_SQL
+import com.ustadmobile.lib.db.composites.ClazzEnrolmentAndPerson
+import com.ustadmobile.lib.db.composites.ScopedGrantAndGroupMember
 import com.ustadmobile.lib.db.entities.*
 
 
@@ -87,6 +90,66 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
         group: String,
     ): Flow<AssignmentProgressSummary?>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            //Get permission entities for this assignment / user
+            HttpServerFunctionCall(
+                functionName = "personHasPermissionWithClazzByAssignmentUidEntities",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "clazzAssignmentUid",
+                        argType = HttpServerFunctionParam.ArgType.MAP_OTHER_PARAM,
+                        fromName = "assignmentUid"
+                    ),
+                    HttpServerFunctionParam(
+                        name = "permission",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}L"
+                    )
+                )
+            ),
+            //Get the assignment entity itself
+            HttpServerFunctionCall(
+                functionName = "findByUidAsync",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "uid",
+                        argType = HttpServerFunctionParam.ArgType.MAP_OTHER_PARAM,
+                        fromName = "assignmentUid"
+                    )
+                )
+
+            ),
+            //Get all ClazzEnrolment and Person entities for this assignment
+            HttpServerFunctionCall(
+                functionName = "getClazzEnrolmentsAndPersonsByAssignmentUid",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "enrolmentFilterPersonUid",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "0",
+                    )
+                )
+            ),
+            //Get CourseGroupMember entities for this assignment
+            HttpServerFunctionCall(
+                functionName = "getCourseGroupMembersByAssignmentUid"
+            ),
+            //Submissinos
+            HttpServerFunctionCall(
+                functionName = "getAssignmentSubmissionsByAssignmentUid"
+            ),
+            //and marks
+            HttpServerFunctionCall(
+                functionName = "getAssignmentMarksByAssignmentUid"
+            ),
+            //PeerReviewAllocations
+            HttpServerFunctionCall(
+                functionName = "getPeerReviewerAllocationsByAssignmentUid"
+            )
+        )
+    )
     @Query("""
         WITH $HAS_LEARNINGRECORD_SELECT_PERMISSION_CTE_SQL,
              $ASSIGNMENT_CLAZZ_UID_CTE_SQL,
@@ -147,6 +210,139 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
         searchText: String,
         sortOption: Int,
     ): PagingSource<Int, AssignmentSubmitterSummary>
+
+    //Note: This does not cover the following edge scenario: where the assignment is peer-reviewed
+    // and does not otherwise have permission to other members of their course.
+    @Query("""
+        SELECT Person.*, ClazzEnrolment.*
+          FROM PersonGroupMember
+               ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
+                        ${Role.PERMISSION_PERSON_SELECT} 
+                        ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2} 
+               JOIN ClazzEnrolment
+                    ON ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
+                       AND ClazzEnrolment.clazzEnrolmentClazzUid = 
+                           (SELECT ClazzAssignment.caClazzUid
+                              FROM ClazzAssignment
+                             WHERE ClazzAssignment.caUid = :assignmentUid)
+             WHERE :enrolmentFilterPersonUid = 0 
+                OR ClazzEnrolment.clazzEnrolmentPersonUid = :enrolmentFilterPersonUid                
+                             
+    """)
+    abstract suspend fun getClazzEnrolmentsAndPersonsByAssignmentUid(
+        assignmentUid: Long,
+        accountPersonUid: Long,
+        enrolmentFilterPersonUid: Long,
+    ): List<ClazzEnrolmentAndPerson>
+
+    @Query("""
+        SELECT CourseGroupMember.*
+          FROM CourseGroupMember
+         WHERE CourseGroupMember.cgmSetUid = 
+               (SELECT ClazzAssignment.caGroupUid
+                  FROM ClazzAssignment
+                 WHERE ClazzAssignment.caUid = :assignmentUid) 
+    """)
+    abstract suspend fun getCourseGroupMembersByAssignmentUid(
+        assignmentUid: Long,
+    ): List<CourseGroupMember>
+
+    /**
+     * Get all submission entities for the given assignment
+     */
+    @Query("""
+        WITH $HAS_LEARNINGRECORD_SELECT_PERMISSION_CTE_SQL,
+             $ASSIGNMENT_CLAZZ_UID_CTE_SQL,
+             $SUBMITTER_LIST_CTE2_SQL
+      SELECT CourseAssignmentSubmission.*
+        FROM CourseAssignmentSubmission 
+       WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
+         AND CourseAssignmentSubmission.casSubmitterUid IN 
+             (SELECT SubmitterList.submitterId
+                FROM SubmitterList) 
+    """
+    )
+    abstract suspend fun getAssignmentSubmissionsByAssignmentUid(
+        assignmentUid: Long,
+        accountPersonUid: Long,
+        group: String,
+    ): List<CourseAssignmentSubmission>
+
+    /**
+     * Get all marks for the given course assignment that the person (as per personAccountUid) can
+     * access
+     */
+    @Query("""
+        WITH $HAS_LEARNINGRECORD_SELECT_PERMISSION_CTE_SQL,
+             $ASSIGNMENT_CLAZZ_UID_CTE_SQL,
+             $SUBMITTER_LIST_CTE2_SQL
+      SELECT CourseAssignmentMark.*
+        FROM CourseAssignmentMark 
+       WHERE CourseAssignmentMark.camAssignmentUid = :assignmentUid
+         AND CourseAssignmentMark.camSubmitterUid IN 
+             (SELECT SubmitterList.submitterId
+                FROM SubmitterList)
+    """)
+    abstract suspend fun getAssignmentMarksByAssignmentUid(
+        assignmentUid: Long,
+        accountPersonUid: Long,
+        group: String
+    ): List<CourseAssignmentMark>
+
+    /**
+     * Used by getAssignmentSubmitterSummaryListForAssignment - only needs PeerReviewerAllocation(s)
+     * for those who do not have the overall Learning Record Select permission e.g. so the query
+     * can decide which submitters to show.
+     *
+     * Gets the PeerReviewerAllocations indicating the who the active user has been assigned to mark.
+     */
+    @Query("""
+          WITH $HAS_LEARNINGRECORD_SELECT_PERMISSION_CTE_SQL
+        SELECT PeerReviewerAllocation.*
+          FROM PeerReviewerAllocation
+         WHERE $SELECT_ASSIGNMENT_IS_PEERMARKED_SQL
+          AND NOT 
+              (SELECT hasPermission 
+                 FROM HasLearningRecordSelectPermission) 
+           AND PeerReviewerAllocation.praAssignmentUid = :assignmentUid
+           AND (   PeerReviewerAllocation.praMarkerSubmitterUid = :accountPersonUid
+                OR PeerReviewerAllocation.praMarkerSubmitterUid IN 
+                   (SELECT CourseGroupMember.cgmGroupNumber
+                      FROM CourseGroupMember
+                     WHERE CourseGroupMember.cgmSetUid = 
+                           (SELECT ClazzAssignment.caGroupUid
+                              FROM ClazzAssignment
+                             WHERE ClazzAssignment.caUid = :assignmentUid)))
+    """)
+    abstract suspend fun getPeerReviewerAllocationsByAssignmentUid(
+        assignmentUid: Long,
+        accountPersonUid: Long,
+        group: String
+    ): List<PeerReviewerAllocation>
+
+    /**
+     * Get a list of the applicable PeerReviewerAllocations for the given accountPersonUid where
+     * the AccountPersonUid is the marker (either directly as an individual or as a group member)
+     */
+    @Query("""
+        SELECT PeerReviewerAllocation.*
+          FROM PeerReviewerAllocation
+         WHERE PeerReviewerAllocation.praAssignmentUid = :assignmentUid
+           AND (PeerReviewerAllocation.praToMarkerSubmitterUid = :accountPersonUid
+                OR
+                PeerReviewerAllocation.praToMarkerSubmitterUid IN 
+                (SELECT CourseGroupMember.cgmSetUid 
+                   FROM CourseGroupMember
+                  WHERE CourseGroupMember.cgmSetUid = 
+                        (SELECT ClazzAssignment.caGroupUid
+                           FROM ClazzAssignment
+                          WHERE ClazzAssignment.caUid = :assignmentUid)
+                    AND CourseGroupMember.cgmPersonUid = :accountPersonUid))                 
+    """)
+    abstract suspend fun getPeerReviewAllocationsForPerson(
+        assignmentUid: Long,
+        accountPersonUid: Long,
+    ): List<PeerReviewerAllocation>
 
     /**
      * Used by UpdatePeerReviewAllocationUseCase - which needs to run even before the assignment
@@ -213,6 +409,38 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
     ): Int
 
 
+    //Needs enrolment for person
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            //Get the assignment itself
+            HttpServerFunctionCall(
+                functionName = "findByUidAsync",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "uid",
+                        argType = HttpServerFunctionParam.ArgType.MAP_OTHER_PARAM,
+                        fromName = "assignmentUid"
+                    )
+                )
+            ),
+            //Get Person and Enrolment entities for the accountpersonuid
+            HttpServerFunctionCall(
+                functionName = "getClazzEnrolmentsAndPersonsByAssignmentUid",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "enrolmentFilterPersonUid",
+                        argType = HttpServerFunctionParam.ArgType.MAP_OTHER_PARAM,
+                        fromName = "accountPersonUid"
+                    ),
+                )
+            ),
+            //Get the CourseGroupMember if any for the accountpersonuid
+            HttpServerFunctionCall(
+                functionName = "findCourseGroupMembersByPersonUidAndAssignmentUid",
+            )
+        )
+    )
     @Query("""
         $SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL
     """)
@@ -221,6 +449,9 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
     @Update
     abstract suspend fun updateAsync(clazzAssignment: ClazzAssignment)
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     @Query("""
         SELECT * 
           FROM ClazzAssignment 
@@ -229,6 +460,9 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
     abstract suspend fun findByUidAsync(uid: Long): ClazzAssignment?
 
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     @Query("""
         SELECT * 
           FROM ClazzAssignment 
@@ -236,6 +470,12 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
     """)
     abstract fun findByUidAsFlow(uid: Long): Flow<ClazzAssignment?>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(functionName = "personHasPermissionWithClazzByAssignmentUidEntities")
+        )
+    )
     @Query("""
         SELECT EXISTS( 
                SELECT PrsGrpMbr.groupMemberPersonUid
@@ -256,6 +496,27 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
     ): Flow<Boolean>
 
     @Query("""
+        SELECT PrsGrpMbr.*, ScopedGrant.*, PersonGroup.*
+          FROM Clazz
+               ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+                  :permission
+                  ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
+               JOIN PersonGroup
+                    ON PersonGroup.groupUid = PrsGrpMbr.groupMemberGroupUid
+         WHERE Clazz.clazzUid = 
+               (SELECT caClazzUid 
+                  FROM ClazzAssignment
+                 WHERE caUid = :clazzAssignmentUid)
+           AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid
+    """)
+    abstract suspend fun personHasPermissionWithClazzByAssignmentUidEntities(
+        accountPersonUid: Long,
+        clazzAssignmentUid: Long,
+        permission: Long
+    ): List<ScopedGrantAndGroupMember>
+
+
+    @Query("""
           SELECT COALESCE((
            SELECT caGroupUid
            FROM ClazzAssignment
@@ -271,6 +532,9 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
     """)
     abstract suspend fun getMarkingTypeFromAssignment(uid: Long): Int
 
+    @HttpAccessible(
+
+    )
     @Query("""
         SELECT * 
           FROM ClazzAssignment
@@ -308,6 +572,22 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
         changeTime: Long
     )
 
+    /**
+     * Get the CourseBlock for the assignment and the submitter id (see
+     * CourseAssignmentSubmission.casSubmitterUid ) for the accountPersonUid.
+     */
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findAssignmentCourseBlockAndSubmitterUidAsFlow"),
+            //Get the ClazzEnrolment objects to correctly determine if active person is student
+            HttpServerFunctionCall("findEnrolmentsByPersonUidAndAssignmentUid"),
+            //Get the CourseGroupMember entities that apply for this assignment and personUid if any
+            HttpServerFunctionCall("findCourseGroupMembersByPersonUidAndAssignmentUid"),
+            //PeerReviewerAllocations if required
+            HttpServerFunctionCall("findPeerReviewerAllocationsByPersonUidAndAssignmentUid"),
+        )
+    )
     @Query("""
         WITH PersonIsStudent(isStudent)
              AS (SELECT EXISTS(
@@ -334,6 +614,70 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
         accountPersonUid: Long,
     ): Flow<ClazzAssignmentCourseBlockAndSubmitterUid?>
 
+
+    /**
+     * Get the ClazzEnrolment entities applicable for the given assignment uid and person uid
+     */
+    @Query("""
+        SELECT ClazzEnrolment.*
+          FROM ClazzEnrolment
+         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = 
+               (SELECT ClazzAssignment.caClazzUid
+                  FROM ClazzAssignment
+                 WHERE ClazzAssignment.caUid = :assignmentUid)
+           AND ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid 
+    """)
+    abstract suspend fun findEnrolmentsByPersonUidAndAssignmentUid(
+        assignmentUid: Long,
+        accountPersonUid: Long,
+    ): List<ClazzEnrolment>
+
+    @Query("""
+        SELECT CourseGroupMember.*
+          FROM CourseGroupMember
+         WHERE CourseGroupMember.cgmSetUid = 
+               (SELECT ClazzAssignment.caGroupUid 
+                  FROM ClazzAssignment
+                 WHERE ClazzAssignment.caUid = :assignmentUid)
+           AND CourseGroupMember.cgmPersonUid = :accountPersonUid
+    """)
+    abstract suspend fun findCourseGroupMembersByPersonUidAndAssignmentUid(
+        assignmentUid: Long,
+        accountPersonUid: Long,
+    ): List<CourseGroupMember>
+
+    /**
+     * Get the PeerReviewerAllocations that are required for the given assignment and the given
+     * active user as per accountPersonUid: this is effectively all PeerReviewerAllocations that
+     * either assign what the active user should be marking, or who will mark them
+     */
+    @Query("""
+        SELECT PeerReviewerAllocation.*
+          FROM PeerReviewerAllocation
+         WHERE PeerReviewerAllocation.praAssignmentUid = :assignmentUid
+           AND PeerReviewerAllocation.praMarkerSubmitterUid = :accountPersonUid
+            OR PeerReviewerAllocation.praToMarkerSubmitterUid = :accountPersonUid
+            OR PeerReviewerAllocation.praMarkerSubmitterUid IN
+               (SELECT CourseGroupMember.cgmGroupNumber
+                  FROM CourseGroupMember
+                 WHERE CourseGroupMember.cgmSetUid = 
+                       (SELECT ClazzAssignment.caGroupUid
+                          FROM ClazzAssignment
+                         WHERE ClazzAssignment.caUid = :assignmentUid)
+                   AND CourseGroupMember.cgmPersonUid = :accountPersonUid)
+            OR PeerReviewerAllocation.praToMarkerSubmitterUid IN
+               (SELECT CourseGroupMember.cgmGroupNumber
+                  FROM CourseGroupMember
+                 WHERE CourseGroupMember.cgmSetUid = 
+                       (SELECT ClazzAssignment.caGroupUid
+                          FROM ClazzAssignment
+                         WHERE ClazzAssignment.caUid = :assignmentUid)
+                   AND CourseGroupMember.cgmPersonUid = :accountPersonUid)
+    """)
+    abstract suspend fun findPeerReviewerAllocationsByPersonUidAndAssignmentUid(
+        assignmentUid: Long,
+        accountPersonUid: Long
+    ): List<PeerReviewerAllocation>
 
     @Query("""
         WITH CourseBlockDeadlines(deadline, gracePeriod) AS

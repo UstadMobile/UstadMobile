@@ -71,6 +71,9 @@ expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
         assignmentUid: Long
     ): Flow<AverageCourseAssignmentMark>
 
+    @HttpAccessible(
+
+    )
     @Query("""
         SELECT CourseAssignmentMark.*,
                Person.firstNames AS markerFirstNames,
@@ -87,6 +90,13 @@ expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
         assignmentUid: Long
     ): Flow<List<CourseAssignmentMarkAndMarkerName>>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("getAllMarksForSubmitterAsFlow"),
+            HttpServerFunctionCall("getAllMarksForSubmitterAsFlowMarkerPersons"),
+        )
+    )
     @Query("""
         SELECT CourseAssignmentMark.*,
                Person.firstNames AS markerFirstNames,
@@ -101,6 +111,20 @@ expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
         submitterUid: Long,
         assignmentUid: Long,
     ): Flow<List<CourseAssignmentMarkAndMarkerName>>
+
+    @Query("""
+        SELECT Person.*
+          FROM Person
+         WHERE PersonUid IN
+               (SELECT CourseAssignmentMark.camMarkerPersonUid
+                  FROM CourseAssignmentMark
+                 WHERE CourseAssignmentMark.camAssignmentUid = :assignmentUid
+                   AND CourseAssignmentMark.camSubmitterUid = :submitterUid)
+    """)
+    abstract suspend fun getAllMarksForSubmitterAsFlowMarkerPersons(
+        submitterUid: Long,
+        assignmentUid: Long,
+    ): List<Person>
 
     @Query("""
           WITH ScoreByMarker AS (

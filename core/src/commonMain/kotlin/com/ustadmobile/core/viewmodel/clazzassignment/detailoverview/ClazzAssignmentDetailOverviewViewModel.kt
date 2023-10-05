@@ -44,6 +44,9 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val courseBlock: CourseBlock? = null,
 
+    /**
+     * The submitter uid of the active user - see CourseAssignmentSubmission.casSubmitterUid
+     */
     internal val submitterUid: Long = 0,
 
     val submissionMark: AverageCourseAssignmentMark? = null,
@@ -73,8 +76,6 @@ data class ClazzAssignmentDetailOverviewUiState(
         UstadAssignmentSubmissionHeaderUiState(),
 
     val unassignedError: String? = null,
-
-    val submissionTextFieldVisible: Boolean = false,
 
     val addFileVisible: Boolean = false,
 
@@ -165,6 +166,15 @@ data class ClazzAssignmentDetailOverviewUiState(
         latestSubmission?.textLength(assignment?.caTextLimitType ?: ClazzAssignment.TEXT_WORD_LIMIT)
     }
 
+    val pointsVisible: Boolean
+        get() = submissionMark != null
+
+    val latePenaltyVisible: Boolean
+        get() = submissionMark != null && submissionMark.averagePenalty != 0
+
+    val submissionTextFieldVisible: Boolean
+        get() = assignment?.caRequireTextSubmission == true && activeUserCanSubmit
+
 }
 
 val CourseAssignmentMarkWithPersonMarker.listItemUiState
@@ -199,7 +209,6 @@ class ClazzAssignmentDetailOverviewViewModel(
             accountPersonUid = activeUserPersonUid,
             assignmentUid = entityUidArg,
         ).also {
-            lastPrivateCommentsPagingSource?.invalidate()
             lastPrivateCommentsPagingSource = it
         }
     }
@@ -210,7 +219,6 @@ class ClazzAssignmentDetailOverviewViewModel(
         activeRepo.commentsDao.findCourseCommentsByAssignmentUid(
             assignmentUid = entityUidArg
         ).also {
-            lastCourseCommentsPagingSourceFactory?.invalidate()
             lastCourseCommentsPagingSourceFactory = it
         }
     }
@@ -289,14 +297,14 @@ class ClazzAssignmentDetailOverviewViewModel(
                         loadFromStateKeys = listOf(STATE_LATEST_SUBMISSION),
                         onLoadFromDb = { db ->
                             db.courseAssignmentSubmissionDao.getLatestSubmissionForUserAsync(
-                                accountManager.currentUserSession?.person?.personUid ?: 0L,
+                                accountManager.currentUserSession.person.personUid,
                                 assignmentUid = entityUidArg,
                             )
                         },
                         makeDefault = {
                             CourseAssignmentSubmission().apply {
                                 casAssignmentUid = entityUidArg
-                                casSubmitterPersonUid = accountManager.currentUserSession?.person?.personUid ?: 0L
+                                casSubmitterPersonUid = accountManager.currentUserSession.person.personUid
                             }
                         },
                         uiUpdate = {
@@ -392,7 +400,7 @@ class ClazzAssignmentDetailOverviewViewModel(
 
         viewModelScope.launch {
             try {
-                activeDb.commentsDao.insertAsync(Comments().apply {
+                activeRepo.commentsDao.insertAsync(Comments().apply {
                     commentSubmitterUid = submitterUid
                     commentsPersonUid = activeUserPersonUid
                     commentsEntityUid = entityUidArg
@@ -402,7 +410,6 @@ class ClazzAssignmentDetailOverviewViewModel(
                 _uiState.update { prev ->
                     prev.copy(newPrivateCommentText = "")
                 }
-                lastPrivateCommentsPagingSource?.invalidate()
             }finally {
                 loadingState = LoadingUiState.NOT_LOADING
             }
@@ -424,7 +431,7 @@ class ClazzAssignmentDetailOverviewViewModel(
         loadingState = LoadingUiState.INDETERMINATE
         viewModelScope.launch {
             try {
-                activeDb.commentsDao.insertAsync(Comments().apply {
+                activeRepo.commentsDao.insertAsync(Comments().apply {
                     commentSubmitterUid = 0
                     commentsPersonUid = activeUserPersonUid
                     commentsEntityUid = entityUidArg
@@ -434,7 +441,6 @@ class ClazzAssignmentDetailOverviewViewModel(
                 _uiState.update { prev ->
                     prev.copy(newCourseCommentText = "")
                 }
-                lastCourseCommentsPagingSourceFactory?.invalidate()
             }finally {
                 loadingState = LoadingUiState.NOT_LOADING
             }
@@ -452,10 +458,10 @@ class ClazzAssignmentDetailOverviewViewModel(
         viewModelScope.launch {
             try {
                 val submissionResult = submitAssignmentUseCase(
-                    db = activeDb,
-                    systemImpl = systemImpl,
+                    repo = activeRepo,
+                    submitterUid = _uiState.value.submitterUid,
                     assignmentUid = entityUidArg,
-                    accountPersonUid = accountManager.currentUserSession?.person?.personUid ?: 0L,
+                    accountPersonUid = accountManager.currentUserSession.person.personUid,
                     submission = submission
                 )
 

@@ -43,6 +43,9 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
         assignmentUid: Long,
     ): Flow<List<CourseAssignmentSubmissionWithAttachment>>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     @Query("""
         SELECT CourseAssignmentSubmission.*
           FROM CourseAssignmentSubmission

@@ -146,7 +146,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                     }
 
                     UstadAssignmentSubmissionHeader {
-                        uiState = props.uiState.submissionHeaderUiState
+                        uiState = props.uiState
                     }
                 }
             }
@@ -388,7 +388,6 @@ val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
             },
             submitterUid = 42L,
             addFileVisible = true,
-            submissionTextFieldVisible = true,
             latestSubmission = CourseAssignmentSubmission().apply {
                 casText = ""
             },

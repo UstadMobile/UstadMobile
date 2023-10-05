@@ -22,6 +22,8 @@ import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -175,7 +177,6 @@ class ClazzAssignmentSubmitterDetailViewModel(
             submitterUid = submitterUid,
             assignmentUid = assignmentUid
         ).also {
-            lastPrivateCommentsPagingSource?.invalidate()
             lastPrivateCommentsPagingSource = it
         }
     }
@@ -196,9 +197,9 @@ class ClazzAssignmentSubmitterDetailViewModel(
                 val submitterName = if(submitterUid < CourseAssignmentSubmission.MIN_SUBMITTER_UID_FOR_PERSON) {
                     systemImpl.getString(MR.strings.group) + " " + submitterUid
                 }else {
-                    activeRepo.personDao.getNamesByUid(submitterUid)?.let {
-                        "${it.firstNames} ${it.lastName}"
-                    }
+                    activeRepo.personDao.getNamesByUid(submitterUid).filter {
+                        it?.firstNames != null
+                    }.first().let {  "${it?.firstNames} ${it?.lastName}" }
                 }
 
                 _appUiState.update { prev ->
