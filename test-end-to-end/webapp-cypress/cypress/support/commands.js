@@ -14,6 +14,23 @@
 
 import '@this-dot/cypress-indexeddb';
 
+Cypress.Commands.add('login', (username, password) => {
+  cy.clearIndexedDb('localhost_8087');
+  cy.visit('http://localhost:8087/', {
+    // Pass arguments as an object
+    qs: {
+      username,
+      password,
+    },
+  });
+
+  // Assuming that elements are found by their IDs
+  cy.get('input#username', { timeout: 5000 }).should('be.visible').type(username);
+  cy.get('input#password').type(password);
+  cy.get('button#login_button').click();
+});
+
+
 //commands.js
 //
 //

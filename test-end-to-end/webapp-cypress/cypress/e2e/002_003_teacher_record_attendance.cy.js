@@ -1,20 +1,12 @@
 describe('Ustad mobile course tests', () => {
-  beforeEach(() => {
-    cy.clearIndexedDb('localhost_8087');
+  it('002_003_teacher_record_attendance.cy.js', () => {
 
-    cy.visit('http://localhost:8087/')
-  });
+    cy.login('admin','testpass')
 
-
-  it('002_001_admin_add_new_course_and_teacher', () => {
-
-    cy.get('input[id="username"]').type("admin")
-    cy.get('input[id="password"]').type("testpass")
-    cy.get('button[id="login_button"]').click()
+    //Add a course
     cy.contains("Courses").click()
     cy.contains("button","Course").click()
-    cy.wait(4000)
-    cy.contains("Add a new course").click()
+    cy.contains("Add a new course").should('be.visible').click()
     cy.get('input[id="clazz_name"]').type("Class 002_003")
     cy.get('div[data-placeholder="Description"]').type("simple class")
     cy.contains("button","Save").click()
@@ -27,7 +19,7 @@ describe('Ustad mobile course tests', () => {
     cy.contains("label", "Last name").parent().find("input").clear().type("A")
     cy.get('div[id="gender"]').click()
     cy.contains("li","Female").click()
-    cy.contains("button","Save").click().should('be.visible')
+    cy.contains("button","Save").should('be.visible').click()
     cy.wait(2000)
     cy.contains("button","Save").should('be.visible')
     cy.contains("button","Save").click()
@@ -44,6 +36,8 @@ describe('Ustad mobile course tests', () => {
      cy.wait(2000)
      cy.contains("button","Save").should('be.visible')
      cy.contains("button","Save").click()
+
+     //Add a student
 
      cy.contains("span","Add a student").click()
      cy.contains("span","Add a new person").click()

@@ -1,17 +1,6 @@
   describe('Ustad mobile course tests', () => {
-  beforeEach(() => {
-    cy.clearIndexedDb('localhost_8087');
-
-    cy.visit('http://localhost:8087/')
-  });
-
-    it('004_001_teacher_add_assignment_and_grade', () => {
-   // cy.visit('http://localhost:8087/')
-     cy.wait(2000)
-    cy.get('input[id="username"]').type("admin")
-    cy.get('input[id="password"]').type("testpass")
-    cy.get('button[id="login_button"]').click()
-    cy.wait(4000)
+     it('004_001_teacher_add_assignment_and_grade', () => {
+    cy.login('admin','testpass')
     cy.contains('Courses').should('be.visible')
 
     // Add new course
@@ -44,7 +33,7 @@
 
    // Add Assignment block
      cy.contains("Course").click()
-     cy.contains("New class").click()
+     cy.contains("004_002").click()
      cy.contains("button","Edit").click()
      cy.contains("Add block").click()
      cy.contains("Assignments").click()
