@@ -90,7 +90,9 @@ internal fun ustadJsDi(
         val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
         val repositoryConfig =  RepositoryConfig.repositoryConfig(
             this,context.url+"UmAppDatabase/",  nodeIdAndAuth.auth,
-            nodeIdAndAuth.nodeId, instance(), instance()
+            nodeIdAndAuth.nodeId,
+            httpClient = instance(),
+            json = instance()
         ){
 
         }

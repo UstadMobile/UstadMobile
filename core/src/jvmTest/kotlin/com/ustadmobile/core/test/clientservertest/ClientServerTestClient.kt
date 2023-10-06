@@ -2,6 +2,7 @@ package com.ustadmobile.core.test.clientservertest
 
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
@@ -19,6 +20,7 @@ import org.kodein.di.on
 class ClientServerTestClient(
     val clientNum: Int,
     val di: DI,
+    val diEndpointScope: EndpointScope,
     private val serverDi: DI,
     val serverUrl: String,
 ) {
@@ -40,9 +42,20 @@ class ClientServerTestClient(
         val personInServerDb = serverDb.insertPersonAndGroup(person)
         val serverAuthManager: AuthManager = serverDi.direct.on(Endpoint(serverUrl)).instance()
         serverAuthManager.setAuth(personInServerDb.personUid, password)
-
-
-        val accountManager: UstadAccountManager = di.direct.instance()
-        return accountManager.login(person.username ?: "", password, serverUrl)
+        return login(person.username ?: "", password)
     }
+
+    suspend fun login(username: String, password: String) : UmAccount {
+        val accountManager: UstadAccountManager = di.direct.instance()
+        return accountManager.login(username, password, serverUrl)
+    }
+
+    fun close() {
+        diEndpointScope.activeEndpointUrls.forEach {
+            di.direct.instance<UstadAccountManager>().close()
+            di.on(Endpoint(it)).direct.instance<UmAppDatabase>(tag = DoorTag.TAG_REPO).close()
+            di.on(Endpoint(it)).direct.instance<UmAppDatabase>(tag = DoorTag.TAG_DB).close()
+        }
+    }
+
 }

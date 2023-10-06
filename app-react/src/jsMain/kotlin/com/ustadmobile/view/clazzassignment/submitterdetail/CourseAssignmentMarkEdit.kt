@@ -37,6 +37,8 @@ external interface CourseAssignmentMarkEditProps: Props {
 
     var scoreError: String?
 
+    var markFieldsEnabled: Boolean
+
     var onChangeDraftMark: (CourseAssignmentMark) -> Unit
 
     var onClickSubmitGrade: () -> Unit
@@ -63,6 +65,7 @@ val CourseAssignmentMarkEdit = FC<CourseAssignmentMarkEditProps> { props ->
             id = "marker_comment"
             label = ReactNode(strings[MR.strings.mark_comment].addOptionalSuffix(strings))
             value = props.draftMark.camMarkerComment ?: ""
+            disabled = !props.markFieldsEnabled
             onTextChange = {
                 props.onChangeDraftMark(props.draftMark.shallowCopy {
                     camMarkerComment = it
@@ -92,6 +95,7 @@ val CourseAssignmentMarkEdit = FC<CourseAssignmentMarkEditProps> { props ->
                 }
                 helperText = props.scoreError?.let { ReactNode(it) }
                 error = props.scoreError != null
+                disabled = !props.markFieldsEnabled
 
                 asDynamic().InputProps = jso<InputBaseProps> {
                     endAdornment = InputAdornment.create {
@@ -109,6 +113,7 @@ val CourseAssignmentMarkEdit = FC<CourseAssignmentMarkEditProps> { props ->
                     props.onClickSubmitGrade()
                 }
                 fullWidth = true
+                disabled = !props.markFieldsEnabled
 
                 + strings[props.submitButtonLabelStringResource]
             }

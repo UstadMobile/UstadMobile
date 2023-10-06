@@ -609,6 +609,8 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
                     ON CourseBlock.cbEntityUid = ClazzAssignment.caUid
          WHERE ClazzAssignment.caUid = :assignmentUid           
     """)
+    @QueryLiveTables(arrayOf("Person", "ClazzAssignment", "CourseBlock", "CourseGroupMember",
+        "ClazzEnrolment"))
     abstract fun findAssignmentCourseBlockAndSubmitterUidAsFlow(
         assignmentUid: Long,
         accountPersonUid: Long,

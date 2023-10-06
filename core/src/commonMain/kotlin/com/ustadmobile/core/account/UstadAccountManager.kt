@@ -19,9 +19,11 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -117,6 +119,8 @@ class UstadAccountManager(
 
     private val apiUrlConfig: ApiUrlConfig by di.instance()
 
+    private val closed = atomic(false)
+
     private val scope = CoroutineScope(Dispatchers.Main + Job())
 
     init {
@@ -199,6 +203,11 @@ class UstadAccountManager(
                 currentDb.userSessionDao.insertSession(it.userSession)
             }
         }
+    }
+
+    private fun assertNotClosed() {
+        if(closed.value)
+            throw IllegalStateException("UstadAccountManager is closed")
     }
 
     /**
@@ -443,6 +452,12 @@ class UstadAccountManager(
         getSiteFromDbOrLoadFromHttp(endpointUrl, repo)
 
         currentUserSession = addSession(guestPerson, endpointUrl, null)
+    }
+
+    fun close() {
+        if(!closed.getAndSet(true)) {
+            scope.cancel()
+        }
     }
 
 

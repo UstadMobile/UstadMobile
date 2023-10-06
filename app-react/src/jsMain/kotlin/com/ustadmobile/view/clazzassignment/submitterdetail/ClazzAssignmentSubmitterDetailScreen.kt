@@ -158,6 +158,7 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
                 item(key = "draftmark") {
                     CourseAssignmentMarkEdit.create {
                         draftMark = draftMarkVal
+                        markFieldsEnabled = props.uiState.markFieldsEnabled
                         maxPoints = props.uiState.courseBlock?.cbMaxPoints ?: 0
                         scoreError = props.uiState.submitMarkError
                         onChangeDraftMark = props.onChangeDraftMark

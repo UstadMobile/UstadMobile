@@ -12,13 +12,16 @@ import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.http.DoorHttpServerConfig
+import com.ustadmobile.door.log.NapierDoorLogger
 import com.ustadmobile.door.util.randomUuid
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.rest.InsertDefaultSiteCallback
 import com.ustadmobile.lib.rest.personAuthRegisterRoute
@@ -39,6 +42,7 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
 import org.kodein.di.ktor.di
+import org.kodein.di.on
 import org.kodein.di.registerContextTranslator
 import org.kodein.di.scoped
 import org.kodein.di.singleton
@@ -99,6 +103,8 @@ private fun clientServerCommonDiModule(
  */
 fun clientServerIntegrationTest(
     numClients: Int = 2,
+    adminUsername: String = "admin",
+    adminPassword: String = "admin",
     block: suspend ClientServerIntegrationTestContext.() -> Unit
 ) {
     val json = Json { encodeDefaults = true }
@@ -106,6 +112,7 @@ fun clientServerIntegrationTest(
     val serverDb: UmAppDatabase = DatabaseBuilder.databaseBuilder(
         UmAppDatabase::class,
         "jdbc:sqlite::memory:", nodeId = 1L)
+        .name("serverdb")
         .addCallback(InsertDefaultSiteCallback())
         .build()
 
@@ -131,6 +138,16 @@ fun clientServerIntegrationTest(
 
         registerContextTranslator { call: ApplicationCall ->
             Endpoint("localhost")
+        }
+
+        onReady {
+            val localhostEndpoint = Endpoint("localhost")
+            val authManager: AuthManager = on(localhostEndpoint).instance()
+            val adminPerson = Person(adminUsername, "Admin", "User")
+            runBlocking {
+                val adminPersonUid = serverDb.insertPersonAndGroup(adminPerson).personUid
+                authManager.setAuth(adminPersonUid, adminPassword)
+            }
         }
     }
 
@@ -158,6 +175,8 @@ fun clientServerIntegrationTest(
         val clientDb = DatabaseBuilder.databaseBuilder(
             UmAppDatabase::class,
             "jdbc:sqlite::memory:", nodeId = it.toLong())
+            .name("client$it")
+            .logger(NapierDoorLogger())
             .build()
         val clientRepo = clientDb.asRepository(
             RepositoryConfig.repositoryConfig(
@@ -193,6 +212,7 @@ fun clientServerIntegrationTest(
                 registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
             },
             serverDi = serverDi,
+            diEndpointScope = clientEndpointScope,
             serverUrl = "http://localhost:8094/"
         )
     }
@@ -209,9 +229,14 @@ fun clientServerIntegrationTest(
             block(testContext)
         }
     }finally {
+        clients.forEach {
+            it.close()
+        }
+
         server.stop()
         serverDb.close()
-
+        httpClient.close()
+        tempDir.deleteRecursively()
     }
 
 }

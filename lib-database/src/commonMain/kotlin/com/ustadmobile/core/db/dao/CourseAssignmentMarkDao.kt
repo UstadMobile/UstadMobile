@@ -85,6 +85,8 @@ expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
            AND CourseAssignmentMark.camAssignmentUid = :assignmentUid
            AND CourseAssignmentMark.camSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
     """)
+    @QueryLiveTables(arrayOf("CourseAssignmentMark", "Person", "ClazzAssignment",
+        "CourseGroupMember", "ClazzEnrolment"))
     abstract fun getAllMarksForUserAsFlow(
         accountPersonUid: Long,
         assignmentUid: Long

@@ -1,7 +1,6 @@
 package com.ustadmobile.core.domain.assignment.submitassignment
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.countWords
 import com.ustadmobile.core.util.ext.htmlToPlainText
 import com.ustadmobile.core.util.ext.lastPossibleSubmissionTime
@@ -9,6 +8,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import io.github.aakira.napier.Napier
 
 /**
  * Handle submission of an assignment - checks to ensure that the submission is valid and then stores
@@ -72,6 +72,7 @@ class SubmitAssignmentUseCase {
             casSubmitterPersonUid = accountPersonUid
         }
 
+        Napier.d("SubmitAssignmentUseCase: save to repo for submitterUid=$submitterUid assignmentUid=$assignmentUid")
         repo.courseAssignmentSubmissionDao.insertAsync(submissionToSave)
 
         return SubmitAssignmentResult(submissionToSave)

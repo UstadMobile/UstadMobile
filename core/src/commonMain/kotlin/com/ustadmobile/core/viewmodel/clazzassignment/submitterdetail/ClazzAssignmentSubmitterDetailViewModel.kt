@@ -14,11 +14,13 @@ import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.*
 import dev.icerock.moko.resources.StringResource
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -59,6 +61,12 @@ data class ClazzAssignmentSubmitterDetailUiState(
     val marks: List<CourseAssignmentMarkAndMarkerName> = emptyList(),
 
     val draftMark: CourseAssignmentMark? = null,
+
+    /**
+     * Whether or not the mark fields (e.g. score itself, comment, and button) are enabled. This is
+     * independent of comments
+     */
+    val markFieldsEnabled: Boolean = true,
 
     val markNextStudentVisible: Boolean =  true,
 
@@ -301,9 +309,8 @@ class ClazzAssignmentSubmitterDetailViewModel(
     }
 
     fun onClickSubmitMark() {
-        if(loadingState == LoadingUiState.INDETERMINATE)
+        if(!_uiState.value.markFieldsEnabled)
             return
-
 
         val draftMark = _uiState.value.draftMark ?: return
         val submissions = _uiState.value.submissionList // note: this would be better to check by making it nullable
@@ -321,12 +328,12 @@ class ClazzAssignmentSubmitterDetailViewModel(
             return
         }
 
-        loadingState = LoadingUiState.INDETERMINATE
+        _uiState.update { prev -> prev.copy(markFieldsEnabled = false) }
 
         viewModelScope.launch {
             try {
                 submitMarkUseCase(
-                    db = activeDb,
+                    repo = activeRepo,
                     activeUserPersonUid = activeUserPersonUid,
                     assignmentUid = assignmentUid,
                     submitterUid = submitterUid,
@@ -341,9 +348,10 @@ class ClazzAssignmentSubmitterDetailViewModel(
                     )
                 }
             }catch(e: Exception) {
-                //nothing yet
+                snackDispatcher.showSnackBar(Snack("Error: ${e.message}"))
+                Napier.w("Exception submitting mark:", e)
             }finally {
-                loadingState = LoadingUiState.NOT_LOADING
+                _uiState.update { prev -> prev.copy(markFieldsEnabled = false) }
             }
         }
     }

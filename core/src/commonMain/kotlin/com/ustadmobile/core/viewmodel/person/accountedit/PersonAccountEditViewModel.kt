@@ -8,9 +8,10 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Role
-import io.ktor.client.HttpClient
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -69,14 +70,15 @@ class PersonAccountEditViewModel(
     private val authManager: AuthManager by on(accountManager.activeEndpoint).instance()
 
     init {
-        loadingState = LoadingUiState.INDETERMINATE
         _appUiState.value = AppUiState(
+            loadingState = LoadingUiState.INDETERMINATE,
             actionBarButtonState = ActionBarButtonUiState(
                 visible = true,
                 text = systemImpl.getString(MR.strings.save),
                 onClick = this::onClickSave
             )
         )
+        _uiState.update { prev -> prev.copy(fieldsEnabled = false) }
 
         viewModelScope.launch {
             loadEntity(
@@ -109,6 +111,7 @@ class PersonAccountEditViewModel(
                 }
             )
             loadingState = LoadingUiState.NOT_LOADING
+            _uiState.update { prev -> prev.copy(fieldsEnabled = true) }
         }
     }
 
@@ -182,9 +185,15 @@ class PersonAccountEditViewModel(
             if(entity.username != null && entity.newPassword != null) {
                 //This is a registration
                 try {
-                    authManager.setAuth(entityUidArg, entity.newPassword)
-                    activeRepo.personDao.updateUsername(entityUidArg, entity.username,
-                        systemTimeInMillis())
+                    activeRepo.withDoorTransactionAsync {
+                        authManager.setAuth(entityUidArg, entity.newPassword)
+                        val numChanges = activeRepo.personDao.updateUsername(
+                            personUid = entityUidArg,
+                            username = entity.username,
+                            currentTime = systemTimeInMillis())
+
+                        Napier.e("Updated username: $numChanges changes")
+                    }
 
                     finishWithResult(null)
                 }catch(e: Exception) {

@@ -20,6 +20,7 @@ import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
@@ -322,7 +323,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                         loadFromStateKeys = listOf(STATE_LATEST_SUBMISSION_ATTACHMENTS),
                         onLoadFromDb = { db ->
                             db.courseAssignmentSubmissionAttachmentDao.getLatestSubmissionAttachmentsForUserAsync(
-                                accountPersonUid = accountManager.currentUserSession?.person?.personUid ?: 0L,
+                                accountPersonUid = accountManager.currentUserSession.person.personUid,
                                 assignmentUid = entityUidArg
                             )
                         },
@@ -448,11 +449,12 @@ class ClazzAssignmentDetailOverviewViewModel(
     }
 
     fun onClickSubmit() {
-        if(loadingState == LoadingUiState.INDETERMINATE)
+        if(!_uiState.value.fieldsEnabled)
             return
 
         val submission = _uiState.value.latestSubmission ?: return
 
+        _uiState.update { prev -> prev.copy(fieldsEnabled = false) }
         loadingState = LoadingUiState.INDETERMINATE
 
         viewModelScope.launch {
@@ -474,10 +476,12 @@ class ClazzAssignmentDetailOverviewViewModel(
 
                 snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.submitted_key)))
             }catch(e: Exception) {
+                Napier.e("Exception submitting assignment: $e", e)
                 _uiState.update { prev ->
                     prev.copy(submissionError = e.message)
                 }
             }finally {
+                _uiState.update { prev -> prev.copy(fieldsEnabled = true) }
                 loadingState = LoadingUiState.NOT_LOADING
             }
         }
