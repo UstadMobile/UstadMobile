@@ -52,6 +52,10 @@ kotlin {
 
                 val version_android_material = "1.9.0"
                 implementation("com.google.android.material:material:$version_android_material")
+
+                //HTML editor
+                val version_android_aztec = "v1.6.3"
+                implementation("org.wordpress:aztec:$version_android_aztec")
             }
         }
 
