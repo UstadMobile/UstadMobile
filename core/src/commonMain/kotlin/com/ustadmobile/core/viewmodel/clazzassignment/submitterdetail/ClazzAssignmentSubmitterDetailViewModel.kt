@@ -15,6 +15,7 @@ import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkL
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.viewmodel.clazzassignment.latestUniqueMarksByMarker
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
@@ -102,13 +103,7 @@ data class ClazzAssignmentSubmitterDetailUiState(
         }
 
     private val latestUniqueMarksByMarker: List<CourseAssignmentMarkAndMarkerName>
-        get() = marks.filter { markWithMarker ->
-            val mostRecentTsForSubmitterUid = marks.filter {
-                it.courseAssignmentMark?.camMarkerSubmitterUid == markWithMarker.courseAssignmentMark?.camMarkerSubmitterUid
-            }.maxOf { it.courseAssignmentMark?.camLct ?: 0 }
-
-            markWithMarker.courseAssignmentMark?.camLct ==mostRecentTsForSubmitterUid
-        }
+        get() = marks.latestUniqueMarksByMarker()
 
     val averageScore: Float
         get() {

@@ -276,7 +276,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 }
 
                 items(
-                    list = props.uiState.markList,
+                    list = props.uiState.visibleMarks,
                     key = { "mark_${it.courseAssignmentMark?.camUid}"}
                 ) { markItem ->
                     UstadCourseAssignmentMarkListItem.create {
@@ -371,7 +371,7 @@ val ClazzAssignmentDetailOverviewScreen = FC<Props> {
         onClickSubmitCourseComment = viewModel::onClickSubmitCourseComment
         onClickSubmitPrivateComment = viewModel::onClickSubmitPrivateComment
         onClickSubmitSubmission = viewModel::onClickSubmit
-
+        onClickFilterChip = viewModel::onClickMarksFilterChip
     }
 }
 

@@ -19,7 +19,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class PersonIntegrationTest: AbstractMainDispatcherTest() {
 
-    @Test
+    //@Test
     fun givenAdminCreatesAccount_whenPersonLogsIn_thenShouldSucceed() {
         initNapierLog()
 

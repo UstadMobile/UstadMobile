@@ -244,7 +244,7 @@ expect abstract class PersonDao : BaseDao<Person> {
           FROM Person
          WHERE Person.personUid = :uid  
     """)
-    abstract suspend fun getNamesByUid(uid: Long): Flow<PersonNames?>
+    abstract fun getNamesByUid(uid: Long): Flow<PersonNames?>
 
 
     @Query("""

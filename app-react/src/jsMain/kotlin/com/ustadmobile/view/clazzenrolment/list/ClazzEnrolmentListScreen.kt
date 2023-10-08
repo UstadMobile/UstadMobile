@@ -57,8 +57,11 @@ val ClazzEnrolmentListComponent2 = FC<ClazzEnrolmentListProps> { props ->
             Divider()
 
             Typography{
-                + strings[MR.strings.person_enrolment_in_class].replace("%1\$s",
-                props.uiState.personName ?: "").replace("%2\$s", props.uiState.courseName ?: "")
+                + strings.format(
+                    MR.strings.person_enrolment_in_class,
+                    props.uiState.personName ?: "",
+                    props.uiState.courseName ?: "",
+                )
                 variant = TypographyVariant.body1
             }
 
@@ -105,13 +108,18 @@ private val ClazzEnrolmentListItem = FC<ClazzenrolmentListItemProps> { props ->
     ListItem {
         if(props.uiState.canEdit) {
             ListItemSecondaryAction {
-                IconButton {
-                    ariaLabel = strings[MR.strings.edit]
-                    onClick = {
-                        props.onClickEdit(enrolment)
+                Tooltip {
+                    title = ReactNode(strings[MR.strings.edit])
+
+                    IconButton {
+                        ariaLabel = strings[MR.strings.edit]
+                        onClick = {
+                            props.onClickEdit(enrolment)
+                        }
+                        EditIcon()
                     }
-                    EditIcon()
                 }
+
             }
         }
 

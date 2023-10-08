@@ -225,8 +225,9 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
                            (SELECT ClazzAssignment.caClazzUid
                               FROM ClazzAssignment
                              WHERE ClazzAssignment.caUid = :assignmentUid)
-             WHERE :enrolmentFilterPersonUid = 0 
-                OR ClazzEnrolment.clazzEnrolmentPersonUid = :enrolmentFilterPersonUid                
+             WHERE PersonGroupMember.groupMemberUid = :accountPersonUid
+               AND (    :enrolmentFilterPersonUid = 0 
+                     OR ClazzEnrolment.clazzEnrolmentPersonUid = :enrolmentFilterPersonUid)                
                              
     """)
     abstract suspend fun getClazzEnrolmentsAndPersonsByAssignmentUid(
@@ -317,7 +318,6 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
     abstract suspend fun getPeerReviewerAllocationsByAssignmentUid(
         assignmentUid: Long,
         accountPersonUid: Long,
-        group: String
     ): List<PeerReviewerAllocation>
 
     /**
