@@ -173,11 +173,15 @@ class DiscussionPostEditViewModel (
             if(_uiState.value.discussionPostTitleError == null
                 && _uiState.value.discussionPostDescError == null){
 
-                activeDb.withDoorTransactionAsync {
-                    post.discussionPostClazzUid = activeDb.courseBlockDao
+                post.discussionPostClazzUid = activeDb.courseBlockDao
+                    .findClazzUidByCourseBlockUid(post.discussionPostCourseBlockUid)
+                if(post.discussionPostClazzUid == 0L) {
+                    post.discussionPostClazzUid = activeRepo.courseBlockDao
                         .findClazzUidByCourseBlockUid(post.discussionPostCourseBlockUid)
+                }
 
-                    activeDb.discussionPostDao.upsertAsync(post)
+                activeRepo.withDoorTransactionAsync {
+                    activeRepo.discussionPostDao.upsertAsync(post)
                 }
 
                 finishWithResult(

@@ -15,6 +15,17 @@ import com.ustadmobile.lib.db.entities.*
 @Repository
 expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            //Get the top level posts themselves
+            HttpServerFunctionCall("getTopLevelPostsByCourseBlockUid"),
+            //Get the person entity associated with the post
+            HttpServerFunctionCall("getTopLevelPostsByCourseBlockUidPersons"),
+            //Get the most recent reply.
+            HttpServerFunctionCall("getTopLevelPostsByCourseBlockUidLatestMessage"),
+        )
+    )
     @Query("""
         SELECT DiscussionPost.*,
                Person.firstNames as authorPersonFirstNames,
@@ -43,6 +54,37 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     abstract fun getTopLevelPostsByCourseBlockUid(
         courseBlockUid: Long
     ): PagingSource<Int, DiscussionPostWithDetails>
+
+    @Query("""
+        SELECT Person.*
+          FROM Person
+         WHERE Person.personUid IN
+               (SELECT DISTINCT DiscussionPost.discussionPostStartedPersonUid
+                  FROM DiscussionPost
+                 WHERE DiscussionPost.discussionPostCourseBlockUid = :courseBlockUid
+                   AND DiscussionPost.discussionPostReplyToPostUid = 0)
+    """)
+    abstract suspend fun getTopLevelPostsByCourseBlockUidPersons(
+        courseBlockUid: Long
+    ): List<Person>
+
+    @Query("""
+        SELECT MostRecentReply.*
+          FROM DiscussionPost
+               JOIN DiscussionPost AS MostRecentReply
+                         ON MostRecentReply.discussionPostUid = 
+                            (SELECT MostRecentReplyInner.discussionPostUid
+                               FROM DiscussionPost AS MostRecentReplyInner
+                              WHERE MostRecentReplyInner.discussionPostReplyToPostUid = DiscussionPost.discussionPostUid
+                           ORDER BY MostRecentReplyInner.discussionPostStartDate DESC
+                              LIMIT 1  
+                            )
+         WHERE DiscussionPost.discussionPostCourseBlockUid = :courseBlockUid
+           AND DiscussionPost.discussionPostReplyToPostUid = 0 
+    """)
+    abstract suspend fun getTopLevelPostsByCourseBlockUidLatestMessage(
+        courseBlockUid: Long
+    ): List<DiscussionPost>
 
     @Query("""
         SELECT DiscussionPost.discussionPostTitle 
@@ -139,6 +181,13 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     abstract fun findAllRepliesByPostUidAsFlow(entityUid: Long):
             Flow<List<DiscussionPostWithPerson>>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findByPostIdWithAllReplies"),
+            HttpServerFunctionCall("findByPostIdWithAllRepliesPersons"),
+        )
+    )
     @Query("""
         SELECT DiscussionPost.*,
                Person.firstNames,
@@ -157,6 +206,20 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     abstract fun findByPostIdWithAllReplies(
         postUid: Long
     ): PagingSource<Int, DiscussionPostAndPosterNames>
+
+    @Query("""
+        SELECT Person.*
+          FROM Person
+         WHERE Person.personUid IN
+               (SELECT DISTINCT DiscussionPost.discussionPostStartedPersonUid
+                  FROM DiscussionPost
+                 WHERE DiscussionPost.discussionPostUid = :postUid
+                    OR DiscussionPost.discussionPostReplyToPostUid= :postUid)
+    """)
+    abstract suspend fun findByPostIdWithAllRepliesPersons(
+        postUid: Long
+    ): List<Person>
+
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsertAsync(

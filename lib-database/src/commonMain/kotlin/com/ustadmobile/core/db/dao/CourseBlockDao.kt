@@ -11,6 +11,7 @@ import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.annotation.QueryLiveTables
 import app.cash.paging.PagingSource
 import com.ustadmobile.door.annotation.HttpAccessible
+import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.composites.CourseBlockUidAndClazzUid
 import com.ustadmobile.lib.db.entities.*
@@ -310,6 +311,9 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     """)
     abstract fun getTitleByAssignmentUid(assignmentUid: Long) : Flow<String?>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     @Query("""
         SELECT CourseBlock.*
           FROM CourseBlock
@@ -318,6 +322,12 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     abstract fun findByUidAsFlow(courseBlockUid: Long): Flow<CourseBlock?>
 
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findCourseBlockByDiscussionPostUid")
+        )
+    )
     @Query("""
         SELECT COALESCE(CourseBlock.cbUid, 0) AS courseBlockUid,
                COALESCE(CourseBlock.cbClazzUid, 0) AS clazzUid
@@ -331,6 +341,18 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     abstract suspend fun findCourseBlockAndClazzUidByDiscussionPostUid(
         postUid: Long
     ): CourseBlockUidAndClazzUid?
+
+    @Query("""
+        SELECT CourseBlock.*
+          FROM CourseBlock
+         WHERE CourseBlock.cbUid = 
+               (SELECT DiscussionPost.discussionPostCourseBlockUid 
+                  FROM DiscussionPost
+                 WHERE DiscussionPost.discussionPostUid = :postUid) 
+    """)
+    abstract suspend fun findCourseBlockByDiscussionPostUid(
+        postUid: Long
+    ): CourseBlock?
 
     @Query("""
         SELECT COALESCE(CourseBlock.cbClazzUid, 0) AS clazzUid
