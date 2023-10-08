@@ -197,7 +197,9 @@ class ClazzAssignmentSubmitterDetailViewModel(
                 prev.copy(
                     privateCommentsList = privateCommentsPagingSourceFactory,
                     activeUserPersonUid = activeUserPersonUid,
-                    draftMark = CourseAssignmentMark(),
+                    draftMark = CourseAssignmentMark().apply {
+                        camMark = (-1).toFloat()
+                    },
                 )
             }
 
@@ -278,7 +280,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
         loadingState = LoadingUiState.INDETERMINATE
         viewModelScope.launch {
             try {
-                activeDb.commentsDao.insertAsync(Comments().apply {
+                activeRepo.commentsDao.insertAsync(Comments().apply {
                     commentSubmitterUid = submitterUid
                     commentsPersonUid = activeUserPersonUid
                     commentsEntityUid = assignmentUid
@@ -288,7 +290,6 @@ class ClazzAssignmentSubmitterDetailViewModel(
                 _uiState.update { prev ->
                     prev.copy(newPrivateCommentText = "")
                 }
-                lastPrivateCommentsPagingSource?.invalidate()
             }finally {
                 loadingState = LoadingUiState.NOT_LOADING
             }
@@ -316,14 +317,25 @@ class ClazzAssignmentSubmitterDetailViewModel(
         val submissions = _uiState.value.submissionList // note: this would be better to check by making it nullable
         val courseBlock = _uiState.value.courseBlock ?: return
 
-        if(draftMark.camMark < 0) {
+        if(draftMark.camMark == (-1).toFloat()) {
             _uiState.update { prev ->
-                prev.copy(submitMarkError = systemImpl.getString(MR.strings.score_greater_than_zero))
+                prev.copy(
+                    submitMarkError = systemImpl.getString(MR.strings.field_required_prompt),
+                )
+            }
+            return
+        }else if(draftMark.camMark < 0) {
+            _uiState.update { prev ->
+                prev.copy(
+                    submitMarkError = systemImpl.getString(MR.strings.score_greater_than_zero),
+                )
             }
             return
         }else if(draftMark.camMark > courseBlock.cbMaxPoints){
             _uiState.update { prev ->
-                prev.copy(submitMarkError = systemImpl.getString(MR.strings.too_high))
+                prev.copy(
+                    submitMarkError = systemImpl.getString(MR.strings.too_high),
+                )
             }
             return
         }
@@ -344,14 +356,16 @@ class ClazzAssignmentSubmitterDetailViewModel(
 
                 _uiState.update { prev ->
                     prev.copy(
-                        draftMark = CourseAssignmentMark(),
+                        draftMark = CourseAssignmentMark().apply {
+                            camMark = (-1).toFloat()
+                        },
                     )
                 }
             }catch(e: Exception) {
                 snackDispatcher.showSnackBar(Snack("Error: ${e.message}"))
                 Napier.w("Exception submitting mark:", e)
             }finally {
-                _uiState.update { prev -> prev.copy(markFieldsEnabled = false) }
+                _uiState.update { prev -> prev.copy(markFieldsEnabled = true) }
             }
         }
     }

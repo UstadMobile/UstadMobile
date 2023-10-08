@@ -130,7 +130,7 @@ data class ClazzAssignmentDetailOverviewUiState(
             if(!isWithinDeadlineOrGracePeriod)
                 return false
 
-            if(assignment?.caSubmissionPolicy != ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED &&
+            if(assignment?.caSubmissionPolicy == ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE &&
                 (latestSubmission?.casTimestamp ?: 1) > 0
             ) {
                 return false
@@ -174,7 +174,7 @@ data class ClazzAssignmentDetailOverviewUiState(
         get() = submissionMark != null && submissionMark.averagePenalty != 0
 
     val submissionTextFieldVisible: Boolean
-        get() = assignment?.caRequireTextSubmission == true && activeUserCanSubmit
+        get() = assignment?.caRequireTextSubmission == true && activeUserIsSubmitter
 
 }
 
@@ -370,12 +370,16 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     fun onChangeSubmissionText(text: String) {
         _uiState.update { prev ->
-            prev.copy(
-                latestSubmission = prev.latestSubmission?.shallowCopy {
-                    casText = text
-                    casTimestamp = 0
-                }
-            )
+            if(prev.activeUserCanSubmit) {
+                prev.copy(
+                    latestSubmission = prev.latestSubmission?.shallowCopy {
+                        casText = text
+                        casTimestamp = 0
+                    }
+                )
+            }else {
+                prev
+            }
         }
     }
 

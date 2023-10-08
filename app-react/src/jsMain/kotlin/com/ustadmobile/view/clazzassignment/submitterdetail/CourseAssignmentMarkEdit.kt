@@ -87,6 +87,7 @@ val CourseAssignmentMarkEdit = FC<CourseAssignmentMarkEditProps> { props ->
                     marginRight = theme.spacing(1)
                 }
                 numValue = props.draftMark.camMark
+                numValueIfBlank = (-1).toFloat()
                 label = ReactNode(strings[MR.strings.mark])
                 onChange = {
                     props.onChangeDraftMark(props.draftMark.shallowCopy {

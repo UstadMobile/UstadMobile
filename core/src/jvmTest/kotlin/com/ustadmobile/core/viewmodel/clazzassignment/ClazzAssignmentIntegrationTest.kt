@@ -89,17 +89,22 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
                     UstadView.ARG_ENTITY_UID to assignmentUid.toString()
                 )
             ).use { viewModel ->
-                viewModel.uiState.test(timeout = 15.seconds, name = "student can submit") {
+                viewModel.uiState.test(timeout = 10.seconds, name = "student can submit") {
                     awaitItemWhere {
                         it.activeUserCanSubmit && it.submissionTextFieldVisible &&
                             it.fieldsEnabled && it.latestSubmission != null
                     }
                     viewModel.onChangeSubmissionText("I can has cheezburger")
-                    Napier.d("===STUDENT SUBMIT===")
                     viewModel.onClickSubmit()
 
-                    //wait for saving to finish
-                    awaitItemWhere { it.latestSubmission?.casText == "I can has cheezburger" }
+                    val uiStateAfterSubmit = awaitItemWhere {
+                        it.fieldsEnabled && it.latestSubmission?.casText == "I can has cheezburger"
+                                && !it.activeUserCanSubmit && it.submissionTextFieldVisible
+                    }
+                    assertFalse(uiStateAfterSubmit.activeUserCanSubmit,
+                        message = "After submission, using default policy of must submit all at once, user must not be able to submit again")
+                    assertTrue(uiStateAfterSubmit.submissionTextFieldVisible,
+                        message = "After submission user should still be able to see the submission")
 
                     cancelAndIgnoreRemainingEvents()
                 }
