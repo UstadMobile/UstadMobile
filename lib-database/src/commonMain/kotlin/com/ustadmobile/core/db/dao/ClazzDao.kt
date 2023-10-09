@@ -318,6 +318,12 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     @Query("SELECT Clazz.*, School.* FROM Clazz LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid WHERE clazz.clazzUid = :clazzUid")
     abstract suspend fun getClazzWithSchool(clazzUid: Long): ClazzWithSchool?
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findByUidAsync")
+        ),
+    )
     @Query("""
         SELECT Clazz.clazzName
           FROM Clazz
