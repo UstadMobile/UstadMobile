@@ -41,6 +41,25 @@ expect abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRe
         changedTime: Long
     )
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findByClazzAndTime"
+            ),
+            HttpServerFunctionCall(
+                functionDao = ClazzEnrolmentDao::class,
+                functionName = "findAllEnrolmentsByClazzUidAndRole",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "roleId",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "${ClazzEnrolment.ROLE_STUDENT}",
+                    )
+                )
+            )
+        )
+    )
     @Query("""
         ${ClazzEnrolmentDaoCommon.WITH_CURRENTLY_ENROLED_STUDENTS_SQL}
                   

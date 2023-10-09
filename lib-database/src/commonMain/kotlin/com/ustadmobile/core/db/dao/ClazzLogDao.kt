@@ -4,9 +4,7 @@ import app.cash.paging.PagingSource
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzLog
-import com.ustadmobile.lib.db.entities.Role
 
 
 @Repository
@@ -25,6 +23,9 @@ expect abstract class ClazzLogDao : BaseDao<ClazzLog> {
     @Query("SELECT * FROM ClazzLog WHERE clazzLogUid = :uid")
     abstract fun findByUidLive(uid: Long): Flow<ClazzLog?>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     @Query("""
         SELECT ClazzLog.* 
           FROM ClazzLog 
@@ -39,6 +40,9 @@ expect abstract class ClazzLogDao : BaseDao<ClazzLog> {
 
 
     //Used by the attendance recording screen to allow the user to go next/prev between days.
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+    )
     @Query("""
         SELECT ClazzLog.* 
           FROM ClazzLog 
@@ -51,6 +55,9 @@ expect abstract class ClazzLogDao : BaseDao<ClazzLog> {
         excludeStatus: Int
     ): List<ClazzLog>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     @Query("""
         SELECT ClazzLog.* 
           FROM ClazzLog 

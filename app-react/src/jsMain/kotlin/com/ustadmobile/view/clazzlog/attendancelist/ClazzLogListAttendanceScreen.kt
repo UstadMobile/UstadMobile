@@ -14,7 +14,6 @@ import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTabAndAppBarHeight
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.ClazzLog
-import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -42,8 +41,6 @@ external interface ClazzLogListAttendanceScreenProps : Props {
     var uiState: ClazzLogListAttendanceUiState
 
     var onClickEntry: (ClazzLog) -> Unit
-
-    var onClickFilterChip: (MessageIdOption2?) -> Unit
 
 }
 
@@ -147,15 +144,6 @@ private val ClazzLogListAttendanceScreenComponent = FC<ClazzLogListAttendanceScr
         }
 
         content = virtualListContent {
-            item {
-                UstadListFilterChipsHeader.create {
-                    filterOptions = props.uiState.viewIdToNumDays
-                    selectedChipId = props.uiState.selectedChipId
-                    enabled = props.uiState.fieldsEnabled
-                    onClickFilterChip = props.onClickFilterChip
-                }
-            }
-
             infiniteQueryPagingItems(
                 items = infiniteQueryResult,
                 key = { "${it.clazzLogUid}"}
@@ -226,16 +214,15 @@ val ClazzLogListItem = FC<ClazzLogListItemProps> { props ->
 
                     Typography {
                         props.clazzLog?.also { clazzLog ->
-                            + (strings[MR.strings.three_num_items_with_name_with_comma]
-                                .replace("%1\$d",
-                                    (clazzLog.clazzLogNumPresent).toString())
-                                .replace("%2\$s", strings[MR.strings.present])
-                                .replace("%3\$d",
-                                    (clazzLog.clazzLogNumPartial).toString())
-                                .replace("%4\$s", strings[MR.strings.partial])
-                                .replace("%5\$d",
-                                    (clazzLog.clazzLogNumAbsent).toString())
-                                .replace("%6\$s", strings[MR.strings.absent]))
+                            + strings.format(
+                                MR.strings.three_num_items_with_name_with_comma,
+                                clazzLog.clazzLogNumPresent,
+                                strings[MR.strings.present],
+                                clazzLog.clazzLogNumPartial,
+                                strings[MR.strings.partial],
+                                clazzLog.clazzLogNumAbsent,
+                                strings[MR.strings.absent]
+                            )
                         }
                     }
                 }
