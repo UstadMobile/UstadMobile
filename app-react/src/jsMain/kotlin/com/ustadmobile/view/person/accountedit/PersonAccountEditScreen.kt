@@ -33,6 +33,7 @@ val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
 
             if (props.uiState.usernameVisible){
                 UstadTextEditField {
+                    id = "username"
                     value = props.uiState.personAccount?.username ?: ""
                     label = strings[MR.strings.username]
                     error = props.uiState.usernameError
@@ -49,6 +50,7 @@ val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
 
             if (props.uiState.currentPasswordVisible){
                 UstadTextEditField {
+                    id = "currentpassword"
                     value = props.uiState.personAccount?.currentPassword ?: ""
                     label = strings[MR.strings.current_password]
                     error = props.uiState.currentPasswordError
@@ -65,6 +67,7 @@ val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
             }
 
             UstadTextEditField {
+                id = "newpassword"
                 value = props.uiState.personAccount?.newPassword
                 label = strings[MR.strings.new_password]
                 error = props.uiState.newPasswordError
