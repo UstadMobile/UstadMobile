@@ -4,8 +4,8 @@ import com.ustadmobile.core.MR
 import dev.icerock.moko.resources.StringResource
 
 enum class ListViewMode(val mode: String) {
-    BROWSER("browser"),
-    PICKER("picker")
+    BROWSER("BROWSER"),
+    PICKER("PICKER")
 }
 
 enum class ListViewAddMode {

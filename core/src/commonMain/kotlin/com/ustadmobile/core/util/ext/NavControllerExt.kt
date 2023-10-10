@@ -12,6 +12,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
 import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
+import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
@@ -124,13 +125,13 @@ suspend fun UstadNavController.navigateToLink(
         else -> {
             val args = mutableMapOf(ARG_NEXT to viewUri)
             if(endpointUrl != null)
-                args[AccountListView.ARG_FILTER_BY_ENDPOINT] = endpointUrl
+                args[AccountListViewModel.ARG_FILTER_BY_ENDPOINT] = endpointUrl
 
-            args[AccountListView.ARG_ACTIVE_ACCOUNT_MODE] = AccountListView.ACTIVE_ACCOUNT_MODE_INLIST
+            args[AccountListViewModel.ARG_ACTIVE_ACCOUNT_MODE] = AccountListViewModel.ACTIVE_ACCOUNT_MODE_INLIST
             args[UstadView.ARG_LISTMODE] = ListViewMode.PICKER.toString()
             args[UstadView.ARG_MAX_DATE_OF_BIRTH] = maxDateOfBirth.toString()
 
-            navigate(AccountListView.VIEW_NAME, args.toMap(), goOptions)
+            navigate(AccountListViewModel.DEST_NAME, args.toMap(), goOptions)
         }
     }
 

@@ -213,6 +213,12 @@ abstract class UstadListViewModel<S>(
         )
     }
 
+    companion object {
+
+        const val ARG_LISTMODE = "listMode"
+
+    }
+
 
 
 }

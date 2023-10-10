@@ -96,6 +96,14 @@ fun NavigateOptions.setIsNewFirstLocation(fromLocation: Location) {
     }
 }
 
+private fun Storage.clearNavHostCommands() {
+    removeItem(KEY_NAV_CONTROLLER_POPUPTO_PAGE)
+    removeItem(KEY_NAV_CONTROLLER_POPUPTO_INCLUSIVE)
+    removeItem(KEY_NAV_CONTROLLER_CLEAR_STACK)
+    removeItem(KEY_NAV_CONTROLLER_NAVTO_AFTER_POP)
+    removeItem(KEY_HAVHOST_ROOT_KEY)
+}
+
 /**
  * NavHostFunction will execute a NavCommand. These are collected from the ViewModel's
  * CommandFlowUstadNavController flow.
@@ -142,6 +150,9 @@ class NavHostFunction(
                     })
                 }else {
                     Napier.d("NavHostFunction: pop, then go /${cmd.viewName}?${cmd.args.toUrlQueryString()}")
+                    sessionStorage.clearNavHostCommands()
+                    sessionStorage.removeItem(KEY_NAV_CONTROLLER_STACK_CLEARED)
+
                     if(popUpToView != null) {
                         sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_PAGE] = popUpToView
                     }
@@ -197,13 +208,7 @@ val NavHost = FC<PropsWithChildren> { props ->
     }
 
     NavHostContext(navHostFunction) {
-        fun Storage.clearNavHostCommands() {
-            removeItem(KEY_NAV_CONTROLLER_POPUPTO_PAGE)
-            removeItem(KEY_NAV_CONTROLLER_POPUPTO_INCLUSIVE)
-            removeItem(KEY_NAV_CONTROLLER_CLEAR_STACK)
-            removeItem(KEY_NAV_CONTROLLER_NAVTO_AFTER_POP)
-            removeItem(KEY_HAVHOST_ROOT_KEY)
-        }
+
 
         /*
          * If we are already at the end of the history, calling navigateFunction(-1) will have no
@@ -213,6 +218,7 @@ val NavHost = FC<PropsWithChildren> { props ->
          */
         fun CoroutineScope.launchClearStackTimeout() = launch {
             delay(250)
+            Napier.v("NavHost: action: clearStackTimeout: apparently at the end of history. go to clearstack")
             sessionStorage[KEY_NAV_CONTROLLER_CLEAR_STACK] = true.toString()
             navigateFn.invoke("/$NAVHOST_CLEARSTACK_VIEWNAME")
         }
@@ -243,7 +249,7 @@ val NavHost = FC<PropsWithChildren> { props ->
             val clearStack = sessionStorage[KEY_NAV_CONTROLLER_CLEAR_STACK]?.toBoolean() ?: false
             val clearStackHitPlaceholder  = sessionStorage[KEY_NAV_CONTROLLER_STACK_CLEARED]?.toBoolean() ?: false
             val popUpToHitDestination = sessionStorage[KEY_NAVCONTROLLER_HIT_POPUP_TO_TARGET]?.toBoolean() ?: false
-            Napier.d("NavHost: useEffect check: key = ${location.key} " +
+            Napier.v("NavHost: useEffect check: key = ${location.key} " +
                     "current viewname = ${location.ustadViewName} " +
                     "popUpToTarget = $popupToTarget " +
                     "navtoAfterPop = $navToAfterPop " +
@@ -255,12 +261,14 @@ val NavHost = FC<PropsWithChildren> { props ->
             when {
                 //We don't have any other pop or stack operation pending, show NavHost children
                 popupToTarget == null && !clearStack && location.pathname != "/$NAVHOST_CLEARSTACK_VIEWNAME" -> {
+                    Napier.v("NavHost: action: no pop or other operation pending, show children")
                     showChildren = true
                 }
 
                 //We have reached the popupTo destination, but popUpToInclusive is set, so we need to pop
                 //once more, then execute any pending navigation
                 popupToTarget == location.ustadViewName && popUpToInclusive-> {
+                    Napier.v("NavHost: action: reached popUpTo destination, popUpToInclusive is set, pop once more")
                     showChildren = false
                     sessionStorage[KEY_NAVCONTROLLER_HIT_POPUP_TO_TARGET] = true.toString()
                     navigateFn.invoke(-1)
@@ -273,6 +281,8 @@ val NavHost = FC<PropsWithChildren> { props ->
                 //We have reached the popUpTo destination (and popUpToInclusive = false), popUpTo
                 // was provided, and the destination was hit. Now it is time to execute forward nav
                 popupToTarget == location.ustadViewName || popUpToHitDestination -> {
+                    Napier.v("NavHost: action: reached popupToDestination with inclusive = false, " +
+                            "or inclusive was true and destination was hit")
                     sessionStorage.clearNavHostCommands()
                     if(navToAfterPop != null){
                         //Popping is done, navigate to the final destination
@@ -287,12 +297,15 @@ val NavHost = FC<PropsWithChildren> { props ->
                 // yet navigate to the dummy placeholder (NAVHOST_CLEARSTACK_VIEWNAME) to clear the
                 // top off the stack and prevent forward navigation
                 clearStack && location.key == firstLocationKey && !clearStackHitPlaceholder -> {
+                    Napier.v("NavHost: action: clearstack was set, reached first entry in history, " +
+                            "but did not yet navigate to dummy placeholder. Going to /$NAVHOST_CLEARSTACK_VIEWNAME")
                     navigateFn.invoke("/$NAVHOST_CLEARSTACK_VIEWNAME")
                 }
 
                 //This is the dummy placeholder (NAVHOST_CLEARSTACK_VIEWNAME), mark that it has been hit
                 //then navigate back
                 location.pathname == "/$NAVHOST_CLEARSTACK_VIEWNAME" -> {
+                    Napier.v("NavHost: action: reached stack clear dummy placeholder. Going back")
                     sessionStorage[KEY_NAV_CONTROLLER_STACK_CLEARED] = true.toString()
                     navigateFn.invoke(-1)
                 }
@@ -300,6 +313,7 @@ val NavHost = FC<PropsWithChildren> { props ->
                 //The stack was set to be cleared, and the placeholder has been hit. Navigate to the
                 // destination
                 clearStack && clearStackHitPlaceholder -> {
+                    Napier.v("NavHost: action: clearStack was set and dummy placeholder was hit")
                     sessionStorage.clearNavHostCommands()
                     if(navToAfterPop != null) {
                         navigateFn.invoke(navToAfterPop, jso {
@@ -312,6 +326,7 @@ val NavHost = FC<PropsWithChildren> { props ->
                 //We need to continue popping off history - there is a popUpToTarget, but we have not
                 // reached it yet, or clearStack has been set and we have not yet cleared the stack
                 else -> {
+                    Napier.v("NavHost: action: need to continue history popping")
                     showChildren = false
 
                     //Handling this needs to be double checked - e.g. if popUpTo is set to something not in the stack

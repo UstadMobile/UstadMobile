@@ -103,8 +103,10 @@ import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.view.dbexport.DbExportScreen
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
+import com.ustadmobile.view.accountlist.AccountListScreen
 import com.ustadmobile.view.person.accountedit.PersonAccountEditPreview
 import com.ustadmobile.view.person.accountedit.PersonAccountEditScreen
+import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -229,7 +231,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ContentEntryListViewModel.DEST_NAME, "ContentEntryList Preview",
         ContentEntryListScreen
     ),
-    UstadScreen("AccountList", "AccountList Preview", AccountListScreenPreview),
+    UstadScreen(AccountListViewModel.DEST_NAME, "AccountList", AccountListScreen),
     UstadScreen(
         ClazzMemberListViewModel.DEST_NAME, "ClazzMemberList Preview", ClazzMemberListScreen
     ),

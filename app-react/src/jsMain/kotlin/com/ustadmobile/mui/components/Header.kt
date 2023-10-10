@@ -81,6 +81,9 @@ val Header = FC<HeaderProps> { props ->
                 }
             }
 
+            if(!props.appUiState.actionBarButtonState.visible && props.appUiState.userAccountIconVisible) {
+                HeaderAvatar()
+            }
         }
     }
 }

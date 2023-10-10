@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -51,7 +50,6 @@ import org.kodein.di.on
  */
 class UstadAccountManager(
     private val systemImpl: UstadMobileSystemImpl,
-    private val appContext: Any,
     val di: DI
 )  {
 
@@ -102,9 +100,6 @@ class UstadAccountManager(
 
     val activeEndpoint: Endpoint
         get() = _currentUserSession.value.endpoint
-
-    val activeAccountLive: Flow<UmAccount>
-        get() = _currentUserSession.map { it.toUmAccount() }
 
 
     fun interface EndpointFilter {
@@ -244,6 +239,7 @@ class UstadAccountManager(
         endpointUrl: String,
         accountRegisterOptions: AccountRegisterOptions = AccountRegisterOptions()
     ): PersonWithAccount = withContext(Dispatchers.Default){
+        assertNotClosed()
         val parentVal = accountRegisterOptions.parentJoin
         val httpStmt = httpClient.preparePost {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
@@ -280,6 +276,7 @@ class UstadAccountManager(
         endpointUrl: String,
         password: String?
     ) : UserSessionWithPersonAndEndpoint{
+        assertNotClosed()
         val endpoint = Endpoint(endpointUrl)
         val endpointRepo: UmAppDatabase = di.on(endpoint).direct
             .instance(tag = DoorTag.TAG_REPO)
@@ -317,7 +314,7 @@ class UstadAccountManager(
             commitActiveEndpointsToPref()
     }
 
-    private suspend fun removeActiveEndpoint(endpoint: Endpoint, commit: Boolean = true) {
+    private fun removeActiveEndpoint(endpoint: Endpoint, commit: Boolean = true) {
         _endpointsWithActiveSessions.update { prev ->
             prev.filter { it != endpoint }
         }
@@ -356,7 +353,11 @@ class UstadAccountManager(
         val endpointRepo: UmAppDatabase = di.on(session.endpoint)
             .direct.instance(tag = DoorTag.TAG_REPO)
         endpointRepo.userSessionDao.endSession(
-            session.userSession.usUid, endStatus, endReason)
+            sessionUid = session.userSession.usUid,
+            newStatus = endStatus,
+            reason = endReason,
+            endTime = systemTimeInMillis()
+        )
 
         //check if the active session has been ended.
         if(currentUserSession.userSession.usUid == session.userSession.usUid
@@ -372,8 +373,14 @@ class UstadAccountManager(
 
 
 
-    suspend fun login(username: String, password: String, endpointUrl: String,
-        maxDateOfBirth: Long = 0L): UmAccount = withContext(Dispatchers.Default){
+    suspend fun login(
+        username: String,
+        password: String,
+        endpointUrl: String,
+        maxDateOfBirth: Long = 0L
+    ): UmAccount = withContext(Dispatchers.Default){
+        assertNotClosed()
+
         val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_REPO)
         val db: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_DB)
 
@@ -419,7 +426,7 @@ class UstadAccountManager(
             }
         }
 
-        getSiteFromDbOrLoadFromHttp(endpointUrl, repo)
+        getSiteFromDbOrLoadFromHttp(repo)
 
         val newSession = addSession(personInDb, endpointUrl, password)
 
@@ -431,7 +438,6 @@ class UstadAccountManager(
     }
 
     private suspend fun getSiteFromDbOrLoadFromHttp(
-        endpointUrl: String,
         repo: UmAppDatabase
     ) {
         val db = (repo as DoorDatabaseRepository).db as UmAppDatabase
@@ -441,7 +447,7 @@ class UstadAccountManager(
         }
     }
 
-    suspend fun startGuestSession(endpointUrl: String) {
+    private suspend fun startGuestSession(endpointUrl: String) {
         val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_REPO)
         val guestPerson = repo.insertPersonAndGroup(Person().apply {
             username = null
@@ -449,7 +455,7 @@ class UstadAccountManager(
             lastName = "User"
         }, groupFlag = PERSONGROUP_FLAG_PERSONGROUP or PERSONGROUP_FLAG_GUESTPERSON)
 
-        getSiteFromDbOrLoadFromHttp(endpointUrl, repo)
+        getSiteFromDbOrLoadFromHttp(repo)
 
         currentUserSession = addSession(guestPerson, endpointUrl, null)
     }

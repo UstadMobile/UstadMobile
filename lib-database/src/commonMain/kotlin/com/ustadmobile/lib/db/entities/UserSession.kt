@@ -71,18 +71,20 @@ class UserSession {
 
         //Session that will not be synced, it is only added to allow an upstream node to have access
         // so that findUnsentEntities will work as expected
+        @Suppress("unused") //reserved for future use
         const val TYPE_UPSTREAM = 2
 
         const val TYPE_GUEST = 4
 
         /**
          * This is a temporary local session that was auto created by the account manager. It will
-         * not be sent to the upstream server.
+         * not be sent to the upstream server and will not be displayed to the user.
          */
         const val TYPE_TEMP_LOCAL = 8
 
         const val STATUS_ACTIVE = 1
 
+        @Suppress("unused") //reserved for future use
         const val STATUS_NEEDS_REAUTH = 2
 
         const val STATUS_LOGGED_OUT = 4
@@ -91,14 +93,8 @@ class UserSession {
 
         const val REASON_CONSENT_REVOKED = 2
 
+        @Suppress("unused") //reserved for future use
         const val REASON_PASSWORD_CHANGED = 3
-
-        const val USER_SESSION_NOT_LOCAL_DEVICE_SQL = """
-            UserSession.usClientNodeId != (
-                 SELECT nodeClientId 
-                   FROM SyncNode
-                  LIMIT 1)
-        """
 
     }
 

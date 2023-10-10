@@ -20,6 +20,7 @@ import kotlinx.datetime.minus
 import kotlinx.serialization.KSerializer
 import kotlin.js.JsName
 import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
+import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 
@@ -124,13 +125,13 @@ abstract class UstadMobileSystemCommon {
             GlobalScope.launch(kotlinx.coroutines.Dispatchers.Main) {
                 if(accountManager.activeSessionCount(maxDateOfBirth) { it == endpointUrl } > 0) {
                     val args = mapOf(ARG_NEXT to viewUri,
-                        AccountListView.ARG_FILTER_BY_ENDPOINT to endpointUrl,
-                        AccountListView.ARG_ACTIVE_ACCOUNT_MODE to AccountListView.ACTIVE_ACCOUNT_MODE_INLIST,
+                        AccountListViewModel.ARG_FILTER_BY_ENDPOINT to endpointUrl,
+                        AccountListViewModel.ARG_ACTIVE_ACCOUNT_MODE to AccountListViewModel.ACTIVE_ACCOUNT_MODE_INLIST,
                         UstadView.ARG_TITLE to getString(MR.strings.select_account),
                         UstadView.ARG_INTENT_MESSAGE to intentMessage,
                         UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString(),
                         UstadView.ARG_MAX_DATE_OF_BIRTH to maxDateOfBirth.toString())
-                    go(AccountListView.VIEW_NAME, args, context)
+                    go(AccountListViewModel.DEST_NAME, args, context)
                 }else {
                     val args = mapOf(ARG_NEXT to viewUri,
                         ARG_INTENT_MESSAGE to intentMessage,
