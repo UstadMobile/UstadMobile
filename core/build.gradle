@@ -163,6 +163,7 @@ kotlin {
                 implementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
                 implementation "com.soywiz.korlibs.klock:klock:$version_klock"
                 implementation "junit:junit:$version_junit"
+                implementation "io.ktor:ktor-server-content-negotiation:$version_ktor"
 
                 implementation project(":sharedse")
                 implementation project(":lib-test-common")

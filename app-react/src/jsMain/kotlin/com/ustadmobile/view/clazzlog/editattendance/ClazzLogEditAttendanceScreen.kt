@@ -34,6 +34,7 @@ import mui.icons.material.Close
 import mui.icons.material.AccessTime
 import mui.icons.material.SvgIconComponent
 import react.dom.aria.ariaLabel
+import web.cssom.Cursor
 
 external interface ClazzLogEditAttendanceScreenProps : Props {
 
@@ -140,7 +141,7 @@ private val ClazzLogEditAttendanceScreenComponent = FC<ClazzLogEditAttendanceScr
                         }
 
                         ListItemText {
-                            primary = ReactNode(strings[MR.strings.mark_all_absent])
+                            primary = ReactNode(strings[MR.strings.mark_all_present])
                         }
                     }
                 }
@@ -283,6 +284,9 @@ private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
     ListItem{
 
         ListItemButton {
+            sx {
+                cursor = Cursor.default
+            }
 
             ListItemIcon {
                 Icon {

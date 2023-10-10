@@ -1193,12 +1193,42 @@ val MIGRATION_120_121 = DoorMigrationStatementList(120, 121) { db ->
     }
 }
 
+//Add new door tables: OutgoingReplication, ReplicationOperation, PendingRepositorySession
+val MIGRATION_121_122 = DoorMigrationStatementList(121, 122) { db ->
+    buildList {
+        when(db.dbType()) {
+            DoorDbType.SQLITE -> {
+                add(
+                    "CREATE TABLE IF NOT EXISTS OutgoingReplication (  destNodeId  INTEGER  NOT NULL , orPk1  INTEGER  NOT NULL , orPk2  INTEGER  NOT NULL , orTableId  INTEGER  NOT NULL , orUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )"
+                )
+                add(
+                    "CREATE TABLE IF NOT EXISTS ReplicationOperation (  repOpRemoteNodeId  INTEGER  NOT NULL , repOpStatus  INTEGER  NOT NULL , repOpTableId  INTEGER  NOT NULL , PRIMARY KEY (repOpRemoteNodeId, repOpTableId) )"
+                )
+                add(
+                    "CREATE TABLE IF NOT EXISTS PendingRepositorySession (  endpointUrl  TEXT , remoteNodeId  INTEGER  NOT NULL , rsUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )"
+                )
+            }
+            DoorDbType.POSTGRES -> {
+                add(
+                    "CREATE TABLE IF NOT EXISTS OutgoingReplication (  destNodeId  BIGINT  NOT NULL , orPk1  BIGINT  NOT NULL , orPk2  BIGINT  NOT NULL , orTableId  INTEGER  NOT NULL , orUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+                )
+                add(
+                    "CREATE TABLE IF NOT EXISTS ReplicationOperation (  repOpRemoteNodeId  BIGINT  NOT NULL , repOpStatus  INTEGER  NOT NULL , repOpTableId  INTEGER  NOT NULL , PRIMARY KEY (repOpRemoteNodeId, repOpTableId) )"
+                )
+                add(
+                    "CREATE TABLE IF NOT EXISTS PendingRepositorySession (  endpointUrl  TEXT , remoteNodeId  BIGINT  NOT NULL , rsUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+                )
+            }
+        }
+    }
+}
+
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
-    MIGRATION_120_121
+    MIGRATION_120_121, MIGRATION_121_122
 )
 
 

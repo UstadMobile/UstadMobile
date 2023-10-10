@@ -10,10 +10,6 @@ abstract class DetailViewModel<T>(
     destinationName: String,
 ) : UstadViewModel(di, savedStateHandle, destinationName){
 
-    //abstract val entity: Flow<T?>
-
-    protected val entityUidArg: Long by lazy(LazyThreadSafetyMode.NONE) {
-        savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
-    }
+    protected val entityUidArg: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
 }

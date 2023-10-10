@@ -43,6 +43,9 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
         assignmentUid: Long,
     ): Flow<List<CourseAssignmentSubmissionWithAttachment>>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     @Query("""
         SELECT CourseAssignmentSubmission.*
           FROM CourseAssignmentSubmission
@@ -55,6 +58,26 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
         assignmentUid: Long,
     ): Flow<List<CourseAssignmentSubmission>>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("getLatestSubmissionForUserAsync"),
+            //Get the ClazzEnrolment objects to correctly determine if active person is student
+            HttpServerFunctionCall(
+                functionDao = ClazzAssignmentDao::class,
+                functionName = "findEnrolmentsByPersonUidAndAssignmentUid"
+            ),
+            //Get the CourseGroupMember entities that apply for this assignment and personUid if any
+            HttpServerFunctionCall(
+                functionDao = ClazzAssignmentDao::class,
+                functionName = "findCourseGroupMembersByPersonUidAndAssignmentUid"),
+            //PeerReviewerAllocations if required
+            HttpServerFunctionCall(
+                functionDao = ClazzAssignmentDao::class,
+                functionName = "findPeerReviewerAllocationsByPersonUidAndAssignmentUid",
+            ),
+        )
+    )
     @Query("""
         SELECT CourseAssignmentSubmission.*
           FROM CourseAssignmentSubmission

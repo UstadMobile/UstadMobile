@@ -140,6 +140,9 @@ expect abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT * From Person WHERE personUid = :uid")
     abstract fun findByUidLive(uid: Long): Flow<Person?>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     @Query("SELECT * FROM Person WHERE personUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : Person?
 
@@ -230,12 +233,18 @@ expect abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT * FROM Person")
     abstract fun getAllPerson(): List<Person>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(functionName = "findByUidAsync")
+        )
+    )
     @Query("""
         SELECT Person.firstNames, Person.lastName
           FROM Person
-         WHERE Person.personUid = :personUid  
+         WHERE Person.personUid = :uid  
     """)
-    abstract suspend fun getNamesByUid(personUid: Long): PersonNames?
+    abstract fun getNamesByUid(uid: Long): Flow<PersonNames?>
 
 
     @Query("""
@@ -244,6 +253,6 @@ expect abstract class PersonDao : BaseDao<Person> {
                personLct = :currentTime
          WHERE Person.personUid = :personUid  
     """)
-    abstract suspend fun updateUsername(personUid: Long, username: String, currentTime: Long)
+    abstract suspend fun updateUsername(personUid: Long, username: String, currentTime: Long): Int
 
 }

@@ -12,6 +12,7 @@ import com.ustadmobile.core.db.dao.ClazzDaoCommon.SORT_CLAZZNAME_DESC
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import app.cash.paging.PagingSource
+import com.ustadmobile.lib.db.composites.ScopedGrantAndGroupMember
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_TEACHER
@@ -44,6 +45,9 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     @Query("SELECT * FROM Clazz WHERE clazzUid = :clazzUid")
     abstract suspend fun findByUidAsync(clazzUid: Long) : Clazz?
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+    )
     @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
     abstract fun findByUidAsFlow(uid: Long): Flow<Clazz?>
 
@@ -225,6 +229,12 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
         permission: Long
     ) : Boolean
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("personHasPermissionWithClazzAsFlowEntities")
+        )
+    )
     @Query("""
         SELECT EXISTS( 
                SELECT PrsGrpMbr.groupMemberPersonUid
@@ -240,6 +250,24 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
         clazzUid: Long,
         permission: Long
     ): Flow<Boolean>
+
+    @Query("""
+        SELECT PrsGrpMbr.*, ScopedGrant.*, PersonGroup.*
+          FROM Clazz
+               ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+                  :permission
+                  ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
+               LEFT JOIN PersonGroup
+                         ON PersonGroup.groupUid = PrsGrpMbr.groupMemberGroupUid
+         WHERE Clazz.clazzUid = :clazzUid
+           AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid
+    """)
+    abstract suspend fun personHasPermissionWithClazzAsFlowEntities(
+        accountPersonUid: Long,
+        clazzUid: Long,
+        permission: Long
+    ): List<ScopedGrantAndGroupMember>
+
 
 
     @Query("""
@@ -318,6 +346,12 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     @Query("SELECT Clazz.*, School.* FROM Clazz LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid WHERE clazz.clazzUid = :clazzUid")
     abstract suspend fun getClazzWithSchool(clazzUid: Long): ClazzWithSchool?
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findByUidAsync")
+        ),
+    )
     @Query("""
         SELECT Clazz.clazzName
           FROM Clazz

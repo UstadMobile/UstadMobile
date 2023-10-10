@@ -88,7 +88,6 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
             sortOption = _uiState.value.sortOption.flag,
         ).also {
-            mLastPagingSource?.invalidate()
             mLastPagingSource = it
         }
     }

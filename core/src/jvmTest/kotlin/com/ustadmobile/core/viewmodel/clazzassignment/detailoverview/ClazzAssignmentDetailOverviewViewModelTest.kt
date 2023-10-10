@@ -332,7 +332,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             val mockSubmitterUseCase = mock<SubmitAssignmentUseCase> {
                 onBlocking { invoke(any(), any(), any(), any(), any()) }.thenAnswer {
-                    val submission = it.arguments[4] as CourseAssignmentSubmission
+                    val submission = it.arguments.last() as CourseAssignmentSubmission
                     SubmitAssignmentUseCase.SubmitAssignmentResult(submission.shallowCopy {
                         casTimestamp = systemTimeInMillis()
                     })
@@ -344,9 +344,10 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle, mockSubmitterUseCase)
             }
 
-            viewModel.uiState.test(timeout = 5.seconds) {
+            viewModel.uiState.test(timeout = 5.seconds, name = "Wait for loading") {
                 awaitItemWhere {
                     it.assignment != null && it.courseBlock != null && it.latestSubmission != null
+                            && it.submitterUid != 0L
                 }
 
                 viewModel.onChangeSubmissionText(submissionText)
@@ -360,7 +361,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                 })
             }
 
-            viewModel.uiState.test(timeout = 5.seconds) {
+            viewModel.uiState.test(timeout = 5.seconds, name = "wait for submission done") {
                 val submittedDoneState = awaitItemWhere {
                     (it.latestSubmission?.casTimestamp ?: 0) > 0
                 }

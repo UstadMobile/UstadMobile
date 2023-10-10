@@ -291,6 +291,18 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         roleId: Int,
     ): List<ClazzEnrolment>
 
+
+    @Query("""
+        SELECT ClazzEnrolment.*
+          FROM ClazzEnrolment
+         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+           AND ClazzEnrolment.clazzEnrolmentRole = :roleId
+    """)
+    abstract suspend fun findAllEnrolmentsByClazzUidAndRole(
+        clazzUid: Long,
+        roleId: Int
+    ): List<ClazzEnrolment>
+
     @Query("""
         UPDATE ClazzEnrolment 
           SET clazzEnrolmentActive = :enrolled,

@@ -11,7 +11,6 @@ import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.composites.PersonAndClazzLogAttendanceRecord
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
-import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -312,9 +311,9 @@ class ClazzLogEditAttendanceViewModel(
                     attendanceRecordsToSave += logRecords
                 }
 
-                activeDb.withDoorTransactionAsync {
-                    activeDb.clazzLogDao.upsertListAsync(clazzLogsToSave)
-                    activeDb.clazzLogAttendanceRecordDao.upsertListAsync(attendanceRecordsToSave)
+                activeRepo.withDoorTransactionAsync {
+                    activeRepo.clazzLogDao.upsertListAsync(clazzLogsToSave)
+                    activeRepo.clazzLogAttendanceRecordDao.upsertListAsync(attendanceRecordsToSave)
                 }
             }
 

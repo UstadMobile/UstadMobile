@@ -59,7 +59,6 @@ class CourseGroupSetListViewModel(
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
             sortOrder = _uiState.value.sortOption.flag,
         ).also {
-            mLastPagingSource?.invalidate()
             mLastPagingSource = it
         }
     }

@@ -17,6 +17,9 @@ expect abstract class CourseGroupSetDao : BaseDao<CourseGroupSet> {
     @Update
     abstract suspend fun updateAsync(entity: CourseGroupSet): Int
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     @Query("""
         SELECT *
          FROM CourseGroupSet
@@ -57,6 +60,9 @@ expect abstract class CourseGroupSetDao : BaseDao<CourseGroupSet> {
     """)
     abstract suspend fun findAllCourseGroupSetForClazzListAsync(clazzUid: Long): List<CourseGroupSet>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+    )
     @Query("""
         SELECT * 
          FROM CourseGroupSet 

@@ -103,7 +103,8 @@ class PersonDetailViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.personDao.findByUidWithDisplayDetailsFlow(entityUid,
+                    activeRepo.personDao.findByUidWithDisplayDetailsFlow(
+                        entityUid,
                         currentUserUid
                     ).collect { person ->
                         _uiState.update { prev -> prev.copy(person = person) }

@@ -64,6 +64,20 @@ expect abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
     @Update
     abstract suspend fun updateListAsync(entityList: List<CourseGroupMember>)
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findByCourseGroupSetAndClazz"
+            ),
+            HttpServerFunctionCall(
+                functionName = "findByCourseGroupSetAndClazzAsFlowPersons",
+            ),
+            HttpServerFunctionCall(
+                functionName = "findByCourseGroupSetAndClazzAsFlowEnrolments"
+            ),
+        )
+    )
     @Query(FIND_BY_COURSEGROUPSET_AND_CLAZZ_SQL)
     /**
      * @param cgsUid CourseGroupSetUid - might be 0 if not created yet
@@ -78,6 +92,21 @@ expect abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
         activeFilter: Int,
     ): List<CourseGroupMemberAndName>
 
+    //Needs Enrolments, Persons,
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findByCourseGroupSetAndClazzAsFlow"
+            ),
+            HttpServerFunctionCall(
+                functionName = "findByCourseGroupSetAndClazzAsFlowPersons",
+            ),
+            HttpServerFunctionCall(
+                functionName = "findByCourseGroupSetAndClazzAsFlowEnrolments"
+            ),
+        )
+    )
     @Query(FIND_BY_COURSEGROUPSET_AND_CLAZZ_SQL)
     abstract fun findByCourseGroupSetAndClazzAsFlow(
         cgsUid: Long,
@@ -86,6 +115,26 @@ expect abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
         activeFilter: Int,
     ): Flow<List<CourseGroupMemberAndName>>
 
+    @Query("""
+        SELECT Person.*
+          FROM Person
+         WHERE Person.personUid IN
+               (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid
+                  FROM ClazzEnrolment
+                 WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid)
+    """)
+    abstract suspend fun findByCourseGroupSetAndClazzAsFlowPersons(
+        clazzUid: Long
+    ): List<Person>
+
+    @Query("""
+        SELECT ClazzEnrolment.*
+          FROM ClazzEnrolment
+         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
+    """)
+    abstract suspend fun findByCourseGroupSetAndClazzAsFlowEnrolments(
+        clazzUid: Long
+    ): List<ClazzEnrolment>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsertListAsync(list: List<CourseGroupMember>)

@@ -12,7 +12,7 @@ private var napierInitDone = false
  */
 fun initNapierLog() {
     if(!napierInitDone) {
-        Napier.base(NapierAntilogJvm(Level.FINER))
+        Napier.base(NapierAntilogJvm(Level.FINEST))
         napierInitDone = true
     }
 }
