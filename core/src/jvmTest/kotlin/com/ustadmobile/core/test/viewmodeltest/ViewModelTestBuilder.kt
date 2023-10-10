@@ -116,7 +116,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         }
 
         bind<UstadAccountManager>() with singleton {
-            spy(UstadAccountManager(instance(), Any(), di))
+            spy(UstadAccountManager(instance(), di))
         }
 
         bind<UstadMobileSystemImpl>() with singleton {

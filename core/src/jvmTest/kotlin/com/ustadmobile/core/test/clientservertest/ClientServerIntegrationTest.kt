@@ -87,7 +87,7 @@ private fun clientServerCommonDiModule(
     }
 
     bind<UstadAccountManager>() with singleton {
-        UstadAccountManager(systemImpl = instance(), appContext = Any(), di)
+        UstadAccountManager(systemImpl = instance(), di)
     }
 
     bind<ApiUrlConfig>() with singleton {

@@ -54,8 +54,6 @@ import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.net.URI
-import java.util.concurrent.Executors
-import com.ustadmobile.core.db.dao.commitLiveConnectivityStatus
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.di.commonDomainDiModule
@@ -99,7 +97,7 @@ class UstadApp : Application(), DIAware {
         }
 
         bind<UstadAccountManager>() with singleton {
-            UstadAccountManager(instance(), applicationContext, di)
+            UstadAccountManager(instance(), di)
         }
 
         bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {

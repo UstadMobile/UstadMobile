@@ -252,7 +252,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenNoUserInPrefKeys_whenInitialized_shouldInitGuestAccountOnDefaultServer() {
-        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
+        val accountManager = UstadAccountManager(mockSystemImpl, di)
         val activeAccount = accountManager.currentAccount
         Assert.assertEquals("Initial account has personUid = 0", 0L, activeAccount.personUid)
         Assert.assertEquals("Initial account uses default apiUrl",
@@ -263,7 +263,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenNoSiteOrPersonInDb_whenLoginCalledForfirstLogin_shouldInitLogin() {
-        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
+        val accountManager = UstadAccountManager(mockSystemImpl, di)
         db.execSQLBatch("DELETE FROM Site", "DELETE FROM Person")
 
 
@@ -287,7 +287,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenValidLoginCredentials_whenLoginCalledForFirstLogin_shouldInitLogin() {
-        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
+        val accountManager = UstadAccountManager(mockSystemImpl, di)
         val loggedInAccount = UmAccount(42L, "bob", "",
             mockServerUrl)
 
@@ -370,7 +370,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
                 savedSessionWithPersonAndEndpoint))
         }
 
-        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
+        val accountManager = UstadAccountManager(mockSystemImpl, di)
 
         val loggedInAccount = UmAccount(42L, "bob", "", mockServerUrl)
         mockDispatcher.authUmAccount = loggedInAccount
@@ -402,7 +402,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenInvalidLoginCredentials_whenLoginCalled_thenShouldThrowException() {
-        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
+        val accountManager = UstadAccountManager(mockSystemImpl, di)
 
         mockDispatcher.authResponseCode = 403
 
@@ -421,7 +421,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenAccountRequiresParentalConsent_whenLoginCalled_thenShouldThrowException() {
-        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
+        val accountManager = UstadAccountManager(mockSystemImpl, di)
 
         mockDispatcher.authResponseCode = 424
 
@@ -441,7 +441,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenUnreachableServer_whenLoginCalled_thenShouldThrowException() {
-        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
+        val accountManager = UstadAccountManager(mockSystemImpl, di)
 
         var exception: Exception? = null
 
@@ -505,7 +505,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
         }
 
 
-        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
+        val accountManager = UstadAccountManager(mockSystemImpl, di)
         accountManager.currentUserSession = joePersonSessionWithPersonAndEndpoint
 
         Assert.assertEquals("Active account is updated when calling setActiveAccount",
@@ -533,7 +533,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenValidRegistrationRequest_whenNewAccountRequested_thenShouldBeRequestedOnServerAndActive() {
-        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
+        val accountManager = UstadAccountManager(mockSystemImpl, di)
 
         val personToRegister = PersonWithAccount().apply {
             firstNames = "Mary"
@@ -562,7 +562,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenActiveAccount_whenIncomingReplicationMakesUserSessionInactive_thenShouldEndSession() {
-        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
+        val accountManager = UstadAccountManager(mockSystemImpl, di)
         val activeAccountPerson = Person().apply {
             firstNames = "Mary"
             lastName = "Poppins"
