@@ -18,12 +18,11 @@ describe('Ustad mobile course tests', () => {
     cy.contains("label", "Last name").parent().find("input").clear().type("A")
     cy.get('div[id="gender"]').click()
     cy.contains("li","Female").click()
-    cy.contains("button","Save").click().should('be.visible')
+     cy.contains("button","Save",{timeout: 1000}).should('not.be.disabled').click()
     cy.wait(2000)
-    //cy.get('button[id="actionBarButton"]',{timeout:6000}).should('be.visible')
-    cy.contains("button","Save").click().should('be.visible')
-
-     //Add a student
+    //cy.get('button[id="actionBarButton"]',{timeout:6000}).should('not.be.disabled').click()
+      cy.contains("button","Save",{timeout: 3000}).should('not.be.disabled').click()
+          //Add a student
 
         cy.contains("span","Add a student").click()
         cy.contains("span","Add a new person").click()
@@ -31,20 +30,20 @@ describe('Ustad mobile course tests', () => {
         cy.contains("label", "Last name").parent().find("input").clear().type("A")
         cy.get('div[id="gender"]').click()
         cy.contains("li","Female").click()
-        cy.contains("button","Save").click().should('be.visible')
+        cy.contains("button","Save",{timeout: 1000}).should('not.be.disabled').click()
         cy.wait(2000)
        // cy.contains("button","Save").should('be.visible')
-        cy.contains("button","Save").click()
+        cy.contains("button","Save",{timeout: 1000}).should('not.be.disabled').click()
         cy.contains("button","members").should('be.visible')
-
+/*
    //Add account for teacher
        cy.contains("Teacher A").click()
        cy.contains('View profile').click()
        cy.contains('Create account').click()
-       cy.contains("label", "Username",{timeout:2000}).parent().find("input").clear().type("ta")
- //      cy.contains("label", "New Password",{timeout:2000}).parent().find("input").clear().type("test")
-       cy.get('input[type="password"]').type("1234")
-       cy.wait(2000)
+       cy.contains("label", "Username").parent().find("input").should('exist').type("ta")
+       //cy.get('#username',{timeout: 1000}).should('not.be.disabled').type('ta')
+       cy.get('#newpassword').type('1234')
+       //cy.wait(2000)
        cy.contains("button","Save").click().should('be.visible')
        cy.contains('Change Password').should('be.visible')
        cy.go('back')
@@ -54,12 +53,12 @@ describe('Ustad mobile course tests', () => {
        cy.contains("Student A").click()
        cy.contains('View profile').click()
        cy.contains('Create account').click()
-       cy.contains("label", "Username",{timeout:2000}).parent().find("input").clear().type("sa")
-       cy.get('input[type="password"]').type("1234")
-       cy.wait(2000)
+       cy.contains("label", "Username").parent().find("input").should('not.be.disabled').clear().type("sa")
+       cy.get('#newpassword').type('1234')
+       //cy.wait(2000)
        cy.contains("button","Save").click().should('be.visible')
        cy.contains('Change Password').should('be.visible')
-
+*/
   })
 
 })

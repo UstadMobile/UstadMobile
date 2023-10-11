@@ -9,7 +9,7 @@
      cy.wait(4000)
      cy.contains("Add a new course").should('be.visible')
      cy.contains("Add a new course").click()
-     cy.get('input[id="clazz_name"]').type("class 004_002")
+     cy.get('input[id="clazz_name"]').type("004_002")
      cy.get('div[data-placeholder="Description"]').type("simple class")
     // Add module block
      cy.contains("Add block").click()
@@ -65,7 +65,7 @@
                  .click({ multiple: true })
                  .then(input => {
                    input[0].dispatchEvent(new Event('input', { bubbles: true }))
-                   input.val('2023-07-01T13:00')
+                   input.val('2025-07-01T13:00')
                  })
                  .click({ multiple: true }).should('be.visible')
     cy.wait(2000)
@@ -74,6 +74,7 @@
     cy.get('svg[data-testid="MoreVertIcon"]').last().click().should('be.visible')
     cy.contains("button","Save").should('be.visible')
     cy.contains("button","Save").click()
+    cy.wait(2000)
     cy.contains("span","Assignment 1").click()
     cy.get('input[id="course_comment_textfield"]').type("comment 1")
     cy.get('svg[data-testid="SendIcon"]').click()
