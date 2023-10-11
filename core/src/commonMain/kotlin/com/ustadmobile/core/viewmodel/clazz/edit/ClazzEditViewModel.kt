@@ -37,6 +37,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.encodeToString
 import org.kodein.di.DI
 import org.kodein.di.instance
+import io.github.aakira.napier.Napier
 
 @Serializable
 data class ClazzEditUiState(
@@ -127,11 +128,6 @@ class ClazzEditViewModel(
         _appUiState.update {
             AppUiState(
                 title = title,
-                actionBarButtonState = ActionBarButtonUiState(
-                    visible = true,
-                    text = systemImpl.getString(MR.strings.save),
-                    onClick = this::onClickSave
-                ),
                 loadingState = LoadingUiState.INDETERMINATE,
                 hideBottomNavigation = true,
             )
@@ -300,7 +296,16 @@ class ClazzEditViewModel(
                 prev.copy(fieldsEnabled = true)
             }
 
-            loadingState = LoadingUiState.NOT_LOADING
+            _appUiState.update { prev ->
+                prev.copy(
+                    loadingState = LoadingUiState.NOT_LOADING,
+                    actionBarButtonState = ActionBarButtonUiState(
+                        visible = true,
+                        text = systemImpl.getString(MR.strings.save),
+                        onClick = this@ClazzEditViewModel::onClickSave
+                    ),
+                )
+            }
         }
 
     }
@@ -411,10 +416,13 @@ class ClazzEditViewModel(
 
     fun onClickSave() {
         val initEntity = _uiState.value.entity ?: return
-        if(loadingState == LoadingUiState.INDETERMINATE)
+        if(loadingState == LoadingUiState.INDETERMINATE) {
+            Napier.d("onClickSave: indeterminate")
             return
+        }
 
         if (initEntity.clazzStartTime == 0L) {
+            Napier.d("onClickSave: clazzstarttime = 0")
             _uiState.update { prev ->
                 prev.copy(
                     clazzStartDateError = systemImpl.getString(MR.strings.field_required_prompt)
@@ -423,13 +431,16 @@ class ClazzEditViewModel(
         }
 
         if(initEntity.clazzEndTime <= initEntity.clazzStartTime) {
+            Napier.d("onClickSave: endbeforestart")
             _uiState.update { prev ->
                 prev.copy(clazzEndDateError = systemImpl.getString(MR.strings.end_is_before_start))
             }
         }
 
-        if(_uiState.value.hasErrors())
+        if(_uiState.value.hasErrors()) {
+            Napier.d("onClickSave: hasErrors")
             return
+        }
 
         loadingState = LoadingUiState.INDETERMINATE
 
@@ -451,6 +462,7 @@ class ClazzEditViewModel(
             val initState = savedStateHandle.getJson(KEY_INIT_STATE, ClazzEditUiState.serializer())
                 ?: return@launch
 
+            Napier.d("onClickSave: start transaction")
             activeDb.withDoorTransactionAsync {
                 if(entityUidArg == 0L) {
                     val termMap = activeDb.courseTerminologyDao.findByUidAsync(initEntity.clazzTerminologyUid)
@@ -488,7 +500,9 @@ class ClazzEditViewModel(
                     .findKeysNotInOtherList(assignmentsToUpsert) { it.caUid }
                 activeRepo.clazzAssignmentDao.takeIf { assignmentsToDeactivate.isNotEmpty() }
                     ?.updateActiveByList(assignmentsToDeactivate, false, systemTimeInMillis())
+                Napier.d("onClickSave: transaction block done")
             }
+            Napier.d("onClickSave: transaction done")
 
             val entityTimeZone = TimeZone.of(entity.effectiveTimeZone)
             val fromLocalDate = Clock.System.now().toLocalDateTime(entityTimeZone)
@@ -504,6 +518,7 @@ class ClazzEditViewModel(
                 prev.copy(fieldsEnabled = true)
             }
             loadingState = LoadingUiState.NOT_LOADING
+            Napier.d("onClickSave: done")
 
             finishWithResult(ClazzDetailViewModel.DEST_NAME, entity.clazzUid, entity)
         }

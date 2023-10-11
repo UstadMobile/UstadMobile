@@ -7,7 +7,6 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MS_PER_HOUR
-import com.ustadmobile.core.util.ext.processEnrolmentIntoClass
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -64,11 +63,6 @@ class ClazzEnrolmentEditViewModel(
                     newEntityStringResource = MR.strings.new_enrolment,
                     editEntityStringResource = MR.strings.edit_enrolment,
                 ),
-                actionBarButtonState = ActionBarButtonUiState(
-                    visible = true,
-                    text = systemImpl.getString(MR.strings.save),
-                    onClick = this::onClickSave
-                )
             )
         }
 
@@ -134,7 +128,16 @@ class ClazzEnrolmentEditViewModel(
                 )
             }
 
-            loadingState = LoadingUiState.NOT_LOADING
+            _appUiState.update { prev ->
+                prev.copy(
+                    loadingState = LoadingUiState.NOT_LOADING,
+                    actionBarButtonState = ActionBarButtonUiState(
+                        visible = true,
+                        text = systemImpl.getString(MR.strings.save),
+                        onClick = this@ClazzEnrolmentEditViewModel::onClickSave
+                    )
+                )
+            }
         }
     }
 

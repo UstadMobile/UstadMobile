@@ -94,11 +94,6 @@ class ClazzAssignmentEditViewModel(
                 userAccountIconVisible = false,
                 loadingState = LoadingUiState.INDETERMINATE,
                 title = createEditTitle(MR.strings.new_assignment, MR.strings.edit_assignment),
-                actionBarButtonState = ActionBarButtonUiState(
-                    visible = true,
-                    text = systemImpl.getString(MR.strings.done),
-                    onClick = this::onClickSave,
-                )
             )
         }
 
@@ -139,8 +134,19 @@ class ClazzAssignmentEditViewModel(
                 }
             }
 
+
             _uiState.update { prev ->
                 prev.copy(fieldsEnabled = true)
+            }
+
+            _appUiState.update { prev ->
+                prev.copy(
+                    actionBarButtonState = ActionBarButtonUiState(
+                        visible = true,
+                        text = systemImpl.getString(MR.strings.done),
+                        onClick = this@ClazzAssignmentEditViewModel::onClickSave,
+                    )
+                )
             }
 
             launch {

@@ -88,11 +88,6 @@ class ClazzLogEditAttendanceViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 title = systemImpl.getString(MR.strings.record_attendance),
-                actionBarButtonState = ActionBarButtonUiState(
-                    visible = true,
-                    text = systemImpl.getString(MR.strings.save),
-                    onClick = this::onClickSave
-                )
             )
         }
 
@@ -229,6 +224,20 @@ class ClazzLogEditAttendanceViewModel(
                 prev.copy(
                     clazzLogAttendanceRecordList = personAndAttendanceRecords
                 )
+            }
+
+            _appUiState.update { prev ->
+                if(!prev.actionBarButtonState.visible) {
+                    prev.copy(
+                        actionBarButtonState = ActionBarButtonUiState(
+                            visible = true,
+                            text = systemImpl.getString(MR.strings.save),
+                            onClick = this@ClazzLogEditAttendanceViewModel::onClickSave
+                        )
+                    )
+                }else {
+                    prev
+                }
             }
         }
     }
