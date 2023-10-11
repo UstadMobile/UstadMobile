@@ -114,7 +114,7 @@ class UstadTestRule(): TestWatcher() {
                 ApiUrlConfig(presetApiUrl = null)
             }
             bind<UstadAccountManager>() with singleton {
-                UstadAccountManager(instance(), Any(), di)
+                UstadAccountManager(instance(), di)
             }
             bind<Json>() with singleton {
                 Json { encodeDefaults = true }

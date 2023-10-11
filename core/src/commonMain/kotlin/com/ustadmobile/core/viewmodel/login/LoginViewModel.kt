@@ -79,6 +79,7 @@ class LoginViewModel(
 
         val baseAppUiState = AppUiState(
             navigationVisible = false,
+            userAccountIconVisible = false,
             title = impl.getString(MR.strings.login),
         )
 

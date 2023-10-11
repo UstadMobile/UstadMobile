@@ -1609,4 +1609,10 @@
     <!-- Used as a caption for buttons that allow the user to collapse something e.g. hide details - opposite of expand -->
     <string name="collapse">Collapse</string>
 
+    <!--
+    Used when something is not deleted, but removed from a particular device e.g. when an account
+    is removed from the device, it is not deleted, just removed from a particular browser/phone.
+    -->
+    <string name="remove">Remove</string>
+
 </resources>

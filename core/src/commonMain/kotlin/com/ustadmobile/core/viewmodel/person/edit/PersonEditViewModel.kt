@@ -110,11 +110,6 @@ class PersonEditViewModel(
         _appUiState.update {
             AppUiState(
                 title = title,
-                actionBarButtonState = ActionBarButtonUiState(
-                    visible = true,
-                    text = systemImpl.getString(MR.strings.save),
-                    onClick = this::onClickSave
-                )
             )
         }
 
@@ -150,6 +145,16 @@ class PersonEditViewModel(
                     )
                 }
             )
+
+            _appUiState.update { prev ->
+                prev.copy(
+                    actionBarButtonState = ActionBarButtonUiState(
+                        visible = true,
+                        text = systemImpl.getString(MR.strings.save),
+                        onClick = this@PersonEditViewModel::onClickSave
+                    )
+                )
+            }
 
             val personParentJoin = if(registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)) {
                 PersonParentJoin()

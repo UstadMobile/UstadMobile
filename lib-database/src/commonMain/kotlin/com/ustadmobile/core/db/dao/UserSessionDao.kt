@@ -70,14 +70,11 @@ expect abstract class UserSessionDao {
            SET usAuth = null,
                usStatus = :newStatus,
                usReason = :reason,
-               usLcb = COALESCE(
-                               (SELECT nodeClientId
-                                  FROM SyncNode
-                                 LIMIT 1), 0)
-         WHERE UserSession.usUid = :sessionUid                        
-               
+               usEndTime = :endTime,
+               usLct = :endTime
+         WHERE UserSession.usUid = :sessionUid
     """)
-    abstract suspend fun endSession(sessionUid: Long, newStatus: Int, reason: Int)
+    abstract suspend fun endSession(sessionUid: Long, newStatus: Int, reason: Int, endTime: Long)
 
     @Query("""
         SELECT UserSession.*

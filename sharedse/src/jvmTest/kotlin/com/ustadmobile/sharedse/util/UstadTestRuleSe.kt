@@ -107,7 +107,7 @@ class UstadTestRule: TestWatcher() {
             bind<UstadMobileSystemImpl>() with singleton { systemImplSpy }
             bind<ApiUrlConfig>() with singleton { ApiUrlConfig(null) }
             bind<UstadAccountManager>() with singleton {
-                UstadAccountManager(instance(), Any(), di)
+                UstadAccountManager(instance(), di)
             }
             bind<NodeIdAndAuth>() with scoped(endpointScope!!).singleton {
                 NodeIdAndAuth(Random.nextLong(), randomUuid().toString())

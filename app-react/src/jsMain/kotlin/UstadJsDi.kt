@@ -74,7 +74,7 @@ internal fun ustadJsDi(
     }
 
     bind<UstadAccountManager>() with singleton {
-        UstadAccountManager(instance(), this, di)
+        UstadAccountManager(instance(), di)
     }
 
     bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {

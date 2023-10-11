@@ -91,7 +91,7 @@ class TestXapiStateResponder {
                     temporaryFolder.newFolder()))
             }
             bind<UstadAccountManager>() with singleton {
-                UstadAccountManager(instance(), Any(), di)
+                UstadAccountManager(instance(), di)
             }
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()

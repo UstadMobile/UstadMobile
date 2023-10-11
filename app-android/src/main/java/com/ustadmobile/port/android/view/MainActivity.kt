@@ -48,6 +48,7 @@ import java.io.*
 import com.ustadmobile.core.impl.BrowserLinkOpener
 import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.port.android.impl.nav.NavHostTempFileRegistrar
 import com.ustadmobile.port.android.util.ext.registerDestinationTempFile
 import com.ustadmobile.port.android.view.person.detail.PersonDetailFragment
@@ -307,7 +308,7 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
         userProfileDrawable?.also { profileImgView.imageForeignKeyPlaceholder(it) }
         profileImgView.setImageForeignKeyAdapter(PersonDetailFragment.FOREIGNKEYADAPTER_PERSON)
         profileImgView.setImageForeignKey(accountManager.currentAccount.personUid)
-        profileImgView.setOnClickListener { impl.go(AccountListView.VIEW_NAME, mapOf(), this) }
+        profileImgView.setOnClickListener { impl.go(AccountListViewModel.DEST_NAME, mapOf(), this) }
     }
 
     companion object {

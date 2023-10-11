@@ -32,6 +32,7 @@ import com.ustadmobile.core.viewmodel.SchoolDetailOverviewViewModel
 import com.ustadmobile.core.viewmodel.ScopedGrantEditViewModel
 import com.ustadmobile.core.viewmodel.SiteDetailViewModel
 import com.ustadmobile.core.viewmodel.SiteEditViewModel
+import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
@@ -136,7 +137,7 @@ class ViewNameToDestMap: DestinationProvider {
                 hideBottomNavigation = true, hideAccountIcon = true),
             LoginViewModel.DEST_NAME to UstadDestination(R.id.login_dest, hideBottomNavigation = true,
                     hideAccountIcon = true),
-            AccountListView.VIEW_NAME to UstadDestination(R.id.account_list_dest,
+            AccountListViewModel.DEST_NAME to UstadDestination(R.id.account_list_dest,
                     hideBottomNavigation = true, hideAccountIcon = true),
             PersonAccountEditView.VIEW_NAME to UstadDestination(R.id.person_account_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,

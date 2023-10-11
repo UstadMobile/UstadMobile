@@ -40,8 +40,6 @@ class SiteEnterLinkViewModel(
 
     private val impl: UstadMobileSystemImpl by instance()
 
-    var counter = 0
-
     init {
         _appUiState.update { prev ->
             prev.copy(
@@ -99,6 +97,8 @@ class SiteEnterLinkViewModel(
     }
 
     companion object {
+
+        const val DEST_NAME = "SiteEnterLinkView"
 
         val ARGS_TO_PASS_THROUGH = listOf(UstadView.ARG_NEXT, UstadView.ARG_INTENT_MESSAGE)
 
