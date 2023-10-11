@@ -3,6 +3,7 @@ package com.ustadmobile.core.viewmodel.clazzlog.edit
 import app.cash.turbine.test
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.schedule.generateUid
+import com.ustadmobile.core.test.awaitAppUiStateWithActionButtonVisible
 import com.ustadmobile.core.test.viewmodeltest.ViewModelTestBuilder
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
@@ -230,6 +231,8 @@ class ClazzLogEditAttendanceViewModelTest : AbstractMainDispatcherTest()  {
                 ClazzLogEditAttendanceViewModel(di, savedStateHandle)
             }
 
+            val readyAppUiState = viewModel.awaitAppUiStateWithActionButtonVisible()
+
             viewModel.uiState.test(timeout = 5.seconds) {
                 awaitItemWhere {
                     it.clazzLogsList.isNotEmpty() && it.clazzLogAttendanceRecordList.isNotEmpty()
@@ -237,7 +240,7 @@ class ClazzLogEditAttendanceViewModelTest : AbstractMainDispatcherTest()  {
 
                 viewModel.onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ATTENDED)
 
-                viewModel.onClickSave()
+                readyAppUiState.actionBarButtonState.onClick()
                 cancelAndIgnoreRemainingEvents()
             }
 

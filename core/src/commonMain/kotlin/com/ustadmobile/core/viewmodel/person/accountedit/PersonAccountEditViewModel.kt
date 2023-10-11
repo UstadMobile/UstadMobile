@@ -72,11 +72,6 @@ class PersonAccountEditViewModel(
     init {
         _appUiState.value = AppUiState(
             loadingState = LoadingUiState.INDETERMINATE,
-            actionBarButtonState = ActionBarButtonUiState(
-                visible = true,
-                text = systemImpl.getString(MR.strings.save),
-                onClick = this::onClickSave
-            )
         )
         _uiState.update { prev -> prev.copy(fieldsEnabled = false) }
 
@@ -110,7 +105,16 @@ class PersonAccountEditViewModel(
                     }
                 }
             )
-            loadingState = LoadingUiState.NOT_LOADING
+            _appUiState.update { prev ->
+                prev.copy(
+                    actionBarButtonState = ActionBarButtonUiState(
+                        visible = true,
+                        text = systemImpl.getString(MR.strings.save),
+                        onClick = this@PersonAccountEditViewModel::onClickSave
+                    ),
+                    loadingState = LoadingUiState.NOT_LOADING,
+                )
+            }
             _uiState.update { prev -> prev.copy(fieldsEnabled = true) }
         }
     }

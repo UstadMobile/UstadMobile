@@ -62,11 +62,6 @@ class DiscussionPostEditViewModel (
         _appUiState.update {
             AppUiState(
                 title = title,
-                actionBarButtonState = ActionBarButtonUiState(
-                    visible = true,
-                    text = systemImpl.getString(MR.strings.post),
-                    onClick = this::onClickSave
-                ),
                 hideBottomNavigation = true,
             )
         }
@@ -101,14 +96,22 @@ class DiscussionPostEditViewModel (
 
             )
 
-
             _uiState.update { prev ->
                 prev.copy(
-
                     fieldsEnabled = true,
                 )
             }
-            loadingState = LoadingUiState.NOT_LOADING
+
+            _appUiState.update { prev ->
+                prev.copy(
+                    actionBarButtonState = ActionBarButtonUiState(
+                        visible = true,
+                        text = systemImpl.getString(MR.strings.post),
+                        onClick = this@DiscussionPostEditViewModel::onClickSave
+                    ),
+                    loadingState = LoadingUiState.NOT_LOADING
+                )
+            }
         }
     }
 

@@ -44,11 +44,6 @@ class CourseTerminologyEditViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 title = createEditTitle(MR.strings.add_new_terminology, MR.strings.edit_terminology),
-                actionBarButtonState = ActionBarButtonUiState(
-                    visible = true,
-                    text = systemImpl.getString(MR.strings.save),
-                    onClick = this::onClickSave
-                ),
                 loadingState = LoadingUiState.INDETERMINATE
             )
         }
@@ -75,9 +70,19 @@ class CourseTerminologyEditViewModel(
                     }
                 }
             )
-
             _uiState.update { prev ->
                 prev.copy(fieldsEnabled = true)
+            }
+
+            _appUiState.update { prev ->
+                prev.copy(
+                    actionBarButtonState = ActionBarButtonUiState(
+                        visible = true,
+                        text = systemImpl.getString(MR.strings.save),
+                        onClick = this@CourseTerminologyEditViewModel::onClickSave
+                    ),
+                    loadingState = LoadingUiState.NOT_LOADING,
+                )
             }
         }
     }
@@ -116,9 +121,20 @@ class CourseTerminologyEditViewModel(
 
 
     fun onClickSave() {
+        if(!_uiState.value.fieldsEnabled)
+            return
+
+        _uiState.update { prev ->
+            prev.copy(fieldsEnabled = false)
+        }
+
         viewModelScope.launch {
             val terminology = _uiState.value.entity ?: return@launch
             activeDb.courseTerminologyDao.upsertAsync(terminology)
+
+            _uiState.update { prev ->
+                prev.copy(fieldsEnabled = true)
+            }
 
             //There is no terminology detail view
             finishWithResult(terminology)

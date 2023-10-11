@@ -20,6 +20,9 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeout
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlin.test.Test
@@ -87,18 +90,21 @@ class ClazzEnrolmentEditViewModelTest : AbstractMainDispatcherTest()  {
                 ClazzEnrolmentEditViewModel(di, savedStateHandle)
             }
 
-            viewModel.uiState.test(timeout = 5.seconds) {
+            val readyAppUiState = withTimeout(5000){
+                viewModel.appUiState.filter { it.actionBarButtonState.visible }.first()
+            }
+            viewModel.uiState.test(timeout = 5.seconds, name = "found readystate") {
                 val readyState = awaitItemWhere { it.fieldsEnabled }
                 assertTrue(ClazzEnrolment.ROLE_STUDENT in readyState.roleOptions)
                 assertTrue(ClazzEnrolment.ROLE_TEACHER in readyState.roleOptions)
                 cancelAndIgnoreRemainingEvents()
             }
 
-            viewModel.onClickSave()
+            readyAppUiState.actionBarButtonState.onClick()
 
             activeDb.clazzEnrolmentDao.findAllClazzesByPersonWithClazz(
                 testContext.personToEnrol.personUid
-            ).assertItemReceived {
+            ).assertItemReceived(timeout = 5.seconds, name = "found person enrolled in course") {
                 it.isNotEmpty() &&
                     it.first().clazzEnrolmentClazzUid == testContext.clazz.clazzUid &&
                     it.first().clazzEnrolmentPersonUid == testContext.personToEnrol.personUid
@@ -120,13 +126,18 @@ class ClazzEnrolmentEditViewModelTest : AbstractMainDispatcherTest()  {
 
             val leaveTime = Clock.System.now().plus(10.days).toEpochMilliseconds()
 
+            val appStateWithButton = withTimeout(5000) {
+                viewModel.appUiState.filter { it.actionBarButtonState.visible }.first()
+            }
+
             viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere { it.fieldsEnabled }
 
                 viewModel.onEntityChanged(readyState.clazzEnrolment?.shallowCopy {
                     clazzEnrolmentDateLeft = leaveTime
                 })
-                viewModel.onClickSave()
+
+                appStateWithButton.actionBarButtonState.onClick()
                 cancelAndIgnoreRemainingEvents()
             }
 
