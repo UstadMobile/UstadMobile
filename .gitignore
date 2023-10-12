@@ -244,7 +244,7 @@ test-end-to-end/android-maestro/e2e-tests/results
 
 # Dependency directory
 # https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git
-node_modules
+test-end-to-end/webapp-cypress/node_modules
 test-end-to-end/webapp-cypress/cypress/videos
 test-end-to-end/webapp-cypress/cypress/screenshots
 test-end-to-end/webapp-cypress/results
