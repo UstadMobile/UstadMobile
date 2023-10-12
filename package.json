@@ -3,6 +3,6 @@
     "cypress": "^13.3.0"
   },
   "dependencies": {
-    "@this-dot/cypress-indexeddb": "^2.0.1"
+    "@this-dot/cypress-indexeddb": "^2.0.0"
   }
 }
