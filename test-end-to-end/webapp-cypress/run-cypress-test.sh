@@ -51,6 +51,8 @@ cd $SCRIPTDIR
 
  cypress run
 
+#--reporter junit \
+--reporter-options "mochaFile=results/my-test-output.xml,toConsole=true"
 
 
 
