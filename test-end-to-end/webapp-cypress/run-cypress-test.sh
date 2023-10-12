@@ -46,7 +46,11 @@ done
 
 
 cd $SCRIPTDIR
- cypress run cypress run
- --reporter-options "mochaFile=results/my-test-output.xml,toConsole=true" \
+
+ npm install
+
+ cypress run
+
+
 
 

@@ -249,5 +249,3 @@ test-end-to-end/webapp-cypress/cypress/videos
 test-end-to-end/webapp-cypress/cypress/screenshots
 test-end-to-end/webapp-cypress/results
 js/*.js
-package.json
-package-lock.json
