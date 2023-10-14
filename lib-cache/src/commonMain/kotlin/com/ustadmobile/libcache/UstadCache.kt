@@ -1,4 +1,7 @@
-package com.ustadmobile.core.cache
+package com.ustadmobile.libcache
+
+import com.ustadmobile.libcache.request.HttpRequest
+import com.ustadmobile.libcache.response.HttpResponse
 
 data class CacheRetentionLock(
     val lockId: Int,
@@ -36,28 +39,23 @@ data class CacheRetentionJoin(
 interface UstadCache {
 
     /**
+     * Prime the cache - store the given requests in the cache. A StoreRequest may include a
+     * HttpResponse containing the response to be stored.
      *
-     *
-     * @param loadFromUri - if set, the data will be loaded from the given uri (e.g. can be used to
-     *       prime the cache from local data).
      */
-    suspend fun cache(
-        url: String,
-        loadFromUri: String? = null,
-        requestHeaders: Map<String, String>,
-        responseHeaders: Map<String, String>?,
-        lock: Boolean,
-        progressListener: () -> Unit,
-    ) //Return cache result that includes the SHA256
+    suspend fun store(
+        storeRequest: List<CacheEntryToStore>,
+        progressListener: StoreProgressListener,
+    ): List<StoreResult>
 
     /**
-     * Only on JVM for use with OKHttp
+     * Retrieve if cached.
      *
      * Expect-SHA-256 is set, then we can search for the given sha-256.
      */
     suspend fun retrieve(
-        request: String,//Actual request object
-    ): String //response
+        request: HttpRequest,
+    ): HttpResponse?
 
     suspend fun addRetentionLocks(locks: List<CacheRetentionLock>): List<Int>
 
@@ -96,6 +94,8 @@ interface UstadCache {
         retentionJoin: CacheRetentionJoin,
     ): String //StoreResult: include url, retention lock id if requested
 
+
+    fun close()
 
 
 }

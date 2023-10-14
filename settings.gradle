@@ -15,9 +15,14 @@ dependencyResolutionManagement {
             version("version_activity_compose", "1.7.2")
             version("version_androidx_appcompat", "1.6.1")
             version("version_androidx_core", "1.9.0")
+            version("version_kotlin", "1.9.0")
+            version("version_okhttp", "4.11.0")
+            version("version_door", "0.70b16")
+            version("version_coroutines", "1.7.3")
 
             plugin("jetbrains-compose", "org.jetbrains.compose").version("1.5.0")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
+            plugin("ksp", "com.google.devtools.ksp").version("1.9.0-1.0.13")
 
             library("kodein-di", "org.kodein.di:kodein-di:7.20.2")
             library("moko-resources", "dev.icerock.moko", "resources").versionRef("version-moko-resources")
@@ -25,6 +30,11 @@ dependencyResolutionManagement {
             library("activity-compose", "androidx.activity", "activity-compose").versionRef("version_activity_compose")
             library("androidx-appcompat", "androidx.appcompat", "appcompat").versionRef("version_androidx_appcompat")
             library("androidx-core-ktx", "androidx.core", "core-ktx").versionRef("version_androidx_core")
+            library("okhttp", "com.squareup.okhttp3", "okhttp").versionRef("version_okhttp")
+            library("door-runtime", "com.github.UstadMobile.door", "door-runtime").versionRef("version_door")
+            library("door-compiler", "com.github.UstadMobile.door", "door-compiler").versionRef("version_door")
+            library("door-room-annotations", "com.github.UstadMobile.door", "room-annotations").versionRef("version_door")
+            library("coroutines", "org.jetbrains.kotlinx", "kotlinx-coroutines-core").versionRef("version_coroutines")
         }
     }
 }
@@ -44,3 +54,4 @@ rootProject.name = "UstadMobile"
 
 include ':app-desktop'
 include ':lib-ui-compose'
+include ':lib-cache'
