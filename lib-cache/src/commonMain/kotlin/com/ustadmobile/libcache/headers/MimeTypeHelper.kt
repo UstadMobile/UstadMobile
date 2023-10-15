@@ -4,6 +4,8 @@ interface MimeTypeHelper {
 
     fun mimeTypeByUri(uri: String): String?
 
+    fun guessByExtension(extension: String): String?
+
     companion object {
 
         val EXTENSION_TO_MIME_TYPE = mapOf(

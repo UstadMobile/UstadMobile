@@ -28,13 +28,13 @@ expect abstract class CacheEntryDao {
          WHERE CacheEntry.url = :url
          LIMIT 1
     """)
-    abstract suspend fun findEntryAndBodyByUrl(url: String): CacheEntryAndBody?
+    abstract fun findEntryAndBodyByUrl(url: String): CacheEntryAndBody?
 
     @Insert
     abstract suspend fun insertAsync(entry: CacheEntry): Long
 
     @Insert
-    abstract suspend fun insertListAsync(entry: List<CacheEntry>)
+    abstract fun insertList(entry: List<CacheEntry>)
 
     @Query("""
         SELECT CacheEntry.*
@@ -44,7 +44,7 @@ expect abstract class CacheEntryDao {
                   FROM RequestedEntry
                  WHERE RequestedEntry.batchId = :batchId)
     """)
-    abstract suspend fun findByRequestBatchId(batchId: Int): List<CacheEntry>
+    abstract fun findByRequestBatchId(batchId: Int): List<CacheEntry>
 
 
 }

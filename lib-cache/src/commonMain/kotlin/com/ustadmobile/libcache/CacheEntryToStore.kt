@@ -2,6 +2,7 @@ package com.ustadmobile.libcache
 
 import com.ustadmobile.libcache.request.HttpRequest
 import com.ustadmobile.libcache.response.HttpResponse
+import com.ustadmobile.libcache.uri.IUri
 
 /**
  * Store a request and response in the cache.
@@ -17,7 +18,7 @@ import com.ustadmobile.libcache.response.HttpResponse
 data class CacheEntryToStore(
     val request: HttpRequest,
     val response: HttpResponse,
-    val responseBodyTmpLocalUri: String? = null,
+    val responseBodyTmpLocalUri: IUri? = null,
     val skipChecksum: Boolean = false,
     val retain: Boolean = true,
 )

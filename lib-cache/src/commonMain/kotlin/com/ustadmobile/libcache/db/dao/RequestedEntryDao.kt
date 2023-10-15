@@ -9,6 +9,9 @@ import com.ustadmobile.libcache.db.entities.RequestedEntry
 expect abstract class RequestedEntryDao {
 
     @Insert
+    abstract fun insertList(requestedSha256s: List<RequestedEntry>)
+
+    @Insert
     abstract suspend fun insertListAsync(requestedSha256s: List<RequestedEntry>)
 
     @Query(
@@ -23,12 +26,12 @@ expect abstract class RequestedEntryDao {
                 LIMIT 1)
     """
     )
-    abstract suspend fun findSha256sNotPresent(batchId: Int): List<String>
+    abstract fun findSha256sNotPresent(batchId: Int): List<String>
 
     @Query("""
         DELETE FROM RequestedEntry
          WHERE RequestedEntry.batchId = :batchId    
     """)
-    abstract suspend fun deleteBatch(batchId: Int)
+    abstract fun deleteBatch(batchId: Int)
 
 }

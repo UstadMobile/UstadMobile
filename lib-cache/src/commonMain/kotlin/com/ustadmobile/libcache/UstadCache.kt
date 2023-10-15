@@ -39,13 +39,11 @@ data class CacheRetentionJoin(
 interface UstadCache {
 
     /**
-     * Prime the cache - store the given requests in the cache. A StoreRequest may include a
-     * HttpResponse containing the response to be stored.
-     *
+     * Store a set of requests with their corresponding response.
      */
-    suspend fun store(
+    fun store(
         storeRequest: List<CacheEntryToStore>,
-        progressListener: StoreProgressListener,
+        progressListener: StoreProgressListener? = null,
     ): List<StoreResult>
 
     /**
@@ -53,13 +51,13 @@ interface UstadCache {
      *
      * Expect-SHA-256 is set, then we can search for the given sha-256.
      */
-    suspend fun retrieve(
+    fun retrieve(
         request: HttpRequest,
     ): HttpResponse?
 
-    suspend fun addRetentionLocks(locks: List<CacheRetentionLock>): List<Int>
+    fun addRetentionLocks(locks: List<CacheRetentionLock>): List<Int>
 
-    suspend fun removeRetentionLocks(lockIds: List<Int>)
+    fun removeRetentionLocks(lockIds: List<Int>)
 
     /**
      * Ustad-specific logic
