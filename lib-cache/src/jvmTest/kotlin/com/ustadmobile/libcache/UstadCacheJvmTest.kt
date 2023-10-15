@@ -13,6 +13,7 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import java.security.MessageDigest
 import java.util.Base64
+import kotlin.test.assertEquals
 
 
 class UstadCacheJvmTest {
@@ -43,7 +44,7 @@ class UstadCacheJvmTest {
 
         runBlocking {
             val request = requestBuilder {
-                url = "http://server.com/file.jpg"
+                url = "http://server.com/file.png"
             }
 
             ustadCache.store(
@@ -52,6 +53,7 @@ class UstadCacheJvmTest {
                         request = request,
                         response = HttpFileResponse(
                             file = testFile,
+                            mimeType = "image/png",
                             request = request,
                         )
                     )
@@ -68,13 +70,11 @@ class UstadCacheJvmTest {
                 it.update(testFile.readBytes())
             }.digest()
 
-            val couponHeader = cacheResponse.headers[CouponHeader.COUPON_HEADER_NAME]?.let {
-                CouponHeader.fromString(it)
-            }!!
-
-            val headerSha256 = Base64.getDecoder().decode(couponHeader.actualSha256!!)
+            val sha256Header = cacheResponse.headers[CouponHeader.COUPON_ACTUAL_SHA_256]!!
+            val headerSha256 = Base64.getDecoder().decode(sha256Header)
             Assert.assertArrayEquals(dataSha256, headerSha256)
-
+            assertEquals(testFile.length(), cacheResponse.headers["content-length"]?.toLong())
+            assertEquals("image/png", cacheResponse.headers["content-type"])
         }
 
     }

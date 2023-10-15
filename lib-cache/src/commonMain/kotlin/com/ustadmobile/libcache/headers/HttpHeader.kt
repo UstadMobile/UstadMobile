@@ -4,6 +4,8 @@ data class HttpHeader(
     val name: String,
     val value: String,
 ) {
+    fun asString() = "$name: $value"
+
     companion object {
 
         fun fromString(headerLine: String) : HttpHeader {

@@ -1,17 +1,15 @@
 package com.ustadmobile.libcache
 
 import com.ustadmobile.door.ext.withDoorTransactionAsync
-import com.ustadmobile.libcache.headers.CouponHeader.Companion.COUPON_HEADER_NAME
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.CacheEntry
 import com.ustadmobile.libcache.db.entities.RequestedEntry
 import com.ustadmobile.libcache.db.entities.ResponseBody
-import com.ustadmobile.libcache.headers.CouponHeader
-import com.ustadmobile.libcache.headers.HttpHeader
+import com.ustadmobile.libcache.headers.CouponHeader.Companion.COUPON_ACTUAL_SHA_256
 import com.ustadmobile.libcache.headers.HttpHeaders
-import com.ustadmobile.libcache.headers.appendOrReplace
-import com.ustadmobile.libcache.headers.toHeaderString
-import com.ustadmobile.libcache.headers.toHeadersList
+import com.ustadmobile.libcache.headers.MimeTypeHelper
+import com.ustadmobile.libcache.headers.asString
+import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.request.HttpRequest
 import com.ustadmobile.libcache.response.CacheResponseJvm
 import com.ustadmobile.libcache.response.HttpResponse
@@ -21,8 +19,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import java.io.File
 import java.io.FileOutputStream
 import java.security.DigestInputStream
@@ -32,8 +28,9 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
 
 class UstadCacheJvm(
-    private val cacheDir: File,
-    private val db: UstadCacheDb
+    cacheDir: File,
+    private val db: UstadCacheDb,
+    internal val mimeTypeHelper: MimeTypeHelper = FileMimeTypeHelperImpl()
 ) : UstadCache {
 
     private val scope = CoroutineScope(Dispatchers.IO + Job())
@@ -73,21 +70,16 @@ class UstadCacheJvm(
             val sha256 = Base64.getEncoder().encodeToString(digest.digest())
             digest.reset()
 
-            //Add the actual-sha256
-            val responseCouponHeader = response.headers[COUPON_HEADER_NAME]?.let {
-                CouponHeader.fromString(it).copy(
-                    actualSha256 = sha256
-                )
-            } ?: CouponHeader(actualSha256 = sha256)
+            val headersStr = headersBuilder {
+                takeFrom(response.headers)
+                header(COUPON_ACTUAL_SHA_256, sha256)
+            }.asString()
 
             CacheEntryAndTmpFile(
                 cacheEntry = CacheEntry(
                     url = entryToStore.request.url,
                     responseBodySha256 = sha256,
-                    responseHeaders = response.headers.toHeadersList().appendOrReplace(
-                        name = COUPON_HEADER_NAME,
-                        value = responseCouponHeader.toHeaderString(),
-                    ).toHeaderString(),
+                    responseHeaders = headersStr,
                 ),
                 tmpFile = tmpFile
             )
@@ -136,9 +128,6 @@ class UstadCacheJvm(
 
         emptyList()
     }
-
-
-
 
     /**
      * Retrieve a response from the cache, if available. The response might be stale.

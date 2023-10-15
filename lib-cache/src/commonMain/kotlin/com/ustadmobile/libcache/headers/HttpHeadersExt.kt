@@ -1,11 +1,10 @@
 package com.ustadmobile.libcache.headers
 
-fun HttpHeaders.toHeadersList(): List<HttpHeader> {
-    return if(this is HttpHeadersImpl) {
-        this.headers
-    }else {
-        this.names().flatMap { headerName ->
-            this.getAllByName(headerName).map { HttpHeader(headerName, it) }
-        }
-    }
+/**
+ * Turn the headers into a string that can be used for CacheEntry
+ */
+internal fun HttpHeaders.asString() : String{
+    return names().flatMap {name ->
+        getAllByName(name).map { HttpHeader(name, it) }
+    }.joinToString(separator = "\r\n") { it.asString() }
 }
