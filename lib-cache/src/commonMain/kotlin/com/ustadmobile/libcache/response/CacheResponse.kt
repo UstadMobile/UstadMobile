@@ -3,19 +3,19 @@ package com.ustadmobile.libcache.response
 import com.ustadmobile.libcache.db.entities.ResponseBody
 import com.ustadmobile.libcache.headers.HttpHeaders
 import com.ustadmobile.libcache.request.HttpRequest
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
-import java.net.URI
+import kotlinx.io.Source
+import kotlinx.io.buffered
+import kotlinx.io.files.FileSystem
+import kotlinx.io.files.Path
 
-class CacheResponseJvm(
+class CacheResponse(
+    private val fileSystem: FileSystem,
     override val request: HttpRequest,
     override val headers: HttpHeaders,
     private val responseBody: ResponseBody,
-) : HttpResponseJvm {
+): HttpResponse {
 
-    override fun bodyInputStream(): InputStream {
-        val file = File(URI(responseBody.storageUri).path)
-        return FileInputStream(file)
+    override fun bodyAsSource(): Source {
+        return fileSystem.source(Path(responseBody.storageUri)).buffered()
     }
 }

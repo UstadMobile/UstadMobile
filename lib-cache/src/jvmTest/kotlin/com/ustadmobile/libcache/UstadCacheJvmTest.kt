@@ -4,9 +4,12 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.headers.CouponHeader
 import com.ustadmobile.libcache.request.requestBuilder
-import com.ustadmobile.libcache.response.HttpFileResponse
-import com.ustadmobile.libcache.response.bodyAsStream
-import com.ustadmobile.libcache.uri.UriJvm
+import com.ustadmobile.libcache.response.HttpPathResponse
+import kotlinx.io.asInputStream
+import kotlinx.io.asSource
+import kotlinx.io.buffered
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -32,7 +35,11 @@ class UstadCacheJvmTest {
         val cacheDb = DatabaseBuilder.databaseBuilder(
             UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
             .build()
-        val ustadCache = UstadCacheJvm(cacheDir, cacheDb)
+        val ustadCache = UstadCacheImpl(
+            storagePath = Path(cacheDir.absolutePath),
+            db = cacheDb,
+            mimeTypeHelper = FileMimeTypeHelperImpl()
+        )
         val testFile = tempDir.newFile()
         testFile.outputStream().use { outputStream ->
             this::class.java.getResourceAsStream("/testfile1.png")!!.copyTo(outputStream)
@@ -48,8 +55,9 @@ class UstadCacheJvmTest {
             listOf(
                 CacheEntryToStore(
                     request = request,
-                    response = HttpFileResponse(
-                        file = testFile,
+                    response = HttpPathResponse(
+                        path = Path(testFile.absolutePath),
+                        fileSystem = SystemFileSystem,
                         mimeType = "image/png",
                         request = request,
                     )
@@ -59,7 +67,7 @@ class UstadCacheJvmTest {
 
         //Check response body content matches
         val cacheResponse = ustadCache.retrieve(request)
-        val bodyBytes = cacheResponse!!.bodyAsStream().readAllBytes()
+        val bodyBytes = cacheResponse!!.bodyAsSource()!!.asInputStream().readAllBytes()
         Assert.assertArrayEquals(testFile.readBytes(), bodyBytes)
 
         val dataSha256 = MessageDigest.getInstance("SHA-256").also {
@@ -79,7 +87,11 @@ class UstadCacheJvmTest {
         val cacheDb = DatabaseBuilder.databaseBuilder(
             UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
             .build()
-        val ustadCache = UstadCacheJvm(cacheDir, cacheDb)
+        val ustadCache = UstadCacheImpl(
+            storagePath = Path(cacheDir.absolutePath),
+            db = cacheDb,
+            mimeTypeHelper = FileMimeTypeHelperImpl()
+        )
         val urlPrefix = "https://endpoint/content/ebook/"
 
         val zipFile = tempDir.newFile().also { file ->
@@ -90,7 +102,7 @@ class UstadCacheJvmTest {
         }
 
         ustadCache.storeZip(
-            zipUri = UriJvm(zipFile.toURI()),
+            zipSource = FileInputStream(zipFile).asSource().buffered(),
             urlPrefix = urlPrefix,
         )
 
@@ -106,7 +118,7 @@ class UstadCacheJvmTest {
                 val cacheResponse = ustadCache.retrieve(requestBuilder {
                     url = "$urlPrefix${zipEntry.name}"
                 })
-                val responseBytes = cacheResponse!!.bodyAsStream().readAllBytes()
+                val responseBytes = cacheResponse!!.bodyAsSource()!!.asInputStream().readAllBytes()
                 Assert.assertArrayEquals(entryBytes, responseBytes)
 
                 val expectedMimeType = mimeHelper.guessByExtension(zipEntry.name.substringAfterLast("."))

@@ -11,75 +11,62 @@ import com.ustadmobile.libcache.headers.HttpHeaders
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.headers.asString
 import com.ustadmobile.libcache.headers.headersBuilder
+import com.ustadmobile.libcache.io.transferToAndGetSha256
+import com.ustadmobile.libcache.io.unzipTo
 import com.ustadmobile.libcache.request.HttpRequest
 import com.ustadmobile.libcache.request.requestBuilder
-import com.ustadmobile.libcache.response.CacheResponseJvm
-import com.ustadmobile.libcache.response.HttpFileResponse
+import com.ustadmobile.libcache.response.CacheResponse
+import com.ustadmobile.libcache.response.HttpPathResponse
 import com.ustadmobile.libcache.response.HttpResponse
-import com.ustadmobile.libcache.response.bodyAsStream
-import com.ustadmobile.libcache.uri.IUri
-import com.ustadmobile.libcache.uri.IUriHelper
-import com.ustadmobile.libcache.uri.UriHelperJvm
-import com.ustadmobile.libcache.uri.UriJvm
+import com.ustadmobile.libcache.uuid.randomUuid
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
-import java.io.File
-import java.io.FileOutputStream
-import java.security.DigestInputStream
-import java.security.DigestOutputStream
-import java.security.MessageDigest
-import java.util.Base64
-import java.util.LinkedList
-import java.util.UUID
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.zip.ZipEntry
-import java.util.zip.ZipInputStream
+import kotlinx.io.Source
+import kotlinx.io.files.FileSystem
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
 
-class UstadCacheJvm(
-    cacheDir: File,
+class UstadCacheImpl(
+    private val fileSystem: FileSystem = SystemFileSystem,
+    storagePath: Path,
     private val db: UstadCacheDb,
-    internal val mimeTypeHelper: MimeTypeHelper = FileMimeTypeHelperImpl(),
-    internal val uriHelper: IUriHelper = UriHelperJvm(mimeTypeHelper),
+    internal val mimeTypeHelper: MimeTypeHelper,
 ) : UstadCache {
 
     private val scope = CoroutineScope(Dispatchers.IO + Job())
 
-    private val tmpDir = File(cacheDir, "tmp")
+    private val tmpDir = Path(storagePath, "tmp")
 
-    private val dataDir = File(cacheDir, "data")
+    private val dataDir = Path(storagePath, "data")
 
-    private val tmpCounter = AtomicInteger(0)
+    private val tmpCounter = atomic(0)
 
-    private val batchIdAtomic = AtomicInteger(0)
+    private val batchIdAtomic = atomic(0)
 
     data class CacheEntryAndTmpFile(
         val cacheEntry: CacheEntry,
-        val tmpFile: File,
+        val tmpFile: Path,
     )
 
     override fun store(
         storeRequest: List<CacheEntryToStore>,
         progressListener: StoreProgressListener?
     ): List<StoreResult> {
-        dataDir.takeIf { !it.exists() }?.mkdirs()
-        tmpDir.takeIf { !it.exists() }?.mkdirs()
+        fileSystem.takeIf { !fileSystem.exists(dataDir) }?.createDirectories(dataDir)
+        fileSystem.takeIf { !fileSystem.exists(tmpDir) }?.createDirectories(tmpDir)
 
-        val digest = MessageDigest.getInstance("SHA-256")
         val cacheEntries = storeRequest.map { entryToStore ->
             val response = entryToStore.response
-            val tmpFile = File(tmpDir, "${tmpCounter.incrementAndGet()}.tmp")
+            val tmpFile = Path(tmpDir, "${tmpCounter.incrementAndGet()}.tmp")
 
-            DigestInputStream(response.bodyAsStream(), digest).use { inputStream ->
-                FileOutputStream(tmpFile).use { fileOut ->
-                    inputStream.copyTo(fileOut)
-                    fileOut.flush()
-                }
-            }
+            val bodySource = response.bodyAsSource()
+                ?: throw IllegalArgumentException("Response for ${entryToStore.request.url} has no body")
 
-            val sha256 = Base64.getEncoder().encodeToString(digest.digest())
-            digest.reset()
+            val sha256 = bodySource.transferToAndGetSha256(tmpFile).sha256
+                .encodeBase64()
 
             val headersStr = headersBuilder {
                 takeFrom(response.headers)
@@ -99,7 +86,7 @@ class UstadCacheJvm(
         //find the sha256's we don't have. If we have it, discard tmpFile. If we don't move tmp file to data dir
         val batchId = batchIdAtomic.incrementAndGet()
 
-        db.withDoorTransaction {
+        db.withDoorTransaction { _ ->
             db.requestedEntryDao.insertList(cacheEntries.map {
                 RequestedEntry(
                     requestSha256 = it.cacheEntry.responseBodySha256 ?: "",
@@ -112,15 +99,15 @@ class UstadCacheJvm(
             val storedEntries = db.cacheEntryDao.findByRequestBatchId(batchId)
             val storedUrls = storedEntries.map { it.url }.toSet()
 
-            val responseBodies = cacheEntries.filter {
-                it.cacheEntry.responseBodySha256.let { it != null && it in sha256sToStore }
+            val responseBodies = cacheEntries.filter { entryAndFile ->
+                entryAndFile.cacheEntry.responseBodySha256.let { it != null && it in sha256sToStore }
             }.map {
-                val destFile = File(dataDir, UUID.randomUUID().toString())
-                it.tmpFile.renameTo(destFile) //Assert here
+                val destFile = Path(dataDir, randomUuid())
+                fileSystem.atomicMove(it.tmpFile, destFile)
 
                 ResponseBody(
                     sha256 = it.cacheEntry.responseBodySha256!!,
-                    storageUri = destFile.toURI().toString(),
+                    storageUri = destFile.toString(),
                 )
             }
 
@@ -144,60 +131,35 @@ class UstadCacheJvm(
      * Store all entries from a given Zip as entries in the cache. This is useful to process zipped
      * content e.g. epubs, xAPI/Scorm files, etc.
      *
-     * @param zipUri Uri providing an InputStream
+     * @param zipSource Source for Zip data
      * @param urlPrefix should end with /
      */
+
     fun storeZip(
-        zipUri: IUri,
+        zipSource: Source,
         urlPrefix: String,
         retain: Boolean = true,
     ) {
-        data class UnzippedEntry(
-            val entry: ZipEntry,
-            val tmpFile: File,
-            val sha256: ByteArray,
-        )
-
-        val unzippedEntries = LinkedList<UnzippedEntry>()
-        val messageDigest = MessageDigest.getInstance("SHA-256")
-        tmpDir.takeIf { !it.exists() }?.mkdirs()
-
-        ZipInputStream(uriHelper.openInputStream(zipUri)).use { zipInput ->
-            lateinit var zipEntry: ZipEntry
-            while(zipInput.nextEntry?.also { zipEntry = it } != null) {
-                if(zipEntry.name.endsWith("/"))
-                    continue
-
-                val tmpFile = File(tmpDir, UUID.randomUUID().toString())
-                DigestOutputStream(FileOutputStream(tmpFile), messageDigest).use { outStream ->
-                    zipInput.copyTo(outStream)
-                    outStream.flush()
-                }
-
-                unzippedEntries.add(UnzippedEntry(
-                    entry = zipEntry,
-                    tmpFile = tmpFile,
-                    sha256 = messageDigest.digest(),
-                ))
-            }
-        }
+        fileSystem.takeIf { !it.exists(tmpDir) }?.createDirectories(tmpDir)
+        val unzippedEntries = zipSource.unzipTo(tmpDir)
 
         val entriesToCache = unzippedEntries.map {
             val request = requestBuilder {
-                url = "$urlPrefix${it.entry.name}"
+                url = "$urlPrefix${it.name}"
             }
+
             CacheEntryToStore(
                 request = request,
-                response = HttpFileResponse(
-                    file = it.tmpFile,
-                    mimeType = mimeTypeHelper.guessByExtension(it.entry.name.substringAfterLast("."))
+                response = HttpPathResponse(
+                    path = it.path,
+                    fileSystem = fileSystem,
+                    mimeType = mimeTypeHelper.guessByExtension(it.name.substringAfterLast("."))
                         ?: "application/octet-stream",
                     request = request,
                     extraHeaders = headersBuilder {
                         header(COUPON_ACTUAL_SHA_256, it.sha256.encodeBase64())
                     }
                 ),
-                responseBodyTmpLocalUri = UriJvm(it.tmpFile.toURI()),
                 skipChecksum = true,
                 retain = retain,
             )
@@ -218,7 +180,12 @@ class UstadCacheJvm(
     override fun retrieve(request: HttpRequest): HttpResponse? {
         val (entry, body) = db.cacheEntryDao.findEntryAndBodyByUrl(request.url) ?: return null
         if(entry != null && body != null) {
-            return CacheResponseJvm(request, HttpHeaders.fromString(entry.responseHeaders), body)
+            return CacheResponse(
+                fileSystem = fileSystem,
+                request = request,
+                headers = HttpHeaders.fromString(entry.responseHeaders),
+                responseBody = body
+            )
         }
 
         return null

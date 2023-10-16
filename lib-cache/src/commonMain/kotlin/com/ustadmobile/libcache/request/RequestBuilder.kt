@@ -1,10 +1,18 @@
 package com.ustadmobile.libcache.request
 
 import com.ustadmobile.libcache.headers.HttpHeader
+import com.ustadmobile.libcache.headers.HttpHeadersImpl
 
-expect fun requestBuilder(
+fun requestBuilder(
     block: RequestBuilder.() -> Unit
-) : HttpRequest
+) : HttpRequest {
+    return RequestBuilder().also(block).let {
+        BaseHttpRequest(
+            it.url, HttpHeadersImpl(it.headers), it.method
+        )
+    }
+}
+
 
 class RequestBuilder internal constructor() {
 

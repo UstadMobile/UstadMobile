@@ -2,6 +2,7 @@ plugins {
     kotlin("multiplatform")
     id("com.android.library")
     alias(libs.plugins.ksp)
+    alias(libs.plugins.atomicfu)
 }
 
 kotlin {
@@ -19,7 +20,17 @@ kotlin {
                 implementation(kotlin("stdlib-common"))
                 implementation(libs.coroutines)
                 implementation(libs.door.runtime)
+                implementation(libs.atomicfu)
+                implementation(libs.kotlinxio.core)
                 compileOnly(libs.door.room.annotations)
+            }
+        }
+
+
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(kotlin("test-common"))
             }
         }
 
@@ -27,13 +38,6 @@ kotlin {
             dependsOn(commonMain)
             dependencies {
                 implementation(libs.okhttp)
-            }
-        }
-
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(kotlin("test-common"))
             }
         }
 
@@ -47,6 +51,10 @@ kotlin {
 
         val androidMain by getting {
             dependsOn(commonJvmMain)
+
+            dependencies {
+                implementation(libs.androidx.room.runtime)
+            }
         }
 
     }
@@ -55,6 +63,7 @@ kotlin {
 dependencies {
     add("kspJvm", libs.door.compiler)
     add("kspAndroid", libs.door.compiler)
+    add("kspAndroid", libs.androidx.room.compiler)
 }
 
 android {
