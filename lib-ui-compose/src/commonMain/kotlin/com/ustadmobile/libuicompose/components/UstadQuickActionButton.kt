@@ -1,6 +1,5 @@
 package com.ustadmobile.libuicompose.components
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -25,13 +24,14 @@ fun UstadQuickActionButton(
             horizontalAlignment = Alignment.CenterHorizontally
         ){
 
-            Image(
-                painter = painterResource(id = imageId),
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(
-                    color = contentColorFor(backgroundColor = MaterialTheme.colors.background)),
-                modifier = Modifier
-                    .size(24.dp))
+//            Image(
+//                          // TODO error
+//                painter = painterResource(id = imageId),
+//                contentDescription = null,
+//                colorFilter = ColorFilter.tint(
+//                    color = contentColorFor(backgroundColor = MaterialTheme.colors.background)),
+//                modifier = Modifier
+//                    .size(24.dp))
 
             Spacer(modifier = Modifier.width(10.dp))
 
