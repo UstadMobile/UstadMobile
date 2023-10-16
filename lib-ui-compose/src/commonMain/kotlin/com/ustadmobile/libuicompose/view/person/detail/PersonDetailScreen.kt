@@ -23,9 +23,9 @@ import androidx.compose.material.icons.filled.Message
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailUiState
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
@@ -34,7 +34,8 @@ import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.libuicompose.components.UstadDetailField
 import com.ustadmobile.libuicompose.components.UstadQuickActionButton
-import dev.icerock.moko.resources.compose.painterResource
+import java.text.DateFormat
+import java.util.Date
 
 @Composable
 fun PersonDetailScreenForViewModel(viewModel: PersonDetailViewModel) {
@@ -66,9 +67,11 @@ fun PersonDetailScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     )  {
+                                 // TODO error
 //        val personPictureUri = rememberResolvedAttachmentUri(uiState.personPicture?.personPictureUri)
 
 //        if(personPictureUri != null) {
+              // TODO error
 //            SubcomposeAsyncImage(
 //                model = personPictureUri,
 //                contentDescription = null,
@@ -144,12 +147,14 @@ private fun QuickActionBar(
 
             UstadQuickActionButton(
                 labelText = stringResource(MR.strings.call),
+                // TODO error
 //                imageId = painterResource(MR.images.ic_call_bcd4_24dp),
                 onClick = onClickDial
             )
 
             UstadQuickActionButton(
                 labelText = stringResource(MR.strings.text),
+                // TODO error
 //                imageId = painterResource(MR.images.ic_baseline_sms_24),
                 onClick = onClickSms
             )
@@ -158,6 +163,7 @@ private fun QuickActionBar(
         if (uiState.emailVisible){
             UstadQuickActionButton(
                 labelText = stringResource(MR.strings.email),
+                // TODO error
 //                imageId = painterResource(MR.images.ic_email_black_24dp),
                 onClick = onClickEmail
             )
@@ -166,6 +172,7 @@ private fun QuickActionBar(
         if(uiState.showCreateAccountVisible){
             UstadQuickActionButton(
                 labelText = stringResource(MR.strings.create_account),
+                // TODO error
 //                imageId = painterResource(MR.images.ic_person_black_24dp),
                 onClick = onClickCreateAccount
             )
@@ -174,6 +181,7 @@ private fun QuickActionBar(
         if(uiState.changePasswordVisible){
             UstadQuickActionButton(
                 labelText = stringResource(MR.strings.change_password),
+                // TODO error
 //                imageId = painterResource(MR.images.person_with_key),
                 onClick = onClickChangePassword
             )
@@ -182,6 +190,7 @@ private fun QuickActionBar(
         if (uiState.manageParentalConsentVisible){
             UstadQuickActionButton(
                 labelText = stringResource(MR.strings.manage_parental_consent),
+                // TODO error
 //                imageId = painterResource(MR.images.ic_baseline_supervised_user_circle_24),
                 onClick = onClickManageParentalConsent
             )
@@ -190,6 +199,7 @@ private fun QuickActionBar(
         if (uiState.chatVisible){
             UstadQuickActionButton(
                 labelText = stringResource(MR.strings.chat),
+                // TODO error
 //                imageId = painterResource(MR.images.ic_baseline_chat_24),
                 onClick = onClickChat
             )
@@ -204,47 +214,52 @@ private fun DetailFields(uiState: PersonDetailUiState){
         modifier = Modifier.padding(8.dp)
     ){
 
+        // TODO error
 //        val gender = stringIdMapResource(
 //            map = PersonConstants.GENDER_MESSAGE_ID_MAP,
 //            key = uiState.person?.gender ?: 1)
 
+                                                  // TODO error
 //        val dateOfBirth = remember { DateFormat.getDateFormat(context)
 //            .format(Date(uiState.person?.dateOfBirth ?: 0)).toString() }
 
         if (uiState.dateOfBirthVisible){
-            UstadDetailField(
-                imageId = R.drawable.ic_date_range_black_24dp,
-                valueText = dateOfBirth,
-                labelText = stringResource(MR.strings.birthday))
+//            UstadDetailField(
+//                          // TODO error
+//                imageId = R.drawable.ic_date_range_black_24dp,
+//                valueText = dateOfBirth,
+//                labelText = stringResource(MR.strings.birthday))
         }
 
         Spacer(modifier = Modifier.height(10.dp))
 
         if (uiState.personGenderVisible){
-            UstadDetailField(
-                valueText = gender,
-                labelText = stringResource(MR.strings.gender_literal),
-                imageId = 0,
-            )
+//            UstadDetailField(
+//                valueText = gender,
+//                labelText = stringResource(MR.strings.gender_literal),
+//                imageId = 0,
+//            )
         }
 
         Spacer(modifier = Modifier.height(10.dp))
 
         if (uiState.personOrgIdVisible){
-            UstadDetailField(
-                imageId = R.drawable.ic_badge_24dp,
-                valueText = uiState.person?.personOrgId ?: "",
-                labelText = stringResource(MR.strings.organization_id)
-            )
+//            UstadDetailField(
+                              // TODO error
+//                imageId = R.drawable.ic_badge_24dp,
+//                valueText = uiState.person?.personOrgId ?: "",
+//                labelText = stringResource(MR.strings.organization_id)
+//            )
         }
 
         Spacer(modifier = Modifier.height(10.dp))
 
         if (uiState.personUsernameVisible){
-            UstadDetailField(
-                imageId = R.drawable.ic_account_circle_black_24dp,
-                valueText = uiState.person?.username ?: "",
-                labelText = stringResource(MR.strings.username))
+//            UstadDetailField(
+                               // TODO error
+//                imageId = R.drawable.ic_account_circle_black_24dp,
+//                valueText = uiState.person?.username ?: "",
+//                labelText = stringResource(MR.strings.username))
         }
     }
 }
@@ -261,37 +276,40 @@ private fun ContactDetails(
     ) {
 
         if (uiState.phoneNumVisible){
-            UstadDetailField(
-                valueText = uiState.person?.phoneNum ?: "",
-                labelText = stringResource(MR.strings.phone),
-                imageId = R.drawable.ic_phone_black_24dp,
-                onClick = onClickDial,
-                secondaryActionContent = {
-                    IconButton(
-                        onClick = onClickSms,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Message,
-                            contentDescription = stringResource(id = CR.string.message),
-                        )
-                    }
-                }
-            )
+//            UstadDetailField(
+//                valueText = uiState.person?.phoneNum ?: "",
+//                labelText = stringResource(MR.strings.phone),
+//                          // TODO error
+//                imageId = R.drawable.ic_phone_black_24dp,
+//                onClick = onClickDial,
+//                secondaryActionContent = {
+//                    IconButton(
+//                        onClick = onClickSms,
+//                    ) {
+//                        Icon(
+//                            imageVector = Icons.Filled.Message,
+//                            contentDescription = stringResource(MR.strings.message),
+//                        )
+//                    }
+//                }
+//            )
         }
 
         if (uiState.emailVisible){
-            UstadDetailField(
-                imageId = R.drawable.ic_email_black_24dp,
-                valueText = uiState.person?.emailAddr ?: "",
-                labelText = stringResource(MR.strings.email),
-                onClick = onClickEmail)
+//            UstadDetailField(
+                            // TODO error
+//                imageId = R.drawable.ic_email_black_24dp,
+//                valueText = uiState.person?.emailAddr ?: "",
+//                labelText = stringResource(MR.strings.email),
+//                onClick = onClickEmail)
         }
 
         if (uiState.personAddressVisible){
-            UstadDetailField(
-                imageId = R.drawable.ic_location_pin_24dp,
-                valueText = uiState.person?.personAddress ?: "",
-                labelText = stringResource(MR.strings.address))
+//            UstadDetailField(
+                            // TODO error
+//                imageId = R.drawable.ic_location_pin_24dp,
+//                valueText = uiState.person?.personAddress ?: "",
+//                labelText = stringResource(MR.strings.address))
         }
     }
 }
@@ -319,11 +337,12 @@ private fun ClassItem(clazz: ClazzEnrolmentWithClazzAndAttendance){
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ){
-        Image(
-            painter = painterResource(MR.images.ic_group_black_24dp),
-            contentDescription = null,
-            modifier = Modifier
-                .width(35.dp))
+//        Image(
+//                                      // TODO error
+//            painter = painterResource(MR.images.ic_group_black_24dp),
+//            contentDescription = null,
+//            modifier = Modifier
+//                .width(35.dp))
 
         Text(text = clazz.clazz?.clazzName ?: "")
     }
