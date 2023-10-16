@@ -113,7 +113,6 @@ data class HelloWorldScreen(
             )
 
             HtmlClickableTextField(
-                root = {},
                 html = "Complete your assignment or <b>else</b>",
                 label = stringResource(MR.strings.description),
                 onClick = {  },
