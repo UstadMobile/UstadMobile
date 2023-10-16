@@ -33,6 +33,8 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
+import com.ustadmobile.libuicompose.components.UstadListSortHeader
 
 @Composable
 fun ClazzListScreenForViewModel(viewModel: ClazzListViewModel) {
@@ -44,6 +46,7 @@ fun ClazzListScreenForViewModel(viewModel: ClazzListViewModel) {
         uiState = uiState,
         onClickClazz = viewModel::onClickEntry,
         onClickSort =  {
+            //  TODO error
 //            SortBottomSheetFragment(
 //                sortOptions = uiState.sortOptions,
 //                selectedSort = uiState.activeSortOrderOption,
@@ -64,13 +67,15 @@ fun ClazzListScreen(
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
 ) {
 
-    val pager = remember(uiState.clazzList){
+    //  TODO error
+//    val pager = remember(uiState.clazzList){
 //        Pager(
 //            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
 //            pagingSourceFactory = uiState.clazzList
 //        )
-    }
+//    }
 
+    //  TODO error
 //    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
     LazyVerticalGrid(
@@ -84,22 +89,25 @@ fun ClazzListScreen(
     ) {
 
         item(span = { GridItemSpan(maxLineSpan) }) {
-//            UstadListSortHeader(
+            //  TODO error
+            UstadListSortHeader(
+                                   //  TODO error
 //                modifier = Modifier.defaultItemPadding(),
-//                activeSortOrderOption = uiState.activeSortOrderOption,
-//                enabled = uiState.fieldsEnabled,
-//                onClickSort = onClickSort
-//            )
+                activeSortOrderOption = uiState.activeSortOrderOption,
+                enabled = uiState.fieldsEnabled,
+                onClickSort = onClickSort
+            )
         }
 
         item(span = { GridItemSpan(maxLineSpan) }) {
-//            UstadListFilterChipsHeader(
+            UstadListFilterChipsHeader(
+                                   //  TODO error
 //                modifier = Modifier.defaultItemPadding(),
-//                filterOptions = uiState.filterOptions,
-//                selectedChipId = uiState.selectedChipId,
-//                enabled = uiState.fieldsEnabled,
-//                onClickFilterChip = onClickFilterChip,
-//            )
+                filterOptions = uiState.filterOptions,
+                selectedChipId = uiState.selectedChipId,
+                enabled = uiState.fieldsEnabled,
+                onClickFilterChip = onClickFilterChip,
+            )
         }
 
 
@@ -139,6 +147,7 @@ fun ClazzListItem(
 
     Card(
         modifier = Modifier
+            //  TODO error
 //            .defaultItemPadding()
             .clickable {
                 clazz?.also { onClickClazz(it) }
@@ -158,6 +167,7 @@ fun ClazzListItem(
                         style = MaterialTheme.typography.h6,
                         maxLines = 1,
                     )
+                    //  TODO error
 //                    HtmlText(
 //                        html = clazz?.clazzDesc ?: "",
 //                        htmlMaxLines = 2,
