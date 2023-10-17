@@ -5,3 +5,8 @@ const val TRIGGER_UPSERT_WHERE_NEWER = """
                       SELECT %NEW_VALUES%
                        WHERE %NEW_ETAG_NOT_EQUAL_TO_EXISTING%
 """
+
+const val TRIGGER_UPSERT = """
+    REPLACE INTO %TABLE_AND_FIELD_NAMES%
+     SELECT %NEW_VALUES%  
+"""

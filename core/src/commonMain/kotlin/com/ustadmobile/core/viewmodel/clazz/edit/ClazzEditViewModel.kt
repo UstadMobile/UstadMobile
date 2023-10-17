@@ -190,7 +190,7 @@ class ClazzEditViewModel(
                         loadFromStateKeys = listOf(STATE_KEY_COURSEBLOCKS),
                         onLoadFromDb = { db ->
                             val courseBlocksDb = db.courseBlockDao.takeIf { entityUidArg != 0L }
-                                ?.findAllCourseBlockByClazzUidAsync(entityUidArg) ?: emptyList()
+                                ?.findAllCourseBlockByClazzUidAsync(entityUidArg, false) ?: emptyList()
 
                             val assignmentPeerAllocations = db.peerReviewerAllocationDao
                                 .takeIf { entityUidArg != 0L }?.getAllPeerReviewerAllocations(

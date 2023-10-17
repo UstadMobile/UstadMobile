@@ -7,7 +7,6 @@ import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.core.util.ext.toggle
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
@@ -70,9 +69,12 @@ class ClazzDetailOverviewViewModel(
 
     private val pagingSourceFactory: () -> PagingSource<Int, CourseBlockAndDisplayDetails> = {
         activeRepo.courseBlockDao.findAllCourseBlockByClazzUidAsPagingSource(
-            clazzUid = entityUidArg, collapseList = _uiState.value.collapsedBlockUids.toList()
+            clazzUid = entityUidArg,
+            collapseList = _uiState.value.collapsedBlockUids.toList(),
+            includeInactive = false,
+            includeHidden = false,
+            hideUntilFilterTime = systemTimeInMillis(),
         ).also {
-            lastCourseBlockPagingSource?.invalidate()
             lastCourseBlockPagingSource = it
         }
     }
