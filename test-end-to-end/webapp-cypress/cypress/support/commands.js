@@ -43,7 +43,6 @@ Cypress.Commands.add('logout', () => {
 Cypress.Commands.add('addCourse',(courseName) => {
     cy.contains("Courses").click()
     cy.contains("button","Course").click()
-    //cy.wait(4000)
     cy.contains("Add a new course").click()
     cy.get('input[id="clazz_name"]').type(courseName)
     cy.get('div[data-placeholder="Description"]').type("simple class")
@@ -60,7 +59,6 @@ Cypress.Commands.add('addCourse',(courseName) => {
         cy.get('div[id="gender"]').click()
         cy.contains("li",gender).click()
         cy.contains("button","Save",{timeout: 1000}).click()
-        cy.wait(2000)
         cy.contains("button","Save",{timeout: 3000}).click()
     })
 
