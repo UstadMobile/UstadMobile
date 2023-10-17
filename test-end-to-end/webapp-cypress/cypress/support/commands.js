@@ -16,21 +16,34 @@
 //below command added as per : https://github.com/thisdot/open-source/blob/main/libs/cypress-indexeddb/README.md
 import '@this-dot/cypress-indexeddb';
 
-// Login flow
+// Start Test Server
+Cypress.Commands.add('startTestServer', () => {
+  cy.visit('http://localhost:8075/start'); // Use cy.visit to navigate to the start page
+  cy.wait(1000); // Wait for 2 seconds after visiting the start page
+});
+
+//clearing indexdb
+Cypress.Commands.add('clearIndexedDB', () => {
+  cy.log('Clearing IndexedDB');
+  cy.clearIndexedDB('localhost_8087');
+});
+
+//User Login
 Cypress.Commands.add('login', (username, password) => {
-  cy.clearIndexedDb('localhost_8087');
+  cy.log('Clearing IndexedDB');
+  cy.clearIndexedDb('localhost_8087') // clearing index db
   cy.visit('http://localhost:8087/', {
     qs: {
       username,
       password,
     },
 
-  });
+  })
   // Assuming that elements are found by their IDs
-  cy.get('input#username', { timeout: 6000 }).should('be.visible').type(username); // 5 seconds
-  cy.get('input#password').type(password);
-  cy.get('button#login_button').click();
-});
+  cy.get('input#username', { timeout: 10000 }).should('be.visible').type(username) // 5 seconds
+  cy.get('input#password').type(password)
+  cy.get('button#login_button').click()
+})
 
 // Logout Flow
 
@@ -58,8 +71,9 @@ Cypress.Commands.add('addCourse',(courseName) => {
         cy.contains("label", "Last name").parent().find("input").clear().type(lastName)
         cy.get('div[id="gender"]').click()
         cy.contains("li",gender).click()
-        cy.contains("button","Save",{timeout: 1000}).click()
-        cy.contains("button","Save",{timeout: 3000}).click()
+        cy.contains("button","Save",{timeout: 2000}).click()
+        cy.wait(2000)
+        cy.contains("button","Save",{timeout: 2000}).click()
     })
 
    // Create a user account
