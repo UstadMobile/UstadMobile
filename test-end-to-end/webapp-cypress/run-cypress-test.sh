@@ -91,9 +91,8 @@ echo $SPECARG
 
 npm install
 
-npm exec cypress run
-
---reporter-options "mochaFile=results/my-test-output.xml,toConsole=true"
+npm exec cypress run \
+--reporter-options "mochaFile=results/my-test-output.xml,toConsole=true" \
 --spec $SPECARG
 
 $SCRIPTDIR/../../testserver-controller/stop.sh
