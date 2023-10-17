@@ -45,7 +45,7 @@ data class PersonAccountEditUiState(
 
     val errorMessage: String? = null,
 
-    val fieldsEnabled: Boolean = true,
+    val fieldsEnabled: Boolean = false,
 ) {
     val usernameVisible: Boolean
         get() = personAccount?.username != null
@@ -73,7 +73,6 @@ class PersonAccountEditViewModel(
         _appUiState.value = AppUiState(
             loadingState = LoadingUiState.INDETERMINATE,
         )
-        _uiState.update { prev -> prev.copy(fieldsEnabled = false) }
 
         viewModelScope.launch {
             loadEntity(

@@ -32,6 +32,7 @@ val HeaderAvatar = FC<Props> {
         )
 
     IconButton {
+        id = "header_avatar"
         onClick = {
             navigateFn.invoke(AccountListViewModel.DEST_NAME)
         }
