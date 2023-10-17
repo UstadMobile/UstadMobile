@@ -32,7 +32,7 @@ data class ClazzLogEditAttendanceUiState(
 
     val clazzLogsList: List<ClazzLog> = emptyList(),
 
-    val fieldsEnabled: Boolean = true,
+    val fieldsEnabled: Boolean = false,
 
     val timeZone: String = "UTC"
 
@@ -182,7 +182,8 @@ class ClazzLogEditAttendanceViewModel(
             prev.copy(
                 currentClazzLogIndex = prev.clazzLogsList.indexOfFirst {
                     it.clazzLogUid == clazzLog.clazzLogUid
-                }
+                },
+                fieldsEnabled = false,
             )
         }
 
@@ -222,7 +223,8 @@ class ClazzLogEditAttendanceViewModel(
 
             _uiState.update { prev ->
                 prev.copy(
-                    clazzLogAttendanceRecordList = personAndAttendanceRecords
+                    clazzLogAttendanceRecordList = personAndAttendanceRecords,
+                    fieldsEnabled = true,
                 )
             }
 

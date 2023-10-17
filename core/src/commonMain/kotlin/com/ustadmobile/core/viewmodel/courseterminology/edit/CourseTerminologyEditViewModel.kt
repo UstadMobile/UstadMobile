@@ -25,7 +25,7 @@ data class CourseTerminologyEditUiState(
 
     val entity: CourseTerminology? = null,
 
-    val fieldsEnabled: Boolean = true,
+    val fieldsEnabled: Boolean = false,
 
     val terminologyTermList: List<TerminologyEntry> = emptyList()
 
@@ -36,7 +36,7 @@ class CourseTerminologyEditViewModel(
     savedStateHandle: UstadSavedStateHandle,
 ): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
-    private val _uiState = MutableStateFlow(CourseTerminologyEditUiState(fieldsEnabled = false))
+    private val _uiState = MutableStateFlow(CourseTerminologyEditUiState())
 
     val uiState: Flow<CourseTerminologyEditUiState> = _uiState.asStateFlow()
 

@@ -31,7 +31,7 @@ import org.kodein.di.instance
 @kotlinx.serialization.Serializable
 data class ClazzAssignmentEditUiState(
 
-    val fieldsEnabled: Boolean = true,
+    val fieldsEnabled: Boolean = false,
 
     val markingTypeEnabled: Boolean = true,
 
@@ -95,10 +95,6 @@ class ClazzAssignmentEditViewModel(
                 loadingState = LoadingUiState.INDETERMINATE,
                 title = createEditTitle(MR.strings.new_assignment, MR.strings.edit_assignment),
             )
-        }
-
-        _uiState.update { prev ->
-            prev.copy(fieldsEnabled = false)
         }
 
         viewModelScope.launch {

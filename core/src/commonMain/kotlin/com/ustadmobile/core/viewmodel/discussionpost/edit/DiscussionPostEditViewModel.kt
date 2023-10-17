@@ -25,7 +25,7 @@ import org.kodein.di.DI
 
 data class DiscussionPostEditUiState(
     val discussionPost: DiscussionPost? = null,
-    val fieldsEnabled: Boolean = true,
+    val fieldsEnabled: Boolean = false,
     val discussionPostTitleError: String? = null,
     val discussionPostDescError: String? = null
 )
@@ -38,9 +38,7 @@ class DiscussionPostEditViewModel (
 
     private val _uiState: MutableStateFlow<DiscussionPostEditUiState> =
         MutableStateFlow(
-            DiscussionPostEditUiState(
-                fieldsEnabled = false,
-            )
+            DiscussionPostEditUiState()
         )
 
     val uiState: Flow<DiscussionPostEditUiState> = _uiState.asStateFlow()

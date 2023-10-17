@@ -42,7 +42,7 @@ import io.github.aakira.napier.Napier
 @Serializable
 data class ClazzEditUiState(
 
-    val fieldsEnabled: Boolean = true,
+    val fieldsEnabled: Boolean = false,
 
     val entity: ClazzWithHolidayCalendarAndSchoolAndTerminology? = null,
 
@@ -132,8 +132,6 @@ class ClazzEditViewModel(
                 hideBottomNavigation = true,
             )
         }
-
-        _uiState.update { prev -> prev.copy(fieldsEnabled = false) }
 
         viewModelScope.launch {
             awaitAll(

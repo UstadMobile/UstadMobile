@@ -38,7 +38,7 @@ data class PersonEditUiState(
 
     val personPicture: PersonPicture? = null,
 
-    val fieldsEnabled: Boolean = true,
+    val fieldsEnabled: Boolean = false,
 
     /**
      * This is set only when registering a minor
@@ -82,11 +82,7 @@ class PersonEditViewModel(
     savedStateHandle: UstadSavedStateHandle,
 ): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
-    private val _uiState: MutableStateFlow<PersonEditUiState> = MutableStateFlow(
-        PersonEditUiState(
-            fieldsEnabled = false,
-        )
-    )
+    private val _uiState: MutableStateFlow<PersonEditUiState> = MutableStateFlow(PersonEditUiState())
 
     val uiState: Flow<PersonEditUiState> = _uiState.asStateFlow()
 

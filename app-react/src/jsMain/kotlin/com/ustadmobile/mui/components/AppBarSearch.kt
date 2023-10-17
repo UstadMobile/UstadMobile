@@ -1,5 +1,6 @@
 package com.ustadmobile.mui.components
 
+import com.ustadmobile.core.hooks.useStringProvider
 import csstype.PropertiesBuilder
 import web.cssom.*
 import emotion.react.css
@@ -12,6 +13,7 @@ import react.dom.html.ReactHTML.div
 import web.html.HTMLInputElement
 import react.*
 import web.cssom.rgb
+import com.ustadmobile.core.MR
 
 external interface AppBarSearchProps: Props {
     var searchText: String
@@ -35,6 +37,7 @@ external interface AppBarSearchProps: Props {
  */
 val AppBarSearch = FC<AppBarSearchProps> {props ->
     val theme by useRequiredContext(ThemeContext)
+    val strings = useStringProvider()
 
     var searchWidth by useState { 24 }
 
@@ -58,12 +61,12 @@ val AppBarSearch = FC<AppBarSearchProps> {props ->
             }
 
             //Icon
-            Search { }
+            Search()
         }
 
 
         InputBase {
-            placeholder = "Search..."
+            placeholder = strings[MR.strings.search] + "…"
             value = props.searchText
             onFocus = {
                 searchWidth = 34
