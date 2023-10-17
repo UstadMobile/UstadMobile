@@ -1,12 +1,10 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.contententry.importlink
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.viewmodel.ContentEntryImportLinkUiState
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkUiState
 import com.ustadmobile.mui.components.UstadTextEditField
 import web.cssom.px
-import io.ktor.http.*
 import mui.material.*
 import mui.material.styles.TypographyVariant
 import mui.system.responsive
@@ -20,7 +18,7 @@ external interface ContentEntryImportLinkProps: Props {
     var onUrlChange: (String?) -> Unit
 }
 
-val ContentEntryImportLinkComponent2 = FC<ContentEntryImportLinkProps> {props ->
+val ContentEntryImportLinkComponent2 = FC<ContentEntryImportLinkProps> { props ->
 
     val strings = useStringProvider()
 

@@ -28,7 +28,7 @@ import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryImportLinkView
-import com.ustadmobile.core.viewmodel.ContentEntryImportLinkUiState
+import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkUiState
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import com.ustadmobile.core.R as CR
