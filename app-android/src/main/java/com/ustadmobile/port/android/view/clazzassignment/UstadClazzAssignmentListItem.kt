@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import com.ustadmobile.port.android.util.compose.stringIdMapResource
 import com.ustadmobile.port.android.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewFragment.Companion.ASSIGNMENT_STATUS_MAP
 import com.ustadmobile.port.android.view.composable.HtmlText

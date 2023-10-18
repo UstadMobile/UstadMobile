@@ -5,6 +5,7 @@ import android.view.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -19,6 +20,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.port.android.view.composable.UstadListSortHeader
 import androidx.paging.compose.items
@@ -142,23 +145,25 @@ fun PersonListScreen(
             }
         }
         
-        items(
-            items = lazyPagingItems,
-            key = { it.personUid },
-        ) {  person ->
-            ListItem(
-                modifier = Modifier
-                    .clickable {
-                         person?.also { onListItemClick(it) }
-                    },
-                text = { Text(text = "${person?.firstNames} ${person?.lastName}")},
-                icon = {
-                    UstadPersonAvatar(
-                        person?.personUid ?: 0,
-                        modifier = Modifier.defaultAvatarSize(),
-                    )
+    items(
+        count = lazyPagingItems.itemCount,
+        key = lazyPagingItems.itemKey(key = { it.personUid }),
+        contentType = lazyPagingItems.itemContentType()
+    ) { index ->
+        val item = lazyPagingItems[index]
+        ListItem(
+            modifier = Modifier
+                .clickable {
+                    item?.also { onListItemClick(it) }
                 },
-            )
+            text = { Text(text = "${item?.firstNames} ${item?.lastName}") },
+            icon = {
+                UstadPersonAvatar(
+                    item?.personUid ?: 0,
+                    modifier = Modifier.defaultAvatarSize(),
+                )
+            },
+        )
         }
 
     }

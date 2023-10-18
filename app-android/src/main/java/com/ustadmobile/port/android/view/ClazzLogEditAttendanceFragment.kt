@@ -39,7 +39,7 @@ import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttend
 import com.ustadmobile.lib.db.composites.PersonAndClazzLogAttendanceRecord
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import kotlinx.coroutines.launch
 import java.util.*
 import com.ustadmobile.core.R as CR
