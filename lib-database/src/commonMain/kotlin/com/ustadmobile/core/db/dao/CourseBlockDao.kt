@@ -51,7 +51,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         )
     )
     @Query("""
-        SELECT CourseBlock.*, assignment.*, courseDiscussion.*, entry.*, Language.*,
+        SELECT CourseBlock.*, assignment.*, entry.*, Language.*,
                (SELECT CourseGroupSet.cgsName
                   FROM CourseGroupSet
                  WHERE CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
@@ -61,9 +61,6 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                LEFT JOIN ClazzAssignment as assignment
                          ON assignment.caUid = CourseBlock.cbEntityUid
                             AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
-               LEFT JOIN CourseDiscussion as courseDiscussion
-                         ON CourseDiscussion.courseDiscussionUid = CourseBlock.cbEntityUid
-                            AND CourseBlock.cbType = ${CourseBlock.BLOCK_DISCUSSION_TYPE}
                LEFT JOIN ContentEntry as entry
                          ON entry.contentEntryUid = CourseBlock.cbEntityUid
                             AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
@@ -107,7 +104,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                 )     
                    
 
-        SELECT CourseBlock.*, ClazzAssignment.*, ContentEntry.*, CourseDiscussion.*, ContentEntryParentChildJoin.*, 
+        SELECT CourseBlock.*, ClazzAssignment.*, ContentEntry.*, ContentEntryParentChildJoin.*, 
                Container.*, CourseAssignmentMark.*, (CourseBlock.cbUid NOT IN (:collapseList)) AS expanded,
                
                COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
@@ -214,11 +211,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                ON ContentEntry.contentEntryUid = CourseBlock.cbEntityUid
                AND NOT ceInactive
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
-               
-               LEFT JOIN CourseDiscussion 
-                      ON CourseDiscussion.courseDiscussionUid = CourseBlock.cbEntityUid
-                     AND CourseBlock.cbType = ${CourseBlock.BLOCK_DISCUSSION_TYPE}
-               
+                
                LEFT JOIN ContentEntryParentChildJoin 
                ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid
                
@@ -284,7 +277,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
            AND CourseBlock.cbModuleParentBlockUid NOT IN (:collapseList)
       ORDER BY CourseBlock.cbIndex
     """)
-    @QueryLiveTables(value = ["CourseBlock", "ClazzAssignment", "CourseDiscussion",
+    @QueryLiveTables(value = ["CourseBlock", "ClazzAssignment",
         "ContentEntry", "CourseAssignmentMark","StatementEntity",
         "Container","ContentEntryParentChildJoin","PersonGroupMember",
         "Clazz","ScopedGrant","ClazzEnrolment","CourseAssignmentSubmission",

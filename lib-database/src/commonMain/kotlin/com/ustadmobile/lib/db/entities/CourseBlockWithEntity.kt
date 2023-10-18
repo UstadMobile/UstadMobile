@@ -28,7 +28,6 @@ class CourseBlockWithEntity: CourseBlockWithEntityDb() {
         assignment = dbEntity.assignment
         assignmentCourseGroupSetName = dbEntity.assignmentCourseGroupSetName
         entry = dbEntity.entry
-        courseDiscussion = dbEntity.courseDiscussion
         language = dbEntity.language
         cbUid = dbEntity.cbUid
         cbType = dbEntity.cbType

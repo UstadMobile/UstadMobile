@@ -46,7 +46,6 @@ import com.ustadmobile.lib.db.entities.*
 //    SqliteChangeSeqNums::class,
 //    UpdateNotification::class,
     DoorNode::class,
-    CourseDiscussion::class,
     CoursePicture::class,
     DiscussionPost::class,
     ExternalAppPermission::class,
@@ -63,7 +62,7 @@ import com.ustadmobile.lib.db.entities.*
 
 
 
-], version = 122)
+], version = 123)
 /*
  Replicate entities (e.g. trackers) to drop:
      ClazzLogReplicate
@@ -301,8 +300,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val messageDao: MessageDao
 
     abstract val messageReadDao: MessageReadDao
-
-    abstract val courseDiscussionDao: CourseDiscussionDao
 
     abstract val peerReviewerAllocationDao: PeerReviewerAllocationDao
 
