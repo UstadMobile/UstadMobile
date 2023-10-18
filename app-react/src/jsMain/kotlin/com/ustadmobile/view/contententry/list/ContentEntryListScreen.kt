@@ -30,6 +30,7 @@ import react.create
 import react.router.useLocation
 import react.useState
 import mui.icons.material.Folder as FolderIcon
+import mui.icons.material.Link as LinkIcon
 
 external interface ContentEntryListScreenProps : Props {
 
@@ -121,6 +122,22 @@ val ContentEntryListScreen = FC<Props> {
 
                     ListItemText {
                         primary = ReactNode(strings[MR.strings.content_editor_create_new_category])
+                    }
+                }
+            }
+
+            ListItem {
+                ListItemButton {
+                    onClick = {
+                        viewModel.onClickImportFromLink()
+                    }
+
+                    ListItemIcon {
+                        LinkIcon()
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(strings[MR.strings.activity_import_link])
                     }
                 }
             }

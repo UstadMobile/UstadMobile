@@ -286,7 +286,7 @@
     <string name="import_link_content_not_supported">Content not supported</string>
     <string name="import_link_big_size">File size too big</string>
     <string name="import_link_error">Import Error</string>
-    <string name="supported_link">Supported link types: Google Drive (folder or file) and plain HTTP links</string>
+    <string name="supported_link">Supported link types: plain HTTP links to supported content (H5P, xAPI, PDF, Video/MP4)</string>
     <string name="offline_sharing_enable_bluetooth_prompt">Offline sharing requires Bluetooth</string>
     <string name="offline_sharing_enable_wifi_promot">Offline sharing requires WiFi to be switched on</string>
     <string name="enable">Enable</string>

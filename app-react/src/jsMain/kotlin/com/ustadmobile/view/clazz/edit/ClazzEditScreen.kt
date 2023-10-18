@@ -32,6 +32,7 @@ import com.ustadmobile.util.ext.onTextChange
 import web.cssom.Cursor
 import js.core.jso
 import com.ustadmobile.mui.common.inputCursor
+import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.wrappers.quill.ReactQuill
 
 const val COURSE_BLOCK_DRAG_CLASS = "dragging_course_block"
@@ -80,7 +81,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
 
     val strings: StringProvider = useStringProvider()
 
-    Container {
+    UstadStandardContainer {
         Stack {
             spacing = responsive(2)
 

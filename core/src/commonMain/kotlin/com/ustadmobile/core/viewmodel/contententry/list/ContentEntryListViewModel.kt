@@ -14,6 +14,7 @@ import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewMode
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel.Companion.FILTER_BY_PARENT_UID
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -141,6 +142,16 @@ class ContentEntryListViewModel(
             editViewName = ContentEntryEditViewModel.DEST_NAME,
             extraArgs = buildMap {
                 put(ContentEntryEditViewModel.ARG_LEAF, false.toString())
+                put(ARG_PARENT_UID, parentEntryUid.toString())
+            }
+        )
+    }
+
+    fun onClickImportFromLink() {
+        navigateToCreateNew(
+            editViewName = ContentEntryImportLinkViewModel.DEST_NAME,
+            extraArgs = buildMap {
+                put(ContentEntryEditViewModel.ARG_LEAF, true.toString())
                 put(ARG_PARENT_UID, parentEntryUid.toString())
             }
         )

@@ -1,9 +1,14 @@
 package com.ustadmobile.view.contententry.importlink
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkUiState
-import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
+import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.mui.components.ThemeContext
+import com.ustadmobile.mui.components.UstadStandardContainer
+import com.ustadmobile.util.ext.onTextChange
 import web.cssom.px
 import mui.material.*
 import mui.material.styles.TypographyVariant
@@ -11,51 +16,47 @@ import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
+import react.ReactNode
+import react.useRequiredContext
 
 external interface ContentEntryImportLinkProps: Props {
     var uiState: ContentEntryImportLinkUiState
     var onClickNext: () -> Unit
-    var onUrlChange: (String?) -> Unit
+    var onUrlChange: (String) -> Unit
 }
 
 val ContentEntryImportLinkComponent2 = FC<ContentEntryImportLinkProps> { props ->
 
     val strings = useStringProvider()
 
-    Container{
-        maxWidth = "lg"
+    UstadStandardContainer {
 
         Stack{
-            direction = responsive(StackDirection.column)
-            spacing = responsive(16.px)
+            val theme by useRequiredContext(ThemeContext)
 
-            UstadTextEditField {
-                value = props.uiState.url.toString()
-                label = strings[MR.strings.enter_url]
-                error = props.uiState.linkError
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
+            direction = responsive(StackDirection.column)
+            spacing = responsive(theme.spacing(1))
+
+            TextField {
+                id = "import_url"
+                value = props.uiState.url
+                label = ReactNode(strings[MR.strings.enter_url])
+                error = props.uiState.linkError != null
+                disabled = !props.uiState.fieldsEnabled
+                helperText = props.uiState.linkError?.let { ReactNode(it) }
+                onTextChange = {
                     props.onUrlChange(it)
                 }
             }
 
             Typography {
                 sx {
-                    paddingLeft = 16.px
-                    paddingRight = 16.px
+                    paddingLeft = theme.spacing(1)
+                    paddingRight = theme.spacing(1)
                 }
                 variant = TypographyVariant.body2
                 + strings[MR.strings.supported_link]
             }
-
-            Button {
-
-                onClick = { props.onClickNext }
-                variant = ButtonVariant.contained
-
-                + strings[MR.strings.next]
-            }
-
         }
     }
 
@@ -67,4 +68,19 @@ val ContentEntryImportLinkScreenPreview = FC<Props> {
             url = "site.com/dir"
         )
     }
+}
+
+val ContentEntryImportLinkScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        ContentEntryImportLinkViewModel(di, savedStateHandle)
+    }
+
+    val uiStateVal by viewModel.uiState.collectAsState(ContentEntryImportLinkUiState())
+
+    ContentEntryImportLinkComponent2 {
+        uiState = uiStateVal
+        onUrlChange = viewModel::onChangeLink
+        onClickNext = viewModel::onClickNext
+    }
+
 }

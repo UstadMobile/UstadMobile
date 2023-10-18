@@ -8,6 +8,7 @@ import mui.system.Container
 import react.FC
 import react.Props
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.mui.components.UstadStandardContainer
 
 val CourseBlockEditScreen = FC<Props> {
 
@@ -17,7 +18,7 @@ val CourseBlockEditScreen = FC<Props> {
 
     val uiStateVar by viewModel.uiState.collectAsState(CourseBlockEditUiState())
 
-    Container {
+    UstadStandardContainer {
         UstadCourseBlockEdit {
             uiState = uiStateVar
             onCourseBlockChange = viewModel::onEntityChanged

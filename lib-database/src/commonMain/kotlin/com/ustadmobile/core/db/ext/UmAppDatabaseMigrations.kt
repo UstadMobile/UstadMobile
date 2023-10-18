@@ -1223,7 +1223,7 @@ val MIGRATION_121_122 = DoorMigrationStatementList(121, 122) { db ->
     }
 }
 
-val MIGRATION_122_123 = DoorMigrationStatementList(121, 122) { db ->
+val MIGRATION_122_123 = DoorMigrationStatementList(122, 123) { db ->
     listOf("DROP TABLE IF EXISTS CourseDiscussion")
 }
 

@@ -104,8 +104,7 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
         else
             strings[MR.strings.file_selected]
 
-    Container {
-        maxWidth = "lg"
+    UstadStandardContainer {
 
         Stack {
             spacing = responsive(20.px)

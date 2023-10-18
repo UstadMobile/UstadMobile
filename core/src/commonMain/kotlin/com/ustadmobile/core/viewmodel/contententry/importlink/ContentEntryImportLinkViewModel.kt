@@ -12,6 +12,7 @@ import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.expectSuccess
@@ -19,6 +20,8 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.instance
@@ -40,6 +43,8 @@ class ContentEntryImportLinkViewModel(
 
     private val httpClient: HttpClient by instance()
 
+    private var commitLinkToSavedStateJob: Job? = null
+
     init {
         _appUiState.value = AppUiState(
             title = systemImpl.getString(MR.strings.activity_import_link),
@@ -49,6 +54,11 @@ class ContentEntryImportLinkViewModel(
                 onClick = this::onClickNext
             )
         )
+        _uiState.update { prev ->
+            prev.copy(
+                url = savedStateHandle[STATE_KEY_IMPORTURL] ?: ""
+            )
+        }
     }
 
     fun onChangeLink(url: String) {
@@ -58,6 +68,11 @@ class ContentEntryImportLinkViewModel(
                 linkError = if(url != prev.url) null else prev.linkError,
             )
         }
+        commitLinkToSavedStateJob?.cancel()
+        commitLinkToSavedStateJob = viewModelScope.launch {
+            delay(200)
+            savedStateHandle[STATE_KEY_IMPORTURL] = url
+        }
     }
 
     fun onClickNext() {
@@ -65,9 +80,22 @@ class ContentEntryImportLinkViewModel(
             return
         }
 
+        if(_uiState.value.url.isBlank()) {
+            Napier.d("link is blank")
+            _uiState.update { prev ->
+                prev.copy(
+                    linkError = systemImpl.getString(MR.strings.field_required_prompt)
+                )
+            }
+            return
+        }
+
         _uiState.update { prev ->
             prev.copy(fieldsEnabled = false)
         }
+
+        commitLinkToSavedStateJob?.cancel()
+        savedStateHandle[STATE_KEY_IMPORTURL] = _uiState.value.url
 
         viewModelScope.launch {
             try {
@@ -118,6 +146,8 @@ class ContentEntryImportLinkViewModel(
     companion object {
 
         const val DEST_NAME = "ContentEntryImportLink"
+
+        private const val STATE_KEY_IMPORTURL = "importUrl"
 
     }
 }

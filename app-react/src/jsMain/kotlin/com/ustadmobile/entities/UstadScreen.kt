@@ -107,7 +107,8 @@ import com.ustadmobile.view.accountlist.AccountListScreen
 import com.ustadmobile.view.person.accountedit.PersonAccountEditPreview
 import com.ustadmobile.view.person.accountedit.PersonAccountEditScreen
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
-import com.ustadmobile.view.contententry.importlink.ContentEntryImportLinkScreenPreview
+import com.ustadmobile.view.contententry.importlink.ContentEntryImportLinkScreen
+import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -177,8 +178,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         "ReportFilterEdit Preview", ReportFilterEditScreenPreview),
     UstadScreen(ScopedGrantDetailView.VIEW_NAME, "ScopedGrantDetail Preview",
         ScopedGrantDetailScreenPreview),
-    UstadScreen(ContentEntryImportLinkView.VIEW_NAME, "ContentEntryImportLink Preview",
-        ContentEntryImportLinkScreenPreview
+    UstadScreen(ContentEntryImportLinkViewModel.DEST_NAME, "ContentEntryImportLink",
+        ContentEntryImportLinkScreen
     ),
     UstadScreen(HolidayCalendarDetailView.VIEW_NAME, "HolidayCalendarDetail Preview",
         HolidayCalendarDetailPreview),
