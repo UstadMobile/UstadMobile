@@ -1,12 +1,12 @@
 describe('Ustad mobile course tests', () => {
-  it('002_003_teacher_record_attendance.cy.js', () => {
+  it('Start Ustad Test Server ', () => {
+    // Start Test Server
+      cy.ustadStartTestServer()
+  })
+    it('002_001_admin_add_new_course_and_teacher', () => {
 
-   // Start Test Server
-        cy.startTestServer()
-
-   // Admin user login
-        cy.wait(2000)
-        cy.login('admin','testpass',{timeout:2000})
+    // Admin user login
+    cy.login('admin','testpass',{timeout:8000})
 
       // Add a new course
         cy.addCourse('002_003')
@@ -51,7 +51,7 @@ describe('Ustad mobile course tests', () => {
      cy.get('svg[data-testid="CalendarTodayIcon"]').should('be.visible')
 
   })
-/*
+
   it('002_003_teacher_record_attendance', () => {
 
     // Teacher Login
@@ -66,7 +66,7 @@ describe('Ustad mobile course tests', () => {
      cy.contains('Mark all present').click()
      cy.contains("button","Save").should('be.visible')
      cy.contains("button","Save").click()
-     cy.get('svg[data-testid="CalendarTodayIcon"]').should('be.visible')
+     cy.contains('2 Present, 0 Partial, 0 Absent').should('be.visible')
      })
-*/
+
 })

@@ -1,13 +1,12 @@
 describe('Ustad mobile course tests', () => {
+ it('Start Ustad Test Server ', () => {
+  // Start Test Server
+    cy.ustadStartTestServer()
+})
   it('002_001_admin_add_new_course_and_teacher', () => {
 
-
-  // Start Test Server
-   cy.startTestServer()
-
   // Admin user login
-  cy.wait(2000)
-  cy.login('admin','testpass',{timeout:2000})
+  cy.login('admin','testpass',{timeout:8000})
 
   // Add a new course
     cy.addCourse('002_001')
