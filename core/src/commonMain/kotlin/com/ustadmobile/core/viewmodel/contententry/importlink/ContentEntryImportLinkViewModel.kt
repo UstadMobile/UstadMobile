@@ -55,7 +55,7 @@ class ContentEntryImportLinkViewModel(
         _uiState.update { prev ->
             prev.copy(
                 url = url,
-                linkError = null,
+                linkError = if(url != prev.url) null else prev.linkError,
             )
         }
     }
@@ -95,11 +95,16 @@ class ContentEntryImportLinkViewModel(
                     //go to ContentEntryEdit
                     navController.navigate(
                         viewName = ContentEntryEditViewModel.DEST_NAME,
-                        args = emptyMap()
+                        args = mapOf(
+                            ContentEntryEditViewModel.ARG_IMPORTED_METADATA to json.encodeToString(
+                                serializer = MetadataResult.serializer(),
+                                value = metadataResult
+                            )
+                        )
                     )
                 }
             }catch(e: Exception) {
-                snackDispatcher.showSnackBar(Snack(""))
+                snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.error) + ": $e"))
             }finally {
                 _uiState.update { prev ->
                     prev.copy(fieldsEnabled = true)
