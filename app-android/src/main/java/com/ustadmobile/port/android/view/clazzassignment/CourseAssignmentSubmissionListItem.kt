@@ -17,7 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.util.ext.htmlToPlainText
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
-import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import kotlinx.datetime.TimeZone
 
 @OptIn(ExperimentalMaterialApi::class)

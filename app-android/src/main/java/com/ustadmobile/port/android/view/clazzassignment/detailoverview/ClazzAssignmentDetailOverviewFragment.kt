@@ -42,7 +42,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager

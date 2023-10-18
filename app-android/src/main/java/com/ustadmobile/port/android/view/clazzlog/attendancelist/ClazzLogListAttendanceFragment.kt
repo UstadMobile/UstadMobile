@@ -38,7 +38,7 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.AttendanceGraphData
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceUiState
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
 import org.kodein.di.direct
 import org.kodein.di.instance

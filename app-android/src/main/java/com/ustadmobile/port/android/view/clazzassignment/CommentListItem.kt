@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.entities.Comments
-import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import com.ustadmobile.port.android.view.composable.UstadPersonAvatar
 import java.util.TimeZone
 
