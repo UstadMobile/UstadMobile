@@ -22,6 +22,9 @@ dependencyResolutionManagement {
             version("version_atomicfu", "0.22.0")
             version("version_kotlinx_io", "0.3.0")
             version("version_android_room", "2.5.2")
+            version("version_paging_multiplatform", "3.2.0-alpha05-0.2.3")
+            version("version_paging_androidx", "3.2.0-alpha05")
+            version("version_paging_compose", "1.0.0-alpha18")
 
             plugin("jetbrains-compose", "org.jetbrains.compose").version("1.5.0")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
@@ -34,6 +37,11 @@ dependencyResolutionManagement {
             library("activity-compose", "androidx.activity", "activity-compose").versionRef("version_activity_compose")
             library("androidx-appcompat", "androidx.appcompat", "appcompat").versionRef("version_androidx_appcompat")
             library("androidx-core-ktx", "androidx.core", "core-ktx").versionRef("version_androidx_core")
+            library("androidx-paging-runtime", "androidx.paging", "paging-runtime").versionRef("version_paging_androidx")
+            library("androidx-paging-compose", "androidx.paging", "paging-compose").versionRef("version_paging_compose")
+
+            library("paging-multiplatform-common", "app.cash.paging", "paging-common").versionRef("version_paging_multiplatform")
+            library("paging-multiplatform-compose", "app.cash.paging", "paging-compose-common").versionRef("version_paging_multiplatform")
             library("okhttp", "com.squareup.okhttp3", "okhttp").versionRef("version_okhttp")
             library("door-runtime", "com.github.UstadMobile.door", "door-runtime").versionRef("version_door")
             library("door-compiler", "com.github.UstadMobile.door", "door-compiler").versionRef("version_door")

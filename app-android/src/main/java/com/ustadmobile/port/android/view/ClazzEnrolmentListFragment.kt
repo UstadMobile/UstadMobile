@@ -30,7 +30,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.util.compose.courseTerminologyEntryResource
 import com.ustadmobile.port.android.util.compose.rememberCourseTerminologyEntries
-import com.ustadmobile.port.android.util.compose.rememberFormattedDateRange
+import com.ustadmobile.libuicompose.util.rememberFormattedDateRange
 import com.ustadmobile.port.android.view.composable.UstadQuickActionButton
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.R as CR

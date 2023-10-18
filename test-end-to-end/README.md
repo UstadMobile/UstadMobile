@@ -28,7 +28,7 @@ adding from device, test downloading from another device.
 
 ### 2: Course creation, enrolment, attendance, progress
 
-2.1 Admin can create a new course, add a new teacher, and create an account for that teacher.
+2.1 Admin can create a new course, add a new teacher, and create an account for that teacher. It is possible to login as the teacher.
 
 2.2 Teacher can login. Students can join class using class code or link. **Failing as of 5/Jan/23**
 

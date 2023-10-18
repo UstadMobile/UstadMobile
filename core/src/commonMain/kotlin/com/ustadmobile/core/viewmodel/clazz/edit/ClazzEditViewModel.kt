@@ -42,7 +42,7 @@ import io.github.aakira.napier.Napier
 @Serializable
 data class ClazzEditUiState(
 
-    val fieldsEnabled: Boolean = true,
+    val fieldsEnabled: Boolean = false,
 
     val entity: ClazzWithHolidayCalendarAndSchoolAndTerminology? = null,
 
@@ -133,8 +133,6 @@ class ClazzEditViewModel(
             )
         }
 
-        _uiState.update { prev -> prev.copy(fieldsEnabled = false) }
-
         viewModelScope.launch {
             awaitAll(
                 async {
@@ -192,7 +190,7 @@ class ClazzEditViewModel(
                         loadFromStateKeys = listOf(STATE_KEY_COURSEBLOCKS),
                         onLoadFromDb = { db ->
                             val courseBlocksDb = db.courseBlockDao.takeIf { entityUidArg != 0L }
-                                ?.findAllCourseBlockByClazzUidAsync(entityUidArg) ?: emptyList()
+                                ?.findAllCourseBlockByClazzUidAsync(entityUidArg, false) ?: emptyList()
 
                             val assignmentPeerAllocations = db.peerReviewerAllocationDao
                                 .takeIf { entityUidArg != 0L }?.getAllPeerReviewerAllocations(

@@ -32,7 +32,7 @@ data class ClazzEnrolmentEditUiState(
 
     val endDateError: String? = null,
 
-    val fieldsEnabled: Boolean = true,
+    val fieldsEnabled: Boolean = false,
 
     val courseTerminology: CourseTerminology? = null,
 
@@ -64,10 +64,6 @@ class ClazzEnrolmentEditViewModel(
                     editEntityStringResource = MR.strings.edit_enrolment,
                 ),
             )
-        }
-
-        _uiState.update { prev ->
-            prev.copy(fieldsEnabled = false)
         }
 
         viewModelScope.launch {

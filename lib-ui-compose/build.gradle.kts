@@ -28,6 +28,8 @@ kotlin {
                 implementation(libs.kodein.di)
                 implementation(libs.moko.resources)
                 implementation(libs.moko.resources.compose)
+                api(libs.paging.multiplatform.common)
+                api(libs.paging.multiplatform.compose)
             }
         }
 
@@ -36,6 +38,8 @@ kotlin {
                 api(libs.activity.compose)
                 api(libs.androidx.appcompat)
                 api(libs.androidx.core.ktx)
+                api(libs.androidx.paging.runtime)
+                api(libs.androidx.paging.compose)
             }
         }
 

@@ -12,6 +12,7 @@ import com.ustadmobile.door.annotation.QueryLiveTables
 import app.cash.paging.PagingSource
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.HttpServerFunctionCall
+import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.composites.CourseBlockUidAndClazzUid
 import com.ustadmobile.lib.db.entities.*
@@ -33,8 +34,24 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     abstract suspend fun replaceListAsync(list: List<CourseBlock>)
 
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findAllCourseBlockByClazzUidAsync",
+                functionArgs = arrayOf(
+                    //Include inactive when fetching from server to ensure local db gets updated
+                    HttpServerFunctionParam(
+                        name = "includeInactive",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true"
+                    )
+                )
+            )
+        )
+    )
     @Query("""
-        SELECT CourseBlock.*, assignment.*, courseDiscussion.*, entry.*, Language.*,
+        SELECT CourseBlock.*, assignment.*, entry.*, Language.*,
                (SELECT CourseGroupSet.cgsName
                   FROM CourseGroupSet
                  WHERE CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
@@ -44,9 +61,6 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                LEFT JOIN ClazzAssignment as assignment
                          ON assignment.caUid = CourseBlock.cbEntityUid
                             AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
-               LEFT JOIN CourseDiscussion as courseDiscussion
-                         ON CourseDiscussion.courseDiscussionUid = CourseBlock.cbEntityUid
-                            AND CourseBlock.cbType = ${CourseBlock.BLOCK_DISCUSSION_TYPE}
                LEFT JOIN ContentEntry as entry
                          ON entry.contentEntryUid = CourseBlock.cbEntityUid
                             AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
@@ -55,10 +69,13 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                             AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
                
          WHERE CourseBlock.cbClazzUid = :clazzUid
-           AND CourseBlock.cbActive
+           AND (CAST(:includeInactive AS INTEGER) = 1 OR CourseBlock.cbActive)
       ORDER BY CourseBlock.cbIndex
           """)
-    abstract suspend fun findAllCourseBlockByClazzUidAsync(clazzUid: Long): List<CourseBlockWithEntityDb>
+    abstract suspend fun findAllCourseBlockByClazzUidAsync(
+        clazzUid: Long,
+        includeInactive: Boolean,
+    ): List<CourseBlockWithEntityDb>
 
     @Query("""
          WITH CtePermissionCheck (hasPermission) 
@@ -87,7 +104,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                 )     
                    
 
-        SELECT CourseBlock.*, ClazzAssignment.*, ContentEntry.*, CourseDiscussion.*, ContentEntryParentChildJoin.*, 
+        SELECT CourseBlock.*, ClazzAssignment.*, ContentEntry.*, ContentEntryParentChildJoin.*, 
                Container.*, CourseAssignmentMark.*, (CourseBlock.cbUid NOT IN (:collapseList)) AS expanded,
                
                COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
@@ -194,11 +211,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                ON ContentEntry.contentEntryUid = CourseBlock.cbEntityUid
                AND NOT ceInactive
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
-               
-               LEFT JOIN CourseDiscussion 
-                      ON CourseDiscussion.courseDiscussionUid = CourseBlock.cbEntityUid
-                     AND CourseBlock.cbType = ${CourseBlock.BLOCK_DISCUSSION_TYPE}
-               
+                
                LEFT JOIN ContentEntryParentChildJoin 
                ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid
                
@@ -264,7 +277,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
            AND CourseBlock.cbModuleParentBlockUid NOT IN (:collapseList)
       ORDER BY CourseBlock.cbIndex
     """)
-    @QueryLiveTables(value = ["CourseBlock", "ClazzAssignment", "CourseDiscussion",
+    @QueryLiveTables(value = ["CourseBlock", "ClazzAssignment",
         "ContentEntry", "CourseAssignmentMark","StatementEntity",
         "Container","ContentEntryParentChildJoin","PersonGroupMember",
         "Clazz","ScopedGrant","ClazzEnrolment","CourseAssignmentSubmission",
@@ -277,19 +290,53 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     ): PagingSource<Int, CourseBlockWithCompleteEntity>
 
 
-    @HttpAccessible
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findAllCourseBlockByClazzUidAsPagingSource",
+                functionArgs = arrayOf(
+                    //When pulling over HTTP include inactive entities to ensure it gets updated on client db
+                    HttpServerFunctionParam(
+                        name = "includeInactive",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    ),
+                    HttpServerFunctionParam(
+                        name = "includeHidden",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    ),
+                    HttpServerFunctionParam(
+                        name = "hideUntilFilterTime",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "0L",
+                    )
+                )
+            )
+        )
+    )
     @Query("""
         SELECT CourseBlock.*,
                CourseBlock.cbUid NOT IN(:collapseList) AS expanded
           FROM CourseBlock
          WHERE CourseBlock.cbClazzUid = :clazzUid
            AND CourseBlock.cbModuleParentBlockUid NOT IN(:collapseList)
-           AND CourseBlock.cbActive
+           AND (CAST(:includeInactive AS INTEGER) = 1 OR CourseBlock.cbActive)
+           AND (CAST(:includeHidden AS INTEGER) = 1 OR NOT CourseBlock.cbHidden)
+           AND (:hideUntilFilterTime >= CourseBlock.cbHideUntilDate)
+           AND (:hideUntilFilterTime >= COALESCE(
+                (SELECT CourseBlockParent.cbHideUntilDate
+                   FROM CourseBlock CourseBlockParent
+                  WHERE CourseBlockParent.cbUid = CourseBlock.cbModuleParentBlockUid), 0))
       ORDER BY CourseBlock.cbIndex       
     """)
     abstract fun findAllCourseBlockByClazzUidAsPagingSource(
         clazzUid: Long,
         collapseList: List<Long>,
+        includeInactive: Boolean,
+        includeHidden: Boolean,
+        hideUntilFilterTime: Long,
     ): PagingSource<Int, CourseBlockAndDisplayDetails>
 
     @Query("""

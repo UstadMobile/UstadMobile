@@ -21,7 +21,7 @@ import com.ustadmobile.core.viewmodel.HolidayCalendarEditUiState
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.port.android.util.compose.rememberFormattedDate
+import com.ustadmobile.libuicompose.util.rememberFormattedDate
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import com.ustadmobile.core.R as CR
 

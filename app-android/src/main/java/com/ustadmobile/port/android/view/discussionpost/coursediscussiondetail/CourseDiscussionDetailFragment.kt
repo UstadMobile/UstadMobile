@@ -39,7 +39,7 @@ import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import java.util.*
 import androidx.paging.compose.items
 import com.ustadmobile.core.util.ext.htmlToPlainText
-import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.port.android.view.composable.HtmlText
 import com.ustadmobile.port.android.view.composable.UstadListSpacerItem

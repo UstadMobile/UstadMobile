@@ -14,9 +14,8 @@ import kotlinx.serialization.Serializable
          order = Trigger.Order.INSTEAD_OF,
          on = Trigger.On.RECEIVEVIEW,
          events = [Trigger.Event.INSERT],
-         sqlStatements = [
-            TRIGGER_UPSERT_WHERE_NEWER
-         ]
+         conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+         sqlStatements = [TRIGGER_UPSERT],
      )
 ))
 @Entity
@@ -60,14 +59,18 @@ open class PersonGroup() {
 
         const val TABLE_ID = 43
 
+        @Suppress("unused") //Reserved for future use
         const val PERSONGROUP_FLAG_DEFAULT = 0
 
         const val PERSONGROUP_FLAG_PERSONGROUP = 1
 
+        @Suppress("unused") //Reserved for future use
         const val PERSONGROUP_FLAG_PARENT_GROUP = 2
 
+        @Suppress("unused") //Reserved for future use
         const val PERSONGROUP_FLAG_STUDENTGROUP = 4
 
+        @Suppress("unused") //Reserved for future use
         const val PERSONGROUP_FLAG_TEACHERGROUP = 8
 
         const val PERSONGROUP_FLAG_GUESTPERSON = 16

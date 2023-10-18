@@ -1223,12 +1223,16 @@ val MIGRATION_121_122 = DoorMigrationStatementList(121, 122) { db ->
     }
 }
 
+val MIGRATION_122_123 = DoorMigrationStatementList(121, 122) { db ->
+    listOf("DROP TABLE IF EXISTS CourseDiscussion")
+}
+
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
-    MIGRATION_120_121, MIGRATION_121_122
+    MIGRATION_120_121, MIGRATION_121_122, MIGRATION_122_123,
 )
 
 

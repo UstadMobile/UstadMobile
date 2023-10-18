@@ -16,9 +16,8 @@ import kotlinx.serialization.Serializable
      order = Trigger.Order.INSTEAD_OF,
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
-     sqlStatements = [
-         TRIGGER_UPSERT_WHERE_NEWER
-     ]
+     conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+     sqlStatements = [TRIGGER_UPSERT],
  )
 ))
 @Serializable
@@ -84,9 +83,6 @@ open class Comments() {
         const val TABLE_ID = 208
 
         const val COMMENTS_STATUS_APPROVED = 0
-        const val COMMENTS_STATUS_PENDING = 1
-        const val COMMENTS_STATUS_REJECTED = 2
-        const val COMMENTS_STATUS_INAPPROPRIATE_REPORTED = 4
     }
 
 

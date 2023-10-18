@@ -194,6 +194,7 @@ val AccountListComponent2 = FC<AccountListProps> { props ->
                     }
 
                     Button {
+                        id = "profile_button"
                         onClick = { props.onMyProfileClick() }
                         variant = ButtonVariant.outlined
                         disabled = !props.uiState.activeAccountButtonsEnabled
@@ -201,6 +202,7 @@ val AccountListComponent2 = FC<AccountListProps> { props ->
                     }
 
                     Button {
+                        id = "logout_button"
                         onClick = { props.onLogoutClick() }
                         variant = ButtonVariant.outlined
                         disabled = !props.uiState.activeAccountButtonsEnabled

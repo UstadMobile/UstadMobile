@@ -20,7 +20,7 @@ import org.kodein.di.DI
 
 data class ClazzLogEditUiState(
 
-    val fieldsEnabled: Boolean = true,
+    val fieldsEnabled: Boolean = false,
 
     val clazzLog: ClazzLog? = null,
 
@@ -76,6 +76,8 @@ class ClazzLogEditViewModel(
                     )
                 )
             }
+
+            _uiState.update { prev -> prev.copy(fieldsEnabled = true) }
         }
     }
 
