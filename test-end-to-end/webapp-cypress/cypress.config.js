@@ -1,3 +1,4 @@
+
 const { defineConfig } = require("cypress");
 
 module.exports = defineConfig({
@@ -5,10 +6,15 @@ module.exports = defineConfig({
   e2e: {
     chromeWebSecurity: false,
     experimentalSessionAndOrigin: true,
-    //  reporter: 'junit',
+    reporter: 'mocha-junit-reporter',
     reporterOptions: {
-     mochaFile: 'results/my-test-output.xml',
-     toConsole: true
-    },
+
+        testsuitesTitle: true,
+        suiteTitleSeparatedBy: '.', // suites separator, default is space (' '), or period ('.') in jenkins mode
+        mochaFile: 'results/my-test-output.xml',
+        toConsole: true,
+        jenkinsMode: true
+    }
+
   },
 });

@@ -24,7 +24,7 @@ Cypress.Commands.add('ustadStartTestServer', () => {
 
 
 //User Login
-Cypress.Commands.add('login', (username, password) => {
+Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
 
 //below command added as per : https://github.com/thisdot/open-source/blob/main/libs/cypress-indexeddb/README.md
   cy.log('Clearing IndexedDB');
@@ -40,18 +40,18 @@ Cypress.Commands.add('login', (username, password) => {
   cy.get('input#username', { timeout: 10000 }).should('exist').type(username) // 5 seconds
   cy.get('input#password').type(password)
   cy.get('button#login_button').click()
-  cy.contains("Courses").should('exist')
+
 })
 
 // Logout Flow
 
-Cypress.Commands.add('logout', () => {
+Cypress.Commands.add('ustadLogout', () => {
    cy.get('.MuiAvatar-colorDefault.css-154ogbs').click()
    cy.contains('LOG OUT').click()
 })
 
 // Create a new course
-Cypress.Commands.add('addCourse',(courseName) => {
+Cypress.Commands.add('ustadAddCourse',(courseName) => {
     cy.contains("Courses").click()
     cy.contains("button","Course").click()
     cy.contains("Add a new course").click()
@@ -63,7 +63,7 @@ Cypress.Commands.add('addCourse',(courseName) => {
 
   // Add a new person
 
-  Cypress.Commands.add('addNewPerson',(firstName,lastName,gender) => {
+  Cypress.Commands.add('ustadAddNewPerson',(firstName,lastName,gender) => {
         cy.contains("span","Add a new person").click()
         cy.contains("label", "First names").parent().find("input").clear().type(firstName)
         cy.contains("label", "Last name").parent().find("input").clear().type(lastName)
@@ -75,7 +75,7 @@ Cypress.Commands.add('addCourse',(courseName) => {
     })
 
    // Create a user account
-    Cypress.Commands.add('createUserAccount',(userName,password) => {
+    Cypress.Commands.add('ustadCreateUserAccount',(userName,password) => {
       cy.contains('Create account').click()
       cy.get('#username:not([disabled])').type(userName)
       cy.get('#newpassword').type(password)
