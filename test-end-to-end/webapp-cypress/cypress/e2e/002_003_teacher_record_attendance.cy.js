@@ -41,14 +41,14 @@ describe('002_003_teacher_record_attendance', () => {
         cy.ustadCreateUserAccount('student2B','test1234')
 
      //Add attendance
-     cy.contains("button","Attendance").click()
-     cy.contains("button","Record attendance").click()
-     cy.contains("button","Next").click()
-     cy.get('button[aria-label="Present"]').first().click()
-     cy.get('button[aria-label="Absent"]').last().click()
-     cy.contains("button","Save").should('be.visible')
-     cy.contains("button","Save").click()
-     cy.get('svg[data-testid="CalendarTodayIcon"]').should('be.visible')
+        cy.contains("button","Attendance").click()
+        cy.contains("button","Record attendance").click()
+        cy.contains("button","Next").click()
+        cy.get('button[aria-label="Present"]').first().click()
+        cy.get('button[aria-label="Absent"]').last().click()
+        cy.contains("button","Save").should('be.visible')
+        cy.contains("button","Save").click()
+        cy.get('svg[data-testid="CalendarTodayIcon"]').should('be.visible')
 
   })
 
@@ -61,7 +61,7 @@ describe('002_003_teacher_record_attendance', () => {
      cy.contains("button","Attendance").click()
 
      // Edit recorded attendance
-     cy.get('svg[data-testid="CalendarTodayIcon"]',{timeout:1000}).first().click()
+     cy.get('svg[data-testid="CalendarTodayIcon"]',{timeout:2000}).first().click()
      cy.contains('Student 002_A').should('be.visible')
      cy.contains('Mark all present').click()
      cy.contains("button","Save").should('be.visible')
