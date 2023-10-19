@@ -1161,6 +1161,7 @@
     <!-- used to display the size limit of a file a user can upload -->
     <string name="maximum">Maximum</string>
     <string name="size_limit">Size limit (MB)</string>
+    <string name="size_limit_error">Size limit must be between %1$s MB and %2$s MB</string>
     <string name="limit">Limit</string>
     <!-- The maximum number of files a user can attach when submitting an assignment -->
     <string name="number_of_files">Maximum number of files</string>

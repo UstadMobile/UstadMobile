@@ -45,7 +45,7 @@ import com.ustadmobile.core.MR
 class ClazzAssignmentEditFragment: UstadBaseMvvmFragment(){
 
     private val viewModel: ClazzAssignmentEditViewModel by
-        ustadViewModels(::ClazzAssignmentEditViewModel)
+    ustadViewModels(::ClazzAssignmentEditViewModel)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
@@ -157,25 +157,29 @@ private fun ClazzAssignmentEditScreen(
                 },
             )
 
-            UstadNumberTextField(
-                modifier = Modifier
-                    .defaultItemPadding()
-                    .fillMaxWidth()
-                    .testTag("caSizeLimit"),
-                value = (uiState.entity?.assignment?.caSizeLimit ?: 0).toFloat(),
-                label = { Text(stringResource(id = CR.string.size_limit)) },
-                enabled = uiState.fieldsEnabled,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                ),
-                onValueChange = {
-                    onChangeAssignment(
-                        uiState.entity?.assignment?.shallowCopy {
-                            caSizeLimit = it.toInt()
-                        }
-                    )
-                },
-            )
+            UstadInputFieldLayout(
+                errorText = uiState.sizeLimitError,
+            ){
+                UstadNumberTextField(
+                    modifier = Modifier
+                        .defaultItemPadding()
+                        .fillMaxWidth()
+                        .testTag("caSizeLimit"),
+                    value = (uiState.entity?.assignment?.caSizeLimit ?: 0).toFloat(),
+                    label = { Text(stringResource(id = CR.string.size_limit)) },
+                    enabled = uiState.fieldsEnabled,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                    ),
+                    onValueChange = {
+                        onChangeAssignment(
+                            uiState.entity?.assignment?.shallowCopy {
+                                caSizeLimit = it.toInt()
+                            }
+                        )
+                    },
+                )
+            }
 
             UstadNumberTextField(
                 modifier = Modifier

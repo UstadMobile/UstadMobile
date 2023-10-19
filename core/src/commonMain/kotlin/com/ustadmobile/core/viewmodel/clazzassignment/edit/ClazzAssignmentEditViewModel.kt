@@ -2,7 +2,6 @@ package com.ustadmobile.core.viewmodel.clazzassignment.edit
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.peerreviewallocation.UpdatePeerReviewAllocationUseCase
-import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -28,6 +27,7 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.encodeToString
 import org.kodein.di.DI
 import org.kodein.di.instance
+import com.ustadmobile.core.MR
 
 @kotlinx.serialization.Serializable
 data class ClazzAssignmentEditUiState(
@@ -47,6 +47,8 @@ data class ClazzAssignmentEditUiState(
     val courseTerminology: CourseTerminology? = null,
 
     val submissionRequiredError: String? = null,
+
+    val sizeLimitError: String? = null,
 
     val courseBlockEditUiState: CourseBlockEditUiState = CourseBlockEditUiState(
         completionCriteriaOptions = ASSIGNMENT_COMPLETION_CRITERIAS
@@ -77,7 +79,7 @@ class ClazzAssignmentEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
     val peerReviewAllocationUseCaseFactory: (UmAppDatabase, UstadMobileSystemImpl)
-        -> UpdatePeerReviewAllocationUseCase = { db, systemImpl ->
+    -> UpdatePeerReviewAllocationUseCase = { db, systemImpl ->
         UpdatePeerReviewAllocationUseCase(db, systemImpl)
     }
 ): UstadEditViewModel(di, savedStateHandle, ClazzAssignmentEditView.VIEW_NAME) {
@@ -175,8 +177,8 @@ class ClazzAssignmentEditViewModel(
                     val newState = _uiState.updateAndGet { prev ->
                         prev.copy(
                             entity = prev.entity?.shallowCopyWithEntity {
-                               assignment?.caGroupUid = groupSet.cgsUid
-                               assignmentCourseGroupSetName = groupSet.takeIf { it.cgsUid != 0L }?.cgsName
+                                assignment?.caGroupUid = groupSet.cgsUid
+                                assignmentCourseGroupSetName = groupSet.takeIf { it.cgsUid != 0L }?.cgsName
                             }
                         )
                     }
@@ -203,6 +205,11 @@ class ClazzAssignmentEditViewModel(
             prev.copy(
                 entity = prev.entity?.shallowCopyWithEntity {
                     assignment = entity
+                },
+                sizeLimitError = if(prev.sizeLimitError != null && entity?.caSizeLimit == prev.entity?.assignment?.caSizeLimit){
+                    prev.sizeLimitError
+                }else {
+                    null
                 },
                 submissionRequiredError = if(prev.submissionRequiredError != null &&
                     entity?.caRequireFileSubmission == false && !entity.caRequireTextSubmission
@@ -247,8 +254,8 @@ class ClazzAssignmentEditViewModel(
                     ),
                     caDeadlineError = if(
                         prev.courseBlockEditUiState.caDeadlineError != null &&
-                            prevBlock?.cbDeadlineDate == entity?.cbDeadlineDate &&
-                            prevBlock?.cbHideUntilDate == entity?.cbHideUntilDate
+                        prevBlock?.cbDeadlineDate == entity?.cbDeadlineDate &&
+                        prevBlock?.cbHideUntilDate == entity?.cbHideUntilDate
                     ) {
                         prev.courseBlockEditUiState.caDeadlineError
                     }else {
@@ -256,8 +263,8 @@ class ClazzAssignmentEditViewModel(
                     },
                     caGracePeriodError = if(
                         prev.courseBlockEditUiState.caGracePeriodError != null &&
-                            prevBlock?.cbDeadlineDate == entity?.cbDeadlineDate &&
-                            prevBlock?.cbGracePeriodDate == entity?.cbGracePeriodDate
+                        prevBlock?.cbDeadlineDate == entity?.cbDeadlineDate &&
+                        prevBlock?.cbGracePeriodDate == entity?.cbGracePeriodDate
                     ) {
                         prev.courseBlockEditUiState.caGracePeriodError
                     }else {
@@ -276,10 +283,11 @@ class ClazzAssignmentEditViewModel(
 
     private fun ClazzAssignmentEditUiState.hasErrors() : Boolean {
         return submissionRequiredError != null ||
-            courseBlockEditUiState.caMaxPointsError != null ||
-            courseBlockEditUiState.caDeadlineError != null ||
-            courseBlockEditUiState.caGracePeriodError != null ||
-            reviewerCountError != null
+                courseBlockEditUiState.caMaxPointsError != null ||
+                courseBlockEditUiState.caDeadlineError != null ||
+                courseBlockEditUiState.caGracePeriodError != null ||
+                reviewerCountError != null ||
+                sizeLimitError != null
     }
 
 
@@ -307,6 +315,12 @@ class ClazzAssignmentEditViewModel(
     }
 
     fun onClickSave() {
+
+//        if(loadingState == LoadingUiState.INDETERMINATE)
+//            return
+//
+//        loadingState = LoadingUiState.INDETERMINATE
+
         if(!_uiState.value.fieldsEnabled)
             return
 
@@ -360,6 +374,16 @@ class ClazzAssignmentEditViewModel(
                 }
             }
 
+            if(assignment.caSizeLimit !in 5..100){
+                _uiState.update { prev ->
+                    prev.copy(
+                        sizeLimitError = systemImpl.getString(MR.strings.size_limit_error)
+                            .replace("%1\$s", ATTACHMENT_LIMIT_MIN.toString())
+                            .replace("%2\$s", ATTACHMENT_LIMIT_MAX.toString())
+                    )
+                }
+            }
+
             var errorSnack: String? = null
 
             if(initState.entity?.assignment?.caGroupUid != assignment.caGroupUid &&
@@ -392,6 +416,14 @@ class ClazzAssignmentEditViewModel(
             }
 
             if(_uiState.value.hasErrors()) {
+
+                loadingState = LoadingUiState.NOT_LOADING
+                _uiState.update { prev ->
+                    prev.copy(
+                        fieldsEnabled = true
+                    )
+                }
+
                 return@launch
             }
 
@@ -425,6 +457,8 @@ class ClazzAssignmentEditViewModel(
     companion object {
 
         const val RESULT_KEY_GROUPSET = "groupSet"
+        const val ATTACHMENT_LIMIT_MIN = 5
+        const val ATTACHMENT_LIMIT_MAX = 100
 
     }
 }
