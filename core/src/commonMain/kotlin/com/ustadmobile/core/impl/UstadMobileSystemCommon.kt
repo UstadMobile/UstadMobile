@@ -29,9 +29,6 @@ import com.ustadmobile.core.viewmodel.login.LoginViewModel
  */
 abstract class UstadMobileSystemCommon {
 
-    //for testing purpose only
-    var networkManager: Any? = null
-
     /**
      * The currently active locale
      */
@@ -254,6 +251,11 @@ abstract class UstadMobileSystemCommon {
     }
 
     abstract fun getString(stringResource: StringResource): String
+
+    abstract fun formatString(
+        stringResource: StringResource,
+        vararg args: Any
+    ): String
 
     /**
      * Return the mime type for the given extension

@@ -113,6 +113,9 @@ class ContentEntryEditViewModel(
 
                         //Put the pluginId in the SavedStateHandle - will be required when the user saves
                         savedStateHandle[KEY_PLUGINID] = metadataResult.pluginId.toString()
+
+                        savedStateHandle[KEY_TITLE] = systemImpl.formatString(MR.strings.importing,
+                            (metadataResult.displaySourceUrl ?: metadataResult.entry.sourceUrl ?: ""))
                         metadataResult.entry.toEntryWithBlockAndLanguage()
                     }else {
                         ContentEntryWithBlockAndLanguage().apply {
@@ -130,20 +133,17 @@ class ContentEntryEditViewModel(
             )
 
             val isLeaf = _uiState.value.entity?.leaf == true
-
-            val titleMessageId = if(entityUidArg == 0L && !isLeaf) {
-                MR.strings.content_editor_create_new_category
-            }else if(entityUidArg == 0L) {
-                MR.strings.add_new_content
-            }else if(entityUidArg != 0L && !isLeaf){
-                MR.strings.edit_folder
-            }else {
-                MR.strings.edit_content
+            val savedStateTitle = savedStateHandle[KEY_TITLE]
+            val title = when {
+                savedStateTitle != null -> savedStateTitle
+                entityUidArg == 0L && !isLeaf -> systemImpl.getString(MR.strings.content_editor_create_new_category)
+                entityUidArg != 0L && !isLeaf -> systemImpl.getString(MR.strings.edit_folder)
+                else -> systemImpl.getString(MR.strings.edit_content)
             }
 
             _appUiState.update { prev ->
                 prev.copy(
-                    title = systemImpl.getString(titleMessageId)
+                    title = title
                 )
             }
         }
@@ -237,6 +237,9 @@ class ContentEntryEditViewModel(
         const val ARG_IMPORTED_METADATA = "metadata"
 
         private const val KEY_PLUGINID = "pluginId"
+
+        //Used to save the title after parsing metadata
+        private const val KEY_TITLE = "savedTitle"
 
     }
 

@@ -10,7 +10,12 @@ data class MetadataResult(
     /**
      * The pluginId that provided this metadata
      */
-    val pluginId: Int
+    val pluginId: Int,
+
+    /**
+     * The import source as it will be displayed to the user e.g. "filename.epub" or "http://site.com/book.epub"
+     */
+    val displaySourceUrl: String? = null,
 ) {
 
     companion object {

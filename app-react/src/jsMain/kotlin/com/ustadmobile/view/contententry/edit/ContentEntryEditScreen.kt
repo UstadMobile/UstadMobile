@@ -16,6 +16,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.view.components.UstadSwitchField
 import web.cssom.px
@@ -128,13 +129,14 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
                 }
             }
 
-            UstadTextEditField {
+            TextField {
                 value = props.uiState.entity?.title ?: ""
                 id = "content_title"
-                label = strings[MR.strings.title]
-                error = props.uiState.titleError
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
+                label = ReactNode(strings[MR.strings.title]  + "*")
+                helperText = ReactNode(props.uiState.titleError ?: strings[MR.strings.required])
+                error = props.uiState.titleError != null
+                disabled = !props.uiState.fieldsEnabled
+                onTextChange = {
                     props.onContentEntryChanged(
                         props.uiState.entity?.shallowCopy {
                             title = it

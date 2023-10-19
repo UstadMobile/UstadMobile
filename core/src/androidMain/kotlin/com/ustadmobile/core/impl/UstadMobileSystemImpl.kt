@@ -53,6 +53,7 @@ import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toFile
 import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.format
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import org.kodein.di.direct
@@ -270,6 +271,10 @@ actual open class UstadMobileSystemImpl(
 
     override fun getString(stringResource: StringResource): String {
         return stringResource.getString(applicationContext)
+    }
+
+    override fun formatString(stringResource: StringResource, vararg args: Any): String {
+        return stringResource.format(args).stringRes.getString(applicationContext)
     }
 
     /**

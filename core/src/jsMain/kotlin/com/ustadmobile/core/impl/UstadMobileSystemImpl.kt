@@ -30,6 +30,14 @@ actual open class UstadMobileSystemImpl(
         return stringResource.localized(provider = jsStringProvider, locale = displayedLocale)
     }
 
+    override fun formatString(stringResource: StringResource, vararg args: Any): String {
+        return stringResource.localized(
+            provider = jsStringProvider,
+            locale = displayedLocale,
+            args = args
+        )
+    }
+
     /**
      * Must provide the system's default locale (e.g. en_US.UTF-8)
      *

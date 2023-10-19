@@ -100,6 +100,16 @@ actual open class UstadMobileSystemImpl(
         })
     }
 
+    override fun formatString(stringResource: StringResource, vararg args: Any): String {
+        val displayLang = getDisplayedLocale()
+        return stringResource.localized(
+            locale = localeCache.getOrPut(displayLang) {
+                Locale(displayLang)
+            },
+            args = args,
+        )
+    }
+
     fun getString(stringResource: StringResource, localeCode: String ) : String{
         return stringResource.localized(Locale(localeCode))
     }
