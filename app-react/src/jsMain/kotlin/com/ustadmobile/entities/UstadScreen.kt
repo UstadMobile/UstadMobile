@@ -109,7 +109,8 @@ import com.ustadmobile.view.person.accountedit.PersonAccountEditScreen
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.view.contententry.importlink.ContentEntryImportLinkScreen
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
-
+import com.ustadmobile.view.contententry.getmetadata.ContentEntryGetMetadataScreen
+import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
 data class UstadScreen(
@@ -314,7 +315,9 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         ClazzAssignmentSubmitterDetailScreen),
     UstadScreen(LeavingReasonEditViewModel.DEST_NAME, "LeavingReasonEdit", LeavingReasonEditScreen),
     UstadScreen("DbExport", "DbExport", DbExportScreen),
-    UstadScreen(PersonAccountEditViewModel.DEST_NAME, "PersonAccountEdit", PersonAccountEditScreen)
+    UstadScreen(PersonAccountEditViewModel.DEST_NAME, "PersonAccountEdit", PersonAccountEditScreen),
+    UstadScreen(ContentEntryGetMetadataViewModel.DEST_NAME, "ContentEntryGetMetadata",
+        ContentEntryGetMetadataScreen)
 )
 
 

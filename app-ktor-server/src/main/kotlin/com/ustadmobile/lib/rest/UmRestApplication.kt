@@ -391,6 +391,10 @@ fun Application.umRestApplication(
             route("pbkdf2"){
                 Pbkdf2Route()
             }
+
+            route("contentupload") {
+                ContentUploadRoute()
+            }
         }
 
         static("umapp") {

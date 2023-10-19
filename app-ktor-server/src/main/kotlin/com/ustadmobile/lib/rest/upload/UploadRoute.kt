@@ -15,8 +15,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
 
-
-
 data class CompletedUpload(
     val call: ApplicationCall,
     val file: File,
@@ -24,11 +22,19 @@ data class CompletedUpload(
 )
 
 /**
- * Upload Receiver that can accept multiple chunks in order.
+ * Upload Receiver that can accept a file upload in one or more chunks. Each upload request must
+ * have a UUID in the header ( HEADER_UPLOAD_UUID ).
  *
+ * The final chunk must include the header:
+ * upload-final-chunk: true
+ *
+ * When receiving the final chunk, the onUploadCompleted callback will be called. The callback will
+ * be responsible for sending a response.
+ *
+ * For other chunks, the data will be appended a 204 (no content) response will be sent.
  */
 fun Route.UploadRoute(
-    uploadDir: File,
+    uploadDir: (ApplicationCall) -> File,
     path: String,
     onUploadCompleted: suspend (CompletedUpload) -> Unit,
 ) {
@@ -41,7 +47,7 @@ fun Route.UploadRoute(
         }
 
         val isFinal = call.request.headers[HEADER_IS_FINAL_CHUNK]?.toBoolean() ?: false
-        val uploadTmpFile = File(uploadDir, uploadUuid)
+        val uploadTmpFile = File(uploadDir(call), uploadUuid)
         withContext(Dispatchers.IO) {
             FileOutputStream(uploadTmpFile, true).use { fileOut ->
                 call.request.receiveChannel().copyTo(fileOut)

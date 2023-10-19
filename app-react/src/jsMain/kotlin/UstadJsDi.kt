@@ -1,6 +1,8 @@
 
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseJs
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.IContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
@@ -151,4 +153,12 @@ internal fun ustadJsDi(
     bind<Json>() with singleton {
         json
     }
+
+    bind<IContentEntryGetMetaDataFromUriUseCase>() with provider {
+        ContentEntryGetMetaDataFromUriUseCaseJs(
+            navResultReturner = instance(),
+            json = instance()
+        )
+    }
+
 }

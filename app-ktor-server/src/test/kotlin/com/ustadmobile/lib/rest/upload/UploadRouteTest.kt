@@ -42,7 +42,7 @@ class UploadRouteTest {
 
             routing {
                 UploadRoute(
-                    uploadDir = uploadDir,
+                    uploadDir = { uploadDir },
                     path = "upload",
                     onUploadCompleted = {
                         it.call.respondText(finalCallMessage)
