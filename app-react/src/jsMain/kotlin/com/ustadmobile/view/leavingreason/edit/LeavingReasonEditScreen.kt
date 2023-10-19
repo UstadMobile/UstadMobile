@@ -9,8 +9,8 @@ import com.ustadmobile.core.viewmodel.LeavingReasonEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextEditField
-import mui.system.Container
 import mui.system.Stack
 import mui.system.responsive
 import react.FC
@@ -27,7 +27,7 @@ val LeavingReasonEditScreenComponent = FC<LeavingReasonEditScreenProps> { props 
 
     val strings: StringProvider = useStringProvider()
 
-    Container {
+    UstadStandardContainer {
         Stack {
             spacing = responsive(2)
 

@@ -14,6 +14,7 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.common.xs
+import com.ustadmobile.mui.components.UstadStandardContainer
 import dev.icerock.moko.resources.StringResource
 import web.cssom.TextAlign
 import web.cssom.px
@@ -114,9 +115,7 @@ private val ClazzLogEditAttendanceScreenComponent = FC<ClazzLogEditAttendanceScr
 
     val strings = useStringProvider()
 
-    Container {
-        maxWidth = "lg"
-
+    UstadStandardContainer {
         Stack {
             direction = responsive(StackDirection.column)
             spacing = responsive(10.px)

@@ -7,12 +7,12 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
+import com.ustadmobile.mui.components.UstadStandardContainer
 import react.dom.html.ReactHTML.img
 import com.ustadmobile.util.ext.onTextChange
 import web.cssom.px
 import mui.icons.material.Add
 import mui.material.*
-import mui.system.Container
 import mui.system.Stack
 import mui.system.responsive
 import mui.system.sx
@@ -48,7 +48,7 @@ val SiteEnterLinkComponent2 = FC <SiteEnterLinkProps> { props ->
 
     val strings: StringProvider = useStringProvider()
 
-    Container {
+    UstadStandardContainer {
         Stack {
             spacing = responsive(2)
 

@@ -21,6 +21,7 @@ import com.ustadmobile.mui.common.input
 import com.ustadmobile.mui.common.readOnly
 import com.ustadmobile.mui.components.UstadCourseBlockEdit
 import com.ustadmobile.mui.components.UstadNumberTextField
+import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.view.components.UstadSelectField
 import com.ustadmobile.view.components.UstadSwitchField
@@ -52,7 +53,7 @@ external interface ClazzAssignmentEditScreenProps : Props {
 
 val ClazzAssignmentEditScreenPreview = FC<Props> {
 
-    var entity: CourseBlockWithEntity? by useState {
+    val entity: CourseBlockWithEntity? by useState {
         CourseBlockWithEntity().apply {
             assignment = ClazzAssignment().apply {
                 caMarkingType = ClazzAssignment.MARKED_BY_PEERS
@@ -80,8 +81,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
 
     val terminologyEntries = useCourseTerminologyEntries(props.uiState.courseTerminology)
 
-    Container {
-        maxWidth = "lg"
+    UstadStandardContainer {
 
         Stack {
             spacing = responsive(20.px)
