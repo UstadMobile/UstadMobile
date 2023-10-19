@@ -10,17 +10,19 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
-import com.ustadmobile.door.ext.withDoorTransaction
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
 import com.ustadmobile.lib.db.entities.CourseBlock
+import io.github.aakira.napier.Napier
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 
 data class ContentEntryEditUiState(
@@ -80,6 +82,7 @@ class ContentEntryEditViewModel(
             )
         }
 
+
         viewModelScope.launch {
             val courseBlockArg = savedStateHandle.getJson(
                 key = ARG_COURSEBLOCK,
@@ -96,10 +99,27 @@ class ContentEntryEditViewModel(
                         }
                 },
                 makeDefault = {
-                    ContentEntryWithBlockAndLanguage().apply {
-                        contentEntryUid = activeDb.doorPrimaryKeyManager.nextId(ContentEntry.TABLE_ID)
-                        block = courseBlockArg
-                        leaf = savedStateHandle[ARG_LEAF]?.toBoolean() == true
+                    val metadataStr = if(entityUidArg == 0L)
+                        savedStateHandle[ARG_IMPORTED_METADATA]
+                    else
+                        null
+
+                    Napier.d("ContentEntryEditViewModel: entityUidArg=$entityUidArg arg=${savedStateHandle[ARG_IMPORTED_METADATA]}")
+
+                    if(metadataStr != null) {
+                        val metadataResult = withContext(Dispatchers.Default) {
+                            json.decodeFromString(MetadataResult.serializer(), metadataStr)
+                        }
+
+                        //Put the pluginId in the SavedStateHandle - will be required when the user saves
+                        savedStateHandle[KEY_PLUGINID] = metadataResult.pluginId.toString()
+                        metadataResult.entry.toEntryWithBlockAndLanguage()
+                    }else {
+                        ContentEntryWithBlockAndLanguage().apply {
+                            contentEntryUid = activeDb.doorPrimaryKeyManager.nextId(ContentEntry.TABLE_ID)
+                            block = courseBlockArg
+                            leaf = savedStateHandle[ARG_LEAF]?.toBoolean() == true
+                        }
                     }
                 },
                 uiUpdate = {
@@ -141,7 +161,6 @@ class ContentEntryEditViewModel(
             it.licenseName = licenseName
             it.licenseUrl = licenseUrl
             it.sourceUrl = sourceUrl
-            it.thumbnailUrl = thumbnailUrl
             it.lastModified = lastModified
             it.primaryLanguageUid = primaryLanguageUid
             it.languageVariantUid = languageVariantUid
@@ -211,14 +230,13 @@ class ContentEntryEditViewModel(
 
         const val ARG_LEAF = "leaf"
 
-        const val ARG_URI = "uri"
-
         const val ARG_COURSEBLOCK = "courseBlock"
 
         const val DEST_NAME = "ContentEntryEdit"
 
         const val ARG_IMPORTED_METADATA = "metadata"
 
+        private const val KEY_PLUGINID = "pluginId"
 
     }
 
