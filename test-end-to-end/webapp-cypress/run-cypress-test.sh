@@ -14,16 +14,15 @@ eval set -- "$TEMP"
 unset TEMP
 
 # Default values for options
-TESTSERIAL=""
-TESTUSER="admin"
-TESTPASS="testpass"
-SPEC=""
-USECONSOLEOUTPUT=0
-
-ENDPOINT=""
 WORKDIR=$(pwd)
 SCRIPTDIR=$(realpath $(dirname $0))
+TESTUSER="admin"
+TESTPASS="testpass"
+USECONSOLEOUTPUT=0
+SPEC=""
+ENDPOINT=""
 CONTROLSERVER=""
+TESTSERIAL=""
 
 
 
@@ -86,6 +85,11 @@ if [ ! -e $SCRIPTDIR/results ]; then
   mkdir $SCRIPTDIR/results
 fi
 
+# Clear the contents of the results folder (if it exists)
+if [ -d "$SCRIPTDIR/results" ]; then
+  rm -rf "$SCRIPTDIR/results"/*
+fi
+
 # Start control server
 $SCRIPTDIR/../../testserver-controller/start.sh  || exit_with_error "Failed to start control server"
 
@@ -118,5 +122,10 @@ teststatus=$?
 
 # Exit with the same status as the Cypress test run
 exit $teststatus
-echo $?
+
+if [ $? -eq 0 ]; then
+    echo "Command succeeded"
+else
+    echo "Command failed"
+fi
 

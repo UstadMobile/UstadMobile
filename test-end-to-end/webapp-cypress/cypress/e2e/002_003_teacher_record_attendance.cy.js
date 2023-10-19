@@ -1,4 +1,4 @@
-describe('Ustad mobile course tests', () => {
+describe('002_003_teacher_record_attendance', () => {
   it('Start Ustad Test Server ', () => {
       // Start Test Server
         cy.ustadStartTestServer()
@@ -52,7 +52,7 @@ describe('Ustad mobile course tests', () => {
 
   })
 
-  it('002_003_teacher_record_attendance', () => {
+  it('Teacher able to edit attendance of students ', () => {
 
     // Teacher Login
 

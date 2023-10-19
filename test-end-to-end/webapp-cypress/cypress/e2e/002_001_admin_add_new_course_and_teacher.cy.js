@@ -1,4 +1,4 @@
-describe('Ustad mobile course tests', () => {
+describe('002_001_admin_add_new_course_and_teacher ', () => {
  it('Start Ustad Test Server ', () => {
   // Start Test Server
     cy.ustadStartTestServer()
@@ -35,11 +35,11 @@ describe('Ustad mobile course tests', () => {
 
   })
 
-it('Verify Teacher login', () => {
+it('Teacher able to login to the app', () => {
 
   // Teacher Login
 
-   cy.ustadClearDbAndLogin('teacher1','test1234')
+   cy.ustadClearDbAndLogin('teacher21','test1234')
    cy.contains("Courses").should('be.visible')  // Assertion to check the user logged in successfully
 
    })
