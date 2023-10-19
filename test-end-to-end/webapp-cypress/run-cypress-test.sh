@@ -8,7 +8,7 @@ exit_with_error() {
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 's:u:p:e:c:r' --long 'serial1:,username:,password:,endpoint:,console-output,spec:' -n 'run-cypress-test.sh' -- "$@")
+TEMP=$(getopt -o 'r' --long 'spec:' -n 'run-cypress-test.sh' -- "$@")
 
 eval set -- "$TEMP"
 unset TEMP
@@ -24,7 +24,7 @@ CONTROLSERVER=""
 
 while true; do
         case "$1" in
-             '-r'|'--spec')
+          '-r'|'--spec')
               echo "Set spec to $2"
               SPEC=$2
               shift 2
