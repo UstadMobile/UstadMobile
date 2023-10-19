@@ -13,7 +13,6 @@ module.exports = defineConfig({
               suiteFilename: true,
               suiteTitleSeparatedBy: '.',   // suites separator, default is space (' '), or period ('.') in jenkins mode
               jenkinsMode: true,
-              BUILD_ID: 4291,
               toConsole: false
           }
   },
