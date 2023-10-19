@@ -38,8 +38,6 @@ while true; do
 	esac
 done
 
-
-
 if [ "$CONTROLSERVER" = "" ]; then
   CONTROLSERVER="http://localhost:8075/"
 fi
@@ -69,7 +67,7 @@ cd $SCRIPTDIR
 
 # Run npm install and Cypress tests
 npm install || exit_with_error "Failed to run 'npm install'"
-npm exec cypress run --spec "$SPECARG" $OUTPUTARGS || exit_with_error "Cypress test run failed"
+npm exec cypress run --spec "$SPECARG"  || exit_with_error "Cypress test run failed"
 
 # Capture the exit status of the Cypress test run
 teststatus=$?
