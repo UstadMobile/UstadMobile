@@ -3,10 +3,10 @@ describe('002_003_teacher_record_attendance', () => {
       // Start Test Server
         cy.ustadStartTestServer()
   })
-    it('002_001_admin_add_new_course_and_teacher', () => {
+    it('Admin record student attendance', () => {
 
       // Admin user login
-        cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
+        cy.ustadClearDbAndLogin('admin','testpass')
 
      // Add a new course
         cy.ustadAddCourse('002_003')
@@ -52,7 +52,7 @@ describe('002_003_teacher_record_attendance', () => {
 
   })
 
-  it('Teacher able to edit attendance of students ', () => {
+  it('Teacher has permission to edit attendance of students ', () => {
 
     // Teacher Login
 
