@@ -104,6 +104,8 @@ else
   OUTPUTARGS="--reporter junit --reporter-options mochaFile=results/my-test-output.xml,toConsole=true"
 fi
 
+cd $SCRIPTDIR
+
 # Run npm install and Cypress tests
 npm install || exit_with_error "Failed to run 'npm install'"
 npm exec cypress run --spec "$SPECARG" $OUTPUTARGS || exit_with_error "Cypress test run failed"
