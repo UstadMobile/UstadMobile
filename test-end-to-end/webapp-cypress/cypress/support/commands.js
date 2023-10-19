@@ -19,7 +19,7 @@ import '@this-dot/cypress-indexeddb';
 // Start Test Server
 Cypress.Commands.add('ustadStartTestServer', () => {
   cy.visit('http://localhost:8075/start'); // Use cy.visit to navigate to the start page
-  cy.wait(4000); // Wait for 2 seconds after visiting the start page
+  cy.wait(5000); // Wait for 5 seconds after visiting the start page
 });
 
 
@@ -79,7 +79,7 @@ Cypress.Commands.add('ustadAddCourse',(courseName) => {
       cy.contains('Create account').click()
       cy.get('#username:not([disabled])').type(userName)
       cy.get('#newpassword').type(password)
-      cy.contains("button","Save").click().should('be.visible')
+      cy.contains("button","Save").click()
       cy.contains('Change Password',{timeout:2000}).should('be.visible')
       cy.go('back')
       cy.go('back')

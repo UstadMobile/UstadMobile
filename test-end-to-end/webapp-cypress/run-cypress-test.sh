@@ -118,4 +118,5 @@ teststatus=$?
 
 # Exit with the same status as the Cypress test run
 exit $teststatus
+echo $?
 
