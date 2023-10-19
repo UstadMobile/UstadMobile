@@ -105,7 +105,7 @@ fi
 if [ "$USECONSOLEOUTPUT" -eq 1 ]; then
   OUTPUTARGS=""
 else
-  OUTPUTARGS="--reporter junit --reporter-options mochaFile=results/my-test-output.xml,toConsole=true"
+  OUTPUTARGS="--reporter junit --reporter-options mochaFile=results/my-test-output.xml,toConsole=false"
 fi
 
 cd $SCRIPTDIR
