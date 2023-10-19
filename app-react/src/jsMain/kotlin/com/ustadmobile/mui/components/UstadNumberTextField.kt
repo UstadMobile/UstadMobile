@@ -50,7 +50,9 @@ val UstadNumberTextField = FC<UstadNumberTextFieldProps> { props ->
     }
 
     TextField {
-        props.getOwnPropertyNames().filter { it != "value" && it != "onChange" }.forEach { propName ->
+        props.getOwnPropertyNames().filter {
+            it != "value" && it != "onChange" && it != "numValue" && it != "numValueIfBlank"
+        }.forEach { propName ->
             asDynamic()[propName] = props.asDynamic()[propName]
         }
 
