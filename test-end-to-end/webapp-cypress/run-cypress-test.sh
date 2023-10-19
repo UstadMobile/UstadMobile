@@ -123,9 +123,5 @@ teststatus=$?
 # Exit with the same status as the Cypress test run
 exit $teststatus
 
-if [ $? -eq 0 ]; then
-    echo "Command succeeded"
-else
-    echo "Command failed"
-fi
+
 

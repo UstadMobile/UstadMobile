@@ -37,7 +37,7 @@ Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
     },
 
   })
-  cy.get('input#username', { timeout: 10000 }).should('exist').type(username) // 5 seconds
+  cy.get('input#username', { timeout: 10000 }).should('exist').type(username) // 10 seconds
   cy.get('input#password').type(password)
   cy.get('button#login_button').click()
 
