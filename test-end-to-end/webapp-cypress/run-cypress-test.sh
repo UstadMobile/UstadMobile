@@ -47,10 +47,13 @@ if [ ! -e $SCRIPTDIR/results ]; then
   mkdir $SCRIPTDIR/results
 fi
 
-# Clear the contents of the results folder (if it exists)
 if [ -d "$SCRIPTDIR/results" ]; then
-  rm -rf "$SCRIPTDIR/results"/*
+  # Check if there are files to delete
+  if [ "$(ls -A $SCRIPTDIR/results)" ]; then
+    rm -rf "$SCRIPTDIR/results"/*
+  fi
 fi
+
 
 # Start control server
 $SCRIPTDIR/../../testserver-controller/start.sh  || exit_with_error "Failed to start control server"
