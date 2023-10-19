@@ -61,6 +61,15 @@ data class ClazzAssignmentEditUiState(
     val fileSubmissionVisible: Boolean
         get()  = entity?.assignment?.caRequireFileSubmission == true
 
+    //Set fields enabled on both the assignment ui state and the courseblockedit state
+    fun copyWithFieldsEnabledSet(
+        fieldsEnabled: Boolean
+    ) = copy(
+        fieldsEnabled = fieldsEnabled,
+        courseBlockEditUiState = courseBlockEditUiState.copy(
+            fieldsEnabled = fieldsEnabled
+        )
+    )
 
     companion object {
 
@@ -132,7 +141,7 @@ class ClazzAssignmentEditViewModel(
 
 
             _uiState.update { prev ->
-                prev.copy(fieldsEnabled = true)
+                prev.copyWithFieldsEnabledSet(fieldsEnabled = true)
             }
 
             _appUiState.update { prev ->
@@ -312,7 +321,7 @@ class ClazzAssignmentEditViewModel(
             return
 
         _uiState.update { prev ->
-            prev.copy(fieldsEnabled = false)
+            prev.copyWithFieldsEnabledSet(fieldsEnabled = false)
         }
 
         viewModelScope.launch {
@@ -384,7 +393,7 @@ class ClazzAssignmentEditViewModel(
             }
 
             _uiState.update { prev ->
-                prev.copy(fieldsEnabled = true)
+                prev.copyWithFieldsEnabledSet(fieldsEnabled = true)
             }
 
             if(errorSnack != null) {
