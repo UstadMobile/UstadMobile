@@ -19,6 +19,7 @@ import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
+import emotion.react.css
 import web.cssom.*
 import js.core.jso
 import mui.material.*
@@ -27,10 +28,16 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import react.dom.html.ReactHTML.input
 import react.router.useLocation
+import react.useRef
 import react.useState
+import web.html.HTMLInputElement
+import web.html.InputType
+import web.url.URL
 import mui.icons.material.Folder as FolderIcon
 import mui.icons.material.Link as LinkIcon
+import mui.icons.material.FileUpload as FileUploadIcon
 
 external interface ContentEntryListScreenProps : Props {
 
@@ -88,6 +95,7 @@ val ContentEntryListScreen = FC<Props> {
 
     val uiStateVal by viewModel.uiState.collectAsState(ContentEntryListUiState())
     val appState by viewModel.appUiState.collectAsState(AppUiState())
+    val fileInputRef = useRef<HTMLInputElement>(null)
 
 
     ContentEntryListScreenComponent {
@@ -101,6 +109,20 @@ val ContentEntryListScreen = FC<Props> {
                 addDialogVisible = true
             }
         )
+    }
+
+    input {
+        ref = fileInputRef
+        type = InputType.file
+        id = "content_input_file"
+        css {
+            display = "none".unsafeCast<Display>()
+        }
+        onChange = {
+            it.target.files?.item(0)?.also { file ->
+                viewModel.onImportFile(URL.createObjectURL(file))
+            }
+        }
     }
 
     Dialog {
@@ -137,7 +159,23 @@ val ContentEntryListScreen = FC<Props> {
                     }
 
                     ListItemText {
-                        primary = ReactNode(strings[MR.strings.activity_import_link])
+                        primary = ReactNode(strings[MR.strings.content_from_link])
+                    }
+                }
+            }
+
+            ListItem {
+                ListItemButton {
+                    onClick = {
+                        fileInputRef.current?.click()
+                    }
+
+                    ListItemIcon {
+                        FileUploadIcon()
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(strings[MR.strings.content_from_file])
                     }
                 }
             }
