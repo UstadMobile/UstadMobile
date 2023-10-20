@@ -85,6 +85,16 @@ Cypress.Commands.add('ustadAddCourse',(courseName) => {
       cy.go('back')
       })
 
+   // Add a Discussion Board
+    Cypress.Commands.add('ustadAddDiscussionBoard',(discussionTitle) => {
+      cy.contains("Add block").click()
+      cy.contains("Discussion board").click()
+      cy.get('input[id="title"]').type(discussionTitle)
+      cy.get('div[data-placeholder="Description"]').type("a simple discussion description")
+      cy.contains("button","Done").click()
+      })
+
+
 //commands.js
 //
 //
