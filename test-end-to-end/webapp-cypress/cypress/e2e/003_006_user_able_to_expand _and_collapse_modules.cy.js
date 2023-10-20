@@ -9,7 +9,7 @@ it('Start Ustad Test Server ', () => {
         cy.ustadClearDbAndLogin('admin','testpass')
 
       // Add a new course
-        cy.ustadAddCourse('003_002')
+        cy.ustadAddCourse('003_006')
 
       // Add module block
          cy.contains('button','Edit').click()
@@ -37,7 +37,7 @@ it('Start Ustad Test Server ', () => {
      //Testing Module Collapse icon working or not
         cy.get('svg[data-testid="KeyboardArrowUpIcon"]').eq(0).click()   // collapse module 1
         cy.contains('text 1').should('not.exist');
-        cy.get('svg[data-testid="KeyboardArrowUpIcon"]').click({force: true})
+        cy.get('svg[data-testid="KeyboardArrowUpIcon"]').click()
         cy.contains("text 2").should('not.exist')
 
      //Testing Module Expand icon working or not

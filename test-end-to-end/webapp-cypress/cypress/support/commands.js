@@ -37,7 +37,8 @@ Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
     },
 
   })
-  cy.get('input#username', { timeout: 10000 }).should('exist').type(username) // 10 seconds
+  cy.contains('Login').should('be.visible')
+  cy.get('input#username:not([disabled])', { timeout: 10000 }).type(username) // 10 seconds
   cy.get('input#password').type(password)
   cy.get('button#login_button').click()
 
@@ -46,7 +47,7 @@ Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
 // Logout Flow
 
 Cypress.Commands.add('ustadLogout', () => {
-   cy.get('.MuiAvatar-colorDefault.css-154ogbs').click()
+   cy.get('#header_avatar').click()
    cy.contains('LOG OUT').click()
 })
 
@@ -104,14 +105,50 @@ Cypress.Commands.add('ustadAddCourse',(courseName) => {
 
      })
 
+  // Add a Discussion Board
+    Cypress.Commands.add('ustadAddDiscussionBoard',(discussionTitle) => {
+      cy.contains("Add block").click()
+           cy.contains("Discussion board").click()
+           cy.get('input[id="title"]').type(discussionTitle)
+           cy.get('div[data-placeholder="Description"]').type("a simple discussion description")
+           cy.contains("button","Done").click()
+
+          })
+
 
   // Add Assignment block
-    Cypress.Commands.add('ustadAddAssignmentBlock',(assignmentTitle) => {
-     cy.contains("Add block").should('be.visible').click()
-     cy.contains("Assignments").click()
-     cy.get('input[id="title"]').type(assignmentTitle)
-     cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
-     cy.contains("button","Done").click()
+    Cypress.Commands.add('ustadAddAssignmentBlock',(assignmentTitle,deadlineDt) => {
+      cy.contains("Add block").click()
+      cy.contains("Assignments").click()
+      cy.get('input[id="title"]').type(assignmentTitle)
+      cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
+      cy.get('input[id="hide_until_date"]').click()
+      cy.get('#hide_until_date')
+                    .click({ multiple: true })
+                    .then(input => {
+                      input[0].dispatchEvent(new Event('input', { bubbles: true }))
+                      input.val('2023-06-01T13:00')
+                    })
+                    .should('be.visible')
+      /*cy.get('#hide_until_date')
+                    .click({ multiple: true })
+                    .then(input => {
+                    input[0].dispatchEvent(new Event('input', { bubbles: true }))
+                    input.val('2023-06-01T13:00')
+                   })*/
+    //   cy.wait(2000)
+       cy.contains("div","Graded").click()
+       cy.contains("li","submitted").click()
+       cy.wait(2000)
+       cy.get('#cbDeadlineDate')
+                        .click({ multiple: true })
+                        .then(input => {
+                          input[0].dispatchEvent(new Event('input', { bubbles: true }))
+                          input.val(deadlineDt)
+                        })
+                        .click({ multiple: true }).should('be.visible')
+         cy.contains("button","Done").should('be.visible')
+         cy.contains("button","Done").click()
      })
 //commands.js
 //
