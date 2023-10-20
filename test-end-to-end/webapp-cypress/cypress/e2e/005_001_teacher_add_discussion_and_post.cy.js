@@ -10,12 +10,7 @@ it('Start Ustad Test Server ', () => {
       // Add a new course
         cy.ustadAddCourse('005_001')
 
-      // Add module block
-         cy.contains('button','Edit').click()
-         cy.ustadAddModuleBlock('module 1')
-
-
-      // Add discussion board
+     // Add discussion board
          cy.contains('button','Edit').click()
          cy.ustadAddDiscussionBoard('Discussion 1')
          cy.contains('Edit course').should('be.visible')
