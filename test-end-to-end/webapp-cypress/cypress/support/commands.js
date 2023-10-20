@@ -46,7 +46,7 @@ Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
 // Logout Flow
 
 Cypress.Commands.add('ustadLogout', () => {
-   cy.get('.MuiAvatar-colorDefault.css-154ogbs').click()
+   cy.get('#header_avatar').click()
    cy.contains('LOG OUT').click()
 })
 
