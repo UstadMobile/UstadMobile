@@ -2,11 +2,13 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
 /**
  * Represents one job that the user created. One ContentJob can have one or more ContentJobItem(s),
  * each of which will have a source URI.
  */
+@Serializable
 @Entity
 data class ContentJob(
 

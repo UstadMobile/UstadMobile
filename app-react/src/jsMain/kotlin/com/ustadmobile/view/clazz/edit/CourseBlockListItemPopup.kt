@@ -94,7 +94,7 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
             if(props.uiState.showHide) {
                 MenuItem {
                     onClick = {
-                        props.onClickHideBlockPopupMenu(props.uiState.courseBlock)
+                        props.onClickHideBlockPopupMenu(props.uiState.block)
                         point = null
                     }
                     + strings[MR.strings.hide]
@@ -104,7 +104,7 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
             if(props.uiState.showUnhide) {
                 MenuItem {
                     onClick = {
-                        props.onClickUnHideBlockPopupMenu(props.uiState.courseBlock)
+                        props.onClickUnHideBlockPopupMenu(props.uiState.block)
                         point = null
                     }
                     + strings[MR.strings.unhide]
@@ -114,7 +114,7 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
             if(props.uiState.showIndent) {
                 MenuItem {
                     onClick = {
-                        props.onClickIndentBlockPopupMenu(props.uiState.courseBlock)
+                        props.onClickIndentBlockPopupMenu(props.uiState.block)
                         point = null
                     }
                     + strings[MR.strings.indent]
@@ -124,7 +124,7 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
             if (props.uiState.showUnindent) {
                 MenuItem {
                     onClick = {
-                        props.onClickUnIndentBlockPopupMenu(props.uiState.courseBlock)
+                        props.onClickUnIndentBlockPopupMenu(props.uiState.block)
                         point = null
                     }
                     + strings[MR.strings.unindent]
@@ -133,7 +133,7 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
 
             MenuItem {
                 onClick = {
-                    props.onClickDeleteBlockPopupMenu(props.uiState.courseBlock)
+                    props.onClickDeleteBlockPopupMenu(props.uiState.block)
                     point = null
                 }
                 + strings[MR.strings.delete]

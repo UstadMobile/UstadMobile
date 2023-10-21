@@ -3,15 +3,23 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
 /**
  * ContentJobItem represents one content item to process e.g. a URL, file, etc.
  */
-@Entity(indices = [Index(value = ["cjiContentEntryUid", "cjiFinishTime"],
-        unique = false)])
+@Entity(
+    indices = [
+        Index(
+            value = ["cjiContentEntryUid", "cjiFinishTime"],
+            unique = false
+        )
+    ]
+)
+@Serializable
 data class ContentJobItem(
 
-        @PrimaryKey(autoGenerate = true)
+    @PrimaryKey(autoGenerate = true)
     var cjiUid: Long = 0,
 
     var cjiJobUid: Long = 0,
