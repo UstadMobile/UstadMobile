@@ -590,10 +590,10 @@ class ClazzEditViewModel(
         )
     }
 
-    fun onClickDeleteCourseBlock(block: CourseBlockWithEntity) {
+    fun onClickDeleteCourseBlock(block: CourseBlockAndEditEntities) {
         viewModelScope.launch {
             updateCourseBlockList(_uiState.value.courseBlockList.filter {
-                it.courseBlock.cbUid != block.cbUid
+                it.courseBlock.cbUid != block.courseBlock.cbUid
             })
         }
     }

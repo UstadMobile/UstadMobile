@@ -3,7 +3,7 @@ package com.ustadmobile.view.clazz.edit
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditUiState
-import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
+import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import web.cssom.ClassName
 import js.core.jso
 import mui.icons.material.MoreVert
@@ -25,15 +25,15 @@ external interface PopUpMenuProps : Props {
 
     var fieldsEnabled: Boolean
 
-    var onClickHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit
+    var onClickHideBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit
 
-    var onClickUnHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit
+    var onClickUnHideBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit
 
-    var onClickIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit
+    var onClickIndentBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit
 
-    var onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit
+    var onClickUnIndentBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit
 
-    var onClickDeleteBlockPopupMenu: (CourseBlockWithEntity) -> Unit
+    var onClickDeleteBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit
 
     var uiState: ClazzEditUiState.CourseBlockUiState
 
