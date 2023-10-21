@@ -24,7 +24,6 @@ import com.ustadmobile.libuicompose.R
  */
 @Composable
 actual fun HtmlClickableTextField(
-    root: @Composable (() -> Unit),
     html: String,
     label: String,
     onClick: () -> Unit,

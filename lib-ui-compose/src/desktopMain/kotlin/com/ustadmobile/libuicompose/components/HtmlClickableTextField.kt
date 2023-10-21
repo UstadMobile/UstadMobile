@@ -40,7 +40,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 actual fun HtmlClickableTextField(
-    root: @Composable (() -> Unit),
     html: String,
     label: String,
     onClick: () -> Unit,
