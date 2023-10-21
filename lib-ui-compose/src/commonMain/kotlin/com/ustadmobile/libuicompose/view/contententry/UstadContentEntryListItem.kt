@@ -20,6 +20,7 @@ import com.ustadmobile.core.viewmodel.contententry.list.listItemUiState
 import com.ustadmobile.lib.db.entities.*
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import dev.icerock.moko.resources.compose.colorResource
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -76,8 +77,7 @@ private fun LeadingContent(
     var badge = Icons.Default.Cancel
     if (contentEntry?.scoreProgress?.progressBadge() == ProgressConstants.BADGE_CHECK) {
         badge = Icons.Default.CheckCircle
-        //  TODO error
-//        badgeColor = colorResource(R.color.successColor)
+        badgeColor = colorResource(MR.colors.success)
     }
 
     Column(
