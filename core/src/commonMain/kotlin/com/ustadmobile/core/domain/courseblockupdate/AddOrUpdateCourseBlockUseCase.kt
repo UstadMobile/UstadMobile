@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.courseblockupdate
 
 import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 
 /**
  * Handle when a new course block is added to the list, or when an existing course block has been
@@ -13,6 +14,7 @@ class AddOrUpdateCourseBlockUseCase {
 
     operator fun invoke(
         currentList: List<CourseBlockAndEditEntities>,
+        clazzUid: Long,
         addOrUpdateBlock: CourseBlockAndEditEntities,
     ) : List<CourseBlockAndEditEntities> {
         val currentIndex = currentList.indexOfFirst {
@@ -25,7 +27,13 @@ class AddOrUpdateCourseBlockUseCase {
                 this[currentIndex] = addOrUpdateBlock
             }
         }else {
-            courseBlockMutableList.add(addOrUpdateBlock)
+            courseBlockMutableList.add(
+                addOrUpdateBlock.copy(
+                    courseBlock = addOrUpdateBlock.courseBlock.shallowCopy {
+                        cbClazzUid = clazzUid
+                    }
+                )
+            )
             courseBlockMutableList.autoIndent(courseBlockMutableList.size - 1)
                 .updateParentModuleUidsAndIndex()
         }

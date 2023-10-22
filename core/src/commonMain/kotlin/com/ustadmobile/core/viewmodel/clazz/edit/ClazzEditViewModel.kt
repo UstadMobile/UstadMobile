@@ -232,13 +232,18 @@ class ClazzEditViewModel(
             }
 
             launch {
+                //Handle text, module, and discussion topic (e.g. plain CourseBlock that does not
+                // include any other entities)
                 resultReturner.filteredResultFlowForKey(RESULT_KEY_COURSEBLOCK).collect { result ->
-                    val courseBlockAndEntities = result.result as? CourseBlockAndEditEntities
+                    val courseBlockResult = result.result as? CourseBlock
                         ?: return@collect
 
                     val newCourseBlockList = addOrUpdateCourseBlockUseCase(
                         currentList = _uiState.value.courseBlockList,
-                        addOrUpdateBlock = courseBlockAndEntities,
+                        clazzUid = _uiState.value.entity?.clazzUid ?: 0L,
+                        addOrUpdateBlock = CourseBlockAndEditEntities(
+                            courseBlock = courseBlockResult
+                        ),
                     )
 
                     updateCourseBlockList(newCourseBlockList)
@@ -629,6 +634,10 @@ class ClazzEditViewModel(
 
         const val STATE_KEY_SCHEDULES = "schedule"
 
+        /**
+         * Result key used for when the user edits text block, module block, or discussion block.
+         * Plain CourseBlock will be returned
+         */
         const val RESULT_KEY_COURSEBLOCK = "courseblock"
 
         const val RESULT_KEY_TIMEZONE = "timeZone"

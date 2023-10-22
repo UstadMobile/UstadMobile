@@ -11,7 +11,7 @@ import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
-import com.ustadmobile.lib.db.composites.ContentEntryAndBlockLanguageAndContentJob
+import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.ContentJobItem
@@ -25,7 +25,7 @@ import org.kodein.di.DI
 
 data class ContentEntryEditUiState(
 
-    val entity: ContentEntryAndBlockLanguageAndContentJob? = null,
+    val entity: ContentEntryBlockLanguageAndContentJob? = null,
 
     val licenceOptions: List<MessageIdOption2> = emptyList(),
 
@@ -47,7 +47,7 @@ data class ContentEntryEditUiState(
 
     val compressionEnabled: Boolean = false,
 
-    ) {
+) {
     val contentCompressVisible: Boolean
         get() = metadataResult != null
 
@@ -60,6 +60,9 @@ data class ContentEntryEditUiState(
 }
 
 /**
+ * When there is no associated CourseBlock
+ *    Show only the ContentEntryEdit part
+ *
  * When there is an associated CourseBlock and the user has permission to edit the ContentEntry itself:
  *    The title and description will be shown only once (e.g. as part of CourseBlockEdit). The title
  *    and description will be copied from CourseBlock to ContentEntry
@@ -100,12 +103,12 @@ class ContentEntryEditViewModel(
                 prev.copy(
                     entity = prev.entity?.copy(
                         block = courseBlockArg
-                    ) ?: ContentEntryAndBlockLanguageAndContentJob(block = courseBlockArg)
+                    ) ?: ContentEntryBlockLanguageAndContentJob(block = courseBlockArg)
                 )
             }
 
             loadEntity(
-                serializer = ContentEntryAndBlockLanguageAndContentJob.serializer(),
+                serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
                 onLoadFromDb = { db ->
                     //Check if the user can edit the content entry itself...
                     db.takeIf { entityUidArg != 0L }?.contentEntryDao
@@ -118,7 +121,7 @@ class ContentEntryEditViewModel(
                         deserializer = MetadataResult.serializer(),
                     )
                     if(importedMetaData != null) {
-                        ContentEntryAndBlockLanguageAndContentJob(
+                        ContentEntryBlockLanguageAndContentJob(
                             entry = importedMetaData.entry,
                             block = courseBlockArg,
                             contentJobItem = ContentJobItem(
@@ -126,7 +129,7 @@ class ContentEntryEditViewModel(
                             )
                         )
                     }else {
-                        ContentEntryAndBlockLanguageAndContentJob(
+                        ContentEntryBlockLanguageAndContentJob(
                             entry = ContentEntry().apply {
                                 contentEntryUid = activeDb.doorPrimaryKeyManager.nextId(ContentEntry.TABLE_ID)
                                 leaf = savedStateHandle[ARG_LEAF]?.toBoolean() == true

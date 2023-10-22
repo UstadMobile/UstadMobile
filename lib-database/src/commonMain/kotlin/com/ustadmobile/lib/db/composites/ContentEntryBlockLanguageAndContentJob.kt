@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
  *
  */
 @Serializable
-data class ContentEntryAndBlockLanguageAndContentJob(
+data class ContentEntryBlockLanguageAndContentJob(
     val entry: ContentEntry? = null,
     val block: CourseBlock? = null,
     val language: Language? = null,

@@ -10,7 +10,7 @@ import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditUiState
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.hooks.useUstadViewModel
-import com.ustadmobile.lib.db.composites.ContentEntryAndBlockLanguageAndContentJob
+import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.CourseBlock
@@ -60,7 +60,7 @@ val ContentEntryEditScreenPreview = FC<Props> {
 
     ContentEntryEditScreenComponent {
         uiState = ContentEntryEditUiState(
-            entity = ContentEntryAndBlockLanguageAndContentJob(
+            entity = ContentEntryBlockLanguageAndContentJob(
                 entry = ContentEntry().apply {
                     leaf = true
                 }

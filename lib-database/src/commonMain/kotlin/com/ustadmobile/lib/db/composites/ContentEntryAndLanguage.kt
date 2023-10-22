@@ -15,7 +15,7 @@ data class ContentEntryAndLanguage(
 ) {
     fun toContentEntryAndBlock(
         block: CourseBlock?
-    ): ContentEntryAndBlockLanguageAndContentJob = ContentEntryAndBlockLanguageAndContentJob(
+    ): ContentEntryBlockLanguageAndContentJob = ContentEntryBlockLanguageAndContentJob(
         entry = contentEntry,
         language = language,
         block = block,
