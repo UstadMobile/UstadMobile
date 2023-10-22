@@ -114,7 +114,7 @@ kotlin {
                 implementation "androidx.room:room-paging:$version_android_room"
                 implementation "androidx.room:room-ktx:$version_android_room"
                 implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
-                implementation "androidx.paging:paging-runtime:$version_androidx_paging"
+                implementation(libs.androidx.paging.runtime)
 
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"

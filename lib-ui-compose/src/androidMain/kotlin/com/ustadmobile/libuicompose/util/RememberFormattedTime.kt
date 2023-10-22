@@ -1,22 +1,16 @@
-package com.ustadmobile.port.android.util.compose
+package com.ustadmobile.libuicompose.util
 
 import android.text.format.DateFormat
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import com.ustadmobile.port.android.util.ext.MS_PER_HOUR
-import com.ustadmobile.port.android.util.ext.MS_PER_MIN
-import java.util.*
+import com.ustadmobile.core.util.MS_PER_HOUR
+import com.ustadmobile.core.util.MS_PER_MIN
+import java.util.Calendar
+import java.util.Date
 
-/**
- * timeInMs should be the hours, minutes, and seconds multiplied out into milliseconds.
- *
- * This will return a string that uses the locale's time formatter. This might be a 24hour clock,
- * or am/pm depending on the locale.
- *
- */
 @Composable
-fun rememberFormattedTime(timeInMs: Int): String {
+actual fun rememberFormattedTime(timeInMs: Int): String {
     val context = LocalContext.current
 
     return remember(timeInMs) {
@@ -29,4 +23,3 @@ fun rememberFormattedTime(timeInMs: Int): String {
             .format(Date(calendar.timeInMillis))
     }
 }
-

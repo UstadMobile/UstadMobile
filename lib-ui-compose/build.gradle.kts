@@ -40,6 +40,8 @@ kotlin {
 
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime")
 
+                api(libs.paging.multiplatform.common)
+                api(libs.paging.multiplatform.compose)
             }
         }
 
@@ -48,6 +50,8 @@ kotlin {
                 api(libs.activity.compose)
                 api(libs.androidx.appcompat)
                 api(libs.androidx.core.ktx)
+                api(libs.androidx.paging.runtime)
+                api(libs.androidx.paging.compose)
                 implementation(compose.material)
 
                 val version_android_material = "1.9.0"

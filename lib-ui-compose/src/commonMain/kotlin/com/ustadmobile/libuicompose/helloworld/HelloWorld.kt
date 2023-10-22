@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,6 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.paging.PagingConfig
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
+import app.cash.paging.Pager
+import app.cash.paging.PagingSource
 import cafe.adriel.voyager.core.lifecycle.LifecycleEffect
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
@@ -36,6 +42,7 @@ import com.ustadmobile.libuicompose.components.UstadDateField
 import com.ustadmobile.libuicompose.components.UstadExposedDropDownMenuField
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import app.cash.paging.compose.*
 
 @Composable
 fun HelloWorld() {
@@ -195,6 +202,32 @@ data class BasicNavigationScreen(
                     Text("Item #$it")
                 }
             }
+        }
+    }
+}
+
+
+@Composable
+fun HelloPaging() {
+    lateinit var pagingSourceFactory: () -> PagingSource<Int, String>
+
+    val pager = remember {
+        Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
+            pagingSourceFactory = pagingSourceFactory,
+        )
+    }
+
+    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+
+    LazyColumn(Modifier.fillMaxSize()) {
+        items(
+            count = lazyPagingItems.itemCount,
+            key = lazyPagingItems.itemKey { it.hashCode() },
+            contentType = lazyPagingItems.itemContentType()
+        ) { index ->
+            val item = lazyPagingItems[index]
+            Text(item ?: "")
         }
     }
 }

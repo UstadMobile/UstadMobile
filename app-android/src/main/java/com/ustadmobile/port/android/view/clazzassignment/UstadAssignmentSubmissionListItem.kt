@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import java.util.*
 import com.ustadmobile.core.R as CR
 

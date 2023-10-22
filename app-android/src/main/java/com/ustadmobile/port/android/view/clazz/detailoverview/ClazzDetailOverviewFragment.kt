@@ -37,8 +37,8 @@ import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.util.compose.rememberFormattedDateRange
-import com.ustadmobile.port.android.util.compose.rememberFormattedTime
+import com.ustadmobile.libuicompose.util.rememberFormattedDateRange
+import com.ustadmobile.libuicompose.util.rememberFormattedTime
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment

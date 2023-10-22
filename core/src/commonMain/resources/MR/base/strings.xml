@@ -1600,6 +1600,9 @@
     -->
     <string name="too_high">Too high!</string>
 
+    <!-- Caption shown underneath required fields -->
+    <string name="required">* Required</string>
+
     <string name="select_date">Select Date</string>
 
 </resources>

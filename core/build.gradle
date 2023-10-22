@@ -208,7 +208,7 @@ kotlin {
                 implementation "androidx.coordinatorlayout:coordinatorlayout:$version_androidx_coordinatorlayout"
                 implementation "androidx.recyclerview:recyclerview:$version_androidx_recyclerview"
                 implementation "androidx.room:room-runtime:$version_android_room"
-                implementation "androidx.paging:paging-runtime:$version_androidx_paging"
+                implementation(libs.androidx.paging.runtime)
                 implementation "androidx.work:work-runtime:$version_android_workmanager"
                 implementation "androidx.work:work-runtime-ktx:$version_android_workmanager"
                 implementation "org.jsoup:jsoup:$version_jsoup"

@@ -231,8 +231,8 @@ dependencies {
     implementation libs.androidx.core.ktx
 
     // Paging
-    implementation "androidx.paging:paging-runtime:$version_androidx_paging"
-    implementation "androidx.paging:paging-compose:$version_androidx_paging_compose"
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.paging.compose)
 
     implementation "androidx.annotation:annotation:$version_androidx_annotation"
 
