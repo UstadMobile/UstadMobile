@@ -14,6 +14,8 @@ import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewMode
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel.Companion.FILTER_BY_PARENT_UID
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
+import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
 import com.ustadmobile.lib.db.entities.Role
@@ -42,7 +44,11 @@ data class ContentEntryListUiState(
 
     val activeSortOption: SortOrderOption = sortOptions.first(),
 
-    val addNewItemVisible: Boolean = false,
+    val createNewFolderItemVisible: Boolean = false,
+
+    val importFromLinkItemVisible: Boolean = false,
+
+    val importFromFileItemVisible: Boolean = false,
 
 ) {
     companion object {
@@ -93,7 +99,6 @@ class ContentEntryListViewModel(
 
             else -> EmptyPagingSource()
         }.also {
-            lastPagingSource?.invalidate()
             lastPagingSource = it
         }
     }
@@ -119,11 +124,23 @@ class ContentEntryListViewModel(
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
-                    accountManager.currentAccount.personUid, Role.PERMISSION_CONTENT_INSERT
-                ).collect { hasNewContentPermission ->
-                    _appUiState.update { prev ->
-                        prev.copy(fabState = prev.fabState.copy(visible = hasNewContentPermission))
+                if(listMode == ListViewMode.PICKER) {
+                    //Picker mode is only used when the user is coming from ClazzEdit
+                    _uiState.update { prev ->
+                        prev.copy(
+                            createNewFolderItemVisible = false,
+                            importFromFileItemVisible = true,
+                            importFromLinkItemVisible = true,
+
+                        )
+                    }
+                }else {
+                    activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
+                        accountManager.currentAccount.personUid, Role.PERMISSION_CONTENT_INSERT
+                    ).collect { hasNewContentPermission ->
+                        _appUiState.update { prev ->
+                            prev.copy(fabState = prev.fabState.copy(visible = hasNewContentPermission))
+                        }
                     }
                 }
             }
@@ -154,6 +171,8 @@ class ContentEntryListViewModel(
             extraArgs = buildMap {
                 put(ContentEntryEditViewModel.ARG_LEAF, true.toString())
                 put(ARG_PARENT_UID, parentEntryUid.toString())
+                putFromSavedStateIfPresent(savedStateHandle,
+                    ContentEntryEditViewModel.ARG_COURSEBLOCK)
             }
         )
     }
@@ -163,6 +182,8 @@ class ContentEntryListViewModel(
             editViewName = ContentEntryGetMetadataViewModel.DEST_NAME,
             extraArgs = buildMap {
                 put(ContentEntryGetMetadataViewModel.ARG_URI, fileUri)
+                putFromSavedStateIfPresent(savedStateHandle,
+                    ContentEntryEditViewModel.ARG_COURSEBLOCK)
             }
         )
     }

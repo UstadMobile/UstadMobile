@@ -11,6 +11,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
@@ -123,12 +124,17 @@ class ContentEntryImportLinkViewModel(
                     //go to ContentEntryEdit
                     navController.navigate(
                         viewName = ContentEntryEditViewModel.DEST_NAME,
-                        args = mapOf(
-                            ContentEntryEditViewModel.ARG_IMPORTED_METADATA to json.encodeToString(
-                                serializer = MetadataResult.serializer(),
-                                value = metadataResult
+                        args = buildMap {
+                            put(
+                                key = ContentEntryEditViewModel.ARG_IMPORTED_METADATA,
+                                value = json.encodeToString(
+                                    serializer = MetadataResult.serializer(),
+                                    value = metadataResult
+                                )
                             )
-                        )
+                            putFromSavedStateIfPresent(savedStateHandle,
+                                ContentEntryEditViewModel.ARG_COURSEBLOCK)
+                        }
                     )
                 }
             }catch(e: Exception) {

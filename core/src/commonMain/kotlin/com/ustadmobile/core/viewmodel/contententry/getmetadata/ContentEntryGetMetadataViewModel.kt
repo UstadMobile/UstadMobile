@@ -5,6 +5,7 @@ import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryG
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.IContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.door.DoorUri
@@ -55,6 +56,8 @@ class ContentEntryGetMetadataViewModel(
                             value = metadataResult
                         )
                     )
+                    putFromSavedStateIfPresent(savedStateHandle,
+                        ContentEntryEditViewModel.ARG_COURSEBLOCK)
                 },
                 goOptions = UstadMobileSystemCommon.UstadGoOptions(
                     popUpToViewName = DEST_NAME,

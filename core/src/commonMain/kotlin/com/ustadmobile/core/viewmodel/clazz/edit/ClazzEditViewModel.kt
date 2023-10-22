@@ -16,11 +16,14 @@ import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
+import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
 import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Clazz.Companion.CLAZZ_FEATURE_ATTENDANCE
@@ -388,6 +391,28 @@ class ClazzEditViewModel(
 
 
     fun onAddCourseBlock(blockType: Int) {
+        if(blockType == CourseBlock.BLOCK_CONTENT_TYPE) {
+            navigateForResult(
+                nextViewName = ContentEntryListViewModel.DEST_NAME,
+                key = RESULT_KEY_CONTENTENTRY,
+                currentValue = null,
+                serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
+                args = mapOf(
+                    UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString(),
+                    ContentEntryEditViewModel.ARG_COURSEBLOCK to json.encodeToString(
+                        serializer = CourseBlock.serializer(),
+                        value = CourseBlock().apply {
+                            cbClazzUid = _uiState.value.entity?.clazzUid ?: 0L
+                            cbType = CourseBlock.BLOCK_CONTENT_TYPE
+                        }
+                    )
+                ),
+            )
+
+            return
+        }
+
+
         val (viewName, keyName) = when(blockType) {
             CourseBlock.BLOCK_DISCUSSION_TYPE,
             CourseBlock.BLOCK_TEXT_TYPE,
@@ -655,6 +680,8 @@ class ClazzEditViewModel(
         const val RESULT_KEY_COURSEBLOCK = "courseblock"
 
         const val RESULT_KEY_ASSIGNMENT = "assignmentResult"
+
+        const val RESULT_KEY_CONTENTENTRY = "contentEntryResult"
 
         const val RESULT_KEY_TIMEZONE = "timeZone"
 

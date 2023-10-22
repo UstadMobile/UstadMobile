@@ -16,14 +16,12 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.lib.db.entities.CourseBlock
-import io.github.aakira.napier.Napier
-import kotlinx.coroutines.Dispatchers
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 
 data class ContentEntryEditUiState(
@@ -60,6 +58,23 @@ data class ContentEntryEditUiState(
     val courseBlockVisible: Boolean
         get() = entity?.block != null
 
+    //Where a CourseBlock is being edited, then the title/description will be taken from the
+    //CourseBlock
+    val contentEntryTitleVisible: Boolean
+        get() = !courseBlockVisible
+
+    val contentEntryDescriptionVisible: Boolean
+        get() = !courseBlockVisible
+
+    fun copyWithFieldsEnabled(fieldsEnabled: Boolean) : ContentEntryEditUiState{
+        return copy(
+            fieldsEnabled = fieldsEnabled,
+            courseBlockEditUiState = courseBlockEditUiState.copy(
+                fieldsEnabled = fieldsEnabled
+            )
+        )
+    }
+
 }
 
 /**
@@ -88,11 +103,6 @@ class ContentEntryEditViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 hideBottomNavigation = true,
-                actionBarButtonState = ActionBarButtonUiState(
-                    visible = true,
-                    text = systemImpl.getString(MR.strings.save),
-                    onClick = this::onClickSave,
-                )
             )
         }
 
@@ -128,7 +138,10 @@ class ContentEntryEditViewModel(
                     if(importedMetaData != null) {
                         ContentEntryBlockLanguageAndContentJob(
                             entry = importedMetaData.entry,
-                            block = courseBlockArg,
+                            block = courseBlockArg?.shallowCopy {
+                                cbTitle = importedMetaData.entry.title
+                                cbDescription = importedMetaData.entry.description
+                            },
                             contentJobItem = ContentJobItem(
                                 cjiPluginId = importedMetaData.pluginId,
                             )
@@ -148,7 +161,12 @@ class ContentEntryEditViewModel(
                 },
                 uiUpdate = {
                     _uiState.update { prev ->
-                        prev.copy(entity = it)
+                        prev.copy(
+                            entity = it,
+                            courseBlockEditUiState = prev.courseBlockEditUiState.copy(
+                                courseBlock = it?.block
+                            )
+                        )
                     }
                 }
             )
@@ -165,8 +183,17 @@ class ContentEntryEditViewModel(
 
             _appUiState.update { prev ->
                 prev.copy(
-                    title = title
+                    title = title,
+                    actionBarButtonState = ActionBarButtonUiState(
+                        visible = true,
+                        text = systemImpl.getString(MR.strings.save),
+                        onClick = this@ContentEntryEditViewModel::onClickSave,
+                    )
                 )
+            }
+
+            _uiState.update { prev ->
+                prev.copyWithFieldsEnabled(true)
             }
         }
     }
@@ -178,6 +205,21 @@ class ContentEntryEditViewModel(
             prev.copy(
                 entity = prev.entity?.copy(
                     entry = contentEntry,
+                )
+            )
+        }
+    }
+
+    fun onCourseBlockChanged(
+        courseBlock: CourseBlock?
+    ) {
+        _uiState.update { prev ->
+            prev.copy(
+                entity = prev.entity?.copy(
+                    block = courseBlock,
+                ),
+                courseBlockEditUiState = prev.courseBlockEditUiState.copy(
+                    courseBlock = courseBlock
                 )
             )
         }

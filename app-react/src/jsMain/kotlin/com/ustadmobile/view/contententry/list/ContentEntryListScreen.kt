@@ -54,6 +54,10 @@ external interface ContentEntryListScreenProps : Props {
     var onClickDownloadContentEntry: (
         ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
 
+    var onClickImportFromFile: (() -> Unit)?
+
+    var onClickImportFromLink: (() -> Unit)?
+
 }
 
 val ContentEntryListScreenPreview = FC<Props> {
@@ -104,19 +108,6 @@ val ContentEntryListScreen = FC<Props> {
     val navResultReturner = useRequiredContext(NavResultReturnerContext)
 
 
-    ContentEntryListScreenComponent {
-        uiState = uiStateVal
-        onClickContentEntry = viewModel::onClickEntry
-    }
-
-    UstadFab {
-        fabState = appState.fabState.copy(
-            onClick = {
-                addDialogVisible = true
-            }
-        )
-    }
-
     input {
         ref = fileInputRef
         type = InputType.file
@@ -134,6 +125,23 @@ val ContentEntryListScreen = FC<Props> {
                 viewModel.onImportFile(URL.createObjectURL(file))
             }
         }
+    }
+
+    ContentEntryListScreenComponent {
+        uiState = uiStateVal
+        onClickContentEntry = viewModel::onClickEntry
+        onClickImportFromLink = viewModel::onClickImportFromLink
+        onClickImportFromFile = {
+            fileInputRef.current?.click()
+        }
+    }
+
+    UstadFab {
+        fabState = appState.fabState.copy(
+            onClick = {
+                addDialogVisible = true
+            }
+        )
     }
 
     Dialog {
@@ -204,6 +212,8 @@ private val ContentEntryListScreenComponent = FC<ContentEntryListScreenProps> { 
 
     val muiAppState = useMuiAppState()
 
+    val strings = useStringProvider()
+
     VirtualList {
         style = jso {
             height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
@@ -213,6 +223,46 @@ private val ContentEntryListScreenComponent = FC<ContentEntryListScreenProps> { 
         }
 
         content = virtualListContent {
+            if(props.uiState.importFromFileItemVisible) {
+                item(key = "import_from_file") {
+                    ListItem.create {
+                        ListItemButton {
+                            onClick = {
+                                props.onClickImportFromFile?.also { it.invoke() }
+                            }
+
+                            ListItemIcon {
+                                FileUploadIcon()
+                            }
+
+                            ListItemText {
+                                primary = ReactNode(strings[MR.strings.content_from_file])
+                            }
+                        }
+                    }
+                }
+            }
+
+            if(props.uiState.importFromLinkItemVisible) {
+                item(key = "import_from_link") {
+                    ListItem.create {
+                        ListItemButton {
+                            onClick = {
+                                props.onClickImportFromLink?.also { it.invoke() }
+                            }
+
+                            ListItemIcon {
+                                LinkIcon()
+                            }
+
+                            ListItemText {
+                                primary = ReactNode(strings[MR.strings.content_from_link])
+                            }
+                        }
+                    }
+                }
+            }
+
             infiniteQueryPagingItems(
                 items = infiniteQueryResult,
                 key = { it.contentEntryUid.toString() }

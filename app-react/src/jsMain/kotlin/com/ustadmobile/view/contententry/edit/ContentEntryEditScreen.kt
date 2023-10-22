@@ -25,12 +25,13 @@ import mui.material.Stack
 import mui.system.responsive
 import react.FC
 import react.Props
+import react.ReactNode
 
 external interface ContentEntryEditScreenProps : Props {
 
     var uiState: ContentEntryEditUiState
 
-    var onCourseBlockChange: (CourseBlock?) -> Unit
+    var onCourseBlockChanged: (CourseBlock?) -> Unit
 
     var onClickUpdateContent: () -> Unit
 
@@ -54,6 +55,7 @@ val ContentEntryEditScreen = FC<Props> {
     ContentEntryEditScreenComponent {
         uiState = uiStateVal
         onContentEntryChanged = viewModel::onContentEntryChanged
+        onCourseBlockChanged = viewModel::onCourseBlockChanged
     }
 }
 
@@ -128,40 +130,44 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
                 }
             }
 
-            TextField {
-                value = props.uiState.entity?.entry?.title ?: ""
-                id = "content_title"
-                label = ReactNode(strings[MR.strings.title]  + "*")
-                helperText = ReactNode(props.uiState.titleError ?: strings[MR.strings.required])
-                error = props.uiState.titleError != null
-                disabled = !props.uiState.fieldsEnabled
-                onTextChange = {
-                    props.onContentEntryChanged(
-                        props.uiState.entity?.entry?.shallowCopy {
-                            title = it
-                        }
-                    )
+            if(props.uiState.contentEntryTitleVisible) {
+                TextField {
+                    value = props.uiState.entity?.entry?.title ?: ""
+                    id = "content_title"
+                    label = ReactNode(strings[MR.strings.title]  + "*")
+                    helperText = ReactNode(props.uiState.titleError ?: strings[MR.strings.required])
+                    error = props.uiState.titleError != null
+                    disabled = !props.uiState.fieldsEnabled
+                    onTextChange = {
+                        props.onContentEntryChanged(
+                            props.uiState.entity?.entry?.shallowCopy {
+                                title = it
+                            }
+                        )
+                    }
                 }
             }
 
-            UstadTextEditField {
-                value = props.uiState.entity?.entry?.description ?: ""
-                id = "content_description"
-                label = strings[MR.strings.description]
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
-                    props.onContentEntryChanged(
-                        props.uiState.entity?.entry?.shallowCopy {
-                            description = it
-                        }
-                    )
+            if(props.uiState.contentEntryDescriptionVisible) {
+                UstadTextEditField {
+                    value = props.uiState.entity?.entry?.description ?: ""
+                    id = "content_description"
+                    label = strings[MR.strings.description]
+                    enabled = props.uiState.fieldsEnabled
+                    onChange = {
+                        props.onContentEntryChanged(
+                            props.uiState.entity?.entry?.shallowCopy {
+                                description = it
+                            }
+                        )
+                    }
                 }
             }
 
             if(props.uiState.courseBlockVisible) {
                 UstadCourseBlockEdit {
                     uiState = props.uiState.courseBlockEditUiState
-                    onCourseBlockChange = props.onCourseBlockChange
+                    onCourseBlockChange = props.onCourseBlockChanged
                 }
             }
 
