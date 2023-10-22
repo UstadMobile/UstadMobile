@@ -9,6 +9,7 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.*
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
@@ -303,6 +304,14 @@ abstract class UstadViewModel(
 
             dbVal ?: makeDefault().also(uiUpdate)
         }
+    }
+
+    /**
+     * If the given key is present in the savedStateHandle for this ViewModel, then put it into
+     * the Receiver MutableMap. This can be convenient for forwarding arguments when navigating
+     */
+    fun MutableMap<String, String>.putFromSavedStateIfPresent(key: String) {
+        putFromSavedStateIfPresent(savedStateHandle, key)
     }
 
 

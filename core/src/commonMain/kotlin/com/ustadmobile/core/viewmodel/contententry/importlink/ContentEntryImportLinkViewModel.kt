@@ -11,7 +11,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.Snack
-import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
@@ -132,8 +132,10 @@ class ContentEntryImportLinkViewModel(
                                     value = metadataResult
                                 )
                             )
-                            putFromSavedStateIfPresent(savedStateHandle,
-                                ContentEntryEditViewModel.ARG_COURSEBLOCK)
+                            putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
+                            putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_VIEWNAME)
+                            putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_KEY)
+                            putFromSavedStateIfPresent(ARG_PARENT_UID)
                         }
                     )
                 }

@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.dao.deactivateByUids
 import com.ustadmobile.core.domain.courseblockupdate.AddOrUpdateCourseBlockUseCase
 import com.ustadmobile.core.domain.courseblockupdate.UpdateCourseBlocksOnReorderOrCommitUseCase
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -20,6 +21,7 @@ import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewMode
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -41,6 +43,8 @@ import kotlinx.serialization.encodeToString
 import org.kodein.di.DI
 import org.kodein.di.instance
 import io.github.aakira.napier.Napier
+import org.kodein.di.direct
+import org.kodein.di.instanceOrNull
 
 @Serializable
 data class ClazzEditUiState(
@@ -102,6 +106,11 @@ class ClazzEditViewModel(
         AddOrUpdateCourseBlockUseCase(),
     private val updateCourseBlocksOnReorderOrCommitUseCase: UpdateCourseBlocksOnReorderOrCommitUseCase =
         UpdateCourseBlocksOnReorderOrCommitUseCase(),
+    private val saveContentEntryUseCase: SaveContentEntryUseCase = SaveContentEntryUseCase(
+        db = di.onActiveEndpoint().direct.instance(tag = DoorTag.TAG_DB),
+        repo = di.onActiveEndpoint().direct.instanceOrNull(tag = DoorTag.TAG_REPO),
+    )
+
 ): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(ClazzEditUiState())
@@ -261,6 +270,25 @@ class ClazzEditViewModel(
                         currentList = _uiState.value.courseBlockList,
                         clazzUid = _uiState.value.entity?.clazzUid ?: 0L,
                         addOrUpdateBlock = assignmentResultBlock
+                    )
+
+                    updateCourseBlockList(newCourseBlockList)
+                }
+            }
+
+            launch {
+                resultReturner.filteredResultFlowForKey(RESULT_KEY_CONTENTENTRY).collect { result ->
+                    val contentEntryResult = result.result as? ContentEntryBlockLanguageAndContentJob ?: return@collect
+                    val block = contentEntryResult.block ?: return@collect //Block must not be null
+                    val newCourseBlockList = addOrUpdateCourseBlockUseCase(
+                        currentList = _uiState.value.courseBlockList,
+                        clazzUid = _uiState.value.entity?.clazzUid ?: 0L,
+                        addOrUpdateBlock = CourseBlockAndEditEntities(
+                            courseBlock = block,
+                            contentEntry = contentEntryResult.entry,
+                            contentJobItem = contentEntryResult.contentJobItem,
+                            contentJob = contentEntryResult.contentJob,
+                        )
                     )
 
                     updateCourseBlockList(newCourseBlockList)
@@ -488,6 +516,7 @@ class ClazzEditViewModel(
                 ?: return@launch
 
             Napier.d("onClickSave: start transaction")
+            val courseBlockListVal = _uiState.value.courseBlockList
             activeDb.withDoorTransactionAsync {
                 if(entityUidArg == 0L) {
                     val termMap = activeDb.courseTerminologyDao.findByUidAsync(initEntity.clazzTerminologyUid)
@@ -511,7 +540,7 @@ class ClazzEditViewModel(
                 )
 
                 val courseBlockModulesToCommit = updateCourseBlocksOnReorderOrCommitUseCase(
-                    _uiState.value.courseBlockList)
+                    courseBlockListVal)
                 activeRepo.courseBlockDao.upsertListAsync(
                     courseBlockModulesToCommit.map { it.courseBlock }
                 )
@@ -521,12 +550,19 @@ class ClazzEditViewModel(
                     }, systemTimeInMillis()
                 )
 
-                val assignmentsToUpsert = _uiState.value.courseBlockList.mapNotNull { it.assignment }
+                val assignmentsToUpsert = courseBlockListVal.mapNotNull { it.assignment }
                 activeRepo.clazzAssignmentDao.upsertListAsync(assignmentsToUpsert)
                 val assignmentsToDeactivate = initState.courseBlockList.mapNotNull { it.assignment}
                     .findKeysNotInOtherList(assignmentsToUpsert) { it.caUid }
                 activeRepo.clazzAssignmentDao.takeIf { assignmentsToDeactivate.isNotEmpty() }
                     ?.updateActiveByList(assignmentsToDeactivate, false, systemTimeInMillis())
+                courseBlockListVal.mapNotNull { it.contentEntry }.forEach {
+                    saveContentEntryUseCase.invoke(
+                        contentEntry = it,
+                        joinToParentUid = null,
+                    )
+                }
+
                 Napier.d("onClickSave: transaction block done")
             }
             Napier.d("onClickSave: transaction done")
@@ -643,6 +679,22 @@ class ClazzEditViewModel(
     }
 
     fun onClickEditCourseBlock(block: CourseBlockAndEditEntities) {
+        if(block.courseBlock.cbType == CourseBlock.BLOCK_CONTENT_TYPE) {
+            navigateForResult(
+                nextViewName = ContentEntryEditViewModel.DEST_NAME,
+                key = RESULT_KEY_CONTENTENTRY,
+                currentValue =  ContentEntryBlockLanguageAndContentJob(
+                    entry = block.contentEntry,
+                    block = block.courseBlock,
+                    contentJob = block.contentJob,
+                    contentJobItem = block.contentJobItem,
+                ),
+                serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
+            )
+            return
+        }
+
+
         when(block.courseBlock.cbType) {
             CourseBlock.BLOCK_DISCUSSION_TYPE,
             CourseBlock.BLOCK_TEXT_TYPE,

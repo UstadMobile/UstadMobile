@@ -14,7 +14,6 @@ import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewMode
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel.Companion.FILTER_BY_PARENT_UID
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
-import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
@@ -171,8 +170,7 @@ class ContentEntryListViewModel(
             extraArgs = buildMap {
                 put(ContentEntryEditViewModel.ARG_LEAF, true.toString())
                 put(ARG_PARENT_UID, parentEntryUid.toString())
-                putFromSavedStateIfPresent(savedStateHandle,
-                    ContentEntryEditViewModel.ARG_COURSEBLOCK)
+                putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
             }
         )
     }
@@ -182,8 +180,8 @@ class ContentEntryListViewModel(
             editViewName = ContentEntryGetMetadataViewModel.DEST_NAME,
             extraArgs = buildMap {
                 put(ContentEntryGetMetadataViewModel.ARG_URI, fileUri)
-                putFromSavedStateIfPresent(savedStateHandle,
-                    ContentEntryEditViewModel.ARG_COURSEBLOCK)
+                put(ARG_PARENT_UID, parentEntryUid.toString())
+                putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
             }
         )
     }

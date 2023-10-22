@@ -2,18 +2,17 @@ package com.ustadmobile.core.viewmodel.contententry.edit
 
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
-import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
-import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
@@ -23,6 +22,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
 
 data class ContentEntryEditUiState(
 
@@ -93,6 +94,7 @@ data class ContentEntryEditUiState(
 class ContentEntryEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
+    private val saveContentEntryUseCase: SaveContentEntryUseCase = di.onActiveEndpoint().direct.instance(),
 ) : UstadEditViewModel(di, savedStateHandle, DEST_NAME){
 
     private val _uiState = MutableStateFlow(ContentEntryEditUiState())
@@ -108,18 +110,10 @@ class ContentEntryEditViewModel(
 
 
         viewModelScope.launch {
-            val courseBlockArg = savedStateHandle.getJson(
+            val courseBlockArgVal = savedStateHandle.getJson(
                 key = ARG_COURSEBLOCK,
                 deserializer = CourseBlock.serializer(),
             )
-
-            _uiState.takeIf { courseBlockArg != null }?.update { prev ->
-                prev.copy(
-                    entity = prev.entity?.copy(
-                        block = courseBlockArg
-                    ) ?: ContentEntryBlockLanguageAndContentJob(block = courseBlockArg)
-                )
-            }
 
             loadEntity(
                 serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
@@ -127,9 +121,10 @@ class ContentEntryEditViewModel(
                     //Check if the user can edit the content entry itself...
                     db.takeIf { entityUidArg != 0L }?.contentEntryDao
                         ?.findEntryWithLanguageByEntryIdAsync(entityUidArg)
-                        ?.toContentEntryAndBlock(courseBlockArg)
+                        ?.toContentEntryAndBlock(courseBlockArgVal)
                 },
                 makeDefault = {
+                    val newContentEntryUid = activeDb.doorPrimaryKeyManager.nextId(ContentEntry.TABLE_ID)
                     val importedMetaData = savedStateHandle.getJson(
                         key = ARG_IMPORTED_METADATA,
                         deserializer = MetadataResult.serializer(),
@@ -137,8 +132,10 @@ class ContentEntryEditViewModel(
 
                     if(importedMetaData != null) {
                         ContentEntryBlockLanguageAndContentJob(
-                            entry = importedMetaData.entry,
-                            block = courseBlockArg?.shallowCopy {
+                            entry = importedMetaData.entry.shallowCopy {
+                                contentEntryUid = newContentEntryUid
+                            },
+                            block = courseBlockArgVal?.shallowCopy {
                                 cbTitle = importedMetaData.entry.title
                                 cbDescription = importedMetaData.entry.description
                             },
@@ -152,10 +149,10 @@ class ContentEntryEditViewModel(
                     }else {
                         ContentEntryBlockLanguageAndContentJob(
                             entry = ContentEntry().apply {
-                                contentEntryUid = activeDb.doorPrimaryKeyManager.nextId(ContentEntry.TABLE_ID)
+                                contentEntryUid = newContentEntryUid
                                 leaf = savedStateHandle[ARG_LEAF]?.toBoolean() == true
                             },
-                            block = courseBlockArg,
+                            block = courseBlockArgVal,
                         )
                     }
                 },
@@ -186,7 +183,14 @@ class ContentEntryEditViewModel(
                     title = title,
                     actionBarButtonState = ActionBarButtonUiState(
                         visible = true,
-                        text = systemImpl.getString(MR.strings.save),
+                        text = systemImpl.getString(
+                            //If the CourseBlock arg is provided, then the actual save to db is
+                            // done by ClazzEdit, not here
+                            if(_uiState.value.entity?.block != null)
+                                MR.strings.done
+                            else
+                                MR.strings.save
+                        ),
                         onClick = this@ContentEntryEditViewModel::onClickSave,
                     )
                 )
@@ -226,37 +230,46 @@ class ContentEntryEditViewModel(
     }
 
     fun onClickSave() {
-        val contentEntryVal = _uiState.value.entity?.entry ?: return
-
-        if(loadingState != LoadingUiState.NOT_LOADING)
-            return
-
-        loadingState = LoadingUiState.INDETERMINATE
-        viewModelScope.launch {
-            val parentUid = savedStateHandle[ARG_PARENT_UID]?.toLong()
-            activeDb.withDoorTransactionAsync {
-                activeDb.contentEntryDao.upsertAsync(contentEntryVal)
-
-                if(entityUidArg == 0L && parentUid != null) {
-                    //create parentchildjoin
-                    activeDb.contentEntryParentChildJoinDao.insertAsync(
-                        ContentEntryParentChildJoin(
-                            cepcjParentContentEntryUid = parentUid,
-                            cepcjChildContentEntryUid = contentEntryVal.contentEntryUid,
-                        )
-                    )
-                }
+        val entityVal = _uiState.value.entity?.copy(
+            block = _uiState.value.entity?.block?.shallowCopy {
+                //Make sure that the CourseBlock (if provided) has the cbEntityUid and cbType set correctly
+                cbType = CourseBlock.BLOCK_CONTENT_TYPE
+                cbEntityUid = _uiState.value.entity?.entry?.contentEntryUid ?: 0L
             }
+        )
 
-            loadingState = LoadingUiState.NOT_LOADING
+        val contentEntryVal = entityVal?.entry ?: return
 
-            if(entityUidArg == 0L && parentUid != null && !contentEntryVal.leaf) {
-                navController.popBackStack(
-                    viewName = destinationName,
-                    inclusive = true
+        if(!_uiState.value.fieldsEnabled) {
+            return
+        }
+
+        _uiState.update { prev -> prev.copyWithFieldsEnabled(false) }
+
+        if(entityVal.block != null) {
+            //This is being edited as part of a course. We won't save anything here. Saving will
+            //be done in ClazzEditViewModel
+            finishWithResult(entityVal)
+        }else {
+            viewModelScope.launch {
+                val parentUidArg = savedStateHandle[ARG_PARENT_UID]?.toLong()
+                saveContentEntryUseCase(
+                    contentEntry = contentEntryVal,
+                    //Where this is a new ContentEntry (e.g. entityUidArg == 0), it should be
+                    // joined to the parentUidArg
+                    joinToParentUid = if(entityUidArg == 0L) parentUidArg else null
                 )
-            }else {
-                finishWithResult(contentEntryVal)
+
+
+                //if a new folder was created, don't go to the "detail view"
+                if(entityUidArg == 0L && parentUidArg != null && !contentEntryVal.leaf) {
+                    navController.popBackStack(
+                        viewName = destinationName,
+                        inclusive = true
+                    )
+                }else {
+                    finishWithResult(contentEntryVal)
+                }
             }
         }
     }
@@ -270,8 +283,6 @@ class ContentEntryEditViewModel(
         const val DEST_NAME = "ContentEntryEdit"
 
         const val ARG_IMPORTED_METADATA = "metadata"
-
-        private const val KEY_PLUGINID = "pluginId"
 
         //Used to save the title after parsing metadata
         private const val KEY_TITLE = "savedTitle"
