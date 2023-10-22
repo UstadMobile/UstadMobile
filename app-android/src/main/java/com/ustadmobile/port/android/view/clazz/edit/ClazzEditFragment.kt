@@ -30,7 +30,6 @@ import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
 import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
-import com.ustadmobile.core.util.ext.editIconId
 import com.ustadmobile.core.viewmodel.clazz.ClazzScheduleConstants
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditUiState
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
@@ -510,7 +509,7 @@ private fun PopUpMenu(
         ) {
             if(uiState.showHide) {
                 DropdownMenuItem(
-                    onClick = { onClickHideBlockPopupMenu(uiState.courseBlock) }
+                    onClick = { onClickHideBlockPopupMenu(uiState.block) }
                 ) {
                     Text(stringResource(id = CR.string.hide))
                 }
@@ -518,7 +517,7 @@ private fun PopUpMenu(
 
             if(uiState.showUnhide) {
                 DropdownMenuItem(
-                    onClick = { onClickUnHideBlockPopupMenu(uiState.courseBlock) }
+                    onClick = { onClickUnHideBlockPopupMenu(uiState.block) }
                 ) {
                     Text(stringResource(id = CR.string.unhide))
                 }
@@ -526,7 +525,7 @@ private fun PopUpMenu(
 
             if(uiState.showIndent) {
                 DropdownMenuItem(
-                    onClick = { onClickIndentBlockPopupMenu(uiState.courseBlock) }
+                    onClick = { onClickIndentBlockPopupMenu(uiState.block) }
                 ) {
                     Text(stringResource(id = CR.string.indent))
                 }
@@ -535,14 +534,14 @@ private fun PopUpMenu(
             if(uiState.showUnindent) {
                 if (uiState.showUnindent) {
                     DropdownMenuItem(
-                        onClick = { onClickUnIndentBlockPopupMenu(uiState.courseBlock) }
+                        onClick = { onClickUnIndentBlockPopupMenu(uiState.block) }
                     ) {
                         Text(stringResource(id = CR.string.unindent))
                     }
                 }
             }
 
-            DropdownMenuItem(onClick = { onClickDeleteBlockPopupMenu(uiState.courseBlock) }) {
+            DropdownMenuItem(onClick = { onClickDeleteBlockPopupMenu(uiState.block) }) {
                 Text(stringResource(id = CR.string.delete))
             }
         }

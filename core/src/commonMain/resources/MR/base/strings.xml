@@ -605,6 +605,7 @@
     <string name="schools">Schools</string>
     <!-- Assignments e.g. homework for a class -->
     <string name="assignments">Assignments</string>
+    <string name="assignment">Assignment</string>
     <string name="none_key">None</string>
     <string name="instructions_for_students">Instructions for students</string>
     <string name="not_started">Not started</string>

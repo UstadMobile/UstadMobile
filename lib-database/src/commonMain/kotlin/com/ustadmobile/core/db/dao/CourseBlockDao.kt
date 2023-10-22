@@ -14,6 +14,7 @@ import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
+import com.ustadmobile.lib.db.composites.CourseBlockAndDbEntities
 import com.ustadmobile.lib.db.composites.CourseBlockUidAndClazzUid
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
@@ -51,23 +52,22 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         )
     )
     @Query("""
-        SELECT CourseBlock.*, assignment.*, entry.*, Language.*,
+        SELECT CourseBlock.*, Assignment.*, Entry.*, Language.*,
                (SELECT CourseGroupSet.cgsName
                   FROM CourseGroupSet
                  WHERE CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
                    AND assignment.caGroupUid != 0
                    AND CourseGroupSet.cgsUid = assignment.caGroupUid) AS assignmentCourseGroupSetName
           FROM CourseBlock 
-               LEFT JOIN ClazzAssignment as assignment
+               LEFT JOIN ClazzAssignment AS Assignment
                          ON assignment.caUid = CourseBlock.cbEntityUid
                             AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
-               LEFT JOIN ContentEntry as entry
+               LEFT JOIN ContentEntry AS Entry
                          ON entry.contentEntryUid = CourseBlock.cbEntityUid
                             AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
                LEFT JOIN Language
-                         ON Language.langUid = entry.primaryLanguageUid
+                         ON Language.langUid = Entry.primaryLanguageUid
                             AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
-               
          WHERE CourseBlock.cbClazzUid = :clazzUid
            AND (CAST(:includeInactive AS INTEGER) = 1 OR CourseBlock.cbActive)
       ORDER BY CourseBlock.cbIndex
@@ -75,7 +75,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     abstract suspend fun findAllCourseBlockByClazzUidAsync(
         clazzUid: Long,
         includeInactive: Boolean,
-    ): List<CourseBlockWithEntityDb>
+    ): List<CourseBlockAndDbEntities>
 
     @Query("""
          WITH CtePermissionCheck (hasPermission) 

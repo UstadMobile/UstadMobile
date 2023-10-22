@@ -11,20 +11,16 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.lib.db.entities.CourseBlock
-import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.lib.db.entities.ext.shallowCopyWithEntity
 import kotlinx.serialization.encodeToString
-import org.kodein.di.bind
 import org.kodein.di.direct
 import org.kodein.di.instance
-import org.kodein.di.singleton
 import org.mockito.kotlin.*
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
 
 class ClazzAssignmentEditViewModelTest  : AbstractMainDispatcherTest() {
@@ -57,9 +53,9 @@ class ClazzAssignmentEditViewModelTest  : AbstractMainDispatcherTest() {
 
             verify(navResultReturner, timeout(5000)).sendResult(argWhere {
                 val result = it.result
-                result is CourseBlockWithEntity &&
+                result is CourseBlockAndEditEntities &&
                     result.assignment?.caClassCommentEnabled == true &&
-                    result.cbTitle == "Assignment"
+                    result.courseBlock.cbTitle == "Assignment"
             })
         }
     }
@@ -170,11 +166,13 @@ class ClazzAssignmentEditViewModelTest  : AbstractMainDispatcherTest() {
             }
             val clazzAssignmentUid = activeDb.clazzAssignmentDao.insert(testAssignment)
             testAssignment.caUid = clazzAssignmentUid
-            val testBlock = CourseBlockWithEntity().apply {
-                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
-                cbEntityUid = clazzAssignmentUid
+            val testBlock = CourseBlockAndEditEntities(
+                courseBlock = CourseBlock().apply {
+                    cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                    cbEntityUid = clazzAssignmentUid
+                },
                 assignment = testAssignment
-            }
+            )
 
             viewModelFactory {
                 savedStateHandle[ARG_ENTITY_JSON] = json.encodeToString(testBlock)
@@ -214,11 +212,13 @@ class ClazzAssignmentEditViewModelTest  : AbstractMainDispatcherTest() {
             }
             val clazzAssignmentUid = activeDb.clazzAssignmentDao.insert(testAssignment)
             testAssignment.caUid = clazzAssignmentUid
-            val testBlock = CourseBlockWithEntity().apply {
-                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
-                cbEntityUid = clazzAssignmentUid
+            val testBlock = CourseBlockAndEditEntities(
+                courseBlock = CourseBlock().apply {
+                    cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                    cbEntityUid = clazzAssignmentUid
+                },
                 assignment = testAssignment
-            }
+            )
 
             viewModelFactory {
                 savedStateHandle[ARG_ENTITY_JSON] = json.encodeToString(testBlock)
