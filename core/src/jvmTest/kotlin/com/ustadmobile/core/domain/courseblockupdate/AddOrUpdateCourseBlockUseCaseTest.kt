@@ -21,10 +21,10 @@ class AddOrUpdateCourseBlockUseCaseTest {
 
         val newList = AddOrUpdateCourseBlockUseCase().invoke(
             currentList = existingList,
+            clazzUid = 1L,
             addOrUpdateBlock = CourseBlockAndEditEntities(
                 courseBlock = CourseBlock().apply {
                     cbUid = 2
-                    cbClazzUid = 1
                     cbType = CourseBlock.BLOCK_TEXT_TYPE
                 }
             ),
@@ -59,11 +59,11 @@ class AddOrUpdateCourseBlockUseCaseTest {
 
         val newList = AddOrUpdateCourseBlockUseCase().invoke(
             currentList = existingList,
+            clazzUid = 1L,
             addOrUpdateBlock = CourseBlockAndEditEntities(
                 courseBlock = CourseBlock().apply {
                     cbUid = 3
                     cbType = CourseBlock.BLOCK_TEXT_TYPE
-                    cbClazzUid = 1
                 }
             )
         )
