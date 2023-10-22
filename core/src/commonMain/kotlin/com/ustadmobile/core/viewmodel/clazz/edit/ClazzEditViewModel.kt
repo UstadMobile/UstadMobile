@@ -251,6 +251,20 @@ class ClazzEditViewModel(
             }
 
             launch {
+                resultReturner.filteredResultFlowForKey(RESULT_KEY_ASSIGNMENT).collect { result ->
+                    val assignmentResultBlock = result.result as? CourseBlockAndEditEntities ?: return@collect
+
+                    val newCourseBlockList = addOrUpdateCourseBlockUseCase(
+                        currentList = _uiState.value.courseBlockList,
+                        clazzUid = _uiState.value.entity?.clazzUid ?: 0L,
+                        addOrUpdateBlock = assignmentResultBlock
+                    )
+
+                    updateCourseBlockList(newCourseBlockList)
+                }
+            }
+
+            launch {
                 resultReturner.filteredResultFlowForKey(RESULT_KEY_TIMEZONE).collect { result ->
                     val timeZoneId = result.result as? String ?: return@collect
                     onEntityChanged(_uiState.value.entity?.shallowCopy {
@@ -380,7 +394,7 @@ class ClazzEditViewModel(
             CourseBlock.BLOCK_MODULE_TYPE ->
                 CourseBlockEditViewModel.DEST_NAME to RESULT_KEY_COURSEBLOCK
             CourseBlock.BLOCK_ASSIGNMENT_TYPE ->
-                ClazzAssignmentEditViewModel.DEST_NAME to RESULT_KEY_COURSEBLOCK
+                ClazzAssignmentEditViewModel.DEST_NAME to RESULT_KEY_ASSIGNMENT
             else -> return
         }
 
@@ -618,7 +632,7 @@ class ClazzEditViewModel(
             CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
                 navigateForResult(
                     nextViewName = ClazzAssignmentEditViewModel.DEST_NAME,
-                    key = RESULT_KEY_COURSEBLOCK,
+                    key = RESULT_KEY_ASSIGNMENT,
                     serializer = CourseBlockAndEditEntities.serializer(),
                     currentValue = block,
                 )
@@ -639,6 +653,8 @@ class ClazzEditViewModel(
          * Plain CourseBlock will be returned
          */
         const val RESULT_KEY_COURSEBLOCK = "courseblock"
+
+        const val RESULT_KEY_ASSIGNMENT = "assignmentResult"
 
         const val RESULT_KEY_TIMEZONE = "timeZone"
 

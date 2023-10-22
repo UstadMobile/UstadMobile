@@ -30,7 +30,6 @@ import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
 import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
-import com.ustadmobile.core.util.ext.editIconId
 import com.ustadmobile.core.viewmodel.clazz.ClazzScheduleConstants
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditUiState
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
