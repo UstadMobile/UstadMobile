@@ -39,6 +39,9 @@ android {
         //coreLibraryDesugaringEnabled true
     }
     namespace 'com.ustadmobile.core'
+    lint {
+        disable 'MissingTranslation', 'ExtraTranslation'
+    }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
         kotlinOptions {
@@ -46,9 +49,6 @@ android {
         }
     }
 
-    lintOptions {
-        disable 'MissingTranslation', 'ExtraTranslation'
-    }
 }
 
 sourceCompatibility = '17'
@@ -56,7 +56,6 @@ targetCompatibility = '17'
 
 group rootProject.group
 version rootProject.version
-def reactLocaleOutPath = "${rootDir.absolutePath}/app-react/src/main/resources/"
 
 // workaround for https://youtrack.jetbrains.com/issue/KT-27170
 configurations {

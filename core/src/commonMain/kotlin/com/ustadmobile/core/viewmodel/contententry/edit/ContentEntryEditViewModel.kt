@@ -10,11 +10,11 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
-import com.ustadmobile.door.ext.withDoorTransaction
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
-import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
+import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.lib.db.entities.CourseBlock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +25,7 @@ import org.kodein.di.DI
 
 data class ContentEntryEditUiState(
 
-    val entity: ContentEntryWithBlockAndLanguage? = null,
+    val entity: ContentEntryBlockLanguageAndContentJob? = null,
 
     val licenceOptions: List<MessageIdOption2> = emptyList(),
 
@@ -33,7 +33,7 @@ data class ContentEntryEditUiState(
 
     val courseBlockEditUiState: CourseBlockEditUiState = CourseBlockEditUiState(),
 
-    val fieldsEnabled: Boolean = true,
+    val fieldsEnabled: Boolean = false,
 
     val updateContentVisible: Boolean = false,
 
@@ -52,13 +52,26 @@ data class ContentEntryEditUiState(
         get() = metadataResult != null
 
     val containerStorageOptionVisible: Boolean
-        get() = false //entity?.leaf == true
+        get() = false
 
     val courseBlockVisible: Boolean
         get() = entity?.block != null
 
 }
 
+/**
+ * When there is no associated CourseBlock
+ *    Show only the ContentEntryEdit part
+ *
+ * When there is an associated CourseBlock and the user has permission to edit the ContentEntry itself:
+ *    The title and description will be shown only once (e.g. as part of CourseBlockEdit). The title
+ *    and description will be copied from CourseBlock to ContentEntry
+ *
+ * When there is an associated CourseBlock and the user does not have permission to edit the ContentEntry itself:
+ *    Only the CourseBlock part of the screen will be displayed. ContentEntry specific fields (e.g.
+ *    license, author, etc) will not be displayed. This would probably be the case if a teacher
+ *    selects a content item from the library.
+ */
 class ContentEntryEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
@@ -86,20 +99,43 @@ class ContentEntryEditViewModel(
                 deserializer = CourseBlock.serializer(),
             )
 
+            _uiState.takeIf { courseBlockArg != null }?.update { prev ->
+                prev.copy(
+                    entity = prev.entity?.copy(
+                        block = courseBlockArg
+                    ) ?: ContentEntryBlockLanguageAndContentJob(block = courseBlockArg)
+                )
+            }
+
             loadEntity(
-                serializer = ContentEntryWithBlockAndLanguage.serializer(),
+                serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
                 onLoadFromDb = { db ->
+                    //Check if the user can edit the content entry itself...
                     db.takeIf { entityUidArg != 0L }?.contentEntryDao
-                        ?.findEntryWithBlockAndLanguageByUidAsync(entityUidArg)
-                        ?.also {
-                            it.block = courseBlockArg
-                        }
+                        ?.findEntryWithLanguageByEntryIdAsync(entityUidArg)
+                        ?.toContentEntryAndBlock(courseBlockArg)
                 },
                 makeDefault = {
-                    ContentEntryWithBlockAndLanguage().apply {
-                        contentEntryUid = activeDb.doorPrimaryKeyManager.nextId(ContentEntry.TABLE_ID)
-                        block = courseBlockArg
-                        leaf = savedStateHandle[ARG_LEAF]?.toBoolean() == true
+                    val importedMetaData = savedStateHandle.getJson(
+                        key = ARG_IMPORTED_METADATA,
+                        deserializer = MetadataResult.serializer(),
+                    )
+                    if(importedMetaData != null) {
+                        ContentEntryBlockLanguageAndContentJob(
+                            entry = importedMetaData.entry,
+                            block = courseBlockArg,
+                            contentJobItem = ContentJobItem(
+                                cjiPluginId = importedMetaData.pluginId,
+                            )
+                        )
+                    }else {
+                        ContentEntryBlockLanguageAndContentJob(
+                            entry = ContentEntry().apply {
+                                contentEntryUid = activeDb.doorPrimaryKeyManager.nextId(ContentEntry.TABLE_ID)
+                                leaf = savedStateHandle[ARG_LEAF]?.toBoolean() == true
+                            },
+                            block = courseBlockArg,
+                        )
                     }
                 },
                 uiUpdate = {
@@ -109,7 +145,7 @@ class ContentEntryEditViewModel(
                 }
             )
 
-            val isLeaf = _uiState.value.entity?.leaf == true
+            val isLeaf = _uiState.value.entity?.entry?.leaf == true
 
             val titleMessageId = if(entityUidArg == 0L && !isLeaf) {
                 MR.strings.content_editor_create_new_category
@@ -129,50 +165,20 @@ class ContentEntryEditViewModel(
         }
     }
 
-    private fun ContentEntry.toEntryWithBlockAndLanguage(): ContentEntryWithBlockAndLanguage {
-        return ContentEntryWithBlockAndLanguage().also {
-            it.contentEntryUid = contentEntryUid
-            it.title = title
-            it.description = description
-            it.entryId = entryId
-            it.author = author
-            it.publisher = publisher
-            it.licenseType = licenseType
-            it.licenseName = licenseName
-            it.licenseUrl = licenseUrl
-            it.sourceUrl = sourceUrl
-            it.thumbnailUrl = thumbnailUrl
-            it.lastModified = lastModified
-            it.primaryLanguageUid = primaryLanguageUid
-            it.languageVariantUid = languageVariantUid
-            it.contentFlags = contentFlags
-            it.leaf = leaf
-            it.publik = publik
-            it.ceInactive = ceInactive
-            it.contentTypeFlag = contentTypeFlag
-            it.contentOwner = contentOwner
-            it.contentEntryLocalChangeSeqNum = contentEntryLocalChangeSeqNum
-            it.contentEntryMasterChangeSeqNum = contentEntryMasterChangeSeqNum
-            it.contentEntryLastChangedBy = contentEntryLastChangedBy
-            it.contentEntryLct = contentEntryLct
-        }
-    }
-
     fun onContentEntryChanged(
         contentEntry: ContentEntry?
     ) {
         _uiState.update { prev ->
             prev.copy(
-                entity = contentEntry?.toEntryWithBlockAndLanguage()?.apply {
-                    block = prev.entity?.block
-                    language = prev.entity?.language
-                }
+                entity = prev.entity?.copy(
+                    entry = contentEntry,
+                )
             )
         }
     }
 
     fun onClickSave() {
-        val contentEntryVal = _uiState.value.entity ?: return
+        val contentEntryVal = _uiState.value.entity?.entry ?: return
 
         if(loadingState != LoadingUiState.NOT_LOADING)
             return

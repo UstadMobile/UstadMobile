@@ -4,7 +4,6 @@ import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.ACTIVE_CONTENT_JOB_ITEMS_CTE_SQL
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.ALL_ENTRIES_RECURSIVE_SQL
-import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.ENTITY_PERSONS_WITH_PERMISSION
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.ENTRY_WITH_CONTAINER_QUERY
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.LATEST_DOWNLOADED_CONTAINER_CTE_SQL
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.PLUGIN_ID_DELETE
@@ -14,6 +13,7 @@ import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.SORT_TITLE_DESC
 import app.cash.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.composites.ContentEntryAndLanguage
 import com.ustadmobile.lib.db.entities.*
 
 @DoorDao
@@ -26,10 +26,17 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsertAsync(entity: ContentEntry)
 
-    @Query("SELECT ContentEntry.*, Language.* FROM ContentEntry LEFT JOIN Language ON Language.langUid = ContentEntry.primaryLanguageUid " +
-            "WHERE ContentEntry.contentEntryUid=:entryUuid"
+    @Query("""
+        SELECT ContentEntry.*, Language.* 
+          FROM ContentEntry 
+               LEFT JOIN Language 
+                         ON Language.langUid = ContentEntry.primaryLanguageUid
+         WHERE ContentEntry.contentEntryUid=:entryUuid
+        """
     )
-    abstract suspend fun findEntryWithLanguageByEntryIdAsync(entryUuid: Long): ContentEntryWithLanguage?
+    abstract suspend fun findEntryWithLanguageByEntryIdAsync(
+        entryUuid: Long
+    ): ContentEntryAndLanguage?
 
     @Query("""
         SELECT ContentEntry.*, 

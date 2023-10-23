@@ -109,9 +109,9 @@ android {
         targetSdkVersion rootProject.ext.version_android_target_sdk
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.ext.ustadVersion
+        resourceConfigurations += ['en', 'fa', 'ps', 'ar', 'tg', 'bn', 'ne', 'my', 'ru', 'tl']
 
         //Shrinks minified version: remove jetpack etc. strings for unsupported locales.
-        resConfigs 'en', 'fa', 'ps', 'ar', 'tg', 'bn', 'ne', 'my', 'ru', 'tl'
         multiDexEnabled true //required for all variants to use java library desugaring
 
 

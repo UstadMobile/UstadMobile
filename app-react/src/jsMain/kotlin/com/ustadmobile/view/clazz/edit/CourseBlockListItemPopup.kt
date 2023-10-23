@@ -3,7 +3,7 @@ package com.ustadmobile.view.clazz.edit
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditUiState
-import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
+import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import web.cssom.ClassName
 import js.core.jso
 import mui.icons.material.MoreVert
@@ -25,15 +25,15 @@ external interface PopUpMenuProps : Props {
 
     var fieldsEnabled: Boolean
 
-    var onClickHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit
+    var onClickHideBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit
 
-    var onClickUnHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit
+    var onClickUnHideBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit
 
-    var onClickIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit
+    var onClickIndentBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit
 
-    var onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit
+    var onClickUnIndentBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit
 
-    var onClickDeleteBlockPopupMenu: (CourseBlockWithEntity) -> Unit
+    var onClickDeleteBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit
 
     var uiState: ClazzEditUiState.CourseBlockUiState
 
@@ -94,7 +94,7 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
             if(props.uiState.showHide) {
                 MenuItem {
                     onClick = {
-                        props.onClickHideBlockPopupMenu(props.uiState.courseBlock)
+                        props.onClickHideBlockPopupMenu(props.uiState.block)
                         point = null
                     }
                     + strings[MR.strings.hide]
@@ -104,7 +104,7 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
             if(props.uiState.showUnhide) {
                 MenuItem {
                     onClick = {
-                        props.onClickUnHideBlockPopupMenu(props.uiState.courseBlock)
+                        props.onClickUnHideBlockPopupMenu(props.uiState.block)
                         point = null
                     }
                     + strings[MR.strings.unhide]
@@ -114,7 +114,7 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
             if(props.uiState.showIndent) {
                 MenuItem {
                     onClick = {
-                        props.onClickIndentBlockPopupMenu(props.uiState.courseBlock)
+                        props.onClickIndentBlockPopupMenu(props.uiState.block)
                         point = null
                     }
                     + strings[MR.strings.indent]
@@ -124,7 +124,7 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
             if (props.uiState.showUnindent) {
                 MenuItem {
                     onClick = {
-                        props.onClickUnIndentBlockPopupMenu(props.uiState.courseBlock)
+                        props.onClickUnIndentBlockPopupMenu(props.uiState.block)
                         point = null
                     }
                     + strings[MR.strings.unindent]
@@ -133,7 +133,7 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
 
             MenuItem {
                 onClick = {
-                    props.onClickDeleteBlockPopupMenu(props.uiState.courseBlock)
+                    props.onClickDeleteBlockPopupMenu(props.uiState.block)
                     point = null
                 }
                 + strings[MR.strings.delete]

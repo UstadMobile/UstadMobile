@@ -26,7 +26,6 @@ import com.google.accompanist.themeadapter.material.MdcTheme
 import com.ustadmobile.core.impl.locale.entityconstants.*
 import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants.MarkingType
 import com.ustadmobile.lib.db.entities.ClazzAssignment
-import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
