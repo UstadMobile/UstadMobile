@@ -108,11 +108,20 @@ Cypress.Commands.add('ustadAddCourse',(courseName) => {
   // Add Assignment block
     Cypress.Commands.add('ustadAddAssignmentBlock',(assignmentTitle) => {
      cy.contains("Add block").should('be.visible').click()
-     cy.contains("Assignments").click()
+     cy.contains("Assignment").click()
      cy.get('input[id="title"]').type(assignmentTitle)
      cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
      cy.contains("button","Done").click()
      })
+
+   // Add a Discussion Board
+     Cypress.Commands.add('ustadAddDiscussionBoard',(discussionTitle) => {
+      cy.contains("Add block").click()
+      cy.contains("Discussion board").click()
+      cy.get('input[id="title"]').type(discussionTitle)
+      cy.get('div[data-placeholder="Description"]').type("a simple discussion description")
+      cy.contains("button","Done").click()
+      })
 //commands.js
 //
 //
