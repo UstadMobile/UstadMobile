@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
@@ -28,11 +27,13 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.libuicompose.components.UstadClickableTextField
 import com.ustadmobile.libuicompose.components.UstadCourseBlockEdit
 import com.ustadmobile.libuicompose.components.UstadExposedDropDownMenuField
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.libuicompose.components.UstadSwitchField
+import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
@@ -61,7 +62,7 @@ fun ContentEntryEditScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .defaultScreenPadding()
             .verticalScroll(rememberScrollState()),
     )  {
 
@@ -177,6 +178,7 @@ fun ContentEntryEditScreen(
         Spacer(modifier = Modifier.height(15.dp))
 
         UstadMessageIdOptionExposedDropDownMenuField(
+            modifier = Modifier.testTag("licenseType"),
             value = uiState.entity?.licenseType ?: 0,
             options = LicenceConstants.LICENSE_MESSAGE_IDS,
             label = stringResource(MR.strings.licence),
@@ -193,6 +195,7 @@ fun ContentEntryEditScreen(
 
         if (uiState.containerStorageOptionVisible){
             UstadExposedDropDownMenuField(
+                modifier = Modifier.testTag("storageOptions"),
                 value = uiState.selectedContainerStorageDir,
                 label = stringResource(MR.strings.content_creation_storage_option_title),
                 options = uiState.storageOptions,
@@ -206,6 +209,7 @@ fun ContentEntryEditScreen(
 
         if (uiState.contentCompressVisible){
             UstadSwitchField(
+                modifier = Modifier.testTag("contentCompress"),
                 checked = uiState.compressionEnabled,
                 label = stringResource(MR.strings.compress),
                 enabled = uiState.fieldsEnabled,
@@ -218,6 +222,7 @@ fun ContentEntryEditScreen(
         Spacer(modifier = Modifier.height(15.dp))
 
         UstadSwitchField(
+            modifier = Modifier.testTag("publik"),
             checked = uiState.entity?.publik ?: false,
             label = stringResource(MR.strings.publicly_accessible),
             enabled = uiState.fieldsEnabled,
@@ -228,13 +233,13 @@ fun ContentEntryEditScreen(
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        OutlinedTextField(
+        UstadClickableTextField(
             modifier = Modifier.testTag("languageName").fillMaxWidth(),
             value = uiState.entity?.language?.name ?: "",
             label = { Text(stringResource(MR.strings.language)) },
-//            readOnly = true,
-//            enabled = uiState.fieldsEnabled,
-//            onClick = onClickLanguage,
+            readOnly = true,
+            enabled = uiState.fieldsEnabled,
+            onClick = onClickLanguage,
             onValueChange = {}
         )
 
