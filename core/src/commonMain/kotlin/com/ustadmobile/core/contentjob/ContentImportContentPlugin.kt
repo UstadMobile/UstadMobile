@@ -47,7 +47,7 @@ abstract class ContentImportContentPlugin(
      * url.
      */
     open suspend fun shouldUpload(): Boolean? {
-        return null
+        return false
     }
 
     override suspend fun processJob(
@@ -58,7 +58,6 @@ abstract class ContentImportContentPlugin(
         val contentJobItem = jobItem.contentJobItem
             ?: throw IllegalArgumentException("missing job item")
         val db: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
-        val repo: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
 
         val localUri = process.getLocalOrCachedUri()
         contentJobItem.updateTotalFromLocalUriIfNeeded(localUri, localUri.isRemote(),

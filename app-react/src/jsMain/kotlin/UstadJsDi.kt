@@ -6,6 +6,7 @@ import com.ustadmobile.core.domain.contententry.getmetadatafromuri.IContentEntry
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.di.DomainDiModuleJs
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJs
@@ -42,8 +43,8 @@ internal fun ustadJsDi(
     configMap: Map<String, String>,
     stringsProvider: JsStringProvider,
 ) = DI {
-
     import(commonDomainDiModule(EndpointScope.Default))
+    import(DomainDiModuleJs(EndpointScope.Default))
 
     val apiUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
     console.log("Api URL = $apiUrl (location.href = ${location.href}")

@@ -101,7 +101,7 @@ class ContentEntryImportLinkViewModel(
         viewModelScope.launch {
             try {
                 val response = httpClient.post {
-                    url(accountManager.activeEndpoint.url + "import/validateLink")
+                    url(accountManager.activeEndpoint.url + "api/import/validateLink")
                     parameter("url", _uiState.value.url)
                     expectSuccess = false
                 }

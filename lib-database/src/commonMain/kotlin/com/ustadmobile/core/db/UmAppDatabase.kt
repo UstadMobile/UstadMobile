@@ -62,7 +62,7 @@ import com.ustadmobile.lib.db.entities.*
 
 
 
-], version = 123)
+], version = 124)
 /*
  Replicate entities (e.g. trackers) to drop:
      ClazzLogReplicate

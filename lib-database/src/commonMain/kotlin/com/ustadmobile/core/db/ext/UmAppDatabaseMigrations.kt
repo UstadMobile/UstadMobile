@@ -1227,12 +1227,35 @@ val MIGRATION_122_123 = DoorMigrationStatementList(122, 123) { db ->
     listOf("DROP TABLE IF EXISTS CourseDiscussion")
 }
 
+/**
+ * ContentJobItem is modified to use ReplicateEntity (adds a last modified time).
+ */
+val MIGRATION_123_124 = DoorMigrationStatementList(123, 124) { db ->
+    buildList {
+        add("DROP TABLE IF EXISTS ContentJobItem")
+        add("DROP TABLE IF EXISTS ContentJob")
+
+        when(db.dbType()) {
+            DoorDbType.SQLITE -> {
+                add("CREATE TABLE IF NOT EXISTS ContentJob (  toUri  TEXT , cjProgress  INTEGER  NOT NULL , cjTotal  INTEGER  NOT NULL , cjNotificationTitle  TEXT , cjIsMeteredAllowed  INTEGER  NOT NULL , params  TEXT , cjLct  INTEGER  NOT NULL , cjUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                add("CREATE TABLE IF NOT EXISTS ContentJobItem (  cjiJobUid  INTEGER  NOT NULL , sourceUri  TEXT , cjiIsLeaf  INTEGER  NOT NULL , cjiContentEntryUid  INTEGER  NOT NULL , cjiParentContentEntryUid  INTEGER  NOT NULL , cjiContainerUid  INTEGER  NOT NULL , cjiItemProgress  INTEGER  NOT NULL , cjiItemTotal  INTEGER  NOT NULL , cjiRecursiveProgress  INTEGER  NOT NULL , cjiRecursiveTotal  INTEGER  NOT NULL , cjiStatus  INTEGER  NOT NULL , cjiRecursiveStatus  INTEGER  NOT NULL , cjiConnectivityNeeded  INTEGER  NOT NULL , cjiPluginId  INTEGER  NOT NULL , cjiAttemptCount  INTEGER  NOT NULL , cjiParentCjiUid  INTEGER  NOT NULL , cjiServerJobId  INTEGER  NOT NULL , cjiStartTime  INTEGER  NOT NULL , cjiFinishTime  INTEGER  NOT NULL , cjiUploadSessionUid  TEXT , cjiContentDeletedOnCancellation  INTEGER  NOT NULL , cjiContainerProcessed  INTEGER  NOT NULL , cjiLastModified  INTEGER  NOT NULL , cjiUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                add("CREATE INDEX index_ContentJobItem_cjiContentEntryUid_cjiFinishTime ON ContentJobItem (cjiContentEntryUid, cjiFinishTime)")
+            }
+            DoorDbType.POSTGRES -> {
+                add("CREATE TABLE IF NOT EXISTS ContentJob (  toUri  TEXT , cjProgress  BIGINT  NOT NULL , cjTotal  BIGINT  NOT NULL , cjNotificationTitle  TEXT , cjIsMeteredAllowed  BOOL  NOT NULL , params  TEXT , cjLct  BIGINT  NOT NULL , cjUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                add("CREATE TABLE IF NOT EXISTS ContentJobItem (  cjiJobUid  BIGINT  NOT NULL , sourceUri  TEXT , cjiIsLeaf  BOOL  NOT NULL , cjiContentEntryUid  BIGINT  NOT NULL , cjiParentContentEntryUid  BIGINT  NOT NULL , cjiContainerUid  BIGINT  NOT NULL , cjiItemProgress  BIGINT  NOT NULL , cjiItemTotal  BIGINT  NOT NULL , cjiRecursiveProgress  BIGINT  NOT NULL , cjiRecursiveTotal  BIGINT  NOT NULL , cjiStatus  INTEGER  NOT NULL , cjiRecursiveStatus  INTEGER  NOT NULL , cjiConnectivityNeeded  BOOL  NOT NULL , cjiPluginId  INTEGER  NOT NULL , cjiAttemptCount  INTEGER  NOT NULL , cjiParentCjiUid  BIGINT  NOT NULL , cjiServerJobId  BIGINT  NOT NULL , cjiStartTime  BIGINT  NOT NULL , cjiFinishTime  BIGINT  NOT NULL , cjiUploadSessionUid  TEXT , cjiContentDeletedOnCancellation  BOOL  NOT NULL , cjiContainerProcessed  BOOL  NOT NULL , cjiLastModified  BIGINT  NOT NULL , cjiUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                add("CREATE INDEX index_ContentJobItem_cjiContentEntryUid_cjiFinishTime ON ContentJobItem (cjiContentEntryUid, cjiFinishTime)")
+            }
+        }
+    }
+}
+
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
-    MIGRATION_120_121, MIGRATION_121_122, MIGRATION_122_123,
+    MIGRATION_120_121, MIGRATION_121_122, MIGRATION_122_123, MIGRATION_123_124,
 )
 
 

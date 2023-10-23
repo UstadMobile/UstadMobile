@@ -3,6 +3,11 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.ustadmobile.door.annotation.ReplicateEntity
+import com.ustadmobile.door.annotation.ReplicateEtag
+import com.ustadmobile.door.annotation.ReplicateLastModified
+import com.ustadmobile.door.annotation.Trigger
+import com.ustadmobile.door.annotation.Triggers
 import kotlinx.serialization.Serializable
 
 /**
@@ -15,6 +20,27 @@ import kotlinx.serialization.Serializable
             unique = false
         )
     ]
+)
+
+/* Normally the ContentJobItem is local on any given node. It will however need to be replicated
+ * in order to allow clients to see progress of an import that takes time to process on the server
+ * (e.g. video import etc)
+ */
+@ReplicateEntity(
+    tableId = ContentJobItem.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
+@Triggers(
+    arrayOf(
+        Trigger(
+            name = "contentjobitem_remote_insert",
+            order = Trigger.Order.INSTEAD_OF,
+            on = Trigger.On.RECEIVEVIEW,
+            events = [Trigger.Event.INSERT],
+            conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+            sqlStatements = [TRIGGER_UPSERT],
+        )
+    )
 )
 @Serializable
 data class ContentJobItem(
@@ -112,7 +138,7 @@ data class ContentJobItem(
     var cjiParentCjiUid: Long = 0,
 
 
-        var cjiServerJobId: Long = 0,
+    var cjiServerJobId: Long = 0,
 
         /**
      * time when the job runner started the job item
@@ -140,6 +166,14 @@ data class ContentJobItem(
     /**
      * Is used to check the status that the  container has finished processing in the job
      */
-    var cjiContainerProcessed: Boolean = false
+    var cjiContainerProcessed: Boolean = false,
 
-)
+    @ReplicateEtag
+    @ReplicateLastModified
+    var cjiLastModified: Long = 0
+
+) {
+    companion object {
+        const val TABLE_ID = 720
+    }
+}

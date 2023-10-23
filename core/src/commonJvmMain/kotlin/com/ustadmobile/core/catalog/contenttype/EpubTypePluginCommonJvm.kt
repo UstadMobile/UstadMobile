@@ -106,9 +106,9 @@ class EpubTypePluginCommonJvm(
         progressListener: ContentJobProgressListener,
         containerStorageUri: DoorUri,
     ): Container {
-        val repo: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
+        val db: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
 
-        return repo.containerBuilder(jobItem.contentJobItem?.cjiContentEntryUid ?: 0,
+        return db.containerBuilder(jobItem.contentJobItem?.cjiContentEntryUid ?: 0,
                 supportedMimeTypes.first(), containerStorageUri)
             .addZip(process.getLocalOrCachedUri(), context)
             .build()

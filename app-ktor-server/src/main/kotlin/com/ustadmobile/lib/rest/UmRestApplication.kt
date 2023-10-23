@@ -12,8 +12,6 @@ import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.*
-import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.*
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.io.UploadSessionManager
@@ -30,7 +28,6 @@ import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import jakarta.mail.Authenticator
 import jakarta.mail.PasswordAuthentication
-import kotlinx.coroutines.runBlocking
 import org.kodein.di.*
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
@@ -39,8 +36,8 @@ import java.nio.file.Files
 import javax.naming.InitialContext
 import com.ustadmobile.door.util.NodeIdAuthCache
 import com.ustadmobile.core.contentjob.DummyContentPluginUploader
-import com.ustadmobile.core.db.ext.preload
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.di.DomainDiModuleJvm
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJvm
 import com.ustadmobile.door.http.DoorHttpServerConfig
@@ -175,6 +172,7 @@ fun Application.umRestApplication(
 
     di {
         import(CommonJvmDiModule)
+        import(DomainDiModuleJvm(EndpointScope.Default))
         import(makeJvmBackendDiModule(environment.config))
         bind<SupportedLanguagesConfig>() with singleton { SupportedLanguagesConfig() }
         bind<StringProvider>() with singleton { StringProviderJvm(Locale.getDefault()) }
@@ -382,7 +380,7 @@ fun Application.umRestApplication(
             }
         }
         SiteRoute()
-        ContentEntryLinkImporter()
+
         ContentUploadRoute()
 
         GetAppRoute()
@@ -394,6 +392,10 @@ fun Application.umRestApplication(
 
             route("contentupload") {
                 ContentUploadRoute()
+            }
+
+            route("import") {
+                ContentEntryImportRoute()
             }
         }
 

@@ -209,7 +209,7 @@ class ContentJobRunner(
                         systemTimeInMillis())
                 }
 
-                Napier.d("$logPrefix Processor #$id completed job #${item.contentJobItem?.cjiUid}")
+                Napier.d("$logPrefix Processor #$id completed job #${item.contentJobItem?.cjiUid} status=${processResult.status}")
             }catch(e: Exception) {
                 //something went wrong
                 processException = e
