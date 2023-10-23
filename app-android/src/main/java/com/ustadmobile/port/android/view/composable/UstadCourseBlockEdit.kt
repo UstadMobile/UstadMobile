@@ -11,6 +11,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
+import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.viewmodel.courseblock.CourseBlockViewModelConstants.CompletionCriteria
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -95,7 +96,7 @@ fun UstadCourseBlockEdit(
                         uiState.courseBlock?.cbCompletionCriteria ?: 0
                     ),
                     label = stringResource(CR.string.completion_criteria),
-                    itemText = { mrStringResource(it.stringResource) },
+                    itemText = { mrStringResource(it.stringResource).capitalizeFirstLetter() },
                     options = uiState.completionCriteriaOptions,
                     onOptionSelected = {
                         onCourseBlockChange(uiState.courseBlock?.shallowCopy{
