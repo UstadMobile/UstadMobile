@@ -158,7 +158,8 @@ internal fun ustadJsDi(
     bind<IContentEntryGetMetaDataFromUriUseCase>() with provider {
         ContentEntryGetMetaDataFromUriUseCaseJs(
             navResultReturner = instance(),
-            json = instance()
+            json = instance(),
+            systemImpl = instance(),
         )
     }
 
