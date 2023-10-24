@@ -102,7 +102,7 @@ class ContentEntryGetMetaDataFromUriUseCaseJs(
 
         const val RESULT_KEY_FILE = "getMetadataFile"
 
-        const val CHUNK_SIZE = (1024 * 1024 * 1024) //1MB
+        const val CHUNK_SIZE = (1024 * 1024) //1MB
 
     }
 }
