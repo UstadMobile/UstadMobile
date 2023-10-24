@@ -111,6 +111,7 @@ import com.ustadmobile.view.contententry.importlink.ContentEntryImportLinkScreen
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
 import com.ustadmobile.view.contententry.getmetadata.ContentEntryGetMetadataScreen
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
+import com.ustadmobile.view.contententry.getmetadata.ContentEntryGetMetadataPreview
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
 data class UstadScreen(
@@ -317,7 +318,9 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("DbExport", "DbExport", DbExportScreen),
     UstadScreen(PersonAccountEditViewModel.DEST_NAME, "PersonAccountEdit", PersonAccountEditScreen),
     UstadScreen(ContentEntryGetMetadataViewModel.DEST_NAME, "ContentEntryGetMetadata",
-        ContentEntryGetMetadataScreen)
+        ContentEntryGetMetadataScreen),
+    UstadScreen("ContentEntryGetMetadataPreview", "ContentEntryGetMetadataPreview",
+        ContentEntryGetMetadataPreview),
 )
 
 

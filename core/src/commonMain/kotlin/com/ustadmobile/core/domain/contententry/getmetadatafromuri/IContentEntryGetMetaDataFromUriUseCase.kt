@@ -7,6 +7,7 @@ import com.ustadmobile.door.DoorUri
 data class ContentEntryGetMetadataStatus(
     val indeterminate: Boolean = true,
     val progress: Int = 0,
+    val error: String? = null,
 )
 
 interface IContentEntryGetMetaDataFromUriUseCase {

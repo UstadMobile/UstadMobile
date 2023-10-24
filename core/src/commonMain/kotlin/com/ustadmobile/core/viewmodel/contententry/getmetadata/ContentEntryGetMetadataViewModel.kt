@@ -17,6 +17,8 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.util.ext.onActiveEndpoint
 
 data class ContentEntryGetMetadataUiState(
     val status: ContentEntryGetMetadataStatus = ContentEntryGetMetadataStatus(),
@@ -25,7 +27,8 @@ data class ContentEntryGetMetadataUiState(
 class ContentEntryGetMetadataViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-    private val contentEntryGetMetaDataFromUriUseCase: IContentEntryGetMetaDataFromUriUseCase = di.direct.instance(),
+    private val contentEntryGetMetaDataFromUriUseCase: IContentEntryGetMetaDataFromUriUseCase =
+        di.onActiveEndpoint().direct.instance(),
 ): UstadViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(ContentEntryGetMetadataUiState())
@@ -36,38 +39,47 @@ class ContentEntryGetMetadataViewModel(
         val uriArg = savedStateHandle[ARG_URI] ?: throw IllegalArgumentException("No uri")
 
         viewModelScope.launch {
-            val metadataResult = contentEntryGetMetaDataFromUriUseCase(
-                contentUri = DoorUri.parse(uriArg),
-                endpoint = accountManager.activeEndpoint,
-                onProgress = {
-                    _uiState.update { prev ->
-                        prev.copy(status = it)
+            try {
+                val metadataResult = contentEntryGetMetaDataFromUriUseCase(
+                    contentUri = DoorUri.parse(uriArg),
+                    endpoint = accountManager.activeEndpoint,
+                    onProgress = {
+                        _uiState.update { prev ->
+                            prev.copy(status = it)
+                        }
                     }
-                }
-            )
+                )
 
-            navController.navigate(
-                viewName = ContentEntryEditViewModel.DEST_NAME,
-                args = buildMap {
-                    put(
-                        ContentEntryEditViewModel.ARG_IMPORTED_METADATA,
-                        json.encodeToString(
-                            serializer = MetadataResult.serializer(),
-                            value = metadataResult
+                navController.navigate(
+                    viewName = ContentEntryEditViewModel.DEST_NAME,
+                    args = buildMap {
+                        put(
+                            ContentEntryEditViewModel.ARG_IMPORTED_METADATA,
+                            json.encodeToString(
+                                serializer = MetadataResult.serializer(),
+                                value = metadataResult
+                            )
+                        )
+                        putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
+                        putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_VIEWNAME)
+                        putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_KEY)
+                        putFromSavedStateIfPresent(ARG_PARENT_UID)
+                    },
+                    goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                        popUpToViewName = DEST_NAME,
+                        popUpToInclusive = true,
+                    )
+                )
+            }catch(e: Exception) {
+                _uiState.update { prev ->
+                    prev.copy(
+                        status = prev.status.copy(
+                            error = "${systemImpl.getString(MR.strings.error)}: ${e.message}"
                         )
                     )
-                    putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
-                    putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_VIEWNAME)
-                    putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_KEY)
-                    putFromSavedStateIfPresent(ARG_PARENT_UID)
-                },
-                goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                    popUpToViewName = DEST_NAME,
-                    popUpToInclusive = true,
-                )
-            )
+                }
+            }
         }
-
     }
 
     companion object {

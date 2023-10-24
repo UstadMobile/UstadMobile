@@ -284,6 +284,13 @@
     <string name="enter_url">Enter Url</string>
     <string name="invalid_link">Invalid link</string>
     <string name="import_link_content_not_supported">Content not supported</string>
+
+    <!--
+    Error message that is displayed to users when they upload a file type that is not supported.
+    %1$s will be replaced with a list of the file types that are supported by the system
+    -->
+    <string name="unsupported_file_type">Unsupported file type. Supported types are: %1$s</string>
+
     <string name="import_link_big_size">File size too big</string>
     <string name="import_link_error">Import Error</string>
     <string name="supported_link">Supported link types: plain HTTP links to supported content (H5P, xAPI, PDF, Video/MP4)</string>
