@@ -26,9 +26,9 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.BottomSheetOption
 import com.ustadmobile.port.android.view.OptionsBottomSheetFragment
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
-import com.ustadmobile.port.android.view.contententry.UstadContentEntryListItem
 import com.ustadmobile.core.R as CR
 import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.view.contententry.list.ContentEntryListScreenForViewModel
 
 class ContentEntryList2Fragment : UstadBaseMvvmFragment() {
 
@@ -61,7 +61,7 @@ class ContentEntryList2Fragment : UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    ContentEntryListScreen(viewModel = viewModel)
+                    ContentEntryListScreenForViewModel(viewModel = viewModel)
                 }
             }
         }
@@ -110,93 +110,5 @@ class ContentEntryList2Fragment : UstadBaseMvvmFragment() {
                 ContentEntry.TYPE_AUDIO to MR.strings.audio
         )
 
-    }
-}
-
-@Composable
-private fun ContentEntryListScreen(
-    viewModel: ContentEntryListViewModel
-) {
-    val uiState by viewModel.uiState.collectAsState(ContentEntryListUiState())
-
-    ContentEntryListScreen(
-        uiState = uiState,
-        onClickContentEntry = viewModel::onClickEntry
-    )
-
-}
-
-@Composable
-private fun ContentEntryListScreen(
-    uiState: ContentEntryListUiState = ContentEntryListUiState(),
-    onClickContentEntry: (
-        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit = {},
-    onClickDownloadContentEntry: (
-        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit = {},
-) {
-    val pager = remember(uiState.contentEntryList) {
-        Pager(
-            pagingSourceFactory = uiState.contentEntryList,
-            config = PagingConfig(pageSize = 20, enablePlaceholders = true)
-        )
-    }
-    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
-
-
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
-    )  {
-
-        items(
-            items = lazyPagingItems,
-            key = { contentEntry -> contentEntry.contentEntryUid }
-        ){ contentEntry ->
-
-            UstadContentEntryListItem(
-                onClick = {
-                    @Suppress("UNNECESSARY_SAFE_CALL")
-                    contentEntry?.also { onClickContentEntry(it) }
-                },
-                onClickDownload = {
-                    @Suppress("UNNECESSARY_SAFE_CALL")
-                    contentEntry?.also { onClickDownloadContentEntry(it) }
-                },
-                contentEntry = contentEntry
-            )
-        }
-    }
-}
-
-@Composable
-@Preview
-private fun ContentEntryListScreenPreview() {
-    val uiStateVal = ContentEntryListUiState(
-        contentEntryList = {
-            ListPagingSource(listOf(
-                ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
-                    contentEntryUid = 1
-                    leaf = false
-                    ceInactive = true
-                    scoreProgress = ContentEntryStatementScoreProgress().apply {
-                        progress = 10
-                        penalty = 20
-                    }
-                    contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
-                    title = "Content Title 1"
-                    description = "Content Description 1"
-                },
-                ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
-                    contentEntryUid = 2
-                    leaf = true
-                    ceInactive = false
-                    contentTypeFlag = ContentEntry.TYPE_DOCUMENT
-                    title = "Content Title 2"
-                    description = "Content Description 2"
-                }
-            ))
-        },
-    )
-    MdcTheme {
-        ContentEntryListScreen(uiStateVal)
     }
 }
