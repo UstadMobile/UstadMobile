@@ -53,7 +53,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
 
     private lateinit var viewModelFactoryVar: TestViewModelFactory<T>
 
-    private val endpointScope = EndpointScope()
+    val endpointScope = EndpointScope()
 
     private val xppFactory: XmlPullParserFactory by lazy {
         XmlPullParserFactory.newInstance().also {
