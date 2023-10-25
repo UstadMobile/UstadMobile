@@ -5,31 +5,32 @@ import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.io.ContainerBuilder
 import com.ustadmobile.core.io.ext.*
+import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.ext.alternative
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.openInputStream
+import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.libcache.UstadCache
 import org.kodein.di.DI
 import org.xmlpull.v1.XmlPullParserFactory
-import java.io.File
 import java.util.*
-import io.ktor.client.*
 import java.util.zip.ZipInputStream
 import kotlinx.coroutines.*
+import kotlinx.io.asInputStream
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
 class EpubTypePluginCommonJvm(
-    context: Any,
     endpoint: Endpoint,
     override val di: DI,
+    private val cache: UstadCache,
+    uriHelper: UriHelper,
     uploader: ContentPluginUploader = DefaultContentPluginUploader(di)
-) : ContentImportContentPlugin(endpoint, context, uploader) {
+) : AbstractContentImportPlugin(endpoint, uploader, uriHelper) {
 
     val viewName: String
         get() = EpubContentView.VIEW_NAME
@@ -43,28 +44,31 @@ class EpubTypePluginCommonJvm(
     override val pluginId: Int
         get() = PLUGIN_ID
 
+    private fun ZipInputStream.findFirstOpfPath(): String? {
+        val xppFactory = XmlPullParserFactory.newInstance()
+        skipToEntry { entry -> entry.name == OCF_CONTAINER_PATH } ?: return null
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
-        val mimeType = uri.guessMimeType(context, di)
+        val ocfContainer = OcfDocument()
+        val xpp = xppFactory.newPullParser()
+        xpp.setInput(this, "UTF-8")
+        ocfContainer.loadFromParser(xpp)
+
+        return ocfContainer.rootFiles.firstOrNull()?.fullPath
+    }
+
+    override suspend fun extractMetadata(uri: DoorUri): MetadataResult? {
+        val mimeType = uriHelper.getMimeType(uri)
         if(mimeType != null && !supportedMimeTypes.contains(mimeType)){
             return null
         }
         return withContext(Dispatchers.Default) {
             val xppFactory = XmlPullParserFactory.newInstance()
             try {
-                val localUri = process.getLocalOrCachedUri()
-                val opfPath = ZipInputStream(localUri.openInputStream(context)).use {
-                    it.skipToEntry { entry -> entry.name == OCF_CONTAINER_PATH } ?: return@use null
-
-                    val ocfContainer = OcfDocument()
-                    val xpp = xppFactory.newPullParser()
-                    xpp.setInput(it, "UTF-8")
-                    ocfContainer.loadFromParser(xpp)
-
-                    return@use ocfContainer.rootFiles.firstOrNull()?.fullPath
+                val opfPath = ZipInputStream(uriHelper.openSource(uri).asInputStream()).use {
+                    it.findFirstOpfPath()
                 } ?: return@withContext null
 
-                return@withContext  ZipInputStream(localUri.openInputStream(context)).use {
+                return@withContext  ZipInputStream(uriHelper.openSource(uri).asInputStream()).use {
 
                     it.skipToEntry { it.name == opfPath } ?: return@use null
 
@@ -77,8 +81,10 @@ class EpubTypePluginCommonJvm(
                         contentFlags = ContentEntry.FLAG_IMPORTED
                         contentTypeFlag = ContentEntry.TYPE_EBOOK
                         licenseType = ContentEntry.LICENSE_TYPE_OTHER
-                        title = if (opfDocument.title.isNullOrEmpty()) localUri.getFileName(context)
-                        else opfDocument.title
+                        title = if (opfDocument.title.isNullOrEmpty())
+                            uriHelper.getFileName(uri)
+                        else
+                            opfDocument.title
                         author = opfDocument.getCreator(0)?.creator
                         description = opfDocument.description
                         leaf = true
@@ -100,18 +106,34 @@ class EpubTypePluginCommonJvm(
     }
 
 
-    override suspend fun makeContainer(
+    override suspend fun addToCache(
         jobItem: ContentJobItemAndContentJob,
-        process: ContentJobProcessContext,
         progressListener: ContentJobProgressListener,
-        containerStorageUri: DoorUri,
-    ): Container {
+    ): ContentEntryVersion {
+        val jobUri = jobItem.contentJobItem?.sourceUri?.let { DoorUri.parse(it) }
+            ?: throw IllegalArgumentException("no sourceUri")
         val db: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
 
-        return db.containerBuilder(jobItem.contentJobItem?.cjiContentEntryUid ?: 0,
-                supportedMimeTypes.first(), containerStorageUri)
-            .addZip(process.getLocalOrCachedUri(), context)
-            .build()
+        val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
+        val urlPrefix = endpoint.url + ContentEntryVersion.PATH_POSTFIX + contentEntryVersionUid + "/"
+
+        val opfPath = ZipInputStream(uriHelper.openSource(jobUri).asInputStream()).use {
+            it.findFirstOpfPath()
+        }
+
+        val contentEntryVersion = ContentEntryVersion(
+            cevUid = contentEntryVersionUid,
+            cevContentType = ContentEntryVersion.TYPE_EPUB,
+            cevUrl = "$urlPrefix$opfPath"
+        )
+
+        cache.storeZip(
+            zipSource = uriHelper.openSource(jobUri),
+            urlPrefix = urlPrefix,
+            retain = true,
+        )
+
+        return contentEntryVersion
     }
 
     companion object {

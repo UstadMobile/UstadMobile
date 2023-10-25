@@ -4,14 +4,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.commitProgressUpdates
-import com.ustadmobile.core.impl.ContainerStorageManager
-import com.ustadmobile.core.io.ext.deleteRecursively
-import com.ustadmobile.core.io.ext.emptyRecursively
 import com.ustadmobile.core.util.EventCollator
-import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.createTemporaryDir
-import com.ustadmobile.core.util.ext.decodeStringMapFromString
-import com.ustadmobile.core.util.ext.deleteZombieContainerEntryFiles
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.*
 import com.ustadmobile.door.util.TransactionMode
@@ -25,18 +18,16 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
-import kotlin.concurrent.Volatile
 import kotlin.math.min
 
 /**
  * Runs a given ContentJob.
  */
-class ContentJobRunner(
+class ContentImportJobRunner(
     val jobId: Long,
     val endpoint: Endpoint,
     override val di: DI,
@@ -61,25 +52,14 @@ class ContentJobRunner(
     private val eventCollator = EventCollator(500, this::commitProgressUpdates)
 
     private val logPrefix: String
-        get() = "ContentJobRunner@$doorIdentityHashCode Job#${jobId} :"
+        get() = "ContentJobRunner Job#${jobId} :"
 
     private val contentJobItemUpdateMutex = Mutex()
-
-    private val json: Json by instance()
-
-    private val containerStorageManager: ContainerStorageManager by on(endpoint).instance()
-
-
-    @Volatile
-    private var jobItemProducer : ReceiveChannel<ContentJobItemAndContentJob>? = null
-
 
     @ExperimentalCoroutinesApi
     private fun CoroutineScope.produceJobs() = produce<ContentJobItemAndContentJob> {
         var done = false
         try {
-            Napier.d("$logPrefix connectivity observer forever")
-
             do {
                 Napier.d("$logPrefix waiting for signal to check queue")
                 checkQueueSignalChannel.receive()
@@ -109,7 +89,6 @@ class ContentJobRunner(
                     done = txDb.contentJobItemDao.isJobDone(jobId)
                     Napier.d("$logPrefix is job Done :$done")
                     queueItemsToSend
-
                 }
 
                 jobItemsToSend.forEach {
@@ -128,16 +107,9 @@ class ContentJobRunner(
         id: Int,
         channel: ReceiveChannel<ContentJobItemAndContentJob>
     ) = launch {
-        val tmpDir = createTemporaryDir("job-$id")
         Napier.d("$logPrefix created tempDir job-$id")
 
         for(item in channel) {
-            val itemUri = item.contentJobItem?.sourceUri?.let { DoorUri.parse(it) } ?: continue
-            val processParams = item.contentJob?.params?.let {
-                json.decodeStringMapFromString(it)
-            }?.toMutableMap() ?: mutableMapOf()
-            val processContext = ContentJobProcessContext(itemUri, tmpDir, processParams,
-                this@ContentJobRunner, di)
             Napier.d("$logPrefix : " +
                 "Proessor #$id processing job #${item.contentJobItem?.cjiUid} " +
                 "attempt #${item.contentJobItem?.cjiAttemptCount}")
@@ -157,14 +129,16 @@ class ContentJobRunner(
 
                 var metadataResult: MetadataResult? = null
                 if(item.contentJobItem?.cjiContentEntryUid == 0L) {
-                    metadataResult = contentPluginManager.extractMetadata(sourceUri,
-                        processContext)
+                    metadataResult = contentPluginManager.extractMetadata(sourceUri)
                     withContentJobItemTransaction { txDb ->
                         val contentEntryUid = txDb.contentEntryDao.insertAsync(
                             metadataResult.entry)
                         item.contentJobItem?.cjiContentEntryUid = contentEntryUid
                         txDb.contentJobItemDao.updateContentEntryUid(
-                            item.contentJobItem?.cjiUid ?: 0, contentEntryUid)
+                            cjiUid = item.contentJobItem?.cjiUid ?: 0,
+                            contentEntryUid = contentEntryUid,
+                            makeContentInactiveOnCancel = true,
+                        )
 
                         if(item.contentJobItem?.cjiParentContentEntryUid != 0L){
                             txDb.contentEntryParentChildJoinDao.insertAsync(
@@ -179,8 +153,7 @@ class ContentJobRunner(
                 }
 
                 val pluginId = if(item.contentJobItem?.cjiPluginId == 0) {
-                    metadataResult?.pluginId ?: contentPluginManager.extractMetadata(sourceUri,
-                        processContext).pluginId
+                    metadataResult?.pluginId ?: contentPluginManager.extractMetadata(sourceUri).pluginId
                 }else {
                     item.contentJobItem?.cjiPluginId ?: 0
                 }
@@ -189,7 +162,11 @@ class ContentJobRunner(
 
                 val jobResult = async {
                     try {
-                        plugin.processJob(item, processContext, this@ContentJobRunner).also {
+                        plugin.processJob(
+                            jobItem = item,
+                            progressListener = this@ContentImportJobRunner,
+                            transactionRunner = this@ContentImportJobRunner
+                        ).also {
                             Napier.i("ContentJobRunner: completed process")
                         }
                     }catch(e: Exception) {
@@ -209,7 +186,10 @@ class ContentJobRunner(
                         systemTimeInMillis())
                 }
 
-                Napier.d("$logPrefix Processor #$id completed job #${item.contentJobItem?.cjiUid} status=${processResult.status}")
+                Napier.d {
+                    "$logPrefix Processor #$id completed job #${item.contentJobItem?.cjiUid} " +
+                    "status=${JobStatus.statusToString(processResult.status)}"
+                }
             }catch(e: Exception) {
                 //something went wrong
                 processException = e
@@ -219,10 +199,12 @@ class ContentJobRunner(
                 withContext(NonCancellable) {
                     val finalStatus: Int = when {
                         processException == null && processResult != null -> {
-                            // it can be queued due to connectivity required to continue the job, don't count that as an attempt
+                            // if status can is queued (e.g. due to needing to wait for connectivity
+                            // to continue the job), don't count that as an attempt
                             if(processResult.status != JobStatus.QUEUED){
                                 item.contentJobItem?.cjiAttemptCount = (item.contentJobItem?.cjiAttemptCount ?: 0) + 1
                             }
+
                             processResult.status
                         }
                         processException is FatalContentJobException -> {
@@ -246,15 +228,13 @@ class ContentJobRunner(
                             item.contentJobItem?.cjiUid ?: 0, systemTimeInMillis())
                     }
 
-
                     activeJobItemIds -= (item.contentJobItem?.cjiUid ?: 0)
-                    try{
-                        tmpDir.emptyRecursively()
-                    }catch (e: Exception){
-                        e.printStackTrace()
+                    Napier.d {
+                        "$logPrefix Processor #$id sending check queue signal after " +
+                        "finishing with #${item.contentJobItem?.cjiUid} " +
+                        "status=${JobStatus.statusToString(finalStatus)} " +
+                        "attempts=${item.contentJobItem?.cjiAttemptCount}"
                     }
-                    Napier.d("$logPrefix Processor #$id sending check queue signal after " +
-                        "finishing with #${item.contentJobItem?.cjiUid}")
                 }
 
                 if(processException is CancellationException &&
@@ -290,20 +270,18 @@ class ContentJobRunner(
 
 
     //This can be called using Worker (Android) or Quartz (JVM)
+    @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun runJob(): ContentJobResult {
         withContext(Dispatchers.Default) {
-            val producerVal = produceJobs().also {
-                jobItemProducer = it
-            }
+            val producerVal = produceJobs()
 
-            val jobList = mutableListOf<Job>()
             try {
                 /* this is used so we can catch the exception for launchProcessor as seen in key point 5 in below article.
                    https://www.lukaslechner.com/why-exception-handling-with-kotlin-coroutines-is-so-hard-and-how-to-successfully-master-it*/
                 coroutineScope {
                     repeat(numProcessors) {
                         Napier.d("$logPrefix launch processor $it")
-                        jobList += launchProcessor(it, producerVal)
+                        launchProcessor(it, producerVal)
                     }
                     Napier.d("$logPrefix run Job, send queue signal")
                     checkQueueSignalChannel.send(true)
@@ -311,28 +289,10 @@ class ContentJobRunner(
 
             }catch(e: CancellationException) {
                 withContext(NonCancellable) {
-                    producerVal.cancel()
-                    coroutineContext.cancelChildren()
-                    jobList.forEach {
-                        it.cancelAndJoin()
-                    }
-
                     withContentJobItemTransaction { txDb ->
                         txDb.contentEntryDao.updateContentEntryActiveByContentJobUid(jobId,
                             true, systemTimeInMillis())
-
-                        //Delete all containers
-                        val jobDestDir = txDb.contentJobDao.findByUidAsync(jobId)?.toUri
-                            ?: containerStorageManager.storageList.first().dirUri
-
-                        txDb.contentJobItemDao.findAllContainersByJobUid(jobId).forEach { containerUid ->
-                            val dirUriToDelete = DoorUri.parse(UMFileUtil.joinPaths(jobDestDir,
-                                containerUid.toString()))
-                            dirUriToDelete.deleteRecursively()
-                        }
                         txDb.contentJobItemDao.updateAllStatusesByJobUid(jobId, JobStatus.CANCELED)
-                        txDb.containerEntryDao.deleteContainerEntriesCreatedByJobs(jobId)
-                        txDb.containerEntryFileDao.deleteZombieContainerEntryFiles(db.dbType())
                     }
 
                     throw e

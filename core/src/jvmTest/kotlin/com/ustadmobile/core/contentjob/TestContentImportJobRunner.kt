@@ -2,11 +2,9 @@ package com.ustadmobile.core.contentjob
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.ContainerStorageManager
-import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.util.*
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
@@ -21,17 +19,26 @@ import org.kodein.di.*
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
-import java.io.File
 import java.io.IOException
 import kotlin.test.Test
 import com.ustadmobile.core.util.ext.encodeStringMapToString
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
+import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.util.test.initNapierLog
-import com.ustadmobile.door.ext.toFile
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import org.junit.BeforeClass
+import org.mockito.kotlin.eq
 import kotlin.jvm.Volatile
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
-class TestContentJobRunner : AbstractMainDispatcherTest() {
+class TestContentImportJobRunner : AbstractMainDispatcherTest() {
 
     @JvmField
     @Rule
@@ -46,13 +53,10 @@ class TestContentJobRunner : AbstractMainDispatcherTest() {
     var numTimesToFail = 0
 
     var processJobCalled = false
+
     var jobCompleted = false
-    var connectivityCancelledExceptionCalled = false
-    var cancellationExceptionCalled = false
 
     private lateinit var json: Json
-
-    private var jobContentParmas: Map<String, String>? = null
 
     @JvmField
     @Rule
@@ -64,8 +68,9 @@ class TestContentJobRunner : AbstractMainDispatcherTest() {
 
     inner class DummyPlugin(
         override val di: DI,
-        endpoint: Endpoint
-    ) : ContentPlugin{
+        endpoint: Endpoint,
+        private val delayTime: Long = dummyPluginDelayTime,
+    ) : ContentImportPlugin{
         override val pluginId: Int
             get() = TEST_PLUGIN_ID
 
@@ -74,13 +79,21 @@ class TestContentJobRunner : AbstractMainDispatcherTest() {
         override val supportedMimeTypes: List<String>
             get() = listOf("text/plain")
 
-        private val db: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_DB)
+        private val _processRequestedJobItems = MutableStateFlow<List<ContentJobItemAndContentJob>>(
+            emptyList()
+        )
+        val processRequestedJobItems: Flow<List<ContentJobItemAndContentJob>> = _processRequestedJobItems.asStateFlow()
 
-        private val containerStorageManager: ContainerStorageManager by on(endpoint).instance()
+        val processCompletedJobItems = concurrentSafeListOf<ContentJobItemAndContentJob>()
+
+        private val _cancelledJobItems = MutableStateFlow<List<Pair<ContentJobItemAndContentJob, CancellationException>>>(
+            emptyList()
+        )
+
+        val canceledJobItems: Flow<List<Pair<ContentJobItemAndContentJob, CancellationException>>> = _cancelledJobItems.asStateFlow()
 
         override suspend fun extractMetadata(
             uri: DoorUri,
-            process: ContentJobProcessContext
         ): MetadataResult {
             return MetadataResult(ContentEntryWithLanguage().apply {
                 title = uri.toString().substringAfterLast("/")
@@ -90,36 +103,30 @@ class TestContentJobRunner : AbstractMainDispatcherTest() {
 
         override suspend fun processJob(
             jobItem: ContentJobItemAndContentJob,
-            process: ContentJobProcessContext,
-            progress: ContentJobProgressListener
+            progressListener: ContentJobProgressListener,
+            transactionRunner: ContentJobItemTransactionRunner,
         ): ProcessResult {
-            jobContentParmas = process.params
             return withContext(Dispatchers.Default) {
                 processJobCalled = true
+                _processRequestedJobItems.update { prev -> prev + listOf(jobItem) }
+
                 println("processJobCalled")
                 try {
                     println("start delay")
-                    db.addEntriesToContainerFromZipResource(
-                            jobItem.contentJobItem!!.cjiContainerUid, this::class.java,
-                            "/com/ustadmobile/core/contentformats/epub/test.epub",
-                            ContainerAddOptions(
-                                DoorUri.parse(containerStorageManager.storageList.first().dirUri)))
 
-                    delay(dummyPluginDelayTime)
+                    delay(delayTime)
                 } catch (c: CancellationException) {
                     println("TestContentJobRunner: caught cancellation")
-                    withContext(NonCancellable) {
-                        if (c is ConnectivityCancellationException) {
-                            connectivityCancelledExceptionCalled = true
-                        } else {
-                            cancellationExceptionCalled = true
-                        }
+                    _cancelledJobItems.update { prev ->
+                        prev + listOf(jobItem to c)
                     }
+
                     throw c
                 }
 
                 println("job completed")
                 jobCompleted = true
+                processCompletedJobItems += jobItem
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)
             }
@@ -129,9 +136,6 @@ class TestContentJobRunner : AbstractMainDispatcherTest() {
     @Before
     fun setup() {
         processJobCalled = false
-        connectivityCancelledExceptionCalled = false
-        cancellationExceptionCalled = false
-        jobContentParmas = null
         jobCompleted = false
         dummyPluginDelayTime = 100L
         di = DI {
@@ -153,9 +157,9 @@ class TestContentJobRunner : AbstractMainDispatcherTest() {
                         DummyPlugin(di, context)
                     }
 
-                    onBlocking { extractMetadata(any(), any()) }.thenAnswer {
+                    onBlocking { extractMetadata(any()) }.thenAnswer {
                         runBlocking { instance<DummyPlugin>().extractMetadata(
-                            it.getArgument(0) as DoorUri, mock {})
+                            it.getArgument(0) as DoorUri)
                         }
                     }
                 }
@@ -186,7 +190,7 @@ class TestContentJobRunner : AbstractMainDispatcherTest() {
                 params = json.encodeStringMapToString(mapOf("compress" to "true"))))
         }
 
-        val runner = ContentJobRunner(2, endpoint, di, 5)
+        val runner = ContentImportJobRunner(2, endpoint, di, 5)
         runBlocking {
             runner.runJob()
         }
@@ -204,43 +208,44 @@ class TestContentJobRunner : AbstractMainDispatcherTest() {
                 db.contentEntryDao.findByUid(it.cjiContentEntryUid))
             Assert.assertEquals("jobStatus complete", JobStatus.COMPLETE, it.cjiStatus)
         }
-
-        Assert.assertEquals("Content job params were provided as inserted on db",
-            mapOf("compress" to "true"), jobContentParmas)
     }
 
-    @Test(timeout = 15000)
+    //TODO - This test tests **NOTHING**
+    //@Test(timeout = 15000)
     fun givenJobCreated_whenJobItemFails_thenShouldRetry() {
         val pluginManager: ContentPluginManager by di.onActiveAccount().instance()
         numTimesToFail = 1
-        val mockPlugin = mock<ContentPlugin> {
+        val mockPlugin = mock<ContentImportPlugin> {
             onBlocking { processJob(any(), any(), any()) }.thenAnswer {
                 throw RuntimeException("Fail!")
             }
         }
+
         pluginManager.stub {
             on { getPluginById(any()) }.thenReturn(mockPlugin)
             on { requirePluginById(any()) }.thenReturn(mockPlugin)
         }
-
-
     }
+
+    //HERE: when job item throws fatal exception - then will not retry
 
     @Test(timeout = 15000)
     fun givenJobCreated_whenJobItemFailsAndExceedsAllowableAttempts_thenShouldFail() {
         runBlocking {
             val maxAttempts = 3
             db.contentJobDao.insertAsync(ContentJob(cjUid = 2))
-            val jobItems = listOf(ContentJobItem().apply {
-                cjiJobUid = 2
-                cjiConnectivityNeeded = false
-                cjiStatus = JobStatus.QUEUED
-                cjiPluginId = TEST_PLUGIN_ID
-                sourceUri = "dummy:///test_0"
-            })
+            val jobItems = listOf(
+                ContentJobItem().apply {
+                    cjiJobUid = 2
+                    cjiConnectivityNeeded = false
+                    cjiStatus = JobStatus.QUEUED
+                    cjiPluginId = TEST_PLUGIN_ID
+                    sourceUri = "dummy:///test_0"
+                }
+            )
             db.contentJobItemDao.insertJobItems(jobItems)
             val pluginManager: ContentPluginManager by di.onActiveAccount().instance()
-            val mockPlugin = mock<ContentPlugin> {
+            val mockPlugin = mock<ContentImportPlugin> {
                 onBlocking { processJob(any(), any(), any()) }.thenAnswer {
                     throw IOException("Fail!")
                 }
@@ -251,13 +256,14 @@ class TestContentJobRunner : AbstractMainDispatcherTest() {
                 on { requirePluginById(any()) }.thenReturn(mockPlugin)
             }
 
-            val runner = ContentJobRunner(2, endpoint, di, maxItemAttempts = maxAttempts)
+            val runner = ContentImportJobRunner(2, endpoint, di, maxItemAttempts = maxAttempts)
             runner.runJob()
 
 
             val allJobItems = runBlocking { db.contentJobItemDao.findAll() }
             allJobItems.forEach {
                 Assert.assertEquals("job attempted match count", maxAttempts, it.cjiAttemptCount)
+                Assert.assertEquals("job failed", JobStatus.FAILED, it.cjiStatus)
                 Assert.assertEquals("job failed", JobStatus.FAILED, it.cjiRecursiveStatus)
             }
         }
@@ -280,12 +286,12 @@ class TestContentJobRunner : AbstractMainDispatcherTest() {
             db.contentJobItemDao.insertJobItems(jobItems)
             val pluginManager: ContentPluginManager by di.onActiveAccount().instance()
             pluginManager.stub {
-                onBlocking { extractMetadata(any(), any())}.thenAnswer {
+                onBlocking { extractMetadata(any())}.thenAnswer {
                     throw IllegalStateException("unexpected error while extracting")
                 }
             }
 
-            val runner = ContentJobRunner(2, endpoint, di, maxItemAttempts = maxAttempts)
+            val runner = ContentImportJobRunner(2, endpoint, di, maxItemAttempts = maxAttempts)
             runner.runJob()
 
 
@@ -297,116 +303,77 @@ class TestContentJobRunner : AbstractMainDispatcherTest() {
         }
     }
 
-    @Test(timeout = 15000)
-    fun givenJobCreated_whenJobItemNotSupportedWhenExtractMetadata_thenJobItemCompleted() {
-        runBlocking {
-            val maxAttempts = 3
-            db.contentJobDao.insertAsync(ContentJob(cjUid = 2))
-            val jobItems = (0 .. 2).map {
-                ContentJobItem().apply {
-                    cjiJobUid = 2
-                    cjiConnectivityNeeded = false
-                    cjiStatus = JobStatus.QUEUED
-                    sourceUri = "dummy:///test_$it"
-                }
-            }
-            db.contentJobItemDao.insertJobItems(jobItems)
-            val pluginManager: ContentPluginManager by di.onActiveAccount().instance()
-            pluginManager.stub {
-                onBlocking { extractMetadata(any(), any())}.thenAnswer {
-                    throw ContentTypeNotSupportedException()
-                }
-            }
-
-            val runner = ContentJobRunner(2, endpoint, di, maxItemAttempts = maxAttempts)
-            runner.runJob()
-
-
-            val allJobItems = runBlocking { db.contentJobItemDao.findAll() }
-            allJobItems.forEach {
-                Assert.assertEquals("job completed", JobStatus.COMPLETE, it.cjiRecursiveStatus)
-            }
-        }
-    }
-
-    @Test
-    fun givenJobCreated_whenJobCancelled_thenContentEntryShouldBeInvalidAndContainerDeleted(){
+    @Test(timeout = 10000)
+    fun givenJobCreated_whenJobCancelled_thenContentEntryShouldBeMadeInactive(){
         val contentJobId = 2L
         runBlocking {
-            ContentEntry().apply {
-                contentEntryUid = 3
-                db.contentEntryDao.insert(this)
-            }
-            Container().apply {
-                containerUid = 3
-                containerContentEntryUid = 3
-                db.containerDao.insert(this)
-            }
             db.contentJobDao.insertAsync(ContentJob(cjUid = contentJobId))
-            db.contentJobItemDao.insertJobItem(ContentJobItem().apply {
-                this.cjiJobUid = 2
-                cjiContentEntryUid = 3
-                cjiContainerUid = 3
+            val contentJobItemUid = db.contentJobItemDao.insertJobItem(ContentJobItem().apply {
+                cjiJobUid = contentJobId
                 cjiConnectivityNeeded = false
                 cjiStatus = JobStatus.QUEUED
                 cjiPluginId = TEST_PLUGIN_ID
-                cjiContentDeletedOnCancellation = true
                 sourceUri = "dummy:///test"
             })
 
-            val runner = ContentJobRunner(2, endpoint, di)
+            val mockPluginId = 42
+
+            val dummyPlugin = DummyPlugin(di, endpoint, 100000)
+
+            val mockPluginManager = mock<ContentPluginManager> {
+                on { getPluginById(eq(mockPluginId)) }.thenReturn(dummyPlugin)
+
+                on { requirePluginById(eq(mockPluginId)) }.thenAnswer {
+                    dummyPlugin
+                }
+
+                onBlocking { extractMetadata(any()) }.thenAnswer {
+                    runBlocking {
+                        dummyPlugin.extractMetadata(it.getArgument(0))
+                    }
+                }
+            }
+
+            val jobRunnerDi = DI {
+                extend(di)
+                bind<ContentPluginManager>(overrides = true) with scoped(ustadTestRule.endpointScope).singleton {
+                    mockPluginManager
+                }
+            }
+
+            val runner = ContentImportJobRunner(2, endpoint, jobRunnerDi)
 
             val result = launch {
                 runner.runJob()
             }
 
-
-            do{
-                delay(10)
-            }while(!processJobCalled)
-
+            //Wait for the Plugin's processJob to be called
+            val processedItem = dummyPlugin.processRequestedJobItems
+                .filter { it.isNotEmpty() }.first().first()
 
             result.cancelAndJoin()
             println("job cancelled")
 
+            val canceledItem = dummyPlugin
+                .canceledJobItems.first().first { it.first.contentJobItem?.cjiUid == contentJobItemUid }
+            assertEquals(contentJobItemUid, canceledItem.first.contentJobItem?.cjiUid,
+                message = "Content plugin received cancellation exception")
 
-            Assert.assertTrue("cancellation exception called from plugin",
-                cancellationExceptionCalled)
-            Assert.assertFalse("job not completed", jobCompleted)
             val contentJobItemFromDb = db.contentJobItemDao.findRootJobItemByJobId(contentJobId)
-
-            Assert.assertEquals("Root ContentJobItem status is canceled", JobStatus.CANCELED,
-                contentJobItemFromDb?.cjiStatus ?: -1)
-
-            Assert.assertEquals("Root ContentJobItem recursive status is canceled",
-                JobStatus.CANCELED,contentJobItemFromDb?.cjiRecursiveStatus ?: -1)
-
-            val containerStorageManager: ContainerStorageManager = di.onActiveAccountDirect()
-                .instance()
-            val containerFolder = DoorUri.parse(containerStorageManager.storageList.first().dirUri)
-                .toFile()
-            val allJobItems = runBlocking { db.contentJobItemDao.findAll() }
-            allJobItems.forEach {
-                Assert.assertEquals("job is cancelled", JobStatus.CANCELED,
-                    it.cjiStatus)
-                val entry = db.contentEntryDao.findByUid(it.cjiContentEntryUid)
-                Assert.assertEquals("entry is inActive", true, entry!!.ceInactive)
-                val listOfEntryAndFile = db.containerEntryDao.findByContainer(it.cjiContainerUid)
-                Assert.assertEquals("no files and containerEntry remain", 0,
-                    listOfEntryAndFile.size)
-                Assert.assertTrue("container folder doesnt exist", !File(containerFolder,
-                    "${it.cjiContainerUid}").exists())
-                Assert.assertEquals("ContentJobItem recursive status is canceled",
-                    JobStatus.CANCELED, it.cjiRecursiveStatus)
-                Assert.assertEquals("ContentJobItem status is canceled",
-                    JobStatus.CANCELED, it.cjiStatus)
-            }
-
+            assertEquals(JobStatus.CANCELED, contentJobItemFromDb?.cjiStatus ?: -1,
+                message = "Root ContentJobItem status is canceled")
+            assertEquals(JobStatus.CANCELED, contentJobItemFromDb?.cjiRecursiveStatus ?: -1,
+                message = "Root ContentJobItem recursive status is canceled")
+            val contentEntryFromDb = db.contentEntryDao.findByUid(
+                contentJobItemFromDb?.cjiContentEntryUid ?: 0)
+            assertNotNull(contentEntryFromDb, "ContentEntry was created (e.g. after extracMetadata called)")
+            assertTrue(contentEntryFromDb.ceInactive,
+                "ContentEntry created by job was set as inactive when job cancelled")
         }
-
     }
 
     companion object {
+
         val TEST_PLUGIN_ID = 42
 
         @BeforeClass

@@ -16,7 +16,7 @@ class ContentJobRunnerJob: Job {
         val endpoint = Endpoint(jobDataMap.getString(ContentJobManager.KEY_ENDPOINT))
 
         runBlocking {
-            ContentJobRunner(jobId, endpoint, di).runJob()
+            ContentImportJobRunner(jobId, endpoint, di).runJob()
         }
 
     }

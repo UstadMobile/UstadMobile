@@ -4,6 +4,14 @@ import com.ustadmobile.libcache.headers.HttpHeader
 import com.ustadmobile.libcache.headers.HttpHeadersImpl
 
 fun requestBuilder(
+    url: String,
+    block: RequestBuilder.() -> Unit = { }
+) : HttpRequest = requestBuilder {
+    this.url = url
+    block()
+}
+
+fun requestBuilder(
     block: RequestBuilder.() -> Unit
 ) : HttpRequest {
     return RequestBuilder().also(block).let {

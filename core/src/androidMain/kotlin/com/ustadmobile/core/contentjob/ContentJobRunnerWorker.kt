@@ -44,7 +44,7 @@ class ContentJobRunnerWorker(
 
     private val notificationManager = getSystemService(applicationContext, NotificationManager::class.java) as NotificationManager
 
-    private fun ContentJobRunner.ContentJobResult.toWorkerResult(): Result {
+    private fun ContentImportJobRunner.ContentJobResult.toWorkerResult(): Result {
         return when(this.status) {
             JobStatus.FAILED -> Result.failure()
             JobStatus.COMPLETE -> Result.success()
@@ -90,7 +90,7 @@ class ContentJobRunnerWorker(
 
             setForeground(ForegroundInfo(jobId.toInt(), notification.build()))
 
-            return ContentJobRunner(jobId, endpoint, di).runJob().toWorkerResult()
+            return ContentImportJobRunner(jobId, endpoint, di).runJob().toWorkerResult()
         } catch(c: CancellationException) {
             return Result.failure()
         }finally {

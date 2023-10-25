@@ -127,18 +127,10 @@ class UstadCacheImpl(
         return emptyList()
     }
 
-    /**
-     * Store all entries from a given Zip as entries in the cache. This is useful to process zipped
-     * content e.g. epubs, xAPI/Scorm files, etc.
-     *
-     * @param zipSource Source for Zip data
-     * @param urlPrefix should end with /
-     */
-
-    fun storeZip(
+    override fun storeZip(
         zipSource: Source,
         urlPrefix: String,
-        retain: Boolean = true,
+        retain: Boolean,
     ) {
         fileSystem.takeIf { !it.exists(tmpDir) }?.createDirectories(tmpDir)
         val unzippedEntries = zipSource.unzipTo(tmpDir)

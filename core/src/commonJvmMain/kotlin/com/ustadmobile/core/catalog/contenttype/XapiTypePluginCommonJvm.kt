@@ -4,28 +4,22 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.tincan.TinCanXML
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.contentjob.*
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.io.ContainerBuilder
 import com.ustadmobile.core.io.ext.*
+import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DI
-import io.ktor.client.*
 import org.xmlpull.v1.XmlPullParserFactory
 import kotlinx.coroutines.*
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
+import kotlinx.io.asInputStream
 
 class XapiTypePluginCommonJvm(
-    context: Any,
     endpoint: Endpoint,
     override val di: DI,
-    uploader: ContentPluginUploader = DefaultContentPluginUploader(di)
-) : ContentImportContentPlugin(endpoint, context, uploader) {
+    uriHelper: UriHelper,
+    uploader: ContentPluginUploader = DefaultContentPluginUploader(di),
+) : AbstractContentImportPlugin(endpoint, uploader, uriHelper) {
 
     val viewName: String
         get() = XapiPackageContentView.VIEW_NAME
@@ -43,19 +37,18 @@ class XapiTypePluginCommonJvm(
     private val MAX_SIZE_LIMIT: Long = 100 * 1024 * 1024
 
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
-        val size = uri.getSize(context, di)
+    override suspend fun extractMetadata(uri: DoorUri): MetadataResult? {
+        val size = uriHelper.getSize(uri)
         if(size > MAX_SIZE_LIMIT){
             return null
         }
-        val mimeType = uri.guessMimeType(context, di)
+
+        val mimeType = uriHelper.getMimeType(uri)
         if (mimeType != null && !supportedMimeTypes.contains(mimeType)) {
             return null
         }
         return withContext(Dispatchers.Default) {
-            val localUri = process.getLocalOrCachedUri()
-            val inputStream = localUri.openInputStream(context)
-            return@withContext ZipInputStream(inputStream).use {
+            return@withContext ZipInputStream(uriHelper.openSource(uri).asInputStream()).use {
                 it.skipToEntry { it.name == TINCAN_FILENAME } ?: return@withContext null
 
                 val xppFactory = XmlPullParserFactory.newInstance()
@@ -68,7 +61,9 @@ class XapiTypePluginCommonJvm(
                     contentFlags = ContentEntry.FLAG_IMPORTED
                     licenseType = ContentEntry.LICENSE_TYPE_OTHER
                     title = if (activity.name.isNullOrEmpty())
-                        uri.getFileName(context) else activity.name
+                        uriHelper.getFileName(uri)
+                    else
+                        activity.name
                     contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
                     description = activity.desc
                     leaf = true
@@ -80,18 +75,17 @@ class XapiTypePluginCommonJvm(
         }
     }
 
-    override suspend fun makeContainer(
+    override suspend fun addToCache(
         jobItem: ContentJobItemAndContentJob,
-        process: ContentJobProcessContext,
-        progressListener: ContentJobProgressListener,
-        containerStorageUri: DoorUri,
-    ) : Container {
-        val repo: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
+        progressListener: ContentJobProgressListener
+    ): ContentEntryVersion {
+        TODO()
+        /*val repo: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
 
         return repo.containerBuilder(jobItem.contentJobItem?.cjiContentEntryUid ?: 0,
                 supportedMimeTypes.first(), containerStorageUri)
             .addZip(process.getLocalOrCachedUri(), context)
-            .build()
+            .build()*/
     }
 
     companion object {

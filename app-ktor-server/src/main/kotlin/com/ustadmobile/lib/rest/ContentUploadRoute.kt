@@ -48,13 +48,6 @@ fun Route.ContentUploadRoute() {
 
                 val metadataResult = pluginManager.extractMetadata(
                     uri = completedUpload.file.toDoorUri(),
-                    processContext = ContentJobProcessContext(
-                        srcUri = completedUpload.file.toDoorUri(),
-                        tempDirUri = extractTmpDir.toDoorUri(),
-                        params = mutableMapOf(),
-                        transactionRunner = null,
-                        di = di
-                    )
                 )
 
                 completedUpload.call.respond(HttpStatusCode.OK, metadataResult)

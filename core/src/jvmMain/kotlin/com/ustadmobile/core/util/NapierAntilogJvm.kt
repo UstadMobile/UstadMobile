@@ -1,5 +1,6 @@
 package com.ustadmobile.core.util
 
+import com.ustadmobile.door.ext.DoorTag
 import io.github.aakira.napier.Antilog
 import io.github.aakira.napier.LogLevel
 import java.io.PrintWriter
@@ -31,6 +32,11 @@ class NapierAntilogJvm(val logLevel: Level): Antilog() {
         LogLevel.ERROR to Level.SEVERE,
         LogLevel.ASSERT to Level.SEVERE,
     )
+
+    override fun isEnable(priority: LogLevel, tag: String?): Boolean {
+        return priority.ordinal >= LogLevel.DEBUG.ordinal
+                || tag != DoorTag.LOG_TAG
+    }
 
     internal fun createStackElementTag(className: String): String {
         var tag = className

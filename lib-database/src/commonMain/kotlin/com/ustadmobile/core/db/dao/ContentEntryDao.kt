@@ -450,6 +450,9 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract fun findAllLive(): Flow<List<ContentEntryWithLanguage>>
 
 
+    /**
+     * Set any ContentEntry that was created by a given ContentJob to be inactive.
+     */
     @Query("""
         UPDATE ContentEntry
            SET ceInactive = :inactive,

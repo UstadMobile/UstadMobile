@@ -53,6 +53,7 @@ import com.ustadmobile.lib.db.entities.*
     Message::class,
     MessageRead::class,
     StudentResult::class,
+    ContentEntryVersion::class,
 
     //Door entities
     OutgoingReplication::class,
@@ -62,7 +63,7 @@ import com.ustadmobile.lib.db.entities.*
 
 
 
-], version = 124)
+], version = 125)
 /*
  Replicate entities (e.g. trackers) to drop:
      ClazzLogReplicate

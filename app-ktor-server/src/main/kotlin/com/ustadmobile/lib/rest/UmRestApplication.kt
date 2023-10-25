@@ -35,7 +35,6 @@ import java.io.File
 import java.nio.file.Files
 import javax.naming.InitialContext
 import com.ustadmobile.door.util.NodeIdAuthCache
-import com.ustadmobile.core.contentjob.DummyContentPluginUploader
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.di.DomainDiModuleJvm
 import com.ustadmobile.core.impl.locale.StringProvider
@@ -213,35 +212,8 @@ fun Application.umRestApplication(
 
         bind<Gson>() with singleton { Gson() }
 
-        bind<EpubTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            EpubTypePluginCommonJvm(Any(), context, di, DummyContentPluginUploader())
-        }
-
-        bind<XapiTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            XapiTypePluginCommonJvm(Any(), context, di, DummyContentPluginUploader())
-        }
-
-        bind<H5PTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            H5PTypePluginCommonJvm(Any(), context, di, DummyContentPluginUploader())
-        }
-        bind<VideoTypePluginJvm>() with scoped(EndpointScope.Default).singleton{
-            VideoTypePluginJvm(Any(), context, di, DummyContentPluginUploader())
-        }
-        bind<PDFTypePlugin>() with scoped(EndpointScope.Default).singleton{
-            PDFTypePluginJvm(Any(), context, di, DummyContentPluginUploader())
-        }
-        bind<ApacheIndexerPlugin>() with scoped(EndpointScope.Default).singleton{
-            ApacheIndexerPlugin(Any(), context, di)
-        }
-
         bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
-            ContentPluginManager(listOf(
-                    di.on(context).direct.instance<EpubTypePluginCommonJvm>(),
-                    di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
-                    di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
-                    di.on(context).direct.instance<VideoTypePluginJvm>(),
-                    di.on(context).direct.instance<PDFTypePlugin>(),
-                    di.on(context).direct.instance<ApacheIndexerPlugin>()))
+            ContentPluginManager(listOf())
         }
 
         bind<Scheduler>() with singleton {

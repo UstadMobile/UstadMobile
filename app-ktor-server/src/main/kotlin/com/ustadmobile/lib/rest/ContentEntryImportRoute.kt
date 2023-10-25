@@ -3,11 +3,9 @@ package com.ustadmobile.lib.rest
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.domain.contententry.import.ImportContentUseCase
 import com.ustadmobile.core.domain.contententry.import.ImportRequest
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri
 import io.ktor.server.application.call
@@ -35,24 +33,22 @@ fun Route.ContentEntryImportRoute() {
         val di = closestDI()
         val pluginManager: ContentPluginManager by di.on(call).instance()
 
-        ContentJobProcessContext(DoorUri.parse(url),
-                createTemporaryDir("content"), mutableMapOf(), null, di).use { processContext ->
-            val metadata: MetadataResult?
-            try{
-                metadata = withTimeout(IMPORT_LINK_TIMEOUT_DEFAULT) {
-                    pluginManager.extractMetadata(DoorUri.parse(url), processContext)
-                }.copy(
-                    displaySourceUrl = url,
-                )
-                if (metadata == null) {
-                    call.respond(HttpStatusCode.BadRequest, "Unsupported")
-                } else {
-                    call.respond(metadata)
-                }
-            }catch (e: Exception){
-                Napier.e("Exception extracting metadata to validateLink: $url", e)
+        val metadata: MetadataResult?
+        try{
+            metadata = withTimeout(IMPORT_LINK_TIMEOUT_DEFAULT) {
+                pluginManager.extractMetadata(DoorUri.parse(url))
+            }.copy(
+                displaySourceUrl = url,
+            )
+            if (metadata == null) {
+                call.respond(HttpStatusCode.BadRequest, "Unsupported")
+            } else {
+                call.respond(metadata)
             }
-       }
+        }catch (e: Exception){
+            Napier.e("Exception extracting metadata to validateLink: $url", e)
+        }
+
     }
 
     /**

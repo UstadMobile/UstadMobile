@@ -50,7 +50,7 @@ data class ContentJobItem(
 
     var cjiJobUid: Long = 0,
 
-        /**
+    /**
      * Where data is being taken from, this could be
      *  - ContentEntry (leaf)
      *     e.g. https://server.com/endpoint/umapp/index.html#ContentEntryDetail?entityUid=1234
@@ -65,7 +65,7 @@ data class ContentJobItem(
 
     var cjiIsLeaf: Boolean = true,
 
-        /**
+    /**
      * Where the ContentEntryUid is set to 0, this indicates that the job must extract metadata
      * from the sourceUri and generate a new ContentEntry.
      */
@@ -78,40 +78,40 @@ data class ContentJobItem(
      */
     var cjiParentContentEntryUid: Long = 0,
 
-        /**
-     * The Container UID might be specified
+    /**
+     * The ContentEntryVersion (once known).
      */
-    var cjiContainerUid: Long = 0,
+    var cjiContentEntryVersion: Long = 0,
 
-        /**
+    /**
      * Represents the progress on this item (itself) not including any child items
      */
     var cjiItemProgress: Long = 0,
 
-        /**
+    /**
      * Represents the total to process on this item (itself) not including any child items
      */
     var cjiItemTotal: Long = 0,
 
-        /**
+    /**
      * Represents the progress of this item and its child items (inclusive). This should not be set
      * directly, it is managed by triggers and should NOT be updated directly.
      */
     var cjiRecursiveProgress: Long = 0,
 
-        /**
+    /**
      * Represents the total size of the job and its child items (inclusive). This should not be set
      * directly, it is managed by triggers and should NOT be updated directly.
      */
     var cjiRecursiveTotal: Long = 0,
 
-        /**
+    /**
      * Represents the status to the process of this job item and not including any child items.
      * Status set to default JobStatus.QUEUED
      */
     var cjiStatus: Int = 4,
 
-        /**
+    /**
      * Represents the status of the job and its child items(inclusive). This is managed by
      * triggers and should NOT be updated directly. Status set to default JobStatus.QUEUED
      */
@@ -121,18 +121,18 @@ data class ContentJobItem(
     var cjiConnectivityNeeded: Boolean = false,
 
 
-        /**
+    /**
      * The plugin id can be set if known. If not known, the runner will guess using the source
      * uri.
      */
     var cjiPluginId: Int = 0,
 
-        /**
+    /**
      * The number of attempts made so far
      */
     var cjiAttemptCount: Int = 0,
 
-        /**
+    /**
      *  The parent of this ContentJobItem in the content job itself.
      */
     var cjiParentCjiUid: Long = 0,
@@ -140,12 +140,12 @@ data class ContentJobItem(
 
     var cjiServerJobId: Long = 0,
 
-        /**
+    /**
      * time when the job runner started the job item
      */
     var cjiStartTime: Long = 0,
 
-        /**
+    /**
      * time when the job runner finished the job item
      */
     var cjiFinishTime: Long = 0,

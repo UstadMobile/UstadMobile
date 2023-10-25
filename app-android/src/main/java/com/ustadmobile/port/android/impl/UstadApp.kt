@@ -170,45 +170,8 @@ class UstadApp : Application(), DIAware {
             EpubTypePluginCommonJvm(applicationContext, context, di)
         }
 
-        bind<XapiTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            XapiTypePluginCommonJvm(applicationContext, context, di)
-        }
-
-        bind<H5PTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            H5PTypePluginCommonJvm(applicationContext, context, di)
-        }
-
-        bind<VideoTypePluginAndroid>() with scoped(EndpointScope.Default).singleton{
-            VideoTypePluginAndroid(applicationContext, context, di)
-        }
-
-        bind<PDFTypePlugin>() with scoped(EndpointScope.Default).singleton{
-            PDFPluginAndroid(applicationContext, context, di)
-        }
-
-        bind<ContainerDownloadPlugin>() with scoped(EndpointScope.Default).singleton{
-            ContainerDownloadPlugin(applicationContext, context, di)
-        }
-
-        bind<DeleteContentEntryPlugin>() with scoped(EndpointScope.Default).singleton{
-            DeleteContentEntryPlugin(applicationContext, context, di)
-        }
-
-        bind<FolderIndexerPlugin>() with scoped(EndpointScope.Default).singleton{
-            FolderIndexerPlugin(applicationContext, context, di)
-        }
-
         bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
-            ContentPluginManager(listOf(
-                    di.on(context).direct.instance<EpubTypePluginCommonJvm>(),
-                    di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
-                    di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
-                    di.on(context).direct.instance<VideoTypePluginAndroid>(),
-                    di.on(context).direct.instance<PDFTypePlugin>(),
-                    di.on(context).direct.instance<FolderIndexerPlugin>(),
-                    di.on(context).direct.instance<ContainerDownloadPlugin>(),
-                    di.on(context).direct.instance<DeleteContentEntryPlugin>(),
-                    ContentEntryBranchDownloadPlugin(applicationContext, context, di)))
+            ContentPluginManager(listOf())
         }
 
         bind<ContentJobManager>() with singleton {

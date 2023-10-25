@@ -3,14 +3,13 @@ package com.ustadmobile.core.contentjob
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.io.ext.isRemote
 import com.ustadmobile.core.network.NetworkProgressListenerAdapter
+import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.ext.updateTotalFromContainerSize
-import com.ustadmobile.core.util.ext.updateTotalFromLocalUriIfNeeded
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -20,26 +19,22 @@ import org.kodein.di.on
  * Base class for a ContentPlugin that handle import of content from some source (e.g. URL, file, etc)
  * to create a Container, which may if needed be uploaded to the upstream server.
  */
-abstract class ContentImportContentPlugin(
+abstract class AbstractContentImportPlugin(
     protected val endpoint: Endpoint,
-    protected val context: Any,
     protected val uploader: ContentPluginUploader,
-) : ContentPlugin {
+    protected val uriHelper: UriHelper,
+) : ContentImportPlugin {
 
     /**
-     * This function should be implemented to make the container when required. This will only run
-     * once per job.
+     * This function should cache the given job into the HttpCache for storage.
      *
      * @param jobItem ContentJobItem
-     * @param process ContentJobProcessContext
      * @param progressListener
      */
-    abstract suspend fun makeContainer(
+    abstract suspend fun addToCache(
         jobItem: ContentJobItemAndContentJob,
-        process: ContentJobProcessContext,
         progressListener: ContentJobProgressListener,
-        containerStorageUri: DoorUri,
-    ): Container
+    ): ContentEntryVersion
 
     /**
      * Can be used to override whether or not content is uploaded to the upstream endpoint server.
@@ -52,37 +47,32 @@ abstract class ContentImportContentPlugin(
 
     override suspend fun processJob(
         jobItem: ContentJobItemAndContentJob,
-        process: ContentJobProcessContext,
-        progress: ContentJobProgressListener
+        progressListener: ContentJobProgressListener,
+        transactionRunner: ContentJobItemTransactionRunner,
     ): ProcessResult {
         val contentJobItem = jobItem.contentJobItem
             ?: throw IllegalArgumentException("missing job item")
         val db: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
-
-        val localUri = process.getLocalOrCachedUri()
-        contentJobItem.updateTotalFromLocalUriIfNeeded(localUri, localUri.isRemote(),
-            progress, context, di)
-
-        val containerStorageManager: ContainerStorageManager = on(endpoint).direct.instance()
-
         val sourceUri = contentJobItem.sourceUri?.let { DoorUri.parse(it) }
+            ?: throw IllegalArgumentException("ContentJobItem has no sourceUri")
 
-        val shouldUpload = shouldUpload() ?: (sourceUri?.isRemote() == false)
+        if(contentJobItem.cjiItemTotal == 0L) {
+            contentJobItem.cjiItemTotal = uriHelper.getSize(sourceUri)
+        }
+
+        val shouldUpload = shouldUpload() ?: !sourceUri.isRemote()
 
         if(!contentJobItem.cjiContainerProcessed) {
-            val containerStorageUri = DoorUri.parse(jobItem.contentJob?.toUri
-                ?: containerStorageManager.storageList.first().dirUri)
+            val contentEntryVersion = addToCache(jobItem, progressListener)
 
-            val container = makeContainer(jobItem, process, progress, containerStorageUri)
+            contentJobItem.cjiContentEntryVersion = contentEntryVersion.cevUid
 
-            contentJobItem.cjiContainerUid = container.containerUid
-
-            process.withContentJobItemTransactionMutex { txDb ->
-                txDb.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
-                    container.containerUid)
+            transactionRunner.withContentJobItemTransaction { txDb ->
+                txDb.contentJobItemDao.updateContentJobItemContentEntryVersion(contentJobItem.cjiUid,
+                    contentEntryVersion.cevUid)
                 txDb.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
                 contentJobItem.updateTotalFromContainerSize(shouldUpload, txDb,
-                    progress)
+                    progressListener)
             }
             contentJobItem.cjiContainerProcessed = true
         }
@@ -95,15 +85,13 @@ abstract class ContentImportContentPlugin(
                 return ProcessResult(JobStatus.WAITING_FOR_CONNECTION)
             }
 
-            process.withContentJobItemTransactionMutex { txDb ->
+            transactionRunner.withContentJobItemTransaction { txDb ->
                 txDb.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
             }
 
-            val progressListenerAdapter = NetworkProgressListenerAdapter(progress,
+            val progressListenerAdapter = NetworkProgressListenerAdapter(progressListener,
                 contentJobItem)
-            return ProcessResult(uploader.upload(
-                contentJobItem, progressListenerAdapter, di.direct.instance(), endpoint,
-                process))
+            TODO()
         }
 
         return ProcessResult(JobStatus.COMPLETE)
