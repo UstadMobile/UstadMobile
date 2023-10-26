@@ -4,19 +4,28 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.tincan.TinCanXML
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.contentjob.*
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.uri.UriHelper
+import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.libcache.UstadCache
 import org.kodein.di.DI
 import org.xmlpull.v1.XmlPullParserFactory
 import kotlinx.coroutines.*
 import kotlinx.io.asInputStream
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
-class XapiTypePluginCommonJvm(
+class XapiZipContentImportPlugin(
     endpoint: Endpoint,
     override val di: DI,
+    private val cache: UstadCache,
     uriHelper: UriHelper,
     uploader: ContentPluginUploader = DefaultContentPluginUploader(di),
 ) : AbstractContentImportPlugin(endpoint, uploader, uriHelper) {
@@ -34,7 +43,7 @@ class XapiTypePluginCommonJvm(
     override val pluginId: Int
         get() = PLUGIN_ID
 
-    private val MAX_SIZE_LIMIT: Long = 100 * 1024 * 1024
+    private val MAX_SIZE_LIMIT: Long = 100 * 1024 * 1024 //100MB
 
 
     override suspend fun extractMetadata(uri: DoorUri): MetadataResult? {
@@ -79,13 +88,31 @@ class XapiTypePluginCommonJvm(
         jobItem: ContentJobItemAndContentJob,
         progressListener: ContentJobProgressListener
     ): ContentEntryVersion {
-        TODO()
-        /*val repo: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
+        val jobUri = jobItem.contentJobItem.requireSourceAsDoorUri()
+        val db: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
 
-        return repo.containerBuilder(jobItem.contentJobItem?.cjiContentEntryUid ?: 0,
-                supportedMimeTypes.first(), containerStorageUri)
-            .addZip(process.getLocalOrCachedUri(), context)
-            .build()*/
+        val tinCanEntry = ZipInputStream(uriHelper.openSource(jobUri).asInputStream()).use {
+            it.skipToEntry { it.name == TINCAN_FILENAME }
+        } ?: throw FatalContentJobException("XapiImportPlugin: no tincan entry file")
+
+        val contentEntryVersionUid = db.doorPrimaryKeyManager.nextIdAsync(
+            ContentEntryVersion.TABLE_ID)
+
+        val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
+
+        val contentEntryVersion = ContentEntryVersion(
+            cevUid = contentEntryVersionUid,
+            cevContentType = ContentEntryVersion.TYPE_XAPI,
+            cevUrl = "$urlPrefix${tinCanEntry.name}"
+        )
+
+        cache.storeZip(
+            zipSource = uriHelper.openSource(jobUri),
+            urlPrefix = urlPrefix,
+            retain = true,
+        )
+
+        return contentEntryVersion
     }
 
     companion object {

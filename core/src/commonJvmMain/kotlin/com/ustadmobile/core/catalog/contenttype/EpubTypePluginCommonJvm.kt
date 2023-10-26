@@ -115,7 +115,7 @@ class EpubTypePluginCommonJvm(
         val db: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
-        val urlPrefix = endpoint.url + ContentEntryVersion.PATH_POSTFIX + contentEntryVersionUid + "/"
+        val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
 
         val opfPath = ZipInputStream(uriHelper.openSource(jobUri).asInputStream()).use {
             it.findFirstOpfPath()

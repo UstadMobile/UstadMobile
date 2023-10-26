@@ -45,6 +45,14 @@ abstract class AbstractContentImportPlugin(
         return false
     }
 
+    /**
+     * Create the URL prefix for a content item in the form of:
+     * https://endpointserer.com/api/content/contentEntryVersionUid/
+     */
+    protected fun createContentUrlPrefix(contentEntryVersionUid: Long): String {
+        return endpoint.url + ContentEntryVersion.PATH_POSTFIX + contentEntryVersionUid + "/"
+    }
+
     override suspend fun processJob(
         jobItem: ContentJobItemAndContentJob,
         progressListener: ContentJobProgressListener,

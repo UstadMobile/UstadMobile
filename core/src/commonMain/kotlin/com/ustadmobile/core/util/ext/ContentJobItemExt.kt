@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.ContentJobItem
 
 
@@ -52,5 +53,10 @@ suspend fun ContentJobItem.updateTotalFromContainerSize(
     cjiItemProgress = containerSize
 
     progressListener.onProgress(this)
+}
+
+fun ContentJobItem?.requireSourceAsDoorUri(): DoorUri {
+    return this?.sourceUri?.let { DoorUri.parse(it) }
+        ?: throw IllegalArgumentException("requireSourceAsDoorUri: SourceUri is null!")
 }
 
