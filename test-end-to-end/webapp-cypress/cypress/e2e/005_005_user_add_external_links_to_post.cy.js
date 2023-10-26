@@ -68,7 +68,7 @@ it('Start Ustad Test Server ', () => {
      cy.get('[data-video="Embed URL"]').type('https://github.com/UstadMobile/UstadMobile/blob/primary/test-end-to-end/README.md')
      cy.get('[class=ql-action]').click()
      cy.contains('button','Post').click()
-     cy.get('.MuiBox-root.css-z7mtfw').eq(1).should('be.visible')
+     cy.contains('External link').should('be.visible')
      cy.go('back')
      cy.go('back')
       })
@@ -82,10 +82,10 @@ it('Start Ustad Test Server ', () => {
           cy.contains('005_003').click()
 
          // Open link on the post board
-
+         let newWindowUrl // Define a variable to store the new window URL
           cy.get('[data-testid="ForumIcon"]').click()
           cy.contains('Topic 1').click()
-          cy.contains('External link').click()
-
-          })
+          cy.contains('External link').invoke('removeAttr','target').click()
+          cy.url().should('include','https://github.com/UstadMobile/UstadMobile/blob/primary/test-end-to-end/README.md')
+       })
 })

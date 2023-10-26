@@ -62,9 +62,9 @@ it('Start Ustad Test Server ', () => {
 
      cy.get('[data-testid="ForumIcon"]').click()
      cy.contains('Topic 1').click()
-     cy.get('[data-placeholder="Add a reply"]').type('Reply 1 to the topic')
+     cy.get('[data-placeholder="Add a reply"]').type('Reply from teacher')
      cy.contains('button','Post').click()
-     cy.get('.MuiBox-root.css-z7mtfw').eq(1).should('be.visible')
+     cy.contains('Reply from teacher').should('be.visible')
      cy.go('back')
      cy.go('back')
    // Teacher add new post -2
@@ -88,10 +88,10 @@ it('Start Ustad Test Server ', () => {
 
           cy.get('[data-testid="ForumIcon"]').click()
           cy.contains('Topic 1').click()
-          cy.get('[data-placeholder="Add a reply"]').type('Reply 2 to the topic')
+          cy.get('[data-placeholder="Add a reply"]').type('Reply from Student')
           cy.contains('button','Post').click()
-          cy.get('.MuiBox-root.css-z7mtfw').eq(1).should('be.visible')
-          cy.get('.MuiBox-root.css-z7mtfw').eq(2).should('be.visible')
+         cy.contains('Reply from teacher').should('be.visible')
+         cy.contains('Reply from Student').should('be.visible')
           cy.go('back')
           cy.go('back')
 
@@ -101,5 +101,6 @@ it('Start Ustad Test Server ', () => {
           cy.get('#discussion_post_title').type('Topic 3')
           cy.get('.ql-editor.ql-blank').type('Discusssion post')
           cy.get('#actionBarButton').click()
+          cy.contains('Topic 3').should('be.visible')
           })
 })

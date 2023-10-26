@@ -68,7 +68,7 @@ it('Start Ustad Test Server ', () => {
      cy.get('[data-video="Embed URL"]').type('http://localhost:8087/umapp/#/ContentEntries')
      cy.get('[class=ql-action]').click()
      cy.contains('button','Post').click()
-     cy.get('.MuiBox-root.css-z7mtfw').eq(1).should('be.visible')
+     cy.contains('Internal link',{timeout:1000}).should('be.visible')
      cy.go('back')
      cy.go('back')
       })
@@ -85,7 +85,8 @@ it('Start Ustad Test Server ', () => {
 
           cy.get('[data-testid="ForumIcon"]').click()
           cy.contains('Topic 1').click()
-          cy.contains('Internal link').click()
+          cy.contains('Internal link').invoke('removeAttr','target').click()
+          cy.url().should('include','http://localhost:8087/umapp/#/ContentEntries')
 
           })
 })
