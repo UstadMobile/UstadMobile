@@ -18,6 +18,8 @@ dependencyResolutionManagement {
             version("version_paging_multiplatform", "3.2.0-alpha05-0.2.3")
             version("version_paging_androidx", "3.2.0-alpha05")
             version("version_paging_compose", "1.0.0-alpha18")
+            version("version_kotlinx_datetime", "0.4.0")
+            version("version_desktop_richeditor_compose", "1.0.0-beta03")
 
             plugin("jetbrains-compose", "org.jetbrains.compose").version("1.5.1")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
@@ -33,6 +35,10 @@ dependencyResolutionManagement {
 
             library("paging-multiplatform-common", "app.cash.paging", "paging-common").versionRef("version_paging_multiplatform")
             library("paging-multiplatform-compose", "app.cash.paging", "paging-compose-common").versionRef("version_paging_multiplatform")
+
+            library("kotlinx-datetime", "org.jetbrains.kotlinx", "kotlinx-datetime").versionRef("version_kotlinx_datetime")
+
+            library("desktop-richeditor-compose", "com.mohamedrejeb.richeditor", "richeditor-compose").versionRef("version_desktop_richeditor_compose")
         }
     }
 }

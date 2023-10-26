@@ -15,7 +15,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichText
 import androidx.compose.material.icons.Icons
-import cafe.adriel.voyager.navigator.LocalNavigator
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.outlined.*
@@ -47,8 +46,6 @@ actual fun HtmlClickableTextField(
     maxHtmlLines: Int
 ) {
 
-    val navigator = LocalNavigator.current
-
     var isHtmlToRichText by remember { mutableStateOf(false) }
 
     var html by remember {
@@ -68,7 +65,7 @@ actual fun HtmlClickableTextField(
                 title = { Text("Html Editor") },
                 navigationIcon = {
                     IconButton(
-                        onClick = { navigator?.pop() }
+                        onClick = { }
                     ) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }

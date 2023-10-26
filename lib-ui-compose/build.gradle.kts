@@ -17,9 +17,6 @@ kotlin {
     sourceSets {
         val commonMain by getting {
 
-            val version_voyager = "1.0.0-rc05"
-            val version_kotlinx_datetime = "0.4.0"
-
             dependencies {
                 api(project(":core"))
                 api(project(":lib-database"))
@@ -34,11 +31,7 @@ kotlin {
                 implementation(libs.moko.resources)
                 implementation(libs.moko.resources.compose)
 
-
-                // Compose Multiplatform Navigator
-                implementation("cafe.adriel.voyager:voyager-navigator:$version_voyager")
-
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime")
+                implementation(libs.kotlinx.datetime)
 
                 api(libs.paging.multiplatform.common)
                 api(libs.paging.multiplatform.compose)
@@ -65,10 +58,9 @@ kotlin {
 
         val desktopMain by getting {
             dependencies {
-                api(project(":core"))
                 api(compose.desktop.common)
                 implementation(compose.desktop.currentOs)
-                implementation("com.mohamedrejeb.richeditor:richeditor-compose:1.0.0-beta03")
+                implementation(libs.desktop.richeditor.compose)
             }
         }
     }
