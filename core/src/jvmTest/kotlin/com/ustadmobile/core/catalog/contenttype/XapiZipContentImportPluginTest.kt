@@ -6,7 +6,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.test.assertZipIsCached
-import com.ustadmobile.core.test.newFileFromResource
+import com.ustadmobile.util.test.ext.newFileFromResource
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.core.util.UstadTestRule

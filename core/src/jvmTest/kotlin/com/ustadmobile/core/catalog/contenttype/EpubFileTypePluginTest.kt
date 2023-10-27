@@ -5,7 +5,7 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.test.assertCachedBodyMatchesZipEntry
-import com.ustadmobile.core.test.newFileFromResource
+import com.ustadmobile.util.test.ext.newFileFromResource
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.core.util.UstadTestRule
@@ -17,7 +17,9 @@ import com.ustadmobile.libcache.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
@@ -125,13 +127,16 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
                 progressListener = { },
             )
 
-            ZipFile(tempEpubFile).use { zipFile ->
-                ustadCache.assertCachedBodyMatchesZipEntry(
-                    url = result.cevUrl,
-                    zipFile = zipFile,
-                    pathInZip = result.cevUrl.substringAfterLast("api/content/${result.cevUid}/")
-                )
+            withContext(Dispatchers.IO) {
+                ZipFile(tempEpubFile).use { zipFile ->
+                    ustadCache.assertCachedBodyMatchesZipEntry(
+                        url = result.cevUrl,
+                        zipFile = zipFile,
+                        pathInZip = result.cevUrl.substringAfterLast("api/content/${result.cevUid}/")
+                    )
+                }
             }
+
 
             //TODO: Epub plugin should be adapted to cache using the OPF Manifest, not the zip.
         }
@@ -173,15 +178,17 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
                 progressListener =  { }
             )
 
-            val tempEpubFile = tmpFolder.newFileFromResource(this::class.java,
-                "/com/ustadmobile/core/contenttype/childrens-literature.epub")
+            withContext(Dispatchers.IO) {
+                val tempEpubFile = tmpFolder.newFileFromResource(this::class.java,
+                    "/com/ustadmobile/core/contenttype/childrens-literature.epub")
 
-            ZipFile(tempEpubFile).use { zipFile ->
-                ustadCache.assertCachedBodyMatchesZipEntry(
-                    url = result.cevUrl,
-                    zipFile = zipFile,
-                    pathInZip = result.cevUrl.substringAfterLast("api/content/${result.cevUid}/")
-                )
+                ZipFile(tempEpubFile).use { zipFile ->
+                    ustadCache.assertCachedBodyMatchesZipEntry(
+                        url = result.cevUrl,
+                        zipFile = zipFile,
+                        pathInZip = result.cevUrl.substringAfterLast("api/content/${result.cevUid}/")
+                    )
+                }
             }
         }
     }

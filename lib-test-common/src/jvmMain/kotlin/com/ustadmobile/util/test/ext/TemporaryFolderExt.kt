@@ -1,4 +1,4 @@
-package com.ustadmobile.core.test
+package com.ustadmobile.util.test.ext
 
 import org.junit.rules.TemporaryFolder
 import java.io.File

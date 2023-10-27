@@ -36,7 +36,6 @@ fun ApplicationRequest.protocolAndHost(): String {
         }
     }
 
-
-    val hostHeader = headers["Host"] ?: throw IllegalArgumentException("Request has no host header!")
-    return "${origin.scheme}://${hostHeader}/"
+    val host = headers["Host"] ?: origin.serverHost
+    return "${origin.scheme}://${host}/"
 }
