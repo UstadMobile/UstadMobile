@@ -6,7 +6,6 @@ import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.whenSubscribed
-import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
@@ -15,6 +14,7 @@ import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewMode
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
 import com.ustadmobile.lib.db.entities.Role
@@ -192,7 +192,7 @@ class ContentEntryListViewModel(
 
         if(entry.leaf) {
             navController.navigate(
-                viewName = ContentEntryDetailView.VIEW_NAME,
+                viewName = ContentEntryDetailViewModel.DEST_NAME,
                 args = mapOf(UstadView.ARG_ENTITY_UID to entry.contentEntryUid.toString())
             )
         }else {

@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.contententry.detailoverviewtab
 
 import com.ustadmobile.lib.db.entities.*
 

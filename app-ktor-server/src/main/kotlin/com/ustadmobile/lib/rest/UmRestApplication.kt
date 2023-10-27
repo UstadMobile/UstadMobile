@@ -39,6 +39,8 @@ import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.di.DomainDiModuleJvm
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJvm
+import com.ustadmobile.core.uri.UriHelper
+import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.door.http.DoorHttpServerConfig
 import com.ustadmobile.lib.rest.dimodules.makeJvmBackendDiModule
 import io.ktor.server.response.*
@@ -56,6 +58,10 @@ import io.ktor.websocket.*
 import org.kodein.di.ktor.di
 import java.util.*
 import com.ustadmobile.lib.rest.logging.LogbackAntiLog
+import com.ustadmobile.libcache.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.UstadCacheBuilder
+import kotlinx.io.files.Path
 import org.kodein.di.ktor.closestDI
 import java.net.Inet6Address
 import java.net.NetworkInterface
@@ -104,7 +110,6 @@ fun Endpoint.identifier(
 @Suppress("unused") // This is used as the KTOR server main module via application.conf
 fun Application.umRestApplication(
     dbModeOverride: String? = null,
-    singletonDbName: String = "UmAppDatabase",
 ) {
     val appConfig = environment.config
 
@@ -231,8 +236,45 @@ fun Application.umRestApplication(
 
         bind<Gson>() with singleton { Gson() }
 
+        bind<UstadCache>() with singleton {
+            val dbUrl = "jdbc:sqlite:(datadir)/ustadcache.db"
+                .replace("(datadir)", appConfig.absoluteDataDir().absolutePath)
+            UstadCacheBuilder(
+                dbUrl = dbUrl,
+                storagePath = Path(
+                    File(appConfig.absoluteDataDir(), "httpfiles").absolutePath.toString()
+                )
+            ).build()
+        }
+
+        bind<UriHelper>() with singleton {
+            UriHelperJvm(
+                mimeTypeHelperImpl = FileMimeTypeHelperImpl(),
+                httpClient = instance(),
+                okHttpClient = instance(),
+            )
+        }
+
         bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
-            ContentPluginManager(listOf())
+            val cache: UstadCache = instance()
+            val uriHelper: UriHelper = instance()
+
+            ContentPluginManager(
+                listOf(
+                    EpubTypePluginCommonJvm(
+                        endpoint = context,
+                        di = di,
+                        cache = cache,
+                        uriHelper = uriHelper,
+                    ),
+                    XapiZipContentImportPlugin(
+                        endpoint = context,
+                        di = di,
+                        cache = cache,
+                        uriHelper = uriHelper
+                    )
+                )
+            )
         }
 
         bind<Scheduler>() with singleton {

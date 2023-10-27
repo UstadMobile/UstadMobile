@@ -80,7 +80,7 @@ import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmi
 import com.ustadmobile.core.viewmodel.LeavingReasonEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
 import com.ustadmobile.view.leavingreason.edit.LeavingReasonEditScreen
-import com.ustadmobile.core.viewmodel.ContentEntryDetailOverviewViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewViewModel
 import com.ustadmobile.core.viewmodel.HolidayCalendarEditViewModel
 import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
@@ -112,6 +112,9 @@ import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImport
 import com.ustadmobile.view.contententry.getmetadata.ContentEntryGetMetadataScreen
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
 import com.ustadmobile.view.contententry.getmetadata.ContentEntryGetMetadataPreview
+import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
+import com.ustadmobile.view.contententry.detail.ContentEntryDetailScreen
+
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
 data class UstadScreen(
@@ -185,7 +188,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     ),
     UstadScreen(HolidayCalendarDetailView.VIEW_NAME, "HolidayCalendarDetail Preview",
         HolidayCalendarDetailPreview),
-    UstadScreen(ContentEntryDetailOverviewViewModel.DEST_NAME,
+    UstadScreen(
+        ContentEntryDetailOverviewViewModel.DEST_NAME,
         "ContentEntryDetailOverview Preview",
         ContentEntryDetailOverviewScreenPreview),
     UstadScreen(HolidayCalendarEditViewModel.DEST_NAME, "HolidayCalendarEdit Preview",
@@ -321,6 +325,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         ContentEntryGetMetadataScreen),
     UstadScreen("ContentEntryGetMetadataPreview", "ContentEntryGetMetadataPreview",
         ContentEntryGetMetadataPreview),
+    UstadScreen(ContentEntryDetailViewModel.DEST_NAME, "ContentEntryDetail",
+        ContentEntryDetailScreen),
 )
 
 

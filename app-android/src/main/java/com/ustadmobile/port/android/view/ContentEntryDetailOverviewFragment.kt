@@ -21,7 +21,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.progressBadge
-import com.ustadmobile.core.viewmodel.ContentEntryDetailOverviewUiState
+import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_FAILURE
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography

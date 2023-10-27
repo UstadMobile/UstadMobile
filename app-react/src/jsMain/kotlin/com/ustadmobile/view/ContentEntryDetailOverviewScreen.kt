@@ -6,15 +6,13 @@ import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.progressBadge
-import com.ustadmobile.core.viewmodel.ContentEntryDetailOverviewUiState
+import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.common.md
 import com.ustadmobile.mui.common.xs
 import com.ustadmobile.mui.components.UstadQuickActionButton
 import web.cssom.*
-import web.cssom.Padding
-import web.cssom.PlaceContent.Companion.end
 import mui.material.*
 import mui.material.Badge
 import mui.material.List
