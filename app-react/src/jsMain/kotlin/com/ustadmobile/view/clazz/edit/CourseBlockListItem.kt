@@ -3,7 +3,7 @@ package com.ustadmobile.view.clazz.edit
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditUiState
 import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.CourseBlock
-import com.ustadmobile.view.CONTENT_ENTRY_TYPE_ICON_MAP
+import com.ustadmobile.view.contententry.detailoverviewtab.CONTENT_ENTRY_TYPE_ICON_MAP
 import com.ustadmobile.wrappers.reacteasysort.SortableItem
 import web.cssom.number
 import web.cssom.px

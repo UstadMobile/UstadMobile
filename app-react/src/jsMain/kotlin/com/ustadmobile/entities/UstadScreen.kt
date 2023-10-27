@@ -114,6 +114,9 @@ import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMe
 import com.ustadmobile.view.contententry.getmetadata.ContentEntryGetMetadataPreview
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
 import com.ustadmobile.view.contententry.detail.ContentEntryDetailScreen
+import com.ustadmobile.view.contententry.detailoverviewtab.ContentEntryDetailOverviewScreen
+import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
+import com.ustadmobile.view.xapicontent.XapiContentScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -190,8 +193,9 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         HolidayCalendarDetailPreview),
     UstadScreen(
         ContentEntryDetailOverviewViewModel.DEST_NAME,
-        "ContentEntryDetailOverview Preview",
-        ContentEntryDetailOverviewScreenPreview),
+        "ContentEntryDetailOverview",
+        ContentEntryDetailOverviewScreen
+    ),
     UstadScreen(HolidayCalendarEditViewModel.DEST_NAME, "HolidayCalendarEdit Preview",
         HolidayCalendarEditPreview),
     UstadScreen(
@@ -327,6 +331,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         ContentEntryGetMetadataPreview),
     UstadScreen(ContentEntryDetailViewModel.DEST_NAME, "ContentEntryDetail",
         ContentEntryDetailScreen),
+    UstadScreen(XapiContentViewModel.DEST_NAME, "XapiContent", XapiContentScreen),
 )
 
 

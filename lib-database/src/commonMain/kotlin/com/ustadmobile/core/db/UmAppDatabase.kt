@@ -308,4 +308,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract val externalAppPermissionDao: ExternalAppPermissionDao
 
+    abstract val contentEntryVersionDao: ContentEntryVersionDao
+
 }

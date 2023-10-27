@@ -103,6 +103,7 @@ class XapiZipContentImportPlugin(
         val contentEntryVersion = ContentEntryVersion(
             cevUid = contentEntryVersionUid,
             cevContentType = ContentEntryVersion.TYPE_XAPI,
+            cevContentEntryUid = jobItem.contentJobItem?.cjiContentEntryUid ?: 0L,
             cevUrl = "$urlPrefix${tinCanEntry.name}"
         )
 

@@ -72,14 +72,16 @@ abstract class AbstractContentImportPlugin(
 
         if(!contentJobItem.cjiContainerProcessed) {
             val contentEntryVersion = addToCache(jobItem, progressListener)
-
             contentJobItem.cjiContentEntryVersion = contentEntryVersion.cevUid
 
-            transactionRunner.withContentJobItemTransaction { txDb ->
-                txDb.contentJobItemDao.updateContentJobItemContentEntryVersion(contentJobItem.cjiUid,
-                    contentEntryVersion.cevUid)
-                txDb.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
-                contentJobItem.updateTotalFromContainerSize(shouldUpload, txDb,
+            transactionRunner.withContentJobItemTransaction {
+                db.contentEntryVersionDao.insertAsync(contentEntryVersion)
+                db.contentJobItemDao.updateContentJobItemContentEntryVersion(
+                    cjiUid = contentJobItem.cjiUid,
+                    contentEntryVersion = contentEntryVersion.cevUid
+                )
+                db.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
+                contentJobItem.updateTotalFromContainerSize(shouldUpload, db,
                     progressListener)
             }
             contentJobItem.cjiContainerProcessed = true

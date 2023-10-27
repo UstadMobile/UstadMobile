@@ -440,6 +440,11 @@ fun Application.umRestApplication(
             route("import") {
                 ContentEntryImportRoute()
             }
+
+            val di: DI by closestDI()
+            ContentEntryVersionRoute(
+                cache = di.direct.instance()
+            )
         }
 
         static("umapp") {

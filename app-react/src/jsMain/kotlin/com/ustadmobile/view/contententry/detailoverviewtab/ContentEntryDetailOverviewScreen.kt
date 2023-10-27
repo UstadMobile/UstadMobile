@@ -1,12 +1,15 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.contententry.detailoverviewtab
 
 import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.progressBadge
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewUiState
+import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewViewModel
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.common.md
@@ -92,9 +95,9 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
                 }
             }
 
-            if (props.uiState.contentEntryButtons?.showOpenButton == true){
+            if (props.uiState.openButtonVisible){
                 Button {
-                    onClick = { props.onClickOpen }
+                    onClick = { props.onClickOpen() }
                     variant = ButtonVariant.contained
 
                     + strings[MR.strings.open].uppercase()
@@ -197,8 +200,9 @@ private val ContentDetailLeftColumn = FC <ContentEntryDetailOverviewScreenProps>
         }
 
         Badge {
-
-            if (props.uiState.scoreProgress?.progressBadge() != ProgressConstants.BADGE_NONE) {
+            if (props.uiState.scoreProgress?.progressBadge()
+                .let { it != null && it != ProgressConstants.BADGE_NONE }
+            ) {
                 badgeContent = Icon.create {
                     + badgeIcon
                     color = badgeColor
@@ -274,20 +278,18 @@ private val ContentDetailRightColumn = FC <ContentEntryDetailOverviewScreenProps
                 }
             }
 
-
-            Stack {
-                direction = responsive(StackDirection.row)
-                spacing = responsive(5.px)
-
-                + EmojiEvents.create()
-
-                Typography{
-                    + props.uiState.scoreProgress?.progress.toString()
-                }
-            }
-
-
             if (props.uiState.scoreResultVisible){
+                Stack {
+                    direction = responsive(StackDirection.row)
+                    spacing = responsive(5.px)
+
+                    + EmojiEvents.create()
+
+                    Typography{
+                        + props.uiState.scoreProgress?.progress.toString()
+                    }
+                }
+
                 Typography {
                     + ("(" + (props.uiState.scoreProgress?.resultScore ?: "") +
                             "/" + (props.uiState.scoreProgress?.resultMax ?: "") + ")")
@@ -382,6 +384,19 @@ private val QuickActionBarsRow = FC <ContentEntryDetailOverviewScreenProps> { pr
                 onClick = { props.onClickManageDownload }
             }
         }
+    }
+}
+
+val ContentEntryDetailOverviewScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        ContentEntryDetailOverviewViewModel(di, savedStateHandle)
+    }
+
+    val uiStateVal by viewModel.uiState.collectAsState(ContentEntryDetailOverviewUiState())
+
+    ContentEntryDetailOverviewComponent2 {
+        uiState = uiStateVal
+        onClickOpen = viewModel::onClickOpen
     }
 }
 

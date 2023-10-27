@@ -7,6 +7,7 @@ import com.ustadmobile.door.annotation.ReplicateEtag
 import com.ustadmobile.door.annotation.ReplicateLastModified
 import com.ustadmobile.door.annotation.Trigger
 import com.ustadmobile.door.annotation.Triggers
+import kotlinx.serialization.Serializable
 
 /**
  * Represents an available version of a ContentEntry. This may be stored on the same endpoint as
@@ -31,6 +32,7 @@ import com.ustadmobile.door.annotation.Triggers
         )
     )
 )
+@Serializable
 data class ContentEntryVersion(
     @PrimaryKey(autoGenerate = true)
     var cevUid: Long = 0,
@@ -46,13 +48,13 @@ data class ContentEntryVersion(
      * https://endpoint.com/api/content/cevUid/tincan.xml for epubs
      * direct url for pdfs
      */
-    var cevUrl: String = "",
+    var cevUrl: String? = "",
 
     /**
      * The content type that will be used to determine what screen will be used to display the
      * content. This can use TYPE_ presets (or content type could be added to import plugins etc).
      */
-    var cevContentType: String = "",
+    var cevContentType: String? = "",
 
     /**
      * The URL for the sitemap that would be used to download this for offline usage if available.

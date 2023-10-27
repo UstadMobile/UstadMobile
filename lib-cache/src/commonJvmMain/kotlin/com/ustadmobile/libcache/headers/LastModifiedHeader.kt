@@ -10,7 +10,7 @@ import java.util.TimeZone
  * https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html
  */
 val LAST_MODIFIED_FORMATTER = SimpleDateFormat(
-    "EEE, d MMM yyyy HH:mm:ss 'GMT'", Locale.US
+    "EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US
 ).also {
     it.timeZone = TimeZone.getTimeZone("UTC")
 }
