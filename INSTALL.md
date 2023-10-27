@@ -31,6 +31,17 @@ On Windows:
 Unzip ustad-server.zip. Open the ustad-server.conf file and set the siteUrl property to the url that 
 will be used to access the site e.g. https://ustad.yourdomain.com/ (e.g. using a reverse proxy setup
 with Apache or Nginx in a production setup) or http://your.ip.address:8087/ (for testing/evaluation).
+e.g.
+```
+ktor {
+    ..
+    ustad {
+        # Uncomment the siteUrl line found here to set the siteUrl
+        siteUrl = "http://192.168.1.2:8087/"
+        ..
+    }
+}        
+```
 
 After setting the siteUrl in the configuration file, start the server:
 
