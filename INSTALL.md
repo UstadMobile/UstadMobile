@@ -28,7 +28,11 @@ On Windows:
 
 ### 3. Unzip ustad-server.zip and start server
 
-Unzip ustad-server.zip, then start the server using the built-in start script:
+Unzip ustad-server.zip. Open the ustad-server.conf file and set the siteUrl property to the url that 
+will be used to access the site e.g. https://ustad.yourdomain.com/ (e.g. using a reverse proxy setup
+with Apache or Nginx in a production setup) or http://your.ip.address:8087/ (for testing/evaluation).
+
+After setting the siteUrl in the configuration file, start the server:
 
 Linux/MacOS:
 ```
@@ -44,8 +48,8 @@ cd C:\User\me\path\to\unzipped\ustad-server
 ```
 Where C:\User\me\path\to\unzipped\ is where you unzipped ustad-server.zip
 
-This starts the server on the default port (8087). You can now open a browser, and enter port 8087
-e.g. http://localhost:8087 to access the web version.
+This starts the server on the default port (8087). You can now open a browser, and use the url
+you specified as the siteUrl.
 
 A random admin password will be generated automatically. It will be placed in
 **data/singleton/admin.txt**.

@@ -57,6 +57,8 @@ import org.kodein.di.ktor.di
 import java.util.*
 import com.ustadmobile.lib.rest.logging.LogbackAntiLog
 import org.kodein.di.ktor.closestDI
+import java.net.Inet6Address
+import java.net.NetworkInterface
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -66,6 +68,8 @@ const val CONF_DBMODE_VIRTUALHOST = "virtualhost"
 const val CONF_DBMODE_SINGLETON = "singleton"
 
 const val CONF_GOOGLE_API = "secret"
+
+const val CONF_KEY_SITE_URL = "ktor.ustad.siteUrl"
 
 /**
  * List of external commands (e.g. media converters) that must be found or have locations specified
@@ -103,6 +107,21 @@ fun Application.umRestApplication(
     singletonDbName: String = "UmAppDatabase",
 ) {
     val appConfig = environment.config
+
+    val siteUrl = environment.config.propertyOrNull(CONF_KEY_SITE_URL)?.getString()
+
+    if(siteUrl.isNullOrBlank()) {
+        val likelyAddr = NetworkInterface.getNetworkInterfaces().toList().filter {
+            !it.isLoopback
+        }.flatMap { netInterface ->
+            netInterface.inetAddresses.toList().filter { it !is Inet6Address }
+        }.firstOrNull()?.let { "http://${it.hostAddress}:${appConfig.port}/"} ?: ""
+
+        throw SiteConfigException("Site URL is not set. You MUST specify the site url e.g. $likelyAddr \n" +
+                "Please specify using the url parameter in command line e.g. --siteUrl $likelyAddr \nor " +
+                "set this in the config file e.g. uncomment siteUrl and set as siteUrl = \"$likelyAddr\"")
+    }
+
 
     val devMode = environment.config.propertyOrNull("ktor.ustad.devmode")?.getString().toBoolean()
 
@@ -329,6 +348,14 @@ fun Application.umRestApplication(
                 }
             }
 
+            //If the request is not using the correct url as per system config, reject it and finish
+            if(!context.urlMatchesConfig()) {
+                call.respondRequestUrlNotMatchingSiteConfUrl()
+                return@intercept finish()
+            }
+
+            //If the request is not matching any API route, then use the reverse proxy to send the
+            // request to the javascript development server.
             if(!KTOR_SERVER_ROUTES.any { requestUri.startsWith(it) }) {
                 call.respondReverseProxy(jsDevServer)
                 return@intercept finish()
@@ -341,6 +368,8 @@ fun Application.umRestApplication(
      * in UstadAppReactProxy
      */
     install(Routing) {
+        addHostCheckIntercept()
+
         ContainerDownload()
         personAuthRegisterRoute()
         ContainerMountRoute()
@@ -393,6 +422,27 @@ fun Application.umRestApplication(
     //Tell anyone looking that the server is up/running and where to find logs
     // As per logback.xml
     val logDir = System.getProperty("logs_dir") ?: "./log/"
-    println("Ustad server is running: Logging to $logDir ")
+    val printableServerUrl = if(dbMode == CONF_DBMODE_VIRTUALHOST) {
+        "*:${appConfig.port}"
+    }else {
+        appConfig.siteUrl()
+    }
+
+    println("Ustad server is running on $printableServerUrl . Logging to $logDir .")
+    println()
+    println("You can connect the Android client to this address as per README.md .")
+    println()
+    if(jsDevServer != null) {
+        println("Javascript development mode is enabled. If you want to use the web client in a browser, you must run: ")
+        println("./gradlew app-react:jsRun")
+        println("Then open $printableServerUrl in your browser. See app-react/README.md for more details.")
+    }else if(this::class.java.getResource("/umapp/index.html") != null) {
+        println(" This build includes the web client, you can access it by opening $printableServerUrl in your browser.")
+    }else {
+        println(" This build does not include the web client and Javascript dev mode is not enabled.")
+        println(" If you want to use the web client in a browser, please see app-react/README.md .")
+    }
+    println()
+    println("Use [Ctrl+C] to stop.")
 }
 

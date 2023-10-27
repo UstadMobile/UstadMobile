@@ -2,6 +2,9 @@ package com.ustadmobile.lib.rest.ext
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.lib.rest.CONF_DBMODE_SINGLETON
+import com.ustadmobile.lib.rest.CONF_DBMODE_VIRTUALHOST
+import com.ustadmobile.lib.rest.CONF_KEY_SITE_URL
+import io.github.aakira.napier.Napier
 import io.ktor.server.application.*
 import io.ktor.http.*
 import io.ktor.server.request.*
@@ -39,6 +42,7 @@ fun ApplicationCall.resolveProxyToUrl(proxyToBaseUrl: String): String {
 /**
  * Respond as a reverse proxy. Proxy the call to the given base URL.
  */
+@Suppress("NewApi") //This is JVM, not Android, the warning is wrong
 suspend fun ApplicationCall.respondReverseProxy(proxyToBaseUrl: String) {
     val requestBuilder = Request.Builder().url(resolveProxyToUrl(proxyToBaseUrl))
     val di: DI by closestDI()
@@ -89,7 +93,20 @@ suspend fun ApplicationCall.respondReverseProxy(proxyToBaseUrl: String) {
 }
 
 /**
- * Property that will resolve the endpoint for a given application call
+ * Property that will resolve the endpoint for a given application call. The Endpoint.url MUST
+ * be consistent with the URL that the client uses to access the server for the content entry
+ * HttpCache based storage system to work.
+ *
+ * e.g. when a user imports a piece of content it will be stored in the HttpCache as
+ * (endpoint)/api/content/versionUid/(...) This could be done by the server, or it could initially
+ * be cached first on the client (and then uploaded to the server later).
+ *
+ * Then the ContentRoute will attempt to retrieve the item from the cache using the URL. If a
+ * different URL is used (e.g. http://127.0.0.1/ instead of http://localhost/ ) then the entry will
+ * not be retrieved from the cache as expected.
+ *
+ * If the ContentRoute cache were to retrieve content without considering the host (e.g. just use
+ * the contentEntryVersion), this could lead to conflicts when there is content on different servers.
  */
 val ApplicationCall.callEndpoint: Endpoint
     get() {
@@ -97,9 +114,44 @@ val ApplicationCall.callEndpoint: Endpoint
         val dbMode = config.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
 
         return if(dbMode == CONF_DBMODE_SINGLETON) {
-            Endpoint("localhost")
+            Endpoint(config.property(CONF_KEY_SITE_URL).getString())
         }else {
-            Endpoint(request.header("Host") ?: "localhost")
+            Endpoint(request.protocolAndHost())
         }
     }
 
+/**
+ * Determine if the request made on the receiver ApplicationCall matches the configuration.
+ */
+fun ApplicationCall.urlMatchesConfig(): Boolean {
+    val dbMode = application.environment.config
+        .dbModeProperty()
+    if(dbMode == CONF_DBMODE_VIRTUALHOST)
+        return true
+
+    val requestUrl = request.url()
+    val siteUrl = application.environment.config.property(CONF_KEY_SITE_URL)
+        .getString()
+
+    return requestUrl.startsWith(siteUrl)
+}
+
+suspend fun ApplicationCall.respondRequestUrlNotMatchingSiteConfUrl() {
+    val confUrl = application.environment.config.siteUrl()
+    val requestUrl = request.url()
+    val message = """
+                <html>
+                <body>
+                Request url $requestUrl does not match site url ($confUrl). Please 
+                access this system via the site url as set by the admin : 
+                <a href="$confUrl">$confUrl</a>
+                </body>
+                </html>
+            """.trimIndent()
+    Napier.e { "Request url $requestUrl does not match $confUrl" }
+    respondText(
+        text = message,
+        contentType = ContentType.Text.Html,
+        status = HttpStatusCode.BadRequest,
+    )
+}

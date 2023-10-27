@@ -21,13 +21,30 @@ class ServerAppMain {
 
         @JvmStatic
         fun main(args: Array<String>) {
-            embeddedServer(Netty, commandLineEnvironment(args)) {
-                requestReadTimeoutSeconds = 600
-                responseWriteTimeoutSeconds = 600
-                httpServerCodec= {
-                    HttpServerCodec(MAX_INITIAL_LINE_LENGTH, MAX_HEADER_SIZE, MAX_CHUNK_SIZE)
+            val siteUrlArgIndex = args.indexOfFirst { it == "--siteUrl" || it == "-u" }
+            val siteUrlArg = if(siteUrlArgIndex != -1) args.getOrNull(siteUrlArgIndex) else null
+            val environmentArgs = if(siteUrlArg != null) {
+                args + arrayOf("-P:ktor.ustad.siteUrl=$siteUrlArg")
+            }else {
+                args
+            }
+
+            try {
+                embeddedServer(Netty, commandLineEnvironment(environmentArgs)) {
+                    //Increase these timeouts to allow for ServerSentEvents which keep the client waiting
+                    requestReadTimeoutSeconds = 600
+                    responseWriteTimeoutSeconds = 600
+                    httpServerCodec= {
+                        HttpServerCodec(MAX_INITIAL_LINE_LENGTH, MAX_HEADER_SIZE, MAX_CHUNK_SIZE)
+                    }
+                }.start(true)
+            }catch(e: Exception) {
+                if(e is SiteConfigException) {
+                    System.err.println(e.message)
+                }else {
+                    e.printStackTrace()
                 }
-            }.start(true)
+            }
         }
 
     }

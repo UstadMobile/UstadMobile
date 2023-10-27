@@ -99,13 +99,15 @@ https://github.com/UstadMobile/UstadMobile.git and wait for the project to impor
 
 Linux/MacOS:
 ```
-$ ./runserver.sh
+$ ./runserver.sh --siteUrl http://your.ip.address:8087/
 ```
 
 Windows:
 ```
-$ runserver.bat
+$ runserver.bat --siteUrl http://your.ip.address:8087/
 ```
+Where your.ip.address is your IP address (e.g. 192.168.1.2). If the siteUrl changes and the old site
+url is inaccessible, then this may make content uploaded before the change inaccessible.
 
 This will start the server on port 8087. The admin password will be randomly generated - you can find
 it in app-ktor-server/data/singleton/admin.txt .

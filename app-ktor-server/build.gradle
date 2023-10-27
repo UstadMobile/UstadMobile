@@ -114,6 +114,8 @@ dependencies {
 
     api libs.moko.resources
 
+    implementation project(":lib-cache")
+
     //test
     testImplementation project(":lib-test-common")
     testImplementation project(":sharedse")
