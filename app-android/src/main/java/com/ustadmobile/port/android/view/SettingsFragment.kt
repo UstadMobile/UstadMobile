@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -16,6 +18,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.material.MdcTheme
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSettingsBinding
@@ -26,68 +30,23 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.core.viewmodel.SettingsUiState
+import com.ustadmobile.core.viewmodel.SettingsViewModel
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 import org.kodein.di.instance
 import com.ustadmobile.core.R as CR
 
-interface SettingsFragmentEventListener {
+class SettingsFragment : UstadBaseMvvmFragment() {
 
-    fun onClickAppLanguage()
+    private val viewModel: SettingsViewModel by ustadViewModels(::SettingsViewModel)
 
-    fun onClickPanicButton()
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
 
-}
-
-class SettingsFragment : UstadBaseFragment(), SettingsView, SettingsFragmentEventListener{
-
-    var mPresenter: SettingsPresenter? = null
-
-    private var mBinding: FragmentSettingsBinding? = null
-
-    override var displayLanguage: String?
-        get() = mBinding?.displayLanguage
-        set(value) {
-            mBinding?.displayLanguage = value
-        }
-
-    override var workspaceSettingsVisible: Boolean = false
-        set(value) {
-            field = value
-            mBinding?.workspaceSettingsVisible = value
-        }
-    override var holidayCalendarVisible: Boolean = false
-        set(value) {
-            field = value
-            mBinding?.holidayCalendarVisible = value
-        }
-
-    override var reasonLeavingVisible: Boolean = false
-        set(value) {
-            field = value
-            mBinding?.reasonLeavingVisible = value
-        }
-
-    override var langListVisible: Boolean = false
-        set(value) {
-            field = value
-            mBinding?.langListVisible = value
-        }
-
-    val uiState = SettingsUiState()
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        super.onCreateView(inflater, container, savedInstanceState)
-
-        mBinding = FragmentSettingsBinding.inflate(inflater, container, false).also {
-
-        }
-
-        mPresenter = SettingsPresenter(requireContext(), arguments.toStringMap(),
-                this, di).withViewLifecycle()
-        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
-
-        mBinding?.presenter = mPresenter
-        mBinding?.fragmentEventListener = this
+        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
+        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
@@ -96,41 +55,22 @@ class SettingsFragment : UstadBaseFragment(), SettingsView, SettingsFragmentEven
 
             setContent {
                 MdcTheme {
-                    SettingsScreen(uiState)
+                    SettingsScreenForViewModel(viewModel)
                 }
             }
         }
     }
+}
 
-    override fun onClickAppLanguage() {
-        val supportedLangConfig : SupportedLanguagesConfig by instance()
-        val langList = supportedLangConfig.supportedUiLanguagesAndSysDefault(
-            requireContext().getString(CR.string.use_device_language)
-        )
-
-        val systemImpl: UstadMobileSystemImpl by instance()
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(CR.string.app_language)
-            .setItems(langList.map { it.langDisplay }.toTypedArray()) { _, which ->
-                val lang = langList[which].langCode
-                systemImpl.setLocale(lang)
-                activity?.recreate()
-            }
-            .show()
-    }
-
-    override fun onClickPanicButton() {
-        findNavController().navigate(R.id.panic_button_settings_dest)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        mBinding?.presenter = null
-        mBinding?.fragmentEventListener = null
-        mBinding = null
-        mPresenter = null
-    }
-
+@Composable
+private fun SettingsScreenForViewModel(
+    viewModel: SettingsViewModel
+) {
+    val uiState: SettingsUiState by viewModel.uiState.collectAsState(initial = SettingsUiState())
+    SettingsScreen(
+        uiState = uiState,
+        onClickAppLanguage = viewModel::onClickAppLanguage
+    )
 }
 
 @Composable
@@ -206,13 +146,7 @@ private fun SettingsScreen(
 @Composable
 @Preview
 fun SettingsPreview() {
-    val uiState = SettingsUiState(
-        reasonLeavingVisible = true,
-        holidayCalendarVisible = true,
-        workspaceSettingsVisible = true,
-        langListVisible = true
-    )
     MdcTheme{
-        SettingsScreen(uiState)
+        SettingsScreen()
     }
 }
