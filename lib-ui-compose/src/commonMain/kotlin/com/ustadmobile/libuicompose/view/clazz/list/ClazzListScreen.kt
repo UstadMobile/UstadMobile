@@ -33,8 +33,13 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.components.HtmlText
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import androidx.paging.PagingConfig
+import androidx.paging.compose.collectAsLazyPagingItems
+import app.cash.paging.Pager
 
 @Composable
 fun ClazzListScreenForViewModel(viewModel: ClazzListViewModel) {
@@ -67,16 +72,14 @@ fun ClazzListScreen(
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
 ) {
 
-    //  TODO error
-//    val pager = remember(uiState.clazzList){
-//        Pager(
-//            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
-//            pagingSourceFactory = uiState.clazzList
-//        )
-//    }
+    val pager = remember(uiState.clazzList){
+        Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
+            pagingSourceFactory = uiState.clazzList
+        )
+    }
 
-    //  TODO error
-//    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
     LazyVerticalGrid(
         modifier = Modifier.fillMaxSize(),
@@ -89,10 +92,8 @@ fun ClazzListScreen(
     ) {
 
         item(span = { GridItemSpan(maxLineSpan) }) {
-            //  TODO error
             UstadListSortHeader(
-                                   //  TODO error
-//                modifier = Modifier.defaultItemPadding(),
+                modifier = Modifier.defaultItemPadding(),
                 activeSortOrderOption = uiState.activeSortOrderOption,
                 enabled = uiState.fieldsEnabled,
                 onClickSort = onClickSort
@@ -101,8 +102,7 @@ fun ClazzListScreen(
 
         item(span = { GridItemSpan(maxLineSpan) }) {
             UstadListFilterChipsHeader(
-                                   //  TODO error
-//                modifier = Modifier.defaultItemPadding(),
+                modifier = Modifier.defaultItemPadding(),
                 filterOptions = uiState.filterOptions,
                 selectedChipId = uiState.selectedChipId,
                 enabled = uiState.fieldsEnabled,
@@ -110,23 +110,17 @@ fun ClazzListScreen(
             )
         }
 
-
         /**
          * Note: Currently there is no direct support for LazyGrid with pagingsource.
          */
-
-
-        /**
-         * Note: Currently there is no direct support for LazyGrid with pagingsource.
-         */
-//        items(
-//            lazyPagingItems.itemCount
-//        ) {
-//            ClazzListItem(
-//                clazz = lazyPagingItems[it],
-//                onClickClazz = onClickClazz
-//            )
-//        }
+        items(
+            lazyPagingItems.itemCount
+        ) {
+            ClazzListItem(
+                clazz = lazyPagingItems[it],
+                onClickClazz = onClickClazz
+            )
+        }
 
         //Host fragment thinks scroll bar behavior increases available height - need to compensate
         item(span = { GridItemSpan(maxLineSpan) }) {
@@ -147,8 +141,7 @@ fun ClazzListItem(
 
     Card(
         modifier = Modifier
-            //  TODO error
-//            .defaultItemPadding()
+            .defaultItemPadding()
             .clickable {
                 clazz?.also { onClickClazz(it) }
             },
@@ -167,11 +160,10 @@ fun ClazzListItem(
                         style = MaterialTheme.typography.h6,
                         maxLines = 1,
                     )
-                    //  TODO error
-//                    HtmlText(
-//                        html = clazz?.clazzDesc ?: "",
-//                        htmlMaxLines = 2,
-//                    )
+                    HtmlText(
+                        html = clazz?.clazzDesc ?: "",
+                        htmlMaxLines = 2,
+                    )
                 }
 
 //                if(role != null) {
