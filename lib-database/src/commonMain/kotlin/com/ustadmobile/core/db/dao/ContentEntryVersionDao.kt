@@ -4,7 +4,6 @@ import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.HttpAccessible
-import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 
@@ -22,6 +21,9 @@ expect abstract class ContentEntryVersionDao {
     @Insert
     abstract suspend fun insertAsync(contentEntryVersion: ContentEntryVersion): Long
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+    )
     @Query("""
         SELECT ContentEntryVersion.*
           FROM ContentEntryVersion
@@ -32,21 +34,5 @@ expect abstract class ContentEntryVersionDao {
     abstract suspend fun findLatestVersionUidByContentEntryUidEntity(
         contentEntryUid: Long
     ): ContentEntryVersion?
-
-    @HttpAccessible(
-        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
-        pullQueriesToReplicate = arrayOf(
-            HttpServerFunctionCall("findLatestVersionUidByContentEntryUidEntity")
-        )
-    )
-    @Query("""
-        SELECT COALESCE(
-               (SELECT ContentEntryVersion.cevUid
-                  FROM ContentEntryVersion
-                 WHERE ContentEntryVersion.cevContentEntryUid = :contentEntryUid
-              ORDER BY ContentEntryVersion.cevLastModified DESC
-                 LIMIT 1), 0) 
-    """)
-    abstract suspend fun findLatestVersionUidByContentEntryUid(contentEntryUid: Long): Long
 
 }

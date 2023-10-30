@@ -272,6 +272,12 @@ fun Application.umRestApplication(
                         di = di,
                         cache = cache,
                         uriHelper = uriHelper
+                    ),
+                    PdfImportPluginJvm(
+                        endpoint = context,
+                        di = di,
+                        cache= cache,
+                        uriHelper = uriHelper,
                     )
                 )
             )

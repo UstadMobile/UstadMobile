@@ -95,7 +95,9 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
 
         runBlocking {
             val epubUri = DoorUri.parse(tempEpubFile.toURI().toString())
-            val metadata = epubPlugin.extractMetadata(epubUri)
+            val metadata = epubPlugin.extractMetadata(
+                epubUri, "childrens-literature.epub"
+            )
             Assert.assertEquals("Got ContentEntry with expected title",
                     "A Textbook of Sources for Teachers and Teacher-Training Classes",
                     metadata!!.entry.title)

@@ -4,6 +4,7 @@ import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.viewmodel.DetailViewModel
+import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
@@ -114,15 +115,23 @@ class ContentEntryDetailOverviewViewModel(
 
     fun onClickOpen() {
         viewModelScope.launch {
-            val latestVersionUid = activeRepo.contentEntryVersionDao
-                .findLatestVersionUidByContentEntryUid(entityUidArg)
-            if(latestVersionUid != 0L) {
-                navController.navigate(
-                    XapiContentViewModel.DEST_NAME,
-                    args = mapOf(
-                        ARG_ENTITY_UID to latestVersionUid.toString()
+            val latestContentEntryVersion = activeRepo.contentEntryVersionDao
+                .findLatestVersionUidByContentEntryUidEntity(entityUidArg)
+            if(latestContentEntryVersion != null) {
+                val destName = when(latestContentEntryVersion.cevContentType) {
+                    ContentEntryVersion.TYPE_XAPI -> XapiContentViewModel.DEST_NAME
+                    ContentEntryVersion.TYPE_PDF -> PdfContentViewModel.DEST_NAME
+                    else -> null
+                }
+
+                if(destName != null) {
+                    navController.navigate(
+                        destName,
+                        args = mapOf(
+                            ARG_ENTITY_UID to latestContentEntryVersion.cevUid.toString()
+                        )
                     )
-                )
+                }
             }
         }
     }

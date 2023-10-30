@@ -35,12 +35,21 @@ fun Route.ContentUploadRoute() {
         },
         onUploadCompleted = { completedUpload ->
             val di: DI by completedUpload.call.closestDI()
+            val originalFilenameParam: String? = completedUpload.call.request
+                .queryParameters["originalFilename"]
             val pluginManager: ContentPluginManager by di.on(completedUpload.call).instance()
 
             try {
                 val metadataResult = pluginManager.extractMetadata(
                     uri = completedUpload.file.toDoorUri(),
-                )
+                    originalFilename = originalFilenameParam,
+                ).let {
+                    //Ensure the original filename is preserved, even if not handled by the plugin
+                    if(it.originalFilename == null && originalFilenameParam != null)
+                        it.copy(originalFilename = originalFilenameParam)
+                    else
+                        it
+                }
 
                 completedUpload.call.respond(HttpStatusCode.OK, metadataResult)
             }catch(e: Exception) {

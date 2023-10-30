@@ -46,7 +46,10 @@ class XapiZipContentImportPlugin(
     private val MAX_SIZE_LIMIT: Long = 100 * 1024 * 1024 //100MB
 
 
-    override suspend fun extractMetadata(uri: DoorUri): MetadataResult? {
+    override suspend fun extractMetadata(
+        uri: DoorUri,
+        originalFilename: String?,
+    ): MetadataResult? {
         val size = uriHelper.getSize(uri)
         if(size > MAX_SIZE_LIMIT){
             return null

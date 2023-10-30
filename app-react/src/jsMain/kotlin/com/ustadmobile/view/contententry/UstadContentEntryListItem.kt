@@ -3,6 +3,7 @@ package com.ustadmobile.view.contententry
 import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.ContentEntryTypeLabelConstants
+import com.ustadmobile.core.impl.locale.messageIdOptionLookup
 import com.ustadmobile.core.util.ext.progressBadge
 import com.ustadmobile.core.viewmodel.contententry.list.listItemUiState
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -171,9 +172,10 @@ private val SecondaryContent = FC<SecondaryContentProps> { props ->
                 val contentType = props.contentEntryItem?.contentTypeFlag
                     ?: ContentEntry.TYPE_DOCUMENT
                 Typography {
-                    + (strings[ContentEntryTypeLabelConstants
-                        .TYPE_LABEL_MESSAGE_IDS[contentType].stringResource]
-                        )
+                    + strings.messageIdOptionLookup(
+                        key = contentType,
+                        messageIdList = ContentEntryTypeLabelConstants.TYPE_LABEL_MESSAGE_IDS
+                    )
                 }
 
                 Box {

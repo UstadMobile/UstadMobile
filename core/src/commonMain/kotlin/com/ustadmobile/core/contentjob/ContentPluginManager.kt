@@ -30,10 +30,13 @@ class ContentPluginManager(val pluginList: List<ContentImportPlugin>) {
         return pluginList.firstOrNull { it.pluginId == id }
     }
 
-    suspend fun extractMetadata(uri: DoorUri): MetadataResult {
+    suspend fun extractMetadata(
+        uri: DoorUri,
+        originalFilename: String? = null,
+    ): MetadataResult {
         pluginList.forEach {
             try {
-                return it.extractMetadata(uri) ?: return@forEach
+                return it.extractMetadata(uri, originalFilename) ?: return@forEach
             }catch (e: Exception){
                 if(e is CancellationException){
                     throw e

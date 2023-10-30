@@ -7,7 +7,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.util.*
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
@@ -32,6 +31,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import org.junit.BeforeClass
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import kotlin.jvm.Volatile
 import kotlin.test.assertEquals
@@ -94,6 +94,7 @@ class TestContentImportJobRunner : AbstractMainDispatcherTest() {
 
         override suspend fun extractMetadata(
             uri: DoorUri,
+            originalFilename: String?,
         ): MetadataResult {
             return MetadataResult(ContentEntryWithLanguage().apply {
                 title = uri.toString().substringAfterLast("/")
@@ -157,9 +158,11 @@ class TestContentImportJobRunner : AbstractMainDispatcherTest() {
                         DummyPlugin(di, context)
                     }
 
-                    onBlocking { extractMetadata(any()) }.thenAnswer {
-                        runBlocking { instance<DummyPlugin>().extractMetadata(
-                            it.getArgument(0) as DoorUri)
+                    onBlocking { extractMetadata(any(), anyOrNull()) }.thenAnswer {
+                        runBlocking {
+                            instance<DummyPlugin>().extractMetadata(
+                                it.getArgument(0) as DoorUri, null
+                            )
                         }
                     }
                 }
@@ -286,7 +289,7 @@ class TestContentImportJobRunner : AbstractMainDispatcherTest() {
             db.contentJobItemDao.insertJobItems(jobItems)
             val pluginManager: ContentPluginManager by di.onActiveAccount().instance()
             pluginManager.stub {
-                onBlocking { extractMetadata(any())}.thenAnswer {
+                onBlocking { extractMetadata(any(), anyOrNull())}.thenAnswer {
                     throw IllegalStateException("unexpected error while extracting")
                 }
             }
@@ -327,9 +330,9 @@ class TestContentImportJobRunner : AbstractMainDispatcherTest() {
                     dummyPlugin
                 }
 
-                onBlocking { extractMetadata(any()) }.thenAnswer {
+                onBlocking { extractMetadata(any(), anyOrNull()) }.thenAnswer {
                     runBlocking {
-                        dummyPlugin.extractMetadata(it.getArgument(0))
+                        dummyPlugin.extractMetadata(it.getArgument(0), null)
                     }
                 }
             }

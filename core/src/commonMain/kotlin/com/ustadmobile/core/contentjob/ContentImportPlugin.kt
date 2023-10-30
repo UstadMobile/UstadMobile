@@ -40,8 +40,16 @@ interface ContentImportPlugin : DIAware {
     /**
      * The plugin should extract metadata from the given uri (if possible) and return a
      * MetadataResult if Metadata is retrieved, or null otherwise.
+     *
+     * @param uri - the URI from which the content data can be accessed
+     * @param originalFilename if the URI does not include the original filename (e.g. as is
+     *        the case for temporary uploads et.c), then the original filename as the user selected
+     *        it.
      */
-    suspend fun extractMetadata(uri: DoorUri): MetadataResult?
+    suspend fun extractMetadata(
+        uri: DoorUri,
+        originalFilename: String?
+    ): MetadataResult?
 
     /**
      * The plugin should actually process the given ContentJobItem (e.g. import, download, etc).

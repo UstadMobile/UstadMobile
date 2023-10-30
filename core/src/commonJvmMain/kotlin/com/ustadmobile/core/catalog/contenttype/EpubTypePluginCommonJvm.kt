@@ -56,7 +56,10 @@ class EpubTypePluginCommonJvm(
         return ocfContainer.rootFiles.firstOrNull()?.fullPath
     }
 
-    override suspend fun extractMetadata(uri: DoorUri): MetadataResult? {
+    override suspend fun extractMetadata(
+        uri: DoorUri,
+        originalFilename: String?,
+    ): MetadataResult? {
         val mimeType = uriHelper.getMimeType(uri)
         if(mimeType != null && !supportedMimeTypes.contains(mimeType)){
             return null

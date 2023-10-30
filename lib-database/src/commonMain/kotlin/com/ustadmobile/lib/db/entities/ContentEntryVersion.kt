@@ -88,6 +88,8 @@ data class ContentEntryVersion(
         @Suppress("unused")
         const val TYPE_VIDEO = "video"
 
+        const val TYPE_PDF = "pdf"
+
         @Suppress("unused")
         const val TYPE_XAPI = "xapi"
 

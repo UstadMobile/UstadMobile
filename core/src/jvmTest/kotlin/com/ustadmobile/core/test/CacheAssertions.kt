@@ -5,12 +5,14 @@ import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.request.requestBuilder
 import kotlinx.io.asInputStream
 import org.junit.Assert
+import java.io.File
+import java.io.FileInputStream
 import java.io.InputStream
 import java.security.DigestInputStream
 import java.security.MessageDigest
 import java.util.zip.ZipFile
 
-fun InputStream.digest(digest: MessageDigest): ByteArray {
+fun InputStream.useAndDigest(digest: MessageDigest): ByteArray {
     return DigestInputStream(this, digest).use {
         copyTo(NullOutputStream())
         digest.digest()
@@ -24,14 +26,29 @@ fun UstadCache.assertCachedBodyMatchesZipEntry(
 ) {
     val digest = MessageDigest.getInstance("SHA-256")
     val response = retrieve(requestBuilder(url))
-    val responseSha256 = response?.bodyAsSource()?.asInputStream()?.digest(digest)
+    val responseSha256 = response?.bodyAsSource()?.asInputStream()?.useAndDigest(digest)
         ?: throw AssertionError("assertCachedBodyMatchesZipEntry: no body for $url")
     digest.reset()
 
     val zipEntry = zipFile.getEntry(pathInZip)
-    val zipEntryDigest = zipFile.getInputStream(zipEntry).digest(digest)
+    val zipEntryDigest = zipFile.getInputStream(zipEntry).useAndDigest(digest)
     Assert.assertArrayEquals("Digest for $url should match entry in zip $zipFile!$pathInZip",
         zipEntryDigest, responseSha256)
+}
+
+fun UstadCache.assertCachedBodyMatchesFileContent(
+    url: String,
+    file: File
+) {
+    val digest = MessageDigest.getInstance("SHA-256")
+    val response = retrieve(requestBuilder(url))
+    val responseSha256 = response?.bodyAsSource()?.asInputStream()?.useAndDigest(digest)
+        ?: throw AssertionError("assertCachedBodyMatchesZipEntry: no body for $url")
+    digest.reset()
+
+    val fileSha256 = FileInputStream(file).useAndDigest(digest)
+    Assert.assertArrayEquals("Digest for $url should match ${file.absolutePath}",
+        fileSha256, responseSha256)
 }
 
 /**

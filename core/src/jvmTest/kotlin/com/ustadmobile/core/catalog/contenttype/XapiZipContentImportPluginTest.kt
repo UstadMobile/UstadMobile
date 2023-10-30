@@ -103,7 +103,7 @@ class XapiZipContentImportPluginTest :AbstractMainDispatcherTest() {
         )
 
         val metadata = runBlocking {
-            xapiPlugin.extractMetadata(tempFile.toDoorUri())
+            xapiPlugin.extractMetadata(tempFile.toDoorUri(), "ustad-tincan.zip")
         }!!
 
         Assert.assertEquals("Got expected title",

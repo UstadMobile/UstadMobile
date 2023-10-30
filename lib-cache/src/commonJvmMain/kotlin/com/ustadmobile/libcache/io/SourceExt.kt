@@ -17,20 +17,6 @@ import java.util.zip.ZipInputStream
 actual fun Source.transferToAndGetSha256(
     path: Path,
 ) : TransferResult {
-
-//    Could change to something like this...
-//    val buffer = Buffer()
-//    val sink = SystemFileSystem.sink(path).buffered()
-//    while(!exhausted()) {
-//        readAtMostTo(buffer, 8192)
-//        //update messagedigest etc.
-//        //use snapshot here
-//        buffer.peek().readAtMostTo()
-//        buffer.transferTo(sink)
-//    }
-//    buffer.close()
-
-
     val messageDigest = MessageDigest.getInstance("SHA-256")
 
     val bytesTransferred = DigestOutputStream(

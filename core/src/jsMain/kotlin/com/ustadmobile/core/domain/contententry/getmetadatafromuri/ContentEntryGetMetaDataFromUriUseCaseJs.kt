@@ -19,6 +19,7 @@ import web.url.URL
 import kotlin.js.json
 import kotlin.math.min
 import com.ustadmobile.core.MR
+import js.uri.encodeURIComponent
 
 /**
  * Javascript implementation of IContentEntryGetMetaDataFromUriUseCase . This will upload to the s
@@ -52,8 +53,13 @@ class ContentEntryGetMetaDataFromUriUseCaseJs(
                 val end = min(start + CHUNK_SIZE, file.size.toInt())
                 val uploadBlob = file.slice(start.toDouble(), end.toDouble())
                 val isLastChunk = (i == (numChunks - 1))
+
                 val fetchResponse = fetchAsync(
-                    input = uploadUrl,
+                    input = if(isLastChunk) {
+                        "$uploadUrl?originalFilename=${encodeURIComponent(file.name)}"
+                    } else {
+                        uploadUrl
+                    },
                     init = jso {
                         body = uploadBlob
                         method = "POST"
@@ -84,8 +90,6 @@ class ContentEntryGetMetaDataFromUriUseCaseJs(
                     return json.decodeFromString(
                         deserializer = MetadataResult.serializer(),
                         string = metadaDataStr,
-                    ).copy(
-                        originalFilename = file.name
                     )
                 }
             }
