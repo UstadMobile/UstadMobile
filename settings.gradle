@@ -20,6 +20,7 @@ dependencyResolutionManagement {
             version("version_paging_compose", "1.0.0-alpha18")
             version("version_kotlinx_datetime", "0.4.0")
             version("version_desktop_richeditor_compose", "1.0.0-beta03")
+            version("version_reorderable_compose", "0.9.6")
 
             plugin("jetbrains-compose", "org.jetbrains.compose").version("1.5.1")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
@@ -39,6 +40,7 @@ dependencyResolutionManagement {
             library("kotlinx-datetime", "org.jetbrains.kotlinx", "kotlinx-datetime").versionRef("version_kotlinx_datetime")
 
             library("desktop-richeditor-compose", "com.mohamedrejeb.richeditor", "richeditor-compose").versionRef("version_desktop_richeditor_compose")
+            library("reorderable_compose", "org.burnoutcrew.composereorderable", "reorderable").versionRef("version_reorderable_compose")
         }
     }
 }

@@ -1,6 +1,7 @@
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
+    id("kotlin-parcelize")
     alias(libs.plugins.jetbrains.compose)
 }
 
@@ -35,6 +36,8 @@ kotlin {
 
                 api(libs.paging.multiplatform.common)
                 api(libs.paging.multiplatform.compose)
+
+                implementation(libs.reorderable.compose)
             }
         }
 
