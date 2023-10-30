@@ -85,7 +85,7 @@ class ContentEntryGetMetaDataFromUriUseCaseJs(
                         deserializer = MetadataResult.serializer(),
                         string = metadaDataStr,
                     ).copy(
-                        displaySourceUrl = file.name
+                        originalFilename = file.name
                     )
                 }
             }

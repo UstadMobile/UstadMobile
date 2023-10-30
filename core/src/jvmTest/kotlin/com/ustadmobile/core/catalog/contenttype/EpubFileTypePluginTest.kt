@@ -130,9 +130,9 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
             withContext(Dispatchers.IO) {
                 ZipFile(tempEpubFile).use { zipFile ->
                     ustadCache.assertCachedBodyMatchesZipEntry(
-                        url = result.cevUrl,
+                        url = result.cevUrl!!,
                         zipFile = zipFile,
-                        pathInZip = result.cevUrl.substringAfterLast("api/content/${result.cevUid}/")
+                        pathInZip = result.cevUrl!!.substringAfterLast("api/content/${result.cevUid}/")
                     )
                 }
             }
@@ -184,9 +184,9 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
 
                 ZipFile(tempEpubFile).use { zipFile ->
                     ustadCache.assertCachedBodyMatchesZipEntry(
-                        url = result.cevUrl,
+                        url = result.cevUrl!!,
                         zipFile = zipFile,
-                        pathInZip = result.cevUrl.substringAfterLast("api/content/${result.cevUid}/")
+                        pathInZip = result.cevUrl!!.substringAfterLast("api/content/${result.cevUid}/")
                     )
                 }
             }

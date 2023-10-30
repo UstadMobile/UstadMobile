@@ -145,12 +145,13 @@ class ContentEntryEditViewModel(
                             contentJobItem = ContentJobItem(
                                 cjiPluginId = importedMetaData.pluginId,
                                 cjiContentEntryUid = newContentEntryUid,
-                                sourceUri = importedMetaData.entry.sourceUrl
+                                sourceUri = importedMetaData.entry.sourceUrl,
+                                cjiOriginalFilename = importedMetaData.originalFilename,
                             ),
                             contentJob = ContentJob()
                         ).also {
                             savedStateHandle[KEY_TITLE] = systemImpl.formatString(MR.strings.importing,
-                                (importedMetaData.displaySourceUrl ?: importedMetaData.entry.sourceUrl ?: ""))
+                                (importedMetaData.originalFilename ?: importedMetaData.entry.sourceUrl ?: ""))
                         }
                     }else {
                         ContentEntryBlockLanguageAndContentJob(

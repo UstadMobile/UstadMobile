@@ -6,7 +6,6 @@ import io.ktor.server.routing.*
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.on
-import java.io.File
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.lib.rest.upload.UploadRoute
@@ -37,15 +36,8 @@ fun Route.ContentUploadRoute() {
         onUploadCompleted = { completedUpload ->
             val di: DI by completedUpload.call.closestDI()
             val pluginManager: ContentPluginManager by di.on(completedUpload.call).instance()
-            val uploadTmpDir: File = di.direct.on(completedUpload.call).instance(
-                tag = DiTag.TAG_FILE_UPLOAD_TMP_DIR
-            )
 
             try {
-                val extractTmpDir = File(uploadTmpDir, completedUpload.uploadUuid).also {
-                    it.mkdirs()
-                }
-
                 val metadataResult = pluginManager.extractMetadata(
                     uri = completedUpload.file.toDoorUri(),
                 )

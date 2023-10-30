@@ -63,6 +63,12 @@ data class ContentJobItem(
      */
     var sourceUri: String? = null,
 
+    /**
+     * Where the filename is not in the URI (e.g. temporary uploaded files etc), this property keeps
+     * the original filename (e.g. as when the user selected it).
+     */
+    var cjiOriginalFilename: String? = null,
+
     var cjiIsLeaf: Boolean = true,
 
     /**

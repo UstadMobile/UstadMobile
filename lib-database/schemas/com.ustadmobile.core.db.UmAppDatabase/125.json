@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 125,
-    "identityHash": "6ecf70f110ce79464a8a3eb0328b0fab",
+    "identityHash": "7fb5e9a08da0b4aa3d9a6a766ffeec08",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5098,7 +5098,7 @@
       },
       {
         "tableName": "ContentJobItem",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cjiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cjiJobUid` INTEGER NOT NULL, `sourceUri` TEXT, `cjiIsLeaf` INTEGER NOT NULL, `cjiContentEntryUid` INTEGER NOT NULL, `cjiParentContentEntryUid` INTEGER NOT NULL, `cjiContentEntryVersion` INTEGER NOT NULL, `cjiItemProgress` INTEGER NOT NULL, `cjiItemTotal` INTEGER NOT NULL, `cjiRecursiveProgress` INTEGER NOT NULL, `cjiRecursiveTotal` INTEGER NOT NULL, `cjiStatus` INTEGER NOT NULL, `cjiRecursiveStatus` INTEGER NOT NULL, `cjiConnectivityNeeded` INTEGER NOT NULL, `cjiPluginId` INTEGER NOT NULL, `cjiAttemptCount` INTEGER NOT NULL, `cjiParentCjiUid` INTEGER NOT NULL, `cjiServerJobId` INTEGER NOT NULL, `cjiStartTime` INTEGER NOT NULL, `cjiFinishTime` INTEGER NOT NULL, `cjiUploadSessionUid` TEXT, `cjiContentDeletedOnCancellation` INTEGER NOT NULL, `cjiContainerProcessed` INTEGER NOT NULL, `cjiLastModified` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cjiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cjiJobUid` INTEGER NOT NULL, `sourceUri` TEXT, `cjiOriginalFilename` TEXT, `cjiIsLeaf` INTEGER NOT NULL, `cjiContentEntryUid` INTEGER NOT NULL, `cjiParentContentEntryUid` INTEGER NOT NULL, `cjiContentEntryVersion` INTEGER NOT NULL, `cjiItemProgress` INTEGER NOT NULL, `cjiItemTotal` INTEGER NOT NULL, `cjiRecursiveProgress` INTEGER NOT NULL, `cjiRecursiveTotal` INTEGER NOT NULL, `cjiStatus` INTEGER NOT NULL, `cjiRecursiveStatus` INTEGER NOT NULL, `cjiConnectivityNeeded` INTEGER NOT NULL, `cjiPluginId` INTEGER NOT NULL, `cjiAttemptCount` INTEGER NOT NULL, `cjiParentCjiUid` INTEGER NOT NULL, `cjiServerJobId` INTEGER NOT NULL, `cjiStartTime` INTEGER NOT NULL, `cjiFinishTime` INTEGER NOT NULL, `cjiUploadSessionUid` TEXT, `cjiContentDeletedOnCancellation` INTEGER NOT NULL, `cjiContainerProcessed` INTEGER NOT NULL, `cjiLastModified` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "cjiUid",
@@ -5115,6 +5115,12 @@
           {
             "fieldPath": "sourceUri",
             "columnName": "sourceUri",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cjiOriginalFilename",
+            "columnName": "cjiOriginalFilename",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -6202,7 +6208,7 @@
       },
       {
         "tableName": "ContentEntryVersion",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cevUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cevContentEntryUid` INTEGER NOT NULL, `cevUrl` TEXT, `cevContentType` TEXT NOT NULL, `cevSitemapUrl` TEXT, `cevSize` INTEGER NOT NULL, `cevInActive` INTEGER NOT NULL, `cevLastModified` INTEGER NOT NULL, `cevLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cevUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cevContentEntryUid` INTEGER NOT NULL, `cevUrl` TEXT, `cevContentType` TEXT, `cevSitemapUrl` TEXT, `cevSize` INTEGER NOT NULL, `cevInActive` INTEGER NOT NULL, `cevLastModified` INTEGER NOT NULL, `cevLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "cevUid",
@@ -6226,7 +6232,7 @@
             "fieldPath": "cevContentType",
             "columnName": "cevContentType",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "cevSitemapUrl",
@@ -6381,7 +6387,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6ecf70f110ce79464a8a3eb0328b0fab')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7fb5e9a08da0b4aa3d9a6a766ffeec08')"
     ]
   }
 }

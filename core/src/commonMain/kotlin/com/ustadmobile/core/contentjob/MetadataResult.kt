@@ -13,9 +13,11 @@ data class MetadataResult(
     val pluginId: Int,
 
     /**
-     * The import source as it will be displayed to the user e.g. "filename.epub" or "http://site.com/book.epub"
+     * The original filename as it was uploaded / selected by the user. This is required when the
+     * uri provided (e.g. upload-tmp files that don't include the original name and Android content
+     * URIs where the filename is retrieved via Android-specific functions).
      */
-    val displaySourceUrl: String? = null,
+    val originalFilename: String? = null,
 ) {
 
     companion object {

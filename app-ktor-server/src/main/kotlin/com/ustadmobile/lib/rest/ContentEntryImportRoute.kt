@@ -37,9 +37,8 @@ fun Route.ContentEntryImportRoute() {
         try{
             metadata = withTimeout(IMPORT_LINK_TIMEOUT_DEFAULT) {
                 pluginManager.extractMetadata(DoorUri.parse(url))
-            }.copy(
-                displaySourceUrl = url,
-            )
+            }
+
             if (metadata == null) {
                 call.respond(HttpStatusCode.BadRequest, "Unsupported")
             } else {
