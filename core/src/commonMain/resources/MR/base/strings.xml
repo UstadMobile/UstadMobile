@@ -99,6 +99,10 @@
     <string name="no_video_file_found">No video file found</string>
     <string name="content_from_file">From file</string>
     <string name="content_from_link">From link</string>
+
+    <string name="import_from_file">Import from file</string>
+    <string name="import_from_link">Import from link</string>
+
     <string-array name="content_source_option">
         <item>@string/content_from_file</item>
         <item>@string/content_from_link</item>

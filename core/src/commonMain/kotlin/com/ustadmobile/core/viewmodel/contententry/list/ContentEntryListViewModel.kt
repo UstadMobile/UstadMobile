@@ -13,11 +13,15 @@ import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewMode
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel.Companion.FILTER_BY_PARENT_UID
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
-import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
+import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
+import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer as ContentEntryAndExtras
@@ -33,7 +37,7 @@ data class ContentEntryListUiState(
 
     val selectedChipId: Int = FILTER_BY_PARENT_UID,
 
-    val showChips: Boolean = false,
+    val filterOptions: List<MessageIdOption2> = listOf(),
 
     val showHiddenEntries: Boolean = false,
 
@@ -50,6 +54,10 @@ data class ContentEntryListUiState(
     val importFromFileItemVisible: Boolean = false,
 
 ) {
+
+    val showChips: Boolean
+        get() =filterOptions.isNotEmpty()
+
     companion object {
 
         val DEFAULT_SORT_OPTIONS = listOf(
@@ -72,9 +80,16 @@ class ContentEntryListViewModel(
     private val parentEntryUid: Long = savedStateHandle[ARG_PARENT_UID]?.toLong()
         ?: LIBRARY_ROOT_CONTENT_ENTRY_UID
 
+    /**
+     * This will be true when the user is selecting content as part of selecting it from ClazzEdit
+     */
+    private val hasCourseBlockArg: Boolean = ContentEntryEditViewModel.ARG_COURSEBLOCK in savedStateHandle.keys
+
     private val pagingSourceFactory: ListPagingSourceFactory<ContentEntryAndExtras> = {
         when(_uiState.value.selectedChipId) {
-            FILTER_MY_CONTENT -> activeRepo.contentEntryDao.getContentByOwner(activeUserPersonUid)
+            FILTER_MY_CONTENT -> activeRepo.contentEntryDao.getContentByOwner(
+                activeUserPersonUid
+            )
 
             FILTER_FROM_MY_COURSES -> activeRepo.contentEntryDao.getContentFromMyCourses(
                 activeUserPersonUid
@@ -110,9 +125,16 @@ class ContentEntryListViewModel(
                 contentEntryList = pagingSourceFactory
             )
         }
+
+        val titleOnStart = when {
+            expectedResultDest != null -> systemImpl.getString(MR.strings.select_content)
+            parentEntryUid == LIBRARY_ROOT_CONTENT_ENTRY_UID -> systemImpl.getString(MR.strings.library)
+            else -> null
+        }
+
         _appUiState.update { prev ->
             prev.copy(
-                title = systemImpl.getString(MR.strings.library),
+                title = titleOnStart,
                 fabState = FabUiState(
                     visible = false,
                     text = systemImpl.getString(MR.strings.content),
@@ -121,26 +143,47 @@ class ContentEntryListViewModel(
             )
         }
 
+        //If the user is selecting ContentEntry for a CourseBlock and is not browsing
+        //within library folders.
+        if(hasCourseBlockArg && parentEntryUid == LIBRARY_ROOT_CONTENT_ENTRY_UID) {
+            _uiState.update { prev ->
+                prev.copy(
+                    createNewFolderItemVisible = false,
+                    importFromFileItemVisible = true,
+                    importFromLinkItemVisible = true,
+                    selectedChipId = savedStateHandle[KEY_FILTER_CHIP_ID]?.toInt() ?: FILTER_MY_CONTENT,
+                    filterOptions = listOf(
+                        MessageIdOption2(MR.strings.my_content, FILTER_MY_CONTENT),
+                        MessageIdOption2(MR.strings.from_my_courses, FILTER_FROM_MY_COURSES),
+                        MessageIdOption2(MR.strings.library, FILTER_FROM_LIBRARY)
+                    )
+                )
+            }
+        }
+
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                if(listMode == ListViewMode.PICKER) {
-                    //Picker mode is only used when the user is coming from ClazzEdit
-                    _uiState.update { prev ->
-                        prev.copy(
-                            createNewFolderItemVisible = false,
-                            importFromFileItemVisible = true,
-                            importFromLinkItemVisible = true,
-
-                        )
-                    }
-                }else {
+                if(!hasCourseBlockArg) {
                     activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
                         accountManager.currentAccount.personUid, Role.PERMISSION_CONTENT_INSERT
                     ).collect { hasNewContentPermission ->
                         _appUiState.update { prev ->
-                            prev.copy(fabState = prev.fabState.copy(visible = hasNewContentPermission))
+                            prev.copy(
+                                fabState = prev.fabState.copy(
+                                    visible = hasNewContentPermission
+                                )
+                            )
                         }
                     }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            if(titleOnStart == null) {
+                val title = activeRepo.contentEntryDao.findTitleByUidAsync(parentEntryUid)
+                _appUiState.update { prev ->
+                    prev.copy(title = title)
                 }
             }
         }
@@ -190,6 +233,33 @@ class ContentEntryListViewModel(
         if(entry == null)
             return
 
+        //When the user is selecting content from ClazzEdit
+        val courseBlockArg = savedStateHandle[ContentEntryEditViewModel.ARG_COURSEBLOCK]
+        if(entry.leaf && courseBlockArg != null) {
+            val courseBlock = json.decodeFromString(
+                deserializer = CourseBlock.serializer(),
+                string = courseBlockArg,
+            ).shallowCopy {
+                cbTitle = entry.title
+                cbDescription = entry.description
+            }
+
+            navigateForResult(
+                nextViewName = ContentEntryEditViewModel.DEST_NAME,
+                key = ClazzEditViewModel.RESULT_KEY_CONTENTENTRY,
+                currentValue = ContentEntryBlockLanguageAndContentJob(
+                    entry = entry,
+                    block = courseBlock,
+                    contentJob = null,
+                    contentJobItem = null,
+                ),
+                serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
+                overwriteDestination = false
+            )
+            return
+        }
+
+
         if(entry.leaf) {
             navController.navigate(
                 viewName = ContentEntryDetailViewModel.DEST_NAME,
@@ -198,12 +268,25 @@ class ContentEntryListViewModel(
         }else {
             navController.navigate(
                 viewName = DEST_NAME,
-                args = mapOf(
-                    ARG_FILTER to FILTER_BY_PARENT_UID.toString(),
-                    ARG_PARENT_UID to entry.contentEntryUid.toString(),
-                )
+                args = buildMap {
+                    put(ARG_FILTER, FILTER_BY_PARENT_UID.toString())
+                    put(ARG_PARENT_UID, entry.contentEntryUid.toString())
+                    putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
+                    putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_KEY)
+                    putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_VIEWNAME)
+                }
             )
         }
+    }
+
+    fun onClickFilterChip(filterOption: MessageIdOption2) {
+        _uiState.takeIf { it.value.selectedChipId != filterOption.value }?.update { prev ->
+            prev.copy(
+                selectedChipId = filterOption.value
+            )
+        }
+        savedStateHandle[KEY_FILTER_CHIP_ID] = filterOption.value.toString()
+        lastPagingSource?.invalidate()
     }
 
     companion object {
@@ -220,8 +303,6 @@ class ContentEntryListViewModel(
 
         const val ARG_FILTER = "filter"
 
-        const val ARG_SHOW_FILTER_CHIPS = "showChips"
-
         const val FILTER_BY_PARENT_UID = 1
 
         const val FILTER_MY_CONTENT = 2
@@ -231,6 +312,8 @@ class ContentEntryListViewModel(
         const val FILTER_FROM_LIBRARY = 4
 
         const val LIBRARY_ROOT_CONTENT_ENTRY_UID = 1L
+
+        private const val KEY_FILTER_CHIP_ID = "chipId"
 
 
     }

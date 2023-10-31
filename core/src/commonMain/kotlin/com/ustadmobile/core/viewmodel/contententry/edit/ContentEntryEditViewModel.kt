@@ -137,6 +137,7 @@ class ContentEntryEditViewModel(
                         ContentEntryBlockLanguageAndContentJob(
                             entry = importedMetaData.entry.shallowCopy {
                                 contentEntryUid = newContentEntryUid
+                                contentOwner = activeUserPersonUid
                             },
                             block = courseBlockArgVal?.shallowCopy {
                                 cbTitle = importedMetaData.entry.title
@@ -158,6 +159,7 @@ class ContentEntryEditViewModel(
                             entry = ContentEntry().apply {
                                 contentEntryUid = newContentEntryUid
                                 leaf = savedStateHandle[ARG_LEAF]?.toBoolean() == true
+                                contentOwner = activeUserPersonUid
                             },
                             block = courseBlockArgVal,
                         )

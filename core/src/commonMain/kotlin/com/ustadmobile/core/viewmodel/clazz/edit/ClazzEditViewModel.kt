@@ -430,6 +430,7 @@ class ClazzEditViewModel(
                     ContentEntryEditViewModel.ARG_COURSEBLOCK to json.encodeToString(
                         serializer = CourseBlock.serializer(),
                         value = CourseBlock().apply {
+                            cbUid = activeDb.doorPrimaryKeyManager.nextId(CourseBlock.TABLE_ID)
                             cbClazzUid = _uiState.value.entity?.clazzUid ?: 0L
                             cbType = CourseBlock.BLOCK_CONTENT_TYPE
                         }

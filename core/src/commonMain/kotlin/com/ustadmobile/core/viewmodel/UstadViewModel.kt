@@ -221,10 +221,14 @@ abstract class UstadViewModel(
     ) {
         val navArgs = args.toMutableMap()
 
-        if(!args.containsKey(ARG_RESULT_DEST_KEY) || overwriteDestination)
+        navArgs.takeIf { !overwriteDestination }?.putFromSavedStateIfPresent(ARG_RESULT_DEST_KEY)
+
+        if(!navArgs.containsKey(ARG_RESULT_DEST_KEY) || overwriteDestination)
             navArgs[ARG_RESULT_DEST_KEY] = key
 
-        if(!args.containsKey(ARG_RESULT_DEST_VIEWNAME) || overwriteDestination)
+        navArgs.takeIf { !overwriteDestination }?.putFromSavedStateIfPresent(ARG_RESULT_DEST_VIEWNAME)
+
+        if(!navArgs.containsKey(ARG_RESULT_DEST_VIEWNAME) || overwriteDestination)
             navArgs[ARG_RESULT_DEST_VIEWNAME] = destinationName
 
         if(currentValue != null) {

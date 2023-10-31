@@ -8,6 +8,7 @@ import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.nav.NavResult
 import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListUiState
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -18,6 +19,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.mui.components.NavResultReturnerContext
+import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.view.contententry.UstadContentEntryListItem
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
@@ -57,6 +59,8 @@ external interface ContentEntryListScreenProps : Props {
     var onClickImportFromFile: (() -> Unit)?
 
     var onClickImportFromLink: (() -> Unit)?
+
+    var onClickFilterChip: (MessageIdOption2) -> Unit
 
 }
 
@@ -134,6 +138,7 @@ val ContentEntryListScreen = FC<Props> {
         onClickImportFromFile = {
             fileInputRef.current?.click()
         }
+        onClickFilterChip = viewModel::onClickFilterChip
     }
 
     UstadFab {
@@ -223,6 +228,17 @@ private val ContentEntryListScreenComponent = FC<ContentEntryListScreenProps> { 
         }
 
         content = virtualListContent {
+            if(props.uiState.showChips) {
+                item(key = "filter_chips") {
+                    UstadListFilterChipsHeader.create {
+                        filterOptions = props.uiState.filterOptions
+                        selectedChipId = props.uiState.selectedChipId
+                        onClickFilterChip = props.onClickFilterChip
+                    }
+                }
+            }
+
+
             if(props.uiState.importFromFileItemVisible) {
                 item(key = "import_from_file") {
                     ListItem.create {
@@ -236,7 +252,7 @@ private val ContentEntryListScreenComponent = FC<ContentEntryListScreenProps> { 
                             }
 
                             ListItemText {
-                                primary = ReactNode(strings[MR.strings.content_from_file])
+                                primary = ReactNode(strings[MR.strings.import_from_file])
                             }
                         }
                     }
@@ -256,7 +272,7 @@ private val ContentEntryListScreenComponent = FC<ContentEntryListScreenProps> { 
                             }
 
                             ListItemText {
-                                primary = ReactNode(strings[MR.strings.content_from_link])
+                                primary = ReactNode(strings[MR.strings.import_from_link])
                             }
                         }
                     }

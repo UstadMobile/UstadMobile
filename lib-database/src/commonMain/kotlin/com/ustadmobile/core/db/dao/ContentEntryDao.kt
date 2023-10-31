@@ -343,10 +343,6 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                           WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
                        ORDER BY cntLastModified DESC LIMIT 1)  
          WHERE ContentEntry.contentOwner = :personUid
-           AND NOT EXISTS(
-               SELECT ContentEntryParentChildJoin.cepcjUid 
-                 FROM ContentEntryParentChildJoin
-                WHERE ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid)
     """)
     abstract fun getContentByOwner(
         personUid: Long
