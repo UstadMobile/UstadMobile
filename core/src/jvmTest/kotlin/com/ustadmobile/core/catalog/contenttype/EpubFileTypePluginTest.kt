@@ -104,7 +104,7 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
                 epubUri, "childrens-literature.epub"
             )
             Assert.assertEquals("Got ContentEntry with expected title",
-                    "A Textbook of Sources for Teachers and Teacher-Training Classes",
+                    "Children's Literature",
                     metadata!!.entry.title)
         }
     }
