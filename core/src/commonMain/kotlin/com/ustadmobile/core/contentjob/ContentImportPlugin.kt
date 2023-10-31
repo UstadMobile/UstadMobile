@@ -35,6 +35,10 @@ interface ContentImportPlugin : DIAware {
 
     val supportedMimeTypes: List<String>
 
+    /**
+     * A list of the file extensions that are supported by this plugin. They should be lowercase
+     * without the dot. e.g. "pdf"
+     */
     val supportedFileExtensions: List<String>
 
     /**

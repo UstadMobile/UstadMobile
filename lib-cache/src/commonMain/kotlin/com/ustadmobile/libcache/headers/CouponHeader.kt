@@ -20,6 +20,7 @@ data class CouponHeader(
 
         const val COUPON_HEADER_NAME = "Coupon"
 
+        const val COUPON_STATIC = "Coupon-Static"
 
 
     }

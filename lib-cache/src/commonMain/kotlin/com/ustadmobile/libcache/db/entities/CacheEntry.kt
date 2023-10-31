@@ -38,5 +38,8 @@ data class CacheEntry(
 
         const val CACHE_FLAG_ONLY_IF_CACHED = 4
 
+        const val CACHE_FLAG_STATIC = 8
+
+
     }
 }

@@ -10,6 +10,8 @@ interface HttpHeaders {
 
     companion object {
 
+        private val EMPTY_HEADERS = HttpHeadersImpl(emptyList())
+
         fun fromString(headersString: String): HttpHeaders {
             return HttpHeadersImpl(
                 headers = headersString.split("\r\n").map {
@@ -17,6 +19,8 @@ interface HttpHeaders {
                 }
             )
         }
+
+        fun emptyHeaders() = EMPTY_HEADERS
 
     }
 

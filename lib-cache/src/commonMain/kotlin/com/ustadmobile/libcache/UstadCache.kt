@@ -53,11 +53,14 @@ interface UstadCache {
      *
      * @param zipSource Source for Zip data
      * @param urlPrefix should end with /
+     * @param retain true if entries should be marked as to retain
+     * @param static true if entries will have the Coupon-Static: true header
      */
     fun storeZip(
         zipSource: Source,
         urlPrefix: String,
         retain: Boolean = true,
+        static: Boolean = true,
     )
 
     /**

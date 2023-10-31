@@ -59,3 +59,9 @@ Cache: Hit
 Coupon-Actual-Sha-256: ...
 Content-Type: video/mp4
 ```
+
+## Headers
+
+**Coupon-Static** : Indicates that this is a static resources, and it can be safely
+served for any request that matches the protocol, host, and path (e.g. the url except query params)
+

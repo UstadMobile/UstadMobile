@@ -278,6 +278,13 @@ fun Application.umRestApplication(
                         di = di,
                         cache= cache,
                         uriHelper = uriHelper,
+                    ),
+                    H5PContentImportPlugin(
+                        endpoint = context,
+                        di = di,
+                        cache = cache,
+                        uriHelper = uriHelper,
+                        json = instance(),
                     )
                 )
             )

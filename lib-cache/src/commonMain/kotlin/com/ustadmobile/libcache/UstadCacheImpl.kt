@@ -7,6 +7,7 @@ import com.ustadmobile.libcache.db.entities.CacheEntry
 import com.ustadmobile.libcache.db.entities.RequestedEntry
 import com.ustadmobile.libcache.db.entities.ResponseBody
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.COUPON_ACTUAL_SHA_256
+import com.ustadmobile.libcache.headers.CouponHeader.Companion.COUPON_STATIC
 import com.ustadmobile.libcache.headers.HttpHeaders
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.headers.asString
@@ -73,11 +74,18 @@ class UstadCacheImpl(
                 header(COUPON_ACTUAL_SHA_256, sha256)
             }.asString()
 
+            val cacheFlags = if(response.headers[COUPON_STATIC]?.toBooleanStrictOrNull() == true) {
+                CacheEntry.CACHE_FLAG_STATIC
+            }else {
+                0
+            }
+
             CacheEntryAndTmpFile(
                 cacheEntry = CacheEntry(
                     url = entryToStore.request.url,
                     responseBodySha256 = sha256,
                     responseHeaders = headersStr,
+                    cacheFlags = cacheFlags,
                 ),
                 tmpFile = tmpFile
             )
@@ -131,7 +139,11 @@ class UstadCacheImpl(
         zipSource: Source,
         urlPrefix: String,
         retain: Boolean,
+        static: Boolean,
     ) {
+        if(!urlPrefix.endsWith("/"))
+            throw IllegalArgumentException("Url prefix must end with / !")
+
         fileSystem.takeIf { !it.exists(tmpDir) }?.createDirectories(tmpDir)
         val unzippedEntries = zipSource.unzipTo(tmpDir)
 
@@ -150,6 +162,8 @@ class UstadCacheImpl(
                     request = request,
                     extraHeaders = headersBuilder {
                         header(COUPON_ACTUAL_SHA_256, it.sha256.encodeBase64())
+                        if(static)
+                            header(COUPON_STATIC, "true")
                     }
                 ),
                 skipChecksum = true,
@@ -170,7 +184,18 @@ class UstadCacheImpl(
      *
      */
     override fun retrieve(request: HttpRequest): HttpResponse? {
-        val (entry, body) = db.cacheEntryDao.findEntryAndBodyByUrl(request.url) ?: return null
+        /*
+         * If a response was marked as static, then we will bust cache busting. See doc
+         * on Coupon-Static header.
+         */
+        val queryParamIndex = request.url.indexOf("?")
+        val requestWithoutQuery = if(queryParamIndex != -1)
+            request.url.substring(0, queryParamIndex)
+        else
+            null
+
+        val (entry, body) = db.cacheEntryDao.findEntryAndBodyByUrl(
+            request.url, requestWithoutQuery) ?: return null
         if(entry != null && body != null) {
             return CacheResponse(
                 fileSystem = fileSystem,
