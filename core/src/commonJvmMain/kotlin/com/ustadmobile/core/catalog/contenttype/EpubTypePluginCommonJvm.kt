@@ -1,7 +1,7 @@
 package com.ustadmobile.core.catalog.contenttype
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
+import com.ustadmobile.core.contentformats.epub.ocf.Container
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.UmAppDatabase
@@ -20,6 +20,7 @@ import java.util.*
 import java.util.zip.ZipInputStream
 import kotlinx.coroutines.*
 import kotlinx.io.asInputStream
+import nl.adaptivity.xmlutil.serialization.XML
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -29,6 +30,7 @@ class EpubTypePluginCommonJvm(
     override val di: DI,
     private val cache: UstadCache,
     uriHelper: UriHelper,
+    private val xml: XML,
     uploader: ContentPluginUploader = DefaultContentPluginUploader(di)
 ) : AbstractContentImportPlugin(endpoint, uploader, uriHelper) {
 
@@ -45,15 +47,14 @@ class EpubTypePluginCommonJvm(
         get() = PLUGIN_ID
 
     private fun ZipInputStream.findFirstOpfPath(): String? {
-        val xppFactory = XmlPullParserFactory.newInstance()
         skipToEntry { entry -> entry.name == OCF_CONTAINER_PATH } ?: return null
 
-        val ocfContainer = OcfDocument()
-        val xpp = xppFactory.newPullParser()
-        xpp.setInput(this, "UTF-8")
-        ocfContainer.loadFromParser(xpp)
+        val container = xml.decodeFromString(
+            deserializer = Container.serializer(),
+            string = readString()
+        )
 
-        return ocfContainer.rootFiles.firstOrNull()?.fullPath
+        return container.rootFiles?.rootFiles?.firstOrNull()?.fullPath
     }
 
     override suspend fun extractMetadata(

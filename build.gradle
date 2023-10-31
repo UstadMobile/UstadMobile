@@ -96,7 +96,6 @@ ext {
     version_jacoco_tool = "0.8.5"
     version_kotlin_jvmTarget = "17"
     version_kotlinx_serialization = "1.6.0"
-    version_xmlutil = "0.86.1"
     version_klock = "2.4.13"
     version_ktor = "2.3.3"
     version_coroutines = "1.7.3"

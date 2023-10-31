@@ -44,6 +44,9 @@ import kotlin.random.Random
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.gson.*
 import kotlinx.serialization.json.Json
+import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
+import nl.adaptivity.xmlutil.serialization.XML
+import nl.adaptivity.xmlutil.serialization.XmlConfig
 import java.util.concurrent.CopyOnWriteArrayList
 
 fun DI.onActiveAccount(): DI {
@@ -87,6 +90,7 @@ class UstadTestRule(): TestWatcher() {
 
     private val dbsToClose = CopyOnWriteArrayList<UmAppDatabase>()
 
+    @OptIn(ExperimentalXmlUtilApi::class)
     override fun starting(description: Description) {
         tempFolder = Files.createTempDirectory("ustadtestrule").toFile()
 
@@ -196,6 +200,14 @@ class UstadTestRule(): TestWatcher() {
 
             bind<Pbkdf2Params>() with singleton {
                 Pbkdf2Params(iterations = 10000, keyLength = 512)
+            }
+
+            bind<XML>() with singleton {
+                XML {
+                    defaultPolicy {
+                        unknownChildHandler  = XmlConfig.IGNORING_UNKNOWN_CHILD_HANDLER
+                    }
+                }
             }
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

@@ -27,6 +27,7 @@ import org.kodein.di.*
 import com.ustadmobile.core.impl.locale.StringProviderJs
 import com.ustadmobile.util.resolveEndpoint
 import dev.icerock.moko.resources.provider.JsStringProvider
+import nl.adaptivity.xmlutil.serialization.XML
 import web.location.location
 import web.url.URLSearchParams
 
@@ -153,6 +154,12 @@ internal fun ustadJsDi(
 
     bind<Json>() with singleton {
         json
+    }
+
+    bind<XML>() with singleton {
+        XML {
+
+        }
     }
 
     bind<IContentEntryGetMetaDataFromUriUseCase>() with provider {

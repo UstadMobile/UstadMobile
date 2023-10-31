@@ -21,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
+import nl.adaptivity.xmlutil.serialization.XML
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
 import org.junit.Before
@@ -51,6 +52,8 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
 
     private lateinit var uriHelper: UriHelper
 
+    private lateinit var xml: XML
+
     @Before
     fun setup(){
         endpointScope = EndpointScope()
@@ -75,6 +78,7 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
             dbUrl = "jdbc:sqlite::memory:",
             storagePath = Path(tmpFolder.newFolder().absolutePath),
         ).build()
+        xml = di.direct.instance()
     }
 
 
@@ -90,7 +94,8 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
             endpoint = Endpoint("http://localhost/dummy"),
             di = di,
             cache = ustadCache,
-            uriHelper = uriHelper
+            uriHelper = uriHelper,
+            xml = xml,
         )
 
         runBlocking {
@@ -114,6 +119,7 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
             di = di,
             cache = ustadCache,
             uriHelper = uriHelper,
+            xml = xml
         )
 
         runBlocking {
@@ -152,7 +158,8 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
             endpoint = Endpoint("http://localhost/dummy/"),
             di = di,
             cache = ustadCache,
-            uriHelper = uriHelper
+            uriHelper = uriHelper,
+            xml = xml
         )
 
         runBlocking{

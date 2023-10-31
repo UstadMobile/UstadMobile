@@ -62,6 +62,7 @@ import com.ustadmobile.libcache.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import kotlinx.io.files.Path
+import nl.adaptivity.xmlutil.serialization.XML
 import org.kodein.di.ktor.closestDI
 import java.net.Inet6Address
 import java.net.NetworkInterface
@@ -258,6 +259,7 @@ fun Application.umRestApplication(
         bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
             val cache: UstadCache = instance()
             val uriHelper: UriHelper = instance()
+            val xml: XML = instance()
 
             ContentPluginManager(
                 listOf(
@@ -266,6 +268,7 @@ fun Application.umRestApplication(
                         di = di,
                         cache = cache,
                         uriHelper = uriHelper,
+                        xml = xml,
                     ),
                     XapiZipContentImportPlugin(
                         endpoint = context,

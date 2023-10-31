@@ -25,12 +25,16 @@ import org.kodein.di.*
 import java.io.File
 import com.ustadmobile.lib.rest.ext.absoluteDataDir
 import com.ustadmobile.lib.rest.ext.ktorInitDb
+import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
+import nl.adaptivity.xmlutil.serialization.XML
+import nl.adaptivity.xmlutil.serialization.XmlConfig
 import org.xmlpull.v1.XmlPullParserFactory
 
 /**
  * DI Module that provides dependencies which are used both by the server and command line tools
  * e.g. password reset, any import/export, etc.
  */
+@OptIn(ExperimentalXmlUtilApi::class)
 fun makeJvmBackendDiModule(
     config: ApplicationConfig,
     contextScope: EndpointScope = EndpointScope.Default,
@@ -100,6 +104,14 @@ fun makeJvmBackendDiModule(
     bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
         XmlPullParserFactory.newInstance().also {
             it.isNamespaceAware = true
+        }
+    }
+
+    bind<XML>() with singleton {
+        XML {
+            defaultPolicy {
+                unknownChildHandler  = XmlConfig.IGNORING_UNKNOWN_CHILD_HANDLER
+            }
         }
     }
 }
