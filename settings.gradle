@@ -21,6 +21,8 @@ dependencyResolutionManagement {
             version("version_kotlinx_datetime", "0.4.0")
             version("version_desktop_richeditor_compose", "1.0.0-beta03")
             version("version_reorderable_compose", "0.9.6")
+            version("version_android_aztec", "v1.6.3")
+            version("version_google_android_material", "1.9.0")
 
             plugin("jetbrains-compose", "org.jetbrains.compose").version("1.5.1")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
@@ -40,7 +42,9 @@ dependencyResolutionManagement {
             library("kotlinx-datetime", "org.jetbrains.kotlinx", "kotlinx-datetime").versionRef("version_kotlinx_datetime")
 
             library("desktop-richeditor-compose", "com.mohamedrejeb.richeditor", "richeditor-compose").versionRef("version_desktop_richeditor_compose")
-            library("reorderable_compose", "org.burnoutcrew.composereorderable", "reorderable").versionRef("version_reorderable_compose")
+            library("reorderable-compose", "org.burnoutcrew.composereorderable", "reorderable").versionRef("version_reorderable_compose")
+            library("android-aztec", "org.wordpress", "aztec").versionRef("version_android_aztec")
+            library("google-android-material", "com.google.android.material", "material").versionRef("version_google_android_material")
         }
     }
 }
