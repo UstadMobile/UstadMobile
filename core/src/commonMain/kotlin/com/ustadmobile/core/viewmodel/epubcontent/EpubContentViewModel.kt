@@ -1,6 +1,7 @@
 package com.ustadmobile.core.viewmodel.epubcontent
 
 import com.ustadmobile.core.contentformats.epub.opf.Package
+import com.ustadmobile.core.domain.openexternallink.OpenExternalLinkUseCase
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.core.view.UstadView
@@ -9,8 +10,11 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -21,6 +25,17 @@ import org.kodein.di.instance
 
 data class EpubContentUiState(
     val spineUrls: List<String> = emptyList()
+)
+
+/**
+ * ScrollCommand - see epubScrollCommands
+ *
+ * @param spineIndex the index of to scroll to in the spine
+ * @param hash if not null, the hash within the item to scroll to after loading
+ */
+data class EpubScrollCommand(
+    val spineIndex: Int,
+    val hash: String? = null
 )
 
 class EpubContentViewModel(
@@ -37,6 +52,23 @@ class EpubContentViewModel(
     private val _uiState = MutableStateFlow(EpubContentUiState())
 
     val uiState: Flow<EpubContentUiState> = _uiState.asStateFlow()
+
+    private val openExternalLinkUseCase: OpenExternalLinkUseCase by instance()
+
+    private val _epubScrollCommands = MutableSharedFlow<EpubScrollCommand>(
+        replay = 1,
+        extraBufferCapacity = 0,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
+
+    /**
+     * Scroll commands that are to be observed by the view. These can be emitted when the user clicks
+     * on an internal link (e.g. via onClickLink) and when the user clicks on an item from the table
+     * of contents.
+     *
+     * These commands then need to be actioned by the view (e.g. using LazyColumn / TanStack query)
+     */
+    val epubScrollCommands: Flow<EpubScrollCommand> = _epubScrollCommands.asSharedFlow()
 
     init {
         viewModelScope.launch {
@@ -66,10 +98,41 @@ class EpubContentViewModel(
                         )
                     }
 
+                    _appUiState.update { prev ->
+                        prev.copy(
+                            title = opfPackage.metadata.titles.firstOrNull()?.content ?: ""
+                        )
+                    }
+
                 }catch(e: Throwable) {
                     e.printStackTrace()
                 }
             }
+        }
+    }
+
+    fun onClickLink(
+        baseUrl: String,
+        href: String,
+    ) {
+        val url = UrlKmp(baseUrl).resolve(href)
+        val urlStr = url.toString()
+        val hashIndex = urlStr.indexOf("#")
+        val urlWithoutHash = urlStr.substringBefore("#")
+        val indexInSpine = _uiState.value.spineUrls.indexOf(urlWithoutHash)
+        if(indexInSpine >= 0) {
+            _epubScrollCommands.tryEmit(
+                EpubScrollCommand(
+                    spineIndex = indexInSpine,
+                    hash = if(hashIndex > 0) {
+                        urlStr.substring(hashIndex)
+                    }else {
+                        null
+                    }
+                )
+            )
+        }else {
+            openExternalLinkUseCase(url.toString())
         }
 
     }

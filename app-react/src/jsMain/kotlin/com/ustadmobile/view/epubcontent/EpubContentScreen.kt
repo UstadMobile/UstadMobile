@@ -1,16 +1,27 @@
 package com.ustadmobile.view.epubcontent
 
 import com.ustadmobile.core.hooks.collectAsState
+import com.ustadmobile.core.hooks.useLaunchedEffect
+import com.ustadmobile.core.util.ext.forEach
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentUiState
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
+import com.ustadmobile.core.viewmodel.epubcontent.EpubScrollCommand
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.view.components.virtuallist.VirtualList
+import com.ustadmobile.view.components.virtuallist.VirtualListContext
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import emotion.react.css
 import js.core.jso
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.update
 import react.FC
 import react.Props
@@ -18,7 +29,9 @@ import react.create
 import react.dom.html.ReactHTML.iframe
 import react.useMemo
 import react.useRef
+import react.useRequiredContext
 import react.useState
+import tanstack.virtual.core.ScrollAlignment
 import web.cssom.Contain
 import web.cssom.Display
 import web.cssom.Height
@@ -28,9 +41,16 @@ import web.cssom.pct
 import web.cssom.px
 import web.dom.getComputedStyle
 import web.html.HTMLIFrameElement
+import web.scroll.ScrollBehavior
+import web.uievents.CLICK
+import kotlin.math.roundToInt
 
 external interface EpubContentProps : Props{
     var uiState: EpubContentUiState
+
+    var onClickLink: (baseUrl: String, href: String) -> Unit
+
+    var scrollToCommands: Flow<EpubScrollCommand>
 }
 
 /**
@@ -42,6 +62,14 @@ external interface EpubContentProps : Props{
  * back the already known height can be used. The VirtualList will only render the elements that
  * are currently visible (this ensures efficient memory usage on epubs with many pages etc).
  *
+ * Scrolling commands have to be handled using the TanStack virtualizer. The target destination
+ * might not be in the DOM depending on the user's scroll position. Upon receiving a scroll command:
+ *  1) EpubScrollComponent will invoke the tanstack virtualizer scroll to position
+ *  2) EpubSpineItemComponent will collect the scroll command (if it is the target). Once the
+ *     iframe has loaded, if there is any hash component, it will (via the scrollByFunction)
+ *     pass the offset from the top of the spine item to the hash component. EpubScrollComponent
+ *     will invoke tanstack virtualizer's scrollToOffset
+ *
  */
 val EpubContentComponent = FC<EpubContentProps> { props ->
     val muiAppState = useMuiAppState()
@@ -51,6 +79,18 @@ val EpubContentComponent = FC<EpubContentProps> { props ->
     }
 
     val defaultHeights: Map<Int, String> by defaultHeightMap.collectAsState(emptyMap())
+
+    val scrollByCommandFlow = useMemo(dependencies = emptyArray()) {
+        MutableSharedFlow<Int>(
+            replay = 1,
+            extraBufferCapacity = 0,
+            onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        )
+    }
+
+    fun onScrollBy(amount: Int) {
+        scrollByCommandFlow.tryEmit(amount)
+    }
 
     VirtualList {
         style = jso {
@@ -67,6 +107,7 @@ val EpubContentComponent = FC<EpubContentProps> { props ->
             ) { item, index ->
                 EpubSpineItem.create {
                     url = item
+                    itemIndex = index
                     defaultHeight = defaultHeights[index]?.unsafeCast<Height>() ?: 600.px
                     onHeightChanged = { newHeight ->
                         defaultHeightMap.update { prev ->
@@ -76,33 +117,113 @@ val EpubContentComponent = FC<EpubContentProps> { props ->
                             }
                         }
                     }
+                    scrollByFunction = ::onScrollBy
+                    onClickLink = { href ->
+                        props.onClickLink(item, href)
+                    }
+                    scrollCommands = props.scrollToCommands
                 }
             }
         }
 
         VirtualListOutlet()
+
+        EpubScrollComponent {
+            scrollToCommands = props.scrollToCommands
+            scrollByCommands = scrollByCommandFlow
+        }
     }
+}
+
+external interface EpubScrollProps : Props {
+    var scrollToCommands: Flow<EpubScrollCommand>
+
+    var scrollByCommands: Flow<Int>
+}
+
+val EpubScrollComponent = FC<EpubScrollProps> { props ->
+    val virtualizerContext = useRequiredContext(VirtualListContext)
+
+    useLaunchedEffect(props.scrollToCommands) {
+        props.scrollToCommands.collect { command ->
+            console.log("EpubScrollComponent: scroll to index: ${command.spineIndex}")
+            virtualizerContext.virtualizer.scrollToIndex(command.spineIndex, jso  {
+                align = ScrollAlignment.start
+                behavior = ScrollBehavior.instant
+            })
+        }
+    }
+
+
+    useLaunchedEffect(props.scrollByCommands) {
+        props.scrollByCommands.collectLatest { scrollAmount ->
+            val currentOffset = virtualizerContext.virtualizer.scrollOffset
+
+            //Unfortunately, this doesn't work without the delay, maybe because it happens almost
+            //immediately after calling scrollToIndex
+            delay(300)
+            console.log("EpubScroll: CurrentOffset = $currentOffset amount = $scrollAmount")
+            virtualizerContext.virtualizer.scrollToOffset(
+                virtualizerContext.virtualizer.scrollOffset + scrollAmount,
+                jso {
+                   align = ScrollAlignment.start
+                   behavior = ScrollBehavior.instant
+                }
+            )
+        }
+    }
+
 }
 
 external interface EpubSpineItemProps: Props {
 
     var url: String
 
+    var itemIndex: Int
+
     var defaultHeight: Height
 
     var onHeightChanged: (Height) -> Unit
+
+    var onClickLink: (String) -> Unit
+
+    var scrollCommands: Flow<EpubScrollCommand>
+
+    var scrollByFunction: (Int) -> Unit
 
 }
 
 val EpubSpineItem = FC<EpubSpineItemProps> { props ->
     val iframeRef = useRef<HTMLIFrameElement>(null)
+
     var iframeHeight: Height by useState { props.defaultHeight }
+
+    val loadedCompletable = useMemo(props.url) {
+        CompletableDeferred<Unit>()
+    }
+
+    useLaunchedEffect(props.scrollCommands, props.itemIndex) {
+        props.scrollCommands.filter { it.spineIndex == props.itemIndex }.collect {
+            val hash = it.hash ?: return@collect
+            loadedCompletable.await()
+
+            val documentEl = iframeRef.current?.contentDocument ?: return@collect
+
+            //find the position of the target
+            val elementId = hash.substring(1)
+            val targetEl = documentEl.getElementById(elementId)
+            if(targetEl != null) {
+                val scrollDownBy = targetEl.getBoundingClientRect().top.roundToInt()
+                props.scrollByFunction(scrollDownBy)
+            }
+        }
+    }
 
     iframe {
         src = props.url
         ref = iframeRef
 
-        onLoad = {
+        onLoad = { _ ->
             iframeRef.current?.contentDocument?.body?.also { bodyEl ->
                 val loadedHeight = bodyEl.offsetHeight
                 val computedStyle = getComputedStyle(bodyEl)
@@ -111,7 +232,20 @@ val EpubSpineItem = FC<EpubSpineItemProps> { props ->
 
                 iframeHeight = calculatedHeight
                 props.onHeightChanged(calculatedHeight)
+
+                bodyEl.getElementsByTagName("a").forEach { element ->
+                    element.addEventListener(
+                        type = web.uievents.MouseEvent.Companion.CLICK,
+                        callback = { evt ->
+                            evt.preventDefault()
+                            evt.stopPropagation()
+                            val href = element.getAttribute("href")
+                            href?.also(props.onClickLink)
+                        }
+                    )
+                }
             }
+            loadedCompletable.complete(Unit)
         }
 
         css {
@@ -135,6 +269,8 @@ val EpubContentScreen = FC<Props> {
 
     EpubContentComponent {
         uiState = uiStateVal
+        onClickLink = epubViewModel::onClickLink
+        scrollToCommands = epubViewModel.epubScrollCommands
     }
 }
 

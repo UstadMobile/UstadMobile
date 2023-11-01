@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import react.useEffect
 import react.useMemo
 
@@ -22,4 +23,20 @@ fun useCoroutineScope(vararg dependencies: Any?): CoroutineScope {
     }
 
     return coroutineScope
+}
+
+fun useLaunchedEffect(
+    vararg dependencies: Any?,
+    block: suspend () -> Unit
+) {
+    useEffect(dependencies = dependencies) {
+        val coroutineScope = CoroutineScope(Dispatchers.Main + Job())
+        coroutineScope.launch {
+            block()
+        }
+
+        cleanup {
+            coroutineScope.cancel()
+        }
+    }
 }
