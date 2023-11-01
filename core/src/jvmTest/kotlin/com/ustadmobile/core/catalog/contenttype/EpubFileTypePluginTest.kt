@@ -127,6 +127,7 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
             uriHelper = uriHelper,
             xml = xml
         )
+        val contentEntryUid = 42L
 
         runBlocking {
             val epubUri = DoorUri.parse(tempEpubFile.toURI().toString())
@@ -135,6 +136,7 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
                 jobItem = ContentJobItemAndContentJob().apply {
                     contentJobItem = ContentJobItem(
                         sourceUri = epubUri.toString(),
+                        cjiContentEntryUid = contentEntryUid,
                     )
                     contentJob = ContentJob()
                 },
@@ -150,9 +152,7 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
                     )
                 }
             }
-
-
-            //TODO: Epub plugin should be adapted to cache using the OPF Manifest, not the zip.
+            assertEquals(contentEntryUid, result.cevContentEntryUid)
         }
     }
 
@@ -177,10 +177,13 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
             val uid = db.contentEntryDao.insert(ContentEntry().apply{
                 title = "hello"
             })
+            val contentEntryChildUid = 42L
+
             
             val jobItem = ContentJobItem(
                 sourceUri = doorUri.uri.toString(),
-                cjiParentContentEntryUid = uid
+                cjiParentContentEntryUid = uid,
+                cjiContentEntryUid = contentEntryChildUid
             )
 
             val job = ContentJob()
@@ -192,6 +195,7 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
                 jobItem = jobAndItem,
                 progressListener =  { }
             )
+            assertEquals(contentEntryChildUid, result.cevContentEntryUid)
 
             withContext(Dispatchers.IO) {
                 val tempEpubFile = tmpFolder.newFileFromResource(this::class.java,

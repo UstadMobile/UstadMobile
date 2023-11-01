@@ -139,7 +139,8 @@ class EpubTypePluginCommonJvm(
         val contentEntryVersion = ContentEntryVersion(
             cevUid = contentEntryVersionUid,
             cevContentType = ContentEntryVersion.TYPE_EPUB,
-            cevUrl = "$urlPrefix$opfPath"
+            cevContentEntryUid = jobItem.contentJobItem?.cjiContentEntryUid ?: 0L,
+            cevUrl = "$urlPrefix$opfPath",
         )
 
         val tmpDir = File.createTempFile("epubimport", "tmp").also {

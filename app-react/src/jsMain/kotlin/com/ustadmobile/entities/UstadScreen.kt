@@ -119,6 +119,8 @@ import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.view.xapicontent.XapiContentScreen
 import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentViewModel
 import com.ustadmobile.view.pdfcontent.PdfContentScreen
+import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
+import com.ustadmobile.view.epubcontent.EpubContentScreen
 
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
@@ -336,6 +338,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         ContentEntryDetailScreen),
     UstadScreen(XapiContentViewModel.DEST_NAME, "XapiContent", XapiContentScreen),
     UstadScreen(PdfContentViewModel.DEST_NAME, "PdfContent", PdfContentScreen),
+    UstadScreen(EpubContentViewModel.DEST_NAME, "EpubContent", EpubContentScreen),
 )
 
 

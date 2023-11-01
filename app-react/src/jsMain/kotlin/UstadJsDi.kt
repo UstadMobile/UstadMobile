@@ -27,7 +27,9 @@ import org.kodein.di.*
 import com.ustadmobile.core.impl.locale.StringProviderJs
 import com.ustadmobile.util.resolveEndpoint
 import dev.icerock.moko.resources.provider.JsStringProvider
+import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
+import nl.adaptivity.xmlutil.serialization.XmlConfig
 import web.location.location
 import web.url.URLSearchParams
 
@@ -36,6 +38,7 @@ import web.url.URLSearchParams
 /**
  * KodeIn DI builder for JS/Browser.
  */
+@OptIn(ExperimentalXmlUtilApi::class)
 internal fun ustadJsDi(
     dbBuilt: UmAppDatabase,
     dbNodeIdAndAuth: NodeIdAndAuth,
@@ -158,7 +161,9 @@ internal fun ustadJsDi(
 
     bind<XML>() with singleton {
         XML {
-
+            defaultPolicy {
+                unknownChildHandler  = XmlConfig.IGNORING_UNKNOWN_CHILD_HANDLER
+            }
         }
     }
 
