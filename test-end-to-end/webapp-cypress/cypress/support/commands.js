@@ -46,7 +46,7 @@ Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
 // Logout Flow
 
 Cypress.Commands.add('ustadLogout', () => {
-   cy.get('.MuiAvatar-colorDefault.css-154ogbs').click()
+   cy.get('#header_avatar').click()
    cy.contains('LOG OUT').click()
 })
 
@@ -56,7 +56,7 @@ Cypress.Commands.add('ustadAddCourse',(courseName) => {
     cy.contains("button","Course").click()
     cy.contains("Add a new course").click()
     cy.get('input[id="clazz_name"]').type(courseName)
-    cy.get('div[data-placeholder="Description"]').type("simple class")
+    cy.get('div[data-placeholder="Description"]').type("test class")
     cy.contains("button","Save").click()
   })
 
@@ -70,7 +70,7 @@ Cypress.Commands.add('ustadAddCourse',(courseName) => {
         cy.get('div[id="gender"]').click()
         cy.contains("li",gender).click()
         cy.contains("button","Save",{timeout: 2000}).click()
-        cy.contains('New enrolment').should('be.visible')
+        cy.contains('New enrolment',{timeout: 2000}).should('be.visible')
         cy.contains("button","Save",{timeout: 2000}).click()
     })
 
@@ -85,6 +85,43 @@ Cypress.Commands.add('ustadAddCourse',(courseName) => {
       cy.go('back')
       })
 
+  // Add a Module Block
+    Cypress.Commands.add('ustadAddModuleBlock',(moduleTitle) => {
+      cy.contains("Add block").click()
+      cy.contains("Module").click()
+      cy.get('input[id="title"]').type(moduleTitle)
+      cy.contains("button","Done").click()
+      cy.contains("button","Save").click()
+    })
+
+  // Add a Text Block
+    Cypress.Commands.add('ustadAddTextBlock',(textTitle) => {
+      cy.contains("Add block").click()
+      cy.contains("Text").click()
+      cy.get('input[id="title"]').type(textTitle)
+      cy.get('div[data-placeholder="Description"]').type("a simple block test")
+      cy.contains("button","Done").click()
+
+     })
+
+
+  // Add Assignment block
+    Cypress.Commands.add('ustadAddAssignmentBlock',(assignmentTitle) => {
+     cy.contains("Add block").should('be.visible').click()
+     cy.contains("Assignment").click()
+     cy.get('input[id="title"]').type(assignmentTitle)
+     cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
+     cy.contains("button","Done").click()
+     })
+
+   // Add a Discussion Board
+     Cypress.Commands.add('ustadAddDiscussionBoard',(discussionTitle) => {
+      cy.contains("Add block").click()
+      cy.contains("Discussion board").click()
+      cy.get('input[id="title"]').type(discussionTitle)
+      cy.get('div[data-placeholder="Description"]').type("a simple discussion description")
+      cy.contains("button","Done").click()
+      })
 //commands.js
 //
 //
