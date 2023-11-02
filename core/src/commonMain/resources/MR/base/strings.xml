@@ -191,6 +191,7 @@
     <string name="open_folder">Open Folder</string>
     <string name="action_hidden">Hidden</string>
     <string name="invalid_register_code">Invalid Registration Code</string>
+    <string name="invalid">Invalid</string>
     <string name="enter_register_code">Enter Registration Code</string>
     <string name="bar_chart">Bar Chart</string>
     <string name="line_chart">Line Chart</string>
