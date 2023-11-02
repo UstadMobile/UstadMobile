@@ -28,6 +28,12 @@ data class EpubContentUiState(
     val spineUrls: List<String> = emptyList()
 )
 
+data class EpubTocItem(
+    val label: String,
+    val href: String,
+    val children: List<EpubTocItem>
+)
+
 /**
  * ScrollCommand - see epubScrollCommands
  *
