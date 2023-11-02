@@ -171,6 +171,10 @@ class ContentEntryEditViewModel(
         }
     }
 
+    private fun ContentEntryEditUiState.hasErrors(): Boolean {
+        return titleError != null
+    }
+
     fun onClickSave() {
         val contentEntryVal = _uiState.value.entity ?: return
 
@@ -178,6 +182,25 @@ class ContentEntryEditViewModel(
             return
 
         loadingState = LoadingUiState.INDETERMINATE
+
+        val contentEntry = _uiState.value.entity
+        _uiState.update { prev ->
+            prev.copy(
+                titleError = if(contentEntry?.title.isNullOrBlank()) systemImpl.getString(MR.strings.required) else null
+            )
+        }
+
+        if (_uiState.value.hasErrors()) {
+            loadingState = LoadingUiState.NOT_LOADING
+            _uiState.update { prev ->
+                prev.copy(
+                    fieldsEnabled = true
+                )
+            }
+
+            return
+        }
+
         viewModelScope.launch {
             val parentUid = savedStateHandle[ARG_PARENT_UID]?.toLong()
             activeDb.withDoorTransactionAsync {
@@ -195,6 +218,17 @@ class ContentEntryEditViewModel(
             }
 
             loadingState = LoadingUiState.NOT_LOADING
+
+            if (_uiState.value.hasErrors()) {
+                loadingState = LoadingUiState.NOT_LOADING
+                _uiState.update { prev ->
+                    prev.copy(
+                        fieldsEnabled = true
+                    )
+                }
+
+                return@launch
+            }
 
             if(entityUidArg == 0L && parentUid != null && !contentEntryVal.leaf) {
                 navController.popBackStack(

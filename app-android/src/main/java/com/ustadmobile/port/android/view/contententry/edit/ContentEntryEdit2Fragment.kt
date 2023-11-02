@@ -29,6 +29,7 @@ import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewMode
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.port.android.view.composable.*
 import com.ustadmobile.core.R as CR
@@ -134,18 +135,27 @@ private fun ContentEntryEditScreen(
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        UstadTextEditField(
-            value = uiState.entity?.title ?: "",
-            label = stringResource(id = CR.string.title),
-            error = uiState.titleError,
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onContentEntryChanged(uiState.entity?.shallowCopy {
+        UstadInputFieldLayout (
+            errorText = uiState.titleError,
+            captionIfNoError = {
+                Text(stringResource(CR.string.required))
+            }
+        ){
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                value = uiState.entity?.title ?: "",
+                label = { Text(stringResource(id = CR.string.title)) },
+                isError = uiState.titleError != null,
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onContentEntryChanged(uiState.entity?.shallowCopy {
                         title = it
                     }
-                )
-            }
-        )
+                    )
+                }
+            )
+        }
 
         Spacer(modifier = Modifier.height(15.dp))
 
