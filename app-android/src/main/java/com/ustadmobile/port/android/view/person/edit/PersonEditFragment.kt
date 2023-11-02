@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -147,7 +149,8 @@ fun PersonEditScreen(
         }
 
         UstadInputFieldLayout(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            errorText = uiState.dateOfBirthError
         ) {
             UstadDateField(
                 value = uiState.person?.dateOfBirth ?: 0,
@@ -175,17 +178,23 @@ fun PersonEditScreen(
             }
         )
 
-        UstadTextEditField(
-            value = uiState.person?.emailAddr ?: "",
-            label = stringResource(id = CR.string.email),
-            error = uiState.emailError,
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onPersonChanged(uiState.person?.shallowCopy{
-                    emailAddr = it
-                })
-            }
-        )
+        UstadInputFieldLayout(
+            errorText = uiState.emailError
+        ) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                value = uiState.person?.emailAddr ?: "",
+                label = { Text(stringResource(id = CR.string.email)) },
+                enabled = uiState.fieldsEnabled,
+                isError = uiState.emailError != null,
+                onValueChange = { newText ->
+                    onPersonChanged(uiState.person?.shallowCopy {
+                        emailAddr = newText
+                    })
+                }
+            )
+        }
 
         UstadTextEditField(
             value = uiState.person?.personAddress ?: "",

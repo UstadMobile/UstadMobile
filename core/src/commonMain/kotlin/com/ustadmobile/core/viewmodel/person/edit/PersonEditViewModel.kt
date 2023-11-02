@@ -218,23 +218,67 @@ class PersonEditViewModel(
             parentContactError != null
     }
 
+    fun checkEmailValidation(email: String): Boolean {
+
+        var hasAtSign = true
+        var dotAfterAt = true
+        var hasSpace = false
+        var isValid = true
+
+        var parts= email.split("")
+        var dotIndex = 0
+        var atIndex = 0
+
+        parts.forEachIndexed { i, letter ->
+            if(letter == "."){
+                dotIndex = i
+            }else if(letter == "@"){
+                atIndex = i
+            }
+        }
+
+        if (dotIndex < atIndex) {
+            dotAfterAt = false
+        }
+
+        if(!email.contains("@")){
+            hasAtSign = false
+        }
+
+        if(email.contains(" ") || email.contains("[") || email.contains("]") || email.contains("\\")){
+            hasSpace = true
+        }
+
+        if (!hasAtSign || !dotAfterAt || hasSpace){
+            isValid = false
+        }
+
+        return isValid
+    }
+
     fun onClickSave() {
+
+        if(!_uiState.value.fieldsEnabled)
+            return
+
+        _uiState.update { prev ->
+            prev.copy(fieldsEnabled = false)
+        }
 
         loadingState = LoadingUiState.INDETERMINATE
         _uiState.update { prev -> prev.copy(fieldsEnabled = false) }
         val savePerson = _uiState.value.person ?: return
         val requiredFieldMessage = systemImpl.getString(MR.strings.field_required_prompt)
+        val dateOfBirthErrorMessage = systemImpl.getString(MR.strings.invalid)
+        val currentTime = systemTimeInMillis()
 
         _uiState.update { prev ->
             prev.copy(
                 usernameError = null,
                 passwordError = null,
-                emailError = if(savePerson.emailAddr.let { !it.isNullOrBlank() && !it.validEmail() })
-                    systemImpl.getString(MR.strings.invalid_email)
-                else
-                    null,
+                emailError = if(savePerson.emailAddr?.let { checkEmailValidation(it) } == false) systemImpl.getString(MR.strings.invalid_email) else null,
                 confirmError = null,
-                dateOfBirthError = null,
+                dateOfBirthError = if(savePerson.dateOfBirth > currentTime) dateOfBirthErrorMessage else null,
                 parentContactError = null,
                 firstNameError = if(savePerson.firstNames.isNullOrEmpty()) requiredFieldMessage else null,
                 lastNameError = if(savePerson.lastName.isNullOrEmpty()) requiredFieldMessage else null,
