@@ -3,6 +3,7 @@ package com.ustadmobile.libuicompose.view.person.edit
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.OutlinedTextField
@@ -22,7 +23,10 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileConstants
+import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.libuicompose.components.UstadDateField
+import com.ustadmobile.libuicompose.components.UstadImageSelectButton
+import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
@@ -50,11 +54,11 @@ fun PersonEditScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-//        UstadImageSelectButton(
-//            imageUri = uiState.personPicture?.personPictureUri,
-//            onImageUriChanged = onPersonPictureUriChanged,
-//            modifier = Modifier.size(60.dp),
-//        )
+        UstadImageSelectButton(
+            imageUri = uiState.personPicture?.personPictureUri,
+            onImageUriChanged = onPersonPictureUriChanged,
+            modifier = Modifier.size(60.dp),
+        )
 
         UstadInputFieldLayout(
             modifier = Modifier.padding(vertical = 8.dp)
@@ -99,21 +103,21 @@ fun PersonEditScreen(
             modifier = Modifier.fillMaxWidth(),
             errorText = uiState.genderError,
         ) {
-//            UstadMessageIdOptionExposedDropDownMenuField(
-//                value = uiState.person?.gender ?: 0,
-//                modifier = Modifier
-//                    .testTag("gender")
-//                    .fillMaxWidth(),
-//                label = stringResource(MR.strings.gender_literal),
-//                options = PersonConstants.GENDER_MESSAGE_IDS,
-//                onOptionSelected = {
-//                    onPersonChanged(uiState.person?.shallowCopy{
-//                        gender = it.value
-//                    })
-//                },
-//                isError = uiState.genderError != null,
-//                enabled = uiState.fieldsEnabled,
-//            )
+            UstadMessageIdOptionExposedDropDownMenuField(
+                value = uiState.person?.gender ?: 0,
+                modifier = Modifier
+                    .testTag("gender")
+                    .fillMaxWidth(),
+                label = stringResource(MR.strings.gender_literal),
+                options = PersonConstants.GENDER_MESSAGE_IDS,
+                onOptionSelected = {
+                    onPersonChanged(uiState.person?.shallowCopy{
+                        gender = it.value
+                    })
+                },
+                isError = uiState.genderError != null,
+                enabled = uiState.fieldsEnabled,
+            )
         }
 
 

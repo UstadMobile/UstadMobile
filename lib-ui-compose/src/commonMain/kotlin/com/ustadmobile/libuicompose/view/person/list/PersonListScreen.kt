@@ -1,6 +1,10 @@
 package com.ustadmobile.libuicompose.view.person.list
 
-import androidx.compose.foundation.clickable
+import androidx.paging.PagingConfig
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
+import app.cash.paging.Pager
+import app.cash.paging.PagingSource
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,8 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import com.ustadmobile.core.viewmodel.person.list.PersonListUiState
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
