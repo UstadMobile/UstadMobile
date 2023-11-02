@@ -16,17 +16,16 @@ import emotion.react.css
 import js.core.jso
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.update
 import react.FC
 import react.Props
 import react.create
 import react.dom.html.ReactHTML.iframe
+import react.useEffect
 import react.useMemo
 import react.useRef
 import react.useRequiredContext
@@ -142,29 +141,60 @@ external interface EpubScrollProps : Props {
 }
 
 val EpubScrollComponent = FC<EpubScrollProps> { props ->
+    //EpubScrollComponent has to be a child component of VirtualList in order to use  VirtualListContext
     val virtualizerContext = useRequiredContext(VirtualListContext)
+
+    /**
+     * The scroll offset that the virtualizer needs to hit in order to reach the spine index as per
+     * the EpubScrollCommand
+     */
+    var spineIndexOffsetTarget by useState { -1 }
+
+    /**
+     * The delta from the top of the spine page to the hash element (as provided by
+     */
+    var hashIndexDelta by useState { -1 }
 
     useLaunchedEffect(props.scrollToCommands) {
         props.scrollToCommands.collect { command ->
-            console.log("EpubScrollComponent: scroll to index: ${command.spineIndex}")
-            virtualizerContext.virtualizer.scrollToIndex(command.spineIndex, jso  {
+            val offsetTarget = virtualizerContext.virtualizer.getOffsetForIndex(
+                command.spineIndex, ScrollAlignment.start
+            )
+            val offsetAsInt = offsetTarget.component1().toInt()
+            spineIndexOffsetTarget = offsetAsInt
+            virtualizerContext.virtualizer.scrollToOffset(offsetAsInt, jso {
                 align = ScrollAlignment.start
                 behavior = ScrollBehavior.instant
             })
         }
     }
 
-
     useLaunchedEffect(props.scrollByCommands) {
-        props.scrollByCommands.collectLatest { scrollAmount ->
-            val currentOffset = virtualizerContext.virtualizer.scrollOffset
+        props.scrollByCommands.collect { scrollAmount ->
+            hashIndexDelta = scrollAmount
+        }
+    }
 
-            //Unfortunately, this doesn't work without the delay, maybe because it happens almost
-            //immediately after calling scrollToIndex
-            delay(300)
-            console.log("EpubScroll: CurrentOffset = $currentOffset amount = $scrollAmount")
+    /*
+     * Once the virtualizer has finished scrolling to the given spineIndexOffsetTarget, if there is
+     * a pending hashIndexDelta, then scroll by that amount so that we (finally) reach the exact
+     * target.
+     */
+    useEffect(
+        dependencies = arrayOf(
+            spineIndexOffsetTarget,
+            hashIndexDelta,
+            virtualizerContext.virtualizer.isScrolling
+        )
+    ) {
+        if(!virtualizerContext.virtualizer.isScrolling &&
+            hashIndexDelta > 0 &&
+            virtualizerContext.virtualizer.scrollOffset == spineIndexOffsetTarget
+        ) {
+            val newOffset =  virtualizerContext.virtualizer.scrollOffset + hashIndexDelta
+            hashIndexDelta = 0
             virtualizerContext.virtualizer.scrollToOffset(
-                virtualizerContext.virtualizer.scrollOffset + scrollAmount,
+                newOffset,
                 jso {
                    align = ScrollAlignment.start
                    behavior = ScrollBehavior.instant
@@ -172,7 +202,6 @@ val EpubScrollComponent = FC<EpubScrollProps> { props ->
             )
         }
     }
-
 }
 
 external interface EpubSpineItemProps: Props {
