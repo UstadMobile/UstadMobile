@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel.epubcontent
 
 import com.ustadmobile.core.contentformats.epub.opf.Package
 import com.ustadmobile.core.domain.openexternallink.OpenExternalLinkUseCase
+import com.ustadmobile.core.impl.appstate.OverflowItem
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.core.view.UstadView
@@ -100,7 +101,13 @@ class EpubContentViewModel(
 
                     _appUiState.update { prev ->
                         prev.copy(
-                            title = opfPackage.metadata.titles.firstOrNull()?.content ?: ""
+                            title = opfPackage.metadata.titles.firstOrNull()?.content ?: "",
+                            overflowItems = listOf(
+                                OverflowItem(
+                                    label = "Table of contents",
+                                    onClick = { }
+                                )
+                            )
                         )
                     }
 
