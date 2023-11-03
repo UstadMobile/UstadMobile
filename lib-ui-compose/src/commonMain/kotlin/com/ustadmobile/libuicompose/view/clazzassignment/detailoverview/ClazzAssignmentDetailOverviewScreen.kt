@@ -6,7 +6,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.EventAvailable
 import androidx.compose.material.icons.filled.InsertDriveFile
+import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -20,10 +22,20 @@ import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssign
 import com.ustadmobile.lib.db.entities.*
 import java.util.*
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.controller.SubmissionConstants
+import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.libuicompose.components.HtmlClickableTextField
+import com.ustadmobile.libuicompose.components.HtmlText
 import com.ustadmobile.libuicompose.components.UstadAddCommentListItem
 import com.ustadmobile.libuicompose.components.UstadEditHeader
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
+import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
+import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
+import com.ustadmobile.libuicompose.view.clazzassignment.UstadAssignmentSubmissionHeader
+import com.ustadmobile.libuicompose.view.clazzassignment.UstadCourseAssignmentMarkListItem
+import com.ustadmobile.libuicompose.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewConstants.SUBMISSION_POLICY_MAP
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
@@ -96,67 +108,74 @@ fun ClazzAssignmentDetailOverviewScreen(
 //    }
 //    val courseCommentsLazyPagingItems = courseCommentsPager.flow.collectAsLazyPagingItems()
 
-                              //  TODO error
-//    val formattedDateTime = rememberFormattedDateTime(
-//        timeInMillis = uiState.courseBlock?.cbDeadlineDate ?: 0,
-//        timeZoneId = TimeZone.getDefault().id
-//    )
+    val formattedDateTime = rememberFormattedDateTime(
+        timeInMillis = uiState.courseBlock?.cbDeadlineDate ?: 0,
+        timeZoneId = TimeZone.getDefault().id
+    )
 
     val policyMessageId = SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS.firstOrNull {
         it.value == uiState.assignment?.caSubmissionPolicy
     }?.stringResource ?: MR.strings.submit_all_at_once_submission_policy
 
 
-                     //  TODO error
-//    val caFileType = stringIdMapResource(
-//        map = SubmissionConstants.FILE_TYPE_MAP,
-//        key = uiState.assignment?.caFileType ?: ClazzAssignment.FILE_TYPE_DOC
-//    )
+    val caFileType = stringIdMapResource(
+        map = SubmissionConstants.FILE_TYPE_MAP,
+        key = uiState.assignment?.caFileType ?: ClazzAssignment.FILE_TYPE_DOC
+    )
 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            //  TODO error
-//            .defaultScreenPadding()
+            .defaultScreenPadding()
     ) {
         if (uiState.caDescriptionVisible){
             item {
-                //  TODO error
-//                HtmlText(
-//                    html = uiState.courseBlock?.cbDescription ?: "",
-//                    modifier = Modifier.defaultItemPadding()
-//                )
+                HtmlText(
+                    html = uiState.courseBlock?.cbDescription ?: "",
+                    modifier = Modifier.defaultItemPadding()
+                )
             }
         }
 
         if (uiState.cbDeadlineDateVisible){
             item {
-//                UstadDetailField(
-//                    valueText = "$formattedDateTime (${TimeZone.getDefault().id})",
-//                    labelText = stringResource(MR.strings.deadline),
-//                    //  TODO error
-//                    imageId = R.drawable.ic_event_available_black_24dp,
-//                    onClick = {  }
-//                )
+                ListItem(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultItemPadding(),
+                    icon = {
+                        Icon(
+                            Icons.Filled.EventAvailable,
+                            contentDescription = null
+                        )
+                    },
+                    text = { Text("$formattedDateTime (${TimeZone.getDefault().id})")},
+                    secondaryText = { Text(stringResource(MR.strings.deadline)) }
+                )
             }
         }
 
         item {
-//            UstadDetailField(
-//                valueText = stringResource(policyMessageId),
-//                labelText = stringResource(MR.strings.submission_policy),
-//                          //  TODO error
-//                imageId = SUBMISSION_POLICY_MAP[uiState.assignment?.caSubmissionPolicy]
-//                    ?: R.drawable.ic_baseline_task_alt_24,
-//                onClick = {  }
-//            )
+            ListItem(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultItemPadding(),
+                icon = {
+                    Icon(
+                        SUBMISSION_POLICY_MAP[uiState.assignment?.caSubmissionPolicy]
+                    ?: Icons.Default.TaskAlt,
+                        contentDescription = null
+                    )
+                },
+                text = { Text(stringResource(policyMessageId))},
+                secondaryText = { Text(stringResource(MR.strings.submission_policy)) }
+            )
         }
 
         item {
-            //  TODO error
-//            UstadAssignmentSubmissionHeader(
-//                uiState = uiState.submissionHeaderUiState,
-//            )
+            UstadAssignmentSubmissionHeader(
+                uiState = uiState.submissionHeaderUiState,
+            )
         }
 
         if(uiState.activeUserIsSubmitter) {
@@ -175,13 +194,12 @@ fun ClazzAssignmentDetailOverviewScreen(
                         onClick = onClickEditSubmission
                     )
                 }else {
-                    //  TODO error
-//                    HtmlText(
-//                        modifier = Modifier
-//                            .testTag("submission_text")
-//                            .defaultItemPadding(),
-//                        html = uiState.latestSubmission?.casText ?: "",
-//                    )
+                    HtmlText(
+                        modifier = Modifier
+                            .testTag("submission_text")
+                            .defaultItemPadding(),
+                        html = uiState.latestSubmission?.casText ?: "",
+                    )
                 }
             }
 
@@ -192,7 +210,7 @@ fun ClazzAssignmentDetailOverviewScreen(
                         text = { Text(stringResource(MR.strings.add_file)) },
                         secondaryText = {
                             Text(
-//                                "${stringResource(MR.strings.file_type_chosen)} $caFileType" +
+                                "${stringResource(MR.strings.file_type_chosen)} $caFileType" +
                                         stringResource(MR.strings.max_number_of_files,
                                             uiState.assignment?.caNumberOfFiles ?: 0),
                             )
@@ -219,9 +237,8 @@ fun ClazzAssignmentDetailOverviewScreen(
 
         if (uiState.unassignedErrorVisible) {
             item {
-                Text(uiState.unassignedError ?: "",)
-                    //  TODO error
-//                    modifier = Modifier.defaultItemPadding())
+                Text(uiState.unassignedError ?: "",
+                    modifier = Modifier.defaultItemPadding())
             }
         }
 
@@ -231,9 +248,8 @@ fun ClazzAssignmentDetailOverviewScreen(
                     onClick = onClickSubmitSubmission,
                     enabled = uiState.fieldsEnabled,
                     modifier = Modifier
-                        .fillMaxWidth(),
-                        //  TODO error
-//                        .defaultItemPadding(),
+                        .fillMaxWidth()
+                        .defaultItemPadding(),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = MaterialTheme.colors.secondary
                     )
@@ -268,12 +284,11 @@ fun ClazzAssignmentDetailOverviewScreen(
                 items = uiState.markList,
                 key = { Pair(3, it.courseAssignmentMark?.camUid ?: 0) }
             ){ mark ->
-                //  TODO error
-//                UstadCourseAssignmentMarkListItem(
-//                    uiState = UstadCourseAssignmentMarkListItemUiState(
-//                        mark = mark,
-//                    ),
-//                )
+                UstadCourseAssignmentMarkListItem(
+                    uiState = UstadCourseAssignmentMarkListItemUiState(
+                        mark = mark,
+                    ),
+                )
             }
         }
 
@@ -296,7 +311,6 @@ fun ClazzAssignmentDetailOverviewScreen(
 //            items = courseCommentsLazyPagingItems,
 //            key = { Pair(4, it.comment.commentsUid) }
 //        ){ comment ->
-//            //  TODO error
 //            CommentListItem(commentAndName = comment)
 //        }
 
@@ -320,7 +334,6 @@ fun ClazzAssignmentDetailOverviewScreen(
 //                items = privateCommentsLazyPagingItems,
 //                key = { Pair(5, it.comment.commentsUid) }
 //            ){ comment ->
-//                //  TODO error
 //                CommentListItem(commentAndName = comment)
 //            }
         }
