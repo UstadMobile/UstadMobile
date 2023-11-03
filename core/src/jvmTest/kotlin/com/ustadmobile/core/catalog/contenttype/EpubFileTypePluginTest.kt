@@ -3,7 +3,7 @@ package com.ustadmobile.core.catalog.contenttype
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.contentformats.epub.opf.Package
+import com.ustadmobile.core.contentformats.epub.opf.PackageDocument
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.test.assertCachedBodyMatchesZipEntry
 import com.ustadmobile.util.test.ext.newFileFromResource
@@ -213,7 +213,7 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
 
                     val opfResponse = ustadCache.retrieve(requestBuilder(result.cevUrl!!))
                     val opfPackage = xml.decodeFromString(
-                        deserializer = Package.serializer(),
+                        deserializer = PackageDocument.serializer(),
                         string = opfResponse?.bodyAsSource()!!.readString()
                     )
 

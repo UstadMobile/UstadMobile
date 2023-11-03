@@ -23,5 +23,7 @@ class NcxDocument(
 
         const val NAMESPACE_NCX = "http://www.daisy.org/z3986/2005/ncx/"
 
+        const val MIMETYPE_NCX = "application/x-dtbncx+xml"
+
     }
 }

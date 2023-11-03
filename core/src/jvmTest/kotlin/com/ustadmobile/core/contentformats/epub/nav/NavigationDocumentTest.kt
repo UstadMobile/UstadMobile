@@ -37,6 +37,8 @@ class NavigationDocumentTest {
 
         assertEquals("toc", navDoc.bodyElement.navigationElements.first().epubType)
 
+        assertEquals("Page_1.xhtml", listItems.first().anchor?.href)
+
         /*
          * Assert that conversion of anchor content to plain text is working as expected in
          *  TestEPUBNavDocument-valid.xhtml the second item contains embedded tags (bold) that are

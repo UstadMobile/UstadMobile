@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.epubcontent
 
 import app.cash.turbine.test
-import com.ustadmobile.core.contentformats.epub.opf.Package
+import com.ustadmobile.core.contentformats.epub.opf.PackageDocument
 import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.url.UrlKmp
@@ -27,13 +27,24 @@ class EpubContentViewModelTest : AbstractMainDispatcherTest(){
         val opfText = this::class.java.getResourceAsStream(
             "/com/ustadmobile/core/contentformats/epub/opf/TestOpfDocument-valid.opf"
         )!!.readString()
+        val navXhtmlText = this::class.java.getResourceAsStream(
+            "/com/ustadmobile/core/contentformats/epub/nav/nav.xhtml"
+        )!!.readString()
 
         testViewModel<EpubContentViewModel> {
             mockWebServer.dispatcher = object: Dispatcher() {
                 override fun dispatch(request: RecordedRequest): MockResponse {
-                    return MockResponse()
-                        .addHeader("content-type", "application/oebps-package+xml")
-                        .setBody(opfText)
+                    return if(request.requestUrl.toString().endsWith("book.opf")) {
+                        MockResponse()
+                            .addHeader("content-type", "application/oebps-package+xml")
+                            .setBody(opfText)
+                    }else if(request.requestUrl.toString().endsWith("nav.xhtml")) {
+                        MockResponse()
+                            .addHeader("content-type", "application/xhtml+xml")
+                            .setBody(navXhtmlText)
+                    }else {
+                        MockResponse().setResponseCode(404)
+                    }
                 }
             }
             val xml: XML = di.direct.instance()
@@ -55,13 +66,22 @@ class EpubContentViewModelTest : AbstractMainDispatcherTest(){
             }.test(timeout = 5.seconds, name = "Spine urls will be set") {
                 val uiState = awaitItem()
                 assertEquals(7, uiState.spineUrls.size)
-                val opfPackage = xml.decodeFromString(Package.serializer(), opfText)
+                val opfPackage = xml.decodeFromString(PackageDocument.serializer(), opfText)
                 val opfUrl = UrlKmp(contentEntryVersion.cevUrl!!)
                 opfPackage.spine.itemRefs.forEachIndexed { index, itemRef ->
                     val item = opfPackage.manifest.items.first { it.id == itemRef.idRef }
                     assertEquals(opfUrl.resolve(item.href).toString(), uiState.spineUrls[index])
                 }
 
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            viewModel.uiState.filter {
+                it.tableOfContents.isNotEmpty()
+            }.test(timeout = 5.seconds, name = "Table of contents will be set") {
+                val uiState = awaitItem()
+                val tocFirstItem = uiState.tableOfContents.first()
+                assertEquals("Page_1.xhtml", tocFirstItem.href)
                 cancelAndIgnoreRemainingEvents()
             }
         }

@@ -26,7 +26,7 @@ class TestPackageParse {
             }
         }
 
-        val opf = xml.decodeFromString(Package.serializer(), opfDoc.readText())
+        val opf = xml.decodeFromString(PackageDocument.serializer(), opfDoc.readText())
         assertEquals("A Book", opf.metadata.titles.firstOrNull()?.content)
         assertEquals("202b10fe-b028-4b84-9b84-852aa766607d", opf.uniqueIdentifierContent())
 

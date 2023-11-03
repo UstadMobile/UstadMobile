@@ -2,7 +2,7 @@ package com.ustadmobile.core.catalog.contenttype
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.epub.ocf.Container
-import com.ustadmobile.core.contentformats.epub.opf.Package
+import com.ustadmobile.core.contentformats.epub.opf.PackageDocument
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.*
@@ -90,7 +90,7 @@ class EpubTypePluginCommonJvm(
 
                     val packageStr = it.readString()
 
-                    val opfPackage: Package = xml.decodeFromString(packageStr)
+                    val opfPackage: PackageDocument = xml.decodeFromString(packageStr)
 
                     val entry = ContentEntryWithLanguage().apply {
                         contentFlags = ContentEntry.FLAG_IMPORTED
@@ -154,7 +154,7 @@ class EpubTypePluginCommonJvm(
             val opfEntry = unzippedEntries.first { it.name == opfPath }
             val opfStr = fileSystem.source(opfEntry.path).buffered().readString()
 
-            val opfPackage = xml.decodeFromString(Package.serializer(), opfStr)
+            val opfPackage = xml.decodeFromString(PackageDocument.serializer(), opfStr)
             val opfUrl = UMFileUtil.resolveLink(urlPrefix, opfPath)
 
             try {

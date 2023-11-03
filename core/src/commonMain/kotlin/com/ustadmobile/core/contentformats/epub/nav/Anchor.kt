@@ -53,7 +53,7 @@ object AnchorSerializer: KSerializer<Anchor> {
 
     private fun deserializeDynamic(reader: XmlReader): Anchor {
         val href = reader.getAttributeValue(
-            nsUri = NAMESPACE_XHTML,
+            nsUri = null,
             localName = "href"
         )
         val text = reader.xhtmlContentToText().trim()

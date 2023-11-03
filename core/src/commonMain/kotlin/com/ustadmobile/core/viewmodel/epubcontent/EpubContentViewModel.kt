@@ -1,6 +1,11 @@
 package com.ustadmobile.core.viewmodel.epubcontent
 
-import com.ustadmobile.core.contentformats.epub.opf.Package
+import com.ustadmobile.core.contentformats.epub.nav.ListItem
+import com.ustadmobile.core.contentformats.epub.nav.NavigationDocument
+import com.ustadmobile.core.contentformats.epub.ncx.NavPoint
+import com.ustadmobile.core.contentformats.epub.ncx.NcxDocument
+import com.ustadmobile.core.contentformats.epub.ncx.NcxDocument.Companion.MIMETYPE_NCX
+import com.ustadmobile.core.contentformats.epub.opf.PackageDocument
 import com.ustadmobile.core.domain.openexternallink.OpenExternalLinkUseCase
 import com.ustadmobile.core.impl.appstate.OverflowItem
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -10,6 +15,7 @@ import com.ustadmobile.core.viewmodel.UstadViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -20,18 +26,23 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.decodeFromString
 import nl.adaptivity.xmlutil.serialization.XML
 import org.kodein.di.DI
 import org.kodein.di.instance
+import com.ustadmobile.core.MR
 
 data class EpubContentUiState(
-    val spineUrls: List<String> = emptyList()
+    val spineUrls: List<String> = emptyList(),
+    val tableOfContents: List<EpubTocItem> = emptyList(),
 )
 
 data class EpubTocItem(
+    val uid: Int,
     val label: String,
-    val href: String,
-    val children: List<EpubTocItem>
+    val href: String?,
+    val children: List<EpubTocItem>,
+    val indentLevel: Int = 0,
 )
 
 /**
@@ -77,6 +88,36 @@ class EpubContentViewModel(
      */
     val epubScrollCommands: Flow<EpubScrollCommand> = _epubScrollCommands.asSharedFlow()
 
+    val tocItemAtomicIds = atomic(0)
+
+    /**
+     * Convert a NCX navpoint to the common EpubTocItem
+     */
+    private fun NavPoint.toTocItem(indentLevel: Int): EpubTocItem {
+        return EpubTocItem(
+            uid = tocItemAtomicIds.incrementAndGet(),
+            label = navLabels.firstOrNull()?.text?.content ?: "",
+            href = content.src,
+            children = this.childPoints.map { it.toTocItem(indentLevel + 1) },
+            indentLevel = indentLevel,
+        )
+    }
+
+    /**
+     * Convert a Epub Nav document to the common EpubTocItem
+     */
+    private fun ListItem.toEpubTocItem(indentLevel: Int) : EpubTocItem {
+        return EpubTocItem(
+            uid = tocItemAtomicIds.incrementAndGet(),
+            label = anchor?.content ?: span?.content ?: "",
+            href = anchor?.href,
+            children = this.orderedList?.listItems?.map {
+                it.toEpubTocItem(indentLevel + 1)
+            } ?: emptyList(),
+            indentLevel = indentLevel,
+        )
+    }
+
     init {
         viewModelScope.launch {
             val contentEntryVersion = activeRepo.contentEntryVersionDao
@@ -87,7 +128,7 @@ class EpubContentViewModel(
                 try {
                     val opfStr = httpClient.get(cevUrl).bodyAsText()
                     val opfPackage = xml.decodeFromString(
-                        deserializer = Package.serializer(),
+                        deserializer = PackageDocument.serializer(),
                         string = opfStr
                     )
                     val cevUrlObj = UrlKmp(cevUrl)
@@ -110,13 +151,53 @@ class EpubContentViewModel(
                             title = opfPackage.metadata.titles.firstOrNull()?.content ?: "",
                             overflowItems = listOf(
                                 OverflowItem(
-                                    label = "Table of contents",
+                                    label = systemImpl.getString(MR.strings.table_of_contents),
                                     onClick = { }
                                 )
                             )
                         )
                     }
 
+                    val whiteSpaceRegex = Regex("\\s+")
+
+                    //Load and setup table of contents. As per the EPUB3 spec, an XHTML navigation
+                    //document is preferred, which will have the "toc nav" property. If that is not
+                    //found, then we will fallback to using the NCX
+                    val tocCandidates = opfPackage.manifest.items.filter {item ->
+                        item.properties?.split(whiteSpaceRegex)?.let { "toc" in it || "nav" in it } ?: false
+                    }
+
+                    val tocToUse = tocCandidates.firstOrNull {
+                        it.properties?.contains("nav") ?: false
+                    } ?: tocCandidates.firstOrNull()
+
+                    val tocItems = if(tocToUse != null && tocToUse.mediaType.startsWith("application/xhtml")) {
+                        val docStr = httpClient.get(
+                            cevUrlObj.resolve(tocToUse.href).toString()
+                        ).bodyAsText()
+                        val navDoc: NavigationDocument = xml.decodeFromString(docStr)
+                        navDoc.bodyElement.navigationElements
+                            .first().orderedList.listItems
+                            .flatMap { listItem ->
+                                listItem.toEpubTocItem(0).let { listOf(it) + it.children }
+                            }
+                    }else if(tocToUse != null && tocToUse.mediaType == MIMETYPE_NCX) {
+                        val docStr = httpClient.get(
+                            cevUrlObj.resolve(tocToUse.href).toString()
+                        ).bodyAsText()
+                        val ncxDoc: NcxDocument = xml.decodeFromString(docStr)
+                        ncxDoc.navMap.navPoints.flatMap { navPoint ->
+                            navPoint.toTocItem(0).let { listOf(it) + it.children }
+                        }
+                    }else {
+                        emptyList()
+                    }
+
+                    _uiState.update { prev ->
+                        prev.copy(
+                            tableOfContents = tocItems,
+                        )
+                    }
                 }catch(e: Throwable) {
                     e.printStackTrace()
                 }
