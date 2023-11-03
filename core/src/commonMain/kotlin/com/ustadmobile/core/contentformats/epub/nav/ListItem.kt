@@ -14,3 +14,4 @@ class ListItem(
     val span: Span? = null,
     val orderedList: OrderedList? = null,
 )
+
