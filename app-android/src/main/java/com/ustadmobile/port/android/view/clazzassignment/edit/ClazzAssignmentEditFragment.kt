@@ -34,23 +34,3 @@ class ClazzAssignmentEditFragment: UstadBaseMvvmFragment(){
         }
     }
 }
-
-//@Composable
-//@Preview
-//fun ClazzAssignmentEditScreenPreview() {
-//    val uiStateVal = ClazzAssignmentEditUiState(
-//        courseBlockEditUiState = CourseBlockEditUiState(
-//            courseBlock = CourseBlock().apply {
-//                cbMaxPoints = 78
-//                cbCompletionCriteria = 14
-//            },
-//        ),
-//        entity = CourseBlockWithEntity().apply {
-//            assignment = ClazzAssignment().apply {
-//                caMarkingType = ClazzAssignment.MARKED_BY_PEERS
-//            }
-//        }
-//    )
-//
-//    ClazzAssignmentEditScreen(uiStateVal)
-//}
