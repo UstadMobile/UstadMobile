@@ -30,12 +30,14 @@ import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readString
+import kotlinx.io.writeString
 import kotlinx.serialization.decodeFromString
 import nl.adaptivity.xmlutil.serialization.XML
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
+import java.net.URLDecoder
 
 class EpubTypePluginCommonJvm(
     endpoint: Endpoint,
@@ -44,6 +46,7 @@ class EpubTypePluginCommonJvm(
     uriHelper: UriHelper,
     private val xml: XML,
     private val fileSystem: FileSystem = SystemFileSystem,
+    private val xhtmlFixer: XhtmlFixer,
     uploader: ContentPluginUploader = DefaultContentPluginUploader(di)
 ) : AbstractContentImportPlugin(endpoint, uploader, uriHelper) {
 
@@ -160,15 +163,37 @@ class EpubTypePluginCommonJvm(
             try {
                 cache.store(
                     opfPackage.manifest.items.map {
+                        val hrefDecoded = URLDecoder.decode(it.href, "UTF-8")
                         val request = requestBuilder(UMFileUtil.resolveLink(opfUrl, it.href))
                         val pathInZip = Path(opfEntry.name).parent?.let { opfParent ->
-                            Path(opfParent, it.href)
-                        } ?: Path(it.href)
+                            Path(opfParent, hrefDecoded)
+                        } ?: Path(hrefDecoded)
+
+                        val filePath = unzippedEntries.firstOrNull {
+                            it.name == pathInZip.toString()
+                        }?.path ?: throw IllegalArgumentException("Cannot find ${pathInZip}")
+
+                        /* If this is XHTML, then use the xhtmlFixer to check for invalid XHTML
+                         * content (some content e.g. Storyweaver includes br's without the trailing
+                         * slash etc).
+                         */
+                        if(it.mediaType == "application/xhtml+xml") {
+                            val xhtmlText = fileSystem.source(filePath).buffered().use {fileSource ->
+                                fileSource.readString()
+                            }
+
+                            val fixResult = xhtmlFixer.fixXhtml(xhtmlText)
+                            if(!fixResult.wasValid) {
+                                fileSystem.sink(filePath).buffered().use {
+                                    it.writeString(fixResult.xhtml)
+                                }
+                            }
+                        }
 
                         CacheEntryToStore(
                             request = request,
                             response = HttpPathResponse(
-                                path = unzippedEntries.first { it.name == pathInZip.toString() }.path,
+                                path = filePath,
                                 fileSystem = fileSystem,
                                 mimeType = it.mediaType,
                                 request = request,

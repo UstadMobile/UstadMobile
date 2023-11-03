@@ -260,6 +260,7 @@ fun Application.umRestApplication(
             val cache: UstadCache = instance()
             val uriHelper: UriHelper = instance()
             val xml: XML = instance()
+            val xhtmlFixer: XhtmlFixer = instance()
 
             ContentPluginManager(
                 listOf(
@@ -269,6 +270,7 @@ fun Application.umRestApplication(
                         cache = cache,
                         uriHelper = uriHelper,
                         xml = xml,
+                        xhtmlFixer = xhtmlFixer,
                     ),
                     XapiZipContentImportPlugin(
                         endpoint = context,

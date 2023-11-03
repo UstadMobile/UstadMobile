@@ -3,6 +3,8 @@ package com.ustadmobile.lib.rest.dimodules
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
+import com.ustadmobile.core.catalog.contenttype.XhtmlFixer
+import com.ustadmobile.core.catalog.contenttype.XhtmlFixerJsoup
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
@@ -113,5 +115,9 @@ fun makeJvmBackendDiModule(
                 unknownChildHandler  = XmlConfig.IGNORING_UNKNOWN_CHILD_HANDLER
             }
         }
+    }
+
+    bind<XhtmlFixer>() with singleton {
+        XhtmlFixerJsoup(xml = instance())
     }
 }
