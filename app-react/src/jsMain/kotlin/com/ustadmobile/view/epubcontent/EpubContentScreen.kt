@@ -2,12 +2,15 @@ package com.ustadmobile.view.epubcontent
 
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useLaunchedEffect
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.util.ext.forEach
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentUiState
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
 import com.ustadmobile.core.viewmodel.epubcontent.EpubScrollCommand
+import com.ustadmobile.core.viewmodel.epubcontent.EpubTocItem
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListContext
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -21,8 +24,19 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.update
+import mui.material.Box
+import mui.material.Drawer
+import mui.material.DrawerAnchor
+import mui.material.IconButton
+import mui.material.ListItem
+import mui.material.ListItemButton
+import mui.material.ListItemSecondaryAction
+import mui.material.ListItemText
+import mui.material.Tooltip
+import mui.system.sx
 import react.FC
 import react.Props
+import react.ReactNode
 import react.create
 import react.dom.html.ReactHTML.iframe
 import react.useEffect
@@ -38,11 +52,17 @@ import web.cssom.None
 import web.cssom.Overflow
 import web.cssom.pct
 import web.cssom.px
+import web.cssom.vw
 import web.dom.getComputedStyle
 import web.html.HTMLIFrameElement
 import web.scroll.ScrollBehavior
 import web.uievents.CLICK
 import kotlin.math.roundToInt
+import mui.material.List as MuiList
+import mui.icons.material.KeyboardArrowUp as KeyboardArrowUpIcon
+import mui.icons.material.KeyboardArrowDown as KeyboardArrowDownIcon
+import com.ustadmobile.core.MR
+import react.dom.aria.ariaLabel
 
 external interface EpubContentProps : Props{
     var uiState: EpubContentUiState
@@ -50,6 +70,12 @@ external interface EpubContentProps : Props{
     var onClickLink: (baseUrl: String, href: String) -> Unit
 
     var scrollToCommands: Flow<EpubScrollCommand>
+
+    var onDismissTableOfContents: () -> Unit
+
+    var onClickTocItem: (EpubTocItem) -> Unit
+
+    var onClickToggleTogItem: (EpubTocItem) -> Unit
 }
 
 /**
@@ -72,6 +98,9 @@ external interface EpubContentProps : Props{
  */
 val EpubContentComponent = FC<EpubContentProps> { props ->
     val muiAppState = useMuiAppState()
+    val theme by useRequiredContext(ThemeContext)
+    val strings = useStringProvider()
+
 
     val defaultHeightMap = useMemo(dependencies = emptyArray()) {
         MutableStateFlow(mapOf<Int, String>())
@@ -89,6 +118,68 @@ val EpubContentComponent = FC<EpubContentProps> { props ->
 
     fun onScrollBy(amount: Int) {
         scrollByCommandFlow.tryEmit(amount)
+    }
+
+    Drawer {
+        anchor = DrawerAnchor.right
+        open = props.uiState.tableOfContentsOpen
+        onClose = { _, _ ->
+            props.onDismissTableOfContents()
+        }
+
+        MuiList {
+            sx {
+                maxWidth = 90.vw
+            }
+
+            Box {
+                sx {
+                    paddingTop = muiAppState.appBarHeight.px
+                }
+            }
+
+            props.uiState.tableOfContentToDisplay.forEach { tocItem ->
+                ListItem {
+                    key = "toc_${tocItem.uid}"
+
+                    ListItemButton {
+                        sx {
+                            paddingLeft = theme.spacing(2 + (tocItem.indentLevel * 2))
+                        }
+                        onClick = {
+                            props.onClickTocItem(tocItem)
+                        }
+
+                        ListItemText {
+                            primary = ReactNode(tocItem.label)
+                        }
+                    }
+
+                    if(tocItem.hasChildren) {
+                        ListItemSecondaryAction {
+                            val collapsed = tocItem.uid in props.uiState.collapsedTocUids
+                            val text = strings[if(collapsed) MR.strings.expand else MR.strings.collapse]
+                            Tooltip {
+                                title = ReactNode(text)
+
+                                IconButton {
+                                    onClick = {
+                                        props.onClickToggleTogItem(tocItem)
+                                    }
+                                    ariaLabel = text
+
+                                    if(collapsed) {
+                                        KeyboardArrowDownIcon()
+                                    }else {
+                                        KeyboardArrowUpIcon()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     VirtualList {
@@ -300,6 +391,9 @@ val EpubContentScreen = FC<Props> {
         uiState = uiStateVal
         onClickLink = epubViewModel::onClickLink
         scrollToCommands = epubViewModel.epubScrollCommands
+        onDismissTableOfContents = epubViewModel::onDismissTableOfContentsDrawer
+        onClickTocItem = epubViewModel::onClickTocItem
+        onClickToggleTogItem = epubViewModel::onClickToggleTocItem
     }
 }
 

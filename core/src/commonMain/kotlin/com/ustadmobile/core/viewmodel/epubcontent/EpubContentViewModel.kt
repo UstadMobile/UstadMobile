@@ -31,19 +31,46 @@ import nl.adaptivity.xmlutil.serialization.XML
 import org.kodein.di.DI
 import org.kodein.di.instance
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.contentformats.epub.opf.Item
+import kotlin.concurrent.Volatile
 
 data class EpubContentUiState(
     val spineUrls: List<String> = emptyList(),
     val tableOfContents: List<EpubTocItem> = emptyList(),
-)
+    val tableOfContentsOpen: Boolean = false,
+    val collapsedTocUids: Set<Int> = emptySet(),
+) {
+
+    /**
+     * The table of contents to be displayed: this will hide any children of collapsed items.
+     */
+    val tableOfContentToDisplay: List<EpubTocItem> = tableOfContents.filter { tocItem ->
+        !collapsedTocUids.any { tocItem.isChildOfUid(it) }
+    }
+
+}
 
 data class EpubTocItem(
     val uid: Int,
     val label: String,
     val href: String?,
     val children: List<EpubTocItem>,
+    /*
+     * A list of all the ancestor uids - makes it easy to filter out children of collapsed toc items
+     */
+    val parentUids: Set<Int> = emptySet(),
     val indentLevel: Int = 0,
-)
+) {
+
+    val hasChildren: Boolean = children.isNotEmpty()
+
+    fun isChildOfUid(
+        uid: Int
+    ) : Boolean {
+        return uid in parentUids
+    }
+
+}
 
 /**
  * ScrollCommand - see epubScrollCommands
@@ -90,31 +117,48 @@ class EpubContentViewModel(
 
     val tocItemAtomicIds = atomic(0)
 
+    @Volatile
+    private var navUrl: String? =null
+
     /**
      * Convert a NCX navpoint to the common EpubTocItem
      */
-    private fun NavPoint.toTocItem(indentLevel: Int): EpubTocItem {
+    private fun NavPoint.toTocItem(
+        indentLevel: Int,
+        parentUids: Set<Int>,
+    ): EpubTocItem {
+        val uid = tocItemAtomicIds.incrementAndGet()
+        val uidsForChildren = parentUids + uid
         return EpubTocItem(
-            uid = tocItemAtomicIds.incrementAndGet(),
+            uid = uid,
             label = navLabels.firstOrNull()?.text?.content ?: "",
             href = content.src,
-            children = this.childPoints.map { it.toTocItem(indentLevel + 1) },
             indentLevel = indentLevel,
+            parentUids = parentUids,
+            children = this.childPoints.map {
+                it.toTocItem(indentLevel + 1, uidsForChildren)
+            }
         )
     }
 
     /**
      * Convert a Epub Nav document to the common EpubTocItem
      */
-    private fun ListItem.toEpubTocItem(indentLevel: Int) : EpubTocItem {
+    private fun ListItem.toEpubTocItem(
+        indentLevel: Int,
+        parentUids: Set<Int>,
+    ) : EpubTocItem {
+        val uid = tocItemAtomicIds.incrementAndGet()
+        val uidsForChildren = parentUids + uid
         return EpubTocItem(
             uid = tocItemAtomicIds.incrementAndGet(),
             label = anchor?.content ?: span?.content ?: "",
             href = anchor?.href,
             children = this.orderedList?.listItems?.map {
-                it.toEpubTocItem(indentLevel + 1)
+                it.toEpubTocItem(indentLevel + 1, uidsForChildren)
             } ?: emptyList(),
             indentLevel = indentLevel,
+            parentUids = parentUids,
         )
     }
 
@@ -152,7 +196,13 @@ class EpubContentViewModel(
                             overflowItems = listOf(
                                 OverflowItem(
                                     label = systemImpl.getString(MR.strings.table_of_contents),
-                                    onClick = { }
+                                    onClick = {
+                                        _uiState.update { prev ->
+                                            prev.copy(
+                                                tableOfContentsOpen = true,
+                                            )
+                                        }
+                                    }
                                 )
                             )
                         )
@@ -166,28 +216,34 @@ class EpubContentViewModel(
                     val tocCandidates = opfPackage.manifest.items.filter {item ->
                         item.properties?.split(whiteSpaceRegex)?.let { "toc" in it || "nav" in it } ?: false
                     }
+                    val spineNcxCandidate: List<Item> = opfPackage.spine.toc?.let { spineTocid ->
+                        opfPackage.manifest.items.firstOrNull { it.id == spineTocid }?.let { listOf(it) } ?: emptyList()
+                    } ?: emptyList()
+                    val allTocCandidates = (tocCandidates + spineNcxCandidate)
 
-                    val tocToUse = tocCandidates.firstOrNull {
+                    val tocToUse = allTocCandidates.firstOrNull {
                         it.properties?.contains("nav") ?: false
-                    } ?: tocCandidates.firstOrNull()
+                    } ?: allTocCandidates.firstOrNull()
 
                     val tocItems = if(tocToUse != null && tocToUse.mediaType.startsWith("application/xhtml")) {
-                        val docStr = httpClient.get(
-                            cevUrlObj.resolve(tocToUse.href).toString()
-                        ).bodyAsText()
+                        val urlResolved = cevUrlObj.resolve(tocToUse.href).toString().also {
+                            navUrl = it
+                        }
+                        val docStr = httpClient.get(urlResolved).bodyAsText()
                         val navDoc: NavigationDocument = xml.decodeFromString(docStr)
                         navDoc.bodyElement.navigationElements
                             .first().orderedList.listItems
                             .flatMap { listItem ->
-                                listItem.toEpubTocItem(0).let { listOf(it) + it.children }
+                                listItem.toEpubTocItem(0, emptySet()).let { listOf(it) + it.children }
                             }
                     }else if(tocToUse != null && tocToUse.mediaType == MIMETYPE_NCX) {
-                        val docStr = httpClient.get(
-                            cevUrlObj.resolve(tocToUse.href).toString()
-                        ).bodyAsText()
+                        val urlResolved = cevUrlObj.resolve(tocToUse.href).toString().also {
+                            navUrl = it
+                        }
+                        val docStr = httpClient.get(urlResolved).bodyAsText()
                         val ncxDoc: NcxDocument = xml.decodeFromString(docStr)
                         ncxDoc.navMap.navPoints.flatMap { navPoint ->
-                            navPoint.toTocItem(0).let { listOf(it) + it.children }
+                            navPoint.toTocItem(0, emptySet()).let { listOf(it) + it.children }
                         }
                     }else {
                         emptyList()
@@ -228,7 +284,39 @@ class EpubContentViewModel(
         }else {
             openExternalLinkUseCase(url.toString())
         }
+    }
 
+    fun onClickTocItem(
+        tocItem: EpubTocItem,
+    ) {
+        _uiState.update { prev ->
+            prev.copy(tableOfContentsOpen = false)
+        }
+
+        //NavUrl will always be set before the table of contents is displayed, so this is safe
+        val baseHref = navUrl ?: return
+        val itemUrl = tocItem.href ?: return
+        onClickLink(baseHref, itemUrl)
+    }
+
+    fun onClickToggleTocItem(tocItem: EpubTocItem) {
+        _uiState.update { prev ->
+            prev.copy(
+                collapsedTocUids = if(tocItem.uid in prev.collapsedTocUids) {
+                    prev.collapsedTocUids.filter { it != tocItem.uid }.toSet()
+                }else {
+                    prev.collapsedTocUids + tocItem.uid
+                }
+            )
+        }
+    }
+
+    fun onDismissTableOfContentsDrawer() {
+        _uiState.update { prev ->
+            prev.copy(
+                tableOfContentsOpen = false,
+            )
+        }
     }
 
     companion object {
