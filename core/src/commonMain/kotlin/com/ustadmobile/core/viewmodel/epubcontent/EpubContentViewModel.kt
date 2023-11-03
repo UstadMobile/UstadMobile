@@ -39,6 +39,7 @@ data class EpubContentUiState(
     val tableOfContents: List<EpubTocItem> = emptyList(),
     val tableOfContentsOpen: Boolean = false,
     val collapsedTocUids: Set<Int> = emptySet(),
+    val coverImageUrl: String? = null,
 ) {
 
     /**
@@ -115,7 +116,7 @@ class EpubContentViewModel(
      */
     val epubScrollCommands: Flow<EpubScrollCommand> = _epubScrollCommands.asSharedFlow()
 
-    val tocItemAtomicIds = atomic(0)
+    private val tocItemAtomicIds = atomic(0)
 
     @Volatile
     private var navUrl: String? =null
@@ -183,10 +184,14 @@ class EpubContentViewModel(
                             cevUrlObj.resolve(it.href)
                         }?.toString()
                     }
+                    val coverImageUrl = opfPackage.coverItem()?.let {
+                        cevUrlObj.resolve(it.href)
+                    }?.toString()
 
                     _uiState.update { prev ->
                         prev.copy(
                             spineUrls = spineUrls,
+                            coverImageUrl = coverImageUrl
                         )
                     }
 

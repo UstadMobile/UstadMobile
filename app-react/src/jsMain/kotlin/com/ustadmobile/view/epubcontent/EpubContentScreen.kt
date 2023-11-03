@@ -63,6 +63,8 @@ import mui.icons.material.KeyboardArrowUp as KeyboardArrowUpIcon
 import mui.icons.material.KeyboardArrowDown as KeyboardArrowDownIcon
 import com.ustadmobile.core.MR
 import react.dom.aria.ariaLabel
+import react.dom.html.ReactHTML.img
+import web.cssom.TextAlign
 
 external interface EpubContentProps : Props{
     var uiState: EpubContentUiState
@@ -135,7 +137,20 @@ val EpubContentComponent = FC<EpubContentProps> { props ->
             Box {
                 sx {
                     paddingTop = muiAppState.appBarHeight.px
+                    textAlign = TextAlign.center
                 }
+
+                props.uiState.coverImageUrl?.also { coverUrl ->
+                    img {
+                        src = coverUrl
+                        css {
+                            maxWidth = 300.px
+                            maxHeight = 300.px
+                            paddingTop = theme.spacing(2)
+                        }
+                    }
+                }
+
             }
 
             props.uiState.tableOfContentToDisplay.forEach { tocItem ->

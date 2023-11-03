@@ -32,6 +32,27 @@ class PackageDocument(
         return metadata.identifiers.firstOrNull { it.id == uniqueIdentifier }?.content
     }
 
+    /**
+     * Get the manifest item representing the cover image url, if any
+     */
+    fun coverItem() : Item? {
+        val whitespaceRegex = Regex("\\s+")
+
+        /**
+         * First try the EPUB3 way: an item with properties including cover-image as per
+         * https://idpf.github.io/epub-vocabs/package/item/#sec-cover-image
+         *
+         * If that doesn't work, try the EPUB 2 way - look for a section in the metadata
+         * meta name=cover name=itemId
+         */
+        return manifest.items.firstOrNull {
+            it.properties?.split(whitespaceRegex)?.contains("cover-image")  ?: false
+        } ?: metadata.metas.firstOrNull { it.name == "cover" }?.content?.let { coverId ->
+            manifest.items.firstOrNull { it.id == coverId }
+        }
+
+    }
+
     companion object {
 
         const val NS_OPF = "http://www.idpf.org/2007/opf"

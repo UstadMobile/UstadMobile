@@ -21,4 +21,6 @@ class Metadata(
 
     val identifiers: List<DcIdentifier> = emptyList(),
 
+    val metas: List<Meta> = emptyList(),
+
 )
