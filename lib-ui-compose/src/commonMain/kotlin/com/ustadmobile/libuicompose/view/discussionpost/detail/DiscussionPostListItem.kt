@@ -6,7 +6,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.ustadmobile.lib.db.composites.DiscussionPostAndPosterNames
-import com.ustadmobile.lib.db.entities.DiscussionPost
 import com.ustadmobile.libuicompose.components.HtmlText
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import java.util.TimeZone
