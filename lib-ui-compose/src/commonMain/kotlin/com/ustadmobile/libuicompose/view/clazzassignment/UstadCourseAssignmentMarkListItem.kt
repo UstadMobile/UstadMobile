@@ -1,9 +1,8 @@
 package com.ustadmobile.libuicompose.view.clazzassignment
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
-import androidx.compose.material.ListItem
+import androidx.compose.material3.ListItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -11,6 +10,7 @@ import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -24,7 +24,6 @@ import dev.icerock.moko.resources.compose.stringResource
 import java.util.TimeZone
 import com.ustadmobile.core.MR
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun UstadCourseAssignmentMarkListItem(
     uiState: UstadCourseAssignmentMarkListItemUiState,
@@ -45,17 +44,19 @@ fun UstadCourseAssignmentMarkListItem(
 
     ListItem(
         modifier = modifier,
-        icon = {
+        leadingContent = {
             Icon(
                 Icons.Filled.Person,
                 contentDescription = "",
                 modifier = Modifier.size(40.dp)
             )
         },
-        text = { Text(text) },
-        secondaryText = {
+        headlineContent = { Text(text) },
+        supportingContent = {
             Column {
-                Row {
+                Row(
+                    verticalAlignment = Alignment.Bottom
+                ) {
                     Icon(
                         Icons.Filled.EmojiEvents,
                         contentDescription = "",
@@ -81,7 +82,9 @@ fun UstadCourseAssignmentMarkListItem(
                     )
                 }
 
-                Row {
+                Row(
+                    verticalAlignment = Alignment.Bottom
+                ) {
                     Icon(
                         Icons.Filled.Chat,
                         contentDescription = "",
@@ -93,30 +96,9 @@ fun UstadCourseAssignmentMarkListItem(
 
             }
         },
-        trailing = {
+        trailingContent = {
             Text(formattedTime)
         }
     )
 }
-
-//@Composable
-//@Preview
-//private fun UstadMarksPersonListItemPreview() {
-//    UstadCourseAssignmentMarkListItem(
-//        uiState = UstadCourseAssignmentMarkListItemUiState(
-//            mark = CourseAssignmentMarkAndMarkerName(
-//                courseAssignmentMark = CourseAssignmentMark().apply {
-//                    camMarkerSubmitterUid = 2
-//                    camMarkerComment = "Comment"
-//                    camMark = 8.1f
-//                    camPenalty = 0.9f
-//                    camMaxMark = 10f
-//                    camLct = systemTimeInMillis()
-//                },
-//                markerFirstNames = "John",
-//                markerLastName = "Smith",
-//            )
-//        )
-//    )
-//}
 
