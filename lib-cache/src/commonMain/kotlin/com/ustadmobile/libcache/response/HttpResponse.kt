@@ -6,6 +6,8 @@ import kotlinx.io.Source
 
 interface HttpResponse {
 
+    val responseCode: Int
+
     val request: HttpRequest
 
     val headers: HttpHeaders

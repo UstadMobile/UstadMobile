@@ -14,7 +14,7 @@ class HeadersBuilder internal constructor(
     }
 
     fun header(name: String, value: String) {
-        headersList.removeAll { it.name.equals(name, false) }
+        headersList.removeAll { it.name.equals(name, true) }
         headersList.add(HttpHeader(name, value))
     }
 

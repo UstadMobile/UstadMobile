@@ -35,6 +35,9 @@ class HttpPathResponse(
 
     }
 
+    override val responseCode: Int
+        get() = 200
+
     override fun bodyAsSource(): Source {
         if(!bodyRead.getAndSet(true)) {
             return fileSystem.source(path).buffered()
@@ -42,4 +45,6 @@ class HttpPathResponse(
             throw IllegalStateException("Body has already been read")
         }
     }
+
+
 }

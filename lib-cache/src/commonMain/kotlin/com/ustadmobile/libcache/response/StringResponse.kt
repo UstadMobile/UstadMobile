@@ -12,6 +12,7 @@ class StringResponse(
     override val request: HttpRequest,
     private val mimeType: String,
     private val extraHeaders: HttpHeaders = HttpHeaders.emptyHeaders(),
+    override val responseCode: Int = 200,
     body: String,
 ): HttpResponse {
 

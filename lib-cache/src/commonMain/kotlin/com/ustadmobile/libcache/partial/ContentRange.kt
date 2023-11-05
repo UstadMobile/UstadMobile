@@ -15,6 +15,9 @@ class ContentRange(
     val contentLength: Long,
 ) {
 
+    val contentRangeResponseHeader: String
+        get() = "bytes $fromByte-$toByte/$totalBytes"
+
     companion object {
 
         /**
