@@ -38,8 +38,6 @@ import com.ustadmobile.libuicompose.components.UstadDateField
 import com.ustadmobile.libuicompose.components.UstadSwitchField
 import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
 import com.ustadmobile.libuicompose.util.compose.stringIdOptionListResource
-import com.ustadmobile.libuicompose.view.clazz.edit.constants.BLOCK_AND_ENTRY_ICON_MAP
-
 import org.burnoutcrew.reorderable.*
 
 @Composable
@@ -200,7 +198,7 @@ fun ClazzEditScreen(
                             )
                             Spacer(modifier = Modifier.width(startPadding))
                             Icon(
-                                BLOCK_AND_ENTRY_ICON_MAP[courseBlock.editIconId]
+                                ClazzEditConstants.BLOCK_AND_ENTRY_ICON_MAP[courseBlock.editIconId]
                                     ?:  Icons.Filled.TextSnippet,
                                 contentDescription = null
                             )
