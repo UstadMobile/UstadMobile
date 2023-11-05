@@ -11,31 +11,31 @@ import com.ustadmobile.lib.db.entities.*
 @Preview
 fun ClazzLogListAttendanceScreenPreview() {
     val uiStateVal = ClazzLogListAttendanceUiState(
-        clazzLogsList = {
-            ListPagingSource(listOf(
-                ClazzLog().apply {
-                    clazzLogUid = 1
-                    clazzLogNumPresent = 40
-                    clazzLogNumPartial = 15
-                    clazzLogNumAbsent = 10
-                    logDate = 1675089491000
-                },
-                ClazzLog().apply {
-                    clazzLogUid = 2
-                    clazzLogNumPresent = 40
-                    clazzLogNumPartial = 30
-                    clazzLogNumAbsent = 30
-                    logDate = 1675003091000
-                },
-                ClazzLog().apply {
-                    clazzLogUid = 3
-                    clazzLogNumPresent = 70
-                    clazzLogNumPartial = 20
-                    clazzLogNumAbsent = 2
-                    logDate = 1674916691000
-                }
-            ))
-        },
+//        clazzLogsList = {
+//            ListPagingSource(listOf(
+//                ClazzLog().apply {
+//                    clazzLogUid = 1
+//                    clazzLogNumPresent = 40
+//                    clazzLogNumPartial = 15
+//                    clazzLogNumAbsent = 10
+//                    logDate = 1675089491000
+//                },
+//                ClazzLog().apply {
+//                    clazzLogUid = 2
+//                    clazzLogNumPresent = 40
+//                    clazzLogNumPartial = 30
+//                    clazzLogNumAbsent = 30
+//                    logDate = 1675003091000
+//                },
+//                ClazzLog().apply {
+//                    clazzLogUid = 3
+//                    clazzLogNumPresent = 70
+//                    clazzLogNumPartial = 20
+//                    clazzLogNumAbsent = 2
+//                    logDate = 1674916691000
+//                }
+//            ))
+//        },
         graphData = AttendanceGraphData(
              percentageAttendedSeries = listOf(
                  Pair(1674743891000, .80f),
