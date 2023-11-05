@@ -2,13 +2,13 @@ package com.ustadmobile.libuicompose.view.clazzassignment
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
-import androidx.compose.material.ListItem
+import androidx.compose.material3.ListItem
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AssignmentTurnedIn
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -17,9 +17,12 @@ import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.lib.db.entities.*
 import java.util.*
 import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.components.HtmlText
+import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
+import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
+import com.ustadmobile.libuicompose.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewConstants.ASSIGNMENT_STATUS_MAP
 import dev.icerock.moko.resources.compose.stringResource
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun UstadClazzAssignmentListItem(
 
@@ -40,22 +43,21 @@ fun UstadClazzAssignmentListItem(
     ListItem(
         modifier = modifier
             .clickable(onClick = onClick),
-        icon = {
+        leadingContent = {
             Icon(
                 Icons.Default.AssignmentTurnedIn,
                 contentDescription = "",
                 modifier = Modifier.size(40.dp)
             )
         },
-        text = { Text(courseBlock.cbTitle ?: "") },
-        secondaryText = {
+        headlineContent = { Text(courseBlock.cbTitle ?: "") },
+        supportingContent = {
             Column{
                 if (blockUiState.cbDescriptionVisible){
-                    // TODO error
-//                    HtmlText(
-//                        html = courseBlock.cbDescription ?: "",
-//                        htmlMaxLines = 1,
-//                    )
+                    HtmlText(
+                        html = courseBlock.cbDescription ?: "",
+                        htmlMaxLines = 1,
+                    )
                 }
 
                 DateAndPointRow(courseBlock = courseBlock)
@@ -64,20 +66,17 @@ fun UstadClazzAssignmentListItem(
                     horizontalArrangement = Arrangement.spacedBy(2.dp)
                 ){
                     if (assignmentUiState?.submissionStatusIconVisible == true){
-//                        Icon(
-//                            painter = painterResource(
-//                                     // TODO error
-//                                id = ASSIGNMENT_STATUS_MAP[assignment.fileSubmissionStatus]
-//                                    ?: R.drawable.ic_baseline_done_all_24),
-//                            contentDescription = "")
+                        Icon(
+                            ASSIGNMENT_STATUS_MAP[assignment.fileSubmissionStatus]
+                                ?: Icons.Default.DoneAll,
+                            contentDescription = "")
                     }
 
                     if (assignmentUiState?.submissionStatusVisible == true){
-                                      // TODO error
-//                        Text(text = stringIdMapResource(
-//                            map = SubmissionConstants.STATUS_MAP,
-//                            key = assignment.fileSubmissionStatus)
-//                        )
+                        Text(text = stringIdMapResource(
+                            map = SubmissionConstants.STATUS_MAP,
+                            key = assignment.fileSubmissionStatus)
+                        )
                     }
                 }
                 
@@ -85,7 +84,6 @@ fun UstadClazzAssignmentListItem(
                     Text(text = stringResource(MR.strings.three_num_items_with_name_with_comma,
 
                         assignment.progressSummary
-                            // TODO error
                             ?.calculateNotSubmittedStudents() ?: 0,
                         stringResource(MR.strings.not_submitted_cap),
 
@@ -112,11 +110,10 @@ private fun DateAndPointRow(
 
     val assignmentUiState = assignment?.listItemUiState
 
-                    // TODO error
-//    val dateTime = rememberFormattedDateTime(
-//        timeInMillis = courseBlock.cbDeadlineDate,
-//        timeZoneId = TimeZone.getDefault().id
-//    )
+    val dateTime = rememberFormattedDateTime(
+        timeInMillis = courseBlock.cbDeadlineDate,
+        timeZoneId = TimeZone.getDefault().id
+    )
 
     Row{
         if (blockUiState.cbDeadlineDateVisible){
@@ -126,11 +123,11 @@ private fun DateAndPointRow(
                 modifier = Modifier.size(20.dp),
             )
             Spacer(modifier = Modifier.width(2.dp))
-//            Text(text = dateTime)
+            Text(text = dateTime)
         }
 
         Spacer(modifier = Modifier.width(10.dp))
-        // TODO error
+
 //To be fixed as part of the assignment screens
 //        if (assignmentUiState?.assignmentMarkVisible == true){
 //            Text("${assignment.mark?.camMark ?: 0}/" +

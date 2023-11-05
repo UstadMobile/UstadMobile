@@ -13,14 +13,20 @@ import androidx.compose.material.Icon
 import androidx.compose.material.ListItem
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.Forum
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Login
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Title
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.util.ext.htmlToPlainText
@@ -32,9 +38,15 @@ import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.CourseBlockWithCompleteEntity
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
-import com.ustadmobile.libuicompose.components.UstadDetailField
+import com.ustadmobile.libuicompose.components.HtmlText
+import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
+import com.ustadmobile.libuicompose.util.rememberFormattedDateRange
+import com.ustadmobile.libuicompose.util.rememberFormattedTime
 import com.ustadmobile.libuicompose.view.clazzassignment.UstadClazzAssignmentListItem
 import com.ustadmobile.libuicompose.view.contententry.UstadContentEntryListItem
+import com.ustadmobile.port.android.view.composable.paddingCourseBlockIndent
 
 val ICON_SIZE = 40.dp
 
@@ -79,95 +91,121 @@ fun ClazzDetailOverviewScreen(
         uiState.clazz?.numTeachers ?: 0,
         uiState.clazz?.numStudents ?: 0)
 
-    //  TODO error
-//    val clazzDateRange = rememberFormattedDateRange(
-//        startTimeInMillis = uiState.clazz?.clazzStartTime ?: 0L,
-//        endTimeInMillis = uiState.clazz?.clazzEndTime ?: UNSET_DISTANT_FUTURE,
-//        timeZoneId = uiState.clazz?.clazzTimeZone ?: "UTC",
-//    )
+    val clazzDateRange = rememberFormattedDateRange(
+        startTimeInMillis = uiState.clazz?.clazzStartTime ?: 0L,
+        endTimeInMillis = uiState.clazz?.clazzEndTime ?: UNSET_DISTANT_FUTURE,
+        timeZoneId = uiState.clazz?.clazzTimeZone ?: "UTC",
+    )
 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-        //  TODO error
-//            .defaultScreenPadding()
+            .defaultScreenPadding()
     ){
         item {
-            //  TODO error
-//            HtmlText(
-//                html = uiState.clazz?.clazzDesc ?: "",
-//                modifier = Modifier.defaultItemPadding()
-//            )
+            HtmlText(
+                html = uiState.clazz?.clazzDesc ?: "",
+                modifier = Modifier.defaultItemPadding()
+            )
         }
 
         item {
-            //  TODO error
-//            UstadDetailField(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .defaultItemPadding(),
-//                imageId = R.drawable.ic_group_black_24dp,
-//                valueText = numMembers,
-//                labelText = stringResource(MR.strings.members_key)
-//            )
+            ListItem(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultItemPadding(),
+                icon = {
+                    Icon(
+                        Icons.Filled.Group,
+                        contentDescription = null
+                    )
+                },
+                text = {
+                    Text(numMembers)},
+                secondaryText = { Text(stringResource(MR.strings.members_key)) }
+            )
         }
 
         if (uiState.clazzCodeVisible) {
             item {
-                //  TODO error
-//                UstadDetailField(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .defaultItemPadding(),
-//                    imageId = R.drawable.ic_login_24px,
-//                    valueText = uiState.clazz?.clazzCode ?: "",
-//                    labelText = stringResource(MR.strings.class_code),
-//                    onClick = {
-//                        onClickClassCode(uiState.clazz?.clazzCode ?: "")
-//                    }
-//                )
+                ListItem(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultItemPadding()
+                        .clickable(
+                            onClick = {
+                                onClickClassCode(uiState.clazz?.clazzCode ?: "")
+                            }
+                        ),
+                    icon = {
+                        Icon(
+                            Icons.Filled.Login,
+                            contentDescription = null
+                        )
+                    },
+                    text = {
+                        Text(uiState.clazz?.clazzCode ?: "")},
+                    secondaryText = { stringResource(MR.strings.class_code) }
+                )
             }
         }
 
         if (uiState.clazzSchoolUidVisible){
             item {
-                //  TODO error
-//                UstadDetailField(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .defaultItemPadding(),
-//                    imageId = R.drawable.ic_school_black_24dp,
-//                    valueText = uiState.clazz?.clazzSchool?.schoolName ?: "",
-//                    labelText = null,
-//                )
+                ListItem(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultItemPadding(),
+                    icon = {
+                        Icon(
+                            Icons.Filled.School,
+                            contentDescription = null
+                        )
+                    },
+                    text = { Text(uiState.clazz?.clazzSchool?.schoolName ?: "")}
+                )
             }
         }
 
         if (uiState.clazzDateVisible){
             item {
-                //  TODO error
-//                UstadDetailField(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .defaultItemPadding(),
-//                    imageId = R.drawable.ic_event_black_24dp,
-//                    valueText = clazzDateRange,
-//                    labelText = "${stringResource(MR.strings.start_date)} - ${stringResource(MR.strings.end_date)}",
-//                )
+                ListItem(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultItemPadding(),
+                    icon = {
+                        Icon(
+                            Icons.Filled.Event,
+                            contentDescription = null
+                        )
+                    },
+                    text = { Text(clazzDateRange)},
+                    secondaryText = {
+                        Text("${stringResource(MR.strings.start_date)} - " +
+                                stringResource(MR.strings.end_date)
+                        )
+                    }
+                )
             }
         }
 
         if (uiState.clazzHolidayCalendarVisible){
             item {
-                //  TODO error
-//                UstadDetailField(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .defaultItemPadding(),
-//                    imageId = R.drawable.ic_event_black_24dp,
-//                    valueText = uiState.clazz?.clazzHolidayCalendar?.umCalendarName ?: "",
-//                    labelText = stringResource(MR.strings.holiday_calendar),
-//                )
+                ListItem(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultItemPadding(),
+                    icon = {
+                        Icon(
+                            Icons.Filled.Event,
+                            contentDescription = null
+                        )
+                    },
+                    text = { Text(uiState.clazz?.clazzHolidayCalendar?.umCalendarName ?: "")},
+                    secondaryText = {
+                        Text(stringResource(MR.strings.holiday_calendar))
+                    }
+                )
             }
         }
 
@@ -179,9 +217,8 @@ fun ClazzDetailOverviewScreen(
             item {
                 Text(
                     modifier = Modifier
-                        .fillMaxWidth(),
-                        //  TODO error
-//                        .defaultItemPadding(),
+                        .fillMaxWidth()
+                        .defaultItemPadding(),
                     text = stringResource(MR.strings.schedule)
                 )
             }
@@ -191,26 +228,23 @@ fun ClazzDetailOverviewScreen(
             items = uiState.scheduleList,
             key = { Pair(1, it.scheduleUid) }
         ){ schedule ->
-            //  TODO error
-//            val fromTimeFormatted = rememberFormattedTime(
-//                timeInMs = schedule.sceduleStartTime.toInt()
-//            )
-//            val toTimeFormatted = rememberFormattedTime(
-//                timeInMs = schedule.scheduleEndTime.toInt()
-//            )
+            val fromTimeFormatted = rememberFormattedTime(
+                timeInMs = schedule.sceduleStartTime.toInt()
+            )
+            val toTimeFormatted = rememberFormattedTime(
+                timeInMs = schedule.scheduleEndTime.toInt()
+            )
             val text = buildString {
-                //  TODO error
-//                append(stringIdMapResource(
-//                    map = ClazzScheduleConstants.SCHEDULE_FREQUENCY_STRING_RESOURCES,
-//                    key = schedule.scheduleFrequency)
-//                )
+                append(stringIdMapResource(
+                    map = ClazzScheduleConstants.SCHEDULE_FREQUENCY_STRING_RESOURCES,
+                    key = schedule.scheduleFrequency)
+                )
                 append(" ")
-                //  TODO error
-//                append(stringIdMapResource(
-//                    map = ClazzScheduleConstants.DAY_STRING_RESOURCES,
-//                    key = schedule.scheduleDay
-//                ))
-//                append(" $fromTimeFormatted - $toTimeFormatted ")
+                append(stringIdMapResource(
+                    map = ClazzScheduleConstants.DAY_STRING_RESOURCES,
+                    key = schedule.scheduleDay
+                ))
+                append(" $fromTimeFormatted - $toTimeFormatted ")
 
             }
 
@@ -262,17 +296,15 @@ fun CourseBlockListItem(
                 Icons.Default.KeyboardArrowDown
             ListItem(
                 modifier = Modifier
-                    //  TODO error
-//                    .paddingCourseBlockIndent(courseBlock?.cbIndentLevel ?: 0)
+                    .paddingCourseBlockIndent(courseBlock?.cbIndentLevel ?: 0)
                     .clickable(onClick = onClick),
                 text = { Text(courseBlock?.cbTitle ?: "") },
                 secondaryText = { Text(courseBlock?.cbDescription ?: "") },
                 icon = {
-                    //  TODO error
-//                    Icon(
-//                        painter = painterResource(id = R.drawable.ic_baseline_folder_open_24),
-//                        modifier = Modifier.size(ICON_SIZE),
-//                        contentDescription = "")
+                    Icon(
+                        Icons.Default.FolderOpen,
+                        modifier = Modifier.size(ICON_SIZE),
+                        contentDescription = "")
                 },
                 trailing = {
                     Icon(trailingIcon, contentDescription = "")
@@ -282,8 +314,7 @@ fun CourseBlockListItem(
         CourseBlock.BLOCK_DISCUSSION_TYPE -> {
             ListItem(
                 modifier = Modifier
-                    //  TODO error
-//                    .paddingCourseBlockIndent(courseBlock?.cbIndentLevel ?: 0)
+                    .paddingCourseBlockIndent(courseBlock?.cbIndentLevel ?: 0)
                     .clickable(onClick = onClick),
                 text = { Text(courseBlock?.cbTitle ?: "") },
                 secondaryText = {
@@ -293,19 +324,17 @@ fun CourseBlockListItem(
                     )
                 },
                 icon = {
-                    //  TODO error
-//                    Icon(
-//                        painter = painterResource(id = R.drawable.ic_baseline_forum_24),
-//                        modifier = Modifier.size(ICON_SIZE),
-//                        contentDescription = "")
+                    Icon(
+                        Icons.Filled.Forum,
+                        modifier = Modifier.size(ICON_SIZE),
+                        contentDescription = "")
                 }
             )
         }
         CourseBlock.BLOCK_TEXT_TYPE -> {
             ListItem(
                 modifier = Modifier
-                    //  TODO error
-//                    .paddingCourseBlockIndent(courseBlock?.cbIndentLevel ?: 0)
+                    .paddingCourseBlockIndent(courseBlock?.cbIndentLevel ?: 0)
                     .clickable(onClick = onClick),
                 text = { Text(courseBlock?.cbTitle ?: "") },
                 secondaryText = {
@@ -315,11 +344,10 @@ fun CourseBlockListItem(
                     )
                 },
                 icon = {
-                    //  TODO error
-//                    Icon(
-//                        painter = painterResource(id = R.drawable.ic_baseline_title_24),
-//                        modifier = androidx.compose.ui.Modifier.size(ICON_SIZE),
-//                        contentDescription = "")
+                    Icon(
+                        Icons.Filled.Title,
+                        modifier = Modifier.size(ICON_SIZE),
+                        contentDescription = "")
                 }
             )
         }
