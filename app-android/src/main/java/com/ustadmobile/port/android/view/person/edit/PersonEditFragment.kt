@@ -87,17 +87,23 @@ fun PersonEditScreen(
             modifier = Modifier.size(60.dp),
         )
 
-        UstadTextEditField(
-            value = uiState.person?.firstNames ?: "",
-            label = stringResource(id = CR.string.first_names),
-            error = uiState.firstNameError,
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onPersonChanged(uiState.person?.shallowCopy{
-                    firstNames = it
-                })
-            }
-        )
+        UstadInputFieldLayout (
+            errorText = uiState.firstNameError
+        ){
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                value = uiState.person?.firstNames ?: "",
+                label = { Text(stringResource(id = CR.string.first_names)) },
+                isError = uiState.firstNameError != null,
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onPersonChanged(uiState.person?.shallowCopy{
+                        firstNames = it
+                    })
+                }
+            )
+        }
 
         UstadTextEditField(
             value = uiState.person?.lastName ?: "",
