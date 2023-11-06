@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.rest
 
+import com.ustadmobile.lib.rest.ext.ktorAppHomeFfmpegDir
+import com.ustadmobile.lib.rest.ffmpeghelper.handleNoFfmpeg
 import io.ktor.server.engine.commandLineEnvironment
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -38,12 +40,12 @@ class ServerAppMain {
                         HttpServerCodec(MAX_INITIAL_LINE_LENGTH, MAX_HEADER_SIZE, MAX_CHUNK_SIZE)
                     }
                 }.start(true)
-            }catch(e: Exception) {
-                if(e is SiteConfigException) {
-                    System.err.println(e.message)
-                }else {
-                    e.printStackTrace()
-                }
+            }catch(e: SiteConfigException) {
+                System.err.println(e.message)
+            }catch(e: NoFfmpegException) {
+                handleNoFfmpeg(ffmpegDestDir = ktorAppHomeFfmpegDir())
+            }catch(e: Throwable) {
+                e.printStackTrace()
             }
         }
 

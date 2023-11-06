@@ -128,6 +128,22 @@ fun Application.umRestApplication(
                 "set this in the config file e.g. uncomment siteUrl and set as siteUrl = \"$likelyAddr\"")
     }
 
+    val appFfmpegDir = ktorAppHomeFfmpegDir()
+    val hasFfmpeg = SysPathUtil.commandExists(
+        commandName = "ffmpeg",
+        manuallySpecifiedLocation = appConfig.commandFileProperty("ffmpeg"),
+        extraSearchPaths = appFfmpegDir.absolutePath,
+    )
+    val hasFfprobe = SysPathUtil.commandExists(
+        commandName = "ffprobe",
+        manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"),
+        extraSearchPaths = appFfmpegDir.absolutePath
+    )
+
+    if(!hasFfmpeg || !hasFfprobe) {
+        throw NoFfmpegException()
+    }
+
 
     val devMode = environment.config.propertyOrNull("ktor.ustad.devmode")?.getString().toBoolean()
 
@@ -323,14 +339,20 @@ fun Application.umRestApplication(
 
         bind<File>(tag = DiTag.TAG_FILE_FFMPEG) with singleton {
             //The availability of ffmpeg is checked on startup
-            SysPathUtil.findCommandInPath("ffmpeg",
-                manuallySpecifiedLocation = appConfig.commandFileProperty("ffmpeg")) ?: File("err")
+            SysPathUtil.findCommandInPath(
+                commandName = "ffmpeg",
+                manuallySpecifiedLocation = appConfig.commandFileProperty("ffmpeg"),
+                extraSearchPaths = appFfmpegDir.absolutePath,
+            ) ?: File("err")
         }
 
         bind<File>(tag = DiTag.TAG_FILE_FFPROBE) with singleton {
             //The availability of ffmpeg is checked on startup
-            SysPathUtil.findCommandInPath("ffprobe",
-                manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"))  ?: File("err")
+            SysPathUtil.findCommandInPath(
+                commandName = "ffprobe",
+                manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"),
+                extraSearchPaths = appFfmpegDir.absolutePath
+            )  ?: File("err")
         }
 
         bind<File>(tag = DiTag.TAG_FILE_UPLOAD_TMP_DIR) with scoped(EndpointScope.Default).singleton {

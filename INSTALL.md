@@ -18,13 +18,15 @@ using apt-get on Ubuntu or MSI/EXE for Windows).
 
 On Ubuntu:
 ```
-apt-get install openjdk-18-jdk
+apt-get install openjdk-18-jdk ffmpeg
 ```
 Note: if you have other Java versions, make sure you run the server jar using JDK17+. You can use ``sudo update-alternatives --config java``
 to set the default java version to run.
 
 On Windows:
 * Download and install Java (JDK17+) if not already installed from the Java site [https://www.oracle.com/java/technologies/downloads/#jdk17-windows](https://www.oracle.com/java/technologies/downloads/#jdk17-windows)
+* FFMPEG is required. If you don't already have it in your path, the server can download it for you 
+  when you run it for the first time.
 
 ### 3. Unzip ustad-server.zip and start server
 
