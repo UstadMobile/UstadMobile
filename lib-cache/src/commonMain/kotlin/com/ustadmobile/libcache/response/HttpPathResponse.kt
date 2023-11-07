@@ -29,6 +29,7 @@ class HttpPathResponse(
         headers = headersBuilder {
             header("Content-Length", metadata.size.toString())
             header("Content-Type", mimeType)
+            header("Accept-Ranges", "bytes")
             headersList += lastModifiedHeader()
             extraHeaders?.also { takeFrom(it) }
         }

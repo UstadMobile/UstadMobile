@@ -318,6 +318,14 @@ fun Application.umRestApplication(
                         cache = cache,
                         uriHelper = uriHelper,
                         json = instance(),
+                    ),
+                    VideoContentImporterJvm(
+                        endpoint = context,
+                        di = di,
+                        cache = cache,
+                        uriHelper = uriHelper,
+                        ffprobe = instance(),
+                        json = instance(),
                     )
                 )
             )
@@ -381,7 +389,8 @@ fun Application.umRestApplication(
                     override fun getPasswordAuthentication(): PasswordAuthentication {
                         return PasswordAuthentication(
                             appConfig.property("mail.user").getString(),
-                            appConfig.property("mail.auth").getString())
+                            appConfig.property("mail.auth").getString()
+                        )
                     }
                 }
             }

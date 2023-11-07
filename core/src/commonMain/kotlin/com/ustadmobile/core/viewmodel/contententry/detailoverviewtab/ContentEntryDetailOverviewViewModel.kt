@@ -6,6 +6,7 @@ import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
 import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentViewModel
+import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
@@ -123,6 +124,7 @@ class ContentEntryDetailOverviewViewModel(
                     ContentEntryVersion.TYPE_XAPI -> XapiContentViewModel.DEST_NAME
                     ContentEntryVersion.TYPE_PDF -> PdfContentViewModel.DEST_NAME
                     ContentEntryVersion.TYPE_EPUB -> EpubContentViewModel.DEST_NAME
+                    ContentEntryVersion.TYPE_VIDEO -> VideoContentViewModel.DEST_NAME
                     else -> null
                 }
 
