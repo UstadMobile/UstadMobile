@@ -1,30 +1,26 @@
 package com.ustadmobile.core.viewmodel.contententry.list
 
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlin.jvm.JvmInline
 
-val ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.listItemUiState
+val ContentEntry.listItemUiState
     get() = ContentEntryListItemUiState(this)
 
 @JvmInline
 value class ContentEntryListItemUiState(
-    val contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
+    val contentEntry: ContentEntry,
 ) {
 
     val containerAlpha: Double
         get() = if(contentEntry.ceInactive) 0.5 else 1.0
 
     val progressVisible: Boolean
-        get() = (contentEntry.scoreProgress?.progress ?: 0) > 0
+        get() = false
 
     val descriptionVisible: Boolean
         get() = !contentEntry.description.isNullOrBlank()
 
     val mimetypeVisible: Boolean
         get() = contentEntry.leaf
-
-    val scoreResultText: String
-        get() = "(" + (contentEntry.scoreProgress?.resultScore ?: 0) + "/" +
-                (contentEntry.scoreProgress?.resultMax ?: 0) + ")"
 
 }

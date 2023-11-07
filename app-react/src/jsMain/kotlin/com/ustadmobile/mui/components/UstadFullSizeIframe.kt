@@ -9,6 +9,7 @@ import web.cssom.Height
 import web.cssom.None
 import web.cssom.pct
 import react.dom.html.ReactHTML.iframe
+import web.cssom.Display
 
 
 external interface UstadFullSizeIframeProps: Props {
@@ -27,6 +28,7 @@ val UstadFullSizeIframe = FC<UstadFullSizeIframeProps> { props ->
             width = 100.pct
             border = None.none
             contain = Contain.strict
+            display = Display.block
         }
 
         src = props.src

@@ -20,7 +20,7 @@ data class ContentEntryDetailOverviewUiState(
 
     val scoreProgress: ContentEntryStatementScoreProgress? = null,
 
-    val contentEntry: ContentEntryWithMostRecentContainer? = null,
+    val contentEntry: ContentEntry? = null,
 
     val contentEntryButtons: ContentEntryButtonModel? = null,
 
@@ -49,8 +49,7 @@ data class ContentEntryDetailOverviewUiState(
         get() = !contentEntry?.licenseName.isNullOrBlank()
 
     val fileSizeVisible: Boolean
-        get() = contentEntry?.container?.fileSize != null
-                && contentEntry.container?.fileSize != 0L
+        get() = false
 
     val scoreResultVisible: Boolean
         get() = scoreProgress != null

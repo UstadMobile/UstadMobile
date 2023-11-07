@@ -272,9 +272,7 @@ private val ContentDetailRightColumn = FC <ContentEntryDetailOverviewScreenProps
 
             if (props.uiState.fileSizeVisible){
                 Typography{
-                    + UMFileUtil.formatFileSize(
-                        props.uiState.contentEntry?.container?.fileSize ?: 0
-                    )
+                    + UMFileUtil.formatFileSize(0)
                 }
             }
 

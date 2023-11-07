@@ -16,8 +16,6 @@ import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.mui.components.NavResultReturnerContext
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.view.contententry.UstadContentEntryListItem
@@ -50,11 +48,7 @@ external interface ContentEntryListScreenProps : Props {
 
     var uiState: ContentEntryListUiState
 
-    var onClickContentEntry: (
-        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
-
-    var onClickDownloadContentEntry: (
-        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
+    var onClickContentEntry: (ContentEntry?) -> Unit
 
     var onClickImportFromFile: (() -> Unit)?
 
@@ -70,19 +64,15 @@ val ContentEntryListScreenPreview = FC<Props> {
         uiState = ContentEntryListUiState(
             contentEntryList = {
                 ListPagingSource(listOf(
-                    ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
+                    ContentEntry().apply {
                         contentEntryUid = 1
                         leaf = false
                         ceInactive = true
-                        scoreProgress = ContentEntryStatementScoreProgress().apply {
-                            progress = 10
-                            penalty = 20
-                        }
                         contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
                         title = "Content Title 1"
                         description = "Content Description 1"
                     },
-                    ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
+                    ContentEntry().apply {
                         contentEntryUid = 2
                         leaf = true
                         ceInactive = false

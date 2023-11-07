@@ -31,8 +31,12 @@ expect abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParen
     @Query("SELECT * FROM ContentEntryParentChildJoin WHERE " + "cepcjChildContentEntryUid = :childEntryContentUid")
     abstract fun findListOfParentsByChildUuid(childEntryContentUid: Long): List<ContentEntryParentChildJoin>
 
-    @Query("SELECT * FROM ContentEntryParentChildJoin WHERE " + "cepcjParentContentEntryUid = :parentUid")
-    abstract fun findListOfChildsByParentUuid(parentUid: Long): List<ContentEntryParentChildJoin>
+    @Query("""
+        SELECT * 
+          FROM ContentEntryParentChildJoin 
+         WHERE cepcjParentContentEntryUid = :parentUid
+    """)
+    abstract suspend fun findListOfChildsByParentUuid(parentUid: Long): List<ContentEntryParentChildJoin>
 
     @Query("SELECT * FROM ContentEntryParentChildJoin WHERE " + "cepcjParentContentEntryUid = :parentUid AND cepcjChildContentEntryUid = :childUid LIMIT 1")
     abstract fun findJoinByParentChildUuids(parentUid: Long, childUid: Long): ContentEntryParentChildJoin?

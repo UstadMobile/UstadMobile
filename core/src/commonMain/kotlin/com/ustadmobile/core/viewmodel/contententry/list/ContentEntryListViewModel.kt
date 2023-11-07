@@ -19,21 +19,19 @@ import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailView
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
 import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer as ContentEntryAndExtras
 import org.kodein.di.DI
 
 data class ContentEntryListUiState(
 
     val filterMode: Int = FILTER_BY_PARENT_UID,
 
-    val contentEntryList: ListPagingSourceFactory<ContentEntryAndExtras> = {
-        EmptyPagingSource()
-    },
+    val contentEntryList: ListPagingSourceFactory<ContentEntry> = { EmptyPagingSource() },
 
     val selectedChipId: Int = FILTER_BY_PARENT_UID,
 
@@ -85,7 +83,7 @@ class ContentEntryListViewModel(
      */
     private val hasCourseBlockArg: Boolean = ContentEntryEditViewModel.ARG_COURSEBLOCK in savedStateHandle.keys
 
-    private val pagingSourceFactory: ListPagingSourceFactory<ContentEntryAndExtras> = {
+    private val pagingSourceFactory: ListPagingSourceFactory<ContentEntry> = {
         when(_uiState.value.selectedChipId) {
             FILTER_MY_CONTENT -> activeRepo.contentEntryDao.getContentByOwner(
                 activeUserPersonUid
@@ -117,7 +115,7 @@ class ContentEntryListViewModel(
         }
     }
 
-    private var lastPagingSource: PagingSource<Int, ContentEntryAndExtras>? = null
+    private var lastPagingSource: PagingSource<Int, ContentEntry>? = null
 
     init {
         _uiState.update { prev ->
@@ -229,7 +227,7 @@ class ContentEntryListViewModel(
         )
     }
 
-    fun onClickEntry(entry: ContentEntryAndExtras?) {
+    fun onClickEntry(entry: ContentEntry?) {
         if(entry == null)
             return
 
