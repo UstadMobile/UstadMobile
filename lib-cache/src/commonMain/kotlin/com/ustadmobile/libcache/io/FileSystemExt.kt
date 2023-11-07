@@ -15,3 +15,6 @@ import kotlinx.io.files.Path
  */
 expect fun FileSystem.rangeSource(path: Path, fromByte: Long, toByte: Long): RawSource
 
+
+expect fun FileSystem.newTmpFile(prefix: String, postfix: String): Path
+
