@@ -26,6 +26,7 @@ dependencyResolutionManagement {
             version("version_paging_androidx", "3.2.0-alpha05")
             version("version_paging_compose", "1.0.0-alpha18")
             version("version_xmlutil", "0.86.2")
+            version("version_javaffmpeg", "0.8.0")
 
             plugin("jetbrains-compose", "org.jetbrains.compose").version("1.5.0")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
@@ -56,6 +57,7 @@ dependencyResolutionManagement {
             library("xmlutil-core-jvm", "io.github.pdvrieze.xmlutil", "core-jvm").versionRef("version_xmlutil")
             library("xmlutil-serialization", "io.github.pdvrieze.xmlutil", "serialization").versionRef("version_xmlutil")
             library("xmlutil-serialization-jvm", "io.github.pdvrieze.xmlutil", "serialization-jvm").versionRef("version_xmlutil")
+            library("javaffmpeg", "net.bramp.ffmpeg", "ffmpeg").versionRef("version_javaffmpeg")
         }
     }
 }

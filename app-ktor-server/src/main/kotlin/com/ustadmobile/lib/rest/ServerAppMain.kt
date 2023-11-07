@@ -1,6 +1,8 @@
 package com.ustadmobile.lib.rest
 
 import com.ustadmobile.lib.rest.ext.ktorAppHomeFfmpegDir
+import com.ustadmobile.lib.rest.ffmpeghelper.InvalidFffmpegException
+import com.ustadmobile.lib.rest.ffmpeghelper.NoFfmpegException
 import com.ustadmobile.lib.rest.ffmpeghelper.handleNoFfmpeg
 import io.ktor.server.engine.commandLineEnvironment
 import io.ktor.server.engine.embeddedServer
@@ -44,7 +46,12 @@ class ServerAppMain {
                 System.err.println(e.message)
             }catch(e: NoFfmpegException) {
                 handleNoFfmpeg(ffmpegDestDir = ktorAppHomeFfmpegDir())
-            }catch(e: Throwable) {
+            }catch(e: InvalidFffmpegException) {
+                System.err.println("FFMPEG was found, but it is not valid/executable. Please check " +
+                        "and ensure these are valid ffmpeg binaries and are executable. See " +
+                        "https://github.com/bramp/ffmpeg-cli-wrapper " +
+                        "ffmpeg=${e.ffmpegFile?.absolutePath} ffprobe=${e.ffprobeFile?.absolutePath}")
+            } catch(e: Throwable) {
                 e.printStackTrace()
             }
         }

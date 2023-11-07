@@ -111,6 +111,7 @@ dependencies {
 
     implementation "net.sourceforge.argparse4j:argparse4j:$version_argparse4j"
     implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
+    implementation libs.javaffmpeg
 
     api libs.moko.resources
 

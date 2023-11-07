@@ -43,6 +43,8 @@ import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.door.http.DoorHttpServerConfig
 import com.ustadmobile.lib.rest.dimodules.makeJvmBackendDiModule
+import com.ustadmobile.lib.rest.ffmpeghelper.InvalidFffmpegException
+import com.ustadmobile.lib.rest.ffmpeghelper.NoFfmpegException
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.lib.util.SysPathUtil
@@ -62,6 +64,8 @@ import com.ustadmobile.libcache.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import kotlinx.io.files.Path
+import net.bramp.ffmpeg.FFmpeg
+import net.bramp.ffmpeg.FFprobe
 import nl.adaptivity.xmlutil.serialization.XML
 import org.kodein.di.ktor.closestDI
 import java.net.Inet6Address
@@ -129,21 +133,29 @@ fun Application.umRestApplication(
     }
 
     val appFfmpegDir = ktorAppHomeFfmpegDir()
-    val hasFfmpeg = SysPathUtil.commandExists(
+    val ffmpegFile = SysPathUtil.findCommandInPath(
         commandName = "ffmpeg",
         manuallySpecifiedLocation = appConfig.commandFileProperty("ffmpeg"),
         extraSearchPaths = appFfmpegDir.absolutePath,
     )
-    val hasFfprobe = SysPathUtil.commandExists(
+    val ffprobeFile = SysPathUtil.findCommandInPath(
         commandName = "ffprobe",
         manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"),
         extraSearchPaths = appFfmpegDir.absolutePath
     )
 
-    if(!hasFfmpeg || !hasFfprobe) {
+    if(ffmpegFile == null || ffprobeFile == null) {
         throw NoFfmpegException()
     }
 
+    try {
+        if(!FFmpeg(ffmpegFile.absolutePath).isFFmpeg || !FFprobe(ffprobeFile.absolutePath).isFFprobe) {
+            throw InvalidFffmpegException(ffmpegFile, ffprobeFile)
+        }
+    }catch(e: Exception) {
+        //If an exception occurs running them, it is also invalid
+        throw InvalidFffmpegException(ffmpegFile, ffprobeFile)
+    }
 
     val devMode = environment.config.propertyOrNull("ktor.ustad.devmode")?.getString().toBoolean()
 
@@ -337,22 +349,12 @@ fun Application.umRestApplication(
             json
         }
 
-        bind<File>(tag = DiTag.TAG_FILE_FFMPEG) with singleton {
-            //The availability of ffmpeg is checked on startup
-            SysPathUtil.findCommandInPath(
-                commandName = "ffmpeg",
-                manuallySpecifiedLocation = appConfig.commandFileProperty("ffmpeg"),
-                extraSearchPaths = appFfmpegDir.absolutePath,
-            ) ?: File("err")
+        bind<FFmpeg>() with provider {
+            FFmpeg(ffmpegFile.absolutePath)
         }
 
-        bind<File>(tag = DiTag.TAG_FILE_FFPROBE) with singleton {
-            //The availability of ffmpeg is checked on startup
-            SysPathUtil.findCommandInPath(
-                commandName = "ffprobe",
-                manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"),
-                extraSearchPaths = appFfmpegDir.absolutePath
-            )  ?: File("err")
+        bind<FFprobe>() with provider {
+            FFprobe(ffprobeFile.absolutePath)
         }
 
         bind<File>(tag = DiTag.TAG_FILE_UPLOAD_TMP_DIR) with scoped(EndpointScope.Default).singleton {
