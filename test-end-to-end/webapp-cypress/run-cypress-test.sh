@@ -56,7 +56,7 @@ fi
 
 
 # Start control server
-$SCRIPTDIR/../../testserver-controller/start.sh  || exit_with_error "Failed to start control server"
+$SCRIPTDIR/../../testserver-controller/start.sh --siteUrl http://localhost:8087/ || exit_with_error "Failed to start control server"
 
 # Define the spec argument
 SPECARG=$SPEC
