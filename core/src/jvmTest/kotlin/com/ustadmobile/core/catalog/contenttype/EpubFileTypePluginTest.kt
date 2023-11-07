@@ -60,6 +60,8 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
 
     private lateinit var xml: XML
 
+    private lateinit var xhtmlFixer: XhtmlFixer
+
     @Before
     fun setup(){
         endpointScope = EndpointScope()
@@ -85,6 +87,7 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
             storagePath = Path(tmpFolder.newFolder().absolutePath),
         ).build()
         xml = di.direct.instance()
+        xhtmlFixer = XhtmlFixerJsoup(xml)
     }
 
 
@@ -102,6 +105,7 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
             cache = ustadCache,
             uriHelper = uriHelper,
             xml = xml,
+            xhtmlFixer = xhtmlFixer,
         )
 
         runBlocking {
@@ -125,7 +129,8 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
             di = di,
             cache = ustadCache,
             uriHelper = uriHelper,
-            xml = xml
+            xml = xml,
+            xhtmlFixer = xhtmlFixer,
         )
         val contentEntryUid = 42L
 
@@ -165,7 +170,8 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
             di = di,
             cache = ustadCache,
             uriHelper = uriHelper,
-            xml = xml
+            xml = xml,
+            xhtmlFixer = xhtmlFixer,
         )
 
         runBlocking{

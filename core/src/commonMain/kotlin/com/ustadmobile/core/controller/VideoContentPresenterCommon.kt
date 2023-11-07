@@ -5,7 +5,7 @@ abstract class VideoContentPresenterCommon() {
 
     companion object {
 
-        val VIDEO_EXT_LIST = listOf(".mp4", ".mkv", ".webm", ".m4v")
+        val VIDEO_EXT_LIST = listOf("mp4", "mkv", "webm", "m4v")
 
         var VIDEO_MIME_MAP = mapOf("video/mp4" to ".mp4",
             "video/x-matroska" to ".mkv",

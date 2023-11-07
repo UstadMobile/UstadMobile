@@ -156,6 +156,7 @@ kotlin {
                 implementation "org.quartz-scheduler:quartz:$version_quartz_scheduler"
                 implementation "io.ktor:ktor-server-core:$version_ktor"
                 implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
+                implementation libs.javaffmpeg
             }
         }
 
