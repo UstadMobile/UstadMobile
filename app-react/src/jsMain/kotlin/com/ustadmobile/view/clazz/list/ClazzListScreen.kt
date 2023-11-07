@@ -28,7 +28,6 @@ import web.cssom.*
 import js.core.jso
 import mui.icons.material.Add
 import mui.icons.material.Login
-import mui.icons.material.People
 import mui.material.*
 import mui.material.styles.TypographyVariant
 import mui.system.responsive
@@ -317,21 +316,6 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
                             + strings[role]
                         }
                     }
-                }
-
-                Stack {
-                    direction = responsive(StackDirection.row)
-
-                    + People.create()
-
-                    Typography {
-                        + strings.format(
-                            MR.strings.x_teachers_y_students,
-                            props.clazzItem?.numTeachers ?: 0,
-                            props.clazzItem?.numStudents ?: 0
-                        )
-                    }
-
                 }
             }
         }
