@@ -2,9 +2,7 @@ package com.ustadmobile.core.util
 
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.catalog.contenttype.VideoTypePlugin
-import com.ustadmobile.core.contentjob.ContentPlugin
 import com.ustadmobile.core.io.ext.readString
-import com.ustadmobile.core.util.ext.commandExists
 import java.io.BufferedReader
 import java.io.File
 import java.io.IOException

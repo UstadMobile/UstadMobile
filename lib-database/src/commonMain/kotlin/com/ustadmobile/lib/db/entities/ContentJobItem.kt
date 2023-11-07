@@ -3,6 +3,11 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.ustadmobile.door.annotation.ReplicateEntity
+import com.ustadmobile.door.annotation.ReplicateEtag
+import com.ustadmobile.door.annotation.ReplicateLastModified
+import com.ustadmobile.door.annotation.Trigger
+import com.ustadmobile.door.annotation.Triggers
 import kotlinx.serialization.Serializable
 
 /**
@@ -16,6 +21,27 @@ import kotlinx.serialization.Serializable
         )
     ]
 )
+
+/* Normally the ContentJobItem is local on any given node. It will however need to be replicated
+ * in order to allow clients to see progress of an import that takes time to process on the server
+ * (e.g. video import etc)
+ */
+@ReplicateEntity(
+    tableId = ContentJobItem.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
+@Triggers(
+    arrayOf(
+        Trigger(
+            name = "contentjobitem_remote_insert",
+            order = Trigger.Order.INSTEAD_OF,
+            on = Trigger.On.RECEIVEVIEW,
+            events = [Trigger.Event.INSERT],
+            conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+            sqlStatements = [TRIGGER_UPSERT],
+        )
+    )
+)
 @Serializable
 data class ContentJobItem(
 
@@ -24,7 +50,7 @@ data class ContentJobItem(
 
     var cjiJobUid: Long = 0,
 
-        /**
+    /**
      * Where data is being taken from, this could be
      *  - ContentEntry (leaf)
      *     e.g. https://server.com/endpoint/umapp/index.html#ContentEntryDetail?entityUid=1234
@@ -37,9 +63,15 @@ data class ContentJobItem(
      */
     var sourceUri: String? = null,
 
+    /**
+     * Where the filename is not in the URI (e.g. temporary uploaded files etc), this property keeps
+     * the original filename (e.g. as when the user selected it).
+     */
+    var cjiOriginalFilename: String? = null,
+
     var cjiIsLeaf: Boolean = true,
 
-        /**
+    /**
      * Where the ContentEntryUid is set to 0, this indicates that the job must extract metadata
      * from the sourceUri and generate a new ContentEntry.
      */
@@ -52,40 +84,40 @@ data class ContentJobItem(
      */
     var cjiParentContentEntryUid: Long = 0,
 
-        /**
-     * The Container UID might be specified
+    /**
+     * The ContentEntryVersion (once known).
      */
-    var cjiContainerUid: Long = 0,
+    var cjiContentEntryVersion: Long = 0,
 
-        /**
+    /**
      * Represents the progress on this item (itself) not including any child items
      */
     var cjiItemProgress: Long = 0,
 
-        /**
+    /**
      * Represents the total to process on this item (itself) not including any child items
      */
     var cjiItemTotal: Long = 0,
 
-        /**
+    /**
      * Represents the progress of this item and its child items (inclusive). This should not be set
      * directly, it is managed by triggers and should NOT be updated directly.
      */
     var cjiRecursiveProgress: Long = 0,
 
-        /**
+    /**
      * Represents the total size of the job and its child items (inclusive). This should not be set
      * directly, it is managed by triggers and should NOT be updated directly.
      */
     var cjiRecursiveTotal: Long = 0,
 
-        /**
+    /**
      * Represents the status to the process of this job item and not including any child items.
      * Status set to default JobStatus.QUEUED
      */
     var cjiStatus: Int = 4,
 
-        /**
+    /**
      * Represents the status of the job and its child items(inclusive). This is managed by
      * triggers and should NOT be updated directly. Status set to default JobStatus.QUEUED
      */
@@ -95,31 +127,31 @@ data class ContentJobItem(
     var cjiConnectivityNeeded: Boolean = false,
 
 
-        /**
+    /**
      * The plugin id can be set if known. If not known, the runner will guess using the source
      * uri.
      */
     var cjiPluginId: Int = 0,
 
-        /**
+    /**
      * The number of attempts made so far
      */
     var cjiAttemptCount: Int = 0,
 
-        /**
+    /**
      *  The parent of this ContentJobItem in the content job itself.
      */
     var cjiParentCjiUid: Long = 0,
 
 
-        var cjiServerJobId: Long = 0,
+    var cjiServerJobId: Long = 0,
 
-        /**
+    /**
      * time when the job runner started the job item
      */
     var cjiStartTime: Long = 0,
 
-        /**
+    /**
      * time when the job runner finished the job item
      */
     var cjiFinishTime: Long = 0,
@@ -140,6 +172,14 @@ data class ContentJobItem(
     /**
      * Is used to check the status that the  container has finished processing in the job
      */
-    var cjiContainerProcessed: Boolean = false
+    var cjiContainerProcessed: Boolean = false,
 
-)
+    @ReplicateEtag
+    @ReplicateLastModified
+    var cjiLastModified: Long = 0
+
+) {
+    companion object {
+        const val TABLE_ID = 720
+    }
+}

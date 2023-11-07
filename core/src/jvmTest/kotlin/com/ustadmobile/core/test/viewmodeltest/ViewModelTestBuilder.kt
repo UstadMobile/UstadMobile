@@ -40,11 +40,15 @@ import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.util.test.nav.TestUstadNavController
+import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
+import nl.adaptivity.xmlutil.serialization.XML
+import nl.adaptivity.xmlutil.serialization.XmlConfig
 import org.mockito.kotlin.mock
 
 
 typealias TestViewModelFactory<T> = ViewModelTestBuilder<T>.() -> T
 
+@OptIn(ExperimentalXmlUtilApi::class)
 class ViewModelTestBuilder<T: ViewModel> internal constructor(
     private val repoConfig: TestRepoConfig,
 ) {
@@ -53,7 +57,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
 
     private lateinit var viewModelFactoryVar: TestViewModelFactory<T>
 
-    private val endpointScope = EndpointScope()
+    val endpointScope = EndpointScope()
 
     private val xppFactory: XmlPullParserFactory by lazy {
         XmlPullParserFactory.newInstance().also {
@@ -101,6 +105,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
 
     private val dbsToClose = mutableListOf<UmAppDatabase>()
 
+    @ExperimentalXmlUtilApi
     private var diVar = DI {
         import(CommonJvmDiModule)
 
@@ -121,6 +126,14 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
 
         bind<UstadMobileSystemImpl>() with singleton {
             spy(UstadMobileSystemImpl(xppFactory, tempDir))
+        }
+
+        bind<XML>() with singleton {
+            XML {
+                defaultPolicy {
+                    unknownChildHandler = XmlConfig.IGNORING_UNKNOWN_CHILD_HANDLER
+                }
+            }
         }
 
         bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
@@ -176,10 +189,6 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         bind<NavResultReturner>() with singleton {
             spy(NavResultReturnerImpl())
         }
-    }
-
-    init {
-
     }
 
     @ViewModelDslMarker

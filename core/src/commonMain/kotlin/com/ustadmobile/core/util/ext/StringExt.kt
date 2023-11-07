@@ -21,8 +21,6 @@ fun String.requirePostfix(
     ignoreCase: Boolean = false
 ) = if(this.endsWith(postFix, ignoreCase)) this else "$this$postFix"
 
-fun String?.alternative(alternative: String) = if(this.isNullOrEmpty()) alternative else this
-
 /**
  * If this string is a hex string, convert it to base64
  */
@@ -31,6 +29,7 @@ fun String.hexStringToBase64Encoded(): String = hexStringToByteArray().encodeBas
 /**
  * If this string is a base64 string, convert it to hex
  */
+@OptIn(ExperimentalStdlibApi::class)
 fun String.base64EncodedToHexString(): String = base64StringToByteArray().toHexString()
 
 fun String.truncate(maxLength: Int = 24): String{
@@ -49,10 +48,10 @@ fun String.startsWithHttpProtocol(): Boolean = lowercase().let {
 }
 
 fun String.requireHttpPrefix(defaultProtocol: String = "https"): String {
-    if(startsWithHttpProtocol())
-        return this
+    return if(startsWithHttpProtocol())
+        this
     else
-        return "$defaultProtocol://$this"
+        "$defaultProtocol://$this"
 }
 
 /**
@@ -60,6 +59,7 @@ fun String.requireHttpPrefix(defaultProtocol: String = "https"): String {
  * already contains a ?, then the arguments will be appended after an &amp;
  * Otherwise, a ? will be added and then the query args
  */
+@Suppress("LiftReturnOrAssignment") //This is wrong: still needs to append queryArgs
 fun String.appendQueryArgs(queryArgs: String): String {
     var retVal = this
     if(this.contains("?"))
@@ -70,15 +70,6 @@ fun String.appendQueryArgs(queryArgs: String): String {
     retVal += queryArgs
 
     return retVal
-}
-
-/**
- * Where this string is a URI of some kind, append query arguments to it. If the string
- * already contains a ?, then the arguments will be appended after an &amp;
- * Otherwise, a ? will be added and then the query args
- */
-fun String.appendQueryArgs(vararg pairs: Pair<String, String>): String {
-    return appendQueryArgs(mapOf(*pairs).toQueryString())
 }
 
 /**
@@ -120,4 +111,21 @@ fun String.initials(): String {
     return split(" ").map {
         it.firstOrNull()?.uppercaseChar()
     }.joinToString(separator = " ")
+}
+
+/**
+ * Remove excess (more than one) white space from the start and end of a string. Will leave up to
+ * one white space character on either end.
+ */
+fun String.trimExcessWhiteSpace() : String {
+    val firstNonWhiteSpace = indexOfFirst { !it.isWhitespace() }
+    val lastNonWhiteSpace = indexOfLast { !it.isWhitespace() }
+    val startPos = kotlin.math.max(0, firstNonWhiteSpace - 1)
+    val endPos = kotlin.math.min(length, lastNonWhiteSpace + 2) //Add 2 because endpos is exclusive
+
+    return if(startPos != 0 || endPos != length) {
+        substring(startPos, endPos)
+    }else{
+        this
+    }
 }

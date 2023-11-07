@@ -3,6 +3,8 @@ package com.ustadmobile.lib.rest.dimodules
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
+import com.ustadmobile.core.catalog.contenttype.XhtmlFixer
+import com.ustadmobile.core.catalog.contenttype.XhtmlFixerJsoup
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
@@ -25,12 +27,16 @@ import org.kodein.di.*
 import java.io.File
 import com.ustadmobile.lib.rest.ext.absoluteDataDir
 import com.ustadmobile.lib.rest.ext.ktorInitDb
+import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
+import nl.adaptivity.xmlutil.serialization.XML
+import nl.adaptivity.xmlutil.serialization.XmlConfig
 import org.xmlpull.v1.XmlPullParserFactory
 
 /**
  * DI Module that provides dependencies which are used both by the server and command line tools
  * e.g. password reset, any import/export, etc.
  */
+@OptIn(ExperimentalXmlUtilApi::class)
 fun makeJvmBackendDiModule(
     config: ApplicationConfig,
     contextScope: EndpointScope = EndpointScope.Default,
@@ -101,5 +107,17 @@ fun makeJvmBackendDiModule(
         XmlPullParserFactory.newInstance().also {
             it.isNamespaceAware = true
         }
+    }
+
+    bind<XML>() with singleton {
+        XML {
+            defaultPolicy {
+                unknownChildHandler  = XmlConfig.IGNORING_UNKNOWN_CHILD_HANDLER
+            }
+        }
+    }
+
+    bind<XhtmlFixer>() with singleton {
+        XhtmlFixerJsoup(xml = instance())
     }
 }

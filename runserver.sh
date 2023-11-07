@@ -4,7 +4,7 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 'p:hdcbsnj' --long 'password:,help,debug,clear,background,stop,nobuild,bundlejs' -n 'runserver.sh' -- "$@")
+TEMP=$(getopt -o 'u:p:hdcbsnj' --long 'siteUrl:,password:,help,debug,clear,background,stop,nobuild,bundlejs,' -n 'runserver.sh' -- "$@")
 
 eval set -- "$TEMP"
 unset TEMP
@@ -28,6 +28,7 @@ while true; do
       echo "Run UstadMobile HTTP server"
       echo " -d --debug Enable JVM debugging"
       echo " -n --nobuild skip gradle build"
+      echo " -u --siteUrl set the site url e.g. http://my.ip.address:8087/"
       exit 0
       ;;
     '-d'|'--debug')
@@ -38,6 +39,11 @@ while true; do
     '-n'|'--nobuild')
       NOBUILD="true"
       shift 1
+      continue
+      ;;
+    '-u'|'--siteUrl')
+      SERVERARGS="$SERVERARGS -P:ktor.ustad.siteUrl=$2"
+      shift 2
       continue
       ;;
     '--')
@@ -81,13 +87,16 @@ if [ "$NCRESULT" == "0" ]; then
   exit 1
 fi
 
-echo "Starting Ustad HTTP/REST server on port 8087 - Use [Ctrl+C] to stop."
-echo " "
-echo "You can use this to run/connect the Android client as per README.md ."
-echo "If you want to use the web client in a browser, you must run "
-echo "./gradlew app-react:jsRun and then open http://localhost:8087/ in your browser."
-echo "See README.md for more details."
-java $DEBUGARGS -jar build/libs/ustad-server-all.jar -P:ktor.ustad.jsDevServer=http://localhost:8080/ $SERVERARGS
+# As per the unixStartScript.txt template to accumalate args that will then be passed on
+eval "set -- \$(
+        printf '%s\\n' "\$DEFAULT_JVM_OPTS \$JAVA_OPTS \$${optsEnvironmentVar}" |
+        xargs -n1 |
+        sed ' s~[^-[:alnum:]+,./:=@_]~\\\\&~g; ' |
+        tr '\\n' ' '
+    )" '"\$@"'
+
+
+java $DEBUGARGS -jar build/libs/ustad-server-all.jar -P:ktor.ustad.jsDevServer=http://localhost:8080/ "\$@" $SERVERARGS
 
 # Go back to wherever we started from
 cd $WORKDIR

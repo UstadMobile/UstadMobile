@@ -12,8 +12,6 @@ import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.*
-import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.*
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.io.UploadSessionManager
@@ -30,7 +28,6 @@ import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import jakarta.mail.Authenticator
 import jakarta.mail.PasswordAuthentication
-import kotlinx.coroutines.runBlocking
 import org.kodein.di.*
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
@@ -38,13 +35,16 @@ import java.io.File
 import java.nio.file.Files
 import javax.naming.InitialContext
 import com.ustadmobile.door.util.NodeIdAuthCache
-import com.ustadmobile.core.contentjob.DummyContentPluginUploader
-import com.ustadmobile.core.db.ext.preload
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.di.DomainDiModuleJvm
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJvm
+import com.ustadmobile.core.uri.UriHelper
+import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.door.http.DoorHttpServerConfig
 import com.ustadmobile.lib.rest.dimodules.makeJvmBackendDiModule
+import com.ustadmobile.lib.rest.ffmpeghelper.InvalidFffmpegException
+import com.ustadmobile.lib.rest.ffmpeghelper.NoFfmpegException
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.lib.util.SysPathUtil
@@ -60,7 +60,16 @@ import io.ktor.websocket.*
 import org.kodein.di.ktor.di
 import java.util.*
 import com.ustadmobile.lib.rest.logging.LogbackAntiLog
+import com.ustadmobile.libcache.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.UstadCacheBuilder
+import kotlinx.io.files.Path
+import net.bramp.ffmpeg.FFmpeg
+import net.bramp.ffmpeg.FFprobe
+import nl.adaptivity.xmlutil.serialization.XML
 import org.kodein.di.ktor.closestDI
+import java.net.Inet6Address
+import java.net.NetworkInterface
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -70,6 +79,8 @@ const val CONF_DBMODE_VIRTUALHOST = "virtualhost"
 const val CONF_DBMODE_SINGLETON = "singleton"
 
 const val CONF_GOOGLE_API = "secret"
+
+const val CONF_KEY_SITE_URL = "ktor.ustad.siteUrl"
 
 /**
  * List of external commands (e.g. media converters) that must be found or have locations specified
@@ -104,9 +115,47 @@ fun Endpoint.identifier(
 @Suppress("unused") // This is used as the KTOR server main module via application.conf
 fun Application.umRestApplication(
     dbModeOverride: String? = null,
-    singletonDbName: String = "UmAppDatabase",
 ) {
     val appConfig = environment.config
+
+    val siteUrl = environment.config.propertyOrNull(CONF_KEY_SITE_URL)?.getString()
+
+    if(siteUrl.isNullOrBlank()) {
+        val likelyAddr = NetworkInterface.getNetworkInterfaces().toList().filter {
+            !it.isLoopback
+        }.flatMap { netInterface ->
+            netInterface.inetAddresses.toList().filter { it !is Inet6Address }
+        }.firstOrNull()?.let { "http://${it.hostAddress}:${appConfig.port}/"} ?: ""
+
+        throw SiteConfigException("Site URL is not set. You MUST specify the site url e.g. $likelyAddr \n" +
+                "Please specify using the url parameter in command line e.g. --siteUrl $likelyAddr \nor " +
+                "set this in the config file e.g. uncomment siteUrl and set as siteUrl = \"$likelyAddr\"")
+    }
+
+    val appFfmpegDir = ktorAppHomeFfmpegDir()
+    val ffmpegFile = SysPathUtil.findCommandInPath(
+        commandName = "ffmpeg",
+        manuallySpecifiedLocation = appConfig.commandFileProperty("ffmpeg"),
+        extraSearchPaths = appFfmpegDir.absolutePath,
+    )
+    val ffprobeFile = SysPathUtil.findCommandInPath(
+        commandName = "ffprobe",
+        manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"),
+        extraSearchPaths = appFfmpegDir.absolutePath
+    )
+
+    if(ffmpegFile == null || ffprobeFile == null) {
+        throw NoFfmpegException()
+    }
+
+    try {
+        if(!FFmpeg(ffmpegFile.absolutePath).isFFmpeg || !FFprobe(ffprobeFile.absolutePath).isFFprobe) {
+            throw InvalidFffmpegException(ffmpegFile, ffprobeFile)
+        }
+    }catch(e: Exception) {
+        //If an exception occurs running them, it is also invalid
+        throw InvalidFffmpegException(ffmpegFile, ffprobeFile)
+    }
 
     val devMode = environment.config.propertyOrNull("ktor.ustad.devmode")?.getString().toBoolean()
 
@@ -175,6 +224,7 @@ fun Application.umRestApplication(
 
     di {
         import(CommonJvmDiModule)
+        import(DomainDiModuleJvm(EndpointScope.Default))
         import(makeJvmBackendDiModule(environment.config))
         bind<SupportedLanguagesConfig>() with singleton { SupportedLanguagesConfig() }
         bind<StringProvider>() with singleton { StringProviderJvm(Locale.getDefault()) }
@@ -215,35 +265,70 @@ fun Application.umRestApplication(
 
         bind<Gson>() with singleton { Gson() }
 
-        bind<EpubTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            EpubTypePluginCommonJvm(Any(), context, di, DummyContentPluginUploader())
+        bind<UstadCache>() with singleton {
+            val dbUrl = "jdbc:sqlite:(datadir)/ustadcache.db"
+                .replace("(datadir)", appConfig.absoluteDataDir().absolutePath)
+            UstadCacheBuilder(
+                dbUrl = dbUrl,
+                storagePath = Path(
+                    File(appConfig.absoluteDataDir(), "httpfiles").absolutePath.toString()
+                )
+            ).build()
         }
 
-        bind<XapiTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            XapiTypePluginCommonJvm(Any(), context, di, DummyContentPluginUploader())
-        }
-
-        bind<H5PTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            H5PTypePluginCommonJvm(Any(), context, di, DummyContentPluginUploader())
-        }
-        bind<VideoTypePluginJvm>() with scoped(EndpointScope.Default).singleton{
-            VideoTypePluginJvm(Any(), context, di, DummyContentPluginUploader())
-        }
-        bind<PDFTypePlugin>() with scoped(EndpointScope.Default).singleton{
-            PDFTypePluginJvm(Any(), context, di, DummyContentPluginUploader())
-        }
-        bind<ApacheIndexerPlugin>() with scoped(EndpointScope.Default).singleton{
-            ApacheIndexerPlugin(Any(), context, di)
+        bind<UriHelper>() with singleton {
+            UriHelperJvm(
+                mimeTypeHelperImpl = FileMimeTypeHelperImpl(),
+                httpClient = instance(),
+                okHttpClient = instance(),
+            )
         }
 
         bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
-            ContentPluginManager(listOf(
-                    di.on(context).direct.instance<EpubTypePluginCommonJvm>(),
-                    di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
-                    di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
-                    di.on(context).direct.instance<VideoTypePluginJvm>(),
-                    di.on(context).direct.instance<PDFTypePlugin>(),
-                    di.on(context).direct.instance<ApacheIndexerPlugin>()))
+            val cache: UstadCache = instance()
+            val uriHelper: UriHelper = instance()
+            val xml: XML = instance()
+            val xhtmlFixer: XhtmlFixer = instance()
+
+            ContentPluginManager(
+                listOf(
+                    EpubTypePluginCommonJvm(
+                        endpoint = context,
+                        di = di,
+                        cache = cache,
+                        uriHelper = uriHelper,
+                        xml = xml,
+                        xhtmlFixer = xhtmlFixer,
+                    ),
+                    XapiZipContentImportPlugin(
+                        endpoint = context,
+                        di = di,
+                        cache = cache,
+                        uriHelper = uriHelper
+                    ),
+                    PdfImportPluginJvm(
+                        endpoint = context,
+                        di = di,
+                        cache= cache,
+                        uriHelper = uriHelper,
+                    ),
+                    H5PContentImportPlugin(
+                        endpoint = context,
+                        di = di,
+                        cache = cache,
+                        uriHelper = uriHelper,
+                        json = instance(),
+                    ),
+                    VideoContentImporterJvm(
+                        endpoint = context,
+                        di = di,
+                        cache = cache,
+                        uriHelper = uriHelper,
+                        ffprobe = instance(),
+                        json = instance(),
+                    )
+                )
+            )
         }
 
         bind<Scheduler>() with singleton {
@@ -272,16 +357,12 @@ fun Application.umRestApplication(
             json
         }
 
-        bind<File>(tag = DiTag.TAG_FILE_FFMPEG) with singleton {
-            //The availability of ffmpeg is checked on startup
-            SysPathUtil.findCommandInPath("ffmpeg",
-                manuallySpecifiedLocation = appConfig.commandFileProperty("ffmpeg")) ?: File("err")
+        bind<FFmpeg>() with provider {
+            FFmpeg(ffmpegFile.absolutePath)
         }
 
-        bind<File>(tag = DiTag.TAG_FILE_FFPROBE) with singleton {
-            //The availability of ffmpeg is checked on startup
-            SysPathUtil.findCommandInPath("ffprobe",
-                manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"))  ?: File("err")
+        bind<FFprobe>() with provider {
+            FFprobe(ffprobeFile.absolutePath)
         }
 
         bind<File>(tag = DiTag.TAG_FILE_UPLOAD_TMP_DIR) with scoped(EndpointScope.Default).singleton {
@@ -308,7 +389,8 @@ fun Application.umRestApplication(
                     override fun getPasswordAuthentication(): PasswordAuthentication {
                         return PasswordAuthentication(
                             appConfig.property("mail.user").getString(),
-                            appConfig.property("mail.auth").getString())
+                            appConfig.property("mail.auth").getString()
+                        )
                     }
                 }
             }
@@ -359,6 +441,14 @@ fun Application.umRestApplication(
                 }
             }
 
+            //If the request is not using the correct url as per system config, reject it and finish
+            if(!context.urlMatchesConfig()) {
+                call.respondRequestUrlNotMatchingSiteConfUrl()
+                return@intercept finish()
+            }
+
+            //If the request is not matching any API route, then use the reverse proxy to send the
+            // request to the javascript development server.
             if(!KTOR_SERVER_ROUTES.any { requestUri.startsWith(it) }) {
                 call.respondReverseProxy(jsDevServer)
                 return@intercept finish()
@@ -371,6 +461,8 @@ fun Application.umRestApplication(
      * in UstadAppReactProxy
      */
     install(Routing) {
+        addHostCheckIntercept()
+
         ContainerDownload()
         personAuthRegisterRoute()
         ContainerMountRoute()
@@ -382,7 +474,7 @@ fun Application.umRestApplication(
             }
         }
         SiteRoute()
-        ContentEntryLinkImporter()
+
         ContentUploadRoute()
 
         GetAppRoute()
@@ -391,6 +483,19 @@ fun Application.umRestApplication(
             route("pbkdf2"){
                 Pbkdf2Route()
             }
+
+            route("contentupload") {
+                ContentUploadRoute()
+            }
+
+            route("import") {
+                ContentEntryImportRoute()
+            }
+
+            val di: DI by closestDI()
+            ContentEntryVersionRoute(
+                cache = di.direct.instance()
+            )
         }
 
         static("umapp") {
@@ -415,6 +520,27 @@ fun Application.umRestApplication(
     //Tell anyone looking that the server is up/running and where to find logs
     // As per logback.xml
     val logDir = System.getProperty("logs_dir") ?: "./log/"
-    println("Ustad server is running: Logging to $logDir ")
+    val printableServerUrl = if(dbMode == CONF_DBMODE_VIRTUALHOST) {
+        "*:${appConfig.port}"
+    }else {
+        appConfig.siteUrl()
+    }
+
+    println("Ustad server is running on $printableServerUrl . Logging to $logDir .")
+    println()
+    println("You can connect the Android client to this address as per README.md .")
+    println()
+    if(jsDevServer != null) {
+        println("Javascript development mode is enabled. If you want to use the web client in a browser, you must run: ")
+        println("./gradlew app-react:jsRun")
+        println("Then open $printableServerUrl in your browser. See app-react/README.md for more details.")
+    }else if(this::class.java.getResource("/umapp/index.html") != null) {
+        println(" This build includes the web client, you can access it by opening $printableServerUrl in your browser.")
+    }else {
+        println(" This build does not include the web client and Javascript dev mode is not enabled.")
+        println(" If you want to use the web client in a browser, please see app-react/README.md .")
+    }
+    println()
+    println("Use [Ctrl+C] to stop.")
 }
 

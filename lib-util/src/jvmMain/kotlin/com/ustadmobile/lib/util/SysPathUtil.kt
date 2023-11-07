@@ -35,8 +35,7 @@ object SysPathUtil {
         osName: String = System.getProperty("os.name") ?: "",
         fileSeparator: String = File.pathSeparator
     ) : Boolean {
-        return (manuallySpecifiedLocation?.exists() ?: false) ||
-                findCommandInPath(commandName, manuallySpecifiedLocation, pathVar, extraSearchPaths,
+        return findCommandInPath(commandName, manuallySpecifiedLocation, pathVar, extraSearchPaths,
                     osName, fileSeparator) != null
     }
 

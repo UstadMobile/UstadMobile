@@ -6,7 +6,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadDestination
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.viewmodel.ContentEntryDetailOverviewViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewViewModel
 import com.ustadmobile.core.viewmodel.HolidayCalendarListViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
@@ -49,7 +49,6 @@ import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.core.viewmodel.scopedgrant.list.ScopedGrantListViewModel
 import com.ustadmobile.core.viewmodel.statement.list.StatementListViewModel
-import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 
 @Keep
 class ViewNameToDestMap: DestinationProvider {
@@ -71,9 +70,6 @@ class ViewNameToDestMap: DestinationProvider {
             PersonEditViewModel.DEST_NAME_REGISTER to UstadDestination(R.id.person_edit_register_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true,
                     hideAccountIcon = true),
-            SchoolEditView.VIEW_NAME to UstadDestination(R.id.school_edit_dest,
-                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true,
-                    hideBottomNavigation = true),
             SchoolDetailView.VIEW_NAME to UstadDestination(R.id.school_detail_dest),
             SchoolDetailOverviewViewModel.DEST_NAME to UstadDestination(R.id.school_detail_overview_dest),
             PersonDetailViewModel.DEST_NAME to UstadDestination(R.id.person_detail_dest),
@@ -111,7 +107,6 @@ class ViewNameToDestMap: DestinationProvider {
                     hideBottomNavigation = true),
             ContentEntryListViewModel.DEST_NAME to UstadDestination(R.id.content_entry_list_dest),
             ContentEntryListViewModel.DEST_NAME_HOME to UstadDestination(R.id.content_entry_list_home_dest),
-            ContentEntryListViewModel.FOLDER_DEST_NAME to UstadDestination(R.id.content_entry_list_select_folder),
             ContentEntryDetailOverviewViewModel.DEST_NAME to UstadDestination(R.id.content_entry_detail_overview_dest),
             ContentEntryDetailView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_dest),
             ContentEntryDetailAttemptListViewModel.DEST_NAME to UstadDestination(R.id.content_entry_detail_attempt_dest),
@@ -121,7 +116,6 @@ class ViewNameToDestMap: DestinationProvider {
             ClazzEnrolmentListViewModel.DEST_NAME to UstadDestination(R.id.clazz_enrolment_list),
             ClazzEnrolmentEditViewModel.DEST_NAME to UstadDestination(R.id.clazz_enrolment_edit,
                     hideAccountIcon = true, hideBottomNavigation = true),
-            LeavingReasonListViewModel.DEST_NAME to UstadDestination(R.id.leaving_reason_list),
             LeavingReasonEditViewModel.DEST_NAME to UstadDestination(R.id.leaving_reason_edit,
                     hideAccountIcon = true, hideBottomNavigation = true),
             SelectExtractFileView.VIEW_NAME to UstadDestination(R.id.select_extract_file_view),
@@ -178,7 +172,6 @@ class ViewNameToDestMap: DestinationProvider {
             ErrorReportView.VIEW_NAME to UstadDestination(R.id.error_report_dest),
             RedirectView.VIEW_NAME to UstadDestination(R.id.redirect_dest),
             ScopedGrantListViewModel.DEST_NAME to UstadDestination(R.id.scoped_grant_list_dest),
-            ScopedGrantDetailView.VIEW_NAME to UstadDestination(R.id.scoped_grant_detail_dest),
             PanicButtonSettingsView.VIEW_NAME to UstadDestination(R.id.panic_button_settings_dest),
             GrantAppPermissionView.VIEW_NAME to UstadDestination(R.id.grant_app_permission_dest),
             CourseBlockEditViewModel.DEST_NAME to UstadDestination(R.id.course_block_edit_dest,

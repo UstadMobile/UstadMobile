@@ -18,17 +18,34 @@ using apt-get on Ubuntu or MSI/EXE for Windows).
 
 On Ubuntu:
 ```
-apt-get install openjdk-18-jdk
+apt-get install openjdk-18-jdk ffmpeg
 ```
 Note: if you have other Java versions, make sure you run the server jar using JDK17+. You can use ``sudo update-alternatives --config java``
 to set the default java version to run.
 
 On Windows:
 * Download and install Java (JDK17+) if not already installed from the Java site [https://www.oracle.com/java/technologies/downloads/#jdk17-windows](https://www.oracle.com/java/technologies/downloads/#jdk17-windows)
+* FFMPEG is required. If you don't already have it in your path, the server can download it for you 
+  when you run it for the first time.
 
 ### 3. Unzip ustad-server.zip and start server
 
-Unzip ustad-server.zip, then start the server using the built-in start script:
+Unzip ustad-server.zip. Open the ustad-server.conf file and set the siteUrl property to the url that 
+will be used to access the site e.g. https://ustad.yourdomain.com/ (e.g. using a reverse proxy setup
+with Apache or Nginx in a production setup) or http://your.ip.address:8087/ (for testing/evaluation).
+e.g.
+```
+ktor {
+    ..
+    ustad {
+        # Uncomment the siteUrl line found here to set the siteUrl
+        siteUrl = "http://192.168.1.2:8087/"
+        ..
+    }
+}        
+```
+
+After setting the siteUrl in the configuration file, start the server:
 
 Linux/MacOS:
 ```
@@ -44,8 +61,8 @@ cd C:\User\me\path\to\unzipped\ustad-server
 ```
 Where C:\User\me\path\to\unzipped\ is where you unzipped ustad-server.zip
 
-This starts the server on the default port (8087). You can now open a browser, and enter port 8087
-e.g. http://localhost:8087 to access the web version.
+This starts the server on the default port (8087). You can now open a browser, and use the url
+you specified as the siteUrl.
 
 A random admin password will be generated automatically. It will be placed in
 **data/singleton/admin.txt**.

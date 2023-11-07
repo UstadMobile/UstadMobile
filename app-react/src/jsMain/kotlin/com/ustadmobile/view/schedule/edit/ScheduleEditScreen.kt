@@ -11,11 +11,11 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.common.justifyContent
+import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.mui.components.UstadTimeField
 import web.cssom.*
 import mui.material.*
-import mui.system.Container
 import mui.system.responsive
 import react.FC
 import react.Props
@@ -32,9 +32,7 @@ val ScheduleEditComponent2 = FC <ScheduleEditScreenProps> { props ->
 
     val strings: StringProvider = useStringProvider()
 
-    Container {
-        maxWidth = "lg"
-
+    UstadStandardContainer {
         Stack {
             spacing = responsive(2)
 

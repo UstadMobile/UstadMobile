@@ -47,16 +47,6 @@ expect abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
     abstract fun deleteList(entries: List<ContainerEntry>)
 
     @Query("""
-            DELETE FROM ContainerEntry 
-             WHERE ceContainerUid 
-                IN (SELECT cjiContainerUid 
-                      FROM ContentJobItem
-                      JOIN ContentJob 
-                           ON ContentJobItem.cjiJobUid = ContentJob.cjUid
-                     WHERE ContentJob.cjUid = :jobId)""")
-    abstract suspend fun deleteContainerEntriesCreatedByJobs(jobId: Long)
-
-    @Query("""
         DELETE FROM ContainerEntry
          WHERE ceContainerUid
             IN (SELECT containerUid

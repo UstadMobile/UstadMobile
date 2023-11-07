@@ -7,10 +7,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntryDetailViewpagerBinding
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.viewmodel.ContentEntryDetailOverviewViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewViewModel
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptListViewModel
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter

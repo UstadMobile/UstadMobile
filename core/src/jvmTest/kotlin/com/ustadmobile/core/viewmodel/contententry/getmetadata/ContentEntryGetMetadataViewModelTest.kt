@@ -1,0 +1,108 @@
+package com.ustadmobile.core.viewmodel.contententry.getmetadata
+
+import app.cash.turbine.test
+import com.ustadmobile.core.contentjob.MetadataResult
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.IContentEntryGetMetaDataFromUriUseCase
+import com.ustadmobile.core.impl.nav.NavigateNavCommand
+import com.ustadmobile.core.test.viewmodeltest.testViewModel
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
+import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
+import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
+import org.kodein.di.bind
+import org.kodein.di.provider
+import org.kodein.di.scoped
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argWhere
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verifyBlocking
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.seconds
+
+class ContentEntryGetMetadataViewModelTest: AbstractMainDispatcherTest() {
+
+    @Test
+    fun givenMetadataExtractedSuccessfully_whenInitialized_thenShouldNavigateToContentEntryEdit() {
+        val mockContentEntryGetMetaDataFromUriUseCase = mock<IContentEntryGetMetaDataFromUriUseCase> {
+            onBlocking { invoke(any(), any(), any()) }
+                .thenReturn(
+                    MetadataResult(
+                        entry = ContentEntryWithLanguage().apply {
+                            title = "Test"
+                        },
+                        pluginId = 42
+                    )
+                )
+        }
+        val argUri = "blob:file.epub"
+
+        testViewModel<ContentEntryGetMetadataViewModel> {
+            extendDi {
+                bind<IContentEntryGetMetaDataFromUriUseCase>() with scoped(endpointScope).provider {
+                    mockContentEntryGetMetaDataFromUriUseCase
+                }
+            }
+
+            viewModelFactory {
+                savedStateHandle[ContentEntryGetMetadataViewModel.ARG_URI] = argUri
+                ContentEntryGetMetadataViewModel(di, savedStateHandle)
+            }
+
+            val navigation = viewModel.navCommandFlow.first() as NavigateNavCommand
+            assertEquals(ContentEntryEditViewModel.DEST_NAME, navigation.viewName)
+            verifyBlocking(mockContentEntryGetMetaDataFromUriUseCase) {
+                invoke(
+                    contentUri = argWhere { it.toString() == argUri },
+                    endpoint = any(),
+                    onProgress = any()
+                )
+            }
+        }
+    }
+
+    @Test
+    fun givenMetadataExtractionFails_whenInitialized_thenShouldShowErrorMessage() {
+        val errorMessage = "snafu"
+        val mockContentEntryGetMetaDataFromUriUseCase = mock<IContentEntryGetMetaDataFromUriUseCase> {
+            onBlocking { invoke(any(), any(), any()) }.thenAnswer {
+                throw Exception(errorMessage)
+            }
+        }
+
+        val argUri = "blob:file.epub"
+
+        testViewModel<ContentEntryGetMetadataViewModel> {
+            extendDi {
+                bind<IContentEntryGetMetaDataFromUriUseCase>() with scoped(endpointScope).provider {
+                    mockContentEntryGetMetaDataFromUriUseCase
+                }
+            }
+
+            viewModelFactory {
+                savedStateHandle[ContentEntryGetMetadataViewModel.ARG_URI] = argUri
+                ContentEntryGetMetadataViewModel(di, savedStateHandle)
+            }
+
+            viewModel.uiState.filter { it.status.error != null }.test(
+                timeout = 5.seconds, name = "error should show"
+            ) {
+                val state = awaitItem()
+                assertTrue(state.status.error?.endsWith(errorMessage) == true,
+                    "Error message is on UI state")
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            verifyBlocking(mockContentEntryGetMetaDataFromUriUseCase) {
+                invoke(
+                    contentUri = argWhere { it.toString() == argUri },
+                    endpoint = any(),
+                    onProgress = any()
+                )
+            }
+        }
+    }
+
+}

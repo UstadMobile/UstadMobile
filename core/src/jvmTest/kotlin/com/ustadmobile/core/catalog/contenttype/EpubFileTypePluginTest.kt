@@ -3,18 +3,29 @@ package com.ustadmobile.core.catalog.contenttype
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.contentjob.ContentJobProcessContext
-import com.ustadmobile.core.contentjob.DummyContentJobItemTransactionRunner
+import com.ustadmobile.core.contentformats.epub.opf.PackageDocument
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.ContainerStorageManager
+import com.ustadmobile.core.test.assertCachedBodyMatchesZipEntry
+import com.ustadmobile.util.test.ext.newFileFromResource
+import com.ustadmobile.core.uri.UriHelper
+import com.ustadmobile.core.uri.UriHelperJvm
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.libcache.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import kotlinx.io.files.Path
+import kotlinx.io.readString
+import nl.adaptivity.xmlutil.serialization.XML
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
 import org.junit.Before
@@ -22,7 +33,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
-import java.io.File
+import java.net.URL
+import java.util.zip.ZipFile
+import kotlin.test.assertEquals
 
 class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
 
@@ -41,18 +54,19 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
 
     private lateinit var db: UmAppDatabase
 
-    private lateinit var containerDir: File
+    private lateinit var ustadCache: UstadCache
+
+    private lateinit var uriHelper: UriHelper
+
+    private lateinit var xml: XML
+
+    private lateinit var xhtmlFixer: XhtmlFixer
 
     @Before
     fun setup(){
-        containerDir = tmpFolder.newFolder()
-
         endpointScope = EndpointScope()
         di = DI {
             import(ustadTestRule.diModule)
-            bind<ContainerStorageManager>() with scoped(endpointScope).singleton {
-                ContainerStorageManager(listOf(containerDir))
-            }
         }
 
         val accountManager: UstadAccountManager by di.instance()
@@ -63,73 +77,172 @@ class EpubFileTypePluginTest : AbstractMainDispatcherTest() {
         mockWebServer = MockWebServer()
         mockWebServer.dispatcher = ContentDispatcher()
         mockWebServer.start()
-
+        uriHelper = UriHelperJvm(
+            mimeTypeHelperImpl = FileMimeTypeHelperImpl(),
+            httpClient = di.direct.instance(),
+            okHttpClient = di.direct.instance(),
+        )
+        ustadCache = UstadCacheBuilder(
+            dbUrl = "jdbc:sqlite::memory:",
+            storagePath = Path(tmpFolder.newFolder().absolutePath),
+        ).build()
+        xml = di.direct.instance()
+        xhtmlFixer = XhtmlFixerJsoup(xml)
     }
+
+
 
     @Test
     fun givenValidEpubFormatFile_whenExtractEntryMetaDataFromFile_thenDataShouldMatch() {
-
         val inputStream = this::class.java.getResourceAsStream(
                 "/com/ustadmobile/core/contenttype/childrens-literature.epub")!!
         val tempEpubFile = tmpFolder.newFile()
         tempEpubFile.copyInputStreamToFile(inputStream)
 
-        val tempFolder = tmpFolder.newFolder("newFolder")
-        val tempUri = tempFolder.toDoorUri()
+        val epubPlugin = EpubTypePluginCommonJvm(
+            endpoint = Endpoint("http://localhost/dummy"),
+            di = di,
+            cache = ustadCache,
+            uriHelper = uriHelper,
+            xml = xml,
+            xhtmlFixer = xhtmlFixer,
+        )
 
-        val epubPlugin = EpubTypePluginCommonJvm(Any(), Endpoint("http://localhost/dummy"), di)
         runBlocking {
             val epubUri = DoorUri.parse(tempEpubFile.toURI().toString())
-            val processContext = ContentJobProcessContext(epubUri, tempUri, params = mutableMapOf(),
-                    DummyContentJobItemTransactionRunner(db), di)
-            val metadata = epubPlugin.extractMetadata(epubUri, processContext)
+            val metadata = epubPlugin.extractMetadata(
+                epubUri, "childrens-literature.epub"
+            )
             Assert.assertEquals("Got ContentEntry with expected title",
-                    "A Textbook of Sources for Teachers and Teacher-Training Classes",
+                    "Children's Literature",
                     metadata!!.entry.title)
         }
+    }
 
+    @Test
+    fun givenValidEpubFile_whenAddToCacheCalled_thenShouldStore() {
+        val tempEpubFile = tmpFolder.newFileFromResource(this::class.java,
+            "/com/ustadmobile/core/contenttype/childrens-literature.epub")
+
+        val epubPlugin = EpubTypePluginCommonJvm(
+            endpoint = Endpoint("http://localhost/dummy/"),
+            di = di,
+            cache = ustadCache,
+            uriHelper = uriHelper,
+            xml = xml,
+            xhtmlFixer = xhtmlFixer,
+        )
+        val contentEntryUid = 42L
+
+        runBlocking {
+            val epubUri = DoorUri.parse(tempEpubFile.toURI().toString())
+
+            val result = epubPlugin.addToCache(
+                jobItem = ContentJobItemAndContentJob().apply {
+                    contentJobItem = ContentJobItem(
+                        sourceUri = epubUri.toString(),
+                        cjiContentEntryUid = contentEntryUid,
+                    )
+                    contentJob = ContentJob()
+                },
+                progressListener = { },
+            )
+
+            withContext(Dispatchers.IO) {
+                ZipFile(tempEpubFile).use { zipFile ->
+                    ustadCache.assertCachedBodyMatchesZipEntry(
+                        url = result.cevUrl!!,
+                        zipFile = zipFile,
+                        pathInZip = result.cevUrl!!.substringAfterLast("api/content/${result.cevUid}/")
+                    )
+                }
+            }
+            assertEquals(contentEntryUid, result.cevContentEntryUid)
+        }
     }
 
     @Test
     fun givenValidEpubLink_whenExtractMetadataAndProcessJobComplete_thenDataShouldBeDownloaded(){
-
-        val containerTmpDir = tmpFolder.newFolder("containerTmpDir")
-        val tempFolder = tmpFolder.newFolder("newFolder")
-        val tempUri = DoorUri.parse(tempFolder.toURI().toString())
         val accountManager: UstadAccountManager by di.instance()
-        val repo: UmAppDatabase = di.on(accountManager.currentAccount).direct.instance(tag = DoorTag.TAG_REPO)
-        val endpoint = accountManager.activeEndpoint
 
-        val epubPlugin = EpubTypePluginCommonJvm(Any(), endpoint, di)
+        val epubPlugin = EpubTypePluginCommonJvm(
+            endpoint = Endpoint("http://localhost/dummy/"),
+            di = di,
+            cache = ustadCache,
+            uriHelper = uriHelper,
+            xml = xml,
+            xhtmlFixer = xhtmlFixer,
+        )
+
         runBlocking{
+            val doorUri = DoorUri.parse(
+                mockWebServer.url("/com/ustadmobile/core/contenttype/childrens-literature.epub")
+                    .toString()
+            )
 
-            val doorUri = DoorUri.parse(mockWebServer.url("/com/ustadmobile/core/contenttype/childrens-literature.epub").toString())
-            val processContext = ContentJobProcessContext(doorUri, tempUri, mutableMapOf(),
-                DummyContentJobItemTransactionRunner(db), di)
-
-            val uid = repo.contentEntryDao.insert(ContentEntry().apply{
+            val uid = db.contentEntryDao.insert(ContentEntry().apply{
                 title = "hello"
             })
+            val contentEntryChildUid = 42L
+
             
-            val jobItem = ContentJobItem(sourceUri = doorUri.uri.toString(),
-                                    cjiParentContentEntryUid = uid)
-            val job = ContentJob(toUri = containerTmpDir.toURI().toString())
+            val jobItem = ContentJobItem(
+                sourceUri = doorUri.uri.toString(),
+                cjiParentContentEntryUid = uid,
+                cjiContentEntryUid = contentEntryChildUid
+            )
+
+            val job = ContentJob()
             val jobAndItem = ContentJobItemAndContentJob().apply{
                 this.contentJob = job
                 this.contentJobItem = jobItem
             }
+            val result = epubPlugin.addToCache(
+                jobItem = jobAndItem,
+                progressListener =  { }
+            )
+            assertEquals(contentEntryChildUid, result.cevContentEntryUid)
 
-            epubPlugin.processJob(jobAndItem, processContext) {
+            withContext(Dispatchers.IO) {
+                val tempEpubFile = tmpFolder.newFileFromResource(this::class.java,
+                    "/com/ustadmobile/core/contenttype/childrens-literature.epub")
 
+                ZipFile(tempEpubFile).use { zipFile ->
+                    //verifies that we have the OPF
+                    val opfPathInZip = result.cevUrl!!.substringAfterLast("api/content/${result.cevUid}/")
+                    val opfUrl = URL(result.cevUrl!!)
+                    ustadCache.assertCachedBodyMatchesZipEntry(
+                        url = result.cevUrl!!,
+                        zipFile = zipFile,
+                        pathInZip = opfPathInZip
+                    )
+
+                    val opfResponse = ustadCache.retrieve(requestBuilder(result.cevUrl!!))
+                    val opfPackage = xml.decodeFromString(
+                        deserializer = PackageDocument.serializer(),
+                        string = opfResponse?.bodyAsSource()!!.readString()
+                    )
+
+                    //Assert that we have all content in the manifest with the expected mimetype
+                    opfPackage.manifest.items.forEach { item ->
+                        val response = ustadCache.retrieve(
+                            requestBuilder(UMFileUtil.resolveLink(result.cevUrl!!, item.href))
+                        )
+                        assertEquals(item.mediaType, response?.headers?.get("content-type"))
+
+                        val pathInZipFile = Path(opfPathInZip).parent?.let {
+                            Path(it, item.href)
+                        } ?: Path(item.href)
+
+                        ustadCache.assertCachedBodyMatchesZipEntry(
+                            url = URL(opfUrl, item.href).toString(),
+                            zipFile = zipFile,
+                            pathInZip = pathInZipFile.toString()
+                        )
+                    }
+                }
             }
-
-            val container = repo.containerDao.findByUid(jobItem.cjiContainerUid)!!
-
-            Assert.assertNotNull(container)
-
-
         }
-
     }
 
 }

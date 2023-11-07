@@ -16,6 +16,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.view.components.UstadSwitchField
 import web.cssom.px
@@ -24,12 +25,13 @@ import mui.material.Stack
 import mui.system.responsive
 import react.FC
 import react.Props
+import react.ReactNode
 
 external interface ContentEntryEditScreenProps : Props {
 
     var uiState: ContentEntryEditUiState
 
-    var onCourseBlockChange: (CourseBlock?) -> Unit
+    var onCourseBlockChanged: (CourseBlock?) -> Unit
 
     var onClickUpdateContent: () -> Unit
 
@@ -53,6 +55,7 @@ val ContentEntryEditScreen = FC<Props> {
     ContentEntryEditScreenComponent {
         uiState = uiStateVal
         onContentEntryChanged = viewModel::onContentEntryChanged
+        onCourseBlockChanged = viewModel::onCourseBlockChanged
     }
 }
 
@@ -103,8 +106,7 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
         else
             strings[MR.strings.file_selected]
 
-    Container {
-        maxWidth = "lg"
+    UstadStandardContainer {
 
         Stack {
             spacing = responsive(20.px)
@@ -128,39 +130,44 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
                 }
             }
 
-            UstadTextEditField {
-                value = props.uiState.entity?.entry?.title ?: ""
-                id = "content_title"
-                label = strings[MR.strings.title]
-                error = props.uiState.titleError
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
-                    props.onContentEntryChanged(
-                        props.uiState.entity?.entry?.shallowCopy {
-                            title = it
-                        }
-                    )
+            if(props.uiState.contentEntryTitleVisible) {
+                TextField {
+                    value = props.uiState.entity?.entry?.title ?: ""
+                    id = "content_title"
+                    label = ReactNode(strings[MR.strings.title]  + "*")
+                    helperText = ReactNode(props.uiState.titleError ?: strings[MR.strings.required])
+                    error = props.uiState.titleError != null
+                    disabled = !props.uiState.fieldsEnabled
+                    onTextChange = {
+                        props.onContentEntryChanged(
+                            props.uiState.entity?.entry?.shallowCopy {
+                                title = it
+                            }
+                        )
+                    }
                 }
             }
 
-            UstadTextEditField {
-                value = props.uiState.entity?.entry?.description ?: ""
-                id = "content_description"
-                label = strings[MR.strings.description]
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
-                    props.onContentEntryChanged(
-                        props.uiState.entity?.entry?.shallowCopy {
-                            description = it
-                        }
-                    )
+            if(props.uiState.contentEntryDescriptionVisible) {
+                UstadTextEditField {
+                    value = props.uiState.entity?.entry?.description ?: ""
+                    id = "content_description"
+                    label = strings[MR.strings.description]
+                    enabled = props.uiState.fieldsEnabled
+                    onChange = {
+                        props.onContentEntryChanged(
+                            props.uiState.entity?.entry?.shallowCopy {
+                                description = it
+                            }
+                        )
+                    }
                 }
             }
 
             if(props.uiState.courseBlockVisible) {
                 UstadCourseBlockEdit {
                     uiState = props.uiState.courseBlockEditUiState
-                    onCourseBlockChange = props.onCourseBlockChange
+                    onCourseBlockChange = props.onCourseBlockChanged
                 }
             }
 

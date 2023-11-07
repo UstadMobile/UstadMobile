@@ -3,7 +3,7 @@ package com.ustadmobile.core.contentjob
 import com.ustadmobile.door.DoorUri
 import kotlinx.coroutines.CancellationException
 
-class ContentPluginManager(val pluginList: List<ContentPlugin>) {
+class ContentPluginManager(val pluginList: List<ContentImportPlugin>) {
 
     val supportedMimeTypeList: List<String>
 
@@ -22,18 +22,21 @@ class ContentPluginManager(val pluginList: List<ContentPlugin>) {
     }
 
 
-    fun requirePluginById(id: Int) : ContentPlugin {
+    fun requirePluginById(id: Int) : ContentImportPlugin {
         return pluginList.find { it.pluginId == id } ?: throw FatalContentJobException("invalid pluginId")
     }
 
-    fun getPluginById(id: Int): ContentPlugin? {
+    fun getPluginById(id: Int): ContentImportPlugin? {
         return pluginList.firstOrNull { it.pluginId == id }
     }
 
-    suspend fun extractMetadata(uri: DoorUri, processContext: ContentJobProcessContext): MetadataResult {
+    suspend fun extractMetadata(
+        uri: DoorUri,
+        originalFilename: String? = null,
+    ): MetadataResult {
         pluginList.forEach {
             try {
-                return it.extractMetadata(uri, processContext) ?: return@forEach
+                return it.extractMetadata(uri, originalFilename) ?: return@forEach
             }catch (e: Exception){
                 if(e is CancellationException){
                     throw e

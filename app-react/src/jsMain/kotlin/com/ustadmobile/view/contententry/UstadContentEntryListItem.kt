@@ -1,24 +1,18 @@
 package com.ustadmobile.view.contententry
 
-import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.ContentEntryTypeLabelConstants
-import com.ustadmobile.core.util.ext.progressBadge
+import com.ustadmobile.core.impl.locale.messageIdOptionLookup
 import com.ustadmobile.core.viewmodel.contententry.list.listItemUiState
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import com.ustadmobile.lib.db.entities.StatementEntity
 import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.ext.paddingCourseBlockIndent
-import com.ustadmobile.view.CONTENT_ENTRY_TYPE_ICON_MAP
+import com.ustadmobile.view.contententry.detailoverviewtab.CONTENT_ENTRY_TYPE_ICON_MAP
 import web.cssom.*
 //WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
-import mui.icons.material.BookOutlined
-import mui.icons.material.CheckCircle
-import mui.icons.material.Folder
-import mui.icons.material.Cancel
-import mui.icons.material.TextSnippet
+import mui.icons.material.BookOutlined as BookOutlinedIcon
+import mui.icons.material.Folder as FolderIcon
+import mui.icons.material.TextSnippet as TextSnippetIcon
 import mui.material.*
 import mui.system.responsive
 import mui.system.sx
@@ -29,11 +23,9 @@ import react.create
 
 external interface UstadContentEntryListItemProps : Props {
 
-    var contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?
+    var contentEntry: ContentEntry?
 
-    var onClickContentEntry: (ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
-
-    var onClickDownloadContentEntry: (ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
+    var onClickContentEntry: (ContentEntry?) -> Unit
 
     var padding: Padding
 
@@ -75,23 +67,15 @@ val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { props ->
 
 private external interface LeadingContentProps: Props {
 
-    var contentEntryItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?
+    var contentEntryItem: ContentEntry?
 }
 
 private val LeadingContent = FC<LeadingContentProps> { props ->
 
-    val uiState = props.contentEntryItem?.listItemUiState
     val thumbnail = if (props.contentEntryItem?.leaf == true)
-        BookOutlined
+        BookOutlinedIcon
     else
-        Folder
-
-    var badgeIcon = CheckCircle
-    var badgeColor = SvgIconColor.success
-    if (props.contentEntryItem?.scoreProgress?.progressBadge() == ProgressConstants.BADGE_CROSS) {
-        badgeIcon = Cancel
-        badgeColor = SvgIconColor.error
-    }
+        FolderIcon
 
     Stack {
         direction = responsive(StackDirection.column)
@@ -104,35 +88,6 @@ private val LeadingContent = FC<LeadingContentProps> { props ->
                 height = 40.px
             }
         }
-
-        /*
-         Restore after reactive sync
-        Badge {
-
-            if (
-                props.contentEntryItem?.scoreProgress != null &&
-                    props.contentEntryItem?.scoreProgress?.progressBadge() != ProgressConstants.BADGE_NONE
-            ) {
-                badgeContent = badgeIcon.create {
-                    sx {
-                        width = 18.px
-                        height = 18.px
-                    }
-                    color = badgeColor
-                }
-            }
-
-            if (uiState?.progressVisible == true){
-                LinearProgress {
-                    value = props.contentEntryItem?.scoreProgress?.progress ?: 0
-                    variant = LinearProgressVariant.determinate
-                    sx {
-                        width = 45.px
-                    }
-                }
-            }
-        }
-         */
     }
 }
 
@@ -140,7 +95,7 @@ private val LeadingContent = FC<LeadingContentProps> { props ->
 
 private external interface SecondaryContentProps: Props {
 
-    var contentEntryItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?
+    var contentEntryItem: ContentEntry?
 }
 
 private val SecondaryContent = FC<SecondaryContentProps> { props ->
@@ -165,39 +120,22 @@ private val SecondaryContent = FC<SecondaryContentProps> { props ->
             if (uiState?.mimetypeVisible == true){
                 Icon {
                     + (CONTENT_ENTRY_TYPE_ICON_MAP[props.contentEntryItem
-                        ?.contentTypeFlag]?.create() ?: TextSnippet.create())
+                        ?.contentTypeFlag]?.create() ?: TextSnippetIcon.create())
                 }
 
                 val contentType = props.contentEntryItem?.contentTypeFlag
                     ?: ContentEntry.TYPE_DOCUMENT
                 Typography {
-                    + (strings[ContentEntryTypeLabelConstants
-                        .TYPE_LABEL_MESSAGE_IDS[contentType].stringResource]
-                        )
+                    + strings.messageIdOptionLookup(
+                        key = contentType,
+                        messageIdList = ContentEntryTypeLabelConstants.TYPE_LABEL_MESSAGE_IDS
+                    )
                 }
 
                 Box {
                     sx { width = 20.px }
                 }
             }
-
-            /*
-            Icon {
-                + EmojiEvents.create()
-            }
-
-
-             Restore after reactive sync
-            if(props.contentEntryItem?.scoreProgress != null) {
-                Typography {
-                    + "${props.contentEntryItem?.scoreProgress?.progress ?: 0}%"
-                }
-
-                Typography {
-                    + uiState?.scoreResultText
-                }
-            }
-             */
 
         }
     }
@@ -207,15 +145,10 @@ private val SecondaryContent = FC<SecondaryContentProps> { props ->
 val UstadContentEntryListItemPreview = FC<Props> {
 
     UstadContentEntryListItem {
-        contentEntry = ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
+        contentEntry = ContentEntry().apply {
             contentEntryUid = 1
             leaf = true
             ceInactive = true
-            scoreProgress = ContentEntryStatementScoreProgress().apply {
-                progress = 10
-                penalty = 20
-                success = StatementEntity.RESULT_SUCCESS
-            }
             contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
             title = "Content Title"
             description = "Content Description"

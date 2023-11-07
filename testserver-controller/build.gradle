@@ -31,8 +31,8 @@ dependencies {
     implementation "io.ktor:ktor-serialization-gson:$version_ktor"
     implementation "com.google.code.gson:gson:$version_gson"
     implementation "org.jetbrains.kotlinx:kotlinx-html-jvm:$version_kotlinx_html"
-    implementation "io.github.pdvrieze.xmlutil:core-jvm:$version_xmlutil"
-    implementation "io.github.pdvrieze.xmlutil:serialization-jvm:$version_xmlutil"
+    implementation libs.xmlutil.core.jvm
+    implementation libs.xmlutil.serialization.jvm
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
 
     testImplementation "junit:junit:$version_junit"

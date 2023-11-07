@@ -10,9 +10,9 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.core.impl.locale.TerminologyEntry
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.util.ext.onTextChange
 import mui.material.TextField
-import mui.system.Container
 import mui.system.Stack
 import mui.system.StackDirection
 import mui.system.responsive
@@ -35,9 +35,7 @@ val CourseTerminologyEditScreenComponent2 = FC <CourseTerminologyEditScreenProps
 
     val strings: StringProvider = useStringProvider()
 
-    Container {
-        maxWidth = "lg"
-
+    UstadStandardContainer {
         Stack {
             direction = responsive(StackDirection.column)
             spacing = responsive(2)

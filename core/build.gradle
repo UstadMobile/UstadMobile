@@ -103,12 +103,15 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
-                implementation project(':lib-database')
+                api project(':lib-database')
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation project(":lib-util")
                 implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
                 implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
+                api libs.kotlinxio.core
+                api libs.xmlutil.core
+                api libs.xmlutil.serialization
             }
         }
 
@@ -118,6 +121,7 @@ kotlin {
             dependencies {
                 implementation kotlin('stdlib-common')
                 implementation project(":lib-database")
+                implementation project(":lib-cache")
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
@@ -152,6 +156,7 @@ kotlin {
                 implementation "org.quartz-scheduler:quartz:$version_quartz_scheduler"
                 implementation "io.ktor:ktor-server-core:$version_ktor"
                 implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
+                implementation libs.javaffmpeg
             }
         }
 

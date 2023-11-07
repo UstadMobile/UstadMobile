@@ -10,7 +10,14 @@ data class MetadataResult(
     /**
      * The pluginId that provided this metadata
      */
-    val pluginId: Int
+    val pluginId: Int,
+
+    /**
+     * The original filename as it was uploaded / selected by the user. This is required when the
+     * uri provided (e.g. upload-tmp files that don't include the original name and Android content
+     * URIs where the filename is retrieved via Android-specific functions).
+     */
+    val originalFilename: String? = null,
 ) {
 
     companion object {

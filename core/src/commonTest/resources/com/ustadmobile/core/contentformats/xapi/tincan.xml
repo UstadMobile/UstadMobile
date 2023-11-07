@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+
+<tincan xmlns="http://projecttincan.com/tincan.xsd">
+    <activities>
+        <activity id="http://id.tincanapi.com/activity/tincan-prototypes/tetris" type="http://activitystrea.ms/schema/1.0/game">
+            <name>Tin Can Tetris Example</name>
+            <description lang="en-US">A game of Tetris</description>
+            <launch lang="en-us">tetris.html</launch>
+        </activity>
+    </activities>
+</tincan>

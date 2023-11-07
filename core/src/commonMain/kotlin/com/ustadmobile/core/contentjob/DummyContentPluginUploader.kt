@@ -16,7 +16,6 @@ class DummyContentPluginUploader(): ContentPluginUploader {
         progress: NetworkProgressListener?,
         httpClient: HttpClient,
         endpoint: Endpoint,
-        processContext: ContentJobProcessContext,
     ): Int {
         return JobStatus.COMPLETE
     }

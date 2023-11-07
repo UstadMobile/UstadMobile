@@ -3,7 +3,6 @@ package com.ustadmobile.core.db.dao
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
-import androidx.room.Transaction
 import com.ustadmobile.core.db.JobStatus
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.lib.db.entities.*
@@ -141,18 +140,26 @@ expect abstract class ContentJobItemDao {
     abstract suspend fun updateFinishTimeForJob(cjiUid: Long, finishTime: Long)
 
     @Query("""
-        UPDATE ContentJobITem
-           SET cjiContentEntryUid = :contentEntryUid
+        UPDATE ContentJobItem
+           SET cjiContentEntryUid = :contentEntryUid,
+               cjiContentDeletedOnCancellation = :makeContentInactiveOnCancel
          WHERE cjiUid = :cjiUid  
     """)
-    abstract suspend fun updateContentEntryUid(cjiUid: Long, contentEntryUid: Long)
+    abstract suspend fun updateContentEntryUid(
+        cjiUid: Long,
+        contentEntryUid: Long,
+        makeContentInactiveOnCancel: Boolean,
+    )
 
     @Query("""
         UPDATE ContentJobItem
-           SET cjiContainerUid = :containerUid
+           SET cjiContentEntryVersion = :contentEntryVersion
          WHERE cjiUid = :cjiUid  
     """)
-    abstract suspend fun updateContentJobItemContainer(cjiUid: Long, containerUid: Long)
+    abstract suspend fun updateContentJobItemContentEntryVersion(
+        cjiUid: Long,
+        contentEntryVersion: Long
+    )
 
     @Query("""
         SELECT * 
@@ -202,13 +209,6 @@ expect abstract class ContentJobItemDao {
     abstract fun getJobItemByUidLive(uid: Long): Flow<ContentJobItem?>
 
     @Query("""
-        SELECT cjiContainerUid
-          FROM ContentJobItem
-         WHERE cjiUid = :uid 
-    """)
-    abstract suspend fun getContainerUidByJobItemUid(uid: Long): Long
-
-    @Query("""
         UPDATE ContentJobItem
            SET cjiStatus = :newStatus
          WHERE cjiJobUid = :jobUid
@@ -217,11 +217,11 @@ expect abstract class ContentJobItemDao {
     abstract suspend fun updateAllStatusesByJobUid(jobUid: Long, newStatus: Int)
 
     @Query("""
-        SELECT ContentJobItem.cjiContainerUid
+        SELECT ContentJobItem.cjiContentEntryVersion
           FROM ContentJobItem
          WHERE cjiJobUid = :jobUid 
     """)
-    abstract suspend fun findAllContainersByJobUid(jobUid: Long): List<Long>
+    abstract suspend fun findAllContentEntryVersionsByJobUid(jobUid: Long): List<Long>
 
 
 }

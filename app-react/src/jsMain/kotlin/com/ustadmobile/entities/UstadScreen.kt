@@ -80,7 +80,7 @@ import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmi
 import com.ustadmobile.core.viewmodel.LeavingReasonEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
 import com.ustadmobile.view.leavingreason.edit.LeavingReasonEditScreen
-import com.ustadmobile.core.viewmodel.ContentEntryDetailOverviewViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewViewModel
 import com.ustadmobile.core.viewmodel.HolidayCalendarEditViewModel
 import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
@@ -107,6 +107,22 @@ import com.ustadmobile.view.accountlist.AccountListScreen
 import com.ustadmobile.view.person.accountedit.PersonAccountEditPreview
 import com.ustadmobile.view.person.accountedit.PersonAccountEditScreen
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
+import com.ustadmobile.view.contententry.importlink.ContentEntryImportLinkScreen
+import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
+import com.ustadmobile.view.contententry.getmetadata.ContentEntryGetMetadataScreen
+import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
+import com.ustadmobile.view.contententry.getmetadata.ContentEntryGetMetadataPreview
+import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
+import com.ustadmobile.view.contententry.detail.ContentEntryDetailScreen
+import com.ustadmobile.view.contententry.detailoverviewtab.ContentEntryDetailOverviewScreen
+import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
+import com.ustadmobile.view.xapicontent.XapiContentScreen
+import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentViewModel
+import com.ustadmobile.view.pdfcontent.PdfContentScreen
+import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
+import com.ustadmobile.view.epubcontent.EpubContentScreen
+import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
+import com.ustadmobile.view.videocontent.VideoContentScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -176,13 +192,16 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         "ReportFilterEdit Preview", ReportFilterEditScreenPreview),
     UstadScreen(ScopedGrantDetailView.VIEW_NAME, "ScopedGrantDetail Preview",
         ScopedGrantDetailScreenPreview),
-    UstadScreen(ContentEntryImportLinkView.VIEW_NAME, "ContentEntryImportLink Preview",
-        ContentEntryImportLinkScreenPreview),
+    UstadScreen(ContentEntryImportLinkViewModel.DEST_NAME, "ContentEntryImportLink",
+        ContentEntryImportLinkScreen
+    ),
     UstadScreen(HolidayCalendarDetailView.VIEW_NAME, "HolidayCalendarDetail Preview",
         HolidayCalendarDetailPreview),
-    UstadScreen(ContentEntryDetailOverviewViewModel.DEST_NAME,
-        "ContentEntryDetailOverview Preview",
-        ContentEntryDetailOverviewScreenPreview),
+    UstadScreen(
+        ContentEntryDetailOverviewViewModel.DEST_NAME,
+        "ContentEntryDetailOverview",
+        ContentEntryDetailOverviewScreen
+    ),
     UstadScreen(HolidayCalendarEditViewModel.DEST_NAME, "HolidayCalendarEdit Preview",
         HolidayCalendarEditPreview),
     UstadScreen(
@@ -311,7 +330,17 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         ClazzAssignmentSubmitterDetailScreen),
     UstadScreen(LeavingReasonEditViewModel.DEST_NAME, "LeavingReasonEdit", LeavingReasonEditScreen),
     UstadScreen("DbExport", "DbExport", DbExportScreen),
-    UstadScreen(PersonAccountEditViewModel.DEST_NAME, "PersonAccountEdit", PersonAccountEditScreen)
+    UstadScreen(PersonAccountEditViewModel.DEST_NAME, "PersonAccountEdit", PersonAccountEditScreen),
+    UstadScreen(ContentEntryGetMetadataViewModel.DEST_NAME, "ContentEntryGetMetadata",
+        ContentEntryGetMetadataScreen),
+    UstadScreen("ContentEntryGetMetadataPreview", "ContentEntryGetMetadataPreview",
+        ContentEntryGetMetadataPreview),
+    UstadScreen(ContentEntryDetailViewModel.DEST_NAME, "ContentEntryDetail",
+        ContentEntryDetailScreen),
+    UstadScreen(XapiContentViewModel.DEST_NAME, "XapiContent", XapiContentScreen),
+    UstadScreen(PdfContentViewModel.DEST_NAME, "PdfContent", PdfContentScreen),
+    UstadScreen(EpubContentViewModel.DEST_NAME, "EpubContent", EpubContentScreen),
+    UstadScreen(VideoContentViewModel.DEST_NAME, "VideoContent", VideoContentScreen),
 )
 
 
