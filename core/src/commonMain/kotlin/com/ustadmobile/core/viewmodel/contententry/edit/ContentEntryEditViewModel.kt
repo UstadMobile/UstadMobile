@@ -144,7 +144,7 @@ class ContentEntryEditViewModel(
                                 cbDescription = importedMetaData.entry.description
                             },
                             contentJobItem = ContentJobItem(
-                                cjiPluginId = importedMetaData.pluginId,
+                                cjiPluginId = importedMetaData.importerId,
                                 cjiContentEntryUid = newContentEntryUid,
                                 sourceUri = importedMetaData.entry.sourceUrl,
                                 cjiOriginalFilename = importedMetaData.originalFilename,

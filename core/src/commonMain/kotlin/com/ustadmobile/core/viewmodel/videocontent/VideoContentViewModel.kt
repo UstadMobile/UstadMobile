@@ -1,6 +1,6 @@
 package com.ustadmobile.core.viewmodel.videocontent
 
-import com.ustadmobile.core.catalog.contenttype.media.MediaContentInfo
+import com.ustadmobile.core.contentformats.media.MediaContentInfo
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel

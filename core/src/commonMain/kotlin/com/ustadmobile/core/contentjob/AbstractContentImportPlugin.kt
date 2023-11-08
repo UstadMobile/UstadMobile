@@ -21,9 +21,9 @@ import org.kodein.di.on
  */
 abstract class AbstractContentImportPlugin(
     protected val endpoint: Endpoint,
-    protected val uploader: ContentPluginUploader,
+    protected val uploader: ContentImporterUploader,
     protected val uriHelper: UriHelper,
-) : ContentImportPlugin {
+) : ContentImporter {
 
     /**
      * This function should cache the given job into the HttpCache for storage.

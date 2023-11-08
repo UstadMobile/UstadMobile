@@ -12,7 +12,7 @@ import org.kodein.di.DIAware
  */
 class DefaultContentPluginUploader(
     override val di: DI
-): ContentPluginUploader, DIAware {
+): ContentImporterUploader, DIAware {
 
     override suspend fun upload(
         contentJobItem: ContentJobItem,

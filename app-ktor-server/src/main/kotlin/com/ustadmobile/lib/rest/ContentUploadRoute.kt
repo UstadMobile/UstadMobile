@@ -37,7 +37,7 @@ fun Route.ContentUploadRoute() {
             val di: DI by completedUpload.call.closestDI()
             val originalFilenameParam: String? = completedUpload.call.request
                 .queryParameters["originalFilename"]
-            val pluginManager: ContentPluginManager by di.on(completedUpload.call).instance()
+            val pluginManager: ContentImportersManager by di.on(completedUpload.call).instance()
 
             try {
                 val metadataResult = pluginManager.extractMetadata(

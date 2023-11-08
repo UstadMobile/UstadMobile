@@ -33,7 +33,7 @@ class ContentEntryGetMetadataViewModelTest: AbstractMainDispatcherTest() {
                         entry = ContentEntryWithLanguage().apply {
                             title = "Test"
                         },
-                        pluginId = 42
+                        importerId = 42
                     )
                 )
         }

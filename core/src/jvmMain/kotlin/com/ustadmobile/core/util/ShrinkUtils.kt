@@ -1,7 +1,6 @@
 package com.ustadmobile.core.util
 
 import io.github.aakira.napier.Napier
-import com.ustadmobile.core.catalog.contenttype.VideoTypePlugin
 import com.ustadmobile.core.io.ext.readString
 import java.io.BufferedReader
 import java.io.File
@@ -85,10 +84,13 @@ object ShrinkUtils {
             ffmpegCommand +=  listOf("-aspect", aspectRatio)
         }
 
+        /*
         ffmpegCommand += listOf("-framerate", VideoTypePlugin.VIDEO_FRAME_RATE.toString(),
                 "-c:v", "libx264", "-b:v", VideoTypePlugin.VIDEO_BIT_RATE.toString(),
                 "-c:a", "aac", "-b:a", VideoTypePlugin.AUDIO_BIT_RATE.toString(),
                 "-vbr", "on", "-y", destFile.path)
+
+         */
 
         val builder = ProcessBuilder(ffmpegCommand)
 

@@ -36,7 +36,7 @@ class ContentEntryEditViewModelTest : AbstractMainDispatcherTest(){
             entry = ContentEntryWithLanguage().apply {
                 sourceUrl = "https://server.com/file.epub"
             },
-            pluginId = 42
+            importerId = 42
         )
         testViewModel<ContentEntryEditViewModel> {
             val mockSaveContentEntryUseCase = mock<SaveContentEntryUseCase>()

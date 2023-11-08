@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.rest
 
 import io.github.aakira.napier.Napier
-import com.ustadmobile.core.contentjob.ContentPluginManager
+import com.ustadmobile.core.contentjob.ContentImportersManager
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.domain.contententry.import.ImportContentUseCase
 import com.ustadmobile.core.domain.contententry.import.ImportRequest
@@ -31,7 +31,7 @@ fun Route.ContentEntryImportRoute() {
     post("validateLink") {
         val url = call.request.queryParameters["url"]?: ""
         val di = closestDI()
-        val pluginManager: ContentPluginManager by di.on(call).instance()
+        val pluginManager: ContentImportersManager by di.on(call).instance()
 
         val metadata: MetadataResult?
         try{
