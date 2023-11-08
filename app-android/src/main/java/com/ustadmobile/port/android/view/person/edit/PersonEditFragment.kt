@@ -220,16 +220,23 @@ fun PersonEditScreen(
         )
 
         if (uiState.usernameVisible){
-            UstadTextEditField(
-                value = uiState.person?.username ?: "",
-                label = stringResource(id = CR.string.username),
-                enabled = uiState.fieldsEnabled,
-                onValueChange = {
-                    onPersonChanged(uiState.person?.shallowCopy{
-                        username = it
-                    })
-                }
-            )
+            UstadInputFieldLayout (
+                errorText = uiState.usernameError
+            ){
+                OutlinedTextField(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    value = uiState.person?.username ?: "",
+                    label = { Text(stringResource(id = CR.string.username)) },
+                    enabled = uiState.fieldsEnabled,
+                    isError = uiState.usernameError != null,
+                    onValueChange = {
+                        onPersonChanged(uiState.person?.shallowCopy{
+                            username = it
+                        })
+                    }
+                )
+            }
         }
 
         if (uiState.passwordVisible){

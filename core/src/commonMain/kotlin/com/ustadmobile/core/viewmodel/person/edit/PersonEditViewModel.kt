@@ -256,6 +256,32 @@ class PersonEditViewModel(
         return isValid
     }
 
+    fun validateUsername(username: String): Boolean {
+        var isValid = true
+
+        if (username.isNullOrEmpty()){
+            isValid = false
+        }
+
+        if (isValid){
+            if (username.contains(" ")){
+                isValid = false
+            }
+        }
+
+        if (isValid){
+            var usernameChars = username.toCharArray()
+
+            for(i in 1..<usernameChars.count()){
+                if(usernameChars[i].isUpperCase()){
+                    isValid = false
+                }
+            }
+        }
+
+        return isValid
+    }
+
     fun onClickSave() {
 
         if(!_uiState.value.fieldsEnabled)
@@ -274,7 +300,7 @@ class PersonEditViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                usernameError = null,
+                usernameError = if(!validateUsername(savePerson.username ?: "")) systemImpl.getString(MR.strings.invalid) else null,
                 passwordError = null,
                 emailError = if(savePerson.emailAddr?.let { checkEmailValidation(it) } == false) systemImpl.getString(MR.strings.invalid_email) else null,
                 confirmError = null,
