@@ -102,6 +102,9 @@ class PdfContentImporterJvm(
     override val supportedFileExtensions: List<String>
         get() = SupportedContent.PDF_EXTENSIONS
 
+    override val formatName: String
+        get() = "PDF"
+
     @Suppress("NewApi") //This is JVM only, warning is wrong
     override suspend fun extractMetadata(
         uri: DoorUri,

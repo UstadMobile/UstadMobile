@@ -18,6 +18,8 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.contentjob.InvalidContentException
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.UnsupportedContentException
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 
 data class ContentEntryGetMetadataUiState(
@@ -70,11 +72,20 @@ class ContentEntryGetMetadataViewModel(
                         popUpToInclusive = true,
                     )
                 )
-            }catch(e: Exception) {
+            }catch(e: Throwable) {
+                val errorMessage = when {
+                    e is InvalidContentException -> {
+                        "${systemImpl.getString(MR.strings.invalid_file)} : ${e.message}"
+                    }
+                    e is UnsupportedContentException -> {
+                        systemImpl.formatString(MR.strings.unsupported_file_type, e.message ?:"")
+                    }
+                    else -> "${systemImpl.getString(MR.strings.error)} : other: ${e.message}"
+                }
                 _uiState.update { prev ->
                     prev.copy(
                         status = prev.status.copy(
-                            error = "${systemImpl.getString(MR.strings.error)}: ${e.message}"
+                            error = errorMessage
                         )
                     )
                 }

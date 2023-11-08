@@ -60,6 +60,9 @@ class VideoContentImporterJvm(
     override val supportedFileExtensions: List<String>
         get() = TODO("Not yet implemented")
 
+    override val formatName: String
+        get() = "Video(MP4, M4V, Quicktime, WEBM, OGV, AVI)"
+
     /**
      * This is not responsible for
      */

@@ -70,6 +70,8 @@ class H5PContentImportPlugin(
     override val supportedFileExtensions: List<String>
         get() = listOf("h5p")
 
+    override val formatName: String
+        get() = "H5P"
 
     override suspend fun extractMetadata(
         uri: DoorUri,

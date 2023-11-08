@@ -7,6 +7,8 @@ package com.ustadmobile.core.contentjob
  *
  * This causes the contentimportersmanager to stop all processing and tell the user that the
  * content is invalid.
+ *
+ * This is represented by an http status code of 400.
  */
 class InvalidContentException(
     message: String,

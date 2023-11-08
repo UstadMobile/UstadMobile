@@ -8,6 +8,7 @@ import org.kodein.di.ktor.closestDI
 import org.kodein.di.on
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.lib.rest.ext.respondContentEntryMetaDataResult
 import com.ustadmobile.lib.rest.upload.UploadRoute
 import io.ktor.http.*
 import org.kodein.di.DI
@@ -37,13 +38,13 @@ fun Route.ContentUploadRoute() {
             val di: DI by completedUpload.call.closestDI()
             val originalFilenameParam: String? = completedUpload.call.request
                 .queryParameters["originalFilename"]
-            val pluginManager: ContentImportersManager by di.on(completedUpload.call).instance()
+            val importersManager: ContentImportersManager by di.on(completedUpload.call).instance()
 
             try {
-                val metadataResult = pluginManager.extractMetadata(
+                val metadataResult = importersManager.extractMetadata(
                     uri = completedUpload.file.toDoorUri(),
                     originalFilename = originalFilenameParam,
-                ).let {
+                )?.let {
                     //Ensure the original filename is preserved, even if not handled by the plugin
                     if(it.originalFilename == null && originalFilenameParam != null)
                         it.copy(originalFilename = originalFilenameParam)
@@ -51,9 +52,13 @@ fun Route.ContentUploadRoute() {
                         it
                 }
 
-                completedUpload.call.respond(HttpStatusCode.OK, metadataResult)
-            }catch(e: Exception) {
-                completedUpload.call.respond(HttpStatusCode.BadRequest)
+                completedUpload.call.respondContentEntryMetaDataResult(metadataResult, importersManager)
+            }catch(e: InvalidContentException) {
+                completedUpload.call.respondText(
+                    contentType = ContentType.Text.Plain,
+                    status = HttpStatusCode.BadRequest,
+                    text = e.message ?: ""
+                )
             }
         },
     )

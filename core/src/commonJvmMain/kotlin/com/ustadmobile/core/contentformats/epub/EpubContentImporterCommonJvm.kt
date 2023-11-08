@@ -66,6 +66,9 @@ class EpubContentImporterCommonJvm(
     override val importerId: Int
         get() = PLUGIN_ID
 
+    override val formatName: String
+        get() = "EPUB"
+
     private fun ZipInputStream.findFirstOpfPath(): String? {
         skipToEntry { entry -> entry.name == OCF_CONTAINER_PATH } ?: return null
 

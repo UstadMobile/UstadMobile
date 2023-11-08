@@ -39,6 +39,8 @@ class XapiZipContentImporter(
     override val supportedFileExtensions: List<String>
         get() = SupportedContent.ZIP_EXTENSIONS
 
+    override val formatName: String
+        get() = "Experience API (TinCan) Zip"
 
     override val importerId: Int
         get() = PLUGIN_ID

@@ -42,6 +42,12 @@ interface ContentImporter : DIAware {
     val supportedFileExtensions: List<String>
 
     /**
+     * A human readable format name (e.g. "PDF", Video(MP4, M4V, WEBM, QuickTime)". This is used to
+     * create a list of supported content types.
+     */
+    val formatName: String
+
+    /**
      * The plugin should extract metadata from the given uri (if possible) and return a
      * MetadataResult if Metadata is retrieved, or null otherwise.
      *

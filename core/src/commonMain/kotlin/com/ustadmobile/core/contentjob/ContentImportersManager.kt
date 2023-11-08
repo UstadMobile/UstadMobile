@@ -1,6 +1,7 @@
 package com.ustadmobile.core.contentjob
 
 import com.ustadmobile.door.DoorUri
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CancellationException
 
 class ContentImportersManager(
@@ -25,22 +26,25 @@ class ContentImportersManager(
         return importersList.firstOrNull { it.importerId == id }
     }
 
+    fun supportedFormatNames(): List<String> = importersList.map { it.formatName }
+
     suspend fun extractMetadata(
         uri: DoorUri,
         originalFilename: String? = null,
-    ): MetadataResult {
+    ): MetadataResult? {
         importersList.forEach {
             try {
                 return it.extractMetadata(uri, originalFilename) ?: return@forEach
-            }catch (e: Exception){
-                if(e is CancellationException){
-                    throw e
-                }
-                e.printStackTrace()
+            }catch(e: CancellationException) {
+                throw e
+            }catch(e: InvalidContentException) {
+                throw e
+            }catch(e: Throwable) {
+                Napier.w("ExtractMetadata: Exception checking $uri using importer #${it.importerId}")
             }
         }
 
-        throw ContentTypeNotSupportedException("no content importer found for $uri")
+        return null
     }
 
 }

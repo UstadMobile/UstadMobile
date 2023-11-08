@@ -2,7 +2,6 @@ package com.ustadmobile.core.domain.contententry.getmetadatafromuri
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.upload.HEADER_IS_FINAL_CHUNK
 import com.ustadmobile.core.upload.HEADER_UPLOAD_UUID
@@ -18,7 +17,7 @@ import web.http.fetchAsync
 import web.url.URL
 import kotlin.js.json
 import kotlin.math.min
-import com.ustadmobile.core.MR
+import com.ustadmobile.core.contentjob.InvalidContentException
 import js.uri.encodeURIComponent
 
 /**
@@ -32,7 +31,6 @@ import js.uri.encodeURIComponent
 class ContentEntryGetMetaDataFromUriUseCaseJs(
     private val navResultReturner: NavResultReturner,
     private val json: Json,
-    private val systemImpl: UstadMobileSystemImpl,
 ) : IContentEntryGetMetaDataFromUriUseCase{
     override suspend fun invoke(
         contentUri: DoorUri,
@@ -80,10 +78,10 @@ class ContentEntryGetMetaDataFromUriUseCaseJs(
                 )
 
                 if(isLastChunk) {
-                    if(fetchResponse.status == 400) {
-                        throw UnsupportedContentException(
-                            systemImpl.formatString(MR.strings.unsupported_file_type, "")
-                        )
+                    if(fetchResponse.status == 406) {
+                        throw UnsupportedContentException(fetchResponse.text().await())
+                    }else if(fetchResponse.status == 400) {
+                        throw InvalidContentException(fetchResponse.text().await())
                     }
 
                     val metadaDataStr = fetchResponse.text().await()

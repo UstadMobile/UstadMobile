@@ -79,6 +79,9 @@ class TestContentImportJobRunner : AbstractMainDispatcherTest() {
         override val supportedMimeTypes: List<String>
             get() = listOf("text/plain")
 
+        override val formatName: String
+            get() = "Dummy Format"
+
         private val _processRequestedJobItems = MutableStateFlow<List<ContentJobItemAndContentJob>>(
             emptyList()
         )

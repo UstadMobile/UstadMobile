@@ -2,16 +2,20 @@ package com.ustadmobile.lib.rest
 
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.contentjob.ContentImportersManager
+import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.domain.contententry.import.ImportContentUseCase
 import com.ustadmobile.core.domain.contententry.import.ImportRequest
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.lib.rest.ext.respondContentEntryMetaDataResult
+import io.ktor.http.ContentType
 import io.ktor.server.application.call
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.*
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import kotlinx.coroutines.withTimeout
@@ -24,6 +28,10 @@ import java.io.File
 
 private val IMPORT_LINK_TIMEOUT_DEFAULT = (30 * 1000).toLong()
 
+/**
+ * Validate the given link. If the link is valid, returns metadata as Json. If the link is not
+ * supported, respond not acceptable (406). If content is invalid, respond bad request (400).
+ */
 fun Route.ContentEntryImportRoute() {
     /**
      * Validate the link that is provided for a client
@@ -31,21 +39,22 @@ fun Route.ContentEntryImportRoute() {
     post("validateLink") {
         val url = call.request.queryParameters["url"]?: ""
         val di = closestDI()
-        val pluginManager: ContentImportersManager by di.on(call).instance()
+        val importersManager: ContentImportersManager by di.on(call).instance()
 
         val metadata: MetadataResult?
         try{
             metadata = withTimeout(IMPORT_LINK_TIMEOUT_DEFAULT) {
-                pluginManager.extractMetadata(DoorUri.parse(url))
+                importersManager.extractMetadata(DoorUri.parse(url))
             }
 
-            if (metadata == null) {
-                call.respond(HttpStatusCode.BadRequest, "Unsupported")
-            } else {
-                call.respond(metadata)
-            }
-        }catch (e: Exception){
+            call.respondContentEntryMetaDataResult(metadata, importersManager)
+        }catch (e: InvalidContentException){
             Napier.e("Exception extracting metadata to validateLink: $url", e)
+            call.respondText(
+                contentType = ContentType.Text.Plain,
+                status = HttpStatusCode.BadRequest,
+                text = e.message ?: "Format error"
+            )
         }
 
     }

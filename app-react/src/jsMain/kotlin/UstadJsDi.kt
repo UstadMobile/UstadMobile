@@ -171,7 +171,6 @@ internal fun ustadJsDi(
         ContentEntryGetMetaDataFromUriUseCaseJs(
             navResultReturner = instance(),
             json = instance(),
-            systemImpl = instance(),
         )
     }
 
