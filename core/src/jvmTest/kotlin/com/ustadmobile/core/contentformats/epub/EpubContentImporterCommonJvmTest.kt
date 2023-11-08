@@ -5,6 +5,7 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.ContentDispatcher
 import com.ustadmobile.core.contentformats.epub.opf.PackageDocument
+import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.test.assertCachedBodyMatchesZipEntry
 import com.ustadmobile.util.test.ext.newFileFromResource
@@ -15,6 +16,7 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.libcache.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.UstadCache
@@ -37,8 +39,9 @@ import org.kodein.di.*
 import java.net.URL
 import java.util.zip.ZipFile
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
-class EpubImporterCommonJvmTest : AbstractMainDispatcherTest() {
+class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
 
     @JvmField
     @Rule
@@ -117,6 +120,86 @@ class EpubImporterCommonJvmTest : AbstractMainDispatcherTest() {
             Assert.assertEquals("Got ContentEntry with expected title",
                     "Children's Literature",
                     metadata!!.entry.title)
+        }
+    }
+
+    @Test
+    fun givenEpubWithoutOpf_whenExtractMetadataCalled_thenShouldThrowInvalidContentException() {
+        val tmpEpubFile = tmpFolder.newFileFromResource(this::class.java,
+            "/com/ustadmobile/core/contenttype/epub-with-no-opf.epub")
+
+        val epubPlugin = EpubContentImporterCommonJvm(
+            endpoint = Endpoint("http://localhost/dummy"),
+            di = di,
+            cache = ustadCache,
+            uriHelper = uriHelper,
+            xml = xml,
+            xhtmlFixer = xhtmlFixer,
+        )
+
+        runBlocking {
+            try {
+                epubPlugin.extractMetadata(tmpEpubFile.toDoorUri(), "epub-with-no-opf.epub")
+                throw IllegalStateException("shouldnt get here")
+            }catch(e: InvalidContentException) {
+                assertTrue(
+                    e.message?.contains("epub does not contain opf") == true
+                )
+            }
+        }
+    }
+
+    @Test
+    fun givenEpubWithoutNav_whenExtractMetadataCalled_thenShouldThrowInvalidContentException() {
+        val tmpEpubFile = tmpFolder.newFileFromResource(this::class.java,
+            "/com/ustadmobile/core/contenttype/epub-with-no-nav.epub")
+
+        val epubPlugin = EpubContentImporterCommonJvm(
+            endpoint = Endpoint("http://localhost/dummy"),
+            di = di,
+            cache = ustadCache,
+            uriHelper = uriHelper,
+            xml = xml,
+            xhtmlFixer = xhtmlFixer,
+        )
+
+        runBlocking {
+            try {
+                epubPlugin.extractMetadata(tmpEpubFile.toDoorUri(), "epub-with-no-nav.epub")
+                throw IllegalStateException("shouldnt get here")
+            }catch(e: InvalidContentException) {
+                assertTrue(
+                    e.message?.contains("EPUB/nav.xhtml not found for") == true
+                )
+            }
+        }
+    }
+
+    @Test
+    fun givenEpubWithManifestItemsMissing_whenExtractMetadataCalled_thenShouldThrowInvalidContentException() {
+        //Resource is missing epub.css
+        val tmpEpubFile = tmpFolder.newFileFromResource(this::class.java,
+            "/com/ustadmobile/core/contenttype/epub-with-missing-item.epub")
+
+        val epubPlugin = EpubContentImporterCommonJvm(
+            endpoint = Endpoint("http://localhost/dummy"),
+            di = di,
+            cache = ustadCache,
+            uriHelper = uriHelper,
+            xml = xml,
+            xhtmlFixer = xhtmlFixer,
+        )
+
+        runBlocking {
+            try {
+                epubPlugin.extractMetadata(tmpEpubFile.toDoorUri(), "epub-with-missing-item.epub")
+                throw IllegalStateException("shouldnt get here")
+            }catch(e: InvalidContentException) {
+                assertTrue(
+                    e.message?.contains("Item(s) from manifest are missing") == true &&
+                    e.message?.contains("epub.css") == true
+                )
+            }
         }
     }
 

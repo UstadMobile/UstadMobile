@@ -2,6 +2,7 @@ package com.ustadmobile.core.contentformats.pdf
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.test.assertCachedBodyMatchesFileContent
 import com.ustadmobile.core.uri.UriHelper
@@ -28,6 +29,7 @@ import org.kodein.di.on
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
@@ -115,6 +117,27 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
         assertNull(metadata)
     }
 
+    @Test
+    fun givenFileShouldBePdf_whenDataIsNotValid_thenWillThrowInvalidContentException() {
+        val invalidPdf = temporaryFolder.newFile()
+        invalidPdf.writeText("Hello World")
+
+        val pdfPlugin = PdfContentImporterJvm(
+            endpoint = activeEndpoint,
+            di = di,
+            cache = ustadCache,
+            uriHelper = uriHelper
+        )
+
+        runBlocking {
+            try {
+                pdfPlugin.extractMetadata(invalidPdf.toDoorUri(), "testFile.pdf")
+                throw IllegalStateException("Should not make it here")
+            }catch(e: InvalidContentException) {
+                assertNotNull(e)
+            }
+        }
+    }
 
     @Test
     fun givenValidPdf_whenAddedToCached_thenDataShouldMatch() {

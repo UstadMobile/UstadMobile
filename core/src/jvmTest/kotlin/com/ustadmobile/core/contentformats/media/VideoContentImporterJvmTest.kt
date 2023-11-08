@@ -112,7 +112,7 @@ class VideoContentImporterJvmTest : AbstractMainDispatcherTest() {
     }
 
     @Test
-    fun givenInvalidFileWithRecognizedExtension_whenExtractMetadataCalled_thenWillThrowMalformedContentException() {
+    fun givenInvalidFileWithRecognizedExtension_whenExtractMetadataCalled_thenWillThrowInvalidContentException() {
         val invalidVideoFile = temporaryFolder.newFile()
         invalidVideoFile.writeText("Hello World")
         val importer = VideoContentImporterJvm(

@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.ContentDispatcher
+import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.test.assertZipIsCached
@@ -37,8 +38,10 @@ import org.kodein.di.on
 import org.kodein.di.scoped
 import org.kodein.di.singleton
 import java.util.zip.ZipFile
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
-class XapiZipContentImportPluginTest :AbstractMainDispatcherTest() {
+class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
 
     @JvmField
     @Rule
@@ -111,6 +114,43 @@ class XapiZipContentImportPluginTest :AbstractMainDispatcherTest() {
             "Ustad Mobile", metadata.entry.title)
         Assert.assertEquals("Got expected description",
             "Ustad Mobile sample tincan", metadata.entry.description)
+    }
+
+    @Test
+    fun givenInvalidTinCanXmlFile_whenExtractMetadataCalled_thenShouldThrowInvalidContentException() {
+        val tempFile = temporaryFolder.newFileFromResource(this::class.java,
+            "/com/ustadmobile/core/contenttype/ustad-tincan-invalid.zip")
+
+        val xapiPlugin =  XapiZipContentImporter(
+            endpoint = Endpoint("http://localhost/dummy/"),
+            di = di,
+            cache = ustadCache,
+            uriHelper = uriHelper
+        )
+
+        runBlocking {
+            try {
+                xapiPlugin.extractMetadata(tempFile.toDoorUri(), "ustad-tincan.zip")
+                throw IllegalStateException("Should not get here")
+            }catch(e: InvalidContentException) {
+                assertNotNull(e)
+            }
+        }
+    }
+
+    @Test
+    fun givenFileNotTincanZip_whenExtractMetadataCalled_thenWillReturnNull() {
+        val tempFile = temporaryFolder.newFile()
+        tempFile.writeText("Hello World")
+        val xapiPlugin =  XapiZipContentImporter(
+            endpoint = Endpoint("http://localhost/dummy/"),
+            di = di,
+            cache = ustadCache,
+            uriHelper = uriHelper
+        )
+        runBlocking {
+            assertNull(xapiPlugin.extractMetadata(tempFile.toDoorUri(), "file.zip"))
+        }
     }
 
 

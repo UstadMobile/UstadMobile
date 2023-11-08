@@ -5,6 +5,7 @@ import com.ustadmobile.core.contentjob.AbstractContentImportPlugin
 import com.ustadmobile.core.contentjob.ContentJobProgressListener
 import com.ustadmobile.core.contentjob.ContentImporterUploader
 import com.ustadmobile.core.contentjob.DefaultContentPluginUploader
+import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.contentjob.SupportedContent
 import com.ustadmobile.core.db.UmAppDatabase
@@ -105,29 +106,33 @@ class PdfContentImporterJvm(
     override suspend fun extractMetadata(
         uri: DoorUri,
         originalFilename: String?,
-    ): MetadataResult? {
-        val isProbablyPdf = originalFilename?.substringAfterLast(".")?.lowercase()?.endsWith("pdf") == true
+    ): MetadataResult? = withContext(Dispatchers.IO)  {
+        val shouldBePdf = originalFilename?.substringAfterLast(".")?.lowercase()?.endsWith("pdf") == true
                 || uriHelper.getMimeType(uri) == "application/pdf"
-        if(!isProbablyPdf)
-            return null
+        if(!shouldBePdf)
+            return@withContext null
 
-        val pdfPDDocument: PDDocument = uriHelper.openSource(uri).asInputStream().use { inStream ->
-            Loader.loadPDF(inStream.readAllBytes())
+        try {
+            val pdfPDDocument: PDDocument = uriHelper.openSource(uri).asInputStream().use { inStream ->
+                Loader.loadPDF(inStream.readAllBytes())
+            }
+
+            val entry = ContentEntryWithLanguage().apply {
+                title = pdfPDDocument.documentInformation.title ?: originalFilename
+                author = pdfPDDocument.documentInformation.author
+                leaf = true
+                sourceUrl = uri.toString()
+                contentTypeFlag = ContentEntry.TYPE_DOCUMENT
+            }
+
+            MetadataResult(
+                entry = entry,
+                importerId = importerId,
+                originalFilename = originalFilename,
+            )
+        }catch(e: Throwable) {
+            throw InvalidContentException("Invalid PDF: ${e.message}", e)
         }
-
-        val entry = ContentEntryWithLanguage().apply {
-            title = pdfPDDocument.documentInformation.title ?: originalFilename
-            author = pdfPDDocument.documentInformation.author
-            leaf = true
-            sourceUrl = uri.toString()
-            contentTypeFlag = ContentEntry.TYPE_DOCUMENT
-        }
-
-        return MetadataResult(
-            entry = entry,
-            importerId = importerId,
-            originalFilename = originalFilename,
-        )
     }
 
     companion object {

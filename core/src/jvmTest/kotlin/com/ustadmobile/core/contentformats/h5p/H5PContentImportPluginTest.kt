@@ -2,6 +2,7 @@ package com.ustadmobile.core.contentformats.h5p
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.test.assertZipIsCached
@@ -38,6 +39,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class H5PContentImportPluginTest : AbstractMainDispatcherTest() {
 
@@ -98,9 +100,49 @@ class H5PContentImportPluginTest : AbstractMainDispatcherTest() {
             h5pPlugin.extractMetadata(h5pFile.toDoorUri(), "fill-in-the-blank-withmetadata.h5p")
         }
 
-        assertEquals("I want to eat", metadata.entry.title)
-        assertEquals("Bob Jones", metadata.entry.author)
-        assertEquals(ContentEntry.LICENSE_TYPE_CC_BY, metadata.entry.licenseType)
+        assertEquals("I want to eat", metadata?.entry?.title)
+        assertEquals("Bob Jones", metadata?.entry?.author)
+        assertEquals(ContentEntry.LICENSE_TYPE_CC_BY, metadata?.entry?.licenseType)
+    }
+
+    @Test
+    fun givenFileWithH5pExtensionNotValidH5p_whenExtractMetadataCalled_thenShouldThrowInvalidContentException() {
+        val invalidH5pFile = temporaryFolder.newFile()
+        invalidH5pFile.writeText("Hello world")
+
+        val h5pPlugin = H5PContentImportPlugin(
+            endpoint = activeEndpoint,
+            di = di,
+            cache = ustadCache,
+            uriHelper = uriHelper,
+            json = di.direct.instance(),
+        )
+
+        runBlocking {
+            try {
+                h5pPlugin.extractMetadata(invalidH5pFile.toDoorUri(), "invalid.h5p")
+                throw IllegalStateException("Should not get here")
+            }catch(e: InvalidContentException) {
+                assertNotNull(e)
+            }
+        }
+    }
+
+    @Test
+    fun givenFileNotH5pFile_whenExtractMetadataCalled_thenShouldReturnNull() {
+        val notH5p = temporaryFolder.newFile()
+
+        val h5pPlugin = H5PContentImportPlugin(
+            endpoint = activeEndpoint,
+            di = di,
+            cache = ustadCache,
+            uriHelper = uriHelper,
+            json = di.direct.instance(),
+        )
+
+        runBlocking {
+            assertNull(h5pPlugin.extractMetadata(notH5p.toDoorUri(), "file.pdf"))
+        }
     }
 
     @Test

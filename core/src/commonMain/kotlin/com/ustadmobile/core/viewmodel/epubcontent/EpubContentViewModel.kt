@@ -1,10 +1,5 @@
 package com.ustadmobile.core.viewmodel.epubcontent
 
-import com.ustadmobile.core.contentformats.epub.nav.ListItem
-import com.ustadmobile.core.contentformats.epub.nav.NavigationDocument
-import com.ustadmobile.core.contentformats.epub.ncx.NavPoint
-import com.ustadmobile.core.contentformats.epub.ncx.NcxDocument
-import com.ustadmobile.core.contentformats.epub.ncx.NcxDocument.Companion.MIMETYPE_NCX
 import com.ustadmobile.core.contentformats.epub.opf.PackageDocument
 import com.ustadmobile.core.domain.openexternallink.OpenExternalLinkUseCase
 import com.ustadmobile.core.impl.appstate.OverflowItem
@@ -15,7 +10,6 @@ import com.ustadmobile.core.viewmodel.UstadViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
-import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -26,12 +20,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.decodeFromString
 import nl.adaptivity.xmlutil.serialization.XML
 import org.kodein.di.DI
 import org.kodein.di.instance
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.contentformats.epub.opf.Item
+import com.ustadmobile.core.domain.epub.GetEpubTableOfContentsUseCase
+import org.kodein.di.direct
 import kotlin.concurrent.Volatile
 
 data class EpubContentUiState(
@@ -87,6 +81,10 @@ data class EpubScrollCommand(
 class EpubContentViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
+    private val getEpubTableOfContentsUseCase: GetEpubTableOfContentsUseCase =
+        GetEpubTableOfContentsUseCase(
+            xml = di.direct.instance()
+        )
 ) : UstadViewModel(di, savedStateHandle, DEST_NAME){
 
     private val entityUidArg: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
@@ -116,52 +114,8 @@ class EpubContentViewModel(
      */
     val epubScrollCommands: Flow<EpubScrollCommand> = _epubScrollCommands.asSharedFlow()
 
-    private val tocItemAtomicIds = atomic(0)
-
     @Volatile
     private var navUrl: String? =null
-
-    /**
-     * Convert a NCX navpoint to the common EpubTocItem
-     */
-    private fun NavPoint.toTocItem(
-        indentLevel: Int,
-        parentUids: Set<Int>,
-    ): EpubTocItem {
-        val uid = tocItemAtomicIds.incrementAndGet()
-        val uidsForChildren = parentUids + uid
-        return EpubTocItem(
-            uid = uid,
-            label = navLabels.firstOrNull()?.text?.content ?: "",
-            href = content.src,
-            indentLevel = indentLevel,
-            parentUids = parentUids,
-            children = this.childPoints.map {
-                it.toTocItem(indentLevel + 1, uidsForChildren)
-            }
-        )
-    }
-
-    /**
-     * Convert a Epub Nav document to the common EpubTocItem
-     */
-    private fun ListItem.toEpubTocItem(
-        indentLevel: Int,
-        parentUids: Set<Int>,
-    ) : EpubTocItem {
-        val uid = tocItemAtomicIds.incrementAndGet()
-        val uidsForChildren = parentUids + uid
-        return EpubTocItem(
-            uid = tocItemAtomicIds.incrementAndGet(),
-            label = anchor?.content ?: span?.content ?: "",
-            href = anchor?.href,
-            children = this.orderedList?.listItems?.map {
-                it.toEpubTocItem(indentLevel + 1, uidsForChildren)
-            } ?: emptyList(),
-            indentLevel = indentLevel,
-            parentUids = parentUids,
-        )
-    }
 
     init {
         viewModelScope.launch {
@@ -213,46 +167,12 @@ class EpubContentViewModel(
                         )
                     }
 
-                    val whiteSpaceRegex = Regex("\\s+")
-
-                    //Load and setup table of contents. As per the EPUB3 spec, an XHTML navigation
-                    //document is preferred, which will have the "toc nav" property. If that is not
-                    //found, then we will fallback to using the NCX
-                    val tocCandidates = opfPackage.manifest.items.filter {item ->
-                        item.properties?.split(whiteSpaceRegex)?.let { "toc" in it || "nav" in it } ?: false
-                    }
-                    val spineNcxCandidate: List<Item> = opfPackage.spine.toc?.let { spineTocid ->
-                        opfPackage.manifest.items.firstOrNull { it.id == spineTocid }?.let { listOf(it) } ?: emptyList()
-                    } ?: emptyList()
-                    val allTocCandidates = (tocCandidates + spineNcxCandidate)
-
-                    val tocToUse = allTocCandidates.firstOrNull {
-                        it.properties?.contains("nav") ?: false
-                    } ?: allTocCandidates.firstOrNull()
-
-                    val tocItems = if(tocToUse != null && tocToUse.mediaType.startsWith("application/xhtml")) {
-                        val urlResolved = cevUrlObj.resolve(tocToUse.href).toString().also {
-                            navUrl = it
+                    val tocItems = getEpubTableOfContentsUseCase(
+                        opfPackage = opfPackage,
+                        readItemText = {
+                            httpClient.get(cevUrlObj.resolve(it.href).toString()).bodyAsText()
                         }
-                        val docStr = httpClient.get(urlResolved).bodyAsText()
-                        val navDoc: NavigationDocument = xml.decodeFromString(docStr)
-                        navDoc.bodyElement.navigationElements
-                            .first().orderedList.listItems
-                            .flatMap { listItem ->
-                                listItem.toEpubTocItem(0, emptySet()).let { listOf(it) + it.children }
-                            }
-                    }else if(tocToUse != null && tocToUse.mediaType == MIMETYPE_NCX) {
-                        val urlResolved = cevUrlObj.resolve(tocToUse.href).toString().also {
-                            navUrl = it
-                        }
-                        val docStr = httpClient.get(urlResolved).bodyAsText()
-                        val ncxDoc: NcxDocument = xml.decodeFromString(docStr)
-                        ncxDoc.navMap.navPoints.flatMap { navPoint ->
-                            navPoint.toTocItem(0, emptySet()).let { listOf(it) + it.children }
-                        }
-                    }else {
-                        emptyList()
-                    }
+                    ) ?: emptyList()
 
                     _uiState.update { prev ->
                         prev.copy(

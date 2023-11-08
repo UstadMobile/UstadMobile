@@ -59,30 +59,41 @@ class XapiZipContentImporter(
         if (mimeType != null && !supportedMimeTypes.contains(mimeType)) {
             return null
         }
-        return withContext(Dispatchers.Default) {
-            return@withContext ZipInputStream(uriHelper.openSource(uri).asInputStream()).use {
-                it.skipToEntry { it.name == TINCAN_FILENAME } ?: return@withContext null
+        return withContext(Dispatchers.IO) {
+            var isTinCan = false
+            try {
+                return@withContext ZipInputStream(uriHelper.openSource(uri).asInputStream()).use {
+                    it.skipToEntry { it.name == TINCAN_FILENAME } ?: return@withContext null
+                    isTinCan = true
 
-                val xppFactory = XmlPullParserFactory.newInstance()
-                val xpp = xppFactory.newPullParser()
-                xpp.setInput(it, "UTF-8")
-                val activity = TinCanXML.loadFromXML(xpp).launchActivity
-                        ?: return@withContext null
+                    val xppFactory = XmlPullParserFactory.newInstance()
+                    val xpp = xppFactory.newPullParser()
+                    xpp.setInput(it, "UTF-8")
+                    val activity = TinCanXML.loadFromXML(xpp).launchActivity
+                        ?: throw IllegalArgumentException("Could not load launch activity")
 
-                val entry = ContentEntryWithLanguage().apply {
-                    contentFlags = ContentEntry.FLAG_IMPORTED
-                    licenseType = ContentEntry.LICENSE_TYPE_OTHER
-                    title = if (activity.name.isNullOrEmpty())
-                        uriHelper.getFileName(uri)
-                    else
-                        activity.name
-                    contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
-                    description = activity.desc
-                    leaf = true
-                    entryId = activity.id
-                    sourceUrl = uri.uri.toString()
+                    val entry = ContentEntryWithLanguage().apply {
+                        contentFlags = ContentEntry.FLAG_IMPORTED
+                        licenseType = ContentEntry.LICENSE_TYPE_OTHER
+                        title = if (activity.name.isNullOrEmpty())
+                            uriHelper.getFileName(uri)
+                        else
+                            activity.name
+                        contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
+                        description = activity.desc
+                        leaf = true
+                        entryId = activity.id
+                        sourceUrl = uri.uri.toString()
+                    }
+                    MetadataResult(entry, PLUGIN_ID)
                 }
-                MetadataResult(entry, PLUGIN_ID)
+            }catch(e: Throwable) {
+                if(isTinCan) {
+                    //This is a zip file with a tincan.xml file, but something went wrong.
+                    throw InvalidContentException("Invalid tincan.xml: ${e.message}", e)
+                }else {
+                    throw e
+                }
             }
         }
     }

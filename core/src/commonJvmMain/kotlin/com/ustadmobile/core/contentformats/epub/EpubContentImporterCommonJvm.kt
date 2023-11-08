@@ -5,6 +5,7 @@ import com.ustadmobile.core.contentformats.epub.ocf.Container
 import com.ustadmobile.core.contentformats.epub.opf.PackageDocument
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.epub.GetEpubTableOfContentsUseCase
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.UMFileUtil
@@ -38,6 +39,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
 import java.net.URLDecoder
+import java.util.zip.ZipEntry
 
 class EpubContentImporterCommonJvm(
     endpoint: Endpoint,
@@ -47,6 +49,8 @@ class EpubContentImporterCommonJvm(
     private val xml: XML,
     private val fileSystem: FileSystem = SystemFileSystem,
     private val xhtmlFixer: XhtmlFixer,
+    private val getEpubTableOfContentsUseCase: GetEpubTableOfContentsUseCase =
+        GetEpubTableOfContentsUseCase(xml),
     uploader: ContentImporterUploader = DefaultContentPluginUploader(di)
 ) : AbstractContentImportPlugin(endpoint, uploader, uriHelper) {
 
@@ -78,47 +82,94 @@ class EpubContentImporterCommonJvm(
         originalFilename: String?,
     ): MetadataResult? {
         val mimeType = uriHelper.getMimeType(uri)
-        if(mimeType != null && !supportedMimeTypes.contains(mimeType)){
+
+        if(!((mimeType != null && mimeType in supportedMimeTypes) ||
+            originalFilename?.substringAfterLast(".")?.lowercase() == "epub")
+        ) {
             return null
         }
-        return withContext(Dispatchers.Default) {
+
+        return withContext(Dispatchers.IO) {
             try {
                 val opfPath = ZipInputStream(uriHelper.openSource(uri).asInputStream()).use {
                     it.findFirstOpfPath()
-                } ?: return@withContext null
+                } ?: throw IllegalStateException("Container.xml not found in EPUB / cant find path for opf")
 
-                return@withContext  ZipInputStream(uriHelper.openSource(uri).asInputStream()).use {
+                val entryNames = mutableListOf<String>()
+                var opfPackage: PackageDocument? = null
 
-                    it.skipToEntry { it.name == opfPath } ?: return@use null
-
-                    val packageStr = it.readString()
-
-                    val opfPackage: PackageDocument = xml.decodeFromString(packageStr)
-
-                    val entry = ContentEntryWithLanguage().apply {
-                        contentFlags = ContentEntry.FLAG_IMPORTED
-                        contentTypeFlag = ContentEntry.TYPE_EBOOK
-                        licenseType = ContentEntry.LICENSE_TYPE_OTHER
-                        title = opfPackage.metadata.titles.firstOrNull()?.content?.let {
-                            it.ifBlank { null }
-                        } ?: uriHelper.getFileName(uri)
-                        author = opfPackage.metadata.creators.joinToString { it.content }
-                        description = opfPackage.metadata.descriptions.firstOrNull()?.content ?: ""
-                        leaf = true
-                        sourceUrl = uri.uri.toString()
-                        entryId = opfPackage.uniqueIdentifierContent()
-                        val languageCode = opfPackage.metadata.languages.firstOrNull()?.content
-                        if (languageCode != null) {
-                            this.language = Language().apply {
-                                iso_639_1_standard = languageCode
-                            }
+                ZipInputStream(uriHelper.openSource(uri).asInputStream()).use { zipIn ->
+                    lateinit var zipEntry: ZipEntry
+                    while(zipIn.nextEntry?.also { zipEntry = it } != null) {
+                        entryNames += zipEntry.name
+                        if(zipEntry.name == opfPath) {
+                            opfPackage = xml.decodeFromString(zipIn.bufferedReader().readText())
                         }
                     }
-
-                    return@use MetadataResult(entry, PLUGIN_ID)
                 }
+
+                val opfPackageVal = opfPackage
+                    ?: throw IllegalStateException("epub does not contain opf: expected to find: $opfPath")
+
+                fun itemPathInZip(href: String): String {
+                    val hrefDecoded = URLDecoder.decode(href, "UTF-8")
+                    val pathInZip = Path(opfPath).parent?.let { opfParent ->
+                        Path(opfParent, hrefDecoded)
+                    } ?: Path(hrefDecoded)
+                    return pathInZip.toString()
+                }
+
+                /*
+                 * As per https://www.w3.org/submissions/2017/SUBM-epub-packages-20170125/ section
+                 * 5.1 The EPUB Navigation Document is a mandatory component of an EPUB Package.
+                 * Therefor any epub without a table of contents is NOT valid.
+                 */
+                getEpubTableOfContentsUseCase(
+                    opfPackage = opfPackageVal,
+                    readItemText = {
+                        val pathInZip = itemPathInZip(it.href)
+                        ZipInputStream(uriHelper.openSource(uri).asInputStream()).use { zipIn ->
+                            if(zipIn.skipToEntry { it.name == pathInZip } != null)
+                                zipIn.bufferedReader().readText()
+                            else
+                                throw IllegalArgumentException("$pathInZip not found for ${it.href}")
+                        }
+                    }
+                ) ?: throw IllegalStateException("EPUB table of contents/nav document not found.")
+
+                //go over manifest - make sure that all items are present
+                val missingItems = opfPackageVal.manifest.items.filter { item ->
+                    itemPathInZip(item.href) !in entryNames
+                }
+
+                if(missingItems.isNotEmpty()) {
+                    throw IllegalStateException("Item(s) from manifest are missing: " +
+                            missingItems.joinToString { it.href })
+                }
+
+                val entry = ContentEntryWithLanguage().apply {
+                    contentFlags = ContentEntry.FLAG_IMPORTED
+                    contentTypeFlag = ContentEntry.TYPE_EBOOK
+                    licenseType = ContentEntry.LICENSE_TYPE_OTHER
+                    title = opfPackageVal.metadata.titles.firstOrNull()?.content?.let {
+                        it.ifBlank { null }
+                    } ?: uriHelper.getFileName(uri)
+                    author = opfPackageVal.metadata.creators.joinToString { it.content }
+                    description = opfPackageVal.metadata.descriptions.firstOrNull()?.content ?: ""
+                    leaf = true
+                    sourceUrl = uri.uri.toString()
+                    entryId = opfPackageVal.uniqueIdentifierContent()
+                    val languageCode = opfPackageVal.metadata.languages.firstOrNull()?.content
+                    if (languageCode != null) {
+                        this.language = Language().apply {
+                            iso_639_1_standard = languageCode
+                        }
+                    }
+                }
+
+                return@withContext MetadataResult(entry, PLUGIN_ID)
             } catch (e: Exception) {
-                null
+                throw InvalidContentException("Invalid epub: ${e.message}", e)
             }
         }
     }

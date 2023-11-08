@@ -5,6 +5,7 @@ import com.ustadmobile.core.contentjob.AbstractContentImportPlugin
 import com.ustadmobile.core.contentjob.ContentJobProgressListener
 import com.ustadmobile.core.contentjob.ContentImporterUploader
 import com.ustadmobile.core.contentjob.DefaultContentPluginUploader
+import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.readString
@@ -73,11 +74,14 @@ class H5PContentImportPlugin(
     override suspend fun extractMetadata(
         uri: DoorUri,
         originalFilename: String?
-    ): MetadataResult = withContext(Dispatchers.IO) {
+    ): MetadataResult? = withContext(Dispatchers.IO) {
+        val shouldBeH5p = originalFilename?.substringAfterLast(".")?.lowercase()
+            ?.endsWith("h5p") == true
+
         try {
             val h5pJsonText = ZipInputStream(uriHelper.openSource(uri).asInputStream()).use { zipIn ->
                 zipIn.skipToEntry { it.name == "h5p.json" }
-                    ?: throw IllegalArgumentException("$uri is not an h5p file")
+                    ?: throw IllegalArgumentException("No h5p.json found")
 
                 zipIn.readString()
             }
@@ -114,8 +118,12 @@ class H5PContentImportPlugin(
                 originalFilename = originalFilename,
             )
         }catch(e: Throwable) {
-            Napier.d("H5pContentImport: cannot import $uri", e)
-            throw e
+            if(shouldBeH5p) {
+                throw InvalidContentException("Invalid h5p file: ${e.message}", e)
+            }else {
+                Napier.d("H5pContentImport: cannot import $uri : ${e.message}")
+                return@withContext null
+            }
         }
     }
 
