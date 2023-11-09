@@ -1,39 +1,35 @@
 package com.ustadmobile.libuicompose.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun UstadQuickActionButton(
-    imageId: Int = 0,
+    imageVector: ImageVector? = null,
     labelText: String,
     onClick: (() -> Unit) = {  },
 ){
+
     TextButton(
         modifier = Modifier.width(110.dp),
         onClick = onClick
-    ){
+    ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
-        ){
-
-//            Image(
-//                          // TODO error
-//                painter = painterResource(id = imageId),
-//                contentDescription = null,
-//                colorFilter = ColorFilter.tint(
-//                    color = contentColorFor(backgroundColor = MaterialTheme.colors.background)),
-//                modifier = Modifier
-//                    .size(24.dp))
-
-            Spacer(modifier = Modifier.width(10.dp))
+        ) {
+            FilledTonalIconButton(
+                onClick = onClick
+            ) {
+                if (imageVector != null) {
+                    Icon(imageVector = imageVector, contentDescription = null)
+                }
+            }
 
             Text(
                 text = labelText,
