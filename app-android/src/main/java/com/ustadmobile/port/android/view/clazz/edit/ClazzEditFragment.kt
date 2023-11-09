@@ -405,22 +405,30 @@ private fun ClazzEditBasicDetails(
     ) {
         UstadEditHeader(text = stringResource(id = CR.string.basic_details))
 
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultItemPadding(),
-            value = uiState.entity?.clazzName ?: "",
-            label = { Text(stringResource( CR.string.name_key )) },
-            enabled = uiState.fieldsEnabled,
-            singleLine = true,
-            onValueChange = {
-                onClazzChanged(
-                    uiState.entity?.shallowCopy {
-                        clazzName = it
-                    }
-                )
+        UstadInputFieldLayout (
+            errorText = uiState.clazzNameError,
+            captionIfNoError = {
+                Text(stringResource(CR.string.required))
             }
-        )
+        ){
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultItemPadding(),
+                value = uiState.entity?.clazzName ?: "",
+                label = { Text(stringResource( CR.string.name_key )) },
+                enabled = uiState.fieldsEnabled,
+                singleLine = true,
+                isError = uiState.clazzNameError != null,
+                onValueChange = {
+                    onClazzChanged(
+                        uiState.entity?.shallowCopy {
+                            clazzName = it
+                        }
+                    )
+                }
+            )
+        }
 
         HtmlClickableTextField(
             html = uiState.entity?.clazzDesc ?: "",
