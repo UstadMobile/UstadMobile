@@ -17,16 +17,16 @@ it('Admin add teacher and discussion board to the course', () => {
   //Add a teacher
   cy.contains("button","members").click()
   cy.contains("span","Add a teacher").click()
-  cy.ustadAddNewPerson('Teacher','A','Female')
+  cy.ustadAddNewPerson('Teacher','1','Female')
   // Add account for teacher
-  cy.contains("Teacher A").click()
+  cy.contains("Teacher 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('teacherA','test1234')
+  cy.ustadCreateUserAccount('teacher1','test1234')
 })
 
 it('Teacher able to add a new discussion board and post to the discussion', () => {
   // Teacher Login
-  cy.ustadClearDbAndLogin('teacherA','test1234')
+  cy.ustadClearDbAndLogin('teacher1','test1234')
   cy.contains("Courses").should('be.visible')
   cy.contains('005_001').click()
   // Add discussion board

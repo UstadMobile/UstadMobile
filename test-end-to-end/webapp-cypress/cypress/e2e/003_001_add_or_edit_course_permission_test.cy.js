@@ -17,24 +17,24 @@ it('Admin has course edit permission', () => {
   //Add a teacher
   cy.contains("button","members").click()
   cy.contains("span","Add a teacher").click()
-  cy.ustadAddNewPerson('Teacher','003','Female')
+  cy.ustadAddNewPerson('Teacher','1','Female')
   // Add account for teacher
-  cy.contains("Teacher 003").click()
+  cy.contains("Teacher 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('teacher3','test1234')
+  cy.ustadCreateUserAccount('teacher1','test1234')
   //Add a student1
   cy.contains("span","Add a student").click()
-  cy.ustadAddNewPerson('Student','003','Male')
+  cy.ustadAddNewPerson('Student','1','Male')
   cy.contains("button","members").should('be.visible')
   //Add account for student1
-  cy.contains("Student 003").click()
+  cy.contains("Student 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('student3','test1234')
+  cy.ustadCreateUserAccount('student1','test1234')
 })
 
 it('Teacher have the permission to edit the course ', () => {
   // Teacher Login
-  cy.ustadClearDbAndLogin('teacher3','test1234')
+  cy.ustadClearDbAndLogin('teacher1','test1234')
   cy.contains('003_001').click()
   // Teacher test the course edit permission
   cy.contains('button','Edit').click()
@@ -45,7 +45,7 @@ it('Teacher have the permission to edit the course ', () => {
 
 it('Student does not have the course edit permission ', () => {
   // Student Login
-  cy.ustadClearDbAndLogin('student3','test1234')
+  cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains('003_001').click()
   // Student doesn't have the course edit permission
   cy.contains('button','Edit').should('not.exist')
