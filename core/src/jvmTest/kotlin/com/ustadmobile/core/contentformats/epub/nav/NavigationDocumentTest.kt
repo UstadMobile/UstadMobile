@@ -60,4 +60,25 @@ class NavigationDocumentTest {
 
     }
 
+    @Test
+    fun givenNavigationDocumentWhereNavIsNotDirectChild_whenParsed_thenMatchesExpectedValues() {
+        val navXhtmlStr = this::class.java.getResourceAsStream(
+            "/com/ustadmobile/core/contentformats/epub/nav/nav-with-indirect-children.xhtml"
+        )!!.readString()
+
+        val xml = XML {
+            defaultPolicy {
+                unknownChildHandler  = XmlConfig.IGNORING_UNKNOWN_CHILD_HANDLER
+            }
+        }
+
+        val navDoc = xml.decodeFromString(
+            NavigationDocument.serializer(), navXhtmlStr
+        )
+
+        assertEquals(
+            "0.xhtml",
+            navDoc.bodyElement.navigationElements.first().orderedList.listItems.first().anchor?.href)
+    }
+
 }
