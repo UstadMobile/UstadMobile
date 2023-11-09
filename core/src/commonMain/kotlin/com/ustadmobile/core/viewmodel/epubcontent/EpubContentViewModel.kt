@@ -167,6 +167,10 @@ class EpubContentViewModel(
                         )
                     }
 
+                    navUrl = opfPackage.tableOfContentItem()?.let {
+                        cevUrlObj.resolve(it.href).toString()
+                    }
+
                     val tocItems = getEpubTableOfContentsUseCase(
                         opfPackage = opfPackage,
                         readItemText = {
