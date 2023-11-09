@@ -50,8 +50,7 @@ it('Teacher add assignment', () => {
   cy.get('#cbGracePeriodDate',{timeout:5000}).should('be.visible')
   cy.get('#cbGracePeriodDate',{timeout:2000})
     .then(input => setDate(input[0], '2023-11-12T00:00'))
-  cy.get('#caSubmissionPolicy').click()
-  cy.contains('Can make multiple submissions').click()
+  cy.get('#cbLateSubmissionPenalty').type('20')
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()
   cy.contains("button","Save").should('be.visible')
@@ -81,7 +80,7 @@ it('Student submit assignment', () => {
 it('Teacher add marks', () => {
   cy.ustadClearDbAndLogin('teacher1','test1234')
  // Adding attendance
-  cy.contains('004_004').click()
+  cy.contains('004_005').click()
   cy.contains("button","Attendance").click()
   cy.contains("button","Record attendance").click()
   cy.contains("button","Next").click()
@@ -92,7 +91,7 @@ it('Teacher add marks', () => {
   cy.contains('1 Present, 0 Partial, 0 Absent').should('be.visible')
  //  Assignment block
   cy.contains("Course").click()
-  cy.contains("004_004").click()
+  cy.contains("004_005").click()
   cy.contains("Assignment 1").click()
   cy.contains('Submissions').click()
   cy.contains('Student 1').click()
@@ -100,13 +99,13 @@ it('Teacher add marks', () => {
   cy.get('#marker_mark').type('9')
   cy.get('#submit_mark_button').click()
   cy.contains('Keep it up').should('be.visible')
-  cy.contains('9/10 Points').should('be.visible')
+  cy.contains('7/10 Points').should('be.visible')
 })
 /*
 it('Student add assignment', () => {
   cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains("Course").click()
-  cy.contains("004_004").click()
+  cy.contains("004_005").click()
   cy.wait(6000)
   cy.contains('Assignment 1').click()
   cy.contains('Keep it up').should('be.visible')
