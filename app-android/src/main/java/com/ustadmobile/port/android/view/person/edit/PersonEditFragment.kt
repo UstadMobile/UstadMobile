@@ -88,7 +88,10 @@ fun PersonEditScreen(
         )
 
         UstadInputFieldLayout (
-            errorText = uiState.firstNameError
+            errorText = uiState.firstNameError,
+            captionIfNoError = {
+                Text(stringResource(CR.string.required))
+            }
         ){
             OutlinedTextField(
                 modifier = Modifier
@@ -106,7 +109,10 @@ fun PersonEditScreen(
         }
 
         UstadInputFieldLayout (
-            errorText = uiState.lastNameError
+            errorText = uiState.lastNameError,
+            captionIfNoError = {
+                Text(stringResource(CR.string.required))
+            }
         ){
             OutlinedTextField(
                 modifier = Modifier
@@ -126,6 +132,9 @@ fun PersonEditScreen(
         UstadInputFieldLayout(
             modifier = Modifier.fillMaxWidth(),
             errorText = uiState.genderError,
+            captionIfNoError = {
+                Text(stringResource(CR.string.required))
+            }
         ) {
             UstadMessageIdOptionExposedDropDownMenuField(
                 value = uiState.person?.gender ?: 0,
@@ -221,7 +230,10 @@ fun PersonEditScreen(
 
         if (uiState.usernameVisible){
             UstadInputFieldLayout (
-                errorText = uiState.usernameError
+                errorText = uiState.usernameError,
+                captionIfNoError = {
+                    Text(stringResource(CR.string.required))
+                }
             ){
                 OutlinedTextField(
                     modifier = Modifier
