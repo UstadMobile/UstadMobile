@@ -17,7 +17,6 @@ import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.isLazyInitialized
-import com.ustadmobile.core.viewmodel.ViewModel
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
@@ -41,6 +40,8 @@ import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.util.test.nav.TestUstadNavController
+import moe.tlaster.precompose.viewmodel.ViewModel
+import moe.tlaster.precompose.viewmodel.viewModelScope
 import org.mockito.kotlin.mock
 
 

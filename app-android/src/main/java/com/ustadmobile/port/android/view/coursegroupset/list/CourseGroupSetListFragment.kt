@@ -26,7 +26,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
+import androidx.paging.compose.itemKey
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.paging.ListPagingSource
@@ -43,15 +43,12 @@ import com.ustadmobile.core.R as CR
 
 class CourseGroupSetListFragment(): UstadBaseMvvmFragment(){
 
-    private val viewModel by ustadViewModels(::CourseGroupSetListViewModel)
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
@@ -60,7 +57,7 @@ class CourseGroupSetListFragment(): UstadBaseMvvmFragment(){
 
             setContent {
                 MdcTheme {
-                    CourseGroupSetListScreen(viewModel = viewModel)
+
                 }
             }
         }
@@ -144,9 +141,10 @@ fun CourseGroupSetListScreen(
         }
 
         items(
-            items = lazyPagingItems,
-            key = { it.cgsUid }
-        ) { courseGroupSet ->
+            count = lazyPagingItems.itemCount,
+            key = lazyPagingItems.itemKey { it.cgsUid }
+        ) { index ->
+            val courseGroupSet = lazyPagingItems[index]
             ListItem(
                 modifier = Modifier.clickable {
                     courseGroupSet?.also(onClickEntry)

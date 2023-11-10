@@ -27,6 +27,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.paging.ListPagingSource
@@ -37,7 +38,6 @@ import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import java.util.*
-import androidx.paging.compose.items
 import com.ustadmobile.core.util.ext.htmlToPlainText
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
@@ -47,16 +47,11 @@ import com.ustadmobile.core.R as CR
 
 class CourseDiscussionDetailFragment: UstadBaseMvvmFragment() {
 
-    val viewModel by ustadViewModels(::CourseDiscussionDetailViewModel)
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
-
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
                 ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
@@ -64,7 +59,7 @@ class CourseDiscussionDetailFragment: UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    CourseDiscussionDetailScreen(viewModel)
+
                 }
             }
         }
@@ -127,10 +122,10 @@ private fun CourseDiscussionDetailScreen(
 
 
         items(
-            items = lazyPagingItems,
-            key = { post -> post.discussionPostUid }
-        ){ discussionPostItem ->
-
+            count = lazyPagingItems.itemCount,
+            key = lazyPagingItems.itemKey { post -> post.discussionPostUid }
+        ){ index  ->
+            val discussionPostItem = lazyPagingItems[index]
             val datePosted = rememberFormattedDateTime(
                 timeInMillis = discussionPostItem?.discussionPostStartDate ?: 0,
                 timeZoneId = systemTimeZone,

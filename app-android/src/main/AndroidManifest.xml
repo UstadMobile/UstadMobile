@@ -108,7 +108,7 @@
         The MainActivity containing fragments/navigation
         -->
         <activity
-            android:name="com.ustadmobile.port.android.view.MainActivity"
+            android:name="com.ustadmobile.port.android.view.AppActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:exported="true"
             android:launchMode="singleTask">

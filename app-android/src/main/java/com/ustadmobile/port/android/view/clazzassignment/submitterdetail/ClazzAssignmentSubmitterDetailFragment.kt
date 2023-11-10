@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
@@ -40,7 +41,6 @@ import com.ustadmobile.port.android.view.clazzassignment.CommentListItem
 import com.ustadmobile.port.android.view.clazzassignment.CourseAssignmentSubmissionListItem
 import com.ustadmobile.port.android.view.clazzassignment.UstadCourseAssignmentMarkListItem
 import com.ustadmobile.port.android.view.composable.*
-import androidx.paging.compose.items
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
 import com.ustadmobile.port.android.util.compose.stringIdMapResource
@@ -58,7 +58,6 @@ interface ClazzAssignmentDetailStudentProgressFragmentEventHandler {
 
 class ClazzAssignmentSubmitterDetailFragment: UstadBaseMvvmFragment() {
 
-    private val viewModel by ustadViewModels(::ClazzAssignmentSubmitterDetailViewModel)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -72,7 +71,7 @@ class ClazzAssignmentSubmitterDetailFragment: UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    ClazzAssignmentDetailStudentProgressScreen(viewModel)
+
                 }
             }
         }
@@ -253,10 +252,10 @@ fun ClazzAssignmentDetailStudentProgressScreen(
         }
 
         items(
-            items = privateCommentsLazyPagingItems,
-            key = { Pair(Comments.TABLE_ID, it.comment.commentsUid) }
-        ) { comment ->
-            CommentListItem(commentAndName = comment)
+            count = privateCommentsLazyPagingItems.itemCount,
+            key = privateCommentsLazyPagingItems.itemKey { Pair(Comments.TABLE_ID, it.comment.commentsUid) }
+        ) { index ->
+            CommentListItem(commentAndName = privateCommentsLazyPagingItems[index])
         }
 
         UstadListSpacerItem()

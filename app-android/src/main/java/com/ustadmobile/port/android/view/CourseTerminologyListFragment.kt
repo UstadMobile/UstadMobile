@@ -30,7 +30,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
+import androidx.paging.compose.itemKey
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListUiState
@@ -40,11 +40,8 @@ import com.ustadmobile.core.R as CR
 
 class CourseTerminologyListFragment: UstadBaseMvvmFragment() {
 
-    private val viewModel: CourseTerminologyListViewModel by ustadViewModels(::CourseTerminologyListViewModel)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
@@ -53,7 +50,7 @@ class CourseTerminologyListFragment: UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    CourseTerminologyListScreen(viewModel)
+
                 }
             }
         }
@@ -99,10 +96,10 @@ fun CourseTerminologyListScreen(
         }
 
         items(
-            items = lazyPagingItems,
-            key = { it.ctUid },
-        ) { terminology ->
-
+            count = lazyPagingItems.itemCount,
+            key = lazyPagingItems.itemKey { it.ctUid }
+        ) { index ->
+            val terminology = lazyPagingItems[index]
             ListItem(
                 modifier = Modifier.clickable {
                     terminology?.also { onClickItem(it) }

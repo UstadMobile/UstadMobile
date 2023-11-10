@@ -59,11 +59,8 @@ class ClazzEditFragment : UstadBaseMvvmFragment() {
 
     private var bottomSheetOptionList: List<TitleDescBottomSheetOption> = listOf()
 
-    private val viewModel: ClazzEditViewModel by ustadViewModels(::ClazzEditViewModel)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
                 ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
@@ -71,7 +68,7 @@ class ClazzEditFragment : UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    ClazzEditScreen(viewModel)
+
                 }
             }
         }

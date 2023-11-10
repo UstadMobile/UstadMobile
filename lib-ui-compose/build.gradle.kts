@@ -19,17 +19,23 @@ kotlin {
             dependencies {
                 api(project(":core"))
                 api(project(":lib-database"))
-                implementation(compose.runtime)
-                implementation(compose.foundation)
-                implementation(compose.material)
-                implementation(compose.materialIconsExtended)
+                api(compose.runtime)
+                api(compose.foundation)
+                api(compose.animation)
+                api(compose.material)
+                api(compose.material3)
+                api(compose.materialIconsExtended)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-                implementation(compose.components.resources)
-                implementation(libs.kodein.di)
-                implementation(libs.moko.resources)
-                implementation(libs.moko.resources.compose)
+                api(compose.components.resources)
+                api(libs.kodein.di)
+                api(libs.kodein.di.compose)
+                api(libs.moko.resources)
+                api(libs.moko.resources.compose)
                 api(libs.paging.multiplatform.common)
                 api(libs.paging.multiplatform.compose)
+                api(libs.door.runtime)
+                api(libs.precompose)
+                api(libs.precompose.viewmodel)
             }
         }
 
@@ -40,6 +46,8 @@ kotlin {
                 api(libs.androidx.core.ktx)
                 api(libs.androidx.paging.runtime)
                 api(libs.androidx.paging.compose)
+                api(libs.androidx.navigation.compose)
+                api(libs.androidx.lifecycle.viewmodel.compose)
             }
         }
 

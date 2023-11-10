@@ -29,23 +29,19 @@ import com.ustadmobile.core.R as CR
 
 class ClazzLogEditFragment: UstadBaseMvvmFragment() {
 
-    private val viewModel by ustadViewModels(::ClazzLogEditViewModel)
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
-
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
                 ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
             )
 
             setContent {
-                ClazzLogEditScreen(viewModel)
+
             }
         }
     }

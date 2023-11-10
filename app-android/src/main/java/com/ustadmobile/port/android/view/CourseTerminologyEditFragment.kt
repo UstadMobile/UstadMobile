@@ -32,12 +32,8 @@ import com.ustadmobile.core.R as CR
 import dev.icerock.moko.resources.compose.stringResource as mrStringResource
 class CourseTerminologyEditFragment: UstadBaseMvvmFragment() {
 
-    val viewModel: CourseTerminologyEditViewModel by ustadViewModels(::CourseTerminologyEditViewModel)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
-
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
                 ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
@@ -45,7 +41,7 @@ class CourseTerminologyEditFragment: UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    CourseTerminologyEditScreen(viewModel)
+
                 }
             }
         }

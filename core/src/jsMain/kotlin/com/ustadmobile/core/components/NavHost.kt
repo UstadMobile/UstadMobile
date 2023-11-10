@@ -19,7 +19,6 @@ import react.router.NavigateFunction
 import react.router.NavigateOptions
 import react.router.useLocation
 import react.router.useNavigate
-import remix.run.router.LocationState
 import kotlin.js.Json
 import kotlin.js.json
 
@@ -90,9 +89,9 @@ private var firstLocationKey: String
         web.storage.sessionStorage.setItem("firstLocationKey", value)
     }
 
-fun NavigateOptions.setIsNewFirstLocation(fromLocation: Location) {
+fun NavigateOptions.setIsNewFirstLocation(fromLocation: Location<*>) {
     if(replace == true && fromLocation.key == firstLocationKey) {
-        state = json("isNewFirstLocation" to true).unsafeCast<LocationState>()
+        state = json("isNewFirstLocation" to true)
     }
 }
 
@@ -106,7 +105,7 @@ fun NavigateOptions.setIsNewFirstLocation(fromLocation: Location) {
  */
 class NavHostFunction(
     private val navigateFn: NavigateFunction,
-    private val location: Location,
+    private val location: Location<*>,
     private val onHideChildren: () -> Unit,
 )  {
 

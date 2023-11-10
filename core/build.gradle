@@ -110,6 +110,7 @@ kotlin {
                 implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
                 implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
+                implementation libs.precompose.viewmodel
             }
         }
 
@@ -221,8 +222,8 @@ kotlin {
 
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
 
-                implementation "androidx.navigation:navigation-fragment-ktx:$version_android_navigation"
-                implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
+                implementation libs.androidx.navigation.fragment.ktx
+                implementation libs.androidx.navigation.ui.ktx
 
                 implementation "com.google.android.material:material:$version_android_material"
 

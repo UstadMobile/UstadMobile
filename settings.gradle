@@ -11,18 +11,25 @@ dependencyResolutionManagement {
     versionCatalogs {
         libs {
             version("version-moko-resources", "0.23.0")
-            version("jetbrains-compose", "1.5.0")
-            version("version_activity_compose", "1.7.2")
+            version("jetbrains-compose", "1.5.10")
+            version("version_activity_compose", "1.8.0")
             version("version_androidx_appcompat", "1.6.1")
-            version("version_androidx_core", "1.9.0")
+            version("version_androidx_core", "1.12.0")
             version("version_paging_multiplatform", "3.2.0-alpha05-0.2.3")
-            version("version_paging_androidx", "3.2.0-alpha05")
-            version("version_paging_compose", "1.0.0-alpha18")
+            version("version_paging_androidx", "3.3.0-alpha02")
+            version("version_paging_compose", "3.3.0-alpha02")
+            version("version_android_navigation", "2.7.5")
+            version("version_androidx_lifecycle", "2.6.2")
+            version("version_kodein_di", "7.20.2")
+            version("version_door", "0.0.63o14")
+            version("version_precompose", "1.5.7")
+            version("version_dragdropswiperecyclerview", "1.2.0")
 
-            plugin("jetbrains-compose", "org.jetbrains.compose").version("1.5.0")
+            plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
 
-            library("kodein-di", "org.kodein.di:kodein-di:7.20.2")
+            library("kodein-di", "org.kodein.di", "kodein-di").versionRef("version_kodein_di")
+            library("kodein-di-compose", "org.kodein.di", "kodein-di-framework-compose").versionRef("version_kodein_di")
             library("moko-resources", "dev.icerock.moko", "resources").versionRef("version-moko-resources")
             library("moko-resources-compose", "dev.icerock.moko", "resources-compose").versionRef("version-moko-resources")
             library("activity-compose", "androidx.activity", "activity-compose").versionRef("version_activity_compose")
@@ -30,9 +37,22 @@ dependencyResolutionManagement {
             library("androidx-core-ktx", "androidx.core", "core-ktx").versionRef("version_androidx_core")
             library("androidx-paging-runtime", "androidx.paging", "paging-runtime").versionRef("version_paging_androidx")
             library("androidx-paging-compose", "androidx.paging", "paging-compose").versionRef("version_paging_compose")
+            library("androidx-navigation-compose", "androidx.navigation", "navigation-compose").versionRef("version_android_navigation")
+            library("androidx-navigation-fragment-ktx", "androidx.navigation", "navigation-fragment-ktx").versionRef("version_android_navigation")
+            library("androidx-navigation-ui", "androidx.navigation", "navigation-ui").versionRef("version_android_navigation")
+            library("androidx-navigation-ui-ktx", "androidx.navigation", "navigation-ui-ktx").versionRef("version_android_navigation")
+            library("androidx-navigation-testing", "androidx.navigation", "navigation-testing").versionRef("version_android_navigation")
+            library("androidx-lifecycle-viewmodel-compose", "androidx.lifecycle", "lifecycle-viewmodel-compose").versionRef("version_androidx_lifecycle")
 
             library("paging-multiplatform-common", "app.cash.paging", "paging-common").versionRef("version_paging_multiplatform")
             library("paging-multiplatform-compose", "app.cash.paging", "paging-compose-common").versionRef("version_paging_multiplatform")
+
+            library("precompose", "moe.tlaster", "precompose").versionRef("version_precompose")
+            library("precompose-viewmodel", "moe.tlaster", "precompose-viewmodel").versionRef("version_precompose")
+
+            library("dragdropswiperecyclerview", "com.ernestoyaquello.dragdropswiperecyclerview", "drag-drop-swipe-recyclerview").versionRef("version_dragdropswiperecyclerview")
+
+            library("door-runtime", "com.github.UstadMobile.door", "door-runtime").versionRef("version_door")
         }
     }
 }

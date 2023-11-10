@@ -16,7 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
+import androidx.paging.compose.itemKey
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.paging.ListPagingSource
@@ -32,28 +32,12 @@ import com.ustadmobile.core.MR
 
 class ContentEntryList2Fragment : UstadBaseMvvmFragment() {
 
-    private val viewModel by ustadViewModels { di, savedStateHandle ->
-        ContentEntryListViewModel(di, savedStateHandle, requireDestinationViewName())
-    }
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(
-            viewModel = viewModel,
-            transform = { appUiState ->
-                appUiState.copy(
-                    fabState = appUiState.fabState.copy(
-                        onClick = this::onClickFab
-                    )
-                )
-            }
-        )
-
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
                 ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
@@ -61,27 +45,27 @@ class ContentEntryList2Fragment : UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    ContentEntryListScreen(viewModel = viewModel)
+
                 }
             }
         }
     }
 
     private fun onClickFab() {
-        val optionList = listOf(
-            BottomSheetOption(
-                R.drawable.ic_folder_black_24dp,
-                requireContext().getString(CR.string.content_editor_create_new_category),
-                42
-            )
-        )
-
-        OptionsBottomSheetFragment(
-            optionsList = optionList,
-            onOptionSelected = {
-                viewModel.onClickNewFolder()
-            }
-        ).show(requireActivity().supportFragmentManager, "content_list_options")
+//        val optionList = listOf(
+//            BottomSheetOption(
+//                R.drawable.ic_folder_black_24dp,
+//                requireContext().getString(CR.string.content_editor_create_new_category),
+//                42
+//            )
+//        )
+//
+//        OptionsBottomSheetFragment(
+//            optionsList = optionList,
+//            onOptionSelected = {
+//                viewModel.onClickNewFolder()
+//            }
+//        ).show(requireActivity().supportFragmentManager, "content_list_options")
     }
 
 
@@ -148,10 +132,10 @@ private fun ContentEntryListScreen(
     )  {
 
         items(
-            items = lazyPagingItems,
-            key = { contentEntry -> contentEntry.contentEntryUid }
-        ){ contentEntry ->
-
+            count = lazyPagingItems.itemCount,
+            key = lazyPagingItems.itemKey{ contentEntry -> contentEntry.contentEntryUid }
+        ){ index ->
+            val contentEntry = lazyPagingItems[index]
             UstadContentEntryListItem(
                 onClick = {
                     @Suppress("UNNECESSARY_SAFE_CALL")

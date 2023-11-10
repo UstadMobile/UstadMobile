@@ -39,16 +39,11 @@ import dev.icerock.moko.resources.compose.stringResource as mrStringResource
 
 class ClazzEnrolmentListFragment(): UstadBaseMvvmFragment() {
 
-    private val viewModel by ustadViewModels(::ClazzEnrolmentListViewModel)
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
-
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
                 ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
@@ -56,7 +51,7 @@ class ClazzEnrolmentListFragment(): UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    ClazzEnrolmentListScreen(viewModel)
+
                 }
             }
         }

@@ -24,7 +24,6 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.port.android.view.composable.UstadListSortHeader
-import androidx.paging.compose.items
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.paging.ListPagingSource
@@ -44,18 +43,12 @@ interface InviteWithLinkHandler{
 
 class PersonListFragment() : UstadBaseMvvmFragment() {
 
-    private val viewModel: PersonListViewModel by ustadViewModels { di, savedStateHandle ->
-        PersonListViewModel(di, savedStateHandle, requireDestinationViewName())
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
@@ -64,7 +57,7 @@ class PersonListFragment() : UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    PersonListScreen(viewModel)
+
                 }
             }
         }

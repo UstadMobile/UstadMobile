@@ -40,15 +40,11 @@ import com.ustadmobile.core.R as CR
 
 class CourseGroupSetEditFragment: UstadBaseMvvmFragment(){
 
-    private val viewModel: CourseGroupSetEditViewModel by ustadViewModels(::CourseGroupSetEditViewModel)
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
         return ComposeView(requireContext()).apply {
             setContent {
                 setViewCompositionStrategy(
@@ -56,7 +52,7 @@ class CourseGroupSetEditFragment: UstadBaseMvvmFragment(){
                 )
 
                 MdcTheme {
-                    CourseGroupEditScreen(viewModel)
+
                 }
             }
         }

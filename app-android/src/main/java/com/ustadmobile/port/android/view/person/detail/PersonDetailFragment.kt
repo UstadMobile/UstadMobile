@@ -50,16 +50,11 @@ import com.ustadmobile.core.R as CR
 
 class PersonDetailFragment : UstadBaseMvvmFragment(){
 
-    private val viewModel: PersonDetailViewModel by ustadViewModels(::PersonDetailViewModel)
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
@@ -68,7 +63,7 @@ class PersonDetailFragment : UstadBaseMvvmFragment(){
 
             setContent {
                 MdcTheme {
-                    PersonDetailScreen(viewModel)
+
                 }
             }
         }

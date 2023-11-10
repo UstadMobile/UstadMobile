@@ -14,15 +14,11 @@ import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 
 class Login2Fragment : UstadBaseMvvmFragment() {
 
-    private val viewModel: LoginViewModel by ustadViewModels(::LoginViewModel)
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
@@ -31,7 +27,7 @@ class Login2Fragment : UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    LoginScreenForViewModel(viewModel)
+
                 }
             }
         }

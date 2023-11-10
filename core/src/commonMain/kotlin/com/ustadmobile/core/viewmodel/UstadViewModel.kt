@@ -15,6 +15,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
@@ -23,6 +24,8 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
+import moe.tlaster.precompose.viewmodel.ViewModel as PreComposeViewModel
+import moe.tlaster.precompose.viewmodel.viewModelScope as preComposeViewModelScope
 
 /**
  * @param di the KodeIn DI
@@ -36,7 +39,7 @@ abstract class UstadViewModel(
     override val di: DI,
     protected val savedStateHandle: UstadSavedStateHandle,
     protected val destinationName: String,
-): ViewModel(savedStateHandle), DIAware {
+): PreComposeViewModel(), DIAware {
 
     protected val navController = CommandFlowUstadNavController()
 
@@ -47,6 +50,9 @@ abstract class UstadViewModel(
     val appUiState: Flow<AppUiState> = _appUiState.asStateFlow()
 
     protected val accountManager: UstadAccountManager by instance()
+
+    val viewModelScope: CoroutineScope
+        get() = preComposeViewModelScope
 
     /**
      * Shorthand to get the person uid of the active user (if any).

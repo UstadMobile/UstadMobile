@@ -26,6 +26,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
@@ -36,7 +37,6 @@ import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
-import androidx.paging.compose.items
 import com.ustadmobile.port.android.util.compose.courseTerminologyEntryResource
 import com.ustadmobile.port.android.util.compose.rememberCourseTerminologyEntries
 import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
@@ -49,15 +49,12 @@ import com.ustadmobile.core.MR
 
 class ClazzAssignmentDetailSubmissionsTabFragment: UstadBaseMvvmFragment(){
 
-    private val viewModel by ustadViewModels(::ClazzAssignmentDetailSubmissionsTabViewModel)
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
@@ -66,7 +63,7 @@ class ClazzAssignmentDetailSubmissionsTabFragment: UstadBaseMvvmFragment(){
 
             setContent {
                 MdcTheme {
-                    ClazzAssignmentDetailSubmissionsTabScreen(viewModel)
+
                 }
             }
         }
@@ -164,10 +161,10 @@ private fun ClazzAssignmentDetailSubmissionsTabScreen(
         }
 
         items(
-            items = lazyPagingItems,
-            key = { person -> person.submitterUid }
-        ){ person ->
-            SubmitterSummaryListItem(person, onClickPerson)
+            count = lazyPagingItems.itemCount,
+            key = lazyPagingItems.itemKey { person -> person.submitterUid }
+        ){ index ->
+            SubmitterSummaryListItem(lazyPagingItems[index], onClickPerson)
         }
 
         UstadListSpacerItem()
