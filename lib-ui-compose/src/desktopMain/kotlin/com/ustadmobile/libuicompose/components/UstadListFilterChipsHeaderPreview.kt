@@ -2,8 +2,8 @@ package com.ustadmobile.libuicompose.components
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.runtime.Composable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.dao.ClazzDaoCommon
 import com.ustadmobile.core.util.MessageIdOption2
 
 @Composable
