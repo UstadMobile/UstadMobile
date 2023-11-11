@@ -1,20 +1,33 @@
-package com.ustadmobile.port.android.view.discussionpost.coursediscussiondetail
+package com.ustadmobile.libuicompose.view.discussionpost.coursediscussiondetail
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.*
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import com.ustadmobile.lib.db.entities.CourseBlock
+import java.util.*
+import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailUiState
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+
 
 @Composable
 @Preview
 fun CourseDiscussionDetailScreenPreview(){
-//    CourseDiscussionDetailScreen(
-//        uiState = CourseDiscussionDetailUiState(
-//
-//            courseBlock = CourseBlock().apply{
-//                cbTitle = "Discussions on Module 4: Statistics and Data Science"
-//                cbDescription = "Here Any discussion related to Module 4 of Data Science chapter goes here."
-//            },
-//
-//
+
+    val currentMoment: Instant = Clock.System.now()
+
+    CourseDiscussionDetailScreen(
+        uiState = CourseDiscussionDetailUiState(
+
+            courseBlock = CourseBlock().apply{
+                cbTitle = "Discussions on Module 4: Statistics and Data Science"
+                cbDescription = "Here Any discussion related to Module 4 of Data Science chapter goes here."
+            },
+
+
 //            posts = {
 //                ListPagingSource(listOf(
 //                    DiscussionPostWithDetails().apply {
@@ -26,7 +39,7 @@ fun CourseDiscussionDetailScreenPreview(){
 //                        postLatestMessage = "Just make sure you submit a late assignment."
 //                        authorPersonFirstNames = "Mike"
 //                        authorPersonLastName = "Jones"
-//                        discussionPostStartDate = systemTimeInMillis()
+//                        discussionPostStartDate = currentMoment.epochSeconds
 //                    },
 //                    DiscussionPostWithDetails().apply {
 //                        discussionPostTitle = "How to install xlib?"
@@ -37,11 +50,11 @@ fun CourseDiscussionDetailScreenPreview(){
 //                        postLatestMessage = "I have the same question"
 //                        authorPersonFirstNames = "Bodium"
 //                        authorPersonLastName = "Carafe"
-//                        discussionPostStartDate = systemTimeInMillis()
+//                        discussionPostStartDate = currentMoment.epochSeconds
 //                    }
 //
 //                ))
 //            }
-//        )
-//    )
+        )
+    )
 }

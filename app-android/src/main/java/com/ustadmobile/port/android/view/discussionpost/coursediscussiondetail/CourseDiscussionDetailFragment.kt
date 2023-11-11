@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
+import com.ustadmobile.libuicompose.view.discussionpost.coursediscussiondetail.CourseDiscussionDetailScreenForViewModel
 
 class CourseDiscussionDetailFragment: UstadBaseMvvmFragment() {
 
