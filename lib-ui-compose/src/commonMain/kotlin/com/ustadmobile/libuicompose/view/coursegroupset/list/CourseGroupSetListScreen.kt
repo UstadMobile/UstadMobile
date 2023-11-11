@@ -1,30 +1,26 @@
 package com.ustadmobile.libuicompose.view.coursegroupset.list
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ListItem
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
+import dev.icerock.moko.resources.compose.stringResource
+import com.ustadmobile.core.MR
+import app.cash.paging.compose.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.ListItem
+import androidx.compose.runtime.collectAsState
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListUiState
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.libuicompose.components.UstadAddListItem
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
-import dev.icerock.moko.resources.compose.stringResource
-import com.ustadmobile.core.MR
 
 @Composable
 fun CourseGroupSetListScreenForViewModel(
@@ -58,14 +54,16 @@ fun CourseGroupSetListScreen(
     onClickSort: () -> Unit = {},
     onClickNewItem: () -> Unit = {},
 ) {
-    val pager = remember(uiState.courseGroupSets) {
-        Pager(
-            pagingSourceFactory = uiState.courseGroupSets,
-            config = PagingConfig(pageSize = 20, enablePlaceholders = true)
-        )
-    }
 
-    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+    // TODO error
+//    val pager = remember {
+//        Pager(
+//            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
+//            pagingSourceFactory = uiState.courseGroupSets,
+//        )
+//    }
+//
+//    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
     LazyColumn(
         modifier = Modifier
@@ -86,7 +84,7 @@ fun CourseGroupSetListScreen(
                     modifier = Modifier.clickable {
                         individualOption.also(onClickEntry)
                     },
-                    text = {
+                    headlineContent = {
                         Text(individualOption.cgsName ?: "")
                     },
                 )
@@ -103,18 +101,18 @@ fun CourseGroupSetListScreen(
 
         }
 
-        items(
-            items = lazyPagingItems,
-            key = { it.cgsUid }
-        ) { courseGroupSet ->
-            ListItem(
-                modifier = Modifier.clickable {
-                    courseGroupSet?.also(onClickEntry)
-                },
-                text = {
-                    Text(courseGroupSet?.cgsName ?: "")
-                },
-            )
-        }
+//        items(
+//            items = lazyPagingItems,
+//            key = { it.cgsUid }
+//        ) { courseGroupSet ->
+//            ListItem(
+//                modifier = Modifier.clickable {
+//                    courseGroupSet?.also(onClickEntry)
+//                },
+//                headlineContent = {
+//                    Text(courseGroupSet?.cgsName ?: "")
+//                },
+//            )
+//        }
     }
 }
