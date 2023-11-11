@@ -7,7 +7,7 @@ import androidx.compose.material.icons.filled.SmartDisplay
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.material.icons.outlined.FolderOpen
 import com.ustadmobile.lib.db.entities.CourseBlock
-import com.ustadmobile.libuicompose.view.contententry.list.constants.CONTENT_ENTRY_TYPE_ICON_MAP
+import com.ustadmobile.libuicompose.view.contententry.list.ClazzAssignmentConstants.CONTENT_ENTRY_TYPE_ICON_MAP
 
 object ClazzEditConstants {
 
