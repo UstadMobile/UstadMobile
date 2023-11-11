@@ -2,25 +2,11 @@ package com.ustadmobile.port.android.view.contententry.list
 
 import android.os.Bundle
 import android.view.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.paging.ListPagingSource
-import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListUiState
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.BottomSheetOption

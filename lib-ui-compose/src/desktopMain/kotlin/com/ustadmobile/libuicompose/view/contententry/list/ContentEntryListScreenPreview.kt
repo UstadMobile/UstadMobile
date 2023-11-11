@@ -1,14 +1,16 @@
 package com.ustadmobile.libuicompose.view.contententry.list
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListUiState
 
 @Composable
 @Preview
 private fun ContentEntryListScreenPreview() {
 
-//    ContentEntryListScreen(
-//        uiState = ContentEntryListUiState(
+    ContentEntryListScreen(
+        uiState = ContentEntryListUiState(
 //            contentEntryList = {
 //                ListPagingSource(listOf(
 //                    ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
@@ -33,6 +35,6 @@ private fun ContentEntryListScreenPreview() {
 //                    }
 //                ))
 //            },
-//        )
-//    )
+        )
+    )
 }
