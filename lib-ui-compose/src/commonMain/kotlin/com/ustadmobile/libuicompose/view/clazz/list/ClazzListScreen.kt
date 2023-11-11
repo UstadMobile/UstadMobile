@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.People
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -37,9 +36,6 @@ import com.ustadmobile.libuicompose.components.HtmlText
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
-import androidx.paging.PagingConfig
-import androidx.paging.compose.collectAsLazyPagingItems
-import app.cash.paging.Pager
 
 @Composable
 fun ClazzListScreenForViewModel(viewModel: ClazzListViewModel) {
@@ -72,14 +68,15 @@ fun ClazzListScreen(
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
 ) {
 
-    val pager = remember(uiState.clazzList){
-        Pager(
-            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
-            pagingSourceFactory = uiState.clazzList
-        )
-    }
-
-    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+    // TODO error
+//    val pager = remember(uiState.clazzList){
+//        Pager(
+//            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
+//            pagingSourceFactory = uiState.clazzList
+//        )
+//    }
+//
+//    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
     LazyVerticalGrid(
         modifier = Modifier.fillMaxSize(),
@@ -113,14 +110,14 @@ fun ClazzListScreen(
         /**
          * Note: Currently there is no direct support for LazyGrid with pagingsource.
          */
-        items(
-            lazyPagingItems.itemCount
-        ) {
-            ClazzListItem(
-                clazz = lazyPagingItems[it],
-                onClickClazz = onClickClazz
-            )
-        }
+//        items(
+//            lazyPagingItems.itemCount
+//        ) {
+//            ClazzListItem(
+//                clazz = lazyPagingItems[it],
+//                onClickClazz = onClickClazz
+//            )
+//        }
 
         //Host fragment thinks scroll bar behavior increases available height - need to compensate
         item(span = { GridItemSpan(maxLineSpan) }) {
