@@ -32,6 +32,8 @@ kotlin {
                 implementation(libs.moko.resources)
                 implementation(libs.moko.resources.compose)
 
+                implementation(libs.richeditor.multiplatform.compose)
+
                 implementation(libs.kotlinx.datetime)
 
                 api(libs.paging.multiplatform.common)
@@ -58,7 +60,6 @@ kotlin {
             dependencies {
                 api(compose.desktop.common)
                 implementation(compose.desktop.currentOs)
-                implementation(libs.desktop.richeditor.compose)
             }
         }
     }
