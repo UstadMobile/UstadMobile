@@ -36,6 +36,7 @@ kotlin {
                 api(libs.door.runtime)
                 api(libs.precompose)
                 api(libs.precompose.viewmodel)
+                implementation(libs.napier)
             }
         }
 

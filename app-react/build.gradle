@@ -96,7 +96,7 @@ kotlin {
                 implementation npm("react-quill", "$version_npm_react_quill")
                 implementation npm("react-easy-sort","$version_npm_react_easy_sort")
                 implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
-                implementation "io.github.aakira:napier:$version_napier"
+                implementation libs.napier
                 implementation npm("linkifyjs", "$version_linkify_js")
                 implementation npm("linkify-react", "$version_linkify_react")
             }

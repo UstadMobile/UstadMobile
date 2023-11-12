@@ -62,7 +62,7 @@ kotlin {
                 implementation "org.apache.httpcomponents.core5:httpcore5:$version_httpcomponents_core5"
                 implementation "commons-cli:commons-cli:$version_apache_commons_cli"
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-                implementation "io.github.aakira:napier-jvm:$version_napier"
+                implementation libs.napier.jvm
 
                 implementation "com.soywiz.korlibs.klock:klock-jvm:$version_klock"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"

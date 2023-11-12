@@ -209,7 +209,7 @@ dependencies {
     api libs.moko.resources
     api libs.moko.resources.compose
 
-    implementation "io.github.aakira:napier:$version_napier"
+    implementation libs.napier
     implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
     implementation "androidx.activity:activity:$version_androidx_activity"
     implementation "androidx.activity:activity-ktx:$version_androidx_activity"

@@ -24,6 +24,7 @@ dependencyResolutionManagement {
             version("version_door", "0.0.63o14")
             version("version_precompose", "1.5.7")
             version("version_dragdropswiperecyclerview", "1.2.0")
+            version("version_napier", "2.6.1")
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
@@ -53,6 +54,8 @@ dependencyResolutionManagement {
             library("dragdropswiperecyclerview", "com.ernestoyaquello.dragdropswiperecyclerview", "drag-drop-swipe-recyclerview").versionRef("version_dragdropswiperecyclerview")
 
             library("door-runtime", "com.github.UstadMobile.door", "door-runtime").versionRef("version_door")
+            library("napier", "io.github.aakira", "napier").versionRef("version_napier")
+            library("napier-jvm", "io.github.aakira", "napier-jvm").versionRef("version_napier")
         }
     }
 }
