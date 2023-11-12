@@ -31,16 +31,11 @@ import com.ustadmobile.core.R as CR
 
 class DiscussionPostEditFragment: UstadBaseMvvmFragment(){
 
-    private val viewModel: DiscussionPostEditViewModel by ustadViewModels(::DiscussionPostEditViewModel)
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
@@ -49,7 +44,7 @@ class DiscussionPostEditFragment: UstadBaseMvvmFragment(){
 
             setContent {
                 MdcTheme {
-                    DiscussionPostEditFragmentScreen(viewModel)
+
                 }
             }
         }

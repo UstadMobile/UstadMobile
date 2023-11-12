@@ -28,7 +28,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
+import androidx.paging.compose.itemKey
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SubmissionConstants
@@ -72,12 +72,8 @@ interface ClazzAssignmentDetailOverviewFragmentEventHandler {
 
 class ClazzAssignmentDetailOverviewFragment : UstadBaseMvvmFragment() {
 
-    private val viewModel by ustadViewModels(::ClazzAssignmentDetailOverviewViewModel)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
-
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
                 ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
@@ -85,7 +81,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    ClazzAssignmentDetailOverviewScreen(viewModel)
+
                 }
             }
         }
@@ -327,10 +323,10 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         items(
-            items = courseCommentsLazyPagingItems,
-            key = { Pair(4, it.comment.commentsUid) }
-        ){ comment ->
-            CommentListItem(commentAndName = comment)
+            count = courseCommentsLazyPagingItems.itemCount,
+            key = courseCommentsLazyPagingItems.itemKey { Pair(4, it.comment.commentsUid) }
+        ) { index ->
+            CommentListItem(commentAndName = courseCommentsLazyPagingItems[index])
         }
 
         if(uiState.activeUserIsSubmitter) {
@@ -350,10 +346,10 @@ fun ClazzAssignmentDetailOverviewScreen(
             }
 
             items(
-                items = privateCommentsLazyPagingItems,
-                key = { Pair(5, it.comment.commentsUid) }
-            ){ comment ->
-                CommentListItem(commentAndName = comment)
+                count = privateCommentsLazyPagingItems.itemCount,
+                key = privateCommentsLazyPagingItems.itemKey{ Pair(5, it.comment.commentsUid) }
+            ){ index ->
+                CommentListItem(commentAndName = privateCommentsLazyPagingItems[index])
             }
         }
 

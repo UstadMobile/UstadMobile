@@ -19,7 +19,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
+import androidx.paging.compose.itemKey
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.paging.ListPagingSource
@@ -36,18 +36,11 @@ import com.ustadmobile.core.R as CR
 
 class DiscussionPostDetailFragment: UstadBaseMvvmFragment() {
 
-    private val viewModel: DiscussionPostDetailViewModel by ustadViewModels{ di, savedStateHandle ->
-        DiscussionPostDetailViewModel(di, savedStateHandle, requireDestinationViewName())
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
-
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
                 ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
@@ -55,7 +48,7 @@ class DiscussionPostDetailFragment: UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    DiscussionPostDetailFragmentScreen(viewModel)
+
                 }
             }
         }
@@ -101,11 +94,12 @@ private fun DiscussionPostDetailFragmentScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         items(
-            items = lazyPagingItems,
-            key = { it.discussionPost?.discussionPostUid ?: 0}
-        ) { discussionPostItem ->
+            count = lazyPagingItems.itemCount,
+            key = lazyPagingItems.itemKey { it.discussionPost?.discussionPostUid ?: 0}
+        ) { index ->
+            val discussionPostItem = lazyPagingItems[index]
             DiscussionPostListItem(
-                discussionPost =discussionPostItem
+                discussionPost = discussionPostItem
             )
 
             //This is the root item - show add a reply here

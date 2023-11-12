@@ -43,13 +43,8 @@ import com.ustadmobile.core.MR
 
 class ClazzAssignmentEditFragment: UstadBaseMvvmFragment(){
 
-    private val viewModel: ClazzAssignmentEditViewModel by
-        ustadViewModels(::ClazzAssignmentEditViewModel)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
-
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
                 ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
@@ -57,7 +52,7 @@ class ClazzAssignmentEditFragment: UstadBaseMvvmFragment(){
 
             setContent {
                 MdcTheme {
-                    ClazzAssignmentEditScreen(viewModel)
+
                 }
             }
         }

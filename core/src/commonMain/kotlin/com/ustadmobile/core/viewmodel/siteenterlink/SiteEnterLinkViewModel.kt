@@ -98,7 +98,7 @@ class SiteEnterLinkViewModel(
 
     companion object {
 
-        const val DEST_NAME = "SiteEnterLinkView"
+        const val DEST_NAME = "SiteEnterLink"
 
         val ARGS_TO_PASS_THROUGH = listOf(UstadView.ARG_NEXT, UstadView.ARG_INTENT_MESSAGE)
 

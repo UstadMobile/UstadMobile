@@ -8,7 +8,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.paging.compose.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -62,17 +61,12 @@ interface ClazzDetailOverviewEventListener {
 
 class ClazzDetailOverviewFragment: UstadBaseMvvmFragment() {
 
-    private val viewModel: ClazzDetailOverviewViewModel by ustadViewModels { di, savedStateHandle ->
-        ClazzDetailOverviewViewModel(di, savedStateHandle, ClazzDetailViewModel.DEST_NAME)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
@@ -81,7 +75,7 @@ class ClazzDetailOverviewFragment: UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    ClazzDetailOverviewScreen(viewModel)
+
                 }
             }
         }
@@ -261,10 +255,8 @@ private fun ClazzDetailOverviewScreen(
             Spacer(modifier = Modifier.height(20.dp))
         }
 
-        items(
-            items = lazyPagingItems,
-            key = { Pair(2, it.cbUid) }
-        ){ courseBlock ->
+        items(count = lazyPagingItems.itemCount) { index ->
+            val courseBlock = lazyPagingItems[index]
             CourseBlockListItem(
                 courseBlock = courseBlock,
                 onClick = {

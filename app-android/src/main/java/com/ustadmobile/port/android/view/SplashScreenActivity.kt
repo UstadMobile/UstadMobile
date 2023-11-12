@@ -40,12 +40,12 @@ class SplashScreenActivity : ComponentActivity() {
         lifecycleScope.launchWhenCreated {
             delay(2000L)
             val systemImpl: UstadMobileSystemImpl = di.direct.instance()
-            val activityClass = if(systemImpl.getAppPref(OnBoardingViewModel.PREF_TAG, "false").toBoolean()) {
-                MainActivity::class.java
-            }else {
-                OnBoardingActivity::class.java
-            }
-            var intent = Intent(this@SplashScreenActivity, activityClass)
+//            val activityClass = if(systemImpl.getAppPref(OnBoardingView.PREF_TAG, "false").toBoolean()) {
+//                MainActivity::class.java
+//            }else {
+//                OnBoardingActivity::class.java
+//            }
+            val intent = Intent(this@SplashScreenActivity, AppActivity::class.java)
             startActivity(intent)
             finish()
         }

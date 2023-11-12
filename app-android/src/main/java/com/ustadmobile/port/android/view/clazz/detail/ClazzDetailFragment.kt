@@ -18,16 +18,10 @@ import com.ustadmobile.port.android.view.clazz.detailoverview.ClazzDetailOvervie
 
 class ClazzDetailFragment: UstadMvvmTabsFragment(VIEWNAME_TO_FRAGMENT_MAP) {
 
-    private val viewModel: ClazzDetailViewModel by ustadViewModels(::ClazzDetailViewModel)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            viewModel.uiState.collect {
-                mTabs = it.tabs
-            }
-        }
     }
 
     companion object {

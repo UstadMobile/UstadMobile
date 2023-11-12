@@ -33,16 +33,11 @@ import com.ustadmobile.core.R as CR
 
 class ScheduleEditFragment: UstadBaseMvvmFragment() {
 
-    private val viewModel: ScheduleEditViewModel by ustadViewModels(::ScheduleEditViewModel)
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
-
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
                 ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
@@ -50,7 +45,7 @@ class ScheduleEditFragment: UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    ScheduleEditScreen(viewModel)
+
                 }
             }
         }
