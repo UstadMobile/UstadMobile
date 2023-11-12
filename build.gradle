@@ -230,18 +230,9 @@ ext {
     kotlinWrappersVersion = "1.0.0-pre.640"
 
     version_npm_mement_io = "^2.14.0"
-    version_npm_mui_lab = "5.0.0-alpha.89"
 
     //Should be as specified by kotlinx datetime lib https://github.com/Kotlin/kotlinx-datetime#note-about-time-zones-in-js
     version_npm_joda_timezone = "2.3.0"
-
-    // These should be EXACTLY the same version as MUI kotlin wrapper.
-    version_npm_mui_styles = "5.10.2"
-    version_npm_mui_icons = "5.10.2"
-    version_npm_mui_material = "5.10.2"
-
-    //TODO: this could/should be removed
-    version_npm_mui_x_date_pickers ="^5.0.4"
 
     version_npm_timezones = "^1.6.1"
     version_npm_buffer = "^6.0.3"

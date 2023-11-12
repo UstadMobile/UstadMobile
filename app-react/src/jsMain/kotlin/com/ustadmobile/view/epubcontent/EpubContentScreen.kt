@@ -56,7 +56,6 @@ import web.cssom.vw
 import web.dom.getComputedStyle
 import web.html.HTMLIFrameElement
 import web.scroll.ScrollBehavior
-import web.uievents.CLICK
 import kotlin.math.roundToInt
 import mui.material.List as MuiList
 import mui.icons.material.KeyboardArrowUp as KeyboardArrowUpIcon
