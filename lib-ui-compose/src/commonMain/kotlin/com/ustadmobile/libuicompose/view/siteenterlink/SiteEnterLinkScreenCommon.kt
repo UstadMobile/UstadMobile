@@ -15,6 +15,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -22,9 +24,22 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
+import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.libuicompose.components.UstadErrorText
 import dev.icerock.moko.resources.compose.stringResource
 
+@Composable
+fun SiteEnterLinkScreen(
+    viewModel: SiteEnterLinkViewModel
+) {
+    val uiState by viewModel.uiState.collectAsState(SiteEnterLinkUiState())
+
+    SiteEnterLinkScreen(
+        uiState = uiState,
+        onClickNext = viewModel::onClickNext,
+        onEditTextValueChange = viewModel::onSiteLinkUpdated,
+    )
+}
 
 @Composable
 fun SiteEnterLinkScreen(

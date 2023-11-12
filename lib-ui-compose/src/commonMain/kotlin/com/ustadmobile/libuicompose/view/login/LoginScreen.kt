@@ -33,7 +33,7 @@ import com.ustadmobile.core.MR
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
-fun LoginScreenForViewModel(
+fun LoginScreen(
     viewModel: LoginViewModel
 ) {
     val uiState: LoginUiState by viewModel.uiState.collectAsState(LoginUiState())

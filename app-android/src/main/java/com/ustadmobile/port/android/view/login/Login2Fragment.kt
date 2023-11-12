@@ -6,10 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
-import com.ustadmobile.core.viewmodel.login.LoginViewModel
-import com.ustadmobile.libuicompose.view.login.LoginScreenForViewModel
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
 
 class Login2Fragment : UstadBaseMvvmFragment() {
