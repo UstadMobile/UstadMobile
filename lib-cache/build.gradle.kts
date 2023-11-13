@@ -64,10 +64,12 @@ dependencies {
     add("kspJvm", libs.door.compiler)
     add("kspAndroid", libs.door.compiler)
     add("kspAndroid", libs.androidx.room.compiler)
+
+    coreLibraryDesugaring(libs.android.desugar.libs)
 }
 
 android {
-    compileSdk = 33
+    compileSdk = 34
     namespace = "com.ustadmobile.libuicompose"
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
@@ -76,12 +78,15 @@ android {
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 33
+        targetSdk = 34
+        multiDexEnabled = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
+
     kotlin {
         jvmToolchain(17)
     }

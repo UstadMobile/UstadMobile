@@ -236,11 +236,9 @@ class LoginViewModel(
 //        }
     }
 
-
     companion object {
 
         const val DEST_NAME = "Login"
 
     }
-
 }

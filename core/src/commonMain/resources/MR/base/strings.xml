@@ -287,6 +287,7 @@
     <string name="no_account">You do not have an account?</string>
     <string name="enter_url">Enter Url</string>
     <string name="invalid_link">Invalid link</string>
+    <string name="invalid_file">Invalid file</string>
     <string name="import_link_content_not_supported">Content not supported</string>
 
     <!--

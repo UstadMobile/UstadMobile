@@ -11,11 +11,12 @@ import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.BuildConfig
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.catalog.contenttype.*
+import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentJobManagerAndroid
-import com.ustadmobile.core.contentjob.ContentPluginManager
+import com.ustadmobile.core.contentjob.ContentImportersManager
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
@@ -166,12 +167,12 @@ class UstadApp : Application(), DIAware {
         }
 
 
-        bind<EpubTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            EpubTypePluginCommonJvm(applicationContext, context, di)
+        bind<EpubContentImporterCommonJvm>() with scoped(EndpointScope.Default).singleton{
+            EpubContentImporterCommonJvm(applicationContext, context, di)
         }
 
-        bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
-            ContentPluginManager(listOf())
+        bind<ContentImportersManager>() with scoped(EndpointScope.Default).singleton {
+            ContentImportersManager(listOf())
         }
 
         bind<ContentJobManager>() with singleton {

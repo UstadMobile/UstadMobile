@@ -2,10 +2,15 @@ package com.ustadmobile.lib.rest
 
 import com.google.gson.Gson
 import com.ustadmobile.core.account.*
-import com.ustadmobile.core.catalog.contenttype.*
+import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
+import com.ustadmobile.core.contentformats.epub.XhtmlFixer
+import com.ustadmobile.core.contentformats.h5p.H5PContentImportPlugin
+import com.ustadmobile.core.contentformats.media.VideoContentImporterJvm
+import com.ustadmobile.core.contentformats.pdf.PdfContentImporterJvm
+import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentJobManagerJvm
-import com.ustadmobile.core.contentjob.ContentPluginManager
+import com.ustadmobile.core.contentjob.ContentImportersManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
@@ -284,15 +289,15 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
+        bind<ContentImportersManager>() with scoped(EndpointScope.Default).singleton {
             val cache: UstadCache = instance()
             val uriHelper: UriHelper = instance()
             val xml: XML = instance()
             val xhtmlFixer: XhtmlFixer = instance()
 
-            ContentPluginManager(
+            ContentImportersManager(
                 listOf(
-                    EpubTypePluginCommonJvm(
+                    EpubContentImporterCommonJvm(
                         endpoint = context,
                         di = di,
                         cache = cache,
@@ -300,13 +305,13 @@ fun Application.umRestApplication(
                         xml = xml,
                         xhtmlFixer = xhtmlFixer,
                     ),
-                    XapiZipContentImportPlugin(
+                    XapiZipContentImporter(
                         endpoint = context,
                         di = di,
                         cache = cache,
                         uriHelper = uriHelper
                     ),
-                    PdfImportPluginJvm(
+                    PdfContentImporterJvm(
                         endpoint = context,
                         di = di,
                         cache= cache,

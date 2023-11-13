@@ -94,7 +94,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-core:$version_ktor"
 
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
-                implementation "io.github.aakira:napier:$version_napier"
+                implementation libs.napier
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 compileOnly "com.github.UstadMobile.door:room-annotations:$version_door"
  

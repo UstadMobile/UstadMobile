@@ -70,14 +70,17 @@ class TestContentImportJobRunner : AbstractMainDispatcherTest() {
         override val di: DI,
         endpoint: Endpoint,
         private val delayTime: Long = dummyPluginDelayTime,
-    ) : ContentImportPlugin{
-        override val pluginId: Int
+    ) : ContentImporter{
+        override val importerId: Int
             get() = TEST_PLUGIN_ID
 
         override val supportedFileExtensions: List<String>
             get() = listOf("txt")
         override val supportedMimeTypes: List<String>
             get() = listOf("text/plain")
+
+        override val formatName: String
+            get() = "Dummy Format"
 
         private val _processRequestedJobItems = MutableStateFlow<List<ContentJobItemAndContentJob>>(
             emptyList()
@@ -150,11 +153,11 @@ class TestContentImportJobRunner : AbstractMainDispatcherTest() {
                 DummyPlugin(di, context)
             }
 
-            bind<ContentPluginManager>() with scoped(ustadTestRule.endpointScope).singleton {
+            bind<ContentImportersManager>() with scoped(ustadTestRule.endpointScope).singleton {
                 mock{
-                    on { getPluginById(any()) }.thenReturn(instance<DummyPlugin>())
+                    on { getImporterById(any()) }.thenReturn(instance<DummyPlugin>())
 
-                    on { requirePluginById(any()) }.thenAnswer {
+                    on { requireImporterById(any()) }.thenAnswer {
                         DummyPlugin(di, context)
                     }
 
@@ -216,17 +219,17 @@ class TestContentImportJobRunner : AbstractMainDispatcherTest() {
     //TODO - This test tests **NOTHING**
     //@Test(timeout = 15000)
     fun givenJobCreated_whenJobItemFails_thenShouldRetry() {
-        val pluginManager: ContentPluginManager by di.onActiveAccount().instance()
+        val pluginManager: ContentImportersManager by di.onActiveAccount().instance()
         numTimesToFail = 1
-        val mockPlugin = mock<ContentImportPlugin> {
+        val mockPlugin = mock<ContentImporter> {
             onBlocking { processJob(any(), any(), any()) }.thenAnswer {
                 throw RuntimeException("Fail!")
             }
         }
 
         pluginManager.stub {
-            on { getPluginById(any()) }.thenReturn(mockPlugin)
-            on { requirePluginById(any()) }.thenReturn(mockPlugin)
+            on { getImporterById(any()) }.thenReturn(mockPlugin)
+            on { requireImporterById(any()) }.thenReturn(mockPlugin)
         }
     }
 
@@ -247,16 +250,16 @@ class TestContentImportJobRunner : AbstractMainDispatcherTest() {
                 }
             )
             db.contentJobItemDao.insertJobItems(jobItems)
-            val pluginManager: ContentPluginManager by di.onActiveAccount().instance()
-            val mockPlugin = mock<ContentImportPlugin> {
+            val pluginManager: ContentImportersManager by di.onActiveAccount().instance()
+            val mockPlugin = mock<ContentImporter> {
                 onBlocking { processJob(any(), any(), any()) }.thenAnswer {
                     throw IOException("Fail!")
                 }
             }
 
             pluginManager.stub {
-                on { getPluginById(any()) }.thenReturn(mockPlugin)
-                on { requirePluginById(any()) }.thenReturn(mockPlugin)
+                on { getImporterById(any()) }.thenReturn(mockPlugin)
+                on { requireImporterById(any()) }.thenReturn(mockPlugin)
             }
 
             val runner = ContentImportJobRunner(2, endpoint, di, maxItemAttempts = maxAttempts)
@@ -287,7 +290,7 @@ class TestContentImportJobRunner : AbstractMainDispatcherTest() {
                 }
             }
             db.contentJobItemDao.insertJobItems(jobItems)
-            val pluginManager: ContentPluginManager by di.onActiveAccount().instance()
+            val pluginManager: ContentImportersManager by di.onActiveAccount().instance()
             pluginManager.stub {
                 onBlocking { extractMetadata(any(), anyOrNull())}.thenAnswer {
                     throw IllegalStateException("unexpected error while extracting")
@@ -323,10 +326,10 @@ class TestContentImportJobRunner : AbstractMainDispatcherTest() {
 
             val dummyPlugin = DummyPlugin(di, endpoint, 100000)
 
-            val mockPluginManager = mock<ContentPluginManager> {
-                on { getPluginById(eq(mockPluginId)) }.thenReturn(dummyPlugin)
+            val mockPluginManager = mock<ContentImportersManager> {
+                on { getImporterById(eq(mockPluginId)) }.thenReturn(dummyPlugin)
 
-                on { requirePluginById(eq(mockPluginId)) }.thenAnswer {
+                on { requireImporterById(eq(mockPluginId)) }.thenAnswer {
                     dummyPlugin
                 }
 
@@ -339,7 +342,7 @@ class TestContentImportJobRunner : AbstractMainDispatcherTest() {
 
             val jobRunnerDi = DI {
                 extend(di)
-                bind<ContentPluginManager>(overrides = true) with scoped(ustadTestRule.endpointScope).singleton {
+                bind<ContentImportersManager>(overrides = true) with scoped(ustadTestRule.endpointScope).singleton {
                     mockPluginManager
                 }
             }

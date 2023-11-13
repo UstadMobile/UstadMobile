@@ -45,15 +45,12 @@ interface ContentEntryEdit2FragmentEventHandler {
 class ContentEntryEdit2Fragment : UstadBaseMvvmFragment(){
 
 
-    private val viewModel: ContentEntryEditViewModel by ustadViewModels(::ContentEntryEditViewModel)
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
@@ -62,7 +59,7 @@ class ContentEntryEdit2Fragment : UstadBaseMvvmFragment(){
 
             setContent {
                 MdcTheme {
-                    ContentEntryEditScreen(viewModel)
+
                 }
             }
         }
@@ -276,7 +273,7 @@ fun ContentEntryEditScreenPreview() {
         updateContentVisible = true,
         metadataResult = MetadataResult(
             entry = ContentEntryWithLanguage(),
-            pluginId = 0
+            importerId = 0
         ),
         courseBlockEditUiState = CourseBlockEditUiState(
             courseBlock = CourseBlock().apply {

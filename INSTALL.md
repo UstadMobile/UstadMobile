@@ -90,6 +90,9 @@ server data is stored, and other options.
 
 * Use an HTTP server such as Apache or Nginx with a reverse proxy. Apache or Nginx
   should be used to provide https support e.g. as per [Apache Reverse Proxy Guide](https://httpd.apache.org/docs/2.4/howto/reverse_proxy.html).
+  The [Forwarded](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded) header must
+  include the protocol (e.g. http or https) or the [X-Forwarded-Proto](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-Proto)
+  header must be set. This can be done in Apache using ```RequestHeader set X-Forwarded-Proto https```
 
 * Setup a Postgres database and use this instead of the default (embedded) SQLite.
 

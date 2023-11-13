@@ -24,7 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
+import androidx.paging.compose.itemKey
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.paging.ListPagingSource
@@ -46,15 +46,12 @@ import com.ustadmobile.core.MR
 
 class ClazzMemberListFragment() : UstadBaseMvvmFragment() {
 
-    private val viewModel: ClazzMemberListViewModel by ustadViewModels(::ClazzMemberListViewModel)
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
@@ -63,7 +60,7 @@ class ClazzMemberListFragment() : UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    ClazzMemberListScreen(viewModel)
+
                 }
             }
         }
@@ -181,9 +178,10 @@ fun ClazzMemberListScreen(
         }
 
         items(
-            items = teacherListItems,
-            key = { Pair(1, it.personUid) }
-        ){ person ->
+            count = teacherListItems.itemCount,
+            key = teacherListItems.itemKey { Pair(1, it.personUid) }
+        ){ index ->
+            val person = teacherListItems[index]
             ListItem (
                 modifier = Modifier.clickable {
                     person?.also(onClickEntry)
@@ -224,11 +222,11 @@ fun ClazzMemberListScreen(
         }
 
         items(
-            items = studentListItems,
-            key = { Pair(2, it.personUid) }
-        ){ personItem ->
+            count = studentListItems.itemCount,
+            key = studentListItems.itemKey { Pair(2, it.personUid) }
+        ){ index ->
             StudentListItem(
-                person = personItem,
+                person = studentListItems[index],
                 onClick = onClickEntry
             )
         }
@@ -240,11 +238,11 @@ fun ClazzMemberListScreen(
         }
         
         items(
-            items = pendingStudentListItems,
-            key = { Pair(3, it.personUid) }
-        ){ pendingStudent ->
+            count = pendingStudentListItems.itemCount,
+            key = pendingStudentListItems.itemKey { Pair(3, it.personUid) }
+        ){ index ->
             PendingStudentListItem(
-                person = pendingStudent,
+                person = pendingStudentListItems[index],
                 onClick = onClickPendingRequest
             )
         }

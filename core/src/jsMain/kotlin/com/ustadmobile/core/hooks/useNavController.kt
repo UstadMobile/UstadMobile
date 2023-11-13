@@ -8,7 +8,7 @@ import react.useRequiredContext
 import remix.run.router.Location
 
 
-val Location.ustadViewName: String
+val Location<*>.ustadViewName: String
     get() = pathname.removePrefix("/").trim()
 
 /**

@@ -10,7 +10,7 @@ data class MetadataResult(
     /**
      * The pluginId that provided this metadata
      */
-    val pluginId: Int,
+    val importerId: Int,
 
     /**
      * The original filename as it was uploaded / selected by the user. This is required when the

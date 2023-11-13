@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.rest.ext
 
-import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.url.UrlKmp
+import com.ustadmobile.core.util.ext.requirePostfix
 import io.ktor.server.plugins.origin
 import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.request.uri
@@ -10,7 +11,7 @@ import io.ktor.server.request.uri
  * available (e.g. when Ktor is running behind a reverse proxy such as Nginx or Apache).
  */
 fun ApplicationRequest.url() : String {
-    return UMFileUtil.joinPaths(protocolAndHost(), uri)
+    return UrlKmp(protocolAndHost()).resolve(uri).toString()
 }
 
 /**
@@ -20,6 +21,7 @@ fun ApplicationRequest.url() : String {
 fun ApplicationRequest.protocolAndHost(): String {
     val forwardedHeader = headers.getAll("Forwarded")?.firstOrNull()
 
+    //First check the standard forwarded header
     if(forwardedHeader != null) {
         val directives = forwardedHeader.split(";").mapNotNull { directives ->
             directives.split("=", limit = 2).let {
@@ -32,8 +34,15 @@ fun ApplicationRequest.protocolAndHost(): String {
         val forwardedProto = directives["proto"]
 
         if(forwardedHost != null && forwardedProto != null) {
-            return UMFileUtil.joinPaths("$forwardedProto://$forwardedHost", uri)
+            return "$forwardedProto://$forwardedHost".requirePostfix("/")
         }
+    }
+
+    //Check the defacto standard X-Forwarded headers
+    val xForwardedHost = headers["X-Forwarded-Host"]
+    val xForwardedProtocol = headers["X-Forwarded-Proto"]
+    if(xForwardedHost != null && xForwardedProtocol != null) {
+        return "$xForwardedProtocol://$xForwardedHost".requirePostfix("/")
     }
 
     val host = headers["Host"] ?: origin.serverHost

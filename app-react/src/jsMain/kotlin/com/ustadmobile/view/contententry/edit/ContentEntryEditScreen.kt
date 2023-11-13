@@ -71,7 +71,7 @@ val ContentEntryEditScreenPreview = FC<Props> {
             updateContentVisible = true,
             metadataResult = MetadataResult(
                 entry = ContentEntryWithLanguage(),
-                pluginId = 0
+                importerId = 0
             ),
             courseBlockEditUiState = CourseBlockEditUiState(
                 courseBlock = CourseBlock().apply {

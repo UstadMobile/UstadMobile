@@ -28,6 +28,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.*
 import com.google.accompanist.themeadapter.material.MdcTheme
@@ -44,7 +45,6 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import java.text.DecimalFormat
 import java.util.*
-import androidx.paging.compose.items
 import com.ustadmobile.core.schedule.totalAttendeeStatusRecorded
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
 import com.ustadmobile.port.android.view.BottomSheetOption
@@ -56,8 +56,6 @@ import kotlin.math.max
 import com.ustadmobile.core.R as CR
 
 class ClazzLogListAttendanceFragment(): UstadBaseMvvmFragment() {
-
-    private val viewModel by ustadViewModels(::ClazzLogListAttendanceViewModel)
 
 
     fun ClazzLogListAttendanceViewModel.RecordAttendanceOption.toBottomSheetOption(): BottomSheetOption {
@@ -72,17 +70,6 @@ class ClazzLogListAttendanceFragment(): UstadBaseMvvmFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(
-            viewModel = viewModel,
-            transform = { appUiState ->
-                appUiState.copy(
-                    fabState = appUiState.fabState.copy(
-                        onClick = this::onClickFab
-                    )
-                )
-            }
-        )
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
@@ -91,7 +78,7 @@ class ClazzLogListAttendanceFragment(): UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    ClazzLogListAttendanceScreen(viewModel)
+
                 }
             }
         }
@@ -99,27 +86,27 @@ class ClazzLogListAttendanceFragment(): UstadBaseMvvmFragment() {
 
 
     private fun onClickFab() {
-        lifecycleScope.launch {
-            val uiState = viewModel.uiState.first()
-            if(uiState.recordAttendanceOptions.size == 1) {
-                viewModel.onClickRecordAttendance(
-                    uiState.recordAttendanceOptions.first()
-                )
-            }else {
-                OptionsBottomSheetFragment(
-                    optionsList = uiState.recordAttendanceOptions.map {
-                        it.toBottomSheetOption()
-                    },
-                    onOptionSelected = {option ->
-                        viewModel.onClickRecordAttendance(
-                            ClazzLogListAttendanceViewModel.RecordAttendanceOption.forCommand(
-                                option.optionCode
-                            )
-                        )
-                    }
-                ).show(requireActivity().supportFragmentManager, "attendance_options")
-            }
-        }
+//        lifecycleScope.launch {
+//            val uiState = viewModel.uiState.first()
+//            if(uiState.recordAttendanceOptions.size == 1) {
+//                viewModel.onClickRecordAttendance(
+//                    uiState.recordAttendanceOptions.first()
+//                )
+//            }else {
+//                OptionsBottomSheetFragment(
+//                    optionsList = uiState.recordAttendanceOptions.map {
+//                        it.toBottomSheetOption()
+//                    },
+//                    onOptionSelected = {option ->
+//                        viewModel.onClickRecordAttendance(
+//                            ClazzLogListAttendanceViewModel.RecordAttendanceOption.forCommand(
+//                                option.optionCode
+//                            )
+//                        )
+//                    }
+//                ).show(requireActivity().supportFragmentManager, "attendance_options")
+//            }
+//        }
     }
 
 
@@ -260,11 +247,11 @@ private fun ClazzLogListAttendanceScreen(
         }
 
         items(
-            items = lazyPagingItems,
-            key = { clazzLog -> clazzLog.clazzLogUid }
-        ){ clazzLog ->
+            count = lazyPagingItems.itemCount,
+            key = lazyPagingItems.itemKey{ clazzLog -> clazzLog.clazzLogUid }
+        ){ index ->
             ClazzLogListItem(
-                clazzLog = clazzLog,
+                clazzLog = lazyPagingItems[index],
                 timeZoneId = uiState.timeZoneId,
                 onClick = onClickClazz
             )

@@ -12,17 +12,10 @@ import com.ustadmobile.port.android.view.clazzassignment.submissionstab.ClazzAss
 
 class ClazzAssignmentDetailFragment: UstadMvvmTabsFragment(VIEWNAME_TO_FRAGMENT_MAP) {
 
-    private val viewModel: ClazzAssignmentDetailViewModel by
-        ustadViewModels(::ClazzAssignmentDetailViewModel)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            viewModel.uiState.collect {
-                mTabs = it.tabs
-            }
-        }
     }
 
     companion object {

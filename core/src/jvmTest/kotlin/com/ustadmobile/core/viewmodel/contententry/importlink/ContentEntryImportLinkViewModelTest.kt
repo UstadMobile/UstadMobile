@@ -2,7 +2,7 @@ package com.ustadmobile.core.viewmodel.contententry.importlink
 
 import app.cash.turbine.test
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
+import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.impl.nav.PopNavCommand
@@ -33,7 +33,7 @@ class ContentEntryImportLinkViewModelTest: AbstractMainDispatcherTest() {
                     entry = ContentEntryWithLanguage().apply {
                         title = mockContentTitle
                     },
-                    pluginId = EpubTypePluginCommonJvm.PLUGIN_ID
+                    importerId = EpubContentImporterCommonJvm.PLUGIN_ID
                 )
             )
         )

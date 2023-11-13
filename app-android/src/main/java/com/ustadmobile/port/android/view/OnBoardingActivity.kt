@@ -50,9 +50,9 @@ class OnBoardingActivity : ComponentActivity() {
 
     val di: DI by closestDI()
 
-    private val viewModel: OnBoardingViewModel by viewModels {
-        provideFactory(di, this, null)
-    }
+//    private val viewModel: OnBoardingViewModel by viewModels {
+//        provideFactory(di, this, null)
+//    }
 
     override fun attachBaseContext(newBase: Context) {
         val res = newBase.resources
@@ -72,7 +72,7 @@ class OnBoardingActivity : ComponentActivity() {
 
         setContent {
             MdcTheme {
-                OnboardingScreenViewModel(viewModel = viewModel)
+                //OnboardingScreenViewModel(viewModel = viewModel)
             }
         }
 

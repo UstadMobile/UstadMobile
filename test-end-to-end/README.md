@@ -86,9 +86,9 @@ adding from device, test downloading from another device.
 4.13 If assignment is set to be marked by peers and submitted by groups, where each assignment is marked by two peers, students can see assignment submissions for those that their group has been assigned to mark. Students can mark each others work according to the peer review allocation (as per group membership). Students will see the marks submitted by their peers (other groups).
 
 ### 5	Discussion board
-5.1 Teacher can add discussion board and topics to course
+5.1 Teacher can add discussion board to course
 
-5.2 Teacher can edit discussion board and topics
+5.2 Teacher can edit discussion board
 
 5.3 All users on course can post on discussion board, see posts from other users. Each topic and post shows last active date and number of replies.
 

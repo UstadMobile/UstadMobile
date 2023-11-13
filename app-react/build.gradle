@@ -41,7 +41,10 @@ kotlin {
 
     sourceSets {
         commonMain {
-
+            dependencies {
+                implementation libs.precompose
+                implementation libs.precompose.viewmodel
+            }
         }
 
         jsMain {
@@ -57,10 +60,13 @@ kotlin {
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-react-dom"
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-styled"
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-redux"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-react-redux"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-mui"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-mui-icons"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-remix-run-router"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-mui-base"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-mui-material"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-mui-lab"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-mui-system"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-mui-icons-material"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-muix-date-pickers"
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-emotion"
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-query-core"
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-react-query"
@@ -70,11 +76,6 @@ kotlin {
                 implementation npm("@js-joda/timezone", "$version_npm_joda_timezone")
 
                 implementation npm("@date-io/moment","$version_npm_mement_io")
-                implementation npm("@mui/lab","$version_npm_mui_lab")
-                implementation npm("@mui/styles","$version_npm_mui_styles")
-                implementation npm("@mui/material","$version_npm_mui_material")
-                implementation npm("@mui/icons-material","$version_npm_mui_icons")
-                implementation npm("@mui/x-date-pickers", "$version_npm_mui_x_date_pickers")
                 implementation npm("date-fns","$version_npm_date_fns")
                 implementation npm("html-to-image","$version_npm_html_to_image")
                 implementation "com.github.UstadMobile.door:room-annotations:$version_door"
@@ -90,7 +91,7 @@ kotlin {
                 implementation npm("react-quill", "$version_npm_react_quill")
                 implementation npm("react-easy-sort","$version_npm_react_easy_sort")
                 implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
-                implementation "io.github.aakira:napier:$version_napier"
+                implementation libs.napier
                 implementation npm("linkifyjs", "$version_linkify_js")
                 implementation npm("linkify-react", "$version_linkify_react")
             }

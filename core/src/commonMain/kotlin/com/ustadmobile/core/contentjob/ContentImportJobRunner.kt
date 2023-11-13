@@ -47,7 +47,7 @@ class ContentImportJobRunner(
 
     private val db: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    private val contentPluginManager: ContentPluginManager by on(endpoint).instance()
+    private val contentPluginManager: ContentImportersManager by on(endpoint).instance()
 
     private val eventCollator = EventCollator(500, this::commitProgressUpdates)
 
@@ -130,6 +130,8 @@ class ContentImportJobRunner(
                 var metadataResult: MetadataResult? = null
                 if(item.contentJobItem?.cjiContentEntryUid == 0L) {
                     metadataResult = contentPluginManager.extractMetadata(sourceUri)
+                        ?: throw FatalContentJobException("ContentImportJobRunner: $sourceUri " +
+                                "has no ContentEntry and cannot extract metadata")
                     withContentJobItemTransaction { txDb ->
                         val contentEntryUid = txDb.contentEntryDao.insertAsync(
                             metadataResult.entry)
@@ -153,12 +155,13 @@ class ContentImportJobRunner(
                 }
 
                 val pluginId = if(item.contentJobItem?.cjiPluginId == 0) {
-                    metadataResult?.pluginId ?: contentPluginManager.extractMetadata(sourceUri).pluginId
+                    metadataResult?.importerId ?: contentPluginManager.extractMetadata(sourceUri)
+                        ?.importerId ?: -1
                 }else {
                     item.contentJobItem?.cjiPluginId ?: 0
                 }
 
-                val plugin = contentPluginManager.requirePluginById(pluginId)
+                val plugin = contentPluginManager.requireImporterById(pluginId)
 
                 val jobResult = async {
                     try {

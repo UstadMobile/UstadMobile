@@ -168,7 +168,7 @@ val UstadScreens = FC<Props> {
  * Use the router loader function to initialize things that require asynchronous initialization e.g.
  * the database, loading strings / appconfig etc.
  */
-val ustadScreensLoader: LoaderFunction = {
+val ustadScreensLoader: LoaderFunction<*> = {
     Napier.base(UstadAntilog())
     Napier.d("Index: Window.onLoad")
 

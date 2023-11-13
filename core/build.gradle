@@ -99,7 +99,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
                 implementation "io.ktor:ktor-io:$version_ktor"
-                implementation "io.github.aakira:napier:$version_napier"
+                implementation libs.napier
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
@@ -112,6 +112,7 @@ kotlin {
                 api libs.kotlinxio.core
                 api libs.xmlutil.core
                 api libs.xmlutil.serialization
+                implementation libs.precompose.viewmodel
             }
         }
 
@@ -230,8 +231,8 @@ kotlin {
 
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
 
-                implementation "androidx.navigation:navigation-fragment-ktx:$version_android_navigation"
-                implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
+                implementation libs.androidx.navigation.fragment.ktx
+                implementation libs.androidx.navigation.ui.ktx
 
                 implementation "com.google.android.material:material:$version_android_material"
 

@@ -41,9 +41,6 @@ import org.kodein.di.*
  */
 abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
 
-    private val navResultReturnerViewModel: NavResultReturnerViewModel by navGraphViewModels(R.id.mobile_navigation) {
-        NavResultReturnerViewModelFactory(requireActivity(), arguments)
-    }
 
 
     //protected val destinationName: String by lazy { requireDestinationViewName() }
@@ -71,9 +68,6 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
     override val di by DI.lazy {
         val closestDi: DI by closestDI()
         extend(closestDi)
-        bind<NavResultReturner>() with singleton {
-            navResultReturnerViewModel
-        }
         bind<SnackBarDispatcher>() with singleton {
             FragmentSnackDisaptcher()
         }

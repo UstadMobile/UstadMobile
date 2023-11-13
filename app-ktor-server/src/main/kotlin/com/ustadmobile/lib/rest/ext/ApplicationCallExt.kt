@@ -1,6 +1,8 @@
 package com.ustadmobile.lib.rest.ext
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.contentjob.ContentImportersManager
+import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.lib.rest.CONF_DBMODE_SINGLETON
 import com.ustadmobile.lib.rest.CONF_DBMODE_VIRTUALHOST
 import com.ustadmobile.lib.rest.CONF_KEY_SITE_URL
@@ -204,6 +206,21 @@ suspend fun ApplicationCall.respondCacheResponse(
         respondText(
             text = "Not found",
             status = HttpStatusCode.NotFound
+        )
+    }
+}
+
+suspend fun ApplicationCall.respondContentEntryMetaDataResult(
+    metadata: MetadataResult?,
+    importersManager: ContentImportersManager,
+) {
+    if(metadata != null) {
+        respond(metadata)
+    }else {
+        respondText(
+            contentType = ContentType.Text.Plain,
+            status = HttpStatusCode.NotAcceptable,
+            text = importersManager.supportedFormatNames().joinToString()
         )
     }
 }
