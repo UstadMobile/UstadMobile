@@ -49,14 +49,14 @@ fun UstadCourseBlockEdit(
             )
         }
 
-        HtmlClickableTextField(
-            html = uiState.courseBlock?.cbDescription ?: "",
-            label = stringResource(MR.strings.description),
-            onClick = onClickEditDescription,
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("description")
-        )
+//        HtmlClickableTextField(
+//            html = uiState.courseBlock?.cbDescription ?: "",
+//            label = stringResource(MR.strings.description),
+//            onClick = onClickEditDescription,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .testTag("description")
+//        )
 
         UstadInputFieldLayout(
             //  TODO error
