@@ -2,45 +2,57 @@
 
 End-to-end tests that start a blank new server/app and test functionality end-to-end.
 
-* [android-maestro](android-maestro/) Android end-to-end tests build using [Maestro](https://maestro.mobile.dev)
+* [android-maestro](android-maestro/) Android end-to-end tests built using [Maestro](https://maestro.mobile.dev)
+* [webapp-cypress](webapp-cypress/) Web end-to-end tests built using [Cypress](https://www.cypress.io/)
 
 ## Tests
 
-### 1 : Content 
+### 1 : Library
 
-1.1 Admin can add H5P, video, and EPUB both from the device and by using a link. In case of adding 
-from a link, then test downloading (can be using the same device) after import finishes. In case of 
-adding from device, test downloading from another device.
+1.1 Admin can add H5P, video, EPUB and Experience API zip files from the device and by using a link. 
+    Once added the content can be opened. If added on Mobile or Desktop app from the device, testing 
+    opening should be from another device or after clearing the app on the device used to upload it.
 
-1.2 Admin can hide content. After hiding on admin device, the content is hidden on other device.
+1.2 If admin uploads an invalid file where the file extension / mime type indicate that it should be 
+    a supported file, but the file content is not valid (e.g. a file with the name video.mp4 that is 
+    not actually a video), then an error message will be displayed to notify that the content is 
+    invalid.
 
-1.3 Admin can move content. After moving, content is shown as moved on other device. 
+1.3 Admin can hide content. After hiding on admin device, the content is hidden on other device.
 
-1.4 Content can be deleted. After deletion, it can be downloaded again and opened as before. (Android only)
+1.4 Admin can move content. After moving, content is shown as moved on other device. 
 
-1.5 Content download can be canceled. After cancellation, the download stops and it can be downloaded again. (Android only)
+1.5 Content can be deleted from a device. After deletion, it can be downloaded again and opened as 
+    before. (Android only).
 
-1.6 If a download is started on WiFi and WiFi is stopped midway, the download will stop and then resume when WiFi is resumed. (Android only)
+1.6 Content download can be canceled. After cancellation, the download stops and it can be 
+    downloaded again. (Android only).
 
-1.7 Content that is set to not publicly available is not visible for guest users, but is visible for logged in users.
+1.7 If a download is started on WiFi and WiFi is stopped midway, the download will stop and then 
+    resume when WiFi is resumed. (Android only).
 
 1.8 H5P and video content can be automatically compressed using high, medium, and low quality presets. 
 
 ### 2: Course creation, enrolment, attendance, progress
 
-2.1 Admin can create a new course, add a new teacher, and create an account for that teacher. It is possible to login as the teacher.
+2.1 Admin can create a new course, add a new teacher, and create an account for that teacher. It is 
+    possible to login as the teacher.
 
-2.2 Teacher can login. Students can join class using class code or link. **Failing as of 5/Jan/23**
+2.2 Teacher can login. Students can join class using class code or link.
 
 2.3 Teacher can record attendance. Teacher can edit attendance after recordings
 
 2.4 Teacher can view progress report showing each students' result for each block in the course.
 
+2.5 The course title is mandatory. If save is clicked when the title is blank, then the field is
+    highlighted as required and it is not saved. The user can then add a title and save successfully.
+
 ### 3: Course block editing
 
 3.1 Admin or teacher can edit the course. Other users cannot edit
 
-3.2 Admin or teacher can add module and text blocks. Blocks can be reordered and hidden, indented, unindented
+3.2 Admin or teacher can add module and text blocks. Blocks can be reordered and hidden, indented, 
+    unindented
 
 3.3 Admin or teacher can add a content block and link existing content
 
@@ -48,9 +60,14 @@ adding from device, test downloading from another device.
 
 3.5 Admin or teacher can add a content block and upload new content via file upload
 
-3.6 All users on course should be able to view the course blocks as they were added. Modules can expand/collapse.
+3.6 All users on course should be able to view the course blocks as they were added. Modules can 
+    expand/collapse.
 
 3.7 All users on course should be able to open text blocks to see all text.
+
+3.8 The course block title is mandatory. If save is clicked when the title is blank, then the field is
+highlighted as required and it is not saved. The user can then add a title and save successfully.
+
 
 ### 4: Assignments
 
@@ -61,9 +78,12 @@ adding from device, test downloading from another device.
 
 4.2 Teachers and students can add course comments which are visible for all who can view the assignment.
 
-4.3 Teachers and students can submit and view private comments. Student can submit a private comment, teacher can see the private comment, and reply to it. 
+4.3 Teachers and students can submit and view private comments. Student can submit a private comment, 
+    teacher can see the private comment, and reply to it. 
 
-4.4 If assignment is set to allow multiple submissions, student can make another submission after the first submission. Teacher can see the revised submission and give a new grade. The student can see the updated grade.
+4.4 If assignment is set to allow multiple submissions, student can make another submission after 
+    the first submission. Teacher can see the revised submission and give a new grade. The student 
+    can see the updated grade.
 
 4.5 If assignment is submitted after the deadline but before the grace period, the submission should
     be accepted. The specified late penalty should be applied to the mark given by the teacher.
@@ -95,47 +115,86 @@ adding from device, test downloading from another device.
 5.4 Users can include a link from within the app (e.g. to a course or content piece) in their post. Clicking the link opens the item directly.
 
 5.5 Users can include external links to websites in their post. Clicking the link opens the browser (e.g. Chrome on Android, new tab in web) for the link
+
+### 6 Messaging
+
+6.1 Users can send a chat message (plain text) to any other user that they have permission to see (
+    teachers and students can see those who are part of their courses by default). The recipient can
+    reply to the message. Messages/replies are delivered instantly when the app is open. Note: 
+    Messages are only delivered if the app is open and notifications are not displayed.
+
+6.2 When a user receives a chat message from a user that they could not normally see (e.g. when the
+    admin sends them a message), they will be able to see the name of the sender.
+
 	
-### 6	User accounts:
-6.1 Admin can enable/disable registration for users
+### 7	User accounts:
 
-6.2 When registration is enabled: Users over 13 can register directly
+7.1 Admin can enable/disable registration for users
 
-6.3 When registration is enabled: Users under 13 can register using parental approval link
+7.2 When registration is enabled: Users over 13 can register directly
 
-6.4 When registration is enabled: If a user does not specify their date of birth, an error message is displayed and they cannot proceed
+7.3 When registration is enabled: Users under 13 can register using parental approval link
 
-6.5 If a user under 13 is added by an adult (e.g. teacher/admin) approval is not required
+7.4 When registration is enabled: If a user does not specify their date of birth, an error message 
+    is displayed and they cannot proceed until they enter their date of birth.
 
-6.6 Admin can enable/disable guest login. If enabled, then users can connect as guest
+7.5 If a user under 13 is added by an adult (e.g. teacher/admin) approval is not required
 
-6.7 Teacher (course leader) or admin can send an invitation to a list of users by providing phone numbers (SMS) or email addresses. User can open the invitation, create a new account if this is allowed by admin policy and they don't have an existing account, and join a course. 
+7.6 Admin can enable/disable guest login. If enabled, then users can connect as guest
 
-6.8 If a user is logged into the Ustad app, they can use an api consumer (e.g. UstadApiConsumerDemo), use the single sign-on, see a list of logged in accounts, select their account, click approve, and receive an auth token.
+7.7 Teacher (course leader) or admin can send an invitation to a list of users by providing phone 
+    numbers (SMS) or email addresses. User can open the invitation, create a new account if this is 
+    allowed by admin policy and they don't have an existing account, and join a course.
 
-6.9 If no user is logged into the Ustad app, they can use an api consumer (e.g. UstadApiConsumerDemo), use the single sign-on, enter the site link, login with their username/password, then click approve, and receive an auth token.
+7.8 First name, last name, and gender are mandatory fields. If the first name or last name is blank,
+    then the field is highlighted as mandatory. If the gender is unset (the initial default), the 
+    field is highlighted as mandatory. The user can only save the person profile once mandatory 
+    fields are completed.
 
-### 7 App panic response (Android only)
+7.9 If the email is not blank, it must be a valid email address. To be considered valid, the email
+    address must 1) contain one @ character 2) not contain prohibited characters (white space, [, ], 
+    \).
 
-7.1 When a panic trigger app is installed and selected, when the app is set to delete all data on panic trigger and the panic app is triggered, then all local data is deleted and the user is logged out.
+7.10 If the phone number is not blank, it must contain a valid phone number. Phone number validation
+     will be performed by libphonenumber which understands location-specific rules on number length
+     etc.
 
-7.2 When a panic trigger app is installed and selected, when the app is set to hide on panic trigger, the app launch disappears from the home screen. A notepad app is visible instead. The app is restored by entering the code into the notepad.
+7.11 If a user is logged into the Ustad app, they can use an api consumer (e.g. UstadApiConsumerDemo), 
+    use the single sign-on, see a list of logged in accounts, select their account, click approve, 
+    and receive an auth token.
 
-### 8 Peer-to-peer (Android and desktop only)
+7.12 If no user is logged into the Ustad app, they can use an api consumer (e.g. UstadApiConsumerDemo), 
+     use the single sign-on, enter the site link, login with their username/password, then click approve, 
+     and receive an auth token.
 
-8.1 Users who do not have an Internet connection can connect via a nearby device with the app installed to login and use the platform (e.g. open course, view course members, etc) via bluetooth. This will work if the nearby device has synced the data required by the user without an Internet connection. Both devices must have Bluetooth enabled. 
+### 8 App panic response (Android only)
 
-8.2 Users who do not have an Internet connection can download content via a nearby device from the device itself instead of from the Internet via bluetooth or local network WiFi. This will work if the nearby device has synced the data required by the user without an Internet connection. Both devices must have Bluetooth enabled.
+8.1 When a panic trigger app is installed and selected, when the app is set to delete all data on panic trigger and the panic app is triggered, then all local data is deleted and the user is logged out.
 
+8.2 When a panic trigger app is installed and selected, when the app is set to hide on panic trigger, the app launch disappears from the home screen. A notepad app is visible instead. The app is restored by entering the code into the notepad.
 
-### 9 Accessibility
+### 9 Peer-to-peer (Android and desktop only)
 
-9.1 Video content can have subtitles added using an SRT file. The subtitles will be displayed with the video if uploaded.
+9.1 Users who do not have an Internet connection can connect via a nearby device with the app 
+    installed to login and use the platform (e.g. open course, view course members, etc). This will 
+    work if the nearby device has synced the data required by the user without an Internet connection
+    or itself has access to an Internet connection.
 
-9.2 Screens support the use of text-to-speech as provided by the operating system (e.g. Windows, Android). Image buttons are labeled appropriately for speech readers.
+8.2 Users who do not have an Internet connection can download content via a nearby device from the 
+    device itself instead of from the Internet. This will work if the nearby device has synced the 
+    data required by the user without an Internet connection or if the nearby intermediary device
+    itself has an Internet connection.
 
-### 10 Administration
+### 10 Accessibility
 
-10.1 Server can be installed via script.
+10.1 Video content can have subtitles added using an WebVTT file. The subtitles will be displayed 
+    with the video if uploaded.
 
-10.2 Server data can be backed up via script.
+10.2 Screens support the use of text-to-speech as provided by the operating system (e.g. Windows, 
+    Android). Image buttons are labeled appropriately for speech readers.
+
+### 11 Administration
+
+11.1 Server can be installed via script.
+
+11.2 Server data can be backed up via script.
