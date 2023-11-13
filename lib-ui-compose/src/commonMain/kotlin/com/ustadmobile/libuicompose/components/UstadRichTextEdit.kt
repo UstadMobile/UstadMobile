@@ -53,7 +53,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.DialogWindow
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.painterResource
@@ -68,9 +67,35 @@ fun UstadRichTextEdit(
     html: String = "",
     onHtmlChange: (String) -> Unit = {}
 ){
+    if (editInNewScreen){
+        RichTextEditorRow(
+            modifier = modifier,
+            html = html,
+            enabled = false,
+            onClick = onHtmlChange
+        )
+    } else {
+        RichTextEditorRow(
+            modifier = modifier,
+            html = html,
+            enabled = true,
+            toolbar = { Text("") }
+        )
+    }
+}
+
+@Composable
+fun RichTextEditorRow(
+    modifier: Modifier,
+    html: String,
+    enabled: Boolean,
+    toolbar: @Composable (() -> Unit)? = null,
+    onClick: (String) -> Unit = {}
+) {
+
     val state = rememberRichTextState()
 
-    var html1 by remember { mutableStateOf("") }
+    var html1 by remember { mutableStateOf(html) }
     state.setHtml(html1)
 
     var isDialogOpen by remember { mutableStateOf(false) }
@@ -90,7 +115,7 @@ fun UstadRichTextEdit(
                             textAlign = TextAlign.Left,
                         )
                     )
-                    onHtmlChange(state.toHtml())
+                    onClick(state.toHtml())
                 },
                 isSelected = state.currentParagraphStyle.textAlign == TextAlign.Left,
                 icon = Icons.Outlined.FormatAlignLeft
@@ -105,7 +130,7 @@ fun UstadRichTextEdit(
                             textAlign = TextAlign.Center
                         )
                     )
-                    onHtmlChange(state.toHtml())
+                    onClick(state.toHtml())
                 },
                 isSelected = state.currentParagraphStyle.textAlign == TextAlign.Center,
                 icon = Icons.Outlined.FormatAlignCenter
@@ -300,7 +325,7 @@ fun UstadRichTextEdit(
                                 label = { androidx.compose.material3.Text(stringResource(MR.strings.add_text)) },
                             )
                         }
-                         },
+                    },
                 )
             }
 //            DialogWindow(
