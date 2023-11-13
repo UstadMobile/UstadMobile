@@ -8,31 +8,31 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 @Composable
 @Preview
 fun PersonDetailScreenPreview() {
-    PersonDetailScreen(
-        uiState = PersonDetailUiState(
-            person = PersonWithPersonParentJoin().apply {
-                firstNames = "Bob Jones"
-                phoneNum = "0799999"
-                emailAddr = "Bob@gmail.com"
-                gender = 2
-                username = "Bob12"
-                dateOfBirth = 1352958816
-                personOrgId = "123"
-                personAddress = "Herat"
-            },
-            chatVisible = true,
-            clazzes = listOf(
-                ClazzEnrolmentWithClazzAndAttendance().apply {
-                    clazz = Clazz().apply {
-                        clazzName = "Jetpack Compose Class"
-                    }
-                },
-                ClazzEnrolmentWithClazzAndAttendance().apply {
-                    clazz = Clazz().apply {
-                        clazzName = "React Class"
-                    }
-                },
-            )
-        )
-    )
+//    PersonDetailScreen(
+//        uiState = PersonDetailUiState(
+//            person = PersonWithPersonParentJoin().apply {
+//                firstNames = "Bob Jones"
+//                phoneNum = "0799999"
+//                emailAddr = "Bob@gmail.com"
+//                gender = 2
+//                username = "Bob12"
+//                dateOfBirth = 1352958816
+//                personOrgId = "123"
+//                personAddress = "Herat"
+//            },
+//            chatVisible = true,
+//            clazzes = listOf(
+//                ClazzEnrolmentWithClazzAndAttendance().apply {
+//                    clazz = Clazz().apply {
+//                        clazzName = "Jetpack Compose Class"
+//                    }
+//                },
+//                ClazzEnrolmentWithClazzAndAttendance().apply {
+//                    clazz = Clazz().apply {
+//                        clazzName = "React Class"
+//                    }
+//                },
+//            )
+//        )
+//    )
 }
