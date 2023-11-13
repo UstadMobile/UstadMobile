@@ -35,18 +35,10 @@ dependencyResolutionManagement {
             version("version_javaffmpeg", "0.8.0")
             version('version_android_desugar_jdk_libs', "2.0.4")
 
-//            version("jetbrains-compose", "1.5.1")
-//            version("version_activity_compose", "1.7.2")
-//            version("version_androidx_appcompat", "1.6.1")
-//            version("version_androidx_core", "1.9.0")
-//            version("version_paging_multiplatform", "3.2.0-alpha05-0.2.3")
-//            version("version_paging_androidx", "3.2.0-alpha05")
-//            version("version_paging_compose", "1.0.0-alpha18")
-//            version("version_kotlinx_datetime", "0.4.0")
-//            version("version_richeditor_multiplatform", "1.0.0-beta03")
-//            version("version_reorderable_compose", "0.9.6")
-//            version("version_android_aztec", "v1.6.3")
-//            version("version_google_android_material", "1.9.0")
+            version("version_kotlinx_datetime", "0.4.0")
+            version("version_richeditor_multiplatform", "1.0.0-beta03")
+            version("version_reorderable_compose", "0.9.6")
+            version("version_google_android_material", "1.9.0")
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
@@ -72,13 +64,12 @@ dependencyResolutionManagement {
 
             library("paging-multiplatform-common", "app.cash.paging", "paging-common").versionRef("version_paging_multiplatform")
             library("paging-multiplatform-compose", "app.cash.paging", "paging-compose-common").versionRef("version_paging_multiplatform")
-//
-//            library("kotlinx-datetime", "org.jetbrains.kotlinx", "kotlinx-datetime").versionRef("version_kotlinx_datetime")
-//
-//            library("richeditor-multiplatform-compose", "com.mohamedrejeb.richeditor", "richeditor-compose").versionRef("version_richeditor_multiplatform")
-//            library("reorderable-compose", "org.burnoutcrew.composereorderable", "reorderable").versionRef("version_reorderable_compose")
-//            library("android-aztec", "org.wordpress", "aztec").versionRef("version_android_aztec")
-//            library("google-android-material", "com.google.android.material", "material").versionRef("version_google_android_material")
+
+            library("kotlinx-datetime", "org.jetbrains.kotlinx", "kotlinx-datetime").versionRef("version_kotlinx_datetime")
+
+            library("richeditor-multiplatform-compose", "com.mohamedrejeb.richeditor", "richeditor-compose").versionRef("version_richeditor_multiplatform")
+            library("reorderable-compose", "org.burnoutcrew.composereorderable", "reorderable").versionRef("version_reorderable_compose")
+            library("google-android-material", "com.google.android.material", "material").versionRef("version_google_android_material")
 
             library("precompose", "moe.tlaster", "precompose").versionRef("version_precompose")
             library("precompose-viewmodel", "moe.tlaster", "precompose-viewmodel").versionRef("version_precompose")

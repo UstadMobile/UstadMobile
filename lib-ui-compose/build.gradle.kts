@@ -56,8 +56,8 @@ kotlin {
                 api(libs.androidx.navigation.compose)
                 api(libs.androidx.lifecycle.viewmodel.compose)
 
-//                implementation(compose.material)
-//                implementation(libs.google.android.material)
+                implementation(compose.material)
+                implementation(libs.google.android.material)
             }
         }
 
