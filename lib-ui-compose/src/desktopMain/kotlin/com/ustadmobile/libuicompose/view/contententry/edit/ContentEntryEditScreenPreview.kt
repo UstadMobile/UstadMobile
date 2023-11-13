@@ -21,7 +21,6 @@ fun ContentEntryEditScreenPreview() {
             updateContentVisible = true,
             metadataResult = MetadataResult(
                 entry = ContentEntryWithLanguage(),
-                pluginId = 0
             ),
             courseBlockEditUiState = CourseBlockEditUiState(
                 courseBlock = CourseBlock().apply {
@@ -42,7 +41,8 @@ fun ContentEntryEditScreenPreview() {
             selectedContainerStorageDir = ContainerStorageDir(
                 name = "Device Memory",
                 dirUri = ""
-            )
+            ),
+            importerId = 1
         )
     )
 
