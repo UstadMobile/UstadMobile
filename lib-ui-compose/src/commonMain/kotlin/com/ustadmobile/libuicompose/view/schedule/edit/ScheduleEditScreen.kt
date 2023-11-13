@@ -1,14 +1,17 @@
 package com.ustadmobile.libuicompose.view.schedule.edit
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -22,7 +25,11 @@ import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
+import com.ustadmobile.libuicompose.components.UstadTimeField
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 
 @Composable
 fun ScheduleEditScreenForViewModel(
@@ -44,12 +51,13 @@ fun ScheduleEditScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .defaultScreenPadding()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
 
         UstadMessageIdOptionExposedDropDownMenuField(
+            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
             value = uiState.entity?.scheduleDay ?: 0,
             label = stringResource(MR.strings.day),
             options = ScheduleConstants.DAY_MESSAGE_IDS,
@@ -61,37 +69,42 @@ fun ScheduleEditScreen(
             enabled = uiState.fieldsEnabled,
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            horizontalArrangement = Arrangement.SpaceAround
+        ){
 
-        Row {
+            UstadInputFieldLayout(
+                errorText = uiState.fromTimeError
+            ) {
+                UstadTimeField(
+                    value = (uiState.entity?.sceduleStartTime ?: 0).toInt(),
+                    label = { Text(stringResource(MR.strings.from)) },
+                    isError = uiState.fromTimeError != null,
+                    enabled = uiState.fieldsEnabled,
+                    onValueChange = {
+                        onScheduleChanged(uiState.entity?.shallowCopy{
+                            sceduleStartTime = it.toLong()
+                        })
+                    }
+                )
+            }
 
-//            UstadTimeEditTextField(
-//                modifier = Modifier.weight(0.5F),
-//                value = (uiState.entity?.sceduleStartTime ?: 0).toInt(),
-//                label = stringResource(MR.strings.from),
-//                error = uiState.fromTimeError,
-//                enabled = uiState.fieldsEnabled,
-//                onValueChange = {
-//                    onScheduleChanged(uiState.entity?.shallowCopy{
-//                        sceduleStartTime = it.toLong()
-//                    })
-//                }
-//            )
-
-            Spacer(modifier = Modifier.width(10.dp))
-
-//            UstadTimeEditTextField(
-//                modifier = Modifier.weight(0.5F),
-//                value = (uiState.entity?.scheduleEndTime ?: 0).toInt(),
-//                label = stringResource(MR.strings.to_key),
-//                error = uiState.toTimeError,
-//                enabled = uiState.fieldsEnabled,
-//                onValueChange = {
-//                    onScheduleChanged(uiState.entity?.shallowCopy{
-//                        scheduleEndTime = it.toLong()
-//                    })
-//                }
-//            )
+            UstadInputFieldLayout(
+                errorText = uiState.toTimeError
+            ) {
+                UstadTimeField(
+                    value = (uiState.entity?.scheduleEndTime ?: 0).toInt(),
+                    label = { Text(stringResource(MR.strings.to_key)) },
+                    isError = uiState.toTimeError != null,
+                    enabled = uiState.fieldsEnabled,
+                    onValueChange = {
+                        onScheduleChanged(uiState.entity?.shallowCopy{
+                            scheduleEndTime = it.toLong()
+                        })
+                    }
+                )
+            }
         }
     }
 }
