@@ -3,8 +3,8 @@ package com.ustadmobile.mui.components
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionHeaderUiState
-import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
+import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewUiState
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission.Companion.NOT_SUBMITTED
 import com.ustadmobile.view.clazzassignment.detailoverview.ASSIGNMENT_STATUS_MAP
 import web.cssom.rgb
 import js.core.jso
@@ -13,7 +13,6 @@ import mui.icons.material.EmojiEvents
 import mui.material.ListItem
 import mui.material.ListItemIcon
 import mui.material.ListItemText
-import mui.material.SvgIconProps
 import mui.material.Typography
 import mui.system.Stack
 import react.create
@@ -22,7 +21,7 @@ import react.dom.html.ReactHTML.span
 
 external interface UstadAssignmentSubmissionHeaderProps: Props {
 
-    var uiState: UstadAssignmentSubmissionHeaderUiState
+    var uiState: ClazzAssignmentDetailOverviewUiState
 
 }
 
@@ -32,26 +31,24 @@ val UstadAssignmentSubmissionHeader = FC<UstadAssignmentSubmissionHeaderProps> {
     val strings = useStringProvider()
 
     Stack{
-
-
-        ListItem {
-            ListItemIcon {
-                Done.create()
-                + (ASSIGNMENT_STATUS_MAP[props.uiState.assignmentStatus] ?: Done).create()
-            }
-            ListItemText {
-                primary = ReactNode(strings[SubmissionConstants.STATUS_MAP
-                        [props.uiState.assignmentStatus] ?: MR.strings.not_submitted_cap])
-                secondary = ReactNode(strings[MR.strings.status])
+        if(props.uiState.activeUserIsSubmitter) {
+            ListItem {
+                ListItemIcon {
+                    + (ASSIGNMENT_STATUS_MAP[props.uiState.submissionStatus ?: NOT_SUBMITTED] ?: Done).create()
+                }
+                ListItemText {
+                    primary = ReactNode(strings[SubmissionConstants.STATUS_MAP
+                        [props.uiState.submissionStatus ?: NOT_SUBMITTED] ?: MR.strings.not_submitted_cap])
+                    secondary = ReactNode(strings[MR.strings.status])
+                }
             }
         }
 
-
-        if (props.uiState.showPoints){
+        if (props.uiState.pointsVisible) {
             val pointsElement = Typography.create {
-                + (props.uiState.assignmentMark?.averageScore?.toString() ?: "")
+                + (props.uiState.submissionMark?.averageScore?.toString() ?: "")
                 + "/"
-                + (props.uiState.block?.cbMaxPoints?.toString() ?: "")
+                + (props.uiState.courseBlock?.cbMaxPoints?.toString() ?: "")
                 + strings[MR.strings.points]
                 + " "
 
@@ -63,7 +60,7 @@ val UstadAssignmentSubmissionHeader = FC<UstadAssignmentSubmissionHeaderProps> {
 
                         + (strings[MR.strings.late_penalty]
                             .replace("%1\$s", (
-                                props.uiState.block?.cbLateSubmissionPenalty ?: 0)
+                                props.uiState.courseBlock?.cbLateSubmissionPenalty ?: 0)
                                 .toString()))
                     }
                 }
@@ -76,13 +73,5 @@ val UstadAssignmentSubmissionHeader = FC<UstadAssignmentSubmissionHeaderProps> {
             }
         }
 
-    }
-}
-
-val UstadAssignmentFileSubmissionHeaderPreview = FC<Props> {
-    UstadAssignmentSubmissionHeader {
-        uiState = UstadAssignmentSubmissionHeaderUiState(
-            assignmentStatus = CourseAssignmentSubmission.NOT_SUBMITTED
-        )
     }
 }

@@ -49,9 +49,11 @@ import com.ustadmobile.core.io.ext.isGzipped
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toFile
 import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.format
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import org.kodein.di.direct
@@ -86,14 +88,11 @@ actual open class UstadMobileSystemImpl(
 
     private val viewNameToAndroidImplMap = mapOf<String, String>(
             "DownloadDialog" to "${PACKAGE_NAME}DownloadDialogFragment",
-            SplashScreenView.VIEW_NAME to "${PACKAGE_NAME}SplashScreenActivity",
-            OnBoardingView.VIEW_NAME to "${PACKAGE_NAME}OnBoardingActivity",
+            OnBoardingViewModel.DEST_NAME to "${PACKAGE_NAME}OnBoardingActivity",
             EpubContentView.VIEW_NAME to "${PACKAGE_NAME}EpubContentActivity",
             AboutView.VIEW_NAME to "${PACKAGE_NAME}AboutActivity",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
-            HarView.VIEW_NAME to "${PACKAGE_NAME}HarActivity",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
-            SchoolEditView.VIEW_NAME to "${PACKAGE_NAME}SchoolEditActivity",
             PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity"
     )
 
@@ -272,6 +271,10 @@ actual open class UstadMobileSystemImpl(
 
     override fun getString(stringResource: StringResource): String {
         return stringResource.getString(applicationContext)
+    }
+
+    override fun formatString(stringResource: StringResource, vararg args: Any): String {
+        return stringResource.format(args).stringRes.getString(applicationContext)
     }
 
     /**

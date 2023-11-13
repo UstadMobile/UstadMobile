@@ -20,7 +20,7 @@ import org.kodein.di.DI
 
 data class ClazzLogEditUiState(
 
-    val fieldsEnabled: Boolean = true,
+    val fieldsEnabled: Boolean = false,
 
     val clazzLog: ClazzLog? = null,
 
@@ -45,11 +45,6 @@ class ClazzLogEditViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 title = systemImpl.getString(MR.strings.add_a_new_occurrence),
-                actionBarButtonState = ActionBarButtonUiState(
-                    visible = true,
-                    text = systemImpl.getString(MR.strings.next),
-                    onClick = this::onClickSave
-                )
             )
         }
 
@@ -71,6 +66,18 @@ class ClazzLogEditViewModel(
                     }
                 }
             )
+
+            _appUiState.update { prev ->
+                prev.copy(
+                    actionBarButtonState = ActionBarButtonUiState(
+                        visible = true,
+                        text = systemImpl.getString(MR.strings.next),
+                        onClick = this@ClazzLogEditViewModel::onClickSave
+                    )
+                )
+            }
+
+            _uiState.update { prev -> prev.copy(fieldsEnabled = true) }
         }
     }
 

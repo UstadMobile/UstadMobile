@@ -133,8 +133,8 @@ val CourseDiscussionDetailPostListItem = FC<CourseDiscussionDetailPostListItemPr
 
                     Typography {
                         variant = TypographyVariant.body2
-                        +(strings[MR.strings.num_replies].replace("%1\$d",
-                            props.discussionPost?.postRepliesCount?.toString() ?: "0"))
+                        +strings.format(MR.strings.num_replies,
+                            props.discussionPost?.postRepliesCount ?: 0)
                     }
                 }
             }

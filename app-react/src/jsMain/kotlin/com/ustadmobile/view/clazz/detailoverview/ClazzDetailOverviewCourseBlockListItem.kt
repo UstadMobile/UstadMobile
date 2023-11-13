@@ -1,9 +1,7 @@
 package com.ustadmobile.view.clazz.detailoverview
 
-import com.ustadmobile.core.util.ext.htmlToPlainText
+import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.mui.components.UstadClazzAssignmentListItem
-import com.ustadmobile.view.contententry.UstadContentEntryListItem
 import com.ustadmobile.mui.ext.paddingCourseBlockIndent
 import web.cssom.px
 import mui.material.*
@@ -14,14 +12,18 @@ import react.ReactNode
 import react.create
 import mui.icons.material.KeyboardArrowUp
 import mui.icons.material.KeyboardArrowDown
-import mui.icons.material.Forum
-import mui.icons.material.Folder
-import mui.icons.material.Title
-
+import react.dom.aria.ariaLabel
+import mui.icons.material.Forum as ForumIcon
+import mui.icons.material.Folder as FolderIcon
+import mui.icons.material.Title as TitleIcon
+import mui.icons.material.AssignmentTurnedIn as AssignmentTurnedInIcon
+import mui.icons.material.Book as BookIcon
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 
 external interface ClazzDetailOverviewCourseBlockListItemProps : Props {
 
-    var courseBlock: CourseBlockWithCompleteEntity?
+    var courseBlock: CourseBlockAndDisplayDetails?
 
     var onClickCourseBlock: (CourseBlock) -> Unit
 
@@ -33,144 +35,73 @@ external interface ClazzDetailOverviewCourseBlockListItemProps : Props {
 
 }
 
+private val MODULE_TYPE_TO_ICON_MAP = mapOf(
+    CourseBlock.BLOCK_MODULE_TYPE to FolderIcon,
+    CourseBlock.BLOCK_DISCUSSION_TYPE to ForumIcon,
+    CourseBlock.BLOCK_TEXT_TYPE to TitleIcon,
+    CourseBlock.BLOCK_ASSIGNMENT_TYPE to AssignmentTurnedInIcon,
+    CourseBlock.BLOCK_CONTENT_TYPE to BookIcon,
+)
+
 val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockListItemProps> { props ->
-    val courseBlockVal = props.courseBlock
+    val courseBlockVal = props.courseBlock?.courseBlock
 
-    when(courseBlockVal?.cbType ?: 0){
-        CourseBlock.BLOCK_MODULE_TYPE  -> {
+    ListItem {
+        ListItemButton {
+            sx {
+                padding = paddingCourseBlockIndent(courseBlockVal?.cbIndentLevel ?: 0)
+            }
 
-            val trailingIcon = if(courseBlockVal?.expanded == true)
-                KeyboardArrowUp
-            else
-                KeyboardArrowDown
+            onClick = {
+                props.courseBlock?.courseBlock?.also { props.onClickCourseBlock(it) }
+            }
 
-            ListItem {
-                ListItemButton {
-
+            ListItemIcon {
+                + MODULE_TYPE_TO_ICON_MAP[courseBlockVal?.cbType ?: CourseBlock.BLOCK_MODULE_TYPE]?.create {
                     sx {
-                        padding = paddingCourseBlockIndent(courseBlockVal?.cbIndentLevel ?: 0)
-                    }
-
-                    onClick = { _ ->
-                        courseBlockVal?.also { props.onClickCourseBlock(it) }
-                    }
-
-                    ListItemIcon {
-                        Folder {
-                            sx {
-                                width = ICON_SIZE
-                                height = ICON_SIZE
-                            }
-                        }
-                    }
-
-                    Box{
-                        sx {
-                            width = 10.px
-                        }
-                    }
-
-                    ListItemText {
-                        primary = ReactNode(courseBlockVal?.cbTitle ?: "")
-                        secondary = ReactNode(courseBlockVal?.cbDescription ?: "")
+                        width = ICON_SIZE
+                        height = ICON_SIZE
                     }
                 }
+            }
 
-                secondaryAction = IconButton.create {
-                    onClick = {_ ->
-                        props.courseBlock?.also { props.onClickCourseBlock(it) }
+            Box{
+                sx {
+                    width = 10.px
+                }
+            }
+
+            ListItemText {
+                primary = ReactNode(courseBlockVal?.cbTitle ?: "")
+                secondary = ReactNode(courseBlockVal?.cbDescription ?: "") //This should be html
+            }
+        }
+
+        secondaryAction = Tooltip.create {
+            val strings = useStringProvider()
+            val labelText = if(props.courseBlock?.expanded == true) {
+                strings[MR.strings.collapse]
+            }else {
+                strings[MR.strings.expand]
+            }
+
+            title = ReactNode(labelText)
+
+            IconButton {
+                if(courseBlockVal?.cbType == CourseBlock.BLOCK_MODULE_TYPE) {
+                    val trailingIcon = if(props.courseBlock?.expanded == true)
+                        KeyboardArrowUp
+                    else
+                        KeyboardArrowDown
+
+                    ariaLabel = labelText
+
+                    onClick = {
+                        props.courseBlock?.courseBlock?.also { props.onClickCourseBlock(it) }
                     }
                     + trailingIcon.create()
                 }
             }
-        }
-        CourseBlock.BLOCK_DISCUSSION_TYPE -> {
-            ListItem {
-                ListItemButton {
-
-                    sx {
-                        padding = paddingCourseBlockIndent(props.courseBlock?.cbIndentLevel ?: 0)
-                    }
-
-                    onClick = { _ ->
-                        props.courseBlock?.also { props.onClickCourseBlock(it) }
-                    }
-
-                    ListItemIcon {
-                        Forum {
-                            sx {
-                                width = ICON_SIZE
-                                height = ICON_SIZE
-                            }
-                        }
-                    }
-
-                    Box{
-                        sx {
-                            width = 10.px
-                        }
-                    }
-
-                    ListItemText {
-                        primary = ReactNode(props.courseBlock?.cbTitle ?: "")
-                        secondary = ReactNode(
-                            (props.courseBlock?.cbDescription ?: "").htmlToPlainText()
-                        )
-                    }
-                }
-            }
-        }
-        CourseBlock.BLOCK_TEXT_TYPE -> {
-            ListItem {
-                ListItemButton {
-
-                    sx {
-                        padding = paddingCourseBlockIndent(courseBlockVal?.cbIndentLevel ?: 0)
-                    }
-
-                    onClick = {_ ->
-                        courseBlockVal?.also { props.onClickCourseBlock(it) }
-                    }
-
-                    ListItemIcon {
-                        Title {
-                            sx {
-                                width = ICON_SIZE
-                                height = ICON_SIZE
-                            }
-                        }
-                    }
-
-                    Box{
-                        sx {
-                            width = 10.px
-                        }
-                    }
-
-                    ListItemText {
-                        primary = ReactNode(props.courseBlock?.cbTitle ?: "")
-//                        secondary = { Html(courseBlock.cbDescription) },
-                    }
-                }
-            }
-        }
-        CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
-            if(courseBlockVal != null) {
-                UstadClazzAssignmentListItem {
-                    courseBlock = courseBlockVal
-                    onClickCourseBlock = props.onClickCourseBlock
-                }
-            }
-        }
-        CourseBlock.BLOCK_CONTENT_TYPE -> {
-            courseBlockVal?.entry?.also { contentEntryItem ->
-                UstadContentEntryListItem {
-                    contentEntry = contentEntryItem
-                    onClickContentEntry = props.onClickContentEntry
-                    onClickDownloadContentEntry = props.onClickDownloadContentEntry
-                }
-            }
-
         }
     }
 }

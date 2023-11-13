@@ -145,7 +145,7 @@ object ClazzAssignmentDaoCommon {
                   WHERE ClazzAssignment.caUid = :assignmentUid
     """
 
-    private const val SELECT_ASSIGNMENT_IS_PEERMARKED_SQL = """
+    const val SELECT_ASSIGNMENT_IS_PEERMARKED_SQL = """
         ((SELECT ClazzAssignment.caMarkingType
            FROM ClazzAssignment
           WHERE ClazzAssignment.caUid = :assignmentUid) = ${ClazzAssignment.MARKED_BY_PEERS})

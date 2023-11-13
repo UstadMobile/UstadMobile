@@ -66,30 +66,35 @@ entire project.
 *  __Step 1: Download and install Android Studio__: If you don't already have the latest version, download 
 from [https://developer.android.com/studio](https://developer.android.com/studio).
 
-* __Step 2: Make sure that java is on your system path__: If you already have OpenJDK17+, you can use that.
-If not, you can use the version that is bundled with Android Studio. 
+* __Step 2: Make sure that java is on your system path__: If you already have OpenJDK17+, you can 
+  use that, otherwise you need to download from the Java website or install using your system package
+  manager.
 
 Linux:
-Option 1: Edit ~/.profile and add the following lines to the bottom (where Android Studio is installed in ~/android-studio):
+
+Install OpenJDK17+ and ffmpeg using the system package manager e.g.
 
 ```
-export JAVA_HOME=~/android-studio/jbr
-export PATH=$JAVA_HOME:PATH
+sudo apt-get install openjdk-18-jdk ffmpeg
 ```
 
-Option 2: Install OpenJDK17+
-```
-sudo apt-get install openjdk-18-jdk
-```
+Windows: 
 
-Windows: Search for "Environment Variables" - then "Edit the system environment variables". Create a
-new environment variable. Set the variable name to JAVA_HOME and set the value to the directory 
-where you have Android Studio\jbr e.g. C:\user\myusername\AndroidStudio\jbr where Android Studio is
-installed in C:\user\myusername\AndroidStudio\ .
+Download and install Java (JDK17+) if not already installed from the Java site
+[https://www.oracle.com/java/technologies/downloads/#jdk17-windows](https://www.oracle.com/java/technologies/downloads/#jdk17-windows)
+
+The installer should automatically put the java command into the system PATH environment variable.
+
+If you need to do this manually, search for "Environment Variables" in Windows - then 
+"Edit the system environment variables". Create a new environment variable. Set the variable name to 
+JAVA_HOME and set the value to the directory where you have installed Java.
 
 Now find the PATH variable. Append ```;%JAVA_HOME%\bin``` to the value and save it. 
 
 Further details: see the [Java website](https://www.java.com/en/download/help/path.html).
+
+If you don't have ffmpeg installed, the server can download it for you when you run it for the first
+time.
 
 * __Step 3: Import the project in Android Studio__: Select File, New, Project from Version Control. Enter
 https://github.com/UstadMobile/UstadMobile.git and wait for the project to import. Switch to the
@@ -99,13 +104,15 @@ https://github.com/UstadMobile/UstadMobile.git and wait for the project to impor
 
 Linux/MacOS:
 ```
-$ ./runserver.sh
+$ ./runserver.sh --siteUrl http://your.ip.address:8087/
 ```
 
 Windows:
 ```
-$ runserver.bat
+$ runserver.bat --siteUrl http://your.ip.address:8087/
 ```
+Where your.ip.address is your IP address (e.g. 192.168.1.2). If the siteUrl changes and the old site
+url is inaccessible, then this may make content uploaded before the change inaccessible.
 
 This will start the server on port 8087. The admin password will be randomly generated - you can find
 it in app-ktor-server/data/singleton/admin.txt .

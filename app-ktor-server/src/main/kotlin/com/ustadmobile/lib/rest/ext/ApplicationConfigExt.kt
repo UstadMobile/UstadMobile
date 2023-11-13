@@ -1,10 +1,7 @@
 package com.ustadmobile.lib.rest.ext
 
-import com.ustadmobile.lib.rest.CONF_DBMODE_SINGLETON
-import io.ktor.server.request.*
 import java.util.*
-import com.ustadmobile.core.account.Endpoint
-import io.ktor.server.application.*
+import com.ustadmobile.lib.rest.CONF_KEY_SITE_URL
 import io.ktor.server.config.*
 import java.io.File
 
@@ -50,3 +47,5 @@ fun ApplicationConfig.databasePropertiesFromSection(
 fun ApplicationConfig.commandFileProperty(command: String) : File? {
     return propertyOrNull("ktor.ustad.paths.$command")?.getString()?.let { File(it) }
 }
+
+fun ApplicationConfig.siteUrl() = propertyOrNull(CONF_KEY_SITE_URL)?.getString() ?: ""

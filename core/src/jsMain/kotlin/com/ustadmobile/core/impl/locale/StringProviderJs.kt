@@ -12,4 +12,8 @@ class StringProviderJs(
         return stringResource.localized(jsStringProvider, locale)
     }
 
+    fun format(stringResource: StringResource, vararg args: Any) : String{
+        return stringResource.localized(jsStringProvider, locale, *args)
+    }
+
 }

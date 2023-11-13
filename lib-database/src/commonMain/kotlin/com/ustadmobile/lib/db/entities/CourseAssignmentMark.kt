@@ -7,20 +7,18 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
-@ReplicateEntity(tableId = CourseAssignmentMark.TABLE_ID, tracker = CourseAssignmentMarkReplicate::class)
+@ReplicateEntity(
+    tableId = CourseAssignmentMark.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
 @Triggers(arrayOf(
         Trigger(
-                name = "courseassignmentmark_remote_insert",
-                order = Trigger.Order.INSTEAD_OF,
-                on = Trigger.On.RECEIVEVIEW,
-                events = [Trigger.Event.INSERT],
-                sqlStatements = [
-                    """REPLACE INTO CourseAssignmentMark(camUid, camAssignmentUid, camSubmitterUid,camMarkerSubmitterUid, camMarkerPersonUid, camMarkerComment, camMark, camMaxMark, camPenalty, camLct) 
-         VALUES (NEW.camUid, NEW.camAssignmentUid, NEW.camSubmitterUid, NEW.camMarkerSubmitterUid, NEW.camMarkerPersonUid, NEW.camMarkerComment, NEW.camMark, NEW.camMaxMark, NEW.camPenalty, NEW.camLct) 
-         /*psql ON CONFLICT (camUid) DO UPDATE 
-         SET camAssignmentUid = EXCLUDED.camAssignmentUid, camSubmitterUid = EXCLUDED.camSubmitterUid, camMarkerSubmitterUid = EXCLUDED.camMarkerSubmitterUid, camMarkerPersonUid = EXCLUDED.camMarkerPersonUid, camMarkerComment = EXCLUDED.camMarkerComment, camMark = EXCLUDED.camMark, camMaxMark = EXCLUDED.camMaxMark, camPenalty = EXCLUDED.camPenalty, camLct = EXCLUDED.camLct
-         */"""
-                ]
+            name = "courseassignmentmark_remote_insert",
+            order = Trigger.Order.INSTEAD_OF,
+            on = Trigger.On.RECEIVEVIEW,
+            events = [Trigger.Event.INSERT],
+            conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+            sqlStatements = [TRIGGER_UPSERT],
         )
 ))
 @Serializable
@@ -73,8 +71,8 @@ open class CourseAssignmentMark {
      */
     var camPenalty: Float = 0f
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var camLct: Long = 0
 
     companion object {

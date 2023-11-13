@@ -15,21 +15,20 @@ import com.ustadmobile.lib.db.entities.*
 import io.ktor.http.HttpStatusCode
 import org.kodein.di.instance
 import org.kodein.di.on
-import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.rest.ext.callEndpoint
 import io.ktor.client.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.util.pipeline.*
 import kotlinx.datetime.Instant
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.ktor.closestDI
 import kotlin.IllegalStateException
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.account.doubleEncryptWithPbkdf2V2
+import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
 
 fun Route.personAuthRegisterRoute() {
 
@@ -48,8 +47,7 @@ fun Route.personAuthRegisterRoute() {
             }
 
 
-            val authResult = authManager.authenticate(username, password,
-                fallbackToOldPersonAuth = true)
+            val authResult = authManager.authenticate(username, password)
             val authorizedPerson = authResult.authenticatedPerson
 
             if(authResult.success && authorizedPerson != null) {
@@ -68,7 +66,6 @@ fun Route.personAuthRegisterRoute() {
         post("register"){
             val di: DI by closestDI()
             val db: UmAppDatabase by di.on(call).instance(tag = DoorTag.TAG_DB)
-            val repo: UmAppDatabase by di.on(call).instance(tag = DoorTag.TAG_REPO)
 
             val registerRequest: RegisterRequest = call.receive()
 
@@ -93,18 +90,17 @@ fun Route.personAuthRegisterRoute() {
             val existingPerson = if(mPerson.personUid != 0L) db.personDao.findByUid(mPerson.personUid)
             else db.personDao.findByUsername(mPerson.username)
 
-            if(existingPerson != null && (mPerson.personUid == 0L ||
-                            mPerson.personUid != 0L && mPerson.username == existingPerson.username)){
+            if(existingPerson != null && mPerson.username == existingPerson.username){
                 call.respond(HttpStatusCode.Conflict, "Person already exists, change username")
                 return@post
             }
 
             if(existingPerson == null) {
                 mPerson.apply {
-                    personUid = repo.insertPersonAndGroup(mPerson).personUid
+                    personUid = db.insertPersonAndGroup(mPerson).personUid
                 }
             } else {
-                repo.personDao.update(mPerson)
+                db.personDao.update(mPerson)
             }
 
             if(Instant.fromEpochMilliseconds(mPerson.dateOfBirth).ageInYears() < UstadMobileConstants.MINOR_AGE_THRESHOLD) {
@@ -112,14 +108,14 @@ fun Route.personAuthRegisterRoute() {
                 val mParentContactVal = mParentContact ?: throw IllegalStateException("Minor without parent contact")
 
                 mParentJoinVal.ppjMinorPersonUid = mPerson.personUid
-                mParentJoinVal.ppjUid = repo.personParentJoinDao.insertAsync(mParentJoinVal)
+                mParentJoinVal.ppjUid = db.personParentJoinDao.insertAsync(mParentJoinVal)
 
                 val systemImpl: UstadMobileSystemImpl by closestDI().instance()
                 val appName = systemImpl.getString(MR.strings.app_name, mLangCode)
                 val linkArgs : Map<String, String> = mapOf(UstadView.ARG_ENTITY_UID to
                         mParentJoinVal.ppjUid.toString())
                 val linkUrl = (UMFileUtil.joinPaths(registerRequest.endpointUrl,
-                    LINK_ENDPOINT_VIEWNAME_DIVIDER) + ParentalConsentManagementView.VIEW_NAME)
+                    LINK_ENDPOINT_VIEWNAME_DIVIDER) + ParentalConsentManagementViewModel.DEST_NAME)
                     .appendQueryArgs(linkArgs.toQueryString())
 
                 val emailText = systemImpl.getString(MR.strings.parent_child_register_message,
@@ -135,11 +131,8 @@ fun Route.personAuthRegisterRoute() {
                 notificationSender.sendEmail(mParentContactVal, subjectText, emailText)
             }
 
-            val authParams: Pbkdf2Params = di.direct.instance()
-            val httpClient: HttpClient = di.direct.instance()
-
-            repo.insertPersonAuthCredentials2(mPerson.personUid, newPassword, authParams,
-                call.callEndpoint, httpClient)
+            val authManager: AuthManager = di.direct.on(call).instance()
+            authManager.setAuth(mPerson.personUid, newPassword)
 
             call.respond(HttpStatusCode.OK, mPerson)
         }
@@ -172,9 +165,8 @@ fun Route.personAuthRegisterRoute() {
             val site: Site = db.siteDao.getSiteAsync() ?: throw IllegalStateException("No site!")
             val authSalt = site.authSalt ?: throw IllegalStateException("No auth salt!")
 
-            val passwordDoubleHashed = password.doublePbkdf2Hash(authSalt, pbkdf2Params,
-                    call.callEndpoint, httpClient)
-                .encodeBase64()
+            val passwordDoubleHashed = password.doubleEncryptWithPbkdf2V2(authSalt,
+                    pbkdf2Params.iterations, pbkdf2Params.keyLength).encodeBase64()
 
             call.respondText { "Hashed password = $passwordDoubleHashed" }
         }

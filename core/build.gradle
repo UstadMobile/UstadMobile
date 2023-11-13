@@ -39,6 +39,9 @@ android {
         //coreLibraryDesugaringEnabled true
     }
     namespace 'com.ustadmobile.core'
+    lint {
+        disable 'MissingTranslation', 'ExtraTranslation'
+    }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
         kotlinOptions {
@@ -46,9 +49,6 @@ android {
         }
     }
 
-    lintOptions {
-        disable 'MissingTranslation', 'ExtraTranslation'
-    }
 }
 
 sourceCompatibility = '17'
@@ -56,7 +56,6 @@ targetCompatibility = '17'
 
 group rootProject.group
 version rootProject.version
-def reactLocaleOutPath = "${rootDir.absolutePath}/app-react/src/main/resources/"
 
 // workaround for https://youtrack.jetbrains.com/issue/KT-27170
 configurations {
@@ -100,19 +99,20 @@ kotlin {
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
                 implementation "io.ktor:ktor-io:$version_ktor"
-                implementation "io.github.aakira:napier:$version_napier"
+                implementation libs.napier
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
-                implementation project(':lib-database')
+                api project(':lib-database')
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation project(":lib-util")
                 implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
                 implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
-
-                // Compose Multiplatform Navigator
-                implementation "cafe.adriel.voyager:voyager-navigator:$version_voyager"
+                api libs.kotlinxio.core
+                api libs.xmlutil.core
+                api libs.xmlutil.serialization
+                implementation libs.precompose.viewmodel
             }
         }
 
@@ -120,8 +120,9 @@ kotlin {
             dependsOn commonMain
 
             dependencies {
-
                 implementation kotlin('stdlib-common')
+                implementation project(":lib-database")
+                implementation project(":lib-cache")
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
@@ -130,6 +131,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                api "io.ktor:ktor-serialization-kotlinx-json:$version_ktor"
                 compileOnly "net.sf.kxml:kxml2:$version_kxml"
             }
         }
@@ -138,6 +140,7 @@ kotlin {
             dependencies {
                 implementation kotlin('test-common')
                 implementation kotlin('test-annotations-common')
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$version_coroutines"
             }
         }
 
@@ -152,6 +155,9 @@ kotlin {
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "org.quartz-scheduler:quartz:$version_quartz_scheduler"
+                implementation "io.ktor:ktor-server-core:$version_ktor"
+                implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
+                implementation libs.javaffmpeg
             }
         }
 
@@ -162,6 +168,7 @@ kotlin {
                 implementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
                 implementation "com.soywiz.korlibs.klock:klock:$version_klock"
                 implementation "junit:junit:$version_junit"
+                implementation "io.ktor:ktor-server-content-negotiation:$version_ktor"
 
                 implementation project(":sharedse")
                 implementation project(":lib-test-common")
@@ -224,8 +231,8 @@ kotlin {
 
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
 
-                implementation "androidx.navigation:navigation-fragment-ktx:$version_android_navigation"
-                implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
+                implementation libs.androidx.navigation.fragment.ktx
+                implementation libs.androidx.navigation.ui.ktx
 
                 implementation "com.google.android.material:material:$version_android_material"
 

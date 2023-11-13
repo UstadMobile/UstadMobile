@@ -44,64 +44,7 @@ fun Route.ContainerMountRoute() {
             this@route.serve(call, false)
         }
 
-        get("/{containerUid}/videoParams"){
-            val db: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_DB)
-            val systemImpl : UstadMobileSystemImpl by closestDI().on(call).instance()
-            val containerUid = call.parameters["containerUid"]?.toLong() ?: 0L
-            val container = db.containerDao.findByUidAsync(containerUid)
-            if(container != null){
-                val result = db.containerEntryDao.findByContainerAsync(containerUid)
-                var defaultLangName = ""
-                var videoPath = ""
-                var audioEntry = ContainerEntryWithContainerEntryFile()
-                val srtMap = mutableMapOf<String, String>()
-                val srtLangList = mutableListOf<String>()
-                for (entry in result) {
-
-                    val fileInContainer = entry.cePath
-                    val containerEntryFile = entry.containerEntryFile
-
-                    if (fileInContainer != null && containerEntryFile != null) {
-                        if (fileInContainer.endsWith(".mp4") || fileInContainer.endsWith(".webm")) {
-                            videoPath = fileInContainer
-                        } else if (fileInContainer == "audio.c2") {
-                            audioEntry = entry
-                        } else if (fileInContainer == "subtitle.srt" || fileInContainer.lowercase() == "subtitle-english.srt") {
-
-                            defaultLangName = if (fileInContainer.contains("-"))
-                                fileInContainer.substring(fileInContainer.indexOf("-") + 1, fileInContainer.lastIndexOf("."))
-                            else "English"
-                            srtMap[defaultLangName] = fileInContainer
-                        } else {
-                            val name = fileInContainer.substring(fileInContainer.indexOf("-") + 1, fileInContainer.lastIndexOf("."))
-                            srtMap[name] = fileInContainer
-                            srtLangList.add(name)
-                        }
-                    }
-                }
-
-                srtLangList.sortedWith { a, b -> when {
-                        a > b -> 1
-                        a < b -> -1
-                        else -> 0
-                    }
-                }
-
-                if (videoPath.isEmpty() && result.isNotEmpty()) {
-                    videoPath = result[0].cePath!!
-                }
-
-                srtLangList.add(0, systemImpl.getString(MR.strings.no_subtitle))
-                if (defaultLangName.isNotEmpty()) srtLangList.add(1, defaultLangName)
-
-                call.respond(HttpStatusCode.OK, VideoContentPresenterCommon.VideoParams(videoPath, audioEntry, srtLangList, srtMap))
-
-            }else{
-                call.respond(HttpStatusCode.NotFound, "No such container: $containerUid")
-            }
-        }
     }
-
 }
 
 suspend fun Route.serve(call: ApplicationCall, isHeadRequest: Boolean){

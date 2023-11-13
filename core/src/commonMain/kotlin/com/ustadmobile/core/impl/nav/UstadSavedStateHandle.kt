@@ -1,7 +1,5 @@
 package com.ustadmobile.core.impl.nav
 
-import com.ustadmobile.door.lifecycle.MutableLiveData
-
 /**
  * SavedStateHandle interface is based on https://developer.android.com/reference/androidx/lifecycle/SavedStateHandle
  * It is used by ViewModels to save state data as the user edits. The data edited by the user may
@@ -20,9 +18,6 @@ interface UstadSavedStateHandle {
     operator fun get(key: String): String?
 
     val keys: Set<String>
-
-    @Deprecated("This should NOT be used with MVVM. Data should be returned via bus")
-    fun <T> getLiveData(key:String): MutableLiveData<T>
 
 
 }

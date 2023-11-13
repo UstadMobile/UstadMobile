@@ -3,7 +3,6 @@ package com.ustadmobile.core.viewmodel.schedule.edit
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.view.ScheduleEditView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.Schedule
@@ -31,7 +30,7 @@ data class ScheduleEditUiState(
 class ScheduleEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
-): UstadEditViewModel(di, savedStateHandle, ScheduleEditView.VIEW_NAME) {
+): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(ScheduleEditUiState(fieldsEnabled = false))
 
@@ -117,5 +116,9 @@ class ScheduleEditViewModel(
     }
 
 
+    companion object {
+
+        const val DEST_NAME = "ScheduleEdit"
+    }
 
 }

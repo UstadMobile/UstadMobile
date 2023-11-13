@@ -11,7 +11,6 @@ import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.composites.PersonAndClazzLogAttendanceRecord
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
-import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -33,7 +32,7 @@ data class ClazzLogEditAttendanceUiState(
 
     val clazzLogsList: List<ClazzLog> = emptyList(),
 
-    val fieldsEnabled: Boolean = true,
+    val fieldsEnabled: Boolean = false,
 
     val timeZone: String = "UTC"
 
@@ -89,11 +88,6 @@ class ClazzLogEditAttendanceViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 title = systemImpl.getString(MR.strings.record_attendance),
-                actionBarButtonState = ActionBarButtonUiState(
-                    visible = true,
-                    text = systemImpl.getString(MR.strings.save),
-                    onClick = this::onClickSave
-                )
             )
         }
 
@@ -188,7 +182,8 @@ class ClazzLogEditAttendanceViewModel(
             prev.copy(
                 currentClazzLogIndex = prev.clazzLogsList.indexOfFirst {
                     it.clazzLogUid == clazzLog.clazzLogUid
-                }
+                },
+                fieldsEnabled = false,
             )
         }
 
@@ -228,8 +223,23 @@ class ClazzLogEditAttendanceViewModel(
 
             _uiState.update { prev ->
                 prev.copy(
-                    clazzLogAttendanceRecordList = personAndAttendanceRecords
+                    clazzLogAttendanceRecordList = personAndAttendanceRecords,
+                    fieldsEnabled = true,
                 )
+            }
+
+            _appUiState.update { prev ->
+                if(!prev.actionBarButtonState.visible) {
+                    prev.copy(
+                        actionBarButtonState = ActionBarButtonUiState(
+                            visible = true,
+                            text = systemImpl.getString(MR.strings.save),
+                            onClick = this@ClazzLogEditAttendanceViewModel::onClickSave
+                        )
+                    )
+                }else {
+                    prev
+                }
             }
         }
     }
@@ -312,9 +322,9 @@ class ClazzLogEditAttendanceViewModel(
                     attendanceRecordsToSave += logRecords
                 }
 
-                activeDb.withDoorTransactionAsync {
-                    activeDb.clazzLogDao.upsertListAsync(clazzLogsToSave)
-                    activeDb.clazzLogAttendanceRecordDao.upsertListAsync(attendanceRecordsToSave)
+                activeRepo.withDoorTransactionAsync {
+                    activeRepo.clazzLogDao.upsertListAsync(clazzLogsToSave)
+                    activeRepo.clazzLogAttendanceRecordDao.upsertListAsync(attendanceRecordsToSave)
                 }
             }
 

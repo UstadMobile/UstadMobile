@@ -9,6 +9,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.RegisterAgeRedirectView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Site
@@ -32,7 +33,7 @@ import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
 @Suppress("RemoveExplicitTypeArguments")
-class LoginViewModelTest {
+class LoginViewModelTest : AbstractMainDispatcherTest(){
 
     private val json = Json {
         encodeDefaults = true

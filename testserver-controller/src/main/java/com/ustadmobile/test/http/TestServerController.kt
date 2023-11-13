@@ -43,6 +43,8 @@ fun Application.testServerController() {
         File(it)
     } ?: File(".")
 
+    val serverSiteUrl = environment.config.property("siteUrl").getString()
+
     if(adbPath == null || !adbPath.exists()) {
         throw IllegalStateException("ERROR: ADB path does not exist")
     }
@@ -209,13 +211,16 @@ fun Application.testServerController() {
                     ?: throw IllegalArgumentException("Could not find server command in PATH ${serverArgs[0]}")
             }
 
-            serverProcess = ProcessBuilder(serverArgs)
+            val serverArgsWithSiteUrl = serverArgs + "-P:ktor.ustad.siteUrl=$serverSiteUrl"
+            serverProcess = ProcessBuilder(serverArgsWithSiteUrl)
                 .directory(serverDir)
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
                 .redirectError(ProcessBuilder.Redirect.PIPE)
                 .start()
 
-            response += "Started server process PID #${serverProcess?.pid()} ${serverArgs.joinToString( " ")} <br/>"
+            response += "Started server process PID #${serverProcess?.pid()} " +
+                    "${serverArgsWithSiteUrl.joinToString( " ")} " +
+                    "(workingDir=${serverDir.absolutePath}<br/>"
 
             if(adbRecordEnabled) {
                 ProcessBuilder(

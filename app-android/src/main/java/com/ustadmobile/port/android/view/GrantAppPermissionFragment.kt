@@ -35,7 +35,7 @@ class GrantAppPermissionFragment: UstadBaseFragment(), GrantAppPermissionView {
     ): View {
         val rootView: View
         mPresenter = GrantAppPermissionPresenter(requireContext(), requireArguments().toStringMap(),
-            this, di).withViewLifecycle()
+            this, di)
         mBinding = FragmentGrantAppPermissionBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.grantButton.setOnClickListener {

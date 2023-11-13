@@ -81,7 +81,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation kotlin('stdlib-common')
-                implementation "io.github.aakira:napier:$version_napier"
+                implementation libs.napier
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"

@@ -64,27 +64,27 @@ class ClazzLogListAttendanceFragment(): UstadBaseMvvmFragment() {
 
 
     private fun onClickFab() {
-        lifecycleScope.launch {
-            val uiState = viewModel.uiState.first()
-            if(uiState.recordAttendanceOptions.size == 1) {
-                viewModel.onClickRecordAttendance(
-                    uiState.recordAttendanceOptions.first()
-                )
-            }else {
-                OptionsBottomSheetFragment(
-                    optionsList = uiState.recordAttendanceOptions.map {
-                        it.toBottomSheetOption()
-                    },
-                    onOptionSelected = {option ->
-                        viewModel.onClickRecordAttendance(
-                            ClazzLogListAttendanceViewModel.RecordAttendanceOption.forCommand(
-                                option.optionCode
-                            )
-                        )
-                    }
-                ).show(requireActivity().supportFragmentManager, "attendance_options")
-            }
-        }
+//        lifecycleScope.launch {
+//            val uiState = viewModel.uiState.first()
+//            if(uiState.recordAttendanceOptions.size == 1) {
+//                viewModel.onClickRecordAttendance(
+//                    uiState.recordAttendanceOptions.first()
+//                )
+//            }else {
+//                OptionsBottomSheetFragment(
+//                    optionsList = uiState.recordAttendanceOptions.map {
+//                        it.toBottomSheetOption()
+//                    },
+//                    onOptionSelected = {option ->
+//                        viewModel.onClickRecordAttendance(
+//                            ClazzLogListAttendanceViewModel.RecordAttendanceOption.forCommand(
+//                                option.optionCode
+//                            )
+//                        )
+//                    }
+//                ).show(requireActivity().supportFragmentManager, "attendance_options")
+//            }
+//        }
     }
 
 

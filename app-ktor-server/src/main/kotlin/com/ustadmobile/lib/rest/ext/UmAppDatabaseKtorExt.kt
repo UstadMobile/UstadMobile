@@ -6,13 +6,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.ext.doublePbkdf2Hash
 import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
-import com.ustadmobile.door.DoorDatabaseRepository
-import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.requireDbAndRepo
-import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.randomString
@@ -28,8 +23,7 @@ import java.io.File
 import com.ustadmobile.core.MR
 
 fun UmAppDatabase.insertCourseTerminology(di: DI){
-    val (db, repo) = requireDbAndRepo()
-    val termList = db.courseTerminologyDao.findAllCourseTerminologyList()
+    val termList = courseTerminologyDao.findAllCourseTerminologyList()
     val supportLangConfig: SupportedLanguagesConfig = di.direct.instance()
 
     if(termList.isEmpty()) {
@@ -55,12 +49,12 @@ fun UmAppDatabase.insertCourseTerminology(di: DI){
             })
         }
 
-        repo.courseTerminologyDao.insertList(terminologyList)
+        courseTerminologyDao.insertList(terminologyList)
     }
 }
 
 /**
- * Initialize the admin account. This must be done on the repo
+ * Initialize the admin account.
  */
 suspend fun UmAppDatabase.initAdminUser(
     endpoint: Endpoint,
@@ -90,12 +84,9 @@ suspend fun UmAppDatabase.initAdminUser(
 
         val saltFile = File(passwordFilePath, "salt-${systemTimeInMillis()}.txt")
 
-        val repo: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
-        val salt = repo.siteDao.getSiteAsync()!!.authSalt!!
+        val salt = siteDao.getSiteAsync()!!.authSalt!!
 
-        saltFile.writeText(
-            "$salt / $adminPass"
-        )
+        saltFile.writeText("$salt / $adminPass")
 
         grantScopedPermission(adminPerson, Role.ALL_PERMISSIONS, ScopedGrant.ALL_TABLES,
                 ScopedGrant.ALL_ENTITIES)
@@ -105,6 +96,6 @@ suspend fun UmAppDatabase.initAdminUser(
     }
 }
 
-fun UmAppDatabase.ktorInitRepo(di: DI) {
+fun UmAppDatabase.ktorInitDb(di: DI) {
     insertCourseTerminology(di)
 }

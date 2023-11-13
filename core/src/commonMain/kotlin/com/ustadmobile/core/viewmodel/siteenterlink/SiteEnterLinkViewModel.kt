@@ -7,11 +7,11 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.requireHttpPrefix
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
-import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.SiteEnterLinkView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import io.ktor.client.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -39,8 +39,6 @@ class SiteEnterLinkViewModel(
     private val httpClient: HttpClient by instance()
 
     private val impl: UstadMobileSystemImpl by instance()
-
-    var counter = 0
 
     init {
         _appUiState.update { prev ->
@@ -78,7 +76,7 @@ class SiteEnterLinkViewModel(
                     previous.copy(validLink =  true, linkError = null, fieldsEnabled = true)
                 }
 
-                navController.navigate(Login2View.VIEW_NAME, args)
+                navController.navigate(LoginViewModel.DEST_NAME, args)
             }catch(e: Throwable) {
                 _uiState.update { previous ->
                     loadingState = LoadingUiState.NOT_LOADING
@@ -99,6 +97,8 @@ class SiteEnterLinkViewModel(
     }
 
     companion object {
+
+        const val DEST_NAME = "SiteEnterLink"
 
         val ARGS_TO_PASS_THROUGH = listOf(UstadView.ARG_NEXT, UstadView.ARG_INTENT_MESSAGE)
 

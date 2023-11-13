@@ -2,7 +2,7 @@ package com.ustadmobile.core.hooks
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.navigation.SavedStateHandle2
-import com.ustadmobile.core.viewmodel.ViewModel
+import moe.tlaster.precompose.viewmodel.ViewModel
 import io.github.aakira.napier.Napier
 import kotlinx.browser.window
 import react.*

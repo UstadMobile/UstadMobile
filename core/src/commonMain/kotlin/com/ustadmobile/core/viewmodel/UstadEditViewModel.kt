@@ -4,7 +4,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.Job
@@ -26,9 +25,7 @@ abstract class UstadEditViewModel(
 
     protected var saveStateJob: Job? = null
 
-    protected val entityUidArg: Long by lazy(LazyThreadSafetyMode.NONE) {
-        savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0
-    }
+    protected val entityUidArg: Long = savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0
 
     /**
      * Schedule saving the entity to the savedstate handle. This will cancel previous jobs (e.g.

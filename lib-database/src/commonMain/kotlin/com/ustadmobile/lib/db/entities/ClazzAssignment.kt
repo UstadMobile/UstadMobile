@@ -8,20 +8,18 @@ import com.ustadmobile.lib.db.entities.ClazzAssignment.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@ReplicateEntity(tableId = TABLE_ID, tracker = ClazzAssignmentReplicate::class)
+@ReplicateEntity(
+    tableId = TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
 @Triggers(arrayOf(
  Trigger(
      name = "clazzassignment_remote_insert",
      order = Trigger.Order.INSTEAD_OF,
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
-     sqlStatements = [
-         """REPLACE INTO ClazzAssignment(caUid, caTitle, caDescription, caGroupUid, caActive, caClassCommentEnabled, caPrivateCommentsEnabled, caRequireFileSubmission, caFileType, caSizeLimit, caNumberOfFiles, caSubmissionPolicy, caMarkingType, caRequireTextSubmission, caTextLimitType, caTextLimit, caXObjectUid, caClazzUid, caPeerReviewerCount, caLocalChangeSeqNum, caMasterChangeSeqNum, caLastChangedBy, caLct) 
-         VALUES (NEW.caUid, NEW.caTitle, NEW.caDescription, NEW.caGroupUid, NEW.caActive, NEW.caClassCommentEnabled, NEW.caPrivateCommentsEnabled, NEW.caRequireFileSubmission, NEW.caFileType, NEW.caSizeLimit, NEW.caNumberOfFiles, NEW.caSubmissionPolicy, NEW.caMarkingType,NEW.caRequireTextSubmission, NEW.caTextLimitType, NEW.caTextLimit, NEW.caXObjectUid, NEW.caClazzUid, NEW.caPeerReviewerCount, NEW.caLocalChangeSeqNum, NEW.caMasterChangeSeqNum, NEW.caLastChangedBy, NEW.caLct) 
-         /*psql ON CONFLICT (caUid) DO UPDATE 
-         SET caTitle = EXCLUDED.caTitle, caDescription = EXCLUDED.caDescription, caGroupUid = EXCLUDED.caGroupUid, caActive = EXCLUDED.caActive, caClassCommentEnabled = EXCLUDED.caClassCommentEnabled, caPrivateCommentsEnabled = EXCLUDED.caPrivateCommentsEnabled, caRequireFileSubmission = EXCLUDED.caRequireFileSubmission, caFileType = EXCLUDED.caFileType, caSizeLimit = EXCLUDED.caSizeLimit, caNumberOfFiles = EXCLUDED.caNumberOfFiles, caSubmissionPolicy = EXCLUDED.caSubmissionPolicy, caMarkingType = EXCLUDED.caMarkingType, caRequireTextSubmission = EXCLUDED.caRequireTextSubmission, caTextLimitType = EXCLUDED.caTextLimitType, caTextLimit = EXCLUDED.caTextLimit, caXObjectUid = EXCLUDED.caXObjectUid, caClazzUid = EXCLUDED.caClazzUid, caPeerReviewerCount = EXCLUDED.caPeerReviewerCount, caLocalChangeSeqNum = EXCLUDED.caLocalChangeSeqNum, caMasterChangeSeqNum = EXCLUDED.caMasterChangeSeqNum, caLastChangedBy = EXCLUDED.caLastChangedBy, caLct = EXCLUDED.caLct
-         */"""
-     ]
+     conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+     sqlStatements = [TRIGGER_UPSERT],
  )
 ))
 
@@ -115,8 +113,8 @@ open class ClazzAssignment {
     @LastChangedBy
     var caLastChangedBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var caLct: Long = 0
 
     companion object {

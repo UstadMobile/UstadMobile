@@ -25,7 +25,7 @@ import org.kodein.di.DI
 
 data class DiscussionPostEditUiState(
     val discussionPost: DiscussionPost? = null,
-    val fieldsEnabled: Boolean = true,
+    val fieldsEnabled: Boolean = false,
     val discussionPostTitleError: String? = null,
     val discussionPostDescError: String? = null
 )
@@ -38,9 +38,7 @@ class DiscussionPostEditViewModel (
 
     private val _uiState: MutableStateFlow<DiscussionPostEditUiState> =
         MutableStateFlow(
-            DiscussionPostEditUiState(
-                fieldsEnabled = false,
-            )
+            DiscussionPostEditUiState()
         )
 
     val uiState: Flow<DiscussionPostEditUiState> = _uiState.asStateFlow()
@@ -62,11 +60,6 @@ class DiscussionPostEditViewModel (
         _appUiState.update {
             AppUiState(
                 title = title,
-                actionBarButtonState = ActionBarButtonUiState(
-                    visible = true,
-                    text = systemImpl.getString(MR.strings.post),
-                    onClick = this::onClickSave
-                ),
                 hideBottomNavigation = true,
             )
         }
@@ -87,7 +80,7 @@ class DiscussionPostEditViewModel (
                                     .nextIdAsync(DiscussionPost.TABLE_ID)
                                 it.discussionPostCourseBlockUid = courseBlockUidArg
                                 it.discussionPostArchive = false
-                                it.discussionPostStartedPersonUid = accountManager.activeAccount.personUid
+                                it.discussionPostStartedPersonUid = accountManager.currentAccount.personUid
                                 it.discussionPostStartDate = systemTimeInMillis()
                             }
                         },
@@ -101,14 +94,22 @@ class DiscussionPostEditViewModel (
 
             )
 
-
             _uiState.update { prev ->
                 prev.copy(
-
                     fieldsEnabled = true,
                 )
             }
-            loadingState = LoadingUiState.NOT_LOADING
+
+            _appUiState.update { prev ->
+                prev.copy(
+                    actionBarButtonState = ActionBarButtonUiState(
+                        visible = true,
+                        text = systemImpl.getString(MR.strings.post),
+                        onClick = this@DiscussionPostEditViewModel::onClickSave
+                    ),
+                    loadingState = LoadingUiState.NOT_LOADING
+                )
+            }
         }
     }
 
@@ -173,11 +174,15 @@ class DiscussionPostEditViewModel (
             if(_uiState.value.discussionPostTitleError == null
                 && _uiState.value.discussionPostDescError == null){
 
-                activeDb.withDoorTransactionAsync {
-                    post.discussionPostClazzUid = activeDb.courseBlockDao
+                post.discussionPostClazzUid = activeDb.courseBlockDao
+                    .findClazzUidByCourseBlockUid(post.discussionPostCourseBlockUid)
+                if(post.discussionPostClazzUid == 0L) {
+                    post.discussionPostClazzUid = activeRepo.courseBlockDao
                         .findClazzUidByCourseBlockUid(post.discussionPostCourseBlockUid)
+                }
 
-                    activeDb.discussionPostDao.upsertAsync(post)
+                activeRepo.withDoorTransactionAsync {
+                    activeRepo.discussionPostDao.upsertAsync(post)
                 }
 
                 finishWithResult(

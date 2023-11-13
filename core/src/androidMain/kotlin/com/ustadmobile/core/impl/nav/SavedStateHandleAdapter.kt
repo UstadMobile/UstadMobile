@@ -1,7 +1,6 @@
 package com.ustadmobile.core.impl.nav
 
 import androidx.lifecycle.SavedStateHandle
-import com.ustadmobile.door.lifecycle.MutableLiveData
 
 class SavedStateHandleAdapter(val savedStateHandle: SavedStateHandle): UstadSavedStateHandle {
 
@@ -14,7 +13,4 @@ class SavedStateHandleAdapter(val savedStateHandle: SavedStateHandle): UstadSave
     override val keys: Set<String>
         get() = savedStateHandle.keys()
 
-    override fun <T> getLiveData(key: String): MutableLiveData<T> {
-        return savedStateHandle.getLiveData(key)
-    }
 }

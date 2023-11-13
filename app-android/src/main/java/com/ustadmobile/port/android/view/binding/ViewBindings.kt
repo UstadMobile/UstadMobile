@@ -9,11 +9,7 @@ import android.widget.LinearLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.BindingAdapter
 import com.toughra.ustadmobile.R
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
-import com.ustadmobile.lib.db.entities.CustomField
-import com.ustadmobile.lib.db.entities.CustomFieldValue
-import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 import com.ustadmobile.port.android.view.util.SelectableViewHelper
 
 
@@ -103,50 +99,8 @@ fun View.setOnClickEmail(emailAddr: String?) {
 }
 
 
-internal class CustomFieldOnClickListener(val customField: CustomField, val customFieldValue: CustomFieldValue?): View.OnClickListener {
-    override fun onClick(v: View) {
-        when(customField.actionOnClick) {
-            CustomField.ACTION_CALL -> {
-                val callIntent = Intent(Intent.ACTION_DIAL).apply {
-                    setData(Uri.parse("tel:${customFieldValue?.customFieldValueValue}"))
-                }
-                v.context.startActivity(callIntent)
-
-            }
-            CustomField.ACTION_EMAIL -> {
-                val emailAddr = customFieldValue?.customFieldValueValue ?: return
-                val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
-                    putExtra(Intent.EXTRA_EMAIL, arrayOf(emailAddr))
-                    data = Uri.parse("mailto:")
-                }
-                if (emailIntent.resolveActivity(v.context.packageManager) != null) {
-                    v.context.startActivity(emailIntent)
-                }
-            }
-        }
-    }
-}
-
-@BindingAdapter(value = ["onClickCustomField", "onClickCustomFieldValue"])
-fun View.setOnClickCustomFieldHandler(customField: CustomField?, customFieldValue: CustomFieldValue) {
-    val actionOnClick = customField?.actionOnClick
-    if(customField != null && actionOnClick != null) {
-        setOnClickListener(CustomFieldOnClickListener(customField, customFieldValue))
-    }
-}
-
 interface OnSelectionStateChangedListener {
     fun onSelectionStateChanged(view: View)
-}
-
-@BindingAdapter(value=["isActiveEnrolment"])
-fun View.setAlphaIfActiveEnrolment(person: PersonWithClazzEnrolmentDetails){
-    val currentTime = systemTimeInMillis()
-    alpha = if(currentTime >= person.earliestJoinDate && currentTime <= person.latestDateLeft){
-        1f
-    }else{
-        0.5f
-    }
 }
 
 

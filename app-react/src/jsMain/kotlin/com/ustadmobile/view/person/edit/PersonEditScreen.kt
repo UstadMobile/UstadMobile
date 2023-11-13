@@ -14,10 +14,10 @@ import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadDateField
+import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.view.components.UstadImageSelectButton
 import com.ustadmobile.view.components.UstadMessageIdSelectField
-import mui.system.Container
 import mui.system.Stack
 import mui.system.responsive
 import react.FC
@@ -39,7 +39,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
 
     val strings: StringProvider = useStringProvider()
 
-    Container {
+    UstadStandardContainer {
         Stack {
             spacing = responsive(2)
 

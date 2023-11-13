@@ -6,31 +6,36 @@ import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.whenSubscribed
-import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel.Companion.FILTER_BY_PARENT_UID
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import com.ustadmobile.door.paging.PagingSource
+import app.cash.paging.PagingSource
+import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
+import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
+import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
+import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
+import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer as ContentEntryAndExtras
 import org.kodein.di.DI
 
 data class ContentEntryListUiState(
 
     val filterMode: Int = FILTER_BY_PARENT_UID,
 
-    val contentEntryList: ListPagingSourceFactory<ContentEntryAndExtras> = {
-        EmptyPagingSource()
-    },
+    val contentEntryList: ListPagingSourceFactory<ContentEntry> = { EmptyPagingSource() },
 
     val selectedChipId: Int = FILTER_BY_PARENT_UID,
 
-    val showChips: Boolean = false,
+    val filterOptions: List<MessageIdOption2> = listOf(),
 
     val showHiddenEntries: Boolean = false,
 
@@ -40,9 +45,17 @@ data class ContentEntryListUiState(
 
     val activeSortOption: SortOrderOption = sortOptions.first(),
 
-    val addNewItemVisible: Boolean = false,
+    val createNewFolderItemVisible: Boolean = false,
+
+    val importFromLinkItemVisible: Boolean = false,
+
+    val importFromFileItemVisible: Boolean = false,
 
 ) {
+
+    val showChips: Boolean
+        get() =filterOptions.isNotEmpty()
+
     companion object {
 
         val DEFAULT_SORT_OPTIONS = listOf(
@@ -65,9 +78,16 @@ class ContentEntryListViewModel(
     private val parentEntryUid: Long = savedStateHandle[ARG_PARENT_UID]?.toLong()
         ?: LIBRARY_ROOT_CONTENT_ENTRY_UID
 
-    private val pagingSourceFactory: ListPagingSourceFactory<ContentEntryAndExtras> = {
+    /**
+     * This will be true when the user is selecting content as part of selecting it from ClazzEdit
+     */
+    private val hasCourseBlockArg: Boolean = ContentEntryEditViewModel.ARG_COURSEBLOCK in savedStateHandle.keys
+
+    private val pagingSourceFactory: ListPagingSourceFactory<ContentEntry> = {
         when(_uiState.value.selectedChipId) {
-            FILTER_MY_CONTENT -> activeRepo.contentEntryDao.getContentByOwner(activeUserPersonUid)
+            FILTER_MY_CONTENT -> activeRepo.contentEntryDao.getContentByOwner(
+                activeUserPersonUid
+            )
 
             FILTER_FROM_MY_COURSES -> activeRepo.contentEntryDao.getContentFromMyCourses(
                 activeUserPersonUid
@@ -91,12 +111,11 @@ class ContentEntryListViewModel(
 
             else -> EmptyPagingSource()
         }.also {
-            lastPagingSource?.invalidate()
             lastPagingSource = it
         }
     }
 
-    private var lastPagingSource: PagingSource<Int, ContentEntryAndExtras>? = null
+    private var lastPagingSource: PagingSource<Int, ContentEntry>? = null
 
     init {
         _uiState.update { prev ->
@@ -104,9 +123,16 @@ class ContentEntryListViewModel(
                 contentEntryList = pagingSourceFactory
             )
         }
+
+        val titleOnStart = when {
+            expectedResultDest != null -> systemImpl.getString(MR.strings.select_content)
+            parentEntryUid == LIBRARY_ROOT_CONTENT_ENTRY_UID -> systemImpl.getString(MR.strings.library)
+            else -> null
+        }
+
         _appUiState.update { prev ->
             prev.copy(
-                title = systemImpl.getString(MR.strings.library),
+                title = titleOnStart,
                 fabState = FabUiState(
                     visible = false,
                     text = systemImpl.getString(MR.strings.content),
@@ -115,14 +141,47 @@ class ContentEntryListViewModel(
             )
         }
 
+        //If the user is selecting ContentEntry for a CourseBlock and is not browsing
+        //within library folders.
+        if(hasCourseBlockArg && parentEntryUid == LIBRARY_ROOT_CONTENT_ENTRY_UID) {
+            _uiState.update { prev ->
+                prev.copy(
+                    createNewFolderItemVisible = false,
+                    importFromFileItemVisible = true,
+                    importFromLinkItemVisible = true,
+                    selectedChipId = savedStateHandle[KEY_FILTER_CHIP_ID]?.toInt() ?: FILTER_MY_CONTENT,
+                    filterOptions = listOf(
+                        MessageIdOption2(MR.strings.my_content, FILTER_MY_CONTENT),
+                        MessageIdOption2(MR.strings.from_my_courses, FILTER_FROM_MY_COURSES),
+                        MessageIdOption2(MR.strings.library, FILTER_FROM_LIBRARY)
+                    )
+                )
+            }
+        }
+
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
-                    accountManager.activeAccount.personUid, Role.PERMISSION_CONTENT_INSERT
-                ).collect { hasNewContentPermission ->
-                    _appUiState.update { prev ->
-                        prev.copy(fabState = prev.fabState.copy(visible = hasNewContentPermission))
+                if(!hasCourseBlockArg) {
+                    activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
+                        accountManager.currentAccount.personUid, Role.PERMISSION_CONTENT_INSERT
+                    ).collect { hasNewContentPermission ->
+                        _appUiState.update { prev ->
+                            prev.copy(
+                                fabState = prev.fabState.copy(
+                                    visible = hasNewContentPermission
+                                )
+                            )
+                        }
                     }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            if(titleOnStart == null) {
+                val title = activeRepo.contentEntryDao.findTitleByUidAsync(parentEntryUid)
+                _appUiState.update { prev ->
+                    prev.copy(title = title)
                 }
             }
         }
@@ -146,29 +205,93 @@ class ContentEntryListViewModel(
         )
     }
 
-    fun onClickEntry(entry: ContentEntryAndExtras?) {
+    fun onClickImportFromLink() {
+        navigateToCreateNew(
+            editViewName = ContentEntryImportLinkViewModel.DEST_NAME,
+            extraArgs = buildMap {
+                put(ContentEntryEditViewModel.ARG_LEAF, true.toString())
+                put(ARG_PARENT_UID, parentEntryUid.toString())
+                putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
+            }
+        )
+    }
+
+    fun onImportFile(fileUri: String) {
+        navigateToCreateNew(
+            editViewName = ContentEntryGetMetadataViewModel.DEST_NAME,
+            extraArgs = buildMap {
+                put(ContentEntryGetMetadataViewModel.ARG_URI, fileUri)
+                put(ARG_PARENT_UID, parentEntryUid.toString())
+                putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
+            }
+        )
+    }
+
+    fun onClickEntry(entry: ContentEntry?) {
         if(entry == null)
             return
 
+        //When the user is selecting content from ClazzEdit
+        val courseBlockArg = savedStateHandle[ContentEntryEditViewModel.ARG_COURSEBLOCK]
+        if(entry.leaf && courseBlockArg != null) {
+            val courseBlock = json.decodeFromString(
+                deserializer = CourseBlock.serializer(),
+                string = courseBlockArg,
+            ).shallowCopy {
+                cbTitle = entry.title
+                cbDescription = entry.description
+            }
+
+            navigateForResult(
+                nextViewName = ContentEntryEditViewModel.DEST_NAME,
+                key = ClazzEditViewModel.RESULT_KEY_CONTENTENTRY,
+                currentValue = ContentEntryBlockLanguageAndContentJob(
+                    entry = entry,
+                    block = courseBlock,
+                    contentJob = null,
+                    contentJobItem = null,
+                ),
+                serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
+                overwriteDestination = false
+            )
+            return
+        }
+
+
         if(entry.leaf) {
             navController.navigate(
-                viewName = ContentEntryDetailView.VIEW_NAME,
+                viewName = ContentEntryDetailViewModel.DEST_NAME,
                 args = mapOf(UstadView.ARG_ENTITY_UID to entry.contentEntryUid.toString())
             )
         }else {
             navController.navigate(
                 viewName = DEST_NAME,
-                args = mapOf(
-                    ARG_FILTER to FILTER_BY_PARENT_UID.toString(),
-                    ARG_PARENT_UID to entry.contentEntryUid.toString(),
-                )
+                args = buildMap {
+                    put(ARG_FILTER, FILTER_BY_PARENT_UID.toString())
+                    put(ARG_PARENT_UID, entry.contentEntryUid.toString())
+                    putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
+                    putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_KEY)
+                    putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_VIEWNAME)
+                }
             )
         }
+    }
+
+    fun onClickFilterChip(filterOption: MessageIdOption2) {
+        _uiState.takeIf { it.value.selectedChipId != filterOption.value }?.update { prev ->
+            prev.copy(
+                selectedChipId = filterOption.value
+            )
+        }
+        savedStateHandle[KEY_FILTER_CHIP_ID] = filterOption.value.toString()
+        lastPagingSource?.invalidate()
     }
 
     companion object {
 
         const val DEST_NAME = "ContentEntries"
+
+        const val DEST_NAME_HOME = "ContentEntryListHome"
 
         /**
          * Note: Because picker mode may involve more than one step in the back stack, we need a
@@ -177,8 +300,6 @@ class ContentEntryListViewModel(
         const val DEST_NAME_PICKER = "PickContentEntry"
 
         const val ARG_FILTER = "filter"
-
-        const val ARG_SHOW_FILTER_CHIPS = "showChips"
 
         const val FILTER_BY_PARENT_UID = 1
 
@@ -189,6 +310,8 @@ class ContentEntryListViewModel(
         const val FILTER_FROM_LIBRARY = 4
 
         const val LIBRARY_ROOT_CONTENT_ENTRY_UID = 1L
+
+        private const val KEY_FILTER_CHIP_ID = "chipId"
 
 
     }

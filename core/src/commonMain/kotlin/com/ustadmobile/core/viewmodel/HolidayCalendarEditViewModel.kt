@@ -9,3 +9,12 @@ data class HolidayCalendarEditUiState(
     val holidayList: List<Holiday>? = emptyList()
 
 )
+
+class HolidayCalendarEditViewModel  {
+
+    companion object {
+
+        const val DEST_NAME = "HolidayCalendarEdit"
+
+    }
+}

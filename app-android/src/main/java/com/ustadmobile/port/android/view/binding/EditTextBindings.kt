@@ -9,10 +9,8 @@ import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import com.google.android.material.textfield.TextInputEditText
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.util.ext.systemImpl
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.view.ReportTemplateListFragment.Companion.REPORT_TITLE_TO_ID
 import java.text.MessageFormat
 import java.util.*
 import com.ustadmobile.core.R as CR
@@ -51,29 +49,6 @@ private fun mkGmtOffsetString(rawOffset: Int): String {
 fun TextView.setTimeZoneText(timeZone: TimeZone) {
     text = "${mkGmtOffsetString(timeZone.rawOffset)} ${timeZone.id}"
 }
-
-
-@SuppressLint("SetTextI18n")
-@BindingAdapter("entityRoleText")
-fun TextView.setTimeZoneTextEntity(entityRole: EntityRoleWithNameAndRole?) {
-
-    val scopeText = when (entityRole?.erTableId) {
-        Clazz.TABLE_ID -> {
-            " (" + context.getString(CR.string.clazz) + ")"
-        }
-        School.TABLE_ID -> {
-            " (" + context.getString(CR.string.school) + ")"
-        }
-        Person.TABLE_ID -> {
-            " (" + context.getString(CR.string.person) + ")"
-        }
-        else -> {
-            ""
-        }
-    }
-    text = entityRole?.entityRoleScopeName?:"" + scopeText
-}
-
 
 
 @BindingAdapter(value = ["createNewFormatText", "createNewFormatArg"], requireAll = true)

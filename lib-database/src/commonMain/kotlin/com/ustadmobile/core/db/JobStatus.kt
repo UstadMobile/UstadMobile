@@ -62,16 +62,17 @@ object JobStatus {
 
 
     fun statusToString(status: Int): String {
-        when (status) {
-            NOT_QUEUED -> return "NOT_QUEUED"
-            PAUSED -> return "PAUSED"
-            QUEUED -> return "QUEUED"
-            RUNNING -> return "RUNNING"
-            COMPLETE -> return "COMPLETE"
-            FAILED -> return "FAILED"
+        return when (status) {
+            NOT_QUEUED -> "NOT_QUEUED"
+            QUEUED ->  "QUEUED"
+            WAITING_FOR_CONNECTION -> "WAITING_FOR_CONNECTION"
+            RUNNING -> "RUNNING"
+            PARTIAL_FAILED -> "PARTIAL_FAILED"
+            COMPLETE -> "COMPLETE"
+            FAILED -> "FAILED"
+            CANCELED -> "CANCELED"
+            else -> "other:$status"
         }
-
-        return "" + status
     }
 
 }

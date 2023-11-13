@@ -16,6 +16,8 @@ import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.lib.db.entities.Site
 import io.github.aakira.napier.Napier
 import io.ktor.client.*
@@ -25,7 +27,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.decodeFromString
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -45,7 +46,7 @@ data class LoginUiState(
 class LoginViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-) : UstadViewModel(di, savedStateHandle, Login2View.VIEW_NAME){
+) : UstadViewModel(di, savedStateHandle, DEST_NAME){
 
     private val _uiState = MutableStateFlow(LoginUiState())
 
@@ -64,7 +65,7 @@ class LoginViewModel(
     private var verifiedSite: Site? = null
 
     init {
-        nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzList2View.VIEW_NAME_HOME
+        nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
         serverUrl = savedStateHandle[UstadView.ARG_API_URL] ?: apiUrlConfig.presetApiUrl
             ?: "http://localhost"
@@ -78,6 +79,7 @@ class LoginViewModel(
 
         val baseAppUiState = AppUiState(
             navigationVisible = false,
+            userAccountIconVisible = false,
             title = impl.getString(MR.strings.login),
         )
 
@@ -219,10 +221,10 @@ class LoginViewModel(
             SiteTermsDetailView.ARG_SHOW_ACCEPT_BUTTON to true.toString(),
             SiteTermsDetailView.ARG_USE_DISPLAY_LOCALE to true.toString(),
             UstadView.ARG_POPUPTO_ON_FINISH to
-                    (savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH] ?: Login2View.VIEW_NAME))
+                    (savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH] ?: DEST_NAME))
 
         args.putFromSavedStateIfPresent(savedStateHandle, UstadView.ARG_NEXT)
-        args.putFromSavedStateIfPresent(savedStateHandle, PersonEditView.REGISTER_VIA_LINK)
+        args.putFromSavedStateIfPresent(savedStateHandle, PersonEditViewModel.REGISTER_VIA_LINK)
 
         navController.navigate(RegisterAgeRedirectView.VIEW_NAME, args)
     }
@@ -234,4 +236,9 @@ class LoginViewModel(
 //        }
     }
 
+    companion object {
+
+        const val DEST_NAME = "Login"
+
+    }
 }

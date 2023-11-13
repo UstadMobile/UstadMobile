@@ -7,7 +7,6 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.encodeToStringMap
 import com.ustadmobile.core.util.ext.replace
 import com.ustadmobile.core.util.ext.toTerminologyEntries
-import com.ustadmobile.core.view.CourseTerminologyEditView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.CourseTerminology
@@ -26,7 +25,7 @@ data class CourseTerminologyEditUiState(
 
     val entity: CourseTerminology? = null,
 
-    val fieldsEnabled: Boolean = true,
+    val fieldsEnabled: Boolean = false,
 
     val terminologyTermList: List<TerminologyEntry> = emptyList()
 
@@ -35,9 +34,9 @@ data class CourseTerminologyEditUiState(
 class CourseTerminologyEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-): UstadEditViewModel(di, savedStateHandle, CourseTerminologyEditView.VIEW_NAME) {
+): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
-    private val _uiState = MutableStateFlow(CourseTerminologyEditUiState(fieldsEnabled = false))
+    private val _uiState = MutableStateFlow(CourseTerminologyEditUiState())
 
     val uiState: Flow<CourseTerminologyEditUiState> = _uiState.asStateFlow()
 
@@ -45,11 +44,6 @@ class CourseTerminologyEditViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 title = createEditTitle(MR.strings.add_new_terminology, MR.strings.edit_terminology),
-                actionBarButtonState = ActionBarButtonUiState(
-                    visible = true,
-                    text = systemImpl.getString(MR.strings.save),
-                    onClick = this::onClickSave
-                ),
                 loadingState = LoadingUiState.INDETERMINATE
             )
         }
@@ -76,9 +70,19 @@ class CourseTerminologyEditViewModel(
                     }
                 }
             )
-
             _uiState.update { prev ->
                 prev.copy(fieldsEnabled = true)
+            }
+
+            _appUiState.update { prev ->
+                prev.copy(
+                    actionBarButtonState = ActionBarButtonUiState(
+                        visible = true,
+                        text = systemImpl.getString(MR.strings.save),
+                        onClick = this@CourseTerminologyEditViewModel::onClickSave
+                    ),
+                    loadingState = LoadingUiState.NOT_LOADING,
+                )
             }
         }
     }
@@ -117,13 +121,29 @@ class CourseTerminologyEditViewModel(
 
 
     fun onClickSave() {
+        if(!_uiState.value.fieldsEnabled)
+            return
+
+        _uiState.update { prev ->
+            prev.copy(fieldsEnabled = false)
+        }
+
         viewModelScope.launch {
             val terminology = _uiState.value.entity ?: return@launch
             activeDb.courseTerminologyDao.upsertAsync(terminology)
 
+            _uiState.update { prev ->
+                prev.copy(fieldsEnabled = true)
+            }
+
             //There is no terminology detail view
             finishWithResult(terminology)
         }
+    }
+
+    companion object {
+
+        const val DEST_NAME = "CourseTerminologyEdit"
     }
 
 }

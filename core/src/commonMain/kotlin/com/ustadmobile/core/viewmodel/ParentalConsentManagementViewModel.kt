@@ -32,3 +32,12 @@ data class ParentalConsentManagementUiState(
         get() = personParentJoin?.ppjParentPersonUid  != null
                 && personParentJoin.ppjParentPersonUid == 0L
 }
+
+class ParentalConsentManagementViewModel  {
+
+    companion object {
+
+        const val DEST_NAME = "ParentalConsentManagement"
+
+    }
+}

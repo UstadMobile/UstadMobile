@@ -6,14 +6,15 @@ import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
 import com.ustadmobile.core.util.ext.grantScopedPermission
-import com.ustadmobile.core.view.ClazzEdit2View
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 
-class ClazzDetailOverviewViewModelTest {
+class ClazzDetailOverviewViewModelTest : AbstractMainDispatcherTest() {
 
     @Test
     fun givenClazzExists_whenOnCreateCalled_thenClazzIsSetOnView() {
@@ -61,7 +62,7 @@ class ClazzDetailOverviewViewModelTest {
 
                 viewModel.navCommandFlow.assertItemReceived(timeout = 5.seconds) {
                     val cmd = it as NavigateNavCommand
-                    cmd.viewName == ClazzEdit2View.VIEW_NAME &&
+                    cmd.viewName == ClazzEditViewModel.DEST_NAME &&
                         cmd.args[UstadView.ARG_ENTITY_UID] == testClazz.clazzUid.toString()
                 }
 

@@ -1,10 +1,12 @@
 
 import com.ustadmobile.core.account.*
-import com.ustadmobile.core.db.RepSubscriptionInitListener
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseJs
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.IContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.di.DomainDiModuleJs
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJs
@@ -22,10 +24,12 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
-import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJs
 import com.ustadmobile.util.resolveEndpoint
 import dev.icerock.moko.resources.provider.JsStringProvider
+import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
+import nl.adaptivity.xmlutil.serialization.XML
+import nl.adaptivity.xmlutil.serialization.XmlConfig
 import web.location.location
 import web.url.URLSearchParams
 
@@ -34,6 +38,7 @@ import web.url.URLSearchParams
 /**
  * KodeIn DI builder for JS/Browser.
  */
+@OptIn(ExperimentalXmlUtilApi::class)
 internal fun ustadJsDi(
     dbBuilt: UmAppDatabase,
     dbNodeIdAndAuth: NodeIdAndAuth,
@@ -42,8 +47,8 @@ internal fun ustadJsDi(
     configMap: Map<String, String>,
     stringsProvider: JsStringProvider,
 ) = DI {
-
     import(commonDomainDiModule(EndpointScope.Default))
+    import(DomainDiModuleJs(EndpointScope.Default))
 
     val apiUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
     console.log("Api URL = $apiUrl (location.href = ${location.href}")
@@ -52,7 +57,7 @@ internal fun ustadJsDi(
         stringsProvider
     }
 
-    bind<StringProvider>() with singleton {
+    bind<StringProviderJs>() with singleton {
         val systemImpl: UstadMobileSystemImpl = instance()
         val jsStringProvider: JsStringProvider = instance()
         StringProviderJs(systemImpl.getDisplayedLocale(), jsStringProvider)
@@ -76,7 +81,7 @@ internal fun ustadJsDi(
     }
 
     bind<UstadAccountManager>() with singleton {
-        UstadAccountManager(instance(), this, di)
+        UstadAccountManager(instance(), di)
     }
 
     bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
@@ -92,9 +97,11 @@ internal fun ustadJsDi(
         val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
         val repositoryConfig =  RepositoryConfig.repositoryConfig(
             this,context.url+"UmAppDatabase/",  nodeIdAndAuth.auth,
-            nodeIdAndAuth.nodeId, instance(), instance()
+            nodeIdAndAuth.nodeId,
+            httpClient = instance(),
+            json = instance()
         ){
-            replicationSubscriptionInitListener = RepSubscriptionInitListener()
+
         }
         db.asRepository(repositoryConfig)
     }
@@ -151,4 +158,20 @@ internal fun ustadJsDi(
     bind<Json>() with singleton {
         json
     }
+
+    bind<XML>() with singleton {
+        XML {
+            defaultPolicy {
+                unknownChildHandler  = XmlConfig.IGNORING_UNKNOWN_CHILD_HANDLER
+            }
+        }
+    }
+
+    bind<IContentEntryGetMetaDataFromUriUseCase>() with provider {
+        ContentEntryGetMetaDataFromUriUseCaseJs(
+            navResultReturner = instance(),
+            json = instance(),
+        )
+    }
+
 }

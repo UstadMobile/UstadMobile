@@ -17,3 +17,12 @@ data class LanguageListUiState(
     ),
     val sortOrder: SortOrderOption = sortOptions.first()
 )
+
+class LanguageListViewModel {
+
+    companion object {
+
+        const val DEST_NAME = "LanguageList"
+    }
+
+}

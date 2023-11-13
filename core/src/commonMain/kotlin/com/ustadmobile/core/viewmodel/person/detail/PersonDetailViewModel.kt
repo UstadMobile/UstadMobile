@@ -14,12 +14,14 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 import com.ustadmobile.core.util.ext.whenSubscribed
-import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
-import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.core.viewmodel.DetailViewModel
+import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
+import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
+import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
+import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 
 data class PersonDetailUiState(
 
@@ -71,7 +73,7 @@ data class PersonDetailUiState(
 class PersonDetailViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
-): DetailViewModel<Person>(di, savedStateHandle, PersonDetailView.VIEW_NAME) {
+): DetailViewModel<Person>(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(PersonDetailUiState())
 
@@ -82,7 +84,7 @@ class PersonDetailViewModel(
     init {
         val accountManager: UstadAccountManager by instance()
 
-        val currentUserUid = accountManager.activeSession?.userSession?.usPersonUid ?: 0
+        val currentUserUid = accountManager.currentUserSession.userSession.usPersonUid
 
         val entityUid: Long = savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0
 
@@ -101,7 +103,8 @@ class PersonDetailViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeDb.personDao.findByUidWithDisplayDetailsFlow(entityUid,
+                    activeRepo.personDao.findByUidWithDisplayDetailsFlow(
+                        entityUid,
                         currentUserUid
                     ).collect { person ->
                         _uiState.update { prev -> prev.copy(person = person) }
@@ -115,7 +118,7 @@ class PersonDetailViewModel(
                 }
 
                 launch {
-                    activeDb.personPictureDao.findByPersonUidAsFlow(
+                    activeRepo.personPictureDao.findByPersonUidAsFlow(
                         entityUid
                     ).collect { personPicture ->
                         _uiState.update { prev -> prev.copy(personPicture = personPicture) }
@@ -123,7 +126,7 @@ class PersonDetailViewModel(
                 }
 
                 launch {
-                    activeDb.personDao.personHasPermissionFlow(currentUserUid,
+                    activeRepo.personDao.personHasPermissionFlow(currentUserUid,
                         entityUid, Role.PERMISSION_RESET_PASSWORD
                     ).collect {
                         _uiState.update { prev -> prev.copy(hasChangePasswordPermission = it) }
@@ -131,7 +134,7 @@ class PersonDetailViewModel(
                 }
 
                 launch {
-                    activeDb.personDao.personHasPermissionFlow(currentUserUid, entityUid,
+                    activeRepo.personDao.personHasPermissionFlow(currentUserUid, entityUid,
                         Role.PERMISSION_PERSON_UPDATE
                     ).collect { hasEditPermission ->
                         _appUiState.update { prev ->
@@ -175,18 +178,18 @@ class PersonDetailViewModel(
     }
 
     fun onClickEdit() {
-        navController.navigate(PersonEditView.VIEW_NAME,
+        navController.navigate(PersonEditViewModel.DEST_NAME,
             mapOf(ARG_ENTITY_UID to personUid.toString()))
     }
 
     fun onClickClazz(clazz: ClazzEnrolmentWithClazz) {
-        navController.navigate(ClazzDetailView.VIEW_NAME,
+        navController.navigate(ClazzDetailViewModel.DEST_NAME,
             mapOf(ARG_ENTITY_UID to clazz.clazzEnrolmentClazzUid.toString()))
     }
 
 
     private fun navigateToEditAccount() {
-        navController.navigate(PersonAccountEditView.VIEW_NAME,
+        navController.navigate(PersonAccountEditViewModel.DEST_NAME,
             mapOf(ARG_ENTITY_UID to personUid.toString()))
     }
 
@@ -195,17 +198,22 @@ class PersonDetailViewModel(
     fun onClickChangePassword() = navigateToEditAccount()
 
     fun onClickChat() {
-        navController.navigate(ChatDetailView.VIEW_NAME,
-            mapOf(ARG_PERSON_UID to personUid.toString()))
+
     }
 
     fun onClickManageParentalConsent() {
         val ppjUid = _uiState.value.person?.parentJoin?.ppjUid ?: 0L
         if(ppjUid != 0L) {
-            navController.navigate(ParentalConsentManagementView.VIEW_NAME,
+            navController.navigate(ParentalConsentManagementViewModel.DEST_NAME,
                 mapOf(ARG_ENTITY_UID to ppjUid.toString(),
                     ARG_NEXT to CURRENT_DEST))
         }
+    }
+
+    companion object {
+
+        const val DEST_NAME = "PersonDetailView"
+
     }
 }
 

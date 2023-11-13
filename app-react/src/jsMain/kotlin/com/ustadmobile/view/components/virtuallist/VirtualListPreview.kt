@@ -1,7 +1,7 @@
 package com.ustadmobile.view.components.virtuallist
 
+import app.cash.paging.PagingSourceLoadResultPage
 import com.ustadmobile.core.paging.ListPagingSource
-import com.ustadmobile.door.paging.LoadResult
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
@@ -62,7 +62,7 @@ val VirtualListPreview = FC<Props> {
             infiniteQueryItems(
                 infiniteQueryResult = infiniteQueryResult,
                 dataPagesToItems = { pages ->
-                    pages.mapNotNull { it as? LoadResult.Page<Int, PersonWithDisplayDetails> }.flatMap {
+                    pages.mapNotNull { it as? PagingSourceLoadResultPage<Int, PersonWithDisplayDetails> }.flatMap {
                         it.data
                     }
                 },

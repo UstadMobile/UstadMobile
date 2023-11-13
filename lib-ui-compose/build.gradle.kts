@@ -17,29 +17,32 @@ kotlin {
 
     sourceSets {
         val commonMain by getting {
-
             dependencies {
                 api(project(":core"))
                 api(project(":lib-database"))
-                implementation(compose.runtime)
-                implementation(compose.foundation)
-                implementation(compose.material)
-                implementation(compose.material3)
-                implementation(compose.materialIconsExtended)
+                api(compose.runtime)
+                api(compose.foundation)
+                api(compose.animation)
+                api(compose.material)
+                api(compose.material3)
+                api(compose.materialIconsExtended)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-                implementation(compose.components.resources)
-                implementation(libs.kodein.di)
-                implementation(libs.moko.resources)
-                implementation(libs.moko.resources.compose)
+                api(compose.components.resources)
+                api(libs.kodein.di)
+                api(libs.kodein.di.compose)
+                api(libs.moko.resources)
+                api(libs.moko.resources.compose)
+                api(libs.paging.multiplatform.common)
+                api(libs.paging.multiplatform.compose)
 
                 implementation(libs.richeditor.multiplatform.compose)
 
                 implementation(libs.kotlinx.datetime)
-
-                api(libs.paging.multiplatform.common)
-                api(libs.paging.multiplatform.compose)
-
                 implementation(libs.reorderable.compose)
+                api(libs.door.runtime)
+                api(libs.precompose)
+                api(libs.precompose.viewmodel)
+                implementation(libs.napier)
             }
         }
 
@@ -50,9 +53,11 @@ kotlin {
                 api(libs.androidx.core.ktx)
                 api(libs.androidx.paging.runtime)
                 api(libs.androidx.paging.compose)
-                implementation(compose.material)
-                implementation(libs.android.aztec)
-                implementation(libs.google.android.material)
+                api(libs.androidx.navigation.compose)
+                api(libs.androidx.lifecycle.viewmodel.compose)
+
+//                implementation(compose.material)
+//                implementation(libs.google.android.material)
             }
         }
 

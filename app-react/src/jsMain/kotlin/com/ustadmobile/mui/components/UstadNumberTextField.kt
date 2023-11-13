@@ -16,25 +16,43 @@ external interface UstadNumberTextFieldProps : TextFieldProps {
 
     var numValue: Float
 
+    /**
+     * The numerical value that will be used if the textfield is blank. If not set, defaults to 0
+     */
+    var numValueIfBlank: Float?
+
     var onChange: (Float) -> Unit
 
 }
 
+/**
+ * The effective unset value (e.g. numerical value when the text string is blank)
+ */
+private val UstadNumberTextFieldProps.effectiveValueIfBlank: Float
+    get() = numValueIfBlank ?: 0.toFloat()
+
 val UstadNumberTextField = FC<UstadNumberTextFieldProps> { props ->
 
     var rawValue by useState {
-        if(props.numValue != 0.toFloat()) props.numValue.toString() else ""
+        if(props.numValue != props.effectiveValueIfBlank) props.numValue.toString() else ""
     }
 
     //If props change to something other than what we have set, change rawValue
     useEffect(props.numValue) {
-        if(props.numValue != (rawValue.toIntOrNull()?.toFloat() ?: 0)) {
-            rawValue = props.numValue.toString()
+        if(props.numValue != (rawValue.toIntOrNull()?.toFloat() ?: props.effectiveValueIfBlank)) {
+            //When the value has been reset to the numValueIfBlank, then make the text blank
+            rawValue = if(props.numValue == props.numValueIfBlank) {
+                ""
+            }else {
+                props.numValue.toString()
+            }
         }
     }
 
     TextField {
-        props.getOwnPropertyNames().filter { it != "value" && it != "onChange" }.forEach { propName ->
+        props.getOwnPropertyNames().filter {
+            it != "value" && it != "onChange" && it != "numValue" && it != "numValueIfBlank"
+        }.forEach { propName ->
             asDynamic()[propName] = props.asDynamic()[propName]
         }
 
@@ -46,12 +64,12 @@ val UstadNumberTextField = FC<UstadNumberTextFieldProps> { props ->
 
         value = rawValue
 
-        onChange = {
-            val text = it.target.unsafeCast<HTMLInputElement>().value
+        onChange = { evt ->
+            val text = evt.target.unsafeCast<HTMLInputElement>().value
 
-            val filteredText = text.filter { it.isDigit() }
+            val filteredText = text.filter { it.isDigit() || it == '-' }
             rawValue = filteredText
-            val floatVal = filteredText.toFloatOrNull() ?: 0.toFloat()
+            val floatVal = filteredText.toFloatOrNull() ?: props.effectiveValueIfBlank
             props.onChange(floatVal)
         }
 

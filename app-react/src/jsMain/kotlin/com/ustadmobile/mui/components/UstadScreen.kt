@@ -12,6 +12,6 @@ val UstadScreen = FC<Props> {
     useLoaderData().unsafeCast<UstadScreen>().component()
 }
 
-val ustadScreenLoader: LoaderFunction = { args ->
+val ustadScreenLoader: LoaderFunction<*> = { args ->
     resolve(USTAD_SCREENS.single { it.key == args.params["ustadScreenName"] })
 }

@@ -9,7 +9,7 @@ import io.ktor.server.testing.*
 import org.junit.Test
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.util.ext.*
-import com.ustadmobile.core.view.ParentalConsentManagementView
+import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.*
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -130,7 +130,7 @@ class PersonAuthRegisterRouteTest {
 
         verifyBlocking(mockNotificationSender) {
             sendEmail(eq("parent@email.com"), any(), argWhere {
-                it.contains("https://org.ustadmobile.app/umapp/#/${ParentalConsentManagementView.VIEW_NAME}")
+                it.contains("https://org.ustadmobile.app/umapp/#/${ParentalConsentManagementViewModel.DEST_NAME}")
             })
         }
     }
@@ -170,8 +170,8 @@ class PersonAuthRegisterRouteTest {
             val personAuth2 = db.personAuth2Dao.findByPersonUid(createdAccount.personUid)
             val salt = db.siteDao.getSite()?.authSalt ?: throw IllegalStateException("No auth salt!")
             Assert.assertEquals("PersonAuth2 created with valid hashed password",
-                "secret23".doublePbkdf2Hash(salt, pbkdf2Params,
-                    Endpoint("https://org.ustadmobile.app/"), serverDi.direct.instance()).encodeBase64(),
+                "secret23".doubleEncryptWithPbkdf2V2(salt, pbkdf2Params.iterations, pbkdf2Params.keyLength)
+                    .encodeBase64(),
                 personAuth2?.pauthAuth)
         }
     }
@@ -180,20 +180,28 @@ class PersonAuthRegisterRouteTest {
     fun givenValidCredentials_whenLoginCalled_thenShouldReturnAccount(
 
     )  = testPersonAuthRegisterApplication { client ->
-        val repo: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_REPO)
+        val db: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_DB)
         val pbkdf2Params: Pbkdf2Params by serverDi.instance()
         val httpClient: HttpClient by serverDi.instance()
 
         val person = runBlocking {
-            repo.insertPersonAndGroup(Person().apply {
+            db.insertPersonAndGroup(Person().apply {
                 username = "mary"
                 dateOfBirth = systemTimeInMillis() - (20 * 365 * 24 * 60 * 60 * 1000L)
             })
         }
 
         runBlocking {
-            repo.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params,
-                Endpoint("localhost"), httpClient)
+            val salt = db.siteDao.getSiteAuthSaltAsync()!!
+            db.personAuth2Dao.insertAsync(
+                PersonAuth2().apply {
+                    pauthUid = person.personUid
+                    pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
+                    pauthAuth = "secret23".doubleEncryptWithPbkdf2V2(
+                        salt, pbkdf2Params.iterations, pbkdf2Params.keyLength
+                    ).encodeBase64()
+                }
+            )
         }
 
         val httpResponse = runBlocking {
@@ -215,20 +223,28 @@ class PersonAuthRegisterRouteTest {
     fun givenInvalidCredentials_whenLoginCalled_thenShouldRespondForbidden(
 
     )  = testPersonAuthRegisterApplication { client ->
-        val repo: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_REPO)
+        val db: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_DB)
         val pbkdf2Params: Pbkdf2Params by serverDi.instance()
         val httpClient: HttpClient by serverDi.instance()
 
         val person = runBlocking {
-            repo.insertPersonAndGroup(Person().apply {
+            db.insertPersonAndGroup(Person().apply {
                 username = "mary"
                 dateOfBirth = systemTimeInMillis() - (20 * 365 * 24 * 60 * 60 * 1000L)
             })
         }
 
         runBlocking {
-            repo.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params,
-                Endpoint("localhost"), httpClient)
+            val salt = db.siteDao.getSiteAuthSaltAsync()!!
+            db.personAuth2Dao.insertAsync(
+                PersonAuth2().apply {
+                    pauthUid = person.personUid
+                    pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
+                    pauthAuth = "secret23".doubleEncryptWithPbkdf2V2(
+                        salt, pbkdf2Params.iterations, pbkdf2Params.keyLength
+                    ).encodeBase64()
+                }
+            )
         }
 
         val httpResponse = runBlocking {
@@ -244,21 +260,29 @@ class PersonAuthRegisterRouteTest {
     fun givenParentalConsentIsRequiredButNotGranted_whenLoginCalled_thenShouldRespondFailedDepdency(
 
     ) = testPersonAuthRegisterApplication {
-        val repo: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_REPO)
+        val db: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_DB)
         val pbkdf2Params: Pbkdf2Params by serverDi.instance()
         val httpClient: HttpClient by serverDi.instance()
 
         val person = runBlocking {
-            repo.insertPersonAndGroup(Person().apply {
+            db.insertPersonAndGroup(Person().apply {
                 username = "mary"
                 dateOfBirth = systemTimeInMillis() - (5 * 365 * 24 * 60 * 60 * 1000L)
             })
         }
 
         runBlocking {
-            repo.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params,
-                Endpoint("localhost"), httpClient)
-            repo.personParentJoinDao.insertAsync(PersonParentJoin().apply {
+            val salt = db.siteDao.getSiteAuthSaltAsync()!!
+            db.personAuth2Dao.insertAsync(
+                PersonAuth2().apply {
+                    pauthUid = person.personUid
+                    pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
+                    pauthAuth = "secret23".doubleEncryptWithPbkdf2V2(
+                        salt, pbkdf2Params.iterations, pbkdf2Params.keyLength
+                    ).encodeBase64()
+                }
+            )
+            db.personParentJoinDao.insertAsync(PersonParentJoin().apply {
                 ppjMinorPersonUid = person.personUid
                 ppjStatus = PersonParentJoin.STATUS_UNSET
             })

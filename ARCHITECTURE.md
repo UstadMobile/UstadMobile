@@ -22,9 +22,15 @@
 # Architecture decisions
 
 * **Code sharing using [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html)**. Kotlin Multiplatform (unlike other multiplatform solutions) is not all or nothing. It allows sharing core logic between platforms (Android, JVM, and JS) such as validation logic, SQL queries, ViewModels, and (because it is compiled to native code) can straightforwardly interoperate with native libraries. Native apps (e.g. on Android/desktop) can access the full platform network stack as needed to use Bluetooth APIs, wifi APIs, etc. Each platform can provide a native UI and native performance.
-* **Database driven**: data (e.g. user details, progress, etc) is stored and updated on the local database on the Android / desktop app, then sync’d when a connection is available.  The web version will make REST requests to/from the server directly. This makes offline-first development far more straightforward: each component simply calls functions to update the database and does not need to worry about the online/offline state or the sync itself.
-    * Data is synced (to the server, potentially via a local device e.g. teacher device) using Door. [Door](https://www.github.com/UstadMobile/door) makes [Room](https://developer.android.com/training/data-storage/room) databases work on Kotlin Multiplatform (e.g. provides support to run the same queries on both the client and the backend). Door runs a selective sync to sync only the data select on any particular device. Data can be pulled (e.g. when accessing a particular screen) or pushed (e.g. when a user selects a course to be synced for offline use.
-    * The web version runs an HTTP rest request directly to the backend server in lieu of the database calls.
+* **Offline-first data layer**: data (e.g. user details, progress, content catalog, etc) is accessed
+  via an offline-first datasource. Changes are made to the local
+  database and updated to/from the server as/when a connection is available. This is done using
+  [Door](https://www.github.com/UstadMobile/door). Data can be pushed (e.g. if a user selects to 
+  sync a particular course or other data set) or pulled on-demand (e.g. when accessing a particular
+  screen). Not all data a user can access is synced because this leads to forcing users to wait for 
+  a sync to complete and often wastes a lot of bandwidth and storage (especially when a user e.g.
+  admin might have access to a lot of data that they are very unlikely to access at a granular 
+  level).
 * **Follow Android architecture recommendations** for [layered architecture](https://developer.android.com/topic/architecture/recommendations#layered-architecture), [UI layer](https://developer.android.com/topic/architecture/recommendations#ui-layer), [ViewModel](https://developer.android.com/topic/architecture/recommendations#viewmodel), [Models](https://developer.android.com/topic/architecture/recommendations#models).  Business logic is contained in a ViewModel which provides a Flow of UiState data (e.g. the entity/entities being displayed to the user, validation messages, etc). Events are passed to the ViewModel, which then updates the UiState. See [CODING-STYLE.md](CODING-STYLE.md).
 * **Testing: unit, integration, end-to-end** it is critical for the app to work as expected for users without needing manual testing for all key functionality. Use [Maestro](https://maestro.dev) for Android end-to-end, [Cypress](https://cypress.io/) for the web/desktop.   
 
@@ -35,5 +41,30 @@
 * **Web client**: React app written in Kotlin using Kotlin/JS, [kotlin-wrappers](https://github.com/JetBrains/kotlin-wrappers) for [React](https://react.dev) and [MUI user interface](https://mui.com/). Screens are built as functional React components and reuse the same ViewModel used on Android. See [app-react](app-react),
 * **Desktop**: Combination of the backend http server and the web user interface in a webview via [WebViewKo](https://github.com/Winterreisender/webviewko). This provides an application that can work offline on a Windows or Linux PC.
 
+# Offline-first content
 
+Content that is to be accessible offline should behave as outlined below. Content can be hosted by
+the Ustad server, however it can also be hosted by any other platform that provides an endpoint that
+complies with the guidelines below. Users can upload content files (e.g. videos, epubs, H5P, 
+TinCan zip, PDF, etc)to a server, it will then provide a URL for that content which complies with the 
+steps outlined below. This allows content to be added to a course or library in a given system without
+being stored on that particular server (e.g. where various schools each have their own instance with 
+a separate URL but share common content).
+
+* Any version of a piece of content should be accessible via a URL and have an associated sitemap.xml eg.: 
+  http(s)://server.com/api/content/contentEntryUid/versionId/ . The sitemap.xml should list all urls
+  required for use of the content.
+* The sitemap.xml SHOULD have the sha-256 checksum of each static resource to allow the client to 
+  avoid downloading
+  the url if it already has the same data (e.g. a resource such as an image, Javascript, etc that is
+  used in another content item), even where that item would otherwise have a different url. The
+  sha256 checksum should match the value that would be provided for 
+  [Subresource Integrity](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity)
+  e.g. it must apply for the entire body and should be applied before any transfer-encoding 
+  (e.g. gzip).
+* When opening a content piece the client will first load the sitemap.xml. For each request, where 
+  the SHA-256 checksum is known, the client will use local data if it already has a copy of the given
+  resource, otherwise it will download the resource from the given url. If a user selects to make a
+  content piece available offline, it will download all the resources listed in sitemap.xml that are
+  not yet stored locally.
 

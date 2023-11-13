@@ -10,13 +10,13 @@ import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.BuildConfig
 import com.ustadmobile.core.account.*
-import com.ustadmobile.core.assignment.ClazzAssignmentIncomingReplicationListener
 import com.ustadmobile.core.catalog.contenttype.*
+import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentJobManagerAndroid
-import com.ustadmobile.core.contentjob.ContentPluginManager
+import com.ustadmobile.core.contentjob.ContentImportersManager
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
@@ -36,7 +36,6 @@ import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.addIncomingReplicationListener
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
@@ -56,8 +55,6 @@ import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.net.URI
-import java.util.concurrent.Executors
-import com.ustadmobile.core.db.dao.commitLiveConnectivityStatus
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.di.commonDomainDiModule
@@ -101,7 +98,7 @@ class UstadApp : Application(), DIAware {
         }
 
         bind<UstadAccountManager>() with singleton {
-            UstadAccountManager(instance(), applicationContext, di)
+            UstadAccountManager(instance(), di)
         }
 
         bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
@@ -122,10 +119,7 @@ class UstadApp : Application(), DIAware {
                 .addCallback(ContentJobItemTriggersCallback())
                 .addMigrations(*migrationList().toTypedArray())
                 .build()
-                .also {
-                    val networkManager: NetworkManagerBle = di.direct.instance()
-                    it.connectivityStatusDao.commitLiveConnectivityStatus(networkManager.connectivityStatus)
-                }
+
         }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
@@ -136,12 +130,7 @@ class UstadApp : Application(), DIAware {
                     instance(), instance()
             ) {
                 useReplicationSubscription = true
-                replicationSubscriptionInitListener = RepSubscriptionInitListener()
-            }).also {
-                (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
-                it.addIncomingReplicationListener(
-                    ClazzAssignmentIncomingReplicationListener(context, di))
-            }
+            })
         }
 
         bind<ContainerStorageManager> () with scoped(EndpointScope.Default).singleton{
@@ -156,11 +145,6 @@ class UstadApp : Application(), DIAware {
             containerFolder
         }
 
-        bind<ConnectivityLiveData>() with scoped(EndpointScope.Default).singleton {
-            val db: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_DB)
-            ConnectivityLiveData(db.connectivityStatusDao.statusLive())
-        }
-
         bind<EmbeddedHTTPD>() with singleton {
             EmbeddedHTTPD(0, di).also {
                 it.UmAppDatabase_AddUriMapping(false, "/:endpoint/UmAppDatabase", di)
@@ -169,12 +153,6 @@ class UstadApp : Application(), DIAware {
             }
         }
 
-        bind<NetworkManagerBle>() with singleton {
-            val coroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
-            NetworkManagerBle(applicationContext, di, coroutineDispatcher).also {
-                it.onCreate()
-            }
-        }
 
         bind<ContainerMounter>() with singleton { instance<EmbeddedHTTPD>() }
 
@@ -189,49 +167,12 @@ class UstadApp : Application(), DIAware {
         }
 
 
-        bind<EpubTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            EpubTypePluginCommonJvm(applicationContext, context, di)
+        bind<EpubContentImporterCommonJvm>() with scoped(EndpointScope.Default).singleton{
+            EpubContentImporterCommonJvm(applicationContext, context, di)
         }
 
-        bind<XapiTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            XapiTypePluginCommonJvm(applicationContext, context, di)
-        }
-
-        bind<H5PTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            H5PTypePluginCommonJvm(applicationContext, context, di)
-        }
-
-        bind<VideoTypePluginAndroid>() with scoped(EndpointScope.Default).singleton{
-            VideoTypePluginAndroid(applicationContext, context, di)
-        }
-
-        bind<PDFTypePlugin>() with scoped(EndpointScope.Default).singleton{
-            PDFPluginAndroid(applicationContext, context, di)
-        }
-
-        bind<ContainerDownloadPlugin>() with scoped(EndpointScope.Default).singleton{
-            ContainerDownloadPlugin(applicationContext, context, di)
-        }
-
-        bind<DeleteContentEntryPlugin>() with scoped(EndpointScope.Default).singleton{
-            DeleteContentEntryPlugin(applicationContext, context, di)
-        }
-
-        bind<FolderIndexerPlugin>() with scoped(EndpointScope.Default).singleton{
-            FolderIndexerPlugin(applicationContext, context, di)
-        }
-
-        bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
-            ContentPluginManager(listOf(
-                    di.on(context).direct.instance<EpubTypePluginCommonJvm>(),
-                    di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
-                    di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
-                    di.on(context).direct.instance<VideoTypePluginAndroid>(),
-                    di.on(context).direct.instance<PDFTypePlugin>(),
-                    di.on(context).direct.instance<FolderIndexerPlugin>(),
-                    di.on(context).direct.instance<ContainerDownloadPlugin>(),
-                    di.on(context).direct.instance<DeleteContentEntryPlugin>(),
-                    ContentEntryBranchDownloadPlugin(applicationContext, context, di)))
+        bind<ContentImportersManager>() with scoped(EndpointScope.Default).singleton {
+            ContentImportersManager(listOf())
         }
 
         bind<ContentJobManager>() with singleton {
@@ -297,7 +238,6 @@ class UstadApp : Application(), DIAware {
         registerContextTranslator { call: NanoHttpdCall -> Endpoint(call.urlParams["endpoint"] ?: "notfound")}
 
         onReady {
-            instance<NetworkManagerBle>()
             instance<EmbeddedHTTPD>()
             instance<ConnectionManager>().start()
 

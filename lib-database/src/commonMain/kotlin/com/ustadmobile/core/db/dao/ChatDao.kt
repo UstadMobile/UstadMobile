@@ -4,71 +4,12 @@ import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.door.paging.DataSourceFactory
+import app.cash.paging.PagingSource
 import com.ustadmobile.lib.db.entities.*
 
 @DoorDao
 @Repository
 expect abstract class ChatDao: BaseDao<Chat>{
-
-    @Query("""
-     REPLACE INTO chatReplicate(chatPk, chatDestination)
-      SELECT DISTINCT Chat.chatUid AS chatPk,
-             :newNodeId AS chatDestination
-        FROM UserSession 
-             JOIN Chat ON 
-                  ((Chat.chatUid IN 
-                       (SELECT ChatMember.chatMemberChatUid 
-                          FROM ChatMember
-                         WHERE ChatMember.chatMemberPersonUid = UserSession.usPersonUid))
-                   OR UserSession.usSessionType = ${UserSession.TYPE_UPSTREAM})
-                  AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE} 
-       WHERE UserSession.usClientNodeId = :newNodeId
-         AND Chat.chatLct != COALESCE(
-             (SELECT chatVersionId
-                FROM chatReplicate
-               WHERE chatPk = Chat.chatUid
-                 AND chatDestination = :newNodeId), 0) 
-      /*psql ON CONFLICT(chatPk, chatDestination) DO UPDATE
-             SET chatPending = true
-      */       
-    """)
-    @ReplicationRunOnNewNode
-    @ReplicationCheckPendingNotificationsFor([Chat::class])
-    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
-
-
-    @Query("""
-         REPLACE INTO chatReplicate(chatPk, chatDestination)
-          SELECT DISTINCT Chat.chatUid AS chatUid,
-                 UserSession.usClientNodeId AS chatDestination
-            FROM ChangeLog
-                 JOIN Chat
-                      ON ChangeLog.chTableId = ${Chat.TABLE_ID}
-                         AND ChangeLog.chEntityPk = Chat.chatUid
-                 JOIN UserSession ON 
-                      ((UserSession.usPersonUid IN 
-                           (SELECT ChatMember.chatMemberPersonUid 
-                              FROM ChatMember 
-                             WHERE ChatMember.chatMemberChatUid = Chat.chatUid))
-                       OR UserSession.usSessionType = ${UserSession.TYPE_UPSTREAM} )
-                      AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-           WHERE UserSession.usClientNodeId != (
-                 SELECT nodeClientId 
-                   FROM SyncNode
-                  LIMIT 1)
-             AND Chat.chatLct != COALESCE(
-                 (SELECT chatVersionId
-                    FROM chatReplicate
-                   WHERE chatPk = Chat.chatUid
-                     AND chatDestination = UserSession.usClientNodeId), 0)
-         /*psql ON CONFLICT(chatPk, chatDestination) DO UPDATE
-             SET chatPending = true
-          */               
-    """)
-    @ReplicationRunOnChange([Chat::class])
-    @ReplicationCheckPendingNotificationsFor([Chat::class])
-    abstract suspend fun replicateOnChange()
 
 
 
@@ -179,7 +120,7 @@ expect abstract class ChatDao: BaseDao<Chat>{
          ORDER BY latestMessageTimestamp DESC
     """)
     abstract fun findAllChatsForUser(searchBit: String, personUid: Long)
-        : DataSourceFactory<Int, ChatWithLatestMessageAndCount>
+        : PagingSource<Int, ChatWithLatestMessageAndCount>
 
 
     @Query("""

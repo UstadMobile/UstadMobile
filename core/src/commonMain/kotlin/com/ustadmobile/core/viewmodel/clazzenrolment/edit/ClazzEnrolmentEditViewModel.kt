@@ -1,11 +1,12 @@
 package com.ustadmobile.core.viewmodel.clazzenrolment.edit
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
+import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MS_PER_HOUR
-import com.ustadmobile.core.util.ext.processEnrolmentIntoClass
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -31,7 +32,7 @@ data class ClazzEnrolmentEditUiState(
 
     val endDateError: String? = null,
 
-    val fieldsEnabled: Boolean = true,
+    val fieldsEnabled: Boolean = false,
 
     val courseTerminology: CourseTerminology? = null,
 
@@ -47,6 +48,7 @@ data class ClazzEnrolmentEditUiState(
 class ClazzEnrolmentEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
+    private val enrolIntoCourseUseCase: EnrolIntoCourseUseCase = EnrolIntoCourseUseCase(),
 ): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(ClazzEnrolmentEditUiState(fieldsEnabled = false))
@@ -61,16 +63,7 @@ class ClazzEnrolmentEditViewModel(
                     newEntityStringResource = MR.strings.new_enrolment,
                     editEntityStringResource = MR.strings.edit_enrolment,
                 ),
-                actionBarButtonState = ActionBarButtonUiState(
-                    visible = true,
-                    text = systemImpl.getString(MR.strings.save),
-                    onClick = this::onClickSave
-                )
             )
-        }
-
-        _uiState.update { prev ->
-            prev.copy(fieldsEnabled = false)
         }
 
         viewModelScope.launch {
@@ -131,7 +124,16 @@ class ClazzEnrolmentEditViewModel(
                 )
             }
 
-            loadingState = LoadingUiState.NOT_LOADING
+            _appUiState.update { prev ->
+                prev.copy(
+                    loadingState = LoadingUiState.NOT_LOADING,
+                    actionBarButtonState = ActionBarButtonUiState(
+                        visible = true,
+                        text = systemImpl.getString(MR.strings.save),
+                        onClick = this@ClazzEnrolmentEditViewModel::onClickSave
+                    )
+                )
+            }
         }
     }
 
@@ -171,6 +173,11 @@ class ClazzEnrolmentEditViewModel(
             return
 
         val entity = _uiState.value.clazzEnrolment ?: return
+        val timeZoneVal = entity.timeZone
+        if(timeZoneVal == null) {
+            snackDispatcher.showSnackBar(Snack(message = "Error: no time zone for course"))
+            return
+        }
 
         loadingState = LoadingUiState.INDETERMINATE
         _uiState.update { prev ->
@@ -212,7 +219,12 @@ class ClazzEnrolmentEditViewModel(
 
         viewModelScope.launch {
             if(entityUidArg == 0L) {
-                activeDb.processEnrolmentIntoClass(entity)
+                enrolIntoCourseUseCase(
+                    enrolment = entity,
+                    db = activeDb,
+                    repo = activeRepo,
+                    timeZoneId = timeZoneVal
+                )
             }else {
                 activeDb.clazzEnrolmentDao.updateAsync(entity)
             }

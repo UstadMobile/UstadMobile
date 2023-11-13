@@ -13,7 +13,6 @@ import androidx.annotation.Keep
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.coroutineScope
 import androidx.recyclerview.widget.*
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityEpubContentBinding
@@ -21,19 +20,16 @@ import com.toughra.ustadmobile.databinding.ItemEpubcontentViewBinding
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.controller.EpubContentPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
-import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.dpAsPx
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.EpubContentView
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.port.android.view.ext.adjustHeightToDisplayHeight
 import com.ustadmobile.port.android.view.ext.adjustHeightToWrapContent
-import com.ustadmobile.core.util.ext.dpAsPx
-import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.port.android.view.ext.scrollToAnchor
-import kotlinx.coroutines.CoroutineScope
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
-import org.kodein.di.android.x.closestDI
 import org.kodein.di.bind
 import org.kodein.di.provider
 
@@ -65,10 +61,6 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
     override val di by DI.lazy {
         val closestDi: DI by closestDI(applicationContext)
         extend(closestDi)
-
-        bind<CoroutineScope>(DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with provider {
-            lifecycle.coroutineScope
-        }
 
         bind<LifecycleOwner>() with provider {
             this@EpubContentActivity

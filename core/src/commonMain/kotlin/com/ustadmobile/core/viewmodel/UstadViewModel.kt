@@ -9,12 +9,14 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.*
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
@@ -23,6 +25,8 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
+import moe.tlaster.precompose.viewmodel.ViewModel as PreComposeViewModel
+import moe.tlaster.precompose.viewmodel.viewModelScope as preComposeViewModelScope
 
 /**
  * @param di the KodeIn DI
@@ -36,23 +40,27 @@ abstract class UstadViewModel(
     override val di: DI,
     protected val savedStateHandle: UstadSavedStateHandle,
     protected val destinationName: String,
-): ViewModel(savedStateHandle), DIAware {
+): PreComposeViewModel(), DIAware {
 
     protected val navController = CommandFlowUstadNavController()
 
     val navCommandFlow = navController.commandFlow
 
+    @Suppress("PropertyName")
     protected val _appUiState = MutableStateFlow(AppUiState())
 
     val appUiState: Flow<AppUiState> = _appUiState.asStateFlow()
 
     protected val accountManager: UstadAccountManager by instance()
 
+    val viewModelScope: CoroutineScope
+        get() = preComposeViewModelScope
+
     /**
      * Shorthand to get the person uid of the active user (if any).
      */
     protected val activeUserPersonUid: Long
-        get() = accountManager.activeSession?.person?.personUid ?: 0
+        get() = accountManager.currentUserSession.person.personUid
 
     protected val activeDb: UmAppDatabase by on(accountManager.activeEndpoint)
         .instance(tag = DoorTag.TAG_DB)
@@ -219,11 +227,15 @@ abstract class UstadViewModel(
     ) {
         val navArgs = args.toMutableMap()
 
-        if(!args.containsKey(UstadView.ARG_RESULT_DEST_KEY) || overwriteDestination)
-            navArgs[UstadView.ARG_RESULT_DEST_KEY] = key
+        navArgs.takeIf { !overwriteDestination }?.putFromSavedStateIfPresent(ARG_RESULT_DEST_KEY)
 
-        if(!args.containsKey(UstadView.ARG_RESULT_DEST_VIEWNAME) || overwriteDestination)
-            navArgs[UstadView.ARG_RESULT_DEST_VIEWNAME] = destinationName
+        if(!navArgs.containsKey(ARG_RESULT_DEST_KEY) || overwriteDestination)
+            navArgs[ARG_RESULT_DEST_KEY] = key
+
+        navArgs.takeIf { !overwriteDestination }?.putFromSavedStateIfPresent(ARG_RESULT_DEST_VIEWNAME)
+
+        if(!navArgs.containsKey(ARG_RESULT_DEST_VIEWNAME) || overwriteDestination)
+            navArgs[ARG_RESULT_DEST_VIEWNAME] = destinationName
 
         if(currentValue != null) {
             navArgs[UstadEditView.ARG_ENTITY_JSON] = json.encodeToString(serializer, currentValue)
@@ -241,8 +253,8 @@ abstract class UstadViewModel(
             viewName = HtmlEditViewModel.DEST_NAME,
             args = mapOf(
                 HtmlEditViewModel.ARG_HTML to (currentValue ?: ""),
-                UstadView.ARG_RESULT_DEST_KEY to resultKey,
-                UstadView.ARG_RESULT_DEST_VIEWNAME to destinationName,
+                ARG_RESULT_DEST_KEY to resultKey,
+                ARG_RESULT_DEST_VIEWNAME to destinationName,
             ) + extraArgs
         )
     }
@@ -289,19 +301,27 @@ abstract class UstadViewModel(
             uiUpdate(dbVal)
         }
 
-        try {
+        return try {
             val repoVal = onLoadFromDb(activeRepo) ?: makeDefault()
             if(repoVal != null)
                 savedStateHandle.setJson(savedStateKey, serializer, repoVal)
             uiUpdate(repoVal)
-            return repoVal
+            repoVal
         }catch(e: Exception) {
             //could happen when connectivity is not so good
             if(dbVal != null)
                 savedStateHandle.setJson(savedStateKey, serializer, dbVal)
 
-            return dbVal ?: makeDefault().also(uiUpdate)
+            dbVal ?: makeDefault().also(uiUpdate)
         }
+    }
+
+    /**
+     * If the given key is present in the savedStateHandle for this ViewModel, then put it into
+     * the Receiver MutableMap. This can be convenient for forwarding arguments when navigating
+     */
+    fun MutableMap<String, String>.putFromSavedStateIfPresent(key: String) {
+        putFromSavedStateIfPresent(savedStateHandle, key)
     }
 
 
@@ -316,11 +336,6 @@ abstract class UstadViewModel(
 
         const val KEY_INIT_STATE = "initState"
 
-        /**
-         * Used to store the time that the viwemodel has first initialized. This
-         */
-        const val KEY_FIRST_INIT_TIME = "firstInit"
-
         const val RESULT_KEY_HTML_DESC = "description"
 
         const val ARG_TIME_ZONE = "timeZone"
@@ -328,6 +343,26 @@ abstract class UstadViewModel(
         const val ARG_PARENT_UID = "parentUid"
 
         const val ARG_COURSE_BLOCK_UID = "courseBlockUid"
+
+        const val ARG_ENTITY_UID = "entityUid"
+
+        /**
+         * Used by Login and SiteEnterLink
+         */
+        const val ARG_SERVER_URL = "serverUrl"
+
+        /**
+         * Commonly used to pass the next view uri to go to after completing an action e.g. after
+         * login, account selection, registration, etc.
+         */
+        const val ARG_NEXT = "next"
+
+        /**
+         * Used to 'enforce' a minimum age policy for certain screens (e.g. parent - child consent
+         * management). This can be used on AccountList to show only adult accounts (e.g.
+         * date of birth < MAX DATE OF BIRTH), or LoginPresenter where an adult account is required.
+         */
+        const val ARG_MAX_DATE_OF_BIRTH = "maxDob"
 
     }
 

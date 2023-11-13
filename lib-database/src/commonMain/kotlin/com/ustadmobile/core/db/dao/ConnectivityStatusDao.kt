@@ -2,18 +2,14 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.*
 import com.ustadmobile.door.annotation.DoorDao
-import com.ustadmobile.door.lifecycle.LiveData
-import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.door.lifecycle.Observer
+import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 @DoorDao
 expect abstract class ConnectivityStatusDao {
 
     @Query("SELECT ConnectivityStatus.* FROM ConnectivityStatus LIMIT 1")
-    abstract fun statusLive(): LiveData<ConnectivityStatus?>
+    abstract fun statusLive(): Flow<ConnectivityStatus?>
 
     @Query("SELECT ConnectivityStatus.* FROM ConnectivityStatus LIMIT 1")
     abstract fun status(): ConnectivityStatus?

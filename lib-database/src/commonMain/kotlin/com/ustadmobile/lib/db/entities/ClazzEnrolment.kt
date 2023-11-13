@@ -26,21 +26,18 @@ import kotlinx.serialization.Serializable
     //Index for streamlining ClazzList where the number of users is counted by role
     Index(value = ["clazzEnrolmentClazzUid", "clazzEnrolmentRole"])
 ])
-@ReplicateEntity(tableId = TABLE_ID, tracker = ClazzEnrolmentReplicate::class,
-    priority = ReplicateEntity.HIGHEST_PRIORITY + 1)
+@ReplicateEntity(
+    tableId = TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
 @Triggers(arrayOf(
      Trigger(
          name = "clazzenrolment_remote_insert",
          order = Trigger.Order.INSTEAD_OF,
          on = Trigger.On.RECEIVEVIEW,
          events = [Trigger.Event.INSERT],
-         sqlStatements = [
-             """REPLACE INTO ClazzEnrolment(clazzEnrolmentUid, clazzEnrolmentPersonUid, clazzEnrolmentClazzUid, clazzEnrolmentDateJoined, clazzEnrolmentDateLeft, clazzEnrolmentRole, clazzEnrolmentAttendancePercentage, clazzEnrolmentActive, clazzEnrolmentLeavingReasonUid, clazzEnrolmentOutcome, clazzEnrolmentLocalChangeSeqNum, clazzEnrolmentMasterChangeSeqNum, clazzEnrolmentLastChangedBy, clazzEnrolmentLct) 
-             VALUES (NEW.clazzEnrolmentUid, NEW.clazzEnrolmentPersonUid, NEW.clazzEnrolmentClazzUid, NEW.clazzEnrolmentDateJoined, NEW.clazzEnrolmentDateLeft, NEW.clazzEnrolmentRole, NEW.clazzEnrolmentAttendancePercentage, NEW.clazzEnrolmentActive, NEW.clazzEnrolmentLeavingReasonUid, NEW.clazzEnrolmentOutcome, NEW.clazzEnrolmentLocalChangeSeqNum, NEW.clazzEnrolmentMasterChangeSeqNum, NEW.clazzEnrolmentLastChangedBy, NEW.clazzEnrolmentLct) 
-             /*psql ON CONFLICT (clazzEnrolmentUid) DO UPDATE 
-             SET clazzEnrolmentPersonUid = EXCLUDED.clazzEnrolmentPersonUid, clazzEnrolmentClazzUid = EXCLUDED.clazzEnrolmentClazzUid, clazzEnrolmentDateJoined = EXCLUDED.clazzEnrolmentDateJoined, clazzEnrolmentDateLeft = EXCLUDED.clazzEnrolmentDateLeft, clazzEnrolmentRole = EXCLUDED.clazzEnrolmentRole, clazzEnrolmentAttendancePercentage = EXCLUDED.clazzEnrolmentAttendancePercentage, clazzEnrolmentActive = EXCLUDED.clazzEnrolmentActive, clazzEnrolmentLeavingReasonUid = EXCLUDED.clazzEnrolmentLeavingReasonUid, clazzEnrolmentOutcome = EXCLUDED.clazzEnrolmentOutcome, clazzEnrolmentLocalChangeSeqNum = EXCLUDED.clazzEnrolmentLocalChangeSeqNum, clazzEnrolmentMasterChangeSeqNum = EXCLUDED.clazzEnrolmentMasterChangeSeqNum, clazzEnrolmentLastChangedBy = EXCLUDED.clazzEnrolmentLastChangedBy, clazzEnrolmentLct = EXCLUDED.clazzEnrolmentLct
-             */"""
-         ]
+         conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+         sqlStatements = [TRIGGER_UPSERT],
      )
 ))
 @Serializable
@@ -88,8 +85,8 @@ open class ClazzEnrolment()  {
     @LastChangedBy
     var clazzEnrolmentLastChangedBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var clazzEnrolmentLct: Long = 0
 
     constructor(clazzUid: Long, personUid: Long) : this() {

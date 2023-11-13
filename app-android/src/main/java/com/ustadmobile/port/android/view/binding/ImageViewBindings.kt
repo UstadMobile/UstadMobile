@@ -29,7 +29,7 @@ fun ImageView.setImageFilePath(imageFilePath: String?, fallbackDrawable: Drawabl
     setTag(R.id.tag_imagefilepath, imageFilePath)
     val di: DI = (context.applicationContext as DIAware).di
     val accountManager: UstadAccountManager = di.direct.instance()
-    val repo: UmAppDatabase = di.direct.on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
+    val repo: UmAppDatabase = di.direct.on(accountManager.currentAccount).instance(tag = DoorTag.TAG_REPO)
     val uriResolved = imageFilePath?.let { repo.resolveAttachmentAndroidUri(it) }
 
     val drawable = fallbackDrawable?: ContextCompat.getDrawable(context,android.R.color.transparent)
@@ -121,7 +121,7 @@ private fun ImageView.updateImageFromForeignKey() {
 
         foreignKeyPropsVal.currentJob = GlobalScope.async {
             val accountManager : UstadAccountManager = di.direct.instance()
-            val endpointUrl = foreignKeyPropsVal.foreignKeyEndpoint ?: accountManager.activeAccount.endpointUrl
+            val endpointUrl = foreignKeyPropsVal.foreignKeyEndpoint ?: accountManager.currentAccount.endpointUrl
             val repo : UmAppDatabase = di.direct.on(Endpoint(endpointUrl)).instance(DoorTag.TAG_REPO)
             repo.onDbThenRepoWithTimeout(10000) { dbToUse: UmAppDatabase, lastResult: Uri? ->
                 val uri = withTimeoutOrNull(10000) {
@@ -162,12 +162,6 @@ private fun ImageView.updateImageFromForeignKey() {
             }
         }
     }
-}
-
-@BindingAdapter("customFieldIcon")
-fun ImageView.setCustomFieldIcon(customField: CustomField?) {
-    val drawableId = ICON_ID_MAP[customField?.customFieldIconId ?: 0] ?: android.R.color.transparent
-    setImageDrawable(ContextCompat.getDrawable(context, drawableId))
 }
 
 @BindingAdapter("attendanceTint")
@@ -290,14 +284,6 @@ fun ImageView.isContentCompleteImage(person: PersonWithSessionsDisplay){
         context.getString(CR.string.incomplete)
         visibility = View.INVISIBLE
     }
-}
-
-private val ICON_ID_MAP : Map<Int, Int> by lazy {
-    mapOf(CustomField.ICON_PHONE to R.drawable.ic_phone_black_24dp,
-        CustomField.ICON_PERSON to R.drawable.ic_person_black_24dp,
-        CustomField.ICON_CALENDAR to R.drawable.ic_event_black_24dp,
-        CustomField.ICON_EMAIL to R.drawable.ic_email_black_24dp,
-        CustomField.ICON_ADDRESS to R.drawable.ic_location_pin_24dp)
 }
 
 @BindingAdapter("imageResIdInt")

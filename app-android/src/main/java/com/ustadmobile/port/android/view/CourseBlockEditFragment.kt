@@ -21,16 +21,11 @@ import com.ustadmobile.port.android.view.composable.UstadCourseBlockEdit
 
 class CourseBlockEditFragment: UstadBaseMvvmFragment() {
 
-    private val viewModel: CourseBlockEditViewModel by ustadViewModels(::CourseBlockEditViewModel)
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
-        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
-
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
                 ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
@@ -38,7 +33,7 @@ class CourseBlockEditFragment: UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    CourseBlockEditScreen(viewModel)
+
                 }
             }
         }

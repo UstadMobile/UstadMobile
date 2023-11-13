@@ -2,10 +2,10 @@ package com.ustadmobile.core.viewmodel.clazzenrolment.list
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.whenSubscribed
-import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
+import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.lib.db.entities.CourseTerminology
@@ -148,7 +148,7 @@ class ClazzEnrolmentListViewModel(
     }
 
     fun onClickViewProfile() {
-        navController.navigate(PersonDetailView.VIEW_NAME,
+        navController.navigate(PersonDetailViewModel.DEST_NAME,
             mapOf(UstadView.ARG_ENTITY_UID to argPersonUid.toString())
         )
     }

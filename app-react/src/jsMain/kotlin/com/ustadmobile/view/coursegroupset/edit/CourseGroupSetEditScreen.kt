@@ -12,6 +12,7 @@ import com.ustadmobile.lib.db.entities.CourseGroupMemberAndName
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadNumberTextField
+import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadSelectField
 import web.cssom.px
@@ -34,9 +35,7 @@ val CourseGroupSetEditComponent2 = FC<CourseGroupSetEditProps> { props ->
 
     val strings = useStringProvider()
 
-    Container{
-        maxWidth = "lg"
-
+    UstadStandardContainer {
         Stack{
             direction = responsive(StackDirection.column)
             spacing = responsive(26.px)

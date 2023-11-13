@@ -8,7 +8,10 @@ import kotlinx.serialization.Serializable
 @Entity
 @Serializable
 @EntityWithAttachment
-@ReplicateEntity(tableId = PersonPicture.TABLE_ID, tracker = PersonPictureReplicate::class)
+@ReplicateEntity(
+    tableId = PersonPicture.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
 @Triggers(arrayOf(
  Trigger(
      name = "personpicture_remote_insert",
@@ -16,11 +19,7 @@ import kotlinx.serialization.Serializable
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
      sqlStatements = [
-         """REPLACE INTO PersonPicture(personPictureUid, personPicturePersonUid, personPictureMasterCsn, personPictureLocalCsn, personPictureLastChangedBy, personPictureLct, personPictureUri, personPictureMd5, fileSize, picTimestamp, mimeType, personPictureActive) 
-         VALUES (NEW.personPictureUid, NEW.personPicturePersonUid, NEW.personPictureMasterCsn, NEW.personPictureLocalCsn, NEW.personPictureLastChangedBy, NEW.personPictureLct, NEW.personPictureUri, NEW.personPictureMd5, NEW.fileSize, NEW.picTimestamp, NEW.mimeType, NEW.personPictureActive) 
-         /*psql ON CONFLICT (personPictureUid) DO UPDATE 
-         SET personPicturePersonUid = EXCLUDED.personPicturePersonUid, personPictureMasterCsn = EXCLUDED.personPictureMasterCsn, personPictureLocalCsn = EXCLUDED.personPictureLocalCsn, personPictureLastChangedBy = EXCLUDED.personPictureLastChangedBy, personPictureLct = EXCLUDED.personPictureLct, personPictureUri = EXCLUDED.personPictureUri, personPictureMd5 = EXCLUDED.personPictureMd5, fileSize = EXCLUDED.fileSize, picTimestamp = EXCLUDED.picTimestamp, mimeType = EXCLUDED.mimeType, personPictureActive = EXCLUDED.personPictureActive
-         */"""
+         TRIGGER_UPSERT_WHERE_NEWER
      ]
  )
 ))
@@ -40,8 +39,8 @@ open class PersonPicture() {
     @LastChangedBy
     var personPictureLastChangedBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var personPictureLct: Long = 0
 
     @AttachmentUri

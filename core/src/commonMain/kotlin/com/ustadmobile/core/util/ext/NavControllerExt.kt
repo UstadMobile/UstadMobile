@@ -11,6 +11,9 @@ import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
+import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
+import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
+import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
@@ -63,7 +66,7 @@ suspend fun UstadNavController.navigateToLink(
         }
     }
 
-    val maxDateOfBirth = if(viewUri?.startsWith(ParentalConsentManagementView.VIEW_NAME) == true) {
+    val maxDateOfBirth = if(viewUri?.startsWith(ParentalConsentManagementViewModel.DEST_NAME) == true) {
         Clock.System.now().minus(UstadMobileConstants.ADULT_AGE_THRESHOLD, DateTimeUnit.YEAR, TimeZone.UTC)
             .toEpochMilliseconds()
     }else {
@@ -83,16 +86,16 @@ suspend fun UstadNavController.navigateToLink(
                     it.person.username == accountName.substringBefore("@")
                 }
             if(session != null) {
-                accountManager.activeSession = session
+                accountManager.currentUserSession = session
                 navigateToViewUri(viewUri, goOptions)
             }
         }
 
-        //when the active account is already on the given endpoint, or there is no endpoint
+        //when the current account is already on the given endpoint, or there is no endpoint
         //specified, then go directly to the given view (unless the force account selection option
         //is set)
         !forceAccountSelection
-            && accountManager.activeSession != null
+            && !accountManager.currentUserSession.userSession.isTemporary()
             && (endpointUrl == null || accountManager.activeEndpoint.url == endpointUrl) ->
         {
             navigateToViewUri(viewUri, goOptions)
@@ -111,7 +114,7 @@ suspend fun UstadNavController.navigateToLink(
             if(endpointUrl != null)
                 args[ARG_API_URL] = endpointUrl
 
-            navigate(Login2View.VIEW_NAME, args.toMap(), goOptions)
+            navigate(LoginViewModel.DEST_NAME, args.toMap(), goOptions)
         }
         //If there are no accounts, the endpoint url is not specified, and the user can select the server, go to EnterLink
         endpointUrl == null && accountManager.activeSessionCount(maxDateOfBirth) == 0 && userCanSelectServer -> {
@@ -122,13 +125,13 @@ suspend fun UstadNavController.navigateToLink(
         else -> {
             val args = mutableMapOf(ARG_NEXT to viewUri)
             if(endpointUrl != null)
-                args[AccountListView.ARG_FILTER_BY_ENDPOINT] = endpointUrl
+                args[AccountListViewModel.ARG_FILTER_BY_ENDPOINT] = endpointUrl
 
-            args[AccountListView.ARG_ACTIVE_ACCOUNT_MODE] = AccountListView.ACTIVE_ACCOUNT_MODE_INLIST
+            args[AccountListViewModel.ARG_ACTIVE_ACCOUNT_MODE] = AccountListViewModel.ACTIVE_ACCOUNT_MODE_INLIST
             args[UstadView.ARG_LISTMODE] = ListViewMode.PICKER.toString()
             args[UstadView.ARG_MAX_DATE_OF_BIRTH] = maxDateOfBirth.toString()
 
-            navigate(AccountListView.VIEW_NAME, args.toMap(), goOptions)
+            navigate(AccountListViewModel.DEST_NAME, args.toMap(), goOptions)
         }
     }
 

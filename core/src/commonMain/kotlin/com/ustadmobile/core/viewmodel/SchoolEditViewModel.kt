@@ -9,3 +9,12 @@ data class SchoolEditUiState(
     val entity: SchoolWithHolidayCalendar? = null,
 
 )
+
+class SchoolEditViewModel  {
+
+    companion object {
+
+        const val DEST_NAME = "SchoolEdit"
+
+    }
+}

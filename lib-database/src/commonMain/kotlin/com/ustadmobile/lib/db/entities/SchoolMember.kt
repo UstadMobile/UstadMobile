@@ -21,8 +21,10 @@ import kotlinx.serialization.Serializable
     Index(value = ["schoolMemberSchoolUid", "schoolMemberActive", "schoolMemberRole"])
 ])
 @Serializable
-@ReplicateEntity(tableId = SchoolMember.TABLE_ID, tracker = SchoolMemberReplicate::class,
-    priority = ReplicateEntity.HIGHEST_PRIORITY + 1)
+@ReplicateEntity(
+    tableId = SchoolMember.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
 @Triggers(arrayOf(
  Trigger(
      name = "schoolmember_remote_insert",
@@ -30,11 +32,7 @@ import kotlinx.serialization.Serializable
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
      sqlStatements = [
-         """REPLACE INTO SchoolMember(schoolMemberUid, schoolMemberPersonUid, schoolMemberSchoolUid, schoolMemberJoinDate, schoolMemberLeftDate, schoolMemberRole, schoolMemberActive, schoolMemberLocalChangeSeqNum, schoolMemberMasterChangeSeqNum, schoolMemberLastChangedBy, schoolMemberLct) 
-         VALUES (NEW.schoolMemberUid, NEW.schoolMemberPersonUid, NEW.schoolMemberSchoolUid, NEW.schoolMemberJoinDate, NEW.schoolMemberLeftDate, NEW.schoolMemberRole, NEW.schoolMemberActive, NEW.schoolMemberLocalChangeSeqNum, NEW.schoolMemberMasterChangeSeqNum, NEW.schoolMemberLastChangedBy, NEW.schoolMemberLct) 
-         /*psql ON CONFLICT (schoolMemberUid) DO UPDATE 
-         SET schoolMemberPersonUid = EXCLUDED.schoolMemberPersonUid, schoolMemberSchoolUid = EXCLUDED.schoolMemberSchoolUid, schoolMemberJoinDate = EXCLUDED.schoolMemberJoinDate, schoolMemberLeftDate = EXCLUDED.schoolMemberLeftDate, schoolMemberRole = EXCLUDED.schoolMemberRole, schoolMemberActive = EXCLUDED.schoolMemberActive, schoolMemberLocalChangeSeqNum = EXCLUDED.schoolMemberLocalChangeSeqNum, schoolMemberMasterChangeSeqNum = EXCLUDED.schoolMemberMasterChangeSeqNum, schoolMemberLastChangedBy = EXCLUDED.schoolMemberLastChangedBy, schoolMemberLct = EXCLUDED.schoolMemberLct
-         */"""
+         TRIGGER_UPSERT_WHERE_NEWER,
      ]
  )
 ))
@@ -66,8 +64,8 @@ open class SchoolMember {
     @LastChangedBy
     var schoolMemberLastChangedBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var schoolMemberLct: Long = 0
 
 

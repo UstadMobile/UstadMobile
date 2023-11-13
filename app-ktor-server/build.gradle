@@ -86,7 +86,7 @@ dependencies {
     implementation "org.kodein.di:kodein-di:$version_kodein_di"
     implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
 
-    implementation "io.github.aakira:napier-jvm:$version_napier"
+    implementation libs.napier
 
     implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
     implementation "net.sf.kxml:kxml2:$version_kxml"
@@ -111,8 +111,11 @@ dependencies {
 
     implementation "net.sourceforge.argparse4j:argparse4j:$version_argparse4j"
     implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
+    implementation libs.javaffmpeg
 
     api libs.moko.resources
+
+    implementation project(":lib-cache")
 
     //test
     testImplementation project(":lib-test-common")

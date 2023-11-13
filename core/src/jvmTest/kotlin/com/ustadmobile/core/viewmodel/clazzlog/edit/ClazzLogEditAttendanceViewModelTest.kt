@@ -3,6 +3,7 @@ package com.ustadmobile.core.viewmodel.clazzlog.edit
 import app.cash.turbine.test
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.schedule.generateUid
+import com.ustadmobile.core.test.awaitAppUiStateWithActionButtonVisible
 import com.ustadmobile.core.test.viewmodeltest.ViewModelTestBuilder
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
@@ -10,6 +11,7 @@ import com.ustadmobile.core.util.ext.awaitItemWhere
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
 import com.ustadmobile.door.ext.withDoorTransactionAsync
@@ -25,7 +27,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
-class ClazzLogEditAttendanceViewModelTest {
+class ClazzLogEditAttendanceViewModelTest : AbstractMainDispatcherTest()  {
 
     private val testEndpoint = Endpoint("https://test.com/")
 
@@ -229,6 +231,8 @@ class ClazzLogEditAttendanceViewModelTest {
                 ClazzLogEditAttendanceViewModel(di, savedStateHandle)
             }
 
+            val readyAppUiState = viewModel.awaitAppUiStateWithActionButtonVisible()
+
             viewModel.uiState.test(timeout = 5.seconds) {
                 awaitItemWhere {
                     it.clazzLogsList.isNotEmpty() && it.clazzLogAttendanceRecordList.isNotEmpty()
@@ -236,7 +240,7 @@ class ClazzLogEditAttendanceViewModelTest {
 
                 viewModel.onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ATTENDED)
 
-                viewModel.onClickSave()
+                readyAppUiState.actionBarButtonState.onClick()
                 cancelAndIgnoreRemainingEvents()
             }
 

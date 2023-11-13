@@ -9,100 +9,45 @@ import com.ustadmobile.core.db.dao.ClazzDaoCommon.SORT_ATTENDANCE_ASC
 import com.ustadmobile.core.db.dao.ClazzDaoCommon.SORT_ATTENDANCE_DESC
 import com.ustadmobile.core.db.dao.ClazzDaoCommon.SORT_CLAZZNAME_ASC
 import com.ustadmobile.core.db.dao.ClazzDaoCommon.SORT_CLAZZNAME_DESC
-import com.ustadmobile.door.paging.DataSourceFactory
-import com.ustadmobile.door.lifecycle.LiveData
+import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.door.paging.PagingSource
+import app.cash.paging.PagingSource
+import com.ustadmobile.lib.db.composites.ScopedGrantAndGroupMember
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
-import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
-import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1
-import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_TEACHER
 import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
-import kotlinx.coroutines.flow.Flow
 
 @Repository
 @DoorDao
 expect abstract class ClazzDao : BaseDao<Clazz> {
-
-    @Query("""
-     REPLACE INTO ClazzReplicate(clazzPk, clazzDestination)
-      SELECT DISTINCT Clazz.clazzUid AS clazzUid,
-             :newNodeId AS clazzDestination
-        FROM UserSession
-               JOIN PersonGroupMember 
-                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-               $JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1
-                    ${Role.PERMISSION_CLAZZ_SELECT} 
-                    $JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2
-       WHERE UserSession.usClientNodeId = :newNodeId 
-         AND Clazz.clazzLct != COALESCE(
-             (SELECT clazzVersionId
-                FROM ClazzReplicate
-               WHERE clazzPk = Clazz.clazzUid
-                 AND clazzDestination = :newNodeId), 0) 
-      /*psql ON CONFLICT(clazzPk, clazzDestination) DO UPDATE
-             SET clazzPending = true
-      */       
-    """)
-    @ReplicationRunOnNewNode
-    @ReplicationCheckPendingNotificationsFor([Clazz::class])
-    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
-
-     @Query("""
- REPLACE INTO ClazzReplicate(clazzPk, clazzDestination)
-  SELECT DISTINCT Clazz.clazzUid AS clazzUid,
-         UserSession.usClientNodeId AS clazzDestination
-    FROM ChangeLog
-         JOIN Clazz
-             ON ChangeLog.chTableId = 6
-                AND ChangeLog.chEntityPk = Clazz.clazzUid
-         $JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
-                    ${Role.PERMISSION_CLAZZ_SELECT}
-                    $JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
-   WHERE UserSession.usClientNodeId != (
-         SELECT nodeClientId 
-           FROM SyncNode
-          LIMIT 1)
-     AND Clazz.clazzLct != COALESCE(
-         (SELECT clazzVersionId
-            FROM ClazzReplicate
-           WHERE clazzPk = Clazz.clazzUid
-             AND clazzDestination = UserSession.usClientNodeId), 0)
-  /*psql ON CONFLICT(clazzPk, clazzDestination) DO UPDATE
-      SET clazzPending = true
-   */               
- """)
-    @ReplicationRunOnChange([Clazz::class])
-    @ReplicationCheckPendingNotificationsFor([Clazz::class])
-    abstract suspend fun replicateOnChange()
 
 
     @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
     abstract fun findByUid(uid: Long): Clazz?
 
     @Query("SELECT * From Clazz WHERE clazzUid = :uid")
-    abstract fun findByUidLive(uid: Long): LiveData<Clazz?>
+    abstract fun findByUidLive(uid: Long): Flow<Clazz?>
 
     @Query("SELECT * FROM Clazz WHERE clazzCode = :code")
     abstract suspend fun findByClazzCode(code: String): Clazz?
 
     @Query("SELECT * FROM Clazz WHERE clazzCode = :code")
-    @RepoHttpAccessible
     @Repository(Repository.METHOD_DELEGATE_TO_WEB)
     abstract suspend fun findByClazzCodeFromWeb(code: String): Clazz?
 
     @Query(SELECT_ACTIVE_CLAZZES)
-    abstract fun findAllLive(): LiveData<List<Clazz>>
+    abstract fun findAllLive(): Flow<List<Clazz>>
 
     @Query(SELECT_ACTIVE_CLAZZES)
     abstract fun findAll(): List<Clazz>
 
-    @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
-    abstract suspend fun findByUidAsync(uid: Long) : Clazz?
+    @Query("SELECT * FROM Clazz WHERE clazzUid = :clazzUid")
+    abstract suspend fun findByUidAsync(clazzUid: Long) : Clazz?
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+    )
     @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
     abstract fun findByUidAsFlow(uid: Long): Flow<Clazz?>
 
@@ -134,9 +79,14 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     @Query("SELECT * FROM Clazz WHERE clazzSchoolUid = :schoolUid " +
             "AND CAST(isClazzActive AS INTEGER) = 1 ")
     abstract fun findAllClazzesBySchoolLive(schoolUid: Long)
-            : DataSourceFactory<Int,Clazz>
+            : PagingSource<Int,Clazz>
 
 
+    @HttpAccessible(
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(functionName = "findClazzesWithPermission"),
+        )
+    )
     @Query("""
         SELECT Clazz.*, ClazzEnrolment.*,
                (SELECT COUNT(DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid) 
@@ -254,6 +204,15 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     abstract suspend fun updateClazzAttendanceAverageAsync(clazzUid: Long, timeChanged: Long)
 
     /** Check if a permission is present on a specific entity e.g. updateState/modify etc */
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionDao = ScopedGrantDao::class,
+                functionName = "findScopedGrantAndPersonGroupByPersonUidAndPermission"
+            )
+        )
+    )
     @Query("""
         SELECT EXISTS( 
                SELECT PrsGrpMbr.groupMemberPersonUid
@@ -270,6 +229,12 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
         permission: Long
     ) : Boolean
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("personHasPermissionWithClazzAsFlowEntities")
+        )
+    )
     @Query("""
         SELECT EXISTS( 
                SELECT PrsGrpMbr.groupMemberPersonUid
@@ -285,6 +250,24 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
         clazzUid: Long,
         permission: Long
     ): Flow<Boolean>
+
+    @Query("""
+        SELECT PrsGrpMbr.*, ScopedGrant.*, PersonGroup.*
+          FROM Clazz
+               ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+                  :permission
+                  ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
+               LEFT JOIN PersonGroup
+                         ON PersonGroup.groupUid = PrsGrpMbr.groupMemberGroupUid
+         WHERE Clazz.clazzUid = :clazzUid
+           AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid
+    """)
+    abstract suspend fun personHasPermissionWithClazzAsFlowEntities(
+        accountPersonUid: Long,
+        clazzUid: Long,
+        permission: Long
+    ): List<ScopedGrantAndGroupMember>
+
 
 
     @Query("""
@@ -363,6 +346,12 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     @Query("SELECT Clazz.*, School.* FROM Clazz LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid WHERE clazz.clazzUid = :clazzUid")
     abstract suspend fun getClazzWithSchool(clazzUid: Long): ClazzWithSchool?
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findByUidAsync")
+        ),
+    )
     @Query("""
         SELECT Clazz.clazzName
           FROM Clazz
@@ -371,6 +360,11 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     abstract fun getTitleByUidAsFlow(clazzUid: Long): Flow<String?>
 
 
+    @HttpAccessible(
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findByUidAsync")
+        ),
+    )
     @Query("""
         SELECT Clazz.clazzTimeZone
           FROM Clazz

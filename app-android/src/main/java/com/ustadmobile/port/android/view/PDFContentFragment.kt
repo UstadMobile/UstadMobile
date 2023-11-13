@@ -11,7 +11,6 @@ import com.toughra.ustadmobile.databinding.FragmentPdfContentBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.PDFContentPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PDFContentView
@@ -70,7 +69,7 @@ class PDFContentFragment : UstadBaseFragment(), PDFContentView {
         })
 
         val accountManager: UstadAccountManager = di.direct.instance()
-        db = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
+        db = di.on(accountManager.currentAccount).direct.instance(tag = DoorTag.TAG_DB)
         containerUid = arguments?.getString(UstadView.ARG_CONTAINER_UID)?.toLong() ?: 0L
 
 
