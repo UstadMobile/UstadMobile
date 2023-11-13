@@ -25,6 +25,7 @@ import com.ustadmobile.libuicompose.components.UstadAddListItem
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 
 @Composable
 fun PersonListScreenForViewModel(
@@ -50,7 +51,6 @@ fun PersonListScreenForViewModel(
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PersonListScreen(
     uiState: PersonListUiState,
@@ -83,8 +83,7 @@ fun PersonListScreen(
         item {
             UstadListSortHeader(
                 modifier = Modifier
-                    //  TODO error
-//                    .defaultItemPadding()
+                    .defaultItemPadding()
                     .fillMaxWidth(),
                 activeSortOrderOption = uiState.sortOption,
                 onClickSort = onClickSort
