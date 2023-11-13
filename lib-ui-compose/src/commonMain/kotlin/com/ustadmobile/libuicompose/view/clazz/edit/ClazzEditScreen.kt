@@ -32,7 +32,6 @@ import dev.icerock.moko.parcelize.Parcelable
 import dev.icerock.moko.parcelize.Parcelize
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
-import com.ustadmobile.libuicompose.components.HtmlClickableTextField
 import com.ustadmobile.libuicompose.components.UstadClickableTextField
 import com.ustadmobile.libuicompose.components.UstadDateField
 import com.ustadmobile.libuicompose.components.UstadSwitchField
@@ -349,14 +348,15 @@ private fun ClazzEditBasicDetails(
             }
         )
 
-        HtmlClickableTextField(
-            html = uiState.entity?.clazzDesc ?: "",
-            label = stringResource(MR.strings.description),
-            onClick = onClickEditDescription,
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("description")
-        )
+        // TODO error
+//        HtmlClickableTextField(
+//            html = uiState.entity?.clazzDesc ?: "",
+//            label = stringResource(MR.strings.description),
+//            onClick = onClickEditDescription,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .testTag("description")
+//        )
 
         Row {
             UstadInputFieldLayout(
