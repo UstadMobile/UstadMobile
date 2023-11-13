@@ -17,7 +17,6 @@ import com.ustadmobile.libuicompose.components.UstadErrorText
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
-import com.ustadmobile.libuicompose.components.UstadEditableHtmlField
 
 @Composable
 fun DiscussionPostEditScreenForViewModel(viewModel: DiscussionPostEditViewModel) {
@@ -59,15 +58,16 @@ fun DiscussionPostEditScreen(
             )
         }
 
-        UstadEditableHtmlField(
-            html = uiState.discussionPost?.discussionPostMessage ?: "",
-            onHtmlChange = {
-                onDiscussionPostBodyChanged(it)
-            },
-            modifier = Modifier
-                .weight(1f, fill = true)
-                .fillMaxWidth()
-        )
+        // TODO error
+//        UstadEditableHtmlField(
+//            html = uiState.discussionPost?.discussionPostMessage ?: "",
+//            onHtmlChange = {
+//                onDiscussionPostBodyChanged(it)
+//            },
+//            modifier = Modifier
+//                .weight(1f, fill = true)
+//                .fillMaxWidth()
+//        )
 
         uiState.discussionPostDescError?.also { descError ->
             UstadErrorText(error = descError)
