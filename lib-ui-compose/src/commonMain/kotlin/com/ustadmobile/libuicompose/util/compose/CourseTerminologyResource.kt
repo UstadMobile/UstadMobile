@@ -39,14 +39,14 @@ fun rememberCourseTerminologyEntries(
 
     val termJsonStr = courseTerminology?.ctTerminology
     return remember(termJsonStr) {
-        if(di != null) {
-            courseTerminology.toTerminologyEntries(
-                json = di.direct.instance(),
-                systemImpl = null,
-            )
-        }else {
+//        if(di != null) {
+//            courseTerminology.toTerminologyEntries(
+//                json = di.direct.instance(),
+//                systemImpl = null,
+//            )
+//        }else {
             emptyList()
-        }
+//        }
     }
 }
 
