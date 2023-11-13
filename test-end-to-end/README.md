@@ -127,69 +127,74 @@ highlighted as required and it is not saved. The user can then add a title and s
     admin sends them a message), they will be able to see the name of the sender.
 
 	
-### 6	User accounts:
+### 7	User accounts:
 
-6.1 Admin can enable/disable registration for users
+7.1 Admin can enable/disable registration for users
 
-6.2 When registration is enabled: Users over 13 can register directly
+7.2 When registration is enabled: Users over 13 can register directly
 
-6.3 When registration is enabled: Users under 13 can register using parental approval link
+7.3 When registration is enabled: Users under 13 can register using parental approval link
 
-6.4 When registration is enabled: If a user does not specify their date of birth, an error message 
+7.4 When registration is enabled: If a user does not specify their date of birth, an error message 
     is displayed and they cannot proceed until they enter their date of birth.
 
-6.5 If a user under 13 is added by an adult (e.g. teacher/admin) approval is not required
+7.5 If a user under 13 is added by an adult (e.g. teacher/admin) approval is not required
 
-6.6 Admin can enable/disable guest login. If enabled, then users can connect as guest
+7.6 Admin can enable/disable guest login. If enabled, then users can connect as guest
 
-6.7 Teacher (course leader) or admin can send an invitation to a list of users by providing phone 
+7.7 Teacher (course leader) or admin can send an invitation to a list of users by providing phone 
     numbers (SMS) or email addresses. User can open the invitation, create a new account if this is 
     allowed by admin policy and they don't have an existing account, and join a course.
 
-6.8 First name, last name, and gender are mandatory fields. If the first name or last name is blank,
+7.8 First name, last name, and gender are mandatory fields. If the first name or last name is blank,
     then the field is highlighted as mandatory. If the gender is unset (the initial default), the 
     field is highlighted as mandatory. The user can only save the person profile once mandatory 
     fields are completed.
 
-6.9 If the email is not blank, it must be a valid email address. To be considered valid, the email
+7.9 If the email is not blank, it must be a valid email address. To be considered valid, the email
     address must 1) contain one @ character 2) not contain prohibited characters (white space, [, ], 
     \).
 
-6.10 If the phone number is not blank, it must contain a valid phone number. Phone number validation
+7.10 If the phone number is not blank, it must contain a valid phone number. Phone number validation
      will be performed by libphonenumber which understands location-specific rules on number length
      etc.
 
-6.11 If a user is logged into the Ustad app, they can use an api consumer (e.g. UstadApiConsumerDemo), 
+7.11 If a user is logged into the Ustad app, they can use an api consumer (e.g. UstadApiConsumerDemo), 
     use the single sign-on, see a list of logged in accounts, select their account, click approve, 
     and receive an auth token.
 
-6.12 If no user is logged into the Ustad app, they can use an api consumer (e.g. UstadApiConsumerDemo), 
+7.12 If no user is logged into the Ustad app, they can use an api consumer (e.g. UstadApiConsumerDemo), 
      use the single sign-on, enter the site link, login with their username/password, then click approve, 
      and receive an auth token.
 
-### 7 App panic response (Android only)
+### 8 App panic response (Android only)
 
-7.1 When a panic trigger app is installed and selected, when the app is set to delete all data on panic trigger and the panic app is triggered, then all local data is deleted and the user is logged out.
+8.1 When a panic trigger app is installed and selected, when the app is set to delete all data on panic trigger and the panic app is triggered, then all local data is deleted and the user is logged out.
 
-7.2 When a panic trigger app is installed and selected, when the app is set to hide on panic trigger, the app launch disappears from the home screen. A notepad app is visible instead. The app is restored by entering the code into the notepad.
+8.2 When a panic trigger app is installed and selected, when the app is set to hide on panic trigger, the app launch disappears from the home screen. A notepad app is visible instead. The app is restored by entering the code into the notepad.
 
-### 8 Peer-to-peer (Android and desktop only)
+### 9 Peer-to-peer (Android and desktop only)
 
-8.1 Users who do not have an Internet connection can connect via a nearby device with the app installed to login and use the platform (e.g. open course, view course members, etc) via bluetooth. This will work if the nearby device has synced the data required by the user without an Internet connection. Both devices must have Bluetooth enabled. 
+9.1 Users who do not have an Internet connection can connect via a nearby device with the app 
+    installed to login and use the platform (e.g. open course, view course members, etc). This will 
+    work if the nearby device has synced the data required by the user without an Internet connection
+    or itself has access to an Internet connection.
 
-8.2 Users who do not have an Internet connection can download content via a nearby device from the device itself instead of from the Internet via bluetooth or local network WiFi. This will work if the nearby device has synced the data required by the user without an Internet connection. Both devices must have Bluetooth enabled.
+8.2 Users who do not have an Internet connection can download content via a nearby device from the 
+    device itself instead of from the Internet. This will work if the nearby device has synced the 
+    data required by the user without an Internet connection or if the nearby intermediary device
+    itself has an Internet connection.
 
+### 10 Accessibility
 
-### 9 Accessibility
-
-9.1 Video content can have subtitles added using an WebVTT file. The subtitles will be displayed 
+10.1 Video content can have subtitles added using an WebVTT file. The subtitles will be displayed 
     with the video if uploaded.
 
-9.2 Screens support the use of text-to-speech as provided by the operating system (e.g. Windows, 
+10.2 Screens support the use of text-to-speech as provided by the operating system (e.g. Windows, 
     Android). Image buttons are labeled appropriately for speech readers.
 
-### 10 Administration
+### 11 Administration
 
-10.1 Server can be installed via script.
+11.1 Server can be installed via script.
 
-10.2 Server data can be backed up via script.
+11.2 Server data can be backed up via script.
