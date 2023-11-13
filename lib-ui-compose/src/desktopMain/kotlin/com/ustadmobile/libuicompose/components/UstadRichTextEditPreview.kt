@@ -36,8 +36,9 @@ fun UstadEditableHtmlFieldPreview(){
             },
         )
 
-        UstadEditableHtmlField(
+        UstadRichTextEdit(
             html = "Complete your assignment or <b>else</b>",
+            editInNewScreen = false,
             onHtmlChange = {
                 html = it
                 richTextState.setHtml(it)
