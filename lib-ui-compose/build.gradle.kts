@@ -1,6 +1,7 @@
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
+    id("kotlin-parcelize")
     alias(libs.plugins.jetbrains.compose)
 }
 
@@ -33,6 +34,11 @@ kotlin {
                 api(libs.moko.resources.compose)
                 api(libs.paging.multiplatform.common)
                 api(libs.paging.multiplatform.compose)
+
+                implementation(libs.richeditor.multiplatform.compose)
+
+                implementation(libs.kotlinx.datetime)
+                implementation(libs.reorderable.compose)
                 api(libs.door.runtime)
                 api(libs.precompose)
                 api(libs.precompose.viewmodel)
@@ -49,6 +55,9 @@ kotlin {
                 api(libs.androidx.paging.compose)
                 api(libs.androidx.navigation.compose)
                 api(libs.androidx.lifecycle.viewmodel.compose)
+
+//                implementation(compose.material)
+//                implementation(libs.google.android.material)
             }
         }
 

@@ -2,35 +2,25 @@ package com.ustadmobile.port.android.view.contententry.list
 
 import android.os.Bundle
 import android.view.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemKey
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.paging.ListPagingSource
-import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListUiState
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.BottomSheetOption
 import com.ustadmobile.port.android.view.OptionsBottomSheetFragment
 import com.ustadmobile.port.android.view.UstadBaseMvvmFragment
-import com.ustadmobile.port.android.view.contententry.UstadContentEntryListItem
 import com.ustadmobile.core.R as CR
 import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.view.contententry.list.ContentEntryListScreenForViewModel
 
 class ContentEntryList2Fragment : UstadBaseMvvmFragment() {
+
+    private val viewModel by ustadViewModels { di, savedStateHandle ->
+        ContentEntryListViewModel(di, savedStateHandle, requireDestinationViewName())
+    }
 
 
     override fun onCreateView(
@@ -38,6 +28,18 @@ class ContentEntryList2Fragment : UstadBaseMvvmFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
+        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(
+            viewModel = viewModel,
+            transform = { appUiState ->
+                appUiState.copy(
+                    fabState = appUiState.fabState.copy(
+                        onClick = this::onClickFab
+                    )
+                )
+            }
+        )
+
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
                 ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
@@ -45,27 +47,27 @@ class ContentEntryList2Fragment : UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-
+                    ContentEntryListScreenForViewModel(viewModel = viewModel)
                 }
             }
         }
     }
 
     private fun onClickFab() {
-//        val optionList = listOf(
-//            BottomSheetOption(
-//                R.drawable.ic_folder_black_24dp,
-//                requireContext().getString(CR.string.content_editor_create_new_category),
-//                42
-//            )
-//        )
-//
-//        OptionsBottomSheetFragment(
-//            optionsList = optionList,
-//            onOptionSelected = {
-//                viewModel.onClickNewFolder()
-//            }
-//        ).show(requireActivity().supportFragmentManager, "content_list_options")
+        val optionList = listOf(
+            BottomSheetOption(
+                R.drawable.ic_folder_black_24dp,
+                requireContext().getString(CR.string.content_editor_create_new_category),
+                42
+            )
+        )
+
+        OptionsBottomSheetFragment(
+            optionsList = optionList,
+            onOptionSelected = {
+                viewModel.onClickNewFolder()
+            }
+        ).show(requireActivity().supportFragmentManager, "content_list_options")
     }
 
 
@@ -94,93 +96,5 @@ class ContentEntryList2Fragment : UstadBaseMvvmFragment() {
                 ContentEntry.TYPE_AUDIO to MR.strings.audio
         )
 
-    }
-}
-
-@Composable
-private fun ContentEntryListScreen(
-    viewModel: ContentEntryListViewModel
-) {
-    val uiState by viewModel.uiState.collectAsState(ContentEntryListUiState())
-
-    ContentEntryListScreen(
-        uiState = uiState,
-        onClickContentEntry = viewModel::onClickEntry
-    )
-
-}
-
-@Composable
-private fun ContentEntryListScreen(
-    uiState: ContentEntryListUiState = ContentEntryListUiState(),
-    onClickContentEntry: (
-        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit = {},
-    onClickDownloadContentEntry: (
-        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit = {},
-) {
-    val pager = remember(uiState.contentEntryList) {
-        Pager(
-            pagingSourceFactory = uiState.contentEntryList,
-            config = PagingConfig(pageSize = 20, enablePlaceholders = true)
-        )
-    }
-    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
-
-
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
-    )  {
-
-        items(
-            count = lazyPagingItems.itemCount,
-            key = lazyPagingItems.itemKey{ contentEntry -> contentEntry.contentEntryUid }
-        ){ index ->
-            val contentEntry = lazyPagingItems[index]
-            UstadContentEntryListItem(
-                onClick = {
-                    @Suppress("UNNECESSARY_SAFE_CALL")
-                    contentEntry?.also { onClickContentEntry(it) }
-                },
-                onClickDownload = {
-                    @Suppress("UNNECESSARY_SAFE_CALL")
-                    contentEntry?.also { onClickDownloadContentEntry(it) }
-                },
-                contentEntry = contentEntry
-            )
-        }
-    }
-}
-
-@Composable
-@Preview
-private fun ContentEntryListScreenPreview() {
-    val uiStateVal = ContentEntryListUiState(
-        contentEntryList = {
-            ListPagingSource(listOf(
-                ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
-                    contentEntryUid = 1
-                    leaf = false
-                    ceInactive = true
-                    scoreProgress = ContentEntryStatementScoreProgress().apply {
-                        progress = 10
-                        penalty = 20
-                    }
-                    contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
-                    title = "Content Title 1"
-                    description = "Content Description 1"
-                },
-                ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
-                    contentEntryUid = 2
-                    leaf = true
-                    ceInactive = false
-                    contentTypeFlag = ContentEntry.TYPE_DOCUMENT
-                    title = "Content Title 2"
-                    description = "Content Description 2"
-                }
-            ))
-        },
-    )
-    MdcTheme {
-        ContentEntryListScreen(uiStateVal)
     }
 }
