@@ -16,11 +16,9 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import app.cash.paging.Pager
 import app.cash.paging.PagingSource
-import com.ustadmobile.libuicompose.components.HtmlClickableTextField
-import dev.icerock.moko.resources.compose.stringResource
-import com.ustadmobile.core.MR
 import app.cash.paging.compose.*
 import com.ustadmobile.libuicompose.components.HtmlText
+import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 
 @Composable
 fun HelloWorld() {
@@ -32,10 +30,11 @@ fun HelloWorld() {
             html = "<p style=\"text-align: left;\">Sallam, I am a<span style=\"font-weight: 700; font-style: italic;\">Developer </span>in <span style=\"text-decoration: underline;\">UstadMobile</span></p>"
         )
 
-        HtmlClickableTextField(
+        UstadRichTextEdit(
             html = "Complete your assignment or <b>else</b>",
-            label = stringResource(MR.strings.description),
-            onClick = {  },
+            editInNewScreen = false,
+//            label = stringResource(MR.strings.description),
+//            onClick = {  },
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("description")
