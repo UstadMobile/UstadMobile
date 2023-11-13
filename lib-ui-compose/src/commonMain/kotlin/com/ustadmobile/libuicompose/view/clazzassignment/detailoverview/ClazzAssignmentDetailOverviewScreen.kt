@@ -24,7 +24,6 @@ import java.util.*
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
-import com.ustadmobile.libuicompose.components.HtmlClickableTextField
 import com.ustadmobile.libuicompose.components.HtmlText
 import com.ustadmobile.libuicompose.components.UstadAddCommentListItem
 import com.ustadmobile.libuicompose.components.UstadEditHeader
@@ -185,14 +184,14 @@ fun ClazzAssignmentDetailOverviewScreen(
 
             item {
                 if(uiState.activeUserCanSubmit) {
-                    HtmlClickableTextField(
-                        modifier = Modifier
-                            .testTag("submission_text_field")
-                            .fillMaxWidth(),
-                        html = uiState.latestSubmission?.casText ?: "",
-                        label = stringResource(MR.strings.text),
-                        onClick = onClickEditSubmission
-                    )
+//                    HtmlClickableTextField(
+//                        modifier = Modifier
+//                            .testTag("submission_text_field")
+//                            .fillMaxWidth(),
+//                        html = uiState.latestSubmission?.casText ?: "",
+//                        label = stringResource(MR.strings.text),
+//                        onClick = onClickEditSubmission
+//                    )
                 }else {
                     HtmlText(
                         modifier = Modifier
