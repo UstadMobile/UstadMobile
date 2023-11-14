@@ -25,6 +25,7 @@ import mui.system.responsive
 import react.FC
 import react.Props
 import react.ReactNode
+import react.dom.onChange
 
 external interface ContentEntryEditScreenProps : Props {
 
@@ -129,16 +130,17 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
                 }
             }
 
-            UstadTextEditField {
+            TextField {
                 value = props.uiState.entity?.title ?: ""
                 id = "content_title"
-                label = strings[MR.strings.title]
-                error = props.uiState.titleError
-                enabled = props.uiState.fieldsEnabled
+                label = ReactNode(strings[MR.strings.title])
+                error = props.uiState.titleError != null
+                disabled = !props.uiState.fieldsEnabled
+                helperText = ReactNode(props.uiState.titleError ?: strings[MR.strings.required])
                 onChange = {
                     props.onContentEntryChanged(
                         props.uiState.entity?.shallowCopy {
-                            title = it
+                            title = it.target.asDynamic().value
                         }
                     )
                 }

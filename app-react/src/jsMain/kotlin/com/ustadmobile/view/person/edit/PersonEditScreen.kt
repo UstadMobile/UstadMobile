@@ -153,7 +153,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                 label = ReactNode(strings[MR.strings.email])
                 error = props.uiState.emailError != null
                 disabled = !props.uiState.fieldsEnabled
-                helperText = ReactNode(props.uiState.emailError ?: "")
+                helperText = ReactNode(props.uiState.emailError)
                 onChange = {
                     props.onPersonChanged(
                         props.uiState.person?.shallowCopy {
