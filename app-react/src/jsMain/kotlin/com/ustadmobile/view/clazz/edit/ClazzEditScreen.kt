@@ -93,6 +93,8 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 label = ReactNode(strings[MR.strings.name_key])
                 id = "clazz_name"
                 disabled = !props.uiState.fieldsEnabled
+                error = props.uiState.clazzNameError != null
+                helperText = ReactNode(props.uiState.clazzNameError ?: strings[MR.strings.required])
                 onTextChange = {
                     props.onClazzChanged(
                         props.uiState.entity?.shallowCopy {
