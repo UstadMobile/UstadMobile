@@ -378,8 +378,6 @@ class ClazzAssignmentEditViewModel(
                 _uiState.update { prev ->
                     prev.copy(
                         sizeLimitError = systemImpl.getString(MR.strings.size_limit_error)
-                            .replace("%1\$s", ATTACHMENT_LIMIT_MIN.toString())
-                            .replace("%2\$s", ATTACHMENT_LIMIT_MAX.toString())
                     )
                 }
             }

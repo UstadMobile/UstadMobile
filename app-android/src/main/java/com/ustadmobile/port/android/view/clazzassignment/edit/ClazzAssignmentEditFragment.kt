@@ -158,7 +158,9 @@ private fun ClazzAssignmentEditScreen(
             )
 
             UstadInputFieldLayout(
-                errorText = uiState.sizeLimitError,
+                errorText = uiState.sizeLimitError
+                    ?.replace("%1\$s", ClazzAssignmentEditViewModel.ATTACHMENT_LIMIT_MIN.toString())
+                    ?.replace("%2\$s", ClazzAssignmentEditViewModel.ATTACHMENT_LIMIT_MAX.toString()),
             ){
                 UstadNumberTextField(
                     modifier = Modifier
@@ -168,6 +170,7 @@ private fun ClazzAssignmentEditScreen(
                     value = (uiState.entity?.assignment?.caSizeLimit ?: 0).toFloat(),
                     label = { Text(stringResource(id = CR.string.size_limit)) },
                     enabled = uiState.fieldsEnabled,
+                    isError = uiState.sizeLimitError != null,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
                     ),
