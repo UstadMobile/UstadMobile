@@ -95,10 +95,6 @@ fun ContentEntryEditScreen(
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        if (uiState.entity?.leaf == true){
-            Text(text = stringResource(MR.strings.supported_files))
-        }
-
         Spacer(modifier = Modifier.height(15.dp))
 
         UstadInputFieldLayout(
@@ -107,14 +103,15 @@ fun ContentEntryEditScreen(
         ) {
             OutlinedTextField(
                 modifier = Modifier.testTag("title").fillMaxWidth(),
-                value = uiState.entity?.title ?: "",
+                value = uiState.entity?.entry?.title ?: "",
                 label = { Text(stringResource(MR.strings.title)) },
                 isError = uiState.titleError != null,
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
-                    onContentEntryChanged(uiState.entity?.shallowCopy {
-                        title = it
-                    }
+                    onContentEntryChanged(
+                        uiState.entity?.entry?.shallowCopy {
+                            title = it
+                        }
                     )
                 }
             )
@@ -124,13 +121,14 @@ fun ContentEntryEditScreen(
 
         OutlinedTextField(
             modifier = Modifier.testTag("description").fillMaxWidth(),
-            value = uiState.entity?.description ?: "",
+            value = uiState.entity?.entry?.description ?: "",
             label = { Text(stringResource(MR.strings.description)) },
             enabled = uiState.fieldsEnabled,
             onValueChange = {
-                onContentEntryChanged(uiState.entity?.shallowCopy {
-                    description = it
-                }
+                onContentEntryChanged(
+                    uiState.entity?.entry?.shallowCopy {
+                        description = it
+                    }
                 )
             }
         )
@@ -149,13 +147,14 @@ fun ContentEntryEditScreen(
 
         OutlinedTextField(
             modifier = Modifier.testTag("author").fillMaxWidth(),
-            value = uiState.entity?.author ?: "",
+            value = uiState.entity?.entry?.author ?: "",
             label = { Text(stringResource(MR.strings.entry_details_author)) },
             enabled = uiState.fieldsEnabled,
             onValueChange = {
-                onContentEntryChanged(uiState.entity?.shallowCopy {
-                    author = it
-                }
+                onContentEntryChanged(
+                    uiState.entity?.entry?.shallowCopy {
+                        author = it
+                    }
                 )
             }
         )
@@ -164,13 +163,14 @@ fun ContentEntryEditScreen(
 
         OutlinedTextField(
             modifier = Modifier.testTag("publisher").fillMaxWidth(),
-            value = uiState.entity?.publisher ?: "",
+            value = uiState.entity?.entry?.publisher ?: "",
             label = { Text(stringResource(MR.strings.entry_details_publisher)) },
             enabled = uiState.fieldsEnabled,
             onValueChange = {
-                onContentEntryChanged(uiState.entity?.shallowCopy {
-                    publisher = it
-                }
+                onContentEntryChanged(
+                    uiState.entity?.entry?.shallowCopy {
+                        publisher = it
+                    }
                 )
             }
         )
@@ -179,14 +179,15 @@ fun ContentEntryEditScreen(
 
         UstadMessageIdOptionExposedDropDownMenuField(
             modifier = Modifier.testTag("licenseType"),
-            value = uiState.entity?.licenseType ?: 0,
+            value = uiState.entity?.entry?.licenseType ?: 0,
             options = LicenceConstants.LICENSE_MESSAGE_IDS,
             label = stringResource(MR.strings.licence),
             enabled = uiState.fieldsEnabled,
             onOptionSelected = {
-                onContentEntryChanged(uiState.entity?.shallowCopy {
-                    licenseType = it.value
-                }
+                onContentEntryChanged(
+                    uiState.entity?.entry?.shallowCopy {
+                        licenseType = it.value
+                    }
                 )
             }
         )
@@ -218,18 +219,6 @@ fun ContentEntryEditScreen(
                 }
             )
         }
-
-        Spacer(modifier = Modifier.height(15.dp))
-
-        UstadSwitchField(
-            modifier = Modifier.testTag("publik"),
-            checked = uiState.entity?.publik ?: false,
-            label = stringResource(MR.strings.publicly_accessible),
-            enabled = uiState.fieldsEnabled,
-            onChange = {
-                onChangePubliclyAccessible(it)
-            }
-        )
 
         Spacer(modifier = Modifier.height(15.dp))
 

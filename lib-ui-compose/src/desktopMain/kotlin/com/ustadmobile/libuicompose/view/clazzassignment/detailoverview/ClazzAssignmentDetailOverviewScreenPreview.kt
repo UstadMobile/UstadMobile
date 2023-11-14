@@ -1,13 +1,14 @@
 package com.ustadmobile.libuicompose.view.clazzassignment.detailoverview
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewUiState
-import com.ustadmobile.lib.db.entities.*
-import java.util.*
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
+import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.CourseAssignmentMark
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionAttachment
+import com.ustadmobile.lib.db.entities.CourseBlock
 
 @Composable
 @Preview
@@ -24,7 +25,6 @@ fun ClazzAssignmentDetailOverviewScreenPreview(){
             },
             submitterUid = 42L,
             addFileVisible = true,
-            submissionTextFieldVisible = true,
             latestSubmissionAttachments = listOf(
                 CourseAssignmentSubmissionAttachment().apply {
                     casaUid = 1L
@@ -48,32 +48,6 @@ fun ClazzAssignmentDetailOverviewScreenPreview(){
                     markerLastName = "Smith",
                 )
             ),
-//            courseComments = {
-//                ListPagingSource(listOf(
-//                    CommentsAndName().apply {
-//                        comment = Comments().apply {
-//                            commentsUid = 1
-//                            commentsText = "This is a very difficult assignment."
-//                        }
-//                        firstNames = "Bob"
-//                        lastName = "Dylan"
-//                    }
-//                ))
-//            },
-//            privateComments = {
-//                ListPagingSource(
-//                    listOf(
-//                        CommentsAndName().apply {
-//                            comment = Comments().apply {
-//                                commentsUid = 2
-//                                commentsText = "Can I please have extension? My rabbit ate my homework."
-//                            }
-//                            firstNames = "Bob"
-//                            lastName = "Dylan"
-//                        }
-//                    ),
-//                )
-//            },
         )
     )
 }

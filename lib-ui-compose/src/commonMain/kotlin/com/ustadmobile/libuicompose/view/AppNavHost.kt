@@ -10,9 +10,11 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
+import com.ustadmobile.libuicompose.view.contententry.list.ContentEntryListScreenForViewModel
 import com.ustadmobile.libuicompose.view.login.LoginScreen
 import com.ustadmobile.libuicompose.view.siteenterlink.SiteEnterLinkScreen
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
@@ -116,6 +118,18 @@ fun AppNavHost(
                     LoginViewModel(di, savedStateHandle)
                 }
             )
+        }
+
+        ContentEntryListViewModel.ALL_DEST_NAMES.forEach { destName ->
+            contentScene("/$destName") { backStackEntry ->
+                ContentEntryListScreenForViewModel(
+                    viewModel = appViewModel(
+                        backStackEntry, ContentEntryListViewModel::class,
+                    ) { di, savedStateHandle ->
+                        ContentEntryListViewModel(di, savedStateHandle, destName)
+                    }
+                )
+            }
         }
     }
 }

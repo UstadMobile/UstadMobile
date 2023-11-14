@@ -15,7 +15,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
 import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
-import com.ustadmobile.core.util.ext.editIconId
 import com.ustadmobile.core.viewmodel.clazz.ClazzScheduleConstants
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditUiState
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
@@ -32,6 +31,7 @@ import dev.icerock.moko.parcelize.Parcelable
 import dev.icerock.moko.parcelize.Parcelize
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.libuicompose.components.UstadClickableTextField
 import com.ustadmobile.libuicompose.components.UstadDateField
 import com.ustadmobile.libuicompose.components.UstadSwitchField
@@ -43,8 +43,6 @@ import org.burnoutcrew.reorderable.*
 fun ClazzEditScreenForViewModel(viewModel: ClazzEditViewModel) {
 
     val uiState: ClazzEditUiState by viewModel.uiState.collectAsState(initial = ClazzEditUiState())
-
-//    val context = LocalContext.current
 
     ClazzEditScreen(
         uiState = uiState,
@@ -98,7 +96,7 @@ fun ClazzEditScreen(
     onClickSchool: () -> Unit = {},
     onClickEditDescription: () -> Unit = {},
     onClickTimezone: () -> Unit = {},
-    onClickEditCourseBlock: (CourseBlockWithEntity) -> Unit = {},
+    onClickEditCourseBlock: (CourseBlockAndEditEntities) -> Unit = {},
     onClickAddCourseBlock: () -> Unit = {},
     onClickAddSchedule: () -> Unit = {},
     onClickEditSchedule: (Schedule) -> Unit = {},
@@ -106,11 +104,11 @@ fun ClazzEditScreen(
     onClickHolidayCalendar: () -> Unit = {},
     onCheckedAttendance: (Boolean) -> Unit = {},
     onClickTerminology: () -> Unit = {},
-    onClickHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit = {},
-    onClickUnHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit = {},
-    onClickIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit = {},
-    onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit = {},
-    onClickDeleteBlockPopupMenu: (CourseBlockWithEntity) -> Unit = {},
+    onClickHideBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit = {},
+    onClickUnHideBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit = {},
+    onClickIndentBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit = {},
+    onClickUnIndentBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit = {},
+    onClickDeleteBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit = {},
 ) {
 
     //The number of items in the LazyColumn before the start of CourseBlocks
@@ -176,16 +174,19 @@ fun ClazzEditScreen(
 
         items (
             items = uiState.courseBlockList,
-            key = {  CourseBlockKey(it.cbUid) }
-        ) { courseBlock ->
-            val courseBlockEditAlpha: Float = if (courseBlock.cbHidden) 0.5F else 1F
-            val startPadding = ((courseBlock.cbIndentLevel * 24) + 8).dp
-            ReorderableItem(state = reorderLazyListState, key = CourseBlockKey(courseBlock.cbUid)) { dragging ->
+            key = {  CourseBlockKey(it.courseBlock.cbUid) }
+        ) { block ->
+            val courseBlockEditAlpha: Float = if (block.courseBlock.cbHidden) 0.5F else 1F
+            val startPadding = ((block.courseBlock.cbIndentLevel * 24) + 8).dp
+            ReorderableItem(
+                state = reorderLazyListState,
+                key = CourseBlockKey(block.courseBlock.cbUid)
+            ) { dragging ->
                 ListItem(
                     modifier = Modifier
                         .clickable {
                             if (!dragging)
-                                onClickEditCourseBlock(courseBlock)
+                                onClickEditCourseBlock(block)
                         }
                         .alpha(courseBlockEditAlpha),
                     icon = {
@@ -197,18 +198,18 @@ fun ClazzEditScreen(
                             )
                             Spacer(modifier = Modifier.width(startPadding))
                             Icon(
-                                ClazzEditConstants.BLOCK_AND_ENTRY_ICON_MAP[courseBlock.editIconId]
+                                imageVector = ClazzEditConstants.BLOCK_AND_ENTRY_ICON_MAP[block.courseBlock.cbType]
                                     ?:  Icons.Filled.TextSnippet,
                                 contentDescription = null
                             )
                         }
                     },
 
-                    text = { Text(courseBlock.cbTitle ?: "") },
+                    text = { Text(block.courseBlock.cbTitle ?: "") },
                     trailing = {
                         PopUpMenu(
                             enabled = uiState.fieldsEnabled,
-                            uiState = uiState.courseBlockStateFor(courseBlock),
+                            uiState = uiState.courseBlockStateFor(block),
                             onClickHideBlockPopupMenu = onClickHideBlockPopupMenu,
                             onClickUnHideBlockPopupMenu = onClickUnHideBlockPopupMenu,
                             onClickIndentBlockPopupMenu = onClickIndentBlockPopupMenu,
@@ -414,11 +415,11 @@ private fun ClazzEditBasicDetails(
 private fun PopUpMenu(
     enabled: Boolean,
     uiState: ClazzEditUiState.CourseBlockUiState,
-    onClickHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit,
-    onClickUnHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit,
-    onClickIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit,
-    onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit,
-    onClickDeleteBlockPopupMenu: (CourseBlockWithEntity) -> Unit,
+    onClickHideBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit,
+    onClickUnHideBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit,
+    onClickIndentBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit,
+    onClickUnIndentBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit,
+    onClickDeleteBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -437,7 +438,7 @@ private fun PopUpMenu(
         ) {
             if(uiState.showHide) {
                 DropdownMenuItem(
-                    onClick = { onClickHideBlockPopupMenu(uiState.courseBlock) }
+                    onClick = { onClickHideBlockPopupMenu(uiState.block) }
                 ) {
                     Text(stringResource(MR.strings.hide))
                 }
@@ -445,7 +446,7 @@ private fun PopUpMenu(
 
             if(uiState.showUnhide) {
                 DropdownMenuItem(
-                    onClick = { onClickUnHideBlockPopupMenu(uiState.courseBlock) }
+                    onClick = { onClickUnHideBlockPopupMenu(uiState.block) }
                 ) {
                     Text(stringResource(MR.strings.unhide))
                 }
@@ -453,7 +454,7 @@ private fun PopUpMenu(
 
             if(uiState.showIndent) {
                 DropdownMenuItem(
-                    onClick = { onClickIndentBlockPopupMenu(uiState.courseBlock) }
+                    onClick = { onClickIndentBlockPopupMenu(uiState.block) }
                 ) {
                     Text(stringResource(MR.strings.indent))
                 }
@@ -462,14 +463,14 @@ private fun PopUpMenu(
             if(uiState.showUnindent) {
                 if (uiState.showUnindent) {
                     DropdownMenuItem(
-                        onClick = { onClickUnIndentBlockPopupMenu(uiState.courseBlock) }
+                        onClick = { onClickUnIndentBlockPopupMenu(uiState.block) }
                     ) {
                         Text(stringResource(MR.strings.unindent))
                     }
                 }
             }
 
-            DropdownMenuItem(onClick = { onClickDeleteBlockPopupMenu(uiState.courseBlock) }) {
+            DropdownMenuItem(onClick = { onClickDeleteBlockPopupMenu(uiState.block) }) {
                 Text(stringResource(MR.strings.delete))
             }
         }

@@ -38,7 +38,7 @@ import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
-fun SiteEnterLinkScreenForViewModel(
+fun SiteEnterLinkScreen(
     viewModel: SiteEnterLinkViewModel
 ) {
     val uiState: SiteEnterLinkUiState by viewModel.uiState.collectAsState(
@@ -55,7 +55,7 @@ fun SiteEnterLinkScreenForViewModel(
 
 @Composable
 fun SiteEnterLinkScreen(
-    uiState: SiteEnterLinkUiState = SiteEnterLinkUiState(),
+    uiState: SiteEnterLinkUiState,
     onClickNext: () -> Unit = {},
     onClickNewLearningEnvironment: () -> Unit = {},
     onEditTextValueChange: (String) -> Unit = {},

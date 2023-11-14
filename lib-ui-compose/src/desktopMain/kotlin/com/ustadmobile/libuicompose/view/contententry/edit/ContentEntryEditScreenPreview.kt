@@ -6,7 +6,8 @@ import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditUiState
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
-import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
+import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.CourseBlock
 
@@ -15,13 +16,15 @@ import com.ustadmobile.lib.db.entities.CourseBlock
 fun ContentEntryEditScreenPreview() {
     ContentEntryEditScreen(
         uiState = ContentEntryEditUiState(
-            entity = ContentEntryWithBlockAndLanguage().apply {
-                leaf = true
-            },
+            entity = ContentEntryBlockLanguageAndContentJob(
+                entry = ContentEntry().apply {
+                    title = "Hello World"
+                }
+            ),
             updateContentVisible = true,
             metadataResult = MetadataResult(
                 entry = ContentEntryWithLanguage(),
-                pluginId = 0
+                importerId = 0
             ),
             courseBlockEditUiState = CourseBlockEditUiState(
                 courseBlock = CourseBlock().apply {

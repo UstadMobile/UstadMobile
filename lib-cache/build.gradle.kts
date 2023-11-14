@@ -70,7 +70,7 @@ dependencies {
 
 android {
     compileSdk = 34
-    namespace = "com.ustadmobile.libuicompose"
+    namespace = "com.ustadmobile.libcache"
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     sourceSets["main"].res.srcDirs("src/androidMain/res")

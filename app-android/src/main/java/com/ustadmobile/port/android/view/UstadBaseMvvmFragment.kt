@@ -26,11 +26,10 @@ import org.kodein.di.android.x.closestDI
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
-import androidx.navigation.navGraphViewModels
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.*
-import com.ustadmobile.port.android.impl.ViewNameToDestMap
+
 import com.ustadmobile.port.android.view.util.UstadActivityWithBottomNavigation
 import kotlinx.coroutines.flow.map
 import org.kodein.di.*
@@ -44,19 +43,6 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
 
 
     //protected val destinationName: String by lazy { requireDestinationViewName() }
-
-    /**
-     * Shortcut to use the UstadViewModelProviderFactory and reduce boilerplate
-     *
-     * @param lookupDestinationName Some fragments are used by multiple destination ids on the
-     * navigation graph. In this case the destinationName must be looked up, otherwise this is
-     * not needed
-     */
-    inline fun <reified VM: ViewModel> ustadViewModels(
-        noinline vmFactory: (DI, UstadSavedStateHandle) -> VM,
-    ): Lazy<VM> = viewModels {
-        UstadViewModelProviderFactory(di, this, arguments, vmFactory)
-    }
 
     inner class FragmentSnackDisaptcher(): SnackBarDispatcher {
         override fun showSnackBar(snack: Snack) {
@@ -292,10 +278,7 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
      * bottom navigation etc). In these cases, the viewname must be explicitly provided
      */
     fun requireDestinationViewName() : String {
-        val currentDest = findNavController().currentDestination
-            ?: throw IllegalStateException("No current destination")
-        return ViewNameToDestMap().lookupViewNameById(currentDest.id)
-            ?: throw IllegalArgumentException("Could not find viewname for $currentDest")
+        TODO("This will be deleted")
     }
 
     override fun onDestroyView() {

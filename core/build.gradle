@@ -229,12 +229,12 @@ kotlin {
                 //dependency injection
                 implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
 
-                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation libs.okhttp
 
                 implementation libs.androidx.navigation.fragment.ktx
                 implementation libs.androidx.navigation.ui.ktx
 
-                implementation "com.google.android.material:material:$version_android_material"
+                implementation libs.android.material
 
 
 

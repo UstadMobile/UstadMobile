@@ -14,4 +14,5 @@ object ClazzAssignmentConstants {
         CourseAssignmentSubmission.NOT_SUBMITTED to Icons.Filled.PendingActions,
     )
 
+
 }

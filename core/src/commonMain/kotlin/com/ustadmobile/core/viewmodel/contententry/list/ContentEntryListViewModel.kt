@@ -289,6 +289,7 @@ class ContentEntryListViewModel(
 
     companion object {
 
+
         const val DEST_NAME = "ContentEntries"
 
         const val DEST_NAME_HOME = "ContentEntryListHome"
@@ -298,6 +299,8 @@ class ContentEntryListViewModel(
          * different destination/view name so that popupTo will work
          */
         const val DEST_NAME_PICKER = "PickContentEntry"
+
+        val ALL_DEST_NAMES = listOf(DEST_NAME, DEST_NAME_HOME, DEST_NAME_PICKER)
 
         const val ARG_FILTER = "filter"
 

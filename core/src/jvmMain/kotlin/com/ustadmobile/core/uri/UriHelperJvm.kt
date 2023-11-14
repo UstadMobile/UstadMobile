@@ -2,7 +2,7 @@ package com.ustadmobile.core.uri
 
 import com.ustadmobile.core.io.await
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.libcache.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import io.ktor.client.HttpClient
 import io.ktor.client.request.head
 import io.ktor.client.statement.discardRemaining
