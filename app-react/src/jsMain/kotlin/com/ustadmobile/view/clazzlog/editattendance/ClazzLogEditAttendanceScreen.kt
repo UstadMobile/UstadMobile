@@ -140,7 +140,7 @@ private val ClazzLogEditAttendanceScreenComponent = FC<ClazzLogEditAttendanceScr
                         }
 
                         ListItemText {
-                            primary = ReactNode(strings[MR.strings.mark_all_absent])
+                            primary = ReactNode(strings[MR.strings.mark_all_present])
                         }
                     }
                 }
