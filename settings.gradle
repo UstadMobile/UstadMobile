@@ -17,7 +17,7 @@ dependencyResolutionManagement {
             version("version_androidx_core", "1.12.0")
             version("version_kotlin", "1.9.20")
             version("version_okhttp", "4.11.0")
-            version("version_door", "0.70b17")
+            version("version_door", "0.70b18")
             version("version_coroutines", "1.7.3")
             version("version_atomicfu", "0.22.0")
             version("version_kotlinx_io", "0.3.0")
@@ -39,6 +39,8 @@ dependencyResolutionManagement {
             version("version_richeditor_multiplatform", "1.0.0-beta03")
             version("version_reorderable_compose", "0.9.6")
             version("version_compose_webview_multiplatform", "1.7.0")
+            version("version_androidx_window", "1.2.0-rc01")
+
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
@@ -62,6 +64,8 @@ dependencyResolutionManagement {
             library("androidx-lifecycle-viewmodel-compose", "androidx.lifecycle", "lifecycle-viewmodel-compose").versionRef("version_androidx_lifecycle")
             library("android-desugar-libs", "com.android.tools", "desugar_jdk_libs_nio").versionRef("version_android_desugar_jdk_libs")
             library("android-material", "com.google.android.material", "material").versionRef("version_android_material")
+            library("androidx-window", "androidx.window", "window").versionRef("version_androidx_window")
+
 
             library("paging-multiplatform-common", "app.cash.paging", "paging-common").versionRef("version_paging_multiplatform")
             library("paging-multiplatform-compose", "app.cash.paging", "paging-compose-common").versionRef("version_paging_multiplatform")

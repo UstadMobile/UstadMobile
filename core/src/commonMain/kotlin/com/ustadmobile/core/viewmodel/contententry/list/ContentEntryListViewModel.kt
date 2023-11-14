@@ -81,7 +81,7 @@ class ContentEntryListViewModel(
     /**
      * This will be true when the user is selecting content as part of selecting it from ClazzEdit
      */
-    private val hasCourseBlockArg: Boolean = ContentEntryEditViewModel.ARG_COURSEBLOCK in savedStateHandle.keys
+    private val hasCourseBlockArg: Boolean = savedStateHandle[ContentEntryEditViewModel.ARG_COURSEBLOCK] != null
 
     private val pagingSourceFactory: ListPagingSourceFactory<ContentEntry> = {
         when(_uiState.value.selectedChipId) {

@@ -1,4 +1,4 @@
-package com.ustadmobile.libuicompose.view
+package com.ustadmobile.libuicompose.view.app
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -10,10 +10,14 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
+import com.ustadmobile.libuicompose.view.PopNavCommandEffect
+import com.ustadmobile.libuicompose.view.clazz.list.ClazzListScreenForViewModel
 import com.ustadmobile.libuicompose.view.contententry.list.ContentEntryListScreenForViewModel
 import com.ustadmobile.libuicompose.view.login.LoginScreen
 import com.ustadmobile.libuicompose.view.siteenterlink.SiteEnterLinkScreen
@@ -94,8 +98,17 @@ fun AppNavHost(
     NavHost(
         modifier = modifier,
         navigator = navigator,
-        initialRoute = "/${SiteEnterLinkViewModel.DEST_NAME}"
+        initialRoute = "/${RedirectViewModel.DEST_NAME}",
+        persistNavState = true,
     ) {
+
+        contentScene("/${RedirectViewModel.DEST_NAME}") { backStackEntry ->
+            //No UI for redirect
+            appViewModel(backStackEntry, RedirectViewModel::class) { di, savedStateHandle ->
+                RedirectViewModel(di, savedStateHandle)
+            }
+        }
+
         contentScene(
             route = "/${SiteEnterLinkViewModel.DEST_NAME}"
         ) { backStackEntry ->
@@ -127,6 +140,18 @@ fun AppNavHost(
                         backStackEntry, ContentEntryListViewModel::class,
                     ) { di, savedStateHandle ->
                         ContentEntryListViewModel(di, savedStateHandle, destName)
+                    }
+                )
+            }
+        }
+
+        ClazzListViewModel.ALL_DEST_NAMES.forEach { destName ->
+            contentScene("/$destName") { backStackEntry ->
+                ClazzListScreenForViewModel(
+                    viewModel = appViewModel(
+                        backStackEntry, ClazzListViewModel::class
+                    ) { di, savedStateHandle, ->
+                        ClazzListViewModel(di, savedStateHandle, destName)
                     }
                 )
             }

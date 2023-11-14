@@ -2,7 +2,6 @@ package com.ustadmobile.libuicompose.nav
 
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.PopNavCommand
-import com.ustadmobile.core.impl.nav.UstadBackStackEntry
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.door.ext.toUrlQueryString
 import moe.tlaster.precompose.navigation.NavOptions
@@ -25,13 +24,6 @@ class UstadNavControllerPreCompose(
         }
     }
 
-    override val currentBackStackEntry: UstadBackStackEntry?
-        get() = throw IllegalStateException("Not supported")
-
-    override fun getBackStackEntry(viewName: String): UstadBackStackEntry? {
-        throw IllegalStateException("Not supported")
-    }
-
     override fun popBackStack(viewName: String, inclusive: Boolean) {
         onPopBack(PopNavCommand(viewName, inclusive))
     }
@@ -47,7 +39,7 @@ class UstadNavControllerPreCompose(
             route = "/${viewName.withQueryParams(args)}",
             options = NavOptions(
                 popUpTo = when {
-                    goOptions.clearStack -> PopUpTo.First(inclusive = goOptions.popUpToInclusive)
+                    goOptions.clearStack -> PopUpTo.First(inclusive = true)
                     popUpToViewName != null -> {
                         PopUpTo(
                             route = popUpToViewName,

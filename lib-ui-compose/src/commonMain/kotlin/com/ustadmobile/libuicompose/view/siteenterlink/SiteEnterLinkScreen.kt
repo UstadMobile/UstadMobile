@@ -71,8 +71,11 @@ fun SiteEnterLinkScreen(
     )  {
 
         Image(
-            painter = painterResource(MR.images.illustration_connect),
-            contentDescription = null,)
+            painter = painterResource(
+                imageResource = MR.images.illustration_connect
+            ),
+            contentDescription = null,
+        )
 
         Text(stringResource(MR.strings.please_enter_the_linK))
 

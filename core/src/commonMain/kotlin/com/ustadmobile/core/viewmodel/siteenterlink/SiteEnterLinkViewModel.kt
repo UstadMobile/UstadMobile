@@ -44,6 +44,7 @@ class SiteEnterLinkViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 title = impl.getString(MR.strings.enter_link),
+                userAccountIconVisible = false,
                 navigationVisible = false,
             )
         }

@@ -276,7 +276,9 @@ dependencies {
 
     //implementation "androidx.activity:activity-compose:$version_activity_compose"
     implementation libs.activity.compose
+    implementation libs.androidx.window
     implementation "androidx.compose.material:material-icons-extended"
+    implementation "androidx.compose.material3:material3-window-size-class"
     implementation "com.google.accompanist:accompanist-themeadapter-material:$version_compose_theme_adapter"
     implementation "com.google.accompanist:accompanist-pager:$version_compose_accompanist"
     implementation "com.google.accompanist:accompanist-pager-indicators:$version_compose_accompanist"
