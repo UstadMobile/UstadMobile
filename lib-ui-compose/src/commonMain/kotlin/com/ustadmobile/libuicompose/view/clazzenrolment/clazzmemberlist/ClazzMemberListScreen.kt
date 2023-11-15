@@ -110,7 +110,7 @@ fun ClazzMemberListScreen(
                 modifier = Modifier.defaultItemPadding(),
                 activeSortOrderOption = uiState.activeSortOrderOption,
                 enabled = uiState.fieldsEnabled,
-                onClickSort = onClickSort
+                onClick = onClickSort
             )
         }
 

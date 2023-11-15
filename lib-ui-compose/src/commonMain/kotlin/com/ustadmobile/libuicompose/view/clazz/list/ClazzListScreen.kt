@@ -43,15 +43,18 @@ import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.libuicompose.components.HtmlText
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadBottomSheetSpacer
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
+import com.ustadmobile.libuicompose.components.UstadSortOptionsBottomSheet
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.util.ext.copyWithNewFabOnClick
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import com.ustadmobile.libuicompose.util.useSortOptionPopup
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
 import moe.tlaster.precompose.navigation.BackStackEntry
 
@@ -64,6 +67,10 @@ fun ClazzListScreen(
     destName: String,
 ) {
     var createNewOptionsVisible by remember {
+        mutableStateOf(false)
+    }
+
+    var sortBottomSheetVisible by remember {
         mutableStateOf(false)
     }
 
@@ -82,7 +89,6 @@ fun ClazzListScreen(
     }
 
     val uiState: ClazzListUiState by viewModel.uiState.collectAsState(initial = ClazzListUiState())
-
 
     if(createNewOptionsVisible) {
         ModalBottomSheet(
@@ -114,21 +120,22 @@ fun ClazzListScreen(
         }
     }
 
+    if(sortBottomSheetVisible) {
+        UstadSortOptionsBottomSheet(
+            sortOptions = uiState.sortOptions,
+            onClickSortOption = viewModel::onSortOrderChanged,
+            onDismissRequest = { sortBottomSheetVisible = false }
+        )
+    }
 
     ClazzListScreen(
         uiState = uiState,
         onClickClazz = viewModel::onClickEntry,
         onClickSort =  {
-            //  TODO error
-//            SortBottomSheetFragment(
-//                sortOptions = uiState.sortOptions,
-//                selectedSort = uiState.activeSortOrderOption,
-//                onSortOptionSelected = {
-//                    viewModel.onSortOrderChanged(it)
-//                }
-//            ).show(context.getContextSupportFragmentManager(), "SortOptions")
+            sortBottomSheetVisible = true
         },
-        onClickFilterChip = viewModel::onClickFilterChip
+        onClickFilterChip = viewModel::onClickFilterChip,
+        onClickSortOption = viewModel::onSortOrderChanged,
     )
 }
 
@@ -138,6 +145,8 @@ fun ClazzListScreen(
     onClickClazz: (Clazz) -> Unit = {},
     onClickSort: () -> Unit = {},
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
+    onClickSortOption: (SortOrderOption) -> Unit = { },
+    showSortOptionsPopup: Boolean = useSortOptionPopup(),
 ) {
 
     val pager = remember(uiState.clazzList){
@@ -164,7 +173,10 @@ fun ClazzListScreen(
                 modifier = Modifier.defaultItemPadding(),
                 activeSortOrderOption = uiState.activeSortOrderOption,
                 enabled = uiState.fieldsEnabled,
-                onClickSort = onClickSort
+                sortOptions = uiState.sortOptions,
+                onClick = onClickSort,
+                onClickSortOption = onClickSortOption,
+                showPopup = showSortOptionsPopup,
             )
         }
 

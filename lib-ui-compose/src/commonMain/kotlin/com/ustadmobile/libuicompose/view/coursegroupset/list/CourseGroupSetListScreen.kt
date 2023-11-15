@@ -74,7 +74,7 @@ fun CourseGroupSetListScreen(
             UstadListSortHeader(
                 modifier = Modifier.defaultItemPadding(),
                 activeSortOrderOption = uiState.sortOption,
-                onClickSort =   onClickSort
+                onClick =   onClickSort
             )
         }
 
