@@ -17,13 +17,23 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.paging.compose.collectAsLazyPagingItems
+import app.cash.paging.Pager
+import app.cash.paging.PagingConfig
 import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListUiState
@@ -32,31 +42,100 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.libuicompose.components.HtmlText
+import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
+import com.ustadmobile.libuicompose.components.UstadBottomSheetSpacer
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
+import com.ustadmobile.libuicompose.components.UstadSortOptionsBottomSheet
+import com.ustadmobile.libuicompose.components.ustadPagedItems
+import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
+import com.ustadmobile.libuicompose.util.ext.copyWithNewFabOnClick
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import com.ustadmobile.libuicompose.util.useSortOptionPopup
+import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
+import moe.tlaster.precompose.navigation.BackStackEntry
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ClazzListScreenForViewModel(viewModel: ClazzListViewModel) {
+fun ClazzListScreen(
+    backStackEntry: BackStackEntry,
+    navController: UstadNavControllerPreCompose,
+    onSetAppUiState: (AppUiState) -> Unit,
+    destName: String,
+) {
+    var createNewOptionsVisible by remember {
+        mutableStateOf(false)
+    }
+
+    var sortBottomSheetVisible by remember {
+        mutableStateOf(false)
+    }
+
+    val viewModel = ustadViewModel(
+        modelClass = ClazzListViewModel::class,
+        backStackEntry = backStackEntry,
+        onSetAppUiState = onSetAppUiState,
+        navController = navController,
+        appUiStateMap = {
+            it.copyWithNewFabOnClick {
+                createNewOptionsVisible = true
+            }
+        }
+    ) { di, savedStateHandle ->
+        ClazzListViewModel(di, savedStateHandle, destName)
+    }
+
     val uiState: ClazzListUiState by viewModel.uiState.collectAsState(initial = ClazzListUiState())
 
-//    val context = LocalContext.current
+    if(createNewOptionsVisible) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                createNewOptionsVisible = false
+            }
+        ) {
+            UstadBottomSheetOption(
+                modifier = Modifier.clickable {
+                    createNewOptionsVisible = false
+                    viewModel.onClickJoinExistingClazz()
+                },
+                headlineContent = { Text(stringResource(MR.strings.join_existing_course)) },
+                leadingContent = { Icon(Icons.Default.Login, contentDescription = null) },
+            )
+
+            if(uiState.canAddNewCourse) {
+                UstadBottomSheetOption(
+                    modifier = Modifier.clickable {
+                        createNewOptionsVisible = false
+                        viewModel.onClickAdd()
+                    },
+                    headlineContent = { Text(stringResource(MR.strings.add_a_new_course)) },
+                    leadingContent = { Icon(Icons.Default.Add, contentDescription = null) },
+                )
+            }
+
+            UstadBottomSheetSpacer()
+        }
+    }
+
+    if(sortBottomSheetVisible) {
+        UstadSortOptionsBottomSheet(
+            sortOptions = uiState.sortOptions,
+            onClickSortOption = viewModel::onSortOrderChanged,
+            onDismissRequest = { sortBottomSheetVisible = false }
+        )
+    }
 
     ClazzListScreen(
         uiState = uiState,
         onClickClazz = viewModel::onClickEntry,
         onClickSort =  {
-            //  TODO error
-//            SortBottomSheetFragment(
-//                sortOptions = uiState.sortOptions,
-//                selectedSort = uiState.activeSortOrderOption,
-//                onSortOptionSelected = {
-//                    viewModel.onSortOrderChanged(it)
-//                }
-//            ).show(context.getContextSupportFragmentManager(), "SortOptions")
+            sortBottomSheetVisible = true
         },
-        onClickFilterChip = viewModel::onClickFilterChip
+        onClickFilterChip = viewModel::onClickFilterChip,
+        onClickSortOption = viewModel::onSortOrderChanged,
     )
 }
 
@@ -66,17 +145,18 @@ fun ClazzListScreen(
     onClickClazz: (Clazz) -> Unit = {},
     onClickSort: () -> Unit = {},
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
+    onClickSortOption: (SortOrderOption) -> Unit = { },
+    showSortOptionsPopup: Boolean = useSortOptionPopup(),
 ) {
 
-    // TODO error
-//    val pager = remember(uiState.clazzList){
-//        Pager(
-//            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
-//            pagingSourceFactory = uiState.clazzList
-//        )
-//    }
-//
-//    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+    val pager = remember(uiState.clazzList){
+        Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
+            pagingSourceFactory = uiState.clazzList
+        )
+    }
+
+    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
     LazyVerticalGrid(
         modifier = Modifier.fillMaxSize(),
@@ -93,7 +173,10 @@ fun ClazzListScreen(
                 modifier = Modifier.defaultItemPadding(),
                 activeSortOrderOption = uiState.activeSortOrderOption,
                 enabled = uiState.fieldsEnabled,
-                onClickSort = onClickSort
+                sortOptions = uiState.sortOptions,
+                onClick = onClickSort,
+                onClickSortOption = onClickSortOption,
+                showPopup = showSortOptionsPopup,
             )
         }
 
@@ -110,14 +193,15 @@ fun ClazzListScreen(
         /**
          * Note: Currently there is no direct support for LazyGrid with pagingsource.
          */
-//        items(
-//            lazyPagingItems.itemCount
-//        ) {
-//            ClazzListItem(
-//                clazz = lazyPagingItems[it],
-//                onClickClazz = onClickClazz
-//            )
-//        }
+        ustadPagedItems(
+            pagingItems = lazyPagingItems,
+            key = { it.clazzUid }
+        ){
+            ClazzListItem(
+                clazz = it,
+                onClickClazz = onClickClazz
+            )
+        }
 
         //Host fragment thinks scroll bar behavior increases available height - need to compensate
         item(span = { GridItemSpan(maxLineSpan) }) {
@@ -142,7 +226,7 @@ fun ClazzListItem(
             .clickable {
                 clazz?.also { onClickClazz(it) }
             },
-        elevation = 8.dp
+        elevation = 8.dp,
     ) {
         Column(
             modifier = Modifier.padding(8.dp)

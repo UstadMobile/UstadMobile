@@ -57,7 +57,7 @@ fun commonTestKtorDiModule(
     }
 
     bind<UstadMobileSystemImpl>() with singleton {
-        UstadMobileSystemImpl(instance(tag = DiTag.XPP_FACTORY_NSAWARE),
+        UstadMobileSystemImpl(
             temporaryFolder.newFolder())
     }
 

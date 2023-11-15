@@ -47,7 +47,6 @@ import org.kodein.di.registerContextTranslator
 import org.kodein.di.scoped
 import org.kodein.di.singleton
 import org.mockito.kotlin.spy
-import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.nio.file.Files
 import kotlin.random.Random
@@ -91,7 +90,7 @@ class UstadTestRule: TestWatcher() {
     override fun starting(description: Description) {
         endpointScope = EndpointScope()
         tmpFolder = Files.createTempDirectory("testrule").toFile()
-        systemImplSpy = spy(UstadMobileSystemImpl(XmlPullParserFactory.newInstance(), tmpFolder))
+        systemImplSpy = spy(UstadMobileSystemImpl(tmpFolder))
         okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp) {
             install(ContentNegotiation) {

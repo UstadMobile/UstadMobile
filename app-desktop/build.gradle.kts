@@ -26,11 +26,16 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation(project(":core"))
     implementation(project(":lib-ui-compose"))
+    implementation(project(":lib-util"))
     implementation(compose.material3)
     implementation(compose.materialIconsExtended)
+
+    implementation(libs.okhttp)
+
     api(libs.moko.resources)
     api(libs.moko.resources.compose)
-
+    api(libs.precompose)
+    api(libs.precompose.viewmodel)
 }
 
 compose.desktop {
