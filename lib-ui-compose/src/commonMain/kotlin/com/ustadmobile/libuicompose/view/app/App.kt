@@ -7,15 +7,14 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.LocalLibrary
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.School
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -31,8 +30,8 @@ import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewMode
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
-import moe.tlaster.precompose.PreComposeApp
 import moe.tlaster.precompose.navigation.NavOptions
+import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.navigation.PopUpTo
 import moe.tlaster.precompose.navigation.rememberNavigator
 
@@ -60,85 +59,89 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     )
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App(
     widthClass: SizeClass = SizeClass.MEDIUM,
+    persistNavState: Boolean = false,
+    useBottomBar: Boolean = true,
+    navigator: Navigator = rememberNavigator(),
+    onSetWindowTitle: (String) -> Unit = { },
 ) {
+    val appUiState = remember {
+        mutableStateOf(AppUiState())
+    }
 
-    PreComposeApp {
-        val navigator = rememberNavigator()
-
-        val appUiState = remember {
-            mutableStateOf(AppUiState())
+    val appUiStateVal by appUiState
+    LaunchedEffect(appUiStateVal.title) {
+        appUiStateVal.title?.also {
+            onSetWindowTitle(it)
         }
+    }
 
-        val appUiStateVal by appUiState
-
-        MaterialTheme {
-            Scaffold(
-                topBar = {
-                    UstadAppBar(
-                        compactHeader = (widthClass != SizeClass.EXPANDED),
-                        appUiState = appUiStateVal,
-                        navigator = navigator,
-                    )
-                },
-                bottomBar = {
-                    //As per https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#navigationbar
-                    var selectedTopLevelItemIndex by remember { mutableIntStateOf(0) }
-                    if(appUiStateVal.navigationVisible) {
-                        NavigationBar {
-                            APP_TOP_LEVEL_NAV_ITEMS.forEachIndexed { index, item ->
-                                NavigationBarItem(
-                                    icon = {
-                                        Icon(item.icon, contentDescription = null)
-                                    },
-                                    label = { Text(stringResource(item.label)) },
-                                    selected = selectedTopLevelItemIndex == index,
-                                    onClick = {
-                                        selectedTopLevelItemIndex = index
-                                        navigator.navigate(
-                                            route  = "/${item.destRoute}",
-                                            options = NavOptions(popUpTo = PopUpTo.First(inclusive = true))
-                                        )
-                                    }
-                                )
-                            }
-                        }
-                    }
-                },
-                floatingActionButton = {
-                    if(appUiStateVal.fabState.visible) {
-                        ExtendedFloatingActionButton(
-                            onClick = appUiStateVal.fabState.onClick,
-                            text = {
-                                Text(appUiStateVal.fabState.text ?: "")
-                            },
+    Scaffold(
+        topBar = {
+            UstadAppBar(
+                compactHeader = (widthClass != SizeClass.EXPANDED),
+                appUiState = appUiStateVal,
+                navigator = navigator,
+            )
+        },
+        bottomBar = {
+            //As per https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#navigationbar
+            var selectedTopLevelItemIndex by remember { mutableIntStateOf(0) }
+            if(useBottomBar && appUiStateVal.navigationVisible) {
+                NavigationBar {
+                    APP_TOP_LEVEL_NAV_ITEMS.forEachIndexed { index, item ->
+                        NavigationBarItem(
                             icon = {
-                                val imageVector = when(appUiStateVal.fabState.icon)  {
-                                    FabUiState.FabIcon.ADD -> Icons.Default.Add
-                                    FabUiState.FabIcon.EDIT -> Icons.Default.Edit
-                                    else -> null
-                                }
-                                if(imageVector != null) {
-                                    Icon(
-                                        imageVector = imageVector,
-                                        contentDescription = null,
-                                    )
-                                }
+                                Icon(item.icon, contentDescription = null)
+                            },
+                            label = { Text(stringResource(item.label)) },
+                            selected = selectedTopLevelItemIndex == index,
+                            onClick = {
+                                selectedTopLevelItemIndex = index
+                                navigator.navigate(
+                                    route  = "/${item.destRoute}",
+                                    options = NavOptions(popUpTo = PopUpTo.First(inclusive = true))
+                                )
                             }
                         )
                     }
-
-                },
-            ) { innerPadding ->
-                AppNavHost(
-                    navigator = navigator,
-                    onSetAppUiState = appUiState.component2(),
-                    modifier = Modifier.padding(innerPadding),
+                }
+            }
+        },
+        floatingActionButton = {
+            if(appUiStateVal.fabState.visible) {
+                ExtendedFloatingActionButton(
+                    onClick = appUiStateVal.fabState.onClick,
+                    text = {
+                        Text(appUiStateVal.fabState.text ?: "")
+                    },
+                    icon = {
+                        val imageVector = when(appUiStateVal.fabState.icon)  {
+                            FabUiState.FabIcon.ADD -> Icons.Default.Add
+                            FabUiState.FabIcon.EDIT -> Icons.Default.Edit
+                            else -> null
+                        }
+                        if(imageVector != null) {
+                            Icon(
+                                imageVector = imageVector,
+                                contentDescription = null,
+                            )
+                        }
+                    }
                 )
             }
-        }
+
+        },
+    ) { innerPadding ->
+        AppNavHost(
+            navigator = navigator,
+            onSetAppUiState = appUiState.component2(),
+            modifier = Modifier.padding(innerPadding),
+            persistNavState = persistNavState,
+        )
     }
+
+
 }

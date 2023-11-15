@@ -95,7 +95,7 @@ class UstadTestRule(): TestWatcher() {
         tempFolder = Files.createTempDirectory("ustadtestrule").toFile()
 
         endpointScope = EndpointScope()
-        systemImplSpy = spy(UstadMobileSystemImpl(xppFactory, tempFolder))
+        systemImplSpy = spy(UstadMobileSystemImpl(tempFolder))
         //coroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
         okHttpClient = OkHttpClient.Builder().build()

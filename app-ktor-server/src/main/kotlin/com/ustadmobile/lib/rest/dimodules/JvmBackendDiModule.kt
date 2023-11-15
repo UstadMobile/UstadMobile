@@ -52,7 +52,7 @@ fun makeJvmBackendDiModule(
     }
 
     bind<UstadMobileSystemImpl>() with singleton {
-        UstadMobileSystemImpl(instance(tag  = DiTag.XPP_FACTORY_NSAWARE), dataDirPath)
+        UstadMobileSystemImpl(dataDirPath)
     }
 
     bind<AuthManager>() with scoped(contextScope).singleton {

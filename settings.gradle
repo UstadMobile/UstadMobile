@@ -34,6 +34,7 @@ dependencyResolutionManagement {
             version("version_javaffmpeg", "0.8.0")
             version('version_android_desugar_jdk_libs', "2.0.4")
             version("version_android_material", "1.9.0")
+            version("version_ktor", "2.3.6")
 
             version("version_kotlinx_datetime", "0.4.0")
             version("version_richeditor_multiplatform", "1.0.0-beta03")

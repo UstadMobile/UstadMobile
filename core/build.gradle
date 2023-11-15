@@ -95,10 +95,10 @@ kotlin {
                 api libs.moko.resources
                 implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
-                implementation "io.ktor:ktor-client-core:$version_ktor"
-                implementation "io.ktor:ktor-client-json:$version_ktor"
-                implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
-                implementation "io.ktor:ktor-io:$version_ktor"
+                api "io.ktor:ktor-client-core:$version_ktor"
+                api "io.ktor:ktor-client-json:$version_ktor"
+                api "io.ktor:ktor-client-content-negotiation:$version_ktor"
+                api "io.ktor:ktor-io:$version_ktor"
                 implementation libs.napier
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"

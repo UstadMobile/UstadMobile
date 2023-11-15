@@ -39,7 +39,6 @@ import okhttp3.OkHttpClient
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
-import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -87,7 +86,7 @@ class TestXapiStateResponder {
 
         di = DI {
             bind<UstadMobileSystemImpl>() with singleton {
-                spy(UstadMobileSystemImpl(XmlPullParserFactory.newInstance(),
+                spy(UstadMobileSystemImpl(
                     temporaryFolder.newFolder()))
             }
             bind<UstadAccountManager>() with singleton {

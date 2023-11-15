@@ -35,6 +35,7 @@ import kotlin.reflect.KClass
 fun AppNavHost(
     navigator: Navigator,
     onSetAppUiState: (AppUiState) -> Unit,
+    persistNavState: Boolean = false,
     modifier: Modifier,
 ) {
     val popCommandFlow = remember {
@@ -99,7 +100,7 @@ fun AppNavHost(
         modifier = modifier,
         navigator = navigator,
         initialRoute = "/${RedirectViewModel.DEST_NAME}",
-        persistNavState = true,
+        persistNavState = persistNavState,
     ) {
 
         contentScene("/${RedirectViewModel.DEST_NAME}") { backStackEntry ->

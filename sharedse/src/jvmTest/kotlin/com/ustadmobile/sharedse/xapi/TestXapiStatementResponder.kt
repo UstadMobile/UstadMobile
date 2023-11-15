@@ -45,7 +45,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
-import org.xmlpull.v1.XmlPullParserFactory
 import java.io.IOException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -79,7 +78,7 @@ class TestXapiStatementResponder {
             }
 
             bind<UstadMobileSystemImpl>() with singleton {
-                spy(UstadMobileSystemImpl(XmlPullParserFactory.newInstance(),
+                spy(UstadMobileSystemImpl(
                     temporaryFolder.newFolder()))
             }
             bind<UstadAccountManager>() with singleton {

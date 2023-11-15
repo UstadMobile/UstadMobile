@@ -1,6 +1,5 @@
 package com.ustadmobile.libuicompose.view.app
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -90,7 +89,7 @@ fun UstadAppBar(
                             .focusRequester(focusRequester)
                             .let {
                                 if(compactHeader || searchHasFocus) {
-                                    it.fillMaxWidth()
+                                    it.width(320.dp)
                                 }else {
                                     it.width(192.dp)
                                 }

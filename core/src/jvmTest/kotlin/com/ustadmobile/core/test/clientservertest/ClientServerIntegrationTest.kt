@@ -75,7 +75,7 @@ private fun clientServerCommonDiModule(
     }
 
     bind<UstadMobileSystemImpl>() with singleton {
-        UstadMobileSystemImpl(instance(tag = DiTag.XPP_FACTORY_NSAWARE),
+        UstadMobileSystemImpl(
             File(baseTmpDir, "servertmp").also { it.mkdir() }
         )
     }

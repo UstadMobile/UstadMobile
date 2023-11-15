@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
 import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
@@ -118,7 +119,7 @@ suspend fun UstadNavController.navigateToLink(
         }
         //If there are no accounts, the endpoint url is not specified, and the user can select the server, go to EnterLink
         endpointUrl == null && accountManager.activeSessionCount(maxDateOfBirth) == 0 && userCanSelectServer -> {
-            navigate(SiteEnterLinkView.VIEW_NAME, mapOf(ARG_NEXT to viewUri))
+            navigate(SiteEnterLinkViewModel.DEST_NAME, mapOf(ARG_NEXT to viewUri))
         }
 
         //else - go to the account manager

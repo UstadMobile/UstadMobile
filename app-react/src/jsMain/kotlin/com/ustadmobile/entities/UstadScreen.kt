@@ -123,6 +123,7 @@ import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
 import com.ustadmobile.view.epubcontent.EpubContentScreen
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.view.videocontent.VideoContentScreen
+import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -150,7 +151,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(LoginViewModel.DEST_NAME, "Login Preview",
         LoginScreen
     ),
-    UstadScreen(SiteEnterLinkView.VIEW_NAME, "Site Enter Link Preview",
+    UstadScreen(SiteEnterLinkViewModel.DEST_NAME, "Site Enter Link Preview",
         SiteEnterLinkScreen
     ),
     UstadScreen(ParentalConsentManagementViewModel.DEST_NAME, "Parental Consent Management Preview",

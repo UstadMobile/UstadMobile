@@ -226,7 +226,7 @@ fun ClazzListItem(
             .clickable {
                 clazz?.also { onClickClazz(it) }
             },
-        elevation = 8.dp
+        elevation = 8.dp,
     ) {
         Column(
             modifier = Modifier.padding(8.dp)

@@ -17,6 +17,7 @@ import org.kodein.di.android.closestDI
 import org.kodein.di.compose.withDI
 import com.ustadmobile.libuicompose.view.app.App
 import com.ustadmobile.libuicompose.view.app.SizeClass
+import moe.tlaster.precompose.PreComposeApp
 
 class AppActivity: AppCompatActivity(), DIAware {
 
@@ -41,11 +42,13 @@ class AppActivity: AppCompatActivity(), DIAware {
                     color = MaterialTheme.colorScheme.background,
                 ) {
                     val windowSizeClass = calculateWindowSizeClass(this)
-
                     withDI(di) {
-                        App(
-                            widthClass = windowSizeClass.widthSizeClass.multiplatformSizeClass
-                        )
+                        PreComposeApp {
+                            App(
+                                widthClass = windowSizeClass.widthSizeClass.multiplatformSizeClass
+                            )
+                        }
+
                     }
                 }
             }
