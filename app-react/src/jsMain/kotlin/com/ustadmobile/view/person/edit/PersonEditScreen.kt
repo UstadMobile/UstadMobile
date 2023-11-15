@@ -175,14 +175,16 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
             }
 
             if (props.uiState.usernameVisible){
-                UstadTextEditField {
+                TextField {
                     value = props.uiState.person?.username ?: ""
-                    label = strings[MR.strings.username]
-                    enabled = props.uiState.fieldsEnabled
+                    label = ReactNode(strings[MR.strings.username])
+                    disabled = !props.uiState.fieldsEnabled
+                    error = props.uiState.usernameError != null
+                    helperText = ReactNode(props.uiState.usernameError ?: strings[MR.strings.required])
                     onChange = {
                         props.onPersonChanged(
                             props.uiState.person?.shallowCopy {
-                                username = it
+                                username = it.target.asDynamic().value
                         })
                     }
                 }
