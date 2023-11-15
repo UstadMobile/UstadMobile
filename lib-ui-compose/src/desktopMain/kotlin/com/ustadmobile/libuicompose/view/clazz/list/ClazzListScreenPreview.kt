@@ -2,9 +2,6 @@ package com.ustadmobile.libuicompose.view.clazz.list
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.runtime.Composable
-import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
-import androidx.compose.foundation.layout.*
-import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListUiState
 
 @Composable

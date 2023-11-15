@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun UstadDetailField2(
     valueContent: @Composable () -> Unit,
-    labelContent: @Composable () -> Unit,
+    labelContent: (@Composable () -> Unit)? = null,
     leadingContent: @Composable (()-> Unit)? = null,
     trailingContent: @Composable (() -> Unit)? = null,
     modifier: Modifier = Modifier,
@@ -49,10 +49,11 @@ fun UstadDetailField2(
 
                 Spacer(Modifier.height(8.dp))
 
-                ProvideTextStyle(MaterialTheme.typography.labelMedium) {
-                    labelContent()
+                if(labelContent != null) {
+                    ProvideTextStyle(MaterialTheme.typography.labelMedium) {
+                        labelContent()
+                    }
                 }
-
             }
 
 

@@ -17,7 +17,7 @@ import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.view.PopNavCommandEffect
-import com.ustadmobile.libuicompose.view.clazz.list.ClazzListScreenForViewModel
+import com.ustadmobile.libuicompose.view.clazz.list.ClazzListScreen
 import com.ustadmobile.libuicompose.view.contententry.list.ContentEntryListScreenForViewModel
 import com.ustadmobile.libuicompose.view.login.LoginScreen
 import com.ustadmobile.libuicompose.view.siteenterlink.SiteEnterLinkScreen
@@ -147,12 +147,8 @@ fun AppNavHost(
 
         ClazzListViewModel.ALL_DEST_NAMES.forEach { destName ->
             contentScene("/$destName") { backStackEntry ->
-                ClazzListScreenForViewModel(
-                    viewModel = appViewModel(
-                        backStackEntry, ClazzListViewModel::class
-                    ) { di, savedStateHandle, ->
-                        ClazzListViewModel(di, savedStateHandle, destName)
-                    }
+                ClazzListScreen(
+                    backStackEntry, ustadNavController, onSetAppUiState, destName
                 )
             }
         }

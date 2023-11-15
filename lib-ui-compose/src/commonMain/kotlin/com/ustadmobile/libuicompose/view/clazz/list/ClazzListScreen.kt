@@ -17,11 +17,17 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -36,17 +42,78 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.libuicompose.components.HtmlText
+import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
+import com.ustadmobile.libuicompose.components.UstadBottomSheetSpacer
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import com.ustadmobile.libuicompose.components.ustadPagedItems
+import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
+import com.ustadmobile.libuicompose.util.ext.copyWithNewFabOnClick
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
+import moe.tlaster.precompose.navigation.BackStackEntry
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ClazzListScreenForViewModel(viewModel: ClazzListViewModel) {
+fun ClazzListScreen(
+    backStackEntry: BackStackEntry,
+    navController: UstadNavControllerPreCompose,
+    onSetAppUiState: (AppUiState) -> Unit,
+    destName: String,
+) {
+    var createNewOptionsVisible by remember {
+        mutableStateOf(false)
+    }
+
+    val viewModel = ustadViewModel(
+        modelClass = ClazzListViewModel::class,
+        backStackEntry = backStackEntry,
+        onSetAppUiState = onSetAppUiState,
+        navController = navController,
+        appUiStateMap = {
+            it.copyWithNewFabOnClick {
+                createNewOptionsVisible = true
+            }
+        }
+    ) { di, savedStateHandle ->
+        ClazzListViewModel(di, savedStateHandle, destName)
+    }
+
     val uiState: ClazzListUiState by viewModel.uiState.collectAsState(initial = ClazzListUiState())
 
-//    val context = LocalContext.current
+
+    if(createNewOptionsVisible) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                createNewOptionsVisible = false
+            }
+        ) {
+            UstadBottomSheetOption(
+                modifier = Modifier.clickable {
+                    createNewOptionsVisible = false
+                    viewModel.onClickJoinExistingClazz()
+                },
+                headlineContent = { Text(stringResource(MR.strings.join_existing_course)) },
+                leadingContent = { Icon(Icons.Default.Login, contentDescription = null) },
+            )
+
+            if(uiState.canAddNewCourse) {
+                UstadBottomSheetOption(
+                    modifier = Modifier.clickable {
+                        createNewOptionsVisible = false
+                        viewModel.onClickAdd()
+                    },
+                    headlineContent = { Text(stringResource(MR.strings.add_a_new_course)) },
+                    leadingContent = { Icon(Icons.Default.Add, contentDescription = null) },
+                )
+            }
+
+            UstadBottomSheetSpacer()
+        }
+    }
+
 
     ClazzListScreen(
         uiState = uiState,

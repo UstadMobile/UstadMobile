@@ -9,6 +9,7 @@ import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.libuicompose.effects.AppUiStateEffect
 import com.ustadmobile.libuicompose.effects.NavCommandEffect
 import com.ustadmobile.libuicompose.nav.UstadSavedStateHandlePreCompose
+import kotlinx.coroutines.flow.map
 import moe.tlaster.precompose.navigation.BackStackEntry
 import moe.tlaster.precompose.viewmodel.viewModel
 import org.kodein.di.DI
@@ -21,6 +22,7 @@ fun <T: UstadViewModel> ustadViewModel(
     backStackEntry: BackStackEntry,
     navController: UstadNavController,
     onSetAppUiState: (AppUiState) -> Unit,
+    appUiStateMap: ((AppUiState) -> AppUiState)? = null,
     block: (di: DI, savedStateHandle: UstadSavedStateHandle) -> T,
 ) : T {
     val di = localDI()
@@ -43,8 +45,16 @@ fun <T: UstadViewModel> ustadViewModel(
         savedStateHandle = UstadSavedStateHandlePreCompose(backStackEntry),
     )
 
+    val uiStateFlow = remember(viewModel.appUiState, appUiStateMap) {
+        if(appUiStateMap != null) {
+            viewModel.appUiState.map(appUiStateMap)
+        }else {
+            viewModel.appUiState
+        }
+    }
+
     AppUiStateEffect(
-        appUiStateFlow = viewModel.appUiState,
+        appUiStateFlow = uiStateFlow,
         onSetAppUiState = onSetAppUiState,
     )
 
