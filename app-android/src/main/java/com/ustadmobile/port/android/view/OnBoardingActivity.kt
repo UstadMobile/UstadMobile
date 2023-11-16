@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -36,8 +38,9 @@ import com.ustadmobile.core.impl.nav.SavedStateHandleAdapter
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.core.viewmodel.OnboardingUiState
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
-import com.ustadmobile.libuicompose.util.ext.getActivityContext
-import com.ustadmobile.libuicompose.util.ext.getUstadLocaleSetting
+import com.ustadmobile.port.android.util.ext.getActivityContext
+import com.ustadmobile.port.android.util.ext.getUstadLocaleSetting
+import kotlinx.coroutines.delay
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import java.util.*

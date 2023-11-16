@@ -12,21 +12,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.impl.locale.entityconstants.ContentEntryTypeLabelConstants
-import com.ustadmobile.core.util.ext.progressBadge
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListItemUiState
 import com.ustadmobile.core.viewmodel.contententry.list.listItemUiState
 import com.ustadmobile.lib.db.entities.*
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
-import dev.icerock.moko.resources.compose.colorResource
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun UstadContentEntryListItem(
     modifier: Modifier = Modifier,
-    contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?,
+    contentEntry: ContentEntry?,
     onClick: () -> Unit = { },
     onClickDownload: () -> Unit = { },
 ) {
@@ -65,7 +62,7 @@ fun UstadContentEntryListItem(
 @Composable
 private fun LeadingContent(
     uiState: ContentEntryListItemUiState?,
-    contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?
+    contentEntry: ContentEntry?
 ){
 
     val thumbnail: ImageVector = if (contentEntry?.leaf == true)
@@ -75,10 +72,10 @@ private fun LeadingContent(
 
     var badgeColor = MaterialTheme.colors.error
     var badge = Icons.Default.Cancel
-    if (contentEntry?.scoreProgress?.progressBadge() == ProgressConstants.BADGE_CHECK) {
-        badge = Icons.Default.CheckCircle
-        badgeColor = colorResource(MR.colors.success)
-    }
+//    if (contentEntry?.scoreProgress?.progressBadge() == ProgressConstants.BADGE_CHECK) {
+//        badge = Icons.Default.CheckCircle
+//        badgeColor = colorResource(MR.colors.success)
+//    }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -92,39 +89,12 @@ private fun LeadingContent(
                 .size(45.dp)
                 .padding(4.dp),
         )
-
-        BadgedBox(badge = {
-            if (contentEntry?.scoreProgress?.progressBadge() != ProgressConstants.BADGE_NONE){
-                Icon(
-                    badge,
-                    contentDescription = "",
-                    modifier = Modifier.size(15.dp),
-                    tint = badgeColor
-                )
-            }
-        }) {
-            if (uiState?.progressVisible == true){
-                Box(
-                    modifier = Modifier
-                        .width(45.dp)
-                        .height(15.dp)
-                        .padding(end = 10.dp)
-                ) {
-                    LinearProgressIndicator(
-                        progress = ((contentEntry?.scoreProgress?.progress ?: 0)/100.0)
-                            .toFloat(),
-                        modifier = Modifier
-                            .height(4.dp)
-                    )
-                }
-            }
-        }
     }
 }
 
 @Composable
 private fun SecondaryContent(
-    contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?,
+    contentEntry: ContentEntry?,
     uiState: ContentEntryListItemUiState?
 ){
     Column(
@@ -150,20 +120,6 @@ private fun SecondaryContent(
                         .stringResource)
                 )
             }
-
-            /*
-            Restore after reactive sync
-            Spacer(modifier = Modifier.width(10.dp))
-
-            Icon(
-                Icons.Default.EmojiEvents,
-                contentDescription = ""
-            )
-
-            Text("${contentEntry?.scoreProgress?.progress ?: 0}%")
-
-            Text(uiState?.scoreResultText ?: "")
-             */
         }
     }
 }

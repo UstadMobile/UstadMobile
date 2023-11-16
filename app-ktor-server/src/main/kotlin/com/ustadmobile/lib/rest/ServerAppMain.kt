@@ -26,7 +26,7 @@ class ServerAppMain {
         @JvmStatic
         fun main(args: Array<String>) {
             val siteUrlArgIndex = args.indexOfFirst { it == "--siteUrl" || it == "-u" }
-            val siteUrlArg = args.getOrNull(siteUrlArgIndex + 1)
+            val siteUrlArg = if(siteUrlArgIndex != -1) args.getOrNull(siteUrlArgIndex) else null
             val environmentArgs = if(siteUrlArg != null) {
                 args + arrayOf("-P:ktor.ustad.siteUrl=$siteUrlArg")
             }else {

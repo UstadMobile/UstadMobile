@@ -3,28 +3,23 @@ package com.ustadmobile.port.android.view
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.view.Menu
 import android.view.MenuItem
 import android.view.inputmethod.InputMethodManager
-import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.navOptions
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -32,27 +27,20 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityMainBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.DbPreloadWorker
-import com.ustadmobile.core.impl.DestinationProvider
+import com.ustadmobile.core.impl.BrowserLinkOpener
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.nav.NavControllerAdapter
 import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.util.ext.navigateToLink
+import com.ustadmobile.core.view.*
+import com.ustadmobile.port.android.impl.nav.NavHostTempFileRegistrar
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
-import com.ustadmobile.port.android.view.binding.imageForeignKeyPlaceholder
-import com.ustadmobile.port.android.view.binding.setImageForeignKey
-import com.ustadmobile.port.android.view.binding.setImageForeignKeyAdapter
+import com.ustadmobile.port.android.util.ext.registerDestinationTempFile
+import com.ustadmobile.port.android.view.util.UstadActivityWithBottomNavigation
 import com.ustadmobile.port.android.view.util.UstadActivityWithProgressBar
 import kotlinx.coroutines.*
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import java.io.*
-import com.ustadmobile.core.impl.BrowserLinkOpener
-import com.ustadmobile.core.util.ext.navigateToLink
-import com.ustadmobile.core.view.*
-import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
-import com.ustadmobile.port.android.impl.nav.NavHostTempFileRegistrar
-import com.ustadmobile.port.android.util.ext.registerDestinationTempFile
-import com.ustadmobile.port.android.view.person.detail.PersonDetailFragment
-import com.ustadmobile.port.android.view.util.UstadActivityWithBottomNavigation
 import com.ustadmobile.core.R as CR
 
 class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
@@ -87,8 +75,6 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
     private val impl : UstadMobileSystemImpl by instance()
 
     private val accountManager: UstadAccountManager by instance()
-
-    private val destinationProvider: DestinationProvider by instance()
 
     private lateinit var navController: NavController
 
@@ -137,29 +123,13 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
         val host: NavHostFragment = supportFragmentManager
                 .findFragmentById(R.id.activity_main_navhost_fragment) as NavHostFragment? ?: return
         navController = host.navController
-        ustadNavController = NavControllerAdapter(navController, destinationProvider)
+
         navController.addOnDestinationChangedListener(this)
         navController.addOnDestinationChangedListener(DeleteTempFilesNavigationListener(this))
         appBarConfiguration = AppBarConfiguration(navController.graph)
         mBinding.bottomNavView.setupWithNavController(navController)
 
-        fun NavController.navigateToRootMenuItem(menuItem: MenuItem) {
-            if(currentDestination?.id != menuItem.itemId)
-                navigate(menuItem.itemId, args = bundleOf(), navOptions = navOptions {
-                    popUpTo(R.id.redirect_dest) {
-                        inclusive = false
-                    }
-                })
-        }
 
-        mBinding.bottomNavView.setOnItemSelectedListener {
-            navController.navigateToRootMenuItem(it)
-            true
-        }
-
-        mBinding.bottomNavView.setOnItemReselectedListener {
-            navController.navigateToRootMenuItem(it)
-        }
 
         setupActionBarWithNavController(navController,
             AppBarConfiguration(mBinding.bottomNavView.menu))
@@ -169,14 +139,7 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
 
     override fun onDestinationChanged(controller: NavController, destination: NavDestination,
                                       arguments: Bundle?) {
-        invalidateOptionsMenu()
-        onAppBarExpand(true)
 
-        val ustadDestination = destinationProvider.lookupDestinationById(destination.id)
-        val scrollFlags = ustadDestination?.actionBarScrollBehavior ?:
-            (AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL)
-        (mBinding.mainCollapsingToolbar.collapsingToolbar.layoutParams as? AppBarLayout.LayoutParams)?.scrollFlags = scrollFlags
-        hideSoftKeyboard()
     }
 
     fun hideSoftKeyboard(){
@@ -208,23 +171,6 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
 
     override fun onSupportNavigateUp(): Boolean {
         return findNavController(R.id.activity_main_navhost_fragment).navigateUp()
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-
-        val navController = findNavController(R.id.activity_main_navhost_fragment)
-        val currentFrag = navController.currentDestination?.id ?: 0
-        val mainScreenItemsVisible = BOTTOM_NAV_DEST.contains(currentFrag)
-        menu.findItem(R.id.menu_main_settings).isVisible = mainScreenItemsVisible
-        menu.findItem(R.id.menu_share_offline).isVisible = mainScreenItemsVisible
-
-        //Should be hidden when they are on the accounts page (only)
-        menu.findItem(R.id.menu_main_profile).isVisible = (mAccountIconVisible ?: false)
-
-        setUserProfile(menu.findItem(R.id.menu_main_profile))
-
-        return super.onCreateOptionsMenu(menu)
     }
 
 
@@ -304,17 +250,6 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
     private fun setUserProfile(menuItem: MenuItem) {
         val accountManager: UstadAccountManager by instance()
 
-        val profileImgView: ImageView = menuItem.actionView?.findViewById(R.id.person_name_profilepic) ?: return
-        userProfileDrawable?.also { profileImgView.imageForeignKeyPlaceholder(it) }
-        profileImgView.setImageForeignKeyAdapter(PersonDetailFragment.FOREIGNKEYADAPTER_PERSON)
-        profileImgView.setImageForeignKey(accountManager.currentAccount.personUid)
-        profileImgView.setOnClickListener { impl.go(AccountListViewModel.DEST_NAME, mapOf(), this) }
     }
 
-    companion object {
-        val BOTTOM_NAV_DEST = listOf(R.id.content_entry_list_home_dest, R.id.home_clazzlist_dest,
-                R.id.home_personlist_dest, R.id.report_list_dest,
-                R.id.chat_list_home_dest)
-
-    }
 }

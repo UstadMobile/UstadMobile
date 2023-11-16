@@ -65,7 +65,7 @@ import io.ktor.websocket.*
 import org.kodein.di.ktor.di
 import java.util.*
 import com.ustadmobile.lib.rest.logging.LogbackAntiLog
-import com.ustadmobile.libcache.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import kotlinx.io.files.Path

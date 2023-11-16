@@ -86,10 +86,6 @@ actual open class UstadMobileSystemImpl(
         lastDestination = LastGoToDest(viewName, args)
     }
 
-    actual fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any) {
-
-    }
-
     override fun getString(stringResource: StringResource): String {
         val displayLang = getDisplayedLocale()
         return stringResource.localized(locale = localeCache.getOrPut(displayLang) {

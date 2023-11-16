@@ -175,6 +175,8 @@ class ClazzListViewModel(
 
         const val DEST_NAME_HOME = "CourseListHome"
 
+        val ALL_DEST_NAMES = listOf(DEST_NAME, DEST_NAME_HOME)
+
         const val ARG_FILTER_EXCLUDE_SELECTED_CLASS_LIST = "excludeAlreadySelectedClazzList"
 
 

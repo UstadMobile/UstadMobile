@@ -36,6 +36,7 @@ kotlin {
                 api(libs.paging.multiplatform.compose)
 
                 implementation(libs.richeditor.multiplatform.compose)
+                implementation(libs.compose.webview.multiplatform)
 
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.reorderable.compose)
@@ -56,8 +57,7 @@ kotlin {
                 api(libs.androidx.navigation.compose)
                 api(libs.androidx.lifecycle.viewmodel.compose)
 
-                implementation(compose.material)
-                implementation(libs.google.android.material)
+                implementation(libs.android.material)
             }
         }
 

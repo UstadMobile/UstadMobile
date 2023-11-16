@@ -46,7 +46,7 @@ import com.ustadmobile.libuicompose.util.rememberFormattedDateRange
 import com.ustadmobile.libuicompose.util.rememberFormattedTime
 import com.ustadmobile.libuicompose.view.clazzassignment.UstadClazzAssignmentListItem
 import com.ustadmobile.libuicompose.view.contententry.UstadContentEntryListItem
-import com.ustadmobile.libuicompose.view.clazz.paddingCourseBlockIndent
+import com.ustadmobile.port.android.view.composable.paddingCourseBlockIndent
 
 val ICON_SIZE = 40.dp
 

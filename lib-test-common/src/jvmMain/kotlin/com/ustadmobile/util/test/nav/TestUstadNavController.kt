@@ -1,7 +1,6 @@
 package com.ustadmobile.util.test.nav
 
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.nav.UstadBackStackEntry
 import com.ustadmobile.core.impl.nav.UstadNavController
 import java.lang.Integer.max
 import java.util.concurrent.CopyOnWriteArrayList
@@ -9,13 +8,6 @@ import java.util.concurrent.CopyOnWriteArrayList
 class TestUstadNavController() : UstadNavController{
 
     private val navStack: MutableList<TestUstadBackStackEntry> = CopyOnWriteArrayList()
-
-    override val currentBackStackEntry: UstadBackStackEntry?
-        get() = navStack.lastOrNull()
-
-    override fun getBackStackEntry(viewName: String): UstadBackStackEntry? {
-        return navStack.lastOrNull { it.viewName == viewName }
-    }
 
     override fun popBackStack(viewName: String, inclusive: Boolean) {
         var splitIndex = navStack.indexOfLast { it.viewName == viewName } + 1

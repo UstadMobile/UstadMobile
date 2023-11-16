@@ -46,7 +46,6 @@ android {
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
         kotlinOptions {
             jvmTarget = "17"
-            freeCompilerArgs += "-Xexpect-actual-classes"
         }
     }
 
@@ -113,8 +112,7 @@ kotlin {
                 api libs.kotlinxio.core
                 api libs.xmlutil.core
                 api libs.xmlutil.serialization
-                api libs.precompose
-                api libs.precompose.viewmodel
+                implementation libs.precompose.viewmodel
             }
         }
 
@@ -231,12 +229,12 @@ kotlin {
                 //dependency injection
                 implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
 
-                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation libs.okhttp
 
                 implementation libs.androidx.navigation.fragment.ktx
                 implementation libs.androidx.navigation.ui.ktx
 
-                implementation "com.google.android.material:material:$version_android_material"
+                implementation libs.android.material
 
 
 
@@ -298,6 +296,7 @@ publishing {
         }
     }
 }
+
 
 
 multiplatformResources {

@@ -3,7 +3,6 @@ package com.ustadmobile.core.impl.nav
 import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavBackStackEntry
-import com.ustadmobile.door.lifecycle.MutableLiveData
 
 class UstadSavedStateHandleAndroid(
     val savedStateHandle: SavedStateHandle,
@@ -26,7 +25,4 @@ class UstadSavedStateHandleAndroid(
     override val keys: Set<String>
         get() = savedStateHandle.keys() + (args?.keySet() ?: emptySet())
 
-    override fun <T> getLiveData(key: String): MutableLiveData<T> {
-        TODO("Not supported")
-    }
 }

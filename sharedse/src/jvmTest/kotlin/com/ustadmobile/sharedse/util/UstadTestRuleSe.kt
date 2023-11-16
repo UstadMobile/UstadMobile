@@ -115,10 +115,7 @@ class UstadTestRule: TestWatcher() {
             bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope!!).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
-                spy(DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
-                        "jdbc:sqlite:build/tmp/$dbName.sqlite",
-                    nodeId = nodeIdAndAuth.nodeId
-                    )
+                spy(DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite:build/tmp/$dbName.sqlite")
                     .addSyncCallback(nodeIdAndAuth)
                     .build()
                     .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)

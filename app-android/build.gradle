@@ -201,6 +201,7 @@ dependencies {
     implementation project(':core')
     implementation project(':sharedse')
     implementation project(':lib-ui-compose')
+    implementation project(":lib-cache")
 
     implementation "com.github.UstadMobile.door:door-runtime:$version_door"
     implementation project(':lib-database')
@@ -259,7 +260,7 @@ dependencies {
     implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_legacy"
     implementation libs.androidx.appcompat
     implementation "androidx.cardview:cardview:$version_androidx_cardview"
-    implementation "com.google.android.material:material:$version_android_material"
+    implementation libs.android.material
     implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy"
     implementation "androidx.recyclerview:recyclerview:$version_androidx_recyclerview"
 
@@ -275,7 +276,9 @@ dependencies {
 
     //implementation "androidx.activity:activity-compose:$version_activity_compose"
     implementation libs.activity.compose
+    implementation libs.androidx.window
     implementation "androidx.compose.material:material-icons-extended"
+    implementation "androidx.compose.material3:material3-window-size-class"
     implementation "com.google.accompanist:accompanist-themeadapter-material:$version_compose_theme_adapter"
     implementation "com.google.accompanist:accompanist-pager:$version_compose_accompanist"
     implementation "com.google.accompanist:accompanist-pager-indicators:$version_compose_accompanist"
@@ -352,10 +355,15 @@ dependencies {
     //PanicKit (PanicButton) integration
     implementation "info.guardianproject.panic:panic:$version_android_panickit"
 
+    //Image loading
     implementation "io.coil-kt:coil:$version_android_coil"
     implementation "io.coil-kt:coil-compose:$version_android_coil"
 
     implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
+
+    //Xml processing
+    implementation libs.xmlutil.core
+    implementation libs.xmlutil.serialization
 
     //LeakCanary - detect memory leaks
     //debugImplementation "com.squareup.leakcanary:leakcanary-android:$version_android_leakcanary"

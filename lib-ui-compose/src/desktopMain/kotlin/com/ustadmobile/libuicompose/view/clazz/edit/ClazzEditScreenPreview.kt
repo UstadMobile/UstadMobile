@@ -1,20 +1,18 @@
 package com.ustadmobile.libuicompose.view.clazz.edit
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditUiState
-import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.view.composable.*
-import org.burnoutcrew.reorderable.*
-import java.util.*
+import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchoolAndTerminology
+import com.ustadmobile.lib.db.entities.Schedule
 
 @Composable
 @Preview
 fun ClazzEditScreenPreview() {
-    var uiState: ClazzEditUiState by remember {
+    val uiState: ClazzEditUiState by remember {
         mutableStateOf(
             ClazzEditUiState(
                 entity = ClazzWithHolidayCalendarAndSchoolAndTerminology().apply {
@@ -28,32 +26,7 @@ fun ClazzEditScreenPreview() {
                         scheduleDay = Schedule.DAY_SUNDAY
                     }
                 ),
-                courseBlockList = listOf(
-                    CourseBlockWithEntity().apply {
-                        cbUid = 1000
-                        cbTitle = "Module"
-                        cbHidden = true
-                        cbType = CourseBlock.BLOCK_MODULE_TYPE
-                        cbIndentLevel = 0
-                    },
-                    CourseBlockWithEntity().apply {
-                        cbUid = 1001
-                        cbTitle = "Content"
-                        cbHidden = false
-                        cbType = CourseBlock.BLOCK_CONTENT_TYPE
-                        entry = ContentEntry().apply {
-                            contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
-                        }
-                        cbIndentLevel = 1
-                    },
-                    CourseBlockWithEntity().apply {
-                        cbUid = 1002
-                        cbTitle = "Assignment"
-                        cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
-                        cbHidden = false
-                        cbIndentLevel = 1
-                    },
-                ),
+                courseBlockList = listOf(),
             )
         )
     }
@@ -61,14 +34,8 @@ fun ClazzEditScreenPreview() {
 
     ClazzEditScreen(
         uiState = uiState,
-        onMoveCourseBlock = { fromIndex, toIndex ->
-            uiState = uiState.copy(
-                courseBlockList = uiState.courseBlockList.toMutableList().apply {
-                    val swapFromIndex = indexOfFirst { it.cbUid == fromIndex.key }
-                    val swapToIndex = indexOfFirst { it.cbUid == toIndex.key }
-                    Collections.swap(this, swapFromIndex, swapToIndex)
-                }.toList()
-            )
+        onMoveCourseBlock = { _, _ ->
+
         }
     )
 

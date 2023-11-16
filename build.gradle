@@ -17,6 +17,8 @@ buildscript {
         maven {
             url "https://maven.pkg.jetbrains.space/public/p/compose/dev"
         }
+
+
     }
 
 }
@@ -59,6 +61,7 @@ allprojects {
         }
 
         //WordPress Utils Android - https://github.com/wordpress-mobile/WordPress-Utils-Android
+        // Used by Aztec
         maven {
             url "https://a8c-libs.s3.amazonaws.com/android"
         }
@@ -69,6 +72,11 @@ allprojects {
         //Compose multiplatform
         maven {
             url "https://maven.pkg.jetbrains.space/public/p/compose/dev"
+        }
+
+        //Compose Multiplatform Webview requirement
+        maven {
+            url "https://jogamp.org/deployment/maven/"
         }
 
     }
@@ -87,7 +95,7 @@ ext {
     ustadVersion = project.version
     ustadVersionCode = 232
 
-    version_door = "0.70b16"
+    version_door = "0.70b18"
     version_retriever = "0.0.1e"
     version_xmlpullparserkmp = '0.0.26'
 
@@ -155,7 +163,6 @@ ext {
     //Androidx versions as per https://developer.android.com/jetpack/androidx/versions
     version_androidx_annotation = "1.7.0"
 
-    version_android_material = "1.9.0"
     version_androidx_appcompat = "1.6.1"
 
     version_compose_bom = "2023.10.01"

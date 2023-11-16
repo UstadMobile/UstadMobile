@@ -23,7 +23,7 @@ import com.ustadmobile.core.util.MS_PER_MIN
 import kotlin.math.min
 import androidx.compose.material.Text
 import com.google.android.material.timepicker.MaterialTimePicker
-import com.ustadmobile.libuicompose.util.ext.getContextSupportFragmentManager
+import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
 import androidx.compose.material.IconButton
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material.Icon
