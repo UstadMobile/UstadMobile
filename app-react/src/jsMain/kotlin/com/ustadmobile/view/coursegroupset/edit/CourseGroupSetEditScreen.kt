@@ -7,12 +7,11 @@ import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditUiSt
 import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.edit.appendGroupNumIfNotInList
 import com.ustadmobile.hooks.useUstadViewModel
-import com.ustadmobile.lib.db.entities.CourseGroupMember
-import com.ustadmobile.lib.db.entities.CourseGroupMemberAndName
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadNumberTextField
 import com.ustadmobile.mui.components.UstadStandardContainer
+import com.ustadmobile.mui.components.UstadTextField
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadSelectField
 import web.cssom.px
@@ -40,7 +39,7 @@ val CourseGroupSetEditComponent2 = FC<CourseGroupSetEditProps> { props ->
             direction = responsive(StackDirection.column)
             spacing = responsive(26.px)
 
-            TextField {
+            UstadTextField {
                 id = "cgs_name"
                 value = props.uiState.courseGroupSet?.cgsName ?: ""
                 label = ReactNode(strings[MR.strings.title])
@@ -151,42 +150,4 @@ val CourseGroupSetEditScreen = FC<Props> {
         onClickAssignRandomly = viewModel::onClickAssignRandomly
     }
 
-}
-
-val CourseGroupSetEditScreenPreview = FC<Props>{
-    CourseGroupSetEditComponent2{
-        onChangeGroupAssignment = { _, _ -> }
-        uiState = CourseGroupSetEditUiState(
-            courseGroupSet = CourseGroupSet().apply {
-                cgsName = "ttl"
-                cgsTotalGroups = 6
-            },
-            membersList = listOf(
-                CourseGroupMemberAndName(
-                    cgm = CourseGroupMember().apply {
-                        cgmGroupNumber = 1
-                    },
-                    name = "Bart Simpson"
-                ),
-                CourseGroupMemberAndName(
-                    cgm = CourseGroupMember().apply {
-                        cgmGroupNumber = 2
-                    },
-                    name = "Shelly Mackleberry"
-                ),
-                CourseGroupMemberAndName(
-                    cgm = CourseGroupMember().apply {
-                        cgmGroupNumber = 2
-                    },
-                    name = "Tracy Mackleberry"
-                ),
-                CourseGroupMemberAndName(
-                    cgm = CourseGroupMember().apply {
-                        cgmGroupNumber = 1
-                    },
-                    name = "Nelzon Muntz"
-                )
-            )
-        )
-    }
 }

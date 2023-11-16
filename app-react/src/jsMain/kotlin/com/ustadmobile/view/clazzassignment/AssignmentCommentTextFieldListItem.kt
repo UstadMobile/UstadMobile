@@ -2,6 +2,7 @@ package com.ustadmobile.view.clazzassignment
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.mui.components.UstadTextField
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadPersonAvatar
 import js.core.jso
@@ -12,7 +13,6 @@ import mui.material.InputBaseProps
 import mui.material.ListItemIcon
 import mui.material.ListItem
 import react.FC
-import mui.material.TextField
 import react.Props
 import react.ReactNode
 import react.create
@@ -38,7 +38,7 @@ val AssignmentCommentTextFieldListItem = FC<AssignmentCommentTextFieldListItemPr
         }
 
 
-        TextField {
+        UstadTextField {
             label = props.label
             fullWidth = true
             value = props.value

@@ -8,8 +8,8 @@ import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImport
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadStandardContainer
+import com.ustadmobile.mui.components.UstadTextField
 import com.ustadmobile.util.ext.onTextChange
-import web.cssom.px
 import mui.material.*
 import mui.material.styles.TypographyVariant
 import mui.system.responsive
@@ -37,7 +37,7 @@ val ContentEntryImportLinkComponent2 = FC<ContentEntryImportLinkProps> { props -
             direction = responsive(StackDirection.column)
             spacing = responsive(theme.spacing(1))
 
-            TextField {
+            UstadTextField {
                 id = "import_url"
                 value = props.uiState.url
                 label = ReactNode(strings[MR.strings.enter_url])
@@ -62,13 +62,6 @@ val ContentEntryImportLinkComponent2 = FC<ContentEntryImportLinkProps> { props -
 
 }
 
-val ContentEntryImportLinkScreenPreview = FC<Props> {
-    ContentEntryImportLinkComponent2{
-        uiState = ContentEntryImportLinkUiState(
-            url = "site.com/dir"
-        )
-    }
-}
 
 val ContentEntryImportLinkScreen = FC<Props> {
     val viewModel = useUstadViewModel { di, savedStateHandle ->
