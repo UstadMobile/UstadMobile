@@ -102,6 +102,8 @@ class PersonAuthRegisterRouteTest {
         }
     }
 
+    //Disabled until consent screens are brought back
+    @Suppress("unused")
     @Test
     fun givenRegisterRequestFromMinor_whenRegisterCalled_thenShouldSendEmailAndReply(
 
