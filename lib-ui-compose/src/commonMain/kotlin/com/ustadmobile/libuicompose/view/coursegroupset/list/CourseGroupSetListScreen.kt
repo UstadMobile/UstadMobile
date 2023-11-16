@@ -22,6 +22,7 @@ import com.ustadmobile.libuicompose.components.UstadAddListItem
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 
+@Suppress("unused") // Pending
 @Composable
 fun CourseGroupSetListScreenForViewModel(
     viewModel: CourseGroupSetListViewModel
@@ -73,8 +74,7 @@ fun CourseGroupSetListScreen(
         item(key = "sortheader") {
             UstadListSortHeader(
                 modifier = Modifier.defaultItemPadding(),
-                activeSortOrderOption = uiState.sortOption,
-                onClick =   onClickSort
+                activeSortOrderOption = uiState.sortOption
             )
         }
 

@@ -12,6 +12,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,14 +25,20 @@ import com.ustadmobile.core.util.SortOrderOption
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 
+enum class SortListMode {
+
+    POPUP, BOTTOM_SHEET
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UstadListSortHeader(
     activeSortOrderOption: SortOrderOption,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    showPopup: Boolean = false,
+    mode: SortListMode = SortListMode.BOTTOM_SHEET,
     sortOptions: List<SortOrderOption> = emptyList(),
-    onClick: () -> Unit = {},
     onClickSortOption: (SortOrderOption) -> Unit = { },
 ){
     var expanded by remember { mutableStateOf(false) }
@@ -41,11 +49,7 @@ fun UstadListSortHeader(
         TextButton(
             enabled = enabled,
             onClick = {
-                if(showPopup) {
-                    expanded = true
-                }else {
-                    onClick()
-                }
+                expanded = true
             }
         ) {
             Text(stringResource(resource = activeSortOrderOption.fieldMessageId))
@@ -65,31 +69,49 @@ fun UstadListSortHeader(
                 modifier = Modifier.size(16.dp)
             )
 
-            if(showPopup) {
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    sortOptions.forEach { sortOption ->
-                        DropdownMenuItem(
-                            onClick = {
+            when(mode) {
+                SortListMode.POPUP -> {
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        sortOptions.forEach { sortOption ->
+                            DropdownMenuItem(
+                                onClick = {
+                                    expanded = false
+                                    onClickSortOption(sortOption)
+                                },
+                                text = {
+                                    Text(
+                                        stringResource(sortOption.fieldMessageId) + " (" + if(sortOption.order) {
+                                            stringResource(MR.strings.ascending)
+                                        }else {
+                                            stringResource(MR.strings.descending)
+                                        } + ")"
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+                SortListMode.BOTTOM_SHEET -> {
+                    if(expanded) {
+                        ModalBottomSheet(
+                            onDismissRequest = {
                                 expanded = false
-                                onClickSortOption(sortOption)
-                            },
-                            text = {
-                                Text(
-                                    stringResource(sortOption.fieldMessageId) + " (" + if(sortOption.order) {
-                                        stringResource(MR.strings.ascending)
-                                    }else {
-                                        stringResource(MR.strings.descending)
-                                    } + ")"
-                                )
                             }
-                        )
+                        ) {
+                            UstadSortOptionsBottomSheet(
+                                sortOptions = sortOptions,
+                                onClickSortOption = onClickSortOption,
+                                onDismissRequest = {
+                                    expanded = false
+                                }
+                            )
+                        }
                     }
                 }
             }
-
         }
     }
 }

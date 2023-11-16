@@ -111,7 +111,6 @@ fun ClazzAssignmentDetailSubmissionsTabScreen(
             UstadListSortHeader(
                 activeSortOrderOption =uiState.sortOption,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                onClick = onClickSort,
             )
         }
 

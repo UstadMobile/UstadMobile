@@ -16,6 +16,7 @@ compileKotlin{
     kotlinOptions.jvmTarget = "17"
     kotlinOptions {
         freeCompilerArgs += "-Xopt-in=com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview"
+        freeCompilerArgs += "-Xexpect-actual-classes"
     }
 
 }
@@ -24,6 +25,7 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "17"
     kotlinOptions {
         freeCompilerArgs += "-Xopt-in=com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview"
+        freeCompilerArgs += "-Xexpect-actual-classes"
     }
 }
 

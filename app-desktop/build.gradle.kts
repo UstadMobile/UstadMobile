@@ -20,6 +20,7 @@ java.targetCompatibility = JavaVersion.VERSION_17
 
 tasks.withType<KotlinCompile> {
     compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    compilerOptions.freeCompilerArgs.add("-Xexpect-actual-classes")
 }
 
 dependencies {

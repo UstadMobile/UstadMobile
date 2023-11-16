@@ -2,11 +2,9 @@ package com.ustadmobile.libuicompose.view.clazzassignment.submitterdetail
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.runtime.Composable
-import androidx.compose.material.*
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailUiState
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.view.composable.*
 
 @Composable
 @Preview

@@ -18,6 +18,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 
+@Suppress("unused") // Pending
 @Composable
 fun PersonListScreenForViewModel(
     viewModel: PersonListViewModel
@@ -28,15 +29,6 @@ fun PersonListScreenForViewModel(
 
     PersonListScreen(
         uiState = uiState,
-        onClickSort =  {
-//            SortBottomSheetFragment(
-//                sortOptions = uiState.sortOptions,
-//                selectedSort = uiState.sortOption,
-//                onSortOptionSelected = {
-//                    viewModel.onSortOrderChanged(it)
-//                }
-//            ).show(context.getContextSupportFragmentManager(), "SortOptions")
-        },
         onListItemClick = viewModel::onClickEntry,
         onClickAddNew = viewModel::onClickAdd,
     )
@@ -45,7 +37,6 @@ fun PersonListScreenForViewModel(
 @Composable
 fun PersonListScreen(
     uiState: PersonListUiState,
-    onClickSort: () -> Unit = {},
     onListItemClick: (PersonWithDisplayDetails) -> Unit = {},
     onClickAddNew: () -> Unit = {},
 ){
@@ -76,8 +67,7 @@ fun PersonListScreen(
                 modifier = Modifier
                     .defaultItemPadding()
                     .fillMaxWidth(),
-                activeSortOrderOption = uiState.sortOption,
-                onClick = onClickSort
+                activeSortOrderOption = uiState.sortOption
             )
         }
 
