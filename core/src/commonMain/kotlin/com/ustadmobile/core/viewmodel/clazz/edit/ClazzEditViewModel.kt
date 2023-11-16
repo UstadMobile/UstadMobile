@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.dao.deactivateByUids
 import com.ustadmobile.core.domain.courseblockupdate.AddOrUpdateCourseBlockUseCase
 import com.ustadmobile.core.domain.courseblockupdate.UpdateCourseBlocksOnReorderOrCommitUseCase
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.contententry.import.ImportContentUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -109,9 +110,9 @@ class ClazzEditViewModel(
     private val saveContentEntryUseCase: SaveContentEntryUseCase = SaveContentEntryUseCase(
         db = di.onActiveEndpoint().direct.instance(tag = DoorTag.TAG_DB),
         repo = di.onActiveEndpoint().direct.instanceOrNull(tag = DoorTag.TAG_REPO),
-    )
-
-): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
+    ),
+    private val importContentUseCase: ImportContentUseCase = di.onActiveEndpoint().direct.instance(),
+    ): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(ClazzEditUiState())
 
@@ -561,6 +562,21 @@ class ClazzEditViewModel(
                     saveContentEntryUseCase.invoke(
                         contentEntry = it,
                         joinToParentUid = null,
+                    )
+                }
+
+                //Run the ContentImport for any jobs where this is required.
+                courseBlockListVal.mapNotNull {
+                    val contentJob = it.contentJob
+                    val contentJobItem = it.contentJobItem
+                    if(contentJob != null && contentJobItem != null)
+                        Pair(contentJob, contentJobItem)
+                    else
+                        null
+                }.forEach {
+                    importContentUseCase.invoke(
+                        contentJob = it.first,
+                        contentJobItem = it.second
                     )
                 }
 
