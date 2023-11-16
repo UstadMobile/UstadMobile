@@ -25,7 +25,6 @@ import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import com.ustadmobile.libuicompose.util.rememberFormattedTime
-import com.ustadmobile.port.android.view.composable.*
 import java.util.*
 import dev.icerock.moko.parcelize.Parcelable
 import dev.icerock.moko.parcelize.Parcelize
@@ -39,8 +38,9 @@ import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
 import com.ustadmobile.libuicompose.util.compose.stringIdOptionListResource
 import org.burnoutcrew.reorderable.*
 
+@Suppress("unused") // Pending add to navhost
 @Composable
-fun ClazzEditScreenForViewModel(viewModel: ClazzEditViewModel) {
+fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
 
     val uiState: ClazzEditUiState by viewModel.uiState.collectAsState(initial = ClazzEditUiState())
 

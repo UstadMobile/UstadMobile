@@ -1,5 +1,7 @@
 package com.ustadmobile.libuicompose.util
 
+import com.ustadmobile.libuicompose.components.SortListMode
+
 /**
  * Simple expect/actual that controls how sort options are dislpayed:
  *
@@ -8,4 +10,4 @@ package com.ustadmobile.libuicompose.util
  *
  * If false, then a bottom sheet appears. Used on Mobile
  */
-actual fun useSortOptionPopup(): Boolean = true
+actual fun defaultSortListMode(): SortListMode = SortListMode.POPUP

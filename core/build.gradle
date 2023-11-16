@@ -46,6 +46,7 @@ android {
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
         kotlinOptions {
             jvmTarget = "17"
+            freeCompilerArgs += "-Xexpect-actual-classes"
         }
     }
 
@@ -112,7 +113,8 @@ kotlin {
                 api libs.kotlinxio.core
                 api libs.xmlutil.core
                 api libs.xmlutil.serialization
-                implementation libs.precompose.viewmodel
+                api libs.precompose
+                api libs.precompose.viewmodel
             }
         }
 
@@ -296,7 +298,6 @@ publishing {
         }
     }
 }
-
 
 
 multiplatformResources {

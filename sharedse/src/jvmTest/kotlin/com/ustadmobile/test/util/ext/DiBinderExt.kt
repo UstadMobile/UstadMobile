@@ -27,7 +27,8 @@ fun DI.Builder.bindDbAndRepoWithEndpoint(endpointScope: EndpointScope, clientMod
     bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
         val dbName = sanitizeDbNameFromUrl(context.url)
         val nodeIdAndAuth: NodeIdAndAuth = instance()
-        spy(DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite:build/tmp/$dbName.sqlite")
+        spy(DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
+                "jdbc:sqlite:build/tmp/$dbName.sqlite", nodeId = nodeIdAndAuth.nodeId)
             .addSyncCallback(nodeIdAndAuth)
             .build()
             .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
