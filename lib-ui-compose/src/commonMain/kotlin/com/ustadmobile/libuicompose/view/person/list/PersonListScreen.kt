@@ -29,15 +29,6 @@ fun PersonListScreenForViewModel(
 
     PersonListScreen(
         uiState = uiState,
-        onClickSort =  {
-//            SortBottomSheetFragment(
-//                sortOptions = uiState.sortOptions,
-//                selectedSort = uiState.sortOption,
-//                onSortOptionSelected = {
-//                    viewModel.onSortOrderChanged(it)
-//                }
-//            ).show(context.getContextSupportFragmentManager(), "SortOptions")
-        },
         onListItemClick = viewModel::onClickEntry,
         onClickAddNew = viewModel::onClickAdd,
     )
