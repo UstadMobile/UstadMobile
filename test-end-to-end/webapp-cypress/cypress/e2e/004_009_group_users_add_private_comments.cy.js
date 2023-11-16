@@ -1,5 +1,5 @@
 import setDate from '../support/setDate'; //https://github.com/cypress-io/cypress/issues/1366#issuecomment-437878862
-describe('004_003_user_add_private_comment', () => {
+describe('004_009_group_users_add_private_comments', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
   cy.ustadStartTestServer()
@@ -9,7 +9,7 @@ it('Admin add a course and members', () => {
  // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass')
  // Add a new course
-  cy.ustadAddCourse('004_003')
+  cy.ustadAddCourse('004_009')
  // Add module block
  // cy.contains('button','Edit').click()
  // cy.ustadAddModuleBlock('module 1')
@@ -37,14 +37,29 @@ it('Admin add a course and members', () => {
   cy.contains("Student 2").click()
   cy.contains('View profile').click()
   cy.ustadCreateUserAccount('student2','test1234')
+ //Add a student3
+  cy.contains("span","Add a student").click()
+  cy.ustadAddNewPerson('Student','3','Male')
+  cy.contains("button","members").should('be.visible')
+ //Add account for student3
+  cy.contains("Student 3").click()
+  cy.contains('View profile').click()
+  cy.ustadCreateUserAccount('student3','test1234')
+ //Add a student4
+  cy.contains("span","Add a student").click()
+  cy.ustadAddNewPerson('Student','4','Male')
+  cy.contains("button","members").should('be.visible')
+ //Add account for student4
+  cy.contains("Student 4").click()
+  cy.contains('View profile').click()
+  cy.ustadCreateUserAccount('student4','test1234')
 })
 
 it('Teacher add assignment and course comment', () => {
   cy.ustadClearDbAndLogin('teacher1','test1234')
-
  // Add Assignment block
   cy.contains("Courses").click()
-  cy.contains("004_003").click()
+  cy.contains("004_009").click()
   cy.contains("button","members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
@@ -60,30 +75,69 @@ it('Teacher add assignment and course comment', () => {
   cy.contains("li","submitted").click()
   cy.get('#cbDeadlineDate')
     .then(input => setDate(input[0], '2023-12-20T00:00'));*/
+  cy.get('#cgsName').click()
+  cy.wait(5000) // added to load "Add new groups" button
+  cy.contains('Add new groups',{timeout: 5000}).click()
+  cy.get('#cgs_name').type('Assignment Team')
+  cy.get('#cgs_total_groups').clear().type('2')
+  cy.contains('Unassigned').eq(0).click()  // s1
+  cy.contains('Group 1').click()
+  cy.contains('Unassigned').eq(0).click()  //s2
+  cy.get('li[data-value="1"]').click()
+  cy.contains('Unassigned').eq(0).click()  //s3
+  cy.contains('Group 2').click()
+  cy.contains('Unassigned').eq(0).click()  //s4
+  cy.get('li[data-value="2"]').click()
+  cy.contains("button","Save").should('be.visible')
+  cy.contains("button","Save").click()
+  cy.get('input[id="title"]').type("Assignment 1")
+ // cy.contains('Assignment Team').click()
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
   cy.contains("button","members").should('be.visible')
-  cy.contains("Assignment 1").click()
-   cy.contains('Submissions').click()
-  cy.contains('Student 1').click()
+  cy.get('svg[data-testid="AssignmentTurnedInIcon"]').click()
+  cy.contains('Submissions').click()
+  cy.contains('Group 1').click()
   cy.get('#private_comment_textfield').click()
   cy.get('#private_comment_textfield').type("comment1")
   cy.get('svg[data-testid="SendIcon"]').click()
   cy.contains("comment1").should('exist')
+
 })
 
-it('Student add private comment', () => {
+it('Group 1 - Student add private comment', () => {
 
   cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains("Course").click()
-  cy.contains("004_003").click()
+  cy.contains("004_009").click()
   cy.contains('Assignment 1').click()
   cy.get('#private_comment_textfield').click()
+ // cy.pause()
   cy.get('#private_comment_textfield').type("comment2")
   cy.get('svg[data-testid="SendIcon"]').click()
-  cy.contains("comment2").should('exist')
   cy.contains("comment1").should('exist')
+  cy.contains("comment2").should('exist')
+})
+
+it('Group 2 - Student make sure Group 1 private comment is not visible', () => {
+
+  cy.ustadClearDbAndLogin('student3','test1234')
+  cy.contains("Course").click()
+  cy.contains("004_009").click()
+  cy.contains('Assignment 1').click()
+  cy.get('#private_comment_textfield').should('exist')
+  cy.contains("comment1").should('not.exist')
+  cy.contains("comment2").should('not.exist')
+})
+it('Group 1 - Student2 able to view Group 1 private comment', () => {
+
+  cy.ustadClearDbAndLogin('student2','test1234')
+  cy.contains("Course").click()
+  cy.contains("004_009").click()
+  cy.contains('Assignment 1').click()
+  cy.contains("comment1").should('exist')
+  cy.contains("comment2").should('exist')
 })
 })

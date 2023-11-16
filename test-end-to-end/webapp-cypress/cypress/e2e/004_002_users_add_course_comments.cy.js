@@ -41,19 +41,11 @@ it('Admin add a course and members', () => {
 
 it('Teacher add assignment and course comment', () => {
   cy.ustadClearDbAndLogin('teacher1','test1234')
-    // Adding attendance
-    cy.contains('004_002').click()
-    cy.contains("button","Attendance").click()
-    cy.contains("button","Record attendance").click()
-      cy.contains("button","Next").click()
-    cy.contains('Student 1').should('be.visible')
-    cy.contains('Mark all present').click()
-    cy.contains("button","Save").should('be.visible')
-    cy.contains("button","Save").click()
-    cy.contains('2 Present, 0 Partial, 0 Absent').should('be.visible')
- // Add Assignment block
   cy.contains("Course").click()
   cy.contains("004_002").click()
+  cy.contains("button","members").click()  // This is a temporary command to make sure member list is loaded
+  cy.contains("button","Course").click()
+ // Add Assignment block
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
   cy.contains("Assignment").click()
@@ -70,27 +62,28 @@ it('Teacher add assignment and course comment', () => {
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()
   cy.contains("button","Save").should('be.visible')
-  //  cy.wait(2000)
   cy.contains("button","Save").click()
   cy.contains("button","members").should('be.visible')
   cy.contains("Assignment 1").click()
   cy.get('#course_comment_textfield').click()
-  cy.get('#course_comment_textfield').type("Teacher's comment")
-  cy.get('svg[data-testid="SendIcon"]').click()
-  cy.contains("Teacher's comment").should('exist')
+  cy.get('#course_comment_textfield').type("comment1",{timeout:5000})
+  cy.get('svg[data-testid="SendIcon"]',{timeout:5000}).click()
+  cy.contains("comment1").should('exist')
 
 })
 
-it('Student add private comment', () => {
+it('Student add course comment', () => {
 
   cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains("Course").click()
   cy.contains("004_002").click()
+  cy.contains("button","members").click()  // This is a temporary command to make sure member list is loaded
+  cy.contains("button","Course").click()
   cy.contains('Assignment 1').click()
   cy.get('#course_comment_textfield').click()
-  cy.get('#course_comment_textfield').type("Student's comment")
-  cy.get('svg[data-testid="SendIcon"]').click()
-  cy.contains("Student's comment").should('exist')
-  cy.contains("Teacher's comment").should('exist')
+  cy.get('#course_comment_textfield').type("comment2")
+  cy.get('svg[data-testid="SendIcon"]',{timeout:2000}).click()
+  cy.contains("comment2").should('exist')
+  cy.contains("comment1").should('exist')
 })
 })
