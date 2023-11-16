@@ -301,23 +301,26 @@ private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
         secondaryAction = ButtonGroup.create {
 
             STATUS_AND_ICONS.forEach { (status, icon, labelMessageId) ->
-                ToggleButton {
-                    disabled = !props.fieldsEnabled
-                    selected = (props.personAndRecord.attendanceRecord?.attendanceStatus == status)
-                    ariaLabel = strings[labelMessageId]
+                Tooltip{
+                    title = ReactNode(strings[labelMessageId])
+                    ToggleButton {
+                        disabled = !props.fieldsEnabled
+                        selected = (props.personAndRecord.attendanceRecord?.attendanceStatus == status)
+                        ariaLabel = strings[labelMessageId]
 
-                    onChange = { _,_ ->
-                        props.onClazzLogAttendanceChanged(
-                            props.personAndRecord.copy(
-                                person = props.personAndRecord.person,
-                                attendanceRecord = props.personAndRecord.attendanceRecord?.shallowCopy {
-                                    attendanceStatus = status
-                                }
+                        onChange = { _,_ ->
+                            props.onClazzLogAttendanceChanged(
+                                props.personAndRecord.copy(
+                                    person = props.personAndRecord.person,
+                                    attendanceRecord = props.personAndRecord.attendanceRecord?.shallowCopy {
+                                        attendanceStatus = status
+                                    }
+                                )
                             )
-                        )
-                    }
+                        }
 
-                    + icon.create()
+                        + icon.create()
+                    }
                 }
             }
         }
