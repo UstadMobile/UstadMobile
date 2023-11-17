@@ -104,7 +104,7 @@ kotlin {
 
         jvmMain {
             dependencies {
-                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                implementation libs.simplejndi
             }
 
             dependsOn commonJvmMain

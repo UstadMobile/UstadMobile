@@ -24,7 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -32,7 +31,6 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.libuicompose.components.UstadErrorText
-import com.ustadmobile.libuicompose.util.ext.onPreviewKeyEventFocusHandler
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
@@ -70,8 +68,6 @@ fun SiteEnterLinkScreen(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
-        val focusManager = LocalFocusManager.current
-
         Image(
             painter = painterResource(
                 imageResource = MR.images.illustration_connect
@@ -85,12 +81,7 @@ fun SiteEnterLinkScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("site_link_text")
-                .onPreviewKeyEventFocusHandler(
-                    focusManager, onEnter = {
-                        onClickNext()
-                        true
-                    }
-                ),
+                ,
             value = uiState.siteLink,
             label = { Text(stringResource(MR.strings.site_link)) },
             onValueChange = {

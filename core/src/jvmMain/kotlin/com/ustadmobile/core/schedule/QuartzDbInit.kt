@@ -1,4 +1,4 @@
-package com.ustadmobile.lib.rest
+package com.ustadmobile.core.schedule
 
 import javax.naming.InitialContext
 import javax.sql.DataSource
@@ -12,8 +12,8 @@ fun InitialContext.initQuartzDb(jndiName: String) {
     class InternalClass
 
     val quartzDs = lookup(jndiName) as DataSource
-    val sqlStr = InternalClass::class.java.getResourceAsStream("/quartz-init.sql").readBytes()
-        .decodeToString()
+    val sqlStr = InternalClass::class.java.getResourceAsStream("/quartz-init.sql")?.readBytes()
+        ?.decodeToString() ?: throw IllegalStateException("Could not open /quartz-init.sql")
     quartzDs.connection.use { connection ->
         connection.metaData.getTables(null, null, "%", arrayOf("TABLE")).use { result ->
             if(!result.next()) {

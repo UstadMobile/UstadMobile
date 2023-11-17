@@ -10,12 +10,15 @@ import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
+import com.ustadmobile.core.domain.contententry.import.ImportContentUseCase
+import com.ustadmobile.core.domain.contententry.import.ImportContentUseCaseJvm
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJvm
+import com.ustadmobile.core.schedule.initQuartzDb
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.door.DatabaseBuilder
@@ -23,6 +26,7 @@ import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepository
+import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
@@ -36,6 +40,10 @@ import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlConfig
 import org.kodein.di.on
+import org.quartz.Scheduler
+import org.quartz.impl.StdSchedulerFactory
+import java.util.Properties
+import javax.naming.InitialContext
 
 const val TAG_APP_HOME = "AppHome"
 
@@ -141,5 +149,33 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
                 json = instance()
             )
         )
+    }
+
+    bind<ImportContentUseCase>() with scoped(EndpointScope.Default).singleton {
+        ImportContentUseCaseJvm(
+            db = instance(tag = DoorTag.TAG_DB),
+            scheduler = instance(),
+            endpoint = context
+        )
+    }
+
+    bind<Scheduler>() with singleton {
+        val dataDir: File = instance(tag = TAG_DATA_DIR)
+        val dbUrl = "jdbc:sqlite:${dataDir.absolutePath}/quartz.db"
+        val dbProperties = Properties().also {
+            it["url"] = dbUrl
+            it["driver"] = "org.sqlite.JDBC"
+            it["user"] = ""
+            it["password"] = ""
+        }
+
+        InitialContext().apply {
+            bindDataSourceIfNotExisting("quartzds", dbProperties)
+            initQuartzDb("java:/comp/env/jdbc/quartzds")
+        }
+
+        StdSchedulerFactory.getDefaultScheduler().also {
+            it.context.put("di", di)
+        }
     }
 }

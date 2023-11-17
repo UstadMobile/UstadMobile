@@ -32,6 +32,7 @@ dependencies {
     implementation(compose.materialIconsExtended)
 
     implementation(libs.okhttp)
+    implementation(libs.quartz)
 
     api(libs.moko.resources)
     api(libs.moko.resources.compose)

@@ -94,7 +94,7 @@ abstract class UstadEditViewModel(
         newEntityStringResource: StringResource,
         editEntityStringResource: StringResource,
     ): String {
-        val isEditing = entityUidArg != 0L || ARG_ENTITY_JSON in savedStateHandle.keys
+        val isEditing = entityUidArg != 0L || savedStateHandle[ARG_ENTITY_JSON] != null
         return systemImpl.getString(
             if(isEditing) {
                 editEntityStringResource

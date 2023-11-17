@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -27,7 +26,6 @@ import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.components.UstadPasswordField
 import com.ustadmobile.core.MR
-import com.ustadmobile.libuicompose.util.ext.onPreviewKeyEventFocusHandler
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -68,8 +66,6 @@ fun LoginScreen(
 
         Text(text = uiState.loginIntentMessage ?: "")
 
-        val focusManager = LocalFocusManager.current
-
         UstadInputFieldLayout(
             modifier = Modifier.padding(vertical = 8.dp)
                 .fillMaxWidth(),
@@ -79,7 +75,7 @@ fun LoginScreen(
                 modifier = Modifier
                     .testTag("username")
                     .fillMaxWidth()
-                    .onPreviewKeyEventFocusHandler(focusManager),
+                    ,
                 value = uiState.username,
                 singleLine = true,
                 label = {
@@ -100,7 +96,7 @@ fun LoginScreen(
                 modifier = Modifier
                     .testTag("password")
                     .fillMaxWidth()
-                    .onPreviewKeyEventFocusHandler(focusManager),
+                    ,
                 value = uiState.password,
                 onValueChange = onPasswordValueChange,
                 isError = uiState.passwordError != null,
