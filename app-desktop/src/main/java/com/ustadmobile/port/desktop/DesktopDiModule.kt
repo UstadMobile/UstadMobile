@@ -10,14 +10,16 @@ import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
-import com.ustadmobile.core.domain.contententry.import.ImportContentUseCase
-import com.ustadmobile.core.domain.contententry.import.ImportContentUseCaseJvm
+import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCaseJvm
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJvm
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager
+import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJvm
 import com.ustadmobile.core.schedule.initQuartzDb
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
@@ -157,6 +159,10 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             scheduler = instance(),
             endpoint = context
         )
+    }
+
+    bind<ClazzLogCreatorManager>() with singleton {
+        ClazzLogCreatorManagerJvm(di)
     }
 
     bind<Scheduler>() with singleton {

@@ -4,7 +4,7 @@ import com.ustadmobile.core.db.dao.deactivateByUids
 import com.ustadmobile.core.domain.courseblockupdate.AddOrUpdateCourseBlockUseCase
 import com.ustadmobile.core.domain.courseblockupdate.UpdateCourseBlocksOnReorderOrCommitUseCase
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.contententry.import.ImportContentUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState

@@ -1,4 +1,4 @@
-package com.ustadmobile.core.domain.contententry.import
+package com.ustadmobile.core.domain.contententry.importcontent
 
 import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem

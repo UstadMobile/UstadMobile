@@ -7,6 +7,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.nav.NavResultReturner
+import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadViewModel
@@ -56,6 +58,10 @@ fun AppNavHost(
         )
     }
 
+    val navResultReturner: NavResultReturner = remember {
+        NavResultReturnerImpl()
+    }
+
     var contentVisible by remember {
         mutableStateOf(true)
     }
@@ -79,6 +85,7 @@ fun AppNavHost(
         backStackEntry = backStackEntry,
         navController = ustadNavController,
         onSetAppUiState = onSetAppUiState,
+        navResultReturner = navResultReturner,
         block = block
     )
 
@@ -151,7 +158,7 @@ fun AppNavHost(
         ClazzListViewModel.ALL_DEST_NAMES.forEach { destName ->
             contentScene("/$destName") { backStackEntry ->
                 ClazzListScreen(
-                    backStackEntry, ustadNavController, onSetAppUiState, destName
+                    backStackEntry, ustadNavController, onSetAppUiState, navResultReturner, destName
                 )
             }
         }

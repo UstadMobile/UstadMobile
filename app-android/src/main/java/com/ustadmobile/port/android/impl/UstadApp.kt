@@ -53,6 +53,7 @@ import java.io.File
 import java.net.URI
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.di.AndroidDomainDiModule
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderAndroid
@@ -81,6 +82,7 @@ class UstadApp : Application(), DIAware {
     val diModule = DI.Module("UstadApp-Android") {
         import(CommonJvmDiModule)
         import(commonDomainDiModule(EndpointScope.Default))
+        import(AndroidDomainDiModule(applicationContext, EndpointScope.Default))
 
         bind<SupportedLanguagesConfig>() with singleton {
             applicationContext.appMetaData?.getString(METADATA_KEY_SUPPORTED_LANGS)?.let { langCodeList ->

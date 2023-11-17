@@ -3,6 +3,7 @@ package com.ustadmobile.libuicompose.viewmodel
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadViewModel
@@ -13,7 +14,9 @@ import kotlinx.coroutines.flow.map
 import moe.tlaster.precompose.navigation.BackStackEntry
 import moe.tlaster.precompose.viewmodel.viewModel
 import org.kodein.di.DI
+import org.kodein.di.bind
 import org.kodein.di.compose.localDI
+import org.kodein.di.singleton
 import kotlin.reflect.KClass
 
 @Composable
@@ -22,6 +25,7 @@ fun <T: UstadViewModel> ustadViewModel(
     backStackEntry: BackStackEntry,
     navController: UstadNavController,
     onSetAppUiState: (AppUiState) -> Unit,
+    navResultReturner: NavResultReturner,
     appUiStateMap: ((AppUiState) -> AppUiState)? = null,
     block: (di: DI, savedStateHandle: UstadSavedStateHandle) -> T,
 ) : T {
@@ -36,7 +40,13 @@ fun <T: UstadViewModel> ustadViewModel(
         modelClass = modelClass,
         keys = listOf(queryParamsHash),
     ) {
-        block(di, UstadSavedStateHandlePreCompose(backStackEntry))
+        block(
+            DI {
+               extend(di)
+               bind<NavResultReturner>() with singleton { navResultReturner }
+            },
+            UstadSavedStateHandlePreCompose(backStackEntry)
+        )
     }
 
     NavCommandEffect(
