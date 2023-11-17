@@ -65,17 +65,15 @@ fun App(
     persistNavState: Boolean = false,
     useBottomBar: Boolean = true,
     navigator: Navigator = rememberNavigator(),
-    onSetWindowTitle: (String) -> Unit = { },
+    onAppStateChange: (AppUiState) -> Unit = { },
 ) {
     val appUiState = remember {
         mutableStateOf(AppUiState())
     }
 
     val appUiStateVal by appUiState
-    LaunchedEffect(appUiStateVal.title) {
-        appUiStateVal.title?.also {
-            onSetWindowTitle(it)
-        }
+    LaunchedEffect(appUiStateVal) {
+        onAppStateChange(appUiStateVal)
     }
 
     Scaffold(

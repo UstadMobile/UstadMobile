@@ -12,21 +12,19 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.contentColorFor
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -34,15 +32,18 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.libuicompose.components.UstadErrorText
+import com.ustadmobile.libuicompose.util.ext.onPreviewKeyEventFocusHandler
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.coroutines.Dispatchers
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
 fun SiteEnterLinkScreen(
     viewModel: SiteEnterLinkViewModel
 ) {
-    val uiState: SiteEnterLinkUiState by viewModel.uiState.collectAsState(
-        initial = SiteEnterLinkUiState()
+    val uiState: SiteEnterLinkUiState by viewModel.uiState.collectAsStateWithLifecycle(
+        initial = SiteEnterLinkUiState(),  context = Dispatchers.Main.immediate
     )
 
     SiteEnterLinkScreen(
@@ -69,6 +70,7 @@ fun SiteEnterLinkScreen(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
+        val focusManager = LocalFocusManager.current
 
         Image(
             painter = painterResource(
@@ -82,7 +84,13 @@ fun SiteEnterLinkScreen(
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .testTag("site_link_text"),
+                .testTag("site_link_text")
+                .onPreviewKeyEventFocusHandler(
+                    focusManager, onEnter = {
+                        onClickNext()
+                        true
+                    }
+                ),
             value = uiState.siteLink,
             label = { Text(stringResource(MR.strings.site_link)) },
             onValueChange = {
@@ -111,30 +119,21 @@ fun SiteEnterLinkScreen(
             modifier = Modifier
                 .testTag("next_button")
                 .fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.colors.secondary
-            )
         ) {
-            Text(stringResource(MR.strings.next).uppercase(),
-                color = contentColorFor(MaterialTheme.colors.secondary)
-            )
+            Text(stringResource(MR.strings.next).uppercase())
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(stringResource(MR.strings.or).uppercase())
 
-        Button(
+        OutlinedButton(
             onClick = onClickNewLearningEnvironment ,
             modifier = Modifier
                 .testTag("create_new_button")
                 .fillMaxWidth(),
             elevation = null,
             enabled = uiState.fieldsEnabled,
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color.Transparent,
-                contentColor = MaterialTheme.colors.primary,
-            )
         ) {
 
             Icon(
