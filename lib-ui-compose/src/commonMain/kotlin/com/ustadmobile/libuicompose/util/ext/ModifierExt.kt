@@ -39,7 +39,7 @@ fun Modifier.defaultScreenPadding() = padding(horizontal = 0.dp, vertical = 8.dp
 
 fun Modifier.defaultAvatarSize() = size(40.dp)
 
-private val FOCUS_TAB_THRESHOLD_TIME = 100
+private const val FOCUS_TAB_THRESHOLD_TIME = 250
 
 /**
  * Manage handling focus when user uses tab, shift+tab, etc. Required for text input fields where
@@ -66,7 +66,8 @@ fun Modifier.onPreviewKeyEventFocusHandler(
 
     /**
      * We need to avoid triggering the onTab handlers in response to the tab event that brings the
-     * user into the textfield itself.
+     * user into the textfield itself. This isn't an ideal solution, but there doesn't seem to be
+     * anything better or recommended best practice.
      */
     return onPreviewKeyEvent {
         val hasFocusVal = (systemTimeInMillis() - focusTime) > FOCUS_TAB_THRESHOLD_TIME

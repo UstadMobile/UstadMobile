@@ -98,6 +98,7 @@ fun SiteEnterLinkScreen(
             },
             isError = uiState.linkError != null,
             enabled = uiState.fieldsEnabled,
+            singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
             keyboardActions = KeyboardActions(
                 onGo = {
