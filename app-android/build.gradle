@@ -203,7 +203,7 @@ dependencies {
     implementation project(':lib-ui-compose')
     implementation project(":lib-cache")
 
-    implementation "com.github.UstadMobile.door:door-runtime:$version_door"
+    implementation libs.door.runtime
     implementation project(':lib-database')
     implementation project(':lib-util')
 

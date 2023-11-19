@@ -306,7 +306,9 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
         }
     }
 
-    @Test
+    //This is disabled until consent screens etc. are brought back
+    //@Test
+    @Suppress("unused")
     fun givenPresenterCreatedInNonRegistrationMode_whenDateOfBirthIndicatesMinor_shouldSaveAPersonInDbAndRecordConsent() {
         testViewModel<PersonEditViewModel> {
             viewModelFactory {

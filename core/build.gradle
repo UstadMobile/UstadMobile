@@ -101,10 +101,10 @@ kotlin {
                 api "io.ktor:ktor-io:$version_ktor"
                 implementation libs.napier
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
-                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
+                implementation libs.door.runtime
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 api project(':lib-database')
-                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
+                implementation libs.door.runtime
                 implementation project(":lib-util")
                 implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
@@ -154,7 +154,7 @@ kotlin {
                 implementation "org.jsoup:jsoup:$version_jsoup"
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "org.quartz-scheduler:quartz:$version_quartz_scheduler"
+                implementation libs.quartz
                 implementation "io.ktor:ktor-server-core:$version_ktor"
                 implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
                 implementation libs.javaffmpeg
@@ -174,7 +174,7 @@ kotlin {
                 implementation project(":lib-test-common")
                 implementation project(":app-ktor-server")
 
-                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                implementation libs.simplejndi
                 implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
                 implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"

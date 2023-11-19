@@ -37,12 +37,16 @@ import com.ustadmobile.libuicompose.components.UstadDateField
 import com.ustadmobile.libuicompose.components.UstadSwitchField
 import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
 import com.ustadmobile.libuicompose.util.compose.stringIdOptionListResource
+import kotlinx.coroutines.Dispatchers
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import org.burnoutcrew.reorderable.*
 
 @Composable
 fun ClazzEditScreenForViewModel(viewModel: ClazzEditViewModel) {
 
-    val uiState: ClazzEditUiState by viewModel.uiState.collectAsState(initial = ClazzEditUiState())
+    val uiState: ClazzEditUiState by viewModel.uiState.collectAsStateWithLifecycle(
+        initial = ClazzEditUiState(), context = Dispatchers.Main.immediate
+    )
 
     ClazzEditScreen(
         uiState = uiState,

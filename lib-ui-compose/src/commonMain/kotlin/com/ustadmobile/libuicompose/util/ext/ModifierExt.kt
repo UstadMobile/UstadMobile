@@ -25,3 +25,4 @@ fun Modifier.defaultItemPadding(
 fun Modifier.defaultScreenPadding() = padding(horizontal = 0.dp, vertical = 8.dp)
 
 fun Modifier.defaultAvatarSize() = size(40.dp)
+

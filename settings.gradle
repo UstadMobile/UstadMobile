@@ -17,7 +17,7 @@ dependencyResolutionManagement {
             version("version_androidx_core", "1.12.0")
             version("version_kotlin", "1.9.20")
             version("version_okhttp", "4.11.0")
-            version("version_door", "0.70b18")
+            version("version_door", "0.70b25")
             version("version_coroutines", "1.7.3")
             version("version_atomicfu", "0.22.0")
             version("version_kotlinx_io", "0.3.0")
@@ -41,6 +41,8 @@ dependencyResolutionManagement {
             version("version_reorderable_compose", "0.9.6")
             version("version_compose_webview_multiplatform", "1.7.0")
             version("version_androidx_window", "1.2.0-rc01")
+            version("version_quartz_scheduler", "2.3.2")
+            version("version_simplejndi", "0.23.0")
 
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
@@ -81,12 +83,12 @@ dependencyResolutionManagement {
 
             library("dragdropswiperecyclerview", "com.ernestoyaquello.dragdropswiperecyclerview", "drag-drop-swipe-recyclerview").versionRef("version_dragdropswiperecyclerview")
 
-            library("door-runtime", "com.github.UstadMobile.door", "door-runtime").versionRef("version_door")
             library("napier", "io.github.aakira", "napier").versionRef("version_napier")
             library("napier-jvm", "io.github.aakira", "napier-jvm").versionRef("version_napier")
             library("okhttp", "com.squareup.okhttp3", "okhttp").versionRef("version_okhttp")
             library("door-runtime", "com.github.UstadMobile.door", "door-runtime").versionRef("version_door")
             library("door-compiler", "com.github.UstadMobile.door", "door-compiler").versionRef("version_door")
+            library("door-shallowcopy", "com.github.UstadMobile.door", "door-shallowcopy").versionRef("version_door")
             library("door-room-annotations", "com.github.UstadMobile.door", "room-annotations").versionRef("version_door")
             library("coroutines", "org.jetbrains.kotlinx", "kotlinx-coroutines-core").versionRef("version_coroutines")
             library("atomicfu", "org.jetbrains.kotlinx", "atomicfu").versionRef("version_atomicfu")
@@ -99,6 +101,8 @@ dependencyResolutionManagement {
             library("xmlutil-serialization-jvm", "io.github.pdvrieze.xmlutil", "serialization-jvm").versionRef("version_xmlutil")
             library("javaffmpeg", "net.bramp.ffmpeg", "ffmpeg").versionRef("version_javaffmpeg")
             library("compose-webview-multiplatform", "io.github.kevinnzou", "compose-webview-multiplatform").versionRef("version_compose_webview_multiplatform")
+            library("quartz", "org.quartz-scheduler", "quartz").versionRef("version_quartz_scheduler")
+            library("simplejndi", "com.github.h-thurow", "simple-jndi").versionRef("version_simplejndi")
         }
     }
 }

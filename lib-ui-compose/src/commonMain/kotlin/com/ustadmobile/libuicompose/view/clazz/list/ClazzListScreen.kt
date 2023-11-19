@@ -43,6 +43,7 @@ import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.libuicompose.components.HtmlText
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
@@ -64,6 +65,7 @@ fun ClazzListScreen(
     backStackEntry: BackStackEntry,
     navController: UstadNavControllerPreCompose,
     onSetAppUiState: (AppUiState) -> Unit,
+    navResultReturner: NavResultReturner,
     destName: String,
 ) {
     var createNewOptionsVisible by remember {
@@ -79,6 +81,7 @@ fun ClazzListScreen(
         backStackEntry = backStackEntry,
         onSetAppUiState = onSetAppUiState,
         navController = navController,
+        navResultReturner = navResultReturner,
         appUiStateMap = {
             it.copyWithNewFabOnClick {
                 createNewOptionsVisible = true
