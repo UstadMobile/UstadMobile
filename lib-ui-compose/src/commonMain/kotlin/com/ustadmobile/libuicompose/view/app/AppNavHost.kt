@@ -22,6 +22,7 @@ import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
+import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.util.PopNavCommandEffect
 import com.ustadmobile.libuicompose.view.clazz.edit.ClazzEditScreen
@@ -31,6 +32,7 @@ import com.ustadmobile.libuicompose.view.contententry.list.ContentEntryListScree
 import com.ustadmobile.libuicompose.view.login.LoginScreen
 import com.ustadmobile.libuicompose.view.schedule.edit.ScheduleEditScreen
 import com.ustadmobile.libuicompose.view.siteenterlink.SiteEnterLinkScreen
+import com.ustadmobile.libuicompose.view.timezone.TimeZoneListScreen
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -199,6 +201,16 @@ fun AppNavHost(
                     backStackEntry, CourseBlockEditViewModel::class
                 ) { di, savedStateHandle ->
                     CourseBlockEditViewModel(di, savedStateHandle)
+                }
+            )
+        }
+
+        contentScene("/${TimeZoneListViewModel.DEST_NAME}") {backStackEntry ->
+            TimeZoneListScreen(
+                appViewModel(
+                    backStackEntry, TimeZoneListViewModel::class
+                ) { di, savedStateHandle ->
+                    TimeZoneListViewModel(di, savedStateHandle)
                 }
             )
         }

@@ -354,6 +354,7 @@ fun ClazzEditScreen(
                 value = uiState.entity?.clazzTimeZone ?: "",
                 onClick = onClickTimezone,
                 enabled = uiState.fieldsEnabled,
+                singleLine = true,
                 onValueChange = { }
             )
         }
@@ -375,6 +376,7 @@ fun ClazzEditScreen(
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {},
                 onClick = onClickTerminology,
+                singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultItemPadding(),
