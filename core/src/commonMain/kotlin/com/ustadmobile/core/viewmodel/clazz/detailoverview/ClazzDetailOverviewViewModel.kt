@@ -59,7 +59,7 @@ data class ClazzDetailOverviewUiState(
 class ClazzDetailOverviewViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-    destinationName: String
+    destinationName: String = DEST_NAME,
 ): DetailViewModel<ClazzWithDisplayDetails>(di, savedStateHandle, destinationName) {
 
     private val _uiState = MutableStateFlow(ClazzDetailOverviewUiState())

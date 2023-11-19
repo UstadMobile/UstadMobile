@@ -1,6 +1,5 @@
 package com.ustadmobile.libuicompose.view.app
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,21 +15,28 @@ import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
+import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.util.PopNavCommandEffect
+import com.ustadmobile.libuicompose.view.clazz.detail.ClazzDetailScreen
 import com.ustadmobile.libuicompose.view.clazz.edit.ClazzEditScreen
 import com.ustadmobile.libuicompose.view.clazz.list.ClazzListScreen
 import com.ustadmobile.libuicompose.view.clazzassignment.courseblockedit.CourseBlockEditScreen
+import com.ustadmobile.libuicompose.view.clazzenrolment.edit.ClazzEnrolmentEditScreen
 import com.ustadmobile.libuicompose.view.contententry.list.ContentEntryListScreenForViewModel
 import com.ustadmobile.libuicompose.view.login.LoginScreen
+import com.ustadmobile.libuicompose.view.person.list.PersonListScreen
 import com.ustadmobile.libuicompose.view.schedule.edit.ScheduleEditScreen
 import com.ustadmobile.libuicompose.view.siteenterlink.SiteEnterLinkScreen
+import com.ustadmobile.libuicompose.view.timezone.TimeZoneListScreen
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -190,7 +196,9 @@ fun AppNavHost(
         }
 
         contentScene("/${ClazzDetailViewModel.DEST_NAME}") { backStackEntry ->
-            Text("Course Detail")
+            ClazzDetailScreen(
+                backStackEntry, ustadNavController, onSetAppUiState, navResultReturner,
+            )
         }
 
         contentScene("/${CourseBlockEditViewModel.DEST_NAME}") { backStackEntry ->
@@ -202,5 +210,39 @@ fun AppNavHost(
                 }
             )
         }
+
+        contentScene("/${TimeZoneListViewModel.DEST_NAME}") {backStackEntry ->
+            TimeZoneListScreen(
+                appViewModel(
+                    backStackEntry, TimeZoneListViewModel::class
+                ) { di, savedStateHandle ->
+                    TimeZoneListViewModel(di, savedStateHandle)
+                }
+            )
+        }
+
+        PersonListViewModel.ALL_DEST_NAMES.forEach { destName ->
+            contentScene("/$destName") { backStackEntry ->
+                PersonListScreen(
+                    appViewModel(
+                        backStackEntry, PersonListViewModel::class
+                    ) { di, savedStateHandle ->
+                        PersonListViewModel(di, savedStateHandle, destName)
+                    }
+                )
+            }
+        }
+
+        contentScene("/${ClazzEnrolmentEditViewModel.DEST_NAME}") { backStackEntry ->
+            ClazzEnrolmentEditScreen(
+                appViewModel(
+                    backStackEntry, ClazzEnrolmentEditViewModel::class,
+                ) { di, savedStateHandle ->
+                    ClazzEnrolmentEditViewModel(di, savedStateHandle)
+                }
+            )
+        }
     }
+
+
 }
