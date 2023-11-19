@@ -1,6 +1,5 @@
 package com.ustadmobile.libuicompose.view.app
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +24,7 @@ import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.util.PopNavCommandEffect
+import com.ustadmobile.libuicompose.view.clazz.detail.ClazzDetailScreen
 import com.ustadmobile.libuicompose.view.clazz.edit.ClazzEditScreen
 import com.ustadmobile.libuicompose.view.clazz.list.ClazzListScreen
 import com.ustadmobile.libuicompose.view.clazzassignment.courseblockedit.CourseBlockEditScreen
@@ -192,7 +192,9 @@ fun AppNavHost(
         }
 
         contentScene("/${ClazzDetailViewModel.DEST_NAME}") { backStackEntry ->
-            Text("Course Detail")
+            ClazzDetailScreen(
+                backStackEntry, ustadNavController, onSetAppUiState, navResultReturner,
+            )
         }
 
         contentScene("/${CourseBlockEditViewModel.DEST_NAME}") { backStackEntry ->

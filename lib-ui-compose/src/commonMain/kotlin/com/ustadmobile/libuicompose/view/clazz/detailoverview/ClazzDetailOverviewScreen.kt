@@ -51,7 +51,7 @@ import com.ustadmobile.libuicompose.view.clazz.paddingCourseBlockIndent
 val ICON_SIZE = 40.dp
 
 @Composable
-fun ClazzDetailOverviewScreenForViewModel(viewModel: ClazzDetailOverviewViewModel) {
+fun ClazzDetailOverviewScreen(viewModel: ClazzDetailOverviewViewModel) {
     val uiState: ClazzDetailOverviewUiState by viewModel.uiState.collectAsState(
         ClazzDetailOverviewUiState()
     )
@@ -60,7 +60,6 @@ fun ClazzDetailOverviewScreenForViewModel(viewModel: ClazzDetailOverviewViewMode
         uiState = uiState,
         onClickCourseBlock = viewModel::onClickCourseBlock,
     )
-
 }
 
 @OptIn(ExperimentalMaterialApi::class)

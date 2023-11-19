@@ -5,7 +5,6 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.libuicompose.util.ext.urlDecode
 import kotlinx.coroutines.flow.MutableStateFlow
 import moe.tlaster.precompose.navigation.BackStackEntry
-import moe.tlaster.precompose.navigation.QueryString
 import moe.tlaster.precompose.stateholder.SavedStateHolder
 
 /**
@@ -15,7 +14,7 @@ import moe.tlaster.precompose.stateholder.SavedStateHolder
  */
 class UstadSavedStateHandlePreCompose(
     private val savedStateHolder: SavedStateHolder,
-    private val queryString: QueryString?
+    private val argsMap: Map<String, List<String>>?
 ) : UstadSavedStateHandle{
 
     data class SavedEntry(
@@ -26,7 +25,7 @@ class UstadSavedStateHandlePreCompose(
     private val savedKeys = mutableMapOf<String, SavedEntry>()
 
     constructor(backStackEntry: BackStackEntry): this(
-        backStackEntry.savedStateHolder, backStackEntry.queryString
+        backStackEntry.savedStateHolder, backStackEntry.queryString?.map
     )
 
     override fun set(key: String, value: String?) {
@@ -47,7 +46,7 @@ class UstadSavedStateHandlePreCompose(
         // flow first.
         val savedState = savedKeys[key]?.stateFlow?.value
             ?: savedStateHolder.consumeRestored(key)?.toString()
-        return  savedState?: queryString?.map?.get(key)?.firstOrNull()?.urlDecode()
+        return  savedState?: argsMap?.get(key)?.firstOrNull()?.urlDecode()
     }
 
     override val keys: Set<String>

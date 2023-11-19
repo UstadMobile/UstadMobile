@@ -27,6 +27,7 @@ fun <T: UstadViewModel> ustadViewModel(
     onSetAppUiState: (AppUiState) -> Unit,
     navResultReturner: NavResultReturner,
     appUiStateMap: ((AppUiState) -> AppUiState)? = null,
+    savedStateHandle: UstadSavedStateHandle = UstadSavedStateHandlePreCompose(backStackEntry),
     block: (di: DI, savedStateHandle: UstadSavedStateHandle) -> T,
 ) : T {
     val di = localDI()
@@ -45,7 +46,7 @@ fun <T: UstadViewModel> ustadViewModel(
                extend(di)
                bind<NavResultReturner>() with singleton { navResultReturner }
             },
-            UstadSavedStateHandlePreCompose(backStackEntry)
+            savedStateHandle
         )
     }
 
