@@ -15,9 +15,11 @@ import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
@@ -28,8 +30,10 @@ import com.ustadmobile.libuicompose.view.clazz.detail.ClazzDetailScreen
 import com.ustadmobile.libuicompose.view.clazz.edit.ClazzEditScreen
 import com.ustadmobile.libuicompose.view.clazz.list.ClazzListScreen
 import com.ustadmobile.libuicompose.view.clazzassignment.courseblockedit.CourseBlockEditScreen
+import com.ustadmobile.libuicompose.view.clazzenrolment.edit.ClazzEnrolmentEditScreen
 import com.ustadmobile.libuicompose.view.contententry.list.ContentEntryListScreenForViewModel
 import com.ustadmobile.libuicompose.view.login.LoginScreen
+import com.ustadmobile.libuicompose.view.person.list.PersonListScreen
 import com.ustadmobile.libuicompose.view.schedule.edit.ScheduleEditScreen
 import com.ustadmobile.libuicompose.view.siteenterlink.SiteEnterLinkScreen
 import com.ustadmobile.libuicompose.view.timezone.TimeZoneListScreen
@@ -216,5 +220,29 @@ fun AppNavHost(
                 }
             )
         }
+
+        PersonListViewModel.ALL_DEST_NAMES.forEach { destName ->
+            contentScene("/$destName") { backStackEntry ->
+                PersonListScreen(
+                    appViewModel(
+                        backStackEntry, PersonListViewModel::class
+                    ) { di, savedStateHandle ->
+                        PersonListViewModel(di, savedStateHandle, destName)
+                    }
+                )
+            }
+        }
+
+        contentScene("/${ClazzEnrolmentEditViewModel.DEST_NAME}") { backStackEntry ->
+            ClazzEnrolmentEditScreen(
+                appViewModel(
+                    backStackEntry, ClazzEnrolmentEditViewModel::class,
+                ) { di, savedStateHandle ->
+                    ClazzEnrolmentEditViewModel(di, savedStateHandle)
+                }
+            )
+        }
     }
+
+
 }

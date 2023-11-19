@@ -11,18 +11,20 @@ import moe.tlaster.precompose.stateholder.SavedStateHolder
  * Basic wrapper to implement SavedStateHandle key/value pair management using PreCompose. See
  * https://github.com/Tlaster/PreCompose/blob/master/docs/component/view_model.md
  *
+ * @param savedKeys might be shared between multiple instances e.g. this is required when tabs are
+ *        being used to avoid duplicate providers being registered with the savedstateholder.
+ *
  */
 class UstadSavedStateHandlePreCompose(
     private val savedStateHolder: SavedStateHolder,
-    private val argsMap: Map<String, List<String>>?
+    private val argsMap: Map<String, List<String>>?,
+    private val savedKeys: MutableMap<String, SavedEntry> = mutableMapOf(),
 ) : UstadSavedStateHandle{
 
     data class SavedEntry(
         val entry: SaveableStateRegistry.Entry,
         val stateFlow: MutableStateFlow<String?>,
     )
-
-    private val savedKeys = mutableMapOf<String, SavedEntry>()
 
     constructor(backStackEntry: BackStackEntry): this(
         backStackEntry.savedStateHolder, backStackEntry.queryString?.map

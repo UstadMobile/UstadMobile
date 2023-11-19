@@ -1,11 +1,15 @@
 package com.ustadmobile.libuicompose.nav
 
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.impl.nav.NavCommand
+import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.door.ext.toUrlQueryString
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.libuicompose.util.ext.ustadDestName
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -23,6 +27,9 @@ class UstadNavControllerPreCompose(
 
     private val scope = CoroutineScope(Dispatchers.Main + Job())
 
+    @Volatile
+    private var lastNavCommandTime = systemTimeInMillis()
+
     private fun String.withQueryParams(
         map: Map<String, String>
     ) : String{
@@ -33,8 +40,54 @@ class UstadNavControllerPreCompose(
         }
     }
 
+    /**
+     * onCollectNavCommand will avoid replaying a navigation command. This can happen when a viewmodel
+     * has been retained (eg. user goes back) and it previously issued a navigation command on its
+     * flow.
+     */
+    fun onCollectNavCommand(navCommand: NavCommand) {
+        //Avoid replaying a navigation command
+        if(navCommand.timestamp <= lastNavCommandTime)
+            return
+
+        lastNavCommandTime = navCommand.timestamp
+
+        when(navCommand) {
+            is NavigateNavCommand -> {
+                Napier.d { "NavCommandEffect: Navigate: Go to ${navCommand.viewName}" }
+                navigate(
+                    viewName = navCommand.viewName,
+                    args = navCommand.args,
+                    goOptions = navCommand.goOptions
+                )
+            }
+            is PopNavCommand -> {
+                Napier.d { "NavCommandEffect: Navigate: Pop command"}
+                popBackStack(
+                    viewName = navCommand.viewName,
+                    inclusive = navCommand.inclusive
+                )
+            }
+            else -> {
+                //do nothing
+            }
+        }
+    }
+
     override fun popBackStack(viewName: String, inclusive: Boolean) {
-        onPopBack(PopNavCommand(viewName, inclusive))
+        if(viewName == CURRENT_DEST && inclusive) {
+            //This is a simple go back one, no need to use the effect.
+            navigator.goBack()
+        }else {
+            scope.launch {
+                val currentDest = navigator.currentEntry.first()
+                if(currentDest?.ustadDestName == viewName && inclusive) {
+                    navigator.goBack()
+                }else {
+                    onPopBack(PopNavCommand(viewName, inclusive))
+                }
+            }
+        }
     }
 
     override fun navigate(
@@ -54,7 +107,7 @@ class UstadNavControllerPreCompose(
         }
     }
 
-    fun navigateInternal(
+    private fun navigateInternal(
         viewName: String,
         args: Map<String, String>,
         goOptions: UstadMobileSystemCommon.UstadGoOptions

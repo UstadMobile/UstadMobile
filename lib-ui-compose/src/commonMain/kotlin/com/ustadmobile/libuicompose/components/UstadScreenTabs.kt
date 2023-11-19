@@ -9,6 +9,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -73,6 +74,10 @@ fun UstadScreenTabs(
 
     val coroutineScope = rememberCoroutineScope()
 
+    val savedStateKeys: MutableMap<String, UstadSavedStateHandlePreCompose.SavedEntry> = remember {
+        mutableMapOf()
+    }
+
     Column {
         if (tabs.isNotEmpty()) {
             TabRow(
@@ -98,12 +103,13 @@ fun UstadScreenTabs(
             HorizontalPager(
                 modifier = Modifier.fillMaxSize(),
                 state = pagerState,
-            ) {tabIndex ->
+            ) { tabIndex ->
                 val selectedTab = tabs[tabIndex]
                 val tabScope = TabScope(
                     savedStateHandle = UstadSavedStateHandlePreCompose(
                         savedStateHolder = backStackEntry.savedStateHolder,
-                        argsMap = selectedTab.args.map { it.key to listOf(it.value) }.toMap()
+                        argsMap = selectedTab.args.map { it.key to listOf(it.value) }.toMap(),
+                        savedKeys = savedStateKeys,
                     ),
                     backStackEntry = backStackEntry,
                     navController = navController,
