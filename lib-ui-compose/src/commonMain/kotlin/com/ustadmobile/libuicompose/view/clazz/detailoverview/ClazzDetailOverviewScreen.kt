@@ -31,6 +31,7 @@ import app.cash.paging.Pager
 import app.cash.paging.PagingConfig
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
+import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.util.ext.htmlToPlainText
 import com.ustadmobile.core.viewmodel.clazz.ClazzScheduleConstants
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewUiState
@@ -100,7 +101,7 @@ fun ClazzDetailOverviewScreen(
         item(key = "members") {
             UstadDetailField2(
                 valueText = numMembers ,
-                labelText = stringResource(MR.strings.members_key),
+                labelText = stringResource(MR.strings.members_key).capitalizeFirstLetter(),
                 icon = Icons.Filled.Group,
             )
         }
