@@ -29,7 +29,9 @@ fun UstadDetailField2(
     modifier: Modifier = Modifier,
 ) {
     Surface(modifier = modifier) {
-        Row{
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        ){
             if(leadingContent != null)
                 leadingContent()
 
