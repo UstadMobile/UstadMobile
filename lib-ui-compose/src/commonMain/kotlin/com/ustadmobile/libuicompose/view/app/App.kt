@@ -91,7 +91,7 @@ fun App(
         bottomBar = {
             //As per https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#navigationbar
             var selectedTopLevelItemIndex by remember { mutableIntStateOf(0) }
-            if(useBottomBar && appUiStateVal.navigationVisible) {
+            if(useBottomBar && appUiStateVal.navigationVisible && !appUiStateVal.hideBottomNavigation) {
                 NavigationBar {
                     APP_TOP_LEVEL_NAV_ITEMS.forEachIndexed { index, item ->
                         NavigationBarItem(

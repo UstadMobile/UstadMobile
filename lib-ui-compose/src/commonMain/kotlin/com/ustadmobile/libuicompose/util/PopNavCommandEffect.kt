@@ -1,4 +1,4 @@
-package com.ustadmobile.libuicompose.view
+package com.ustadmobile.libuicompose.util
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.ustadmobile.core.impl.nav.PopNavCommand
+import com.ustadmobile.libuicompose.util.ext.ustadDestName
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import moe.tlaster.precompose.navigation.Navigator
@@ -49,7 +50,7 @@ fun PopNavCommandEffect(
     val canGoBack by navigator.canGoBack.collectAsState(true)
 
     LaunchedEffect(popUpToTarget, currentEntry) {
-        val currentDestName = currentEntry?.route?.route?.substringBefore("/")
+        val currentDestName = currentEntry?.ustadDestName
         val popUpToTargetVal = popUpToTarget
         val logPrefix = {
             "UstadNavControllerNavHost: currentDestName=$currentDestName target = $popUpToTargetVal"
