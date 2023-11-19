@@ -8,9 +8,11 @@ import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailUiState
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
+import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
 import com.ustadmobile.libuicompose.components.UstadScreenTabs
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.view.clazz.detailoverview.ClazzDetailOverviewScreen
+import com.ustadmobile.libuicompose.view.clazzenrolment.clazzmemberlist.ClazzMemberListScreen
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -65,13 +67,18 @@ fun ClazzDetailScreen(
     ) {
         when(it.viewName) {
             ClazzDetailOverviewViewModel.DEST_NAME -> {
-                val detailViewModel = tabViewModel(
-                    ClazzDetailOverviewViewModel::class
-                ) { di, savedStateHandle ->
-                    ClazzDetailOverviewViewModel(di, savedStateHandle)
-                }
-
-                ClazzDetailOverviewScreen(detailViewModel)
+                ClazzDetailOverviewScreen(
+                    tabViewModel(ClazzDetailOverviewViewModel::class) { di, savedStateHandle ->
+                        ClazzDetailOverviewViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+            ClazzMemberListViewModel.DEST_NAME -> {
+                ClazzMemberListScreen(
+                    tabViewModel(ClazzMemberListViewModel::class) { di, savedStateHandle ->
+                        ClazzMemberListViewModel(di, savedStateHandle)
+                    }
+                )
             }
             else -> {
                 Text(it.viewName)

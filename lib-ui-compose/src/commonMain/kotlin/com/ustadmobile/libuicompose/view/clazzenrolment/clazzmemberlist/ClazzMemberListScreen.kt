@@ -12,41 +12,36 @@ import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.paging.compose.collectAsLazyPagingItems
+import app.cash.paging.Pager
+import app.cash.paging.PagingConfig
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListUiState
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.libuicompose.components.UstadAddListItem
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
+import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
-import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
-fun ClazzMemberListScreenForViewModel(
+fun ClazzMemberListScreen(
     viewModel: ClazzMemberListViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState(ClazzMemberListUiState())
-//    val context = LocalContext.current
 
     ClazzMemberListScreen(
         uiState = uiState,
         onClickEntry = viewModel::onClickEntry,
         onClickAddNewMember = viewModel::onClickAddNewMember,
         onClickPendingRequest = viewModel::onClickRespondToPendingEnrolment,
-        onClickSort = {
-                      // TODO error
-//            SortBottomSheetFragment(
-//                sortOptions = uiState.sortOptions,
-//                selectedSort = uiState.activeSortOrderOption,
-//                onSortOptionSelected = {
-//                    viewModel.onSortOrderChanged(it)
-//                }
-//            ).show(context.getContextSupportFragmentManager(), "SortOptions")
-        },
+        onSortOrderChanged = viewModel::onSortOrderChanged,
         onClickFilterChip = viewModel::onClickFilterChip,
     )
 }
@@ -61,39 +56,36 @@ fun ClazzMemberListScreen(
         enrolment: PersonWithClazzEnrolmentDetails,
         approved: Boolean
     ) -> Unit = {_, _ -> },
-    onClickSort: () -> Unit = {},
+    onSortOrderChanged: (SortOrderOption) -> Unit = { },
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
 ) {
 
-    // TODO error
-//    val teacherListPager = remember(uiState.teacherList) {
-//        Pager(
-//            pagingSourceFactory = uiState.teacherList,
-//            config = PagingConfig(pageSize = 20, enablePlaceholders = true)
-//        )
-//    }
-//    val teacherListItems = teacherListPager.flow.collectAsLazyPagingItems()
-//
-//    val studentListPager = remember(uiState.studentList) {
-//        Pager(
-//            pagingSourceFactory = uiState.studentList,
-//            config = PagingConfig(pageSize = 20, enablePlaceholders = true)
-//        )
-//    }
-//    val studentListItems = studentListPager.flow.collectAsLazyPagingItems()
-//
-//    val pendingStudentListPager = remember(uiState.pendingStudentList) {
-//        Pager(
-//            pagingSourceFactory = uiState.pendingStudentList,
-//            config = PagingConfig(pageSize = 20, enablePlaceholders = true)
-//        )
-//    }
-//    val pendingStudentListItems = pendingStudentListPager.flow.collectAsLazyPagingItems()
+    val teacherListPager = remember(uiState.teacherList) {
+        Pager(
+            pagingSourceFactory = uiState.teacherList,
+            config = PagingConfig(pageSize = 20, enablePlaceholders = true)
+        )
+    }
+    val teacherListItems = teacherListPager.flow.collectAsLazyPagingItems()
+
+    val studentListPager = remember(uiState.studentList) {
+        Pager(
+            pagingSourceFactory = uiState.studentList,
+            config = PagingConfig(pageSize = 20, enablePlaceholders = true)
+        )
+    }
+    val studentListItems = studentListPager.flow.collectAsLazyPagingItems()
+
+    val pendingStudentListPager = remember(uiState.pendingStudentList) {
+        Pager(
+            pagingSourceFactory = uiState.pendingStudentList,
+            config = PagingConfig(pageSize = 20, enablePlaceholders = true)
+        )
+    }
+    val pendingStudentListItems = pendingStudentListPager.flow.collectAsLazyPagingItems()
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .defaultScreenPadding()
+        modifier = Modifier.fillMaxSize()
     ) {
 
         item {
@@ -109,7 +101,9 @@ fun ClazzMemberListScreen(
             UstadListSortHeader(
                 modifier = Modifier.defaultItemPadding(),
                 activeSortOrderOption = uiState.activeSortOrderOption,
-                enabled = uiState.fieldsEnabled
+                sortOptions = uiState.sortOptions,
+                enabled = uiState.fieldsEnabled,
+                onClickSortOption = onSortOrderChanged,
             )
         }
 
@@ -136,25 +130,25 @@ fun ClazzMemberListScreen(
             }
         }
 
-//        items(
-//            items = teacherListItems,
-//            key = { Pair(1, it.personUid) }
-//        ){ person ->
-//            ListItem (
-//                modifier = Modifier.clickable {
-//                    person?.also(onClickEntry)
-//                },
-//                text = {
-//                    Text(text = "${person?.firstNames} ${person?.lastName}")
-//                },
-//                icon = {
-//                    Icon(
-//                        imageVector = Icons.Filled.AccountCircle,
-//                        contentDescription = null
-//                    )
-//                }
-//            )
-//        }
+        ustadPagedItems(
+            pagingItems = teacherListItems,
+            key = { Pair(1, it.personUid) }
+        ){ person ->
+            ListItem (
+                modifier = Modifier.clickable {
+                    person?.also(onClickEntry)
+                },
+                text = {
+                    Text(text = "${person?.firstNames} ${person?.lastName}")
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.AccountCircle,
+                        contentDescription = null
+                    )
+                }
+            )
+        }
 
         item {
             ListItem(
@@ -179,31 +173,33 @@ fun ClazzMemberListScreen(
             }
         }
 
-//        items(
-//            items = studentListItems,
-//            key = { Pair(2, it.personUid) }
-//        ){ personItem ->
-//            StudentListItem(
-//                person = personItem,
-//                onClick = onClickEntry
-//            )
-//        }
-
-        item {
-            ListItem(
-                text = { Text(text = stringResource(MR.strings.pending_requests)) }
+        ustadPagedItems(
+            pagingItems = studentListItems,
+            key = { Pair(2, it.personUid) }
+        ){ personItem ->
+            StudentListItem(
+                person = personItem,
+                onClick = onClickEntry
             )
         }
+
+        if(pendingStudentListItems.itemCount > 0) {
+            item {
+                ListItem(
+                    text = { Text(text = stringResource(MR.strings.pending_requests)) }
+                )
+            }
+        }
         
-//        items(
-//            items = pendingStudentListItems,
-//            key = { Pair(3, it.personUid) }
-//        ){ pendingStudent ->
-//            PendingStudentListItem(
-//                person = pendingStudent,
-//                onClick = onClickPendingRequest
-//            )
-//        }
+        ustadPagedItems(
+            pagingItems = pendingStudentListItems,
+            key = { Pair(3, it.personUid) }
+        ){ pendingStudent ->
+            PendingStudentListItem(
+                person = pendingStudent,
+                onClick = onClickPendingRequest
+            )
+        }
     }
 }
 
@@ -213,7 +209,6 @@ fun ClazzMemberListScreen(
      person: PersonWithClazzEnrolmentDetails?,
      onClick: (PersonWithClazzEnrolmentDetails) -> Unit,
  ){
-
      ListItem (
          modifier = Modifier.clickable {
              person?.also(onClick)
