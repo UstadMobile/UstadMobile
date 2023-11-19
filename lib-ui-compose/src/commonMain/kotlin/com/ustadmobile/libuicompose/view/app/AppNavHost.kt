@@ -1,5 +1,6 @@
 package com.ustadmobile.libuicompose.view.app
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,11 +13,13 @@ import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
+import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.view.PopNavCommandEffect
@@ -24,6 +27,7 @@ import com.ustadmobile.libuicompose.view.clazz.edit.ClazzEditScreen
 import com.ustadmobile.libuicompose.view.clazz.list.ClazzListScreen
 import com.ustadmobile.libuicompose.view.contententry.list.ContentEntryListScreenForViewModel
 import com.ustadmobile.libuicompose.view.login.LoginScreen
+import com.ustadmobile.libuicompose.view.schedule.edit.ScheduleEditScreen
 import com.ustadmobile.libuicompose.view.siteenterlink.SiteEnterLinkScreen
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
 import kotlinx.coroutines.channels.BufferOverflow
@@ -171,6 +175,20 @@ fun AppNavHost(
                     ClazzEditViewModel(di, savedStateHandle)
                 }
             )
+        }
+
+        contentScene("/${ScheduleEditViewModel.DEST_NAME}") { backStackEntry ->
+            ScheduleEditScreen(
+                appViewModel(
+                    backStackEntry, ScheduleEditViewModel::class
+                ) { di, savedStateHandle ->
+                    ScheduleEditViewModel(di, savedStateHandle)
+                }
+            )
+        }
+
+        contentScene("/${ClazzDetailViewModel.DEST_NAME}") { backStackEntry ->
+            Text("Course Detail")
         }
     }
 }

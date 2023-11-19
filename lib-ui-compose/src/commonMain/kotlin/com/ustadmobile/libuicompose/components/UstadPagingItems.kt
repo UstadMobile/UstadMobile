@@ -13,7 +13,9 @@ fun <T: Any> LazyGridScope.ustadPagedItems(
 ) {
     items(
         count = pagingItems.itemCount,
-        key = pagingItems.itemKey { key(it) }
+        key = pagingItems.itemKey {
+            key(it)
+        }
     ) { index ->
         itemContent(pagingItems[index])
     }

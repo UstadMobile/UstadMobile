@@ -27,7 +27,7 @@ import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 
 @Composable
-fun ScheduleEditScreenForViewModel(
+fun ScheduleEditScreen(
     viewModel: ScheduleEditViewModel
 ){
     val uiState: ScheduleEditUiState by viewModel.uiState.collectAsState(initial = ScheduleEditUiState())
