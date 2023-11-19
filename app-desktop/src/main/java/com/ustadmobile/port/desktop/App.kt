@@ -98,7 +98,7 @@ fun main() = application {
                             UstadPrecomposeApp(
                                 widthClass = SizeClass.EXPANDED,
                                 navigator = navigator,
-                                onAppStateChange = {
+                                onAppStateChanged = {
                                     appState = it
                                 },
                                 persistNavState = false,

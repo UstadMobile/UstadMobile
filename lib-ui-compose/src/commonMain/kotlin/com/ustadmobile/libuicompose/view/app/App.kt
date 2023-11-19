@@ -59,13 +59,17 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     )
 )
 
+/**
+ * @param onAppStateChanged - a change Listener that is used by the calling function, mostly the JVM
+ *        window and activity. Used to update title, navbar visibility.
+ */
 @Composable
 fun App(
     widthClass: SizeClass = SizeClass.MEDIUM,
     persistNavState: Boolean = false,
     useBottomBar: Boolean = true,
     navigator: Navigator = rememberNavigator(),
-    onAppStateChange: (AppUiState) -> Unit = { },
+    onAppStateChanged: (AppUiState) -> Unit = { },
 ) {
     val appUiState = remember {
         mutableStateOf(AppUiState())
@@ -73,7 +77,7 @@ fun App(
 
     val appUiStateVal by appUiState
     LaunchedEffect(appUiStateVal) {
-        onAppStateChange(appUiStateVal)
+        onAppStateChanged(appUiStateVal)
     }
 
     Scaffold(
