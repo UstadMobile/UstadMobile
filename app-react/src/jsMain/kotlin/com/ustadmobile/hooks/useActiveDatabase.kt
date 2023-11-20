@@ -20,7 +20,7 @@ fun useActiveDatabase(tag: Int = DoorTag.TAG_DB) : UmAppDatabase {
     }
 
     val db: UmAppDatabase = useMemo(accountManager.activeEndpoint) {
-        di.direct.on(accountManager.activeAccount).instance(tag = tag)
+        di.direct.on(accountManager.currentAccount).instance(tag = tag)
     }
 
     return db

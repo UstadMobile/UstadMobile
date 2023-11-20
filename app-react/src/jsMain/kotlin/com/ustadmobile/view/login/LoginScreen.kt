@@ -16,6 +16,8 @@ import mui.system.sx
 import react.*
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.mui.components.UstadStandardContainer
+import com.ustadmobile.mui.components.UstadTextField
 
 
 external interface LoginProps : Props {
@@ -48,9 +50,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
 
     val strings = useStringProvider()
 
-    Container {
-        maxWidth = "lg"
-
+    UstadStandardContainer {
         Stack {
             direction = responsive(StackDirection.column)
             spacing = responsive(10.px)
@@ -60,7 +60,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                 + (props.uiState.loginIntentMessage ?: "")
             }
 
-            TextField {
+            UstadTextField {
                 id = "username"
                 value = props.uiState.username
                 label = ReactNode(strings[MR.strings.username])

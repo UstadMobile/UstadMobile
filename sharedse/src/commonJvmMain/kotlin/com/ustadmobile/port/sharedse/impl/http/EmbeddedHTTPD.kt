@@ -34,7 +34,10 @@ import com.ustadmobile.door.ext.DoorTag
  *
  * Created by mike on 8/14/15.
  */
-open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di: DI) : RouterNanoHTTPD(portNum), DIAware, ContainerMounter {
+open class EmbeddedHTTPD(
+    portNum: Int,
+    override val di: DI
+) : RouterNanoHTTPD(portNum), DIAware, ContainerMounter {
 
     private val id: Int
 

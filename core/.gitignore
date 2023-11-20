@@ -1,0 +1,3 @@
+# Ignore moko-resources generated files
+karma.config.d/moko-resource-generated.js
+webpack.config.d/moko-resources-generated.js

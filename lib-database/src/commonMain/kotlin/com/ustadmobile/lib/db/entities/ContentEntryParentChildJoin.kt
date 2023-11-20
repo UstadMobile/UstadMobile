@@ -14,20 +14,18 @@ import kotlinx.serialization.Serializable
  */
 //short code = cepcj
 @Entity(indices = [Index(name = "parent_child", value = ["cepcjChildContentEntryUid", "cepcjParentContentEntryUid"])])
-@ReplicateEntity(tableId = TABLE_ID, tracker = ContentEntryParentChildJoinReplicate::class)
+@ReplicateEntity(
+    tableId = TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
 @Triggers(arrayOf(
  Trigger(
      name = "contententryparentchildjoin_remote_insert",
      order = Trigger.Order.INSTEAD_OF,
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
-     sqlStatements = [
-         """REPLACE INTO ContentEntryParentChildJoin(cepcjParentContentEntryUid, cepcjChildContentEntryUid, childIndex, cepcjUid, cepcjLocalChangeSeqNum, cepcjMasterChangeSeqNum, cepcjLastChangedBy, cepcjLct)
-         VALUES (NEW.cepcjParentContentEntryUid, NEW.cepcjChildContentEntryUid, NEW.childIndex, NEW.cepcjUid, NEW.cepcjLocalChangeSeqNum, NEW.cepcjMasterChangeSeqNum, NEW.cepcjLastChangedBy, NEW.cepcjLct)
-         /*psql ON CONFLICT (cepcjUid) DO UPDATE
-         SET cepcjParentContentEntryUid = EXCLUDED.cepcjParentContentEntryUid, cepcjChildContentEntryUid = EXCLUDED.cepcjChildContentEntryUid, childIndex = EXCLUDED.childIndex, cepcjLocalChangeSeqNum = EXCLUDED.cepcjLocalChangeSeqNum, cepcjMasterChangeSeqNum = EXCLUDED.cepcjMasterChangeSeqNum, cepcjLastChangedBy = EXCLUDED.cepcjLastChangedBy, cepcjLct = EXCLUDED.cepcjLct
-         */"""
-     ]
+     conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+     sqlStatements = [TRIGGER_UPSERT],
  )
 ))
 @Serializable
@@ -52,8 +50,8 @@ class ContentEntryParentChildJoin(
     @LastChangedBy
     var cepcjLastChangedBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var cepcjLct: Long = 0
 
     constructor(parentEntry: ContentEntry, childEntry: ContentEntry, index: Int) : this(){

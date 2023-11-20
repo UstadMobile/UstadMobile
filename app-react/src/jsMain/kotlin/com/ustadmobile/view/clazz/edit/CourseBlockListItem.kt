@@ -1,9 +1,9 @@
 package com.ustadmobile.view.clazz.edit
 
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditUiState
+import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.CourseBlock
-import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
-import com.ustadmobile.view.CONTENT_ENTRY_TYPE_ICON_MAP
+import com.ustadmobile.view.contententry.detailoverviewtab.CONTENT_ENTRY_TYPE_ICON_MAP
 import com.ustadmobile.wrappers.reacteasysort.SortableItem
 import web.cssom.number
 import web.cssom.px
@@ -34,23 +34,23 @@ val COURSE_BLOCK_TYPE_ICON_MAP: Map<Int, SvgIconComponent> = CONTENT_ENTRY_TYPE_
 
 external interface CourseBlockListItemProps : Props {
 
-    var courseBlock: CourseBlockWithEntity
+    var block: CourseBlockAndEditEntities
 
     var uiState: ClazzEditUiState.CourseBlockUiState
 
-    var onClickEditCourseBlock: (CourseBlockWithEntity) -> Unit
+    var onClickEditCourseBlock: (CourseBlockAndEditEntities) -> Unit
 
     var fieldsEnabled: Boolean
 
-    var onClickHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit
+    var onClickHideBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit
 
-    var onClickUnHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit
+    var onClickUnHideBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit
 
-    var onClickIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit
+    var onClickIndentBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit
 
-    var onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit
+    var onClickUnIndentBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit
 
-    var onClickDeleteBlockPopupMenu: (CourseBlockWithEntity) -> Unit
+    var onClickDeleteBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit
 
 }
 
@@ -60,13 +60,13 @@ val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
             val divRef : MutableRefObject<HTMLDivElement> = useRef(null)
 
             ListItem{
-                val courseBlockEditAlpha: Double = if (props.courseBlock.cbHidden) 0.5 else 1.0
-                val startPadding = (props.courseBlock.cbIndentLevel * 24).px
+                val courseBlockEditAlpha: Double = if (props.block.courseBlock.cbHidden) 0.5 else 1.0
+                val startPadding = (props.block.courseBlock.cbIndentLevel * 24).px
 
-                val iconFlag = if(props.courseBlock.cbType == CourseBlock.BLOCK_CONTENT_TYPE)
-                    props.courseBlock.entry?.contentTypeFlag
+                val iconFlag = if(props.block.courseBlock.cbType == CourseBlock.BLOCK_CONTENT_TYPE)
+                    props.block.contentEntry?.contentTypeFlag
                 else
-                    props.courseBlock.cbType
+                    props.block.courseBlock.cbType
 
                 ListItemButton {
                     sx {
@@ -77,7 +77,7 @@ val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
                         //Avoid triggering the onClick listener if the dragging is in process
                         //This might not be needed
                         if(divRef.current?.classList?.contains(COURSE_BLOCK_DRAG_CLASS) != true) {
-                            props.onClickEditCourseBlock(props.courseBlock)
+                            props.onClickEditCourseBlock(props.block)
                         }
                     }
 
@@ -89,7 +89,7 @@ val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
                     }
 
                     ListItemText {
-                        primary = ReactNode(props.courseBlock.cbTitle ?: "")
+                        primary = ReactNode(props.block.courseBlock.cbTitle ?: "")
                     }
                 }
 

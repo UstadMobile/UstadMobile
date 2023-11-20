@@ -9,30 +9,18 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-@ReplicateEntity(tableId = TABLE_ID , tracker = MessageReplicate::class)
+@ReplicateEntity(
+    tableId = TABLE_ID ,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
 @Triggers(arrayOf(
     Trigger(
         name = "message_remote_insert",
         order = Trigger.Order.INSTEAD_OF,
         on = Trigger.On.RECEIVEVIEW,
         events = [Trigger.Event.INSERT],
-        sqlStatements = [
-            """
-                REPLACE INTO Message(messageUid, messageSenderPersonUid, messageTableId, 
-                messageEntityUid, messageText, messageTimestamp, messageClazzUid, messageLct)
-                VALUES(NEW.messageUid, NEW.messageSenderPersonUid, NEW.messageTableId, 
-                NEW.messageEntityUid, NEW.messageText, NEW.messageTimestamp, NEW.messageClazzUid, 
-                NEW.messageLct)
-                /*psql ON CONFLICT (messageUid) DO UPDATE 
-                SET messageSenderPersonUid = EXCLUDED.messageSenderPersonUid, 
-                messageTableId = EXCLUDED.messageTableId, 
-                messageEntityUid = EXCLUDED.messageEntityUid, 
-                messageText = EXCLUDED.messageText, messageTimestamp = EXCLUDED.messageTimestamp,
-                messageClazzUid = EXCLUDED.messageClazzUid,
-                messageLct = EXCLUDED.messageLct
-                */
-            """
-        ]
+        conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+        sqlStatements = [TRIGGER_UPSERT],
     )
 ))
 open class Message() {
@@ -52,8 +40,8 @@ open class Message() {
 
     var messageClazzUid: Long = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var messageLct: Long = 0
 
     constructor(personUid: Long, table: Int, entityUid: Long, text: String, clazzUid: Long ) : this() {

@@ -1,14 +1,11 @@
 package com.ustadmobile.port.android.view
 
-import android.annotation.SuppressLint
 import android.content.*
 import android.hardware.SensorManager
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
 import android.webkit.WebView
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -22,7 +19,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.port.android.impl.UserFeedbackException
-import com.ustadmobile.port.android.util.ext.getUstadLocaleSetting
+import com.ustadmobile.libuicompose.util.ext.getUstadLocaleSetting
 import dev.icerock.moko.resources.StringResource
 import org.acra.ACRA
 import org.kodein.di.DIAware

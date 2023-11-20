@@ -1,16 +1,12 @@
 package com.ustadmobile.core.domain.assignment.submitassignment
 
-import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.ext.addSyncCallback
-import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -20,12 +16,10 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.Person
-import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
-import java.nio.file.Files
 import kotlin.random.Random
 import kotlin.test.assertEquals
 
@@ -46,18 +40,12 @@ class SubmitAssignmentUseCaseTest {
         courseBlock: CourseBlock = CourseBlock(),
         block: suspend SubmitUseCaseContext.() -> Unit,
     ) {
-        val tmpDir = Files.createTempDirectory("submittest").toFile()
-
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
         val db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
-            "jdbc:sqlite:build/tmp/submitusecase_${systemTimeInMillis()}.sqlite", attachmentDir = tmpDir)
-            .addSyncCallback(nodeIdAndAuth)
-            .addCallback(ContentJobItemTriggersCallback())
-            .addMigrations(*migrationList().toTypedArray())
+            "jdbc:sqlite::memory:", nodeId = nodeIdAndAuth.nodeId)
             .build()
-            .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
         val systemImpl: UstadMobileSystemImpl = mock {
-            on { getString(any<StringResource>())}.thenAnswer { it.arguments.first().toString() }
+            on { getString(any())}.thenAnswer { it.arguments.first().toString() }
         }
 
         try {
@@ -89,8 +77,7 @@ class SubmitAssignmentUseCaseTest {
                 block(SubmitUseCaseContext(db, systemImpl, assignment, courseBlock, person))
             }
         }finally {
-            tmpDir.deleteRecursively()
-            //db.close()
+            db.close()
         }
     }
 
@@ -100,8 +87,8 @@ class SubmitAssignmentUseCaseTest {
             val submitUseCase = SubmitAssignmentUseCase()
             val response = "I can has cheezburger"
             submitUseCase(
-                db = db,
-                systemImpl = systemImpl,
+                repo = db,
+                submitterUid = person.personUid,
                 assignmentUid = assignment.caUid,
                 accountPersonUid = person.personUid,
                 submission = CourseAssignmentSubmission().apply {
@@ -116,6 +103,7 @@ class SubmitAssignmentUseCaseTest {
             assertEquals(response, submissionInDb?.casText)
         }
     }
+
 
     @Test(expected = AssignmentAlreadySubmittedException::class)
     fun givenValidAssignment_whenSubmissionAlreadyMadeAndPolicyIsSubmitAllAtOnce_thenWillThrowAlreadySubmittedException() {
@@ -134,8 +122,8 @@ class SubmitAssignmentUseCaseTest {
             val response = "I can has cheezburger"
 
             submitUseCase(
-                db = db,
-                systemImpl = systemImpl,
+                repo = db,
+                submitterUid = person.personUid,
                 assignmentUid = assignment.caUid,
                 accountPersonUid = person.personUid,
                 submission = CourseAssignmentSubmission().apply {
@@ -145,6 +133,7 @@ class SubmitAssignmentUseCaseTest {
         }
     }
 
+
     @Test(expected = AccountIsNotSubmitterException::class)
     fun givenValidAssignment_whenAccountPersonUidIsNotSubmitter_thenWillThrowNotSubmitterException() {
         testSubmitAssignment(
@@ -153,8 +142,8 @@ class SubmitAssignmentUseCaseTest {
             val submitUseCase = SubmitAssignmentUseCase()
 
             submitUseCase(
-                db = db,
-                systemImpl = systemImpl,
+                repo = db,
+                submitterUid = 0,
                 assignmentUid = assignment.caUid,
                 accountPersonUid = person.personUid,
                 submission = CourseAssignmentSubmission().apply {
@@ -181,8 +170,8 @@ class SubmitAssignmentUseCaseTest {
             val response = "I can has cheezburger"
 
             submitUseCase(
-                db = db,
-                systemImpl = systemImpl,
+                repo = db,
+                submitterUid = person.personUid,
                 assignmentUid = assignment.caUid,
                 accountPersonUid = person.personUid,
                 submission = CourseAssignmentSubmission().apply {
@@ -210,8 +199,8 @@ class SubmitAssignmentUseCaseTest {
             val submitUseCase = SubmitAssignmentUseCase()
             val response = "I can still has cheezburger"
             submitUseCase(
-                db = db,
-                systemImpl = systemImpl,
+                repo = db,
+                submitterUid = person.personUid,
                 assignmentUid = assignment.caUid,
                 accountPersonUid = person.personUid,
                 submission = CourseAssignmentSubmission().apply {
@@ -232,8 +221,8 @@ class SubmitAssignmentUseCaseTest {
             val submitUseCase = SubmitAssignmentUseCase()
             val response = "I can still has cheezburger, right?"
             submitUseCase(
-                db = db,
-                systemImpl = systemImpl,
+                repo = db,
+                submitterUid = person.personUid,
                 assignmentUid = assignment.caUid,
                 accountPersonUid = person.personUid,
                 submission = CourseAssignmentSubmission().apply {

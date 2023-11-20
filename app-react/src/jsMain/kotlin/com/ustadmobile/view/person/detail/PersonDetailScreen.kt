@@ -136,9 +136,8 @@ val PersonDetailComponent2 = FC<PersonDetailProps> { props ->
                 }
             }
 
-
-            QuickActionBar{
-                uiState = props.uiState
+            QuickActionBar {
+                + props
             }
 
             Divider { orientation = Orientation.horizontal }
@@ -188,7 +187,9 @@ private val QuickActionBar = FC<PersonDetailProps> { props ->
             UstadQuickActionButton {
                 icon = Call.create()
                 text = strings[MR.strings.call]
-                onClick = { props.onClickDial }
+                onClick = {
+                    props.onClickDial()
+                }
             }
         }
 
@@ -196,7 +197,9 @@ private val QuickActionBar = FC<PersonDetailProps> { props ->
             UstadQuickActionButton {
                 icon = Email.create()
                 text = strings[MR.strings.email]
-                onClick = { props.onClickEmail }
+                onClick = {
+                    props.onClickEmail()
+                }
             }
         }
 
@@ -204,7 +207,9 @@ private val QuickActionBar = FC<PersonDetailProps> { props ->
             UstadQuickActionButton {
                 icon = Person.create()
                 text = strings[MR.strings.create_account]
-                onClick = { props.onClickCreateAccount }
+                onClick = {
+                    props.onClickCreateAccount()
+                }
             }
         }
 
@@ -212,7 +217,7 @@ private val QuickActionBar = FC<PersonDetailProps> { props ->
             UstadQuickActionButton {
                 icon = Key.create()
                 text = strings[MR.strings.change_password]
-                onClick = { props.onClickChangePassword }
+                onClick = { props.onClickChangePassword() }
             }
         }
 
@@ -220,7 +225,7 @@ private val QuickActionBar = FC<PersonDetailProps> { props ->
             UstadQuickActionButton {
                 icon = SupervisedUserCircle.create()
                 text = strings[MR.strings.manage_parental_consent]
-                onClick = { props.onClickManageParentalConsent }
+                onClick = { props.onClickManageParentalConsent() }
             }
         }
 
@@ -228,7 +233,7 @@ private val QuickActionBar = FC<PersonDetailProps> { props ->
             UstadQuickActionButton {
                 icon = Chat.create()
                 text = strings[MR.strings.chat]
-                onClick = { props.onClickChat }
+                onClick = { props.onClickChat() }
             }
         }
     }

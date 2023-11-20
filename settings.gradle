@@ -11,20 +11,98 @@ dependencyResolutionManagement {
     versionCatalogs {
         libs {
             version("version-moko-resources", "0.23.0")
-            version("jetbrains-compose", "1.5.0")
-            version("version_activity_compose", "1.7.2")
+            version("jetbrains-compose", "1.5.10")
+            version("version_activity_compose", "1.8.0")
             version("version_androidx_appcompat", "1.6.1")
-            version("version_androidx_core", "1.9.0")
+            version("version_androidx_core", "1.12.0")
+            version("version_kotlin", "1.9.20")
+            version("version_okhttp", "4.11.0")
+            version("version_door", "0.70b18")
+            version("version_coroutines", "1.7.3")
+            version("version_atomicfu", "0.22.0")
+            version("version_kotlinx_io", "0.3.0")
+            version("version_android_room", "2.5.2")
+            version("version_paging_multiplatform", "3.3.0-alpha02-0.4.0")
+            version("version_paging_androidx", "3.3.0-alpha02")
+            version("version_android_navigation", "2.7.5")
+            version("version_androidx_lifecycle", "2.6.2")
+            version("version_kodein_di", "7.20.2")
+            version("version_precompose", "1.5.7")
+            version("version_dragdropswiperecyclerview", "1.2.0")
+            version("version_napier", "2.6.1")
+            version("version_xmlutil", "0.86.2")
+            version("version_javaffmpeg", "0.8.0")
+            version('version_android_desugar_jdk_libs', "2.0.4")
+            version("version_android_material", "1.9.0")
+            version("version_ktor", "2.3.6")
 
-            plugin("jetbrains-compose", "org.jetbrains.compose").version("1.5.0")
+            version("version_kotlinx_datetime", "0.4.0")
+            version("version_richeditor_multiplatform", "1.0.0-beta03")
+            version("version_reorderable_compose", "0.9.6")
+            version("version_compose_webview_multiplatform", "1.7.0")
+            version("version_androidx_window", "1.2.0-rc01")
+            version("version_quartz_scheduler", "2.3.2")
+            version("version_simplejndi", "0.23.0")
+
+
+            plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
+            plugin("ksp", "com.google.devtools.ksp").version("1.9.20-1.0.13")
+            plugin("atomicfu", "org.jetbrains.kotlin.plugin.atomicfu").versionRef("version_kotlin")
 
-            library("kodein-di", "org.kodein.di:kodein-di:7.20.2")
+            library("kodein-di", "org.kodein.di", "kodein-di").versionRef("version_kodein_di")
+            library("kodein-di-compose", "org.kodein.di", "kodein-di-framework-compose").versionRef("version_kodein_di")
             library("moko-resources", "dev.icerock.moko", "resources").versionRef("version-moko-resources")
             library("moko-resources-compose", "dev.icerock.moko", "resources-compose").versionRef("version-moko-resources")
             library("activity-compose", "androidx.activity", "activity-compose").versionRef("version_activity_compose")
             library("androidx-appcompat", "androidx.appcompat", "appcompat").versionRef("version_androidx_appcompat")
             library("androidx-core-ktx", "androidx.core", "core-ktx").versionRef("version_androidx_core")
+            library("androidx-paging-runtime", "androidx.paging", "paging-runtime").versionRef("version_paging_androidx")
+            library("androidx-paging-compose", "androidx.paging", "paging-compose").versionRef("version_paging_androidx")
+            library("androidx-navigation-compose", "androidx.navigation", "navigation-compose").versionRef("version_android_navigation")
+            library("androidx-navigation-fragment-ktx", "androidx.navigation", "navigation-fragment-ktx").versionRef("version_android_navigation")
+            library("androidx-navigation-ui", "androidx.navigation", "navigation-ui").versionRef("version_android_navigation")
+            library("androidx-navigation-ui-ktx", "androidx.navigation", "navigation-ui-ktx").versionRef("version_android_navigation")
+            library("androidx-navigation-testing", "androidx.navigation", "navigation-testing").versionRef("version_android_navigation")
+            library("androidx-lifecycle-viewmodel-compose", "androidx.lifecycle", "lifecycle-viewmodel-compose").versionRef("version_androidx_lifecycle")
+            library("android-desugar-libs", "com.android.tools", "desugar_jdk_libs_nio").versionRef("version_android_desugar_jdk_libs")
+            library("android-material", "com.google.android.material", "material").versionRef("version_android_material")
+            library("androidx-window", "androidx.window", "window").versionRef("version_androidx_window")
+
+
+            library("paging-multiplatform-common", "app.cash.paging", "paging-common").versionRef("version_paging_multiplatform")
+            library("paging-multiplatform-compose", "app.cash.paging", "paging-compose-common").versionRef("version_paging_multiplatform")
+
+            library("kotlinx-datetime", "org.jetbrains.kotlinx", "kotlinx-datetime").versionRef("version_kotlinx_datetime")
+
+            library("richeditor-multiplatform-compose", "com.mohamedrejeb.richeditor", "richeditor-compose").versionRef("version_richeditor_multiplatform")
+            library("reorderable-compose", "org.burnoutcrew.composereorderable", "reorderable").versionRef("version_reorderable_compose")
+
+            library("precompose", "moe.tlaster", "precompose").versionRef("version_precompose")
+            library("precompose-viewmodel", "moe.tlaster", "precompose-viewmodel").versionRef("version_precompose")
+
+            library("dragdropswiperecyclerview", "com.ernestoyaquello.dragdropswiperecyclerview", "drag-drop-swipe-recyclerview").versionRef("version_dragdropswiperecyclerview")
+
+            library("door-runtime", "com.github.UstadMobile.door", "door-runtime").versionRef("version_door")
+            library("napier", "io.github.aakira", "napier").versionRef("version_napier")
+            library("napier-jvm", "io.github.aakira", "napier-jvm").versionRef("version_napier")
+            library("okhttp", "com.squareup.okhttp3", "okhttp").versionRef("version_okhttp")
+            library("door-runtime", "com.github.UstadMobile.door", "door-runtime").versionRef("version_door")
+            library("door-compiler", "com.github.UstadMobile.door", "door-compiler").versionRef("version_door")
+            library("door-room-annotations", "com.github.UstadMobile.door", "room-annotations").versionRef("version_door")
+            library("coroutines", "org.jetbrains.kotlinx", "kotlinx-coroutines-core").versionRef("version_coroutines")
+            library("atomicfu", "org.jetbrains.kotlinx", "atomicfu").versionRef("version_atomicfu")
+            library("kotlinxio-core", "org.jetbrains.kotlinx", "kotlinx-io-core").versionRef("version_kotlinx_io")
+            library("androidx-room-runtime", "androidx.room", "room-runtime").versionRef("version_android_room")
+            library("androidx-room-compiler", "androidx.room", "room-compiler").versionRef("version_android_room")
+            library("xmlutil-core", "io.github.pdvrieze.xmlutil", "core").versionRef("version_xmlutil")
+            library("xmlutil-core-jvm", "io.github.pdvrieze.xmlutil", "core-jvm").versionRef("version_xmlutil")
+            library("xmlutil-serialization", "io.github.pdvrieze.xmlutil", "serialization").versionRef("version_xmlutil")
+            library("xmlutil-serialization-jvm", "io.github.pdvrieze.xmlutil", "serialization-jvm").versionRef("version_xmlutil")
+            library("javaffmpeg", "net.bramp.ffmpeg", "ffmpeg").versionRef("version_javaffmpeg")
+            library("compose-webview-multiplatform", "io.github.kevinnzou", "compose-webview-multiplatform").versionRef("version_compose_webview_multiplatform")
+            library("quartz", "org.quartz-scheduler", "quartz").versionRef("version_quartz_scheduler")
+            library("simplejndi", "com.github.h-thurow", "simple-jndi").versionRef("version_simplejndi")
         }
     }
 }
@@ -38,10 +116,10 @@ include ':app-android',
         ':sharedse',
         ':lib-util',
         ':testserver-controller',
-        ':lib-database',
-        ':lib-content-scrapers'
+        ':lib-database'
 
 rootProject.name = "UstadMobile"
 
 include ':app-desktop'
 include ':lib-ui-compose'
+include ':lib-cache'

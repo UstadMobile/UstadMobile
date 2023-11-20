@@ -109,9 +109,9 @@ android {
         targetSdkVersion rootProject.ext.version_android_target_sdk
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.ext.ustadVersion
+        resourceConfigurations += ['en', 'fa', 'ps', 'ar', 'tg', 'bn', 'ne', 'my', 'ru', 'tl']
 
         //Shrinks minified version: remove jetpack etc. strings for unsupported locales.
-        resConfigs 'en', 'fa', 'ps', 'ar', 'tg', 'bn', 'ne', 'my', 'ru', 'tl'
         multiDexEnabled true //required for all variants to use java library desugaring
 
 
@@ -127,7 +127,12 @@ android {
         //see https://proandroiddev.com/current-issues-with-kotlin-multiplatform-and-how-to-fix-them-5ae62822a546
         packagingOptions {
             pickFirst "META-INF/io.netty.versions.properties"
-            excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module"]
+            excludes += [
+                'META-INF/INDEX.LIST',
+                "**/*.kotlin_metadata",
+                "META-INF/*.kotlin_module",
+                "META-INF/versions/9/previous-compilation-data.bin"
+            ]
         }
     }
 
@@ -153,7 +158,7 @@ android {
     //See  Compose to Kotlin Compatibility Map
     // https://developer.android.com/jetpack/androidx/releases/compose-kotlin
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.2"
+        kotlinCompilerExtensionVersion = "1.5.3"
     }
     packagingOptions {
         resources {
@@ -191,11 +196,12 @@ configurations.all {
 }
 
 dependencies {
-    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
+    coreLibraryDesugaring libs.android.desugar.libs
 
     implementation project(':core')
     implementation project(':sharedse')
     implementation project(':lib-ui-compose')
+    implementation project(":lib-cache")
 
     implementation "com.github.UstadMobile.door:door-runtime:$version_door"
     implementation project(':lib-database')
@@ -204,7 +210,7 @@ dependencies {
     api libs.moko.resources
     api libs.moko.resources.compose
 
-    implementation "io.github.aakira:napier:$version_napier"
+    implementation libs.napier
     implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
     implementation "androidx.activity:activity:$version_androidx_activity"
     implementation "androidx.activity:activity-ktx:$version_androidx_activity"
@@ -231,8 +237,8 @@ dependencies {
     implementation libs.androidx.core.ktx
 
     // Paging
-    implementation "androidx.paging:paging-runtime:$version_androidx_paging"
-    implementation "androidx.paging:paging-compose:$version_androidx_paging_compose"
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.paging.compose)
 
     implementation "androidx.annotation:annotation:$version_androidx_annotation"
 
@@ -254,7 +260,7 @@ dependencies {
     implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_legacy"
     implementation libs.androidx.appcompat
     implementation "androidx.cardview:cardview:$version_androidx_cardview"
-    implementation "com.google.android.material:material:$version_android_material"
+    implementation libs.android.material
     implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy"
     implementation "androidx.recyclerview:recyclerview:$version_androidx_recyclerview"
 
@@ -270,7 +276,9 @@ dependencies {
 
     //implementation "androidx.activity:activity-compose:$version_activity_compose"
     implementation libs.activity.compose
+    implementation libs.androidx.window
     implementation "androidx.compose.material:material-icons-extended"
+    implementation "androidx.compose.material3:material3-window-size-class"
     implementation "com.google.accompanist:accompanist-themeadapter-material:$version_compose_theme_adapter"
     implementation "com.google.accompanist:accompanist-pager:$version_compose_accompanist"
     implementation "com.google.accompanist:accompanist-pager-indicators:$version_compose_accompanist"
@@ -319,9 +327,9 @@ dependencies {
 
     //Android play core for update support within the application
     implementation "com.google.android.play:core:$version_play_core"
-    implementation "androidx.navigation:navigation-fragment-ktx:$version_android_navigation"
-    implementation "androidx.navigation:navigation-ui:$version_android_navigation"
-    implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
+    implementation libs.androidx.navigation.fragment.ktx
+    implementation libs.androidx.navigation.ui
+    implementation libs.androidx.navigation.ui.ktx
 
     //dependency injection
     implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
@@ -337,7 +345,7 @@ dependencies {
     //Persian-Date-Picker
     implementation 'com.github.varunasingh:Persian-Date-Picker-Dialog-Strings:primary-SNAPSHOT'
 
-    implementation 'com.ernestoyaquello.dragdropswiperecyclerview:drag-drop-swipe-recyclerview:1.1.1'
+    implementation libs.dragdropswiperecyclerview
 
     //Better Link Movement Method
     implementation "me.saket:better-link-movement-method:$version_better_link_movement"
@@ -347,10 +355,15 @@ dependencies {
     //PanicKit (PanicButton) integration
     implementation "info.guardianproject.panic:panic:$version_android_panickit"
 
+    //Image loading
     implementation "io.coil-kt:coil:$version_android_coil"
     implementation "io.coil-kt:coil-compose:$version_android_coil"
 
     implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
+
+    //Xml processing
+    implementation libs.xmlutil.core
+    implementation libs.xmlutil.serialization
 
     //LeakCanary - detect memory leaks
     //debugImplementation "com.squareup.leakcanary:leakcanary-android:$version_android_leakcanary"
@@ -362,7 +375,7 @@ dependencies {
     testImplementation "androidx.test:runner:$version_android_junit_runner"
     testImplementation "androidx.test.ext:junit:$version_androidx_test_ext_junit"
     testImplementation "androidx.fragment:fragment-testing:$version_androidx_fragment"
-    testImplementation "androidx.navigation:navigation-testing:$version_android_navigation"
+    testImplementation libs.androidx.navigation.testing
 
     testImplementation "org.robolectric:robolectric:$version_android_roboelectric"
     testImplementation "junit:junit:$version_junit"
@@ -405,7 +418,7 @@ dependencies {
         exclude group: "org.checkerframework", module: "check-qual"
     }
     androidTestImplementation "androidx.fragment:fragment-testing:$version_androidx_fragment"
-    androidTestImplementation "androidx.navigation:navigation-testing:$version_android_navigation"
+    androidTestImplementation libs.androidx.navigation.testing
     androidTestImplementation "androidx.test.ext:junit:$version_androidx_test_ext_junit"
 
     androidTestImplementation "androidx.test.uiautomator:uiautomator:$version_android_uiautomator"

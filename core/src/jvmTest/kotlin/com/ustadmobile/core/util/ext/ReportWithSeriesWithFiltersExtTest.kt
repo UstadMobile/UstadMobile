@@ -45,7 +45,7 @@ class ReportWithSeriesWithFiltersExtTest {
     @Before
     fun setup() {
         accountManager = mock{
-            on{activeAccount}.thenReturn(UmAccount(loggedPersonUid,"","",serverUrl))
+            on{currentAccount}.thenReturn(UmAccount(loggedPersonUid,"","",serverUrl))
             on { activeEndpoint }.thenReturn(Endpoint(serverUrl))
         }
 

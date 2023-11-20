@@ -1,7 +1,6 @@
 package com.ustadmobile.core.io
 
 import com.ustadmobile.core.io.ext.toConcatenatedEntry
-import com.ustadmobile.door.ext.toHexString
 import java.io.FilterInputStream
 import java.io.IOException
 import java.io.InputStream
@@ -18,6 +17,7 @@ import io.github.aakira.napier.Napier
  * possible to read the data of that entry. The consumer should continue calling getNextEntry until
  * it returns null
  */
+@OptIn(ExperimentalStdlibApi::class)
 class ConcatenatedInputStream2(inputStream: InputStream, messageDigest: MessageDigest = MessageDigest.getInstance("MD5")) : FilterInputStream(inputStream) {
 
     private var currentEntry: ConcatenatedEntry? = null

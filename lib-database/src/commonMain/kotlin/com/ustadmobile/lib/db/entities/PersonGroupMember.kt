@@ -8,21 +8,18 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-@ReplicateEntity(tableId = PersonGroupMember.TABLE_ID, tracker = PersonGroupMemberReplicate::class,
-    priority = ReplicateEntity.HIGHEST_PRIORITY)
+@ReplicateEntity(
+    tableId = PersonGroupMember.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
 @Triggers(arrayOf(
  Trigger(
      name = "persongroupmember_remote_insert",
      order = Trigger.Order.INSTEAD_OF,
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
-     sqlStatements = [
-         """REPLACE INTO PersonGroupMember(groupMemberUid, groupMemberActive, groupMemberPersonUid, groupMemberGroupUid, groupMemberMasterCsn, groupMemberLocalCsn, groupMemberLastChangedBy, groupMemberLct) 
-         VALUES (NEW.groupMemberUid, NEW.groupMemberActive, NEW.groupMemberPersonUid, NEW.groupMemberGroupUid, NEW.groupMemberMasterCsn, NEW.groupMemberLocalCsn, NEW.groupMemberLastChangedBy, NEW.groupMemberLct) 
-         /*psql ON CONFLICT (groupMemberUid) DO UPDATE 
-         SET groupMemberActive = EXCLUDED.groupMemberActive, groupMemberPersonUid = EXCLUDED.groupMemberPersonUid, groupMemberGroupUid = EXCLUDED.groupMemberGroupUid, groupMemberMasterCsn = EXCLUDED.groupMemberMasterCsn, groupMemberLocalCsn = EXCLUDED.groupMemberLocalCsn, groupMemberLastChangedBy = EXCLUDED.groupMemberLastChangedBy, groupMemberLct = EXCLUDED.groupMemberLct
-         */"""
-     ]
+     conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+     sqlStatements = [TRIGGER_UPSERT],
  )
 ))
 class PersonGroupMember() {
@@ -49,8 +46,8 @@ class PersonGroupMember() {
     @LastChangedBy
     var groupMemberLastChangedBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var groupMemberLct: Long = 0
 
     constructor(personUid:Long, groupUid:Long) : this(){

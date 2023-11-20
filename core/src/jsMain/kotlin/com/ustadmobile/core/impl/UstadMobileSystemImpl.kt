@@ -17,10 +17,7 @@ import org.w3c.dom.HTMLAnchorElement
  *
  *
  * @author mike, kileha3
- * @param defaultStringsXmlStr The string of the strings.xml file for English (must be loaded
- *        (asynchronously in advance)
- * @param displayLocaleStringsXmlStr The String of the strings.xml file for the display locale
- *        if the display locale is not English.
+ * @param jsStringProvider Moko resources JsStringProvider
  */
 actual open class UstadMobileSystemImpl(
     private val jsStringProvider: JsStringProvider,
@@ -28,6 +25,14 @@ actual open class UstadMobileSystemImpl(
 
     override fun getString(stringResource: StringResource): String {
         return stringResource.localized(provider = jsStringProvider, locale = displayedLocale)
+    }
+
+    override fun formatString(stringResource: StringResource, vararg args: Any): String {
+        return stringResource.localized(
+            provider = jsStringProvider,
+            locale = displayedLocale,
+            args = args
+        )
     }
 
     /**
@@ -121,10 +126,6 @@ actual open class UstadMobileSystemImpl(
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any,
                            flags: Int,
                            ustadGoOptions: UstadGoOptions) {
-        throw IllegalStateException("Not supported on JS anymore!")
-    }
-
-    actual fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any) {
         throw IllegalStateException("Not supported on JS anymore!")
     }
 

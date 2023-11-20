@@ -12,7 +12,6 @@ import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
@@ -23,7 +22,7 @@ import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListView
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
-import com.ustadmobile.door.paging.PagingSource
+import app.cash.paging.PagingSource
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
@@ -53,8 +52,6 @@ data class ClazzMemberListUiState(
         SortOrderOption(MR.strings.first_name, ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_DESC, false),
         SortOrderOption(MR.strings.last_name, ClazzEnrolmentDaoCommon.SORT_LAST_NAME_ASC, true),
         SortOrderOption(MR.strings.last_name, ClazzEnrolmentDaoCommon.SORT_LAST_NAME_DESC, false),
-        SortOrderOption(MR.strings.attendance, ClazzEnrolmentDaoCommon.SORT_ATTENDANCE_ASC, true),
-        SortOrderOption(MR.strings.attendance, ClazzEnrolmentDaoCommon.SORT_ATTENDANCE_DESC, false),
         SortOrderOption(MR.strings.date_enroll, ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_ASC, true),
         SortOrderOption(MR.strings.date_enroll, ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_DESC, false),
         SortOrderOption(MR.strings.date_left, ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_ASC, true),
@@ -109,21 +106,18 @@ class ClazzMemberListViewModel(
 
     private val teacherListPagingSource: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = {
         getMembersAsPagingSource(ClazzEnrolment.ROLE_TEACHER).also {
-            lastTeacherListPagingSource?.invalidate()
             lastTeacherListPagingSource = it
         }
     }
 
     private val studentListPagingSource: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = {
         getMembersAsPagingSource(ClazzEnrolment.ROLE_STUDENT).also {
-            lastStudentListPagingsource?.invalidate()
             lastStudentListPagingsource = it
         }
     }
 
     private val pendingStudentListPagingSource: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = {
         getMembersAsPagingSource(ClazzEnrolment.ROLE_STUDENT_PENDING).also {
-            lastPendingStudentListPagingSource?.invalidate()
             lastPendingStudentListPagingSource = it
         }
     }
@@ -221,7 +215,7 @@ class ClazzMemberListViewModel(
             ))
 
         val args = mutableMapOf(
-            PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to clazzUid.toString(),
+            PersonListViewModel.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to clazzUid.toString(),
             UstadView.ARG_LISTMODE to ListViewMode.PICKER.mode,
             PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED to goToOnPersonSelectedArg,
         )

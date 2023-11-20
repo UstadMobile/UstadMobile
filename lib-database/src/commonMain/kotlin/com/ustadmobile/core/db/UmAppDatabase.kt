@@ -3,22 +3,19 @@ package com.ustadmobile.core.db
 import com.ustadmobile.door.annotation.DoorDatabase
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.SyncNode
-import com.ustadmobile.door.annotation.MinReplicationVersion
 import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.room.RoomDatabase
 import com.ustadmobile.lib.db.entities.*
 
 @DoorDatabase(entities = [NetworkNode::class,
     ClazzLog::class, ClazzLogAttendanceRecord::class,
-    Schedule::class, DateRange::class, HolidayCalendar::class, Holiday::class,
-    ScheduledCheck::class,
-    AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
+    Schedule::class, HolidayCalendar::class, Holiday::class,
     Person::class,
     Clazz::class, ClazzEnrolment::class, LeavingReason::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
     ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
     Language::class, LanguageVariant::class, AccessToken::class, PersonAuth::class, Role::class,
-    EntityRole::class, PersonGroup::class, PersonGroupMember::class,
+    PersonGroup::class, PersonGroupMember::class,
     PersonPicture::class,
     ScrapeQueueItem::class, ScrapeRun::class, ConnectivityStatus::class,
     Container::class, ContainerEntry::class, ContainerEntryFile::class,
@@ -29,107 +26,130 @@ import com.ustadmobile.lib.db.entities.*
     School::class,
     SchoolMember::class, Comments::class,
     Report::class,
-    Site::class, ContainerImportJob::class,
-    LearnerGroup::class, LearnerGroupMember::class,
-    GroupLearningSession::class,
-    SiteTerms::class, ClazzContentJoin::class,
+    Site::class,
+    ContainerImportJob::class,
+    SiteTerms::class,
     PersonParentJoin::class,
     ScopedGrant::class,
     ErrorReport::class,
     ClazzAssignment::class, ClazzAssignmentContentJoin::class, CourseAssignmentSubmission::class,
     CourseAssignmentSubmissionAttachment::class, CourseAssignmentMark::class,
     PeerReviewerAllocation::class,
-    ClazzAssignmentRollUp::class,
     PersonAuth2::class,
     UserSession::class,
     ContentJob::class, ContentJobItem::class, CourseBlock::class, CourseTerminology::class,
     CourseGroupSet::class, CourseGroupMember::class,
+    Chat::class,
+    ContentEntryPicture::class,
 
     //Door Helper entities
 //    SqliteChangeSeqNums::class,
 //    UpdateNotification::class,
-    ChangeLog::class,
-    ZombieAttachmentData::class,
     DoorNode::class,
-    ReplicationStatus::class,
-
-    ClazzLogReplicate::class,
-    ClazzLogAttendanceRecordReplicate::class,
-    CourseAssignmentSubmissionReplicate::class,
-    CourseAssignmentSubmissionAttachmentReplicate::class,
-    CourseAssignmentMarkReplicate::class,
-    CourseBlockReplicate::class,
-    CourseTerminologyReplicate::class,
-    CourseGroupSetReplicate::class,
-    CourseGroupMemberReplicate::class,
-    ScheduleReplicate::class,
-    HolidayCalendarReplicate::class,
-    HolidayReplicate::class,
-    PersonReplicate::class,
-    ClazzReplicate::class,
-    ClazzEnrolmentReplicate::class,
-    LeavingReasonReplicate::class,
-    ContentEntryReplicate::class,
-    ContentEntryContentCategoryJoinReplicate::class,
-    ContentEntryParentChildJoinReplicate::class,
-    ContentEntryRelatedEntryJoinReplicate::class,
-    ContentCategorySchemaReplicate::class,
-    ContentCategoryReplicate::class,
-    LanguageReplicate::class,
-    LanguageVariantReplicate::class,
-    PersonGroupReplicate::class,
-    PersonGroupMemberReplicate::class,
-    PersonPictureReplicate::class,
-    ContainerReplicate::class,
-    VerbEntityReplicate::class,
-    XObjectEntityReplicate::class,
-    StatementEntityReplicate::class,
-    ContextXObjectStatementJoinReplicate::class,
-    AgentEntityReplicate::class,
-    StateEntityReplicate::class,
-    StateContentEntityReplicate::class,
-    XLangMapEntryReplicate::class,
-    SchoolReplicate::class,
-    SchoolMemberReplicate::class,
-    CommentsReplicate::class,
-    ReportReplicate::class,
-    SiteReplicate::class,
-    LearnerGroupReplicate::class,
-    LearnerGroupMemberReplicate::class,
-    GroupLearningSessionReplicate::class,
-    SiteTermsReplicate::class,
-    ClazzContentJoinReplicate::class,
-    PersonParentJoinReplicate::class,
-    ScopedGrantReplicate::class,
-    ErrorReportReplicate::class,
-    ClazzAssignmentReplicate::class,
-    ClazzAssignmentContentJoinReplicate::class,
-    PersonAuth2Replicate::class,
-    UserSessionReplicate::class,
     CoursePicture::class,
-    CoursePictureReplicate::class,
-    ContentEntryPicture::class,
-    ContentEntryPictureReplicate::class,
-    PeerReviewerAllocationReplicate::class,
-    Chat::class,
+    DiscussionPost::class,
+    ExternalAppPermission::class,
     ChatMember::class,
     Message::class,
-    MessageReplicate::class,
-    ChatReplicate::class,
-    ChatMemberReplicate::class,
     MessageRead::class,
-    MessageReadReplicate::class,
-    CourseDiscussion::class,
-    CourseDiscussionReplicate::class,
-    DiscussionTopic::class,
-    DiscussionTopicReplicate::class,
-    DiscussionPost::class,
-    DiscussionPostReplicate::class,
-    ExternalAppPermission::class,
+    StudentResult::class,
+    ContentEntryVersion::class,
+
+    //Door entities
+    OutgoingReplication::class,
+    ReplicationOperation::class,
+    PendingRepositorySession::class,
 
 
-], version = 109)
-@MinReplicationVersion(60)
+
+
+], version = 125)
+/*
+ Replicate entities (e.g. trackers) to drop:
+     ClazzLogReplicate
+    ClazzLogAttendanceRecordReplicate
+    CourseAssignmentSubmissionReplicate
+    CourseAssignmentSubmissionAttachmentReplicate
+    CourseAssignmentMarkReplicate
+    CourseBlockReplicate
+    CourseTerminologyReplicate
+    CourseGroupSetReplicate
+    CourseGroupMemberReplicate
+    ScheduleReplicate
+    HolidayCalendarReplicate
+    HolidayReplicate
+    PersonReplicate
+    ClazzReplicate
+    ClazzEnrolmentReplicate
+    LeavingReasonReplicate
+    ContentEntryReplicate
+    ContentEntryContentCategoryJoinReplicate
+    ContentEntryParentChildJoinReplicate
+    ContentEntryRelatedEntryJoinReplicate
+    ContentCategorySchemaReplicate
+    ContentCategoryReplicate
+    LanguageReplicate
+    LanguageVariantReplicate
+    PersonGroupReplicate
+    PersonGroupMemberReplicate
+    PersonPictureReplicate
+    ContainerReplicate
+    VerbEntityReplicate
+    XObjectEntityReplicate
+    StatementEntityReplicate
+    ContextXObjectStatementJoinReplicate
+    AgentEntityReplicate
+    StateEntityReplicate
+    StateContentEntityReplicate
+    XLangMapEntryReplicate
+    SchoolReplicate
+    SchoolMemberReplicate
+    CommentsReplicate
+    ReportReplicate
+    SiteReplicate
+    LearnerGroupReplicate
+    LearnerGroupMemberReplicate
+    GroupLearningSessionReplicate
+    SiteTermsReplicate
+    ClazzContentJoinReplicate
+    PersonParentJoinReplicate
+    ScopedGrantReplicate
+    ErrorReportReplicate
+    ClazzAssignmentReplicate
+    ClazzAssignmentContentJoinReplicate
+    PersonAuth2Replicate
+    UserSessionReplicate
+    CoursePictureReplicate
+    ContentEntryPictureReplicate
+    PeerReviewerAllocationReplicate
+    MessageReplicate
+    ChatReplicate
+    ChatMemberReplicate
+    MessageReadReplicate
+    CourseDiscussionReplicate
+    DiscussionTopicReplicate
+    DiscussionPostReplicate
+
+    Others to Drop
+    ClazzContentJoin
+    DiscussionTopic
+    GroupLearningSession
+    LearnerGroup
+    LearnerGroupMember
+    ChangeLog
+    ZombieAttachmentData
+    EntityRole
+    AuditLog
+    CustomField
+    CustomFieldValue
+    CustomFieldValueOption
+    DateRange
+    ClazzAssignmentRollUp
+
+    Entities to add:
+    OutgoingReplication,
+    ReplicationOperation,
+ */
 expect abstract class UmAppDatabase : RoomDatabase {
 
     /*
@@ -177,8 +197,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract val contentEntryRelatedEntryJoinDao: ContentEntryRelatedEntryJoinDao
 
-    abstract val clazzContentJoinDao: ClazzContentJoinDao
-
     // abstract val syncStatusDao: SyncStatusDao
 
     abstract val contentCategorySchemaDao: ContentCategorySchemaDao
@@ -196,8 +214,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val personGroupDao: PersonGroupDao
 
     abstract val personGroupMemberDao: PersonGroupMemberDao
-
-    abstract val entityRoleDao: EntityRoleDao
 
     abstract val personPictureDao: PersonPictureDao
 
@@ -229,12 +245,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract val agentDao: AgentDao
 
-    abstract val learnerGroupDao: LearnerGroupDao
-
-    abstract val learnerGroupMemberDao: LearnerGroupMemberDao
-
-    abstract val groupLearningSessionDao: GroupLearningSessionDao
-
     abstract val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao
     abstract val clazzLogDao: ClazzLogDao
 
@@ -251,10 +261,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val schoolMemberDao: SchoolMemberDao
 
     abstract val clazzAssignmentDao: ClazzAssignmentDao
-
-    abstract val clazzAssignmentContentJoinDao: ClazzAssignmentContentJoinDao
-
-    abstract val clazzAssignmentRollUpDao: ClazzAssignmentRollUpDao
 
     abstract val courseAssignmentSubmissionDao: CourseAssignmentSubmissionDao
 
@@ -296,14 +302,12 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract val messageReadDao: MessageReadDao
 
-    abstract val courseDiscussionDao: CourseDiscussionDao
-
     abstract val peerReviewerAllocationDao: PeerReviewerAllocationDao
-
-    abstract val discussionTopicDao: DiscussionTopicDao
 
     abstract val discussionPostDao: DiscussionPostDao
 
     abstract val externalAppPermissionDao: ExternalAppPermissionDao
+
+    abstract val contentEntryVersionDao: ContentEntryVersionDao
 
 }

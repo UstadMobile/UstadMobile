@@ -26,3 +26,12 @@ data class ReportFilterEditUiState(
     val reportFilterUidAndLabelListVisible: Boolean = true
 
 )
+
+class ReportFilterEditViewModel  {
+
+    companion object {
+
+        const val DEST_NAME = "ReportFilterEdit"
+    }
+
+}

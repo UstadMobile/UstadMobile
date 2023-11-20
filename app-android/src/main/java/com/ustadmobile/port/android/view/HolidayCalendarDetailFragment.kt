@@ -20,7 +20,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.HolidayCalendarDetailUIState
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
-import com.ustadmobile.port.android.util.compose.rememberFormattedDate
+import com.ustadmobile.libuicompose.util.rememberFormattedDate
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.core.R as CR
 

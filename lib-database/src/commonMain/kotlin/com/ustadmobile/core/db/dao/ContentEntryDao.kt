@@ -4,80 +4,39 @@ import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.ACTIVE_CONTENT_JOB_ITEMS_CTE_SQL
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.ALL_ENTRIES_RECURSIVE_SQL
-import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.ENTITY_PERSONS_WITH_PERMISSION
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.ENTRY_WITH_CONTAINER_QUERY
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.LATEST_DOWNLOADED_CONTAINER_CTE_SQL
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.PLUGIN_ID_DELETE
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.PLUGIN_ID_DOWNLOAD
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.SORT_TITLE_ASC
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.SORT_TITLE_DESC
-import com.ustadmobile.door.paging.DataSourceFactory
-import com.ustadmobile.door.lifecycle.LiveData
+import app.cash.paging.PagingSource
+import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.door.paging.PagingSource
+import com.ustadmobile.lib.db.composites.ContentEntryAndLanguage
 import com.ustadmobile.lib.db.entities.*
-import kotlin.js.JsName
 
 @DoorDao
 @Repository
 expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
-    @Query("""
-        REPLACE INTO ContentEntryReplicate(cePk, ceDestination)
-         SELECT DISTINCT contentEntryUid AS ceUid,
-                :newNodeId AS siteDestination
-           FROM ContentEntry
-          WHERE ContentEntry.contentEntryLct != COALESCE(
-                (SELECT ceVersionId
-                   FROM ContentEntryReplicate
-                  WHERE cePk = ContentEntry.contentEntryUid
-                    AND ceDestination = :newNodeId), -1) 
-         /*psql ON CONFLICT(cePk, ceDestination) DO UPDATE
-                SET cePending = true
-         */       
-    """)
-    @ReplicationRunOnNewNode
-    @ReplicationCheckPendingNotificationsFor([ContentEntry::class])
-    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
-
-    @Query("""
-        REPLACE INTO ContentEntryReplicate(cePk, ceDestination)
-         SELECT DISTINCT ContentEntry.contentEntryUid AS cePk,
-                UserSession.usClientNodeId AS siteDestination
-           FROM ChangeLog
-                JOIN ContentEntry
-                    ON ChangeLog.chTableId = ${ContentEntry.TABLE_ID}
-                       AND ChangeLog.chEntityPk = ContentEntry.contentEntryUid
-                JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-          WHERE UserSession.usClientNodeId != (
-                SELECT nodeClientId 
-                  FROM SyncNode
-                 LIMIT 1)
-            AND ContentEntry.contentEntryLct != COALESCE(
-                (SELECT ceVersionId
-                   FROM ContentEntryReplicate
-                  WHERE cePk = ContentEntry.contentEntryUid
-                    AND ceDestination = UserSession.usClientNodeId), 0)     
-        /*psql ON CONFLICT(cePk, ceDestination) DO UPDATE
-            SET cePending = true
-         */               
-    """)
-    @ReplicationRunOnChange([ContentEntry::class])
-    @ReplicationCheckPendingNotificationsFor([ContentEntry::class])
-    abstract suspend fun replicateOnChange()
-
-    @JsName("insertListAsync")
     @Insert
     abstract suspend fun insertListAsync(entityList: List<ContentEntry>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsertAsync(entity: ContentEntry)
 
-    @Query("SELECT ContentEntry.*, Language.* FROM ContentEntry LEFT JOIN Language ON Language.langUid = ContentEntry.primaryLanguageUid " +
-            "WHERE ContentEntry.contentEntryUid=:entryUuid"
+    @Query("""
+        SELECT ContentEntry.*, Language.* 
+          FROM ContentEntry 
+               LEFT JOIN Language 
+                         ON Language.langUid = ContentEntry.primaryLanguageUid
+         WHERE ContentEntry.contentEntryUid=:entryUuid
+        """
     )
-    @JsName("findEntryWithLanguageByEntryId")
-    abstract suspend fun findEntryWithLanguageByEntryIdAsync(entryUuid: Long): ContentEntryWithLanguage?
+    abstract suspend fun findEntryWithLanguageByEntryIdAsync(
+        entryUuid: Long
+    ): ContentEntryAndLanguage?
 
     @Query("""
         SELECT ContentEntry.*, 
@@ -93,27 +52,39 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                
          WHERE ContentEntry.contentEntryUid = :entityUid       
     """)
-    @JsName("findEntryWithBlockAndLanguageByUidAsync")
     abstract suspend fun findEntryWithBlockAndLanguageByUidAsync(entityUid: Long): ContentEntryWithBlockAndLanguage?
 
     @Query(ENTRY_WITH_CONTAINER_QUERY)
-    abstract suspend fun findEntryWithContainerByEntryId(entryUuid: Long): ContentEntryWithMostRecentContainer?
+    abstract suspend fun findEntryWithContainerByEntryId(
+        entryUuid: Long
+    ): ContentEntry?
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     @Query(ENTRY_WITH_CONTAINER_QUERY)
-    abstract fun findEntryWithContainerByEntryIdLive(entryUuid: Long): LiveData<ContentEntryWithMostRecentContainer?>
+    abstract fun findEntryWithContainerByEntryIdLive(
+        entryUuid: Long
+    ): Flow<ContentEntry?>
 
     @Query("SELECT * FROM ContentEntry WHERE sourceUrl = :sourceUrl LIMIT 1")
-    @JsName("findBySourceUrl")
     abstract fun findBySourceUrl(sourceUrl: String): ContentEntry?
 
-    @Query("SELECT title FROM ContentEntry WHERE contentEntryUid = :contentEntryUid")
-    abstract suspend fun findTitleByUidAsync(contentEntryUid: Long): String?
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findEntryWithContainerByEntryId",
+            )
+        )
+    )
+    @Query("SELECT title FROM ContentEntry WHERE contentEntryUid = :entryUuid")
+    abstract suspend fun findTitleByUidAsync(entryUuid: Long): String?
 
     @Query("SELECT ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
-    @JsName("getChildrenByParentUid")
-    abstract fun getChildrenByParentUid(parentUid: Long): DataSourceFactory<Int, ContentEntry>
+    abstract fun getChildrenByParentUid(parentUid: Long): PagingSource<Int, ContentEntry>
 
     @Query("""
         SELECT ContentEntry.*
@@ -152,23 +123,19 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Query("SELECT COUNT(*) FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
-    @JsName("getCountNumberOfChildrenByParentUUidAsync")
     abstract suspend fun getCountNumberOfChildrenByParentUUidAsync(parentUid: Long): Int
 
 
     @Query("SELECT * FROM ContentEntry where contentEntryUid = :parentUid LIMIT 1")
-    @JsName("getContentByUuidAsync")
     abstract suspend fun getContentByUuidAsync(parentUid: Long): ContentEntry?
 
 
     @Query("SELECT ContentEntry.* FROM ContentEntry LEFT JOIN ContentEntryRelatedEntryJoin " +
             "ON ContentEntryRelatedEntryJoin.cerejRelatedEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryRelatedEntryJoin.relType = 1 AND ContentEntryRelatedEntryJoin.cerejRelatedEntryUid != :entryUuid")
-    @JsName("findAllLanguageRelatedEntriesAsync")
     abstract suspend fun findAllLanguageRelatedEntriesAsync(entryUuid: Long): List<ContentEntry>
 
     @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
-    @RepoHttpAccessible
     @Query("SELECT DISTINCT ContentCategory.contentCategoryUid, ContentCategory.name AS categoryName, " +
             "ContentCategorySchema.contentCategorySchemaUid, ContentCategorySchema.schemaName FROM ContentEntry " +
             "LEFT JOIN ContentEntryContentCategoryJoin ON ContentEntryContentCategoryJoin.ceccjContentEntryUid = ContentEntry.contentEntryUid " +
@@ -177,15 +144,12 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
             "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid " +
             "AND ContentCategory.contentCategoryUid != 0 ORDER BY ContentCategory.name")
-    @JsName("findListOfCategoriesAsync")
     abstract suspend fun findListOfCategoriesAsync(parentUid: Long): List<DistinctCategorySchema>
 
     @Query("SELECT DISTINCT Language.* from Language " +
             "LEFT JOIN ContentEntry ON ContentEntry.primaryLanguageUid = Language.langUid " +
             "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid ORDER BY Language.name")
-    @JsName("findUniqueLanguagesInListAsync")
-    @RepoHttpAccessible
     abstract suspend fun findUniqueLanguagesInListAsync(parentUid: Long): List<Language>
 
     @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
@@ -193,8 +157,6 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         LEFT JOIN ContentEntry ON ContentEntry.primaryLanguageUid = Language.langUid
         LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
         WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid ORDER BY Language.name""")
-    @JsName("findUniqueLanguageWithParentUid")
-    @RepoHttpAccessible
     abstract suspend fun findUniqueLanguageWithParentUid(parentUid: Long): List<LangUidAndName>
 
     @Update
@@ -215,13 +177,11 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
 
     @Query("SELECT * FROM ContentEntry WHERE contentEntryUid = :entryUid")
-    @JsName("findByUid")
     abstract fun findByUid(entryUid: Long): ContentEntry?
 
 
     @Query("SELECT * FROM ContentEntry WHERE title = :title")
-    @JsName("findByTitle")
-    abstract fun findByTitle(title: String): LiveData<ContentEntry?>
+    abstract fun findByTitle(title: String): Flow<ContentEntry?>
 
     /**
      * For new jobs, if the user is currently on Mobile Data, we will assume that they know what
@@ -245,56 +205,37 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
     @Query("SELECT ContentEntry.* FROM ContentEntry " +
             "WHERE ContentEntry.sourceUrl = :sourceUrl")
-    @JsName("findBySourceUrlWithContentEntryStatusAsync")
     abstract suspend fun findBySourceUrlWithContentEntryStatusAsync(sourceUrl: String): ContentEntry?
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "getChildrenByParentUidWithCategoryFilterOrderByName"
+            ),
+            HttpServerFunctionCall(
+                functionName = "findListOfChildsByParentUuid",
+                functionDao = ContentEntryParentChildJoinDao::class,
+            )
+        )
+    )
     @Query("""
-            SELECT ContentEntry.*, ContentEntryParentChildJoin.*, Container.*, 
-                COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
-                COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
-                COALESCE(StatementEntity.resultScoreScaled,0) AS resultScaled, 
-                COALESCE(StatementEntity.extensionProgress,0) AS progress, 
-                COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
-                COALESCE(StatementEntity.resultSuccess, 0) AS success,
-                COALESCE((CASE WHEN StatementEntity.resultCompletion 
-                THEN 1 ELSE 0 END),0) AS totalCompletedContent,
-                0 AS assignmentContentWeight,
-                
-                1 as totalContent, 
-                
-                0 as penalty
-            FROM ContentEntry 
+            SELECT ContentEntry.*
+              FROM ContentEntry 
                     LEFT JOIN ContentEntryParentChildJoin 
-                    ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
-                    
-                    LEFT JOIN StatementEntity
-							ON StatementEntity.statementUid = 
-                                (SELECT statementUid 
-							       FROM StatementEntity 
-                                  WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
-							        AND StatementEntity.statementPersonUid = :personUid
-							        AND contentEntryRoot 
-                               ORDER BY resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC LIMIT 1)
-                    
-                    LEFT JOIN Container 
-                    ON Container.containerUid = 
-                        (SELECT containerUid 
-                           FROM Container 
-                          WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
-                       ORDER BY cntLastModified DESC LIMIT 1)
-            WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid 
-            AND (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam) 
-            AND (NOT ContentEntry.ceInactive OR ContentEntry.ceInactive = :showHidden) 
-            AND (NOT ContentEntry.leaf OR NOT ContentEntry.leaf = :onlyFolder) 
-            AND (ContentEntry.publik 
-                 OR (SELECT username
-                        FROM Person
-                       WHERE personUid = :personUid) IS NOT NULL) 
-            AND 
-            (:categoryParam0 = 0 OR :categoryParam0 
-                IN (SELECT ceccjContentCategoryUid 
-                      FROM ContentEntryContentCategoryJoin 
-                     WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) 
+                         ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
+             WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid 
+               AND (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam) 
+               AND (NOT ContentEntry.ceInactive OR ContentEntry.ceInactive = :showHidden) 
+               AND (NOT ContentEntry.leaf OR NOT ContentEntry.leaf = :onlyFolder) 
+               AND (ContentEntry.publik 
+                    OR (SELECT username
+                          FROM Person
+                         WHERE personUid = :personUid) IS NOT NULL) 
+               AND (:categoryParam0 = 0 OR :categoryParam0 
+                    IN (SELECT ceccjContentCategoryUid 
+                          FROM ContentEntryContentCategoryJoin 
+                         WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) 
             ORDER BY ContentEntryParentChildJoin.childIndex,
                      CASE(:sortOrder)
                      WHEN $SORT_TITLE_ASC THEN ContentEntry.title
@@ -305,7 +246,6 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                      ELSE ''
                      END DESC,             
                      ContentEntry.contentEntryUid""")
-    @JsName("getChildrenByParentUidWithCategoryFilterOrderByNameAsc")
     abstract fun getChildrenByParentUidWithCategoryFilterOrderByName(
         parentUid: Long,
         langParam: Long,
@@ -314,49 +254,15 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         showHidden: Boolean,
         onlyFolder: Boolean,
         sortOrder: Int
-    ): PagingSource<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
-
-
-
-
+    ): PagingSource<Int, ContentEntry>
 
     @Query("""
-        SELECT ContentEntry.*, ContentEntryParentChildJoin.*, Container.*, 
-                COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
-                COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
-                COALESCE(StatementEntity.resultScoreScaled,0) AS resultScaled, 
-                COALESCE(StatementEntity.extensionProgress,0) AS progress, 
-                COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
-                COALESCE(StatementEntity.resultSuccess, 0) AS success,
-                COALESCE((CASE WHEN StatementEntity.resultCompletion 
-                THEN 1 ELSE 0 END),0) AS totalCompletedContent,
-                0 AS assignmentContentWeight,
-                
-                1 as totalContent, 
-                
-                0 as penalty
+        SELECT ContentEntry.*
           FROM CourseBlock
                JOIN ContentEntry 
                     ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
                        AND ContentEntry.contentEntryUid = CourseBlock.cbEntityUid
                        AND CAST(CourseBlock.cbActive AS INTEGER) = 1
-               LEFT JOIN ContentEntryParentChildJoin 
-                    ON ContentEntryParentChildJoin.cepcjUid = 0 
-               LEFT JOIN StatementEntity
-							ON StatementEntity.statementUid = 
-                                (SELECT statementUid 
-							       FROM StatementEntity 
-                                  WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
-							        AND StatementEntity.statementPersonUid = :personUid
-							        AND contentEntryRoot 
-                               ORDER BY resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC LIMIT 1)     
-               LEFT JOIN Container 
-                    ON Container.containerUid = 
-                        (SELECT containerUid 
-                           FROM Container 
-                          WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
-                       ORDER BY cntLastModified DESC LIMIT 1)  
-                               
          WHERE CourseBlock.cbClazzUid IN
                (SELECT ClazzEnrolment.clazzEnrolmentClazzUid
                   FROM ClazzEnrolment
@@ -364,50 +270,17 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     """)
     abstract fun getContentFromMyCourses(
         personUid: Long
-    ): PagingSource<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+    ): PagingSource<Int, ContentEntry>
 
 
     @Query("""
-        SELECT ContentEntry.*, ContentEntryParentChildJoin.*, Container.*, 
-                COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
-                COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
-                COALESCE(StatementEntity.resultScoreScaled,0) AS resultScaled, 
-                COALESCE(StatementEntity.extensionProgress,0) AS progress, 
-                COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
-                COALESCE(StatementEntity.resultSuccess, 0) AS success,
-                COALESCE((CASE WHEN StatementEntity.resultCompletion 
-                THEN 1 ELSE 0 END),0) AS totalCompletedContent,
-                0 AS assignmentContentWeight,
-                
-                1 as totalContent, 
-                
-                0 as penalty
+        SELECT ContentEntry.*
           FROM ContentEntry
-               LEFT JOIN ContentEntryParentChildJoin 
-                    ON ContentEntryParentChildJoin.cepcjUid = 0 
-               LEFT JOIN StatementEntity
-							ON StatementEntity.statementUid = 
-                                (SELECT statementUid 
-							       FROM StatementEntity 
-                                  WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
-							        AND StatementEntity.statementPersonUid = :personUid
-							        AND contentEntryRoot 
-                               ORDER BY resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC LIMIT 1)     
-               LEFT JOIN Container 
-                    ON Container.containerUid = 
-                        (SELECT containerUid 
-                           FROM Container 
-                          WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
-                       ORDER BY cntLastModified DESC LIMIT 1)  
          WHERE ContentEntry.contentOwner = :personUid
-           AND NOT EXISTS(
-               SELECT ContentEntryParentChildJoin.cepcjUid 
-                 FROM ContentEntryParentChildJoin
-                WHERE ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid)
     """)
     abstract fun getContentByOwner(
         personUid: Long
-    ): PagingSource<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+    ): PagingSource<Int, ContentEntry>
 
 
     @Update
@@ -416,24 +289,20 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Query("SELECT ContentEntry.* FROM ContentEntry "+
             "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid" +
             " WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
-    @JsName("getChildrenByAll")
     abstract fun getChildrenByAll(parentUid: Long): List<ContentEntry>
 
 
-    @JsName("findLiveContentEntry")
     @Query("SELECT * FROM ContentEntry where contentEntryUid = :parentUid LIMIT 1")
-    abstract fun findLiveContentEntry(parentUid: Long): LiveData<ContentEntry?>
+    abstract fun findLiveContentEntry(parentUid: Long): Flow<ContentEntry?>
 
     @Query("""SELECT COALESCE((SELECT contentEntryUid 
                                       FROM ContentEntry 
                                      WHERE entryId = :objectId 
                                      LIMIT 1),0) AS ID""")
-    @JsName("getContentEntryUidFromXapiObjectId")
     abstract fun getContentEntryUidFromXapiObjectId(objectId: String): Long
 
 
     @Query("SELECT * FROM ContentEntry WHERE sourceUrl LIKE :sourceUrl")
-    @JsName("findSimilarIdEntryForKhan")
     abstract fun findSimilarIdEntryForKhan(sourceUrl: String): List<ContentEntry>
 
     /**
@@ -441,7 +310,6 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
      * not yet have the indexes
      */
     @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
-    @RepoHttpAccessible
     @Query("""
         WITH RECURSIVE 
                ContentEntry_recursive(contentEntryUid, containerSize) AS (
@@ -471,7 +339,7 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract suspend fun getRecursiveDownloadTotals(contentEntryUid: Long): DownloadJobSizeInfo?
 
     @Query(ALL_ENTRIES_RECURSIVE_SQL)
-    abstract fun getAllEntriesRecursively(contentEntryUid: Long): DataSourceFactory<Int, ContentEntryWithParentChildJoinAndMostRecentContainer>
+    abstract fun getAllEntriesRecursively(contentEntryUid: Long): PagingSource<Int, ContentEntryWithParentChildJoinAndMostRecentContainer>
 
     @Query(ALL_ENTRIES_RECURSIVE_SQL)
     abstract fun getAllEntriesRecursivelyAsList(contentEntryUid: Long): List<ContentEntryWithParentChildJoinAndMostRecentContainer>
@@ -481,7 +349,6 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                SET ceInactive = :ceInactive,
                    contentEntryLct = :changedTime        
             WHERE ContentEntry.contentEntryUid = :contentEntryUid""")
-    @JsName("updateContentEntryInActive")
     abstract fun updateContentEntryInActive(
         contentEntryUid: Long,
         ceInactive: Boolean,
@@ -493,7 +360,6 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
            SET contentTypeFlag = :contentFlag,
                contentEntryLct = :changedTime 
          WHERE ContentEntry.contentEntryUid = :contentEntryUid""")
-    @JsName("updateContentEntryContentFlag")
     abstract fun updateContentEntryContentFlag(
         contentFlag: Int,
         contentEntryUid: Long,
@@ -511,15 +377,12 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract fun insertWithReplace(entry: ContentEntry)
 
     @Query("SELECT ContentEntry.*, Language.* FROM ContentEntry LEFT JOIN Language ON Language.langUid = ContentEntry.primaryLanguageUid")
-    abstract fun findAllLive(): LiveData<List<ContentEntryWithLanguage>>
-
-    /** Check if a permission is present on a specific entity e.g. updateState/modify etc */
-    @Query("SELECT EXISTS(SELECT 1 FROM ContentEntry WHERE " +
-            "ContentEntry.contentEntryUid = :contentEntryUid AND :accountPersonUid IN ($ENTITY_PERSONS_WITH_PERMISSION))")
-    abstract suspend fun personHasPermissionWithContentEntry(accountPersonUid: Long, contentEntryUid: Long,
-                                                      permission: Long) : Boolean
+    abstract fun findAllLive(): Flow<List<ContentEntryWithLanguage>>
 
 
+    /**
+     * Set any ContentEntry that was created by a given ContentJob to be inactive.
+     */
     @Query("""
         UPDATE ContentEntry
            SET ceInactive = :inactive,

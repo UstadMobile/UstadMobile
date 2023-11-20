@@ -173,20 +173,20 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
 
 
 
-            List{
-
+            List {
                 ListItem {
+                    ListItemButton {
+                        onClick = {
+                            props.onClickNewItemFilter()
+                        }
 
-                    onClick = {
-                        props.onClickNewItemFilter()
-                    }
+                        ListItemIcon {
+                            Add()
+                        }
 
-                    ListItemIcon {
-                        + Add.create()
-                    }
-
-                    ListItemText {
-                        primary = ReactNode(props.uiState.createNewFilter)
+                        ListItemText {
+                            primary = ReactNode(props.uiState.createNewFilter)
+                        }
                     }
                 }
 

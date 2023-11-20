@@ -5,12 +5,9 @@ import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.locale.StringProvider
-import com.ustadmobile.lib.db.entities.Schedule.Companion.SCHEDULE_FREQUENCY_WEEKLY
-import com.ustadmobile.lib.db.entities.Schedule.Companion.DAY_MONDAY
-import com.ustadmobile.core.util.MS_PER_HOUR
-import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditUiState
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
+import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.common.input
@@ -32,6 +29,8 @@ import com.ustadmobile.util.ext.onTextChange
 import web.cssom.Cursor
 import js.core.jso
 import com.ustadmobile.mui.common.inputCursor
+import com.ustadmobile.mui.components.UstadStandardContainer
+import com.ustadmobile.mui.components.UstadTextField
 import com.ustadmobile.wrappers.quill.ReactQuill
 
 const val COURSE_BLOCK_DRAG_CLASS = "dragging_course_block"
@@ -43,8 +42,6 @@ external interface ClazzEditScreenProps : Props {
     var onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit
 
     var onCourseBlockMoved: (from: Int, to: Int) -> Unit
-
-    var onClickSchool: () -> Unit
 
     var onClickTimezone: () -> Unit
 
@@ -62,17 +59,17 @@ external interface ClazzEditScreenProps : Props {
 
     var onClickTerminology: () -> Unit
 
-    var onClickHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit
+    var onClickHideBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit
 
-    var onClickUnHideBlockPopupMenu: (CourseBlockWithEntity) -> Unit
+    var onClickUnHideBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit
 
-    var onClickIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit
+    var onClickIndentBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit
 
-    var onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity) -> Unit
+    var onClickUnIndentBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit
 
-    var onClickDeleteBlockPopupMenu: (CourseBlockWithEntity) -> Unit
+    var onClickDeleteBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit
 
-    var onClickEditCourseBlock: (CourseBlockWithEntity) -> Unit
+    var onClickEditCourseBlock: (CourseBlockAndEditEntities) -> Unit
 
 }
 
@@ -80,7 +77,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
 
     val strings: StringProvider = useStringProvider()
 
-    Container {
+    UstadStandardContainer {
         Stack {
             spacing = responsive(2)
 
@@ -88,7 +85,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 + strings[MR.strings.basic_details]
             }
 
-            TextField {
+            UstadTextField {
                 value = props.uiState.entity?.clazzName ?: ""
                 label = ReactNode(strings[MR.strings.name_key])
                 id = "clazz_name"
@@ -191,7 +188,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
 
                     props.uiState.courseBlockList.forEach { courseBlockItem ->
                         CourseBlockListItem {
-                            courseBlock = courseBlockItem
+                            block = courseBlockItem
                             fieldsEnabled = props.uiState.fieldsEnabled
                             onClickEditCourseBlock = props.onClickEditCourseBlock
                             onClickHideBlockPopupMenu = props.onClickHideBlockPopupMenu
@@ -244,7 +241,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 + strings[MR.strings.course_setup]
             }
 
-            TextField {
+            UstadTextField {
                 sx {
                     input {
                         cursor = Cursor.pointer
@@ -268,7 +265,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 enabled = props.uiState.fieldsEnabled
             }
 
-            TextField {
+            UstadTextField {
                 sx {
                     inputCursor = Cursor.pointer
                 }
@@ -330,59 +327,3 @@ val ClazzEditScreen = FC<Props> {
 
 }
 
-
-val ClazzEditScreenPreview = FC<Props> {
-
-    var uiStateVar : ClazzEditUiState by useState {
-        ClazzEditUiState(
-            entity = ClazzWithHolidayCalendarAndSchoolAndTerminology().apply {
-
-            },
-            clazzSchedules = listOf(
-                Schedule().apply {
-                    sceduleStartTime = ((13 * MS_PER_HOUR) + (30 * MS_PER_MIN)).toLong()
-                    scheduleEndTime = ((15 * MS_PER_HOUR) + (30 * MS_PER_MIN)).toLong()
-                    scheduleFrequency = SCHEDULE_FREQUENCY_WEEKLY
-                    scheduleDay = DAY_MONDAY
-                }
-            ),
-            courseBlockList = listOf(
-                CourseBlockWithEntity().apply {
-                    cbTitle = "Module"
-                    cbHidden = true
-                    cbType = CourseBlock.BLOCK_MODULE_TYPE
-                    cbIndentLevel = 0
-                },
-                CourseBlockWithEntity().apply {
-                    cbTitle = "Content"
-                    cbHidden = false
-                    cbType = CourseBlock.BLOCK_CONTENT_TYPE
-                    entry = ContentEntry().apply {
-                        contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
-                    }
-                    cbIndentLevel = 1
-                },
-                CourseBlockWithEntity().apply {
-                    cbTitle = "Assignment"
-                    cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
-                    cbHidden = false
-                    cbIndentLevel = 1
-                },
-            ),
-            fieldsEnabled = true
-        )
-    }
-
-    ClazzEditScreenComponent2 {
-        uiState = uiStateVar
-
-        onCourseBlockMoved = {fromIndex, toIndex ->
-            uiStateVar = uiStateVar.copy(
-                courseBlockList = uiStateVar.courseBlockList.toMutableList().apply {
-                    add(toIndex, removeAt(fromIndex))
-                }.toList()
-            )
-        }
-    }
-
-}

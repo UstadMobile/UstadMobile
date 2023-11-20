@@ -25,7 +25,7 @@ data class CourseBlockEditUiState(
 
     val completionCriteriaOptions: List<CompletionCriteria> = emptyList(),
 
-    val fieldsEnabled: Boolean = true,
+    val fieldsEnabled: Boolean = false,
 
     val caHideUntilDateError: String? = null,
 
@@ -67,7 +67,7 @@ class CourseBlockEditViewModel(
     savedStateHandle: UstadSavedStateHandle,
 ): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
-    private val _uiState = MutableStateFlow(CourseBlockEditUiState(fieldsEnabled = false))
+    private val _uiState = MutableStateFlow(CourseBlockEditUiState())
 
     val uiState: Flow<CourseBlockEditUiState> = _uiState.asStateFlow()
     init {
@@ -75,11 +75,6 @@ class CourseBlockEditViewModel(
             prev.copy(
                 hideBottomNavigation = true,
                 userAccountIconVisible = false,
-                actionBarButtonState = ActionBarButtonUiState(
-                    visible = true,
-                    text = systemImpl.getString(MR.strings.done),
-                    onClick = this::onClickSave,
-                )
             )
         }
 
@@ -115,7 +110,12 @@ class CourseBlockEditViewModel(
                         CourseBlock.BLOCK_DISCUSSION_TYPE ->
                             createEditTitle(MR.strings.add_discussion, MR.strings.edit_discussion)
                         else -> ""
-                    }
+                    },
+                    actionBarButtonState = ActionBarButtonUiState(
+                        visible = true,
+                        text = systemImpl.getString(MR.strings.done),
+                        onClick = this@CourseBlockEditViewModel::onClickSave,
+                    )
                 )
             }
 

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.test.viewmodeltest
 
+import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
@@ -17,14 +18,11 @@ import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.isLazyInitialized
-import com.ustadmobile.core.viewmodel.ViewModel
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.randomUuid
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.util.test.nav.TestUstadSavedStateHandle
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
@@ -32,7 +30,6 @@ import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockWebServer
 import org.kodein.di.*
 import org.mockito.kotlin.spy
-import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.nio.file.Files
 import kotlin.random.Random
@@ -41,11 +38,17 @@ import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.util.test.nav.TestUstadNavController
+import moe.tlaster.precompose.viewmodel.ViewModel
+import moe.tlaster.precompose.viewmodel.viewModelScope
+import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
+import nl.adaptivity.xmlutil.serialization.XML
+import nl.adaptivity.xmlutil.serialization.XmlConfig
 import org.mockito.kotlin.mock
 
 
 typealias TestViewModelFactory<T> = ViewModelTestBuilder<T>.() -> T
 
+@OptIn(ExperimentalXmlUtilApi::class)
 class ViewModelTestBuilder<T: ViewModel> internal constructor(
     private val repoConfig: TestRepoConfig,
 ) {
@@ -54,15 +57,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
 
     private lateinit var viewModelFactoryVar: TestViewModelFactory<T>
 
-    private val endpointScope = EndpointScope()
-
-    private val testStartTime = systemTimeInMillis()
-
-    private val xppFactory: XmlPullParserFactory by lazy {
-        XmlPullParserFactory.newInstance().also {
-            it.isNamespaceAware = true
-        }
-    }
+    val endpointScope = EndpointScope()
 
     /**
      * Temporary directory that can be used by a test. It will be deleted when the test is finished
@@ -102,6 +97,9 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
     val json: Json
         get() = di.direct.instance()
 
+    private val dbsToClose = mutableListOf<UmAppDatabase>()
+
+    @ExperimentalXmlUtilApi
     private var diVar = DI {
         import(CommonJvmDiModule)
 
@@ -117,11 +115,19 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         }
 
         bind<UstadAccountManager>() with singleton {
-            spy(UstadAccountManager(instance(), Any(), di))
+            spy(UstadAccountManager(instance(), di))
         }
 
         bind<UstadMobileSystemImpl>() with singleton {
-            spy(UstadMobileSystemImpl(xppFactory, tempDir))
+            spy(UstadMobileSystemImpl(tempDir))
+        }
+
+        bind<XML>() with singleton {
+            XML {
+                defaultPolicy {
+                    unknownChildHandler = XmlConfig.IGNORING_UNKNOWN_CHILD_HANDLER
+                }
+            }
         }
 
         bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
@@ -132,14 +138,16 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
             Pbkdf2Params(iterations = 10000, keyLength = 512)
         }
 
+        bind<AuthManager>() with scoped(endpointScope).singleton {
+            AuthManager(context, di)
+        }
+
         bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
-            val sanitizedName = sanitizeDbNameFromUrl(context.url)
-            val dbUrl = "jdbc:sqlite:build/tmp/$sanitizedName.sqlite"
-            val attachmentsDir = File(tempDir, "attachments-$testStartTime")
+            val dbUrl = "jdbc:sqlite::memory:"
             val nodeIdAndAuth: NodeIdAndAuth = instance()
             spy(
                 DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl,
-                    attachmentsDir.absolutePath)
+                    nodeId = nodeIdAndAuth.nodeId)
                 .addSyncCallback(nodeIdAndAuth)
                 .addCallback(ContentJobItemTriggersCallback())
                 .addMigrations(*migrationList().toTypedArray())
@@ -153,7 +161,9 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
                         authSalt = randomString(20)
                     })
                 }
-            )
+            ).also {
+                dbsToClose.add(it)
+            }
         }
 
         if(repoConfig.useDbAsRepo) {
@@ -173,10 +183,6 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         bind<NavResultReturner>() with singleton {
             spy(NavResultReturnerImpl())
         }
-    }
-
-    init {
-
     }
 
     @ViewModelDslMarker
@@ -226,7 +232,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         db.withDoorTransactionAsync {
             val personInDb = db.insertPersonAndGroup(person)
             val session = accountManager.addSession(personInDb, endpoint.url, "dummypassword")
-            accountManager.activeSession = session
+            accountManager.currentUserSession = session
         }
 
         return person
@@ -248,10 +254,15 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         if(this::mockWebServer.isLazyInitialized) {
             mockWebServer.shutdown()
         }
-        endpointScope.activeEndpointUrls.forEach {
 
+        dbsToClose.forEach {
+            try {
+                it.close()
+            }catch(e: Exception) {
+                //do nothing - can happen if there is any pending database stuff going on
+            }
         }
-
+        dbsToClose.clear()
     }
 
 }

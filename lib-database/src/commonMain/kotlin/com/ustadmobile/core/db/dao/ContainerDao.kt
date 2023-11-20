@@ -7,7 +7,7 @@ import androidx.room.Query
 import com.ustadmobile.core.db.dao.ContainerDaoCommon.CONTAINER_READY_WHERE_CLAUSE
 import com.ustadmobile.core.db.dao.ContainerDaoCommon.FROM_CONTAINER_WHERE_MOST_RECENT_AND_READY
 import com.ustadmobile.core.db.dao.ContainerDaoCommon.SELECT_MOST_RECENT_READY_CONTAINER
-import com.ustadmobile.door.lifecycle.LiveData
+import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerUidAndMimeType
@@ -18,49 +18,6 @@ import com.ustadmobile.lib.db.entities.UserSession
 @Repository
 expect abstract class ContainerDao : BaseDao<Container> {
 
-    @Query("""
-         REPLACE INTO ContainerReplicate(containerPk, containerDestination)
-          SELECT DISTINCT Container.containerUid AS containerPk,
-                 :newNodeId AS containerDestination
-            FROM Container
-           WHERE Container.cntLct != COALESCE(
-                 (SELECT containerVersionId
-                    FROM ContainerReplicate
-                   WHERE containerPk = Container.containerUid
-                     AND containerDestination = :newNodeId), 0) 
-          /*psql ON CONFLICT(containerPk, containerDestination) DO UPDATE
-                 SET containerPending = true
-          */       
-    """)
-    @ReplicationRunOnNewNode
-    @ReplicationCheckPendingNotificationsFor([Container::class])
-    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
-
-    @Query("""
- REPLACE INTO ContainerReplicate(containerPk, containerDestination)
-  SELECT DISTINCT Container.containerUid AS containerUid,
-         UserSession.usClientNodeId AS containerDestination
-    FROM ChangeLog
-         JOIN Container
-             ON ChangeLog.chTableId = ${Container.TABLE_ID}
-                AND ChangeLog.chEntityPk = Container.containerUid
-         JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-   WHERE UserSession.usClientNodeId != (
-         SELECT nodeClientId 
-           FROM SyncNode
-          LIMIT 1)
-     AND Container.cntLct != COALESCE(
-         (SELECT containerVersionId
-            FROM ContainerReplicate
-           WHERE containerPk = Container.containerUid
-             AND containerDestination = UserSession.usClientNodeId), 0)
- /*psql ON CONFLICT(containerPk, containerDestination) DO UPDATE
-     SET containerPending = true
-  */               
-    """)
-    @ReplicationRunOnChange([Container::class])
-    @ReplicationCheckPendingNotificationsFor([Container::class])
-    abstract suspend fun replicateOnChange()
 
     @Insert
     abstract suspend fun insertListAsync(containerList: List<Container>)
@@ -107,7 +64,7 @@ expect abstract class ContainerDao : BaseDao<Container> {
                                         WHERE ContainerEntry.ceContainerUid = Container.containerUid)   
                       ORDER BY cntLastModified DESC LIMIT 1)
     """)
-    abstract fun hasContainerWithFilesToDownload(contentEntryUid: Long): LiveData<Boolean>
+    abstract fun hasContainerWithFilesToDownload(contentEntryUid: Long): Flow<Boolean>
 
     @Query("""
             SELECT Container.*

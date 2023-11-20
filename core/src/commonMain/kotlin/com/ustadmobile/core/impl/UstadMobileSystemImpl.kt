@@ -52,10 +52,9 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
      * @param args (Optional) Hahstable of arguments for the new view (e.g. catalog/container url etc)
      * @param context System context object
      */
+    @Deprecated("This is replaced with using the navigation controller")
     override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int,
                     ustadGoOptions: UstadGoOptions)
-
-    fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any)
 
     /**
      * Must provide the system's default locale (e.g. en_US.UTF-8)

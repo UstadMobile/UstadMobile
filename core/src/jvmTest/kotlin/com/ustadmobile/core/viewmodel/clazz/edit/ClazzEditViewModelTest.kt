@@ -3,29 +3,36 @@ package com.ustadmobile.core.viewmodel.clazz.edit
 import app.cash.turbine.test
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.flow.doorFlow
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.util.test.initNapierLog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.junit.Assert
 import org.kodein.di.*
 import org.mockito.kotlin.mock
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 
-class ClazzEditViewModelTest {
+
+class ClazzEditViewModelTest : AbstractMainDispatcherTest() {
 
     @Test
     fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalled_thenShouldSaveToDatabase() {
+        initNapierLog()
         testViewModel<ClazzEditViewModel> {
             viewModelFactory {
                 ClazzEditViewModel(di, savedStateHandle)
@@ -35,6 +42,16 @@ class ClazzEditViewModelTest {
                 bind<ClazzLogCreatorManager>() with singleton {
                     mock { }
                 }
+
+                bind<ImportContentUseCase>() with scoped(endpointScope).singleton {
+                    mock { }
+                }
+            }
+
+            val readyAppUiState = withTimeout(5000) {
+                viewModel.appUiState.filter {
+                    it.actionBarButtonState.visible
+                }.first()
             }
 
             viewModel.uiState.test(timeout = 5.seconds) {
@@ -44,7 +61,7 @@ class ClazzEditViewModelTest {
                     clazzDesc = "Test description"
                 })
 
-                viewModel.onClickSave()
+                readyAppUiState.actionBarButtonState.onClick()
 
                 val db = di.direct.on(activeEndpoint).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
 
@@ -92,6 +109,10 @@ class ClazzEditViewModelTest {
 
             extendDi {
                 bind<ClazzLogCreatorManager>() with singleton {
+                    mock { }
+                }
+
+                bind<ImportContentUseCase>() with scoped(endpointScope).singleton {
                     mock { }
                 }
             }

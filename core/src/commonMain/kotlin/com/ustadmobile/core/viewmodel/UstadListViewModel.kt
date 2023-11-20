@@ -7,7 +7,7 @@ import com.ustadmobile.core.util.EventCollator2
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.paging.PagingSource
+import app.cash.paging.PagingSource
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
@@ -16,6 +16,17 @@ import org.kodein.di.DI
 typealias ListPagingSourceFactory<T> = () -> PagingSource<Int, T>
 
 /**
+ *
+ * Base class for list view models.
+ *
+ * Note: The UiState PagingSourceFactory needs to stay the same even when parameters change. If the
+ * PagingSourceFactory changes, then we need a new Pager (Android) or QueryKey (JS). That will
+ * cause flickering when the user searches, reorders, changes filtering chips etc. The list ViewModel
+ * will therefor create a single PagingSourceFactory. When the PagingSourceFactory is invoked the
+ * ViewModel will get a reference to the PagingSource that was created. That PagingSource will be
+ * invalidated by the ViewModel if input parameters change (e.g. search text, sorting, filtering
+ * options, etc).
+ *
  * @param S the UI State type
  */
 abstract class UstadListViewModel<S>(
@@ -200,6 +211,12 @@ abstract class UstadListViewModel<S>(
                 selectStringResource
             }
         )
+    }
+
+    companion object {
+
+        const val ARG_LISTMODE = "listMode"
+
     }
 
 

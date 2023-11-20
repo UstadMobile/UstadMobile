@@ -90,7 +90,7 @@ val AddCourseBlockDialog = FC<AddCourseDialogProps> { props ->
                     }
 
                     ListItemText {
-                        primary = ReactNode(strings[MR.strings.assignments])
+                        primary = ReactNode(strings[MR.strings.assignment])
                         secondary = ReactNode(strings[MR.strings.add_assignment_block_content_desc])
                     }
                 }

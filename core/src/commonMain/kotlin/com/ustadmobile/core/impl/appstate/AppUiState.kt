@@ -18,4 +18,5 @@ data class AppUiState(
     val userAccountIconVisible: Boolean = true,
     val searchState: AppBarSearchUiState = AppBarSearchUiState(),
     val actionBarButtonState: ActionBarButtonUiState = ActionBarButtonUiState(),
+    val overflowItems: List<OverflowItem> = emptyList(),
 )

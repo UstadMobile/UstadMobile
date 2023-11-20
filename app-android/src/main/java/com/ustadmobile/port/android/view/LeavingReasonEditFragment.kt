@@ -29,7 +29,6 @@ import com.ustadmobile.core.R as CR
 
 class LeavingReasonEditFragment: UstadBaseMvvmFragment() {
 
-    private val viewModel: LeavingReasonEditViewModel by ustadViewModels(::LeavingReasonEditViewModel)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,7 +42,7 @@ class LeavingReasonEditFragment: UstadBaseMvvmFragment() {
 
             setContent {
                 MdcTheme {
-                    LeavingReasonEditScreen(viewModel)
+
                 }
             }
         }

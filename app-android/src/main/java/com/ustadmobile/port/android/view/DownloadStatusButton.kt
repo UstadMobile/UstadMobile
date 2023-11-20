@@ -9,7 +9,6 @@ import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.JobStatus
-import com.ustadmobile.core.util.ext.isStatusPaused
 import com.ustadmobile.core.R as CR
 
 /**
@@ -31,10 +30,6 @@ class DownloadStatusButton : RelativeLayout {
             currentDownloadStatus = value ?: -1
 
             when {
-                statusChanged && currentDownloadStatus.isStatusPaused() -> {
-                    setImageResource(R.drawable.ic_baseline_pause_24)
-                    contentDescription = context.getString(CR.string.download_entry_state_paused)
-                }
 
                 statusChanged && currentDownloadStatus == JobStatus.COMPLETE -> {
                     setImageResource(R.drawable.ic_baseline_offline_pin_24)

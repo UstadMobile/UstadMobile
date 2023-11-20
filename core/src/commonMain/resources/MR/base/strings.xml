@@ -99,6 +99,10 @@
     <string name="no_video_file_found">No video file found</string>
     <string name="content_from_file">From file</string>
     <string name="content_from_link">From link</string>
+
+    <string name="import_from_file">Import from file</string>
+    <string name="import_from_link">Import from link</string>
+
     <string-array name="content_source_option">
         <item>@string/content_from_file</item>
         <item>@string/content_from_link</item>
@@ -284,10 +288,18 @@
     <string name="no_account">You do not have an account?</string>
     <string name="enter_url">Enter Url</string>
     <string name="invalid_link">Invalid link</string>
+    <string name="invalid_file">Invalid file</string>
     <string name="import_link_content_not_supported">Content not supported</string>
+
+    <!--
+    Error message that is displayed to users when they upload a file type that is not supported.
+    %1$s will be replaced with a list of the file types that are supported by the system
+    -->
+    <string name="unsupported_file_type">Unsupported file type. Supported types are: %1$s</string>
+
     <string name="import_link_big_size">File size too big</string>
     <string name="import_link_error">Import Error</string>
-    <string name="supported_link">Supported link types: Google Drive (folder or file) and plain HTTP links</string>
+    <string name="supported_link">Supported link types: plain HTTP links to supported content (H5P, xAPI, PDF, Video/MP4)</string>
     <string name="offline_sharing_enable_bluetooth_prompt">Offline sharing requires Bluetooth</string>
     <string name="offline_sharing_enable_wifi_promot">Offline sharing requires WiFi to be switched on</string>
     <string name="enable">Enable</string>
@@ -606,6 +618,7 @@
     <string name="schools">Schools</string>
     <!-- Assignments e.g. homework for a class -->
     <string name="assignments">Assignments</string>
+    <string name="assignment">Assignment</string>
     <string name="none_key">None</string>
     <string name="instructions_for_students">Instructions for students</string>
     <string name="not_started">Not started</string>
@@ -1604,5 +1617,21 @@
 
     <!-- Caption shown underneath required fields -->
     <string name="required">* Required</string>
+
+    <!-- Used as a caption for buttons that allow the user to expand something e.g. to show more details -->
+    <string name="expand">Expand</string>
+
+    <!-- Used as a caption for buttons that allow the user to collapse something e.g. hide details - opposite of expand -->
+    <string name="collapse">Collapse</string>
+
+    <!--
+    Used when something is not deleted, but removed from a particular device e.g. when an account
+    is removed from the device, it is not deleted, just removed from a particular browser/phone.
+    -->
+    <string name="remove">Remove</string>
+
+    <string name="table_of_contents">Table of contents</string>
+
+    <string name="select_date">Select Date</string>
 
 </resources>

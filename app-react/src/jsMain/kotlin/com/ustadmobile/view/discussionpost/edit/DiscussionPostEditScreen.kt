@@ -9,7 +9,8 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.ThemeContext
-import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.mui.components.UstadStandardContainer
+import com.ustadmobile.mui.components.UstadTextField
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.wrappers.quill.ReactQuill
 import web.cssom.px
@@ -33,14 +34,12 @@ val DiscussionPostEditComponent2 = FC<DiscussionPostEditProps> { props ->
 
     val theme by useRequiredContext(ThemeContext)
 
-    Container {
-        maxWidth = "lg"
-
+    UstadStandardContainer {
         Stack {
-            direction = responsive(mui.material.StackDirection.column)
+            direction = responsive(StackDirection.column)
             spacing = responsive(10.px)
 
-            TextField {
+            UstadTextField {
                 value = props.uiState.discussionPost?.discussionPostTitle ?: ""
                 id = "discussion_post_title"
                 label = ReactNode(strings[MR.strings.title])

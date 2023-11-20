@@ -2,23 +2,24 @@ package com.ustadmobile.core.viewmodel.clazzassignment.edit
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.peerreviewallocation.UpdatePeerReviewAllocationUseCase
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.util.ext.asCourseBlockWithEntity
 import com.ustadmobile.core.util.ext.whenSubscribed
-import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.CourseBlockViewModelConstants
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
+import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ext.shallowCopyWithEntity
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -27,12 +28,11 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.encodeToString
 import org.kodein.di.DI
 import org.kodein.di.instance
-import com.ustadmobile.core.MR
 
 @kotlinx.serialization.Serializable
 data class ClazzAssignmentEditUiState(
 
-    val fieldsEnabled: Boolean = true,
+    val fieldsEnabled: Boolean = false,
 
     val markingTypeEnabled: Boolean = true,
 
@@ -42,13 +42,11 @@ data class ClazzAssignmentEditUiState(
 
     val timeZone: String? = null,
 
-    val entity: CourseBlockWithEntity? = null,
+    val entity: CourseBlockAndEditEntities? = null,
 
     val courseTerminology: CourseTerminology? = null,
 
     val submissionRequiredError: String? = null,
-
-    val sizeLimitError: String? = null,
 
     val courseBlockEditUiState: CourseBlockEditUiState = CourseBlockEditUiState(
         completionCriteriaOptions = ASSIGNMENT_COMPLETION_CRITERIAS
@@ -64,6 +62,15 @@ data class ClazzAssignmentEditUiState(
     val fileSubmissionVisible: Boolean
         get()  = entity?.assignment?.caRequireFileSubmission == true
 
+    //Set fields enabled on both the assignment ui state and the courseblockedit state
+    fun copyWithFieldsEnabledSet(
+        fieldsEnabled: Boolean
+    ) = copy(
+        fieldsEnabled = fieldsEnabled,
+        courseBlockEditUiState = courseBlockEditUiState.copy(
+            fieldsEnabled = fieldsEnabled
+        )
+    )
 
     companion object {
 
@@ -79,10 +86,10 @@ class ClazzAssignmentEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
     val peerReviewAllocationUseCaseFactory: (UmAppDatabase, UstadMobileSystemImpl)
-    -> UpdatePeerReviewAllocationUseCase = { db, systemImpl ->
+        -> UpdatePeerReviewAllocationUseCase = { db, systemImpl ->
         UpdatePeerReviewAllocationUseCase(db, systemImpl)
     }
-): UstadEditViewModel(di, savedStateHandle, ClazzAssignmentEditView.VIEW_NAME) {
+): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(ClazzAssignmentEditUiState())
 
@@ -97,40 +104,35 @@ class ClazzAssignmentEditViewModel(
                 userAccountIconVisible = false,
                 loadingState = LoadingUiState.INDETERMINATE,
                 title = createEditTitle(MR.strings.new_assignment, MR.strings.edit_assignment),
-                actionBarButtonState = ActionBarButtonUiState(
-                    visible = true,
-                    text = systemImpl.getString(MR.strings.done),
-                    onClick = this::onClickSave,
-                )
             )
-        }
-
-        _uiState.update { prev ->
-            prev.copy(fieldsEnabled = false)
         }
 
         viewModelScope.launch {
             loadEntity(
-                serializer = CourseBlockWithEntity.serializer(),
+                serializer = CourseBlockAndEditEntities.serializer(),
                 onLoadFromDb = { null  }, //does not load from db, always via json
                 makeDefault = {
                     val assignmentUid = activeDb.doorPrimaryKeyManager.nextId(ClazzAssignment.TABLE_ID)
-                    CourseBlockWithEntity().apply {
-                        cbUid = activeDb.doorPrimaryKeyManager.nextId(CourseBlock.TABLE_ID)
-                        cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
-                        cbEntityUid = assignmentUid
-                        cbCompletionCriteria = ClazzAssignment.COMPLETION_CRITERIA_GRADED
+                    CourseBlockAndEditEntities(
+                        courseBlock = CourseBlock().apply {
+                            cbUid = activeDb.doorPrimaryKeyManager.nextId(CourseBlock.TABLE_ID)
+                            cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                            cbEntityUid = assignmentUid
+                            cbCompletionCriteria = ClazzAssignment.COMPLETION_CRITERIA_GRADED
+                        },
                         assignment = ClazzAssignment().apply {
                             caUid = assignmentUid
                             caClazzUid = savedStateHandle[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
                         }
-                    }
+                    )
                 },
                 uiUpdate = {
                     _uiState.update { prev ->
                         prev.copy(
                             entity = it,
-                            courseBlockEditUiState = prev.courseBlockEditUiState.copy(courseBlock = it),
+                            courseBlockEditUiState = prev.courseBlockEditUiState.copy(
+                                courseBlock = it?.courseBlock
+                            ),
                         )
                     }
                 }
@@ -142,8 +144,19 @@ class ClazzAssignmentEditViewModel(
                 }
             }
 
+
             _uiState.update { prev ->
-                prev.copy(fieldsEnabled = true)
+                prev.copyWithFieldsEnabledSet(fieldsEnabled = true)
+            }
+
+            _appUiState.update { prev ->
+                prev.copy(
+                    actionBarButtonState = ActionBarButtonUiState(
+                        visible = true,
+                        text = systemImpl.getString(MR.strings.done),
+                        onClick = this@ClazzAssignmentEditViewModel::onClickSave,
+                    )
+                )
             }
 
             launch {
@@ -164,28 +177,32 @@ class ClazzAssignmentEditViewModel(
             launch {
                 navResultReturner.filteredResultFlowForKey(RESULT_KEY_HTML_DESC).collect { result ->
                     val descriptionHtml = result.result as? String ?: return@collect
-                    onCourseBlockChanged(_uiState.value.entity?.shallowCopyWithEntity {
-                        cbDescription = descriptionHtml
-                    })
+                    onCourseBlockChanged(
+                        _uiState.value.entity?.courseBlock?.shallowCopy {
+                            cbDescription = descriptionHtml
+                        }
+                    )
                 }
             }
 
             launch {
-                navResultReturner.filteredResultFlowForKey(RESULT_KEY_GROUPSET).collect {
-                    val groupSet = it.result as? CourseGroupSet ?: return@collect
+                navResultReturner.filteredResultFlowForKey(RESULT_KEY_GROUPSET).collect { result ->
+                    val groupSet = result.result as? CourseGroupSet ?: return@collect
 
                     val newState = _uiState.updateAndGet { prev ->
                         prev.copy(
-                            entity = prev.entity?.shallowCopyWithEntity {
-                                assignment?.caGroupUid = groupSet.cgsUid
+                            entity = prev.entity?.copy(
+                                assignment = prev.entity.assignment?.shallowCopy {
+                                    caGroupUid = groupSet.cgsUid
+                                },
                                 assignmentCourseGroupSetName = groupSet.takeIf { it.cgsUid != 0L }?.cgsName
-                            }
+                            )
                         )
                     }
 
                     scheduleEntityCommitToSavedState(
                         entity = newState.entity,
-                        serializer = CourseBlockWithEntity.serializer(),
+                        serializer = CourseBlockAndEditEntities.serializer(),
                         commitDelay = 200,
                     )
                 }
@@ -195,32 +212,27 @@ class ClazzAssignmentEditViewModel(
 
     fun onClickEditDescription() {
         navigateToEditHtml(
-            currentValue = _uiState.value.entity?.cbDescription,
+            currentValue = _uiState.value.entity?.courseBlock?.cbDescription,
             resultKey = RESULT_KEY_HTML_DESC
         )
     }
 
-    fun onAssignmentChanged(entity: ClazzAssignment?) {
+    fun onAssignmentChanged(assignment: ClazzAssignment?) {
         val newState = _uiState.updateAndGet { prev ->
             prev.copy(
-                entity = prev.entity?.shallowCopyWithEntity {
-                    assignment = entity
-                },
-                sizeLimitError = if(prev.sizeLimitError != null && entity?.caSizeLimit == prev.entity?.assignment?.caSizeLimit){
-                    prev.sizeLimitError
-                }else {
-                    null
-                },
+                entity = prev.entity?.copy(
+                    assignment = assignment,
+                ),
                 submissionRequiredError = if(prev.submissionRequiredError != null &&
-                    entity?.caRequireFileSubmission == false && !entity.caRequireTextSubmission
+                    assignment?.caRequireFileSubmission == false && !assignment.caRequireTextSubmission
                 ) {
                     prev.submissionRequiredError
                 }else {
                     null
                 },
                 reviewerCountError = if(prev.reviewerCountError != null &&
-                    entity?.caPeerReviewerCount == prev.entity?.assignment?.caPeerReviewerCount &&
-                    entity?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS
+                    assignment?.caPeerReviewerCount == prev.entity?.assignment?.caPeerReviewerCount &&
+                    assignment?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS
                 ) {
                     prev.reviewerCountError
                 }else {
@@ -231,31 +243,35 @@ class ClazzAssignmentEditViewModel(
 
         scheduleEntityCommitToSavedState(
             entity = newState.entity,
-            serializer = CourseBlockWithEntity.serializer(),
+            serializer = CourseBlockAndEditEntities.serializer(),
             commitDelay = 200,
         )
     }
 
-    fun onCourseBlockChanged(entity: CourseBlock?) {
+    fun onCourseBlockChanged(courseBlock: CourseBlock?) {
+        if(courseBlock == null) {
+            Napier.w("Change courseblock shoudl not really be null")
+            return
+        }
+
         val newState = _uiState.updateAndGet { prev ->
-            val prevBlock = prev.courseBlockEditUiState.courseBlock
+            val prevBlock = prev.entity?.courseBlock
 
             prev.copy(
-                entity = entity?.asCourseBlockWithEntity()?.also {
-                    it.assignment = prev.entity?.assignment
-                    it.assignmentCourseGroupSetName = prev.entity?.assignmentCourseGroupSetName
-                },
+                entity = prev.entity?.copy(
+                    courseBlock = courseBlock
+                ),
                 courseBlockEditUiState = prev.courseBlockEditUiState.copy(
-                    courseBlock = entity,
+                    courseBlock = courseBlock,
                     caMaxPointsError = updateErrorMessageOnChange(
                         prevFieldValue = prev.courseBlockEditUiState.courseBlock?.cbMaxPoints,
-                        currentFieldValue = entity?.cbMaxPoints,
+                        currentFieldValue = courseBlock.cbMaxPoints,
                         currentErrorMessage = prev.courseBlockEditUiState.caMaxPointsError
                     ),
                     caDeadlineError = if(
                         prev.courseBlockEditUiState.caDeadlineError != null &&
-                        prevBlock?.cbDeadlineDate == entity?.cbDeadlineDate &&
-                        prevBlock?.cbHideUntilDate == entity?.cbHideUntilDate
+                            prevBlock?.cbDeadlineDate == courseBlock.cbDeadlineDate &&
+                            prevBlock.cbHideUntilDate == courseBlock.cbHideUntilDate
                     ) {
                         prev.courseBlockEditUiState.caDeadlineError
                     }else {
@@ -263,8 +279,8 @@ class ClazzAssignmentEditViewModel(
                     },
                     caGracePeriodError = if(
                         prev.courseBlockEditUiState.caGracePeriodError != null &&
-                        prevBlock?.cbDeadlineDate == entity?.cbDeadlineDate &&
-                        prevBlock?.cbGracePeriodDate == entity?.cbGracePeriodDate
+                            prevBlock?.cbDeadlineDate == courseBlock.cbDeadlineDate &&
+                            prevBlock.cbGracePeriodDate == courseBlock.cbGracePeriodDate
                     ) {
                         prev.courseBlockEditUiState.caGracePeriodError
                     }else {
@@ -276,18 +292,17 @@ class ClazzAssignmentEditViewModel(
 
         scheduleEntityCommitToSavedState(
             entity = newState.entity,
-            serializer = CourseBlockWithEntity.serializer(),
+            serializer = CourseBlockAndEditEntities.serializer(),
             commitDelay = 200,
         )
     }
 
     private fun ClazzAssignmentEditUiState.hasErrors() : Boolean {
         return submissionRequiredError != null ||
-                courseBlockEditUiState.caMaxPointsError != null ||
-                courseBlockEditUiState.caDeadlineError != null ||
-                courseBlockEditUiState.caGracePeriodError != null ||
-                reviewerCountError != null ||
-                sizeLimitError != null
+            courseBlockEditUiState.caMaxPointsError != null ||
+            courseBlockEditUiState.caDeadlineError != null ||
+            courseBlockEditUiState.caGracePeriodError != null ||
+            reviewerCountError != null
     }
 
 
@@ -315,17 +330,11 @@ class ClazzAssignmentEditViewModel(
     }
 
     fun onClickSave() {
-
-//        if(loadingState == LoadingUiState.INDETERMINATE)
-//            return
-//
-//        loadingState = LoadingUiState.INDETERMINATE
-
         if(!_uiState.value.fieldsEnabled)
             return
 
         _uiState.update { prev ->
-            prev.copy(fieldsEnabled = false)
+            prev.copyWithFieldsEnabledSet(fieldsEnabled = false)
         }
 
         viewModelScope.launch {
@@ -374,14 +383,6 @@ class ClazzAssignmentEditViewModel(
                 }
             }
 
-            if(assignment.caSizeLimit !in 5..100){
-                _uiState.update { prev ->
-                    prev.copy(
-                        sizeLimitError = systemImpl.getString(MR.strings.size_limit_error)
-                    )
-                }
-            }
-
             var errorSnack: String? = null
 
             if(initState.entity?.assignment?.caGroupUid != assignment.caGroupUid &&
@@ -405,7 +406,7 @@ class ClazzAssignmentEditViewModel(
             }
 
             _uiState.update { prev ->
-                prev.copy(fieldsEnabled = true)
+                prev.copyWithFieldsEnabledSet(fieldsEnabled = true)
             }
 
             if(errorSnack != null) {
@@ -414,14 +415,6 @@ class ClazzAssignmentEditViewModel(
             }
 
             if(_uiState.value.hasErrors()) {
-
-                loadingState = LoadingUiState.NOT_LOADING
-                _uiState.update { prev ->
-                    prev.copy(
-                        fieldsEnabled = true
-                    )
-                }
-
                 return@launch
             }
 
@@ -441,9 +434,9 @@ class ClazzAssignmentEditViewModel(
 
                 _uiState.update { prev ->
                     prev.copy(
-                        entity = prev.entity?.shallowCopyWithEntity {
+                        entity = prev.entity?.copy(
                             assignmentPeerAllocations = newAllocations
-                        }
+                        )
                     )
                 }
             }
@@ -455,8 +448,8 @@ class ClazzAssignmentEditViewModel(
     companion object {
 
         const val RESULT_KEY_GROUPSET = "groupSet"
-        const val ATTACHMENT_LIMIT_MIN = 5
-        const val ATTACHMENT_LIMIT_MAX = 100
+
+        const val DEST_NAME = "CourseAssignmentEdit"
 
     }
 }

@@ -13,15 +13,20 @@ import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import com.ustadmobile.door.paging.PagingSource
+import app.cash.paging.PagingSource
+import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.viewmodel.clazzassignment.latestUniqueMarksByMarker
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.*
 import dev.icerock.moko.resources.StringResource
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -58,6 +63,12 @@ data class ClazzAssignmentSubmitterDetailUiState(
 
     val draftMark: CourseAssignmentMark? = null,
 
+    /**
+     * Whether or not the mark fields (e.g. score itself, comment, and button) are enabled. This is
+     * independent of comments
+     */
+    val markFieldsEnabled: Boolean = true,
+
     val markNextStudentVisible: Boolean =  true,
 
     val fieldsEnabled: Boolean = true,
@@ -92,13 +103,7 @@ data class ClazzAssignmentSubmitterDetailUiState(
         }
 
     private val latestUniqueMarksByMarker: List<CourseAssignmentMarkAndMarkerName>
-        get() = marks.filter { markWithMarker ->
-            val mostRecentTsForSubmitterUid = marks.filter {
-                it.courseAssignmentMark?.camMarkerSubmitterUid == markWithMarker.courseAssignmentMark?.camMarkerSubmitterUid
-            }.maxOf { it.courseAssignmentMark?.camLct ?: 0 }
-
-            markWithMarker.courseAssignmentMark?.camLct ==mostRecentTsForSubmitterUid
-        }
+        get() = marks.latestUniqueMarksByMarker()
 
     val averageScore: Float
         get() {
@@ -175,7 +180,6 @@ class ClazzAssignmentSubmitterDetailViewModel(
             submitterUid = submitterUid,
             assignmentUid = assignmentUid
         ).also {
-            lastPrivateCommentsPagingSource?.invalidate()
             lastPrivateCommentsPagingSource = it
         }
     }
@@ -188,7 +192,9 @@ class ClazzAssignmentSubmitterDetailViewModel(
                 prev.copy(
                     privateCommentsList = privateCommentsPagingSourceFactory,
                     activeUserPersonUid = activeUserPersonUid,
-                    draftMark = CourseAssignmentMark(),
+                    draftMark = CourseAssignmentMark().apply {
+                        camMark = (-1).toFloat()
+                    },
                 )
             }
 
@@ -196,9 +202,9 @@ class ClazzAssignmentSubmitterDetailViewModel(
                 val submitterName = if(submitterUid < CourseAssignmentSubmission.MIN_SUBMITTER_UID_FOR_PERSON) {
                     systemImpl.getString(MR.strings.group) + " " + submitterUid
                 }else {
-                    activeRepo.personDao.getNamesByUid(submitterUid)?.let {
-                        "${it.firstNames} ${it.lastName}"
-                    }
+                    activeRepo.personDao.getNamesByUid(submitterUid).filter {
+                        it?.firstNames != null
+                    }.first().let {  "${it?.firstNames} ${it?.lastName}" }
                 }
 
                 _appUiState.update { prev ->
@@ -269,7 +275,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
         loadingState = LoadingUiState.INDETERMINATE
         viewModelScope.launch {
             try {
-                activeDb.commentsDao.insertAsync(Comments().apply {
+                activeRepo.commentsDao.insertAsync(Comments().apply {
                     commentSubmitterUid = submitterUid
                     commentsPersonUid = activeUserPersonUid
                     commentsEntityUid = assignmentUid
@@ -279,7 +285,6 @@ class ClazzAssignmentSubmitterDetailViewModel(
                 _uiState.update { prev ->
                     prev.copy(newPrivateCommentText = "")
                 }
-                lastPrivateCommentsPagingSource?.invalidate()
             }finally {
                 loadingState = LoadingUiState.NOT_LOADING
             }
@@ -300,32 +305,42 @@ class ClazzAssignmentSubmitterDetailViewModel(
     }
 
     fun onClickSubmitMark() {
-        if(loadingState == LoadingUiState.INDETERMINATE)
+        if(!_uiState.value.markFieldsEnabled)
             return
-
 
         val draftMark = _uiState.value.draftMark ?: return
         val submissions = _uiState.value.submissionList // note: this would be better to check by making it nullable
         val courseBlock = _uiState.value.courseBlock ?: return
 
-        if(draftMark.camMark < 0) {
+        if(draftMark.camMark == (-1).toFloat()) {
             _uiState.update { prev ->
-                prev.copy(submitMarkError = systemImpl.getString(MR.strings.score_greater_than_zero))
+                prev.copy(
+                    submitMarkError = systemImpl.getString(MR.strings.field_required_prompt),
+                )
+            }
+            return
+        }else if(draftMark.camMark < 0) {
+            _uiState.update { prev ->
+                prev.copy(
+                    submitMarkError = systemImpl.getString(MR.strings.score_greater_than_zero),
+                )
             }
             return
         }else if(draftMark.camMark > courseBlock.cbMaxPoints){
             _uiState.update { prev ->
-                prev.copy(submitMarkError = systemImpl.getString(MR.strings.too_high))
+                prev.copy(
+                    submitMarkError = systemImpl.getString(MR.strings.too_high),
+                )
             }
             return
         }
 
-        loadingState = LoadingUiState.INDETERMINATE
+        _uiState.update { prev -> prev.copy(markFieldsEnabled = false) }
 
         viewModelScope.launch {
             try {
                 submitMarkUseCase(
-                    db = activeDb,
+                    repo = activeRepo,
                     activeUserPersonUid = activeUserPersonUid,
                     assignmentUid = assignmentUid,
                     submitterUid = submitterUid,
@@ -336,13 +351,16 @@ class ClazzAssignmentSubmitterDetailViewModel(
 
                 _uiState.update { prev ->
                     prev.copy(
-                        draftMark = CourseAssignmentMark(),
+                        draftMark = CourseAssignmentMark().apply {
+                            camMark = (-1).toFloat()
+                        },
                     )
                 }
             }catch(e: Exception) {
-                //nothing yet
+                snackDispatcher.showSnackBar(Snack("Error: ${e.message}"))
+                Napier.w("Exception submitting mark:", e)
             }finally {
-                loadingState = LoadingUiState.NOT_LOADING
+                _uiState.update { prev -> prev.copy(markFieldsEnabled = true) }
             }
         }
     }

@@ -81,10 +81,9 @@ object ContentEntryDaoCommon {
             SELECT * FROM ContentEntry_recursive"""
 
     const val ENTRY_WITH_CONTAINER_QUERY = """
-            SELECT ContentEntry.*, Container.* FROM ContentEntry LEFT 
-                JOIN Container ON Container.containerUid = (
-                    SELECT containerUid FROM Container WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1) 
-            WHERE ContentEntry.contentEntryUid=:entryUuid
+            SELECT ContentEntry.*
+              FROM ContentEntry
+             WHERE ContentEntry.contentEntryUid = :entryUuid
             """
 
 

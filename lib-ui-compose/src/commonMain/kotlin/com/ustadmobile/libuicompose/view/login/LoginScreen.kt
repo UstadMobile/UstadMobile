@@ -10,15 +10,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.contentColorFor
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,12 +27,16 @@ import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.components.UstadPasswordField
 import com.ustadmobile.core.MR
 import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.coroutines.Dispatchers
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
-fun LoginScreenForViewModel(
+fun LoginScreen(
     viewModel: LoginViewModel
 ) {
-    val uiState: LoginUiState by viewModel.uiState.collectAsState(LoginUiState())
+    val uiState: LoginUiState by viewModel.uiState.collectAsStateWithLifecycle(LoginUiState(),
+        Dispatchers.Main.immediate)
+
     LoginScreen(
         uiState = uiState,
         onClickLogin = viewModel::onClickLogin,
@@ -72,8 +72,12 @@ fun LoginScreen(
             errorText = uiState.usernameError
         ) {
             OutlinedTextField(
-                modifier = Modifier.testTag("username").fillMaxWidth(),
+                modifier = Modifier
+                    .testTag("username")
+                    .fillMaxWidth()
+                    ,
                 value = uiState.username,
+                singleLine = true,
                 label = {
                     Text(stringResource(MR.strings.username))
                 },
@@ -89,9 +93,13 @@ fun LoginScreen(
             errorText = uiState.passwordError
         ) {
             UstadPasswordField(
-                modifier = Modifier.testTag("password").fillMaxWidth(),
+                modifier = Modifier
+                    .testTag("password")
+                    .fillMaxWidth()
+                    ,
                 value = uiState.password,
                 onValueChange = onPasswordValueChange,
+                isError = uiState.passwordError != null,
                 label = {
                     Text(stringResource(MR.strings.password))
                 },
@@ -109,18 +117,12 @@ fun LoginScreen(
         Button(
             onClick = onClickLogin,
             enabled = uiState.fieldsEnabled,
-            modifier = Modifier
-                .fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.colors.secondary
-            )
+            modifier = Modifier.fillMaxWidth(),
         ) {
-            Text(stringResource(MR.strings.login).uppercase(),
-                color = contentColorFor(MaterialTheme.colors.secondary)
-            )
+            Text(stringResource(MR.strings.login))
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedButton(
             onClick = onClickCreateAccount,
@@ -128,7 +130,7 @@ fun LoginScreen(
                 .fillMaxWidth(),
             enabled = uiState.fieldsEnabled,
         ) {
-            Text(stringResource(MR.strings.create_account).uppercase())
+            Text(stringResource(MR.strings.create_account))
         }
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -139,7 +141,7 @@ fun LoginScreen(
                 .fillMaxWidth(),
             enabled = uiState.fieldsEnabled,
         ) {
-            Text(stringResource(MR.strings.connect_as_guest).uppercase())
+            Text(stringResource(MR.strings.connect_as_guest))
         }
 
         Spacer(modifier = Modifier.height(10.dp))

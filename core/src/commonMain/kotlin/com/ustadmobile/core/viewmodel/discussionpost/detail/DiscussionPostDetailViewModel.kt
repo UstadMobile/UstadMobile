@@ -8,7 +8,8 @@ import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.ext.withDoorTransactionAsync
-import com.ustadmobile.door.paging.PagingSource
+import app.cash.paging.PagingSource
+import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.DiscussionPostAndPosterNames
 import com.ustadmobile.lib.db.entities.*
@@ -37,7 +38,6 @@ class DiscussionPostDetailViewModel(
 
     private val pagingSourceFactory: ListPagingSourceFactory<DiscussionPostAndPosterNames> = {
         activeRepo.discussionPostDao.findByPostIdWithAllReplies(entityUidArg).also {
-            lastPagingSource?.invalidate()
             lastPagingSource = it
         }
     }
@@ -117,12 +117,27 @@ class DiscussionPostDetailViewModel(
         loadingState = LoadingUiState.INDETERMINATE
 
         try {
-            activeDb.withDoorTransactionAsync {
-                val clazzAndBlockUids = activeDb.courseBlockDao.findCourseBlockAndClazzUidByDiscussionPostUid(
-                    entityUidArg
-                ) ?: return@withDoorTransactionAsync
+            //We probably have the course block in the local db, but check just in case. If we don't
+            //have it, then load from repo
+            val clazzAndBlockUids = activeDb.courseBlockDao.findCourseBlockAndClazzUidByDiscussionPostUid(
+                entityUidArg
+            ).let {
+                //Double check that we
+                if(it != null && it.clazzUid != 0L && it.courseBlockUid != 0L)
+                    it
+                else
+                    activeRepo.courseBlockDao.findCourseBlockAndClazzUidByDiscussionPostUid(entityUidArg)
+            }
 
-                activeDb.discussionPostDao.insertAsync(DiscussionPost().apply {
+            if(clazzAndBlockUids == null || clazzAndBlockUids.courseBlockUid == 0L ||
+                clazzAndBlockUids.clazzUid == 0L
+            ) {
+                snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.error)))
+                return
+            }
+
+            activeRepo.withDoorTransactionAsync {
+                activeRepo.discussionPostDao.insertAsync(DiscussionPost().apply {
                     discussionPostStartDate = systemTimeInMillis()
                     discussionPostReplyToPostUid = entityUidArg
                     discussionPostMessage = replyText
@@ -132,7 +147,6 @@ class DiscussionPostDetailViewModel(
                 })
                 onChangeReplyText("")
             }
-            lastPagingSource?.invalidate()
         }finally {
             loadingState = LoadingUiState.NOT_LOADING
             _uiState.update { prev ->

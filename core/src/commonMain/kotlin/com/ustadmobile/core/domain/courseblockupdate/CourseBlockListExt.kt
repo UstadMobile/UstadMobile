@@ -1,23 +1,23 @@
 package com.ustadmobile.core.domain.courseblockupdate
 
+import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.CourseBlock
-import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
-import com.ustadmobile.lib.db.entities.ext.shallowCopyWithEntity
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 
-fun List<CourseBlock>.findParentModule(
-    courseBlock: CourseBlock
+fun List<CourseBlockAndEditEntities>.findParentModule(
+    forBlock: CourseBlockAndEditEntities
 ): Long {
     //Modules don't have parent modules
-    if(courseBlock.cbType == CourseBlock.BLOCK_MODULE_TYPE)
+    if(forBlock.courseBlock.cbType == CourseBlock.BLOCK_MODULE_TYPE)
         return 0
 
-    val index = indexOfFirst { it.cbUid == courseBlock.cbUid }
-    val prevCourseBlock = getOrNull(index - 1) ?: return 0
+    val index = indexOfFirst { it.courseBlock.cbUid == forBlock.courseBlock.cbUid }
+    val prevBlock = getOrNull(index - 1) ?: return 0
 
-    return if(prevCourseBlock.cbType == CourseBlock.BLOCK_MODULE_TYPE)
-        prevCourseBlock.cbUid
-    else if(prevCourseBlock.cbIndentLevel >= 1)
-        prevCourseBlock.cbModuleParentBlockUid
+    return if(prevBlock.courseBlock.cbType == CourseBlock.BLOCK_MODULE_TYPE)
+        prevBlock.courseBlock.cbUid
+    else if(prevBlock.courseBlock.cbIndentLevel >= 1)
+        prevBlock.courseBlock.cbModuleParentBlockUid
     else
         0
 }
@@ -27,14 +27,16 @@ fun List<CourseBlock>.findParentModule(
  * previous items module if it is either a module itself, or the same as the previous item if the
  * indent >= 1
  */
-fun List<CourseBlockWithEntity>.updateParentModuleUidsAndIndex(): List<CourseBlockWithEntity> {
+fun List<CourseBlockAndEditEntities>.updateParentModuleUidsAndIndex(): List<CourseBlockAndEditEntities> {
     return toMutableList().mapIndexed { index, block ->
         val parentModUid = findParentModule(block)
-        if(block.cbModuleParentBlockUid != parentModUid || block.cbIndex != index){
-            block.shallowCopyWithEntity {
-                cbModuleParentBlockUid = parentModUid
-                cbIndex = index
-            }
+        if(block.courseBlock.cbModuleParentBlockUid != parentModUid || block.courseBlock.cbIndex != index){
+            block.copy(
+                courseBlock = block.courseBlock.shallowCopy {
+                    cbModuleParentBlockUid = parentModUid
+                    cbIndex = index
+                }
+            )
         }else {
             block
         }
@@ -47,15 +49,15 @@ fun List<CourseBlockWithEntity>.updateParentModuleUidsAndIndex(): List<CourseBlo
  * 2. If previous course block is a module, then indent = 1
  * 3. If previous course block is indented, then indent = same as previous block
  */
-fun List<CourseBlockWithEntity>.autoIndent(
+fun List<CourseBlockAndEditEntities>.autoIndent(
     index: Int
-) : List<CourseBlockWithEntity> {
+) : List<CourseBlockAndEditEntities> {
     //Do not indent a module block
-    val block = this[index]
+    val block = this[index].courseBlock
     if(block.cbType == CourseBlock.BLOCK_MODULE_TYPE)
         return this
 
-    val prevBlock = getOrNull(index - 1) ?: return this
+    val prevBlock = getOrNull(index - 1)?.courseBlock ?: return this
     val autoIndent = if(prevBlock.cbType == CourseBlock.BLOCK_MODULE_TYPE) {
         1
     }else {
@@ -64,9 +66,13 @@ fun List<CourseBlockWithEntity>.autoIndent(
 
     return if(block.cbIndentLevel != autoIndent) {
         toMutableList().apply {
-            this[index] = block.shallowCopyWithEntity { cbIndentLevel = autoIndent }
+            this[index] = this[index].copy(
+                courseBlock = this[index].courseBlock.shallowCopy {
+                    cbIndentLevel = autoIndent
+                }
+            )
         }.toList()
-    }else {
+    } else {
         this
     }
 }

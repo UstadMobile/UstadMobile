@@ -5,8 +5,9 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.ext.awaitItemWhere
-import com.ustadmobile.core.view.ClazzEdit2View
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import org.mockito.kotlin.argWhere
@@ -17,7 +18,7 @@ import kotlin.time.Duration.Companion.seconds
 
 
 @Suppress("RemoveExplicitTypeArguments")
-class ScheduleEditViewModelTest {
+class ScheduleEditViewModelTest : AbstractMainDispatcherTest() {
 
     @Test
     fun givenScheduleHasNoStartTime_whenClickSave_thenShouldShowError() {
@@ -101,7 +102,7 @@ class ScheduleEditViewModelTest {
     fun givenValidSchedule_whenClickSave_thenShouldFinishWithResult() {
         testViewModel<ScheduleEditViewModel> {
             savedStateHandle[UstadView.ARG_RESULT_DEST_KEY] = "schedule"
-            savedStateHandle[UstadView.ARG_RESULT_DEST_VIEWNAME] = ClazzEdit2View.VIEW_NAME
+            savedStateHandle[UstadView.ARG_RESULT_DEST_VIEWNAME] = ClazzEditViewModel.DEST_NAME
 
             viewModelFactory {
                 ScheduleEditViewModel(di, savedStateHandle)

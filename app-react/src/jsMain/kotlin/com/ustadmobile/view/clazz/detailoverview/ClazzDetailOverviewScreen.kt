@@ -8,12 +8,14 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.MS_PER_MIN
+import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
 import com.ustadmobile.hooks.useFormattedDateRange
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTabAndAppBarHeight
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.mui.components.UstadRawHtml
@@ -55,9 +57,6 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
 
     val strings = useStringProvider()
 
-    val numMembers = strings[MR.strings.x_teachers_y_students]
-        .replace("%1\$d", (props.uiState.clazz?.numTeachers ?: 0).toString())
-        .replace("%2\$d", (props.uiState.clazz?.numStudents ?: 0).toString())
 
 
     val clazzDateRangeFormatted = useFormattedDateRange(
@@ -96,8 +95,14 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
 
                     UstadDetailField {
                         icon = Group.create()
-                        valueText = ReactNode(numMembers)
-                        labelText = strings[MR.strings.members_key]
+                        valueText = ReactNode(
+                            strings.format(
+                                MR.strings.x_teachers_y_students,
+                                (props.uiState.clazz?.numTeachers ?: 0).toString(),
+                                (props.uiState.clazz?.numStudents ?: 0).toString(),
+                            )
+                        )
+                        labelText = strings[MR.strings.members_key].capitalizeFirstLetter()
                     }
 
                     if (props.uiState.clazzCodeVisible) {
@@ -146,7 +151,7 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
 
             infiniteQueryPagingItems(
                 items = courseBlocksResult,
-                key = { "cb${it.cbUid}" }
+                key = { "cb${it.courseBlock?.cbUid}" }
             ) { courseBlockItem ->
                 ClazzDetailOverviewCourseBlockListItem.create {
                     courseBlock = courseBlockItem
@@ -223,51 +228,49 @@ val ClazzDetailOverviewScreenPreview = FC<Props> {
             courseBlockList = {
                 ListPagingSource(
                     listOf(
-                        CourseBlockWithCompleteEntity().apply {
-                            cbUid = 1
-                            cbTitle = "Module"
-                            cbDescription = "Description"
-                            cbType = CourseBlock.BLOCK_MODULE_TYPE
-                        },
-                        CourseBlockWithCompleteEntity().apply {
-                            cbUid = 2
-                            cbTitle = "Main discussion board"
-                            cbType = CourseBlock.BLOCK_DISCUSSION_TYPE
-                        },
-                        CourseBlockWithCompleteEntity().apply {
-                            cbUid = 3
-                            cbDescription = "Description"
-                            cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
-                            cbIndentLevel = 0
-                            cbTitle = "Assignment"
-                            assignment = ClazzAssignmentWithMetrics().apply {
-                                fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
-                                progressSummary = AssignmentProgressSummary().apply {
-                                    submittedStudents = 5
-                                    markedStudents = 10
-                                }
+                        CourseBlockAndDisplayDetails(
+                            courseBlock = CourseBlock().apply {
+                                cbUid = 1
+                                cbTitle = "Module"
+                                cbDescription = "Description"
+                                cbType = CourseBlock.BLOCK_MODULE_TYPE
+                            },
+                            expanded = true
+                        ),
+                        CourseBlockAndDisplayDetails(
+                            courseBlock = CourseBlock().apply {
+                                cbUid = 2
+                                cbTitle = "Main discussion board"
+                                cbType = CourseBlock.BLOCK_DISCUSSION_TYPE
+                            },
+                        ),
+                        CourseBlockAndDisplayDetails(
+                            courseBlock = CourseBlock().apply {
+                                cbUid = 3
+                                cbDescription = "Description"
+                                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                                cbIndentLevel = 0
+                                cbTitle = "Assignment"
                             }
-                        },
-                        CourseBlockWithCompleteEntity().apply {
-                            cbUid = 4
-                            cbType = CourseBlock.BLOCK_CONTENT_TYPE
-                            entry = ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
-                                title = "Content Entry"
-                                scoreProgress = ContentEntryStatementScoreProgress().apply {
-                                    success = StatementEntity.RESULT_SUCCESS
-                                    progress = 70
-                                }
+                        ),
+                        CourseBlockAndDisplayDetails(
+                            courseBlock = CourseBlock().apply {
+                                cbUid = 4
+                                cbType = CourseBlock.BLOCK_CONTENT_TYPE
+                                cbTitle = "Content entry"
                             }
-                        },
-                        CourseBlockWithCompleteEntity().apply {
-                            cbUid = 5
-                            cbTitle = "Text Block Module"
-                            cbDescription = "<pre>\n" +
-                                "            GeeksforGeeks\n" +
-                                "                         A Computer   Science Portal   For Geeks\n" +
-                                "        </pre>"
-                            cbType = CourseBlock.BLOCK_TEXT_TYPE
-                        }
+                        ),
+                        CourseBlockAndDisplayDetails(
+                            courseBlock = CourseBlock().apply {
+                                cbUid = 5
+                                cbTitle = "Text Block Module"
+                                cbDescription = "<pre>\n" +
+                                        "            GeeksforGeeks\n" +
+                                        "                         A Computer   Science Portal   For Geeks\n" +
+                                        "        </pre>"
+                                cbType = CourseBlock.BLOCK_TEXT_TYPE
+                            }
+                        )
                     )
                 )
             },

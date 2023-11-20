@@ -16,6 +16,7 @@ compileKotlin{
     kotlinOptions.jvmTarget = "17"
     kotlinOptions {
         freeCompilerArgs += "-Xopt-in=com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview"
+        freeCompilerArgs += "-Xexpect-actual-classes"
     }
 
 }
@@ -24,6 +25,7 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "17"
     kotlinOptions {
         freeCompilerArgs += "-Xopt-in=com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview"
+        freeCompilerArgs += "-Xexpect-actual-classes"
     }
 }
 
@@ -71,7 +73,7 @@ dependencies {
     implementation "io.ktor:ktor-server-html-builder:$version_ktor"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
 
-    implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+    implementation libs.simplejndi
     implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
     implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     implementation "org.postgresql:postgresql:$version_postgres_jdbc"
@@ -86,12 +88,12 @@ dependencies {
     implementation "org.kodein.di:kodein-di:$version_kodein_di"
     implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
 
-    implementation "io.github.aakira:napier-jvm:$version_napier"
+    implementation libs.napier
 
     implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
     implementation "net.sf.kxml:kxml2:$version_kxml"
 
-    implementation "org.quartz-scheduler:quartz:$version_quartz_scheduler"
+    implementation libs.quartz
     implementation "io.ktor:ktor-server-websockets:$version_ktor"
 
 
@@ -111,8 +113,11 @@ dependencies {
 
     implementation "net.sourceforge.argparse4j:argparse4j:$version_argparse4j"
     implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
+    implementation libs.javaffmpeg
 
     api libs.moko.resources
+
+    implementation project(":lib-cache")
 
     //test
     testImplementation project(":lib-test-common")
@@ -121,7 +126,7 @@ dependencies {
     testImplementation "io.ktor:ktor-server-test-host:$version_ktor"
     testImplementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
 
-    testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+    testImplementation libs.simplejndi
     testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
     testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
@@ -131,7 +136,6 @@ dependencies {
     testImplementation "io.ktor:ktor-client-okhttp:$version_ktor"
     testImplementation "io.ktor:ktor-serialization-gson:$version_ktor"
 
-    testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
     testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
     testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"

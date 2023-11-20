@@ -10,8 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.SubcomposeAsyncImage
-import com.ustadmobile.port.android.util.compose.URI_NOT_READY
-import com.ustadmobile.port.android.util.compose.collectAttachmentUri
 import com.ustadmobile.port.android.util.compose.rememberActiveDatabase
 
 
@@ -25,18 +23,8 @@ fun UstadPersonAvatar(
         db?.personPictureDao?.findByPersonUidAsFlow(personUid)
     }
 
-    val attachmentUri: Uri? by personPicFlow.collectAttachmentUri(db) {
-        it?.personPictureUri
-    }
+    val attachmentUri: Uri? = null
 
-    /*
-     * Normally collecting a flow requires an initial value, which would be null. If there is an
-     * image, then this initial value causes an immediate display of the placeholder icon, which
-     * then switches to the image. Recognizing URI_NOT_READY avoids the flicker.
-     */
-    if(attachmentUri == URI_NOT_READY) {
-        return
-    }
 
     if(attachmentUri != null) {
         SubcomposeAsyncImage(

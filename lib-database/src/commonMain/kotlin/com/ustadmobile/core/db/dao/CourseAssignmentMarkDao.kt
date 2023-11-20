@@ -4,79 +4,15 @@ import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL
 import com.ustadmobile.core.db.dao.CourseAssignmentMarkDaoCommon.ARG_FILTER_ALL_SCORES
-import com.ustadmobile.door.lifecycle.LiveData
+import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.door.paging.DataSourceFactory
+import app.cash.paging.PagingSource
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
-import kotlinx.coroutines.flow.Flow
 
 @DoorDao
 @Repository
 expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
-
-
-    @Query("""
-     REPLACE INTO CourseAssignmentMarkReplicate(camPk, camDestination)
-      SELECT DISTINCT CourseAssignmentMark.camUid AS camPk,
-             :newNodeId AS camDestination
-        FROM UserSession
-             JOIN PersonGroupMember 
-                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-             ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_ASSIGNMENT_SELECT} 
-                    ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
-               JOIN ClazzAssignment
-                    ON ClazzAssignment.caClazzUid = Clazz.clazzUid                
-             JOIN CourseAssignmentMark
-                    ON CourseAssignmentMark.camAssignmentUid = ClazzAssignment.caUid
-                    
-       WHERE UserSession.usClientNodeId = :newNodeId
-         AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-         AND CourseAssignmentMark.camLct != COALESCE(
-             (SELECT camVersionId
-                FROM CourseAssignmentMarkReplicate
-               WHERE camPk = CourseAssignmentMark.camUid
-                 AND camDestination = :newNodeId), 0) 
-      /*psql ON CONFLICT(camPk, camDestination) DO UPDATE
-             SET camPending = true
-      */       
-    """)
-    @ReplicationRunOnNewNode
-    @ReplicationCheckPendingNotificationsFor([CourseAssignmentMark::class])
-    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
-
-    @Query("""
- REPLACE INTO CourseAssignmentMarkReplicate(camPk, camDestination)
-  SELECT DISTINCT CourseAssignmentMark.camUid AS camPk,
-         UserSession.usClientNodeId AS camDestination
-    FROM ChangeLog
-         JOIN CourseAssignmentMark
-             ON ChangeLog.chTableId = ${CourseAssignmentMark.TABLE_ID}
-                AND ChangeLog.chEntityPk = CourseAssignmentMark.camUid
-             JOIN ClazzAssignment
-                    ON CourseAssignmentMark.camAssignmentUid = ClazzAssignment.caUid
-             JOIN Clazz
-                    ON  Clazz.clazzUid = ClazzAssignment.caClazzUid
-         ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-              ${Role.PERMISSION_ASSIGNMENT_SELECT}
-              ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}  
-   WHERE UserSession.usClientNodeId != (
-         SELECT nodeClientId 
-           FROM SyncNode
-          LIMIT 1)
-     AND CourseAssignmentMark.camLct != COALESCE(
-         (SELECT camVersionId
-            FROM CourseAssignmentMarkReplicate
-           WHERE camPk = CourseAssignmentMark.camUid
-             AND camDestination = UserSession.usClientNodeId), 0)
- /*psql ON CONFLICT(camPk, camDestination) DO UPDATE
-     SET camPending = true
-  */               
- """)
-    @ReplicationRunOnChange([CourseAssignmentMark::class])
-    @ReplicationCheckPendingNotificationsFor([CourseAssignmentMark::class])
-    abstract suspend fun replicateOnChange()
 
 
     @Query("""
@@ -85,7 +21,7 @@ expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
                        WHERE CourseAssignmentMark.camAssignmentUid = :assignmentUid
                        LIMIT 1)
     """)
-    abstract fun checkNoSubmissionsMarked(assignmentUid: Long): LiveData<Boolean>
+    abstract fun checkNoSubmissionsMarked(assignmentUid: Long): Flow<Boolean>
 
     @Query("""
          WITH ScoreByMarker (averageScore, averagePenalty) AS (
@@ -110,31 +46,11 @@ expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
     abstract fun getMarkOfAssignmentForSubmitterLiveData(
         assignmentUid: Long,
         submitterUid: Long,
-    ): LiveData<AverageCourseAssignmentMark?>
+    ): Flow<AverageCourseAssignmentMark?>
 
-    @Query("""
-         WITH ScoreByMarker (averageScore, averagePenalty) AS (
-                 SELECT AVG(camMark), AVG(camPenalty)
-                   FROM courseAssignmentMark
-                        JOIN ClazzAssignment
-                             ON caUid = courseAssignmentMark.camAssignmentUid         
-                    AND camAssignmentUid = :assignmentUid
-                    AND camSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
-                  WHERE camLct = (SELECT MAX(mark.camLct) 
-                                    FROM CourseAssignmentMark As mark
-                                    WHERE mark.camAssignmentUid = :assignmentUid
-                                     AND mark.camSubmitterUid = :accountPersonUid
-                                     AND (ClazzAssignment.caMarkingType = ${ClazzAssignment.MARKED_BY_COURSE_LEADER}
-                                       OR mark.camMarkerSubmitterUid = courseAssignmentMark.camMarkerSubmitterUid))
-                )
-         SELECT COALESCE(averageScore, -1) AS averageScore, COALESCE(averagePenalty, -1) AS averagePenalty
-           FROM ScoreByMarker
-    """)
-    abstract fun getAverageMarkForUserAsFlow(
-        accountPersonUid: Long,
-        assignmentUid: Long
-    ): Flow<AverageCourseAssignmentMark>
+    @HttpAccessible(
 
+    )
     @Query("""
         SELECT CourseAssignmentMark.*,
                Person.firstNames AS markerFirstNames,
@@ -146,11 +62,20 @@ expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
            AND CourseAssignmentMark.camAssignmentUid = :assignmentUid
            AND CourseAssignmentMark.camSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
     """)
+    @QueryLiveTables(arrayOf("CourseAssignmentMark", "Person", "ClazzAssignment",
+        "CourseGroupMember", "ClazzEnrolment"))
     abstract fun getAllMarksForUserAsFlow(
         accountPersonUid: Long,
         assignmentUid: Long
     ): Flow<List<CourseAssignmentMarkAndMarkerName>>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("getAllMarksForSubmitterAsFlow"),
+            HttpServerFunctionCall("getAllMarksForSubmitterAsFlowMarkerPersons"),
+        )
+    )
     @Query("""
         SELECT CourseAssignmentMark.*,
                Person.firstNames AS markerFirstNames,
@@ -165,6 +90,20 @@ expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
         submitterUid: Long,
         assignmentUid: Long,
     ): Flow<List<CourseAssignmentMarkAndMarkerName>>
+
+    @Query("""
+        SELECT Person.*
+          FROM Person
+         WHERE PersonUid IN
+               (SELECT CourseAssignmentMark.camMarkerPersonUid
+                  FROM CourseAssignmentMark
+                 WHERE CourseAssignmentMark.camAssignmentUid = :assignmentUid
+                   AND CourseAssignmentMark.camSubmitterUid = :submitterUid)
+    """)
+    abstract suspend fun getAllMarksForSubmitterAsFlowMarkerPersons(
+        submitterUid: Long,
+        assignmentUid: Long,
+    ): List<Person>
 
     @Query("""
           WITH ScoreByMarker AS (
@@ -192,7 +131,7 @@ expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
         assignmentUid: Long,
         submitterUid: Long,
         filter: Int
-    ): DataSourceFactory<Int, CourseAssignmentMarkWithPersonMarker>
+    ): PagingSource<Int, CourseAssignmentMarkWithPersonMarker>
 
     @Query("""
         SELECT * 

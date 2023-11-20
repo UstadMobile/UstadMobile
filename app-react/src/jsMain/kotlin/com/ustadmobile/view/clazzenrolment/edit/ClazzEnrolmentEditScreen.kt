@@ -15,17 +15,16 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadDateField
+import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.view.components.UstadSelectField
 import web.cssom.px
-import mui.material.Container
 import mui.system.Stack
 import mui.system.StackDirection
 import mui.system.responsive
 import react.FC
 import react.Props
 import react.ReactNode
-import react.useState
 
 external interface ClazzEnrolmentEditScreenProps : Props {
 
@@ -41,7 +40,7 @@ val ClazzEnrolmentEditScreenComponent = FC<ClazzEnrolmentEditScreenProps> { prop
 
     val terminologyEntries = useCourseTerminologyEntries(props.uiState.courseTerminology)
 
-    Container {
+    UstadStandardContainer {
         Stack {
             direction = responsive(StackDirection.column)
             spacing = responsive(20.px)

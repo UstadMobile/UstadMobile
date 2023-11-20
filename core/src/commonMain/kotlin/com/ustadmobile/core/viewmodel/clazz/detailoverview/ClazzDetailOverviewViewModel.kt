@@ -6,15 +6,16 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.core.util.ext.toggle
 import com.ustadmobile.core.util.ext.whenSubscribed
-import com.ustadmobile.core.view.ClazzAssignmentDetailView
-import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import com.ustadmobile.door.paging.PagingSource
+import app.cash.paging.PagingSource
+import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
+import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
+import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +30,7 @@ data class ClazzDetailOverviewUiState(
 
     val scheduleList: List<Schedule> = emptyList(),
 
-    val courseBlockList: () -> PagingSource<Int, CourseBlockWithCompleteEntity> = { EmptyPagingSource() },
+    val courseBlockList: () -> PagingSource<Int, CourseBlockAndDisplayDetails> = { EmptyPagingSource() },
 
     val clazzCodeVisible: Boolean = false,
 
@@ -61,19 +62,20 @@ class ClazzDetailOverviewViewModel(
     destinationName: String
 ): DetailViewModel<ClazzWithDisplayDetails>(di, savedStateHandle, destinationName) {
 
-
     private val _uiState = MutableStateFlow(ClazzDetailOverviewUiState())
 
     val uiState: Flow<ClazzDetailOverviewUiState> = _uiState.asStateFlow()
 
-    private var lastCourseBlockPagingSource: PagingSource<Int, CourseBlockWithCompleteEntity>? = null
+    private var lastCourseBlockPagingSource: PagingSource<Int, CourseBlockAndDisplayDetails>? = null
 
-    private val pagingSourceFactory: () -> PagingSource<Int, CourseBlockWithCompleteEntity> = {
-        activeRepo.courseBlockDao.findAllCourseBlockByClazzUidLive(
-                entityUidArg, accountManager.activeAccount.personUid,
-                _uiState.value.collapsedBlockUids.toList(), systemTimeInMillis()
+    private val pagingSourceFactory: () -> PagingSource<Int, CourseBlockAndDisplayDetails> = {
+        activeRepo.courseBlockDao.findAllCourseBlockByClazzUidAsPagingSource(
+            clazzUid = entityUidArg,
+            collapseList = _uiState.value.collapsedBlockUids.toList(),
+            includeInactive = false,
+            includeHidden = false,
+            hideUntilFilterTime = systemTimeInMillis(),
         ).also {
-            lastCourseBlockPagingSource?.invalidate()
             lastCourseBlockPagingSource = it
         }
     }
@@ -112,7 +114,7 @@ class ClazzDetailOverviewViewModel(
 
                 launch {
                     activeRepo.clazzDao.personHasPermissionWithClazzAsFlow(
-                        accountManager.activeAccount.personUid, entityUidArg, Role.PERMISSION_CLAZZ_UPDATE
+                        accountManager.currentAccount.personUid, entityUidArg, Role.PERMISSION_CLAZZ_UPDATE
                     ).collect { hasEditPermission ->
                         _appUiState.update { prev ->
                             prev.copy(
@@ -136,7 +138,7 @@ class ClazzDetailOverviewViewModel(
                 lastCourseBlockPagingSource?.invalidate()
             }
             CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
-                navController.navigate(ClazzAssignmentDetailView.VIEW_NAME,
+                navController.navigate(ClazzAssignmentDetailViewModel.DEST_NAME,
                     mapOf(ARG_ENTITY_UID to courseBlock.cbEntityUid.toString()))
             }
             CourseBlock.BLOCK_DISCUSSION_TYPE -> {
@@ -145,11 +147,23 @@ class ClazzDetailOverviewViewModel(
                     args = mapOf(ARG_ENTITY_UID to courseBlock.cbUid.toString())
                 )
             }
+            CourseBlock.BLOCK_CONTENT_TYPE -> {
+                navController.navigate(
+                    viewName = ContentEntryDetailViewModel.DEST_NAME,
+                    args = mapOf(ARG_ENTITY_UID to courseBlock.cbEntityUid.toString())
+                )
+            }
         }
     }
 
     fun onClickEdit() {
-        navController.navigate(ClazzEdit2View.VIEW_NAME,
+        navController.navigate(ClazzEditViewModel.DEST_NAME,
             mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString()))
+    }
+
+    companion object {
+
+        const val DEST_NAME = "CourseDetailOverviewView"
+
     }
 }

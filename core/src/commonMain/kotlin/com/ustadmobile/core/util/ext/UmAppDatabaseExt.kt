@@ -1,8 +1,6 @@
 package com.ustadmobile.core.util.ext
 
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.Pbkdf2Params
-import com.ustadmobile.core.controller.ReportFilterEditPresenter.Companion.genderMap
+import app.cash.paging.PagingSource
 import com.ustadmobile.core.controller.TerminologyKeys
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.findEntriesByMd5SumsSafeAsync
@@ -12,8 +10,6 @@ import com.ustadmobile.core.util.graph.LabelValueFormatter
 import com.ustadmobile.core.util.graph.MessageIdFormatter
 import com.ustadmobile.core.util.graph.TimeFormatter
 import com.ustadmobile.core.util.graph.UidAndLabelFormatter
-import com.ustadmobile.door.paging.DataSourceFactory
-import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.ext.dbType
@@ -336,8 +332,12 @@ fun UmAppDatabase.insertPersonOnlyAndGroup(entity: Person): Person{
 
 }
 
-suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
-                                            context: Any, impl: UstadMobileSystemImpl, loggedInPersonUid: Long): ChartData{
+suspend fun UmAppDatabase.generateChartData(
+    report: ReportWithSeriesWithFilters,
+    context: Any,
+    impl: UstadMobileSystemImpl,
+    loggedInPersonUid: Long
+): ChartData{
 
     val queries = report.generateSql(loggedInPersonUid, dbType())
     val seriesDataList = mutableListOf<SeriesData>()
@@ -363,11 +363,12 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
                         .map { it.uid to it.labelName }.toMap()
                 UidAndLabelFormatter(clazzLabelList)
             }
-            Report.GENDER -> {
-                MessageIdFormatter(
-                        genderMap.mapKeys { it.key.toString() },
-                        impl, context)
-            }
+//must be handled when reports are brought back
+//            Report.GENDER -> {
+//                MessageIdFormatter(
+//                        genderMap.mapKeys { it.key.toString() },
+//                        impl, context)
+//            }
             Report.CONTENT_ENTRY ->{
                 val listOfUids = reportList.mapNotNull { it.subgroup?.toLong() }.toSet().toList()
                 val entryLabelList = contentEntryDao.getContentEntryFromUids(listOfUids)
@@ -398,11 +399,12 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
                     .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
             UidAndLabelFormatter(clazzLabelList)
         }
-        Report.GENDER -> {
-            MessageIdFormatter(
-                    genderMap.mapKeys { it.key.toString() },
-                    impl, context)
-        }
+//Must be handled when reporting is brought back
+//        Report.GENDER -> {
+//            MessageIdFormatter(
+//                    genderMap.mapKeys { it.key.toString() },
+//                    impl, context)
+//        }
         Report.CONTENT_ENTRY ->{
             val entryLabelList = contentEntryDao.getContentEntryFromUids(xAxisList
                     .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
@@ -427,10 +429,10 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
 }
 
 fun UmAppDatabase.generateStatementList(report: ReportWithSeriesWithFilters, loggedInPersonUid: Long):
-        List<DataSourceFactory<Int, StatementEntityWithDisplayDetails>> {
+        List<PagingSource<Int, StatementEntityWithDisplayDetails>> {
 
     val queries = report.generateSql(loggedInPersonUid, dbType())
-    val statementDataSourceList = mutableListOf<DataSourceFactory<Int, StatementEntityWithDisplayDetails>>()
+    val statementDataSourceList = mutableListOf<PagingSource<Int, StatementEntityWithDisplayDetails>>()
     queries.forEach {
         statementDataSourceList.add(statementDao.getListResults(SimpleDoorQuery(it.value.sqlListStr, it.value.queryParams)))
     }
@@ -611,30 +613,6 @@ suspend fun UmAppDatabase.grantScopedPermission(toGroupUid: Long, permissions: L
 suspend fun UmAppDatabase.grantScopedPermission(toPerson: Person, permissions: Long,
                                                 scopeTableId: Int, scopeEntityUid: Long): ScopedGrantResult {
     return grantScopedPermission(toPerson.personGroupUid, permissions, scopeTableId, scopeEntityUid)
-}
-
-/**
- * Insert authentication credentials for the given person uid with the given password. This is fine
- * to use in tests etc, but for performance it is better to use AuthManager.setAuth
- */
-suspend fun UmAppDatabase.insertPersonAuthCredentials2(
-    personUid: Long,
-    password: String,
-    pbkdf2Params: Pbkdf2Params,
-    endpoint: Endpoint,
-    httpClient: HttpClient,
-) {
-    val db = (this as? DoorDatabaseRepository)?.db as? UmAppDatabase ?: this
-    db.withDoorTransactionAsync {
-        val authSalt = db.siteDao.getSiteAuthSaltAsync()
-            ?: throw IllegalStateException("insertAuthCredentials: No auth salt!")
-        db.personAuth2Dao.insertAsync(PersonAuth2().apply {
-            pauthUid = personUid
-            pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
-            pauthAuth = password.doublePbkdf2Hash(authSalt, pbkdf2Params,
-                endpoint, httpClient).encodeBase64()
-        })
-    }
 }
 
 /**

@@ -97,7 +97,7 @@ kotlin {
                 implementation "io.ktor:ktor-io:$version_ktor"
                 implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
                 implementation "io.ktor:ktor-serialization-gson:$version_ktor"
-                implementation "io.github.aakira:napier:$version_napier"
+                implementation libs.napier
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
 
@@ -146,7 +146,7 @@ kotlin {
 
                 implementation "androidx.room:room-runtime:$version_android_room"
 
-                implementation "com.google.android.material:material:$version_android_material"
+                implementation libs.android.material
 
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
@@ -199,15 +199,15 @@ kotlin {
             dependencies {
                 implementation project(":lib-test-common")
 
-                implementation "io.github.aakira:napier:$version_napier"
+                implementation libs.napier
 
                 implementation "junit:junit:$version_junit"
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "io.github.aakira:napier-jvm:$version_napier"
+                implementation libs.napier.jvm
                 implementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
-                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                implementation libs.simplejndi
                 implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
                 implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"

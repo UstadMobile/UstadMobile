@@ -10,7 +10,6 @@ import kotlin.coroutines.coroutineContext
 import java.util.concurrent.atomic.AtomicLong
 import com.ustadmobile.core.io.ConcatenatedEntry
 import io.github.aakira.napier.Napier
-import com.ustadmobile.door.ext.toHexString
 import java.io.*
 import com.ustadmobile.core.util.ext.base64EncodedToHexString
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
@@ -41,6 +40,7 @@ const val FILE_EXTENSION_CE_JSON = ".ce.json"
  * This is a list of Base64 encoded strings.
  * @param logPrefix prefix to use when logging using Napier
  */
+@OptIn(ExperimentalStdlibApi::class)
 suspend fun ConcatenatedInputStream2.readAndSaveToDir(
     destDirFile: File,
     tmpDirFile: File,

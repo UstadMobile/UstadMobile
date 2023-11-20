@@ -8,20 +8,19 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @EntityWithAttachment
-@ReplicateEntity(tableId = TABLE_ID, tracker = CourseAssignmentSubmissionAttachmentReplicate::class)
+@ReplicateEntity(
+    tableId = TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
 @Triggers(arrayOf(
         Trigger(
-                name = "courseassignmentsubmissionattachment_remote_insert",
-                order = Trigger.Order.INSTEAD_OF,
-                on = Trigger.On.RECEIVEVIEW,
-                events = [Trigger.Event.INSERT],
-                sqlStatements = [
-                    """REPLACE INTO CourseAssignmentSubmissionAttachment(casaUid, casaSubmissionUid, casaMimeType,casaFileName, casaUri, casaMd5, casaSize, casaTimestamp) 
-         VALUES (NEW.casaUid, NEW.casaSubmissionUid, NEW.casaMimeType, NEW.casaFileName, NEW.casaUri, NEW.casaMd5, NEW.casaSize, NEW.casaTimestamp) 
-         /*psql ON CONFLICT (casaUid) DO UPDATE 
-         SET casaSubmissionUid = EXCLUDED.casaSubmissionUid, casaMimeType = EXCLUDED.casaMimeType, casaFileName = EXCLUDED.casaFileName, casaUri = EXCLUDED.casaUri, casaMd5 = EXCLUDED.casaMd5, casaSize = EXCLUDED.casaSize, casaTimestamp = EXCLUDED.casaTimestamp
-         */"""
-                    ])
+            name = "courseassignmentsubmissionattachment_remote_insert",
+            order = Trigger.Order.INSTEAD_OF,
+            on = Trigger.On.RECEIVEVIEW,
+            events = [Trigger.Event.INSERT],
+            conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+            sqlStatements = [TRIGGER_UPSERT],
+        )
     )
 )
 @Serializable
@@ -45,8 +44,8 @@ class CourseAssignmentSubmissionAttachment {
     @AttachmentSize
     var casaSize: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var casaTimestamp: Long = 0
 
     companion object {

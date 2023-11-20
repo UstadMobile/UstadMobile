@@ -1,37 +1,37 @@
 package com.ustadmobile.view.contententry.edit
 
-import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.locale.entityconstants.LicenceConstants
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditUiState
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
-import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.components.UstadCourseBlockEdit
+import com.ustadmobile.mui.components.UstadStandardContainer
+import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.mui.components.UstadTextField
+import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.view.components.UstadSwitchField
-import web.cssom.px
-import mui.material.*
+import mui.material.Button
+import mui.material.ButtonVariant
 import mui.material.Stack
+import mui.material.Typography
 import mui.system.responsive
 import react.FC
 import react.Props
 import react.ReactNode
-import react.dom.onChange
+import web.cssom.px
 
 external interface ContentEntryEditScreenProps : Props {
 
     var uiState: ContentEntryEditUiState
 
-    var onCourseBlockChange: (CourseBlock?) -> Unit
+    var onCourseBlockChanged: (CourseBlock?) -> Unit
 
     var onClickUpdateContent: () -> Unit
 
@@ -42,8 +42,6 @@ external interface ContentEntryEditScreenProps : Props {
     var onChangePubliclyAccessible: (Boolean) -> Unit
 
     var onClickLanguage: () -> Unit
-
-    var onSelectContainerStorageDir: (ContainerStorageDir?) -> Unit
 
 }
 
@@ -57,42 +55,7 @@ val ContentEntryEditScreen = FC<Props> {
     ContentEntryEditScreenComponent {
         uiState = uiStateVal
         onContentEntryChanged = viewModel::onContentEntryChanged
-    }
-}
-
-val ContentEntryEditScreenPreview = FC<Props> {
-
-    ContentEntryEditScreenComponent {
-        uiState = ContentEntryEditUiState(
-            entity = ContentEntryWithBlockAndLanguage().apply {
-                leaf = true
-            },
-            updateContentVisible = true,
-            metadataResult = MetadataResult(
-                entry = ContentEntryWithLanguage(),
-                pluginId = 0
-            ),
-            courseBlockEditUiState = CourseBlockEditUiState(
-                courseBlock = CourseBlock().apply {
-                    cbMaxPoints = 78
-                    cbCompletionCriteria = 14
-                },
-            ),
-            storageOptions = listOf(
-                ContainerStorageDir(
-                    name = "Device Memory",
-                    dirUri = ""
-                ),
-                ContainerStorageDir(
-                    name = "Memory Card",
-                    dirUri = ""
-                ),
-            ),
-            selectedContainerStorageDir = ContainerStorageDir(
-                name = "Device Memory",
-                dirUri = ""
-            )
-        )
+        onCourseBlockChanged = viewModel::onCourseBlockChanged
     }
 }
 
@@ -105,8 +68,7 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
         else
             strings[MR.strings.file_selected]
 
-    Container {
-        maxWidth = "lg"
+    UstadStandardContainer {
 
         Stack {
             spacing = responsive(20.px)
@@ -124,57 +86,61 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
                 }
             }
 
-            if (props.uiState.entity?.leaf == true){
+            if (props.uiState.entity?.entry?.leaf == true){
                 Typography {
                     + strings[MR.strings.supported_files]
                 }
             }
 
-            TextField {
-                value = props.uiState.entity?.title ?: ""
-                id = "content_title"
-                label = ReactNode(strings[MR.strings.title])
-                error = props.uiState.titleError != null
-                disabled = !props.uiState.fieldsEnabled
-                helperText = ReactNode(props.uiState.titleError ?: strings[MR.strings.required])
-                onChange = {
-                    props.onContentEntryChanged(
-                        props.uiState.entity?.shallowCopy {
-                            title = it.target.asDynamic().value
-                        }
-                    )
+            if(props.uiState.contentEntryTitleVisible) {
+                UstadTextField {
+                    value = props.uiState.entity?.entry?.title ?: ""
+                    id = "content_title"
+                    label = ReactNode(strings[MR.strings.title]  + "*")
+                    helperText = ReactNode(props.uiState.titleError ?: strings[MR.strings.required])
+                    error = props.uiState.titleError != null
+                    disabled = !props.uiState.fieldsEnabled
+                    onTextChange = {
+                        props.onContentEntryChanged(
+                            props.uiState.entity?.entry?.shallowCopy {
+                                title = it
+                            }
+                        )
+                    }
                 }
             }
 
-            UstadTextEditField {
-                value = props.uiState.entity?.description ?: ""
-                id = "content_description"
-                label = strings[MR.strings.description]
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
-                    props.onContentEntryChanged(
-                        props.uiState.entity?.shallowCopy {
-                            description = it
-                        }
-                    )
+            if(props.uiState.contentEntryDescriptionVisible) {
+                UstadTextEditField {
+                    value = props.uiState.entity?.entry?.description ?: ""
+                    id = "content_description"
+                    label = strings[MR.strings.description]
+                    enabled = props.uiState.fieldsEnabled
+                    onChange = {
+                        props.onContentEntryChanged(
+                            props.uiState.entity?.entry?.shallowCopy {
+                                description = it
+                            }
+                        )
+                    }
                 }
             }
 
             if(props.uiState.courseBlockVisible) {
                 UstadCourseBlockEdit {
                     uiState = props.uiState.courseBlockEditUiState
-                    onCourseBlockChange = props.onCourseBlockChange
+                    onCourseBlockChange = props.onCourseBlockChanged
                 }
             }
 
             UstadTextEditField {
-                value = props.uiState.entity?.author ?: ""
+                value = props.uiState.entity?.entry?.author ?: ""
                 label = strings[MR.strings.entry_details_author]
                 id = "content_author"
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
                     props.onContentEntryChanged(
-                        props.uiState.entity?.shallowCopy {
+                        props.uiState.entity?.entry?.shallowCopy {
                             author = it
                         }
                     )
@@ -182,13 +148,13 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
             }
 
             UstadTextEditField {
-                value = props.uiState.entity?.publisher ?: ""
+                value = props.uiState.entity?.entry?.publisher ?: ""
                 label = strings[MR.strings.entry_details_publisher]
                 id = "content_publisher"
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
                     props.onContentEntryChanged(
-                        props.uiState.entity?.shallowCopy {
+                        props.uiState.entity?.entry?.shallowCopy {
                             publisher = it
                         }
                     )
@@ -196,13 +162,13 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
             }
 
             UstadMessageIdSelectField {
-                value = props.uiState.entity?.licenseType ?: ContentEntry.LICENSE_TYPE_UNSPECIFIED
+                value = props.uiState.entity?.entry?.licenseType ?: ContentEntry.LICENSE_TYPE_UNSPECIFIED
                 options = LicenceConstants.LICENSE_MESSAGE_IDS
                 label = strings[MR.strings.licence]
                 id = "content_license"
                 onChange = {
                     props.onContentEntryChanged(
-                        props.uiState.entity?.shallowCopy {
+                        props.uiState.entity?.entry?.shallowCopy {
                             licenseType = it.value
                         }
                     )
@@ -221,7 +187,7 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
 
             UstadSwitchField {
                 id = "content_publik"
-                checked= props.uiState.entity?.publik ?: false
+                checked= props.uiState.entity?.entry?.publik ?: false
                 onChanged = { props.onChangePubliclyAccessible(it) }
                 label = strings[MR.strings.publicly_accessible]
                 enabled = props.uiState.fieldsEnabled

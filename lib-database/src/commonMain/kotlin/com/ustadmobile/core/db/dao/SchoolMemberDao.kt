@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.paging.DataSourceFactory
+import app.cash.paging.PagingSource
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
@@ -17,61 +17,6 @@ import com.ustadmobile.lib.db.entities.SchoolMember.Companion.JOIN_FROM_SCHOOLME
 @Repository
 @DoorDao
 expect abstract class SchoolMemberDao : BaseDao<SchoolMember> {
-
-    @Query("""
-     REPLACE INTO SchoolMemberReplicate(smPk, smDestination)
-      SELECT DISTINCT SchoolMember.schoolMemberUid AS smPk,
-             :newNodeId AS smDestination
-        FROM UserSession
-             JOIN PersonGroupMember
-                  ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-             JOIN ScopedGrant
-                  ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-                     AND (ScopedGrant.sgPermissions &  ${Role.PERMISSION_PERSON_SELECT}) > 0
-             JOIN SchoolMember
-                  ON $FROM_SCHOOLMEMBER_TO_SCOPEDGRANT_JOIN_ON_PERSON_OR_CLAZZ_PERMISSION_CLAUSE
-       WHERE UserSession.usClientNodeId = :newNodeId
-         AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-         AND SchoolMember.schoolMemberLct != COALESCE(
-             (SELECT smVersionId
-                FROM SchoolMemberReplicate
-               WHERE smPk = SchoolMember.schoolMemberUid
-                 AND smDestination = :newNodeId), 0) 
-      /*psql ON CONFLICT(smPk, smDestination) DO UPDATE
-             SET smPending = true
-      */       
-    """)
-    @ReplicationRunOnNewNode
-    @ReplicationCheckPendingNotificationsFor([SchoolMember::class])
-    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
-
-    @Query("""
- REPLACE INTO SchoolMemberReplicate(smPk, smDestination)
-  SELECT DISTINCT SchoolMember.schoolMemberUid AS smUid,
-         UserSession.usClientNodeId AS smDestination
-    FROM ChangeLog
-         JOIN SchoolMember
-              ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID}
-                  AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-         $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PERSON_OR_CLAZZ_PERMISSION_PT1
-              ${Role.PERMISSION_PERSON_SELECT}
-              $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
-   WHERE UserSession.usClientNodeId != (
-         SELECT nodeClientId 
-           FROM SyncNode
-          LIMIT 1)
-     AND SchoolMember.schoolMemberLct != COALESCE(
-         (SELECT smVersionId
-            FROM SchoolMemberReplicate
-           WHERE smPk = SchoolMember.schoolMemberUid
-             AND smDestination = UserSession.usClientNodeId), 0)
- /*psql ON CONFLICT(smPk, smDestination) DO UPDATE
-     SET smPending = true
-  */               
- """)
-     @ReplicationRunOnChange([SchoolMember::class])
-     @ReplicationCheckPendingNotificationsFor([SchoolMember::class])
-     abstract suspend fun replicateOnChange()
 
     @Query("SELECT * FROM SchoolMember WHERE schoolMemberUid = :schoolMemberUid " +
             " AND CAST(schoolMemberActive AS INTEGER) = 1")
@@ -121,7 +66,7 @@ expect abstract class SchoolMemberDao : BaseDao<SchoolMember> {
                                                         sortOrder: Int,
                                                         searchQuery: String,
                                                         accountPersonUid: Long)
-            : DataSourceFactory<Int, SchoolMemberWithPerson>
+            : PagingSource<Int, SchoolMemberWithPerson>
 
     @Query("""SELECT SchoolMember.*, Person.* FROM SchoolMember
         LEFT JOIN Person ON Person.personUid = SchoolMember.schoolMemberPersonUid

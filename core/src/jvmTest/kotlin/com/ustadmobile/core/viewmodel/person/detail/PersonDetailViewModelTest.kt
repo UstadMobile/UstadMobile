@@ -7,6 +7,7 @@ import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.withDoorTransactionAsync
@@ -23,7 +24,7 @@ import org.kodein.di.on
 import kotlin.time.Duration.Companion.minutes
 import kotlin.test.assertFalse
 
-class PersonDetailViewModelTest {
+class PersonDetailViewModelTest: AbstractMainDispatcherTest() {
 
     val endpoint = Endpoint("http://test.com/")
 

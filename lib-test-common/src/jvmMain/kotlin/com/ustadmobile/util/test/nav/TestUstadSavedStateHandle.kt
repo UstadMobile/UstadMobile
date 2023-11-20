@@ -1,31 +1,26 @@
 package com.ustadmobile.util.test.nav
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.door.lifecycle.MutableLiveData
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Basic test implementation of SavedStateHandle. Provides no persistence support
  */
 class TestUstadSavedStateHandle: UstadSavedStateHandle {
 
-    private val mLiveDatas: MutableMap<String, MutableLiveData<String?>> = ConcurrentHashMap()
+    private val mSavedData = mutableMapOf<String, String>()
 
     override fun set(key: String, value: String?) {
-        mLiveDatas[key] = MutableLiveData(value)
+        if(value != null) {
+            mSavedData[key] = value
+        }else {
+            mSavedData.remove(key)
+        }
     }
 
     override fun get(key: String): String? {
-        return mLiveDatas[key]?.getValue()
+        return mSavedData[key]
     }
 
     override val keys: Set<String>
-        get() = mLiveDatas.keys.toSet()
-
-    @Deprecated("This should NOT be used in MVVM")
-    override fun <T> getLiveData(key: String): MutableLiveData<T> {
-        return mLiveDatas.getOrPut(key) {
-            MutableLiveData(null)
-        } as MutableLiveData<T>
-    }
+        get() = mSavedData.keys
 }

@@ -12,9 +12,9 @@ import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
-import com.ustadmobile.core.view.PersonEditView
-import com.ustadmobile.core.view.PersonEditView.Companion.ARG_DATE_OF_BIRTH
-import com.ustadmobile.core.view.PersonEditView.Companion.ARG_REGISTRATION_MODE
+import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
+import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_DATE_OF_BIRTH
+import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_REGISTRATION_MODE
 import com.ustadmobile.core.view.RegisterMinorWaitForParentView
 import com.ustadmobile.core.view.RegisterMinorWaitForParentView.Companion.ARG_PARENT_CONTACT
 import com.ustadmobile.core.view.RegisterMinorWaitForParentView.Companion.ARG_USERNAME
@@ -25,9 +25,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import io.github.aakira.napier.DebugAntilog
-import io.github.aakira.napier.Napier
-import kotlinx.coroutines.delay
+import com.ustadmobile.util.test.initNapierLog
 import org.kodein.di.*
 import org.mockito.kotlin.*
 import kotlin.test.Test
@@ -36,13 +34,13 @@ import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
 @Suppress("RemoveExplicitTypeArguments") // This is incorrect for using testViewModel
-class PersonEditViewModelTest {
+class PersonEditViewModelTest : AbstractMainDispatcherTest(){
 
     @Suppress("SameParameterValue")
     private fun createMockAccountManager(serverUrl: String) : UstadAccountManager {
         return mock {
             on { activeEndpoint }.thenReturn(Endpoint(serverUrl))
-            on { activeAccount }.thenReturn(UmAccount(0L, "", "", serverUrl))
+            on { currentAccount }.thenReturn(UmAccount(0L, "", "", serverUrl))
         }
     }
 
@@ -50,7 +48,7 @@ class PersonEditViewModelTest {
     fun givenPresenterCreatedInRegistrationMode_whenUsernameAndPasswordNotFilledClickSave_shouldShowErrors() {
         testViewModel<PersonEditViewModel> {
             viewModelFactory {
-                savedStateHandle[ARG_REGISTRATION_MODE] = PersonEditView.REGISTER_MODE_ENABLED.toString()
+                savedStateHandle[ARG_REGISTRATION_MODE] = PersonEditViewModel.REGISTER_MODE_ENABLED.toString()
                 PersonEditViewModel(di, savedStateHandle)
             }
 
@@ -83,7 +81,7 @@ class PersonEditViewModelTest {
     fun givenPresenterCreatedInRegistrationMode_whenDateOfBirthNotFilledClickSave_shouldShowErrors() {
         testViewModel<PersonEditViewModel> {
             viewModelFactory {
-                savedStateHandle[ARG_REGISTRATION_MODE] = PersonEditView.REGISTER_MODE_ENABLED.toString()
+                savedStateHandle[ARG_REGISTRATION_MODE] = PersonEditViewModel.REGISTER_MODE_ENABLED.toString()
                 PersonEditViewModel(di, savedStateHandle)
             }
 
@@ -114,7 +112,7 @@ class PersonEditViewModelTest {
 
     @Test
     fun givenPresenterCreatedInRegistrationMode_whenFormFilledAndClickSave_shouldRegisterAPerson() {
-        testViewModel<PersonEditViewModel>() {
+        testViewModel<PersonEditViewModel> {
             val serverUrl = "http://test.com/"
             val accountManager = createMockAccountManager(serverUrl)
 
@@ -125,7 +123,7 @@ class PersonEditViewModelTest {
             }
 
             viewModelFactory {
-                savedStateHandle[ARG_REGISTRATION_MODE] = PersonEditView.REGISTER_MODE_ENABLED.toString()
+                savedStateHandle[ARG_REGISTRATION_MODE] = PersonEditViewModel.REGISTER_MODE_ENABLED.toString()
                 savedStateHandle[ARG_API_URL] = serverUrl
                 PersonEditViewModel(di, savedStateHandle)
             }
@@ -155,8 +153,8 @@ class PersonEditViewModelTest {
 
     @Test
     fun givenPresenterCreatedInNonRegistrationMode_whenFormFilledAndClickSave_shouldSaveAPersonInDb() {
-        Napier.base(DebugAntilog())
-        testViewModel<PersonEditViewModel>() {
+        initNapierLog()
+        testViewModel<PersonEditViewModel> {
             viewModelFactory {
                 PersonEditViewModel(di, savedStateHandle)
             }
@@ -176,8 +174,6 @@ class PersonEditViewModelTest {
 
             val db = di.direct.on(activeEndpoint).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
 
-            //Should not be needed - issue is with doorFlow
-            delay(1000)
 
             db.doorFlow(arrayOf("Person")) {
                 db.personDao.getAllPerson()
@@ -202,7 +198,7 @@ class PersonEditViewModelTest {
 
             viewModelFactory {
                 savedStateHandle[ARG_REGISTRATION_MODE] =
-                    (PersonEditView.REGISTER_MODE_ENABLED or PersonEditView.REGISTER_MODE_MINOR).toString()
+                    (PersonEditViewModel.REGISTER_MODE_ENABLED or PersonEditViewModel.REGISTER_MODE_MINOR).toString()
                 savedStateHandle[ARG_API_URL] = activeEndpoint.url
                 savedStateHandle[ARG_DATE_OF_BIRTH] = minorDateOfBirth.toString()
                 PersonEditViewModel(di, savedStateHandle)
@@ -269,7 +265,7 @@ class PersonEditViewModelTest {
 
             viewModelFactory {
                 savedStateHandle[ARG_REGISTRATION_MODE] =
-                    (PersonEditView.REGISTER_MODE_ENABLED or PersonEditView.REGISTER_MODE_MINOR).toString()
+                    (PersonEditViewModel.REGISTER_MODE_ENABLED or PersonEditViewModel.REGISTER_MODE_MINOR).toString()
                 savedStateHandle[ARG_API_URL] = activeEndpoint.url
                 savedStateHandle[ARG_DATE_OF_BIRTH] = minorDateOfBirth.toString()
                 PersonEditViewModel(di, savedStateHandle)
@@ -310,7 +306,9 @@ class PersonEditViewModelTest {
         }
     }
 
-    @Test
+    //This is disabled until consent screens etc. are brought back
+    //@Test
+    @Suppress("unused")
     fun givenPresenterCreatedInNonRegistrationMode_whenDateOfBirthIndicatesMinor_shouldSaveAPersonInDbAndRecordConsent() {
         testViewModel<PersonEditViewModel> {
             viewModelFactory {

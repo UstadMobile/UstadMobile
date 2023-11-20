@@ -6,20 +6,18 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
-@ReplicateEntity(tableId = CourseAssignmentSubmission.TABLE_ID, tracker = CourseAssignmentSubmissionReplicate::class)
+@ReplicateEntity(
+    tableId = CourseAssignmentSubmission.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
 @Triggers(arrayOf(
         Trigger(
                 name = "courseassignmentsubmission_remote_insert",
                 order = Trigger.Order.INSTEAD_OF,
                 on = Trigger.On.RECEIVEVIEW,
                 events = [Trigger.Event.INSERT],
-                sqlStatements = [
-                    """REPLACE INTO CourseAssignmentSubmission(casUid, casAssignmentUid, casSubmitterUid, casSubmitterPersonUid, casText, casType, casTimestamp) 
-         VALUES (NEW.casUid, NEW.casAssignmentUid, NEW.casSubmitterUid, NEW.casSubmitterPersonUid, NEW.casText, NEW.casType, NEW.casTimestamp) 
-         /*psql ON CONFLICT (casUid) DO UPDATE 
-         SET casAssignmentUid = EXCLUDED.casAssignmentUid, casSubmitterUid = EXCLUDED.casSubmitterUid, casSubmitterPersonUid = EXCLUDED.casSubmitterPersonUid, casText = EXCLUDED.casText, casType = EXCLUDED.casType, casTimestamp = EXCLUDED.casTimestamp
-         */"""
-                ]
+                conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+                sqlStatements = [TRIGGER_UPSERT],
         )
 ))
 @Serializable
@@ -70,8 +68,8 @@ open class CourseAssignmentSubmission {
      * The timestamp for when this entry was submitted. Zero indicates that it is still a draft/not
      * saved in the database yet.
      */
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var casTimestamp: Long = 0
 
     companion object {

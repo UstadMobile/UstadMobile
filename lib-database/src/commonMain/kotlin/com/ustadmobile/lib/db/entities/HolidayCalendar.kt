@@ -11,7 +11,10 @@ import kotlinx.serialization.Serializable
  */
 @Entity
 @Serializable
-@ReplicateEntity(tableId = HolidayCalendar.TABLE_ID, tracker = HolidayCalendarReplicate::class)
+@ReplicateEntity(
+    tableId = HolidayCalendar.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
 @Triggers(arrayOf(
  Trigger(
      name = "holidaycalendar_remote_insert",
@@ -19,11 +22,7 @@ import kotlinx.serialization.Serializable
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
      sqlStatements = [
-         """REPLACE INTO HolidayCalendar(umCalendarUid, umCalendarName, umCalendarCategory, umCalendarActive, umCalendarMasterChangeSeqNum, umCalendarLocalChangeSeqNum, umCalendarLastChangedBy, umCalendarLct) 
-         VALUES (NEW.umCalendarUid, NEW.umCalendarName, NEW.umCalendarCategory, NEW.umCalendarActive, NEW.umCalendarMasterChangeSeqNum, NEW.umCalendarLocalChangeSeqNum, NEW.umCalendarLastChangedBy, NEW.umCalendarLct) 
-         /*psql ON CONFLICT (umCalendarUid) DO UPDATE 
-         SET umCalendarName = EXCLUDED.umCalendarName, umCalendarCategory = EXCLUDED.umCalendarCategory, umCalendarActive = EXCLUDED.umCalendarActive, umCalendarMasterChangeSeqNum = EXCLUDED.umCalendarMasterChangeSeqNum, umCalendarLocalChangeSeqNum = EXCLUDED.umCalendarLocalChangeSeqNum, umCalendarLastChangedBy = EXCLUDED.umCalendarLastChangedBy, umCalendarLct = EXCLUDED.umCalendarLct
-         */"""
+         TRIGGER_UPSERT_WHERE_NEWER
      ]
  )
 ))
@@ -50,8 +49,8 @@ open class HolidayCalendar() {
     @LastChangedBy
     var umCalendarLastChangedBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var umCalendarLct: Long = 0
 
     constructor(name: String, category: Int): this() {

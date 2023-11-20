@@ -1,6 +1,7 @@
 package com.ustadmobile.view.components.virtuallist
 
-import com.ustadmobile.door.paging.LoadResult
+import app.cash.paging.PagingSourceLoadResult
+import app.cash.paging.PagingSourceLoadResultPage
 import web.cssom.*
 import js.core.jso
 import react.*
@@ -123,7 +124,7 @@ class VirtualListContentScope internal constructor() {
     }
 
     fun <T: Any> infiniteQueryPagingItemsIndexed(
-        items: UseInfiniteQueryResult<LoadResult<Int, T>, Throwable>,
+        items: UseInfiniteQueryResult<PagingSourceLoadResult<Int, T>, Throwable>,
         key: (item: T, index: Int) -> String,
         itemToNode: (item: T?, index: Int) -> ReactNode,
     ) {
@@ -132,7 +133,7 @@ class VirtualListContentScope internal constructor() {
             infiniteSectionIndex = sections.count { it is InfiniteQueryResultSection<*, *, *> },
             dataPagesToItems = { pages ->
                 console.log("Mapping data pages to items")
-                pages.mapNotNull { it as? LoadResult.Page<Int, T> }.flatMap {
+                pages.mapNotNull { it as? PagingSourceLoadResultPage<Int, T> }.flatMap {
                     it.data
                 }
             },
@@ -142,7 +143,7 @@ class VirtualListContentScope internal constructor() {
     }
 
     fun <T: Any> infiniteQueryPagingItems(
-        items: UseInfiniteQueryResult<LoadResult<Int, T>, Throwable>,
+        items: UseInfiniteQueryResult<PagingSourceLoadResult<Int, T>, Throwable>,
         key: (item: T) -> String,
         itemToNode: (item: T?) -> ReactNode
     ) {

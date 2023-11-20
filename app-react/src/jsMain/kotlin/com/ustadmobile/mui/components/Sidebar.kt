@@ -2,10 +2,9 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.view.ClazzList2View
-import com.ustadmobile.core.view.ContentEntryList2View
-import com.ustadmobile.core.view.PersonListView
+import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.entities.USTAD_SCREENS
 import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
@@ -37,9 +36,9 @@ data class RootScreen(
 )
 
 val ROOT_SCREENS = listOf(
-    RootScreen(ClazzList2View.VIEW_NAME, MR.strings.courses, School),
+    RootScreen(ClazzListViewModel.DEST_NAME, MR.strings.courses, School),
     RootScreen(ContentEntryListViewModel.DEST_NAME, MR.strings.library, LibraryBooks),
-    RootScreen(PersonListView.VIEW_NAME, MR.strings.people, Person)
+    RootScreen(PersonListViewModel.DEST_NAME, MR.strings.people, Person)
 )
 
 val Sidebar = FC<SidebarProps> { props ->

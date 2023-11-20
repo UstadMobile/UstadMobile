@@ -8,20 +8,18 @@ import kotlinx.serialization.Serializable
 @Entity
 @Serializable
 @EntityWithAttachment
-@ReplicateEntity(tableId = ContentEntryPicture.TABLE_ID, tracker = ContentEntryPictureReplicate::class)
+@ReplicateEntity(
+    tableId = ContentEntryPicture.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
 @Triggers(arrayOf(
     Trigger(
         name = "ceppicture_remote_insert",
         order = Trigger.Order.INSTEAD_OF,
         on = Trigger.On.RECEIVEVIEW,
         events = [Trigger.Event.INSERT],
-        sqlStatements = [
-            """REPLACE INTO ContentEntryPicture(cepUid, cepContentEntryUid, cepUri, cepMd5, cepFileSize, cepTimestamp, cepMimeType, cepActive) 
-         VALUES (NEW.cepUid, NEW.cepContentEntryUid, NEW.cepUri, NEW.cepMd5, NEW.cepFileSize, NEW.cepTimestamp, NEW.cepMimeType, NEW.cepActive) 
-         /*psql ON CONFLICT (cepUid) DO UPDATE 
-         SET cepContentEntryUid = EXCLUDED.cepContentEntryUid, cepUri = EXCLUDED.cepUri, cepMd5 = EXCLUDED.cepMd5, cepFileSize = EXCLUDED.cepFileSize, cepTimestamp = EXCLUDED.cepTimestamp, cepMimeType = EXCLUDED.cepMimeType, cepActive = EXCLUDED.cepActive
-         */"""
-        ]
+        conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+        sqlStatements = [TRIGGER_UPSERT],
     )
 ))
 open class ContentEntryPicture() {
@@ -40,8 +38,8 @@ open class ContentEntryPicture() {
     @AttachmentSize
     var cepFileSize: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var cepTimestamp: Long = 0
 
     var cepMimeType: String? = null

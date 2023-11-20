@@ -7,20 +7,18 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-@ReplicateEntity(tableId = Schedule.TABLE_ID, tracker = ScheduleReplicate::class)
+@ReplicateEntity(
+    tableId = Schedule.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
 @Triggers(arrayOf(
  Trigger(
      name = "schedule_remote_insert",
      order = Trigger.Order.INSTEAD_OF,
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
-     sqlStatements = [
-         """REPLACE INTO Schedule(scheduleUid, sceduleStartTime, scheduleEndTime, scheduleDay, scheduleMonth, scheduleFrequency, umCalendarUid, scheduleClazzUid, scheduleMasterChangeSeqNum, scheduleLocalChangeSeqNum, scheduleLastChangedBy, scheduleLastChangedTime, scheduleActive) 
-         VALUES (NEW.scheduleUid, NEW.sceduleStartTime, NEW.scheduleEndTime, NEW.scheduleDay, NEW.scheduleMonth, NEW.scheduleFrequency, NEW.umCalendarUid, NEW.scheduleClazzUid, NEW.scheduleMasterChangeSeqNum, NEW.scheduleLocalChangeSeqNum, NEW.scheduleLastChangedBy, NEW.scheduleLastChangedTime, NEW.scheduleActive) 
-         /*psql ON CONFLICT (scheduleUid) DO UPDATE 
-         SET sceduleStartTime = EXCLUDED.sceduleStartTime, scheduleEndTime = EXCLUDED.scheduleEndTime, scheduleDay = EXCLUDED.scheduleDay, scheduleMonth = EXCLUDED.scheduleMonth, scheduleFrequency = EXCLUDED.scheduleFrequency, umCalendarUid = EXCLUDED.umCalendarUid, scheduleClazzUid = EXCLUDED.scheduleClazzUid, scheduleMasterChangeSeqNum = EXCLUDED.scheduleMasterChangeSeqNum, scheduleLocalChangeSeqNum = EXCLUDED.scheduleLocalChangeSeqNum, scheduleLastChangedBy = EXCLUDED.scheduleLastChangedBy, scheduleLastChangedTime = EXCLUDED.scheduleLastChangedTime, scheduleActive = EXCLUDED.scheduleActive
-         */"""
-     ]
+     conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+     sqlStatements = [TRIGGER_UPSERT],
  )
 ))
 class Schedule {
@@ -74,8 +72,8 @@ class Schedule {
     @LastChangedBy
     var scheduleLastChangedBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var scheduleLastChangedTime: Long = 0
 
     //active or removed
