@@ -1,5 +1,5 @@
 import setDate from '../support/setDate'; //https://github.com/cypress-io/cypress/issues/1366#issuecomment-437878862
-describe('004_001_assignment_creation_submission_grading.cy.js', () => {
+describe('004_001_assignment_creation_submission_grading', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
   cy.ustadStartTestServer()
