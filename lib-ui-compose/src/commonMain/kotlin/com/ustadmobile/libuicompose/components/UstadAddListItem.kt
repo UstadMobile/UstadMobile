@@ -1,7 +1,7 @@
 package com.ustadmobile.libuicompose.components
 
 import androidx.compose.foundation.clickable
-import androidx.compose.material.Icon
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
