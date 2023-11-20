@@ -30,7 +30,7 @@ fun UstadQuickActionButton(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             FilledTonalIconButton(
-                onClick = {   },
+                onClick = onClick,
                 interactionSource = interactionSource,
             ) {
                 if (imageVector != null) {

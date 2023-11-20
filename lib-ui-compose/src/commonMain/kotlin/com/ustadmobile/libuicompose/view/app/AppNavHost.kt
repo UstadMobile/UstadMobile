@@ -12,6 +12,7 @@ import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
@@ -30,6 +31,7 @@ import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.util.PopNavCommandEffect
+import com.ustadmobile.libuicompose.view.accountlist.AccountListScreen
 import com.ustadmobile.libuicompose.view.clazz.detail.ClazzDetailScreen
 import com.ustadmobile.libuicompose.view.clazz.edit.ClazzEditScreen
 import com.ustadmobile.libuicompose.view.clazz.list.ClazzListScreen
@@ -280,6 +282,12 @@ fun AppNavHost(
                 appViewModel(
                     backStackEntry, PersonAccountEditViewModel::class, ::PersonAccountEditViewModel
                 )
+            )
+        }
+
+        contentScene("/${AccountListViewModel.DEST_NAME}") { backStackEntry ->
+            AccountListScreen(
+                appViewModel(backStackEntry, AccountListViewModel::class, ::AccountListViewModel)
             )
         }
 

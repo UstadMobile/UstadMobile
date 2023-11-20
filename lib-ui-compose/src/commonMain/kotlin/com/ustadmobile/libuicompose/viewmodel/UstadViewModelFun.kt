@@ -10,6 +10,7 @@ import com.ustadmobile.libuicompose.effects.AppUiStateEffect
 import com.ustadmobile.libuicompose.effects.NavCommandEffect
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.nav.UstadSavedStateHandlePreCompose
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.map
 import moe.tlaster.precompose.navigation.BackStackEntry
 import moe.tlaster.precompose.viewmodel.viewModel
@@ -26,28 +27,29 @@ fun <T: UstadViewModel> ustadViewModel(
     navController: UstadNavControllerPreCompose,
     onSetAppUiState: (AppUiState) -> Unit,
     navResultReturner: NavResultReturner,
+    name: String? = null,
     appUiStateMap: ((AppUiState) -> AppUiState)? = null,
-    savedStateHandle: UstadSavedStateHandle = UstadSavedStateHandlePreCompose(backStackEntry),
+    savedStateHandle: UstadSavedStateHandlePreCompose = UstadSavedStateHandlePreCompose(backStackEntry),
     block: (di: DI, savedStateHandle: UstadSavedStateHandle) -> T,
 ) : T {
     val di = localDI()
+    val diWithResultReturner = remember {
+        DI {
+            extend(di)
+            bind<NavResultReturner>() with singleton { navResultReturner }
+        }
+    }
 
-    //Use the query parameters as a key for the viewmodel function invalidation
-    val queryParamsHash = remember(backStackEntry.queryString) {
-        backStackEntry.queryString?.map?.hashCode() ?: 0
+    val viewModelNameHash = remember {
+        modelClass.qualifiedName?.hashCode() ?: 0
     }
 
     val viewModel =  viewModel(
         modelClass = modelClass,
-        keys = listOf(queryParamsHash),
+        keys = listOf(viewModelNameHash, savedStateHandle.argsHash),
     ) {
-        block(
-            DI {
-               extend(di)
-               bind<NavResultReturner>() with singleton { navResultReturner }
-            },
-            savedStateHandle
-        )
+        Napier.d("ustadViewModel(${name ?: ""}): create viewmodel for: ${modelClass.qualifiedName}")
+        block(diWithResultReturner, savedStateHandle)
     }
 
     NavCommandEffect(

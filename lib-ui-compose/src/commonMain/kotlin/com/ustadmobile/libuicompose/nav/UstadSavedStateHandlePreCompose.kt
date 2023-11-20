@@ -21,6 +21,9 @@ class UstadSavedStateHandlePreCompose(
     private val savedKeys: MutableMap<String, SavedEntry> = mutableMapOf(),
 ) : UstadSavedStateHandle{
 
+    //Used by ViewModel keys to generate a key that is unique for the given arguments
+    internal val argsHash: Int = argsMap?.hashCode() ?: 0
+
     data class SavedEntry(
         val entry: SaveableStateRegistry.Entry,
         val stateFlow: MutableStateFlow<String?>,
