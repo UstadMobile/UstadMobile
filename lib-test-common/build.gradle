@@ -73,7 +73,7 @@ kotlin {
                 implementation libs.napier
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 implementation project(":lib-database")
-                compileOnly libs.door.runtime
+                compileOnly "com.github.UstadMobile.door:door-runtime:$version_door"
                 compileOnly project(":lib-util")
             }
         }
@@ -84,7 +84,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
                 implementation "io.ktor:ktor-serialization-gson:$version_ktor"
 
-                compileOnly libs.door.runtime
+                compileOnly "com.github.UstadMobile.door:door-runtime:$version_door"
                 compileOnly project(":lib-util")
             }
         }

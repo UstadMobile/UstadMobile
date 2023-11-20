@@ -44,8 +44,7 @@ class ScheduleEditViewModel(
                     visible = true,
                     text = systemImpl.getString(MR.strings.done),
                     onClick = this::onClickSave
-                ),
-                hideBottomNavigation = true,
+                )
             )
         }
 

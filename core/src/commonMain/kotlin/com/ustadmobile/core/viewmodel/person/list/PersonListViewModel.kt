@@ -157,8 +157,6 @@ class PersonListViewModel(
 
         const val DEST_NAME_HOME = "PersonListHome"
 
-        val ALL_DEST_NAMES = listOf(DEST_NAME, DEST_NAME_HOME)
-
         const val RESULT_PERSON_KEY = "Person"
 
         const val ARG_HIDE_PERSON_ADD = "ArgHidePersonAdd"

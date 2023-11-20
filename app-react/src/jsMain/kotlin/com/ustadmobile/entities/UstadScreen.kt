@@ -124,7 +124,6 @@ import com.ustadmobile.view.epubcontent.EpubContentScreen
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.view.videocontent.VideoContentScreen
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
-import com.ustadmobile.view.clazz.courseblockedit.CourseBlockEditScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -278,8 +277,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         UstadMessageIdSelectFieldPreview),
     UstadScreen("Quill", "Quill", QuillDemo),
     UstadScreen("CourseBlockEdit", CourseBlockEditViewModel.DEST_NAME,
-        CourseBlockEditScreen
-    ),
+        CourseBlockEditScreen),
     UstadScreen("UstadNumberTextEditField", "UstadNumberTextEditField Preview",
         UstadNumberTextFieldPreview),
     UstadScreen(TimeZoneListViewModel.DEST_NAME, "Time Zone List", TimeZoneListScreen),

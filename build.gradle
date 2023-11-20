@@ -95,6 +95,7 @@ ext {
     ustadVersion = project.version
     ustadVersionCode = 232
 
+    version_door = "0.70b18"
     version_retriever = "0.0.1e"
     version_xmlpullparserkmp = '0.0.26'
 
@@ -131,6 +132,7 @@ ext {
     version_mpandroidchart = "v3.1.0"
 
     version_mockwebserver = "4.12.0"
+    version_simple_jndi = "0.23.0"
     version_sqlite_jdbc = "3.42.0.0"
     version_core_mockito = "5.7.0"
     version_kotlin_mockito = "5.1.0"
@@ -147,6 +149,7 @@ ext {
     version_logback = "1.4.11"
     version_kodein_di = "7.20.2"
     version_netty_tcnative = "2.0.62.Final"
+    version_quartz_scheduler = "2.3.2"
     version_httpcomponents_core5 = "5.2.3"
     version_argparse4j = "0.9.0"
 

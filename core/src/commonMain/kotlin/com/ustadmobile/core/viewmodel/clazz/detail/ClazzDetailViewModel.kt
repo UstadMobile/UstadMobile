@@ -3,7 +3,6 @@ package com.ustadmobile.core.viewmodel.clazz.detail
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.TabItem
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.*
@@ -41,7 +40,7 @@ class ClazzDetailViewModel(
             TabItem(
                 viewName = ClazzMemberListViewModel.DEST_NAME,
                 args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
-                label = systemImpl.getString(MR.strings.members_key).capitalizeFirstLetter(),
+                label = systemImpl.getString(MR.strings.members_key),
             )
         )
 

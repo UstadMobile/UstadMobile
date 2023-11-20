@@ -1,4 +1,4 @@
-package com.ustadmobile.core.domain.contententry.importcontent
+package com.ustadmobile.core.domain.contententry.import
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.ContentJobManager
@@ -18,7 +18,7 @@ class ImportContentUseCaseJvm(
     private val db: UmAppDatabase,
     private val scheduler: Scheduler,
     private val endpoint: Endpoint,
-) : ImportContentUseCase {
+) : ImportContentUseCase{
 
     override suspend fun invoke(
         contentJob: ContentJob,

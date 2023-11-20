@@ -119,7 +119,7 @@ suspend fun UstadNavController.navigateToLink(
         }
         //If there are no accounts, the endpoint url is not specified, and the user can select the server, go to EnterLink
         endpointUrl == null && accountManager.activeSessionCount(maxDateOfBirth) == 0 && userCanSelectServer -> {
-            navigate(SiteEnterLinkViewModel.DEST_NAME, mapOf(ARG_NEXT to viewUri), goOptions)
+            navigate(SiteEnterLinkViewModel.DEST_NAME, mapOf(ARG_NEXT to viewUri))
         }
 
         //else - go to the account manager

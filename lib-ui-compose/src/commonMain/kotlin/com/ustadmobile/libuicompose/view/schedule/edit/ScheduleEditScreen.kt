@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
@@ -14,7 +13,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditUiState
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
@@ -26,9 +24,10 @@ import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.libuicompose.components.UstadTimeField
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 
 @Composable
-fun ScheduleEditScreen(
+fun ScheduleEditScreenForViewModel(
     viewModel: ScheduleEditViewModel
 ){
     val uiState: ScheduleEditUiState by viewModel.uiState.collectAsState(initial = ScheduleEditUiState())
@@ -47,9 +46,11 @@ fun ScheduleEditScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .defaultScreenPadding()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
+
         UstadMessageIdOptionExposedDropDownMenuField(
             modifier = Modifier.fillMaxWidth().defaultItemPadding(),
             value = uiState.entity?.scheduleDay ?: 0,
@@ -65,10 +66,10 @@ fun ScheduleEditScreen(
 
         Row(
             modifier = Modifier.fillMaxWidth().defaultItemPadding(),
-            horizontalArrangement = Arrangement.SpaceAround,
+            horizontalArrangement = Arrangement.SpaceAround
         ){
+
             UstadInputFieldLayout(
-                modifier = Modifier.weight(0.5f).padding(end = 8.dp),
                 errorText = uiState.fromTimeError
             ) {
                 UstadTimeField(
@@ -85,7 +86,6 @@ fun ScheduleEditScreen(
             }
 
             UstadInputFieldLayout(
-                modifier = Modifier.weight(0.5f).padding(start = 8.dp),
                 errorText = uiState.toTimeError
             ) {
                 UstadTimeField(

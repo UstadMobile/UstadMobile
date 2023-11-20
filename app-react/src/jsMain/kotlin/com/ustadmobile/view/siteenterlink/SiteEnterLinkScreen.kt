@@ -8,7 +8,6 @@ import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.mui.components.UstadStandardContainer
-import com.ustadmobile.mui.components.UstadTextField
 import react.dom.html.ReactHTML.img
 import com.ustadmobile.util.ext.onTextChange
 import web.cssom.px
@@ -64,7 +63,7 @@ val SiteEnterLinkComponent2 = FC <SiteEnterLinkProps> { props ->
                 + strings[MR.strings.please_enter_the_linK]
             }
 
-            UstadTextField {
+            TextField {
                 id = "sitelink_textfield"
                 value = props.uiState.siteLink
                 label = ReactNode(strings[MR.strings.site_link])
@@ -106,5 +105,16 @@ val SiteEnterLinkComponent2 = FC <SiteEnterLinkProps> { props ->
                 + strings[MR.strings.create_a_new_learning_env].uppercase()
             }
         }
+    }
+}
+
+val SiteEnterLinkScreenPreview = FC<Props> {
+
+    val uiStateVar by useState {
+        SiteEnterLinkUiState()
+    }
+
+    SiteEnterLinkComponent2 {
+        uiState = uiStateVar
     }
 }

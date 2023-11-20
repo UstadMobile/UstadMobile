@@ -1,8 +1,6 @@
 package com.ustadmobile.core.domain.contententry.import
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
-import com.ustadmobile.core.domain.contententry.importcontent.ImportRequest
 import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import io.ktor.client.HttpClient
@@ -14,7 +12,7 @@ import io.ktor.http.contentType
 class ImportContentUseCaseJs(
     private val endpoint: Endpoint,
     private val httpClient: HttpClient,
-) : ImportContentUseCase {
+) : ImportContentUseCase{
 
     override suspend fun invoke(contentJob: ContentJob, contentJobItem: ContentJobItem) {
         //send request to the server

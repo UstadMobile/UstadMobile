@@ -47,10 +47,6 @@ class SiteEnterLinkViewModel(
                 navigationVisible = false,
             )
         }
-
-        _uiState.update { prev ->
-            prev.copy(siteLink = savedStateHandle[KEY_LINK] ?: "")
-        }
     }
 
     fun onClickNext() {
@@ -98,7 +94,6 @@ class SiteEnterLinkViewModel(
         _uiState.update { previous ->
             previous.copy(siteLink = siteLink)
         }
-        savedStateHandle[KEY_LINK] = siteLink
     }
 
     companion object {
@@ -106,8 +101,6 @@ class SiteEnterLinkViewModel(
         const val DEST_NAME = "SiteEnterLink"
 
         val ARGS_TO_PASS_THROUGH = listOf(UstadView.ARG_NEXT, UstadView.ARG_INTENT_MESSAGE)
-
-        val KEY_LINK = "stateUrl"
 
     }
 

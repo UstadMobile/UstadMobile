@@ -4,13 +4,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,101 +25,30 @@ import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import com.ustadmobile.libuicompose.util.rememberFormattedTime
+import com.ustadmobile.port.android.view.composable.*
 import java.util.*
 import dev.icerock.moko.parcelize.Parcelable
 import dev.icerock.moko.parcelize.Parcelize
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
-import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
-import com.ustadmobile.libuicompose.components.UstadBottomSheetSpacer
 import com.ustadmobile.libuicompose.components.UstadClickableTextField
 import com.ustadmobile.libuicompose.components.UstadDateField
 import com.ustadmobile.libuicompose.components.UstadSwitchField
 import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
 import com.ustadmobile.libuicompose.util.compose.stringIdOptionListResource
-import kotlinx.coroutines.Dispatchers
-import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import org.burnoutcrew.reorderable.*
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Suppress("unused") // Pending add to navhost
 @Composable
-fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
+fun ClazzEditScreenForViewModel(viewModel: ClazzEditViewModel) {
 
-    val uiState: ClazzEditUiState by viewModel.uiState.collectAsStateWithLifecycle(
-        initial = ClazzEditUiState(), context = Dispatchers.Main.immediate
-    )
-
-    var newCourseBlockSheetVisible by remember {
-        mutableStateOf(false)
-    }
-
-    fun Modifier.addCourseBlockClickable(
-        blockType: Int
-    ) : Modifier = clickable {
-        newCourseBlockSheetVisible = false
-        viewModel.onAddCourseBlock(blockType)
-    }
-
-    if(newCourseBlockSheetVisible) {
-        ModalBottomSheet(
-            onDismissRequest = {
-                newCourseBlockSheetVisible = false
-            },
-        ){
-            Text(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                style = MaterialTheme.typography.headlineSmall,
-                text = stringResource(MR.strings.add_block)
-            )
-
-            Divider(thickness = 1.dp)
-
-            Column(
-                Modifier.verticalScroll(
-                    state = rememberScrollState()
-                ).fillMaxSize()
-            ) {
-                UstadBottomSheetOption(
-                    modifier = Modifier.addCourseBlockClickable(CourseBlock.BLOCK_MODULE_TYPE),
-                    headlineContent = { Text(stringResource(MR.strings.module)) },
-                    leadingContent = { Icon(Icons.Default.Folder, contentDescription = null) },
-                )
-                UstadBottomSheetOption(
-                    modifier = Modifier.addCourseBlockClickable(CourseBlock.BLOCK_TEXT_TYPE),
-                    headlineContent = { Text(stringResource(MR.strings.text)) },
-                    leadingContent = { Icon(Icons.Default.Article, contentDescription = null) },
-                    secondaryContent = { Text(stringResource(MR.strings.formatted_text_to_show_to_course_participants ))},
-                )
-                UstadBottomSheetOption(
-                    modifier = Modifier.addCourseBlockClickable(CourseBlock.BLOCK_CONTENT_TYPE),
-                    headlineContent = { Text(stringResource(MR.strings.content)) },
-                    leadingContent = { Icon(Icons.Default.Collections, contentDescription = null) },
-                    secondaryContent = { Text(stringResource(MR.strings.add_course_block_content_desc)) },
-                )
-                UstadBottomSheetOption(
-                    modifier = Modifier.addCourseBlockClickable(CourseBlock.BLOCK_ASSIGNMENT_TYPE),
-                    headlineContent = { Text(stringResource(MR.strings.assignment)) },
-                    leadingContent = { Icon(Icons.Default.Assignment, contentDescription = null)},
-                    secondaryContent = { Text(stringResource(MR.strings.add_assignment_block_content_desc))}
-                )
-                UstadBottomSheetOption(
-                    modifier = Modifier.addCourseBlockClickable(CourseBlock.BLOCK_DISCUSSION_TYPE),
-                    headlineContent = { Text(stringResource(MR.strings.discussion_board)) },
-                    leadingContent = { Icon(Icons.Default.Forum, contentDescription = null) },
-                    secondaryContent = { Text(stringResource(MR.strings.add_discussion_board_desc)) }
-                )
-                UstadBottomSheetSpacer()
-            }
-
-        }
-    }
+    val uiState: ClazzEditUiState by viewModel.uiState.collectAsState(initial = ClazzEditUiState())
 
     ClazzEditScreen(
         uiState = uiState,
         onClazzChanged = viewModel::onEntityChanged,
         onClickTimezone = viewModel::onClickTimezone,
+        onCheckedAttendance = viewModel::onCheckedAttendanceChanged,
         onClickEditDescription = viewModel::onClickEditDescription,
         onClickAddSchedule = viewModel::onClickAddSchedule,
         onClickEditSchedule = viewModel::onClickEditSchedule,
@@ -131,13 +56,21 @@ fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
         onClickEditCourseBlock = viewModel::onClickEditCourseBlock,
         onClickHideBlockPopupMenu = viewModel::onClickHideBlockPopupMenu,
         onClickUnHideBlockPopupMenu = viewModel::onClickUnHideBlockPopupMenu,
+        onClickIndentBlockPopupMenu = viewModel::onClickIndentBlockPopupMenu,
         onClickUnIndentBlockPopupMenu = viewModel::onClickUnIndentBlockPopupMenu,
         onClickDeleteBlockPopupMenu = viewModel::onClickDeleteCourseBlock,
         onMoveCourseBlock = { from: ItemPosition, to: ItemPosition ->
             viewModel.onCourseBlockMoved(from.index, to.index)
         },
         onClickAddCourseBlock = {
-            newCourseBlockSheetVisible = true
+//            val sheet = TitleDescBottomSheetOptionFragment(
+//                optionsList = ADD_COURSE_BLOCK_OPTIONS(context),
+//                onOptionSelected = { option ->
+//                    viewModel.onAddCourseBlock(option.optionCode)
+//                }
+//            )
+//
+//            sheet.show(context.getContextSupportFragmentManager(), sheet.tag)
         }
     )
 
@@ -154,11 +87,13 @@ class CourseBlockKey(val cbUid: Long): Parcelable {
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ClazzEditScreen(
     uiState: ClazzEditUiState = ClazzEditUiState(),
     onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit = {},
     onMoveCourseBlock: (from: ItemPosition, to: ItemPosition) -> Unit = {_, _ -> },
+    onClickSchool: () -> Unit = {},
     onClickEditDescription: () -> Unit = {},
     onClickTimezone: () -> Unit = {},
     onClickEditCourseBlock: (CourseBlockAndEditEntities) -> Unit = {},
@@ -166,6 +101,7 @@ fun ClazzEditScreen(
     onClickAddSchedule: () -> Unit = {},
     onClickEditSchedule: (Schedule) -> Unit = {},
     onClickDeleteSchedule: (Schedule) -> Unit = {},
+    onClickHolidayCalendar: () -> Unit = {},
     onCheckedAttendance: (Boolean) -> Unit = {},
     onClickTerminology: () -> Unit = {},
     onClickHideBlockPopupMenu: (CourseBlockAndEditEntities) -> Unit = {},
@@ -176,8 +112,7 @@ fun ClazzEditScreen(
 ) {
 
     //The number of items in the LazyColumn before the start of CourseBlocks
-    //There is: basic details, course block headers, add course block button
-    val courseBlockIndexOffset = 3
+    val courseBlockIndexOffset = 0
 
     val reorderLazyListState = rememberReorderableLazyListState(
         onMove = { from, to ->
@@ -205,6 +140,7 @@ fun ClazzEditScreen(
                 ClazzEditBasicDetails(
                     uiState = uiState,
                     onClazzChanged= onClazzChanged,
+                    onClickSchool = onClickSchool,
                     onClickTimezone = onClickTimezone,
                     onClickEditDescription = onClickEditDescription,
                 )
@@ -221,7 +157,7 @@ fun ClazzEditScreen(
         item {
             ReorderableItem(reorderableState = reorderLazyListState, key = 3) {
                 ListItem(
-                    leadingContent = {
+                    icon = {
                         Icon(
                             imageVector = Icons.Filled.Add,
                             contentDescription = null
@@ -230,7 +166,7 @@ fun ClazzEditScreen(
                     modifier = Modifier.clickable {
                         onClickAddCourseBlock()
                     },
-                    headlineContent = { Text(stringResource(MR.strings.add_block)) },
+                    text = { Text(stringResource(MR.strings.add_block)) },
                 )
             }
 
@@ -253,7 +189,7 @@ fun ClazzEditScreen(
                                 onClickEditCourseBlock(block)
                         }
                         .alpha(courseBlockEditAlpha),
-                    leadingContent ={
+                    icon = {
                         Row{
                             Icon(
                                 imageVector = Icons.Filled.Reorder,
@@ -269,8 +205,8 @@ fun ClazzEditScreen(
                         }
                     },
 
-                    headlineContent = { Text(block.courseBlock.cbTitle ?: "") },
-                    trailingContent = {
+                    text = { Text(block.courseBlock.cbTitle ?: "") },
+                    trailing = {
                         PopUpMenu(
                             enabled = uiState.fieldsEnabled,
                             uiState = uiState.courseBlockStateFor(block),
@@ -295,8 +231,8 @@ fun ClazzEditScreen(
                 modifier = Modifier.clickable {
                     onClickAddSchedule()
                 },
-                headlineContent = { Text(stringResource(MR.strings.add_a_schedule)) },
-                leadingContent ={
+                text = { Text(stringResource(MR.strings.add_a_schedule)) },
+                icon = {
                     Icon(
                         imageVector = Icons.Filled.Add,
                         contentDescription = "",
@@ -324,11 +260,11 @@ fun ClazzEditScreen(
                 modifier = Modifier.clickable {
                     onClickEditSchedule(schedule)
                 },
-                leadingContent ={
+                icon = {
                     Spacer(Modifier.width(24.dp))
                 },
-                headlineContent = { Text(text) },
-                trailingContent = {
+                text = { Text(text) },
+                trailing = {
                     IconButton(
                         onClick = { onClickDeleteSchedule(schedule) },
                     ) {
@@ -354,7 +290,6 @@ fun ClazzEditScreen(
                 value = uiState.entity?.clazzTimeZone ?: "",
                 onClick = onClickTimezone,
                 enabled = uiState.fieldsEnabled,
-                singleLine = true,
                 onValueChange = { }
             )
         }
@@ -376,7 +311,6 @@ fun ClazzEditScreen(
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {},
                 onClick = onClickTerminology,
-                singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultItemPadding(),
@@ -389,9 +323,9 @@ fun ClazzEditScreen(
 private fun ClazzEditBasicDetails(
     uiState: ClazzEditUiState,
     onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit = {},
-    @Suppress("UNUSED_PARAMETER") onClickTimezone: () -> Unit = {},
-    //Reserved for use when HTML editing is added to compose
-    @Suppress("UNUSED_PARAMETER") onClickEditDescription: () -> Unit = {},
+    onClickSchool: () -> Unit = {},
+    onClickTimezone: () -> Unit = {},
+    onClickEditDescription: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier.defaultScreenPadding()
@@ -504,38 +438,41 @@ private fun PopUpMenu(
         ) {
             if(uiState.showHide) {
                 DropdownMenuItem(
-                    onClick = { onClickHideBlockPopupMenu(uiState.block) },
-                    text = {Text(stringResource(MR.strings.hide)) }
-                )
+                    onClick = { onClickHideBlockPopupMenu(uiState.block) }
+                ) {
+                    Text(stringResource(MR.strings.hide))
+                }
             }
 
             if(uiState.showUnhide) {
                 DropdownMenuItem(
-                    onClick = { onClickUnHideBlockPopupMenu(uiState.block) },
-                    text = { Text(stringResource(MR.strings.unhide)) }
-                )
+                    onClick = { onClickUnHideBlockPopupMenu(uiState.block) }
+                ) {
+                    Text(stringResource(MR.strings.unhide))
+                }
             }
 
             if(uiState.showIndent) {
                 DropdownMenuItem(
-                    onClick = { onClickIndentBlockPopupMenu(uiState.block) },
-                    text = { Text(stringResource(MR.strings.indent)) }
-                )
+                    onClick = { onClickIndentBlockPopupMenu(uiState.block) }
+                ) {
+                    Text(stringResource(MR.strings.indent))
+                }
             }
 
             if(uiState.showUnindent) {
                 if (uiState.showUnindent) {
                     DropdownMenuItem(
-                        onClick = { onClickUnIndentBlockPopupMenu(uiState.block) },
-                        text = { Text(stringResource(MR.strings.unindent)) }
-                    )
+                        onClick = { onClickUnIndentBlockPopupMenu(uiState.block) }
+                    ) {
+                        Text(stringResource(MR.strings.unindent))
+                    }
                 }
             }
 
-            DropdownMenuItem(
-                onClick = { onClickDeleteBlockPopupMenu(uiState.block) },
-                text = {  Text(stringResource(MR.strings.delete)) }
-            )
+            DropdownMenuItem(onClick = { onClickDeleteBlockPopupMenu(uiState.block) }) {
+                Text(stringResource(MR.strings.delete))
+            }
         }
     }
 }

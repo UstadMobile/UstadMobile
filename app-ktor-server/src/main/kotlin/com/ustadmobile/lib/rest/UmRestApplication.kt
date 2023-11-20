@@ -44,7 +44,6 @@ import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.di.DomainDiModuleJvm
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJvm
-import com.ustadmobile.core.schedule.initQuartzDb
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.door.http.DoorHttpServerConfig

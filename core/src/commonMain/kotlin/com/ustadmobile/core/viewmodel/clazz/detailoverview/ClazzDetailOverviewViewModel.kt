@@ -13,7 +13,6 @@ import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
-import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.*
@@ -59,7 +58,7 @@ data class ClazzDetailOverviewUiState(
 class ClazzDetailOverviewViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-    destinationName: String = DEST_NAME,
+    destinationName: String
 ): DetailViewModel<ClazzWithDisplayDetails>(di, savedStateHandle, destinationName) {
 
     private val _uiState = MutableStateFlow(ClazzDetailOverviewUiState())
@@ -145,12 +144,6 @@ class ClazzDetailOverviewViewModel(
                 navController.navigate(
                     viewName = CourseDiscussionDetailViewModel.DEST_NAME,
                     args = mapOf(ARG_ENTITY_UID to courseBlock.cbUid.toString())
-                )
-            }
-            CourseBlock.BLOCK_CONTENT_TYPE -> {
-                navController.navigate(
-                    viewName = ContentEntryDetailViewModel.DEST_NAME,
-                    args = mapOf(ARG_ENTITY_UID to courseBlock.cbEntityUid.toString())
                 )
             }
         }

@@ -6,7 +6,6 @@ import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadNumberTextField
-import com.ustadmobile.mui.components.UstadTextField
 import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.util.ext.onTextChange
 import dev.icerock.moko.resources.StringResource
@@ -21,6 +20,7 @@ import mui.material.InputAdornment
 import mui.material.InputAdornmentPosition
 import mui.material.InputBaseProps
 import mui.material.Stack
+import mui.material.TextField
 import mui.system.responsive
 import mui.system.sx
 import react.FC
@@ -61,7 +61,7 @@ val CourseAssignmentMarkEdit = FC<CourseAssignmentMarkEditProps> { props ->
             paddingTop = theme.spacing(2)
         }
 
-        UstadTextField {
+        TextField {
             id = "marker_comment"
             label = ReactNode(strings[MR.strings.mark_comment].addOptionalSuffix(strings))
             value = props.draftMark.camMarkerComment ?: ""

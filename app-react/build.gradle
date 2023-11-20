@@ -78,10 +78,10 @@ kotlin {
                 implementation npm("@date-io/moment","$version_npm_mement_io")
                 implementation npm("date-fns","$version_npm_date_fns")
                 implementation npm("html-to-image","$version_npm_html_to_image")
-                implementation libs.door.room.annotations
+                implementation "com.github.UstadMobile.door:room-annotations:$version_door"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 implementation npm("react-google-charts","$version_npm_google_charts")
-                implementation libs.door.runtime
+                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-serialization-kotlinx-json:$version_ktor"

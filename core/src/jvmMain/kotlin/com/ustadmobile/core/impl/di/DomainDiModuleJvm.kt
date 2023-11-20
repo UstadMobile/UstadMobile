@@ -1,8 +1,8 @@
 package com.ustadmobile.core.impl.di
 
 import com.ustadmobile.core.account.EndpointScope
-import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
-import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCaseJvm
+import com.ustadmobile.core.domain.contententry.import.ImportContentUseCase
+import com.ustadmobile.core.domain.contententry.import.ImportContentUseCaseJvm
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
 import org.kodein.di.bind

@@ -1,7 +1,7 @@
 package com.ustadmobile.core.impl.di
 
 import com.ustadmobile.core.account.EndpointScope
-import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
+import com.ustadmobile.core.domain.contententry.import.ImportContentUseCase
 import com.ustadmobile.core.domain.contententry.import.ImportContentUseCaseJs
 import com.ustadmobile.core.domain.openexternallink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.openexternallink.OpenExternalLinkUseCaseJs

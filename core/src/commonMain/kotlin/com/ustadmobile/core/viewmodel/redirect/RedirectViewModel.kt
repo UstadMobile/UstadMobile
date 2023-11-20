@@ -1,7 +1,6 @@
 package com.ustadmobile.core.viewmodel.redirect
 
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.navigateToLink
@@ -27,7 +26,6 @@ class RedirectViewModel(
     private val apiUrlConfig: ApiUrlConfig by instance()
 
     init {
-        _appUiState.value = AppUiState(navigationVisible = false)
         val destination = deepLink ?: nextViewArg ?: ClazzListViewModel.DEST_NAME_HOME
 
         viewModelScope.launch {
@@ -37,7 +35,8 @@ class RedirectViewModel(
                 browserLinkOpener = { },
                 userCanSelectServer = apiUrlConfig.canSelectServer,
                 goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                    clearStack = true
+                    popUpToViewName = DEST_NAME,
+                    popUpToInclusive = true,
                 )
             )
         }

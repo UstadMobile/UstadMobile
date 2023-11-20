@@ -1,14 +1,24 @@
 package com.ustadmobile.libuicompose.components
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
-import androidx.compose.material3.ListItem
+import androidx.compose.material.Surface
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 
 /**
- * Currently this is just a wrapper for ListItem, but that could change if needed.
+ * This is conceptually similar to a ListItem. It does not set any background
  */
 @Composable
 fun UstadDetailField2(
@@ -18,15 +28,42 @@ fun UstadDetailField2(
     trailingContent: @Composable (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
-    //if required - this can be converted to use our own colors /style via
-    //ProvideTextStyle and CompositionLocalProvider(LocalContentColor provides color)
-    ListItem(
-        modifier = modifier,
-        headlineContent = valueContent,
-        supportingContent = labelContent,
-        leadingContent = leadingContent,
-        trailingContent = trailingContent,
-    )
+    Surface(modifier = modifier) {
+        Row{
+            if(leadingContent != null)
+                leadingContent()
+
+            //Note: If needed to set color - use
+            // CompositionLocalProvider(LocalContentColor provides color)
+
+            Column(
+                modifier = if(leadingContent != null) {
+                    Modifier.padding(start = 16.dp).weight(1f)
+                }else {
+                    Modifier
+                }
+            ) {
+                ProvideTextStyle(MaterialTheme.typography.bodyLarge) {
+                    valueContent()
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                if(labelContent != null) {
+                    ProvideTextStyle(MaterialTheme.typography.labelMedium) {
+                        labelContent()
+                    }
+                }
+            }
+
+
+            if(trailingContent != null) {
+                Box(contentAlignment = Alignment.TopEnd) {
+                    trailingContent()
+                }
+            }
+        }
+    }
 }
 
 @Composable

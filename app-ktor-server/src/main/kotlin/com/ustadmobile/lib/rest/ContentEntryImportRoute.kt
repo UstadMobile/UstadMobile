@@ -4,8 +4,8 @@ import io.github.aakira.napier.Napier
 import com.ustadmobile.core.contentjob.ContentImportersManager
 import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
-import com.ustadmobile.core.domain.contententry.importcontent.ImportRequest
+import com.ustadmobile.core.domain.contententry.import.ImportContentUseCase
+import com.ustadmobile.core.domain.contententry.import.ImportRequest
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri

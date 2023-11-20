@@ -11,14 +11,15 @@ import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.core.impl.locale.TerminologyEntry
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadStandardContainer
-import com.ustadmobile.mui.components.UstadTextField
 import com.ustadmobile.util.ext.onTextChange
+import mui.material.TextField
 import mui.system.Stack
 import mui.system.StackDirection
 import mui.system.responsive
 import react.FC
 import react.Props
 import react.ReactNode
+import react.useState
 
 external interface CourseTerminologyEditScreenProps : Props {
 
@@ -39,7 +40,7 @@ val CourseTerminologyEditScreenComponent2 = FC <CourseTerminologyEditScreenProps
             direction = responsive(StackDirection.column)
             spacing = responsive(2)
 
-            UstadTextField {
+            TextField {
                 id = "terms_title"
                 value = props.uiState.entity?.ctTitle ?: ""
                 label = ReactNode(strings[MR.strings.name_key])
@@ -57,7 +58,7 @@ val CourseTerminologyEditScreenComponent2 = FC <CourseTerminologyEditScreenProps
             + strings[MR.strings.your_words_for]
 
             props.uiState.terminologyTermList.forEach { terminologyTerm ->
-                UstadTextField {
+                TextField {
                     fullWidth = true
                     value = terminologyTerm.term ?: ""
                     label = ReactNode(strings[terminologyTerm.stringResource])
@@ -74,6 +75,35 @@ val CourseTerminologyEditScreenComponent2 = FC <CourseTerminologyEditScreenProps
                 }
             }
         }
+    }
+}
+
+val CourseTerminologyEditScreenPreview = FC<Props> {
+
+    val uiStateVal by useState {
+        CourseTerminologyEditUiState(
+            terminologyTermList = listOf(
+                TerminologyEntry(
+                    id = "1",
+                    term = "First",
+                    stringResource = MR.strings.teacher
+                ),
+                TerminologyEntry(
+                    id = "2",
+                    term = "Second",
+                    stringResource = MR.strings.student
+                ),
+                TerminologyEntry(
+                    id = "3",
+                    term = "Third",
+                    stringResource = MR.strings.add_a_teacher
+                )
+            )
+        )
+    }
+
+    CourseTerminologyEditScreenComponent2 {
+        uiState = uiStateVal
     }
 }
 

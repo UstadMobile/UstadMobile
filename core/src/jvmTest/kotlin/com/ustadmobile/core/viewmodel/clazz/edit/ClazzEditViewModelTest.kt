@@ -3,7 +3,6 @@ package com.ustadmobile.core.viewmodel.clazz.edit
 import app.cash.turbine.test
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
@@ -40,10 +39,6 @@ class ClazzEditViewModelTest : AbstractMainDispatcherTest() {
 
             extendDi {
                 bind<ClazzLogCreatorManager>() with singleton {
-                    mock { }
-                }
-
-                bind<ImportContentUseCase>() with scoped(endpointScope).singleton {
                     mock { }
                 }
             }
@@ -109,10 +104,6 @@ class ClazzEditViewModelTest : AbstractMainDispatcherTest() {
 
             extendDi {
                 bind<ClazzLogCreatorManager>() with singleton {
-                    mock { }
-                }
-
-                bind<ImportContentUseCase>() with scoped(endpointScope).singleton {
                     mock { }
                 }
             }

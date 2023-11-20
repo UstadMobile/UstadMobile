@@ -41,7 +41,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
     Stack{
         spacing = responsive(20.px)
 
-        UstadTextField {
+        TextField {
             id = "title"
             value = props.uiState.courseBlock?.cbTitle ?: ""
             label = ReactNode(strings[MR.strings.title])

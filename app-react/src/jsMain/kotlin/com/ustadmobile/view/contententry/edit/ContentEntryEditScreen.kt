@@ -1,31 +1,31 @@
 package com.ustadmobile.view.contententry.edit
 
+import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.locale.entityconstants.LicenceConstants
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditUiState
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
+import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.UstadCourseBlockEdit
-import com.ustadmobile.mui.components.UstadStandardContainer
-import com.ustadmobile.mui.components.UstadTextEditField
-import com.ustadmobile.mui.components.UstadTextField
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.view.components.UstadSwitchField
-import mui.material.Button
-import mui.material.ButtonVariant
+import web.cssom.px
+import mui.material.*
 import mui.material.Stack
-import mui.material.Typography
 import mui.system.responsive
 import react.FC
 import react.Props
 import react.ReactNode
-import web.cssom.px
 
 external interface ContentEntryEditScreenProps : Props {
 
@@ -56,6 +56,44 @@ val ContentEntryEditScreen = FC<Props> {
         uiState = uiStateVal
         onContentEntryChanged = viewModel::onContentEntryChanged
         onCourseBlockChanged = viewModel::onCourseBlockChanged
+    }
+}
+
+val ContentEntryEditScreenPreview = FC<Props> {
+
+    ContentEntryEditScreenComponent {
+        uiState = ContentEntryEditUiState(
+            entity = ContentEntryBlockLanguageAndContentJob(
+                entry = ContentEntry().apply {
+                    leaf = true
+                }
+            ),
+            updateContentVisible = true,
+            metadataResult = MetadataResult(
+                entry = ContentEntryWithLanguage(),
+                importerId = 0
+            ),
+            courseBlockEditUiState = CourseBlockEditUiState(
+                courseBlock = CourseBlock().apply {
+                    cbMaxPoints = 78
+                    cbCompletionCriteria = 14
+                },
+            ),
+            storageOptions = listOf(
+                ContainerStorageDir(
+                    name = "Device Memory",
+                    dirUri = ""
+                ),
+                ContainerStorageDir(
+                    name = "Memory Card",
+                    dirUri = ""
+                ),
+            ),
+            selectedContainerStorageDir = ContainerStorageDir(
+                name = "Device Memory",
+                dirUri = ""
+            )
+        )
     }
 }
 
@@ -93,7 +131,7 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
             }
 
             if(props.uiState.contentEntryTitleVisible) {
-                UstadTextField {
+                TextField {
                     value = props.uiState.entity?.entry?.title ?: ""
                     id = "content_title"
                     label = ReactNode(strings[MR.strings.title]  + "*")
