@@ -46,6 +46,7 @@ android {
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
         kotlinOptions {
             jvmTarget = "17"
+            freeCompilerArgs += "-Xexpect-actual-classes"
         }
     }
 
@@ -95,16 +96,16 @@ kotlin {
                 api libs.moko.resources
                 implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
-                implementation "io.ktor:ktor-client-core:$version_ktor"
-                implementation "io.ktor:ktor-client-json:$version_ktor"
-                implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
-                implementation "io.ktor:ktor-io:$version_ktor"
+                api "io.ktor:ktor-client-core:$version_ktor"
+                api "io.ktor:ktor-client-json:$version_ktor"
+                api "io.ktor:ktor-client-content-negotiation:$version_ktor"
+                api "io.ktor:ktor-io:$version_ktor"
                 implementation libs.napier
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
-                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
+                implementation libs.door.runtime
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 api project(':lib-database')
-                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
+                implementation libs.door.runtime
                 implementation project(":lib-util")
                 implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
@@ -112,7 +113,8 @@ kotlin {
                 api libs.kotlinxio.core
                 api libs.xmlutil.core
                 api libs.xmlutil.serialization
-                implementation libs.precompose.viewmodel
+                api libs.precompose
+                api libs.precompose.viewmodel
             }
         }
 
@@ -154,7 +156,7 @@ kotlin {
                 implementation "org.jsoup:jsoup:$version_jsoup"
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "org.quartz-scheduler:quartz:$version_quartz_scheduler"
+                implementation libs.quartz
                 implementation "io.ktor:ktor-server-core:$version_ktor"
                 implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
                 implementation libs.javaffmpeg
@@ -174,7 +176,7 @@ kotlin {
                 implementation project(":lib-test-common")
                 implementation project(":app-ktor-server")
 
-                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                implementation libs.simplejndi
                 implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
                 implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
@@ -229,12 +231,12 @@ kotlin {
                 //dependency injection
                 implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
 
-                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation libs.okhttp
 
                 implementation libs.androidx.navigation.fragment.ktx
                 implementation libs.androidx.navigation.ui.ktx
 
-                implementation "com.google.android.material:material:$version_android_material"
+                implementation libs.android.material
 
 
 
@@ -296,7 +298,6 @@ publishing {
         }
     }
 }
-
 
 
 multiplatformResources {

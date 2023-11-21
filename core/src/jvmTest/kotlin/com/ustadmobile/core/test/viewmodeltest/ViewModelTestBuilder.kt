@@ -30,7 +30,6 @@ import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockWebServer
 import org.kodein.di.*
 import org.mockito.kotlin.spy
-import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.nio.file.Files
 import kotlin.random.Random
@@ -59,12 +58,6 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
     private lateinit var viewModelFactoryVar: TestViewModelFactory<T>
 
     val endpointScope = EndpointScope()
-
-    private val xppFactory: XmlPullParserFactory by lazy {
-        XmlPullParserFactory.newInstance().also {
-            it.isNamespaceAware = true
-        }
-    }
 
     /**
      * Temporary directory that can be used by a test. It will be deleted when the test is finished
@@ -126,7 +119,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         }
 
         bind<UstadMobileSystemImpl>() with singleton {
-            spy(UstadMobileSystemImpl(xppFactory, tempDir))
+            spy(UstadMobileSystemImpl(tempDir))
         }
 
         bind<XML>() with singleton {

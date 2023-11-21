@@ -45,7 +45,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
-import org.xmlpull.v1.XmlPullParserFactory
 import java.io.IOException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -79,7 +78,7 @@ class TestXapiStatementResponder {
             }
 
             bind<UstadMobileSystemImpl>() with singleton {
-                spy(UstadMobileSystemImpl(XmlPullParserFactory.newInstance(),
+                spy(UstadMobileSystemImpl(
                     temporaryFolder.newFolder()))
             }
             bind<UstadAccountManager>() with singleton {
@@ -110,7 +109,8 @@ class TestXapiStatementResponder {
             bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
-                spy(DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite:build/tmp/$dbName.sqlite")
+                spy(DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
+                        "jdbc:sqlite:build/tmp/$dbName.sqlite", nodeId = nodeIdAndAuth.nodeId)
                     .addSyncCallback(nodeIdAndAuth)
                     .build()
                     .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)

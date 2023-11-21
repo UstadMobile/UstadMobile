@@ -2,7 +2,7 @@ package com.ustadmobile.core.viewmodel.contententry.edit
 
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.contententry.import.ImportContentUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState

@@ -1,34 +1,19 @@
 package com.ustadmobile.port.android.view.binding
 
-import android.annotation.SuppressLint
 import android.text.InputFilter
 import android.text.Spanned
-import android.text.format.DateFormat
 import android.widget.EditText
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
-import androidx.databinding.InverseBindingAdapter
 import com.google.android.material.textfield.TextInputEditText
-import com.ustadmobile.core.util.ext.systemImpl
 import com.ustadmobile.lib.db.entities.*
-import java.text.MessageFormat
 import java.util.*
-import com.ustadmobile.core.R as CR
 
 
 private val MS_PER_HOUR = 3600000
 private val MS_PER_MIN = 60000
 
-private val scheduleMessageFormat: MessageFormat by lazy {
-    MessageFormat("{0} - {1} {2,time,short} - {3,time,short}")
-}
 
-private fun scheduleTimeToDate(msSinceMidnight: Int) : Date{
-    val cal = Calendar.getInstance()
-    cal.set(Calendar.HOUR_OF_DAY, msSinceMidnight / 3600000)
-    cal.set(Calendar.MINUTE, msSinceMidnight.rem(MS_PER_HOUR) / MS_PER_MIN)
-    return Date(cal.timeInMillis)
-}
 
 
 
@@ -44,24 +29,6 @@ private fun mkGmtOffsetString(rawOffset: Int): String {
     return "(GMT$plusMinSymbol$gmtOffset)"
 }
 
-@SuppressLint("SetTextI18n")
-@BindingAdapter("timeZoneText")
-fun TextView.setTimeZoneText(timeZone: TimeZone) {
-    text = "${mkGmtOffsetString(timeZone.rawOffset)} ${timeZone.id}"
-}
-
-
-@BindingAdapter(value = ["createNewFormatText", "createNewFormatArg"], requireAll = true)
-fun TextView.setCreateNewItemText(formatTextId: Int, formatArg: String) {
-    text = context.resources.getString(formatTextId, formatArg)
-}
-
-@BindingAdapter(value=["textDateRangeFrom", "textDateRangeTo"], requireAll = true)
-fun TextView.setTextDateRange(fromDate: Long, toDate: Long) {
-    val dateFormatter = DateFormat.getDateFormat(context)
-    text = context.getString(CR.string.from_to_date, dateFormatter.format(fromDate),
-        dateFormatter.format(toDate))
-}
 
 @BindingAdapter("runOnClickWhenFocused")
 fun TextInputEditText.setRunOnClickWhenFocused(runOnClickWhenFocused: Boolean) {
@@ -75,41 +42,10 @@ fun TextInputEditText.setRunOnClickWhenFocused(runOnClickWhenFocused: Boolean) {
     }
 }
 
-@BindingAdapter("dontShowZeroInt")
-fun TextInputEditText.setValueIfZero(value: Int){
-    if(value == 0){
-        setText("")
-    }else{
-        setText(Integer.toString(value))
-    }
-}
-
-@InverseBindingAdapter(attribute = "dontShowZeroInt")
-fun getRealValueInt(et: TextView): Int {
-    return et.text.toString().toInt()?:0
-}
-
 @BindingAdapter(value = ["minValue", "maxValue"])
 fun EditText.setMinMax(min: Int, max: Int){
     filters = arrayOf(InputFilterMinMax(min, max))
 }
-
-@SuppressLint("SetTextI18n")
-@BindingAdapter("reportTitleText")
-fun TextView.setReportTitleText(report: Report) {
-    val reportTitleId = report.reportTitleId
-    text = REPORT_TITLE_TO_ID[reportTitleId]?.let {
-        systemImpl.getString(it)} ?: report.reportTitle
-}
-
-@SuppressLint("SetTextI18n")
-@BindingAdapter("reportDescText")
-fun TextView.setReportDescText(report: Report) {
-    val reportDescId = report.reportDescId
-    text = REPORT_TITLE_TO_ID[reportDescId]?.let {
-        systemImpl.getString(it)} ?: report.reportDescription
-}
-
 
 class InputFilterMinMax(private val minimumValue: Int, private val maximumValue: Int) : InputFilter {
     override fun filter(source: CharSequence, start: Int, end: Int, dest: Spanned, dstart: Int, dend: Int): CharSequence? {

@@ -7,7 +7,6 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.requireHttpPrefix
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
-import com.ustadmobile.core.view.SiteEnterLinkView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
 import com.ustadmobile.core.viewmodel.UstadViewModel
@@ -30,7 +29,7 @@ data class SiteEnterLinkUiState(
 class SiteEnterLinkViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
-): UstadViewModel(di, savedStateHandle, SiteEnterLinkView.VIEW_NAME) {
+): UstadViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(SiteEnterLinkUiState())
 
@@ -44,8 +43,13 @@ class SiteEnterLinkViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 title = impl.getString(MR.strings.enter_link),
+                userAccountIconVisible = false,
                 navigationVisible = false,
             )
+        }
+
+        _uiState.update { prev ->
+            prev.copy(siteLink = savedStateHandle[KEY_LINK] ?: "")
         }
     }
 
@@ -94,6 +98,7 @@ class SiteEnterLinkViewModel(
         _uiState.update { previous ->
             previous.copy(siteLink = siteLink)
         }
+        savedStateHandle[KEY_LINK] = siteLink
     }
 
     companion object {
@@ -101,6 +106,8 @@ class SiteEnterLinkViewModel(
         const val DEST_NAME = "SiteEnterLink"
 
         val ARGS_TO_PASS_THROUGH = listOf(UstadView.ARG_NEXT, UstadView.ARG_INTENT_MESSAGE)
+
+        val KEY_LINK = "stateUrl"
 
     }
 

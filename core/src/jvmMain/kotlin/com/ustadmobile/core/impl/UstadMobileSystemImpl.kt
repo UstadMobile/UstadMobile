@@ -36,7 +36,6 @@ import java.util.*
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.concurrentSafeMapOf
 import dev.icerock.moko.resources.StringResource
-import org.xmlpull.v1.XmlPullParserFactory
 
 
 /**
@@ -45,10 +44,8 @@ import org.xmlpull.v1.XmlPullParserFactory
  *
  *
  * @author mike, kileha3
- * @param xppFactory - XmlPullParser factory that
  */
 actual open class UstadMobileSystemImpl(
-    val xppFactory: XmlPullParserFactory,
     private val dataRoot: File
 ) : UstadMobileSystemCommon(){
 
@@ -87,10 +84,6 @@ actual open class UstadMobileSystemImpl(
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int,
         ustadGoOptions: UstadGoOptions){
         lastDestination = LastGoToDest(viewName, args)
-    }
-
-    actual fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any) {
-
     }
 
     override fun getString(stringResource: StringResource): String {

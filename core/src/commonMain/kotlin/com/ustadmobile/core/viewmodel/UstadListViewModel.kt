@@ -74,8 +74,8 @@ abstract class UstadListViewModel<S>(
     protected fun createSearchEnabledState(): AppBarSearchUiState {
         return AppBarSearchUiState(
             visible = true,
-            onSearchTextChanged = {searchText ->
-                _appUiState.update {prev ->
+            onSearchTextChanged = { searchText ->
+                _appUiState.update { prev ->
                     prev.copy(
                         searchState = prev.searchState.copy(searchText = searchText)
                     )

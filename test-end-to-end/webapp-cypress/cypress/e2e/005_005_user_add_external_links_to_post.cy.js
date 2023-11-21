@@ -24,26 +24,26 @@ it('Admin add discussion board and post', () => {
   cy.go('back')
   cy.go('back')
   //Add a teacher
-  cy.contains("button","members").click()
+  cy.contains("button","Members").click()
   cy.contains("span","Add a teacher").click()
-  cy.ustadAddNewPerson('Teacher','1','Female')
+  cy.ustadAddNewPerson('Teacher','A','Female')
   // Add account for teacher
-  cy.contains("Teacher 1").click()
+  cy.contains("Teacher A").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('teacher1','test1234')
+  cy.ustadCreateUserAccount('teacherA','test1234')
   //Add a student
   cy.contains("span","Add a student").click()
-  cy.ustadAddNewPerson('Student','1','Male')
-  cy.contains("button","members").should('be.visible')
+  cy.ustadAddNewPerson('Student','A','Male')
+  cy.contains("button","Members").should('be.visible')
   //Add account for student
-  cy.contains("Student 1").click()
+  cy.contains("Student A").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('student1','test1234')
+  cy.ustadCreateUserAccount('studentA','test1234')
 })
 
 it('Teacher able to add external link as reply to the post', () => {
   // Teacher Login
-  cy.ustadClearDbAndLogin('teacher1','test1234')
+  cy.ustadClearDbAndLogin('teacherA','test1234')
   cy.contains("Courses").should('be.visible')
   cy.contains('005_003').click()
   // Add reply to the post board
@@ -62,7 +62,7 @@ it('Teacher able to add external link as reply to the post', () => {
 
 it('Student able to open the external link in the reply', () => {
   // Student Login
-  cy.ustadClearDbAndLogin('student1','test1234')
+  cy.ustadClearDbAndLogin('studentA','test1234')
   cy.contains("Courses").should('be.visible')
   cy.contains('005_003').click()
   // Open link on the post board

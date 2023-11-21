@@ -41,7 +41,7 @@ val UstadAddCommentListItem = FC<UstadAddCommentListItemProps> { props ->
             + AccountCircle.create()
         }
 
-        TextField {
+        UstadTextField {
             fullWidth = true
             id = props.id
             onKeyUp = {

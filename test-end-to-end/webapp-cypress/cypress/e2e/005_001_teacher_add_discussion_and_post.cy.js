@@ -15,7 +15,7 @@ it('Admin add teacher and discussion board to the course', () => {
   cy.contains('Edit course').should('be.visible')
   cy.contains("button","Save").click()
   //Add a teacher
-  cy.contains("button","members").click()
+  cy.contains("button","Members").click()
   cy.contains("span","Add a teacher").click()
   cy.ustadAddNewPerson('Teacher','1','Female')
   // Add account for teacher

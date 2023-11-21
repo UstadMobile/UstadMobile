@@ -34,12 +34,5 @@ class NavHostAdapter(
         }
     }
 
-    override val currentBackStackEntry: UstadBackStackEntry?
-        get() = TODO("Not yet implemented")
-
-    override fun getBackStackEntry(viewName: String): UstadBackStackEntry? {
-        TODO("Not yet implemented")
-    }
-
 
 }

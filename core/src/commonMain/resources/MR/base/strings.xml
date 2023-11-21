@@ -1630,4 +1630,6 @@
 
     <string name="table_of_contents">Table of contents</string>
 
+    <string name="select_date">Select Date</string>
+
 </resources>

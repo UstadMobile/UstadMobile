@@ -44,6 +44,7 @@ import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.di.DomainDiModuleJvm
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJvm
+import com.ustadmobile.core.schedule.initQuartzDb
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.door.http.DoorHttpServerConfig
@@ -65,7 +66,7 @@ import io.ktor.websocket.*
 import org.kodein.di.ktor.di
 import java.util.*
 import com.ustadmobile.lib.rest.logging.LogbackAntiLog
-import com.ustadmobile.libcache.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import kotlinx.io.files.Path
