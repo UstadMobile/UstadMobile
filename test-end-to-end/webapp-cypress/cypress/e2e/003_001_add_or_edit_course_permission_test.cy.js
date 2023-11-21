@@ -15,7 +15,7 @@ it('Admin has course edit permission', () => {
   cy.contains("button","Save").click()
   cy.contains("Admin has edit permission").should('be.visible')
   //Add a teacher
-  cy.contains("button","Members").click()
+  cy.contains("button","members").click()
   cy.contains("span","Add a teacher").click()
   cy.ustadAddNewPerson('Teacher','003','Female')
   // Add account for teacher
@@ -25,7 +25,7 @@ it('Admin has course edit permission', () => {
   //Add a student1
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','003','Male')
-  cy.contains("button","Members").should('be.visible')
+  cy.contains("button","members").should('be.visible')
   //Add account for student1
   cy.contains("Student 003").click()
   cy.contains('View profile').click()

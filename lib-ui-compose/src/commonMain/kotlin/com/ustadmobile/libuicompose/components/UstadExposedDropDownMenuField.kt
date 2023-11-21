@@ -1,6 +1,7 @@
 package com.ustadmobile.libuicompose.components
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
@@ -40,9 +41,8 @@ fun <T> UstadExposedDropDownMenuField(
     }
 
     Box(modifier = modifier) {
-
         OutlinedTextField(
-            modifier = modifier,
+            modifier = Modifier.fillMaxWidth(),
             value = value?.let { itemText(it) } ?: "",
             onValueChange = { },
             readOnly = true,

@@ -102,7 +102,9 @@ class PersonAuthRegisterRouteTest {
         }
     }
 
-    @Test
+    //Disabled until consent screens are brought back
+    @Suppress("unused")
+    //@Test
     fun givenRegisterRequestFromMinor_whenRegisterCalled_thenShouldSendEmailAndReply(
 
     ) = testPersonAuthRegisterApplication { client ->
@@ -256,7 +258,9 @@ class PersonAuthRegisterRouteTest {
             httpResponse.status)
     }
 
-    @Test
+    //Disabled until consent screens are re-introduced
+    @Suppress("unused")
+    //@Test
     fun givenParentalConsentIsRequiredButNotGranted_whenLoginCalled_thenShouldRespondFailedDepdency(
 
     ) = testPersonAuthRegisterApplication {

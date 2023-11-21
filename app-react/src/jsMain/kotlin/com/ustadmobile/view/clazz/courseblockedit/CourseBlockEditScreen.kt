@@ -1,10 +1,9 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.clazz.courseblockedit
 
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.mui.components.UstadCourseBlockEdit
-import mui.system.Container
 import react.FC
 import react.Props
 import com.ustadmobile.hooks.useUstadViewModel

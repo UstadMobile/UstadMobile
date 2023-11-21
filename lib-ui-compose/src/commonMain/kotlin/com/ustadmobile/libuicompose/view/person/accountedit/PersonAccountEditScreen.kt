@@ -9,34 +9,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditUiState
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonUsernameAndPasswordModel
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.components.UstadPasswordField
 import dev.icerock.moko.resources.compose.stringResource
-import kotlinx.coroutines.Dispatchers
-import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
-
-@Composable
-fun PersonAccountEditScreen(
-    viewModel: PersonAccountEditViewModel
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle(
-        PersonAccountEditUiState(), Dispatchers.Main.immediate
-    )
-
-    PersonAccountEditScreen(
-        uiState = uiState,
-        onChange = viewModel::onEntityChanged
-    )
-}
 
 @Composable
 fun PersonAccountEditScreen(

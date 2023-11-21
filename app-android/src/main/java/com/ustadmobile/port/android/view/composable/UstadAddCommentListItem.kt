@@ -12,6 +12,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.material.MdcTheme
+import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

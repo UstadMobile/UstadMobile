@@ -24,7 +24,7 @@ it('Admin add discussion board and a post', () => {
   cy.go('back')
   cy.go('back')
   //Add a teacher
-  cy.contains("button","Members").click()
+  cy.contains("button","members").click()
   cy.contains("span","Add a teacher").click()
   cy.ustadAddNewPerson('Teacher','A','Female')
   // Add account for teacher

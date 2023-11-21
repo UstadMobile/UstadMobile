@@ -1,16 +1,24 @@
 package com.ustadmobile.libuicompose.view.person.detail
 
-//import androidx.compose.material.icons.filled.Passkey
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Badge
@@ -19,39 +27,32 @@ import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.LocationOn
+//import androidx.compose.material.icons.filled.Passkey
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material.icons.filled.SupervisedUserCircle
-import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.ustadmobile.core.MR
-import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailUiState
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
-import com.ustadmobile.libuicompose.components.UstadEditHeader
+import dev.icerock.moko.resources.compose.stringResource
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.libuicompose.components.UstadQuickActionButton
 import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
 import com.ustadmobile.libuicompose.util.rememberFormattedDate
-import dev.icerock.moko.resources.compose.stringResource
-import kotlinx.coroutines.Dispatchers
-import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
-fun PersonDetailScreen(viewModel: PersonDetailViewModel) {
-    val uiState: PersonDetailUiState by viewModel.uiState.collectAsStateWithLifecycle(
-        PersonDetailUiState(), Dispatchers.Main.immediate)
+fun PersonDetailScreenForViewModel(viewModel: PersonDetailViewModel) {
+    val uiState: PersonDetailUiState by viewModel.uiState.collectAsState(PersonDetailUiState())
     PersonDetailScreen(
         uiState = uiState,
         onClickCreateAccount = viewModel::onClickCreateAccount,
@@ -64,7 +65,7 @@ fun PersonDetailScreen(viewModel: PersonDetailViewModel) {
 
 @Composable
 fun PersonDetailScreen(
-    uiState: PersonDetailUiState,
+    uiState: PersonDetailUiState = PersonDetailUiState(),
     onClickDial: () -> Unit = {},
     onClickSms: () -> Unit = {},
     onClickEmail: () -> Unit = {},
@@ -109,7 +110,9 @@ fun PersonDetailScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        UstadEditHeader(stringResource(MR.strings.basic_details))
+        Text(stringResource(MR.strings.basic_details),
+            style = MaterialTheme.typography.h4,
+            modifier = Modifier.padding(8.dp))
 
         DetailFields(uiState)
 
@@ -117,7 +120,9 @@ fun PersonDetailScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        UstadEditHeader(stringResource(MR.strings.contact_details))
+        Text(stringResource(MR.strings.contact_details),
+            style = MaterialTheme.typography.h4,
+            modifier = Modifier.padding(8.dp))
 
         ContactDetails(uiState,
             onClickDial,
@@ -128,7 +133,9 @@ fun PersonDetailScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        UstadEditHeader(stringResource(MR.strings.courses))
+        Text(stringResource(MR.strings.classes),
+            style = MaterialTheme.typography.h4,
+            modifier = Modifier.padding(8.dp))
 
         Classes(uiState.clazzes, onClickClazz)
     }
@@ -183,7 +190,8 @@ private fun QuickActionBar(
         if(uiState.changePasswordVisible){
             UstadQuickActionButton(
                 labelText = stringResource(MR.strings.change_password),
-                imageVector = Icons.Default.Key,
+                // TODO error
+//                imageVector = Icons.Default.Passkey,
                 onClick = onClickChangePassword
             )
         }
@@ -232,12 +240,16 @@ private fun DetailFields(uiState: PersonDetailUiState){
             )
         }
 
+        Spacer(modifier = Modifier.height(10.dp))
+
         if (uiState.personGenderVisible){
             ListItem(
                 headlineContent = { Text(gender)},
                 supportingContent = { Text(stringResource(MR.strings.gender_literal)) }
             )
         }
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         if (uiState.personOrgIdVisible){
             ListItem(
@@ -251,6 +263,8 @@ private fun DetailFields(uiState: PersonDetailUiState){
                 supportingContent = { Text(stringResource(MR.strings.organization_id)) }
             )
         }
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         if (uiState.personUsernameVisible){
             ListItem(
@@ -342,15 +356,28 @@ private fun Classes(
 ){
 
     clazzes.forEach { clazz ->
-        ListItem(
-            modifier = Modifier.clickable { onClickClazz(clazz) },
-            headlineContent = {
-                Text(clazz.clazz?.clazzName ?: "")
-            },
-            leadingContent = {
-                Icon(Icons.Default.Group, contentDescription = null)
-            }
+        TextButton(
+            onClick = { onClickClazz(clazz) }
+        ) {
+            ClassItem(clazz)
+        }
+    }
+}
 
-        )
+@Composable
+private fun ClassItem(clazz: ClazzEnrolmentWithClazzAndAttendance){
+    Row(
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ){
+        Icon(
+            Icons.Filled.Group,
+            contentDescription = null,
+            modifier = Modifier
+                .width(35.dp))
+
+        Text(text = clazz.clazz?.clazzName ?: "")
     }
 }

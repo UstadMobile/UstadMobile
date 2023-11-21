@@ -59,23 +59,25 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     )
 )
 
+/**
+ * @param onAppStateChanged - a change Listener that is used by the calling function, mostly the JVM
+ *        window and activity. Used to update title, navbar visibility.
+ */
 @Composable
 fun App(
     widthClass: SizeClass = SizeClass.MEDIUM,
     persistNavState: Boolean = false,
     useBottomBar: Boolean = true,
     navigator: Navigator = rememberNavigator(),
-    onSetWindowTitle: (String) -> Unit = { },
+    onAppStateChanged: (AppUiState) -> Unit = { },
 ) {
     val appUiState = remember {
         mutableStateOf(AppUiState())
     }
 
     val appUiStateVal by appUiState
-    LaunchedEffect(appUiStateVal.title) {
-        appUiStateVal.title?.also {
-            onSetWindowTitle(it)
-        }
+    LaunchedEffect(appUiStateVal) {
+        onAppStateChanged(appUiStateVal)
     }
 
     Scaffold(
@@ -89,7 +91,7 @@ fun App(
         bottomBar = {
             //As per https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#navigationbar
             var selectedTopLevelItemIndex by remember { mutableIntStateOf(0) }
-            if(useBottomBar && appUiStateVal.navigationVisible) {
+            if(useBottomBar && appUiStateVal.navigationVisible && !appUiStateVal.hideBottomNavigation) {
                 NavigationBar {
                     APP_TOP_LEVEL_NAV_ITEMS.forEachIndexed { index, item ->
                         NavigationBarItem(

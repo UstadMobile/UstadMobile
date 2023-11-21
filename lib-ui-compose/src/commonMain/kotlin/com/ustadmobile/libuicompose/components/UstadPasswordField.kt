@@ -48,6 +48,7 @@ fun UstadPasswordField(
         },
         isError = isError,
         enabled = enabled,
+        singleLine = true,
         trailingIcon = {
             IconButton(
                 onClick = {

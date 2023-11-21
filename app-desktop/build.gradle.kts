@@ -20,6 +20,7 @@ java.targetCompatibility = JavaVersion.VERSION_17
 
 tasks.withType<KotlinCompile> {
     compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    compilerOptions.freeCompilerArgs.add("-Xexpect-actual-classes")
 }
 
 dependencies {
@@ -31,6 +32,8 @@ dependencies {
     implementation(compose.materialIconsExtended)
 
     implementation(libs.okhttp)
+    implementation(libs.quartz)
+    implementation(libs.napier)
 
     api(libs.moko.resources)
     api(libs.moko.resources.compose)

@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.util.ext
+package com.ustadmobile.libuicompose.util.ext
 
 import android.app.Activity
 import android.content.Context

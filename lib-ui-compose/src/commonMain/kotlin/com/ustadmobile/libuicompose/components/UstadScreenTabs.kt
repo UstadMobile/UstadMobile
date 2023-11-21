@@ -27,7 +27,7 @@ import org.kodein.di.DI
 import kotlin.reflect.KClass
 
 class TabScope(
-    private val savedStateHandle: UstadSavedStateHandlePreCompose,
+    private val savedStateHandle: UstadSavedStateHandle,
     private val backStackEntry: BackStackEntry,
     private val navController: UstadNavControllerPreCompose,
     private val onSetAppUiState: (AppUiState) -> Unit,

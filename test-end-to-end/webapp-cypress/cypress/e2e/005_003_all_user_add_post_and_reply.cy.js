@@ -24,7 +24,7 @@ it('Admin add discussion board and post', () => {
   cy.go('back')
   cy.go('back')
   //Add a teacher
-  cy.contains("button","Members").click()
+  cy.contains("button","members").click()
   cy.contains("span","Add a teacher").click()
   cy.ustadAddNewPerson('Teacher','A','Female')
   // Add account for teacher
@@ -34,7 +34,7 @@ it('Admin add discussion board and post', () => {
   //Add a student
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','A','Male')
-  cy.contains("button","Members").should('be.visible')
+  cy.contains("button","members").should('be.visible')
   //Add account for student
   cy.contains("Student A").click()
   cy.contains('View profile').click()

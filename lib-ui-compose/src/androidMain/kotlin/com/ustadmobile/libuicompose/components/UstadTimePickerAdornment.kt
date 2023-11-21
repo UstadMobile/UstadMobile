@@ -9,7 +9,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.MS_PER_MIN
-import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
+import com.ustadmobile.libuicompose.util.ext.getContextSupportFragmentManager
 
 @Composable
 actual fun UstadTimePickerAdornment(onTimeSelected: (Int) -> Unit) {

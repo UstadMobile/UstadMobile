@@ -1,7 +1,7 @@
 package com.ustadmobile.mui.components
 
+import com.ustadmobile.util.ext.assignPropsTo
 import js.core.jso
-import kotlinext.js.getOwnPropertyNames
 import mui.material.*
 import mui.system.responsive
 import react.*
@@ -50,10 +50,8 @@ val UstadNumberTextField = FC<UstadNumberTextFieldProps> { props ->
     }
 
     TextField {
-        props.getOwnPropertyNames().filter {
+        props.assignPropsTo(this) {
             it != "value" && it != "onChange" && it != "numValue" && it != "numValueIfBlank"
-        }.forEach { propName ->
-            asDynamic()[propName] = props.asDynamic()[propName]
         }
 
         if(props.inputProps == null) {

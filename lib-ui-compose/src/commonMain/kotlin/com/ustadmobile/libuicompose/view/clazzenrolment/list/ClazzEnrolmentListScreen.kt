@@ -4,16 +4,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Divider
+import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.ListItem
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -34,7 +34,7 @@ import com.ustadmobile.libuicompose.util.rememberFormattedDateRange
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
-fun ClazzEnrolmentListScreen(
+fun ClazzEnrolmentListScreenForViewModel(
     viewModel: ClazzEnrolmentListViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState(ClazzEnrolmentListUiState())
@@ -78,7 +78,7 @@ fun ClazzEnrolmentListScreen(
             Text(
                 text = stringResource(MR.strings.person_enrolment_in_class,
                     uiState.personName ?: "", uiState.courseName ?: ""),
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.body1,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp)
@@ -136,9 +136,9 @@ private fun ClazzEnrolmentListItem(
 
 
     ListItem(
-        headlineContent = { Text(text = itemPrimaryText) },
-        supportingContent = { Text(text = joinedLeftDate)},
-        trailingContent = {
+        text = { Text(text = itemPrimaryText) },
+        secondaryText = { Text(text = joinedLeftDate)},
+        trailing = {
             if(uiState.canEdit) {
                 IconButton(
                     onClick = {

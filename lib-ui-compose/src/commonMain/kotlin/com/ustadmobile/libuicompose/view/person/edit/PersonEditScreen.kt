@@ -6,9 +6,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,14 +28,10 @@ import com.ustadmobile.libuicompose.components.UstadDateField
 import com.ustadmobile.libuicompose.components.UstadImageSelectButton
 import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
 import dev.icerock.moko.resources.compose.stringResource
-import kotlinx.coroutines.Dispatchers
-import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
-fun PersonEditScreen(viewModel: PersonEditViewModel) {
-    val uiState: PersonEditUiState by viewModel.uiState.collectAsStateWithLifecycle(
-        PersonEditUiState(), Dispatchers.Main.immediate)
-
+fun PersonEditScreenForViewModel(viewModel: PersonEditViewModel) {
+    val uiState: PersonEditUiState by viewModel.uiState.collectAsState(PersonEditUiState())
     PersonEditScreen(
         uiState,
         onPersonChanged = viewModel::onEntityChanged,
@@ -74,7 +71,6 @@ fun PersonEditScreen(
                 label = { Text(stringResource(MR.strings.first_names)) },
                 isError = uiState.firstNameError != null,
                 enabled = uiState.fieldsEnabled,
-                singleLine = true,
                 onValueChange = {
                     onPersonChanged(uiState.person?.shallowCopy{
                         firstNames = it
@@ -94,7 +90,6 @@ fun PersonEditScreen(
                 label = { Text(stringResource(MR.strings.last_name)) },
                 isError = uiState.lastNameError != null,
                 enabled = uiState.fieldsEnabled,
-                singleLine = true,
                 onValueChange = {
                     onPersonChanged(uiState.person?.shallowCopy{
                         lastName = it
@@ -137,7 +132,6 @@ fun PersonEditScreen(
                     value = uiState.approvalPersonParentJoin?.ppjEmail ?: "",
                     label = { Text(stringResource(MR.strings.parents_email_address)) },
                     isError = uiState.parentContactError != null,
-                    singleLine = true,
                     enabled = uiState.fieldsEnabled,
                     onValueChange = {
                         onApprovalPersonParentJoinChanged(
@@ -174,7 +168,6 @@ fun PersonEditScreen(
             value = uiState.person?.phoneNum ?: "",
             label = { Text(stringResource(MR.strings.phone_number)) },
             enabled = uiState.fieldsEnabled,
-            singleLine = true,
             onValueChange = {
                 onPersonChanged(uiState.person?.shallowCopy{
                     phoneNum = it
@@ -191,7 +184,6 @@ fun PersonEditScreen(
                 value = uiState.person?.emailAddr ?: "",
                 label = { Text(stringResource(MR.strings.email)) },
                 isError = uiState.emailError != null,
-                singleLine = true,
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
                     onPersonChanged(uiState.person?.shallowCopy{
@@ -207,7 +199,6 @@ fun PersonEditScreen(
             value = uiState.person?.personAddress ?: "",
             label = { Text(stringResource(MR.strings.address)) },
             enabled = uiState.fieldsEnabled,
-            singleLine = true,
             onValueChange = {
                 onPersonChanged(uiState.person?.shallowCopy{
                     personAddress = it
@@ -221,7 +212,6 @@ fun PersonEditScreen(
                 value = uiState.person?.username ?: "",
                 label = { Text(stringResource(MR.strings.username)) },
                 enabled = uiState.fieldsEnabled,
-                singleLine = true,
                 onValueChange = {
                     onPersonChanged(uiState.person?.shallowCopy{
                         username = it
@@ -236,7 +226,6 @@ fun PersonEditScreen(
                 value = uiState.person?.newPassword ?: "",
                 label = { Text(stringResource(MR.strings.password)) },
                 enabled = uiState.fieldsEnabled,
-                singleLine = true,
                 onValueChange = {
                     onPersonChanged(uiState.person?.shallowCopy{
                         newPassword = it

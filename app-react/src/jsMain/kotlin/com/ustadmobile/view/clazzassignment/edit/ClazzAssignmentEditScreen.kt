@@ -5,16 +5,13 @@ import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.*
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditUiState
-import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants.TextLimitType
 import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants.MarkingType
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
 import com.ustadmobile.hooks.courseTerminologyResource
 import com.ustadmobile.hooks.useCourseTerminologyEntries
 import com.ustadmobile.hooks.useUstadViewModel
-import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.ClazzAssignment
-import com.ustadmobile.lib.db.entities.ClazzAssignment.Companion.COMPLETION_CRITERIA_GRADED
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.common.input
@@ -22,6 +19,7 @@ import com.ustadmobile.mui.common.readOnly
 import com.ustadmobile.mui.components.UstadCourseBlockEdit
 import com.ustadmobile.mui.components.UstadNumberTextField
 import com.ustadmobile.mui.components.UstadStandardContainer
+import com.ustadmobile.mui.components.UstadTextField
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.view.components.UstadSelectField
 import com.ustadmobile.view.components.UstadSwitchField
@@ -34,7 +32,6 @@ import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
-import react.useState
 
 external interface ClazzAssignmentEditScreenProps : Props {
 
@@ -51,32 +48,6 @@ external interface ClazzAssignmentEditScreenProps : Props {
 
 }
 
-val ClazzAssignmentEditScreenPreview = FC<Props> {
-
-    val entity: CourseBlockAndEditEntities? by useState {
-        CourseBlockAndEditEntities(
-            courseBlock = CourseBlock().apply {
-
-            },
-            assignment = ClazzAssignment().apply {
-                caMarkingType = ClazzAssignment.MARKED_BY_PEERS
-            }
-        )
-    }
-
-    ClazzAssignmentEditScreenComponent2 {
-        uiState = ClazzAssignmentEditUiState(
-            courseBlockEditUiState = CourseBlockEditUiState(
-                courseBlock = CourseBlock().apply {
-                    cbMaxPoints = 78
-                    cbCompletionCriteria = COMPLETION_CRITERIA_GRADED
-                },
-                completionCriteriaOptions = ClazzAssignmentEditUiState.ASSIGNMENT_COMPLETION_CRITERIAS,
-            ),
-            entity = entity
-        )
-    }
-}
 
 private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenProps> { props ->
 
@@ -94,7 +65,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 onCourseBlockChange = props.onChangeCourseBlock
             }
 
-            TextField {
+            UstadTextField {
                 id = "cgsName"
                 sx {
                     input {

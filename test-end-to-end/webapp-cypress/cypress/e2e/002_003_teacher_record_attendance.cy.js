@@ -10,7 +10,7 @@ it('Admin record student attendance', () => {
   // Add a new course
   cy.ustadAddCourse('002_003')
   //Add a teacher
-  cy.contains("button","Members").click()
+  cy.contains("button","members").click()
   cy.contains("span","Add a teacher").click()
   cy.ustadAddNewPerson('Teacher','002_003','Female')
   // Add account for teacher
@@ -20,7 +20,7 @@ it('Admin record student attendance', () => {
   //Add a student1
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','002_A','Male')
-  cy.contains("button","Members").should('be.visible')
+  cy.contains("button","members").should('be.visible')
   //Add account for student1
   cy.contains("Student 002_A").click()
   cy.contains('View profile').click()
@@ -28,7 +28,7 @@ it('Admin record student attendance', () => {
   //Add a student2
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','002_B','Male')
-  cy.contains("button","Members").should('be.visible')
+  cy.contains("button","members").should('be.visible')
   //Add account for student2
   cy.contains("Student 002_B").click()
   cy.contains('View profile').click()

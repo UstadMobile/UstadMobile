@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view.composable
 
 import android.annotation.SuppressLint
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -29,7 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.port.android.util.ext.getContextSupportFragmentManager
+import com.ustadmobile.libuicompose.util.ext.getContextSupportFragmentManager
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.min

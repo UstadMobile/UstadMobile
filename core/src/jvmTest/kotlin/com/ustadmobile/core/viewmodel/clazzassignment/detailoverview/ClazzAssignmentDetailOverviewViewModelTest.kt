@@ -516,9 +516,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             }
 
             viewModel.uiState.test(timeout = 5.seconds) {
-                val commentReadyState = awaitItemWhere {
-                    it.privateComments() !is EmptyPagingSource && it.privateCommentSectionVisible
-                }
+                val commentReadyState = awaitItemWhere { it.privateComments() !is EmptyPagingSource }
                 val commentLoadResult: List<CommentsAndName> = commentReadyState.privateComments().loadFirstList()
                 assertEquals(teacherComment, commentLoadResult.first().comment.commentsText)
                 cancelAndIgnoreRemainingEvents()

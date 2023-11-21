@@ -1,4 +1,4 @@
-package com.ustadmobile.libuicompose.view
+package com.ustadmobile.libuicompose.util
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -6,10 +6,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.ustadmobile.core.impl.nav.PopNavCommand
+import com.ustadmobile.libuicompose.util.ext.ustadDestName
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import moe.tlaster.precompose.navigation.Navigator
 
 data class PopTargetState(
@@ -38,9 +43,16 @@ fun PopNavCommandEffect(
         mutableStateOf(null)
     }
 
+    var pendingGoBackTimeout: Job? by remember {
+        mutableStateOf(null)
+    }
+
+    val coroutineScope = rememberCoroutineScope()
+
     LaunchedEffect(popCommandFlow) {
         popCommandFlow.collect {
             Napier.d { "UstadNavControllerNavHost: received PopNavCommand $it" }
+            onSetContentVisible(false)
             popUpToTarget = PopTargetState(it)
         }
     }
@@ -49,11 +61,16 @@ fun PopNavCommandEffect(
     val canGoBack by navigator.canGoBack.collectAsState(true)
 
     LaunchedEffect(popUpToTarget, currentEntry) {
-        val currentDestName = currentEntry?.route?.route?.substringBefore("/")
+        val currentDestName = currentEntry?.ustadDestName
         val popUpToTargetVal = popUpToTarget
         val logPrefix = {
             "UstadNavControllerNavHost: currentDestName=$currentDestName target = $popUpToTargetVal"
         }
+        pendingGoBackTimeout?.also {
+            it.cancel()
+            Napier.v { "${logPrefix()} cancel timeout"}
+        }
+
         when {
             /*
              * There is a popUpToTarget, but we have not reached it yet. Go back once more
@@ -62,7 +79,17 @@ fun PopNavCommandEffect(
                     && !popUpToTargetVal.targetHit-> {
                 if(canGoBack){
                     Napier.d { "${logPrefix()} target not reached: can go back, going back" }
-                    navigator.goBack()
+                    pendingGoBackTimeout = coroutineScope.launch {
+                        //Unfortunately if we call go back immediately in succession, that will not
+                        //work, so we have to retry. This will be cancelled by the effect once
+                        //navigation has actually taken place, so there is no risk of running goBack
+                        //too many times.
+                        repeat(3) {
+                            Napier.d { "${logPrefix()} target not reached: can go back,: attempting" }
+                            navigator.goBack()
+                            delay(200)
+                        }
+                    }
                 }else {
                     //Target is not in stack, cannot go back, give up
                     Napier.d { "${logPrefix()} target not reached: but cannot go back, give up" }

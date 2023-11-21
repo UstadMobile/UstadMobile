@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.contententry.edit
 
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.domain.contententry.import.ImportContentUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest

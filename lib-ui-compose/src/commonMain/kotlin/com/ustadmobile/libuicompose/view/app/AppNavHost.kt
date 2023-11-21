@@ -12,18 +12,13 @@ import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadViewModel
-import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
-import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
-import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
-import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
-import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
@@ -31,18 +26,13 @@ import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.util.PopNavCommandEffect
-import com.ustadmobile.libuicompose.view.accountlist.AccountListScreen
 import com.ustadmobile.libuicompose.view.clazz.detail.ClazzDetailScreen
 import com.ustadmobile.libuicompose.view.clazz.edit.ClazzEditScreen
 import com.ustadmobile.libuicompose.view.clazz.list.ClazzListScreen
 import com.ustadmobile.libuicompose.view.clazzassignment.courseblockedit.CourseBlockEditScreen
 import com.ustadmobile.libuicompose.view.clazzenrolment.edit.ClazzEnrolmentEditScreen
-import com.ustadmobile.libuicompose.view.clazzenrolment.list.ClazzEnrolmentListScreen
 import com.ustadmobile.libuicompose.view.contententry.list.ContentEntryListScreenForViewModel
 import com.ustadmobile.libuicompose.view.login.LoginScreen
-import com.ustadmobile.libuicompose.view.person.accountedit.PersonAccountEditScreen
-import com.ustadmobile.libuicompose.view.person.detail.PersonDetailScreen
-import com.ustadmobile.libuicompose.view.person.edit.PersonEditScreen
 import com.ustadmobile.libuicompose.view.person.list.PersonListScreen
 import com.ustadmobile.libuicompose.view.schedule.edit.ScheduleEditScreen
 import com.ustadmobile.libuicompose.view.siteenterlink.SiteEnterLinkScreen
@@ -252,46 +242,6 @@ fun AppNavHost(
                 }
             )
         }
-
-        contentScene("/${ClazzEnrolmentListViewModel.DEST_NAME}") { backStackEntry ->
-            ClazzEnrolmentListScreen(
-                appViewModel(
-                    backStackEntry, ClazzEnrolmentListViewModel::class, ::ClazzEnrolmentListViewModel
-                )
-            )
-        }
-
-        contentScene("/${PersonDetailViewModel.DEST_NAME}") { backStackEntry ->
-            PersonDetailScreen(
-                appViewModel(
-                    backStackEntry, PersonDetailViewModel::class, ::PersonDetailViewModel
-                )
-            )
-        }
-
-        contentScene("/${PersonEditViewModel.DEST_NAME}") { backStackEntry ->
-            PersonEditScreen(
-                appViewModel(
-                    backStackEntry, PersonEditViewModel::class, ::PersonEditViewModel
-                )
-            )
-        }
-
-        contentScene("/${PersonAccountEditViewModel.DEST_NAME}") { backStackEntry ->
-            PersonAccountEditScreen(
-                appViewModel(
-                    backStackEntry, PersonAccountEditViewModel::class, ::PersonAccountEditViewModel
-                )
-            )
-        }
-
-        contentScene("/${AccountListViewModel.DEST_NAME}") { backStackEntry ->
-            AccountListScreen(
-                appViewModel(backStackEntry, AccountListViewModel::class, ::AccountListViewModel)
-            )
-        }
-
-
     }
 
 

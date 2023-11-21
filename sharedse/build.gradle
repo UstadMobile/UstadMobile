@@ -102,7 +102,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
 
 
-                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
+                implementation libs.door.runtime
                 implementation project(':lib-database')
                 implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
             }
@@ -207,7 +207,7 @@ kotlin {
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation libs.napier.jvm
                 implementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
-                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                implementation libs.simplejndi
                 implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
                 implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"

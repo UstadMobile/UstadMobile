@@ -43,18 +43,19 @@ import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.libuicompose.components.HtmlText
+import com.ustadmobile.libuicompose.components.SortListMode
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadBottomSheetSpacer
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
-import com.ustadmobile.libuicompose.components.UstadSortOptionsBottomSheet
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.util.ext.copyWithNewFabOnClick
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
-import com.ustadmobile.libuicompose.util.useSortOptionPopup
+import com.ustadmobile.libuicompose.util.defaultSortListMode
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
 import moe.tlaster.precompose.navigation.BackStackEntry
 
@@ -64,21 +65,20 @@ fun ClazzListScreen(
     backStackEntry: BackStackEntry,
     navController: UstadNavControllerPreCompose,
     onSetAppUiState: (AppUiState) -> Unit,
+    navResultReturner: NavResultReturner,
     destName: String,
 ) {
     var createNewOptionsVisible by remember {
         mutableStateOf(false)
     }
 
-    var sortBottomSheetVisible by remember {
-        mutableStateOf(false)
-    }
 
     val viewModel = ustadViewModel(
         modelClass = ClazzListViewModel::class,
         backStackEntry = backStackEntry,
         onSetAppUiState = onSetAppUiState,
         navController = navController,
+        navResultReturner = navResultReturner,
         appUiStateMap = {
             it.copyWithNewFabOnClick {
                 createNewOptionsVisible = true
@@ -120,20 +120,9 @@ fun ClazzListScreen(
         }
     }
 
-    if(sortBottomSheetVisible) {
-        UstadSortOptionsBottomSheet(
-            sortOptions = uiState.sortOptions,
-            onClickSortOption = viewModel::onSortOrderChanged,
-            onDismissRequest = { sortBottomSheetVisible = false }
-        )
-    }
-
     ClazzListScreen(
         uiState = uiState,
         onClickClazz = viewModel::onClickEntry,
-        onClickSort =  {
-            sortBottomSheetVisible = true
-        },
         onClickFilterChip = viewModel::onClickFilterChip,
         onClickSortOption = viewModel::onSortOrderChanged,
     )
@@ -143,10 +132,9 @@ fun ClazzListScreen(
 fun ClazzListScreen(
     uiState: ClazzListUiState = ClazzListUiState(),
     onClickClazz: (Clazz) -> Unit = {},
-    onClickSort: () -> Unit = {},
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
     onClickSortOption: (SortOrderOption) -> Unit = { },
-    showSortOptionsPopup: Boolean = useSortOptionPopup(),
+    sortListMode: SortListMode = defaultSortListMode(),
 ) {
 
     val pager = remember(uiState.clazzList){
@@ -174,9 +162,8 @@ fun ClazzListScreen(
                 activeSortOrderOption = uiState.activeSortOrderOption,
                 enabled = uiState.fieldsEnabled,
                 sortOptions = uiState.sortOptions,
-                onClick = onClickSort,
                 onClickSortOption = onClickSortOption,
-                showPopup = showSortOptionsPopup,
+                mode = sortListMode,
             )
         }
 
