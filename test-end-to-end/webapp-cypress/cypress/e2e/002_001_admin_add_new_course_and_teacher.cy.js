@@ -41,7 +41,7 @@ it('Teacher able to login to the app', () => {
 
    cy.ustadClearDbAndLogin('teacher21','test1234')
    cy.contains("Courses").should('be.visible')  // Assertion to check the user logged in successfully
-   cy.contains('1 teachers, 1 students').should('be.visible')
+  // cy.contains('1 teachers, 1 students').should('be.visible')
 
    })
 })

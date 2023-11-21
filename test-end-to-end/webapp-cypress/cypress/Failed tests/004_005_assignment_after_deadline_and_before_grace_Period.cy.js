@@ -11,7 +11,7 @@ it('Admin add a course and assignment block', () => {
  // Add a new course
   cy.ustadAddCourse('004_005')
  //Add a teacher
-  cy.contains("button","members").click()
+  cy.contains("button","Members").click()
   cy.contains("span","Add a teacher").click()
   cy.ustadAddNewPerson('Teacher','1','Female')
  // Add account for teacher
@@ -21,7 +21,7 @@ it('Admin add a course and assignment block', () => {
  //Add a student1
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','1','Male')
-  cy.contains("button","members").should('be.visible')
+  cy.contains("button","Members").should('be.visible')
  //Add account for student1
   cy.contains("Student 1").click()
   cy.contains('View profile').click()
@@ -33,7 +33,7 @@ it('Teacher add assignment', () => {
   // Add Assignment block
   cy.contains("Course").click()
   cy.contains("004_005").click()
-  cy.contains("button","members").click()  // This is a temporary command to make sure member list is loaded
+  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
@@ -46,25 +46,25 @@ it('Teacher add assignment', () => {
    // .then(input => setDate(input[0], '2023-11-08T00:00'));
   //cy.debug();
   cy.get('#cbDeadlineDate')
-    .then(input => setDate(input[0], '2023-11-05T00:00'))
+    .then(input => setDate(input[0], '2023-11-12T00:00'))
   cy.contains("div","Graded").click()
   cy.contains("li","submitted").click()
   cy.get('#cbGracePeriodDate',{timeout:5000}).should('be.visible')
   cy.get('#cbGracePeriodDate',{timeout:2000})
-    .then(input => setDate(input[0], '2023-11-12T00:00'))
+    .then(input => setDate(input[0], '2024-11-12T00:00'))
   cy.get('#cbLateSubmissionPenalty').type('20')
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
-  cy.contains("button","members").should('be.visible')
+  cy.contains("button","Members").should('be.visible')
   cy.contains("button","Edit").click()
   cy.contains("Assignment 1").click()
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
-  cy.contains("button","members").should('be.visible')
+  cy.contains("button","Members").should('be.visible')
 })
 
 it('Student submit assignment', () => {
@@ -86,7 +86,7 @@ it('Teacher add marks', () => {
  //  Assignment block
   cy.contains("Course").click()
   cy.contains("004_005").click()
-  cy.contains("button","members").click()  // This is a temporary command to make sure member list is loaded
+  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.contains('Submissions').click()

@@ -70,13 +70,14 @@ cd $SCRIPTDIR
 
 # Run npm install and Cypress tests
 npm install || exit_with_error "Failed to run 'npm install'"
-npm exec cypress run --spec "$SPECARG"  || exit_with_error "Cypress test run failed"
+#npm exec
+cypress run cypress run --spec "$SPECARG"  || exit_with_error "Cypress test run failed"
 
 # Capture the exit status of the Cypress test run
 teststatus=$?
 
 # Stop the control server
-"$SCRIPTDIR/../../testserver-controller/stop.sh" || exit_with_error "Failed to stop control server"
+#"$SCRIPTDIR/../../testserver-controller/stop.sh" || exit_with_error "Failed to stop control server"
 
 # Exit with the same status as the Cypress test run
 exit $teststatus

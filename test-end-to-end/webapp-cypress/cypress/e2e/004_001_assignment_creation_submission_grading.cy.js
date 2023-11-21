@@ -11,7 +11,7 @@ it('Admin add a course and assignment block', () => {
  // Add a new course
   cy.ustadAddCourse('004_001')
  //Add a teacher
-  cy.contains("button","members").click()
+  cy.contains("button","Members").click()
   cy.contains("span","Add a teacher").click()
   cy.ustadAddNewPerson('Teacher','1','Female')
  // Add account for teacher
@@ -21,7 +21,7 @@ it('Admin add a course and assignment block', () => {
  //Add a student1
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','1','Male')
-  cy.contains("button","members").should('be.visible')
+  cy.contains("button","Members").should('be.visible')
  //Add account for student1
   cy.contains("Student 1").click()
   cy.contains('View profile').click()
@@ -33,7 +33,7 @@ it('Teacher add assignment', () => {
   // Add Assignment block
   cy.contains("Course").click()
   cy.contains("004_001").click()
-  cy.contains("button","members").click() // This is a temporary command to make sure member list is loaded
+  cy.contains("button","Members").click() // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
@@ -55,14 +55,14 @@ it('Teacher add assignment', () => {
   cy.contains("button","Done").click()
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
-  cy.contains("button","members").should('be.visible')
+  cy.contains("button","Members").should('be.visible')
   cy.contains("button","Edit").click()
   cy.contains("Assignment 1").click()
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
-  cy.contains("button","members").should('be.visible')
+  cy.contains("button","Members").should('be.visible')
 })
 
 it('Student submit assignment', () => {
@@ -86,7 +86,7 @@ it('Teacher add assignment mark and course comment', () => {
  //  Assignment block
   cy.contains("Course").click()
   cy.contains("004_001").click()
-  cy.contains("button","members").click()  // This is a temporary command to make sure member list is loaded
+  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.contains('Submissions').click()

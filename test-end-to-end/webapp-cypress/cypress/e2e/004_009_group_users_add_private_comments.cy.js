@@ -5,7 +5,7 @@ it('Start Ustad Test Server ', () => {
   cy.ustadStartTestServer()
 })
 
-it('Admin add a course and members', () => {
+it('Admin add a course and Members', () => {
  // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass')
  // Add a new course
@@ -14,7 +14,7 @@ it('Admin add a course and members', () => {
  // cy.contains('button','Edit').click()
  // cy.ustadAddModuleBlock('module 1')
  //Add a teacher
-  cy.contains("button","members").click()
+  cy.contains("button","Members").click()
   cy.contains("span","Add a teacher").click()
   cy.ustadAddNewPerson('Teacher','1','Female')
  // Add account for teacher
@@ -24,7 +24,7 @@ it('Admin add a course and members', () => {
  //Add a student1
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','1','Male')
-  cy.contains("button","members").should('be.visible')
+  cy.contains("button","Members").should('be.visible')
  //Add account for student1
   cy.contains("Student 1").click()
   cy.contains('View profile').click()
@@ -32,7 +32,7 @@ it('Admin add a course and members', () => {
  //Add a student2
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','2','Male')
-  cy.contains("button","members").should('be.visible')
+  cy.contains("button","Members").should('be.visible')
  //Add account for student1
   cy.contains("Student 2").click()
   cy.contains('View profile').click()
@@ -40,7 +40,7 @@ it('Admin add a course and members', () => {
  //Add a student3
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','3','Male')
-  cy.contains("button","members").should('be.visible')
+  cy.contains("button","Members").should('be.visible')
  //Add account for student3
   cy.contains("Student 3").click()
   cy.contains('View profile').click()
@@ -48,7 +48,7 @@ it('Admin add a course and members', () => {
  //Add a student4
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','4','Male')
-  cy.contains("button","members").should('be.visible')
+  cy.contains("button","Members").should('be.visible')
  //Add account for student4
   cy.contains("Student 4").click()
   cy.contains('View profile').click()
@@ -60,7 +60,7 @@ it('Teacher add assignment and course comment', () => {
  // Add Assignment block
   cy.contains("Courses").click()
   cy.contains("004_009").click()
-  cy.contains("button","members").click()  // This is a temporary command to make sure member list is loaded
+  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
@@ -96,7 +96,7 @@ it('Teacher add assignment and course comment', () => {
   cy.contains("button","Done").click()
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
-  cy.contains("button","members").should('be.visible')
+  cy.contains("button","Members").should('be.visible')
   cy.get('svg[data-testid="AssignmentTurnedInIcon"]').click()
   cy.contains('Submissions').click()
   cy.contains('Group 1').click()
