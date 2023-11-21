@@ -80,7 +80,8 @@ fun handleNoFfmpeg(
                                 destFile = File(ffmpegDestDir, filename)
                             )
                         }
-                        System.err.println("Done! Extracted to $ffmpegDestDir")
+                        System.err.println("Done! Extracted to $ffmpegDestDir . Please run the " +
+                                "command again to start the server")
                     }else {
                         System.err.println("Ffmpeg license declined! Cannot continue.")
                     }
