@@ -13,7 +13,7 @@ describe('002_001_admin_add_new_course_and_teacher ', () => {
     cy.ustadAddCourse('002_001')
 
     //Add a teacher
-    cy.contains("button","members").click()
+    cy.contains("button","Members").click()
     cy.contains("span","Add a teacher").click()
     cy.ustadAddNewPerson('Teacher','002_001','Female')
 
@@ -21,7 +21,7 @@ describe('002_001_admin_add_new_course_and_teacher ', () => {
   //Add a student
     cy.contains("span","Add a student").click()
     cy.ustadAddNewPerson('Student','002_001','Male')
-    cy.contains("button","members").should('be.visible')
+    cy.contains("button","Members").should('be.visible')
 
   // Add account for teacher
     cy.contains("Teacher 002_001").click()

@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import dev.icerock.moko.resources.compose.stringResource
 import moe.tlaster.precompose.navigation.Navigator
 
@@ -141,7 +142,7 @@ fun UstadAppBar(
             }else if(appUiState.userAccountIconVisible) {
                 IconButton(
                     onClick = {
-
+                        navigator.navigate("/${AccountListViewModel.DEST_NAME}")
                     }
                 ) {
                     Icon(
