@@ -1,6 +1,6 @@
 @echo off
 
-call gradlew.bat app-ktor-server:shadowJar
+gradlew app-ktor-server:shadowJar
 
 if not exist app-ktor-server\build\libs\ustad-server-all.jar (
     echo "Please build the server jar: gradlew app-ktor-server:buildFatJar"

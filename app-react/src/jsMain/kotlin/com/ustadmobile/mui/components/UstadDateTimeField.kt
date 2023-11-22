@@ -1,7 +1,6 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.util.ext.chopOffSeconds
-import com.ustadmobile.hooks.useFormattedDateAndTime
 import web.cssom.px
 import js.core.jso
 import kotlinx.datetime.*
@@ -9,7 +8,6 @@ import mui.material.TextField
 import mui.system.PropsWithSx
 import mui.system.sx
 import react.*
-import react.dom.html.ReactHTML.br
 import react.dom.onChange
 import web.html.HTMLInputElement
 import web.html.InputType
@@ -126,10 +124,7 @@ val UstadDateTimeField = FC<UstadDateTimeFieldProps> { props ->
 
 val DateTimeEditFieldPreview = FC<Props> {
     var dateTime: Long by useState { 0 }
-    val formattedDate = useFormattedDateAndTime(dateTime, TimeZone.currentSystemDefault().id)
-
     UstadDateTimeField {
-        id = "datetime"
         sx {
             margin = 20.px
         }
@@ -141,8 +136,5 @@ val DateTimeEditFieldPreview = FC<Props> {
         }
     }
 
-    br()
-
-    + formattedDate
 }
 

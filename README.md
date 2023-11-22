@@ -111,12 +111,8 @@ Windows:
 ```
 $ runserver.bat --siteUrl http://your.ip.address:8087/
 ```
-
-The siteUrl parameter must match the address that you use to access the system (e.g. in the browser
-or when entering the link on the Android app). 
-
-As above, your.ip.address is your IP address (e.g. 192.168.1.2). If the siteUrl changes and the old 
-site url is inaccessible, then this may make content uploaded before the change inaccessible.
+Where your.ip.address is your IP address (e.g. 192.168.1.2). If the siteUrl changes and the old site
+url is inaccessible, then this may make content uploaded before the change inaccessible.
 
 This will start the server on port 8087. The admin password will be randomly generated - you can find
 it in app-ktor-server/data/singleton/admin.txt .
