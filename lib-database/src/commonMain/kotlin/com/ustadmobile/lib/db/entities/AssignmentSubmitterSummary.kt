@@ -1,13 +1,14 @@
 package com.ustadmobile.lib.db.entities
 
-open class AssignmentSubmitterSummary {
+import kotlinx.serialization.Serializable
 
-    var submitterUid: Long = 0
+@Serializable
+data class AssignmentSubmitterSummary(
+    var submitterUid: Long = 0,
 
-    var name: String? = null
+    var name: String? = null,
 
-    var latestPrivateComment: String? = null
+    var latestPrivateComment: String? = null,
 
-    var fileSubmissionStatus: Int = 0
-
-}
+    var fileSubmissionStatus: Int = 0,
+)

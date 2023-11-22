@@ -125,6 +125,8 @@ import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.view.videocontent.VideoContentScreen
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.view.clazz.courseblockedit.CourseBlockEditScreen
+import com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditViewModel
+import com.ustadmobile.view.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditPreview
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -344,6 +346,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(PdfContentViewModel.DEST_NAME, "PdfContent", PdfContentScreen),
     UstadScreen(EpubContentViewModel.DEST_NAME, "EpubContent", EpubContentScreen),
     UstadScreen(VideoContentViewModel.DEST_NAME, "VideoContent", VideoContentScreen),
+    UstadScreen(PeerReviewerAllocationEditViewModel.DEST_NAME, "PeerReviewAllocationEdit",
+        PeerReviewerAllocationEditPreview),
 )
 
 
