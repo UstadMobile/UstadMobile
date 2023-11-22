@@ -715,7 +715,7 @@
     <string name="mark_penalty">Mark penalty</string>
     <string name="late_submission_penalty">Late submission penalty</string>
     <string name="end_of_grace_period">End of grace period</string>
-    <string name="allow_class_comments">Allow class comments from students</string>
+    <string name="allow_class_comments">Class comments enabled</string>
     <string name="after_deadline_date_error">Must be after deadline date</string>
     <!-- score points gained from content -->
     <string name="points">Points</string>

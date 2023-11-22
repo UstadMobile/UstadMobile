@@ -110,6 +110,9 @@ data class ClazzAssignmentDetailOverviewUiState(
     val activeUserIsSubmitter: Boolean
         get() = submitterUid > 0L
 
+    val showPrivateComments: Boolean
+        get() = activeUserIsSubmitter && assignment?.caPrivateCommentsEnabled == true
+
     val isWithinDeadlineOrGracePeriod: Boolean
         get() {
             val timeNow = systemTimeInMillis()
