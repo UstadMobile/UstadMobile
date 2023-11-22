@@ -287,37 +287,40 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 }
             }
 
-            //Course comments
-            item {
-                ListItem.create {
-                    ListItemText {
-                        primary = ReactNode(strings[MR.strings.class_comments])
+            if(props.uiState.showClassComments) {
+                //Course comments
+                item {
+                    ListItem.create {
+                        ListItemText {
+                            primary = ReactNode(strings[MR.strings.class_comments])
+                        }
+                    }
+                }
+
+                item {
+                    AssignmentCommentTextFieldListItem.create {
+                        onChange = props.onChangeCourseComment
+                        label = ReactNode(strings[MR.strings.add_class_comment])
+                        value = props.uiState.newCourseCommentText
+                        activeUserPersonUid = props.uiState.activeUserPersonUid
+                        textFieldId = "course_comment_textfield"
+                        onClickSubmit = props.onClickSubmitCourseComment
+                    }
+                }
+
+                infiniteQueryPagingItems(
+                    items = courseCommentInfiniteQueryResult,
+                    key = { "cc_${it.comment.commentsUid}" }
+                ) { comment ->
+                    UstadCommentListItem.create {
+                        commentsAndName = comment
                     }
                 }
             }
 
-            item {
-                AssignmentCommentTextFieldListItem.create {
-                    onChange = props.onChangeCourseComment
-                    label = ReactNode(strings[MR.strings.add_class_comment])
-                    value = props.uiState.newCourseCommentText
-                    activeUserPersonUid = props.uiState.activeUserPersonUid
-                    textFieldId = "course_comment_textfield"
-                    onClickSubmit = props.onClickSubmitCourseComment
-                }
-            }
-
-            infiniteQueryPagingItems(
-                items = courseCommentInfiniteQueryResult,
-                key = { "cc_${it.comment.commentsUid}" }
-            ) { comment ->
-                UstadCommentListItem.create {
-                    commentsAndName = comment
-                }
-            }
 
             //Private comments
-            if(props.uiState.activeUserIsSubmitter) {
+            if(props.uiState.showPrivateComments) {
                 item {
                     ListItem.create {
                         ListItemText {

@@ -225,7 +225,7 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
                            (SELECT ClazzAssignment.caClazzUid
                               FROM ClazzAssignment
                              WHERE ClazzAssignment.caUid = :assignmentUid)
-             WHERE PersonGroupMember.groupMemberUid = :accountPersonUid
+             WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
                AND (    :enrolmentFilterPersonUid = 0 
                      OR ClazzEnrolment.clazzEnrolmentPersonUid = :enrolmentFilterPersonUid)                
                              
