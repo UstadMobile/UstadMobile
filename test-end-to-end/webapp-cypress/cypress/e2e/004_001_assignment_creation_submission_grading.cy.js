@@ -48,8 +48,7 @@ it('Teacher add assignment', () => {
  */
   cy.contains("div","Graded").click()
   cy.contains("li","submitted").click()
-  cy.get('#cbDeadlineDate')
-    .then(input => setDate(input[0], '2023-12-20T00:00'))
+  cy.ustadSetDateTime(cy.get("#cbDeadlineDate"),  new Date(Date.now() + (1000*60*1000)))
   cy.get('#caSubmissionPolicy').click()
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()

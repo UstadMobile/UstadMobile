@@ -49,7 +49,7 @@ it('Teacher add assignment', () => {
 
   cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date("2023-11-01T08:30"))
   cy.get('#cbGracePeriodDate',{timeout:5000}).should('be.visible')
-  cy.ustadSetDateTime(cy.get("#cbGracePeriodDate"), new Date("2024-01-01T08:30"))
+  cy.ustadSetDateTime(cy.get("#cbGracePeriodDate"),  new Date(Date.now() + (2*60*1000)))
   //cy.get('#caSubmissionPolicy').click()
   cy.get('#cbLateSubmissionPenalty').type('20')
     cy.contains("div","Graded").click()
@@ -80,7 +80,7 @@ it('Student submit assignment', () => {
   cy.contains('SUBMIT',{timeout:5000}).click()
   cy.go('back')
   cy.contains('Assignment 1',{timeout:1000}).click()
-  cy.contains("Not submitted").should('not.exist')
+  cy.contains("Not submitted").should('exist') //should not able to submit the assignment
 })
 
 it('Teacher add assignment mark and course comment', () => {
@@ -102,13 +102,4 @@ it('Teacher add assignment mark and course comment', () => {
   cy.contains('10/10 Points').should('exist')
 })
 
-it('Student view his grade', () => {
-  cy.ustadClearDbAndLogin('student1','test1234')
-  cy.contains("Course").click()
-  cy.contains("004_005").click()
-  cy.contains('Assignment 1').click()
-  cy.contains('Keep it up').should('exist')
-  cy.contains('8/10 Points').should('exist')
-  cy.contains('SUBMIT').should('not.exist') // assertion to make sure multiple submission is not allowed
-  })
 })

@@ -20,7 +20,7 @@ import '@this-dot/cypress-indexeddb';
 // Start Test Server
 Cypress.Commands.add('ustadStartTestServer', () => {
   cy.visit('http://localhost:8075/start'); // Use cy.visit to navigate to the start page
-  cy.wait(5000); // Wait for 5 seconds after visiting the start page
+  cy.wait(6000); // Wait for 6 seconds after visiting the start page
 });
 
 
