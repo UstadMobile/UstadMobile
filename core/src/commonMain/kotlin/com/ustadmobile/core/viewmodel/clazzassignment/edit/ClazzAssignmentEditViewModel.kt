@@ -13,6 +13,7 @@ import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditUiState.Companion.ASSIGNMENT_COMPLETION_CRITERIAS
 import com.ustadmobile.core.viewmodel.courseblock.CourseBlockViewModelConstants
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -24,6 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.TimeZone
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.encodeToString
 import org.kodein.di.DI
@@ -39,8 +41,6 @@ data class ClazzAssignmentEditUiState(
     val groupSetEnabled: Boolean = true,
 
     val reviewerCountError: String? = null,
-
-    val timeZone: String? = null,
 
     val entity: CourseBlockAndEditEntities? = null,
 
@@ -91,7 +91,14 @@ class ClazzAssignmentEditViewModel(
     }
 ): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
-    private val _uiState = MutableStateFlow(ClazzAssignmentEditUiState())
+    private val _uiState = MutableStateFlow(
+        ClazzAssignmentEditUiState(
+            courseBlockEditUiState = CourseBlockEditUiState(
+                completionCriteriaOptions = ASSIGNMENT_COMPLETION_CRITERIAS,
+                timeZone = TimeZone.currentSystemDefault().id,
+            )
+        )
+    )
 
     val uiState: Flow<ClazzAssignmentEditUiState> = _uiState.asStateFlow()
 
