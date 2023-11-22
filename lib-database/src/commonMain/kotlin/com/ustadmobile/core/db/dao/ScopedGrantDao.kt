@@ -84,6 +84,8 @@ expect abstract class ScopedGrantDao {
                        JOIN ScopedGrant
                            ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
                  WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
+                   AND (ScopedGrant.sgEntityUid = 0 OR ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+                   AND (ScopedGrant.sgTableId = 0 OR ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES})
                    AND (ScopedGrant.sgPermissions & :permission) > 0    
                )
         """
