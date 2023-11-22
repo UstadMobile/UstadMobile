@@ -1,10 +1,11 @@
 package com.ustadmobile.core.impl.locale
 
 import com.ustadmobile.core.controller.TerminologyKeys
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.encodeStringMapToString
 import com.ustadmobile.lib.db.entities.CourseTerminology
+import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.json.Json
 import org.junit.Test
 import org.mockito.kotlin.any
@@ -16,7 +17,7 @@ class CourseTerminologyStringsTest {
 
     val json = Json { encodeDefaults = true }
     val systemImpl = mock<UstadMobileSystemImpl> {
-        on { getString(any()) }.thenAnswer { "${it.arguments.first()}" }
+        on { getString(any<StringResource>()) }.thenAnswer { "${it.arguments.first()}" }
     }
 
     @Test
@@ -29,7 +30,7 @@ class CourseTerminologyStringsTest {
 
         val terminologyStrings = CourseTerminologyStrings(terminology, systemImpl, json)
 
-        assertEquals("course participant", terminologyStrings[MessageID.student],
+        assertEquals("course participant", terminologyStrings[MR.strings.student],
             "Terminology string will be overriden if present")
     }
 
@@ -37,7 +38,7 @@ class CourseTerminologyStringsTest {
     fun givenEmptyTerminologyStrings_whenKeyNotPresent_thenWillBeNull() {
         val terminologyStrings = CourseTerminologyStrings(emptyList())
 
-        assertNull(terminologyStrings[MessageID.student])
+        assertNull(terminologyStrings[MR.strings.student])
     }
 
 }

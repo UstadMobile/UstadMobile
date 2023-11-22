@@ -3,6 +3,11 @@ package com.ustadmobile.core.paging
 import com.ustadmobile.door.paging.*
 import kotlin.math.max
 import kotlin.math.min
+import app.cash.paging.PagingSource
+import app.cash.paging.PagingSourceLoadParams
+import app.cash.paging.PagingSourceLoadResult
+import app.cash.paging.PagingSourceLoadResultPage
+import app.cash.paging.PagingState
 
 /**
  * Simple PagingSource based on a list. Useful for preview data and testing purposes.
@@ -10,17 +15,19 @@ import kotlin.math.min
 class ListPagingSource<Value: Any>(
     private val list: List<Value>,
 ): PagingSource<Int, Value>() {
+
     override fun getRefreshKey(state: PagingState<Int, Value>): Int? {
         return state.anchorPosition
     }
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Value> {
+    @Suppress("CAST_NEVER_SUCCEEDS") //required as per the library docs
+    override suspend fun load(params: PagingSourceLoadParams<Int>): PagingSourceLoadResult<Int, Value> {
         val startFrom = params.key ?: 0
-        val loadSize = params.toDoorLoadParams().loadSize
+        val loadSize = params.loadSize
         val subList = list.subList(params.key ?: 0,
             min(list.size, startFrom + loadSize))
 
-        return DoorLoadResult.Page(
+        return PagingSourceLoadResultPage(
             data = subList,
             prevKey = if(startFrom > 0) {
                 max(0, startFrom - loadSize)
@@ -32,6 +39,6 @@ class ListPagingSource<Value: Any>(
             }else {
                 null
             },
-        ).toLoadResult()
+        ) as PagingSourceLoadResult<Int, Value>
     }
 }

@@ -10,21 +10,18 @@ import kotlinx.serialization.Serializable
     Index(value = ["usPersonUid", "usStatus", "usClientNodeId"], name = "person_status_node_idx"),
     Index(value = ["usClientNodeId", "usStatus", "usPersonUid"], name = "node_status_person_idx")])
 @Serializable
-@ReplicateEntity(tableId = UserSession.TABLE_ID, tracker = UserSessionReplicate::class,
-    priority = ReplicateEntity.HIGHEST_PRIORITY)
+@ReplicateEntity(
+    tableId = UserSession.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
 @Triggers(arrayOf(
  Trigger(
      name = "usersession_remote_insert",
      order = Trigger.Order.INSTEAD_OF,
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
-     sqlStatements = [
-         """REPLACE INTO UserSession(usUid, usPcsn, usLcsn, usLcb, usLct, usPersonUid, usClientNodeId, usStartTime, usEndTime, usStatus, usReason, usAuth, usSessionType) 
-         VALUES (NEW.usUid, NEW.usPcsn, NEW.usLcsn, NEW.usLcb, NEW.usLct, NEW.usPersonUid, NEW.usClientNodeId, NEW.usStartTime, NEW.usEndTime, NEW.usStatus, NEW.usReason, NEW.usAuth, NEW.usSessionType) 
-         /*psql ON CONFLICT (usUid) DO UPDATE 
-         SET usPcsn = EXCLUDED.usPcsn, usLcsn = EXCLUDED.usLcsn, usLcb = EXCLUDED.usLcb, usLct = EXCLUDED.usLct, usPersonUid = EXCLUDED.usPersonUid, usClientNodeId = EXCLUDED.usClientNodeId, usStartTime = EXCLUDED.usStartTime, usEndTime = EXCLUDED.usEndTime, usStatus = EXCLUDED.usStatus, usReason = EXCLUDED.usReason, usAuth = EXCLUDED.usAuth, usSessionType = EXCLUDED.usSessionType
-         */"""
-     ]
+     conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+     sqlStatements = [TRIGGER_UPSERT],
  )
 ))
 class UserSession {
@@ -41,8 +38,8 @@ class UserSession {
     @LastChangedBy
     var usLcb: Int = 0
 
-    @ReplicationVersionId
-    @LastChangedTime
+    @ReplicateEtag
+    @ReplicateLastModified
     var usLct: Long = 0
 
     var usPersonUid: Long = 0
@@ -69,10 +66,20 @@ class UserSession {
 
         //Session that will not be synced, it is only added to allow an upstream node to have access
         // so that findUnsentEntities will work as expected
+        @Suppress("unused") //reserved for future use
         const val TYPE_UPSTREAM = 2
+
+        const val TYPE_GUEST = 4
+
+        /**
+         * This is a temporary local session that was auto created by the account manager. It will
+         * not be sent to the upstream server and will not be displayed to the user.
+         */
+        const val TYPE_TEMP_LOCAL = 8
 
         const val STATUS_ACTIVE = 1
 
+        @Suppress("unused") //reserved for future use
         const val STATUS_NEEDS_REAUTH = 2
 
         const val STATUS_LOGGED_OUT = 4
@@ -81,14 +88,8 @@ class UserSession {
 
         const val REASON_CONSENT_REVOKED = 2
 
+        @Suppress("unused") //reserved for future use
         const val REASON_PASSWORD_CHANGED = 3
-
-        const val USER_SESSION_NOT_LOCAL_DEVICE_SQL = """
-            UserSession.usClientNodeId != (
-                 SELECT nodeClientId 
-                   FROM SyncNode
-                  LIMIT 1)
-        """
 
     }
 

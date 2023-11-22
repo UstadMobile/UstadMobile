@@ -2,9 +2,8 @@ package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.tincan.Activity
-import com.ustadmobile.core.view.OnBoardingView
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,17 +20,17 @@ data class OnboardingUiState(
 class OnBoardingViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
-): UstadViewModel(di, savedStateHandle) {
+): UstadViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
+
+    private val supportLangConfig: SupportedLanguagesConfig by instance()
 
     val uiState: Flow<OnboardingUiState>
         get() = _uiState.asStateFlow()
 
-    private val systemImpl: UstadMobileSystemImpl by instance()
-
     init {
-        val allLanguages = systemImpl.getAllUiLanguagesList()
+        val allLanguages = supportLangConfig.supportedUiLanguagesAndSysDefault(systemImpl)
         val currentLocaleCode = systemImpl.getLocale()
         val currentLanguage = allLanguages.first { it.langCode == currentLocaleCode}
 
@@ -42,7 +41,7 @@ class OnBoardingViewModel(
 
     fun onClickNext(){
         val systemImpl: UstadMobileSystemImpl = di.direct.instance()
-        systemImpl.setAppPref(OnBoardingView.PREF_TAG, true.toString())
+        systemImpl.setAppPref(PREF_TAG, true.toString())
     }
 
     fun onLanguageSelected(uiLanguage: UstadMobileSystemCommon.UiLanguage) {
@@ -50,5 +49,13 @@ class OnBoardingViewModel(
         _uiState.update { previous ->
             previous.copy(currentLanguage =  uiLanguage)
         }
+    }
+
+    companion object {
+
+        const val DEST_NAME = "Onboarding"
+
+        const val PREF_TAG = "onboaring_screen"
+
     }
 }

@@ -23,7 +23,6 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.DI
 import org.kodein.di.instance
-import org.kodein.di.on
 import java.io.IOException
 
 class ContainerEntryListResponderTest {
@@ -72,7 +71,7 @@ class ContainerEntryListResponderTest {
 
         val accountManager: UstadAccountManager by di.instance()
         val response = responder.get(mockUriResource,
-                mutableMapOf("endpoint" to accountManager.activeAccount.endpointUrl), mockSession)
+                mutableMapOf("endpoint" to accountManager.currentAccount.endpointUrl), mockSession)
 
         Assert.assertNotNull("Response is not null", response)
         val responseStr = String(response.data.readBytes())
@@ -97,7 +96,7 @@ class ContainerEntryListResponderTest {
 
         val accountManager: UstadAccountManager by di.instance()
         val response = responder.get(mockUriResource,
-                mutableMapOf("endpoint" to accountManager.activeAccount.endpointUrl), mockSession)
+                mutableMapOf("endpoint" to accountManager.currentAccount.endpointUrl), mockSession)
         Assert.assertEquals("When making a request for a container that has no entries, 404 status " + "is returns", NanoHTTPD.Response.Status.NOT_FOUND, response.getStatus())
 
     }

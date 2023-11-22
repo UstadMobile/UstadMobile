@@ -32,10 +32,4 @@ class CommandFlowUstadNavController: UstadNavController {
         _commandFlow.tryEmit(PopNavCommand(viewName, inclusive))
     }
 
-    override val currentBackStackEntry: UstadBackStackEntry
-        get() = throw IllegalStateException("getting current back stack entry NOT supported by commadnflownavcontroller")
-
-    override fun getBackStackEntry(viewName: String): UstadBackStackEntry? {
-        throw IllegalStateException("getting back stack entry ($viewName) NOT supported by commadnflownavcontroller")
-    }
 }

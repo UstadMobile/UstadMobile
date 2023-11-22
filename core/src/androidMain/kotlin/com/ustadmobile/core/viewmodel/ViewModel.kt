@@ -1,15 +1,15 @@
 package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import androidx.lifecycle.ViewModel as AndroidXViewModel
-import androidx.lifecycle.viewModelScope as androidXViewModelScope
+import moe.tlaster.precompose.viewmodel.ViewModel as PreComposeViewModel
+import moe.tlaster.precompose.viewmodel.viewModelScope as preComposeViewModelScope
 import kotlinx.coroutines.CoroutineScope
 
 actual abstract class ViewModel actual constructor(
     savedStateHandle: UstadSavedStateHandle
-): AndroidXViewModel() {
+): PreComposeViewModel() {
 
-    actual val viewModelScope: CoroutineScope = androidXViewModelScope
+    actual val viewModelScope: CoroutineScope = preComposeViewModelScope
 
     actual override fun onCleared() {
         super.onCleared()

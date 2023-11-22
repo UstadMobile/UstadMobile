@@ -16,7 +16,6 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.plugins.json.*
 import io.ktor.serialization.gson.*
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
@@ -44,7 +43,10 @@ class UmAppDatabaseExtTest {
     @Before
     fun setup() {
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(), randomUuid().toString())
-        db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite")
+        db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
+            "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite",
+                nodeId = nodeIdAndAuth.nodeId,
+            )
             .addSyncCallback(nodeIdAndAuth)
             .build()
             .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
@@ -65,7 +67,7 @@ class UmAppDatabaseExtTest {
             nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient))
 
         mockSystemImpl = mock {
-            on { getString(any<Int>(), any())}.thenAnswer {
+            on { getString(any())}.thenAnswer {
                 "${it.arguments[0]}"
             }
         }
@@ -74,17 +76,28 @@ class UmAppDatabaseExtTest {
     @After
     fun tearDown() {
         httpClient.close()
+        try {
+            repo.close()
+        }catch(e: Exception) {
+            //do nothing
+        }
+
+        try {
+            db.close()
+        }catch (e: Exception) {
+            //do nothing
+        }
     }
 
     @Test
     fun givenClazzDoesNotExist_whenCreateClazzAndGroupsCalled_thenClazzGroupsAndEntityRolesCreated() = runBlocking {
         val testClazz = Clazz("Test name")
 
-        repo.createNewClazzAndGroups(testClazz, mockSystemImpl, mapOf(), context)
+        repo.createNewClazzAndGroups(testClazz, mockSystemImpl, mapOf())
 
         val clazzInDb = db.clazzDao.findByUid(testClazz.clazzUid)!!
         Assert.assertEquals("Stored class has same name", testClazz.clazzName,
-                clazzInDb?.clazzName)
+                clazzInDb.clazzName)
 
         val teacherGroup = db.personGroupDao.findByUid(clazzInDb.clazzTeachersPersonGroupUid)
         Assert.assertNotNull("Teacher PersonGroup created", teacherGroup)
@@ -98,7 +111,7 @@ class UmAppDatabaseExtTest {
         val testClazz = Clazz("Test name")
         val testPerson = Person("teacher", "Teacher", "Test")
 
-        repo.createNewClazzAndGroups(testClazz, mockSystemImpl, mapOf(), context)
+        repo.createNewClazzAndGroups(testClazz, mockSystemImpl, mapOf())
         repo.personDao.insert(testPerson)
 
         repo.enrolPersonIntoClazzAtLocalTimezone(testPerson, testClazz.clazzUid, ClazzEnrolment.ROLE_TEACHER)
@@ -120,7 +133,7 @@ class UmAppDatabaseExtTest {
         val testStudent = Person("student", "Student", "Jones")
         val testParent = Person("parent", "Parent", "Jones")
 
-        repo.createNewClazzAndGroups(testClazz, mockSystemImpl, mapOf(), context)
+        repo.createNewClazzAndGroups(testClazz, mockSystemImpl, mapOf())
         testStudent.personUid = repo.personDao.insert(testStudent)
         testParent.personUid = repo.personDao.insert(testParent)
 

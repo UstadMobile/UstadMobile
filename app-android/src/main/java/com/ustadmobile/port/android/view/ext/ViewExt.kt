@@ -15,5 +15,6 @@ import androidx.recyclerview.widget.DiffUtil
  * @param differ The ItemCallback used with the recyclerview
  */
 fun <T> View.setSelectedIfInList(item: T?, selectedItemsList: List<T>, differ: DiffUtil.ItemCallback<T>) {
-    isSelected = item != null && selectedItemsList.any { differ.areItemsTheSame(it, item) }
+    //All lists in use are converted to jetpack compose.
+    //isSelected = item != null && selectedItemsList.any { differ.areItemsTheSame(it, item) }
 }

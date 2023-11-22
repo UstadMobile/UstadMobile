@@ -12,6 +12,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.LanguageDetailUiState
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.view.composable.UstadDetailField
+import com.ustadmobile.core.R as CR
 
 
 @Composable
@@ -26,17 +27,20 @@ fun LanguageDetailScreen(
 
         UstadDetailField(
             valueText = uiState.language?.name ?: "",
-            labelText = stringResource(R.string.name)
+            labelText = stringResource(CR.string.name_key),
+            imageId = 0,
         )
 
         UstadDetailField(
             valueText = uiState.language?.iso_639_1_standard ?: "",
-            labelText = stringResource(R.string.two_letter_code)
+            labelText = stringResource(CR.string.two_letter_code),
+            imageId = 0,
         )
 
         UstadDetailField(
             valueText = uiState.language?.iso_639_2_standard ?: "",
-            labelText = stringResource(R.string.three_letter_code)
+            labelText = stringResource(CR.string.three_letter_code),
+            imageId = 0,
         )
     }
 }

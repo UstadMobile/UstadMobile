@@ -7,7 +7,6 @@ import androidx.compose.ui.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -30,25 +29,27 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.SavedStateHandleAdapter
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.core.viewmodel.OnboardingUiState
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
-import com.ustadmobile.port.android.util.ext.getActivityContext
-import com.ustadmobile.port.android.util.ext.getUstadLocaleSetting
+import com.ustadmobile.libuicompose.util.ext.getActivityContext
+import com.ustadmobile.libuicompose.util.ext.getUstadLocaleSetting
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import java.util.*
+import com.ustadmobile.core.R as CR
 
 class OnBoardingActivity : ComponentActivity() {
 
     val di: DI by closestDI()
-    private val viewModel: OnBoardingViewModel by viewModels {
-        provideFactory(di, this, null)
-    }
+
+//    private val viewModel: OnBoardingViewModel by viewModels {
+//        provideFactory(di, this, null)
+//    }
 
     override fun attachBaseContext(newBase: Context) {
         val res = newBase.resources
@@ -68,9 +69,10 @@ class OnBoardingActivity : ComponentActivity() {
 
         setContent {
             MdcTheme {
-                OnboardingScreenViewModel(viewModel = viewModel)
+                //OnboardingScreenViewModel(viewModel = viewModel)
             }
         }
+
     }
 
     companion object {
@@ -79,7 +81,7 @@ class OnBoardingActivity : ComponentActivity() {
             owner: SavedStateRegistryOwner,
             defaultArgs: Bundle? = null,
         ): AbstractSavedStateViewModelFactory = object: AbstractSavedStateViewModelFactory(owner, defaultArgs) {
-            override fun <T : ViewModel?> create(
+            override fun <T : ViewModel> create(
                 key: String,
                 modelClass: Class<T>,
                 handle: SavedStateHandle
@@ -177,6 +179,7 @@ private fun SetLanguageMenu(
     onItemSelected: (UstadMobileSystemCommon.UiLanguage) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -188,7 +191,7 @@ private fun SetLanguageMenu(
             readOnly = true,
             value = currentLanguage.langDisplay,
             onValueChange = { },
-            label = { stringResource(R.string.language) },
+            label = { stringResource(CR.string.language) },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(
                     expanded = expanded
@@ -210,14 +213,13 @@ private fun SetLanguageMenu(
 
             }
         ) {
-            val activity = LocalContext.current.getActivityContext()
-            langList.forEachIndexed { index, uiLanguage ->
+            langList.takeIf { expanded }?.forEach { uiLanguage ->
                 DropdownMenuItem(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         expanded = false
                         onItemSelected(uiLanguage)
-                        activity.recreate()
+                        context.getActivityContext().recreate()
                     }
                 ) {
                     Text(text = uiLanguage.langDisplay)
@@ -240,12 +242,12 @@ data class OnboardingItem(
 private fun PagerView() {
 
     val onboardingItems: List<OnboardingItem> = remember {
-        listOf(OnboardingItem(R.string.onboarding_no_internet_headline,
-            R.string.onboarding_no_internet_subheadline, R.drawable.illustration_offline_usage),
-        OnboardingItem(R.string.onboarding_offline_sharing,
-            R.string.onboarding_offline_sharing_subheading, R.drawable.illustration_offline_sharing),
-        OnboardingItem(R.string.onboarding_stay_organized_headline,
-            R.string.onboarding_stay_organized_subheading, R.drawable.illustration_organized)
+        listOf(OnboardingItem(CR.string.onboarding_no_internet_headline,
+            CR.string.onboarding_no_internet_subheadline, R.drawable.illustration_offline_usage),
+        OnboardingItem(CR.string.onboarding_offline_sharing,
+            CR.string.onboarding_offline_sharing_subheading, R.drawable.illustration_offline_sharing),
+        OnboardingItem(CR.string.onboarding_stay_organized_headline,
+            CR.string.onboarding_stay_organized_subheading, R.drawable.illustration_organized)
         )
     }
 
@@ -330,12 +332,12 @@ private fun BottomRow(onClickNext: () -> Unit = { }){
         Button(
             onClick = onClickNext,
         ) {
-            Text(stringResource(R.string.onboarding_get_started_label))
+            Text(stringResource(CR.string.onboarding_get_started_label))
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(text = stringResource(R.string.created_partnership),
+        Text(text = stringResource(CR.string.created_partnership),
             style = Typography.body2,
             color = Color.DarkGray)
 

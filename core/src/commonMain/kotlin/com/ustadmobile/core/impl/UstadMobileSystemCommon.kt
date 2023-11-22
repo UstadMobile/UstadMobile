@@ -1,31 +1,33 @@
 package com.ustadmobile.core.impl
 
-import com.soywiz.klock.DateTime
-import com.soywiz.klock.years
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT_MESSAGE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
-import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
+import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.doorMainDispatcher
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
 import kotlinx.serialization.KSerializer
 import kotlin.js.JsName
+import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
+import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
+import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.login.LoginViewModel
 
 /**
  * Class has all the shared function across all supported platforms
  */
 abstract class UstadMobileSystemCommon {
-
-    //for testing purpose only
-    var networkManager: Any? = null
 
     /**
      * The currently active locale
@@ -89,24 +91,11 @@ abstract class UstadMobileSystemCommon {
 
 
     /**
-     * Lookup a value from the app runtime configuration. These come from a properties file loaded
-     * from the assets folder.
-     *
-     * @param key The config key to lookup
-     * @param defaultVal The default value to return if the key is not found
-     *
-     * @return The value of the key if found, if not, the default value provided
-     */
-    @JsName("getAppConfigString")
-    abstract fun getAppConfigString(key: String, defaultVal: String?): String?
-
-    /**
      * Get the default first destination that the user should be taken to after logging in or
      * selecting to continue as a guest.
      */
-    fun getAppConfigDefaultFirstDest(): String {
-        return getAppConfigString(AppConfig.KEY_FIRST_DEST, null)
-            ?: ClazzList2View.VIEW_NAME_HOME
+    fun getDefaultFirstDest(): String {
+        return ClazzListViewModel.DEST_NAME_HOME
     }
 
     fun goToDeepLink(deepLink: String, accountManager: UstadAccountManager, context: Any) {
@@ -116,11 +105,13 @@ abstract class UstadMobileSystemCommon {
             val viewUri = deepLink.substringAfter(LINK_ENDPOINT_VIEWNAME_DIVIDER)
 
 
-            val intentMessage = getString(MessageID.opening_link, context)
+            val intentMessage = getString(MR.strings.opening_link)
                 .replace("%1\$s", deepLink)
 
-            val maxDateOfBirth = if(viewUri.startsWith(ParentalConsentManagementView.VIEW_NAME)) {
-                (DateTime.now() - UstadMobileConstants.ADULT_AGE_THRESHOLD.years).unixMillisLong
+            val maxDateOfBirth = if(viewUri.startsWith(ParentalConsentManagementViewModel.DEST_NAME)) {
+                Clock.System.now()
+                    .minus(UstadMobileConstants.ADULT_AGE_THRESHOLD, DateTimeUnit.YEAR, TimeZone.UTC)
+                    .toEpochMilliseconds()
             }else {
                 0L
             }
@@ -128,21 +119,21 @@ abstract class UstadMobileSystemCommon {
             //if there are any accounts that match endpoint url the user wants to work with,
             // then go to the accountmanager list in picker mode, otherwise go directly to the login
             // screen for that particular server.
-            GlobalScope.launch(doorMainDispatcher()) {
+            GlobalScope.launch(kotlinx.coroutines.Dispatchers.Main) {
                 if(accountManager.activeSessionCount(maxDateOfBirth) { it == endpointUrl } > 0) {
                     val args = mapOf(ARG_NEXT to viewUri,
-                        AccountListView.ARG_FILTER_BY_ENDPOINT to endpointUrl,
-                        AccountListView.ARG_ACTIVE_ACCOUNT_MODE to AccountListView.ACTIVE_ACCOUNT_MODE_INLIST,
-                        UstadView.ARG_TITLE to getString(MessageID.select_account, context),
+                        AccountListViewModel.ARG_FILTER_BY_ENDPOINT to endpointUrl,
+                        AccountListViewModel.ARG_ACTIVE_ACCOUNT_MODE to AccountListViewModel.ACTIVE_ACCOUNT_MODE_INLIST,
+                        UstadView.ARG_TITLE to getString(MR.strings.select_account),
                         UstadView.ARG_INTENT_MESSAGE to intentMessage,
                         UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString(),
                         UstadView.ARG_MAX_DATE_OF_BIRTH to maxDateOfBirth.toString())
-                    go(AccountListView.VIEW_NAME, args, context)
+                    go(AccountListViewModel.DEST_NAME, args, context)
                 }else {
                     val args = mapOf(ARG_NEXT to viewUri,
                         ARG_INTENT_MESSAGE to intentMessage,
-                        ARG_SERVER_URL to endpointUrl)
-                    go(Login2View.VIEW_NAME, args, context)
+                        ARG_API_URL to endpointUrl)
+                    go(LoginViewModel.DEST_NAME, args, context)
                 }
 
             }
@@ -259,35 +250,12 @@ abstract class UstadMobileSystemCommon {
         return locale?.substring(0, 2) ?: "en"
     }
 
-    /**
-     * Get a string for use in the UI using a constant int from MessageID
-     */
-    @JsName("getString")
-    abstract fun getString(messageCode: Int, context: Any): String
+    abstract fun getString(stringResource: StringResource): String
 
-    /**
-     * Get a string for use in the UI (without requiring context)
-     */
-    abstract fun getString(messageCode: Int): String
-
-    /**
-     * Get a list of all languages available for the UI. This is a list of pairs in the form of
-     * langcode, language display name. The first entry will always be empty constant which
-     * tells the app to use the system default language.
-     *
-     */
-    @JsName("getAllUiLanguagesList")
-    open fun getAllUiLanguagesList(): List<UiLanguage> {
-        val languagesConfigVal = getAppConfigString(
-            AppConfig.KEY_SUPPORTED_LANGUAGES,
-            ""
-        ) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
-        val availableLangs = languagesConfigVal.split(",").sorted()
-
-
-        return listOf(UiLanguage(LOCALE_USE_SYSTEM, getString(MessageID.use_device_language))) +
-                availableLangs.map { UiLanguage(it ,(LANGUAGE_NAMES[it] ?: it)) }
-    }
+    abstract fun formatString(
+        stringResource: StringResource,
+        vararg args: Any
+    ): String
 
     /**
      * Return the mime type for the given extension
@@ -317,45 +285,6 @@ abstract class UstadMobileSystemCommon {
 
 
     /**
-     * Get a boolean from the app configuration. App config is stored as a string, so this is
-     * converted to a boolean using Boolean.parseBoolean
-     *
-     * @param key The preference key to lookup
-     * @param defaultVal The default value to return if the key is not found
-     * @param context System context object
-     * @return The boolean value of the given preference key if found, otherwise the default value
-     */
-    private fun getAppConfigBoolean(key: String, defaultVal: Boolean, context: Any): Boolean {
-        val strVal = getAppConfigString(key, null)
-        return strVal?.toBoolean() ?: defaultVal
-    }
-
-    /**
-     * Get a boolean from the app configuration. App config is stored as a string, so this is
-     * converted to a boolean using Boolean.parseBoolean
-     *
-     * @param key The preference key to lookup
-     * @param context System viewContext object
-     * @return The boolean value of the given preference key if found, otherwise false
-     */
-    fun getAppConfigBoolean(key: String, context: Any): Boolean {
-        return getAppConfigBoolean(key, false, context)
-    }
-
-
-    /**
-     * Get an integer from the app configuration.
-     *
-     * @param key The preference key to lookup
-     * @param defaultVal The default value if the preference key is not found
-     * @param context System context object
-     * @return The integer value of the value if found, otherwise the default value
-     */
-    open fun getAppConfigInt(key: String, defaultVal: Int, context: Any): Int {
-        return getAppConfigString(key, "" + defaultVal)!!.toInt()
-    }
-
-    /**
      * Determine if the two given locales are the same as far as what the user will see.
      *
      * @param oldLocale
@@ -366,10 +295,6 @@ abstract class UstadMobileSystemCommon {
         val currentlyDisplayedLocale = getDisplayedLocale()
         return !(currentlyDisplayedLocale != null && oldLocale != null
                 && oldLocale.substring(0, 2) == currentlyDisplayedLocale.substring(0, 2))
-    }
-
-    protected fun getContentDirName(context: Any): String? {
-        return getAppConfigString(AppConfig.KEY_CONTENT_DIR_NAME, DEFAULT_CONTENT_DIR_NAME)
     }
 
 

@@ -6,41 +6,39 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
-@ReplicateEntity(tableId = PeerReviewerAllocation.TABLE_ID, tracker = PeerReviewerAllocationReplicate::class)
+@ReplicateEntity(
+    tableId = PeerReviewerAllocation.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
 @Triggers(arrayOf(
     Trigger(
         name = "peerreviewerallocation_remote_insert",
         order = Trigger.Order.INSTEAD_OF,
         on = Trigger.On.RECEIVEVIEW,
         events = [Trigger.Event.INSERT],
-        sqlStatements = [
-            """REPLACE INTO PeerReviewerAllocation(praUid, praMarkerSubmitterUid, praToMarkerSubmitterUid, praAssignmentUid, praActive, praLct) 
-         VALUES (NEW.praUid, NEW.praMarkerSubmitterUid, NEW.praToMarkerSubmitterUid, NEW.praAssignmentUid, NEW.praActive, NEW.praLct) 
-         /*psql ON CONFLICT (praUid) DO UPDATE 
-         SET praMarkerSubmitterUid = EXCLUDED.praMarkerSubmitterUid, praToMarkerSubmitterUid = EXCLUDED.praToMarkerSubmitterUid, praAssignmentUid = EXCLUDED.praAssignmentUid, praActive = EXCLUDED.praActive, praLct = EXCLUDED.praLct
-         */"""
-        ]
+        conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+        sqlStatements = [TRIGGER_UPSERT],
     )
 ))
 @Serializable
-class PeerReviewerAllocation {
-
+data class PeerReviewerAllocation(
     @PrimaryKey(autoGenerate = true)
-    var praUid: Long = 0
+    var praUid: Long = 0,
 
     // peer that is marking the assignment
-    var praMarkerSubmitterUid: Long = 0
+    var praMarkerSubmitterUid: Long = 0,
 
     // peer that is being marked
-    var praToMarkerSubmitterUid: Long = 0
+    var praToMarkerSubmitterUid: Long = 0,
 
-    var praAssignmentUid: Long = 0
+    var praAssignmentUid: Long = 0,
 
-    var praActive: Boolean = true
+    var praActive: Boolean = true,
 
-    @LastChangedTime
-    @ReplicationVersionId
-    var praLct: Long = 0
+    @ReplicateLastModified
+    @ReplicateEtag
+    var praLct: Long = 0,
+) {
 
     companion object {
 

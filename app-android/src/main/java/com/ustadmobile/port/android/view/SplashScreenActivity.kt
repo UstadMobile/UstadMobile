@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.OnBoardingView
+import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.ui.theme.ui.theme.UstadMobileTheme
 import kotlinx.coroutines.delay
@@ -28,6 +28,7 @@ import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import org.kodein.di.direct
 import org.kodein.di.instance
+import com.ustadmobile.core.R as CR
 
 class SplashScreenActivity : ComponentActivity() {
 
@@ -39,12 +40,12 @@ class SplashScreenActivity : ComponentActivity() {
         lifecycleScope.launchWhenCreated {
             delay(2000L)
             val systemImpl: UstadMobileSystemImpl = di.direct.instance()
-            val activityClass = if(systemImpl.getAppPref(OnBoardingView.PREF_TAG, "false").toBoolean()) {
-                MainActivity::class.java
-            }else {
-                OnBoardingActivity::class.java
-            }
-            var intent = Intent(this@SplashScreenActivity, activityClass)
+//            val activityClass = if(systemImpl.getAppPref(OnBoardingView.PREF_TAG, "false").toBoolean()) {
+//                MainActivity::class.java
+//            }else {
+//                OnBoardingActivity::class.java
+//            }
+            val intent = Intent(this@SplashScreenActivity, AppActivity::class.java)
             startActivity(intent)
             finish()
         }
@@ -92,7 +93,7 @@ private fun SplashScreen(){
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
 
-            Text(text = stringResource(R.string.created_partnership),
+            Text(text = stringResource(CR.string.created_partnership),
                 style = Typography.body1,
                 color = Color.DarkGray)
 

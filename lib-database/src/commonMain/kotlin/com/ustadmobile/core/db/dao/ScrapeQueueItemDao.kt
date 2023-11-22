@@ -3,7 +3,7 @@ package com.ustadmobile.core.db.dao
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDaoCommon.STATUS_PENDING
-import com.ustadmobile.door.lifecycle.LiveData
+import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.db.entities.ScrapeQueueItemWithScrapeRun
 
@@ -12,7 +12,7 @@ expect abstract class ScrapeQueueItemDao : BaseDao<ScrapeQueueItem> {
 
 
     @Query("SELECT * FROM ScrapeQueueItem WHERE status = $STATUS_PENDING AND itemType = :itemType ORDER BY priority ASC LIMIT 10")
-    abstract fun findNextQueueItems(itemType: Int): LiveData<List<ScrapeQueueItem>>
+    abstract fun findNextQueueItems(itemType: Int): Flow<List<ScrapeQueueItem>>
 
     @Query("UPDATE ScrapeQueueItem SET status = :status, errorCode = :errorCode WHERE sqiUid = :uid")
     abstract fun updateSetStatusById(uid: Int, status: Int, errorCode: Int)

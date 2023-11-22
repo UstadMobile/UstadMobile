@@ -14,5 +14,6 @@ object UserSessionDaoCommon {
                             FROM SyncNode
                            LIMIT 1), 0))
                AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}        
+               AND (UserSession.usSessionType & ${UserSession.TYPE_TEMP_LOCAL}) != ${UserSession.TYPE_TEMP_LOCAL}
             """
 }

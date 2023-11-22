@@ -1,16 +1,15 @@
 package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
+import com.ustadmobile.core.view.UstadView
 import org.kodein.di.DI
 
 abstract class DetailViewModel<T>(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-) : UstadViewModel(di, savedStateHandle){
+    destinationName: String,
+) : UstadViewModel(di, savedStateHandle, destinationName){
 
-    //abstract val entity: Flow<T?>
-
+    protected val entityUidArg: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
 }

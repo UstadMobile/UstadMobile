@@ -1,68 +1,18 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.paging.DataSourceFactory
+import app.cash.paging.PagingSource
 import androidx.room.*
 import com.ustadmobile.core.db.dao.ReportDaoCommon.SORT_TITLE_ASC
 import com.ustadmobile.core.db.dao.ReportDaoCommon.SORT_TITLE_DESC
-import com.ustadmobile.door.lifecycle.LiveData
+import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Report
-import com.ustadmobile.lib.db.entities.UserSession
 import kotlin.js.JsName
 
 @DoorDao
 @Repository
 expect abstract class ReportDao : BaseDao<Report> {
-
-    @Query("""
-     REPLACE INTO ReportReplicate(reportPk, reportDestination)
-      SELECT DISTINCT Report.reportUid AS reportPk,
-             :newNodeId AS reportDestination
-        FROM Report
-             JOIN UserSession
-                  ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-                     AND CAST(Report.isTemplate AS INTEGER) = 1
-       WHERE Report.reportLct != COALESCE(
-             (SELECT reportVersionId
-                FROM ReportReplicate
-               WHERE reportPk = Report.reportUid
-                 AND reportDestination = :newNodeId), 0) 
-      /*psql ON CONFLICT(reportPk, reportDestination) DO UPDATE
-             SET reportPending = true
-      */       
-    """)
-    @ReplicationRunOnNewNode
-    @ReplicationCheckPendingNotificationsFor([Report::class])
-    abstract suspend fun replicateOnNewNodeTemplates(@NewNodeIdParam newNodeId: Long)
-
-    @Query("""
- REPLACE INTO ReportReplicate(reportPk, reportDestination)
-  SELECT DISTINCT Report.reportUid AS reportUid,
-         UserSession.usClientNodeId AS reportDestination
-    FROM ChangeLog
-         JOIN Report
-              ON ChangeLog.chTableId = ${Report.TABLE_ID} 
-                 AND ChangeLog.chEntityPk = Report.reportUid
-         JOIN UserSession
-              ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-                 AND CAST(Report.isTemplate AS INTEGER) = 1
-   WHERE UserSession.usClientNodeId != (
-         SELECT nodeClientId 
-           FROM SyncNode
-          LIMIT 1)
-     AND Report.reportLct != COALESCE(
-         (SELECT reportVersionId
-            FROM ReportReplicate
-           WHERE reportPk = Report.reportUid
-             AND reportDestination = UserSession.usClientNodeId), 0)
- /*psql ON CONFLICT(reportPk, reportDestination) DO UPDATE
-     SET reportPending = true
-  */               
- """)
-    @ReplicationRunOnChange([Report::class])
-    @ReplicationCheckPendingNotificationsFor([Report::class])
-    abstract suspend fun replicateOnChangeTemplates()
 
     @RawQuery
     abstract fun getResults(query: DoorQuery): List<Report>
@@ -82,7 +32,7 @@ expect abstract class ReportDao : BaseDao<Report> {
             """)
     abstract fun findAllActiveReport(searchBit: String, personUid: Long, sortOrder: Int,
                                      isTemplate: Boolean)
-            : DataSourceFactory<Int, Report>
+            : PagingSource<Int, Report>
 
     @Query("SELECT * FROM Report WHERE reportUid = :entityUid")
     abstract suspend fun findByUid(entityUid: Long): Report?
@@ -91,14 +41,14 @@ expect abstract class ReportDao : BaseDao<Report> {
     abstract suspend fun updateAsync(entity: Report)
 
     @Query("SELECT * From Report WHERE  reportUid = :uid")
-    abstract fun findByUidLive(uid: Long): LiveData<Report?>
+    abstract fun findByUidLive(uid: Long): Flow<Report?>
 
     @Query("""SELECT * FROM REPORT WHERE NOT reportInactive 
         AND isTemplate = :isTemplate
         ORDER BY priority ASC
             """)
     abstract fun findAllActiveReportLive(isTemplate: Boolean)
-            : LiveData<List<Report>>
+            : Flow<List<Report>>
 
     @Query("""SELECT * FROM REPORT WHERE NOT reportInactive 
         AND isTemplate = :isTemplate

@@ -13,11 +13,11 @@ import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.systemImpl
 import com.ustadmobile.port.android.view.ext.calendar
 import java.text.MessageFormat
 import java.util.*
+import com.ustadmobile.core.R as CR
 
 
 /**
@@ -132,8 +132,7 @@ fun openDateTimeZonePicker(et: EditText, context: Context, inverseBindingListene
     picker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
             calendar.get(Calendar.DAY_OF_MONTH), null)
 
-    builder.setPositiveButton(et.systemImpl.getString(MessageID.ok,
-            context)) { dialog, _ ->
+    builder.setPositiveButton(context.getString(CR.string.ok)) { dialog, _ ->
 
         et.calendar.timeZone = calendar.timeZone
         et.calendar.set(picker.year, picker.month, picker.dayOfMonth,
@@ -142,8 +141,7 @@ fun openDateTimeZonePicker(et: EditText, context: Context, inverseBindingListene
         et.updateDateWithTimeZone()
         inverseBindingListener.onChange()
     }
-    builder.setNegativeButton(et.systemImpl.getString(MessageID.cancel,
-            context)) { dialog, _ -> dialog.dismiss() }
+    builder.setNegativeButton(context.getString(CR.string.cancel)) { dialog, _ -> dialog.dismiss() }
     builder.show()
 }
 
@@ -166,8 +164,7 @@ fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: Inve
     val picker = dialogView.findViewById<DatePicker>(R.id.date_picker)
     picker.init(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH), null)
 
-    builder.setPositiveButton(et.systemImpl.getString(MessageID.ok,
-            context)) { dialog, _ ->
+    builder.setPositiveButton(CR.string.ok) { dialog, _ ->
 
         c[Calendar.DAY_OF_MONTH] = picker.dayOfMonth
         c[Calendar.MONTH] = picker.month
@@ -177,8 +174,7 @@ fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: Inve
         updateDateOnEditText(et, c.timeInMillis)
         inverseBindingListener.onChange()
     }
-    builder.setNegativeButton(et.systemImpl.getString(MessageID.cancel,
-            context)) { dialog, _ -> dialog.dismiss() }
+    builder.setNegativeButton(CR.string.cancel) { dialog, _ -> dialog.dismiss() }
     builder.show()
 }
 

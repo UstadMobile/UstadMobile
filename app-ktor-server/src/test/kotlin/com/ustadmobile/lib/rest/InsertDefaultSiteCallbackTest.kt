@@ -16,7 +16,8 @@ class InsertDefaultSiteCallbackTest {
     fun givenDatabaseCreated_thenWhenOpened_itShouldBloodyWellBeThereFfs() {
         val dbUrl = "jdbc:sqlite::memory:"
         val nodeIdAndAuth = NodeIdAndAuth(42, "secret")
-        val umAppDb = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl)
+        val umAppDb = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl,
+                nodeId = nodeIdAndAuth.nodeId)
             .addSyncCallback(nodeIdAndAuth)
             .addCallback(ContentJobItemTriggersCallback())
             .addCallback(InsertDefaultSiteCallback())

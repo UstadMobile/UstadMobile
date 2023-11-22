@@ -6,11 +6,11 @@ import com.neovisionaries.i18n.LanguageCode
 import com.ustadmobile.core.contentformats.xapi.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
-import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.lib.db.entities.*
 import java.util.*
 import com.ustadmobile.core.util.parse8601Duration
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import java.time.Instant
 
 object XapiUtil {
 
@@ -304,8 +304,8 @@ object XapiUtil {
                 it.subStatementActorUid = subActorUid
                 it.substatementVerbUid = subVerbUid
                 it.subStatementObjectUid = subObjectUid
-                it.timestamp = UMCalendarUtil.parse8601TimestampOrDefault(statement.timestamp)
-                it.stored = UMCalendarUtil.parse8601TimestampOrDefault(statement.stored)
+                it.timestamp = Instant.parse(statement.timestamp).toEpochMilli()
+                it.stored = statement.stored?.let { Instant.parse(it).toEpochMilli() } ?: 0
                 it.statementContentEntryUid = contentEntryUid
                 it.statementLearnerGroupUid = learnerGroupUid
                 it.contentEntryRoot = contentEntryRoot

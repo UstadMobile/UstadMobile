@@ -1,11 +1,11 @@
 package com.ustadmobile.core.impl
 
-import com.ustadmobile.core.generated.locale.MessageIdMap
-import com.ustadmobile.core.impl.locale.StringsXml
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlin.js.Date
 import com.ustadmobile.door.DoorUri
+import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.provider.JsStringProvider
 import kotlinx.browser.document
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -17,29 +17,22 @@ import org.w3c.dom.HTMLAnchorElement
  *
  *
  * @author mike, kileha3
- * @param defaultStringsXmlStr The string of the strings_ui.xml file for English (must be loaded
- *        (asynchronously in advance)
- * @param displayLocaleStringsXmlStr The String of the strings_ui.xml file for the display locale
- *        if the display locale is not English.
+ * @param jsStringProvider Moko resources JsStringProvider
  */
 actual open class UstadMobileSystemImpl(
-    private val defaultStringsXml: StringsXml,
-    private val displayLocaleStringsXml: StringsXml?
+    private val jsStringProvider: JsStringProvider,
 ): UstadMobileSystemCommon() {
 
-    private val messageIdMapFlipped: Map<String, Int> by lazy {
-        MessageIdMap.idMap.entries.associate { (k, v) -> v to k }
+    override fun getString(stringResource: StringResource): String {
+        return stringResource.localized(provider = jsStringProvider, locale = displayedLocale)
     }
 
-    /**
-     * Get a string for use in the UI
-     */
-    actual override fun getString(messageCode: Int, context: Any): String {
-        return (displayLocaleStringsXml ?: defaultStringsXml)[messageCode]
-    }
-
-    actual override fun getString(messageCode: Int): String {
-        return (displayLocaleStringsXml ?: defaultStringsXml)[messageCode]
+    override fun formatString(stringResource: StringResource, vararg args: Any): String {
+        return stringResource.localized(
+            provider = jsStringProvider,
+            locale = displayedLocale,
+            args = args
+        )
     }
 
     /**
@@ -103,22 +96,6 @@ actual open class UstadMobileSystemImpl(
      */
     actual fun getBuildTimestamp(context: Any): Long = Date().getTime().toLong()
 
-    /**
-     * Lookup a value from the app runtime configuration. These come from a properties file loaded
-     * from the assets folder, the path of which is set by the manifest preference
-     * com.sutadmobile.core.appconfig .
-     *
-     * @param key The config key to lookup
-     * @param defaultVal The default value to return if the key is not found
-     * @param context Systme context object
-     *
-     * @return The value of the key if found, if not, the default value provided
-     */
-    actual override fun getAppConfigString(key: String, defaultVal: String?): String? {
-        val value =  localStorage.getItem(key)
-        return  value ?: defaultVal
-    }
-
 
     override fun openFileInDefaultViewer(
         context: Any,
@@ -149,10 +126,6 @@ actual open class UstadMobileSystemImpl(
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any,
                            flags: Int,
                            ustadGoOptions: UstadGoOptions) {
-        throw IllegalStateException("Not supported on JS anymore!")
-    }
-
-    actual fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any) {
         throw IllegalStateException("Not supported on JS anymore!")
     }
 

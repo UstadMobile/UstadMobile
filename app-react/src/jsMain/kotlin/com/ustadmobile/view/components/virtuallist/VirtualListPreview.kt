@@ -1,0 +1,84 @@
+package com.ustadmobile.view.components.virtuallist
+
+import app.cash.paging.PagingSourceLoadResultPage
+import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.hooks.useMuiAppState
+import com.ustadmobile.hooks.usePagingSource
+import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
+import web.cssom.*
+import js.core.jso
+import mui.material.Container
+import mui.material.ListItem
+import mui.material.ListItemText
+import mui.material.Typography
+import react.*
+import web.cssom.Contain
+import web.cssom.Overflow
+
+val demoPersonList = (0..100).map {
+    PersonWithDisplayDetails().apply {
+        firstNames = "Person"
+        lastName = "$it"
+        personUid = it.toLong()
+    }
+}
+
+val demoPagingSource = { ListPagingSource(demoPersonList) }
+
+val VirtualListPreview = FC<Props> {
+
+    val infiniteQueryResult = usePagingSource(
+        demoPagingSource, true, 50
+    )
+
+    val muiAppState = useMuiAppState()
+
+    VirtualList {
+        style = jso {
+            height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
+            width = 100.pct
+            contain = Contain.strict
+            overflowY = Overflow.scroll
+        }
+
+        content = virtualListContent {
+            item {
+                Typography.create {
+                    +"List Header "
+                }
+            }
+
+            items(
+                list = (0..100).toList(),
+                key = { "$it" }
+            ) { number ->
+                ListItem.create {
+                    ListItemText {
+                        + "item $number"
+                    }
+                }
+            }
+
+            infiniteQueryItems(
+                infiniteQueryResult = infiniteQueryResult,
+                dataPagesToItems = { pages ->
+                    pages.mapNotNull { it as? PagingSourceLoadResultPage<Int, PersonWithDisplayDetails> }.flatMap {
+                        it.data
+                    }
+                },
+                itemToKey = { "${it.personUid}" }
+            ) { person ->
+                ListItem.create {
+                    ListItemText {
+                        +person?.fullName()
+                    }
+                }
+            }
+        }
+
+        Container {
+            VirtualListOutlet()
+        }
+
+    }
+}

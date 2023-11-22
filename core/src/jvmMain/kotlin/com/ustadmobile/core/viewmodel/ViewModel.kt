@@ -15,7 +15,7 @@ actual abstract class ViewModel actual constructor(
 
     }
 
-    internal fun close(){
+    fun close(){
         onCleared()
         viewModelScope.cancel()
     }

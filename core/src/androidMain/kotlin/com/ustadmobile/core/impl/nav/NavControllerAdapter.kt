@@ -12,14 +12,6 @@ class NavControllerAdapter(
     private val destinationProvider: DestinationProvider
 ) : UstadNavController{
 
-    override val currentBackStackEntry: UstadBackStackEntry?
-        get() = droidNavController.currentBackStackEntry?.let {
-            val viewName = destinationProvider.lookupViewNameById(it.destination.id)
-                ?: throw IllegalArgumentException("Current backstack view name not found for " +
-                        "${it.destination}!")
-            BackStackEntryAdapter(it, viewName)
-        }
-
     private fun resolveViewId(
         viewName: String,
     ) : Int {
@@ -30,11 +22,6 @@ class NavControllerAdapter(
         } ?: throw IllegalArgumentException("Could not find destination id for $viewName")
     }
 
-
-    override fun getBackStackEntry(viewName: String): UstadBackStackEntry {
-        return BackStackEntryAdapter(
-            droidNavController.getBackStackEntry(resolveViewId(viewName)), viewName)
-    }
 
     override fun popBackStack(viewName: String, inclusive: Boolean) {
         droidNavController.popBackStack(resolveViewId(viewName), inclusive)
@@ -53,7 +40,7 @@ class NavControllerAdapter(
                         inclusive = false
                     }
                 }else if(goOptions.popUpToViewName != null) {
-                    popUpTo(resolveViewId(viewName)) {
+                    popUpTo(resolveViewId(goOptions.popUpToViewName)) {
                         inclusive = goOptions.popUpToInclusive
                     }
                 }

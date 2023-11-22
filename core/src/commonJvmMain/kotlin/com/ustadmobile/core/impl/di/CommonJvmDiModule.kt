@@ -1,5 +1,4 @@
 package com.ustadmobile.core.impl.di
-import com.ustadmobile.core.contentformats.xapi.*
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import org.kodein.di.*
@@ -7,7 +6,7 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.gson.*
+import io.ktor.serialization.kotlinx.json.json
 
 
 val CommonJvmDiModule = DI.Module("CommonJvm") {
@@ -24,11 +23,7 @@ val CommonJvmDiModule = DI.Module("CommonJvm") {
         HttpClient(OkHttp) {
 
             install(ContentNegotiation) {
-                gson {
-                    registerTypeAdapter(Statement::class.java, StatementSerializer())
-                    registerTypeAdapter(Statement::class.java, StatementDeserializer())
-                    registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
-                }
+                json(json = instance())
             }
             install(HttpTimeout)
 

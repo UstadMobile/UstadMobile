@@ -31,26 +31,21 @@
 
 package com.ustadmobile.core.impl
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.util.Log
-import android.widget.Toast
 import androidx.annotation.VisibleForTesting
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
-import androidx.fragment.app.DialogFragment
 import androidx.navigation.*
-import com.ustadmobile.core.impl.nav.toNavOptions
 import com.ustadmobile.core.io.ext.isGzipped
-import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toFile
+import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.format
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import org.kodein.di.direct
@@ -73,11 +68,8 @@ actual open class UstadMobileSystemImpl(
     private val applicationContext: Context
 ) : UstadMobileSystemCommon() {
 
-    private var appConfig: Properties? = null
-
     private var appPreferences: SharedPreferences? = null
 
-    var messageIdMap: Map<Int, Int> = mapOf()
 
     /**
      * This should be used only for testing. This will use the given navcontroller instead of
@@ -88,14 +80,11 @@ actual open class UstadMobileSystemImpl(
 
     private val viewNameToAndroidImplMap = mapOf<String, String>(
             "DownloadDialog" to "${PACKAGE_NAME}DownloadDialogFragment",
-            SplashScreenView.VIEW_NAME to "${PACKAGE_NAME}SplashScreenActivity",
-            OnBoardingView.VIEW_NAME to "${PACKAGE_NAME}OnBoardingActivity",
+            OnBoardingViewModel.DEST_NAME to "${PACKAGE_NAME}OnBoardingActivity",
             EpubContentView.VIEW_NAME to "${PACKAGE_NAME}EpubContentActivity",
             AboutView.VIEW_NAME to "${PACKAGE_NAME}AboutActivity",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
-            HarView.VIEW_NAME to "${PACKAGE_NAME}HarActivity",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
-            SchoolEditView.VIEW_NAME to "${PACKAGE_NAME}SchoolEditActivity",
             PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity"
     )
 
@@ -111,9 +100,9 @@ actual open class UstadMobileSystemImpl(
             val di: DI by closestDI(context)
             val impl : UstadMobileSystemImpl = di.direct.instance()
 
-            val baseName = impl.getAppConfigString(AppConfig.KEY_APP_BASE_NAME, "") + "-" +
+            val baseName =  (context.applicationInfo.metaData
+                .getString("com.ustadmobile.shareappbasename") ?: "ustad")  + "-" +
                     impl.getVersion(context)
-
 
             var apkFileIn: FileInputStream? = null
             val outDir = File(context.filesDir, "shared")
@@ -168,125 +157,19 @@ actual open class UstadMobileSystemImpl(
      * @param args (Optional) Hahstable of arguments for the new view (e.g. catalog/container url etc)
      * @param context System context object
      */
+    @Deprecated("Replaced with nav controller")
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any,
                            flags: Int, ustadGoOptions: UstadGoOptions) {
 
-        val destinationQueryPos = viewName.indexOf('?')
-        val viewNameOnly = if (destinationQueryPos == -1) {
-            viewName
-        }else {
-            viewName.substring(0, destinationQueryPos)
-        }
-        val allArgs = args + UMFileUtil.parseURLQueryString(viewName)
-
-
-        val di: DI by closestDI(context as Context)
-        val destinationProvider: DestinationProvider = di.direct.instance()
-
-        val ustadDestination = destinationProvider.lookupDestinationName(viewNameOnly)
-        if(ustadDestination != null) {
-            val navController = navController ?: (context as Activity).findNavController(destinationProvider.navControllerViewId)
-
-            //Note: default could be set using style as per https://stackoverflow.com/questions/50482095/how-do-i-define-default-animations-for-navigation-actions
-            val options = ustadGoOptions.toNavOptions(navController, destinationProvider)
-
-            navController.navigate(ustadDestination.destinationId,
-                    allArgs.toBundleWithNullableValues(), options)
-
-            return
-        }
-
-
-        val androidImplClassName = viewNameToAndroidImplMap[viewName] ?: return
-        val androidImplClass: Class<*>
-        val ctx = context as Context
-        try {
-            androidImplClass = Class.forName(androidImplClassName)
-        }catch(e: Exception) {
-            Log.wtf(TAG, "No activity for $viewName found")
-            Toast.makeText(ctx, "ERROR: No Activity found for view: $viewName",
-                    Toast.LENGTH_LONG).show()
-            return
-        }
-
-        val argsBundle = UMAndroidUtil.mapToBundle(args)
-
-        if (DialogFragment::class.java.isAssignableFrom(androidImplClass as Class<*>)) {
-            var toastMsg: String? = null
-            try {
-                val dialog = androidImplClass.newInstance() as DialogFragment
-                if (args != null)
-                    dialog.arguments = argsBundle
-                val activity = context as AppCompatActivity
-                dialog.show(activity.supportFragmentManager, TAG_DIALOG_FRAGMENT)
-            } catch (e: InstantiationException) {
-                Log.wtf(TAG, "Could not instantiate dialog", e)
-                toastMsg = "Dialog error: $e"
-            } catch (e2: IllegalAccessException) {
-                Log.wtf(TAG, "Could not instantiate dialog", e2)
-                toastMsg = "Dialog error: $e2"
-            }
-
-            if (toastMsg != null) {
-                Toast.makeText(ctx, toastMsg, Toast.LENGTH_LONG).show()
-            }
-        } else {
-            val startIntent = Intent(ctx, androidImplClass)
-            if (ctx is Activity) {
-                var referrer = ""
-                if (ctx.intent.extras != null) {
-                    referrer = ctx.intent.extras!!.getString(ARG_REFERRER, "")
-                }
-
-                if (flags and GO_FLAG_CLEAR_TOP > 0) {
-                    referrer = UMFileUtil.clearTopFromReferrerPath(viewName, args,
-                            referrer)
-                } else {
-                    referrer += "/" + viewName + "?" + UMFileUtil.mapToQueryString(args)
-                }
-
-                startIntent.putExtra(ARG_REFERRER, referrer)
-            }
-            startIntent.flags = flags
-            if (argsBundle != null)
-                startIntent.putExtras(argsBundle)
-
-            ctx.startActivity(startIntent)
-        }
+        throw IllegalStateException("This should not be used")
     }
 
-    actual fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any) {
-        val di : DI by closestDI { context as Context }
-        val destinationProvider: DestinationProvider = di.direct.instance()
-
-        val navController = navController ?: (context as Activity)
-                .findNavController(destinationProvider.navControllerViewId)
-
-        val popBackDestId = if(popUpToViewName == UstadView.CURRENT_DEST) {
-            navController.currentDestination?.id ?: 0
-        }else {
-            destinationProvider.lookupDestinationName(popUpToViewName)
-                    ?.destinationId ?: 0
-        }
-
-        navController.popBackStack(popBackDestId, popUpInclusive)
+    override fun getString(stringResource: StringResource): String {
+        return stringResource.getString(applicationContext)
     }
 
-
-    /**
-     * Get a string for use in the UI
-     */
-    actual override fun getString(messageCode: Int, context: Any): String {
-        val androidId = messageIdMap[messageCode]
-        return if (androidId != null) {
-            (context as Context).resources.getString(androidId)
-        } else {
-            return ""
-        }
-    }
-
-    actual override fun getString(messageCode: Int): String {
-        return messageIdMap[messageCode]?.let { applicationContext.getString(it) } ?: ""
+    override fun formatString(stringResource: StringResource, vararg args: Any): String {
+        return stringResource.format(args).stringRes.getString(applicationContext)
     }
 
     /**
@@ -399,37 +282,6 @@ actual open class UstadMobileSystemImpl(
             UMLog.l(UMLog.ERROR, UMLog.ERROR, key, e)
         }
         return null
-    }
-
-    /**
-     * Lookup a value from the app runtime configuration. These come from a properties file loaded
-     * from the assets folder, the path of which is set by the manifest preference
-     * com.sutadmobile.core.appconfig .
-     *
-     * @param key The config key to lookup
-     * @param defaultVal The default value to return if the key is not found
-     * @param context Systme context object
-     *
-     * @return The value of the key if found, if not, the default value provided
-     */
-    actual override fun getAppConfigString(key: String, defaultVal: String?): String? {
-        if (appConfig == null) {
-            val appPrefResource = getManifestPreference("com.ustadmobile.core.appconfig",
-                    applicationContext) ?: "com/ustadmobile/core/appconfig.properties"
-            appConfig = Properties()
-            var prefIn: InputStream? = null
-
-            try {
-                prefIn =  applicationContext.assets.open(appPrefResource)
-                appConfig!!.load(prefIn)
-            } catch (e: IOException) {
-                UMLog.l(UMLog.ERROR, 685, appPrefResource, e)
-            } finally {
-                prefIn?.close()
-            }
-        }
-
-        return appConfig!!.getProperty(key, defaultVal)
     }
 
 

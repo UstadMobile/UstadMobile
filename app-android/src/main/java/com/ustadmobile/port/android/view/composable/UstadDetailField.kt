@@ -15,7 +15,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.toughra.ustadmobile.R
-
+import com.ustadmobile.core.R as CR
 
 /**
  * Main field layout for detail fields in DetailViews
@@ -23,7 +23,26 @@ import com.toughra.ustadmobile.R
 @Composable
 fun UstadDetailField(
     valueText: String,
-    labelText: String,
+    labelText: String?,
+    modifier: Modifier = Modifier,
+    icon: (@Composable () -> Unit)? = null,
+    onClick: (() -> Unit)? = null,
+    secondaryActionContent: (@Composable () -> Unit)? = null,
+) {
+    UstadDetailField(
+        valueText = AnnotatedString(valueText),
+        labelText = labelText?.let { AnnotatedString(it) },
+        modifier = modifier,
+        icon = icon,
+        onClick = onClick,
+        secondaryActionContent = secondaryActionContent,
+    )
+}
+
+@Composable
+fun UstadDetailField(
+    valueText: String,
+    labelText: String?,
     modifier: Modifier = Modifier,
     imageId: Int = 0,
     onClick: (() -> Unit)? = null,
@@ -31,22 +50,56 @@ fun UstadDetailField(
 ) {
     UstadDetailField(
         valueText = AnnotatedString(valueText),
-        labelText = AnnotatedString(labelText),
+        labelText = labelText?.let { AnnotatedString(it) },
         modifier = modifier,
         imageId = imageId,
         onClick = onClick,
         secondaryActionContent = secondaryActionContent,
     )
 }
+
+@Composable
+fun UstadDetailField(
+    valueText: AnnotatedString,
+    labelText: AnnotatedString?,
+    modifier: Modifier = Modifier,
+    imageId: Int = 0,
+    onClick: (() -> Unit)? = null,
+    secondaryActionContent: (@Composable () -> Unit)? = null,
+) {
+    UstadDetailField(
+        valueText = valueText,
+        labelText = labelText,
+        modifier = modifier,
+        onClick = onClick,
+        secondaryActionContent = secondaryActionContent,
+        icon = {
+            if(imageId != 0) {
+                Image(
+                    painter = painterResource(id = imageId),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(
+                        color = contentColorFor(backgroundColor = MaterialTheme.colors.background)),
+                    modifier = Modifier
+                        .size(24.dp))
+            }else {
+                Spacer(
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+    )
+}
+
 /**
  * Main field layout for detail fields in DetailViews
  */
 @Composable
 fun UstadDetailField(
     valueText: AnnotatedString,
-    labelText: AnnotatedString,
+    labelText: AnnotatedString?,
     modifier: Modifier = Modifier,
-    imageId: Int = 0,
+    icon: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     secondaryActionContent: (@Composable () -> Unit)? = null,
 ){
@@ -59,7 +112,7 @@ fun UstadDetailField(
             DetailFieldContent(
                 valueText = valueText,
                 labelText = labelText,
-                imageId = imageId,
+                icon = icon,
                 secondaryActionContent = secondaryActionContent,
             )
         }
@@ -68,7 +121,7 @@ fun UstadDetailField(
             modifier = modifier,
             valueText = valueText,
             labelText = labelText,
-            imageId = imageId,
+            icon = icon,
             secondaryActionContent = secondaryActionContent,
         )
     }
@@ -77,20 +130,14 @@ fun UstadDetailField(
 @Composable
 private fun DetailFieldContent(
     modifier: Modifier = Modifier,
-    imageId: Int = 0,
+    icon: (@Composable () -> Unit)? = null,
     valueText: AnnotatedString,
-    labelText: AnnotatedString,
+    labelText: AnnotatedString?,
     secondaryActionContent: (@Composable () -> Unit)? = null,
 ) {
     Row(modifier){
-        if (imageId != 0){
-            Image(
-                painter = painterResource(id = imageId),
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(
-                    color = contentColorFor(backgroundColor = MaterialTheme.colors.background)),
-                modifier = Modifier
-                    .size(24.dp))
+        if (icon != null){
+            icon()
         } else {
             Box(modifier = Modifier.width(24.dp))
         }
@@ -106,11 +153,14 @@ private fun DetailFieldContent(
                 color = contentColorFor(backgroundColor = MaterialTheme.colors.background)
             )
 
-            Text(
-                text = labelText,
-                style = MaterialTheme.typography.subtitle1,
-                color = colorResource(id = R.color.list_subheader),
-            )
+            if(labelText != null) {
+                Text(
+                    text = labelText,
+                    style = MaterialTheme.typography.subtitle1,
+                    color = colorResource(R.color.list_subheader),
+                )
+            }
+
         }
 
         if(secondaryActionContent != null) {
@@ -142,7 +192,7 @@ private fun DetailFieldWithSecondaryActionPreview() {
             ) {
                 Icon(
                     imageVector = Icons.Filled.Message,
-                    contentDescription = stringResource(id = R.string.message),
+                    contentDescription = stringResource(id = CR.string.message),
                 )
             }
         }

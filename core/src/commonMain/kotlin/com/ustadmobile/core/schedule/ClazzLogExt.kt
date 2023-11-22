@@ -9,3 +9,8 @@ import com.ustadmobile.lib.db.entities.ClazzLog
 fun ClazzLog.generateUid(): Long {
     return (clazzLogClazzUid.hashCode().toLong() shl 32) or (logDate.hashCode().toLong())
 }
+
+val ClazzLog.totalAttendeeStatusRecorded: Int
+    get() =  clazzLogNumPresent + clazzLogNumPartial + clazzLogNumAbsent
+
+

@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view.composable
 
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Column
@@ -14,21 +13,17 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.android.material.datepicker.MaterialDatePicker
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.util.StringAndSerialNum
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.port.android.util.compose.messageIdResource
-import com.ustadmobile.port.android.util.compose.rememberFormattedDate
-import com.ustadmobile.port.android.util.ext.getActivityContext
 import java.util.*
+import com.ustadmobile.core.R as CR
+import dev.icerock.moko.resources.compose.stringResource as mrStringResource
 
 @Composable
 fun UstadEditField(
@@ -60,6 +55,7 @@ fun UstadEditField(
  * user starts typing. This isn't strictly reactive to follow the viewmodel, but avoids the need to
  * add a lot of new viewmodel event functions
  */
+@Deprecated("This is trying to do too much and needs split up. Where possible, use the standard OutlinedTextField")
 @Composable
 fun UstadTextEditField(
     value: String,
@@ -132,7 +128,7 @@ fun UstadTextEditField(
                         }
                         Icon(
                             imageVector = icon,
-                            contentDescription = stringResource(R.string.toggle_visibility)
+                            contentDescription = stringResource(CR.string.toggle_visibility)
                         )
                     }
                 }
@@ -201,134 +197,56 @@ fun UstadTextEditPasswordPreview() {
 }
 
 @Composable
-fun UstadDateEditTextField(
-    value: Long,
-    label: String,
-    timeZoneId: String,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    @Suppress("UNUSED_PARAMETER") //Reserved for future use
-    error: String? = null,
-    onValueChange: (Long) -> Unit = {},
-) {
-    var errorText by remember(error) {
-        mutableStateOf(error)
-    }
-
-    val dateFormatted = rememberFormattedDate(
-        timeInMillis = value,
-        timeZoneId = timeZoneId
-    )
-
-    val context = LocalContext.current
-
-    UstadTextEditField(
-        value = dateFormatted,
-        label = label,
-        enabled = enabled,
-        modifier = modifier,
-        onValueChange = {},
-        readOnly = true,
-        onClick = {
-            val supportFragmentManager =
-                (context.getActivityContext() as AppCompatActivity)
-                    .supportFragmentManager
-            MaterialDatePicker.Builder
-                .datePicker()
-                .build()
-                .apply {
-                    addOnPositiveButtonClickListener {
-                        //The MaterialDatePicker will return the time in UTC. We need to adjust this
-                        //for the specified timezone
-                        val utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-                        utcCalendar.timeInMillis = it
-
-                        val tzInstance = Calendar.getInstance(TimeZone.getTimeZone(timeZoneId))
-                        tzInstance.set(utcCalendar[Calendar.YEAR],
-                            utcCalendar[Calendar.MONTH], utcCalendar[Calendar.DAY_OF_MONTH],
-                            0, 0, 0)
-                        tzInstance[Calendar.MILLISECOND] = 0
-
-                        onValueChange(tzInstance.timeInMillis)
-                        errorText = null
-                    }
-                }
-                .show(supportFragmentManager, "tag")
-        }
-    )
-}
-
-@Preview
-@Composable
-private fun UstadDateTextFieldPreview() {
-    UstadDateEditTextField(
-        value = System.currentTimeMillis(),
-        label = "Date",
-        enabled = true,
-        timeZoneId = TimeZone.getDefault().id
-    )
-}
-
-@Composable
 @OptIn(ExperimentalMaterialApi::class)
 fun <T> UstadExposedDropDownMenuField(
     value: T?,
     label: String,
     options: List<T>,
     onOptionSelected: (T) -> Unit,
-    itemText: @Composable (T) -> String,
     modifier: Modifier = Modifier,
-    error: String? = null,
+    isError: Boolean = false,
+    itemText: @Composable (T) -> String,
     enabled: Boolean = true,
 ) {
 
-    var errorText: String? by remember {
-        mutableStateOf(error)
-    }
-
-    UstadEditField(
+    var expanded by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(
+        expanded = expanded,
         modifier = modifier,
-        error = error,
+        onExpandedChange = {
+            expanded = !expanded
+        }
     ) {
-        var expanded by remember { mutableStateOf(false) }
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = {
-                expanded = !expanded
+        OutlinedTextField(
+            value = value?.let { itemText(it) } ?: "",
+            modifier = Modifier.fillMaxWidth(),
+            onValueChange = { },
+            readOnly = true,
+            label = { Text(label) },
+            isError = isError,
+            enabled = enabled,
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(
+                    expanded = expanded
+                )
+            },
+            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded ,
+            onDismissRequest = {
+                expanded = false
             }
         ) {
-            OutlinedTextField(
-                value = value?.let { itemText(it) } ?: "",
-                modifier = Modifier.fillMaxWidth(),
-                onValueChange = { },
-                readOnly = true,
-                label = { Text(label) },
-                isError = errorText != null,
-                enabled = enabled,
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(
-                        expanded = expanded
-                    )
-                },
-                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
-            )
-
-            ExposedDropdownMenu(
-                expanded = expanded ,
-                onDismissRequest = {
-                    expanded = false
-                }
-            ) {
-                options.forEach { option ->
-                    DropdownMenuItem(
-                        onClick = {
-                            expanded = false
-                            errorText = null
-                            onOptionSelected(option)
-                        }
-                    ) {
-                        Text(text = itemText(option))
+            options.takeIf { expanded }?.forEach { option ->
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        onOptionSelected(option)
                     }
+                ) {
+                    Text(text = itemText(option))
                 }
             }
         }
@@ -342,17 +260,17 @@ fun UstadMessageIdOptionExposedDropDownMenuField(
     options: List<MessageIdOption2>,
     onOptionSelected: (MessageIdOption2) -> Unit,
     modifier: Modifier = Modifier,
-    error: String? = null,
+    isError: Boolean = false,
     enabled: Boolean = true,
 ) {
     UstadExposedDropDownMenuField(
         value = options.firstOrNull { it.value == value },
         label = label,
         options = options,
-        onOptionSelected,
-        itemText = { messageIdResource(id = it.messageId) },
+        onOptionSelected = onOptionSelected,
+        itemText = { mrStringResource(resource = it.stringResource) },
         modifier = modifier,
-        error = error,
+        isError = isError,
         enabled = enabled,
     )
 }

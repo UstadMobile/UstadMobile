@@ -1,76 +1,18 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.paging.DataSourceFactory
+import app.cash.paging.PagingSource
 import androidx.room.*
-import com.ustadmobile.door.lifecycle.LiveData
+import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzLog
-import com.ustadmobile.lib.db.entities.Role
 
 
 @Repository
 @DoorDao
 expect abstract class ClazzLogDao : BaseDao<ClazzLog> {
 
-    @Query("""
-     REPLACE INTO ClazzLogReplicate(clPk, clDestination)
-      SELECT DISTINCT ClazzLog.clazzLogUid AS clUid,
-             :newNodeId AS clDestination
-        FROM UserSession
-             JOIN PersonGroupMember 
-                  ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-             ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
-                  ${Role.PERMISSION_CLAZZ_SELECT} 
-                  ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
-             JOIN ClazzLog
-                  ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid
-       WHERE ClazzLog.clazzLogLastChangedTime != COALESCE(
-             (SELECT clVersionId
-                FROM ClazzLogReplicate
-               WHERE clPk = ClazzLog.clazzLogUid
-                 AND clDestination = :newNodeId), 0) 
-      /*psql ON CONFLICT(clPk, clDestination) DO UPDATE
-             SET clPending = true
-      */       
-    """)
-    @ReplicationRunOnNewNode
-    @ReplicationCheckPendingNotificationsFor([ClazzLog::class])
-    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
-
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replace(entity: ClazzLog): Long
-
-    @Query("""
- REPLACE INTO ClazzLogReplicate(clPk, clDestination)
-  SELECT DISTINCT ClazzLog.clazzLogUid AS clUid,
-         UserSession.usClientNodeId AS clDestination
-    FROM ChangeLog
-         JOIN ClazzLog 
-              ON ChangeLog.chTableId = ${ClazzLog.TABLE_ID} 
-             AND ClazzLog.clazzLogUid = ChangeLog.chEntityPk
-         JOIN Clazz 
-              ON Clazz.clazzUid = ClazzLog.clazzLogClazzUid 
-         ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-              ${Role.PERMISSION_CLAZZ_SELECT}
-              ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
-   WHERE UserSession.usClientNodeId != (
-         SELECT nodeClientId 
-           FROM SyncNode
-          LIMIT 1)
-     AND ClazzLog.clazzLogLastChangedTime != COALESCE(
-         (SELECT clVersionId
-            FROM ClazzLogReplicate
-           WHERE clPk = ClazzLog.clazzLogUid
-             AND clDestination = UserSession.usClientNodeId), 0)
- /*psql ON CONFLICT(clPk, clDestination) DO UPDATE
-     SET clPending = true
-  */               
-    """)
-    @ReplicationRunOnChange([ClazzLog::class])
-    @ReplicationCheckPendingNotificationsFor([ClazzLog::class])
-    abstract suspend fun replicateOnChange()
 
     @Query("SELECT * FROM ClazzLog WHERE clazzLogUid = :uid")
     abstract fun findByUid(uid: Long): ClazzLog?
@@ -79,22 +21,57 @@ expect abstract class ClazzLogDao : BaseDao<ClazzLog> {
     abstract suspend fun findByUidAsync(uid: Long): ClazzLog?
 
     @Query("SELECT * FROM ClazzLog WHERE clazzLogUid = :uid")
-    abstract fun findByUidLive(uid: Long): LiveData<ClazzLog?>
+    abstract fun findByUidLive(uid: Long): Flow<ClazzLog?>
 
-    @Query("""SELECT ClazzLog.* FROM ClazzLog 
-        WHERE clazzLogClazzUid = :clazzUid
-        AND clazzLog.clazzLogStatusFlag != :excludeStatus
-        ORDER BY ClazzLog.logDate DESC""")
-    abstract fun findByClazzUidAsFactory(clazzUid: Long, excludeStatus: Int): DataSourceFactory<Int, ClazzLog>
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
+    @Query("""
+        SELECT ClazzLog.* 
+          FROM ClazzLog 
+         WHERE clazzLogClazzUid = :clazzUid
+           AND clazzLog.clazzLogStatusFlag != :excludeStatus
+      ORDER BY ClazzLog.logDate DESC
+    """)
+    abstract fun findByClazzUidAsFactory(
+        clazzUid: Long,
+        excludeStatus: Int
+    ): PagingSource<Int, ClazzLog>
 
 
     //Used by the attendance recording screen to allow the user to go next/prev between days.
-    @Query("""SELECT ClazzLog.* FROM ClazzLog 
-        WHERE clazzLogClazzUid = :clazzUid
-        AND clazzLog.clazzLogStatusFlag != :excludeStatus
-        ORDER BY ClazzLog.logDate ASC""")
-    abstract suspend fun findByClazzUidAsync(clazzUid: Long, excludeStatus: Int): List<ClazzLog>
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+    )
+    @Query("""
+        SELECT ClazzLog.* 
+          FROM ClazzLog 
+         WHERE ClazzLog.clazzLogClazzUid = :clazzUid
+           AND clazzLog.clazzLogStatusFlag != :excludeStatus
+      ORDER BY ClazzLog.logDate ASC
+    """)
+    abstract suspend fun findByClazzUidAsync(
+        clazzUid: Long,
+        excludeStatus: Int
+    ): List<ClazzLog>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
+    @Query("""
+        SELECT ClazzLog.* 
+          FROM ClazzLog 
+         WHERE ClazzLog.clazzLogClazzUid = 
+               (SELECT ClazzLogInner.clazzLogClazzUid
+                  FROM ClazzLog ClazzLogInner
+                 WHERE ClazzLogInner.clazzLogUid = :clazzLogUid)
+           AND clazzLog.clazzLogStatusFlag != :excludeStatus
+      ORDER BY ClazzLog.logDate ASC
+    """)
+    abstract suspend fun findAllForClazzByClazzLogUid(
+        clazzLogUid: Long,
+        excludeStatus: Int
+    ): List<ClazzLog>
 
     @Query("""SELECT ClazzLog.* FROM ClazzLog 
         WHERE 
@@ -125,14 +102,19 @@ expect abstract class ClazzLogDao : BaseDao<ClazzLog> {
         AND (:statusFilter = 0 OR ClazzLog.clazzLogStatusFlag = :statusFilter)
         ORDER BY ClazzLog.logDate
     """)
-    abstract fun findByClazzUidWithinTimeRangeLive(clazzUid: Long, fromTime: Long, toTime: Long, statusFilter: Int): LiveData<List<ClazzLog>>
+    abstract fun findByClazzUidWithinTimeRangeLive(clazzUid: Long, fromTime: Long, toTime: Long, statusFilter: Int): Flow<List<ClazzLog>>
 
     @Query("""
-        SELECT EXISTS(SELECT ClazzLog.clazzLogUid FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid 
-        AND (:excludeStatusFilter = 0 OR ((ClazzLog.clazzLogStatusFlag & :excludeStatusFilter) = 0)))
+        SELECT EXISTS
+               (SELECT ClazzLog.clazzLogUid 
+                  FROM ClazzLog 
+                 WHERE clazzLogClazzUid = :clazzUid 
+                 AND (:excludeStatusFilter = 0 
+                      OR ((ClazzLog.clazzLogStatusFlag & :excludeStatusFilter) = 0))
+               )
     """)
     @QueryLiveTables(["ClazzLog"])
-    abstract fun clazzHasScheduleLive(clazzUid: Long, excludeStatusFilter: Int): LiveData<Boolean>
+    abstract fun clazzHasScheduleLive(clazzUid: Long, excludeStatusFilter: Int): Flow<Boolean>
 
 
     @Query("""UPDATE ClazzLog 
@@ -143,5 +125,27 @@ expect abstract class ClazzLogDao : BaseDao<ClazzLog> {
 
     @Update
     abstract suspend fun updateAsync(clazzLog: ClazzLog)
+
+    @Query("""
+        SELECT COALESCE(
+               (SELECT ClazzLog.clazzLogUid
+                  FROM ClazzLog
+                 WHERE ClazzLog.clazzLogClazzUid = :clazzUid
+                   AND (ClazzLog.clazzLogStatusFlag & ${ClazzLog.STATUS_RESCHEDULED}) != ${ClazzLog.STATUS_RESCHEDULED}
+              ORDER BY ClazzLog.logDate DESC
+                 LIMIT 1), 0)
+
+        
+    """)
+    abstract suspend fun findMostRecentClazzLogToEditUid(
+        clazzUid: Long
+    ): Long
+
+
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertListAsync(entityList: List<ClazzLog>)
+
+
 
 }

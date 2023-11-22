@@ -6,20 +6,32 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 /**
- * Represents the site as a whole. There is only ever one row.
+ * Represents the site as a whole. There is only ever one row. Note trigger SQL checks to make sure
+ * that there is never any change to the authSalt. That MUST remain constant otherwise authentication
+ * will be broken.
  */
 @Entity
 @Serializable
-@ReplicateEntity(tableId = 189, tracker = SiteReplicate::class)
+@ReplicateEntity(
+    tableId = Site.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
 @Triggers(arrayOf(
      Trigger(
          name = "site_remote_insert",
          order = Trigger.Order.INSTEAD_OF,
          on = Trigger.On.RECEIVEVIEW,
          events = [Trigger.Event.INSERT],
+         conditionSql = """
+             SELECT ((SELECT COUNT(*) 
+                        FROM Site) = 0
+                     OR NEW.authSalt = 
+                        (SELECT Site.authSalt
+                           FROM Site
+                          LIMIT 1)) 
+         """,
          sqlStatements = [
-             "REPLACE INTO Site(siteUid, sitePcsn, siteLcsn, siteLcb, siteLct, siteName, guestLogin, registrationAllowed, authSalt) VALUES (NEW.siteUid, NEW.sitePcsn, NEW.siteLcsn, NEW.siteLcb, NEW.siteLct, NEW.siteName, NEW.guestLogin, NEW.registrationAllowed, NEW.authSalt) " +
-             "/*psql ON CONFLICT (siteUid) DO UPDATE SET sitePcsn = EXCLUDED.sitePcsn, siteLcsn = EXCLUDED.siteLcsn, siteLcb = EXCLUDED.siteLcb, siteLct = EXCLUDED.siteLct, siteName = EXCLUDED.siteName, guestLogin = EXCLUDED.guestLogin, registrationAllowed = EXCLUDED.registrationAllowed, authSalt = EXCLUDED.authSalt*/"
+             TRIGGER_UPSERT_WHERE_NEWER
          ]
      )
 ))
@@ -37,8 +49,8 @@ open class Site {
     @LastChangedBy
     var siteLcb: Int = 0
 
-    @ReplicationVersionId
-    @LastChangedTime
+    @ReplicateEtag
+    @ReplicateLastModified
     var siteLct: Long = 0
 
     var siteName: String? = null
@@ -48,5 +60,11 @@ open class Site {
     var registrationAllowed: Boolean = true
 
     var authSalt: String? = null
+
+    companion object {
+
+        const val TABLE_ID = 189
+
+    }
 
 }

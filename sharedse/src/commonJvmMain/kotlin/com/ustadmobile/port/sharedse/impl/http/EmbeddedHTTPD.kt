@@ -20,7 +20,6 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.sharedse.impl.http.vhToPxFactor
 import com.ustadmobile.door.ext.DoorTag
 
@@ -35,13 +34,14 @@ import com.ustadmobile.door.ext.DoorTag
  *
  * Created by mike on 8/14/15.
  */
-open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di: DI) : RouterNanoHTTPD(portNum), DIAware, ContainerMounter {
+open class EmbeddedHTTPD(
+    portNum: Int,
+    override val di: DI
+) : RouterNanoHTTPD(portNum), DIAware, ContainerMounter {
 
     private val id: Int
 
     private val responseListeners = Vector<ResponseListener>()
-
-    private val networkManager: NetworkManagerBle by instance()
 
     /**
      * Returns the local URL in the form of http://localhost;PORT/

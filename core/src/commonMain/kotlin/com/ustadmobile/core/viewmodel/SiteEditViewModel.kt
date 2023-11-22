@@ -9,3 +9,13 @@ data class SiteEditUiState(
     val fieldsEnabled: Boolean = true,
     val siteNameError: String? = null
 )
+
+class SiteEditViewModel  {
+
+    companion object {
+
+        const val DEST_NAME = "SiteEdit"
+
+    }
+
+}

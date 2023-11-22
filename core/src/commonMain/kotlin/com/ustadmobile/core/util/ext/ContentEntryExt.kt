@@ -2,8 +2,8 @@ package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.view.ContentEntryDetailView
-import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.lib.db.entities.ContentEntry
 
 /**
@@ -18,7 +18,7 @@ fun makeContentEntryDeepLink(contentEntryUid: Long, leaf: Boolean, endpoint: End
     val viewName = if(leaf) {
         ContentEntryDetailView.VIEW_NAME
     }else {
-        ContentEntryList2View.VIEW_NAME
+        ContentEntryListViewModel.DEST_NAME
     }
 
     return mapOf(UstadView.ARG_ENTITY_UID to contentEntryUid.toString()).toDeepLink(

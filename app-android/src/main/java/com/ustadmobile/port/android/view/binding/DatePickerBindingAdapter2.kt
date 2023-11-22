@@ -25,7 +25,7 @@ import org.kodein.di.instance
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
-
+import com.ustadmobile.core.R as CR
 
 const val MODE_START_OF_DAY = 1
 const val MODE_END_OF_DAY = 2
@@ -152,9 +152,9 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
         if(localeString.startsWith("ps") || localeString.startsWith("fa")){
 
             val picker: PersianDatePickerDialog = PersianDatePickerDialog(context)
-                .setPositiveButtonString(context.getString(R.string.ok))
-                .setNegativeButton(context.getString(R.string.cancel))
-                .setTodayButton(context.getString(R.string.today))
+                .setPositiveButtonString(context.getString(CR.string.ok))
+                .setNegativeButton(context.getString(CR.string.cancel))
+                .setTodayButton(context.getString(CR.string.today))
                 .setTodayButtonVisible(true)
                 .setMinYear(1200)
                 .setMaxYear(1600)
@@ -197,7 +197,7 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
                 null
             )
 
-            builder.setPositiveButton(R.string.ok) { dialog, _ ->
+            builder.setPositiveButton(CR.string.ok) { dialog, _ ->
                 cal[Calendar.DAY_OF_MONTH] = picker.dayOfMonth
                 cal[Calendar.MONTH] = picker.month
                 cal[Calendar.YEAR] = picker.year

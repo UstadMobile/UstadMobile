@@ -7,7 +7,7 @@ class BackStackEntryAdapter(private val backStackEntry: NavBackStackEntry,
                             override val viewName: String) : UstadBackStackEntry {
 
     private val savedStateAdapter: UstadSavedStateHandle by lazy {
-        SavedStateHandleAdapter(backStackEntry.savedStateHandle)
+        UstadSavedStateHandleAndroid(backStackEntry)
     }
 
     override val savedStateHandle: UstadSavedStateHandle

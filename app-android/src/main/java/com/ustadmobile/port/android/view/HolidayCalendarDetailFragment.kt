@@ -20,8 +20,9 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.HolidayCalendarDetailUIState
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
-import com.ustadmobile.port.android.util.compose.rememberFormattedDate
+import com.ustadmobile.libuicompose.util.rememberFormattedDate
 import com.ustadmobile.port.android.view.composable.UstadDetailField
+import com.ustadmobile.core.R as CR
 
 @Composable
 fun HolidayCalendarDetailScreen(
@@ -36,7 +37,7 @@ fun HolidayCalendarDetailScreen(
 
         UstadDetailField(
             valueText = uiState.holidayCalendar?.umCalendarName ?: "",
-            labelText = stringResource(id = R.string.name),
+            labelText = stringResource(id = CR.string.name_key),
             imageId = R.drawable.ic_calendar_today_24px_,
         )
 

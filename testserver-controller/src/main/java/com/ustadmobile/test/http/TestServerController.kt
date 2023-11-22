@@ -4,12 +4,14 @@ import com.ustadmobile.lib.util.SysPathUtil
 import io.ktor.http.*
 import io.ktor.serialization.gson.*
 import io.ktor.server.application.*
+import io.ktor.server.http.content.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.io.File
+import java.io.FileFilter
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -40,6 +42,8 @@ fun Application.testServerController() {
     val resultDir = environment.config.propertyOrNull("resultDir")?.getString()?.let {
         File(it)
     } ?: File(".")
+
+    val serverSiteUrl = environment.config.property("siteUrl").getString()
 
     if(adbPath == null || !adbPath.exists()) {
         throw IllegalStateException("ERROR: ADB path does not exist")
@@ -89,7 +93,9 @@ fun Application.testServerController() {
     }
 
     val serverDir = File("app-ktor-server")
-    val testContentDir = File(File("test-end-to-end", "test-files"), "content")
+    val testFilesDir = File("test-end-to-end", "test-files")
+    val testContentDir = File(testFilesDir, "content")
+    log.info("TEST FILES: ${testContentDir.absolutePath}")
 
     if(!serverDir.exists()) {
         println("ERROR: Server dir does not exist! testServerManager working directory MUST be the " +
@@ -125,6 +131,18 @@ fun Application.testServerController() {
 
 
     install(Routing) {
+        static("/test-files/content/") {
+            //KTOR default files implementation does not cooperate.
+            staticRootFolder = testContentDir
+            testContentDir.listFiles(FileFilter {
+                it.isFile
+            })?.forEach {
+               file(it.name)
+            }
+
+            default("index.html")
+        }
+
         get("/") {
             var response = ""
             if(serverProcess != null) {
@@ -193,13 +211,16 @@ fun Application.testServerController() {
                     ?: throw IllegalArgumentException("Could not find server command in PATH ${serverArgs[0]}")
             }
 
-            serverProcess = ProcessBuilder(serverArgs)
+            val serverArgsWithSiteUrl = serverArgs + "-P:ktor.ustad.siteUrl=$serverSiteUrl"
+            serverProcess = ProcessBuilder(serverArgsWithSiteUrl)
                 .directory(serverDir)
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
                 .redirectError(ProcessBuilder.Redirect.PIPE)
                 .start()
 
-            response += "Started server process PID #${serverProcess?.pid()} ${serverArgs.joinToString( " ")} <br/>"
+            response += "Started server process PID #${serverProcess?.pid()} " +
+                    "${serverArgsWithSiteUrl.joinToString( " ")} " +
+                    "(workingDir=${serverDir.absolutePath}<br/>"
 
             if(adbRecordEnabled) {
                 ProcessBuilder(

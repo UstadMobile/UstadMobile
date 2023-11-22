@@ -21,3 +21,7 @@ env:
     file: "../common/login_download_and_open_content.yaml"
     env:
        TESTCONTENTNAME: AddContentVideoTest
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_download_and_open"
+- back
+- tapOn: "ATTEMPTS"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/video_attempts_page"

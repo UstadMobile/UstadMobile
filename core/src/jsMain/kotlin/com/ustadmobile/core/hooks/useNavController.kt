@@ -2,12 +2,13 @@ package com.ustadmobile.core.hooks
 
 import com.ustadmobile.core.components.*
 import com.ustadmobile.core.impl.nav.NavCommand
-import history.Location
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
-import react.useContext
+import react.useRequiredContext
+import remix.run.router.Location
 
 
-val Location.ustadViewName: String
+val Location<*>.ustadViewName: String
     get() = pathname.removePrefix("/").trim()
 
 /**
@@ -15,10 +16,11 @@ val Location.ustadViewName: String
  * is required, then save the destination into the
  */
 fun useNavControllerEffect(commandFlow: Flow<NavCommand>?) {
-    val navHostFn = useContext(NavHostContext)
+    val navHostFn = useRequiredContext(NavHostContext)
 
-    useLaunchedEffect(dependencies = arrayOf(commandFlow)) {
+    useLaunchedEffect(commandFlow) {
         commandFlow?.collect {
+            Napier.d("useNavControllerEffect: collect command: $it")
             navHostFn(it)
         }
     }

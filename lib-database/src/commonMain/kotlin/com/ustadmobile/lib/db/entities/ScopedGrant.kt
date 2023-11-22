@@ -7,30 +7,26 @@ import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
+/**
+ * Represents permission granted to a given PersonGroup scoped to a specific entity.
+ */
 @Entity(indices = [
     Index(value = ["sgGroupUid", "sgPermissions", "sgTableId", "sgEntityUid"], name = "idx_group_to_entity"),
     Index(value = ["sgTableId", "sgEntityUid", "sgPermissions", "sgGroupUid"], name = "idx_entity_to_group")]
 )
 
-@ReplicateEntity(tableId = TABLE_ID, tracker = ScopedGrantReplicate::class,
-    priority = ReplicateEntity.HIGHEST_PRIORITY)
+@ReplicateEntity(
+    tableId = TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
 @Triggers(arrayOf(
     Trigger(name = "sg_remote_insert",
         order = Trigger.Order.INSTEAD_OF,
         on = Trigger.On.RECEIVEVIEW,
         events = [Trigger.Event.INSERT],
-        sqlStatements = [
-            """
-                REPLACE INTO ScopedGrant(sgUid, sgPcsn, sgLcsn, sgLcb, sgLct, sgTableId, sgEntityUid, 
-                         sgPermissions, sgGroupUid, sgIndex, sgFlags)
-                  VALUES (NEW.sgUid, NEW.sgPcsn, NEW.sgLcsn, NEW.sgLcb, NEW.sgLct, NEW.sgTableId,
-                         NEW.sgEntityUid, NEW.sgPermissions, NEW.sgGroupUid, NEW.sgIndex, NEW.sgFlags)
-                  /*psql ON CONFLICT(sgUid) DO UPDATE
-                     SET sgLct = EXCLUDED.sgLct,
-                         sgPermissions = EXCLUDED.sgPermissions 
-                  */
-            """
-        ])
+        conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+        sqlStatements = [TRIGGER_UPSERT],
+    )
 ))
 @Serializable
 open class ScopedGrant {
@@ -47,8 +43,8 @@ open class ScopedGrant {
     @LastChangedBy
     var sgLcb: Int = 0
 
-    @ReplicationVersionId
-    @LastChangedTime
+    @ReplicateEtag
+    @ReplicateLastModified
     var sgLct: Long = 0
 
     //The table id that this grant is form, or ALL_TABLES to indicate it is for all tables (eg. superadmin)
@@ -57,7 +53,7 @@ open class ScopedGrant {
     //The entity uid that this grant is for, or ALL_ENTITIES to indicate it is for all entities (e.g. superadmin)
     var sgEntityUid: Long = 0
 
-    //Actual scoped permissions granted (bitmask)
+    //Actual scoped permissions granted (bitmask) as per Role.PERMISSION_ constants
     var sgPermissions: Long = 0
 
     //The group that these permissions are granted to

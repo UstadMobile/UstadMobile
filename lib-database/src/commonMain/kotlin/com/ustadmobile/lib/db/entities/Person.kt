@@ -4,29 +4,43 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
-import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
-import com.ustadmobile.lib.db.entities.Person.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 /**
- * Created by mike on 3/8/18.
+ * Represents an actual person in the system. May or may not have a user account.
  */
-
 @Entity
-@ReplicateEntity(tableId = TABLE_ID, tracker = PersonReplicate::class)
+@ReplicateEntity(
+    tableId = Person.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
  @Triggers(arrayOf(
      Trigger(
          name = "person_remote_insert",
          order = Trigger.Order.INSTEAD_OF,
          on = Trigger.On.RECEIVEVIEW,
          events = [Trigger.Event.INSERT],
+         //Temporary check to avoid other instances (e.g. previous versions on same url) interfering.
+         conditionSql = """
+             SELECT 
+                    ((NEW.username IS NULL
+                     OR (SELECT NOT EXISTS(
+                            SELECT Person.personUid
+                              FROM Person
+                             WHERE Person.username = NEW.username))  
+                     OR NEW.personUid = 
+                        (SELECT Person.personUid
+                           FROM Person
+                          WHERE Person.username = NEW.username)))
+                  AND CAST(NEW.personLct AS BIGINT) > 
+                         (SELECT COALESCE(
+                                  (SELECT Person.personLct
+                                     FROM Person
+                                    WHERE Person.personUid = CAST(NEW.personUid AS BIGINT)), 0))   
+                            
+         """,
          sqlStatements = [
-             """REPLACE INTO Person(personUid, username, firstNames, lastName, emailAddr, phoneNum, gender, active, admin, personNotes, fatherName, fatherNumber, motherName, motherNum, dateOfBirth, personAddress, personOrgId, personGroupUid, personMasterChangeSeqNum, personLocalChangeSeqNum, personLastChangedBy, personLct, personCountry, personType) 
-             VALUES (NEW.personUid, NEW.username, NEW.firstNames, NEW.lastName, NEW.emailAddr, NEW.phoneNum, NEW.gender, NEW.active, NEW.admin, NEW.personNotes, NEW.fatherName, NEW.fatherNumber, NEW.motherName, NEW.motherNum, NEW.dateOfBirth, NEW.personAddress, NEW.personOrgId, NEW.personGroupUid, NEW.personMasterChangeSeqNum, NEW.personLocalChangeSeqNum, NEW.personLastChangedBy, NEW.personLct, NEW.personCountry, NEW.personType) 
-             /*psql ON CONFLICT (personUid) DO UPDATE 
-             SET username = EXCLUDED.username, firstNames = EXCLUDED.firstNames, lastName = EXCLUDED.lastName, emailAddr = EXCLUDED.emailAddr, phoneNum = EXCLUDED.phoneNum, gender = EXCLUDED.gender, active = EXCLUDED.active, admin = EXCLUDED.admin, personNotes = EXCLUDED.personNotes, fatherName = EXCLUDED.fatherName, fatherNumber = EXCLUDED.fatherNumber, motherName = EXCLUDED.motherName, motherNum = EXCLUDED.motherNum, dateOfBirth = EXCLUDED.dateOfBirth, personAddress = EXCLUDED.personAddress, personOrgId = EXCLUDED.personOrgId, personGroupUid = EXCLUDED.personGroupUid, personMasterChangeSeqNum = EXCLUDED.personMasterChangeSeqNum, personLocalChangeSeqNum = EXCLUDED.personLocalChangeSeqNum, personLastChangedBy = EXCLUDED.personLastChangedBy, personLct = EXCLUDED.personLct, personCountry = EXCLUDED.personCountry, personType = EXCLUDED.personType
-             */"""
+             TRIGGER_UPSERT_WHERE_NEWER
          ]
      )
  ))
@@ -87,8 +101,8 @@ open class Person() {
     @LastChangedBy
     var personLastChangedBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var personLct: Long = 0
 
     var personCountry: String? = null

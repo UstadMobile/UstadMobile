@@ -1,6 +1,3 @@
-import org.json.JSONObject
-
-import java.util.concurrent.atomic.AtomicInteger
 
 plugins {
     id 'org.jetbrains.kotlin.multiplatform'
@@ -8,6 +5,7 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.android.library'
     id 'maven-publish'
+    alias(libs.plugins.moko.resources.plugin)
 }
 
 
@@ -34,27 +32,31 @@ android {
 
 
     compileOptions {
-        sourceCompatibility = '1.8'
-        targetCompatibility = '1.8'
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
 
         //This will apparently prevent Android Studio from recognizing the project
         //coreLibraryDesugaringEnabled true
     }
     namespace 'com.ustadmobile.core'
+    lint {
+        disable 'MissingTranslation', 'ExtraTranslation'
+    }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
         kotlinOptions {
-            jvmTarget = "1.8"
+            jvmTarget = "17"
+            freeCompilerArgs += "-Xexpect-actual-classes"
         }
     }
+
 }
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility = '17'
+targetCompatibility = '17'
 
 group rootProject.group
 version rootProject.version
-def reactLocaleOutPath = "${rootDir.absolutePath}/app-react/src/main/resources/"
 
 // workaround for https://youtrack.jetbrains.com/issue/KT-27170
 configurations {
@@ -77,17 +79,11 @@ kotlin {
 
     android()
 
-    js(LEGACY) {
+    js(IR) {
         browser {
-            dceTask {
-                keep("kotlin.defineModule") //To avoid  e.defineModule is not a function error
-            }
             testTask {
                 useKarma {
                     useChromeHeadless() //change to useChrome to run the actual browser
-                    /* Not supported from Kotlin 1.8
-                    webpackConfig.cssSupport.enabled = true
-                     */
                 }
             }
         }
@@ -96,26 +92,29 @@ kotlin {
     sourceSets {
 
         commonMain {
-            kotlin.srcDirs += "build/generated/source/umlocale/"
-            kotlin.srcDirs += "build/generated/source/umlocale-namemap"
             dependencies {
+                api libs.moko.resources
                 implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
-                implementation "io.ktor:ktor-client-core:$version_ktor"
-                implementation "io.ktor:ktor-client-json:$version_ktor"
-                implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
-                implementation "io.ktor:ktor-io:$version_ktor"
-                implementation "com.soywiz.korlibs.klock:klock:$version_klock"
-                implementation "io.github.aakira:napier:$version_napier"
+                api "io.ktor:ktor-client-core:$version_ktor"
+                api "io.ktor:ktor-client-json:$version_ktor"
+                api "io.ktor:ktor-client-content-negotiation:$version_ktor"
+                api "io.ktor:ktor-io:$version_ktor"
+                implementation libs.napier
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
-                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
+                implementation libs.door.runtime
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
-                implementation project(':lib-database')
-                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
+                api project(':lib-database')
+                implementation libs.door.runtime
                 implementation project(":lib-util")
-                implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
+                implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
                 implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
+                api libs.kotlinxio.core
+                api libs.xmlutil.core
+                api libs.xmlutil.serialization
+                api libs.precompose
+                api libs.precompose.viewmodel
             }
         }
 
@@ -123,8 +122,9 @@ kotlin {
             dependsOn commonMain
 
             dependencies {
-
                 implementation kotlin('stdlib-common')
+                implementation project(":lib-database")
+                implementation project(":lib-cache")
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
@@ -133,6 +133,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                api "io.ktor:ktor-serialization-kotlinx-json:$version_ktor"
                 compileOnly "net.sf.kxml:kxml2:$version_kxml"
             }
         }
@@ -141,19 +142,24 @@ kotlin {
             dependencies {
                 implementation kotlin('test-common')
                 implementation kotlin('test-annotations-common')
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$version_coroutines"
             }
         }
 
         jvmMain {
+            dependsOn commonMain
             dependsOn commonJvmMain
-            resources.srcDirs += ["locale/main", "src/main/assets"]
+            resources.srcDirs += ["src/main/assets"]
 
             dependencies {
                 implementation "org.apache.pdfbox:pdfbox:$version_pdfbox_apache"
                 implementation "org.jsoup:jsoup:$version_jsoup"
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "org.quartz-scheduler:quartz:$version_quartz_scheduler"
+                implementation libs.quartz
+                implementation "io.ktor:ktor-server-core:$version_ktor"
+                implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
+                implementation libs.javaffmpeg
             }
         }
 
@@ -162,13 +168,15 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-test:$version_kotlin"
                 implementation "org.jetbrains.kotlin:kotlin-test-junit:$version_kotlin"
                 implementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
+                implementation "com.soywiz.korlibs.klock:klock:$version_klock"
                 implementation "junit:junit:$version_junit"
+                implementation "io.ktor:ktor-server-content-negotiation:$version_ktor"
 
                 implementation project(":sharedse")
                 implementation project(":lib-test-common")
                 implementation project(":app-ktor-server")
 
-                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                implementation libs.simplejndi
                 implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
                 implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
@@ -183,7 +191,7 @@ kotlin {
 
                 implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
 
-                implementation "net.bytebuddy:byte-buddy:1.12.18"
+                implementation "net.bytebuddy:byte-buddy:$version_byte_buddy"
                 implementation "app.cash.turbine:turbine:$version_turbine"
             }
         }
@@ -202,14 +210,14 @@ kotlin {
                 implementation "androidx.room:room-runtime:$version_android_room"
                 implementation "com.google.code.gson:gson:$version_gson"
 
-                implementation "androidx.appcompat:appcompat:$version_androidx_appcompat"
+                implementation libs.androidx.appcompat
                 implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy"
 
                 //Seems to fix things when we put a specific dependency here
                 implementation "androidx.coordinatorlayout:coordinatorlayout:$version_androidx_coordinatorlayout"
                 implementation "androidx.recyclerview:recyclerview:$version_androidx_recyclerview"
                 implementation "androidx.room:room-runtime:$version_android_room"
-                implementation "androidx.paging:paging-runtime:$version_androidx_paging"
+                implementation(libs.androidx.paging.runtime)
                 implementation "androidx.work:work-runtime:$version_android_workmanager"
                 implementation "androidx.work:work-runtime-ktx:$version_android_workmanager"
                 implementation "org.jsoup:jsoup:$version_jsoup"
@@ -223,12 +231,12 @@ kotlin {
                 //dependency injection
                 implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
 
-                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation libs.okhttp
 
-                implementation "androidx.navigation:navigation-fragment-ktx:$version_android_navigation"
-                implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
+                implementation libs.androidx.navigation.fragment.ktx
+                implementation libs.androidx.navigation.ui.ktx
 
-                implementation "com.google.android.material:material:$version_android_material"
+                implementation libs.android.material
 
 
 
@@ -238,6 +246,10 @@ kotlin {
         }
 
         jsMain {
+            //Note: if dependsOn commonMain is not explicitly added below, MokoResources will not
+            // generate string resources for JS as required.
+            dependsOn commonMain
+
             dependencies {
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-json-js:$version_ktor"
@@ -246,8 +258,14 @@ kotlin {
                 implementation enforcedPlatform("org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom:$kotlinWrappersVersion")
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-extensions"
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-react"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom-legacy"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom"
+
+                //Required to do encryption for tokens etc.
                 implementation npm("asmcrypto.js","$version_npm_asmcrypto")
+                //required by asmcrypto - see webpack.confg.d
+                implementation npm("crypto-browserify", "$version_crypto_browserify")
+                //required by asmcrypto - see webpack.confg.d
+                implementation npm("stream-browserify", "$version_stream_browserify")
                 implementation npm("buffer","$version_npm_buffer")
             }
         }
@@ -255,140 +273,14 @@ kotlin {
         jsTest {
             dependencies {
                 implementation kotlin('test-js')
-                implementation npm("moment","$version_npm_moment")
-                implementation npm("moment-timezone","$version_npm_moment_timezone")
             }
         }
 
     }
 }
-/*
- * Generate a class with constant integer flags for each string message ID. See localization docs
- * for further information.
- */
-task prepareLocale {
-    inputs.files(fileTree(dir: project.file("locale")).matching { include '**/*.xml' })
-    outputs.file("build/generated/source/umlocale/com/ustadmobile/core/generated/locale/MessageID.kt")
 
-    doFirst {
-        File messageIdFile = project.file("build/generated/source/umlocale/com/ustadmobile/core/generated/locale/MessageID.kt")
+afterEvaluate {
 
-        if(!messageIdFile.parentFile.exists()) {
-            messageIdFile.parentFile.mkdirs()
-        }
-
-        messageIdFile.text = ''
-        messageIdFile << 'package com.ustadmobile.core.generated.locale\n\n'
-        messageIdFile << '/** DO NOT EDIT. GENERATED CODE */\n'
-        messageIdFile << 'object MessageID{\n\n'
-
-        String messageIdMap = """package com.ustadmobile.core.generated.locale\n\n
-        object MessageIdMap {
-        
-            private val strMap = mapOf(
-                
-        """
-
-        Map<String, Integer> messageIds = new HashMap<>()
-        AtomicInteger messageIdGenerator = new AtomicInteger(2000)
-
-        rootProject.fileTree(dir: "core/locale/main/values", include: "*.xml").each() { File file ->
-            def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
-            xmlDoc.string.each() { str ->
-                String msgName = str.@name
-
-                if (!messageIds.containsKey(msgName)) {
-                    messageIds.put(msgName, new Integer(messageIdGenerator.getAndIncrement()))
-                }
-            }
-        }
-
-        Iterator<String> nameIterator = messageIds.keySet().iterator()
-
-        boolean first = true
-        while (nameIterator.hasNext()) {
-            String strName = nameIterator.next()
-            Integer value = messageIds.get(strName)
-            messageIdFile << '    const val ' + strName + ' = ' + String.valueOf(value) + '\n\n'
-            if(!first) {
-                messageIdMap += ",\n"
-            }
-
-            messageIdMap += String.valueOf(value) + ' to "' + strName + '"'
-            first = false
-        }
-        messageIdFile << '}'
-
-        messageIdMap += """)
-        operator fun get(messageId: Int) = strMap[messageId]
-        
-        val idMap: Map<Int, String> = strMap.toMap()
-        
-        }"""
-        File messageIdMapFile = project.file("build/generated/source/umlocale-namemap/com/ustadmobile/core/generated/locale/MessageIdMap.kt")
-        if(!messageIdMapFile.parentFile.exists()) {
-            messageIdMapFile.parentFile.mkdirs()
-        }
-
-        messageIdMapFile.text = messageIdMap
-    }
-}
-
-task copyStringValuesToWebAssets {
-    File outDir = project.file("${reactLocaleOutPath}/locales/")
-    if(!outDir.exists()){
-        outDir.mkdirs()
-    }
-    rootProject.fileTree(dir: "core/locale/main").each() { File file ->
-        def localeCode = "en"
-
-        def pathString = file.absolutePath.substring(file.absolutePath.lastIndexOf("values"))
-        if(pathString.split("-").size() > 1){
-            localeCode = file.getParent().substring(file.getParent().lastIndexOf("-") + 1)
-        }
-        FileWriter writer = new FileWriter(project.file("${outDir.absolutePath}/${localeCode}.xml").absolutePath)
-        writer.write(file.getText())
-        writer.flush()
-    }
-}
-
-task prepareAppConfigs{
-    try {
-        File outFile = project.file("${reactLocaleOutPath}appconfig.json")
-        File configFile =  project.file("${rootDir.absolutePath}/core/src/main/assets/" +
-                "com/ustadmobile/core/appconfig.properties")
-        Scanner scanner = new Scanner(configFile)
-        def configContent = new JSONObject()
-        while(scanner.hasNextLine()){
-            String line = scanner.nextLine()
-            if(!line.startsWith("#") && !line.isEmpty()){
-                def keyValue = line.replace(" ","").split("=")
-                if(keyValue.length > 1){
-                    configContent.put(keyValue[0],keyValue[1])
-                }
-            }
-        }
-        FileWriter jsonFile = new FileWriter(outFile.absolutePath)
-        jsonFile.write(configContent.toString(4))
-        jsonFile.flush()
-
-    }catch(FileNotFoundException e){
-        e.printStackTrace()
-    }
-}
-
-tasks.whenTaskAdded { task ->
-    if (task.name == "compileTestKotlinJvm") {
-        task.dependsOn(copyTestResources)
-    }
-
-    if(task.name.startsWith("compile") || task.name.startsWith("assemble") || task.name.endsWith("Jar") || task.name.startsWith("build")) {
-        task.dependsOn(prepareLocale)
-    }
-}
-
-gradle.projectsEvaluated {
-    preBuild.dependsOn(prepareLocale, copyStringValuesToWebAssets, prepareAppConfigs)
 }
 
 publishing {
@@ -405,4 +297,10 @@ publishing {
             url rootProject.ext.buildConfigProperties['repo.dir']
         }
     }
+}
+
+
+multiplatformResources {
+    multiplatformResourcesPackage = "com.ustadmobile.core"
+    iosBaseLocalizationRegion = "en"
 }

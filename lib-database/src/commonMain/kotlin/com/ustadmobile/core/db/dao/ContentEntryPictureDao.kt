@@ -3,60 +3,15 @@ package com.ustadmobile.core.db.dao
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.lifecycle.LiveData
+import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ContentEntryPicture
-import com.ustadmobile.lib.db.entities.UserSession
 
 
 @DoorDao
 @Repository
 expect abstract class ContentEntryPictureDao : BaseDao<ContentEntryPicture> {
 
-    @Query("""
-     REPLACE INTO ContentEntryPictureReplicate(cepPk, cepDestination)
-         SELECT DISTINCT cepUid AS cepPK,
-                :newNodeId AS siteDestination
-           FROM ContentEntryPicture
-          WHERE ContentEntryPicture.cepTimestamp != COALESCE(
-                (SELECT cepVersionId
-                   FROM ContentEntryPictureReplicate
-                  WHERE cepPk = ContentEntryPicture.cepUid
-                    AND cepDestination = :newNodeId), -1) 
-         /*psql ON CONFLICT(cepPk, cepDestination) DO UPDATE
-                SET cepPending = true
-         */       
-    """)
-    @ReplicationRunOnNewNode
-    @ReplicationCheckPendingNotificationsFor([ContentEntryPicture::class])
-    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
-
-
-    @Query("""
-  REPLACE INTO ContentEntryPictureReplicate(cepPk, cepDestination)
-         SELECT DISTINCT ContentEntryPicture.cepUid AS cepPk,
-                UserSession.usClientNodeId AS siteDestination
-           FROM ChangeLog
-                JOIN ContentEntryPicture
-                    ON ChangeLog.chTableId = ${ContentEntryPicture.TABLE_ID}
-                       AND ChangeLog.chEntityPk = ContentEntryPicture.cepUid
-                JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-          WHERE UserSession.usClientNodeId != (
-                SELECT nodeClientId 
-                  FROM SyncNode
-                 LIMIT 1)
-            AND ContentEntryPicture.cepTimestamp != COALESCE(
-                (SELECT cepVersionId
-                   FROM ContentEntryPictureReplicate
-                  WHERE cepPk = ContentEntryPicture.cepUid
-                    AND cepDestination = UserSession.usClientNodeId), 0)     
-        /*psql ON CONFLICT(cepPk, cepDestination) DO UPDATE
-            SET cepPending = true
-         */               
-    """)
-    @ReplicationRunOnChange([ContentEntryPicture::class])
-    @ReplicationCheckPendingNotificationsFor([ContentEntryPicture::class])
-    abstract suspend fun replicateOnChange()
 
     @Query("""
         SELECT * 
@@ -76,7 +31,7 @@ expect abstract class ContentEntryPictureDao : BaseDao<ContentEntryPicture> {
       ORDER BY cepTimestamp DESC 
          LIMIT 1
          """)
-    abstract fun findByContentEntryUidLive(entryUid: Long): LiveData<ContentEntryPicture?>
+    abstract fun findByContentEntryUidLive(entryUid: Long): Flow<ContentEntryPicture?>
 
     @Update
     abstract suspend fun updateAsync(ContentEntryPicture: ContentEntryPicture)

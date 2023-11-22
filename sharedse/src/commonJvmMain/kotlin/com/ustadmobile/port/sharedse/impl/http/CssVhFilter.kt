@@ -11,8 +11,12 @@ import fi.iki.elonen.router.RouterNanoHTTPD
  */
 class CssVhFilter (var vhToPxFactor: () -> Float): MountedContainerResponder.MountedContainerFilter{
 
-    override fun filterResponse(responseIn: NanoHTTPD.Response, uriResource: RouterNanoHTTPD.UriResource,
-                                urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
+    override fun filterResponse(
+        responseIn: NanoHTTPD.Response,
+        uriResource: RouterNanoHTTPD.UriResource,
+        urlParams: Map<String, String>, session
+        : NanoHTTPD.IHTTPSession
+    ): NanoHTTPD.Response {
         val contentType = responseIn.getMimeType()
         if(contentType.startsWith("text/css")) {
             var cssText = responseIn.dataInflatedIfRequired().bufferedReader().use {

@@ -9,4 +9,7 @@ data class SettingsUiState(
     val reasonLeavingVisible: Boolean = false,
 
     val langListVisible: Boolean = false,
+
+    val currentLanguage: String = "",
+
 )
