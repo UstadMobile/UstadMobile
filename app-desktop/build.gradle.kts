@@ -47,6 +47,15 @@ compose.desktop {
         mainClass = "com.ustadmobile.port.desktop.AppKt"
 
         nativeDistributions {
+            modules("java.sql")
+            modules("java.base")
+            modules("java.compiler")
+            modules("java.instrument")
+            modules("java.management")
+            modules("java.naming")
+            modules("java.rmi")
+            modules("jdk.unsupported")
+            modules("jdk.xml.dom")
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi)
             packageVersion = "1.0.0"
             packageName = "UstadMobile"
