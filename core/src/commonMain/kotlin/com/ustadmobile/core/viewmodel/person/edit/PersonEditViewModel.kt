@@ -218,7 +218,7 @@ class PersonEditViewModel(
             parentContactError != null
     }
 
-    fun checkEmailValidation(email: String): Boolean {
+    private fun checkEmailValidation(email: String): Boolean {
 
         var hasAtSign = true
         var dotAfterAt = true
@@ -256,7 +256,7 @@ class PersonEditViewModel(
         return isValid
     }
 
-    fun validateUsername(username: String): Boolean {
+    private fun validateUsername(username: String): Boolean {
         var isValid = true
 
         if (username.isNullOrEmpty()){

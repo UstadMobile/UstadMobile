@@ -6,6 +6,7 @@ import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCa
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
+import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.onActiveEndpoint
@@ -223,6 +224,10 @@ class ContentEntryEditViewModel(
         }
     }
 
+    private fun ContentEntryEditUiState.hasErrors(): Boolean {
+        return titleError != null
+    }
+
     fun onCourseBlockChanged(
         courseBlock: CourseBlock?
     ) {
@@ -246,6 +251,24 @@ class ContentEntryEditViewModel(
                 cbEntityUid = _uiState.value.entity?.entry?.contentEntryUid ?: 0L
             }
         )
+
+        val contentEntry = _uiState.value.entity?.entry
+        _uiState.update { prev ->
+            prev.copy(
+                titleError = if(contentEntry?.title.isNullOrBlank()) systemImpl.getString(MR.strings.required) else null
+            )
+        }
+
+        if (_uiState.value.hasErrors()) {
+            loadingState = LoadingUiState.NOT_LOADING
+            _uiState.update { prev ->
+                prev.copy(
+                    fieldsEnabled = true
+                )
+            }
+
+            return
+        }
 
         val contentEntryVal = entityVal?.entry ?: return
 
@@ -286,6 +309,17 @@ class ContentEntryEditViewModel(
                     )
                 }else {
                     finishWithResult(contentEntryVal)
+                }
+
+                if (_uiState.value.hasErrors()) {
+                    loadingState = LoadingUiState.NOT_LOADING
+                    _uiState.update { prev ->
+                        prev.copy(
+                            fieldsEnabled = true
+                        )
+                    }
+
+                    return@launch
                 }
             }
         }

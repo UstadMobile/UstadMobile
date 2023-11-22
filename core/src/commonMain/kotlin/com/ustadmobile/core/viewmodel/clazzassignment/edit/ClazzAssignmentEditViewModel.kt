@@ -48,6 +48,8 @@ data class ClazzAssignmentEditUiState(
 
     val submissionRequiredError: String? = null,
 
+    val sizeLimitError: String? = null,
+
     val courseBlockEditUiState: CourseBlockEditUiState = CourseBlockEditUiState(
         completionCriteriaOptions = ASSIGNMENT_COMPLETION_CRITERIAS
     ),
@@ -223,6 +225,11 @@ class ClazzAssignmentEditViewModel(
                 entity = prev.entity?.copy(
                     assignment = assignment,
                 ),
+                sizeLimitError = if(prev.sizeLimitError != null && assignment?.caSizeLimit == prev.entity?.assignment?.caSizeLimit){
+                    prev.sizeLimitError
+                } else {
+                    null
+                },
                 submissionRequiredError = if(prev.submissionRequiredError != null &&
                     assignment?.caRequireFileSubmission == false && !assignment.caRequireTextSubmission
                 ) {
@@ -302,7 +309,8 @@ class ClazzAssignmentEditViewModel(
             courseBlockEditUiState.caMaxPointsError != null ||
             courseBlockEditUiState.caDeadlineError != null ||
             courseBlockEditUiState.caGracePeriodError != null ||
-            reviewerCountError != null
+            reviewerCountError != null ||
+            sizeLimitError != null
     }
 
 
@@ -383,6 +391,14 @@ class ClazzAssignmentEditViewModel(
                 }
             }
 
+            if(assignment.caSizeLimit !in 5..100){
+                _uiState.update {   prev ->
+                    prev.copy(
+                        sizeLimitError = systemImpl.getString(MR.strings.size_limit_error)
+                    )
+                }
+            }
+
             var errorSnack: String? = null
 
             if(initState.entity?.assignment?.caGroupUid != assignment.caGroupUid &&
@@ -415,7 +431,12 @@ class ClazzAssignmentEditViewModel(
             }
 
             if(_uiState.value.hasErrors()) {
-                return@launch
+                loadingState = LoadingUiState.NOT_LOADING
+                _uiState.update { prev ->
+                    prev.copy(
+                        fieldsEnabled = true
+                    )
+                }
             }
 
             if(assignment.caMarkingType == ClazzAssignment.MARKED_BY_PEERS &&
@@ -450,6 +471,7 @@ class ClazzAssignmentEditViewModel(
         const val RESULT_KEY_GROUPSET = "groupSet"
 
         const val DEST_NAME = "CourseAssignmentEdit"
-
+        const val ATTACHMENT_LIMIT_MIN = 5
+        const val ATTACHMENT_LIMIT_MAX = 100
     }
 }

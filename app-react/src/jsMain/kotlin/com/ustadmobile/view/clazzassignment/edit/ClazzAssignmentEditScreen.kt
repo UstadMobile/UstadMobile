@@ -20,6 +20,7 @@ import com.ustadmobile.mui.components.UstadCourseBlockEdit
 import com.ustadmobile.mui.components.UstadNumberTextField
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextField
+import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.view.components.UstadSelectField
 import com.ustadmobile.view.components.UstadSwitchField
@@ -120,10 +121,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     label = ReactNode(strings[MR.strings.size_limit])
                     disabled = !props.uiState.fieldsEnabled
                     error = props.uiState.sizeLimitError != null
-                    helperText = props.uiState.sizeLimitError?.let { ReactNode(it
-                        .replace("%1\$s", ClazzAssignmentEditViewModel.ATTACHMENT_LIMIT_MIN.toString())
-                        .replace("%2\$s", ClazzAssignmentEditViewModel.ATTACHMENT_LIMIT_MAX.toString()))
-                    }
+                    helperText = props.uiState.sizeLimitError?.let { ReactNode(it.format(ClazzAssignmentEditViewModel.ATTACHMENT_LIMIT_MIN.toString(), ClazzAssignmentEditViewModel.ATTACHMENT_LIMIT_MAX.toString())) }
                     onChange = {
                         props.onAssignmentChanged(
                             props.uiState.entity?.assignment?.shallowCopy {

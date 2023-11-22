@@ -99,7 +99,10 @@ fun ContentEntryEditScreen(
 
         UstadInputFieldLayout(
             modifier = Modifier.fillMaxWidth(),
-            errorText = uiState.titleError
+            errorText = uiState.titleError,
+            captionIfNoError = {
+                Text(stringResource(MR.strings.required))
+            }
         ) {
             OutlinedTextField(
                 modifier = Modifier.testTag("title").fillMaxWidth(),

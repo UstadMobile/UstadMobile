@@ -336,22 +336,30 @@ private fun ClazzEditBasicDetails(
     ) {
         UstadEditHeader(text = stringResource(MR.strings.basic_details))
 
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultItemPadding(),
-            value = uiState.entity?.clazzName ?: "",
-            label = { Text(stringResource(MR.strings.name_key )) },
-            enabled = uiState.fieldsEnabled,
-            singleLine = true,
-            onValueChange = {
-                onClazzChanged(
-                    uiState.entity?.shallowCopy {
-                        clazzName = it
-                    }
-                )
+        UstadInputFieldLayout (
+            errorText = uiState.clazzNameError,
+            captionIfNoError = {
+                Text(stringResource(MR.strings.required))
             }
-        )
+        ){
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultItemPadding(),
+                value = uiState.entity?.clazzName ?: "",
+                label = { Text(stringResource(MR.strings.name_key )) },
+                enabled = uiState.fieldsEnabled,
+                isError = uiState.clazzNameError != null,
+                singleLine = true,
+                onValueChange = {
+                    onClazzChanged(
+                        uiState.entity?.shallowCopy {
+                            clazzName = it
+                        }
+                    )
+                }
+            )
+        }
 
         // TODO error
 //        HtmlClickableTextField(

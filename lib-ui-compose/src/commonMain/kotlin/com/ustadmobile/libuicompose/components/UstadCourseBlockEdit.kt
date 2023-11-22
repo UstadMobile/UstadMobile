@@ -13,6 +13,7 @@ import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
@@ -93,7 +94,7 @@ fun UstadCourseBlockEdit(
                         uiState.courseBlock?.cbCompletionCriteria ?: 0
                     ),
                     label = stringResource(MR.strings.completion_criteria),
-                    itemText = { stringResource(it.stringResource) },
+                    itemText = { stringResource(it.stringResource).capitalizeFirstLetter() },
                     options = uiState.completionCriteriaOptions,
                     onOptionSelected = {
                         onCourseBlockChange(uiState.courseBlock?.shallowCopy{

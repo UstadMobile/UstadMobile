@@ -85,7 +85,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 + strings[MR.strings.basic_details]
             }
 
-            UstadTextField {
+            TextField {
                 value = props.uiState.entity?.clazzName ?: ""
                 label = ReactNode(strings[MR.strings.name_key])
                 id = "clazz_name"

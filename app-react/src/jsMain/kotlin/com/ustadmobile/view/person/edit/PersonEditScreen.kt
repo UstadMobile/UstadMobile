@@ -18,11 +18,13 @@ import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.view.components.UstadImageSelectButton
 import com.ustadmobile.view.components.UstadMessageIdSelectField
+import mui.material.TextField
 import mui.system.Stack
 import mui.system.responsive
 import react.FC
 import react.Props
 import react.ReactNode
+import react.dom.onChange
 import react.useState
 
 external interface PersonEditScreenProps : Props{
@@ -50,29 +52,32 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                 }
             }
 
-            UstadTextEditField {
+            TextField {
                 value = props.uiState.person?.firstNames ?: ""
-                label = strings[MR.strings.first_names]
-                error = props.uiState.firstNameError
-                enabled = props.uiState.fieldsEnabled
+                label = ReactNode(strings[MR.strings.first_names])
+                error = props.uiState.firstNameError != null
+                disabled = !props.uiState.fieldsEnabled
+                helperText = ReactNode(props.uiState.firstNameError ?: strings[MR.strings.required])
                 onChange = {
                     props.onPersonChanged(
                         props.uiState.person?.shallowCopy {
-                            firstNames = it
-                    })
+                            firstNames = it.target.asDynamic().value as? String
+                        })
                 }
             }
 
-            UstadTextEditField {
+            TextField {
                 value = props.uiState.person?.lastName ?: ""
-                label = strings[MR.strings.last_name]
-                error = props.uiState.lastNameError
-                enabled = props.uiState.fieldsEnabled
+                label = ReactNode(strings[MR.strings.last_name])
+                error = props.uiState.lastNameError != null
+                disabled = !props.uiState.fieldsEnabled
+                helperText = ReactNode(props.uiState.lastNameError ?: strings[MR.strings.required])
+                disabled = !props.uiState.fieldsEnabled
                 onChange = {
                     props.onPersonChanged(
                         props.uiState.person?.shallowCopy {
-                            lastName = it
-                    })
+                            lastName = it.target.asDynamic().value as? String
+                        })
                 }
             }
 
@@ -81,6 +86,8 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                 options = GENDER_MESSAGE_IDS_AND_UNSET
                 label = strings[MR.strings.gender_literal]
                 id = "gender"
+                enabled = props.uiState.fieldsEnabled
+                error = props.uiState.genderError
                 onChange = { messageIdOpt ->
                     props.onPersonChanged(
                         props.uiState.person?.shallowCopy {
@@ -108,6 +115,8 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                 timeInMillis = props.uiState.person?.dateOfBirth ?: 0
                 label = ReactNode(strings[MR.strings.birthday])
                 timeZoneId = UstadMobileConstants.UTC
+                error = props.uiState.dateOfBirthError != null
+                helperText = ReactNode(props.uiState.dateOfBirthError)
                 onChange = {
                     props.onPersonChanged(
                         props.uiState.person?.shallowCopy {
@@ -140,15 +149,16 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                 }
             }
 
-            UstadTextEditField {
+            TextField {
                 value = props.uiState.person?.emailAddr ?: ""
-                label = strings[MR.strings.email]
-                error = props.uiState.emailError
-                enabled = props.uiState.fieldsEnabled
+                label = ReactNode(strings[MR.strings.email])
+                error = props.uiState.emailError != null
+                disabled = !props.uiState.fieldsEnabled
+                helperText = ReactNode(props.uiState.emailError)
                 onChange = {
                     props.onPersonChanged(
                         props.uiState.person?.shallowCopy {
-                            emailAddr = it
+                            emailAddr = it.target.asDynamic().value as? String
                     })
                 }
             }
@@ -166,14 +176,16 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
             }
 
             if (props.uiState.usernameVisible){
-                UstadTextEditField {
+                TextField {
                     value = props.uiState.person?.username ?: ""
-                    label = strings[MR.strings.username]
-                    enabled = props.uiState.fieldsEnabled
+                    label = ReactNode(strings[MR.strings.username])
+                    disabled = !props.uiState.fieldsEnabled
+                    error = props.uiState.usernameError != null
+                    helperText = ReactNode(props.uiState.usernameError ?: strings[MR.strings.required])
                     onChange = {
                         props.onPersonChanged(
                             props.uiState.person?.shallowCopy {
-                                username = it
+                                username = it.target.asDynamic().value
                         })
                     }
                 }
