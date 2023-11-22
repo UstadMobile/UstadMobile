@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 //Roughly as per
 // https://github.com/JetBrains/compose-multiplatform-desktop-template#readme
@@ -44,5 +45,22 @@ dependencies {
 compose.desktop {
     application {
         mainClass = "com.ustadmobile.port.desktop.AppKt"
+
+        nativeDistributions {
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi)
+            packageVersion = "1.0.0"
+            packageName = "UstadMobile"
+            version = rootProject.version
+            description = "Ustad Mobile"
+            copyright = "© UstadMobile FZ-LLC."
+            vendor = "UstadMobile FZ-LLC"
+            licenseFile.set(rootProject.file("LICENSE"))
+            windows {
+                packageVersion = "1.0.0"
+                msiPackageVersion = "1.0.0"
+                exePackageVersion = "1.0.0"
+                iconFile.set(project.file("ustad-logo.ico"))
+            }
+        }
     }
 }
