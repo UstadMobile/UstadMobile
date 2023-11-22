@@ -7,11 +7,8 @@ import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import java.io.File
 import java.io.FileOutputStream
-import java.nio.file.Files
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.deleteRecursively
 
 private fun ZipFile.extractEntryToFile(
     entry: ZipEntry,
@@ -31,7 +28,6 @@ private fun ZipFile.extractEntryToFile(
  * On Ubuntu: we just tell them to install the package
  * On Windows: we will offer to download ffmpeg
  */
-@OptIn(ExperimentalPathApi::class)
 @Suppress("NewApi") //This is JVM only
 fun handleNoFfmpeg(
     ffmpegDestDir: File
@@ -53,8 +49,7 @@ fun handleNoFfmpeg(
             val url = "https://github.com/GyanD/codexffmpeg/releases/download/2023-11-05-git-44a0148fad/ffmpeg-2023-11-05-git-44a0148fad-full_build.zip"
 
             val okHttpClient = OkHttpClient.Builder().build()
-            val tmpDir = Files.createTempDirectory("ustad-ffmpeg-tmp")
-            val tmpFile = tmpDir.resolve("ffmpeg-2023-11-05-git-44a0148fad-full_build.zip")
+            val tmpFile = File.createTempFile("ffmpeg-2023-11-05-git-44a0148fad-full_build", ".zip")
             try {
                 val request = Request.Builder().url(url).build()
                 val response = okHttpClient.newCall(request).execute()
@@ -64,7 +59,7 @@ fun handleNoFfmpeg(
                     it.readAll(sink)
                 }
                 System.err.println("Done. Saved to $tmpFile")
-                ZipFile(tmpFile.toFile()).use { ffmpegZip ->
+                ZipFile(tmpFile).use { ffmpegZip ->
                     val entryList = ffmpegZip.entries().toList()
 
                     val licenseEntry = entryList.first {
@@ -76,6 +71,7 @@ fun handleNoFfmpeg(
                     }
 
                     System.err.print("Do you accept the FFMPEG license (y/n)? ")
+                    ffmpegDestDir.takeIf { !it.exists() }?.mkdirs()
 
                     if(sysInReader.readLine().startsWith("y")) {
                         listOf("ffmpeg.exe", "ffprobe.exe").forEach { filename ->
@@ -84,7 +80,8 @@ fun handleNoFfmpeg(
                                 destFile = File(ffmpegDestDir, filename)
                             )
                         }
-                        System.err.println("Done! Extracted to $ffmpegDestDir")
+                        System.err.println("Done! Extracted to $ffmpegDestDir . Please run the " +
+                                "command again to start the server")
                     }else {
                         System.err.println("Ffmpeg license declined! Cannot continue.")
                     }
@@ -93,7 +90,12 @@ fun handleNoFfmpeg(
                 System.err.println("Sorry, error attempting to download ffmpeg.: ${e.message}")
                 e.printStackTrace()
             }finally {
-                tmpDir.deleteRecursively()
+                try {
+                    if(!tmpFile.delete())
+                        tmpFile.deleteOnExit()
+                }catch (e: Throwable) {
+                    //do nothing
+                }
             }
         }else {
             System.err.println("OK, You need to download the ffmpeg and ffprobe commands, and put them " +

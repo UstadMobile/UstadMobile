@@ -133,8 +133,10 @@ fun Application.umRestApplication(
             netInterface.inetAddresses.toList().filter { it !is Inet6Address }
         }.firstOrNull()?.let { "http://${it.hostAddress}:${appConfig.port}/"} ?: ""
 
-        throw SiteConfigException("Site URL is not set. You MUST specify the site url e.g. $likelyAddr \n" +
-                "Please specify using the url parameter in command line e.g. --siteUrl $likelyAddr \nor " +
+        throw SiteConfigException("ERROR: Site URL is not set. You MUST specify the site url e.g. $likelyAddr \n" +
+                "Please specify using the url parameter in command line e.g. add " +
+                "--siteUrl $likelyAddr \n" +
+                "to the command you are running or \n" +
                 "set this in the config file e.g. uncomment siteUrl and set as siteUrl = \"$likelyAddr\"")
     }
 
