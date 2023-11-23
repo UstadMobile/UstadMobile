@@ -65,12 +65,8 @@ fun UstadRichTextEdit(
     onHtmlChange: (String) -> Unit = {}
 ){
 
-    var htmlVal by remember {
-        mutableStateOf(TextFieldValue(html))
-    }
     val richTextState = rememberRichTextState()
-
-    htmlVal = TextFieldValue(richTextState.toHtml())
+//    richTextState.setHtml(html)
 
 
     Column(
@@ -79,7 +75,7 @@ fun UstadRichTextEdit(
     ) {
 
         if (isDesktop())
-            RichTextStyleRow(state = richTextState, onClick = onHtmlChange, html = html)
+            RichTextStyleRow(state = richTextState, onClick = onHtmlChange)
 
         OutlinedRichTextEditor(
             modifier = Modifier
@@ -94,7 +90,6 @@ fun UstadRichTextEdit(
 @Composable
 private fun RichTextStyleRow(
     state: RichTextState,
-    html: String,
     onClick: (String) -> Unit
 ){
 
@@ -144,6 +139,7 @@ private fun RichTextStyleRow(
                             textAlign = TextAlign.Right
                         )
                     )
+                    onClick(state.toHtml())
                 },
                 isSelected = state.currentParagraphStyle.textAlign == TextAlign.Right,
                 icon = Icons.Outlined.FormatAlignRight
@@ -158,6 +154,7 @@ private fun RichTextStyleRow(
                             fontWeight = FontWeight.Bold
                         )
                     )
+                    onClick(state.toHtml())
                 },
                 isSelected = state.currentSpanStyle.fontWeight == FontWeight.Bold,
                 icon = Icons.Outlined.FormatBold
@@ -172,6 +169,7 @@ private fun RichTextStyleRow(
                             fontStyle = FontStyle.Italic
                         )
                     )
+                    onClick(state.toHtml())
                 },
                 isSelected = state.currentSpanStyle.fontStyle == FontStyle.Italic,
                 icon = Icons.Outlined.FormatItalic
@@ -186,6 +184,7 @@ private fun RichTextStyleRow(
                             textDecoration = TextDecoration.Underline
                         )
                     )
+                    onClick(state.toHtml())
                 },
                 isSelected = state.currentSpanStyle.textDecoration?.contains(TextDecoration.Underline) == true,
                 icon = Icons.Outlined.FormatUnderlined
@@ -200,6 +199,7 @@ private fun RichTextStyleRow(
                             textDecoration = TextDecoration.LineThrough
                         )
                     )
+                    onClick(state.toHtml())
                 },
                 isSelected = state.currentSpanStyle.textDecoration?.contains(TextDecoration.LineThrough) == true,
                 icon = Icons.Outlined.FormatStrikethrough
@@ -214,6 +214,7 @@ private fun RichTextStyleRow(
                             fontSize = 28.sp
                         )
                     )
+                    onClick(state.toHtml())
                 },
                 isSelected = state.currentSpanStyle.fontSize == 28.sp,
                 icon = Icons.Outlined.FormatSize
@@ -228,6 +229,7 @@ private fun RichTextStyleRow(
                             color = Color.Red
                         )
                     )
+                    onClick(state.toHtml())
                 },
                 isSelected = state.currentSpanStyle.color == Color.Red,
                 icon = Icons.Filled.Circle,
@@ -243,6 +245,7 @@ private fun RichTextStyleRow(
                             background = Color.Yellow
                         )
                     )
+                    onClick(state.toHtml())
                 },
                 isSelected = state.currentSpanStyle.background == Color.Yellow,
                 icon = Icons.Outlined.Circle,
@@ -254,6 +257,7 @@ private fun RichTextStyleRow(
             RichTextStyleButton(
                 onClick = {
                     state.toggleUnorderedList()
+                    onClick(state.toHtml())
                 },
                 isSelected = state.isUnorderedList,
                 icon = Icons.Outlined.FormatListBulleted,
@@ -264,6 +268,7 @@ private fun RichTextStyleRow(
             RichTextStyleButton(
                 onClick = {
                     state.toggleOrderedList()
+                    onClick(state.toHtml())
                 },
                 isSelected = state.isOrderedList,
                 icon = Icons.Outlined.FormatListNumbered,
@@ -298,6 +303,7 @@ private fun RichTextStyleRow(
                         Button(
                             onClick = {
                                 state.addLink(text = text, url = link)
+                                onClick(state.toHtml())
                             }
                         ) {
                             Text(
