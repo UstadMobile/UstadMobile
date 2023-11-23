@@ -17,11 +17,11 @@ import com.mohamedrejeb.richeditor.model.rememberRichTextState
 fun UstadEditableHtmlFieldPreview(){
 
     var html by remember {
-        mutableStateOf("")
+        mutableStateOf("Complete your assignment or <b>else</b>")
     }
 
     UstadRichTextEdit(
-        html = "Complete your assignment or <b>else</b>",
+        html = html,
         onHtmlChange = {
             html = it
         }
