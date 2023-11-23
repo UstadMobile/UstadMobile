@@ -9,6 +9,7 @@ import com.mohamedrejeb.richeditor.ui.material3.OutlinedRichTextEditor
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -62,14 +63,14 @@ import com.ustadmobile.core.MR
 fun UstadRichTextEdit(
     modifier: Modifier = Modifier,
     html: String = "",
-    onHtmlChange: (String) -> Unit = {}
+    onHtmlChange: (String) -> Unit = {},
+    editInNewScreen: Boolean = !isDesktop(),
+    onClick: () -> Unit = {},
 ){
 
     val richTextState = rememberRichTextState()
-    LaunchedEffect(Unit) {
-        richTextState.setHtml(
-            html.trimIndent()
-        )
+    LaunchedEffect(html) {
+        richTextState.setHtml(html)
     }
 
 
@@ -78,19 +79,19 @@ fun UstadRichTextEdit(
             .fillMaxHeight()
     ) {
 
-        if (isDesktop())
+        if (!editInNewScreen)
             RichTextStyleRow(state = richTextState)
 
         OutlinedRichTextEditor(
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultItemPadding()
+                .clickable(onClick = { if(editInNewScreen) onClick() })
                 .onFocusEvent {
-                     onHtmlChange(richTextState.toHtml())
+                    onHtmlChange(richTextState.toHtml())
                 },
             state = richTextState,
-            enabled = isDesktop(),
-            readOnly = false,
+            readOnly = editInNewScreen,
         )
     }
 }
@@ -279,8 +280,9 @@ private fun RichTextStyleRow(
                 icon = Icons.Outlined.Link,
             )
         }
+
         item {
-            if (isDialogOpen) {
+            if (isDialogOpen)
                 AlertDialog(
                     onDismissRequest = { isDialogOpen = false },
                     dismissButton = {
@@ -333,7 +335,6 @@ private fun RichTextStyleRow(
                         }
                     },
                 )
-            }
         }
     }
 }

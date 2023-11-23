@@ -421,8 +421,7 @@ private fun ClazzEditBasicDetails(
                 .fillMaxWidth()
                 .testTag("description"),
             html = uiState.entity?.clazzDesc ?: "",
-            // TODO error
-//            onHtmlChange = onClickEditDescription,
+            onClick = onClickEditDescription,
             onHtmlChange = {
                 onClazzChanged(
                     uiState.entity?.shallowCopy {
