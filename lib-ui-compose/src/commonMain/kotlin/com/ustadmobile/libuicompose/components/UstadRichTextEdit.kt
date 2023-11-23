@@ -44,7 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.focus.focusProperties
-import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.ParagraphStyle
@@ -87,8 +87,8 @@ fun UstadRichTextEdit(
                 .fillMaxWidth()
                 .defaultItemPadding()
                 .clickable(onClick = { if(editInNewScreen) onClick() })
-                .onFocusEvent {
-                    onHtmlChange(richTextState.toHtml())
+                .onFocusChanged {
+                    if(html != richTextState.toHtml()) onHtmlChange(richTextState.toHtml())
                 },
             state = richTextState,
             readOnly = editInNewScreen,
