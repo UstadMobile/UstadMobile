@@ -417,6 +417,9 @@ private fun ClazzEditBasicDetails(
         )
 
         UstadRichTextEdit(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("description"),
             html = uiState.entity?.clazzDesc ?: "",
             // TODO error
 //            onHtmlChange = onClickEditDescription,
@@ -427,9 +430,6 @@ private fun ClazzEditBasicDetails(
                     }
                 )
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("description")
         )
 
         Row {
