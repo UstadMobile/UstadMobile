@@ -19,15 +19,11 @@ fun UstadEditableHtmlFieldPreview(){
     var html by remember {
         mutableStateOf("")
     }
-    val richTextState = rememberRichTextState()
-
-    richTextState.setHtml(html)
 
     UstadRichTextEdit(
         html = "Complete your assignment or <b>else</b>",
         onHtmlChange = {
             html = it
-            richTextState.setHtml(it)
         }
     )
 }
