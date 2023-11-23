@@ -62,13 +62,9 @@ it('Teacher add multiple submission assignment and group ', () => {
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
   cy.contains("Assignment").click()
-  cy.get('input[id="title"]').type("Assignment 1")
+  cy.get('input[id="title"]').clear().type("Assignment 1")
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
-  //cy.get('input[id="hide_until_date"]').click()
-    //cy.get('#hide_until_date')
-     // .click()
-     // .then(input => setDate(input[0], '2023-11-08T00:00'));
-    //cy.debug();
+  cy.ustadSetDateTime(cy.get("#cbDeadlineDate"),  new Date(Date.now() + (1000*60*1000)))
   cy.get('#caSubmissionPolicy').click()
   cy.contains('Can make multiple submissions').click()
   cy.get('#cgsName').click()
@@ -89,8 +85,10 @@ it('Teacher add multiple submission assignment and group ', () => {
   cy.get('input[id="title"]').type("Assignment 1")
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()
+  cy.wait(1000)
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
+  cy.wait(1000)
   cy.contains("button","Members").should('be.visible')
 
 })
@@ -110,25 +108,24 @@ it('Group 1- Student 1 submit assignment', () => {
   cy.contains("Not submitted").should('not.exist')
 })
 
-it('Group 1 - Student2 able to view Group 1 assignment and submit button not visible since it is single submission', () => {
+it('Group 1 - Student2 able to view Group 1 assignment and submit button should be visible since it is multiple submission', () => {
 
-    cy.ustadClearDbAndLogin('student2','test1234')
-
-   //  Assignment block
-    cy.contains("Course").click()
-    cy.contains("004_011").click()
-    cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
-    cy.contains("button","Course").click()
-    cy.contains("Assignment 1").click()
-    cy.contains("Text 1").should('be.visible')
-    cy.contains("SUBMIT").should('exist')
-    cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
-    cy.get('#assignment_text').click()
-    cy.get('#assignment_text').type("Text 1")
-    cy.contains('SUBMIT',{timeout:5000}).click()
-    cy.go('back')
-    cy.contains('Assignment 1',{timeout:1000}).click()
-    cy.contains("Not submitted").should('not.exist')
-
+  cy.ustadClearDbAndLogin('student2','test1234')
+ //  Assignment block
+  cy.contains("Course").click()
+  cy.contains("004_011").click()
+  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
+  cy.contains("button","Course").click()
+  cy.contains("Assignment 1").click()
+  cy.contains("Text 1").should('be.visible')
+  cy.contains("SUBMIT").should('exist')
+  cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
+  cy.get('#assignment_text').click()
+  cy.get('#assignment_text').type("Text 1")
+  cy.contains('SUBMIT',{timeout:5000}).click()
+  cy.go('back')
+  cy.contains('Assignment 1',{timeout:1000}).click()
+  cy.contains("Not submitted").should('not.exist')
 })
+
 })

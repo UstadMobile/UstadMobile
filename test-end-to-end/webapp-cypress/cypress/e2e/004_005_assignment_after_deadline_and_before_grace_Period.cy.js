@@ -9,7 +9,7 @@ it('Admin add a course and assignment block', () => {
  // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass')
  // Add a new course
-  cy.ustadAddCourse('004_001')
+  cy.ustadAddCourse('004_005')
  //Add a teacher
   cy.contains("button","Members").click()
   cy.contains("span","Add a teacher").click()
@@ -32,7 +32,7 @@ it('Teacher add assignment', () => {
   cy.ustadClearDbAndLogin('teacher1','test1234')
   // Add Assignment block
   cy.contains("Course").click()
-  cy.contains("004_001").click()
+  cy.contains("004_005").click()
   cy.contains("button","Members").click() // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
@@ -46,6 +46,7 @@ it('Teacher add assignment', () => {
     .click()
     .then(input => setDate(input[0], '2023-11-08T00:00'))
  */
+  cy.ustadSetDateTime(cy.get("#hide_until_date"), new Date("2023-10-30T08:30"))
   cy.contains("div","Graded").click()
   cy.contains("li","submitted").click()
   cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date("2023-11-01T08:30"))
@@ -71,7 +72,7 @@ it('Student submit assignment', () => {
 
   cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains("Course").click()
-  cy.contains("004_001").click()
+  cy.contains("004_005").click()
   cy.contains('Assignment 1').click()
   cy.wait(1000)
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
@@ -91,7 +92,7 @@ it('Teacher add assignment mark and course comment', () => {
 
  //  Assignment block
   cy.contains("Course").click()
-  cy.contains("004_001").click()
+  cy.contains("004_005").click()
   cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
@@ -108,7 +109,7 @@ it('Teacher add assignment mark and course comment', () => {
 it('Student view his grade', () => {
   cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains("Course").click()
-  cy.contains("004_001").click()
+  cy.contains("004_005").click()
   cy.contains('Assignment 1').click()
   cy.contains('Keep it up').should('exist')
   cy.contains('8/10 Points').should('exist')
