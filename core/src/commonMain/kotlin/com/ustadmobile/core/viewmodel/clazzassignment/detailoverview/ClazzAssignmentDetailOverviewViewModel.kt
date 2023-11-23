@@ -34,6 +34,8 @@ import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
 import kotlin.jvm.JvmInline
 import kotlin.math.roundToInt
 
@@ -225,7 +227,9 @@ value class CourseAssignmentMarkWithPersonMarkerUiState(
 class ClazzAssignmentDetailOverviewViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-    private val submitAssignmentUseCase: SubmitAssignmentUseCase = SubmitAssignmentUseCase(),
+    private val submitAssignmentUseCase: SubmitAssignmentUseCase = SubmitAssignmentUseCase(
+        systemImpl = di.direct.instance(),
+    ),
 ) : DetailViewModel<ClazzAssignment>(
     di, savedStateHandle, DEST_NAME
 ){

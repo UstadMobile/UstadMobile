@@ -1477,7 +1477,29 @@
     <!-- Used when editing the options for a discussion block on a course -->
     <string name="edit_discussion">Edit discussion</string>
     <string name="type_here">Type here…</string>
+
+    <!-- Error shown if a student attempts to submit an assignment after the deadline -->
     <string name="deadline_has_passed">Deadline has passed</string>
+
+    <!-- Error shown if a student attempts to submit an assignment again after they already submitted
+         and the teacher allows only one submission per student/group.
+     -->
+    <string name="already_submitted">Already submitted</string>
+
+    <!--
+     Error shown when a student attempts to submit more words than allowed. %1$s will be replaced
+     with the number of words the student attempted to submit. %2$s will be replaced with the limit
+     set by the teacher.
+    -->
+    <string name="exceeds_word_limit">Exceeds word limit: %1$s/%2$s</string>
+
+    <!--
+     Error shown when a student attempts to submit more characters than allowed. %1$s will be replaced
+     with the number of characters the student attempted to submit. %2$s will be replaced with the limit
+     set by the teacher.
+    -->
+    <string name="exceeds_char_limit">Exceeds character limit: %1$s/%2$s</string>
+
     <!-- used to display as an error to the user when he is not assigned in a group for an assignment -->
     <string name="unassigned_error">Can\'t submit: you\'re enroled in the course, but not assigned to a group</string>
     <!-- E.g. an option in the app that is enabled -->

@@ -45,8 +45,11 @@ import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
 import com.ustadmobile.view.clazzassignment.UstadCommentListItem
 import com.ustadmobile.view.components.UstadDetailHeader
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
+import mui.system.sx
+import react.useRequiredContext
 import web.cssom.Contain
 import web.cssom.Overflow
+import web.cssom.TextAlign
 
 val ASSIGNMENT_STATUS_MAP = mapOf(
     CourseAssignmentSubmission.NOT_SUBMITTED to DoneIcon,
@@ -81,6 +84,8 @@ external interface ClazzAssignmentDetailOverviewScreenProps : Props {
 private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDetailOverviewScreenProps> { props ->
 
     val strings = useStringProvider()
+
+    val theme by useRequiredContext(ThemeContext)
 
     val formattedDateTime = useFormattedDateAndTime(
         timeInMillis = props.uiState.courseBlock?.cbDeadlineDate ?: 0,
@@ -243,10 +248,10 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 }
 
                 if (props.uiState.submitSubmissionButtonVisible) {
-                    item {
+                    item(key = "item_submit_button") {
                         Button.create {
                             onClick = { props.onClickSubmitSubmission() }
-                            id = "sbumit_button"
+                            id = "submit_button"
                             disabled = !props.uiState.fieldsEnabled
                             variant = ButtonVariant.contained
                             fullWidth = true
@@ -254,7 +259,19 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                             +strings[MR.strings.submit].uppercase()
                         }
                     }
+                }
 
+                props.uiState.submissionError?.also { submissionError ->
+                    item(key = "submit_error") {
+                        Typography.create {
+                            sx {
+                                color = theme.palette.error.main
+                                textAlign = TextAlign.center
+                            }
+
+                            + submissionError
+                        }
+                    }
                 }
 
                 //List of grades awarded
