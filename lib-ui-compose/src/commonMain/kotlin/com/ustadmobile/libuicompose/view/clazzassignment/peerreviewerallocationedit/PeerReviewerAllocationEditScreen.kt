@@ -92,7 +92,7 @@ fun PeerReviewerAllocationEditScreen(
                             expanded = expanded,
                             onDismissRequest = { expanded = false}
                         ) {
-                            reviewerOptions.forEach { reviewer ->
+                            uiState.reviewerOptionsForAllocation(allocation).forEach { reviewer ->
                                 DropdownMenuItem(
                                     text = { Text(reviewer.submitter.name ?: "") },
                                     onClick = {
@@ -104,17 +104,6 @@ fun PeerReviewerAllocationEditScreen(
                             }
                         }
                     }
-
-
-//                    ListItem(
-//                        headlineContent = {
-//
-//                        },
-//                        trailingContent = {
-//                            //As per https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#ExposedDropdownMenuBox(kotlin.Boolean,kotlin.Function1,androidx.compose.ui.Modifier,kotlin.Function1)
-//
-//                        }
-//                    )
                 }
             }
         }

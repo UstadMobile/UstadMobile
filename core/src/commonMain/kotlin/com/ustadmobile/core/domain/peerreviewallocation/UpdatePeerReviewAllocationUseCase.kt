@@ -42,6 +42,7 @@ class UpdatePeerReviewAllocationUseCase(
         assignmentUid: Long,
         numReviewsPerSubmission: Int,
         allocateRemaining: Boolean,
+        resetAllocations: Boolean = false,
     ) : List<PeerReviewerAllocation>{
         val submitterUids = db.clazzAssignmentDao.getSubmitterUidsByClazzOrGroupSetUid(
             clazzUid = clazzUid,
@@ -65,7 +66,15 @@ class UpdatePeerReviewAllocationUseCase(
             submitterToMarkUid to existingAllocationsForSubmitter
         }.toMap()
 
-        val allocationList = allocationsForEachSubmitter.flatMap { it.value }.toMutableList()
+        val allocationList = allocationsForEachSubmitter
+            .flatMap { it.value }.toMutableList()
+        if(resetAllocations) {
+            for(index in allocationList.indices) {
+                allocationList[index] = allocationList[index].copy(
+                    praMarkerSubmitterUid = 0
+                )
+            }
+        }
 
         if(allocateRemaining) {
             //put into bucket: each submitter uid n times, n = reviewsPerSubmission - count assignments

@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SELECT_ASSIGNMENT_IS_PEERMARKED_SQL
+import com.ustadmobile.lib.db.composites.AssignmentSubmitterUidAndName
 import com.ustadmobile.lib.db.composites.ClazzEnrolmentAndPerson
 import com.ustadmobile.lib.db.composites.ScopedGrantAndGroupMember
 import com.ustadmobile.lib.db.entities.*
@@ -371,6 +372,72 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
         groupSetUid: Long,
         time: Long
     ): List<Long>
+
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "getAllClazzEnrolledAtTimeAsync",
+                functionDao = ClazzEnrolmentDao::class,
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "roleFilter",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "${ClazzEnrolment.ROLE_STUDENT}",
+                    ),
+                    HttpServerFunctionParam(
+                        name = "personUidFilter",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "0"
+                    )
+                )
+            ),
+            HttpServerFunctionCall(
+                functionName = "findByGroupSetUidAsync",
+                functionDao = CourseGroupMemberDao::class,
+            )
+        )
+    )
+    /**
+     * Query to get a list of submitter uids and names. This query is used by assignment edit /
+     * peer reviewer allocation edit, so it has to work before the asignment is saved to the
+     * database (e.g. does not rely on assignment uid).
+     */
+    @Query("""
+        WITH SubmitterUids(submitterUid) AS (
+            SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid AS submitterUid
+               FROM ClazzEnrolment
+              WHERE (:groupSetUid = 0)
+                AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+                AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                AND :date BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft
+              
+             UNION
+             
+            SELECT DISTINCT CourseGroupMember.cgmGroupNumber AS submitterUid
+              FROM CourseGroupMember
+             WHERE :groupSetUid != 0
+               AND CourseGroupMember.cgmSetUid = :groupSetUid    
+        )
+        
+        SELECT SubmitterUids.submitterUid AS submitterUid,
+               CASE :groupSetUid
+               WHEN 0 THEN
+                      (SELECT Person.firstNames || ' ' || Person.lastName
+                         FROM Person
+                        WHERE Person.personUid = SubmitterUids.submitterUid)
+               ELSE (:groupStr || ' ' || SubmitterUids.submitterUid)   
+               END AS name
+          FROM SubmitterUids                  
+    """)
+    abstract suspend fun getSubmitterUidsAndNameByClazzOrGroupSetUid(
+        clazzUid: Long,
+        groupSetUid: Long,
+        date: Long,
+        groupStr: String,
+    ): List<AssignmentSubmitterUidAndName>
+
 
 
     @Query("""
