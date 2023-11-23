@@ -421,7 +421,6 @@ private fun ClazzEditBasicDetails(
             // TODO error
 //            onHtmlChange = onClickEditDescription,
             onHtmlChange = {
-                print("Text from UStad Rich "+it)
                 onClazzChanged(
                     uiState.entity?.shallowCopy {
                         clazzDesc = it
