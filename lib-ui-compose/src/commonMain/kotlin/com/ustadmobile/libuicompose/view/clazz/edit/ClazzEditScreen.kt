@@ -39,6 +39,7 @@ import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadBottomSheetSpacer
 import com.ustadmobile.libuicompose.components.UstadClickableTextField
 import com.ustadmobile.libuicompose.components.UstadDateField
+import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.components.UstadSwitchField
 import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
 import com.ustadmobile.libuicompose.util.compose.stringIdOptionListResource
@@ -415,15 +416,22 @@ private fun ClazzEditBasicDetails(
             }
         )
 
-        // TODO error
-//        HtmlClickableTextField(
-//            html = uiState.entity?.clazzDesc ?: "",
-//            label = stringResource(MR.strings.description),
-//            onClick = onClickEditDescription,
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .testTag("description")
-//        )
+        UstadRichTextEdit(
+            html = uiState.entity?.clazzDesc ?: "",
+            // TODO error
+//            onHtmlChange = onClickEditDescription,
+            onHtmlChange = {
+                print("Text from UStad Rich "+it)
+                onClazzChanged(
+                    uiState.entity?.shallowCopy {
+                        clazzDesc = it
+                    }
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("description")
+        )
 
         Row {
             UstadInputFieldLayout(

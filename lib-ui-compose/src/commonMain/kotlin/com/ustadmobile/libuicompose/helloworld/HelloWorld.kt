@@ -32,7 +32,6 @@ fun HelloWorld() {
 
         UstadRichTextEdit(
             html = "Complete your assignment or <b>else</b>",
-            editInNewScreen = false,
 //            label = stringResource(MR.strings.description),
 //            onClick = {  },
             modifier = Modifier

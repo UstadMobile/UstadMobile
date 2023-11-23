@@ -23,26 +23,11 @@ fun UstadEditableHtmlFieldPreview(){
 
     richTextState.setHtml(html)
 
-    Column {
-
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            value = html,
-            onValueChange = {  text ->
-                html = text
-                richTextState.setHtml(text)
-            },
-        )
-
-        UstadRichTextEdit(
-            html = "Complete your assignment or <b>else</b>",
-            editInNewScreen = false,
-            onHtmlChange = {
-                html = it
-                richTextState.setHtml(it)
-            }
-        )
-    }
+    UstadRichTextEdit(
+        html = "Complete your assignment or <b>else</b>",
+        onHtmlChange = {
+            html = it
+            richTextState.setHtml(it)
+        }
+    )
 }

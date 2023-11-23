@@ -1,22 +1,24 @@
 package com.ustadmobile.libuicompose.components
 
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import com.mohamedrejeb.richeditor.model.RichTextState
+import com.mohamedrejeb.richeditor.ui.material3.OutlinedRichTextEditor
+import androidx.compose.ui.text.input.TextFieldValue
+import com.mohamedrejeb.richeditor.model.rememberRichTextState
+import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.contentColorFor
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material.icons.outlined.FormatAlignCenter
@@ -41,7 +43,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -51,52 +52,51 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
-import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UstadRichTextEdit(
     modifier: Modifier = Modifier,
-    editInNewScreen: Boolean,
-    onClickEditInNewScreen: () -> Unit = {},
     html: String = "",
     onHtmlChange: (String) -> Unit = {}
 ){
-    if (editInNewScreen){
-        RichTextEditorRow(
-            modifier = modifier,
-            html = html,
-            enabled = false,
-            onClick = onHtmlChange
-        )
-    } else {
-        RichTextEditorRow(
-            modifier = modifier,
-            html = html,
-            enabled = true,
-            toolbar = { Text("") }
+
+    var htmlVal by remember {
+        mutableStateOf(TextFieldValue(html))
+    }
+    val richTextState = rememberRichTextState()
+
+    htmlVal = TextFieldValue(richTextState.toHtml())
+
+
+    Column(
+        modifier = modifier
+            .fillMaxHeight()
+    ) {
+
+        if (isDesktop())
+            RichTextStyleRow(state = richTextState, onClick = onHtmlChange, html = html)
+
+        OutlinedRichTextEditor(
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultItemPadding(),
+            state = richTextState,
+            enabled = isDesktop()
         )
     }
 }
 
 @Composable
-fun RichTextEditorRow(
-    modifier: Modifier,
+private fun RichTextStyleRow(
+    state: RichTextState,
     html: String,
-    enabled: Boolean,
-    toolbar: @Composable (() -> Unit)? = null,
-    onClick: (String) -> Unit = {}
-) {
-
-    val state = rememberRichTextState()
-
-    var html1 by remember { mutableStateOf(html) }
-    state.setHtml(html1)
+    onClick: (String) -> Unit
+){
 
     var isDialogOpen by remember { mutableStateOf(false) }
     var link by remember { mutableStateOf("") }
@@ -104,7 +104,6 @@ fun RichTextEditorRow(
 
     LazyRow(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
     ) {
 
         item {
@@ -145,7 +144,6 @@ fun RichTextEditorRow(
                             textAlign = TextAlign.Right
                         )
                     )
-                    html1 = state.toHtml()
                 },
                 isSelected = state.currentParagraphStyle.textAlign == TextAlign.Right,
                 icon = Icons.Outlined.FormatAlignRight
@@ -253,15 +251,6 @@ fun RichTextEditorRow(
         }
 
         item {
-            Box(
-                Modifier
-                    .height(24.dp)
-                    .width(1.dp)
-                    .background(Color(0xFF393B3D))
-            )
-        }
-
-        item {
             RichTextStyleButton(
                 onClick = {
                     state.toggleUnorderedList()
@@ -293,17 +282,34 @@ fun RichTextEditorRow(
         item {
             if (isDialogOpen) {
                 AlertDialog(
-                    onDismissRequest = { },
-                    confirmButton = {
-                        Button(onClick = { isDialogOpen = false }) {
-                            Text(stringResource(MR.strings.add))
+                    onDismissRequest = { isDialogOpen = false },
+                    dismissButton = {
+                        Button(
+                            onClick = {
+                                isDialogOpen = false
+                            }
+                        ) {
+                            Text(
+                                stringResource(MR.strings.cancel),
+                            )
                         }
                     },
-                    title = { Text("Add Link",
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().defaultItemPadding()) },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                state.addLink(text = text, url = link)
+                            }
+                        ) {
+                            Text(
+                                stringResource(MR.strings.add),
+                            )
+                        }
+                    },
+                    title = { Text(
+                        modifier = Modifier.defaultItemPadding(),
+                        text = stringResource(MR.strings.enter_link))
+                    },
                     text = {
-
                         Column(
                             modifier = Modifier.defaultItemPadding()
                         ) {
@@ -313,7 +319,7 @@ fun RichTextEditorRow(
                                 onValueChange = { newText ->
                                     link = newText
                                 },
-                                label = { androidx.compose.material3.Text(stringResource(MR.strings.enter_link)) },
+                                label = { Text(stringResource(MR.strings.enter_link)) },
                             )
 
                             OutlinedTextField(
@@ -322,57 +328,12 @@ fun RichTextEditorRow(
                                 onValueChange = { newText ->
                                     text = newText
                                 },
-                                label = { androidx.compose.material3.Text(stringResource(MR.strings.add_text)) },
+                                label = { Text(stringResource(MR.strings.add_text)) },
                             )
                         }
                     },
                 )
             }
-//            DialogWindow(
-//                onCloseRequest = { dialogState.value = false },
-//                visible = dialogState.value,
-//                title = stringResource(MR.strings.enter_link),
-//                icon = painterResource(MR.images.ustad_logo),
-//                content = {
-//                    Column(
-//                        modifier = Modifier.fillMaxHeight(),
-//                        horizontalAlignment = Alignment.CenterHorizontally,
-//                        verticalArrangement = Arrangement.Center,
-//                    ) {
-//                        OutlinedTextField(
-//                            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
-//                            value = link,
-//                            onValueChange = { newText ->
-//                                link = newText
-//                            },
-//                            label = { androidx.compose.material3.Text(stringResource(MR.strings.enter_link)) },
-//                        )
-//
-//                        OutlinedTextField(
-//                            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
-//                            value = link,
-//                            onValueChange = { newText ->
-//                                text = newText
-//                            },
-//                            label = { androidx.compose.material3.Text(stringResource(MR.strings.add_text)) },
-//                        )
-//
-//                        Button(
-//                            onClick = {
-//                                state.addLink(text = text, url = link)
-//                            },
-//                            colors = ButtonDefaults.buttonColors(
-//                                backgroundColor = MaterialTheme.colors.secondary
-//                            )
-//                        ) {
-//                            Text(
-//                                stringResource(MR.strings.submit).uppercase(),
-//                                color = contentColorFor(MaterialTheme.colors.secondary)
-//                            )
-//                        }
-//                    }
-//                }
-//            )
         }
     }
 }
