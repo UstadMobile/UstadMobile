@@ -206,7 +206,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                 caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
             }
         ) { testContext ->
-            val exceptionMessage = "Deadline passed"
+            val exceptionMessage = "Deadline has passed"
             val mockSubmissionUseCase = mock<SubmitAssignmentUseCase> {
                 onBlocking { invoke(any(), any(), any(), any(), any()) }
                     .thenThrow(AssignmentDeadlinePassedException(exceptionMessage))

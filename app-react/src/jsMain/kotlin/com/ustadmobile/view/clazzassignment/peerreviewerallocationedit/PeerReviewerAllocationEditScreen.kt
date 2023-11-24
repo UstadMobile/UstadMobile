@@ -12,6 +12,9 @@ import mui.system.StackDirection
 import react.FC
 import react.Props
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.collectAsState
+import com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditViewModel
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadStandardContainer
@@ -39,18 +42,13 @@ val PeerReviewerAllocationEditComponent2 = FC<PeerReviewerAllocationEditProps>{ 
             spacing = responsive(2)
 
             Button {
-                onClick = { props.onAssignRandomReviewerClick }
+                onClick = { props.onAssignRandomReviewerClick() }
                 variant = ButtonVariant.contained
 
                 + strings[MR.strings.assign_random_reviewers]
             }
 
             props.uiState.submitterListWithAllocations.forEach { submitter ->
-                val filteredReviewerList = props.uiState
-                    .submitterListWithAllocations.filter {
-                        it.submitter.submitterUid != submitter.submitter.submitterUid
-                    }
-
                 Typography {
                     variant = TypographyVariant.body1
 
@@ -97,7 +95,8 @@ val PeerReviewerAllocationEditComponent2 = FC<PeerReviewerAllocationEditProps>{ 
                                     + "(${strings[MR.strings.unassigned]})"
                                 }
 
-                                filteredReviewerList.forEach { reviewer ->
+
+                                props.uiState.reviewerOptionsForAllocation(allocation).forEach { reviewer ->
                                     MenuItem {
                                         value =  reviewer.submitter.submitterUid.toString()
                                         + (reviewer.submitter.name ?: "")
@@ -112,6 +111,21 @@ val PeerReviewerAllocationEditComponent2 = FC<PeerReviewerAllocationEditProps>{ 
     }
 }
 
+val PeerReviewerAllocationEditScreen = FC<Props> { props ->
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        PeerReviewerAllocationEditViewModel(di, savedStateHandle)
+    }
+
+    val uiStateVal by viewModel.uiState.collectAsState(PeerReviewerAllocationEditUIState())
+
+    PeerReviewerAllocationEditComponent2 {
+        uiState = uiStateVal
+        onAssignRandomReviewerClick = viewModel::onAssignRandomReviewers
+        onAllocationChanged = viewModel::onAllocationChanged
+    }
+}
+
+@Suppress("unused")
 val PeerReviewerAllocationEditPreview = FC<Props> {
     PeerReviewerAllocationEditComponent2 {
         onAllocationChanged = { }
