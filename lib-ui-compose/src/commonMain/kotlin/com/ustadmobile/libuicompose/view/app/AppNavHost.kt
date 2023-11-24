@@ -11,6 +11,7 @@ import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
@@ -20,6 +21,9 @@ import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditView
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
+import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
@@ -39,6 +43,10 @@ import com.ustadmobile.libuicompose.view.clazzassignment.courseblockedit.CourseB
 import com.ustadmobile.libuicompose.view.clazzenrolment.edit.ClazzEnrolmentEditScreen
 import com.ustadmobile.libuicompose.view.clazzenrolment.list.ClazzEnrolmentListScreen
 import com.ustadmobile.libuicompose.view.contententry.list.ContentEntryListScreenForViewModel
+import com.ustadmobile.libuicompose.view.discussionpost.coursediscussiondetail.CourseDiscussionDetailScreen
+import com.ustadmobile.libuicompose.view.discussionpost.detail.DiscussionPostDetailScreen
+import com.ustadmobile.libuicompose.view.discussionpost.edit.DiscussionPostEditScreen
+import com.ustadmobile.libuicompose.view.htmledit.HtmlEditScreen
 import com.ustadmobile.libuicompose.view.login.LoginScreen
 import com.ustadmobile.libuicompose.view.person.accountedit.PersonAccountEditScreen
 import com.ustadmobile.libuicompose.view.person.detail.PersonDetailScreen
@@ -291,6 +299,32 @@ fun AppNavHost(
             )
         }
 
+        contentScene("/${CourseDiscussionDetailViewModel.DEST_NAME}") { backStackEntry ->
+            CourseDiscussionDetailScreen(
+                appViewModel(backStackEntry, CourseDiscussionDetailViewModel::class,
+                    ::CourseDiscussionDetailViewModel)
+            )
+        }
+
+        contentScene("/${DiscussionPostDetailViewModel.DEST_NAME}") { backStackEntry ->
+            DiscussionPostDetailScreen(
+                appViewModel(backStackEntry, DiscussionPostDetailViewModel::class,
+                    ::DiscussionPostDetailViewModel)
+            )
+        }
+
+        contentScene("/${DiscussionPostEditViewModel.DEST_NAME}") { backStackEntry ->
+            DiscussionPostEditScreen(
+                appViewModel(backStackEntry, DiscussionPostEditViewModel::class,
+                    ::DiscussionPostEditViewModel)
+            )
+        }
+
+        contentScene("/${HtmlEditViewModel.DEST_NAME}") { backStackEntry ->
+            HtmlEditScreen(
+                appViewModel(backStackEntry, HtmlEditViewModel::class, ::HtmlEditViewModel)
+            )
+        }
 
     }
 
