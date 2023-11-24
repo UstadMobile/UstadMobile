@@ -57,7 +57,7 @@ class NavControllerExtTest {
         }
 
 
-        verify(mockNavController).navigate(eq("ContentEntryList"), argWhere {
+        verify(mockNavController, timeout(5000)).navigate(eq("ContentEntryList"), argWhere {
             it["parentUid"] == "1234"
         }, any())
     }
@@ -72,7 +72,7 @@ class NavControllerExtTest {
             mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase,
                 forceAccountSelection = true)
         }
-        verify(mockNavController).navigate(eq(AccountListViewModel.DEST_NAME), argWhere { args ->
+        verify(mockNavController, timeout(5000)).navigate(eq(AccountListViewModel.DEST_NAME), argWhere { args ->
             val nextArg = UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!)
             nextArg.substringBefore('?') == "ContentEntryList" &&
                 UMFileUtil.parseURLQueryString(nextArg)["parentUid"] == "1234"
@@ -96,7 +96,7 @@ class NavControllerExtTest {
             mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase)
         }
 
-        verify(mockNavController).navigate(eq("ContentEntryList"), argWhere {
+        verify(mockNavController, timeout(5000)).navigate(eq("ContentEntryList"), argWhere {
             it["parentUid"] == "1234"
         }, any())
     }
@@ -119,7 +119,7 @@ class NavControllerExtTest {
             mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase,
                 forceAccountSelection = true)
         }
-        verify(mockNavController).navigate(eq(AccountListViewModel.DEST_NAME), argWhere { args ->
+        verify(mockNavController, timeout(5000)).navigate(eq(AccountListViewModel.DEST_NAME), argWhere { args ->
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"
@@ -154,7 +154,7 @@ class NavControllerExtTest {
             mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase)
         }
 
-        verify(mockNavController).navigate(eq(AccountListViewModel.DEST_NAME), argWhere { args ->
+        verify(mockNavController, timeout(5000)).navigate(eq(AccountListViewModel.DEST_NAME), argWhere { args ->
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"
@@ -188,7 +188,7 @@ class NavControllerExtTest {
             mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase)
         }
 
-        verify(mockNavController).navigate(eq(LoginViewModel.DEST_NAME), argWhere { args ->
+        verify(mockNavController, timeout(5000)).navigate(eq(LoginViewModel.DEST_NAME), argWhere { args ->
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"
@@ -210,7 +210,7 @@ class NavControllerExtTest {
                 userCanSelectServer = false, forceAccountSelection = true)
         }
 
-        verify(mockNavController).navigate(eq(LoginViewModel.DEST_NAME), argWhere { args->
+        verify(mockNavController, timeout(5000)).navigate(eq(LoginViewModel.DEST_NAME), argWhere { args->
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"

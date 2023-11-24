@@ -75,7 +75,7 @@ val CourseDiscussionDetailComponent = FC<CourseDiscussionDetailProps> { props ->
         }
     }
 }
-
+@Suppress("unused")
 val CourseDiscussionDetailPreview = FC<Props> {
     CourseDiscussionDetailComponent {
         uiState = CourseDiscussionDetailUiState(
@@ -124,9 +124,12 @@ val CourseDiscussionDetailScreen = FC<Props> {
     val uiStateVal by viewModel.uiState.collectAsState(CourseDiscussionDetailUiState())
     val appUiState by viewModel.appUiState.collectAsState(AppUiState())
 
-    CourseDiscussionDetailComponent {
-        uiState = uiStateVal
-        onClickPost = viewModel::onClickPost
+    ViewModelLinkOpenerContext {
+        this.viewModel = viewModel
+        CourseDiscussionDetailComponent {
+            uiState = uiStateVal
+            onClickPost = viewModel::onClickPost
+        }
     }
 
     UstadFab {
