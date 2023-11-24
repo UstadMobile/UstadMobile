@@ -20,7 +20,7 @@ import app.cash.paging.Pager
 import app.cash.paging.PagingConfig
 import java.util.*
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
-import com.ustadmobile.libuicompose.components.HtmlText
+import com.ustadmobile.libuicompose.components.UstadHtmlText
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.ext.htmlToPlainText
@@ -30,6 +30,7 @@ import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadListSpacerItem
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
+import com.ustadmobile.libuicompose.util.ViewModelUriHandlerLocalProvider
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -40,10 +41,13 @@ fun CourseDiscussionDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle(
         CourseDiscussionDetailUiState(), Dispatchers.Main.immediate)
-    CourseDiscussionDetailScreen(
-        uiState = uiState,
-        onClickPost = viewModel::onClickPost,
-    )
+
+    ViewModelUriHandlerLocalProvider(viewModel) {
+        CourseDiscussionDetailScreen(
+            uiState = uiState,
+            onClickPost = viewModel::onClickPost,
+        )
+    }
 
 }
 
@@ -68,7 +72,7 @@ fun CourseDiscussionDetailScreen(
 
     LazyColumn{
         item(key = "description"){
-            HtmlText(
+            UstadHtmlText(
                 uiState.courseBlock?.cbDescription?:"",
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 16.dp, end = 16.dp)
             )

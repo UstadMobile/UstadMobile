@@ -27,7 +27,6 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityMainBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.DbPreloadWorker
-import com.ustadmobile.core.impl.BrowserLinkOpener
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.ext.navigateToLink
@@ -50,9 +49,6 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
         NavHostTempFileRegistrar,
         DIAware{
 
-    private val browserLinkOpener = BrowserLinkOpener { url ->
-
-    }
 
     private lateinit var appBarConfiguration: AppBarConfiguration
 
@@ -108,7 +104,7 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
 
         if(uri != null){
             lifecycleScope.launchWhenResumed {
-                ustadNavController.navigateToLink(uri, accountManager, browserLinkOpener,
+                ustadNavController.navigateToLink(uri, accountManager, {   },
                     forceAccountSelection = true,
                     accountName = argAccountName)
             }

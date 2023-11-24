@@ -1,10 +1,10 @@
-package com.ustadmobile.core.domain.openexternallink
+package com.ustadmobile.core.domain.openlink
 
 /**
  * Interface that is implemented on underlying platforms to handle when the user clicks an external
  * link.
  */
-interface OpenExternalLinkUseCase {
+fun interface OpenExternalLinkUseCase {
 
     operator fun invoke(url: String)
 

@@ -5,7 +5,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.ustadmobile.lib.db.composites.DiscussionPostAndPosterNames
-import com.ustadmobile.libuicompose.components.HtmlText
+import com.ustadmobile.libuicompose.components.UstadHtmlText
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import java.util.TimeZone
@@ -34,7 +34,7 @@ fun DiscussionPostListItem(
             )
         },
         supportingContent = {
-            HtmlText(html = discussionPost?.discussionPost?.discussionPostMessage ?: "")
+            UstadHtmlText(html = discussionPost?.discussionPost?.discussionPostMessage ?: "")
         },
         trailingContent = {
             Text(dateTimeStr)

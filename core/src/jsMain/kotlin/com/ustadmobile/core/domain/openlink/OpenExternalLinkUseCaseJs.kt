@@ -1,9 +1,9 @@
-package com.ustadmobile.core.domain.openexternallink
+package com.ustadmobile.core.domain.openlink
 
 import web.window.WindowTarget
 import web.window.window
 
-class OpenExternalLinkUseCaseJs : OpenExternalLinkUseCase{
+class OpenExternalLinkUseCaseJs : OpenExternalLinkUseCase {
 
     override fun invoke(url: String) {
         window.open(url, WindowTarget._blank)

@@ -8,6 +8,8 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -23,7 +25,9 @@ import com.ustadmobile.libuicompose.components.ustadPagedItems
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.libuicompose.components.UstadHtmlEditPlaceholder
+import com.ustadmobile.libuicompose.util.ViewModelUriHandlerLocalProvider
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import com.ustadmobile.libuicompose.util.rememberViewModelUriHandler
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
@@ -33,14 +37,14 @@ fun DiscussionPostDetailScreen(viewModel: DiscussionPostDetailViewModel){
         DiscussionPostDetailUiState2(), Dispatchers.Main.immediate
     )
 
-    DiscussionPostDetailScreen(
-        uiState = uiState,
-        onClickAddReply = viewModel::onClickEditReplyHtml,
-        onChangeReplyText = viewModel::onChangeReplyText,
-        onClickReplyButton = viewModel::onClickPostReply
-    )
-
-
+    ViewModelUriHandlerLocalProvider(viewModel) {
+        DiscussionPostDetailScreen(
+            uiState = uiState,
+            onClickAddReply = viewModel::onClickEditReplyHtml,
+            onChangeReplyText = viewModel::onChangeReplyText,
+            onClickReplyButton = viewModel::onClickPostReply
+        )
+    }
 }
 @Composable
 fun DiscussionPostDetailScreen(
@@ -68,7 +72,7 @@ fun DiscussionPostDetailScreen(
             key = { it.discussionPost?.discussionPostUid ?: 0}
         ) { discussionPostItem ->
             DiscussionPostListItem(
-                discussionPost =discussionPostItem
+                discussionPost = discussionPostItem
             )
 
             //This is the root item - show add a reply here

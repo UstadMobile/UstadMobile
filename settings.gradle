@@ -43,7 +43,7 @@ dependencyResolutionManagement {
             version("version_androidx_window", "1.2.0-rc01")
             version("version_quartz_scheduler", "2.3.2")
             version("version_simplejndi", "0.23.0")
-
+            version("version_htmltext_android", "2.0.0-beta01")
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
@@ -68,6 +68,7 @@ dependencyResolutionManagement {
             library("android-desugar-libs", "com.android.tools", "desugar_jdk_libs_nio").versionRef("version_android_desugar_jdk_libs")
             library("android-material", "com.google.android.material", "material").versionRef("version_android_material")
             library("androidx-window", "androidx.window", "window").versionRef("version_androidx_window")
+            library("htmltext-android", "de.charlex.compose.material3", "material3-html-text").versionRef("version_htmltext_android")
 
 
             library("paging-multiplatform-common", "app.cash.paging", "paging-common").versionRef("version_paging_multiplatform")

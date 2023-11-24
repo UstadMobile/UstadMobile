@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -77,6 +78,15 @@ abstract class UstadViewModel(
     protected val resultReturner: NavResultReturner by instance()
 
     protected val systemImpl: UstadMobileSystemImpl by instance()
+
+    protected val onClickLinkUseCase: OnClickLinkUseCase by lazy {
+        OnClickLinkUseCase(
+            navController = navController,
+            accountManager = accountManager,
+            openExternalLinkUseCase = di.direct.instance(),
+            apiUrlConfig = di.direct.instance(),
+        )
+    }
 
     private var lastNavResultTimestampCollected: Long = savedStateHandle[KEY_LAST_COLLECTED_TS]?.toLong() ?: 0L
         set(value) {
@@ -322,6 +332,14 @@ abstract class UstadViewModel(
      */
     fun MutableMap<String, String>.putFromSavedStateIfPresent(key: String) {
         putFromSavedStateIfPresent(savedStateHandle, key)
+    }
+
+    /**
+     * Default handler for when a user clicks a link. Will delegate to the onClickLinkUseCase which
+     * can handle internal/external links
+     */
+    fun onClickLink(link: String) {
+        onClickLinkUseCase.launchLink(link)
     }
 
 

@@ -1,13 +1,13 @@
 package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.impl.BrowserLinkOpener
+import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.LINK_ENDPOINT_VIEWNAME_DIVIDER
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UstadUrlComponents
+import com.ustadmobile.core.util.UstadUrlComponents.Companion.DEFAULT_DIVIDER
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
@@ -44,7 +44,7 @@ fun UstadNavController.navigateToViewUri(
 suspend fun UstadNavController.navigateToLink(
     link: String,
     accountManager: UstadAccountManager,
-    browserLinkOpener: BrowserLinkOpener,
+    openExternalLinkUseCase: OpenExternalLinkUseCase,
     goOptions: UstadMobileSystemCommon.UstadGoOptions = UstadMobileSystemCommon.UstadGoOptions.Default,
     forceAccountSelection: Boolean = false,
     userCanSelectServer: Boolean = true,
@@ -56,7 +56,7 @@ suspend fun UstadNavController.navigateToLink(
 
 
     when {
-        link.startsWithHttpProtocol() && link.contains(LINK_ENDPOINT_VIEWNAME_DIVIDER) -> {
+        link.startsWithHttpProtocol() && link.contains(DEFAULT_DIVIDER) -> {
             val urlComponents = UstadUrlComponents.parse(link)
             endpointUrl = urlComponents.endpoint
             viewUri = urlComponents.viewUri
@@ -77,7 +77,7 @@ suspend fun UstadNavController.navigateToLink(
     when {
         //when the link is not an ustad link, open in browser
         viewUri == null -> {
-            browserLinkOpener.onOpenLink(link)
+            openExternalLinkUseCase(link)
         }
 
         //When the account has already been selected and the endpoint url is known.
