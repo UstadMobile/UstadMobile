@@ -17,6 +17,8 @@ import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
+import com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
@@ -40,6 +42,8 @@ import com.ustadmobile.libuicompose.view.clazz.detail.ClazzDetailScreen
 import com.ustadmobile.libuicompose.view.clazz.edit.ClazzEditScreen
 import com.ustadmobile.libuicompose.view.clazz.list.ClazzListScreen
 import com.ustadmobile.libuicompose.view.clazzassignment.courseblockedit.CourseBlockEditScreen
+import com.ustadmobile.libuicompose.view.clazzassignment.edit.ClazzAssignmentEditScreen
+import com.ustadmobile.libuicompose.view.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditScreen
 import com.ustadmobile.libuicompose.view.clazzenrolment.edit.ClazzEnrolmentEditScreen
 import com.ustadmobile.libuicompose.view.clazzenrolment.list.ClazzEnrolmentListScreen
 import com.ustadmobile.libuicompose.view.contententry.list.ContentEntryListScreenForViewModel
@@ -323,6 +327,20 @@ fun AppNavHost(
         contentScene("/${HtmlEditViewModel.DEST_NAME}") { backStackEntry ->
             HtmlEditScreen(
                 appViewModel(backStackEntry, HtmlEditViewModel::class, ::HtmlEditViewModel)
+            )
+        }
+
+        contentScene("/${ClazzAssignmentEditViewModel.DEST_NAME}") { backStackEntry ->
+            ClazzAssignmentEditScreen(
+                appViewModel(backStackEntry, ClazzAssignmentEditViewModel::class,
+                    ::ClazzAssignmentEditViewModel)
+            )
+        }
+
+        contentScene("/${PeerReviewerAllocationEditViewModel.DEST_NAME}") { backStackEntry ->
+            PeerReviewerAllocationEditScreen(
+                appViewModel(backStackEntry, PeerReviewerAllocationEditViewModel::class,
+                    ::PeerReviewerAllocationEditViewModel)
             )
         }
 
