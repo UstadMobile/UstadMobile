@@ -669,11 +669,14 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
                         
         SELECT ClazzAssignment.*,
                CourseBlock.*,
+               CourseGroupSet.*,
                ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL) AS submitterUid
                    
           FROM ClazzAssignment
                JOIN CourseBlock
                     ON CourseBlock.cbEntityUid = ClazzAssignment.caUid
+               LEFT JOIN CourseGroupSet
+                    ON CourseGroupSet.cgsUid = ClazzAssignment.caGroupUid
          WHERE ClazzAssignment.caUid = :assignmentUid           
     """)
     @QueryLiveTables(arrayOf("Person", "ClazzAssignment", "CourseBlock", "CourseGroupMember",

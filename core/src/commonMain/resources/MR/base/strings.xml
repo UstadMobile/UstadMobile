@@ -1169,6 +1169,13 @@
     a certain date and time.
     -->
     <string name="dont_show_before">Don\'t show before</string>
+
+    <!--
+    Used with assignments: indicates that the given assignment is submitted by groups.
+    -->
+    <string name="group_submission">Group submission</string>
+
+
     <string name="require_file_submission">Require file submission</string>
     <string name="require_text_submission">Require text submission</string>
     <!-- used to display the size limit of a file a user can upload -->
@@ -1199,6 +1206,13 @@
     -->
     <string name="marked_by">Marked by</string>
     <string name="peers">Peers</string>
+
+    <!--
+    Used when there is an assignment that is marked by peers (e.g. other students) not the teacher.
+    This is a tab that students click on to see the list of their peers that they should review.
+    -->
+    <string name="peers_to_review">Peers to review</string>
+
     <!--
     Header for options where the teacher or admin can set what kind of files the user can
     submit

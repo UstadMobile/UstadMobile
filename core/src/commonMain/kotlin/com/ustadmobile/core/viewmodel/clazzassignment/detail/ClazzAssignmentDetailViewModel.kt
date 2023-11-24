@@ -4,7 +4,6 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.TabItem
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewViewModel
@@ -47,8 +46,20 @@ class ClazzAssignmentDetailViewModel(
                     systemImpl.getString(MR.strings.clazz_assignment))
             )
             if(hasSubmissionsTab) {
-                tabs.add(TabItem(ClazzAssignmentDetailSubmissionsTabViewModel.DEST_NAME,
-                    tabArgs, systemImpl.getString(MR.strings.submissions)))
+                val tabName = if(!hasLearnerRecordPermission &&
+                    clazzAssignment?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS
+                ) {
+                    systemImpl.getString(MR.strings.peers_to_review)
+                }else {
+                    systemImpl.getString(MR.strings.submissions)
+                }
+                tabs.add(
+                    TabItem(
+                        viewName = ClazzAssignmentDetailSubmissionsTabViewModel.DEST_NAME,
+                        args = tabArgs,
+                        label = tabName
+                    )
+                )
             }
 
             ClazzAssignmentDetailUiState(tabs = tabs.toList())

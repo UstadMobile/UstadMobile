@@ -16,6 +16,7 @@ import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionH
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.viewmodel.clazzassignment.latestUniqueMarksByMarker
+import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
@@ -52,10 +53,12 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val courseBlock: CourseBlock? = null,
 
+    val courseGroupSet: CourseGroupSet? = null,
+
     /**
      * The submitter uid of the active user - see CourseAssignmentSubmission.casSubmitterUid
      */
-    internal val submitterUid: Long = 0,
+    val submitterUid: Long = 0,
 
     val latestSubmission: CourseAssignmentSubmission? = null,
 
@@ -92,6 +95,8 @@ data class ClazzAssignmentDetailOverviewUiState(
     val newCourseCommentText: String = "",
 
     val activeUserPersonUid: Long = 0,
+
+    val courseTerminology: CourseTerminology? = null,
 ) {
 
     val caDescriptionVisible: Boolean
@@ -209,6 +214,10 @@ data class ClazzAssignmentDetailOverviewUiState(
                 } / latestUnique.size).roundToInt()
             }
         }
+
+    val isGroupSubmission: Boolean
+        get() = assignment?.caGroupUid?.let { it != 0L } ?: false
+
 }
 
 val CourseAssignmentMarkWithPersonMarker.listItemUiState
@@ -217,12 +226,7 @@ val CourseAssignmentMarkWithPersonMarker.listItemUiState
 @JvmInline
 value class CourseAssignmentMarkWithPersonMarkerUiState(
     val mark: CourseAssignmentMarkWithPersonMarker,
-) {
-
-    val markerGroupNameVisible: Boolean
-        get() = mark.isGroup && mark.camMarkerSubmitterUid != 0L
-
-}
+)
 
 class ClazzAssignmentDetailOverviewViewModel(
     di: DI,
@@ -279,6 +283,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                                 assignment = assignmentData?.clazzAssignment,
                                 courseBlock = assignmentData?.courseBlock,
                                 submitterUid = assignmentData?.submitterUid ?: 0,
+                                courseGroupSet = assignmentData?.courseGroupSet,
                                 unassignedError = if(isEnrolledButNotInGroup) {
                                     systemImpl.getString(MR.strings.unassigned_error)
                                 }else {
@@ -539,6 +544,13 @@ class ClazzAssignmentDetailOverviewViewModel(
                 loadingState = LoadingUiState.NOT_LOADING
             }
         }
+    }
+
+    fun onClickCourseGroupSet() {
+        navController.navigate(
+            viewName = CourseGroupSetDetailViewModel.DEST_NAME,
+            args = mapOf(ARG_ENTITY_UID to (_uiState.value.courseGroupSet?.cgsUid?.toString() ?: "0"))
+        )
     }
 
     companion object {

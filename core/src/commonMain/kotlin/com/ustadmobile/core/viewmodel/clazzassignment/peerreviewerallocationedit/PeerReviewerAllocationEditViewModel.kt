@@ -31,6 +31,12 @@ import org.kodein.di.instance
 data class PeerReviewerAllocationEditUIState(
     val submitterListWithAllocations: List<AssignmentSubmitterAndAllocations> = emptyList(),
 ) {
+
+    /**
+     * Get the list of potential reviewers for a given allocation. This will include all other
+     * submitters except the one being marked and those already selected for the given submitter (
+     * e.g. you cannot assign one submitter to review the same peer twice).
+     */
     fun reviewerOptionsForAllocation(
         allocation: PeerReviewerAllocation
     ): List<AssignmentSubmitterAndAllocations> {

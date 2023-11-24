@@ -42,7 +42,7 @@ val UstadCourseAssignmentMarkListItem = FC<UstadCourseAssignmentMarkListItemProp
     var text = props.uiState.markerName
 
     if (props.uiState.markerGroupNameVisible){
-        text += strings.format(MR.strings.group_number, props.uiState.peerGroupNumber.toString())
+        text += " (${strings.format(MR.strings.group_number, props.uiState.peerGroupNumber.toString())})"
     }
 
     val formattedTime = useFormattedDateAndTime(
