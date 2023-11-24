@@ -17,6 +17,7 @@ import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
@@ -42,6 +43,7 @@ import com.ustadmobile.libuicompose.view.clazz.detail.ClazzDetailScreen
 import com.ustadmobile.libuicompose.view.clazz.edit.ClazzEditScreen
 import com.ustadmobile.libuicompose.view.clazz.list.ClazzListScreen
 import com.ustadmobile.libuicompose.view.clazzassignment.courseblockedit.CourseBlockEditScreen
+import com.ustadmobile.libuicompose.view.clazzassignment.detail.ClazzAssignmentDetailScreen
 import com.ustadmobile.libuicompose.view.clazzassignment.edit.ClazzAssignmentEditScreen
 import com.ustadmobile.libuicompose.view.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditScreen
 import com.ustadmobile.libuicompose.view.clazzenrolment.edit.ClazzEnrolmentEditScreen
@@ -341,6 +343,12 @@ fun AppNavHost(
             PeerReviewerAllocationEditScreen(
                 appViewModel(backStackEntry, PeerReviewerAllocationEditViewModel::class,
                     ::PeerReviewerAllocationEditViewModel)
+            )
+        }
+
+        contentScene("/${ClazzAssignmentDetailViewModel.DEST_NAME}") { backStackEntry ->
+            ClazzAssignmentDetailScreen(
+                backStackEntry, ustadNavController, onSetAppUiState, navResultReturner,
             )
         }
 
