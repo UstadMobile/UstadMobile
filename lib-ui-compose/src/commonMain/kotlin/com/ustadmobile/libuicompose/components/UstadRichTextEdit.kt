@@ -1,8 +1,7 @@
 package com.ustadmobile.libuicompose.components
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import com.mohamedrejeb.richeditor.model.RichTextState
 import com.mohamedrejeb.richeditor.ui.material3.OutlinedRichTextEditor
@@ -11,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
@@ -76,7 +74,8 @@ fun UstadRichTextEdit(
 
     Column(
         modifier = modifier
-            .fillMaxHeight()
+            .defaultItemPadding()
+            .fillMaxWidth()
     ) {
 
         if (!editInNewScreen)
@@ -85,10 +84,10 @@ fun UstadRichTextEdit(
         OutlinedRichTextEditor(
             modifier = Modifier
                 .fillMaxWidth()
-                .defaultItemPadding()
                 .clickable(onClick = { if(editInNewScreen) onClick() })
                 .onFocusChanged {
-                    if(html != richTextState.toHtml()) onHtmlChange(richTextState.toHtml())
+                    val richTextStateHtml = richTextState.toHtml()
+                    if(html != richTextStateHtml) onHtmlChange(richTextStateHtml)
                 },
             state = richTextState,
             readOnly = editInNewScreen,
