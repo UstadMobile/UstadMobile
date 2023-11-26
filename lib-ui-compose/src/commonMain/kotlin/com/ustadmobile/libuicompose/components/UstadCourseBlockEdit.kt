@@ -22,8 +22,7 @@ fun UstadCourseBlockEdit(
     uiState: CourseBlockEditUiState,
     modifier: Modifier = Modifier,
     onCourseBlockChange: (CourseBlock?) -> Unit = {},
-    //Reserved for future use when Html editing is added.
-    @Suppress("UNUSED_PARAMETER") onClickEditDescription: () -> Unit = {},
+    onClickEditDescription: () -> Unit = {},
 ){
 
     Column(
@@ -51,14 +50,22 @@ fun UstadCourseBlockEdit(
             )
         }
 
-//        HtmlClickableTextField(
-//            html = uiState.courseBlock?.cbDescription ?: "",
-//            label = stringResource(MR.strings.description),
-//            onClick = onClickEditDescription,
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .testTag("description")
-//        )
+        UstadRichTextEdit(
+            html = uiState.courseBlock?.cbDescription ?: "",
+            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            onHtmlChange = {
+                uiState.courseBlock?.also { courseBlock ->
+                    onCourseBlockChange(courseBlock.shallowCopy {
+                        cbDescription = it
+                    })
+                }
+            },
+            onClickToEditInNewScreen = onClickEditDescription,
+            editInNewScreenLabel = stringResource(MR.strings.description),
+            placeholder = {
+                Text(stringResource(MR.strings.description))
+            }
+        )
 
         UstadInputFieldLayout(
             modifier = Modifier.defaultItemPadding(),

@@ -419,15 +419,22 @@ private fun ClazzEditBasicDetails(
         UstadRichTextEdit(
             modifier = Modifier
                 .fillMaxWidth()
+                .defaultItemPadding()
                 .testTag("description"),
             html = uiState.entity?.clazzDesc ?: "",
-            onClick = onClickEditDescription,
+            onClickToEditInNewScreen = onClickEditDescription,
+            editInNewScreenLabel = stringResource(MR.strings.description),
+            placeholder = {
+                Text(stringResource(MR.strings.description))
+            },
             onHtmlChange = {
-                onClazzChanged(
-                    uiState.entity?.shallowCopy {
-                        clazzDesc = it
-                    }
-                )
+                uiState.entity?.also { entity ->
+                    onClazzChanged(
+                        entity.shallowCopy {
+                            clazzDesc = it
+                        }
+                    )
+                }
             },
         )
 

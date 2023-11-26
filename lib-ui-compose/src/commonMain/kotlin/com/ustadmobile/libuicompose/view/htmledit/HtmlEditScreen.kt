@@ -1,14 +1,13 @@
 package com.ustadmobile.libuicompose.view.htmledit
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.viewmodel.HtmlEditUiState
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
-import com.ustadmobile.libuicompose.components.UstadHtmlEditPlaceholder
+import com.ustadmobile.libuicompose.components.UstadRichTextEdit
+import com.ustadmobile.libuicompose.util.HideSoftInputEffect
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
@@ -31,10 +30,14 @@ fun HtmlEditScreen(
     uiState: HtmlEditUiState,
     onChangeHtml: (String) -> Unit,
 ) {
-    UstadHtmlEditPlaceholder(
-        htmlTextTmp = uiState.html,
-        onChangeHtmlTmp = onChangeHtml,
-        editInNewScreenTmp = false,
-        modifier = Modifier.fillMaxSize().padding(16.dp)
+
+    UstadRichTextEdit(
+        modifier = Modifier.fillMaxSize(),
+        html = uiState.html,
+        onHtmlChange = onChangeHtml,
+        editInNewScreen = false,
+        onClickToEditInNewScreen = { }
     )
+
+    HideSoftInputEffect()
 }

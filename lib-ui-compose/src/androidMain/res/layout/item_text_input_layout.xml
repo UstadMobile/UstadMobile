@@ -22,9 +22,8 @@ Used by HtmlClickableTextField function
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/text_input_layout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_margin="@dimen/dimen_16dp"
         android:hint="@string/name_key"
+        style="?attr/textInputOutlinedStyle"
         app:hintEnabled="true">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -40,12 +39,13 @@ Used by HtmlClickableTextField function
     <TextView
 
         android:id="@+id/text_input_layout_textview"
-        android:layout_marginTop="32dp"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+        android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+        android:textColor="?colorOnBackground"
         tools:text="Hello\n\nHTML\n\nWorld">
 
     </TextView>

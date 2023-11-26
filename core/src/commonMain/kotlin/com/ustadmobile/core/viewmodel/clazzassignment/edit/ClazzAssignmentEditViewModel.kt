@@ -17,6 +17,7 @@ import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditUiState.Companion.ASSIGNMENT_COMPLETION_CRITERIAS
 import com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.CourseBlockViewModelConstants
+import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
@@ -187,7 +188,7 @@ class ClazzAssignmentEditViewModel(
             }
 
             launch {
-                navResultReturner.filteredResultFlowForKey(RESULT_KEY_HTML_DESC).collect { result ->
+                navResultReturner.filteredResultFlowForKey(CourseBlockEditViewModel.KEY_HTML_DESCRIPTION).collect { result ->
                     val descriptionHtml = result.result as? String ?: return@collect
                     onCourseBlockChanged(
                         _uiState.value.entity?.courseBlock?.shallowCopy {
@@ -245,7 +246,8 @@ class ClazzAssignmentEditViewModel(
     fun onClickEditDescription() {
         navigateToEditHtml(
             currentValue = _uiState.value.entity?.courseBlock?.cbDescription,
-            resultKey = RESULT_KEY_HTML_DESC
+            resultKey = CourseBlockEditViewModel.KEY_HTML_DESCRIPTION,
+            title = systemImpl.getString(MR.strings.description),
         )
     }
 

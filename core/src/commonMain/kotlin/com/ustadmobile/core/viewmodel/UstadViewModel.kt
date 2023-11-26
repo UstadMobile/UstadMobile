@@ -257,15 +257,18 @@ abstract class UstadViewModel(
     fun navigateToEditHtml(
         currentValue: String?,
         resultKey: String,
+        title: String? = null,
         extraArgs: Map<String, String> = emptyMap(),
     ) {
         navController.navigate(
             viewName = HtmlEditViewModel.DEST_NAME,
-            args = mapOf(
-                HtmlEditViewModel.ARG_HTML to (currentValue ?: ""),
-                ARG_RESULT_DEST_KEY to resultKey,
-                ARG_RESULT_DEST_VIEWNAME to destinationName,
-            ) + extraArgs
+            args = buildMap {
+                put(HtmlEditViewModel.ARG_HTML, (currentValue ?: ""))
+                put(ARG_RESULT_DEST_KEY, resultKey)
+                put(ARG_RESULT_DEST_VIEWNAME, destinationName)
+                title?.also { put(HtmlEditViewModel.ARG_TITLE, it ) }
+                putAll(extraArgs)
+            }
         )
     }
 
