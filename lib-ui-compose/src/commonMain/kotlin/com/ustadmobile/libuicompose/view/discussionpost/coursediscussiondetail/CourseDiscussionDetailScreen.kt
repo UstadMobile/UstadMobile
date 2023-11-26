@@ -30,7 +30,6 @@ import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadListSpacerItem
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
-import com.ustadmobile.libuicompose.util.ViewModelUriHandlerLocalProvider
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -42,12 +41,12 @@ fun CourseDiscussionDetailScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle(
         CourseDiscussionDetailUiState(), Dispatchers.Main.immediate)
 
-    ViewModelUriHandlerLocalProvider(viewModel) {
-        CourseDiscussionDetailScreen(
-            uiState = uiState,
-            onClickPost = viewModel::onClickPost,
-        )
-    }
+
+    CourseDiscussionDetailScreen(
+        uiState = uiState,
+        onClickPost = viewModel::onClickPost,
+    )
+
 
 }
 
