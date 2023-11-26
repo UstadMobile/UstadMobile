@@ -45,7 +45,6 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.libuicompose.components.HtmlText
 import com.ustadmobile.libuicompose.components.SortListMode
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadBottomSheetSpacer
@@ -56,6 +55,7 @@ import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.util.ext.copyWithNewFabOnClick
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.defaultSortListMode
+import com.ustadmobile.libuicompose.util.rememberHtmlToPlainText
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
 import moe.tlaster.precompose.navigation.BackStackEntry
 
@@ -228,9 +228,9 @@ fun ClazzListItem(
                         style = MaterialTheme.typography.h6,
                         maxLines = 1,
                     )
-                    HtmlText(
-                        html = clazz?.clazzDesc ?: "",
-                        htmlMaxLines = 2,
+                    Text(
+                        text = rememberHtmlToPlainText(clazz?.clazzDesc ?: ""),
+                        maxLines = 2
                     )
                 }
 

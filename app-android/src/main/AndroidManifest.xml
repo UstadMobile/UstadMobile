@@ -113,6 +113,7 @@
         <activity
             android:name="com.ustadmobile.port.android.view.AppActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:windowSoftInputMode="adjustResize"
             android:exported="true"
             android:launchMode="singleTask">
 

@@ -93,10 +93,10 @@ kotlin {
                 implementation project(":lib-util")
                 implementation "io.ktor:ktor-client-core:$version_ktor"
 
-                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
+                implementation libs.door.runtime
                 implementation libs.napier
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
-                compileOnly "com.github.UstadMobile.door:room-annotations:$version_door"
+                compileOnly libs.door.room.annotations
  
             }
         }
@@ -162,11 +162,11 @@ ksp {
 }
 
 dependencies {
-    kspJvm "com.github.UstadMobile.door:door-compiler:$version_door"
-    kspJvm "com.github.UstadMobile.door:door-shallowcopy:$version_door"
-    kspJs "com.github.UstadMobile.door:door-compiler:$version_door"
-    kspJs "com.github.UstadMobile.door:door-shallowcopy:$version_door"
-    kspAndroid "com.github.UstadMobile.door:door-compiler:$version_door"
+    kspJvm libs.door.compiler
+    kspJvm libs.door.shallowcopy
+    kspJs libs.door.compiler
+    kspJs libs.door.shallowcopy
+    kspAndroid libs.door.compiler
     kspAndroid "androidx.room:room-compiler:$version_android_room"
-    kspAndroid "com.github.UstadMobile.door:door-shallowcopy:$version_door"
+    kspAndroid libs.door.shallowcopy
 }

@@ -87,7 +87,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
 
             TextField {
                 value = props.uiState.entity?.clazzName ?: ""
-                label = ReactNode(strings[MR.strings.name_key])
+                label = ReactNode(strings[MR.strings.name_key] + "*")
                 id = "clazz_name"
                 disabled = !props.uiState.fieldsEnabled
                 error = props.uiState.clazzNameError != null
@@ -123,7 +123,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 UstadDateField {
                     timeInMillis = props.uiState.entity?.clazzStartTime ?: 0
                     timeZoneId = props.uiState.timeZone
-                    label = ReactNode(strings[MR.strings.start_date])
+                    label = ReactNode(strings[MR.strings.start_date] + "*")
                     error = props.uiState.clazzStartDateError != null
                     helperText = props.uiState.clazzStartDateError?.let { ReactNode(it) }
                     disabled = !props.uiState.fieldsEnabled

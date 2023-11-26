@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.util.SortOrderOption
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.util.defaultSortListMode
 
 enum class SortListMode {
 
@@ -37,7 +38,7 @@ fun UstadListSortHeader(
     activeSortOrderOption: SortOrderOption,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    mode: SortListMode = SortListMode.BOTTOM_SHEET,
+    mode: SortListMode = defaultSortListMode(),
     sortOptions: List<SortOrderOption> = emptyList(),
     onClickSortOption: (SortOrderOption) -> Unit = { },
 ){

@@ -5,28 +5,32 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.libuicompose.util.ext.urlDecode
 import kotlinx.coroutines.flow.MutableStateFlow
 import moe.tlaster.precompose.navigation.BackStackEntry
-import moe.tlaster.precompose.navigation.QueryString
 import moe.tlaster.precompose.stateholder.SavedStateHolder
 
 /**
  * Basic wrapper to implement SavedStateHandle key/value pair management using PreCompose. See
  * https://github.com/Tlaster/PreCompose/blob/master/docs/component/view_model.md
  *
+ * @param savedKeys might be shared between multiple instances e.g. this is required when tabs are
+ *        being used to avoid duplicate providers being registered with the savedstateholder.
+ *
  */
 class UstadSavedStateHandlePreCompose(
     private val savedStateHolder: SavedStateHolder,
-    private val queryString: QueryString?
+    private val argsMap: Map<String, List<String>>?,
+    private val savedKeys: MutableMap<String, SavedEntry> = mutableMapOf(),
 ) : UstadSavedStateHandle{
+
+    //Used by ViewModel keys to generate a key that is unique for the given arguments
+    internal val argsHash: Int = argsMap?.hashCode() ?: 0
 
     data class SavedEntry(
         val entry: SaveableStateRegistry.Entry,
         val stateFlow: MutableStateFlow<String?>,
     )
 
-    private val savedKeys = mutableMapOf<String, SavedEntry>()
-
     constructor(backStackEntry: BackStackEntry): this(
-        backStackEntry.savedStateHolder, backStackEntry.queryString
+        backStackEntry.savedStateHolder, backStackEntry.queryString?.map
     )
 
     override fun set(key: String, value: String?) {
@@ -47,7 +51,7 @@ class UstadSavedStateHandlePreCompose(
         // flow first.
         val savedState = savedKeys[key]?.stateFlow?.value
             ?: savedStateHolder.consumeRestored(key)?.toString()
-        return  savedState?: queryString?.map?.get(key)?.firstOrNull()?.urlDecode()
+        return  savedState?: argsMap?.get(key)?.firstOrNull()?.urlDecode()
     }
 
     override val keys: Set<String>

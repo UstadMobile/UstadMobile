@@ -206,7 +206,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                 caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
             }
         ) { testContext ->
-            val exceptionMessage = "Deadline passed"
+            val exceptionMessage = "Deadline has passed"
             val mockSubmissionUseCase = mock<SubmitAssignmentUseCase> {
                 onBlocking { invoke(any(), any(), any(), any(), any()) }
                     .thenThrow(AssignmentDeadlinePassedException(exceptionMessage))
@@ -516,7 +516,9 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             }
 
             viewModel.uiState.test(timeout = 5.seconds) {
-                val commentReadyState = awaitItemWhere { it.privateComments() !is EmptyPagingSource }
+                val commentReadyState = awaitItemWhere {
+                    it.privateComments() !is EmptyPagingSource && it.privateCommentSectionVisible
+                }
                 val commentLoadResult: List<CommentsAndName> = commentReadyState.privateComments().loadFirstList()
                 assertEquals(teacherComment, commentLoadResult.first().comment.commentsText)
                 cancelAndIgnoreRemainingEvents()

@@ -102,7 +102,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
 
 
-                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
+                implementation libs.door.runtime
                 implementation project(':lib-database')
                 implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
             }

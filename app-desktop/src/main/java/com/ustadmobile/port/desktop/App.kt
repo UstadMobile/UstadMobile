@@ -27,6 +27,8 @@ import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.libuicompose.view.app.APP_TOP_LEVEL_NAV_ITEMS
 import com.ustadmobile.libuicompose.view.app.SizeClass
 import dev.icerock.moko.resources.compose.stringResource
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
 import moe.tlaster.precompose.PreComposeApp
 import moe.tlaster.precompose.navigation.NavOptions
 import moe.tlaster.precompose.navigation.PopUpTo
@@ -47,6 +49,8 @@ import com.ustadmobile.libuicompose.view.app.App as UstadPrecomposeApp
  */
 
 fun main() = application {
+    Napier.base(DebugAntilog())
+
     var selectedItem by remember { mutableIntStateOf(0) }
     var appState by remember  {
         mutableStateOf(AppUiState(navigationVisible = false))
@@ -56,6 +60,7 @@ fun main() = application {
         di = DI.from(listOf(
             DesktopDiModule,
             CommonJvmDiModule,
+            DesktopDomainDiModule,
             commonDomainDiModule(EndpointScope.Default),
         )),
     ) {
@@ -94,7 +99,7 @@ fun main() = application {
                             UstadPrecomposeApp(
                                 widthClass = SizeClass.EXPANDED,
                                 navigator = navigator,
-                                onAppStateChange = {
+                                onAppStateChanged = {
                                     appState = it
                                 },
                                 persistNavState = false,

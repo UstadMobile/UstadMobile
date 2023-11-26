@@ -102,10 +102,10 @@ kotlin {
                 api "io.ktor:ktor-io:$version_ktor"
                 implementation libs.napier
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
-                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
+                implementation libs.door.runtime
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 api project(':lib-database')
-                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
+                implementation libs.door.runtime
                 implementation project(":lib-util")
                 implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"

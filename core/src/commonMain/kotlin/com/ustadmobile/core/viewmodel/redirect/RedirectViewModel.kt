@@ -34,7 +34,7 @@ class RedirectViewModel(
             navController.navigateToLink(
                 link = destination,
                 accountManager = accountManager,
-                browserLinkOpener = { },
+                openExternalLinkUseCase = { _, _ ->  },
                 userCanSelectServer = apiUrlConfig.canSelectServer,
                 goOptions = UstadMobileSystemCommon.UstadGoOptions(
                     clearStack = true

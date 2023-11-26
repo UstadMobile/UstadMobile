@@ -1,3 +1,8 @@
+/*
+ * Unfortunately, Cypress does not allow opening links in a new tab. The workaround was to remove
+ * the target attribute. There will need to be some workaround added to the JS code.
+ */
+
 describe('005_005_user_add_external_links_to_post', () => {
 it('Start Ustad Test Server ', () => {
   // Start Test Server
@@ -24,7 +29,7 @@ it('Admin add discussion board and post', () => {
   cy.go('back')
   cy.go('back')
   //Add a teacher
-  cy.contains("button","members").click()
+  cy.contains("button","Members").click()
   cy.contains("span","Add a teacher").click()
   cy.ustadAddNewPerson('Teacher','A','Female')
   // Add account for teacher
@@ -34,7 +39,7 @@ it('Admin add discussion board and post', () => {
   //Add a student
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','A','Male')
-  cy.contains("button","members").should('be.visible')
+  cy.contains("button","Members").should('be.visible')
   //Add account for student
   cy.contains("Student A").click()
   cy.contains('View profile').click()
@@ -68,7 +73,7 @@ it('Student able to open the external link in the reply', () => {
   // Open link on the post board
   cy.get('[data-testid="ForumIcon"]').click()
   cy.contains('Topic 1').click()
-  cy.contains('External link').invoke('removeAttr','target').click()
+  cy.contains('External link').invoke('attr','target', '_self').click()
   cy.url().should('include','https://github.com/UstadMobile/UstadMobile/blob/primary/test-end-to-end/README.md')
 })
 })

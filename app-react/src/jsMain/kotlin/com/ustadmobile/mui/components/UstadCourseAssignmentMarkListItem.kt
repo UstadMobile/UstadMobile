@@ -42,8 +42,7 @@ val UstadCourseAssignmentMarkListItem = FC<UstadCourseAssignmentMarkListItemProp
     var text = props.uiState.markerName
 
     if (props.uiState.markerGroupNameVisible){
-        text += "  (${strings[MR.strings.group_number]
-            .replace("%1\$s", props.uiState.peerGroupNumber.toString())})"
+        text += " (${strings.format(MR.strings.group_number, props.uiState.peerGroupNumber.toString())})"
     }
 
     val formattedTime = useFormattedDateAndTime(
@@ -109,11 +108,9 @@ val UstadCourseAssignmentMarkListItem = FC<UstadCourseAssignmentMarkListItemProp
                                 color = rgb(255, 0,0, 1.0)
                             }
 
-                            +strings[MR.strings.late_penalty]
-                                .replace(
-                                    oldValue = "%1\$s",
-                                    newValue = props.uiState.mark.courseAssignmentMark?.penaltyPercentage().toString()
-                                )
+                            + strings.format(MR.strings.late_penalty,
+                                props.uiState.mark.courseAssignmentMark?.penaltyPercentage().toString()
+                            )
                         }
                     }
                 }

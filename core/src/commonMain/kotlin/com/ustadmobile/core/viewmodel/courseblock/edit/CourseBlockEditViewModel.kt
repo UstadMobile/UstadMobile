@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
 import org.kodein.di.DI
 
 @kotlinx.serialization.Serializable
@@ -37,6 +38,10 @@ data class CourseBlockEditUiState(
 
     val caGracePeriodError: String? = null,
 
+    /**
+     * The timezone that will be used when formatting timestamps. This should be set to the system
+     * default timezone by the viewmodel.
+     */
     val timeZone: String = "UTC",
 ) {
     val minScoreVisible: Boolean
@@ -67,7 +72,9 @@ class CourseBlockEditViewModel(
     savedStateHandle: UstadSavedStateHandle,
 ): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
-    private val _uiState = MutableStateFlow(CourseBlockEditUiState())
+    private val _uiState = MutableStateFlow(
+        CourseBlockEditUiState(timeZone = TimeZone.currentSystemDefault().id)
+    )
 
     val uiState: Flow<CourseBlockEditUiState> = _uiState.asStateFlow()
     init {
@@ -120,7 +127,7 @@ class CourseBlockEditViewModel(
             }
 
             launch {
-                resultReturner.filteredResultFlowForKey(RESULT_KEY_HTML_DESC).collect { result ->
+                resultReturner.filteredResultFlowForKey(KEY_HTML_DESCRIPTION).collect { result ->
                     val descriptionHtml = result.result as? String ?: return@collect
                     onEntityChanged(_uiState.value.courseBlock?.shallowCopy {
                         cbDescription = descriptionHtml
@@ -146,7 +153,8 @@ class CourseBlockEditViewModel(
     fun onClickEditDescription() {
         navigateToEditHtml(
             currentValue = _uiState.value.courseBlock?.cbDescription,
-            resultKey = RESULT_KEY_HTML_DESC
+            resultKey = KEY_HTML_DESCRIPTION,
+            title = systemImpl.getString(MR.strings.description),
         )
     }
 
@@ -160,6 +168,12 @@ class CourseBlockEditViewModel(
         const val DEST_NAME = "CourseBlockEdit"
 
         const val ARG_BLOCK_TYPE = "blockType"
+
+        /**
+         * If this key is the same as used in ClazzEdit, then editing the value for CourseBlock
+         * results in it being picked up by ClazzEdit as well as CourseBlock
+         */
+        const val KEY_HTML_DESCRIPTION = "courseBlockDesc"
 
 
     }

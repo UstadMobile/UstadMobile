@@ -10,12 +10,13 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.hooks.courseTerminologyResource
+import com.ustadmobile.hooks.useCourseTerminologyEntries
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
-import web.cssom.px
 import kotlinx.datetime.TimeZone
 import mui.material.*
 import mui.system.responsive
@@ -35,6 +36,9 @@ import mui.icons.material.DoneAll as DoneAllIcon
 import mui.icons.material.EventAvailable as EventAvailableIcon
 import mui.icons.material.Add as AddIcon
 import mui.icons.material.InsertDriveFile as InsertDriveFileIcon
+import mui.icons.material.Groups as GroupsIcon
+import mui.icons.material.Person as PersonIcon
+import mui.icons.material.Group as GroupIcon
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import com.ustadmobile.hooks.usePagingSource
@@ -45,8 +49,11 @@ import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
 import com.ustadmobile.view.clazzassignment.UstadCommentListItem
 import com.ustadmobile.view.components.UstadDetailHeader
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
+import mui.system.sx
+import react.useRequiredContext
 import web.cssom.Contain
 import web.cssom.Overflow
+import web.cssom.TextAlign
 
 val ASSIGNMENT_STATUS_MAP = mapOf(
     CourseAssignmentSubmission.NOT_SUBMITTED to DoneIcon,
@@ -76,11 +83,15 @@ external interface ClazzAssignmentDetailOverviewScreenProps : Props {
 
     var onClickSubmitSubmission: () -> Unit
 
+    var onClickCourseGroupSet: () -> Unit
+
 }
 
 private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDetailOverviewScreenProps> { props ->
 
     val strings = useStringProvider()
+
+    val theme by useRequiredContext(ThemeContext)
 
     val formattedDateTime = useFormattedDateAndTime(
         timeInMillis = props.uiState.courseBlock?.cbDeadlineDate ?: 0,
@@ -107,6 +118,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
         props.uiState.privateComments, true, 50
     )
 
+    val courseTerminologyEntries = useCourseTerminologyEntries(props.uiState.courseTerminology)
 
     VirtualList {
         style = jso {
@@ -120,8 +132,6 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
             //Header section - description, deadline, etc
             item {
                 Stack.create {
-                    spacing = responsive(20.px)
-
                     UstadRawHtml {
                         html = props.uiState.courseBlock?.cbDescription ?: ""
                     }
@@ -137,12 +147,42 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                         }
                     }
 
-                    UstadDetailField {
-                        valueText = ReactNode(strings[policyMessageId])
-                        labelText = strings[MR.strings.submission_policy]
-                        icon = (ASSIGNMENT_STATUS_MAP[
+                    UstadDetailField2 {
+                        valueContent = ReactNode(strings[policyMessageId])
+                        labelContent = ReactNode(strings[MR.strings.submission_policy])
+                        leadingContent = (ASSIGNMENT_STATUS_MAP[
                             props.uiState.assignment?.caSubmissionPolicy] ?: DoneIcon).create()
-                        onClick = { }
+                    }
+
+                    props.uiState.courseGroupSet?.also { groupSet ->
+                        UstadDetailField2 {
+                            valueContent = ReactNode(groupSet.cgsName ?: "")
+                            labelContent = ReactNode(strings[MR.strings.group_submission])
+                            leadingContent = GroupsIcon.create()
+                            onClick = {
+                                props.onClickCourseGroupSet()
+                            }
+                        }
+                    }
+
+                    UstadDetailField2 {
+                        valueContent = ReactNode(props.uiState.assignment?.let {
+                            if(it.caMarkingType == ClazzAssignment.MARKED_BY_COURSE_LEADER) {
+                                courseTerminologyResource(
+                                    terminologyEntries = courseTerminologyEntries,
+                                    stringProvider = strings,
+                                    stringResource = MR.strings.teacher,
+                                )
+                            }else {
+                                strings[MR.strings.peers]
+                            }
+                        } ?: "")
+                        labelContent = ReactNode(strings[MR.strings.marked_by])
+                        leadingContent = when(props.uiState.assignment?.caMarkingType) {
+                            ClazzAssignment.MARKED_BY_COURSE_LEADER -> PersonIcon.create()
+                            ClazzAssignment.MARKED_BY_PEERS -> GroupIcon.create()
+                            else -> null
+                        }
                     }
 
                     UstadAssignmentSubmissionHeader {
@@ -153,9 +193,11 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
 
 
             if (props.uiState.unassignedErrorVisible) {
-                ListItem {
-                    ListItemText {
-                        primary = ReactNode(props.uiState.unassignedError ?: "")
+                item("unassigned_error") {
+                    ListItem.create {
+                        ListItemText {
+                            primary = ReactNode(props.uiState.unassignedError ?: "")
+                        }
                     }
                 }
             }
@@ -164,7 +206,12 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
             if(props.uiState.activeUserIsSubmitter) {
                 item {
                     UstadDetailHeader.create {
-                        header = ReactNode(strings[MR.strings.your_submission])
+                        val suffix = if(props.uiState.isGroupSubmission) {
+                            "(${strings.format(MR.strings.group_number, props.uiState.submitterUid.toString())})"
+                        }else {
+                            ""
+                        }
+                        header = ReactNode("${strings[MR.strings.your_submission]} $suffix")
                     }
                 }
 
@@ -243,10 +290,10 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 }
 
                 if (props.uiState.submitSubmissionButtonVisible) {
-                    item {
+                    item(key = "item_submit_button") {
                         Button.create {
                             onClick = { props.onClickSubmitSubmission() }
-                            id = "sbumit_button"
+                            id = "submit_button"
                             disabled = !props.uiState.fieldsEnabled
                             variant = ButtonVariant.contained
                             fullWidth = true
@@ -254,7 +301,19 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                             +strings[MR.strings.submit].uppercase()
                         }
                     }
+                }
 
+                props.uiState.submissionError?.also { submissionError ->
+                    item(key = "submit_error") {
+                        Typography.create {
+                            sx {
+                                color = theme.palette.error.main
+                                textAlign = TextAlign.center
+                            }
+
+                            + submissionError
+                        }
+                    }
                 }
 
                 //List of grades awarded
@@ -287,37 +346,40 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 }
             }
 
-            //Course comments
-            item {
-                ListItem.create {
-                    ListItemText {
-                        primary = ReactNode(strings[MR.strings.class_comments])
+            if(props.uiState.showClassComments) {
+                //Course comments
+                item {
+                    ListItem.create {
+                        ListItemText {
+                            primary = ReactNode(strings[MR.strings.class_comments])
+                        }
+                    }
+                }
+
+                item {
+                    AssignmentCommentTextFieldListItem.create {
+                        onChange = props.onChangeCourseComment
+                        label = ReactNode(strings[MR.strings.add_class_comment])
+                        value = props.uiState.newCourseCommentText
+                        activeUserPersonUid = props.uiState.activeUserPersonUid
+                        textFieldId = "course_comment_textfield"
+                        onClickSubmit = props.onClickSubmitCourseComment
+                    }
+                }
+
+                infiniteQueryPagingItems(
+                    items = courseCommentInfiniteQueryResult,
+                    key = { "cc_${it.comment.commentsUid}" }
+                ) { comment ->
+                    UstadCommentListItem.create {
+                        commentsAndName = comment
                     }
                 }
             }
 
-            item {
-                AssignmentCommentTextFieldListItem.create {
-                    onChange = props.onChangeCourseComment
-                    label = ReactNode(strings[MR.strings.add_class_comment])
-                    value = props.uiState.newCourseCommentText
-                    activeUserPersonUid = props.uiState.activeUserPersonUid
-                    textFieldId = "course_comment_textfield"
-                    onClickSubmit = props.onClickSubmitCourseComment
-                }
-            }
-
-            infiniteQueryPagingItems(
-                items = courseCommentInfiniteQueryResult,
-                key = { "cc_${it.comment.commentsUid}" }
-            ) { comment ->
-                UstadCommentListItem.create {
-                    commentsAndName = comment
-                }
-            }
 
             //Private comments
-            if(props.uiState.activeUserIsSubmitter) {
+            if(props.uiState.showPrivateComments) {
                 item {
                     ListItem.create {
                         ListItemText {
@@ -372,6 +434,7 @@ val ClazzAssignmentDetailOverviewScreen = FC<Props> {
         onClickSubmitPrivateComment = viewModel::onClickSubmitPrivateComment
         onClickSubmitSubmission = viewModel::onClickSubmit
         onClickFilterChip = viewModel::onClickMarksFilterChip
+        onClickCourseGroupSet = viewModel::onClickCourseGroupSet
     }
 }
 

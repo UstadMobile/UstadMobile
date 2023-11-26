@@ -100,8 +100,8 @@ dependencies {
     implementation project(":core")
     implementation project(":sharedse")
     implementation project(":lib-database")
-    implementation "com.github.UstadMobile.door:room-annotations:$version_door"
-    implementation "com.github.UstadMobile.door:door-runtime:$version_door"
+    implementation libs.door.room.annotations
+    implementation libs.door.runtime
     implementation project(":lib-util")
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"

@@ -11,9 +11,13 @@ import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditUiState.Companion.ASSIGNMENT_COMPLETION_CRITERIAS
+import com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.CourseBlockViewModelConstants
+import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
@@ -24,6 +28,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.TimeZone
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.encodeToString
 import org.kodein.di.DI
@@ -39,8 +45,6 @@ data class ClazzAssignmentEditUiState(
     val groupSetEnabled: Boolean = true,
 
     val reviewerCountError: String? = null,
-
-    val timeZone: String? = null,
 
     val entity: CourseBlockAndEditEntities? = null,
 
@@ -93,11 +97,20 @@ class ClazzAssignmentEditViewModel(
     }
 ): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
-    private val _uiState = MutableStateFlow(ClazzAssignmentEditUiState())
+    private val _uiState = MutableStateFlow(
+        ClazzAssignmentEditUiState(
+            courseBlockEditUiState = CourseBlockEditUiState(
+                completionCriteriaOptions = ASSIGNMENT_COMPLETION_CRITERIAS,
+                timeZone = TimeZone.currentSystemDefault().id,
+            )
+        )
+    )
 
     val uiState: Flow<ClazzAssignmentEditUiState> = _uiState.asStateFlow()
 
     private val snackDisaptcher: SnackBarDispatcher by instance()
+
+    private val clazzUid = savedStateHandle[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
 
     init {
         _appUiState.update { prev ->
@@ -124,7 +137,7 @@ class ClazzAssignmentEditViewModel(
                         },
                         assignment = ClazzAssignment().apply {
                             caUid = assignmentUid
-                            caClazzUid = savedStateHandle[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
+                            caClazzUid = clazzUid
                         }
                     )
                 },
@@ -177,7 +190,7 @@ class ClazzAssignmentEditViewModel(
             }
 
             launch {
-                navResultReturner.filteredResultFlowForKey(RESULT_KEY_HTML_DESC).collect { result ->
+                navResultReturner.filteredResultFlowForKey(CourseBlockEditViewModel.KEY_HTML_DESCRIPTION).collect { result ->
                     val descriptionHtml = result.result as? String ?: return@collect
                     onCourseBlockChanged(
                         _uiState.value.entity?.courseBlock?.shallowCopy {
@@ -209,13 +222,34 @@ class ClazzAssignmentEditViewModel(
                     )
                 }
             }
+
+            launch {
+                navResultReturner.filteredResultFlowForKey(RESULT_KEY_PEER_REVIEW_ALLOCATIONS).collect { result ->
+                    @Suppress("UNCHECKED_CAST")
+                    val allocations = result.result as? List<PeerReviewerAllocation> ?: return@collect
+                    val newState = _uiState.updateAndGet { prev ->
+                        prev.copy(
+                            entity = prev.entity?.copy(
+                                assignmentPeerAllocations = allocations
+                            )
+                        )
+                    }
+
+                    scheduleEntityCommitToSavedState(
+                        entity = newState.entity,
+                        serializer = CourseBlockAndEditEntities.serializer(),
+                        commitDelay = 200,
+                    )
+                }
+            }
         }
     }
 
     fun onClickEditDescription() {
         navigateToEditHtml(
             currentValue = _uiState.value.entity?.courseBlock?.cbDescription,
-            resultKey = RESULT_KEY_HTML_DESC
+            resultKey = CourseBlockEditViewModel.KEY_HTML_DESCRIPTION,
+            title = systemImpl.getString(MR.strings.description),
         )
     }
 
@@ -334,7 +368,25 @@ class ClazzAssignmentEditViewModel(
     }
 
     fun onClickAssignReviewers() {
-        //Go to assign peer reviewers
+        val assignmentVal = _uiState.value.entity?.assignment ?: return
+
+        navigateForResult(
+            nextViewName = PeerReviewerAllocationEditViewModel.DEST_NAME,
+            key = RESULT_KEY_PEER_REVIEW_ALLOCATIONS,
+            currentValue = null,
+            serializer = ListSerializer(PeerReviewerAllocation.serializer()),
+            args = mapOf(
+                PeerReviewerAllocationEditViewModel.ARG_ALLOCATIONS to json.encodeToString(
+                    serializer = ListSerializer(PeerReviewerAllocation.serializer()),
+                    value = _uiState.value.entity?.assignmentPeerAllocations ?: emptyList()
+                ),
+                PeerReviewerAllocationEditViewModel.ARG_GROUP_SET_UID to assignmentVal.caGroupUid.toString(),
+                ARG_CLAZZUID to assignmentVal.caClazzUid.toString(),
+                PeerReviewerAllocationEditViewModel.ARG_NUM_REVIEWERS_PER_SUBMITTER to
+                        assignmentVal.caPeerReviewerCount.toString(),
+                UstadView.ARG_CLAZZ_ASSIGNMENT_UID to assignmentVal.caUid.toString(),
+            )
+        )
     }
 
     fun onClickSave() {
@@ -469,6 +521,8 @@ class ClazzAssignmentEditViewModel(
     companion object {
 
         const val RESULT_KEY_GROUPSET = "groupSet"
+
+        const val RESULT_KEY_PEER_REVIEW_ALLOCATIONS = "peerAllocationsResult"
 
         const val DEST_NAME = "CourseAssignmentEdit"
         const val ATTACHMENT_LIMIT_MIN = 5

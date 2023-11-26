@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -101,7 +102,13 @@ class ContentEntryEditViewModel(
     private val importContentUseCase: ImportContentUseCase = di.onActiveEndpoint().direct.instance(),
 ) : UstadEditViewModel(di, savedStateHandle, DEST_NAME){
 
-    private val _uiState = MutableStateFlow(ContentEntryEditUiState())
+    private val _uiState = MutableStateFlow(
+        ContentEntryEditUiState(
+            courseBlockEditUiState = CourseBlockEditUiState(
+                timeZone = TimeZone.currentSystemDefault().id
+            )
+        )
+    )
 
     val uiState: Flow<ContentEntryEditUiState> = _uiState.asStateFlow()
 
