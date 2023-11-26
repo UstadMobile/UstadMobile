@@ -104,7 +104,7 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
 
         if(uri != null){
             lifecycleScope.launchWhenResumed {
-                ustadNavController.navigateToLink(uri, accountManager, {   },
+                ustadNavController.navigateToLink(uri, accountManager, { _, _ -> },
                     forceAccountSelection = true,
                     accountName = argAccountName)
             }
