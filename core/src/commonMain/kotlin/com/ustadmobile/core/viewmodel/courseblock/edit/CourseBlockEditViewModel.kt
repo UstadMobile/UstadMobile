@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
 import org.kodein.di.DI
 
 @kotlinx.serialization.Serializable
@@ -37,6 +38,10 @@ data class CourseBlockEditUiState(
 
     val caGracePeriodError: String? = null,
 
+    /**
+     * The timezone that will be used when formatting timestamps. This should be set to the system
+     * default timezone by the viewmodel.
+     */
     val timeZone: String = "UTC",
 ) {
     val minScoreVisible: Boolean
@@ -67,7 +72,9 @@ class CourseBlockEditViewModel(
     savedStateHandle: UstadSavedStateHandle,
 ): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
-    private val _uiState = MutableStateFlow(CourseBlockEditUiState())
+    private val _uiState = MutableStateFlow(
+        CourseBlockEditUiState(timeZone = TimeZone.currentSystemDefault().id)
+    )
 
     val uiState: Flow<CourseBlockEditUiState> = _uiState.asStateFlow()
     init {

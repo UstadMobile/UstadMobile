@@ -7,7 +7,7 @@ import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichText
 
 @Composable
-actual fun HtmlText(
+actual fun UstadHtmlText(
     html: String,
     modifier: Modifier,
     htmlMaxLines: Int,

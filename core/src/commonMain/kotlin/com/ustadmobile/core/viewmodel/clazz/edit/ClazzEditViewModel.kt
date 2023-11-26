@@ -564,6 +564,21 @@ class ClazzEditViewModel(
                         joinToParentUid = null,
                     )
                 }
+                val currentPeerReviewAllocations = courseBlockListVal.flatMap {
+                    it.assignmentPeerAllocations
+                }
+                val prevPeerReviewerAllocations = initState.courseBlockList.flatMap {
+                    it.assignmentPeerAllocations
+                }
+
+                activeRepo.peerReviewerAllocationDao.deactivateByUids(
+                    uidList = prevPeerReviewerAllocations.findKeysNotInOtherList(
+                        otherList = currentPeerReviewAllocations,
+                        key = { it.praUid }
+                    ),
+                    changeTime = systemTimeInMillis()
+                )
+                activeRepo.peerReviewerAllocationDao.upsertList(currentPeerReviewAllocations)
 
                 //Run the ContentImport for any jobs where this is required.
                 courseBlockListVal.mapNotNull {

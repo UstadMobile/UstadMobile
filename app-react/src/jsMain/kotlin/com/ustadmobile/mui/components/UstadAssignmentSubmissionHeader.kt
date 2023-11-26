@@ -49,6 +49,7 @@ val UstadAssignmentSubmissionHeader = FC<UstadAssignmentSubmissionHeaderProps> {
                 + (props.uiState.submissionMark?.averageScore?.toString() ?: "")
                 + "/"
                 + (props.uiState.courseBlock?.cbMaxPoints?.toString() ?: "")
+                + " "
                 + strings[MR.strings.points]
                 + " "
 
@@ -58,18 +59,17 @@ val UstadAssignmentSubmissionHeader = FC<UstadAssignmentSubmissionHeaderProps> {
                             color = rgb(255, 0,0, 1.0)
                         }
 
-                        + (strings[MR.strings.late_penalty]
-                            .replace("%1\$s", (
-                                props.uiState.courseBlock?.cbLateSubmissionPenalty ?: 0)
-                                .toString()))
+                        + strings.format(MR.strings.late_penalty,
+                            (props.uiState.courseBlock?.cbLateSubmissionPenalty ?: 0).toString()
+                        )
                     }
                 }
             }
 
-            UstadDetailField{
-                valueText = pointsElement
-                labelText = strings[MR.strings.xapi_result_header]
-                icon = EmojiEvents.create()
+            UstadDetailField2 {
+                valueContent = pointsElement
+                labelContent = ReactNode(strings[MR.strings.xapi_result_header])
+                leadingContent = EmojiEvents.create()
             }
         }
 

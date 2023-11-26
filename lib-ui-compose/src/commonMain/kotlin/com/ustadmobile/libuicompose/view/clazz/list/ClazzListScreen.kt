@@ -45,7 +45,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.libuicompose.components.HtmlText
+import com.ustadmobile.libuicompose.components.UstadHtmlText
 import com.ustadmobile.libuicompose.components.SortListMode
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadBottomSheetSpacer
@@ -228,7 +228,7 @@ fun ClazzListItem(
                         style = MaterialTheme.typography.h6,
                         maxLines = 1,
                     )
-                    HtmlText(
+                    UstadHtmlText(
                         html = clazz?.clazzDesc ?: "",
                         htmlMaxLines = 2,
                     )

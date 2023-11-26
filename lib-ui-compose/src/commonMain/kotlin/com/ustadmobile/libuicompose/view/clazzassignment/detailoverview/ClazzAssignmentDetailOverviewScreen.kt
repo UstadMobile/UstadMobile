@@ -24,7 +24,7 @@ import java.util.*
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
-import com.ustadmobile.libuicompose.components.HtmlText
+import com.ustadmobile.libuicompose.components.UstadHtmlText
 import com.ustadmobile.libuicompose.components.UstadAddCommentListItem
 import com.ustadmobile.libuicompose.components.UstadEditHeader
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
@@ -129,7 +129,7 @@ fun ClazzAssignmentDetailOverviewScreen(
     ) {
         if (uiState.caDescriptionVisible){
             item {
-                HtmlText(
+                UstadHtmlText(
                     html = uiState.courseBlock?.cbDescription ?: "",
                     modifier = Modifier.defaultItemPadding()
                 )
@@ -193,7 +193,7 @@ fun ClazzAssignmentDetailOverviewScreen(
 //                        onClick = onClickEditSubmission
 //                    )
                 }else {
-                    HtmlText(
+                    UstadHtmlText(
                         modifier = Modifier
                             .testTag("submission_text")
                             .defaultItemPadding(),

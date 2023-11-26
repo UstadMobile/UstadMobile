@@ -56,6 +56,7 @@ kotlin {
                 api(libs.androidx.paging.compose)
                 api(libs.androidx.navigation.compose)
                 api(libs.androidx.lifecycle.viewmodel.compose)
+                api(libs.htmltext.android)
 
                 implementation(libs.android.material)
             }
