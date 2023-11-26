@@ -1,5 +1,6 @@
 package com.ustadmobile.mui.components
 
+import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase.Companion.LinkTarget
 import js.core.jso
 import react.FC
 import react.Props
@@ -22,7 +23,7 @@ external interface UstadRawHtmlProps: Props {
 val UstadRawHtml = FC<UstadRawHtmlProps> { props ->
     //Add https://github.com/cure53/DOMPurify
     val divRef = useRef<HTMLDivElement>(null)
-    val linkOpener = useContext(LinkOpenerContext)
+    val linkOpener = useContext(OnClickLinkContext)
 
     div {
         ref = divRef
@@ -43,8 +44,12 @@ val UstadRawHtml = FC<UstadRawHtmlProps> { props ->
                         evt.preventDefault()
                         evt.stopPropagation()
                         val href = anchorEl.getAttribute("href")
+                        val target = anchorEl.getAttribute("target")?.let {
+                            LinkTarget.of(it)
+                        }
+
                         href?.also { url ->
-                            linkOpener?.invoke(url)
+                            linkOpener?.invoke(url, target ?: LinkTarget.DEFAULT)
                         }
                     }
                 )

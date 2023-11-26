@@ -1,11 +1,13 @@
 package com.ustadmobile.libuicompose.view.app
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
@@ -37,6 +39,7 @@ import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
+import com.ustadmobile.libuicompose.util.NavControllerUriHandler
 import com.ustadmobile.libuicompose.util.PopNavCommandEffect
 import com.ustadmobile.libuicompose.view.accountlist.AccountListScreen
 import com.ustadmobile.libuicompose.view.clazz.detail.ClazzDetailScreen
@@ -69,6 +72,9 @@ import moe.tlaster.precompose.navigation.NavHost
 import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.navigation.RouteBuilder
 import org.kodein.di.DI
+import org.kodein.di.compose.localDI
+import org.kodein.di.direct
+import org.kodein.di.instance
 import kotlin.reflect.KClass
 
 @Composable
@@ -141,218 +147,229 @@ fun AppNavHost(
         }
     }
 
-    NavHost(
-        modifier = modifier,
-        navigator = navigator,
-        initialRoute = "/${RedirectViewModel.DEST_NAME}",
-        persistNavState = persistNavState,
-    ) {
+    val di = localDI()
 
-        contentScene("/${RedirectViewModel.DEST_NAME}") { backStackEntry ->
-            //No UI for redirect
-            appViewModel(backStackEntry, RedirectViewModel::class) { di, savedStateHandle ->
-                RedirectViewModel(di, savedStateHandle)
-            }
-        }
-
-        contentScene(
-            route = "/${SiteEnterLinkViewModel.DEST_NAME}"
-        ) { backStackEntry ->
-            SiteEnterLinkScreen(
-                viewModel = appViewModel(
-                    backStackEntry, SiteEnterLinkViewModel::class
-                ) { di, savedStateHandle ->
-                    SiteEnterLinkViewModel(di, savedStateHandle)
-                }
-            )
-        }
-
-        contentScene(
-            route = "/${LoginViewModel.DEST_NAME}"
-        ) { backStackEntry ->
-            LoginScreen(
-                viewModel = appViewModel(
-                    backStackEntry, LoginViewModel::class,
-                ) { di, savedStateHandle ->
-                    LoginViewModel(di, savedStateHandle)
-                }
-            )
-        }
-
-        ContentEntryListViewModel.ALL_DEST_NAMES.forEach { destName ->
-            contentScene("/$destName") { backStackEntry ->
-                ContentEntryListScreenForViewModel(
-                    viewModel = appViewModel(
-                        backStackEntry, ContentEntryListViewModel::class,
-                    ) { di, savedStateHandle ->
-                        ContentEntryListViewModel(di, savedStateHandle, destName)
-                    }
-                )
-            }
-        }
-
-        ClazzListViewModel.ALL_DEST_NAMES.forEach { destName ->
-            contentScene("/$destName") { backStackEntry ->
-                ClazzListScreen(
-                    backStackEntry, ustadNavController, onSetAppUiState, navResultReturner, destName
-                )
-            }
-        }
-
-        contentScene("/${ClazzEditViewModel.DEST_NAME}") {backStackEntry ->
-            ClazzEditScreen(
-                appViewModel(
-                    backStackEntry, ClazzEditViewModel::class
-                ) { di, savedStateHandle ->
-                    ClazzEditViewModel(di, savedStateHandle)
-                }
-            )
-        }
-
-        contentScene("/${ScheduleEditViewModel.DEST_NAME}") { backStackEntry ->
-            ScheduleEditScreen(
-                appViewModel(
-                    backStackEntry, ScheduleEditViewModel::class
-                ) { di, savedStateHandle ->
-                    ScheduleEditViewModel(di, savedStateHandle)
-                }
-            )
-        }
-
-        contentScene("/${ClazzDetailViewModel.DEST_NAME}") { backStackEntry ->
-            ClazzDetailScreen(
-                backStackEntry, ustadNavController, onSetAppUiState, navResultReturner,
-            )
-        }
-
-        contentScene("/${CourseBlockEditViewModel.DEST_NAME}") { backStackEntry ->
-            CourseBlockEditScreen(
-                appViewModel(
-                    backStackEntry, CourseBlockEditViewModel::class
-                ) { di, savedStateHandle ->
-                    CourseBlockEditViewModel(di, savedStateHandle)
-                }
-            )
-        }
-
-        contentScene("/${TimeZoneListViewModel.DEST_NAME}") {backStackEntry ->
-            TimeZoneListScreen(
-                appViewModel(
-                    backStackEntry, TimeZoneListViewModel::class
-                ) { di, savedStateHandle ->
-                    TimeZoneListViewModel(di, savedStateHandle)
-                }
-            )
-        }
-
-        PersonListViewModel.ALL_DEST_NAMES.forEach { destName ->
-            contentScene("/$destName") { backStackEntry ->
-                PersonListScreen(
-                    appViewModel(
-                        backStackEntry, PersonListViewModel::class
-                    ) { di, savedStateHandle ->
-                        PersonListViewModel(di, savedStateHandle, destName)
-                    }
-                )
-            }
-        }
-
-        contentScene("/${ClazzEnrolmentEditViewModel.DEST_NAME}") { backStackEntry ->
-            ClazzEnrolmentEditScreen(
-                appViewModel(
-                    backStackEntry, ClazzEnrolmentEditViewModel::class,
-                ) { di, savedStateHandle ->
-                    ClazzEnrolmentEditViewModel(di, savedStateHandle)
-                }
-            )
-        }
-
-        contentScene("/${ClazzEnrolmentListViewModel.DEST_NAME}") { backStackEntry ->
-            ClazzEnrolmentListScreen(
-                appViewModel(
-                    backStackEntry, ClazzEnrolmentListViewModel::class, ::ClazzEnrolmentListViewModel
-                )
-            )
-        }
-
-        contentScene("/${PersonDetailViewModel.DEST_NAME}") { backStackEntry ->
-            PersonDetailScreen(
-                appViewModel(
-                    backStackEntry, PersonDetailViewModel::class, ::PersonDetailViewModel
-                )
-            )
-        }
-
-        contentScene("/${PersonEditViewModel.DEST_NAME}") { backStackEntry ->
-            PersonEditScreen(
-                appViewModel(
-                    backStackEntry, PersonEditViewModel::class, ::PersonEditViewModel
-                )
-            )
-        }
-
-        contentScene("/${PersonAccountEditViewModel.DEST_NAME}") { backStackEntry ->
-            PersonAccountEditScreen(
-                appViewModel(
-                    backStackEntry, PersonAccountEditViewModel::class, ::PersonAccountEditViewModel
-                )
-            )
-        }
-
-        contentScene("/${AccountListViewModel.DEST_NAME}") { backStackEntry ->
-            AccountListScreen(
-                appViewModel(backStackEntry, AccountListViewModel::class, ::AccountListViewModel)
-            )
-        }
-
-        contentScene("/${CourseDiscussionDetailViewModel.DEST_NAME}") { backStackEntry ->
-            CourseDiscussionDetailScreen(
-                appViewModel(backStackEntry, CourseDiscussionDetailViewModel::class,
-                    ::CourseDiscussionDetailViewModel)
-            )
-        }
-
-        contentScene("/${DiscussionPostDetailViewModel.DEST_NAME}") { backStackEntry ->
-            DiscussionPostDetailScreen(
-                appViewModel(backStackEntry, DiscussionPostDetailViewModel::class,
-                    ::DiscussionPostDetailViewModel)
-            )
-        }
-
-        contentScene("/${DiscussionPostEditViewModel.DEST_NAME}") { backStackEntry ->
-            DiscussionPostEditScreen(
-                appViewModel(backStackEntry, DiscussionPostEditViewModel::class,
-                    ::DiscussionPostEditViewModel)
-            )
-        }
-
-        contentScene("/${HtmlEditViewModel.DEST_NAME}") { backStackEntry ->
-            HtmlEditScreen(
-                appViewModel(backStackEntry, HtmlEditViewModel::class, ::HtmlEditViewModel)
-            )
-        }
-
-        contentScene("/${ClazzAssignmentEditViewModel.DEST_NAME}") { backStackEntry ->
-            ClazzAssignmentEditScreen(
-                appViewModel(backStackEntry, ClazzAssignmentEditViewModel::class,
-                    ::ClazzAssignmentEditViewModel)
-            )
-        }
-
-        contentScene("/${PeerReviewerAllocationEditViewModel.DEST_NAME}") { backStackEntry ->
-            PeerReviewerAllocationEditScreen(
-                appViewModel(backStackEntry, PeerReviewerAllocationEditViewModel::class,
-                    ::PeerReviewerAllocationEditViewModel)
-            )
-        }
-
-        contentScene("/${ClazzAssignmentDetailViewModel.DEST_NAME}") { backStackEntry ->
-            ClazzAssignmentDetailScreen(
-                backStackEntry, ustadNavController, onSetAppUiState, navResultReturner,
-            )
-        }
-
+    val navControllerUriHandler = remember {
+        NavControllerUriHandler(
+            navController = ustadNavController,
+            accountManager = di.direct.instance(),
+            openExternalLinkUseCase = di.direct.instance(),
+            apiUrlConfig = di.direct.instance()
+        )
     }
 
+    CompositionLocalProvider(LocalUriHandler provides navControllerUriHandler) {
+        NavHost(
+            modifier = modifier,
+            navigator = navigator,
+            initialRoute = "/${RedirectViewModel.DEST_NAME}",
+            persistNavState = persistNavState,
+        ) {
 
+            contentScene("/${RedirectViewModel.DEST_NAME}") { backStackEntry ->
+                //No UI for redirect
+                appViewModel(backStackEntry, RedirectViewModel::class) { di, savedStateHandle ->
+                    RedirectViewModel(di, savedStateHandle)
+                }
+            }
+
+            contentScene(
+                route = "/${SiteEnterLinkViewModel.DEST_NAME}"
+            ) { backStackEntry ->
+                SiteEnterLinkScreen(
+                    viewModel = appViewModel(
+                        backStackEntry, SiteEnterLinkViewModel::class
+                    ) { di, savedStateHandle ->
+                        SiteEnterLinkViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+
+            contentScene(
+                route = "/${LoginViewModel.DEST_NAME}"
+            ) { backStackEntry ->
+                LoginScreen(
+                    viewModel = appViewModel(
+                        backStackEntry, LoginViewModel::class,
+                    ) { di, savedStateHandle ->
+                        LoginViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+
+            ContentEntryListViewModel.ALL_DEST_NAMES.forEach { destName ->
+                contentScene("/$destName") { backStackEntry ->
+                    ContentEntryListScreenForViewModel(
+                        viewModel = appViewModel(
+                            backStackEntry, ContentEntryListViewModel::class,
+                        ) { di, savedStateHandle ->
+                            ContentEntryListViewModel(di, savedStateHandle, destName)
+                        }
+                    )
+                }
+            }
+
+            ClazzListViewModel.ALL_DEST_NAMES.forEach { destName ->
+                contentScene("/$destName") { backStackEntry ->
+                    ClazzListScreen(
+                        backStackEntry, ustadNavController, onSetAppUiState, navResultReturner, destName
+                    )
+                }
+            }
+
+            contentScene("/${ClazzEditViewModel.DEST_NAME}") {backStackEntry ->
+                ClazzEditScreen(
+                    appViewModel(
+                        backStackEntry, ClazzEditViewModel::class
+                    ) { di, savedStateHandle ->
+                        ClazzEditViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+
+            contentScene("/${ScheduleEditViewModel.DEST_NAME}") { backStackEntry ->
+                ScheduleEditScreen(
+                    appViewModel(
+                        backStackEntry, ScheduleEditViewModel::class
+                    ) { di, savedStateHandle ->
+                        ScheduleEditViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+
+            contentScene("/${ClazzDetailViewModel.DEST_NAME}") { backStackEntry ->
+                ClazzDetailScreen(
+                    backStackEntry, ustadNavController, onSetAppUiState, navResultReturner,
+                )
+            }
+
+            contentScene("/${CourseBlockEditViewModel.DEST_NAME}") { backStackEntry ->
+                CourseBlockEditScreen(
+                    appViewModel(
+                        backStackEntry, CourseBlockEditViewModel::class
+                    ) { di, savedStateHandle ->
+                        CourseBlockEditViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+
+            contentScene("/${TimeZoneListViewModel.DEST_NAME}") {backStackEntry ->
+                TimeZoneListScreen(
+                    appViewModel(
+                        backStackEntry, TimeZoneListViewModel::class
+                    ) { di, savedStateHandle ->
+                        TimeZoneListViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+
+            PersonListViewModel.ALL_DEST_NAMES.forEach { destName ->
+                contentScene("/$destName") { backStackEntry ->
+                    PersonListScreen(
+                        appViewModel(
+                            backStackEntry, PersonListViewModel::class
+                        ) { di, savedStateHandle ->
+                            PersonListViewModel(di, savedStateHandle, destName)
+                        }
+                    )
+                }
+            }
+
+            contentScene("/${ClazzEnrolmentEditViewModel.DEST_NAME}") { backStackEntry ->
+                ClazzEnrolmentEditScreen(
+                    appViewModel(
+                        backStackEntry, ClazzEnrolmentEditViewModel::class,
+                    ) { di, savedStateHandle ->
+                        ClazzEnrolmentEditViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+
+            contentScene("/${ClazzEnrolmentListViewModel.DEST_NAME}") { backStackEntry ->
+                ClazzEnrolmentListScreen(
+                    appViewModel(
+                        backStackEntry, ClazzEnrolmentListViewModel::class, ::ClazzEnrolmentListViewModel
+                    )
+                )
+            }
+
+            contentScene("/${PersonDetailViewModel.DEST_NAME}") { backStackEntry ->
+                PersonDetailScreen(
+                    appViewModel(
+                        backStackEntry, PersonDetailViewModel::class, ::PersonDetailViewModel
+                    )
+                )
+            }
+
+            contentScene("/${PersonEditViewModel.DEST_NAME}") { backStackEntry ->
+                PersonEditScreen(
+                    appViewModel(
+                        backStackEntry, PersonEditViewModel::class, ::PersonEditViewModel
+                    )
+                )
+            }
+
+            contentScene("/${PersonAccountEditViewModel.DEST_NAME}") { backStackEntry ->
+                PersonAccountEditScreen(
+                    appViewModel(
+                        backStackEntry, PersonAccountEditViewModel::class, ::PersonAccountEditViewModel
+                    )
+                )
+            }
+
+            contentScene("/${AccountListViewModel.DEST_NAME}") { backStackEntry ->
+                AccountListScreen(
+                    appViewModel(backStackEntry, AccountListViewModel::class, ::AccountListViewModel)
+                )
+            }
+
+            contentScene("/${CourseDiscussionDetailViewModel.DEST_NAME}") { backStackEntry ->
+                CourseDiscussionDetailScreen(
+                    appViewModel(backStackEntry, CourseDiscussionDetailViewModel::class,
+                        ::CourseDiscussionDetailViewModel)
+                )
+            }
+
+            contentScene("/${DiscussionPostDetailViewModel.DEST_NAME}") { backStackEntry ->
+                DiscussionPostDetailScreen(
+                    appViewModel(backStackEntry, DiscussionPostDetailViewModel::class,
+                        ::DiscussionPostDetailViewModel)
+                )
+            }
+
+            contentScene("/${DiscussionPostEditViewModel.DEST_NAME}") { backStackEntry ->
+                DiscussionPostEditScreen(
+                    appViewModel(backStackEntry, DiscussionPostEditViewModel::class,
+                        ::DiscussionPostEditViewModel)
+                )
+            }
+
+            contentScene("/${HtmlEditViewModel.DEST_NAME}") { backStackEntry ->
+                HtmlEditScreen(
+                    appViewModel(backStackEntry, HtmlEditViewModel::class, ::HtmlEditViewModel)
+                )
+            }
+
+            contentScene("/${ClazzAssignmentEditViewModel.DEST_NAME}") { backStackEntry ->
+                ClazzAssignmentEditScreen(
+                    appViewModel(backStackEntry, ClazzAssignmentEditViewModel::class,
+                        ::ClazzAssignmentEditViewModel)
+                )
+            }
+
+            contentScene("/${PeerReviewerAllocationEditViewModel.DEST_NAME}") { backStackEntry ->
+                PeerReviewerAllocationEditScreen(
+                    appViewModel(backStackEntry, PeerReviewerAllocationEditViewModel::class,
+                        ::PeerReviewerAllocationEditViewModel)
+                )
+            }
+
+            contentScene("/${ClazzAssignmentDetailViewModel.DEST_NAME}") { backStackEntry ->
+                ClazzAssignmentDetailScreen(
+                    backStackEntry, ustadNavController, onSetAppUiState, navResultReturner,
+                )
+            }
+
+        }
+    }
 }

@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.account.UstadAccountManager.Companion.GUEST_PERSON
+import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase.Companion.LinkTarget
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCaseJvm
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UMFileUtil
@@ -38,7 +39,7 @@ class NavControllerExtTest {
         runBlocking {
             mockNavController.navigateToLink("https://www.google.com/",
                 mockAccountManager, mockOpenLinkUseCase)
-            verify(mockOpenLinkUseCase).invoke("https://www.google.com/")
+            verify(mockOpenLinkUseCase).invoke("https://www.google.com/", LinkTarget.DEFAULT)
         }
     }
 

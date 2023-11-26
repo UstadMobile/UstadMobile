@@ -10,7 +10,6 @@ import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.DiscussionPostAndPosterNames
 import com.ustadmobile.lib.db.entities.DiscussionPost
-import com.ustadmobile.mui.components.ViewModelLinkOpenerContext
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
@@ -154,14 +153,11 @@ val DiscussionPostDetailScreen = FC<Props>{
         DiscussionPostDetailUiState2()
     )
 
-    ViewModelLinkOpenerContext {
-        this.viewModel = viewModel
 
-        DiscussionPostDetailComponent2 {
-            uiState = uiStateVal
-            onReplyChanged = viewModel::onChangeReplyText
-            onClickPostReply = viewModel::onClickPostReply
-        }
+    DiscussionPostDetailComponent2 {
+        uiState = uiStateVal
+        onReplyChanged = viewModel::onChangeReplyText
+        onClickPostReply = viewModel::onClickPostReply
     }
 
 }

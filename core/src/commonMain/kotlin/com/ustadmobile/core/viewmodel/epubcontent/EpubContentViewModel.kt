@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel.epubcontent
 
 import com.ustadmobile.core.contentformats.epub.opf.PackageDocument
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
+import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase.Companion.LinkTarget
 import com.ustadmobile.core.impl.appstate.OverflowItem
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.url.UrlKmp
@@ -211,7 +212,7 @@ class EpubContentViewModel(
                 )
             )
         }else {
-            openExternalLinkUseCase(url.toString())
+            openExternalLinkUseCase(url.toString(), LinkTarget.BLANK)
         }
     }
 

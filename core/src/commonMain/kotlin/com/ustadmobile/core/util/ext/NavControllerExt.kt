@@ -2,6 +2,7 @@ package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
+import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase.Companion.LinkTarget
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.UstadNavController
@@ -24,7 +25,6 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
-
 /**
  * Navigate to a given viewUri
  *
@@ -48,6 +48,10 @@ fun UstadNavController.navigateToViewUri(
  *
  * Note: if we are opening an external link, this must be done synchronously. On Javascript opening
  * tabs is only allowed in response to events.
+ *
+ * @return If the link is internal, then opening the link will be done asynchronously (required to
+ * check existing accounts etc) a Job will be returned. If the link is external, it is opened
+ * synchronously and null will be returned.
  */
 @OptIn(DelicateCoroutinesApi::class)
 fun UstadNavController.navigateToLink(
@@ -58,11 +62,11 @@ fun UstadNavController.navigateToLink(
     forceAccountSelection: Boolean = false,
     userCanSelectServer: Boolean = true,
     accountName: String? = null,
-    scope: CoroutineScope = GlobalScope
+    scope: CoroutineScope = GlobalScope,
+    linkTarget: LinkTarget = LinkTarget.DEFAULT,
 ) : Job? {
     var endpointUrl: String? = null
     var viewUri: String? = null
-
 
 
     when {
@@ -84,19 +88,27 @@ fun UstadNavController.navigateToLink(
         0L
     }
 
-    return if(viewUri == null) {
+    /**
+     * Where the link is not an Ustad link, or the link is an ustad link but the system does not
+     * allow the user to select to connect to another server, then we need to open the link in a
+     * via openExternalLinkUseCase
+     */
+    return if(viewUri == null ||
+        !userCanSelectServer && endpointUrl != null && endpointUrl != accountManager.activeEndpoint.url
+    ) {
         //when the link is not an ustad link, open in browser
-        openExternalLinkUseCase(link)
+        openExternalLinkUseCase(link, linkTarget)
         null
     }else {
         scope.launch {
             when {
                 //When the account has already been selected and the endpoint url is known.
                 accountName != null && endpointUrl != null -> {
-                    val session = accountManager.activeSessionsList { filterUrl -> filterUrl == endpointUrl }
-                        .firstOrNull {
-                            it.person.username == accountName.substringBefore("@")
-                        }
+                    val session = accountManager.activeSessionsList { filterUrl ->
+                        filterUrl == endpointUrl
+                    }.firstOrNull {
+                        it.person.username == accountName.substringBefore("@")
+                    }
                     if(session != null) {
                         accountManager.currentUserSession = session
                         navigateToViewUri(viewUri, goOptions)

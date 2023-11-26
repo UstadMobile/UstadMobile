@@ -334,15 +334,6 @@ abstract class UstadViewModel(
         putFromSavedStateIfPresent(savedStateHandle, key)
     }
 
-    /**
-     * Default handler for when a user clicks a link. Will delegate to the onClickLinkUseCase which
-     * can handle internal/external links
-     */
-    fun onClickLink(link: String) {
-        onClickLinkUseCase.launchLink(link)
-    }
-
-
     companion object {
         /**
          * Saved state key for the current value of the entity itself. This is different to

@@ -73,7 +73,7 @@ it('Student able to open the external link in the reply', () => {
   // Open link on the post board
   cy.get('[data-testid="ForumIcon"]').click()
   cy.contains('Topic 1').click()
-  cy.contains('External link').invoke('removeAttr','target').click()
+  cy.contains('External link').invoke('attr','target', '_self').click()
   cy.url().should('include','https://github.com/UstadMobile/UstadMobile/blob/primary/test-end-to-end/README.md')
 })
 })

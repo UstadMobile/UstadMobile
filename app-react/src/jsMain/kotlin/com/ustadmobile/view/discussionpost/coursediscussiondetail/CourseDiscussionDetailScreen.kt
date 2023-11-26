@@ -124,12 +124,9 @@ val CourseDiscussionDetailScreen = FC<Props> {
     val uiStateVal by viewModel.uiState.collectAsState(CourseDiscussionDetailUiState())
     val appUiState by viewModel.appUiState.collectAsState(AppUiState())
 
-    ViewModelLinkOpenerContext {
-        this.viewModel = viewModel
-        CourseDiscussionDetailComponent {
-            uiState = uiStateVal
-            onClickPost = viewModel::onClickPost
-        }
+    CourseDiscussionDetailComponent {
+        uiState = uiStateVal
+        onClickPost = viewModel::onClickPost
     }
 
     UstadFab {
