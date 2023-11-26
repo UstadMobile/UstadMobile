@@ -110,7 +110,7 @@ class ClazzAssignmentEditViewModel(
 
     private val snackDisaptcher: SnackBarDispatcher by instance()
 
-    private val clazzUid = savedStateHandle[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
+    private val clazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0
 
     init {
         _appUiState.update { prev ->
@@ -326,7 +326,12 @@ class ClazzAssignmentEditViewModel(
                         prev.courseBlockEditUiState.caGracePeriodError
                     }else {
                         null
-                    }
+                    },
+                    caTitleError = updateErrorMessageOnChange(
+                        prev.courseBlockEditUiState.courseBlock?.cbTitle,
+                        courseBlock.cbTitle,
+                        prev.courseBlockEditUiState.caTitleError
+                    )
                 )
             )
         }
@@ -344,7 +349,8 @@ class ClazzAssignmentEditViewModel(
             courseBlockEditUiState.caDeadlineError != null ||
             courseBlockEditUiState.caGracePeriodError != null ||
             reviewerCountError != null ||
-            sizeLimitError != null
+            sizeLimitError != null ||
+            courseBlockEditUiState.hasErrors
     }
 
 
@@ -362,7 +368,7 @@ class ClazzAssignmentEditViewModel(
             serializer = String.serializer(),
             args = mapOf(
                 CourseGroupSetListViewModel.ARG_SHOW_INDIVIDUAL_OPTION to true.toString(),
-                UstadView.ARG_CLAZZUID to (_uiState.value.entity?.assignment?.caClazzUid ?: 0).toString()
+                ARG_CLAZZUID to (_uiState.value.entity?.assignment?.caClazzUid ?: 0).toString()
             ),
         )
     }
@@ -446,7 +452,18 @@ class ClazzAssignmentEditViewModel(
             if(assignment.caSizeLimit !in 5..100){
                 _uiState.update {   prev ->
                     prev.copy(
-                        sizeLimitError = systemImpl.getString(MR.strings.size_limit_error)
+                        sizeLimitError = systemImpl.formatString(MR.strings.size_limit_error,
+                            ATTACHMENT_LIMIT_MIN.toString(), ATTACHMENT_LIMIT_MAX.toString())
+                    )
+                }
+            }
+
+            if(courseBlock.cbTitle.isNullOrBlank()) {
+                _uiState.update { prev ->
+                    prev.copy(
+                        courseBlockEditUiState = prev.courseBlockEditUiState.copy(
+                            caTitleError = systemImpl.getString(MR.strings.required)
+                        )
                     )
                 }
             }
@@ -473,22 +490,17 @@ class ClazzAssignmentEditViewModel(
                 }
             }
 
-            _uiState.update { prev ->
-                prev.copyWithFieldsEnabledSet(fieldsEnabled = true)
-            }
+            val errorSnackVal = errorSnack
+            if(_uiState.value.hasErrors() || errorSnackVal != null) {
+                errorSnackVal?.also {
+                    snackDisaptcher.showSnackBar(Snack(it))
+                }
 
-            if(errorSnack != null) {
-                snackDisaptcher.showSnackBar(Snack(errorSnack))
-                return@launch
-            }
-
-            if(_uiState.value.hasErrors()) {
                 loadingState = LoadingUiState.NOT_LOADING
                 _uiState.update { prev ->
-                    prev.copy(
-                        fieldsEnabled = true
-                    )
+                    prev.copyWithFieldsEnabledSet(fieldsEnabled = true)
                 }
+                return@launch
             }
 
             if(assignment.caMarkingType == ClazzAssignment.MARKED_BY_PEERS &&

@@ -124,32 +124,29 @@ fun ClazzAssignmentEditScreen(
                 },
             )
 
-            UstadInputFieldLayout (
-                errorText = uiState.sizeLimitError
-                    ?.replace("%1\$s", ClazzAssignmentEditViewModel.ATTACHMENT_LIMIT_MIN.toString())
-                    ?.replace("%2\$s", ClazzAssignmentEditViewModel.ATTACHMENT_LIMIT_MAX.toString()),
-            ){
-                UstadNumberTextField(
-                    modifier = Modifier
-                        .defaultItemPadding()
-                        .fillMaxWidth()
-                        .testTag("caSizeLimit"),
-                    value = (uiState.entity?.assignment?.caSizeLimit ?: 0).toFloat(),
-                    label = { Text(stringResource(MR.strings.size_limit)) },
-                    enabled = uiState.fieldsEnabled,
-                    isError = uiState.sizeLimitError != null,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                    ),
-                    onValueChange = {
-                        onChangeAssignment(
-                            uiState.entity?.assignment?.shallowCopy {
-                                caSizeLimit = it.toInt()
-                            }
-                        )
-                    },
-                )
-            }
+            UstadNumberTextField(
+                modifier = Modifier
+                    .defaultItemPadding()
+                    .fillMaxWidth()
+                    .testTag("caSizeLimit"),
+                value = (uiState.entity?.assignment?.caSizeLimit ?: 0).toFloat(),
+                label = { Text(stringResource(MR.strings.size_limit)) },
+                enabled = uiState.fieldsEnabled,
+                isError = uiState.sizeLimitError != null,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                ),
+                supportingText = uiState.sizeLimitError?.let {
+                    { Text(it) }
+                },
+                onValueChange = {
+                    onChangeAssignment(
+                        uiState.entity?.assignment?.shallowCopy {
+                            caSizeLimit = it.toInt()
+                        }
+                    )
+                },
+            )
 
             UstadNumberTextField(
                 modifier = Modifier

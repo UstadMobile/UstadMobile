@@ -65,6 +65,10 @@ data class CourseBlockEditUiState(
         get() = courseBlock?.cbType == CourseBlock.BLOCK_ASSIGNMENT_TYPE ||
             courseBlock?.cbType == CourseBlock.BLOCK_CONTENT_TYPE
 
+    val hasErrors: Boolean
+        get() = caTitleError != null || caDeadlineError != null || caGracePeriodError != null ||
+                caMaxPointsError != null
+
 }
 
 class CourseBlockEditViewModel(
@@ -139,7 +143,11 @@ class CourseBlockEditViewModel(
 
     fun onEntityChanged(courseBlock: CourseBlock?) {
         _uiState.update { prev ->
-            prev.copy(courseBlock = courseBlock)
+            prev.copy(
+                courseBlock = courseBlock,
+                caTitleError = updateErrorMessageOnChange(prev.courseBlock?.cbTitle,
+                    courseBlock?.cbTitle, prev.caTitleError)
+            )
         }
 
         scheduleEntityCommitToSavedState(
@@ -159,6 +167,18 @@ class CourseBlockEditViewModel(
     }
 
     fun onClickSave() {
+        val courseBlockVal = _uiState.value.courseBlock ?: return
+        if(courseBlockVal.cbTitle.isNullOrBlank()) {
+            _uiState.update { prev ->
+                prev.copy(
+                    caTitleError = systemImpl.getString(MR.strings.required)
+                )
+            }
+        }
+
+        if(_uiState.value.hasErrors)
+            return
+
         finishWithResult(_uiState.value.courseBlock)
     }
 
