@@ -6,13 +6,11 @@ End-to-end tests that start a blank new server/app and test functionality end-to
 
 ## Tests
 
-### 1 : Content 
+### 1 : Content Library
 
-1.1 Admin can add H5P, video, and EPUB both from the device and by using a link. In case of adding 
-from a link, then test downloading (can be using the same device) after import finishes. In case of 
-adding from device, test downloading from another device.
+1.1 Admin can add/edit/remove H5P, video (MP4 and other formats as supported by underlying platform, with standard subtitle file support), PDF, and EPUB both from the device and by using a link. In case of adding from a link, then test downloading (can be using the same device) after import finishes. In case of adding from device, test downloading from another device.
 
-1.2 Admin can hide content. After hiding on admin device, the content is hidden on other device.
+1.2 Admin can hide/unhide content. After hiding on admin device, the content is hidden on other device.
 
 1.3 Admin can move content. After moving, content is shown as moved on other device. 
 
@@ -20,15 +18,15 @@ adding from device, test downloading from another device.
 
 1.5 Content download can be canceled. After cancellation, the download stops and it can be downloaded again. (Android only)
 
-1.6 If a download is started on WiFi and WiFi is stopped midway, the download will stop and then resume when WiFi is resumed. (Android only)
+1.6 If a download is started on WiFi and WiFi is stopped midway, the download will pause and then resume when WiFi is resumed. (Android only)
 
 1.7 Content that is set to not publicly available is not visible for guest users, but is visible for logged in users.
 
-1.8 H5P and video content can be automatically compressed using high, medium, and low quality presets. 
+1.8 H5P and video content can be automatically compressed using high, medium, and low quality presets (up to 80% compression)
 
 ### 2: Course creation, enrolment, attendance, progress
 
-2.1 Admin can create a new course, add a new teacher, and create an account for that teacher.
+2.1 Admin can create a new course, add/remove a new teacher, and create an account for that teacher.
 
 2.2 Teacher can login. Students can join class using class code or link. **Failing as of 5/Jan/23**
 
@@ -40,9 +38,9 @@ adding from device, test downloading from another device.
 
 3.1 Admin or teacher can edit the course. Other users cannot edit
 
-3.2 Admin or teacher can add module and text blocks. Blocks can be reordered and hidden, indented, unindented
+3.2 Admin or teacher can add module and text blocks. Blocks can be reordered and hidden, indented, unindented, edited, deleted
 
-3.3 Admin or teacher can add a content block and link existing content
+3.3 Admin or teacher can add a content block and link existing content. Blocks can be edited, deleted
 
 3.4 Admin or teacher can add a content block and upload new content via link
 
@@ -57,9 +55,9 @@ adding from device, test downloading from another device.
 4.1 Teacher can create assignment (set to allow one submission per student as per default), student 
     can submit assignment (text and attachment), teacher can view submission and grade it. After 
     submitting their work, the submit button is no longer visible. Student will see their mark when 
-    it is graded.
+    it is graded. Assignments can be edited, deleted. **Note: Users may expect to be able to resubmit an assigment provided it is within deadlines. ** 
 
-4.2 Teachers and students can add course comments which are visible for all who can view the assignment.
+4.2 Teachers and students can add course comments which are visible for all who can view the assignment. Course comments can be edited, deleted by owners/admin accounts
 
 4.3 Teachers and students can submit and view private comments. Student can submit a private comment, teacher can see the private comment, and reply to it. 
 
@@ -88,9 +86,9 @@ adding from device, test downloading from another device.
 ### 5	Discussion board
 5.1 Teacher can add discussion board and topics to course
 
-5.2 Teacher can edit discussion board and topics
+5.2 Teacher can edit/remove discussion board and topics
 
-5.3 All users on course can post on discussion board, see posts from other users. Each topic and post shows last active date and number of replies.
+5.3 All users on course can post on discussion board, see posts from other users. Each topic and post shows last active date and number of replies. Posts should be editable/deletable by owners/admin accounts.
 
 5.4 Users can include a link from within the app (e.g. to a course or content piece) in their post. Clicking the link opens the item directly.
 
