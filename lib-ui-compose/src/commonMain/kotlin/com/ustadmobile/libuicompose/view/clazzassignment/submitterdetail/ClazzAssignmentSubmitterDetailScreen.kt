@@ -29,6 +29,13 @@ import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmiss
 import com.ustadmobile.libuicompose.view.clazzassignment.UstadCourseAssignmentMarkListItem
 import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
+import app.cash.paging.Pager
+import app.cash.paging.PagingConfig
+import com.ustadmobile.libuicompose.components.ustadPagedItems
+import androidx.compose.runtime.remember
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.ustadmobile.lib.db.entities.Comments
+import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
 
 @Composable
 fun ClazzAssignmentDetailStudentProgressScreenForViewModel(
@@ -73,15 +80,14 @@ fun ClazzAssignmentDetailStudentProgressScreen(
     onChangeDraftMark: (CourseAssignmentMark?) -> Unit = {},
 ){
 
-    // TODO error
-//    val privateCommentsPager = remember(uiState.privateCommentsList) {
-//        Pager(
-//            pagingSourceFactory = uiState.privateCommentsList,
-//            config = PagingConfig(pageSize = 50, enablePlaceholders = true)
-//        )
-//    }
-//
-//    val privateCommentsLazyPagingItems = privateCommentsPager.flow.collectAsLazyPagingItems()
+    val privateCommentsPager = remember(uiState.privateCommentsList) {
+        Pager(
+            pagingSourceFactory = uiState.privateCommentsList,
+            config = PagingConfig(pageSize = 50, enablePlaceholders = true)
+        )
+    }
+
+    val privateCommentsLazyPagingItems = privateCommentsPager.flow.collectAsLazyPagingItems()
 
 
     LazyColumn (
@@ -204,12 +210,12 @@ fun ClazzAssignmentDetailStudentProgressScreen(
             )
         }
 
-//        items(
-//            items = privateCommentsLazyPagingItems,
-//            key = { Pair(Comments.TABLE_ID, it.comment.commentsUid) }
-//        ) { comment ->
-//            CommentListItem(commentAndName = comment)
-//        }
+        ustadPagedItems(
+            pagingItems = privateCommentsLazyPagingItems,
+            key = { Pair(Comments.TABLE_ID, it.comment.commentsUid) }
+        ) { comment ->
+            CommentListItem(commentAndName = comment)
+        }
 
         UstadListSpacerItem()
     }

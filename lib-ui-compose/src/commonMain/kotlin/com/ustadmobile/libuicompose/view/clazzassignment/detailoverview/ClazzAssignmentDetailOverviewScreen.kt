@@ -36,12 +36,17 @@ import com.ustadmobile.libuicompose.view.clazzassignment.UstadAssignmentSubmissi
 import com.ustadmobile.libuicompose.view.clazzassignment.UstadCourseAssignmentMarkListItem
 import com.ustadmobile.libuicompose.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewConstants.SUBMISSION_POLICY_MAP
 import dev.icerock.moko.resources.compose.stringResource
+import app.cash.paging.Pager
+import app.cash.paging.PagingConfig
+import com.ustadmobile.libuicompose.components.ustadPagedItems
+import androidx.compose.runtime.remember
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
 
 @Composable
 fun ClazzAssignmentDetailOverviewScreenForViewModel(viewModel: ClazzAssignmentDetailOverviewViewModel) {
     val uiState by viewModel.uiState.collectAsState(initial = ClazzAssignmentDetailOverviewUiState())
 
-    //  TODO error
 //    val localContext = LocalContext.current
     val newCourseCommentHint = stringResource(MR.strings.add_class_comment)
     val newPrivateCommentHint = stringResource(MR.strings.add_private_comment)
@@ -89,23 +94,21 @@ fun ClazzAssignmentDetailOverviewScreen(
     onClickSubmitSubmission: () -> Unit = { }
 ){
 
-    //  TODO error
-//    val privateCommentsPager = remember(uiState.privateComments) {
-//        Pager(
-//            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
-//            pagingSourceFactory = uiState.privateComments
-//        )
-//    }
-//    val privateCommentsLazyPagingItems = privateCommentsPager.flow.collectAsLazyPagingItems()
+    val privateCommentsPager = remember(uiState.privateComments) {
+        Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
+            pagingSourceFactory = uiState.privateComments
+        )
+    }
+    val privateCommentsLazyPagingItems = privateCommentsPager.flow.collectAsLazyPagingItems()
 
-    //  TODO error
-//    val courseCommentsPager = remember(uiState.courseComments) {
-//        Pager(
-//            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
-//            pagingSourceFactory = uiState.courseComments
-//        )
-//    }
-//    val courseCommentsLazyPagingItems = courseCommentsPager.flow.collectAsLazyPagingItems()
+    val courseCommentsPager = remember(uiState.courseComments) {
+        Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
+            pagingSourceFactory = uiState.courseComments
+        )
+    }
+    val courseCommentsLazyPagingItems = courseCommentsPager.flow.collectAsLazyPagingItems()
 
     val formattedDateTime = rememberFormattedDateTime(
         timeInMillis = uiState.courseBlock?.cbDeadlineDate ?: 0,
@@ -306,12 +309,12 @@ fun ClazzAssignmentDetailOverviewScreen(
             )
         }
 
-//        items(
-//            items = courseCommentsLazyPagingItems,
-//            key = { Pair(4, it.comment.commentsUid) }
-//        ){ comment ->
-//            CommentListItem(commentAndName = comment)
-//        }
+        ustadPagedItems(
+            pagingItems = courseCommentsLazyPagingItems,
+            key = { Pair(4, it.comment.commentsUid) }
+        ){
+            CommentListItem(commentAndName = it)
+        }
 
         if(uiState.activeUserIsSubmitter) {
             item {
@@ -329,12 +332,12 @@ fun ClazzAssignmentDetailOverviewScreen(
                 )
             }
 
-//            items(
-//                items = privateCommentsLazyPagingItems,
-//                key = { Pair(5, it.comment.commentsUid) }
-//            ){ comment ->
-//                CommentListItem(commentAndName = comment)
-//            }
+            ustadPagedItems(
+                pagingItems = privateCommentsLazyPagingItems,
+                key = { Pair(5, it.comment.commentsUid) }
+            ){ comment ->
+                CommentListItem(commentAndName = comment)
+            }
         }
 
         //The collapse scrolling policy means we have to add space to ensure the user can scroll to

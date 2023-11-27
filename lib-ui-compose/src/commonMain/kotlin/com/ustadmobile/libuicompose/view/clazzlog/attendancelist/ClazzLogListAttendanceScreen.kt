@@ -26,6 +26,11 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import dev.icerock.moko.resources.compose.colorResource
 import dev.icerock.moko.resources.compose.stringResource
+import app.cash.paging.Pager
+import app.cash.paging.PagingConfig
+import com.ustadmobile.libuicompose.components.ustadPagedItems
+import androidx.compose.runtime.remember
+import androidx.paging.compose.collectAsLazyPagingItems
 
 private val DECIMAL_FORMAT = DecimalFormat("###,###,##0")
 
@@ -60,7 +65,7 @@ private val DECIMAL_FORMAT = DecimalFormat("###,###,##0")
 //}
 
 @Composable
-fun ClazzLogListAttendanceScreenForViewModel(
+fun ClazzLogListAttendanceScreen(
     viewModel: ClazzLogListAttendanceViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState(ClazzLogListAttendanceUiState())
@@ -78,14 +83,14 @@ fun ClazzLogListAttendanceScreen(
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
 ) {
 
-//    val pager = remember(uiState.clazzLogsList) {
-//        Pager(
-//            pagingSourceFactory = uiState.clazzLogsList,
-//            config = PagingConfig(pageSize = 50)
-//        )
-//    }
-//
-//    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+    val pager = remember(uiState.clazzLogsList) {
+        Pager(
+            pagingSourceFactory = uiState.clazzLogsList,
+            config = PagingConfig(pageSize = 50)
+        )
+    }
+
+    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -150,16 +155,16 @@ fun ClazzLogListAttendanceScreen(
             )
         }
 
-//        items(
-//            items = lazyPagingItems,
-//            key = { clazzLog -> clazzLog.clazzLogUid }
-//        ){ clazzLog ->
-//            ClazzLogListItem(
-//                clazzLog = clazzLog,
-//                timeZoneId = uiState.timeZoneId,
-//                onClick = onClickClazz
-//            )
-//        }
+        ustadPagedItems(
+            pagingItems = lazyPagingItems,
+            key = { clazzLog -> clazzLog.clazzLogUid }
+        ){ clazzLog ->
+            ClazzLogListItem(
+                clazzLog = clazzLog,
+                timeZoneId = uiState.timeZoneId,
+                onClick = onClickClazz
+            )
+        }
     }
 }
 

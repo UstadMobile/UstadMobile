@@ -21,6 +21,11 @@ import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.libuicompose.components.UstadAddListItem
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import app.cash.paging.Pager
+import app.cash.paging.PagingConfig
+import com.ustadmobile.libuicompose.components.ustadPagedItems
+import androidx.compose.runtime.remember
+import androidx.paging.compose.collectAsLazyPagingItems
 
 @Suppress("unused") // Pending
 @Composable
@@ -57,14 +62,14 @@ fun CourseGroupSetListScreen(
 ) {
 
     // TODO error
-//    val pager = remember {
-//        Pager(
-//            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
-//            pagingSourceFactory = uiState.courseGroupSets,
-//        )
-//    }
-//
-//    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+    val pager = remember {
+        Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
+            pagingSourceFactory = uiState.courseGroupSets,
+        )
+    }
+
+    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
     LazyColumn(
         modifier = Modifier

@@ -23,6 +23,12 @@ import com.ustadmobile.libuicompose.util.compose.courseTerminologyEntryResource
 import com.ustadmobile.libuicompose.util.compose.rememberCourseTerminologyEntries
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import dev.icerock.moko.resources.compose.stringResource
+import app.cash.paging.Pager
+import app.cash.paging.PagingConfig
+import com.ustadmobile.libuicompose.components.ustadPagedItems
+import androidx.compose.runtime.remember
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
 
 
 @Composable
@@ -55,15 +61,15 @@ fun ClazzAssignmentDetailSubmissionsTabScreen(
     onClickPerson: (AssignmentSubmitterSummary) -> Unit = {},
     onClickSort: () -> Unit = {},
 ) {
-    // TODO error
-//    val pager = remember(uiState.assignmentSubmitterList) {
-//        Pager(
-//            pagingSourceFactory = uiState.assignmentSubmitterList,
-//            config = PagingConfig(pageSize = 20, enablePlaceholders = true)
-//        )
-//    }
 
-//    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+    val pager = remember(uiState.assignmentSubmitterList) {
+        Pager(
+            pagingSourceFactory = uiState.assignmentSubmitterList,
+            config = PagingConfig(pageSize = 20, enablePlaceholders = true)
+        )
+    }
+
+    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
     val courseTerminologyEntries = rememberCourseTerminologyEntries(
         courseTerminology = uiState.courseTerminology
@@ -114,12 +120,12 @@ fun ClazzAssignmentDetailSubmissionsTabScreen(
             )
         }
 
-//        items(
-//            items = lazyPagingItems,
-//            key = { person -> person.submitterUid }
-//        ){ person ->
-//            SubmitterSummaryListItem(person, onClickPerson)
-//        }
+        ustadPagedItems(
+            pagingItems = lazyPagingItems,
+            key = { person -> person.submitterUid }
+        ){ person ->
+            SubmitterSummaryListItem(person, onClickPerson)
+        }
 
         UstadListSpacerItem()
 

@@ -160,11 +160,9 @@ fun UstadCourseBlockEdit(
 
         if(uiState.deadlineVisible) {
             UstadInputFieldLayout(
-                //  TODO error
                 modifier = Modifier.defaultItemPadding(),
                 errorText = uiState.caDeadlineError
             ) {
-                //  TODO error
                 UstadDateTimeField(
                     modifier = Modifier.testTag("cbDeadlineDate"),
                     value = uiState.courseBlock?.cbDeadlineDate ?: 0,
