@@ -63,77 +63,60 @@ fun PersonEditScreen(
             modifier = Modifier.size(60.dp),
         )
 
-        UstadInputFieldLayout(
-            modifier = Modifier.padding(vertical = 8.dp)
+        OutlinedTextField(
+            modifier = Modifier.testTag("firstNames").fillMaxWidth()
+                .padding(vertical = 8.dp),
+            value = uiState.person?.firstNames ?: "",
+            label = { Text(stringResource(MR.strings.first_names)+"*") },
+            isError = uiState.firstNameError != null,
+            enabled = uiState.fieldsEnabled,
+            singleLine = true,
+            onValueChange = {
+                onPersonChanged(uiState.person?.shallowCopy{
+                    firstNames = it
+                })
+            },
+            supportingText = {
+                Text(uiState.firstNameError ?: stringResource(MR.strings.required))
+            }
+        )
+
+        OutlinedTextField(
+            modifier = Modifier.testTag("lastName").fillMaxWidth()
+                .padding(vertical = 8.dp),
+            value = uiState.person?.lastName ?: "",
+            label = { Text(stringResource(MR.strings.last_name) +"*") },
+            isError = uiState.lastNameError != null,
+            enabled = uiState.fieldsEnabled,
+            singleLine = true,
+            onValueChange = {
+                onPersonChanged(uiState.person?.shallowCopy{
+                    lastName = it
+                })
+            },
+            supportingText = {
+                Text(uiState.lastNameError ?: stringResource(MR.strings.required))
+            }
+        )
+
+        UstadMessageIdOptionExposedDropDownMenuField(
+            value = uiState.person?.gender ?: 0,
+            modifier = Modifier
+                .testTag("gender")
                 .fillMaxWidth(),
-            errorText = uiState.firstNameError,
-            captionIfNoError = {
-                Text(stringResource(MR.strings.required))
+            label = stringResource(MR.strings.gender_literal) + "*",
+            options = PersonConstants.GENDER_MESSAGE_IDS,
+            onOptionSelected = {
+                onPersonChanged(uiState.person?.shallowCopy{
+                    gender = it.value
+                })
+            },
+            isError = uiState.genderError != null,
+            enabled = uiState.fieldsEnabled,
+            supportingText = {
+                Text(uiState.genderError ?: stringResource(MR.strings.required))
             }
-        ) {
-            OutlinedTextField(
-                modifier = Modifier.testTag("firstNames").fillMaxWidth(),
-                value = uiState.person?.firstNames ?: "",
-                label = { Text(stringResource(MR.strings.first_names)) },
-                isError = uiState.firstNameError != null,
-                enabled = uiState.fieldsEnabled,
-                singleLine = true,
-                onValueChange = {
-                    onPersonChanged(uiState.person?.shallowCopy{
-                        firstNames = it
-                    })
-                }
-            )
-        }
-
-        UstadInputFieldLayout(
-            modifier = Modifier.padding(vertical = 8.dp)
-                .fillMaxWidth(),
-            errorText = uiState.lastNameError,
-            captionIfNoError = {
-                Text(stringResource(MR.strings.required))
-            }
-        ) {
-            OutlinedTextField(
-                modifier = Modifier.testTag("lastName").fillMaxWidth(),
-                value = uiState.person?.lastName ?: "",
-                label = { Text(stringResource(MR.strings.last_name)) },
-                isError = uiState.lastNameError != null,
-                enabled = uiState.fieldsEnabled,
-                singleLine = true,
-                onValueChange = {
-                    onPersonChanged(uiState.person?.shallowCopy{
-                        lastName = it
-                    })
-                }
-            )
-        }
-
-
-        UstadInputFieldLayout(
-            modifier = Modifier.fillMaxWidth(),
-            errorText = uiState.genderError,
-            captionIfNoError = {
-                Text(stringResource(MR.strings.required))
-            }
-        ) {
-            UstadMessageIdOptionExposedDropDownMenuField(
-                value = uiState.person?.gender ?: 0,
-                modifier = Modifier
-                    .testTag("gender")
-                    .fillMaxWidth(),
-                label = stringResource(MR.strings.gender_literal),
-                options = PersonConstants.GENDER_MESSAGE_IDS,
-                onOptionSelected = {
-                    onPersonChanged(uiState.person?.shallowCopy{
-                        gender = it.value
-                    })
-                },
-                isError = uiState.genderError != null,
-                enabled = uiState.fieldsEnabled,
-            )
-        }
-
+        )
 
         if (uiState.parentalEmailVisible){
             UstadInputFieldLayout(

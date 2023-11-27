@@ -170,7 +170,15 @@ class PersonEditViewModel(
 
     fun onEntityChanged(entity: PersonWithAccount?) {
         _uiState.update { prev ->
-            prev.copy(person = entity)
+            prev.copy(
+                person = entity,
+                genderError = updateErrorMessageOnChange(prev.person?.gender,
+                    entity?.gender, prev.genderError),
+                firstNameError = updateErrorMessageOnChange(prev.person?.firstNames,
+                    entity?.firstNames, prev.firstNameError),
+                lastNameError = updateErrorMessageOnChange(prev.person?.lastName,
+                    entity?.lastName, prev.lastNameError)
+            )
         }
 
         scheduleEntityCommitToSavedState(entity, serializer = PersonWithAccount.serializer(),
