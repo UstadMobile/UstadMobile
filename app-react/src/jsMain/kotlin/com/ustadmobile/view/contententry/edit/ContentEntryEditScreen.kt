@@ -20,6 +20,7 @@ import com.ustadmobile.view.components.UstadSwitchField
 import mui.material.Button
 import mui.material.ButtonVariant
 import mui.material.Stack
+import mui.material.TextField
 import mui.material.Typography
 import mui.system.responsive
 import react.FC
@@ -93,7 +94,7 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
             }
 
             if(props.uiState.contentEntryTitleVisible) {
-                UstadTextField {
+                TextField {
                     value = props.uiState.entity?.entry?.title ?: ""
                     id = "content_title"
                     label = ReactNode(strings[MR.strings.title]  + "*")

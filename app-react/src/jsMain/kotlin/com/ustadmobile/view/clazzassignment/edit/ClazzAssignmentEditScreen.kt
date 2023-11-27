@@ -119,6 +119,8 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     numValue = (props.uiState.entity?.assignment?.caSizeLimit ?: 0).toFloat()
                     label = ReactNode(strings[MR.strings.size_limit])
                     disabled = !props.uiState.fieldsEnabled
+                    error = props.uiState.sizeLimitError != null
+                    helperText = props.uiState.sizeLimitError?.let { ReactNode(it) }
                     onChange = {
                         props.onAssignmentChanged(
                             props.uiState.entity?.assignment?.shallowCopy {

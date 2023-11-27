@@ -29,6 +29,7 @@ class SubmitAssignmentUseCaseTest {
         val db: UmAppDatabase,
         val systemImpl: UstadMobileSystemImpl,
         val assignment: ClazzAssignment,
+        @Suppress("unused")
         val courseBlock: CourseBlock,
         val person: Person,
     )
@@ -84,7 +85,7 @@ class SubmitAssignmentUseCaseTest {
     @Test
     fun givenValidAssignment_whenNoSubmissionMadeYet_thenWillSaveSubmission() {
         testSubmitAssignment {
-            val submitUseCase = SubmitAssignmentUseCase()
+            val submitUseCase = SubmitAssignmentUseCase(systemImpl = systemImpl)
             val response = "I can has cheezburger"
             submitUseCase(
                 repo = db,
@@ -118,7 +119,7 @@ class SubmitAssignmentUseCaseTest {
                 casText = "Burger!"
             })
 
-            val submitUseCase = SubmitAssignmentUseCase()
+            val submitUseCase = SubmitAssignmentUseCase(systemImpl = systemImpl)
             val response = "I can has cheezburger"
 
             submitUseCase(
@@ -139,7 +140,7 @@ class SubmitAssignmentUseCaseTest {
         testSubmitAssignment(
             accountPersonUidRole = 0
         ) {
-            val submitUseCase = SubmitAssignmentUseCase()
+            val submitUseCase = SubmitAssignmentUseCase(systemImpl = systemImpl)
 
             submitUseCase(
                 repo = db,
@@ -166,7 +167,7 @@ class SubmitAssignmentUseCaseTest {
                 casText = "Burger!"
             })
 
-            val submitUseCase = SubmitAssignmentUseCase()
+            val submitUseCase = SubmitAssignmentUseCase(systemImpl = systemImpl)
             val response = "I can has cheezburger"
 
             submitUseCase(
@@ -196,7 +197,7 @@ class SubmitAssignmentUseCaseTest {
                 cbGracePeriodDate = systemTimeInMillis() - 1000
             }
         ) {
-            val submitUseCase = SubmitAssignmentUseCase()
+            val submitUseCase = SubmitAssignmentUseCase(systemImpl = systemImpl)
             val response = "I can still has cheezburger"
             submitUseCase(
                 repo = db,
@@ -218,7 +219,7 @@ class SubmitAssignmentUseCaseTest {
                 caTextLimit = 5
             }
         ) {
-            val submitUseCase = SubmitAssignmentUseCase()
+            val submitUseCase = SubmitAssignmentUseCase(systemImpl = systemImpl)
             val response = "I can still has cheezburger, right?"
             submitUseCase(
                 repo = db,

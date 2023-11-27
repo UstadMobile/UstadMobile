@@ -65,6 +65,10 @@ data class CourseBlockEditUiState(
         get() = courseBlock?.cbType == CourseBlock.BLOCK_ASSIGNMENT_TYPE ||
             courseBlock?.cbType == CourseBlock.BLOCK_CONTENT_TYPE
 
+    val hasErrors: Boolean
+        get() = caTitleError != null || caDeadlineError != null || caGracePeriodError != null ||
+                caMaxPointsError != null
+
 }
 
 class CourseBlockEditViewModel(
@@ -127,7 +131,7 @@ class CourseBlockEditViewModel(
             }
 
             launch {
-                resultReturner.filteredResultFlowForKey(RESULT_KEY_HTML_DESC).collect { result ->
+                resultReturner.filteredResultFlowForKey(KEY_HTML_DESCRIPTION).collect { result ->
                     val descriptionHtml = result.result as? String ?: return@collect
                     onEntityChanged(_uiState.value.courseBlock?.shallowCopy {
                         cbDescription = descriptionHtml
@@ -139,7 +143,11 @@ class CourseBlockEditViewModel(
 
     fun onEntityChanged(courseBlock: CourseBlock?) {
         _uiState.update { prev ->
-            prev.copy(courseBlock = courseBlock)
+            prev.copy(
+                courseBlock = courseBlock,
+                caTitleError = updateErrorMessageOnChange(prev.courseBlock?.cbTitle,
+                    courseBlock?.cbTitle, prev.caTitleError)
+            )
         }
 
         scheduleEntityCommitToSavedState(
@@ -153,11 +161,24 @@ class CourseBlockEditViewModel(
     fun onClickEditDescription() {
         navigateToEditHtml(
             currentValue = _uiState.value.courseBlock?.cbDescription,
-            resultKey = RESULT_KEY_HTML_DESC
+            resultKey = KEY_HTML_DESCRIPTION,
+            title = systemImpl.getString(MR.strings.description),
         )
     }
 
     fun onClickSave() {
+        val courseBlockVal = _uiState.value.courseBlock ?: return
+        if(courseBlockVal.cbTitle.isNullOrBlank()) {
+            _uiState.update { prev ->
+                prev.copy(
+                    caTitleError = systemImpl.getString(MR.strings.required)
+                )
+            }
+        }
+
+        if(_uiState.value.hasErrors)
+            return
+
         finishWithResult(_uiState.value.courseBlock)
     }
 
@@ -167,6 +188,12 @@ class CourseBlockEditViewModel(
         const val DEST_NAME = "CourseBlockEdit"
 
         const val ARG_BLOCK_TYPE = "blockType"
+
+        /**
+         * If this key is the same as used in ClazzEdit, then editing the value for CourseBlock
+         * results in it being picked up by ClazzEdit as well as CourseBlock
+         */
+        const val KEY_HTML_DESCRIPTION = "courseBlockDesc"
 
 
     }

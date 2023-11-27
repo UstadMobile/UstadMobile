@@ -58,6 +58,8 @@ data class ClazzEditUiState(
 
     val clazzEndDateError: String? = null,
 
+    val clazzNameError: String? = null,
+
     val clazzSchedules: List<Schedule> = emptyList(),
 
     val courseBlockList: List<CourseBlockAndEditEntities> = emptyList(),
@@ -316,7 +318,7 @@ class ClazzEditViewModel(
             }
 
             launch {
-                resultReturner.filteredResultFlowForKey(RESULT_KEY_HTML_DESC).collect { result ->
+                resultReturner.filteredResultFlowForKey(RESULT_KEY_DESCRIPTION).collect { result ->
                     val newDescription = result.result as? String ?: return@collect
                     onEntityChanged(_uiState.value.entity?.shallowCopy {
                         clazzDesc = newDescription
@@ -364,7 +366,8 @@ class ClazzEditViewModel(
                 clazzEndDateError = updateErrorMessageOnChange(prev.entity?.clazzEndTime,
                     entity?.clazzEndTime, prev.clazzEndDateError),
                 clazzStartDateError = updateErrorMessageOnChange(prev.entity?.clazzStartTime,
-                    entity?.clazzStartTime, prev.clazzStartDateError)
+                    entity?.clazzStartTime, prev.clazzStartDateError),
+                clazzNameError = updateErrorMessageOnChange(prev.entity?.clazzName, entity?.clazzName, prev.clazzNameError)
             )
         }
 
@@ -414,7 +417,8 @@ class ClazzEditViewModel(
     fun onClickEditDescription() {
         navigateToEditHtml(
             currentValue = _uiState.value.entity?.clazzDesc,
-            resultKey = RESULT_KEY_HTML_DESC
+            resultKey = RESULT_KEY_DESCRIPTION,
+            title = systemImpl.getString(MR.strings.description)
         )
     }
 
@@ -466,7 +470,7 @@ class ClazzEditViewModel(
     }
 
     private fun ClazzEditUiState.hasErrors() : Boolean {
-        return clazzStartDateError != null || clazzEndDateError != null
+        return clazzStartDateError != null || clazzEndDateError != null || clazzNameError != null
     }
 
     fun onClickSave() {
@@ -489,6 +493,14 @@ class ClazzEditViewModel(
             Napier.d("onClickSave: endbeforestart")
             _uiState.update { prev ->
                 prev.copy(clazzEndDateError = systemImpl.getString(MR.strings.end_is_before_start))
+            }
+        }
+
+        if(initEntity.clazzName.isNullOrBlank()) {
+            _uiState.update { prev ->
+                prev.copy(
+                    clazzNameError = systemImpl.getString(MR.strings.required)
+                )
             }
         }
 
@@ -772,6 +784,11 @@ class ClazzEditViewModel(
         const val RESULT_KEY_TERMINOLOGY = "terminology"
 
         const val STATE_KEY_COURSEBLOCKS = "courseblocks"
+
+        /**
+         * Should not be the same as CourseBlockEdit - see note on CourseBlockEdit
+         */
+        const val RESULT_KEY_DESCRIPTION = "clazzDescriptionHtml"
 
     }
 

@@ -2,11 +2,11 @@ package com.ustadmobile.libuicompose.components
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material3.DatePicker
@@ -107,6 +107,7 @@ fun UstadDateField(
     isError: Boolean = false,
     onValueChange: (Long) -> Unit = {},
     unsetDefault: Long = 0,
+    supportingText: @Composable (() -> Unit)? = null,
 ) {
 
     val timeZone = remember(timeZoneId) {
@@ -158,6 +159,7 @@ fun UstadDateField(
         label = label,
         visualTransformation = DateVisualTransformation(),
         singleLine = true,
+
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         trailingIcon = {
             IconButton(
@@ -170,7 +172,8 @@ fun UstadDateField(
                     contentDescription = "",
                 )
             }
-        }
+        },
+        supportingText = supportingText,
     )
 
     if (isDialogOpen) {

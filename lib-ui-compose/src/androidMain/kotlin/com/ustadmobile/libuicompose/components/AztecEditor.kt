@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.view.composable
+package com.ustadmobile.libuicompose.components
 
 import android.text.Editable
 import android.text.TextWatcher
@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
-import com.toughra.ustadmobile.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.wordpress.aztec.Aztec
@@ -15,6 +14,8 @@ import org.wordpress.aztec.AztecText
 import org.wordpress.aztec.ITextFormat
 import org.wordpress.aztec.plugins.CssUnderlinePlugin
 import org.wordpress.aztec.toolbar.IAztecToolbarClickListener
+import com.ustadmobile.libuicompose.R
+
 
 class DefaultToolbarListener(
     private val onInvalidate: () -> Unit

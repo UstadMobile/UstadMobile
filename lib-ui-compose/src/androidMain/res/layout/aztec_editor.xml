@@ -7,12 +7,11 @@
 
     <org.wordpress.aztec.AztecText
         android:id="@+id/editor"
-        style="@style/UmTheme.AztecTextStyle"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:gravity="top|start"
         android:imeOptions="flagNoExtractUi"
-        android:padding="@dimen/dimen_16dp"
+        android:padding="16dp"
         android:scrollbars="vertical"
         app:historyEnable="true"
         app:historySize="10"

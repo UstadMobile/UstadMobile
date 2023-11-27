@@ -60,6 +60,7 @@ fun main() = application {
         di = DI.from(listOf(
             DesktopDiModule,
             CommonJvmDiModule,
+            DesktopDomainDiModule,
             commonDomainDiModule(EndpointScope.Default),
         )),
     ) {

@@ -4,11 +4,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditUiState
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.lib.db.entities.DiscussionPost
@@ -17,11 +15,15 @@ import com.ustadmobile.libuicompose.components.UstadErrorText
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.components.UstadHtmlEditPlaceholder
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import kotlinx.coroutines.Dispatchers
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
-fun DiscussionPostEditScreenForViewModel(viewModel: DiscussionPostEditViewModel) {
-    val uiState: DiscussionPostEditUiState by viewModel.uiState.collectAsState(
-        DiscussionPostEditUiState()
+fun DiscussionPostEditScreen(viewModel: DiscussionPostEditViewModel) {
+    val uiState: DiscussionPostEditUiState by viewModel.uiState.collectAsStateWithLifecycle(
+        DiscussionPostEditUiState(), Dispatchers.Main.immediate
     )
 
     DiscussionPostEditScreen(
@@ -42,7 +44,7 @@ fun DiscussionPostEditScreen(
     )  {
         UstadInputFieldLayout(
             errorText = uiState.discussionPostTitleError,
-            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp).fillMaxWidth()
+            modifier = Modifier.defaultItemPadding().fillMaxWidth()
         ) {
             OutlinedTextField(
                 value = uiState.discussionPost?.discussionPostTitle ?: "",
@@ -58,16 +60,15 @@ fun DiscussionPostEditScreen(
             )
         }
 
-        // TODO error
-//        UstadEditableHtmlField(
-//            html = uiState.discussionPost?.discussionPostMessage ?: "",
-//            onHtmlChange = {
-//                onDiscussionPostBodyChanged(it)
-//            },
-//            modifier = Modifier
-//                .weight(1f, fill = true)
-//                .fillMaxWidth()
-//        )
+        UstadHtmlEditPlaceholder(
+            htmlTextTmp = uiState.discussionPost?.discussionPostMessage ?: "",
+            onChangeHtmlTmp = onDiscussionPostBodyChanged,
+            editInNewScreenTmp = false,
+            modifier = Modifier.defaultItemPadding().weight(1.0f).fillMaxWidth()
+                .testTag("discussion_post_body"),
+            isError = uiState.discussionPostDescError != null,
+
+        )
 
         uiState.discussionPostDescError?.also { descError ->
             UstadErrorText(error = descError)
