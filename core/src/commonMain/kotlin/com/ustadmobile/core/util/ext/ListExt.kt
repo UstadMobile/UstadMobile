@@ -47,4 +47,27 @@ fun <T, R> List<T>.findKeysNotInOtherList(
     }
 }
 
+/**
+ * Trim the given
+ */
+fun <T> List<T>.trimToSize(maxSize: Int) : List<T> {
+    return if(size > maxSize) {
+        subList(0, maxSize)
+    }else {
+        this
+    }
+}
 
+/**
+ * If the list is smaller than the given size, pad it to the given size by adding items to the end
+ */
+inline fun <T> List<T>.padEnd(
+    minSize: Int,
+    item: (index: Int) -> T
+): List<T> {
+    return if(size < minSize) {
+        this + (size until minSize).map(item)
+    }else {
+        this
+    }
+}

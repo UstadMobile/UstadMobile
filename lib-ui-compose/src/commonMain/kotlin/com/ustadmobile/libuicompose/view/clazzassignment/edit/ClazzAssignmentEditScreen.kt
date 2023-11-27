@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -31,11 +31,10 @@ import com.ustadmobile.libuicompose.components.UstadSwitchField
 import com.ustadmobile.libuicompose.util.compose.courseTerminologyEntryResource
 import com.ustadmobile.libuicompose.util.compose.rememberCourseTerminologyEntries
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
-import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
-fun ClazzAssignmentEditScreenForViewModel(viewModel: ClazzAssignmentEditViewModel) {
+fun ClazzAssignmentEditScreen(viewModel: ClazzAssignmentEditViewModel) {
     val uiState by viewModel.uiState.collectAsState(initial = ClazzAssignmentEditUiState())
 
     ClazzAssignmentEditScreen(
@@ -50,7 +49,7 @@ fun ClazzAssignmentEditScreenForViewModel(viewModel: ClazzAssignmentEditViewMode
 
 @Composable
 fun ClazzAssignmentEditScreen(
-    uiState: ClazzAssignmentEditUiState = ClazzAssignmentEditUiState(),
+    uiState: ClazzAssignmentEditUiState,
     onChangeAssignment: (ClazzAssignment?) -> Unit = {},
     onChangeCourseBlock: (CourseBlock?) -> Unit = {},
     onClickSubmissionType: () -> Unit = {},
@@ -63,7 +62,6 @@ fun ClazzAssignmentEditScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .defaultScreenPadding()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
@@ -277,12 +275,14 @@ fun ClazzAssignmentEditScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 UstadInputFieldLayout(
-                    modifier = Modifier.weight(0.7F),
+                    modifier = Modifier.weight(0.7F)
+                    ,
                     errorText = uiState.reviewerCountError,
                 ) {
                     UstadNumberTextField(
                         modifier = Modifier
-                            .testTag("caPeerReviewerCount"),
+                            .testTag("caPeerReviewerCount")
+                            .fillMaxWidth(),
                         value = (uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toFloat(),
                         label = { Text(stringResource(MR.strings.reviews_per_user_group)) },
                         enabled = uiState.fieldsEnabled,
@@ -296,6 +296,8 @@ fun ClazzAssignmentEditScreen(
                         },
                     )
                 }
+
+                Spacer(Modifier.width(16.dp))
 
                 OutlinedButton(
                     onClick = onClickAssignReviewers,

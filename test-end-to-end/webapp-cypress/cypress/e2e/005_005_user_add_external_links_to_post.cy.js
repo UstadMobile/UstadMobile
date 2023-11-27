@@ -1,3 +1,8 @@
+/*
+ * Unfortunately, Cypress does not allow opening links in a new tab. The workaround was to remove
+ * the target attribute. There will need to be some workaround added to the JS code.
+ */
+
 describe('005_005_user_add_external_links_to_post', () => {
 it('Start Ustad Test Server ', () => {
   // Start Test Server
@@ -68,7 +73,7 @@ it('Student able to open the external link in the reply', () => {
   // Open link on the post board
   cy.get('[data-testid="ForumIcon"]').click()
   cy.contains('Topic 1').click()
-  cy.contains('External link').invoke('removeAttr','target').click()
+  cy.contains('External link').invoke('attr','target', '_self').click()
   cy.url().should('include','https://github.com/UstadMobile/UstadMobile/blob/primary/test-end-to-end/README.md')
 })
 })

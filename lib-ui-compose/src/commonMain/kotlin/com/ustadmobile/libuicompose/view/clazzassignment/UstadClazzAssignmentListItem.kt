@@ -17,7 +17,7 @@ import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.lib.db.entities.*
 import java.util.*
 import com.ustadmobile.core.MR
-import com.ustadmobile.libuicompose.components.HtmlText
+import com.ustadmobile.libuicompose.components.UstadHtmlText
 import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import com.ustadmobile.libuicompose.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewConstants.ASSIGNMENT_STATUS_MAP
@@ -54,7 +54,7 @@ fun UstadClazzAssignmentListItem(
         supportingContent = {
             Column{
                 if (blockUiState.cbDescriptionVisible){
-                    HtmlText(
+                    UstadHtmlText(
                         html = courseBlock.cbDescription ?: "",
                         htmlMaxLines = 1,
                     )

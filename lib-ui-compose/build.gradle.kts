@@ -35,7 +35,6 @@ kotlin {
                 api(libs.paging.multiplatform.common)
                 api(libs.paging.multiplatform.compose)
 
-                implementation(libs.richeditor.multiplatform.compose)
                 implementation(libs.compose.webview.multiplatform)
 
                 implementation(libs.kotlinx.datetime)
@@ -56,6 +55,10 @@ kotlin {
                 api(libs.androidx.paging.compose)
                 api(libs.androidx.navigation.compose)
                 api(libs.androidx.lifecycle.viewmodel.compose)
+                api(libs.htmltext.android)
+
+                implementation(libs.volley)
+                implementation(libs.aztec)
 
                 implementation(libs.android.material)
             }
@@ -64,6 +67,7 @@ kotlin {
         val desktopMain by getting {
             dependencies {
                 api(compose.desktop.common)
+                implementation(libs.richeditor.multiplatform.compose)
                 implementation(compose.desktop.currentOs)
             }
         }

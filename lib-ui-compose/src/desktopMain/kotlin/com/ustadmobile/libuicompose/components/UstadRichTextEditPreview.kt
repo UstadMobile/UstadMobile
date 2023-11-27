@@ -19,6 +19,9 @@ fun UstadEditableHtmlFieldPreview(){
         html = html,
         onHtmlChange = {
             html = it
+        },
+        onClickToEditInNewScreen = {
+
         }
     )
 }

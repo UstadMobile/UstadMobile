@@ -25,7 +25,7 @@ fun UstadClickableTextField(
     value: String,
     onClick: () -> Unit,
     onValueChange: (String) -> Unit,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     enabled: Boolean = true,
     readOnly: Boolean = false,
     textStyle: TextStyle = LocalTextStyle.current,

@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.PeerReviewerAllocation
 
 @DoorDao
 @Repository
-expect abstract class PeerReviewerAllocationDao : BaseDao<PeerReviewerAllocation>, OneToManyJoinDao<PeerReviewerAllocation>{
+expect abstract class PeerReviewerAllocationDao : BaseDao<PeerReviewerAllocation> {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -45,6 +45,9 @@ expect abstract class PeerReviewerAllocationDao : BaseDao<PeerReviewerAllocation
                praLct = :changeTime
          WHERE praUid = :cbUid""")
     abstract suspend fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertList(entityList: List<PeerReviewerAllocation>)
 
 
 }

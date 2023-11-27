@@ -715,7 +715,7 @@
     <string name="mark_penalty">Mark penalty</string>
     <string name="late_submission_penalty">Late submission penalty</string>
     <string name="end_of_grace_period">End of grace period</string>
-    <string name="allow_class_comments">Allow class comments from students</string>
+    <string name="allow_class_comments">Class comments enabled</string>
     <string name="after_deadline_date_error">Must be after deadline date</string>
     <!-- score points gained from content -->
     <string name="points">Points</string>
@@ -1169,6 +1169,13 @@
     a certain date and time.
     -->
     <string name="dont_show_before">Don\'t show before</string>
+
+    <!--
+    Used with assignments: indicates that the given assignment is submitted by groups.
+    -->
+    <string name="group_submission">Group submission</string>
+
+
     <string name="require_file_submission">Require file submission</string>
     <string name="require_text_submission">Require text submission</string>
     <!-- used to display the size limit of a file a user can upload -->
@@ -1199,6 +1206,13 @@
     -->
     <string name="marked_by">Marked by</string>
     <string name="peers">Peers</string>
+
+    <!--
+    Used when there is an assignment that is marked by peers (e.g. other students) not the teacher.
+    This is a tab that students click on to see the list of their peers that they should review.
+    -->
+    <string name="peers_to_review">Peers to review</string>
+
     <!--
     Header for options where the teacher or admin can set what kind of files the user can
     submit
@@ -1477,7 +1491,29 @@
     <!-- Used when editing the options for a discussion block on a course -->
     <string name="edit_discussion">Edit discussion</string>
     <string name="type_here">Type here…</string>
+
+    <!-- Error shown if a student attempts to submit an assignment after the deadline -->
     <string name="deadline_has_passed">Deadline has passed</string>
+
+    <!-- Error shown if a student attempts to submit an assignment again after they already submitted
+         and the teacher allows only one submission per student/group.
+     -->
+    <string name="already_submitted">Already submitted</string>
+
+    <!--
+     Error shown when a student attempts to submit more words than allowed. %1$s will be replaced
+     with the number of words the student attempted to submit. %2$s will be replaced with the limit
+     set by the teacher.
+    -->
+    <string name="exceeds_word_limit">Exceeds word limit: %1$s/%2$s</string>
+
+    <!--
+     Error shown when a student attempts to submit more characters than allowed. %1$s will be replaced
+     with the number of characters the student attempted to submit. %2$s will be replaced with the limit
+     set by the teacher.
+    -->
+    <string name="exceeds_char_limit">Exceeds character limit: %1$s/%2$s</string>
+
     <!-- used to display as an error to the user when he is not assigned in a group for an assignment -->
     <string name="unassigned_error">Can\'t submit: you\'re enroled in the course, but not assigned to a group</string>
     <!-- E.g. an option in the app that is enabled -->
@@ -1631,5 +1667,7 @@
     <string name="table_of_contents">Table of contents</string>
 
     <string name="select_date">Select Date</string>
+
+    <string name="link">Link</string>
 
 </resources>

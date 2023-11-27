@@ -316,7 +316,7 @@ class ClazzEditViewModel(
             }
 
             launch {
-                resultReturner.filteredResultFlowForKey(RESULT_KEY_HTML_DESC).collect { result ->
+                resultReturner.filteredResultFlowForKey(RESULT_KEY_DESCRIPTION).collect { result ->
                     val newDescription = result.result as? String ?: return@collect
                     onEntityChanged(_uiState.value.entity?.shallowCopy {
                         clazzDesc = newDescription
@@ -414,7 +414,8 @@ class ClazzEditViewModel(
     fun onClickEditDescription() {
         navigateToEditHtml(
             currentValue = _uiState.value.entity?.clazzDesc,
-            resultKey = RESULT_KEY_HTML_DESC
+            resultKey = RESULT_KEY_DESCRIPTION,
+            title = systemImpl.getString(MR.strings.description)
         )
     }
 
@@ -564,6 +565,21 @@ class ClazzEditViewModel(
                         joinToParentUid = null,
                     )
                 }
+                val currentPeerReviewAllocations = courseBlockListVal.flatMap {
+                    it.assignmentPeerAllocations
+                }
+                val prevPeerReviewerAllocations = initState.courseBlockList.flatMap {
+                    it.assignmentPeerAllocations
+                }
+
+                activeRepo.peerReviewerAllocationDao.deactivateByUids(
+                    uidList = prevPeerReviewerAllocations.findKeysNotInOtherList(
+                        otherList = currentPeerReviewAllocations,
+                        key = { it.praUid }
+                    ),
+                    changeTime = systemTimeInMillis()
+                )
+                activeRepo.peerReviewerAllocationDao.upsertList(currentPeerReviewAllocations)
 
                 //Run the ContentImport for any jobs where this is required.
                 courseBlockListVal.mapNotNull {
@@ -757,6 +773,11 @@ class ClazzEditViewModel(
         const val RESULT_KEY_TERMINOLOGY = "terminology"
 
         const val STATE_KEY_COURSEBLOCKS = "courseblocks"
+
+        /**
+         * Should not be the same as CourseBlockEdit - see note on CourseBlockEdit
+         */
+        const val RESULT_KEY_DESCRIPTION = "clazzDescriptionHtml"
 
     }
 
