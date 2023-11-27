@@ -295,16 +295,29 @@ class PersonEditViewModel(
         _uiState.update { prev -> prev.copy(fieldsEnabled = false) }
         val savePerson = _uiState.value.person ?: return
         val requiredFieldMessage = systemImpl.getString(MR.strings.field_required_prompt)
-        val dateOfBirthErrorMessage = systemImpl.getString(MR.strings.invalid)
         val currentTime = systemTimeInMillis()
+        val isRegistrationMode = registrationModeFlags.hasFlag(REGISTER_MODE_ENABLED)
 
         _uiState.update { prev ->
             prev.copy(
-                usernameError = if(!validateUsername(savePerson.username ?: "")) systemImpl.getString(MR.strings.invalid) else null,
-                passwordError = null,
-                emailError = if(savePerson.emailAddr?.let { checkEmailValidation(it) } == false) systemImpl.getString(MR.strings.invalid_email) else null,
+                usernameError = if(isRegistrationMode && !validateUsername(savePerson.username ?: "")) {
+                    systemImpl.getString(MR.strings.invalid)
+                }else {
+                    null
+                },
+                passwordError = if(isRegistrationMode && savePerson.username.isNullOrBlank()) {
+                    systemImpl.getString(MR.strings.field_required_prompt)
+                }else {
+                    null
+                },
                 confirmError = null,
-                dateOfBirthError = if(savePerson.dateOfBirth > currentTime) dateOfBirthErrorMessage else null,
+                dateOfBirthError = if(savePerson.dateOfBirth > currentTime) {
+                    systemImpl.getString(MR.strings.invalid)
+                }else if(isRegistrationMode && !savePerson.dateOfBirth.isDateSet()) {
+                    systemImpl.getString(MR.strings.field_required_prompt)
+                }else {
+                    null
+                },
                 parentContactError = null,
                 firstNameError = if(savePerson.firstNames.isNullOrEmpty()) requiredFieldMessage else null,
                 lastNameError = if(savePerson.lastName.isNullOrEmpty()) requiredFieldMessage else null,
@@ -319,7 +332,7 @@ class PersonEditViewModel(
         }
 
         viewModelScope.launch {
-            if(registrationModeFlags.hasFlag(REGISTER_MODE_ENABLED)) {
+            if(isRegistrationMode) {
                 val parentJoin = _uiState.value.approvalPersonParentJoin
                 _uiState.update { prev ->
                     prev.copy(

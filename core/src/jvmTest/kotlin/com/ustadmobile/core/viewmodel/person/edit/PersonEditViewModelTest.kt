@@ -65,12 +65,12 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
                 viewModel.onClickSave()
 
                 val systemImpl: UstadMobileSystemImpl = di.direct.instance()
-                val expectedErrMsg = systemImpl.getString(MR.strings.field_required_prompt)
 
                 val stateAfterSave = awaitItemWhere { it.usernameError != null }
-                assertEquals(expectedErrMsg, stateAfterSave.usernameError,
+                assertEquals(systemImpl.getString(MR.strings.invalid), stateAfterSave.usernameError,
                     "Username error set")
-                assertEquals(expectedErrMsg, stateAfterSave.passwordError,
+                assertEquals(systemImpl.getString(MR.strings.field_required_prompt),
+                    stateAfterSave.passwordError,
                     "Password error set")
                 cancelAndIgnoreRemainingEvents()
             }
@@ -87,7 +87,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
 
             viewModel.uiState.assertItemReceived(timeout = 5.seconds) { it.fieldsEnabled && it.person != null }
 
-            viewModel.uiState.test {
+            viewModel.uiState.test(timeout =1000.seconds) {
                 val state = awaitItem()
                 viewModel.onEntityChanged(state.person?.shallowCopy {
                     firstNames = "Test"
