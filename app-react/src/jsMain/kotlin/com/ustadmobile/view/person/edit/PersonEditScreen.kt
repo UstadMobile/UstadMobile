@@ -17,6 +17,7 @@ import com.ustadmobile.mui.components.UstadDateField
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.view.components.UstadImageSelectButton
+import com.ustadmobile.wrappers.muitelinput.MuiTelInput
 import mui.material.FormControl
 import mui.material.FormHelperText
 import mui.material.InputLabel
@@ -174,16 +175,19 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                 }
             }
 
-            UstadTextEditField {
+            MuiTelInput {
                 value = props.uiState.person?.phoneNum ?: ""
-                label = strings[MR.strings.phone_number]
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
+                label = ReactNode(strings[MR.strings.phone_number])
+                disabled = !props.uiState.fieldsEnabled
+                onChange = { number, _ ->
                     props.onPersonChanged(
                         props.uiState.person?.shallowCopy {
-                            phoneNum = it
-                    })
+                            phoneNum = number
+                        }
+                    )
                 }
+                error = props.uiState.phoneNumError != null
+                helperText = props.uiState.phoneNumError.let { ReactNode(it) }
             }
 
             TextField {

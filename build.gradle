@@ -250,6 +250,8 @@ ext {
 
     version_npm_striptags = "^3.2.0"
     version_npm_react_easy_sort = "^1.5.1"
+    version_npm_mui_tel_input = "4.0.1"
+    version_npm_libphonenumber_js = "^1.10.47"
     version_react_linkify = "^1.0.0-alpha"
     version_linkify_js = "^3.0.5"
     version_linkify_react = "^3.0.4"

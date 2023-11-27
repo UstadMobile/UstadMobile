@@ -127,6 +127,7 @@ import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.view.clazz.courseblockedit.CourseBlockEditScreen
 import com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditViewModel
 import com.ustadmobile.view.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditScreen
+import com.ustadmobile.wrappers.muitelinput.MuiTelInputDemo
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -348,6 +349,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(VideoContentViewModel.DEST_NAME, "VideoContent", VideoContentScreen),
     UstadScreen(PeerReviewerAllocationEditViewModel.DEST_NAME, "PeerReviewAllocationEdit",
         PeerReviewerAllocationEditScreen),
+    UstadScreen("MuiTelInputDemo", "MuiTelInput", MuiTelInputDemo),
 )
 
 

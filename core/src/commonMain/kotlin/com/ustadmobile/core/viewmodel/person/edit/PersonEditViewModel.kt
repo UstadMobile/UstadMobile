@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel.person.edit
 
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.phonenumvalidator.PhoneNumValidatorUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -71,6 +72,8 @@ data class PersonEditUiState(
 
     val passwordVisible: Boolean = false,
 
+    val phoneNumError: String? = null,
+
 ) {
 
     val parentalEmailVisible: Boolean
@@ -98,6 +101,8 @@ class PersonEditViewModel(
         ?: apiUrlConfig.presetApiUrl ?: "http://localhost"
 
     private val nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: systemImpl.getDefaultFirstDest()
+
+    private val phoneNumValidatorUseCase: PhoneNumValidatorUseCase by instance()
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
@@ -177,7 +182,9 @@ class PersonEditViewModel(
                 firstNameError = updateErrorMessageOnChange(prev.person?.firstNames,
                     entity?.firstNames, prev.firstNameError),
                 lastNameError = updateErrorMessageOnChange(prev.person?.lastName,
-                    entity?.lastName, prev.lastNameError)
+                    entity?.lastName, prev.lastNameError),
+                phoneNumError = updateErrorMessageOnChange(prev.person?.phoneNum,
+                    entity?.phoneNum, prev.phoneNumError),
             )
         }
 
@@ -223,7 +230,8 @@ class PersonEditViewModel(
             lastNameError != null ||
             genderError != null ||
             emailError != null ||
-            parentContactError != null
+            parentContactError != null ||
+            phoneNumError != null
     }
 
     private fun checkEmailValidation(email: String): Boolean {
@@ -330,6 +338,13 @@ class PersonEditViewModel(
                 firstNameError = if(savePerson.firstNames.isNullOrEmpty()) requiredFieldMessage else null,
                 lastNameError = if(savePerson.lastName.isNullOrEmpty()) requiredFieldMessage else null,
                 genderError = if(savePerson.gender == GENDER_UNSET) requiredFieldMessage else null,
+                phoneNumError = savePerson.phoneNum?.takeIf { it.isNotBlank() }?.let {
+                    if(!phoneNumValidatorUseCase.isValid(it)) {
+                        systemImpl.getString(MR.strings.invalid)
+                    }else {
+                        null
+                    }
+                },
             )
         }
 
