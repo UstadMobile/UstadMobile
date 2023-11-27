@@ -6,7 +6,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,10 +31,13 @@ import com.ustadmobile.libuicompose.util.compose.courseTerminologyEntryResource
 import com.ustadmobile.libuicompose.util.compose.rememberCourseTerminologyEntries
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.coroutines.Dispatchers
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
 fun ClazzAssignmentEditScreen(viewModel: ClazzAssignmentEditViewModel) {
-    val uiState by viewModel.uiState.collectAsState(initial = ClazzAssignmentEditUiState())
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle(
+        ClazzAssignmentEditUiState(), Dispatchers.Main.immediate)
 
     ClazzAssignmentEditScreen(
         uiState = uiState,
@@ -132,9 +134,13 @@ fun ClazzAssignmentEditScreen(
                 value = (uiState.entity?.assignment?.caSizeLimit ?: 0).toFloat(),
                 label = { Text(stringResource(MR.strings.size_limit)) },
                 enabled = uiState.fieldsEnabled,
+                isError = uiState.sizeLimitError != null,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                 ),
+                supportingText = uiState.sizeLimitError?.let {
+                    { Text(it) }
+                },
                 onValueChange = {
                     onChangeAssignment(
                         uiState.entity?.assignment?.shallowCopy {

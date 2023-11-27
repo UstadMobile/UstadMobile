@@ -32,7 +32,7 @@ import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
 
 
 @Composable
-fun ClazzAssignmentDetailSubmissionsTabScreenForViewModel(
+fun ClazzAssignmentDetailSubmissionsTabScreen(
     viewModel: ClazzAssignmentDetailSubmissionsTabViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState(ClazzAssignmentDetailSubmissionsTabUiState())

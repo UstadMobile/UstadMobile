@@ -25,7 +25,6 @@ import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadEditHeader
-import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import com.ustadmobile.libuicompose.util.rememberFormattedTime
@@ -392,7 +391,7 @@ private fun ClazzEditBasicDetails(
     onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit = {},
     @Suppress("UNUSED_PARAMETER") onClickTimezone: () -> Unit = {},
     //Reserved for use when HTML editing is added to compose
-    @Suppress("UNUSED_PARAMETER") onClickEditDescription: () -> Unit = {},
+    onClickEditDescription: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier.defaultScreenPadding()
@@ -404,9 +403,13 @@ private fun ClazzEditBasicDetails(
                 .fillMaxWidth()
                 .defaultItemPadding(),
             value = uiState.entity?.clazzName ?: "",
-            label = { Text(stringResource(MR.strings.name_key )) },
+            label = { Text(stringResource(MR.strings.name_key ) + "*") },
             enabled = uiState.fieldsEnabled,
+            isError = uiState.clazzNameError != null,
             singleLine = true,
+            supportingText = {
+                 Text(uiState.clazzNameError ?: stringResource(MR.strings.required))
+            },
             onValueChange = {
                 onClazzChanged(
                     uiState.entity?.shallowCopy {
@@ -415,6 +418,7 @@ private fun ClazzEditBasicDetails(
                 )
             }
         )
+
 
         UstadRichTextEdit(
             modifier = Modifier
@@ -439,52 +443,48 @@ private fun ClazzEditBasicDetails(
         )
 
         Row {
-            UstadInputFieldLayout(
-                modifier = Modifier
-                    .weight(1f)
+            UstadDateField(
+                value = uiState.entity?.clazzStartTime ?: 0,
+                modifier = Modifier.testTag("start_date").weight(1f)
                     .defaultItemPadding(end = 8.dp),
-                errorText = uiState.clazzStartDateError
-            ) {
-                UstadDateField(
-                    value = uiState.entity?.clazzStartTime ?: 0,
-                    modifier = Modifier.testTag("start_date"),
-                    label = { Text(stringResource(MR.strings.start_date)) } ,
-                    isError = uiState.clazzStartDateError != null,
-                    enabled = uiState.fieldsEnabled,
-                    timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
-                    onValueChange = {
-                        onClazzChanged(
-                            uiState.entity?.shallowCopy {
-                                clazzStartTime = it
-                            }
-                        )
-                    }
-                )
-            }
+                label = { Text(stringResource(MR.strings.start_date) + "*") } ,
+                isError = uiState.clazzStartDateError != null,
+                enabled = uiState.fieldsEnabled,
+                timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
+                onValueChange = {
+                    onClazzChanged(
+                        uiState.entity?.shallowCopy {
+                            clazzStartTime = it
+                        }
+                    )
+                },
+                supportingText = {
+                    Text(uiState.clazzStartDateError ?: stringResource(MR.strings.required))
+                }
+            )
 
-            UstadInputFieldLayout(
+            UstadDateField(
+                value = uiState.entity?.clazzEndTime ?: 0,
                 modifier = Modifier
                     .weight(1f)
-                    .defaultItemPadding(start = 8.dp),
-                errorText = uiState.clazzEndDateError
-            ) {
-                UstadDateField(
-                    value = uiState.entity?.clazzEndTime ?: 0,
-                    modifier = Modifier.testTag("end_date"),
-                    label = { Text(stringResource(MR.strings.end_date)) },
-                    isError = uiState.clazzEndDateError != null,
-                    enabled = uiState.fieldsEnabled,
-                    unsetDefault = UNSET_DISTANT_FUTURE,
-                    timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
-                    onValueChange = {
-                        onClazzChanged(
-                            uiState.entity?.shallowCopy {
-                                clazzEndTime = it
-                            }
-                        )
-                    }
-                )
-            }
+                    .defaultItemPadding(start = 8.dp)
+                    .testTag("end_date"),
+                label = { Text(stringResource(MR.strings.end_date)) },
+                isError = uiState.clazzEndDateError != null,
+                enabled = uiState.fieldsEnabled,
+                unsetDefault = UNSET_DISTANT_FUTURE,
+                timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
+                supportingText = {
+                    Text(uiState.clazzEndDateError ?: "")
+                },
+                onValueChange = {
+                    onClazzChanged(
+                        uiState.entity?.shallowCopy {
+                            clazzEndTime = it
+                        }
+                    )
+                }
+            )
         }
     }
 }

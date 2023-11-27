@@ -9,21 +9,30 @@ import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants.GENDER_MESSAGE_IDS_AND_UNSET
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditUiState
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
-import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadDateField
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.view.components.UstadImageSelectButton
-import com.ustadmobile.view.components.UstadMessageIdSelectField
+import mui.material.FormControl
+import mui.material.FormHelperText
+import mui.material.InputLabel
+import mui.material.MenuItem
+import mui.material.Select
+import mui.material.TextField
 import mui.system.Stack
 import mui.system.responsive
+import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
+import react.dom.onChange
+import react.useRequiredContext
 import react.useState
+import web.cssom.Color
 
 external interface PersonEditScreenProps : Props{
     var uiState: PersonEditUiState
@@ -39,6 +48,8 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
 
     val strings: StringProvider = useStringProvider()
 
+    val theme by useRequiredContext(ThemeContext)
+
     UstadStandardContainer {
         Stack {
             spacing = responsive(2)
@@ -50,44 +61,77 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                 }
             }
 
-            UstadTextEditField {
+            TextField {
                 value = props.uiState.person?.firstNames ?: ""
-                label = strings[MR.strings.first_names]
-                error = props.uiState.firstNameError
-                enabled = props.uiState.fieldsEnabled
+                label = ReactNode(strings[MR.strings.first_names] + "*")
+                error = props.uiState.firstNameError != null
+                disabled = !props.uiState.fieldsEnabled
+                helperText = ReactNode(props.uiState.firstNameError ?: strings[MR.strings.required])
                 onChange = {
                     props.onPersonChanged(
                         props.uiState.person?.shallowCopy {
-                            firstNames = it
-                    })
+                            firstNames = it.target.asDynamic().value as? String
+                        })
                 }
             }
 
-            UstadTextEditField {
+            TextField {
                 value = props.uiState.person?.lastName ?: ""
-                label = strings[MR.strings.last_name]
-                error = props.uiState.lastNameError
-                enabled = props.uiState.fieldsEnabled
+                label = ReactNode(strings[MR.strings.last_name] + "*")
+                error = props.uiState.lastNameError != null
+                disabled = !props.uiState.fieldsEnabled
+                helperText = ReactNode(props.uiState.lastNameError ?: strings[MR.strings.required])
+                disabled = !props.uiState.fieldsEnabled
                 onChange = {
                     props.onPersonChanged(
                         props.uiState.person?.shallowCopy {
-                            lastName = it
-                    })
+                            lastName = it.target.asDynamic().value as? String
+                        })
                 }
             }
 
-            UstadMessageIdSelectField {
-                value = props.uiState.person?.gender ?: Person.GENDER_UNSET
-                options = GENDER_MESSAGE_IDS_AND_UNSET
-                label = strings[MR.strings.gender_literal]
-                id = "gender"
-                onChange = { messageIdOpt ->
-                    props.onPersonChanged(
-                        props.uiState.person?.shallowCopy {
-                            gender = messageIdOpt.value
-                    })
+
+            FormControl {
+                fullWidth = true
+                error = props.uiState.genderError != null
+
+                InputLabel {
+                    id = "gender_label"
+                    shrink = true
+                    sx {
+                        backgroundColor = Color(theme.palette.background.default)
+                    }
+                    + ReactNode(strings[MR.strings.gender_literal] + "*")
+                }
+
+                Select {
+                    value = props.uiState.person?.gender?.toString()
+                    id = "gender"
+                    labelId = "gender_label"
+                    disabled = !props.uiState.fieldsEnabled
+                    fullWidth = true
+                    onChange = { event, _ ->
+                        val selectedVal = ("" + event.target.value)
+                        props.onPersonChanged(
+                            props.uiState.person?.shallowCopy {
+                                gender = selectedVal.toInt()
+                            }
+                        )
+                    }
+
+                    GENDER_MESSAGE_IDS_AND_UNSET.forEach { option ->
+                        MenuItem {
+                            value = option.value.toString()
+                            + ReactNode(strings[option.stringResource])
+                        }
+                    }
+                }
+
+                FormHelperText {
+                    +ReactNode(props.uiState.genderError?: strings[MR.strings.required])
                 }
             }
+
 
             if (props.uiState.parentalEmailVisible){
                 UstadTextEditField {
@@ -108,6 +152,8 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                 timeInMillis = props.uiState.person?.dateOfBirth ?: 0
                 label = ReactNode(strings[MR.strings.birthday])
                 timeZoneId = UstadMobileConstants.UTC
+                error = props.uiState.dateOfBirthError != null
+                helperText = ReactNode(props.uiState.dateOfBirthError)
                 onChange = {
                     props.onPersonChanged(
                         props.uiState.person?.shallowCopy {
@@ -140,15 +186,16 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                 }
             }
 
-            UstadTextEditField {
+            TextField {
                 value = props.uiState.person?.emailAddr ?: ""
-                label = strings[MR.strings.email]
-                error = props.uiState.emailError
-                enabled = props.uiState.fieldsEnabled
+                label = ReactNode(strings[MR.strings.email])
+                error = props.uiState.emailError != null
+                disabled = !props.uiState.fieldsEnabled
+                helperText = ReactNode(props.uiState.emailError)
                 onChange = {
                     props.onPersonChanged(
                         props.uiState.person?.shallowCopy {
-                            emailAddr = it
+                            emailAddr = it.target.asDynamic().value as? String
                     })
                 }
             }
@@ -166,14 +213,16 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
             }
 
             if (props.uiState.usernameVisible){
-                UstadTextEditField {
+                TextField {
                     value = props.uiState.person?.username ?: ""
-                    label = strings[MR.strings.username]
-                    enabled = props.uiState.fieldsEnabled
+                    label = ReactNode(strings[MR.strings.username])
+                    disabled = !props.uiState.fieldsEnabled
+                    error = props.uiState.usernameError != null
+                    helperText = ReactNode(props.uiState.usernameError ?: strings[MR.strings.required])
                     onChange = {
                         props.onPersonChanged(
                             props.uiState.person?.shallowCopy {
-                                username = it
+                                username = it.target.asDynamic().value
                         })
                     }
                 }

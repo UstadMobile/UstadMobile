@@ -85,11 +85,13 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 + strings[MR.strings.basic_details]
             }
 
-            UstadTextField {
+            TextField {
                 value = props.uiState.entity?.clazzName ?: ""
-                label = ReactNode(strings[MR.strings.name_key])
+                label = ReactNode(strings[MR.strings.name_key] + "*")
                 id = "clazz_name"
                 disabled = !props.uiState.fieldsEnabled
+                error = props.uiState.clazzNameError != null
+                helperText = ReactNode(props.uiState.clazzNameError ?: strings[MR.strings.required])
                 onTextChange = {
                     props.onClazzChanged(
                         props.uiState.entity?.shallowCopy {
@@ -104,9 +106,13 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 id = "clazz_desc"
                 placeholder = strings[MR.strings.description]
                 onChange = {
-                    props.onClazzChanged(props.uiState.entity?.shallowCopy {
-                        clazzDesc = it
-                    })
+                    props.uiState.entity?.also { entity ->
+                        props.onClazzChanged(
+                            entity.shallowCopy {
+                                clazzDesc = it
+                            }
+                        )
+                    }
                 }
             }
 
@@ -121,9 +127,9 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 UstadDateField {
                     timeInMillis = props.uiState.entity?.clazzStartTime ?: 0
                     timeZoneId = props.uiState.timeZone
-                    label = ReactNode(strings[MR.strings.start_date])
+                    label = ReactNode(strings[MR.strings.start_date] + "*")
                     error = props.uiState.clazzStartDateError != null
-                    helperText = props.uiState.clazzStartDateError?.let { ReactNode(it) }
+                    helperText = ReactNode(props.uiState.clazzStartDateError?: strings[MR.strings.required])
                     disabled = !props.uiState.fieldsEnabled
                     fullWidth = true
                     id = "clazz_start_time"

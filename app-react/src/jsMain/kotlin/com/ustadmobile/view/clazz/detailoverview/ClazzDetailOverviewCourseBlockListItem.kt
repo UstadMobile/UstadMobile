@@ -20,6 +20,7 @@ import mui.icons.material.AssignmentTurnedIn as AssignmentTurnedInIcon
 import mui.icons.material.Book as BookIcon
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.hooks.useHtmlToPlainText
 
 external interface ClazzDetailOverviewCourseBlockListItemProps : Props {
 
@@ -45,6 +46,8 @@ private val MODULE_TYPE_TO_ICON_MAP = mapOf(
 
 val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockListItemProps> { props ->
     val courseBlockVal = props.courseBlock?.courseBlock
+
+    val blockDescription = useHtmlToPlainText(courseBlockVal?.cbDescription ?: "")
 
     ListItem {
         ListItemButton {
@@ -73,7 +76,7 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
 
             ListItemText {
                 primary = ReactNode(courseBlockVal?.cbTitle ?: "")
-                secondary = ReactNode(courseBlockVal?.cbDescription ?: "") //This should be html
+                secondary = ReactNode(blockDescription)
             }
         }
 

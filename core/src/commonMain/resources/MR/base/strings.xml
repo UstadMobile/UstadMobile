@@ -195,6 +195,7 @@
     <string name="open_folder">Open Folder</string>
     <string name="action_hidden">Hidden</string>
     <string name="invalid_register_code">Invalid Registration Code</string>
+    <string name="invalid">Invalid</string>
     <string name="enter_register_code">Enter Registration Code</string>
     <string name="bar_chart">Bar Chart</string>
     <string name="line_chart">Line Chart</string>
@@ -1181,6 +1182,7 @@
     <!-- used to display the size limit of a file a user can upload -->
     <string name="maximum">Maximum</string>
     <string name="size_limit">Size limit (MB)</string>
+    <string name="size_limit_error">Size limit must be between %1$s MB and %2$s MB</string>
     <string name="limit">Limit</string>
     <!-- The maximum number of files a user can attach when submitting an assignment -->
     <string name="number_of_files">Maximum number of files</string>

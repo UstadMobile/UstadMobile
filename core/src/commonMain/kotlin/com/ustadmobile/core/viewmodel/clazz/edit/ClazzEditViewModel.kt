@@ -58,6 +58,8 @@ data class ClazzEditUiState(
 
     val clazzEndDateError: String? = null,
 
+    val clazzNameError: String? = null,
+
     val clazzSchedules: List<Schedule> = emptyList(),
 
     val courseBlockList: List<CourseBlockAndEditEntities> = emptyList(),
@@ -364,7 +366,8 @@ class ClazzEditViewModel(
                 clazzEndDateError = updateErrorMessageOnChange(prev.entity?.clazzEndTime,
                     entity?.clazzEndTime, prev.clazzEndDateError),
                 clazzStartDateError = updateErrorMessageOnChange(prev.entity?.clazzStartTime,
-                    entity?.clazzStartTime, prev.clazzStartDateError)
+                    entity?.clazzStartTime, prev.clazzStartDateError),
+                clazzNameError = updateErrorMessageOnChange(prev.entity?.clazzName, entity?.clazzName, prev.clazzNameError)
             )
         }
 
@@ -467,7 +470,7 @@ class ClazzEditViewModel(
     }
 
     private fun ClazzEditUiState.hasErrors() : Boolean {
-        return clazzStartDateError != null || clazzEndDateError != null
+        return clazzStartDateError != null || clazzEndDateError != null || clazzNameError != null
     }
 
     fun onClickSave() {
@@ -490,6 +493,14 @@ class ClazzEditViewModel(
             Napier.d("onClickSave: endbeforestart")
             _uiState.update { prev ->
                 prev.copy(clazzEndDateError = systemImpl.getString(MR.strings.end_is_before_start))
+            }
+        }
+
+        if(initEntity.clazzName.isNullOrBlank()) {
+            _uiState.update { prev ->
+                prev.copy(
+                    clazzNameError = systemImpl.getString(MR.strings.required)
+                )
             }
         }
 

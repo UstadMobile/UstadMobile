@@ -44,11 +44,11 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
         UstadTextField {
             id = "title"
             value = props.uiState.courseBlock?.cbTitle ?: ""
-            label = ReactNode(strings[MR.strings.title])
+            label = ReactNode(strings[MR.strings.title] + "*")
             disabled = !props.uiState.fieldsEnabled
             fullWidth = true
             error = props.uiState.caTitleError != null
-            helperText = props.uiState.caTitleError?.let { ReactNode(it) }
+            helperText =  ReactNode(props.uiState.caTitleError ?: strings[MR.strings.required])
             onTextChange = {
                 props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
                     cbTitle = it
@@ -62,9 +62,11 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             id = "description_quill"
             placeholder = strings[MR.strings.description]
             onChange = {
-                props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
-                    cbDescription = it
-                })
+                props.uiState.courseBlock?.also { courseBlock ->
+                    props.onCourseBlockChange(courseBlock.shallowCopy {
+                        cbDescription = it
+                    })
+                }
             }
         }
 

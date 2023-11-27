@@ -44,7 +44,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
 
 @Composable
-fun ClazzAssignmentDetailOverviewScreenForViewModel(viewModel: ClazzAssignmentDetailOverviewViewModel) {
+fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverviewViewModel) {
     val uiState by viewModel.uiState.collectAsState(initial = ClazzAssignmentDetailOverviewUiState())
 
 //    val localContext = LocalContext.current

@@ -52,6 +52,8 @@ data class ClazzAssignmentEditUiState(
 
     val submissionRequiredError: String? = null,
 
+    val sizeLimitError: String? = null,
+
     val courseBlockEditUiState: CourseBlockEditUiState = CourseBlockEditUiState(
         completionCriteriaOptions = ASSIGNMENT_COMPLETION_CRITERIAS
     ),
@@ -108,7 +110,7 @@ class ClazzAssignmentEditViewModel(
 
     private val snackDisaptcher: SnackBarDispatcher by instance()
 
-    private val clazzUid = savedStateHandle[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
+    private val clazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0
 
     init {
         _appUiState.update { prev ->
@@ -257,6 +259,11 @@ class ClazzAssignmentEditViewModel(
                 entity = prev.entity?.copy(
                     assignment = assignment,
                 ),
+                sizeLimitError = if(prev.sizeLimitError != null && assignment?.caSizeLimit == prev.entity?.assignment?.caSizeLimit){
+                    prev.sizeLimitError
+                } else {
+                    null
+                },
                 submissionRequiredError = if(prev.submissionRequiredError != null &&
                     assignment?.caRequireFileSubmission == false && !assignment.caRequireTextSubmission
                 ) {
@@ -319,7 +326,12 @@ class ClazzAssignmentEditViewModel(
                         prev.courseBlockEditUiState.caGracePeriodError
                     }else {
                         null
-                    }
+                    },
+                    caTitleError = updateErrorMessageOnChange(
+                        prev.courseBlockEditUiState.courseBlock?.cbTitle,
+                        courseBlock.cbTitle,
+                        prev.courseBlockEditUiState.caTitleError
+                    )
                 )
             )
         }
@@ -336,7 +348,9 @@ class ClazzAssignmentEditViewModel(
             courseBlockEditUiState.caMaxPointsError != null ||
             courseBlockEditUiState.caDeadlineError != null ||
             courseBlockEditUiState.caGracePeriodError != null ||
-            reviewerCountError != null
+            reviewerCountError != null ||
+            sizeLimitError != null ||
+            courseBlockEditUiState.hasErrors
     }
 
 
@@ -354,7 +368,7 @@ class ClazzAssignmentEditViewModel(
             serializer = String.serializer(),
             args = mapOf(
                 CourseGroupSetListViewModel.ARG_SHOW_INDIVIDUAL_OPTION to true.toString(),
-                UstadView.ARG_CLAZZUID to (_uiState.value.entity?.assignment?.caClazzUid ?: 0).toString()
+                ARG_CLAZZUID to (_uiState.value.entity?.assignment?.caClazzUid ?: 0).toString()
             ),
         )
     }
@@ -435,6 +449,25 @@ class ClazzAssignmentEditViewModel(
                 }
             }
 
+            if(assignment.caSizeLimit !in 5..100){
+                _uiState.update {   prev ->
+                    prev.copy(
+                        sizeLimitError = systemImpl.formatString(MR.strings.size_limit_error,
+                            ATTACHMENT_LIMIT_MIN.toString(), ATTACHMENT_LIMIT_MAX.toString())
+                    )
+                }
+            }
+
+            if(courseBlock.cbTitle.isNullOrBlank()) {
+                _uiState.update { prev ->
+                    prev.copy(
+                        courseBlockEditUiState = prev.courseBlockEditUiState.copy(
+                            caTitleError = systemImpl.getString(MR.strings.required)
+                        )
+                    )
+                }
+            }
+
             var errorSnack: String? = null
 
             if(initState.entity?.assignment?.caGroupUid != assignment.caGroupUid &&
@@ -457,16 +490,16 @@ class ClazzAssignmentEditViewModel(
                 }
             }
 
-            _uiState.update { prev ->
-                prev.copyWithFieldsEnabledSet(fieldsEnabled = true)
-            }
+            val errorSnackVal = errorSnack
+            if(_uiState.value.hasErrors() || errorSnackVal != null) {
+                errorSnackVal?.also {
+                    snackDisaptcher.showSnackBar(Snack(it))
+                }
 
-            if(errorSnack != null) {
-                snackDisaptcher.showSnackBar(Snack(errorSnack))
-                return@launch
-            }
-
-            if(_uiState.value.hasErrors()) {
+                loadingState = LoadingUiState.NOT_LOADING
+                _uiState.update { prev ->
+                    prev.copyWithFieldsEnabledSet(fieldsEnabled = true)
+                }
                 return@launch
             }
 
@@ -504,6 +537,7 @@ class ClazzAssignmentEditViewModel(
         const val RESULT_KEY_PEER_REVIEW_ALLOCATIONS = "peerAllocationsResult"
 
         const val DEST_NAME = "CourseAssignmentEdit"
-
+        const val ATTACHMENT_LIMIT_MIN = 5
+        const val ATTACHMENT_LIMIT_MAX = 100
     }
 }

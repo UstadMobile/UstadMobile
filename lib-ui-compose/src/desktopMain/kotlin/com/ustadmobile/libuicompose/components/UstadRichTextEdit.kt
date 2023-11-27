@@ -301,8 +301,6 @@ private fun RichTextStyleRow(
         }
 
         item {
-            lateinit var textFieldValue: TextFieldValue
-
             RichTextStyleButton(
                 onClick = {
                     linkDialogHref = ""

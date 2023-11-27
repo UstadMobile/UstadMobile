@@ -2,7 +2,7 @@ package com.ustadmobile.libuicompose.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -15,6 +15,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.UNSET_DISTANT_FUTURE
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
@@ -28,27 +29,24 @@ fun UstadCourseBlockEdit(
     Column(
         modifier = modifier
     ) {
-
-        UstadInputFieldLayout(
-            modifier = Modifier.fillMaxWidth(),
-            errorText = uiState.caTitleError,
-        ) {
-            OutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("title")
-                    .defaultItemPadding(),
-                value = uiState.courseBlock?.cbTitle ?: "",
-                label = { Text(stringResource(MR.strings.title)) },
-                isError = uiState.caTitleError != null,
-                enabled = uiState.fieldsEnabled,
-                onValueChange = {
-                    onCourseBlockChange(uiState.courseBlock?.shallowCopy {
-                        cbTitle = it
-                    })
-                },
-            )
-        }
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("title")
+                .defaultItemPadding(),
+            value = uiState.courseBlock?.cbTitle ?: "",
+            label = { Text(stringResource(MR.strings.title) + "*") },
+            isError = uiState.caTitleError != null,
+            enabled = uiState.fieldsEnabled,
+            supportingText = {
+                Text(uiState.caTitleError ?: stringResource(MR.strings.required))
+            },
+            onValueChange = {
+                onCourseBlockChange(uiState.courseBlock?.shallowCopy {
+                    cbTitle = it
+                })
+            },
+        )
 
         UstadRichTextEdit(
             html = uiState.courseBlock?.cbDescription ?: "",
@@ -98,7 +96,7 @@ fun UstadCourseBlockEdit(
                         uiState.courseBlock?.cbCompletionCriteria ?: 0
                     ),
                     label = stringResource(MR.strings.completion_criteria),
-                    itemText = { stringResource(it.stringResource) },
+                    itemText = { stringResource(it.stringResource).capitalizeFirstLetter() },
                     options = uiState.completionCriteriaOptions,
                     onOptionSelected = {
                         onCourseBlockChange(uiState.courseBlock?.shallowCopy{
@@ -227,12 +225,9 @@ fun UstadCourseBlockEdit(
                         cbLateSubmissionPenalty = it.toInt()
                     })
                 },
-            )
-
-            Text(
-                modifier = Modifier.padding(start = 32.dp, bottom = 8.dp),
-                style = MaterialTheme.typography.caption,
-                text = stringResource(MR.strings.penalty_label)
+                supportingText = {
+                    Text(stringResource(MR.strings.penalty_label))
+                }
             )
         }
     }
