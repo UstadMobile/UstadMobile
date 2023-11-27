@@ -26,7 +26,7 @@ import dev.icerock.moko.resources.compose.stringResource
 
 
 @Composable
-fun ClazzAssignmentDetailSubmissionsTabScreenForViewModel(
+fun ClazzAssignmentDetailSubmissionsTabScreen(
     viewModel: ClazzAssignmentDetailSubmissionsTabViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState(ClazzAssignmentDetailSubmissionsTabUiState())

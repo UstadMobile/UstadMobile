@@ -10,6 +10,8 @@ import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.Claz
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewViewModel
 import com.ustadmobile.libuicompose.components.UstadScreenTabs
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
+import com.ustadmobile.libuicompose.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewScreen
+import com.ustadmobile.libuicompose.view.clazzassignment.submissionstab.ClazzAssignmentDetailSubmissionsTabScreen
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -58,11 +60,19 @@ fun ClazzAssignmentDetailScreen(
     ) {
         when(it.viewName) {
             ClazzAssignmentDetailOverviewViewModel.DEST_NAME -> {
-
+                ClazzAssignmentDetailOverviewScreen(
+                    tabViewModel(ClazzAssignmentDetailOverviewViewModel::class) { di, savedStateHandle ->
+                        ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
+                    }
+                )
             }
 
             ClazzAssignmentDetailSubmissionsTabViewModel.DEST_NAME -> {
-
+                ClazzAssignmentDetailSubmissionsTabScreen(
+                    tabViewModel(ClazzAssignmentDetailSubmissionsTabViewModel::class) { di, savedStateHandle ->
+                        ClazzAssignmentDetailSubmissionsTabViewModel(di, savedStateHandle)
+                    }
+                )
             }
         }
     }

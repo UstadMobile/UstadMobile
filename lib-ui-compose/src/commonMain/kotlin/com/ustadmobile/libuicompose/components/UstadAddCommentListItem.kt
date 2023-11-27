@@ -16,8 +16,12 @@ fun UstadAddCommentListItem(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     personUid: Long,
-    onClickAddComment: (() -> Unit) = {  }
+    commentInBottomSheet: Boolean = false, //Will be true on Android, false on desktop
+    onCommentTextChanged: (String) -> Unit = { },
+    onClickAddComment: () -> Unit = {  },
 ){
+    //If using bottom, show in bottom sheet modal, otherwise, use "normal" outlined text field.
+
     ListItem(
         modifier = modifier,
         icon = {

@@ -38,7 +38,7 @@ import com.ustadmobile.libuicompose.view.clazzassignment.detailoverview.ClazzAss
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
-fun ClazzAssignmentDetailOverviewScreenForViewModel(viewModel: ClazzAssignmentDetailOverviewViewModel) {
+fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverviewViewModel) {
     val uiState by viewModel.uiState.collectAsState(initial = ClazzAssignmentDetailOverviewUiState())
 
     //  TODO error
