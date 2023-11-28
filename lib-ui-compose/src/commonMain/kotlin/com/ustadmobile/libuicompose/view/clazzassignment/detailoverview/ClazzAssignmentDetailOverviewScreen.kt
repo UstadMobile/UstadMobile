@@ -195,8 +195,7 @@ fun ClazzAssignmentDetailOverviewScreen(
                         modifier = Modifier
                             .testTag("submission_text")
                             .defaultItemPadding(),
-                        html = uiState.latestSubmission?.casText ?: "",
-                        htmlMaxLines = 1
+                        html = uiState.latestSubmission?.casText ?: ""
                     )
                 }
             }
