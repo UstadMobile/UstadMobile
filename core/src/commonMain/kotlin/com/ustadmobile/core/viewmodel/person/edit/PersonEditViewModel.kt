@@ -2,7 +2,7 @@ package com.ustadmobile.core.viewmodel.person.edit
 
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.phonenumvalidator.PhoneNumValidatorUseCase
+import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -111,6 +111,7 @@ class PersonEditViewModel(
         _appUiState.update {
             AppUiState(
                 title = title,
+                hideBottomNavigation = true,
             )
         }
 

@@ -7,9 +7,12 @@ import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCa
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCaseAndroid
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCaseAndroid
-import com.ustadmobile.core.domain.phonenumvalidator.PhoneNumValidatorAndroid
-import com.ustadmobile.core.domain.phonenumvalidator.PhoneNumValidatorUseCase
+import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
+import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtilAndroid
+import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorAndroid
+import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.door.ext.DoorTag
+import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
@@ -34,6 +37,10 @@ fun AndroidDomainDiModule(
 
         bind<PhoneNumValidatorUseCase>() with provider {
             PhoneNumValidatorAndroid()
+        }
+
+        bind<IPhoneNumberUtil>() with provider {
+            IPhoneNumberUtilAndroid(PhoneNumberUtil.createInstance(appContext))
         }
 
     }

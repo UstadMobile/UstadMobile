@@ -1,4 +1,4 @@
-package com.ustadmobile.core.domain.phonenumvalidator
+package com.ustadmobile.core.domain.phonenumber
 
 interface PhoneNumValidatorUseCase {
 
