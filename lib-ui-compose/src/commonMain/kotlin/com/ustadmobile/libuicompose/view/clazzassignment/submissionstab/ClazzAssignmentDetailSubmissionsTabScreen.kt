@@ -3,7 +3,7 @@ package com.ustadmobile.libuicompose.view.clazzassignment.submissionstab
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
@@ -28,7 +28,8 @@ import app.cash.paging.PagingConfig
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import androidx.compose.runtime.remember
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
+import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 
 
 @Composable
@@ -37,21 +38,10 @@ fun ClazzAssignmentDetailSubmissionsTabScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState(ClazzAssignmentDetailSubmissionsTabUiState())
 
-//    val context = LocalContext.current
-
     ClazzAssignmentDetailSubmissionsTabScreen(
         uiState = uiState,
         onClickPerson = viewModel::onClickSubmitter,
-        onClickSort = {
-            // TODO error
-//            SortBottomSheetFragment(
-//                sortOptions = uiState.sortOptions,
-//                selectedSort = uiState.sortOption,
-//                onSortOptionSelected = {
-//                    viewModel.onChangeSortOption(it)
-//                }
-//            ).show(context.getContextSupportFragmentManager(), "SortOptions")
-        }
+        onChangeSortOption = viewModel::onChangeSortOption
     )
 }
 
@@ -59,7 +49,7 @@ fun ClazzAssignmentDetailSubmissionsTabScreen(
 fun ClazzAssignmentDetailSubmissionsTabScreen(
     uiState: ClazzAssignmentDetailSubmissionsTabUiState,
     onClickPerson: (AssignmentSubmitterSummary) -> Unit = {},
-    onClickSort: () -> Unit = {},
+    onChangeSortOption: (SortOrderOption) -> Unit = {}
 ) {
 
     val pager = remember(uiState.assignmentSubmitterList) {
@@ -115,8 +105,12 @@ fun ClazzAssignmentDetailSubmissionsTabScreen(
 
         item(key = "sort") {
             UstadListSortHeader(
+                modifier = Modifier
+                    .defaultItemPadding()
+                    .fillMaxWidth(),
                 activeSortOrderOption =uiState.sortOption,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                sortOptions = uiState.sortOptions,
+                onClickSortOption =  onChangeSortOption
             )
         }
 
