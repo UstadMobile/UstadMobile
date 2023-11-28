@@ -362,6 +362,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
                     phoneNum = invalidNum
                     gender = Person.GENDER_MALE
                 })
+                viewModel.onNationalPhoneNumSetChanged(true)
 
                 cancelAndIgnoreRemainingEvents()
             }
@@ -402,6 +403,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
                     phoneNum = invalidNum
                     gender = Person.GENDER_MALE
                 })
+                viewModel.onNationalPhoneNumSetChanged(true)
 
                 cancelAndIgnoreRemainingEvents()
             }
