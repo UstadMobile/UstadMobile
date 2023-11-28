@@ -40,13 +40,7 @@ it('Teacher add assignment', () => {
   cy.contains("Assignment").click()
   cy.get('input[id="title"]').type("Assignment 1")
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
- /* when grace period is added - student not able to see the assignment
-  cy.get('input[id="hide_until_date"]').click()
-  cy.get('#hide_until_date')
-    .click()
-    .then(input => setDate(input[0], '2023-11-08T00:00'))
- */
-  cy.contains("div","Graded").click()
+   cy.contains("div","Graded").click()
   cy.contains("li","Submitted").click()
   cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date("2023-11-01T08:30"))
   cy.get('#cbGracePeriodDate',{timeout:5000}).should('be.visible')
@@ -73,14 +67,10 @@ it('Student submit assignment', () => {
   cy.contains("Course").click()
   cy.contains("004_005").click()
   cy.contains('Assignment 1').click()
-  cy.wait(1000)
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
   cy.get('#assignment_text').click()
   cy.get('#assignment_text').type("Text 1")
-  //cy.wait(150000)
   cy.contains('SUBMIT',{timeout:5000}).click()
-  cy.wait(1000)
-  //cy.contains("Not submitted").should('exist') // assignment won't get submitted
   cy.go('back')
   cy.contains('Assignment 1',{timeout:1000}).click()
   cy.contains("Not submitted").should('not.exist') //
@@ -92,7 +82,7 @@ it('Teacher add assignment mark and course comment', () => {
  //  Assignment block
   cy.contains("Course").click()
   cy.contains("004_005").click()
-  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
+ //cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.contains('Submissions').click()
@@ -112,6 +102,7 @@ it('Student view his grade', () => {
   cy.contains('Assignment 1').click()
   cy.contains('Keep it up').should('exist')
   cy.contains('8/10 Points').should('exist')
+  cy.contains('(20% late penalty)').should('exist') // assertion for error message
   cy.contains('SUBMIT').should('not.exist') // assertion to make sure multiple submission is not allowed
   })
 })

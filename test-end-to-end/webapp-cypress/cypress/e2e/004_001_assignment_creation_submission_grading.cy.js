@@ -40,13 +40,6 @@ it('Teacher add assignment', () => {
   cy.contains("Assignment").click()
   cy.get('input[id="title"]').type("Assignment 1")
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
- /* when grace period is added - student not able to see the assignment
-  cy.get('input[id="hide_until_date"]').click()
-  cy.get('#hide_until_date')
-    .click()
-    .then(input => setDate(input[0], '2023-11-08T00:00'))
- */
-  //cy.ustadSetDateTime(cy.get("#hide_until_date"),  new Date("2023-10-30T08:30"))
   cy.contains("div","Graded").click()
   cy.contains("li","Submitted").click()
   cy.ustadSetDateTime(cy.get("#cbDeadlineDate"),  new Date(Date.now() + (1000*60*1000)))

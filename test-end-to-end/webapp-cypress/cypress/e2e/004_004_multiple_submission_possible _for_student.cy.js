@@ -33,22 +33,16 @@ it('Teacher add assignment', () => {
   // Add Assignment block
   cy.contains("Course").click()
   cy.contains("004_004").click()
-  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
-    cy.contains("button","Course").click()
+ // cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
+  cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
   cy.contains("Assignment").click()
   cy.get('input[id="title"]').type("Assignment 1")
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
-  //cy.get('input[id="hide_until_date"]').click()
-  //cy.get('#hide_until_date')
-   // .click()
-   // .then(input => setDate(input[0], '2023-11-08T00:00'));
-  //cy.debug();
   cy.contains("div","Graded").click()
   cy.contains("li","Submitted").click()
-  cy.get('#cbDeadlineDate')
-    .then(input => setDate(input[0], '2023-12-20T00:00'))
+  cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date("2025-06-01T08:30"))
   cy.get('#caSubmissionPolicy').click()
   cy.contains('Can make multiple submissions').click()
   cy.contains("button","Done").should('be.visible')
@@ -58,7 +52,6 @@ it('Teacher add assignment', () => {
   cy.contains("button","Members").should('be.visible')
   cy.contains("button","Edit").click()
   cy.contains("Assignment 1").click()
-  //cy.get('input[value="2020-11-08T00:00"]').should('exist')
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()
   cy.contains("button","Save").should('be.visible')
@@ -72,7 +65,6 @@ it('Student submit assignment', () => {
   cy.contains("Course").click()
   cy.contains("004_004").click()
   cy.contains('Assignment 1').click()
-   cy.wait(6000)
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:5000}).should('be.visible')
   cy.get('#assignment_text').type("Text 1")
   cy.contains('SUBMIT').click()
@@ -81,7 +73,6 @@ it('Student submit assignment', () => {
 
 it('Teacher add assignment and course comment', () => {
   cy.ustadClearDbAndLogin('teacher1','test1234')
-
   cy.contains("Course").click()
   cy.contains("004_004").click()
   cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
@@ -100,7 +91,6 @@ it('Student add assignment', () => {
   cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains("Course").click()
   cy.contains("004_004").click()
-  cy.wait(6000)
   cy.contains('Assignment 1').click()
   cy.contains('Keep it up').should('exist')
   cy.contains('9/10 Points').should('exist')

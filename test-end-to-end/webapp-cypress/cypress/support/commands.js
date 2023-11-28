@@ -127,10 +127,10 @@ Cypress.Commands.add('ustadAddDiscussionBoard',(discussionTitle) => {
  *
  * e.g.
  * Set a fixed date/time:
- * cy.ustadSetDate(cy.get("input#id"), new Date("2017-06-01T08:30"));
+ * cy.ustadSetDateTime(cy.get("input#id"), new Date("2017-06-01T08:30"));
  *
  * Set the time to two minutes from now e.g. now plus (2 x 60 x 1000)ms:
- * cy.ustadSetDate(cy.get("input#id"), new Date(Date.now() + (2*60*1000))
+ * cy.ustadSetDateTime(cy.get("input#id"), new Date(Date.now() + (2*60*1000))
  */
 Cypress.Commands.add("ustadSetDateTime", (element, date) => {
     element.type(date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2, '0') + "-" +

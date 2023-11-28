@@ -67,16 +67,8 @@ it('Teacher add assignment and course comment', () => {
   cy.contains("Assignment").click()
   cy.get('input[id="title"]').type("Assignment 1")
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
- /* cy.get('input[id="hide_until_date"]').click()
-  cy.get('#hide_until_date')
-    .click({ multiple: true })
-    .then(input => setDate(input[0], '2023-11-01T00:00'));
-  cy.contains("div","Graded").click()
-  cy.contains("li","Submitted").click()
-  cy.get('#cbDeadlineDate')
-    .then(input => setDate(input[0], '2023-12-20T00:00'));*/
   cy.get('#cgsName').click()
-  cy.wait(5000) // added to load "Add new groups" button
+  cy.wait(2000) // added to load "Add new groups" button
   cy.contains('Add new groups',{timeout: 5000}).click()
   cy.get('#cgs_name').type('Assignment Team')
   cy.get('#cgs_total_groups').clear().type('2')
@@ -91,7 +83,6 @@ it('Teacher add assignment and course comment', () => {
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
   cy.get('input[id="title"]').type("Assignment 1")
- // cy.contains('Assignment Team').click()
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()
   cy.contains("button","Save").should('be.visible')
@@ -114,7 +105,6 @@ it('Group 1 - Student add private comment', () => {
   cy.contains("004_009").click()
   cy.contains('Assignment 1').click()
   cy.get('#private_comment_textfield').click()
- // cy.pause()
   cy.get('#private_comment_textfield').type("comment2")
   cy.get('svg[data-testid="SendIcon"]').click()
   cy.contains("comment1").should('exist')

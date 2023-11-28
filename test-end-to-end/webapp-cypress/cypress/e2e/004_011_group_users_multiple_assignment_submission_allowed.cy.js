@@ -64,11 +64,10 @@ it('Teacher add multiple submission assignment and group ', () => {
   cy.contains("Assignment").click()
   cy.get('input[id="title"]').clear().type("Assignment 1")
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
-  //cy.ustadSetDateTime(cy.get("#cbDeadlineDate"),  new Date(Date.now() + (1000*60*1000)))
   cy.get('#caSubmissionPolicy').click()
   cy.contains('Can make multiple submissions').click()
   cy.get('#cgsName').click()
-  cy.wait(5000) // added to load "Add new groups" button
+  cy.wait(2000) // added to load "Add new groups" button
   cy.contains('Add new groups',{timeout: 5000}).click()
   cy.get('#cgs_name').type('Assignment Team')
   cy.get('#cgs_total_groups').clear().type('2')
@@ -85,10 +84,9 @@ it('Teacher add multiple submission assignment and group ', () => {
   cy.get('input[id="title"]').type("Assignment 1")
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()
-  cy.wait(1000)
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
-  cy.wait(1000)
+  cy.wait(1000) // This command helps to view Assignment to user
   cy.contains("button","Members").should('be.visible')
 
 })

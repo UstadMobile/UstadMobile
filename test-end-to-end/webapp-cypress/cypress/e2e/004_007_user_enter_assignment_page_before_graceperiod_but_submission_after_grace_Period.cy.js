@@ -40,12 +40,6 @@ it('Teacher add assignment', () => {
   cy.contains("Assignment").click()
   cy.get('input[id="title"]').type("Assignment 1")
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
- /* when grace period is added - student not able to see the assignment
-  cy.get('input[id="hide_until_date"]').click()
-  cy.get('#hide_until_date')
-    .click()
-    .then(input => setDate(input[0], '2023-11-08T00:00'))
- */
   cy.contains("div","Graded").click()
   cy.contains("li","Submitted").click()
   cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date(Date.now()))
@@ -72,12 +66,13 @@ it('Student not able to submit assignment', () => {
   cy.contains("Course").click()
   cy.contains("004_007").click()
   cy.contains('Assignment 1').click()
-  cy.wait(1000)
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
   cy.get('#assignment_text').click()
   cy.get('#assignment_text').type("Text 1")
-  cy.wait(120000)
+  cy.wait(120000) //wait before submitting the assignment -2 mins-120sec
   cy.contains('SUBMIT',{timeout:5000}).click()
+  cy.wait(1000) //This wait command added to make sure to the error message is visible
+  cy.contains("Deadline has passed").should('exist') // error saying Deadline has passed should be visible
   cy.contains("Not submitted").should('exist') // assignment won't get submitted
 
 })

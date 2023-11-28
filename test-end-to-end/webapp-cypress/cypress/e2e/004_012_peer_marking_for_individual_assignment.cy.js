@@ -38,33 +38,24 @@ it('Admin add a course and assignment block', () => {
 
 it('Teacher add assignment', () => {
   cy.ustadClearDbAndLogin('teacher1','test1234')
-  // Add Assignment block
+ // Add Assignment block
   cy.contains("Course").click()
   cy.contains("004_012").click()
   cy.contains("button","Members").click() // This is a temporary command to make sure member list is loaded
-  cy.wait(5000)
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
   cy.contains("Assignment").click()
   cy.get('input[id="title"]').clear().type("Assignment 1")
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
- /* when grace period is added - student not able to see the assignment
-  cy.get('input[id="hide_until_date"]').click()
-  cy.get('#hide_until_date')
-    .click()
-    .then(input => setDate(input[0], '2023-11-08T00:00'))
- */
-  //cy.ustadSetDateTime(cy.get("#hide_until_date"),  new Date("2023-10-30T08:30"))
   cy.contains("div","Graded").click()
   cy.contains("li","Submitted").click()
   cy.ustadSetDateTime(cy.get("#cbDeadlineDate"),  new Date(Date.now() + (1000*60*1000)))
-  //cy.get('#caSubmissionPolicy').click()
   cy.get('#caMarkingType').click()
   cy.contains("li","Peers").click()
   cy.get('#caPeerReviewerCount').should('exist')
   cy.get('#caPeerReviewerCount').type('1')
-  cy.wait(1000)
+  cy.wait(1000) // wait to load the student list
   cy.get('#buttonAssignReviewers').click()
   cy.contains('Unassigned').eq(0).click()
   cy.get('li[role="option"]').eq(1).should('be.visible')
@@ -75,7 +66,6 @@ it('Teacher add assignment', () => {
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()
   cy.contains("button","Done").should('be.visible')
-  cy.wait(1000)
   cy.contains("button","Done").click()
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
@@ -98,9 +88,7 @@ it('Student1 submit assignment', () => {
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
   cy.get('#assignment_text').click()
   cy.get('#assignment_text').type("Text 1")
-    cy.wait(1000)
   cy.contains('SUBMIT',{timeout:5000}).click()
-    cy.wait(1000)
   cy.go('back')
   cy.contains('Assignment 1',{timeout:1000}).click()
   cy.contains("Not submitted").should('not.exist')
@@ -108,7 +96,6 @@ it('Student1 submit assignment', () => {
 
 it('Student2 add assignment mark and course comment', () => {
   cy.ustadClearDbAndLogin('student2','test1234')
-
  //  Assignment block
   cy.contains("Course").click()
   cy.contains("004_012").click()

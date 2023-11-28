@@ -67,16 +67,8 @@ it('Teacher add assignment and course comment', () => {
   cy.contains("Assignment").click()
   cy.get('input[id="title"]').type("Assignment 1")
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
- /* cy.get('input[id="hide_until_date"]').click()
-  cy.get('#hide_until_date')
-    .click({ multiple: true })
-    .then(input => setDate(input[0], '2023-11-01T00:00'));
-  cy.contains("div","Graded").click()
-  cy.contains("li","Submitted").click()
-  cy.get('#cbDeadlineDate')
-    .then(input => setDate(input[0], '2023-12-20T00:00'));*/
   cy.get('#cgsName').click()
-  cy.wait(5000) // added to load "Add new groups" button
+  cy.wait(2000) // added to load "Add new groups" button
   cy.contains('Add new groups',{timeout: 5000}).click()
   cy.get('#cgs_name').type('Assignment Team')
   cy.get('#cgs_total_groups').clear().type('2')

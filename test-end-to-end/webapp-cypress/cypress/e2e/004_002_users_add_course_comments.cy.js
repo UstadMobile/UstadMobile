@@ -51,10 +51,6 @@ it('Teacher add assignment and course comment', () => {
   cy.contains("Assignment").click()
   cy.get('input[id="title"]').type("Assignment 1")
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
- /* cy.get('input[id="hide_until_date"]').click()
-  cy.get('#hide_until_date')
-    .click({ multiple: true })
-    .then(input => setDate(input[0], '2023-11-01T00:00'));*/
   cy.contains("div","Graded").click()
   cy.contains("li","Submitted").click()
   cy.contains("button","Done").should('be.visible')

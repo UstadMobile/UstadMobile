@@ -86,8 +86,8 @@ it('Teacher add assignment', () => {
   cy.contains("button","Done").click()
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
-  cy.wait(5000)
-  cy.contains("button","Members").should('be.visible')
+  cy.wait(1000) // This command helps to view Assignment to user
+  cy.contains("button","Members",{timeout:2000}).should('be.visible')
 
 })
 
@@ -96,14 +96,12 @@ it('Group 1- Student 1 submit assignment', () => {
   cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains("Course").click()
   cy.contains("004_010").click()
-  cy.wait(5000)
   cy.contains('Assignment 1').click()
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
   cy.get('#assignment_text').click()
   cy.get('#assignment_text').type("Text 1")
   cy.contains('SUBMIT',{timeout:5000}).click()
-  cy.wait(5000)
-   cy.contains("Not submitted").should('not.exist')
+  cy.contains("Not submitted").should('not.exist')
   cy.go('back')
   cy.contains('Assignment 1',{timeout:1000}).click()
   cy.contains("Not submitted").should('not.exist')
@@ -111,16 +109,14 @@ it('Group 1- Student 1 submit assignment', () => {
 
 it('Group 1 - Student2 able to view Group 1 assignment and submit button not visible since it is single submission', () => {
 
-    cy.ustadClearDbAndLogin('student2','test1234')
-
-   //  Assignment block
-    cy.contains("Course").click()
-    cy.contains("004_010").click()
-    cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
-    cy.contains("button","Course").click()
-    cy.contains("Assignment 1").click()
-    cy.contains("Text 1").should('be.visible')
-    cy.contains("SUBMIT").should('not.exist')
-
+  cy.ustadClearDbAndLogin('student2','test1234')
+ //  Assignment block
+  cy.contains("Course").click()
+  cy.contains("004_010").click()
+  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
+  cy.contains("button","Course").click()
+  cy.contains("Assignment 1").click()
+  cy.contains("Text 1").should('be.visible')
+  cy.contains("SUBMIT").should('not.exist')
 })
 })
