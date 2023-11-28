@@ -3,10 +3,12 @@ package com.ustadmobile.libuicompose.view.clazzassignment.submitterdetail
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.material3.ListItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Pending
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,48 +35,36 @@ import app.cash.paging.Pager
 import app.cash.paging.PagingConfig
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.testTag
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
 
 @Composable
-fun ClazzAssignmentDetailStudentProgressScreenForViewModel(
+fun ClazzAssignmentDetailStudentProgressScreen(
     viewModel: ClazzAssignmentSubmitterDetailViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState(ClazzAssignmentSubmitterDetailUiState())
-
-    val newCommentHintText = stringResource(MR.strings.add_private_comment)
-
-//    val localContext = LocalContext.current
 
     ClazzAssignmentDetailStudentProgressScreen(
         uiState = uiState,
         onClickSubmitGrade = viewModel::onClickSubmitMark,
         onClickSubmitGradeAndMarkNext = viewModel::onClickSubmitMarkAndGoNext,
-        onClickNewPrivateComment = {
-            // TODO error
-//            CommentsBottomSheet(
-//                hintText = newCommentHintText,
-//                personUid = uiState.activeUserPersonUid,
-//                onSubmitComment = {
-//                    viewModel.onChangePrivateComment(it)
-//                    viewModel.onSubmitPrivateComment()
-//                }
-//            ).show(localContext.getContextSupportFragmentManager(), "private_comment_sheet")
-        },
+        onChangePrivateComment = viewModel::onChangePrivateComment,
+        onClickSubmitPrivateComment = viewModel::onSubmitPrivateComment,
         onClickGradeFilterChip = viewModel::onClickGradeFilterChip,
         onClickOpenSubmission = viewModel::onClickSubmission,
         onChangeDraftMark = viewModel::onChangeDraftMark,
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ClazzAssignmentDetailStudentProgressScreen(
     uiState: ClazzAssignmentSubmitterDetailUiState,
     onClickSubmitGrade: () -> Unit = {},
     onClickSubmitGradeAndMarkNext: () -> Unit = {},
-    onClickNewPrivateComment: () -> Unit = {},
+    onChangePrivateComment: (String) -> Unit = {},
+    onClickSubmitPrivateComment: () -> Unit = {},
     onClickGradeFilterChip: (MessageIdOption2) -> Unit = {},
     onClickOpenSubmission: (CourseAssignmentSubmission) -> Unit = {},
     onChangeDraftMark: (CourseAssignmentMark?) -> Unit = {},
@@ -97,14 +87,14 @@ fun ClazzAssignmentDetailStudentProgressScreen(
     ) {
         item(key = "status") {
             ListItem(
-                icon = {
+                leadingContent = {
                     Icon(
                         imageVector = SUBMISSION_STATUS_ICON_MAP[uiState.submissionStatus]
                             ?: Icons.Filled.Pending,
                         contentDescription = ""
                     )
                 },
-                text = {
+                headlineContent = {
                     Text(
                         text = stringIdMapResource(
                             map = ClazzAssignmentViewModelConstants.SUBMISSION_STAUTUS_MESSAGE_ID,
@@ -112,7 +102,7 @@ fun ClazzAssignmentDetailStudentProgressScreen(
                         ).capitalizeFirstLetter()
                     )
                 },
-                secondaryText = {
+                supportingContent = {
                     Text(stringResource(MR.strings.status))
                 }
             )
@@ -121,16 +111,16 @@ fun ClazzAssignmentDetailStudentProgressScreen(
         if(uiState.scoreSummaryVisible) {
             item(key = "averagescore") {
                 ListItem(
-                    icon = {
+                    leadingContent = {
                         Icon(
                             imageVector = Icons.Filled.EmojiEvents,
                             contentDescription = ""
                         )
                     },
-                    text = {
+                    headlineContent = {
                         Text("${uiState.averageScore} ${stringResource(MR.strings.points)}")
                     },
-                    secondaryText = {
+                    supportingContent = {
                         Text(stringResource(MR.strings.score))
                     }
                 )
@@ -167,6 +157,7 @@ fun ClazzAssignmentDetailStudentProgressScreen(
                     filterOptions = uiState.markListFilterOptions,
                     selectedChipId = uiState.markListSelectedChipId,
                     onClickFilterChip = onClickGradeFilterChip,
+                    enabled = uiState.fieldsEnabled,
                 )
             }
         }
@@ -203,10 +194,12 @@ fun ClazzAssignmentDetailStudentProgressScreen(
 
         item(key = "new_private_comment") {
             UstadAddCommentListItem(
-                text = stringResource(MR.strings.add_private_comment),
+                modifier = Modifier.testTag("add_private_comment"),
+                commentText = stringResource(MR.strings.add_private_comment),
                 enabled = uiState.fieldsEnabled,
-                personUid = uiState.activeUserPersonUid,
-                onClickAddComment =  onClickNewPrivateComment,
+                currentUserPersonUid = uiState.activeUserPersonUid,
+                onSubmitComment =  onClickSubmitPrivateComment,
+                onCommentChanged = onChangePrivateComment
             )
         }
 
