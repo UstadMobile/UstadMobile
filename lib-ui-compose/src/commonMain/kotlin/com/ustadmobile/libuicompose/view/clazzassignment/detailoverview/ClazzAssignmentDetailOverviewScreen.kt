@@ -297,7 +297,8 @@ fun ClazzAssignmentDetailOverviewScreen(
         item {
             UstadAddCommentListItem(
                 modifier = Modifier.testTag("add_class_comment"),
-                commentText = stringResource(MR.strings.add_class_comment),
+                commentText = uiState.newCourseCommentText,
+                commentLabel = stringResource(MR.strings.add_class_comment),
                 enabled = uiState.fieldsEnabled,
                 currentUserPersonUid = uiState.activeUserPersonUid,
                 onSubmitComment = onClickSubmitCourseComment,
@@ -322,7 +323,8 @@ fun ClazzAssignmentDetailOverviewScreen(
             item {
                 UstadAddCommentListItem(
                     modifier = Modifier.testTag("add_private_comment"),
-                    commentText = stringResource(MR.strings.add_private_comment),
+                    commentText = uiState.newPrivateCommentText,
+                    commentLabel = stringResource(MR.strings.add_private_comment),
                     enabled = uiState.fieldsEnabled,
                     currentUserPersonUid = uiState.activeUserPersonUid,
                     onSubmitComment = onClickSubmitPrivateComment,
