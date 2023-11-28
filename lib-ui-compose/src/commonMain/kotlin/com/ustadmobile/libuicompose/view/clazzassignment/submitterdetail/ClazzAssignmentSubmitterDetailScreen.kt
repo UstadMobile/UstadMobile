@@ -195,7 +195,8 @@ fun ClazzAssignmentDetailStudentProgressScreen(
         item(key = "new_private_comment") {
             UstadAddCommentListItem(
                 modifier = Modifier.testTag("add_private_comment"),
-                commentText = stringResource(MR.strings.add_private_comment),
+                commentText = uiState.newPrivateCommentText,
+                commentLabel = stringResource(MR.strings.add_private_comment),
                 enabled = uiState.fieldsEnabled,
                 currentUserPersonUid = uiState.activeUserPersonUid,
                 onSubmitComment =  onClickSubmitPrivateComment,
