@@ -3,12 +3,18 @@ package com.ustadmobile.libuicompose.view.clazzassignment.detailoverview
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.ListItem
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.EventAvailable
 import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.TaskAlt
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,52 +47,33 @@ import app.cash.paging.PagingConfig
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import androidx.compose.runtime.remember
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
 
 @Composable
 fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverviewViewModel) {
     val uiState by viewModel.uiState.collectAsState(initial = ClazzAssignmentDetailOverviewUiState())
 
-//    val localContext = LocalContext.current
-    val newCourseCommentHint = stringResource(MR.strings.add_class_comment)
-    val newPrivateCommentHint = stringResource(MR.strings.add_private_comment)
-
     ClazzAssignmentDetailOverviewScreen(
         uiState = uiState,
         onClickEditSubmission = viewModel::onClickEditSubmissionText,
-        onClickNewPublicComment = {
-            //  TODO error
-//            CommentsBottomSheet(
-//                hintText = newCourseCommentHint,
-//                personUid = uiState.activeUserPersonUid,
-//                onSubmitComment = {
-//                    viewModel.onChangeCourseCommentText(it)
-//                    viewModel.onClickSubmitCourseComment()
-//                }
-//            ).show(localContext.getContextSupportFragmentManager(), "public_comment_sheet")
-        },
-        onClickNewPrivateComment = {
-            //  TODO error
-//            CommentsBottomSheet(
-//                hintText = newPrivateCommentHint,
-//                personUid = uiState.activeUserPersonUid,
-//                onSubmitComment = {
-//                    viewModel.onChangePrivateCommentText(it)
-//                    viewModel.onClickSubmitCourseComment()
-//                }
-//            ).show(localContext.getContextSupportFragmentManager(), "private_comment_sheet")
-        },
+        onChangeCourseComment = viewModel::onChangeCourseCommentText,
+        onChangePrivateComment = viewModel::onChangePrivateCommentText,
+        onClickSubmitCourseComment = viewModel::onClickSubmitCourseComment,
+        onClickSubmitPrivateComment = viewModel::onClickSubmitPrivateComment,
         onClickSubmitSubmission = viewModel::onClickSubmit
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ClazzAssignmentDetailOverviewScreen(
     uiState: ClazzAssignmentDetailOverviewUiState,
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
-    onClickNewPublicComment: () -> Unit = {},
-    onClickNewPrivateComment: () -> Unit = {},
+    onChangeCourseComment: (String) -> Unit = {},
+    onChangePrivateComment: (String) -> Unit = {},
+    onClickSubmitCourseComment: () -> Unit = {},
+    onClickSubmitPrivateComment: () -> Unit = {},
     onClickEditSubmission: () -> Unit = {},
     onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = {},
     onClickDeleteSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = { },
@@ -145,14 +132,14 @@ fun ClazzAssignmentDetailOverviewScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .defaultItemPadding(),
-                    icon = {
+                    leadingContent = {
                         Icon(
                             Icons.Filled.EventAvailable,
                             contentDescription = null
                         )
                     },
-                    text = { Text("$formattedDateTime (${TimeZone.getDefault().id})")},
-                    secondaryText = { Text(stringResource(MR.strings.deadline)) }
+                    headlineContent = { Text("$formattedDateTime (${TimeZone.getDefault().id})")},
+                    supportingContent = { Text(stringResource(MR.strings.deadline)) }
                 )
             }
         }
@@ -162,15 +149,15 @@ fun ClazzAssignmentDetailOverviewScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultItemPadding(),
-                icon = {
+                leadingContent = {
                     Icon(
                         SUBMISSION_POLICY_MAP[uiState.assignment?.caSubmissionPolicy]
                     ?: Icons.Default.TaskAlt,
                         contentDescription = null
                     )
                 },
-                text = { Text(stringResource(policyMessageId))},
-                secondaryText = { Text(stringResource(MR.strings.submission_policy)) }
+                headlineContent = { Text(stringResource(policyMessageId))},
+                supportingContent = { Text(stringResource(MR.strings.submission_policy)) }
             )
         }
 
@@ -187,20 +174,29 @@ fun ClazzAssignmentDetailOverviewScreen(
 
             item {
                 if(uiState.activeUserCanSubmit) {
-//                    HtmlClickableTextField(
-//                        modifier = Modifier
-//                            .testTag("submission_text_field")
-//                            .fillMaxWidth(),
-//                        html = uiState.latestSubmission?.casText ?: "",
-//                        label = stringResource(MR.strings.text),
-//                        onClick = onClickEditSubmission
-//                    )
+                    UstadRichTextEdit(
+                        modifier = Modifier
+                            .testTag("submission_text_field")
+                            .fillMaxWidth(),
+                        html = uiState.latestSubmission?.casText ?: "",
+                        editInNewScreenLabel = stringResource(MR.strings.text),
+                        placeholder = { Text(stringResource(MR.strings.text)) },
+                        onHtmlChange = {
+                            uiState.latestSubmission?.also {  latestSubmission ->
+                                latestSubmission.shallowCopy {
+                                        casText = it
+                                    }
+                            }
+                        },
+                        onClickToEditInNewScreen = onClickEditSubmission
+                    )
                 }else {
                     UstadHtmlText(
                         modifier = Modifier
                             .testTag("submission_text")
                             .defaultItemPadding(),
                         html = uiState.latestSubmission?.casText ?: "",
+                        htmlMaxLines = 1
                     )
                 }
             }
@@ -209,15 +205,15 @@ fun ClazzAssignmentDetailOverviewScreen(
                 item {
                     ListItem(
                         modifier = Modifier.testTag("add_file"),
-                        text = { Text(stringResource(MR.strings.add_file)) },
-                        secondaryText = {
+                        headlineContent = { Text(stringResource(MR.strings.add_file)) },
+                        supportingContent = {
                             Text(
                                 "${stringResource(MR.strings.file_type_chosen)} $caFileType" +
                                         stringResource(MR.strings.max_number_of_files,
                                             uiState.assignment?.caNumberOfFiles ?: 0),
                             )
                         },
-                        icon = {
+                        leadingContent = {
                             Icon(imageVector = Icons.Default.Add, contentDescription = null)
                         }
                     )
@@ -229,8 +225,8 @@ fun ClazzAssignmentDetailOverviewScreen(
                 key = { Pair(1, it.casaUid) }
             ){ attachment ->
                 ListItem(
-                    text = { Text(attachment.casaFileName ?: "") },
-                    icon = {
+                    headlineContent = { Text(attachment.casaFileName ?: "") },
+                    leadingContent = {
                         Icon(imageVector = Icons.Default.InsertDriveFile, contentDescription = null)
                     }
                 )
@@ -252,13 +248,11 @@ fun ClazzAssignmentDetailOverviewScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .defaultItemPadding(),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = MaterialTheme.colors.secondary
-                    )
+                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary)
                 ) {
                     Text(stringResource(MR.strings.submit).uppercase(),
                         color = contentColorFor(
-                            MaterialTheme.colors.secondary
+                            MaterialTheme.colorScheme.secondary
                         )
                     )
                 }
@@ -269,7 +263,7 @@ fun ClazzAssignmentDetailOverviewScreen(
         if(uiState.activeUserIsSubmitter) {
             item {
                 ListItem(
-                    text = { Text(stringResource(MR.strings.grades_class_age)) }
+                    headlineContent = { Text(stringResource(MR.strings.grades_class_age)) }
                 )
             }
 
@@ -296,16 +290,18 @@ fun ClazzAssignmentDetailOverviewScreen(
 
         item {
             ListItem(
-                text = { Text(stringResource(MR.strings.class_comments)) }
+                headlineContent = { Text(stringResource(MR.strings.class_comments)) }
             )
         }
 
         item {
             UstadAddCommentListItem(
-                text = stringResource(MR.strings.add_class_comment),
+                modifier = Modifier.testTag("add_class_comment"),
+                commentText = stringResource(MR.strings.add_class_comment),
                 enabled = uiState.fieldsEnabled,
-                personUid = 0,
-                onClickAddComment = { onClickNewPublicComment() }
+                currentUserPersonUid = uiState.activeUserPersonUid,
+                onSubmitComment = onClickSubmitCourseComment,
+                onCommentChanged = onChangeCourseComment
             )
         }
 
@@ -319,16 +315,18 @@ fun ClazzAssignmentDetailOverviewScreen(
         if(uiState.activeUserIsSubmitter) {
             item {
                 ListItem(
-                    text = { Text(stringResource(MR.strings.private_comments)) }
+                    headlineContent = { Text(stringResource(MR.strings.private_comments)) }
                 )
             }
 
             item {
                 UstadAddCommentListItem(
-                    text = stringResource(MR.strings.add_private_comment),
+                    modifier = Modifier.testTag("add_private_comment"),
+                    commentText = stringResource(MR.strings.add_private_comment),
                     enabled = uiState.fieldsEnabled,
-                    personUid = 0,
-                    onClickAddComment = { onClickNewPrivateComment() }
+                    currentUserPersonUid = uiState.activeUserPersonUid,
+                    onSubmitComment = onClickSubmitPrivateComment,
+                    onCommentChanged = onChangePrivateComment
                 )
             }
 
