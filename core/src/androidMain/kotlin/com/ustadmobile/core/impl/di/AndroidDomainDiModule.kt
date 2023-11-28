@@ -35,14 +35,15 @@ fun AndroidDomainDiModule(
             OpenExternalLinkUseCaseAndroid(appContext)
         }
 
-        bind<PhoneNumValidatorUseCase>() with provider {
-            PhoneNumValidatorAndroid()
-        }
-
         bind<IPhoneNumberUtil>() with provider {
             IPhoneNumberUtilAndroid(PhoneNumberUtil.createInstance(appContext))
         }
 
+        bind<PhoneNumValidatorUseCase>() with provider {
+            PhoneNumValidatorAndroid(
+                iPhoneNumberUtil = instance()
+            )
+        }
     }
 
 }

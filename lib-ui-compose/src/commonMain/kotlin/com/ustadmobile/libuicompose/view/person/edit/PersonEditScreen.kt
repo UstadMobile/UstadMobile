@@ -42,6 +42,7 @@ fun PersonEditScreen(viewModel: PersonEditViewModel) {
         onPersonChanged = viewModel::onEntityChanged,
         onApprovalPersonParentJoinChanged = viewModel::onApprovalPersonParentJoinChanged,
         onPersonPictureUriChanged = viewModel::onPersonPictureChanged,
+        onNationalNumberSetChanged = viewModel::onNationalPhoneNumSetChanged,
     )
 }
 
@@ -50,7 +51,8 @@ fun PersonEditScreen(
     uiState: PersonEditUiState = PersonEditUiState(),
     onPersonChanged: (PersonWithAccount?) -> Unit = {},
     onApprovalPersonParentJoinChanged: (PersonParentJoin?) -> Unit = {},
-    onPersonPictureUriChanged: (String?) -> Unit = { }
+    onPersonPictureUriChanged: (String?) -> Unit = { },
+    onNationalNumberSetChanged: (Boolean) -> Unit = { },
 ){
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -170,6 +172,11 @@ fun PersonEditScreen(
                         phoneNum = it
                     }
                 )
+            },
+            onNationalNumberSetChanged = onNationalNumberSetChanged,
+            isError = uiState.phoneNumError != null,
+            supportingText = uiState.phoneNumError?.let {
+                { Text(it) }
             }
         )
 

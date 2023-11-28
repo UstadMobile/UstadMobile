@@ -24,6 +24,13 @@ external class PhoneNumber {
     fun isValid(): Boolean
     fun isPossible(): Boolean
 
+
+    fun formatInternational(): String
+
+    fun formatNational(): String
+
+    fun getURI(): String
+
 }
 
 external fun parsePhoneNumber(

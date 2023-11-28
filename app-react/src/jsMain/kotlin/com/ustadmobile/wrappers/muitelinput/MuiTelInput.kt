@@ -14,15 +14,15 @@ external interface MuiTelInputProps: TextFieldProps {
 //As per https://viclafouch.github.io/mui-tel-input/docs/api-reference/
 @Suppress("unused")
 external interface MuiTelInputInfo {
-    var countryCallingCode: String
+    var countryCallingCode: String?
 
-    var countryCode: String
+    var countryCode: String?
 
-    var nationalNumber: String
+    var nationalNumber: String?
 
-    var numberValue: String
+    var numberValue: String?
 
-    var reason: String
+    var reason: String?
 }
 
 external val MuiTelInput: FC<MuiTelInputProps>

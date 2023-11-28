@@ -3,7 +3,7 @@ package com.ustadmobile.core.domain.phonenumber
 import com.google.i18n.phonenumbers.Phonenumber
 
 class PhoneNumberJvm(
-    private val phoneNumber: Phonenumber.PhoneNumber
+    internal val phoneNumber: Phonenumber.PhoneNumber
 ) : IPhoneNumber {
 
     override val countryCode: Int

@@ -30,6 +30,7 @@ import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
 import com.ustadmobile.libuicompose.util.phonenum.CountryCodeTransformation
 import com.ustadmobile.libuicompose.util.phonenum.CountryCodeTransformation.Companion.COUNTRY_CODE_MAX_LEN
 import com.ustadmobile.libuicompose.util.phonenum.PhoneNumberTransformation
+import com.ustadmobile.libuicompose.util.phonenum.guessInitialPhoneCountryCode
 import org.kodein.di.compose.localDI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -43,8 +44,11 @@ import kotlin.math.min
 fun UstadPhoneNumberTextField(
     value: String,
     onValueChange: (String) -> Unit,
+    onNationalNumberSetChanged: ((Boolean) -> Unit)? = null,
     label: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
+    isError: Boolean = false,
+    supportingText: (@Composable () -> Unit)? = null,
 ) {
 
     //As per https://developermemos.com/posts/checking-composable-render-preview
@@ -59,14 +63,17 @@ fun UstadPhoneNumberTextField(
 
     val parsedValue by lazy {
         try {
+            //Because we always store the country code, the defaultRegion has no effect
             phoneUtil.parse(value, "US")
         }catch(e: Throwable) {
             null
         }
     }
 
+    val guessedCountryCode = guessInitialPhoneCountryCode(phoneUtil)
+
     var countryCode by remember {
-        mutableStateOf(parsedValue?.countryCode?.toString() ?: "")
+        mutableStateOf(parsedValue?.countryCode?.toString() ?: guessedCountryCode?.toString() ?: "")
     }
 
     var nationalNumberFieldVal by remember {
@@ -84,9 +91,11 @@ fun UstadPhoneNumberTextField(
                 val numParsed = phoneUtil.parse(value, "US")
                 countryCode = numParsed.countryCode.toString()
                 nationalNumberFieldVal = TextFieldValue(numParsed.nationalNumber.toString())
+                onNationalNumberSetChanged?.invoke(true)
             }catch(e: Throwable) {
-                countryCode = ""
+                countryCode = guessedCountryCode?.toString() ?: ""
                 nationalNumberFieldVal = TextFieldValue("")
+                onNationalNumberSetChanged?.invoke(false)
             }
         }
     }
@@ -127,6 +136,7 @@ fun UstadPhoneNumberTextField(
                 Text("")
             },
             singleLine = true,
+            isError = isError,
             visualTransformation = countryCodeTransformation,
             onValueChange = { newText ->
                 val filteredVal = newText.filter { it.isDigit() }
@@ -186,14 +196,17 @@ fun UstadPhoneNumberTextField(
                     text = filteredTextVal
                 )
                 onValueChange("+$countryCode$filteredTextVal")
+                onNationalNumberSetChanged?.invoke(filteredTextVal.isNotEmpty())
             },
             label = label,
             visualTransformation = visualTransformation,
             singleLine = true,
+            isError = isError,
             modifier = Modifier.weight(1f),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number
             ),
+            supportingText =  supportingText,
         )
     }
 

@@ -289,7 +289,7 @@ private fun ContactDetails(
                         contentDescription = null
                     )
                 },
-                headlineContent = { Text(uiState.person?.phoneNum ?: "")},
+                headlineContent = { Text(uiState.displayPhoneNum ?: uiState.person?.phoneNum ?: "")},
                 supportingContent = { Text(stringResource(MR.strings.phone)) },
                 trailingContent = {
                     IconButton(

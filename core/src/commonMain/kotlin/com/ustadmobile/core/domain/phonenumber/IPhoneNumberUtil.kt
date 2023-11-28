@@ -12,4 +12,8 @@ interface IPhoneNumberUtil {
 
     fun parse(numberToParse: String, defaultRegion: String?): IPhoneNumber
 
+    fun isValidNumber(number: IPhoneNumber): Boolean
+
+    fun formatInternational(number: IPhoneNumber): String
+
 }

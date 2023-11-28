@@ -25,4 +25,12 @@ class IPhoneNumberUtilAndroid(
         return PhoneNumberAndroid(phoneNumberUtil.parse(numberToParse, defaultRegion))
     }
 
+    override fun isValidNumber(number: IPhoneNumber): Boolean {
+        return phoneNumberUtil.isValidNumber((number as PhoneNumberAndroid).phoneNumber)
+    }
+
+    override fun formatInternational(number: IPhoneNumber): String {
+        return phoneNumberUtil.format((number as PhoneNumberAndroid).phoneNumber,
+            PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
+    }
 }

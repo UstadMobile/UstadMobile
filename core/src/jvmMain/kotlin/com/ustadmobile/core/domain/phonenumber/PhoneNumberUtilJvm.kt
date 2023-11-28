@@ -25,4 +25,13 @@ class PhoneNumberUtilJvm(
     override fun parse(numberToParse: String, defaultRegion: String?): IPhoneNumber {
         return PhoneNumberJvm(phoneNumberUtil.parse(numberToParse, defaultRegion))
     }
+
+    override fun isValidNumber(number: IPhoneNumber): Boolean {
+        return phoneNumberUtil.isValidNumber((number as PhoneNumberJvm).phoneNumber)
+    }
+
+    override fun formatInternational(number: IPhoneNumber): String {
+        return phoneNumberUtil.format((number as PhoneNumberJvm).phoneNumber,
+            PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
+    }
 }

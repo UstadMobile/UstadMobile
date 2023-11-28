@@ -1,6 +1,5 @@
-package com.ustadmobile.core.domain.phonenumvalidator
+package com.ustadmobile.core.domain.phonenumber
 
-import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.wrappers.libphonenumber.parsePhoneNumber
 
 class PhoneNumValidatorJs: PhoneNumValidatorUseCase {

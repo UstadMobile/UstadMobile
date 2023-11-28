@@ -10,18 +10,21 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.provider
 import com.google.i18n.phonenumbers.PhoneNumberUtil
+import org.kodein.di.instance
 
 val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
     bind<OpenExternalLinkUseCase>() with provider {
         OpenExternalLinkUseCaseJvm()
     }
 
-    bind<PhoneNumValidatorUseCase>() with provider {
-        PhoneNumValidatorJvm()
-    }
-
     bind<IPhoneNumberUtil>() with provider {
         PhoneNumberUtilJvm(PhoneNumberUtil.getInstance())
+    }
+
+    bind<PhoneNumValidatorUseCase>() with provider {
+        PhoneNumValidatorJvm(
+            iPhoneNumberUtil = instance()
+        )
     }
 
 }

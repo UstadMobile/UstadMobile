@@ -1,9 +1,16 @@
 package com.ustadmobile.core.domain.phonenumber
 
 
-class PhoneNumValidatorAndroid: PhoneNumValidatorUseCase {
+
+class PhoneNumValidatorAndroid(
+    private val iPhoneNumberUtil: IPhoneNumberUtil
+): PhoneNumValidatorUseCase {
     override fun isValid(phoneNumber: String): Boolean {
-        return true
+        return try {
+            iPhoneNumberUtil.isValidNumber(iPhoneNumberUtil.parse(phoneNumber, "US"))
+        }catch(e: Throwable) {
+            false
+        }
     }
 
 }

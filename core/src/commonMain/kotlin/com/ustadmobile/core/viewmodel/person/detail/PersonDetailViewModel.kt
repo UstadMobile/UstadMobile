@@ -2,6 +2,8 @@ package com.ustadmobile.core.viewmodel.person.detail
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
+import com.ustadmobile.core.domain.phonenumber.formatInternationalOrNull
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.INDETERMINATE
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.NOT_LOADING
@@ -14,18 +16,19 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 import com.ustadmobile.core.util.ext.whenSubscribed
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
+import org.kodein.di.instanceOrNull
 
 data class PersonDetailUiState(
 
     val person: PersonWithPersonParentJoin? = null,
+
+    val displayPhoneNum: String? = null,
 
     val personPicture: PersonPicture? = null,
 
@@ -81,6 +84,8 @@ class PersonDetailViewModel(
 
     private val personUid = savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0
 
+    private val phoneNumberUtil: IPhoneNumberUtil? by instanceOrNull()
+
     init {
         val accountManager: UstadAccountManager by instance()
 
@@ -107,7 +112,14 @@ class PersonDetailViewModel(
                         entityUid,
                         currentUserUid
                     ).collect { person ->
-                        _uiState.update { prev -> prev.copy(person = person) }
+                        _uiState.update { prev ->
+                            prev.copy(
+                                person = person,
+                                displayPhoneNum = person?.phoneNum?.let {
+                                    phoneNumberUtil?.formatInternationalOrNull(it)
+                                }
+                            )
+                        }
                         _appUiState.update { prev ->
                             prev.copy(
                                 title = person?.personFullName() ?: "",
