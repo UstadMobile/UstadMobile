@@ -7,6 +7,8 @@ import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCa
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCaseAndroid
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCaseAndroid
+import com.ustadmobile.core.domain.phonenumvalidator.PhoneNumValidatorAndroid
+import com.ustadmobile.core.domain.phonenumvalidator.PhoneNumValidatorUseCase
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
 import org.kodein.di.bind
@@ -28,6 +30,10 @@ fun AndroidDomainDiModule(
 
         bind<OpenExternalLinkUseCase>() with provider {
             OpenExternalLinkUseCaseAndroid(appContext)
+        }
+
+        bind<PhoneNumValidatorUseCase>() with provider {
+            PhoneNumValidatorAndroid()
         }
 
     }

@@ -6,6 +6,8 @@ import com.ustadmobile.core.domain.contententry.import.ImportContentUseCaseJs
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCaseJs
+import com.ustadmobile.core.domain.phonenumvalidator.PhoneNumValidatorJs
+import com.ustadmobile.core.domain.phonenumvalidator.PhoneNumValidatorUseCase
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
@@ -32,5 +34,9 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             openExternalLinkUseCase = instance(),
             apiUrlConfig = instance(),
         )
+    }
+
+    bind<PhoneNumValidatorUseCase>() with provider {
+        PhoneNumValidatorJs()
     }
 }
