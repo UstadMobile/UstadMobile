@@ -62,6 +62,7 @@ val PersonDetailScreen = FC<Props> {
         onClickChangePassword = viewModel::onClickChangePassword
         onClickCreateAccount = viewModel::onClickCreateAccount
         onClickManageParentalConsent = viewModel::onClickManageParentalConsent
+        onClickDial = viewModel::onClickDial
     }
 
 }
@@ -293,6 +294,7 @@ private val ContactDetails = FC<PersonDetailProps> { props ->
             valueText = ReactNode(props.uiState.displayPhoneNum ?: props.uiState.person?.phoneNum ?: "")
             labelText = strings[MR.strings.phone]
             icon = Call.create()
+            onClick = props.onClickDial
         }
     }
 

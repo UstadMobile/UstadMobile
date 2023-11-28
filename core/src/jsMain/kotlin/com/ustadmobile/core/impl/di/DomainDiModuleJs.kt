@@ -7,7 +7,9 @@ import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCaseJs
 import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
-import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorJs
+import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
+import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCaseJs
+import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCaseJs
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumberUtilJs
 import org.kodein.di.DI
@@ -43,6 +45,10 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
     }
 
     bind<PhoneNumValidatorUseCase>() with provider {
-        PhoneNumValidatorJs()
+        PhoneNumValidatorUseCaseJs()
+    }
+
+    bind<OnClickPhoneNumUseCase>() with provider {
+        OnClickPhoneNumUseCaseJs()
     }
 }
