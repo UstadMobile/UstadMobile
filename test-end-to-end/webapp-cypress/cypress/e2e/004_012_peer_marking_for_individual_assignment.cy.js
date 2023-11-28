@@ -1,5 +1,5 @@
 import setDate from '../support/setDate'; //https://github.com/cypress-io/cypress/issues/1366#issuecomment-437878862
-describe('004_001_assignment_creation_submission_grading', () => {
+describe('004_012_peer_marking_for_individual_assignment', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
   cy.ustadStartTestServer()
@@ -9,7 +9,7 @@ it('Admin add a course and assignment block', () => {
  // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass')
  // Add a new course
-  cy.ustadAddCourse('004_001')
+  cy.ustadAddCourse('004_012')
  //Add a teacher
   cy.contains("button","Members").click()
   cy.contains("span","Add a teacher").click()
@@ -26,19 +26,28 @@ it('Admin add a course and assignment block', () => {
   cy.contains("Student 1").click()
   cy.contains('View profile').click()
   cy.ustadCreateUserAccount('student1','test1234')
+ //Add a student2
+  cy.contains("span","Add a student").click()
+  cy.ustadAddNewPerson('Student','2','Male')
+  cy.contains("button","Members").should('be.visible')
+ //Add account for student2
+  cy.contains("Student 2").click()
+  cy.contains('View profile').click()
+  cy.ustadCreateUserAccount('student2','test1234')
 })
 
 it('Teacher add assignment', () => {
   cy.ustadClearDbAndLogin('teacher1','test1234')
   // Add Assignment block
   cy.contains("Course").click()
-  cy.contains("004_001").click()
+  cy.contains("004_012").click()
   cy.contains("button","Members").click() // This is a temporary command to make sure member list is loaded
+  cy.wait(5000)
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
   cy.contains("Assignment").click()
-  cy.get('input[id="title"]').type("Assignment 1")
+  cy.get('input[id="title"]').clear().type("Assignment 1")
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
  /* when grace period is added - student not able to see the assignment
   cy.get('input[id="hide_until_date"]').click()
@@ -50,8 +59,23 @@ it('Teacher add assignment', () => {
   cy.contains("div","Graded").click()
   cy.contains("li","Submitted").click()
   cy.ustadSetDateTime(cy.get("#cbDeadlineDate"),  new Date(Date.now() + (1000*60*1000)))
-  cy.get('#caSubmissionPolicy').click()
+  //cy.get('#caSubmissionPolicy').click()
+  cy.get('#caMarkingType').click()
+  cy.contains("li","Peers").click()
+  cy.get('#caPeerReviewerCount').should('exist')
+  cy.get('#caPeerReviewerCount').type('1')
+  cy.wait(1000)
+  cy.get('#buttonAssignReviewers').click()
+  cy.contains('Unassigned').eq(0).click()
+  cy.get('li[role="option"]').eq(1).should('be.visible')
+  cy.get('li[role="option"]').eq(1).click()
+  cy.contains('Unassigned').eq(0).click()
+  cy.get('li[role="option"]').eq(1).should('be.visible')
+  cy.get('li[role="option"]').eq(1).click()
   cy.contains("button","Done").should('be.visible')
+  cy.contains("button","Done").click()
+  cy.contains("button","Done").should('be.visible')
+  cy.wait(1000)
   cy.contains("button","Done").click()
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
@@ -65,31 +89,33 @@ it('Teacher add assignment', () => {
   cy.contains("button","Members").should('be.visible')
 })
 
-it('Student submit assignment', () => {
+it('Student1 submit assignment', () => {
 
   cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains("Course").click()
-  cy.contains("004_001").click()
+  cy.contains("004_012").click()
   cy.contains('Assignment 1').click()
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
   cy.get('#assignment_text').click()
   cy.get('#assignment_text').type("Text 1")
+    cy.wait(1000)
   cy.contains('SUBMIT',{timeout:5000}).click()
+    cy.wait(1000)
   cy.go('back')
   cy.contains('Assignment 1',{timeout:1000}).click()
   cy.contains("Not submitted").should('not.exist')
 })
 
-it('Teacher add assignment mark and course comment', () => {
-  cy.ustadClearDbAndLogin('teacher1','test1234')
+it('Student2 add assignment mark and course comment', () => {
+  cy.ustadClearDbAndLogin('student2','test1234')
 
  //  Assignment block
   cy.contains("Course").click()
-  cy.contains("004_001").click()
+  cy.contains("004_012").click()
   cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
-  cy.contains('Submissions').click()
+  cy.contains('Peers to review').click()
   cy.contains('Student 1').click()
   cy.contains("Text 1").should('be.visible')
   cy.get('#marker_comment').type("Keep it up")
@@ -99,10 +125,10 @@ it('Teacher add assignment mark and course comment', () => {
   cy.contains('9/10 Points').should('exist')
 })
 
-it('Student view his grade', () => {
+it('Student1 view his grade', () => {
   cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains("Course").click()
-  cy.contains("004_001").click()
+  cy.contains("004_012").click()
   cy.contains('Assignment 1').click()
   cy.contains('Keep it up').should('exist')
   cy.contains('9/10 Points').should('exist')

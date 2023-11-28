@@ -47,7 +47,7 @@ it('Teacher add assignment', () => {
     .then(input => setDate(input[0], '2023-11-08T00:00'))
  */
   cy.contains("div","Graded").click()
-  cy.contains("li","submitted").click()
+  cy.contains("li","Submitted").click()
   cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date("2023-11-01T08:30"))
   cy.get('#cbGracePeriodDate',{timeout:5000}).should('be.visible')
   cy.ustadSetDateTime(cy.get("#cbGracePeriodDate"),  new Date(Date.now() + (60*60*1000)))

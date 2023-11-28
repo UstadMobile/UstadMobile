@@ -62,8 +62,9 @@ it('Teacher add assignment', () => {
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
   cy.contains("Assignment").click()
-  cy.get('input[id="title"]').type("Assignment 1")
+  cy.get('input[id="title"]').clear().type("Assignment 1")
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
+  // cy.ustadSetDateTime(cy.get("#cbDeadlineDate"),  new Date(Date.now() + (1000*60*1000)))
   cy.contains('Must submit all at once').should('exist')
   cy.get('#cgsName').click()
   cy.wait(5000) // added to load "Add new groups" button

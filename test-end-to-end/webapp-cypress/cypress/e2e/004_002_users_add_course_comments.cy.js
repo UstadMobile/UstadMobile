@@ -54,11 +54,9 @@ it('Teacher add assignment and course comment', () => {
  /* cy.get('input[id="hide_until_date"]').click()
   cy.get('#hide_until_date')
     .click({ multiple: true })
-    .then(input => setDate(input[0], '2023-11-01T00:00'));
+    .then(input => setDate(input[0], '2023-11-01T00:00'));*/
   cy.contains("div","Graded").click()
-  cy.contains("li","submitted").click()
-  cy.get('#cbDeadlineDate')
-    .then(input => setDate(input[0], '2023-12-20T00:00'));*/
+  cy.contains("li","Submitted").click()
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()
   cy.contains("button","Save").should('be.visible')

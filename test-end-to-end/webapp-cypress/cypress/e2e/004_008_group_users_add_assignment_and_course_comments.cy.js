@@ -72,7 +72,7 @@ it('Teacher add assignment and course comment', () => {
     .click({ multiple: true })
     .then(input => setDate(input[0], '2023-11-01T00:00'));
   cy.contains("div","Graded").click()
-  cy.contains("li","submitted").click()
+  cy.contains("li","Submitted").click()
   cy.get('#cbDeadlineDate')
     .then(input => setDate(input[0], '2023-12-20T00:00'));*/
   cy.get('#cgsName').click()

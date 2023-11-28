@@ -1,5 +1,5 @@
 import setDate from '../support/setDate'; //https://github.com/cypress-io/cypress/issues/1366#issuecomment-437878862
-describe('004_009_group_users_add_private_comments', () => {
+describe('004_013_peer_marking_for_group_assignment', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
   cy.ustadStartTestServer()
@@ -9,10 +9,7 @@ it('Admin add a course and Members', () => {
  // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass')
  // Add a new course
-  cy.ustadAddCourse('004_009')
- // Add module block
- // cy.contains('button','Edit').click()
- // cy.ustadAddModuleBlock('module 1')
+  cy.ustadAddCourse('004_013')
  //Add a teacher
   cy.contains("button","Members").click()
   cy.contains("span","Add a teacher").click()
@@ -55,11 +52,11 @@ it('Admin add a course and Members', () => {
   cy.ustadCreateUserAccount('student4','test1234')
 })
 
-it('Teacher add assignment and course comment', () => {
+it('Teacher add assignment', () => {
   cy.ustadClearDbAndLogin('teacher1','test1234')
  // Add Assignment block
   cy.contains("Courses").click()
-  cy.contains("004_009").click()
+  cy.contains("004_013").click()
   cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
@@ -67,16 +64,9 @@ it('Teacher add assignment and course comment', () => {
   cy.contains("Assignment").click()
   cy.get('input[id="title"]').type("Assignment 1")
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
- /* cy.get('input[id="hide_until_date"]').click()
-  cy.get('#hide_until_date')
-    .click({ multiple: true })
-    .then(input => setDate(input[0], '2023-11-01T00:00'));
-  cy.contains("div","Graded").click()
-  cy.contains("li","Submitted").click()
-  cy.get('#cbDeadlineDate')
-    .then(input => setDate(input[0], '2023-12-20T00:00'));*/
+  cy.contains('Must submit all at once').should('exist')
   cy.get('#cgsName').click()
-  cy.wait(5000) // added to load "Add new groups" button
+  cy.wait(1000) // added to load "Add new groups" button
   cy.contains('Add new groups',{timeout: 5000}).click()
   cy.get('#cgs_name').type('Assignment Team')
   cy.get('#cgs_total_groups').clear().type('2')
@@ -91,53 +81,81 @@ it('Teacher add assignment and course comment', () => {
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
   cy.get('input[id="title"]').type("Assignment 1")
- // cy.contains('Assignment Team').click()
-  cy.contains("button","Done").should('be.visible')
-  cy.contains("button","Done").click()
-  cy.contains("button","Save").should('be.visible')
-  cy.contains("button","Save").click()
-  cy.contains("button","Members").should('be.visible')
-  cy.get('svg[data-testid="AssignmentTurnedInIcon"]').click()
-  cy.contains('Submissions').click()
-  cy.contains('Group 1').click()
-  cy.get('#private_comment_textfield').click()
-  cy.get('#private_comment_textfield').type("comment1")
-  cy.get('svg[data-testid="SendIcon"]').click()
-  cy.contains("comment1").should('exist')
+   //cy.get('#caSubmissionPolicy').click()
+    cy.get('#caMarkingType').click()
+    cy.contains("li","Peers").click()
+    cy.get('#caPeerReviewerCount').should('exist')
+    cy.get('#caPeerReviewerCount').type('1')
+    cy.wait(1000)
+    cy.get('#buttonAssignReviewers').click()
+    cy.contains('Unassigned').eq(0).click()
+    cy.get('li[role="option"]').eq(1).should('be.visible')
+    cy.get('li[role="option"]').eq(1).click()
+    cy.contains('Unassigned').eq(0).click()
+    cy.get('li[role="option"]').eq(1).should('be.visible')
+    cy.get('li[role="option"]').eq(1).click()
+    cy.contains("button","Done").should('be.visible')
+    cy.contains("button","Done").click()
+    cy.contains("button","Done").should('be.visible')
+    cy.wait(1000)
+    cy.contains("button","Done").click()
+    cy.contains("button","Save").should('be.visible')
+    cy.contains("button","Save").click()
+    cy.contains("button","Members").should('be.visible')
+    cy.contains("button","Edit").click()
+    cy.contains("Assignment 1").click()
+    cy.contains("button","Done").should('be.visible')
+    cy.contains("button","Done").click()
+    cy.contains("button","Save").should('be.visible')
+    cy.contains("button","Save").click()
+    cy.contains("button","Members").should('be.visible')
 
 })
 
-it('Group 1 - Student add private comment', () => {
+it('Group 1- Student 1 submit assignment', () => {
 
   cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains("Course").click()
-  cy.contains("004_009").click()
+  cy.contains("004_013").click()
+  cy.wait(5000)
   cy.contains('Assignment 1').click()
-  cy.get('#private_comment_textfield').click()
- // cy.pause()
-  cy.get('#private_comment_textfield').type("comment2")
-  cy.get('svg[data-testid="SendIcon"]').click()
-  cy.contains("comment1").should('exist')
-  cy.contains("comment2").should('exist')
+  cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
+  cy.get('#assignment_text').click()
+  cy.get('#assignment_text').type("Text 1")
+  cy.contains('SUBMIT',{timeout:5000}).click()
+  cy.wait(5000)
+   cy.contains("Not submitted").should('not.exist')
+  cy.go('back')
+  cy.contains('Assignment 1',{timeout:1000}).click()
+  cy.contains("Not submitted").should('not.exist')
 })
 
-it('Group 2 - Student make sure Group 1 private comment is not visible', () => {
 
+it('Student3 add assignment mark for Group 1', () => {
   cy.ustadClearDbAndLogin('student3','test1234')
+ //  Assignment block
   cy.contains("Course").click()
-  cy.contains("004_009").click()
-  cy.contains('Assignment 1').click()
-  cy.get('#private_comment_textfield').should('exist')
-  cy.contains("comment1").should('not.exist')
-  cy.contains("comment2").should('not.exist')
+  cy.contains("004_013").click()
+  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
+  cy.contains("button","Course").click()
+  cy.contains("Assignment 1").click()
+  cy.contains('Peers to review').click()
+  cy.contains('Group 1').click()
+  cy.contains("Text 1").should('be.visible')
+  cy.get('#marker_comment').type("Keep it up")
+  cy.get('#marker_mark').type('9')
+  cy.get('#submit_mark_button').click()
+  cy.contains('Keep it up').should('exist')
+  cy.contains('9/10 Points').should('exist')
 })
-it('Group 1 - Student2 able to view Group 1 private comment', () => {
 
+it('Student2 -Group 1 view his grade', () => {
   cy.ustadClearDbAndLogin('student2','test1234')
   cy.contains("Course").click()
-  cy.contains("004_009").click()
+  cy.contains("004_013").click()
   cy.contains('Assignment 1').click()
-  cy.contains("comment1").should('exist')
-  cy.contains("comment2").should('exist')
+  cy.contains('Keep it up').should('exist')
+  cy.contains('9/10 Points').should('exist')
+  cy.contains('SUBMIT').should('not.exist') // assertion to make sure multiple submission is not allowed
 })
 })
