@@ -41,12 +41,12 @@ import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
 
 @Composable
-fun ClazzAssignmentDetailStudentProgressScreen(
+fun ClazzAssignmentSubmitterDetailScreen(
     viewModel: ClazzAssignmentSubmitterDetailViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState(ClazzAssignmentSubmitterDetailUiState())
 
-    ClazzAssignmentDetailStudentProgressScreen(
+    ClazzAssignmentSubmitterDetailScreen(
         uiState = uiState,
         onClickSubmitGrade = viewModel::onClickSubmitMark,
         onClickSubmitGradeAndMarkNext = viewModel::onClickSubmitMarkAndGoNext,
@@ -59,7 +59,7 @@ fun ClazzAssignmentDetailStudentProgressScreen(
 }
 
 @Composable
-fun ClazzAssignmentDetailStudentProgressScreen(
+fun ClazzAssignmentSubmitterDetailScreen(
     uiState: ClazzAssignmentSubmitterDetailUiState,
     onClickSubmitGrade: () -> Unit = {},
     onClickSubmitGradeAndMarkNext: () -> Unit = {},

@@ -211,6 +211,7 @@ fun ClazzAssignmentDetailOverviewScreen(
                         UstadRichTextEdit(
                             modifier = Modifier
                                 .testTag("submission_text_field")
+                                .defaultItemPadding()
                                 .fillMaxWidth(),
                             html = uiState.latestSubmission?.casText ?: "",
                             editInNewScreenLabel = stringResource(MR.strings.text),

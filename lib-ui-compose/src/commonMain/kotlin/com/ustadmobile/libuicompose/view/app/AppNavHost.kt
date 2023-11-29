@@ -22,6 +22,7 @@ import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditViewModel
+import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
@@ -52,6 +53,7 @@ import com.ustadmobile.libuicompose.view.clazzassignment.courseblockedit.CourseB
 import com.ustadmobile.libuicompose.view.clazzassignment.detail.ClazzAssignmentDetailScreen
 import com.ustadmobile.libuicompose.view.clazzassignment.edit.ClazzAssignmentEditScreen
 import com.ustadmobile.libuicompose.view.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditScreen
+import com.ustadmobile.libuicompose.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreen
 import com.ustadmobile.libuicompose.view.clazzenrolment.edit.ClazzEnrolmentEditScreen
 import com.ustadmobile.libuicompose.view.clazzenrolment.list.ClazzEnrolmentListScreen
 import com.ustadmobile.libuicompose.view.contententry.list.ContentEntryListScreenForViewModel
@@ -394,6 +396,12 @@ fun AppNavHost(
                     appViewModel(
                         backStackEntry, TextBlockDetailViewModel::class, ::TextBlockDetailViewModel
                     )
+                )
+            }
+            contentScene("/${ClazzAssignmentSubmitterDetailViewModel.DEST_NAME}") { backStackEntry ->
+                ClazzAssignmentSubmitterDetailScreen(
+                    appViewModel(backStackEntry, ClazzAssignmentSubmitterDetailViewModel::class,
+                        ::ClazzAssignmentSubmitterDetailViewModel)
                 )
             }
         }
