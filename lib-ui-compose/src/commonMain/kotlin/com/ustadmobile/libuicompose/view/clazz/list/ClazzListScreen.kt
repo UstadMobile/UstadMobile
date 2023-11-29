@@ -47,7 +47,6 @@ import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.libuicompose.components.SortListMode
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
-import com.ustadmobile.libuicompose.components.UstadBottomSheetSpacer
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import com.ustadmobile.libuicompose.components.ustadPagedItems
@@ -115,8 +114,6 @@ fun ClazzListScreen(
                     leadingContent = { Icon(Icons.Default.Add, contentDescription = null) },
                 )
             }
-
-            UstadBottomSheetSpacer()
         }
     }
 
@@ -203,6 +200,8 @@ fun ClazzListItem(
     onClickClazz: (Clazz) -> Unit
 ){
 
+
+    @Suppress("UNUSED_VARIABLE") //Reserved for future use
     val role = RoleConstants.ROLE_MESSAGE_IDS.find {
         it.value == clazz?.clazzActiveEnrolment?.clazzEnrolmentRole
     }?.stringResource
