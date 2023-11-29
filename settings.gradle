@@ -47,6 +47,8 @@ dependencyResolutionManagement {
             version("version_aztec", "v1.6.3")
             version("version_volley", "1.2.1")
             version("version_androidx_constraintlayout", "2.1.4")
+            version("version_libphonenumber_google", "8.12.56")
+            version("version_libphonenumber_android", "8.13.25")
 
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
@@ -115,6 +117,8 @@ dependencyResolutionManagement {
             library("compose-webview-multiplatform", "io.github.kevinnzou", "compose-webview-multiplatform").versionRef("version_compose_webview_multiplatform")
             library("quartz", "org.quartz-scheduler", "quartz").versionRef("version_quartz_scheduler")
             library("simplejndi", "com.github.h-thurow", "simple-jndi").versionRef("version_simplejndi")
+            library("libphonenumber-google", "com.googlecode.libphonenumber", "libphonenumber").versionRef("version_libphonenumber_google")
+            library("libphonenumber-android", "io.michaelrocks", "libphonenumber-android").versionRef("version_libphonenumber_android")
         }
     }
 }

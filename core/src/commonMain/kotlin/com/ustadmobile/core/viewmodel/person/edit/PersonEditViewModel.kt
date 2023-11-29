@@ -2,7 +2,7 @@ package com.ustadmobile.core.viewmodel.person.edit
 
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.phonenumvalidator.PhoneNumValidatorUseCase
+import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -22,6 +22,7 @@ import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_UNSET
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.PersonWithAccount
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
@@ -74,6 +75,16 @@ data class PersonEditUiState(
 
     val phoneNumError: String? = null,
 
+    /**
+     * Used to determine if the user has actually set a phone number. This is set by the UI
+     * components as a user inputs a number. True if the national phone number part (e.g. not just
+     * country code) is set, false otherwise.
+     *
+     * A person without any phone number set is allowed, but if a number is entered, it will be
+     * validated.
+     */
+    val nationalPhoneNumSet: Boolean = false,
+
 ) {
 
     val parentalEmailVisible: Boolean
@@ -111,6 +122,7 @@ class PersonEditViewModel(
         _appUiState.update {
             AppUiState(
                 title = title,
+                hideBottomNavigation = true,
             )
         }
 
@@ -298,8 +310,13 @@ class PersonEditViewModel(
         return isValid
     }
 
-    fun onClickSave() {
+    fun onNationalPhoneNumSetChanged(phoneNumSet: Boolean) {
+        _uiState.takeIf { it.value.nationalPhoneNumSet != phoneNumSet }?.update { prev ->
+            prev.copy(nationalPhoneNumSet = phoneNumSet)
+        }
+    }
 
+    fun onClickSave() {
         if(!_uiState.value.fieldsEnabled)
             return
 
@@ -309,7 +326,10 @@ class PersonEditViewModel(
 
         loadingState = LoadingUiState.INDETERMINATE
         _uiState.update { prev -> prev.copy(fieldsEnabled = false) }
-        val savePerson = _uiState.value.person ?: return
+        val savePerson = _uiState.value.person?.shallowCopy {
+            phoneNum = phoneNum?.trim()?.replace(" ", "")
+        } ?: return
+
         val requiredFieldMessage = systemImpl.getString(MR.strings.field_required_prompt)
         val currentTime = systemTimeInMillis()
         val isRegistrationMode = registrationModeFlags.hasFlag(REGISTER_MODE_ENABLED)
@@ -338,12 +358,12 @@ class PersonEditViewModel(
                 firstNameError = if(savePerson.firstNames.isNullOrEmpty()) requiredFieldMessage else null,
                 lastNameError = if(savePerson.lastName.isNullOrEmpty()) requiredFieldMessage else null,
                 genderError = if(savePerson.gender == GENDER_UNSET) requiredFieldMessage else null,
-                phoneNumError = savePerson.phoneNum?.takeIf { it.isNotBlank() }?.let {
-                    if(!phoneNumValidatorUseCase.isValid(it)) {
-                        systemImpl.getString(MR.strings.invalid)
-                    }else {
-                        null
-                    }
+                phoneNumError = if(_uiState.value.nationalPhoneNumSet &&
+                    savePerson.phoneNum?.let { phoneNumValidatorUseCase.isValid(it) } != true
+                ) {
+                    systemImpl.getString(MR.strings.invalid)
+                }else {
+                    null
                 },
             )
         }

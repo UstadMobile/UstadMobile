@@ -7,7 +7,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.phonenumvalidator.PhoneNumValidatorUseCase
+import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
@@ -362,6 +362,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
                     phoneNum = invalidNum
                     gender = Person.GENDER_MALE
                 })
+                viewModel.onNationalPhoneNumSetChanged(true)
 
                 cancelAndIgnoreRemainingEvents()
             }
@@ -402,6 +403,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
                     phoneNum = invalidNum
                     gender = Person.GENDER_MALE
                 })
+                viewModel.onNationalPhoneNumSetChanged(true)
 
                 cancelAndIgnoreRemainingEvents()
             }

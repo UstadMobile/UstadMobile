@@ -61,14 +61,17 @@ kotlin {
                 implementation(libs.aztec)
 
                 implementation(libs.android.material)
+                implementation(libs.libphonenumber.android)
             }
         }
 
         val desktopMain by getting {
             dependencies {
                 api(compose.desktop.common)
-                implementation(libs.richeditor.multiplatform.compose)
                 implementation(compose.desktop.currentOs)
+
+                implementation(libs.richeditor.multiplatform.compose)
+                implementation(libs.libphonenumber.google)
             }
         }
     }
