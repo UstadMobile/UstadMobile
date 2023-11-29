@@ -26,6 +26,8 @@ import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditView
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
+import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
+import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.textblockdetail.TextBlockDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
@@ -54,6 +56,8 @@ import com.ustadmobile.libuicompose.view.clazzenrolment.edit.ClazzEnrolmentEditS
 import com.ustadmobile.libuicompose.view.clazzenrolment.list.ClazzEnrolmentListScreen
 import com.ustadmobile.libuicompose.view.contententry.list.ContentEntryListScreenForViewModel
 import com.ustadmobile.libuicompose.view.courseblock.textblockdetail.TextBlockDetailScreen
+import com.ustadmobile.libuicompose.view.coursegroupset.detail.CourseGroupSetDetailScreen
+import com.ustadmobile.libuicompose.view.coursegroupset.edit.CourseGroupSetEditScreen
 import com.ustadmobile.libuicompose.view.discussionpost.coursediscussiondetail.CourseDiscussionDetailScreen
 import com.ustadmobile.libuicompose.view.discussionpost.detail.DiscussionPostDetailScreen
 import com.ustadmobile.libuicompose.view.discussionpost.edit.DiscussionPostEditScreen
@@ -372,6 +376,19 @@ fun AppNavHost(
                 )
             }
 
+            contentScene("/${CourseGroupSetDetailViewModel.DEST_NAME}") { backStackEntry ->
+                CourseGroupSetDetailScreen(
+                    appViewModel(backStackEntry, CourseGroupSetDetailViewModel::class,
+                        ::CourseGroupSetDetailViewModel)
+                )
+            }
+
+            contentScene("/${CourseGroupSetEditViewModel.DEST_NAME}") { backStackEntry ->
+                CourseGroupSetEditScreen(
+                    appViewModel(backStackEntry, CourseGroupSetEditViewModel::class,
+                        ::CourseGroupSetEditViewModel)
+                )
+            }
             contentScene("/${TextBlockDetailViewModel.DEST_NAME}") { backStackEntry ->
                 TextBlockDetailScreen(
                     appViewModel(

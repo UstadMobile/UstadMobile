@@ -27,7 +27,7 @@ import com.ustadmobile.libuicompose.components.UstadNumberTextField
 
 
 @Composable
-fun CourseGroupSetEditScreenForViewModel(
+fun CourseGroupSetEditScreen(
     viewModel: CourseGroupSetEditViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState(CourseGroupSetEditUiState())
