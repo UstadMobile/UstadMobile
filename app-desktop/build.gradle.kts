@@ -40,6 +40,7 @@ dependencies {
     api(libs.moko.resources.compose)
     api(libs.precompose)
     api(libs.precompose.viewmodel)
+    implementation(libs.libphonenumber.google)
 }
 
 compose.desktop {

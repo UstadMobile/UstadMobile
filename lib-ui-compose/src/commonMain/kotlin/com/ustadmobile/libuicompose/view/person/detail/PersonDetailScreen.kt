@@ -59,6 +59,8 @@ fun PersonDetailScreen(viewModel: PersonDetailViewModel) {
         onClickChat = viewModel::onClickChat,
         onClickManageParentalConsent = viewModel::onClickManageParentalConsent,
         onClickClazz = viewModel::onClickClazz,
+        onClickDial = viewModel::onClickDial,
+        onClickSms = viewModel::onClickSms,
     )
 }
 
@@ -148,21 +150,22 @@ private fun QuickActionBar(
     Row(
         modifier = Modifier.horizontalScroll(rememberScrollState())
     ) {
-
         if (uiState.phoneNumVisible){
-
             UstadQuickActionButton(
                 labelText = stringResource(MR.strings.call),
                 imageVector = Icons.Filled.Call,
                 onClick = onClickDial
             )
+        }
 
+        if(uiState.sendSmsVisible) {
             UstadQuickActionButton(
                 labelText = stringResource(MR.strings.text),
                 imageVector = Icons.Filled.Sms,
                 onClick = onClickSms
             )
         }
+
 
         if (uiState.emailVisible){
             UstadQuickActionButton(
@@ -289,17 +292,21 @@ private fun ContactDetails(
                         contentDescription = null
                     )
                 },
-                headlineContent = { Text(uiState.person?.phoneNum ?: "")},
+                headlineContent = { Text(uiState.displayPhoneNum ?: uiState.person?.phoneNum ?: "")},
                 supportingContent = { Text(stringResource(MR.strings.phone)) },
-                trailingContent = {
-                    IconButton(
-                        onClick = onClickSms,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Message,
-                            contentDescription = stringResource(MR.strings.message),
-                        )
+                trailingContent = if(uiState.sendSmsVisible) {
+                    {
+                        IconButton(
+                            onClick = onClickSms,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Message,
+                                contentDescription = stringResource(MR.strings.message),
+                            )
+                        }
                     }
+                }else {
+                    null
                 }
             )
         }

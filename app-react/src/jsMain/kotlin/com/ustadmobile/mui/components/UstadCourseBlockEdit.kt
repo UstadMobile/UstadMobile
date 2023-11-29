@@ -2,6 +2,7 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.viewmodel.courseblock.CourseBlockViewModelConstants.CompletionCriteria
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -98,7 +99,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
                     label = strings[MR.strings.completion_criteria]
                     options = props.uiState.completionCriteriaOptions
                     itemValue = { it.value.toString() }
-                    itemLabel = { ReactNode(strings[it.stringResource]) }
+                    itemLabel = { ReactNode(strings[it.stringResource].capitalizeFirstLetter()) }
                     enabled = props.uiState.fieldsEnabled
                     onChange = {
                         props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
