@@ -26,6 +26,7 @@ import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditView
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
+import com.ustadmobile.core.viewmodel.courseblock.textblockdetail.TextBlockDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
@@ -52,6 +53,7 @@ import com.ustadmobile.libuicompose.view.clazzassignment.peerreviewerallocatione
 import com.ustadmobile.libuicompose.view.clazzenrolment.edit.ClazzEnrolmentEditScreen
 import com.ustadmobile.libuicompose.view.clazzenrolment.list.ClazzEnrolmentListScreen
 import com.ustadmobile.libuicompose.view.contententry.list.ContentEntryListScreenForViewModel
+import com.ustadmobile.libuicompose.view.courseblock.textblockdetail.TextBlockDetailScreen
 import com.ustadmobile.libuicompose.view.discussionpost.coursediscussiondetail.CourseDiscussionDetailScreen
 import com.ustadmobile.libuicompose.view.discussionpost.detail.DiscussionPostDetailScreen
 import com.ustadmobile.libuicompose.view.discussionpost.edit.DiscussionPostEditScreen
@@ -370,6 +372,13 @@ fun AppNavHost(
                 )
             }
 
+            contentScene("/${TextBlockDetailViewModel.DEST_NAME}") { backStackEntry ->
+                TextBlockDetailScreen(
+                    appViewModel(
+                        backStackEntry, TextBlockDetailViewModel::class, ::TextBlockDetailViewModel
+                    )
+                )
+            }
         }
     }
 }
