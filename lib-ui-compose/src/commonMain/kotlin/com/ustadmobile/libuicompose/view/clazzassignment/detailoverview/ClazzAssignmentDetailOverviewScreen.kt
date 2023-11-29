@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -49,10 +48,14 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
+import kotlinx.coroutines.Dispatchers
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
 fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverviewViewModel) {
-    val uiState by viewModel.uiState.collectAsState(initial = ClazzAssignmentDetailOverviewUiState())
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle(
+        ClazzAssignmentDetailOverviewUiState(), Dispatchers.Main.immediate
+    )
 
     ClazzAssignmentDetailOverviewScreen(
         uiState = uiState,
@@ -61,7 +64,7 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
         onChangePrivateComment = viewModel::onChangePrivateCommentText,
         onClickSubmitCourseComment = viewModel::onClickSubmitCourseComment,
         onClickSubmitPrivateComment = viewModel::onClickSubmitPrivateComment,
-        onClickSubmitSubmission = viewModel::onClickSubmit
+        onClickSubmitSubmission = viewModel::onClickSubmit,
     )
 }
 
@@ -77,7 +80,7 @@ fun ClazzAssignmentDetailOverviewScreen(
     onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = {},
     onClickDeleteSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = { },
     onClickAddFileSubmission: () -> Unit = { },
-    onClickSubmitSubmission: () -> Unit = { }
+    onClickSubmitSubmission: () -> Unit = { },
 ){
 
     val privateCommentsPager = remember(uiState.privateComments) {
@@ -175,7 +178,7 @@ fun ClazzAssignmentDetailOverviewScreen(
             }
         }
 
-        item {
+        item(key = "submission_header") {
             UstadAssignmentSubmissionHeader(
                 uiState = uiState.submissionHeaderUiState,
             )
@@ -333,7 +336,7 @@ fun ClazzAssignmentDetailOverviewScreen(
                     enabled = uiState.fieldsEnabled,
                     currentUserPersonUid = uiState.activeUserPersonUid,
                     onSubmitComment = onClickSubmitCourseComment,
-                    onCommentChanged = onChangeCourseComment
+                    onCommentChanged = onChangeCourseComment,
                 )
             }
 
@@ -375,7 +378,7 @@ fun ClazzAssignmentDetailOverviewScreen(
 
         //The collapse scrolling policy means we have to add space to ensure the user can scroll to
         // see last items - otherwise they could be hidden behind bottom navigation.
-        item {
+        item(key = "bottomspacer") {
             Spacer(modifier = Modifier.height(96.dp))
         }
     }
