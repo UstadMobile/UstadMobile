@@ -3,9 +3,10 @@ package com.ustadmobile.libuicompose.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.IconButton
@@ -50,17 +51,18 @@ fun UstadAddCommentListItem(
 
     if(editCommentInBottomSheet && bottomSheetExpanded) {
         ModalBottomSheet(
-            onDismissRequest= {
+            onDismissRequest = {
                 bottomSheetExpanded = false
-            }
+            },
+            modifier = Modifier.fillMaxSize(),
+            windowInsets = WindowInsets.ime,
         ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).height(150.dp),
-                verticalAlignment = Alignment.Top
-            ) {
+
+            Row(modifier = Modifier.defaultItemPadding()) {
+
                 UstadPersonAvatar(
                     personUid = currentUserPersonUid,
-                    modifier = Modifier.size(40.dp).align(Alignment.Top)
+                    modifier = Modifier.size(40.dp).align(Alignment.CenterVertically)
                 )
 
                 Spacer(modifier = Modifier.width(10.dp))
