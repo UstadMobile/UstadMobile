@@ -22,7 +22,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 
 @Composable
-fun CourseGroupSetDetailScreenForViewModel(
+fun CourseGroupSetDetailScreen(
     viewModel: CourseGroupSetDetailViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState(CourseGroupSetDetailUiState())
