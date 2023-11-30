@@ -72,6 +72,7 @@ fun SiteEnterLinkScreen(
             painter = painterResource(
                 imageResource = MR.images.illustration_connect
             ),
+            modifier = Modifier.size(156.dp),
             contentDescription = null,
         )
 
