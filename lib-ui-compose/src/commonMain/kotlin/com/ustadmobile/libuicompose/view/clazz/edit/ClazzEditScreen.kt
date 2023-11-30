@@ -35,7 +35,6 @@ import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
-import com.ustadmobile.libuicompose.components.UstadBottomSheetSpacer
 import com.ustadmobile.libuicompose.components.UstadClickableTextField
 import com.ustadmobile.libuicompose.components.UstadDateField
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
@@ -114,7 +113,6 @@ fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
                     leadingContent = { Icon(Icons.Default.Forum, contentDescription = null) },
                     secondaryContent = { Text(stringResource(MR.strings.add_discussion_board_desc)) }
                 )
-                UstadBottomSheetSpacer()
             }
 
         }
