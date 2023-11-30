@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Surface
@@ -35,20 +36,23 @@ class AppActivity: AppCompatActivity(), DIAware {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        //As per https://developer.android.com/jetpack/compose/layouts/insets
+        //Insets are handled by topappbar and bottomnavigatino as required
+        enableEdgeToEdge()
+
         setContent {
+            val windowSizeClass = calculateWindowSizeClass(this)
             UstadMobileTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    val windowSizeClass = calculateWindowSizeClass(this)
                     withDI(di) {
                         PreComposeApp {
                             App(
                                 widthClass = windowSizeClass.widthSizeClass.multiplatformSizeClass
                             )
                         }
-
                     }
                 }
             }

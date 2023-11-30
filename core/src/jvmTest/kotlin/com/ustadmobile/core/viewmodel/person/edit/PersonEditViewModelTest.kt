@@ -7,6 +7,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
@@ -336,6 +337,88 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
         }
     }
 
+    @Test
+    fun givenInvalidPhoneNumberIncluded_whenSaved_shouldValidatePhoneNumberAndShowError() {
+        testViewModel<PersonEditViewModel> {
+            viewModelFactory {
+                PersonEditViewModel(di, savedStateHandle)
+            }
+
+            val mockPhoneValidator = mock<PhoneNumValidatorUseCase> {
+                on { isValid(any()) }.thenReturn(false)
+            }
+
+            extendDi {
+                bind<PhoneNumValidatorUseCase>() with singleton { mockPhoneValidator }
+            }
+
+            val invalidNum = "+1234"
+
+            viewModel.uiState.test(timeout = 5.seconds) {
+                val initState = awaitItemWhere { it.fieldsEnabled && it.person != null }
+                viewModel.onEntityChanged(initState.person?.shallowCopy {
+                    firstNames = "bob"
+                    lastName = "newtestuser"
+                    phoneNum = invalidNum
+                    gender = Person.GENDER_MALE
+                })
+                viewModel.onNationalPhoneNumSetChanged(true)
+
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            viewModel.onClickSave()
+
+            verify(mockPhoneValidator).isValid(invalidNum)
+            viewModel.uiState.assertItemReceived {
+                it.phoneNumError == systemImpl.getString(MR.strings.invalid)
+            }
+        }
+    }
+
+
+
+    @Test
+    fun givenValidPhoneNumberIncluded_whenSaved_shouldValidatePhoneNumberAndShowError() {
+        testViewModel<PersonEditViewModel> {
+            viewModelFactory {
+                PersonEditViewModel(di, savedStateHandle)
+            }
+
+            val mockPhoneValidator = mock<PhoneNumValidatorUseCase> {
+                on { isValid(any()) }.thenReturn(true)
+            }
+
+            extendDi {
+                bind<PhoneNumValidatorUseCase>() with singleton { mockPhoneValidator }
+            }
+
+            val invalidNum = "+19097187456"
+
+            viewModel.uiState.test(timeout = 5.seconds) {
+                val initState = awaitItemWhere { it.fieldsEnabled && it.person != null }
+                viewModel.onEntityChanged(initState.person?.shallowCopy {
+                    firstNames = "bob"
+                    lastName = "newtestuser"
+                    phoneNum = invalidNum
+                    gender = Person.GENDER_MALE
+                })
+                viewModel.onNationalPhoneNumSetChanged(true)
+
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            viewModel.onClickSave()
+
+            verify(mockPhoneValidator).isValid(invalidNum)
+
+            activeDb.doorFlow(arrayOf("Person")) {
+                activeDb.personDao.getAllPerson()
+            }.assertItemReceived(timeout = 5.seconds) { list ->
+                list.any { it.lastName == "newtestuser" }
+            }
+        }
+    }
 
 
 

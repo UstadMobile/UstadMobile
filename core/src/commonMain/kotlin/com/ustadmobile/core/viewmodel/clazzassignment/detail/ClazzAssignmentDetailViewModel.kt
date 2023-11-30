@@ -17,6 +17,10 @@ data class ClazzAssignmentDetailUiState(
     val tabs: List<TabItem> = emptyList(),
 )
 
+/**
+ * This is ALWAYS used within the assignment detail tab, so the destination name is actually
+ * assignmentdetail
+ */
 class ClazzAssignmentDetailViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle

@@ -160,6 +160,7 @@ kotlin {
                 implementation "io.ktor:ktor-server-core:$version_ktor"
                 implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
                 implementation libs.javaffmpeg
+                implementation libs.libphonenumber.google
             }
         }
 
@@ -237,6 +238,7 @@ kotlin {
                 implementation libs.androidx.navigation.ui.ktx
 
                 implementation libs.android.material
+                implementation libs.libphonenumber.android
 
 
 
@@ -267,6 +269,8 @@ kotlin {
                 //required by asmcrypto - see webpack.confg.d
                 implementation npm("stream-browserify", "$version_stream_browserify")
                 implementation npm("buffer","$version_npm_buffer")
+
+                implementation npm("libphonenumber-js", "$version_npm_libphonenumber_js")
             }
         }
 

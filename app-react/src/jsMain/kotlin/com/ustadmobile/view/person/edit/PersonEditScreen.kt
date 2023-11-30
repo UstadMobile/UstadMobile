@@ -17,6 +17,7 @@ import com.ustadmobile.mui.components.UstadDateField
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.view.components.UstadImageSelectButton
+import com.ustadmobile.wrappers.muitelinput.MuiTelInput
 import mui.material.FormControl
 import mui.material.FormHelperText
 import mui.material.InputLabel
@@ -42,6 +43,9 @@ external interface PersonEditScreenProps : Props{
     var onApprovalPersonParentJoinChanged: (PersonParentJoin?) -> Unit
 
     var onPersonPictureUriChanged: (String?) -> Unit
+
+    var onNationalPhoneNumSetChanged: (Boolean) -> Unit
+
 }
 
 val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
@@ -174,16 +178,21 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                 }
             }
 
-            UstadTextEditField {
+            MuiTelInput {
                 value = props.uiState.person?.phoneNum ?: ""
-                label = strings[MR.strings.phone_number]
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
+                label = ReactNode(strings[MR.strings.phone_number])
+                disabled = !props.uiState.fieldsEnabled
+                onChange = { number, telInfo ->
                     props.onPersonChanged(
                         props.uiState.person?.shallowCopy {
-                            phoneNum = it
-                    })
+                            phoneNum = number
+                        }
+                    )
+
+                    props.onNationalPhoneNumSetChanged(!telInfo.nationalNumber.isNullOrBlank())
                 }
+                error = props.uiState.phoneNumError != null
+                helperText = props.uiState.phoneNumError.let { ReactNode(it) }
             }
 
             TextField {
@@ -237,7 +246,8 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                         props.onPersonChanged(
                             props.uiState.person?.shallowCopy {
                                 newPassword = it
-                        })
+                            }
+                        )
                     }
                 }
             }
@@ -283,5 +293,6 @@ val PersonEditScreen = FC<Props> {
         onPersonChanged = viewModel::onEntityChanged
         onApprovalPersonParentJoinChanged = viewModel::onApprovalPersonParentJoinChanged
         onPersonPictureUriChanged = viewModel::onPersonPictureChanged
+        onNationalPhoneNumSetChanged = viewModel::onNationalPhoneNumSetChanged
     }
 }

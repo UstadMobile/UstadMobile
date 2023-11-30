@@ -15,6 +15,7 @@ import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.latestUniqueMarksByMarker
 import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -235,7 +236,7 @@ class ClazzAssignmentDetailOverviewViewModel(
         systemImpl = di.direct.instance(),
     ),
 ) : DetailViewModel<ClazzAssignment>(
-    di, savedStateHandle, DEST_NAME
+    di, savedStateHandle, ClazzAssignmentDetailViewModel.DEST_NAME
 ){
 
     private val _uiState = MutableStateFlow(ClazzAssignmentDetailOverviewUiState())

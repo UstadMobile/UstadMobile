@@ -9,14 +9,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ListItem
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.EventAvailable
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -50,10 +48,14 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
+import kotlinx.coroutines.Dispatchers
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
 fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverviewViewModel) {
-    val uiState by viewModel.uiState.collectAsState(initial = ClazzAssignmentDetailOverviewUiState())
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle(
+        ClazzAssignmentDetailOverviewUiState(), Dispatchers.Main.immediate
+    )
 
     ClazzAssignmentDetailOverviewScreen(
         uiState = uiState,
@@ -62,7 +64,7 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
         onChangePrivateComment = viewModel::onChangePrivateCommentText,
         onClickSubmitCourseComment = viewModel::onClickSubmitCourseComment,
         onClickSubmitPrivateComment = viewModel::onClickSubmitPrivateComment,
-        onClickSubmitSubmission = viewModel::onClickSubmit
+        onClickSubmitSubmission = viewModel::onClickSubmit,
     )
 }
 
@@ -78,7 +80,7 @@ fun ClazzAssignmentDetailOverviewScreen(
     onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = {},
     onClickDeleteSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = { },
     onClickAddFileSubmission: () -> Unit = { },
-    onClickSubmitSubmission: () -> Unit = { }
+    onClickSubmitSubmission: () -> Unit = { },
 ){
 
     val privateCommentsPager = remember(uiState.privateComments) {
@@ -118,7 +120,7 @@ fun ClazzAssignmentDetailOverviewScreen(
             .defaultScreenPadding()
     ) {
         if (uiState.caDescriptionVisible){
-            item {
+            item(key = "cbDescription") {
                 UstadHtmlText(
                     html = uiState.courseBlock?.cbDescription ?: "",
                     modifier = Modifier.defaultItemPadding()
@@ -127,11 +129,9 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         if (uiState.cbDeadlineDateVisible){
-            item {
+            item(key = "deadline") {
                 ListItem(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .defaultItemPadding(),
+                    modifier = Modifier.fillMaxWidth(),
                     leadingContent = {
                         Icon(
                             Icons.Filled.EventAvailable,
@@ -144,11 +144,10 @@ fun ClazzAssignmentDetailOverviewScreen(
             }
         }
 
-        item {
+        item(key = "submissionpolicy") {
             ListItem(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .defaultItemPadding(),
+                    .fillMaxWidth(),
                 leadingContent = {
                     Icon(
                         SUBMISSION_POLICY_MAP[uiState.assignment?.caSubmissionPolicy]
@@ -161,47 +160,85 @@ fun ClazzAssignmentDetailOverviewScreen(
             )
         }
 
-        item {
+        uiState.courseGroupSet?.also { groupSet ->
+            item(key = "submissionGroups") {
+                ListItem(
+                    leadingContent = {
+                        Icon(
+                            Icons.Default.Groups, contentDescription = null
+                        )
+                    },
+                    headlineContent = {
+                        Text(groupSet.cgsName ?: "")
+                    },
+                    supportingContent = {
+                        Text(stringResource(MR.strings.group_submission))
+                    }
+                )
+            }
+        }
+
+        item(key = "submission_header") {
             UstadAssignmentSubmissionHeader(
                 uiState = uiState.submissionHeaderUiState,
             )
         }
 
+        if(uiState.unassignedErrorVisible) {
+            item("unassigned_error") {
+                Text(
+                    text = uiState.unassignedError ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.defaultItemPadding()
+                )
+            }
+        }
+
         if(uiState.activeUserIsSubmitter) {
-            item {
-                UstadEditHeader(text = stringResource(MR.strings.your_submission))
+            item(key = "your_submission_header") {
+                val suffix = if (uiState.isGroupSubmission) {
+                    stringResource(MR.strings.group_number, uiState.submitterUid.toString())
+                } else {
+                    ""
+                }
+                UstadEditHeader(stringResource(MR.strings.your_submission) + " " + suffix)
             }
 
-            item {
-                if(uiState.activeUserCanSubmit) {
-                    UstadRichTextEdit(
-                        modifier = Modifier
-                            .testTag("submission_text_field")
-                            .fillMaxWidth(),
-                        html = uiState.latestSubmission?.casText ?: "",
-                        editInNewScreenLabel = stringResource(MR.strings.text),
-                        placeholder = { Text(stringResource(MR.strings.text)) },
-                        onHtmlChange = {
-                            uiState.latestSubmission?.also {  latestSubmission ->
-                                latestSubmission.shallowCopy {
+
+            if(uiState.submissionTextFieldVisible) {
+                item(key = "submission") {
+                    if(uiState.activeUserCanSubmit) {
+                        UstadRichTextEdit(
+                            modifier = Modifier
+                                .testTag("submission_text_field")
+                                .defaultItemPadding()
+                                .fillMaxWidth(),
+                            html = uiState.latestSubmission?.casText ?: "",
+                            editInNewScreenLabel = stringResource(MR.strings.text),
+                            placeholder = { Text(stringResource(MR.strings.text)) },
+                            onHtmlChange = {
+                                uiState.latestSubmission?.also {  latestSubmission ->
+                                    latestSubmission.shallowCopy {
                                         casText = it
                                     }
-                            }
-                        },
-                        onClickToEditInNewScreen = onClickEditSubmission
-                    )
-                }else {
-                    UstadHtmlText(
-                        modifier = Modifier
-                            .testTag("submission_text")
-                            .defaultItemPadding(),
-                        html = uiState.latestSubmission?.casText ?: ""
-                    )
+                                }
+                            },
+                            onClickToEditInNewScreen = onClickEditSubmission
+                        )
+                    }else {
+                        UstadHtmlText(
+                            modifier = Modifier
+                                .testTag("submission_text")
+                                .defaultItemPadding(),
+                            html = uiState.latestSubmission?.casText ?: ""
+                        )
+                    }
                 }
+
             }
 
             if(uiState.addFileVisible) {
-                item {
+                item(key = "add_file_button") {
                     ListItem(
                         modifier = Modifier.testTag("add_file"),
                         headlineContent = { Text(stringResource(MR.strings.add_file)) },
@@ -230,43 +267,39 @@ fun ClazzAssignmentDetailOverviewScreen(
                     }
                 )
             }
-        }
 
-        if (uiState.unassignedErrorVisible) {
-            item {
-                Text(uiState.unassignedError ?: "",
-                    modifier = Modifier.defaultItemPadding())
+            if (uiState.submitSubmissionButtonVisible){
+                item(key = "submit_button") {
+                    Button(
+                        onClick = onClickSubmitSubmission,
+                        enabled = uiState.fieldsEnabled,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .defaultItemPadding(),
+                    ) {
+                        Text(stringResource(MR.strings.submit))
+                    }
+                }
             }
-        }
 
-        if (uiState.submitSubmissionButtonVisible){
-            item {
-                Button(
-                    onClick = onClickSubmitSubmission,
-                    enabled = uiState.fieldsEnabled,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .defaultItemPadding(),
-                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary)
-                ) {
-                    Text(stringResource(MR.strings.submit).uppercase(),
-                        color = contentColorFor(
-                            MaterialTheme.colorScheme.secondary
-                        )
+            uiState.submissionError?.also { submissionError ->
+                item(key = "submission_error") {
+                    Text(
+                        text = submissionError,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.defaultItemPadding()
                     )
                 }
             }
-        }
 
 
-        if(uiState.activeUserIsSubmitter) {
-            item {
+            item(key = "grades_header") {
                 ListItem(
-                    headlineContent = { Text(stringResource(MR.strings.grades_class_age)) }
+                    headlineContent = { Text(stringResource(MR.strings.grades_scoring)) }
                 )
             }
 
-            item {
+            item(key = "grades_filter_chips") {
                 UstadListFilterChipsHeader(
                     filterOptions = uiState.gradeFilterChips,
                     selectedChipId = uiState.selectedChipId,
@@ -285,7 +318,8 @@ fun ClazzAssignmentDetailOverviewScreen(
                     ),
                 )
             }
-        }
+
+        } //End section that is only for submitters
 
         item {
             ListItem(
@@ -293,27 +327,31 @@ fun ClazzAssignmentDetailOverviewScreen(
             )
         }
 
-        item {
-            UstadAddCommentListItem(
-                modifier = Modifier.testTag("add_class_comment"),
-                commentText = uiState.newCourseCommentText,
-                commentLabel = stringResource(MR.strings.add_class_comment),
-                enabled = uiState.fieldsEnabled,
-                currentUserPersonUid = uiState.activeUserPersonUid,
-                onSubmitComment = onClickSubmitCourseComment,
-                onCommentChanged = onChangeCourseComment
-            )
+
+        if(uiState.showClassComments) {
+            item(key = "add_class_comment_item") {
+                UstadAddCommentListItem(
+                    modifier = Modifier.testTag("add_class_comment"),
+                    commentText = uiState.newCourseCommentText,
+                    commentLabel = stringResource(MR.strings.add_class_comment),
+                    enabled = uiState.fieldsEnabled,
+                    currentUserPersonUid = uiState.activeUserPersonUid,
+                    onSubmitComment = onClickSubmitCourseComment,
+                    onCommentChanged = onChangeCourseComment,
+                )
+            }
+
+            ustadPagedItems(
+                pagingItems = courseCommentsLazyPagingItems,
+                key = { Pair(4, it.comment.commentsUid) }
+            ){
+                CommentListItem(commentAndName = it)
+            }
         }
 
-        ustadPagedItems(
-            pagingItems = courseCommentsLazyPagingItems,
-            key = { Pair(4, it.comment.commentsUid) }
-        ){
-            CommentListItem(commentAndName = it)
-        }
 
-        if(uiState.activeUserIsSubmitter) {
-            item {
+        if(uiState.showPrivateComments) {
+            item(key = "add_private_comment_item") {
                 ListItem(
                     headlineContent = { Text(stringResource(MR.strings.private_comments)) }
                 )
@@ -341,7 +379,7 @@ fun ClazzAssignmentDetailOverviewScreen(
 
         //The collapse scrolling policy means we have to add space to ensure the user can scroll to
         // see last items - otherwise they could be hidden behind bottom navigation.
-        item {
+        item(key = "bottomspacer") {
             Spacer(modifier = Modifier.height(96.dp))
         }
     }
