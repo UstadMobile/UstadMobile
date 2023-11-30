@@ -3,6 +3,7 @@ package com.ustadmobile.libuicompose.view.clazzassignment.detail
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
@@ -22,10 +23,12 @@ fun ClazzAssignmentDetailScreen(
     backStackEntry: BackStackEntry,
     navController: UstadNavControllerPreCompose,
     onSetAppUiState: (AppUiState) -> Unit,
+    onShowSnackBar: SnackBarDispatcher,
     navResultReturner: NavResultReturner,
 ) {
     val viewModel = ustadViewModel(
-        ClazzAssignmentDetailViewModel::class, backStackEntry, navController, onSetAppUiState, navResultReturner
+        ClazzAssignmentDetailViewModel::class, backStackEntry, navController, onSetAppUiState,
+        navResultReturner, onShowSnackBar
     ) { di, savedStateHandle ->
         ClazzAssignmentDetailViewModel(di, savedStateHandle)
     }
@@ -39,6 +42,7 @@ fun ClazzAssignmentDetailScreen(
         backStackEntry = backStackEntry,
         navController = navController,
         onSetAppUiState = onSetAppUiState,
+        onShowSnackBar = onShowSnackBar,
         navResultReturner = navResultReturner
     )
 }
@@ -49,6 +53,7 @@ fun ClazzAssignmentDetailScreen(
     backStackEntry: BackStackEntry,
     navController: UstadNavControllerPreCompose,
     onSetAppUiState: (AppUiState) -> Unit,
+    onShowSnackBar: SnackBarDispatcher,
     navResultReturner: NavResultReturner,
 ) {
     UstadScreenTabs(
@@ -56,7 +61,8 @@ fun ClazzAssignmentDetailScreen(
         backStackEntry = backStackEntry,
         navController = navController,
         onSetAppUiState = onSetAppUiState,
-        navResultReturner = navResultReturner
+        onShowSnackBar = onShowSnackBar,
+        navResultReturner = navResultReturner,
     ) {
         when(it.viewName) {
             ClazzAssignmentDetailOverviewViewModel.DEST_NAME -> {

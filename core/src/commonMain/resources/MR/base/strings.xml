@@ -1672,4 +1672,9 @@
 
     <string name="link">Link</string>
 
+    <!--
+    The time at which a user submitted something e.g. an assignment.
+    -->
+    <string name="time_submitted">Time submitted</string>
+
 </resources>

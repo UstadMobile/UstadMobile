@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.PopNavCommand
@@ -22,6 +23,7 @@ import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditViewModel
+import com.ustadmobile.core.viewmodel.clazzassignment.submissiondetail.CourseAssignmentSubmissionDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
@@ -53,6 +55,7 @@ import com.ustadmobile.libuicompose.view.clazzassignment.courseblockedit.CourseB
 import com.ustadmobile.libuicompose.view.clazzassignment.detail.ClazzAssignmentDetailScreen
 import com.ustadmobile.libuicompose.view.clazzassignment.edit.ClazzAssignmentEditScreen
 import com.ustadmobile.libuicompose.view.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditScreen
+import com.ustadmobile.libuicompose.view.clazzassignment.submissiondetail.CourseAssignmentSubmissionDetailScreen
 import com.ustadmobile.libuicompose.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreen
 import com.ustadmobile.libuicompose.view.clazzenrolment.edit.ClazzEnrolmentEditScreen
 import com.ustadmobile.libuicompose.view.clazzenrolment.list.ClazzEnrolmentListScreen
@@ -89,6 +92,7 @@ import kotlin.reflect.KClass
 fun AppNavHost(
     navigator: Navigator,
     onSetAppUiState: (AppUiState) -> Unit,
+    onShowSnackBar: SnackBarDispatcher,
     persistNavState: Boolean = false,
     modifier: Modifier,
 ) {
@@ -135,6 +139,7 @@ fun AppNavHost(
         backStackEntry = backStackEntry,
         navController = ustadNavController,
         onSetAppUiState = onSetAppUiState,
+        onShowSnackBar = onShowSnackBar,
         navResultReturner = navResultReturner,
         block = block
     )
@@ -220,7 +225,7 @@ fun AppNavHost(
             ClazzListViewModel.ALL_DEST_NAMES.forEach { destName ->
                 contentScene("/$destName") { backStackEntry ->
                     ClazzListScreen(
-                        backStackEntry, ustadNavController, onSetAppUiState, navResultReturner, destName
+                        backStackEntry, ustadNavController, onSetAppUiState, navResultReturner, onShowSnackBar, destName
                     )
                 }
             }
@@ -247,7 +252,7 @@ fun AppNavHost(
 
             contentScene("/${ClazzDetailViewModel.DEST_NAME}") { backStackEntry ->
                 ClazzDetailScreen(
-                    backStackEntry, ustadNavController, onSetAppUiState, navResultReturner,
+                    backStackEntry, ustadNavController, onSetAppUiState, onShowSnackBar, navResultReturner,
                 )
             }
 
@@ -374,7 +379,7 @@ fun AppNavHost(
 
             contentScene("/${ClazzAssignmentDetailViewModel.DEST_NAME}") { backStackEntry ->
                 ClazzAssignmentDetailScreen(
-                    backStackEntry, ustadNavController, onSetAppUiState, navResultReturner,
+                    backStackEntry, ustadNavController, onSetAppUiState, onShowSnackBar, navResultReturner,
                 )
             }
 
@@ -402,6 +407,15 @@ fun AppNavHost(
                 ClazzAssignmentSubmitterDetailScreen(
                     appViewModel(backStackEntry, ClazzAssignmentSubmitterDetailViewModel::class,
                         ::ClazzAssignmentSubmitterDetailViewModel)
+                )
+            }
+
+            contentScene("/${CourseAssignmentSubmissionDetailViewModel.DEST_NAME}") { backStackEntry ->
+                CourseAssignmentSubmissionDetailScreen(
+                    appViewModel(
+                        backStackEntry, CourseAssignmentSubmissionDetailViewModel::class,
+                            ::CourseAssignmentSubmissionDetailViewModel
+                    )
                 )
             }
         }

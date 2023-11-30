@@ -174,4 +174,15 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
     """)
     abstract fun checkNoSubmissionsMadeFlow(assignmentUid: Long): Flow<Boolean>
 
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
+    @Query("""
+        SELECT CourseAssignmentSubmission.*
+          FROM CourseAssignmentSubmission
+         WHERE casUid = :submissionUid
+    """)
+    abstract fun findByUidAsFlow(submissionUid: Long): Flow<CourseAssignmentSubmission?>
+
 }

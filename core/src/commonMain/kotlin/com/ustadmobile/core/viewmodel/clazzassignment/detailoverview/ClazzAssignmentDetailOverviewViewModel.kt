@@ -144,8 +144,12 @@ data class ClazzAssignmentDetailOverviewUiState(
             if(!isWithinDeadlineOrGracePeriod)
                 return false
 
+            //User must not submit or be shown option to submit until the entity is added when loading
+            if(latestSubmission == null)
+                return false
+
             if(assignment?.caSubmissionPolicy == ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE &&
-                (latestSubmission?.casTimestamp ?: 1) > 0
+                latestSubmission.casTimestamp > 0
             ) {
                 return false
             }
@@ -187,8 +191,12 @@ data class ClazzAssignmentDetailOverviewUiState(
     val latePenaltyVisible: Boolean
         get() = submissionMark.let { it  != null && it.averagePenalty != 0 }
 
+    /**
+     * Submission text field will be visible when text submission is required, active user is a submitter,
+     * and the latest submission is not null (entity will be set by viewmodel as part of loading process).
+     */
     val submissionTextFieldVisible: Boolean
-        get() = assignment?.caRequireTextSubmission == true && activeUserIsSubmitter
+        get() = assignment?.caRequireTextSubmission == true && activeUserIsSubmitter && latestSubmission != null
 
     private val latestUniqueMarksByMarker: List<CourseAssignmentMarkAndMarkerName>
         get() = markList.latestUniqueMarksByMarker()

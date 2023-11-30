@@ -10,7 +10,6 @@ import androidx.compose.material.icons.filled.Pending
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.ustadmobile.core.util.MessageIdOption2
@@ -39,12 +38,16 @@ import androidx.compose.ui.platform.testTag
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
+import kotlinx.coroutines.Dispatchers
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
 fun ClazzAssignmentSubmitterDetailScreen(
     viewModel: ClazzAssignmentSubmitterDetailViewModel
 ) {
-    val uiState by viewModel.uiState.collectAsState(ClazzAssignmentSubmitterDetailUiState())
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle(
+        ClazzAssignmentSubmitterDetailUiState(), Dispatchers.Main.immediate
+    )
 
     ClazzAssignmentSubmitterDetailScreen(
         uiState = uiState,

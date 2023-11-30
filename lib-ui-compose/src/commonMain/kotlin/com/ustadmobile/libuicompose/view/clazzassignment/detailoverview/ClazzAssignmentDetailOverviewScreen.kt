@@ -45,7 +45,6 @@ import app.cash.paging.PagingConfig
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import androidx.compose.runtime.remember
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
 import kotlinx.coroutines.Dispatchers
@@ -65,6 +64,7 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
         onClickSubmitCourseComment = viewModel::onClickSubmitCourseComment,
         onClickSubmitPrivateComment = viewModel::onClickSubmitPrivateComment,
         onClickSubmitSubmission = viewModel::onClickSubmit,
+        onChangeSubmissionText = viewModel::onChangeSubmissionText,
     )
 }
 
@@ -77,6 +77,7 @@ fun ClazzAssignmentDetailOverviewScreen(
     onClickSubmitCourseComment: () -> Unit = {},
     onClickSubmitPrivateComment: () -> Unit = {},
     onClickEditSubmission: () -> Unit = {},
+    onChangeSubmissionText: (String) -> Unit = { },
     onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = {},
     onClickDeleteSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = { },
     onClickAddFileSubmission: () -> Unit = { },
@@ -217,11 +218,7 @@ fun ClazzAssignmentDetailOverviewScreen(
                             editInNewScreenLabel = stringResource(MR.strings.text),
                             placeholder = { Text(stringResource(MR.strings.text)) },
                             onHtmlChange = {
-                                uiState.latestSubmission?.also {  latestSubmission ->
-                                    latestSubmission.shallowCopy {
-                                        casText = it
-                                    }
-                                }
+                                onChangeSubmissionText(it)
                             },
                             onClickToEditInNewScreen = onClickEditSubmission
                         )

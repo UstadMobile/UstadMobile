@@ -84,7 +84,8 @@ expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
                LEFT JOIN Person
                          ON Person.personUid = CourseAssignmentMark.camMarkerPersonUid
          WHERE CourseAssignmentMark.camAssignmentUid = :assignmentUid
-           AND CourseAssignmentMark.camSubmitterUid = :submitterUid                         
+           AND CourseAssignmentMark.camSubmitterUid = :submitterUid
+      ORDER BY CourseAssignmentMark.camLct DESC                             
     """)
     abstract fun getAllMarksForSubmitterAsFlow(
         submitterUid: Long,

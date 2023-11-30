@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailUiState
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
@@ -25,15 +26,18 @@ fun ClazzDetailScreen(
     backStackEntry: BackStackEntry,
     navController: UstadNavControllerPreCompose,
     onSetAppUiState: (AppUiState) -> Unit,
+    onShowSnackbar: SnackBarDispatcher,
     navResultReturner: NavResultReturner,
 ) {
     val clazzDetailViewModel = ustadViewModel(
-        ClazzDetailViewModel::class, backStackEntry, navController, onSetAppUiState, navResultReturner
+        ClazzDetailViewModel::class, backStackEntry, navController, onSetAppUiState,
+        navResultReturner, onShowSnackbar
     ) { di, savedStateHandle ->
         ClazzDetailViewModel(di, savedStateHandle)
     }
 
-    ClazzDetailScreen(clazzDetailViewModel, backStackEntry, navController, onSetAppUiState, navResultReturner)
+    ClazzDetailScreen(clazzDetailViewModel, backStackEntry, navController, onSetAppUiState,
+        onShowSnackbar, navResultReturner)
 }
 
 @Composable
@@ -42,13 +46,15 @@ fun ClazzDetailScreen(
     backStackEntry: BackStackEntry,
     navController: UstadNavControllerPreCompose,
     onSetAppUiState: (AppUiState) -> Unit,
+    onShowSnackbar: SnackBarDispatcher,
     navResultReturner: NavResultReturner,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle(
         ClazzDetailUiState(), Dispatchers.Main.immediate
     )
 
-    ClazzDetailScreen(uiState, backStackEntry, navController, onSetAppUiState, navResultReturner)
+    ClazzDetailScreen(uiState, backStackEntry, navController, onSetAppUiState, onShowSnackbar,
+        navResultReturner)
 }
 
 @Composable
@@ -57,6 +63,7 @@ fun ClazzDetailScreen(
     backStackEntry: BackStackEntry,
     navController: UstadNavControllerPreCompose,
     onSetAppUiState: (AppUiState) -> Unit,
+    onShowSnackbar: SnackBarDispatcher,
     navResultReturner: NavResultReturner,
 ) {
 
@@ -65,7 +72,8 @@ fun ClazzDetailScreen(
         backStackEntry = backStackEntry,
         navController = navController,
         onSetAppUiState = onSetAppUiState,
-        navResultReturner = navResultReturner
+        navResultReturner = navResultReturner,
+        onShowSnackBar = onShowSnackbar
     ) {
         when(it.viewName) {
             ClazzDetailOverviewViewModel.DEST_NAME -> {
