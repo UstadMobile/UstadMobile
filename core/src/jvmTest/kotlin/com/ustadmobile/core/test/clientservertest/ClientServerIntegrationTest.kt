@@ -7,7 +7,9 @@ import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
+import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitterNameUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
@@ -46,6 +48,7 @@ import org.kodein.di.on
 import org.kodein.di.registerContextTranslator
 import org.kodein.di.scoped
 import org.kodein.di.singleton
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
@@ -122,6 +125,8 @@ fun clientServerIntegrationTest(
             json(json = json)
         }
     }
+
+    val mockSnackBarDispatcher: SnackBarDispatcher = mock { }
     val tempDir = Files.createTempDirectory("client-server-integration-test").toFile()
 
     val serverEndpointScope = EndpointScope()
@@ -207,6 +212,14 @@ fun clientServerIntegrationTest(
 
                 bind<NavResultReturner>() with singleton {
                     spy(NavResultReturnerImpl())
+                }
+
+                bind<SnackBarDispatcher>() with singleton {
+                    mockSnackBarDispatcher
+                }
+
+                bind<GetAssignmentSubmitterNameUseCase>() with scoped(clientEndpointScope).singleton {
+                    GetAssignmentSubmitterNameUseCase(clientRepo, instance())
                 }
 
                 registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
