@@ -10,11 +10,13 @@ import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailUiState
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
+import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.libuicompose.components.UstadScreenTabs
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.view.clazz.detailoverview.ClazzDetailOverviewScreen
 import com.ustadmobile.libuicompose.view.clazzenrolment.clazzmemberlist.ClazzMemberListScreen
+import com.ustadmobile.libuicompose.view.clazzlog.attendancelist.ClazzLogListAttendanceScreen
 import com.ustadmobile.libuicompose.view.coursegroupset.list.CourseGroupSetListScreen
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
 import kotlinx.coroutines.Dispatchers
@@ -98,6 +100,15 @@ fun ClazzDetailScreen(
                     }
                 )
             }
+
+            ClazzLogListAttendanceViewModel.DEST_NAME -> {
+                ClazzLogListAttendanceScreen(
+                    tabViewModel(ClazzLogListAttendanceViewModel::class) { di, savedStateHandle ->
+                        ClazzLogListAttendanceViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+
             else -> {
                 Text(it.viewName)
             }

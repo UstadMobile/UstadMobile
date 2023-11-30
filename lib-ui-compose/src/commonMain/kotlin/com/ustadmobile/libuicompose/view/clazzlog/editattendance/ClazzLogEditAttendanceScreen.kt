@@ -45,7 +45,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
 
 @Composable
-fun ClazzLogEditAttendanceScreenForViewModel(
+fun ClazzLogEditAttendanceScreen(
     viewModel: ClazzLogEditAttendanceViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState(ClazzLogEditAttendanceUiState())
