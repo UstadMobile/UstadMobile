@@ -25,6 +25,8 @@ import com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
+import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
+import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
@@ -56,6 +58,8 @@ import com.ustadmobile.libuicompose.view.clazzassignment.peerreviewerallocatione
 import com.ustadmobile.libuicompose.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreen
 import com.ustadmobile.libuicompose.view.clazzenrolment.edit.ClazzEnrolmentEditScreen
 import com.ustadmobile.libuicompose.view.clazzenrolment.list.ClazzEnrolmentListScreen
+import com.ustadmobile.libuicompose.view.clazzlog.attendancelist.ClazzLogListAttendanceScreen
+import com.ustadmobile.libuicompose.view.clazzlog.editattendance.ClazzLogEditAttendanceScreen
 import com.ustadmobile.libuicompose.view.contententry.list.ContentEntryListScreenForViewModel
 import com.ustadmobile.libuicompose.view.courseblock.textblockdetail.TextBlockDetailScreen
 import com.ustadmobile.libuicompose.view.coursegroupset.detail.CourseGroupSetDetailScreen
@@ -402,6 +406,21 @@ fun AppNavHost(
                 ClazzAssignmentSubmitterDetailScreen(
                     appViewModel(backStackEntry, ClazzAssignmentSubmitterDetailViewModel::class,
                         ::ClazzAssignmentSubmitterDetailViewModel)
+                )
+            }
+
+            contentScene("/${ClazzLogEditAttendanceViewModel.DEST_NAME}") { backStackEntry ->
+                ClazzLogEditAttendanceScreen(
+                    appViewModel(backStackEntry, ClazzLogEditAttendanceViewModel::class,
+                        ::ClazzLogEditAttendanceViewModel)
+                )
+            }
+
+
+            contentScene("/${ClazzLogListAttendanceViewModel.DEST_NAME}") { backStackEntry ->
+                ClazzLogListAttendanceScreen(
+                    appViewModel(backStackEntry, ClazzLogListAttendanceViewModel::class,
+                        ::ClazzLogListAttendanceViewModel)
                 )
             }
         }
