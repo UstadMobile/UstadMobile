@@ -141,6 +141,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                 casSubmitterPersonUid = testContext.person.personUid
                 casSubmitterUid = testContext.person.personUid
                 casText = "I can has cheezburger"
+                casAssignmentUid = testContext.assignment.caUid
             })
 
             viewModelFactory {
@@ -175,6 +176,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                 casSubmitterUid = testContext.person.personUid
                 casSubmitterPersonUid = testContext.person.personUid
                 casText = "Test text"
+                casAssignmentUid = testContext.assignment.caUid
             })
 
             viewModelFactory {
@@ -251,6 +253,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                 casSubmitterPersonUid = testContext.person.personUid
                 casSubmitterUid = testContext.person.personUid
                 casText = "I can has cheezburger"
+                casAssignmentUid = testContext.assignment.caUid
             })
 
             //insert mark
