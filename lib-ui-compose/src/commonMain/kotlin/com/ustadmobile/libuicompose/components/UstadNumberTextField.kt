@@ -28,6 +28,7 @@ fun UstadNumberTextField(
     ),
     supportingText: (@Composable () -> Unit)? = null,
     unsetDefault: Float = 0f,
+    singleLine: Boolean = true,
 ) {
 
     var rawValue by remember(value) {
@@ -50,5 +51,6 @@ fun UstadNumberTextField(
         trailingIcon = trailingIcon,
         keyboardOptions = keyboardOptions,
         supportingText = supportingText,
+        singleLine = singleLine,
     )
 }

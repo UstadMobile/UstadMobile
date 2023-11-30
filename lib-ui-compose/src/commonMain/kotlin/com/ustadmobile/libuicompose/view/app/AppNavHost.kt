@@ -34,6 +34,7 @@ import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.textblockdetail.TextBlockDetailViewModel
+import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
@@ -67,6 +68,7 @@ import com.ustadmobile.libuicompose.view.contententry.list.ContentEntryListScree
 import com.ustadmobile.libuicompose.view.courseblock.textblockdetail.TextBlockDetailScreen
 import com.ustadmobile.libuicompose.view.coursegroupset.detail.CourseGroupSetDetailScreen
 import com.ustadmobile.libuicompose.view.coursegroupset.edit.CourseGroupSetEditScreen
+import com.ustadmobile.libuicompose.view.coursegroupset.list.CourseGroupSetListScreen
 import com.ustadmobile.libuicompose.view.discussionpost.coursediscussiondetail.CourseDiscussionDetailScreen
 import com.ustadmobile.libuicompose.view.discussionpost.detail.DiscussionPostDetailScreen
 import com.ustadmobile.libuicompose.view.discussionpost.edit.DiscussionPostEditScreen
@@ -435,6 +437,13 @@ fun AppNavHost(
                 ClazzLogListAttendanceScreen(
                     appViewModel(backStackEntry, ClazzLogListAttendanceViewModel::class,
                         ::ClazzLogListAttendanceViewModel)
+                )
+            }
+
+            contentScene("/${CourseGroupSetListViewModel.DEST_NAME}") { backStackEntry ->
+                CourseGroupSetListScreen(
+                    appViewModel(backStackEntry, CourseGroupSetListViewModel::class,
+                        ::CourseGroupSetListViewModel)
                 )
             }
         }

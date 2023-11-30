@@ -82,6 +82,7 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
         SELECT CourseAssignmentSubmission.*
           FROM CourseAssignmentSubmission
          WHERE casSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
+           AND CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
       ORDER BY casTimestamp DESC
          LIMIT 1
     """)
@@ -94,7 +95,8 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
         SELECT EXISTS
                (SELECT CourseAssignmentSubmission.casUid
                   FROM CourseAssignmentSubmission
-                 WHERE casSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL))
+                 WHERE CourseAssignmentSubmission.casSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
+                   AND CourseAssignmentSubmission.casAssignmentUid = :assignmentUid)
     """)
     abstract suspend fun doesUserHaveSubmissions(
         accountPersonUid: Long,

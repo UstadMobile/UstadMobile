@@ -16,7 +16,9 @@ import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitterNameUseCase
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.viewmodel.clazzassignment.hasUpdatedMarks
 import com.ustadmobile.core.viewmodel.clazzassignment.latestUniqueMarksByMarker
+import com.ustadmobile.core.viewmodel.clazzassignment.submissionStatusFor
 import com.ustadmobile.core.viewmodel.clazzassignment.submissiondetail.CourseAssignmentSubmissionDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
@@ -44,8 +46,6 @@ import kotlin.math.max
  * the currently active user to submit)
  * @param markNextStudentVisible if true, show a button for the marker to record the mark for the
  * current submitter and move to the next submission that requires marking.
- * @param markListFilterChipsVisible If there are previous (superceded) grades, the use should see
- * filter chips with the option to see all, or only the latest.
  * @param privateCommentsList list of private comments for this submitter
  * @param newPrivateCommentText private comment text currently being drafted by user on screen
  */
@@ -97,11 +97,7 @@ data class ClazzAssignmentSubmitterDetailUiState(
 
     val submissionStatus: Int
         get() {
-            return when {
-                marks.isNotEmpty() -> CourseAssignmentSubmission.MARKED
-                submissionList.isNotEmpty() -> CourseAssignmentSubmission.SUBMITTED
-                else -> CourseAssignmentSubmission.NOT_SUBMITTED
-            }
+            return submissionStatusFor(marks, submissionList)
         }
 
     private val latestUniqueMarksByMarker: List<CourseAssignmentMarkAndMarkerName>
@@ -144,12 +140,7 @@ data class ClazzAssignmentSubmitterDetailUiState(
         }
 
     val markListFilterChipsVisible: Boolean
-        get() {
-            //Determine if there are multiple marks from a single marker submitter uid.
-            return marks
-                .groupingBy { it.courseAssignmentMark?.camMarkerSubmitterUid ?: 0L }
-                .eachCount().any { it.value > 1 }
-        }
+        get() = marks.hasUpdatedMarks()
 
     val scoreSummaryVisible: Boolean
         get() = marks.isNotEmpty()

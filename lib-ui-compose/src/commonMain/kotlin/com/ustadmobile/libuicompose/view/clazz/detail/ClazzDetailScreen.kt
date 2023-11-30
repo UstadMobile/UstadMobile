@@ -1,7 +1,6 @@
 package com.ustadmobile.libuicompose.view.clazz.detail
 
 import androidx.compose.runtime.Composable
-import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
@@ -76,18 +75,18 @@ fun ClazzDetailScreen(
         onSetAppUiState = onSetAppUiState,
         navResultReturner = navResultReturner,
         onShowSnackBar = onShowSnackbar
-    ) {
-        when(it.viewName) {
+    ) { tabItem ->
+        when(tabItem.viewName) {
             ClazzDetailOverviewViewModel.DEST_NAME -> {
                 ClazzDetailOverviewScreen(
-                    tabViewModel(ClazzDetailOverviewViewModel::class) { di, savedStateHandle ->
+                    tabViewModel(ClazzDetailOverviewViewModel::class, tabItem) { di, savedStateHandle ->
                         ClazzDetailOverviewViewModel(di, savedStateHandle)
                     }
                 )
             }
             ClazzMemberListViewModel.DEST_NAME -> {
                 ClazzMemberListScreen(
-                    tabViewModel(ClazzMemberListViewModel::class) { di, savedStateHandle ->
+                    tabViewModel(ClazzMemberListViewModel::class, tabItem) { di, savedStateHandle ->
                         ClazzMemberListViewModel(di, savedStateHandle)
                     }
                 )
@@ -95,7 +94,7 @@ fun ClazzDetailScreen(
 
             CourseGroupSetListViewModel.DEST_NAME -> {
                 CourseGroupSetListScreen(
-                    tabViewModel(CourseGroupSetListViewModel::class) { di, savedStateHandle ->
+                    tabViewModel(CourseGroupSetListViewModel::class, tabItem) { di, savedStateHandle ->
                         CourseGroupSetListViewModel(di, savedStateHandle)
                     }
                 )
@@ -103,14 +102,10 @@ fun ClazzDetailScreen(
 
             ClazzLogListAttendanceViewModel.DEST_NAME -> {
                 ClazzLogListAttendanceScreen(
-                    tabViewModel(ClazzLogListAttendanceViewModel::class) { di, savedStateHandle ->
+                    tabViewModel(ClazzLogListAttendanceViewModel::class, tabItem) { di, savedStateHandle ->
                         ClazzLogListAttendanceViewModel(di, savedStateHandle)
                     }
                 )
-            }
-
-            else -> {
-                Text(it.viewName)
             }
         }
     }

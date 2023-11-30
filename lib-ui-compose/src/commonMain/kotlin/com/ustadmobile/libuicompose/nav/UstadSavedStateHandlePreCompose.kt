@@ -18,7 +18,7 @@ import moe.tlaster.precompose.stateholder.SavedStateHolder
 class UstadSavedStateHandlePreCompose(
     private val savedStateHolder: SavedStateHolder,
     private val argsMap: Map<String, List<String>>?,
-    private val savedKeys: MutableMap<String, SavedEntry> = mutableMapOf(),
+    internal val savedKeys: MutableMap<String, SavedEntry> = mutableMapOf(),
 ) : UstadSavedStateHandle{
 
     //Used by ViewModel keys to generate a key that is unique for the given arguments

@@ -3,41 +3,35 @@ package com.ustadmobile.libuicompose.view.clazzassignment.submitterdetail
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ListItem
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Pending
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.util.ext.capitalizeFirstLetter
-import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants
-import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailUiState
-import com.ustadmobile.port.android.view.clazzassignment.ClazzAssignmentConstants.SUBMISSION_STATUS_ICON_MAP
-import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
-import dev.icerock.moko.resources.compose.stringResource
-import com.ustadmobile.core.MR
-import com.ustadmobile.lib.db.entities.CourseAssignmentMark
-import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
-import com.ustadmobile.libuicompose.components.UstadDetailHeader
-import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
-import com.ustadmobile.libuicompose.components.UstadAddCommentListItem
-import com.ustadmobile.libuicompose.components.UstadListSpacerItem
-import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionListItem
-import com.ustadmobile.libuicompose.view.clazzassignment.UstadCourseAssignmentMarkListItem
-import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
-import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
-import com.ustadmobile.libuicompose.components.ustadPagedItems
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.paging.compose.collectAsLazyPagingItems
+import app.cash.paging.Pager
+import app.cash.paging.PagingConfig
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
+import com.ustadmobile.core.viewmodel.clazzassignment.submissionStatusFor
+import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailUiState
+import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
 import com.ustadmobile.lib.db.entities.Comments
+import com.ustadmobile.lib.db.entities.CourseAssignmentMark
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
+import com.ustadmobile.libuicompose.components.UstadAddCommentListItem
+import com.ustadmobile.libuicompose.components.UstadDetailHeader
+import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
+import com.ustadmobile.libuicompose.components.UstadListSpacerItem
+import com.ustadmobile.libuicompose.components.ustadPagedItems
+import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
+import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionListItem
+import com.ustadmobile.libuicompose.view.clazzassignment.UstadAssignmentSubmissionStatusHeaderItems
+import com.ustadmobile.libuicompose.view.clazzassignment.UstadCourseAssignmentMarkListItem
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
@@ -88,47 +82,12 @@ fun ClazzAssignmentSubmitterDetailScreen(
             .defaultScreenPadding()
             .fillMaxSize()
     ) {
-        item(key = "status") {
-            ListItem(
-                leadingContent = {
-                    Icon(
-                        imageVector = SUBMISSION_STATUS_ICON_MAP[uiState.submissionStatus]
-                            ?: Icons.Filled.Pending,
-                        contentDescription = ""
-                    )
-                },
-                headlineContent = {
-                    Text(
-                        text = stringIdMapResource(
-                            map = ClazzAssignmentViewModelConstants.SUBMISSION_STAUTUS_MESSAGE_ID,
-                            key = uiState.submissionStatus
-                        ).capitalizeFirstLetter()
-                    )
-                },
-                supportingContent = {
-                    Text(stringResource(MR.strings.status))
-                }
-            )
-        }
-
-        if(uiState.scoreSummaryVisible) {
-            item(key = "averagescore") {
-                ListItem(
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Filled.EmojiEvents,
-                            contentDescription = ""
-                        )
-                    },
-                    headlineContent = {
-                        Text("${uiState.averageScore} ${stringResource(MR.strings.points)}")
-                    },
-                    supportingContent = {
-                        Text(stringResource(MR.strings.score))
-                    }
-                )
-            }
-        }
+        UstadAssignmentSubmissionStatusHeaderItems(
+            submissionStatus = submissionStatusFor(uiState.marks, uiState.submissionList),
+            averageMark = uiState.marks.averageMark(),
+            maxPoints = uiState.courseBlock?.cbMaxPoints ?: 0,
+            submissionPenaltyPercent = uiState.courseBlock?.cbLateSubmissionPenalty ?: 0
+        )
 
         item(key = "submissionheader") {
             UstadDetailHeader {

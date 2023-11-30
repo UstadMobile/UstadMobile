@@ -41,7 +41,9 @@ fun CourseGroupSetDetailScreen(
             .fillMaxWidth()
     ){
         (1..(uiState.courseGroupSet?.cgsTotalGroups ?: 1)).forEach { groupNum ->
-            val members = uiState.membersList.filter { it.cgm?.cgmGroupNumber == groupNum }
+            val members = uiState.membersList.filter {
+                it.cgm?.cgmGroupNumber == groupNum
+            }
 
             if(members.isNotEmpty()) {
                 item(key = "header_${groupNum}") {

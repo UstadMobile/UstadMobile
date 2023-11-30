@@ -63,11 +63,11 @@ fun ClazzAssignmentDetailScreen(
         onSetAppUiState = onSetAppUiState,
         onShowSnackBar = onShowSnackBar,
         navResultReturner = navResultReturner,
-    ) {
-        when(it.viewName) {
+    ) { currentTab ->
+        when(currentTab.viewName) {
             ClazzAssignmentDetailOverviewViewModel.DEST_NAME -> {
                 ClazzAssignmentDetailOverviewScreen(
-                    tabViewModel(ClazzAssignmentDetailOverviewViewModel::class) { di, savedStateHandle ->
+                    tabViewModel(ClazzAssignmentDetailOverviewViewModel::class, currentTab) { di, savedStateHandle ->
                         ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
                     }
                 )
@@ -75,7 +75,7 @@ fun ClazzAssignmentDetailScreen(
 
             ClazzAssignmentDetailSubmissionsTabViewModel.DEST_NAME -> {
                 ClazzAssignmentDetailSubmissionsTabScreen(
-                    tabViewModel(ClazzAssignmentDetailSubmissionsTabViewModel::class) { di, savedStateHandle ->
+                    tabViewModel(ClazzAssignmentDetailSubmissionsTabViewModel::class, currentTab) { di, savedStateHandle ->
                         ClazzAssignmentDetailSubmissionsTabViewModel(di, savedStateHandle)
                     }
                 )

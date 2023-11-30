@@ -24,7 +24,6 @@ import com.ustadmobile.libuicompose.components.ustadPagedItems
 import androidx.compose.runtime.remember
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 
 @Suppress("unused") // Pending
 @Composable
@@ -32,7 +31,6 @@ fun CourseGroupSetListScreen(
     viewModel: CourseGroupSetListViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState(CourseGroupSetListUiState())
-
 
     CourseGroupSetListScreen(
         uiState = uiState,
@@ -50,7 +48,7 @@ fun CourseGroupSetListScreen(
     onClickNewItem: () -> Unit = {},
 ) {
 
-    val pager = remember {
+    val pager = remember(uiState.courseGroupSets) {
         Pager(
             config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
             pagingSourceFactory = uiState.courseGroupSets,
@@ -60,9 +58,7 @@ fun CourseGroupSetListScreen(
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
     LazyColumn(
-        modifier = Modifier
-            .defaultScreenPadding()
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ){
         item(key = "sortheader") {
             UstadListSortHeader(
@@ -93,7 +89,6 @@ fun CourseGroupSetListScreen(
                     onClickAdd = onClickNewItem,
                 )
             }
-
         }
 
         ustadPagedItems(

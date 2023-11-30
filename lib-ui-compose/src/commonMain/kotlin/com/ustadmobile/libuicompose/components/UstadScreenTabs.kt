@@ -42,6 +42,7 @@ class TabScope(
     @Composable
     fun <T: UstadViewModel> tabViewModel(
         viewModelClass: KClass<T>,
+        tab: TabItem,
         appUiStateMap: ((AppUiState) -> AppUiState)? = null,
         creator: (DI, UstadSavedStateHandle) -> T,
     ): T {
@@ -53,7 +54,11 @@ class TabScope(
             onShowSnackBar =  onShowSnackBar,
             navResultReturner = navResultReturner,
             appUiStateMap =  appUiStateMap,
-            savedStateHandle = savedStateHandle,
+            savedStateHandle = UstadSavedStateHandlePreCompose(
+                savedStateHolder = backStackEntry.savedStateHolder,
+                argsMap = tab.args.map { it.key to listOf(it.value) }.toMap(),
+                savedKeys = savedStateHandle.savedKeys,
+            ),
             block = creator,
         )
     }
