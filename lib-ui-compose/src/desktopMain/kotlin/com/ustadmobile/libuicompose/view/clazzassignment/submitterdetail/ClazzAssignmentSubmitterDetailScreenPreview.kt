@@ -53,5 +53,5 @@ fun ClazzAssignmentSubmitterDetailScreenPreview(){
     )
 
 
-    ClazzAssignmentDetailStudentProgressScreen(uiStateVal)
+    ClazzAssignmentSubmitterDetailScreen(uiState = uiStateVal)
 }
