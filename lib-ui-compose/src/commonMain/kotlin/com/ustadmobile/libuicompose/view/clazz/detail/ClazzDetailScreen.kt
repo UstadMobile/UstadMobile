@@ -1,9 +1,9 @@
 package com.ustadmobile.libuicompose.view.clazz.detail
 
 import androidx.compose.runtime.Composable
-import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailUiState
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
@@ -27,15 +27,18 @@ fun ClazzDetailScreen(
     backStackEntry: BackStackEntry,
     navController: UstadNavControllerPreCompose,
     onSetAppUiState: (AppUiState) -> Unit,
+    onShowSnackbar: SnackBarDispatcher,
     navResultReturner: NavResultReturner,
 ) {
     val clazzDetailViewModel = ustadViewModel(
-        ClazzDetailViewModel::class, backStackEntry, navController, onSetAppUiState, navResultReturner
+        ClazzDetailViewModel::class, backStackEntry, navController, onSetAppUiState,
+        navResultReturner, onShowSnackbar
     ) { di, savedStateHandle ->
         ClazzDetailViewModel(di, savedStateHandle)
     }
 
-    ClazzDetailScreen(clazzDetailViewModel, backStackEntry, navController, onSetAppUiState, navResultReturner)
+    ClazzDetailScreen(clazzDetailViewModel, backStackEntry, navController, onSetAppUiState,
+        onShowSnackbar, navResultReturner)
 }
 
 @Composable
@@ -44,13 +47,15 @@ fun ClazzDetailScreen(
     backStackEntry: BackStackEntry,
     navController: UstadNavControllerPreCompose,
     onSetAppUiState: (AppUiState) -> Unit,
+    onShowSnackbar: SnackBarDispatcher,
     navResultReturner: NavResultReturner,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle(
         ClazzDetailUiState(), Dispatchers.Main.immediate
     )
 
-    ClazzDetailScreen(uiState, backStackEntry, navController, onSetAppUiState, navResultReturner)
+    ClazzDetailScreen(uiState, backStackEntry, navController, onSetAppUiState, onShowSnackbar,
+        navResultReturner)
 }
 
 @Composable
@@ -59,6 +64,7 @@ fun ClazzDetailScreen(
     backStackEntry: BackStackEntry,
     navController: UstadNavControllerPreCompose,
     onSetAppUiState: (AppUiState) -> Unit,
+    onShowSnackbar: SnackBarDispatcher,
     navResultReturner: NavResultReturner,
 ) {
 
@@ -67,19 +73,20 @@ fun ClazzDetailScreen(
         backStackEntry = backStackEntry,
         navController = navController,
         onSetAppUiState = onSetAppUiState,
-        navResultReturner = navResultReturner
-    ) {
-        when(it.viewName) {
+        navResultReturner = navResultReturner,
+        onShowSnackBar = onShowSnackbar
+    ) { tabItem ->
+        when(tabItem.viewName) {
             ClazzDetailOverviewViewModel.DEST_NAME -> {
                 ClazzDetailOverviewScreen(
-                    tabViewModel(ClazzDetailOverviewViewModel::class) { di, savedStateHandle ->
+                    tabViewModel(ClazzDetailOverviewViewModel::class, tabItem) { di, savedStateHandle ->
                         ClazzDetailOverviewViewModel(di, savedStateHandle)
                     }
                 )
             }
             ClazzMemberListViewModel.DEST_NAME -> {
                 ClazzMemberListScreen(
-                    tabViewModel(ClazzMemberListViewModel::class) { di, savedStateHandle ->
+                    tabViewModel(ClazzMemberListViewModel::class, tabItem) { di, savedStateHandle ->
                         ClazzMemberListViewModel(di, savedStateHandle)
                     }
                 )
@@ -87,7 +94,7 @@ fun ClazzDetailScreen(
 
             CourseGroupSetListViewModel.DEST_NAME -> {
                 CourseGroupSetListScreen(
-                    tabViewModel(CourseGroupSetListViewModel::class) { di, savedStateHandle ->
+                    tabViewModel(CourseGroupSetListViewModel::class, tabItem) { di, savedStateHandle ->
                         CourseGroupSetListViewModel(di, savedStateHandle)
                     }
                 )
@@ -95,14 +102,10 @@ fun ClazzDetailScreen(
 
             ClazzLogListAttendanceViewModel.DEST_NAME -> {
                 ClazzLogListAttendanceScreen(
-                    tabViewModel(ClazzLogListAttendanceViewModel::class) { di, savedStateHandle ->
+                    tabViewModel(ClazzLogListAttendanceViewModel::class, tabItem) { di, savedStateHandle ->
                         ClazzLogListAttendanceViewModel(di, savedStateHandle)
                     }
                 )
-            }
-
-            else -> {
-                Text(it.viewName)
             }
         }
     }

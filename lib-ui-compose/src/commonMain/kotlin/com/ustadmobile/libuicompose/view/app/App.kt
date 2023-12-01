@@ -12,6 +12,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -19,17 +21,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.FabUiState
+import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.coroutines.launch
 import moe.tlaster.precompose.navigation.NavOptions
 import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.navigation.PopUpTo
@@ -79,6 +84,17 @@ fun App(
     LaunchedEffect(appUiStateVal) {
         onAppStateChanged(appUiStateVal)
     }
+
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val onShowSnackBar: SnackBarDispatcher = remember {
+        SnackBarDispatcher {  snack ->
+            scope.launch {
+                snackbarHostState.showSnackbar(snack.message, snack.action)
+            }
+        }
+    }
+
 
     Scaffold(
         topBar = {
@@ -134,7 +150,9 @@ fun App(
                     }
                 )
             }
-
+        },
+        snackbarHost = {
+            SnackbarHost(snackbarHostState)
         },
     ) { innerPadding ->
         AppNavHost(
@@ -142,6 +160,7 @@ fun App(
             onSetAppUiState = appUiState.component2(),
             modifier = Modifier.padding(innerPadding),
             persistNavState = persistNavState,
+            onShowSnackBar = onShowSnackBar,
         )
     }
 

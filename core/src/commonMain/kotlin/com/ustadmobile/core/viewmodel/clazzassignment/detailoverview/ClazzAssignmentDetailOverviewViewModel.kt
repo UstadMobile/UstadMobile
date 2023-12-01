@@ -15,7 +15,9 @@ import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
+import com.ustadmobile.core.viewmodel.clazzassignment.hasUpdatedMarks
 import com.ustadmobile.core.viewmodel.clazzassignment.latestUniqueMarksByMarker
 import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -39,7 +41,6 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import kotlin.jvm.JvmInline
-import kotlin.math.roundToInt
 
 
 /**
@@ -144,8 +145,12 @@ data class ClazzAssignmentDetailOverviewUiState(
             if(!isWithinDeadlineOrGracePeriod)
                 return false
 
+            //User must not submit or be shown option to submit until the entity is added when loading
+            if(latestSubmission == null)
+                return false
+
             if(assignment?.caSubmissionPolicy == ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE &&
-                (latestSubmission?.casTimestamp ?: 1) > 0
+                latestSubmission.casTimestamp > 0
             ) {
                 return false
             }
@@ -187,8 +192,12 @@ data class ClazzAssignmentDetailOverviewUiState(
     val latePenaltyVisible: Boolean
         get() = submissionMark.let { it  != null && it.averagePenalty != 0 }
 
+    /**
+     * Submission text field will be visible when text submission is required, active user is a submitter,
+     * and the latest submission is not null (entity will be set by viewmodel as part of loading process).
+     */
     val submissionTextFieldVisible: Boolean
-        get() = assignment?.caRequireTextSubmission == true && activeUserIsSubmitter
+        get() = assignment?.caRequireTextSubmission == true && activeUserIsSubmitter && latestSubmission != null
 
     private val latestUniqueMarksByMarker: List<CourseAssignmentMarkAndMarkerName>
         get() = markList.latestUniqueMarksByMarker()
@@ -200,21 +209,11 @@ data class ClazzAssignmentDetailOverviewUiState(
             markList
         }
 
-    val submissionMark: AverageCourseAssignmentMark?
-        get() {
-            val latestUnique = latestUniqueMarksByMarker
-            if(latestUnique.isEmpty())
-                return null
+    val gradeFilterChipsVisible: Boolean
+        get() = markList.hasUpdatedMarks()
 
-            return AverageCourseAssignmentMark().apply {
-                averageScore = latestUnique.sumOf {
-                    it.courseAssignmentMark?.camMark?.toDouble() ?: 0.toDouble()
-                }.toFloat() / latestUnique.size
-                averagePenalty = (latestUnique.sumOf {
-                    it.courseAssignmentMark?.camPenalty?.toDouble() ?: 0.toDouble()
-                } / latestUnique.size).roundToInt()
-            }
-        }
+    val submissionMark: AverageCourseAssignmentMark?
+        get() = markList.averageMark()
 
     val isGroupSubmission: Boolean
         get() = assignment?.caGroupUid?.let { it != 0L } ?: false
@@ -407,6 +406,7 @@ class ClazzAssignmentDetailOverviewViewModel(
             if(prev.activeUserCanSubmit) {
                 prev.copy(
                     latestSubmission = prev.latestSubmission?.shallowCopy {
+                        casUid = 0L
                         casText = text
                         casTimestamp = 0
                     }
