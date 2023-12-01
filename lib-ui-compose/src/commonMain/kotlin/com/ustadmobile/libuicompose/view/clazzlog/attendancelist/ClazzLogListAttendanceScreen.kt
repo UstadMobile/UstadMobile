@@ -6,7 +6,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -31,6 +35,9 @@ import app.cash.paging.PagingConfig
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import androidx.compose.runtime.remember
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
+import com.ustadmobile.libuicompose.view.clazz.list.ClazzListScreen
 
 private val DECIMAL_FORMAT = DecimalFormat("###,###,##0")
 
@@ -64,11 +71,30 @@ private val DECIMAL_FORMAT = DecimalFormat("###,###,##0")
 //    xAxis.axisMaximum = graphData.graphDateRange.second.toFloat()
 //}
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClazzLogListAttendanceScreen(
     viewModel: ClazzLogListAttendanceViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState(ClazzLogListAttendanceUiState())
+
+    if(uiState.createNewOptionsVisible) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                viewModel.onDismissCreateNewOptions()
+            }
+        ) {
+
+            uiState.recordAttendanceOptions.forEach { option ->
+                UstadBottomSheetOption(
+                    modifier = Modifier.clickable {
+                        viewModel.onClickRecordAttendance(option)
+                    },
+                    headlineContent = { Text(stringResource(option.stringResource)) },
+                )
+            }
+        }
+    }
 
     ClazzLogListAttendanceScreen(
         uiState = uiState,
