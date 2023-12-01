@@ -130,6 +130,7 @@ import com.ustadmobile.view.clazzassignment.peerreviewerallocationedit.PeerRevie
 import com.ustadmobile.wrappers.muitelinput.MuiTelInputDemo
 import com.ustadmobile.core.viewmodel.courseblock.textblockdetail.TextBlockDetailViewModel
 import com.ustadmobile.view.courseblock.textblockdetail.TextBlockDetailScreen
+import com.ustadmobile.wrappers.linkify.LinkifyPreview
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
 data class UstadScreen(
@@ -352,6 +353,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         PeerReviewerAllocationEditScreen),
     UstadScreen("MuiTelInputDemo", "MuiTelInput", MuiTelInputDemo),
     UstadScreen(TextBlockDetailViewModel.DEST_NAME, "TextCourseBlock", TextBlockDetailScreen),
+    UstadScreen("LinkifyPreview", "Linkify", LinkifyPreview)
 )
 
 //Here as per the MUI showcase template

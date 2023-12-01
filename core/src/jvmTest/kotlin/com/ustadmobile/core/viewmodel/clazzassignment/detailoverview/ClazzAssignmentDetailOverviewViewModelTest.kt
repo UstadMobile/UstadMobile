@@ -40,6 +40,8 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
+//USELESS_IS_CHECK: IDE does not understand multiplatform hierarchy the checks are not useless
+@Suppress("USELESS_IS_CHECK")
 class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest()  {
 
     val endpoint = Endpoint("http://test.com/")
@@ -520,7 +522,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModel.uiState.test(timeout = 5.seconds) {
                 val commentReadyState = awaitItemWhere {
-                    it.privateComments() !is EmptyPagingSource && it.privateCommentSectionVisible
+                    it.privateComments() !is EmptyPagingSource<*, *> && it.privateCommentSectionVisible
                 }
                 val commentLoadResult: List<CommentsAndName> = commentReadyState.privateComments().loadFirstList()
                 assertEquals(teacherComment, commentLoadResult.first().comment.commentsText)
@@ -531,7 +533,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             viewModel.onClickSubmitPrivateComment()
             viewModel.uiState.test(timeout = 5.seconds) {
                 val commentReadyState = awaitItemWhere {
-                    it.privateComments() !is EmptyPagingSource && it.newPrivateCommentText == ""
+                    it.privateComments() !is EmptyPagingSource<*, *> && it.newPrivateCommentText == ""
                 }
                 val commentsAfterReply = commentReadyState.privateComments().loadFirstList()
                 assertEquals(replyComment, commentsAfterReply.first().comment.commentsText)
@@ -565,7 +567,9 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             }
 
             viewModel.uiState.test(timeout = 5.seconds) {
-                val commentReadyState = awaitItemWhere { it.courseComments() !is EmptyPagingSource  }
+                @Suppress("unused") val commentReadyState = awaitItemWhere {
+                    it.courseComments() !is EmptyPagingSource<*, *>
+                }
                 val commentsOnLoad = commentReadyState.courseComments().loadFirstList()
                 assertEquals(startComment, commentsOnLoad.first().comment.commentsText)
                 cancelAndIgnoreRemainingEvents()
@@ -576,7 +580,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModel.uiState.test(timeout = 5.seconds) {
                 val commentReadyState = awaitItemWhere {
-                    it.courseComments() !is EmptyPagingSource && it.newCourseCommentText == ""
+                    it.courseComments() !is EmptyPagingSource<*, *> && it.newCourseCommentText == ""
                 }
                 val commentsAfterReply = commentReadyState.courseComments().loadFirstList()
                 assertEquals(replyComment, commentsAfterReply.first().comment.commentsText)

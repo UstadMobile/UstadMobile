@@ -62,6 +62,7 @@ kotlin {
 
                 implementation(libs.android.material)
                 implementation(libs.libphonenumber.android)
+                implementation(libs.autolink)
             }
         }
 
@@ -72,6 +73,7 @@ kotlin {
 
                 implementation(libs.richeditor.multiplatform.compose)
                 implementation(libs.libphonenumber.google)
+                implementation(libs.autolink)
             }
         }
     }
