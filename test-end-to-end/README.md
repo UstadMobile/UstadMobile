@@ -198,3 +198,13 @@ highlighted as required and it is not saved. The user can then add a title and s
 11.1 Server can be installed via script.
 
 11.2 Server data can be backed up via script.
+
+### 12 Language support
+
+12.1 When first starting the app it will load in the default system language if the system is set to a supported language.
+
+12.2 If the system is set to an unsupported language, the app will be displayed in English (fallback language).
+
+12.3 After login, user can go to settings, and select any supported language, or to use the system device language. The user interface will change to the selected language. The language setting is applied to the whole app, not per-user (if a user switched accounts, the language does not change - language setting is stored locally).
+
+12.4 Android: Android 13+ users can select language in app settings using [per-app language preferences](https://developer.android.com/guide/topics/resources/app-languages) 
