@@ -208,3 +208,34 @@ highlighted as required and it is not saved. The user can then add a title and s
 12.3 After login, user can go to settings, and select any supported language, or to use the system device language. The user interface will change to the selected language. The language setting is applied to the whole app, not per-user (if a user switched accounts, the language does not change - language setting is stored locally).
 
 12.4 Android: Android 13+ users can select language in app settings using [per-app language preferences](https://developer.android.com/guide/topics/resources/app-languages) 
+
+
+### 13 Reporting
+
+13.1 Users can generate a bar chart or line chart.
+
+Y-axis data options:
+
+a. Content usage - total duration<br/>
+b. Content usage - average duration per session<br/>
+c. Content usage - number of sessions<br/>
+d. Content usage - number of interactions recorded<br/>
+e. Content usage - number of active users<br/>
+f. Content usage - average usage time per user<br/>
+g. Content usage - number of students who completed content<br/>
+h. Content usage - percentage of students who completed content (out of those who attempted)<br/>
+i. Attendance - total attendances<br/>
+j. Attendance - total absences<br/>
+k. Attendance - total lates<br/>
+l. Attendance - Percentage of students who attended<br/>
+m. Attendance - Percentage of students who attended or were late<br/>
+n. Attendance - Total number of classes<br/>
+o. Attendance - Number of unique students attending.<br/>
+
+X-axis options: day, week, month, content entry, gender, class, class enrolment outcome, class enrolment reason for leaving<br/>
+
+Subgroup options: content entry (content usage reports only), gender, course, enrolment outcome (attendance reports only), reason for leaving (attendance reports only)
+
+Filter options: gender, completion status, content completion status, content entry,  content progress, attendance percentage, class enrolment outcome, class enrolment reason for leaving.
+
+Data is derived only from data the active user has permission to see (e.g. if admin, from all data. If a teacher, from those courses they teach, if a student, only from their own data).
