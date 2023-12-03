@@ -257,3 +257,10 @@ Subgroup options: content entry (content usage reports only), gender, course, en
 Filter options: gender, completion status, content completion status, content entry,  content progress, attendance percentage, class enrolment outcome, class enrolment reason for leaving.
 
 Data is derived only from data the active user has permission to see (e.g. if admin, from all data. If a teacher, from those courses they teach, if a student, only from their own data).
+
+### 14 Offline behavior (Android and Desktop only)
+
+14.1. If the user visits a screen whilst online, and then returns offline, the screen will load using cached data
+14.2. If the user edits data offline, the data will be sent to the server as soon as the app is open and a connection is available.
+14.3  If the same piece of data was edited by two users offline simultaneously, the edit that was performed most recently will take effect.
+14.4 If a user visits a screen whilst offline that cannot be loaded (because the data is not available), an error message will be displayed.
