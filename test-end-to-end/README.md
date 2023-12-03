@@ -193,16 +193,12 @@ highlighted as required and it is not saved. The user can then add a title and s
 
 ### 9 Peer-to-peer (Android and desktop only)
 
-9.1 Users who do not have an Internet connection can connect via a nearby device with the app 
-    installed to login and use the platform (e.g. open course, view course members, etc). This will 
-    work if the nearby device has synced the data required by the user without an Internet connection
-    or itself has access to an Internet connection.
+9.1 If a user is connected to the same network (e.g. LAN) as another user they can request to use the other device as a proxy. If the other user approves, they will be able to login and access and edit their data the same as if they were connected directly to the server provided that a) the other device already has the relevant data or b) the other device has an Internet connection
 
-8.2 Users who do not have an Internet connection can download content via a nearby device from the 
-    device itself instead of from the Internet. This will work if the nearby device has synced the 
-    data required by the user without an Internet connection or if the nearby intermediary device
-    itself has an Internet connection.
+9.2 If a user is connected to the same network as another user and downloads content (e.g. supported content types such as H5P, EPUB, Video, as above) and another device on the smae network has those content files, then the content will be downloaded from the other device instead of from the Internet.
 
+9.3 A user on an Android device may create a new mesh hotspot (e.g. if there is not an existing WiFi access point). Users on other devices may join the hotspot by scanning a QR code. Devices can simultaneously provide a hotspot for other devices and connect to one other hotspot on Android versions that support this (Android 10+ that supports IPv6 and WiFi direct, which includes almost all Android 10+ devices, or those that support Wifi Station/Access point concurrency which is limited to those that have chipset support on Android 11+). All devices connected can communicate with each other (e.g. over multiple hops).
+    
 ### 10 Accessibility
 
 10.1 Video content can have subtitles added using an WebVTT file. The subtitles will be displayed 
@@ -260,7 +256,11 @@ Data is derived only from data the active user has permission to see (e.g. if ad
 
 ### 14 Offline behavior (Android and Desktop only)
 
-14.1. If the user visits a screen whilst online, and then returns offline, the screen will load using cached data
+14.1. If the user visits a screen whilst online, and then returns whilst offline, the screen will load using cached data.
+
 14.2. If the user edits data offline, the data will be sent to the server as soon as the app is open and a connection is available.
-14.3  If the same piece of data was edited by two users offline simultaneously, the edit that was performed most recently will take effect.
+
+14.3 If the same piece of data was edited by two users offline simultaneously, the edit that was performed most recently will take effect.
+
 14.4 If a user visits a screen whilst offline that cannot be loaded (because the data is not available), an error message will be displayed.
+
