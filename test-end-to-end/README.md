@@ -18,9 +18,9 @@ End-to-end tests that start a blank new server/app and test functionality end-to
     not actually a video), then an error message will be displayed to notify that the content is 
     invalid.
 
-1.3 Admin can hide content. After hiding on admin device, the content is hidden on other device.
+1.3 Admin can hide and unhide content. After hiding on admin device, the content is hidden on other device.
 
-1.4 Admin can move content. After moving, content is shown as moved on other device. 
+1.4 Admin can move content to another folder in Library. After moving, content is shown as moved on other device. 
 
 1.5 Content can be deleted from a device. After deletion, it can be downloaded again and opened as 
     before. (Android only).
@@ -32,6 +32,8 @@ End-to-end tests that start a blank new server/app and test functionality end-to
     resume when WiFi is resumed. (Android only).
 
 1.8 H5P and video content can be automatically compressed using high, medium, and low quality presets. 
+
+1.9 Admin can delete content from library. Deleting content will remove the files associated with the content from the server. Client devices will recognize any files that are associated with deleted content as eligible for eviction from the cache.
 
 ### 2: Course creation, enrolment, attendance, progress
 
@@ -47,14 +49,16 @@ End-to-end tests that start a blank new server/app and test functionality end-to
 2.5 The course title is mandatory. If save is clicked when the title is blank, then the field is
     highlighted as required and it is not saved. The user can then add a title and save successfully.
 
+2.6 Teacher/admin can remove people from a course (e.g. delete their enrolment). This removes any permissions that were associated with their enrolment.    
+
 ### 3: Course block editing
 
 3.1 Admin or teacher can edit the course. Other users cannot edit
 
 3.2 Admin or teacher can add module and text blocks. Blocks can be reordered and hidden, indented, 
-    unindented
+    unindented, edited, deleted.
 
-3.3 Admin or teacher can add a content block and link existing content
+3.3 Admin or teacher can add a content block and link existing content. Block can be edited (title, description, other metadata, not the content itself within app) or deleted from course.
 
 3.4 Admin or teacher can add a content block and upload new content via link
 
@@ -74,7 +78,7 @@ highlighted as required and it is not saved. The user can then add a title and s
 4.1 Teacher can create assignment (set to allow one submission per student as per default), student 
     can submit assignment (text and attachment), teacher can view submission and grade it. After 
     submitting their work, the submit button is no longer visible. Student will see their mark when 
-    it is graded.
+    it is graded. Assignment can be edited or deleted from course.
 
 4.2 Teachers and students can add course comments which are visible for all who can view the assignment.
 
@@ -105,6 +109,8 @@ highlighted as required and it is not saved. The user can then add a title and s
 
 4.13 If assignment is set to be marked by peers and submitted by groups, where each assignment is marked by two peers, students can see assignment submissions for those that their group has been assigned to mark. Students can mark each others work according to the peer review allocation (as per group membership). Students will see the marks submitted by their peers (other groups).
 
+4.14 Teacher/admin (any user with permission to edit the course itself) can delete private comments and course comments.
+
 ### 5	Discussion board
 5.1 Teacher can add discussion board to course
 
@@ -115,6 +121,8 @@ highlighted as required and it is not saved. The user can then add a title and s
 5.4 Users can include a link from within the app (e.g. to a course or content piece) in their post. Clicking the link opens the item directly.
 
 5.5 Users can include external links to websites in their post. Clicking the link opens the browser (e.g. Chrome on Android, new tab in web) for the link
+
+5.6 Teacher/admin (any user with permission to edit the course itself) can delete posts and replies. 
 
 ### 6 Messaging
 
