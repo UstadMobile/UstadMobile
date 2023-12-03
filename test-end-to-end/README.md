@@ -55,6 +55,10 @@ End-to-end tests that start a blank new server/app and test functionality end-to
 
 2.7 Teacher and admin user can grant permission for the course to other users. Permissions that can be granted include view attendance, edit attendance, view learning records, edit learning records, view details (name, date of birth, phone number etc) of members, edit details of members, view course, edit course.
 
+2.8 Teacher/admin can add banner photo to the course that is displayed in the course list screen and course detail screen.
+
+2.9 Teacher/admin, or the user themselves, can select or remove a profile photo. Photo can be taken from camera or gallery on Android.
+
 ### 3: Course block editing
 
 3.1 Admin or teacher can edit the course. Other users cannot edit
@@ -114,6 +118,8 @@ highlighted as required and it is not saved. The user can then add a title and s
 4.13 If assignment is set to be marked by peers and submitted by groups, where each assignment is marked by two peers, students can see assignment submissions for those that their group has been assigned to mark. Students can mark each others work according to the peer review allocation (as per group membership). Students will see the marks submitted by their peers (other groups).
 
 4.14 Teacher/admin (any user with permission to edit the course itself) can delete private comments and course comments.
+
+4.15 Students may upload attachments for assignment submissions if enabled by the teacher, up to the maximum file size limit set by the teacher. 
 
 ### 5	Discussion board
 5.1 Teacher can add discussion board to course
