@@ -35,6 +35,8 @@ End-to-end tests that start a blank new server/app and test functionality end-to
 
 1.9 Admin can delete content from library. Deleting content will remove the files associated with the content from the server. Client devices will recognize any files that are associated with deleted content as eligible for eviction from the cache.
 
+1.10 User can select (in settings) to store content on device storage or memory card (if available - Android apps can only use storage on memory cards that are reformatted on the device to use as storage (not FAT32 etc)). Any subsequent download is saved on the selected storage medium. (Android only).
+
 ### 2: Course creation, enrolment, attendance, progress
 
 2.1 Admin can create a new course, add a new teacher, and create an account for that teacher. It is 
