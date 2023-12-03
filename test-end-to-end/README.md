@@ -51,6 +51,8 @@ End-to-end tests that start a blank new server/app and test functionality end-to
 
 2.6 Teacher/admin can remove people from a course (e.g. delete their enrolment). This removes any permissions that were associated with their enrolment.    
 
+2.7 Teacher and admin user can grant permission for the course to other users. Permissions that can be granted include view attendance, edit attendance, view learning records, edit learning records, view details (name, date of birth, phone number etc) of members, edit details of members, view course, edit course.
+
 ### 3: Course block editing
 
 3.1 Admin or teacher can edit the course. Other users cannot edit
