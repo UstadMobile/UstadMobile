@@ -15,6 +15,7 @@ import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
+import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
@@ -45,6 +46,7 @@ import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
+import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
@@ -74,11 +76,13 @@ import com.ustadmobile.libuicompose.view.discussionpost.detail.DiscussionPostDet
 import com.ustadmobile.libuicompose.view.discussionpost.edit.DiscussionPostEditScreen
 import com.ustadmobile.libuicompose.view.htmledit.HtmlEditScreen
 import com.ustadmobile.libuicompose.view.login.LoginScreen
+import com.ustadmobile.libuicompose.view.onboarding.OnboardingScreen
 import com.ustadmobile.libuicompose.view.person.accountedit.PersonAccountEditScreen
 import com.ustadmobile.libuicompose.view.person.detail.PersonDetailScreen
 import com.ustadmobile.libuicompose.view.person.edit.PersonEditScreen
 import com.ustadmobile.libuicompose.view.person.list.PersonListScreen
 import com.ustadmobile.libuicompose.view.schedule.edit.ScheduleEditScreen
+import com.ustadmobile.libuicompose.view.settings.SettingsScreen
 import com.ustadmobile.libuicompose.view.siteenterlink.SiteEnterLinkScreen
 import com.ustadmobile.libuicompose.view.timezone.TimeZoneListScreen
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
@@ -190,6 +194,12 @@ fun AppNavHost(
                 appViewModel(backStackEntry, RedirectViewModel::class) { di, savedStateHandle ->
                     RedirectViewModel(di, savedStateHandle)
                 }
+            }
+
+            contentScene("/${OnBoardingViewModel.DEST_NAME}") { backStackEntry ->
+                OnboardingScreen(
+                    appViewModel(backStackEntry, OnBoardingViewModel::class, ::OnBoardingViewModel)
+                )
             }
 
             contentScene(
@@ -444,6 +454,12 @@ fun AppNavHost(
                 CourseGroupSetListScreen(
                     appViewModel(backStackEntry, CourseGroupSetListViewModel::class,
                         ::CourseGroupSetListViewModel)
+                )
+            }
+
+            contentScene("/${SettingsViewModel.DEST_NAME}") { backStackEntry ->
+                SettingsScreen(
+                    appViewModel(backStackEntry, SettingsViewModel::class, ::SettingsViewModel)
                 )
             }
         }

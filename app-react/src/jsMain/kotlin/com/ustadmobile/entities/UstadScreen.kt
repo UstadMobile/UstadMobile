@@ -131,6 +131,9 @@ import com.ustadmobile.wrappers.muitelinput.MuiTelInputDemo
 import com.ustadmobile.core.viewmodel.courseblock.textblockdetail.TextBlockDetailViewModel
 import com.ustadmobile.view.courseblock.textblockdetail.TextBlockDetailScreen
 import com.ustadmobile.wrappers.linkify.LinkifyPreview
+import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
+
+
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
 data class UstadScreen(
@@ -162,8 +165,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     ),
     UstadScreen(ParentalConsentManagementViewModel.DEST_NAME, "Parental Consent Management Preview",
         ParentalConsentManagementPreview),
-    UstadScreen(SettingsView.VIEW_NAME, "Settings Preview",
-        SettingsPreview),
+    UstadScreen(SettingsViewModel.DEST_NAME, "Settings", SettingsScreen),
     UstadScreen(InviteViaLinkView.VIEW_NAME, "Invite Via Link Preview",
         InviteViaLinkPreview),
     UstadScreen(ClazzEnrolmentEditViewModel.DEST_NAME, "ClazzEnrolmentEdit",
@@ -242,6 +244,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         LanguageListScreenPreview),
     UstadScreen("PersonListPreview", "PersonList Preview", PersonListScreenPreview),
     UstadScreen(PersonListViewModel.DEST_NAME, "PersonList", PersonListScreen),
+    UstadScreen(PersonListViewModel.DEST_NAME_HOME, "PersonListHome", PersonListScreen),
     UstadScreen(NAVHOST_CLEARSTACK_VIEWNAME, "Clear Stack", NavHostClearStackPlaceholder),
     UstadScreen("UstadAddListItem", "UstadAddListItem Preview",
         UstadAddListItemPreview),
@@ -257,6 +260,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ContentEntryListViewModel.DEST_NAME, "ContentEntryList Preview",
         ContentEntryListScreen
     ),
+    UstadScreen(ContentEntryListViewModel.DEST_NAME_HOME, "ContentEntryListHome",
+        ContentEntryListScreen),
     UstadScreen(AccountListViewModel.DEST_NAME, "AccountList", AccountListScreen),
     UstadScreen(
         ClazzMemberListViewModel.DEST_NAME, "ClazzMemberList Preview", ClazzMemberListScreen

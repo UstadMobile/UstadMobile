@@ -34,8 +34,13 @@ fun UstadNavController.navigateToViewUri(
     viewUri: String,
     goOptions: UstadMobileSystemCommon.UstadGoOptions
 ) {
-    val viewName = viewUri.substringBefore('?')
-    val args = UMFileUtil.parseURLQueryString(viewUri)
+    val questionIndex = viewUri.indexOf('?')
+    val viewName = if(questionIndex != -1) viewUri.substring(0, questionIndex) else viewUri
+    val args = if(questionIndex > 0) {
+        UMFileUtil.parseURLQueryString(viewUri.substring(questionIndex))
+    }else {
+        emptyMap()
+    }
 
     navigate(viewName, args, goOptions)
 }

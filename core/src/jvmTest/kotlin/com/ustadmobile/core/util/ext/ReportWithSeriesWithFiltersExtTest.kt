@@ -193,7 +193,7 @@ class ReportWithSeriesWithFiltersExtTest {
 
     }
 
-    @Test
+    //@Test will be re-enabled when report screen is added back to dev-mvvm-primary
     fun givenStatementShowingAverageUsageTimePerUserByGenderAbove18YearsOfAge_whenDataSetIsAverageUsageTimePerUser_whenXaxisIsGender_andFilterWithAgeGreaterThan18_thenShowExpectedValues(){
         val report = ReportWithSeriesWithFilters().apply {
             xAxis = Report.GENDER

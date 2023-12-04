@@ -1,16 +1,24 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.viewmodel.SettingsUiState
+import com.ustadmobile.core.viewmodel.settings.SettingsUiState
+import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.UstadDetailField
+import com.ustadmobile.mui.components.UstadDetailField2
+import com.ustadmobile.mui.components.UstadStandardContainer
 import web.cssom.px
 //WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
 import mui.icons.material.Language
-import mui.icons.material.CalendarMonth
 import mui.icons.material.AccountBalance
 import mui.icons.material.ExitToApp
-import mui.material.Container
+import mui.material.Dialog
+import mui.material.List
+import mui.material.ListItem
+import mui.material.ListItemButton
+import mui.material.ListItemText
 import mui.system.Stack
 import mui.system.StackDirection
 import mui.system.responsive
@@ -31,6 +39,45 @@ external interface SettingsProps : Props {
     var onClickLangList: () -> Unit
 }
 
+val SettingsScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        SettingsViewModel(di, savedStateHandle)
+    }
+    val uiStateVal by viewModel.uiState.collectAsState(SettingsUiState())
+
+    Dialog {
+        open = uiStateVal.langDialogVisible
+        onClose = { _, _ ->
+            viewModel.onDismissLangDialog()
+        }
+        println("languages = ${uiStateVal.availableLanguages.joinToString { it.langCode }}")
+
+        List {
+            uiStateVal.availableLanguages.forEach { uiLang ->
+                ListItem {
+                    ListItemButton {
+                        onClick = {
+                            viewModel.onClickLang(uiLang)
+                        }
+
+                        ListItemText {
+                            primary = ReactNode(uiLang.langDisplay)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    SettingsComponent2 {
+        uiState = uiStateVal
+        onClickWorkspace = viewModel::onClickSiteSettings
+        onClickAppLanguage = viewModel::onClickLanguage
+    }
+
+}
+
+@Suppress("unused")
 val SettingsPreview = FC<Props> {
 
     val uiStateVar by useState {
@@ -38,7 +85,7 @@ val SettingsPreview = FC<Props> {
             reasonLeavingVisible = true,
             holidayCalendarVisible = true,
             workspaceSettingsVisible = true,
-            langListVisible = true,
+            langDialogVisible = true,
         )
     }
 
@@ -56,34 +103,23 @@ val SettingsComponent2 = FC<SettingsProps> { props ->
 
     val strings = useStringProvider()
 
-    Container {
-        maxWidth = "lg"
-
+    UstadStandardContainer {
         Stack {
             direction = responsive(StackDirection.column)
             spacing = responsive(10.px)
 
-            UstadDetailField {
-                icon = Language.create()
-                labelText = "English"
-                valueText = ReactNode(strings[MR.strings.app_language])
+            UstadDetailField2 {
+                leadingContent = Language.create()
+                labelContent = ReactNode(props.uiState.currentLanguage)
+                valueContent = ReactNode(strings[MR.strings.app_language])
                 onClick = props.onClickAppLanguage
             }
 
-            if (props.uiState.holidayCalendarVisible){
-                UstadDetailField {
-                    icon = CalendarMonth.create()
-                    labelText = strings[MR.strings.holiday_calendars_desc]
-                    valueText = ReactNode(strings[MR.strings.holiday_calendars])
-                    onClick = props.onClickGoToHolidayCalendarList
-                }
-            }
-
             if (props.uiState.workspaceSettingsVisible){
-                UstadDetailField {
-                    icon = AccountBalance.create()
-                    labelText = strings[MR.strings.manage_site_settings]
-                    valueText = ReactNode(strings[MR.strings.site])
+                UstadDetailField2 {
+                    leadingContent = AccountBalance.create()
+                    labelContent = ReactNode(strings[MR.strings.manage_site_settings])
+                    valueContent = ReactNode(strings[MR.strings.site])
                     onClick = props.onClickWorkspace
                 }
             }
@@ -94,15 +130,6 @@ val SettingsComponent2 = FC<SettingsProps> { props ->
                     labelText = strings[MR.strings.leaving_reason_manage]
                     valueText = ReactNode(strings[MR.strings.leaving_reason])
                     onClick = props.onClickLeavingReason
-                }
-            }
-
-            if (props.uiState.langListVisible){
-                UstadDetailField {
-                    icon = Language.create()
-                    labelText = strings[MR.strings.languages_description]
-                    valueText = ReactNode(strings[MR.strings.languages])
-                    onClick = props.onClickLangList
                 }
             }
         }

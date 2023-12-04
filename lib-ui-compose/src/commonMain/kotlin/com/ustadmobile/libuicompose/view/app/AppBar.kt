@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,9 +31,15 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
+import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
 import dev.icerock.moko.resources.compose.stringResource
 import moe.tlaster.precompose.navigation.Navigator
+
+private val ROOT_LOCATIONS = UstadViewModel.ROOT_DESTINATIONS.map {
+    "/$it"
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,7 +48,10 @@ fun UstadAppBar(
     appUiState: AppUiState,
     navigator: Navigator,
 ) {
+    val title = appUiState.title ?: stringResource(MR.strings.app_name)
     val canGoBack by navigator.canGoBack.collectAsState(false)
+    val currentLocation by navigator.currentEntry.collectAsState(null)
+
     var searchActive by remember {
         mutableStateOf(false)
     }
@@ -65,7 +75,7 @@ fun UstadAppBar(
             titleContentColor = MaterialTheme.colorScheme.primary
         ),
         title = {
-            Text(appUiState.title ?: stringResource(MR.strings.app_name))
+            Text(title)
         },
         navigationIcon = {
             if(canGoBack) {
@@ -83,6 +93,17 @@ fun UstadAppBar(
             }
         },
         actions = {
+            currentLocation?.path?.takeIf { path -> ROOT_LOCATIONS.any { it.startsWith(path) } }?.also {
+                IconButton(
+                    modifier = Modifier.testTag("settings_button"),
+                    onClick = {
+                        navigator.navigate("/${SettingsViewModel.DEST_NAME}")
+                    }
+                ) {
+                    Icon(Icons.Default.Settings, contentDescription = stringResource(MR.strings.settings))
+                }
+            }
+
             if(appUiState.searchState.visible) {
                 if(!compactHeader || searchActive) {
                     OutlinedTextField(

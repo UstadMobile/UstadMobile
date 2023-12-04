@@ -5,7 +5,6 @@ import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
-import com.ustadmobile.entities.USTAD_SCREENS
 import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
 import dev.icerock.moko.resources.StringResource
@@ -24,6 +23,9 @@ import emotion.react.css
 import react.ReactNode
 import react.create
 import react.dom.html.ReactHTML.nav
+import react.router.useLocation
+import react.useEffect
+import react.useState
 
 external interface SidebarProps: Props {
     var visible: Boolean
@@ -36,13 +38,25 @@ data class RootScreen(
 )
 
 val ROOT_SCREENS = listOf(
-    RootScreen(ClazzListViewModel.DEST_NAME, MR.strings.courses, School),
-    RootScreen(ContentEntryListViewModel.DEST_NAME, MR.strings.library, LibraryBooks),
-    RootScreen(PersonListViewModel.DEST_NAME, MR.strings.people, Person)
+    RootScreen(ClazzListViewModel.DEST_NAME_HOME, MR.strings.courses, School),
+    RootScreen(ContentEntryListViewModel.DEST_NAME_HOME, MR.strings.library, LibraryBooks),
+    RootScreen(PersonListViewModel.DEST_NAME_HOME, MR.strings.people, Person)
 )
 
 val Sidebar = FC<SidebarProps> { props ->
     val strings = useStringProvider()
+    var currentItemIndex by useState { 0 }
+    val location = useLocation()
+
+    useEffect(location.pathname) {
+        val pathIndex = ROOT_SCREENS.indexOfFirst {
+            location.pathname == "/${it.key}"
+        }
+
+        if(pathIndex >= 0)
+            currentItemIndex = pathIndex
+    }
+
 
     Box {
         component = nav
@@ -66,7 +80,7 @@ val Sidebar = FC<SidebarProps> { props ->
                 List {
                     sx { width = Sizes.Sidebar.Width }
 
-                    ROOT_SCREENS.forEach { screen ->
+                    ROOT_SCREENS.forEachIndexed { index, screen ->
                         NavLink {
                             to = screen.key
                             css {
@@ -74,15 +88,20 @@ val Sidebar = FC<SidebarProps> { props ->
                                 color = Color.currentcolor
                             }
 
-                            ListItemButton {
-                                ListItemIcon {
-                                    + screen.icon?.create()
-                                }
+                            ListItem {
+                                selected = index == currentItemIndex
 
-                                ListItemText {
-                                    primary = ReactNode(strings[screen.nameMessageId])
+                                ListItemButton {
+                                    ListItemIcon {
+                                        + screen.icon?.create()
+                                    }
+
+                                    ListItemText {
+                                        primary = ReactNode(strings[screen.nameMessageId])
+                                    }
                                 }
                             }
+
                         }
                     }
                 }

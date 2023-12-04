@@ -1,5 +1,7 @@
 package com.ustadmobile.core.test.clientservertest
 
+import com.russhwolf.settings.PropertiesSettings
+import com.russhwolf.settings.Settings
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
@@ -53,6 +55,7 @@ import org.mockito.kotlin.spy
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.nio.file.Files
+import java.util.Properties
 import kotlin.random.Random
 
 private fun clientServerCommonDiModule(
@@ -77,9 +80,18 @@ private fun clientServerCommonDiModule(
         db
     }
 
+    bind<Settings>() with  singleton {
+        PropertiesSettings(
+            delegate = Properties(),
+            onModify = {
+                //Do nothing
+            }
+        )
+    }
+
     bind<UstadMobileSystemImpl>() with singleton {
         UstadMobileSystemImpl(
-            File(baseTmpDir, "servertmp").also { it.mkdir() }
+            settings = instance()
         )
     }
 
@@ -90,7 +102,7 @@ private fun clientServerCommonDiModule(
     }
 
     bind<UstadAccountManager>() with singleton {
-        UstadAccountManager(systemImpl = instance(), di)
+        UstadAccountManager(settings = instance(), di)
     }
 
     bind<ApiUrlConfig>() with singleton {

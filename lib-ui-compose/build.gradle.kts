@@ -3,6 +3,7 @@ plugins {
     id("com.android.library")
     id("kotlin-parcelize")
     alias(libs.plugins.jetbrains.compose)
+    alias(libs.plugins.moko.resources.plugin)
 }
 
 //Roughly as per compose multiplatform template
@@ -47,6 +48,8 @@ kotlin {
         }
 
         val androidMain by getting {
+            dependsOn(commonMain)
+
             dependencies {
                 api(libs.activity.compose)
                 api(libs.androidx.appcompat)
@@ -67,6 +70,8 @@ kotlin {
         }
 
         val desktopMain by getting {
+            dependsOn(commonMain)
+
             dependencies {
                 api(compose.desktop.common)
                 implementation(compose.desktop.currentOs)
@@ -99,4 +104,10 @@ android {
     kotlin {
         jvmToolchain(17)
     }
+}
+
+multiplatformResources {
+    multiplatformResourcesPackage = "com.ustadmobile.libuicompose"
+
+    iosBaseLocalizationRegion = "en"
 }

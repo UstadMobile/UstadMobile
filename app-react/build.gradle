@@ -73,6 +73,8 @@ kotlin {
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-virtual-core"
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-react-virtual"
                 implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
+                implementation libs.multiplatformsettings
+
                 implementation npm("@js-joda/timezone", "$version_npm_joda_timezone")
 
                 implementation npm("@date-io/moment","$version_npm_mement_io")

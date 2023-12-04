@@ -1,9 +1,10 @@
 package com.ustadmobile.core.impl
 
+import com.russhwolf.settings.Settings
+import com.russhwolf.settings.set
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT_MESSAGE
@@ -27,12 +28,9 @@ import com.ustadmobile.core.viewmodel.login.LoginViewModel
 /**
  * Class has all the shared function across all supported platforms
  */
-abstract class UstadMobileSystemCommon {
-
-    /**
-     * The currently active locale
-     */
-    private var locale: String = ""
+abstract class UstadMobileSystemCommon(
+    private val settings: Settings
+) {
 
     internal data class LastGoToDest(val viewName: String, val args: Map<String, String?>)
 
@@ -98,66 +96,6 @@ abstract class UstadMobileSystemCommon {
         return ClazzListViewModel.DEST_NAME_HOME
     }
 
-    fun goToDeepLink(deepLink: String, accountManager: UstadAccountManager, context: Any) {
-        if(deepLink.contains(LINK_ENDPOINT_VIEWNAME_DIVIDER)) {
-            val endpointUrl = deepLink.substringBefore(LINK_ENDPOINT_VIEWNAME_DIVIDER)
-                .requirePostfix("/")
-            val viewUri = deepLink.substringAfter(LINK_ENDPOINT_VIEWNAME_DIVIDER)
-
-
-            val intentMessage = getString(MR.strings.opening_link)
-                .replace("%1\$s", deepLink)
-
-            val maxDateOfBirth = if(viewUri.startsWith(ParentalConsentManagementViewModel.DEST_NAME)) {
-                Clock.System.now()
-                    .minus(UstadMobileConstants.ADULT_AGE_THRESHOLD, DateTimeUnit.YEAR, TimeZone.UTC)
-                    .toEpochMilliseconds()
-            }else {
-                0L
-            }
-
-            //if there are any accounts that match endpoint url the user wants to work with,
-            // then go to the accountmanager list in picker mode, otherwise go directly to the login
-            // screen for that particular server.
-            GlobalScope.launch(kotlinx.coroutines.Dispatchers.Main) {
-                if(accountManager.activeSessionCount(maxDateOfBirth) { it == endpointUrl } > 0) {
-                    val args = mapOf(ARG_NEXT to viewUri,
-                        AccountListViewModel.ARG_FILTER_BY_ENDPOINT to endpointUrl,
-                        AccountListViewModel.ARG_ACTIVE_ACCOUNT_MODE to AccountListViewModel.ACTIVE_ACCOUNT_MODE_INLIST,
-                        UstadView.ARG_TITLE to getString(MR.strings.select_account),
-                        UstadView.ARG_INTENT_MESSAGE to intentMessage,
-                        UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString(),
-                        UstadView.ARG_MAX_DATE_OF_BIRTH to maxDateOfBirth.toString())
-                    go(AccountListViewModel.DEST_NAME, args, context)
-                }else {
-                    val args = mapOf(ARG_NEXT to viewUri,
-                        ARG_INTENT_MESSAGE to intentMessage,
-                        ARG_API_URL to endpointUrl)
-                    go(LoginViewModel.DEST_NAME, args, context)
-                }
-
-            }
-        }
-    }
-
-    /**
-     * Go to a new view using a ViewLink in the form of ViewName?arg1=val1&arg2=val2 . This function
-     * will parse the arguments from the query string into a map
-     *
-     * @param destination Destination name in the form of ViewName?arg1=val1&arg2=val2 etc.
-     * @param context System context object
-     * @param ustadGoOptions Go Options to specify popUpTo etc.
-     */
-    open fun goToViewLink(destination: String, context: Any, ustadGoOptions: UstadGoOptions = UstadGoOptions()) {
-        val destinationQueryPos = destination.indexOf('?')
-        if(destinationQueryPos == -1) {
-            go(destination, mapOf(), context, ustadGoOptions)
-        }else {
-            val destArgs = UMFileUtil.parseURLQueryString(destination)
-            go(destination.substring(0, destinationQueryPos), destArgs, context, ustadGoOptions)
-        }
-    }
-
     open fun go(viewName: String, args: Map<String, String?>, context: Any) {
         go(viewName, args, context, 0, UstadGoOptions(null, false))
     }
@@ -186,45 +124,11 @@ abstract class UstadMobileSystemCommon {
      * @return The currently active locale code, or a blank "" string meaning the locale is the system default.
      */
     @JsName("getLocale")
-    open fun getLocale(): String = getAppPref(PREFKEY_LOCALE, LOCALE_USE_SYSTEM)
+    open fun getLocale(): String = settings.getString(PREFKEY_LOCALE, LOCALE_USE_SYSTEM)
 
     @JsName("setLocale")
-    fun setLocale(locale: String) = setAppPref(PREFKEY_LOCALE, locale)
-
-
-    /**
-     * Get a preference for the app
-     *
-     * @param key preference key as a string
-     * @return value of that preference
-     */
-    @JsName("getAppPref")
-    abstract fun getAppPref(key: String): String?
-
-    /**
-     * Set a preference for the app
-     *
-     * @param key preference that is being set
-     * @param value value to be set
-     */
-    abstract fun setAppPref(key: String, value: String?)
-
-    /**
-     * Get a preference for the app.  If not set, return the provided defaultVal
-     *
-     * @param key preference key as string
-     * @param defaultVal default value to return if not set
-     * @return value of the preference if set, defaultVal otherwise
-     */
-    open fun getAppPref(key: String, defaultVal: String): String {
-        val valFound = getAppPref(key)
-        return valFound ?: defaultVal
-    }
-
-    open fun getOrPutAppPref(key: String, block: () -> String): String {
-        return getAppPref(key) ?: block().also { newValue ->
-            setAppPref(key, newValue)
-        }
+    open fun setLocale(locale: String) {
+        settings[PREFKEY_LOCALE] = locale
     }
 
     /**
@@ -299,23 +203,6 @@ abstract class UstadMobileSystemCommon {
 
 
     abstract fun openLinkInBrowser(url: String, context: Any)
-
-    /**
-     * Handle clicking link that decides to open on the web or to open in the browser
-     */
-    fun handleClickLink(url: String, accountManager: UstadAccountManager, context: Any){
-        if(url.contains(LINK_ENDPOINT_VIEWNAME_DIVIDER)) {
-            val components = UstadUrlComponents.parse(url)
-            if(components.endpoint == accountManager.activeEndpoint.url){
-                goToViewLink(components.viewUri, context)
-            }else{
-                goToDeepLink(url, accountManager, context)
-            }
-        }else{
-            //Send link to system
-            openLinkInBrowser(url, context)
-        }
-    }
 
     /**
      * Open the given DoorUri in the default viewer. On Android this means using a VIEW intent.

@@ -48,10 +48,10 @@ val ClazzEnrolmentEditScreenComponent = FC<ClazzEnrolmentEditScreenProps> { prop
             UstadSelectField<Int> {
                 id = "enrolment_role"
                 value = props.uiState.clazzEnrolment?.clazzEnrolmentRole ?: ClazzEnrolment.ROLE_STUDENT
-                label = strings[MR.strings.role]
+                label = strings[MR.strings.role] + "*"
                 options = props.uiState.roleOptions
                 error = props.uiState.roleSelectedError != null
-                helperText = props.uiState.roleSelectedError?.let { ReactNode(it) }
+                helperText = ReactNode(props.uiState.roleSelectedError ?: strings[MR.strings.required])
                 enabled = props.uiState.fieldsEnabled
                 itemValue = { "$it" }
                 itemLabel = {
@@ -74,10 +74,10 @@ val ClazzEnrolmentEditScreenComponent = FC<ClazzEnrolmentEditScreenProps> { prop
             UstadDateField {
                 id = "date_joined"
                 timeInMillis = props.uiState.clazzEnrolment?.clazzEnrolmentDateJoined ?: 0
-                label = ReactNode(strings[MR.strings.start_date])
+                label = ReactNode(strings[MR.strings.start_date] + "*")
                 disabled = !props.uiState.fieldsEnabled
                 error = props.uiState.startDateError != null
-                helperText = props.uiState.startDateError?.let { ReactNode(it) }
+                helperText = ReactNode(props.uiState.startDateError ?: strings[MR.strings.required])
                 timeZoneId = props.uiState.clazzEnrolment?.timeZone ?: "UTC"
                 onChange = {
                     props.onClazzEnrolmentChanged(

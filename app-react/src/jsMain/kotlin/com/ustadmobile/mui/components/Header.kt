@@ -3,6 +3,8 @@ package com.ustadmobile.mui.components
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
 import com.ustadmobile.mui.common.Area
 import js.core.jso
 import web.cssom.*
@@ -13,12 +15,20 @@ import react.*
 import react.dom.aria.AriaHasPopup
 import react.dom.aria.ariaExpanded
 import react.dom.aria.ariaHasPopup
+import react.dom.aria.ariaLabel
 import react.dom.aria.ariaLabelledBy
 import react.dom.html.ReactHTML.div
+import react.router.useLocation
+import react.router.useNavigate
 import web.dom.Element
 import web.dom.document
 import web.html.HTMLElement
 import mui.icons.material.MoreVert as MoreVertIcon
+import mui.icons.material.Settings as SettingsIcon
+
+private val ROOT_LOCATIONS = UstadViewModel.ROOT_DESTINATIONS.map {
+    "/$it"
+}
 
 external interface HeaderProps: Props {
     var appUiState: AppUiState
@@ -32,6 +42,9 @@ val Header = FC<HeaderProps> { props ->
     val appBarRef = useRef<HTMLElement>(null)
     val strings = useStringProvider()
     var overflowAnchor by useState<Element?> { null }
+    val location = useLocation()
+    val navigateFn = useNavigate()
+
 
     var appBarTitle by useState {
         strings[MR.strings.app_name]
@@ -67,6 +80,22 @@ val Header = FC<HeaderProps> { props ->
                 component = div
 
                 + appBarTitle
+            }
+
+            if(location.pathname in ROOT_LOCATIONS) {
+                IconButton {
+                    id = "settings_button"
+                    onClick = {
+                        navigateFn("/${SettingsViewModel.DEST_NAME}")
+                    }
+                    ariaLabel = strings[MR.strings.settings]
+
+                    SettingsIcon {
+                        sx {
+                            color = theme.palette.primary.contrastText
+                        }
+                    }
+                }
             }
 
             if(props.appUiState.searchState.visible) {
