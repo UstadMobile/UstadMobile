@@ -40,6 +40,7 @@ import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
 import com.ustadmobile.core.MR
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.libuicompose.components.ClazzLogEditAttendanceToggleGroup
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
@@ -132,10 +133,8 @@ private fun PagerView(
     onChangeClazzLog: (ClazzLog) -> Unit = {},
 ) {
 
-    // TODO error
-    val pagerState =  rememberPagerState(pageCount = { 10 })
+    val pagerState =  rememberPagerState(pageCount = { list.size })
 
-//    val pagerState = rememberPagerState(0)
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(pagerState, list) {
@@ -185,19 +184,6 @@ private fun PagerView(
 
             Text(dateFormatted)
         }
-//        HorizontalPager(
-//            modifier = Modifier.weight(8F),
-//            state = pagerState,
-//            count = list.size
-//        ) { index ->
-//
-//            val dateFormatted = rememberFormattedDateTime(
-//                timeInMillis = list[index].logDate,
-//                timeZoneId = timeZone
-//            )
-//
-//            Text(dateFormatted)
-//        }
 
         IconButton(
             onClick = {
@@ -218,12 +204,6 @@ private fun PagerView(
     }
 }
 
-//private val buttonsIdMap = mapOf(
-//    ClazzLogAttendanceRecord.STATUS_ATTENDED to R.id.present_button,
-//    ClazzLogAttendanceRecord.STATUS_ABSENT to R.id.absent_button,
-//    ClazzLogAttendanceRecord.STATUS_PARTIAL to R.id.late_button
-//)
-
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ClazzLogItemView(
@@ -242,49 +222,21 @@ private fun ClazzLogItemView(
                 contentDescription = ""
             )
         },
-//        trailing = {
-//            fun MaterialButtonToggleGroup.update() {
-//                buttonsIdMap.forEach { (status, buttonId) ->
-//                    val button = findViewById<Button>(buttonId)
-//                    button.isEnabled = fieldsEnabled
-//
-//                    button.setOnClickListener {
-//                        onClazzLogAttendanceChanged(
-//                            clazzLog.copy(
-//                                attendanceRecord = clazzLog.attendanceRecord?.shallowCopy {
-//                                    attendanceStatus = status
-//                                }
-//                            )
-//                        )
-//                    }
-//                }
-//
-//                val idToCheck = buttonsIdMap[clazzLog.attendanceRecord?.attendanceStatus ?: 0]
-//                if(idToCheck != null) {
-//                    check(idToCheck)
-//                }else {
-//                    clearChecked()
-//                }
-//            }
-//
-//            AndroidView(
-//                factory = {  context ->
-//                    val view = LayoutInflater.from(context).inflate(
-//                        R.layout.item_clazz_log_attendance_status_toggle_buttons,
-//                        null, false
-//                    ) as MaterialButtonToggleGroup
-//
-//                    view.isSingleSelection = true
-//                    view.update()
-//
-//
-//                    view
-//                },
-//                update = {
-//                    it.update()
-//                }
-//            )
-//        }
+        trailing = {
+            ClazzLogEditAttendanceToggleGroup(
+                isEnabled = fieldsEnabled,
+                attendanceStatus = clazzLog.attendanceRecord?.attendanceStatus ?: 0,
+                onAttendanceStatusChanged = { status ->
+                    onClazzLogAttendanceChanged(
+                        clazzLog.copy(
+                            attendanceRecord = clazzLog.attendanceRecord?.shallowCopy {
+                                attendanceStatus = status
+                            }
+                        )
+                    )
+                }
+            )
+        }
     )
 
 
