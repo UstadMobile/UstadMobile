@@ -35,10 +35,14 @@ actual fun ClazzLogEditAttendanceToggleGroup(
         iconsMap.forEach { (status, icon) ->
 
             IconButton(
-                modifier = Modifier.border( width = 2.dp,
-                    color = MaterialTheme.colors.primary,
-                    shape = RoundedCornerShape(5.dp)
-                ).background(color = if((attendanceStatus+1)==status) MaterialTheme.colors.onSurface else Color.Green),
+                modifier = Modifier.border( width = 1.dp,
+                    color = MaterialTheme.colors.onPrimary,
+                    shape = RoundedCornerShape(2.dp)
+                ).background(
+                    color = if(attendanceStatus==status)
+                        MaterialTheme.colors.primary
+                    else
+                        MaterialTheme.colors.background),
                 onClick = { onAttendanceStatusChanged(status) },
                 content = {
                     Icon(
