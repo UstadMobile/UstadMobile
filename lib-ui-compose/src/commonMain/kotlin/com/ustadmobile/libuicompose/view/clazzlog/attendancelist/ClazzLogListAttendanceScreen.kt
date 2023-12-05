@@ -4,7 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.*
+import androidx.compose.material3.Text
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -97,7 +100,6 @@ fun ClazzLogListAttendanceScreen(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ClazzLogListItem(
     clazzLog: ClazzLog?,
@@ -114,14 +116,14 @@ private fun ClazzLogListItem(
         modifier = Modifier.clickable {
             clazzLog?.also(onClick)
         },
-        icon = {
+        leadingContent = {
             Icon(
                 Icons.Outlined.CalendarToday,
                 contentDescription = ""
             )
         },
-        text = { Text(dateTime) },
-        secondaryText = {
+        headlineContent = { Text(dateTime) },
+        supportingContent = {
             Column {
                 Row {
                     ClazzLogListItemAttendanceStatusBox(
@@ -132,12 +134,12 @@ private fun ClazzLogListItem(
                     ClazzLogListItemAttendanceStatusBox(
                         numerator = clazzLog?.clazzLogNumPartial ?: 0,
                         denominator = clazzLog?.totalAttendeeStatusRecorded ?: 1,
-                        color = MaterialTheme.colors.secondary,
+                        color = MaterialTheme.colorScheme.secondary,
                     )
                     ClazzLogListItemAttendanceStatusBox(
                         numerator = clazzLog?.clazzLogNumAbsent ?: 0,
                         denominator = clazzLog?.totalAttendeeStatusRecorded ?: 1,
-                        color = MaterialTheme.colors.error,
+                        color = MaterialTheme.colorScheme.error,
                     )
                 }
 
