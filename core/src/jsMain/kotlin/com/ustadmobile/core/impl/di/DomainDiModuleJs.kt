@@ -14,6 +14,8 @@ import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCaseJs
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCaseJs
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumberUtilJs
+import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
+import com.ustadmobile.core.domain.sendemail.OnClickSendEmailUseCaseJs
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
@@ -52,6 +54,10 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
 
     bind<OnClickPhoneNumUseCase>() with provider {
         OnClickPhoneNumUseCaseJs()
+    }
+
+    bind<OnClickEmailUseCase>() with provider {
+        OnClickSendEmailUseCaseJs()
     }
 
     bind<SetLanguageUseCase>() with provider {

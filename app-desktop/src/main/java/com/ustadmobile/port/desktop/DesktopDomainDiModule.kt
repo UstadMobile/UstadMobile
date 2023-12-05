@@ -14,6 +14,8 @@ import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCaseJvm
+import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
+import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCaseJvm
 import org.kodein.di.instance
 
 val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
@@ -39,6 +41,10 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         SetLanguageUseCaseJvm(
             systemImpl = instance()
         )
+    }
+
+    bind<OnClickEmailUseCase>() with provider {
+        OnClickEmailUseCaseJvm()
     }
 
 }
