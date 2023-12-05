@@ -10,11 +10,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.ListItem
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
@@ -57,7 +56,6 @@ fun ClazzLogEditAttendanceScreen(
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ClazzLogEditAttendanceScreen(
     uiState: ClazzLogEditAttendanceUiState = ClazzLogEditAttendanceUiState(),
@@ -84,8 +82,8 @@ fun ClazzLogEditAttendanceScreen(
                 modifier = Modifier.clickable {
                     onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ATTENDED)
                 },
-                text = { Text(stringResource(MR.strings.mark_all_present)) },
-                icon = {
+                headlineContent = { Text(stringResource(MR.strings.mark_all_present)) },
+                leadingContent = {
                     Icon(
                         Icons.Outlined.LibraryAddCheck,
                         contentDescription = ""
@@ -99,8 +97,8 @@ fun ClazzLogEditAttendanceScreen(
                 modifier = Modifier.clickable {
                     onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ABSENT)
                 },
-                text = { Text(stringResource(MR.strings.mark_all_absent)) },
-                icon = {
+                headlineContent = { Text(stringResource(MR.strings.mark_all_absent)) },
+                leadingContent = {
                     Icon(
                         Icons.Outlined.CheckBox,
                         contentDescription = ""
@@ -205,7 +203,6 @@ private fun PagerView(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ClazzLogItemView(
     fieldsEnabled: Boolean,
@@ -214,16 +211,16 @@ private fun ClazzLogItemView(
 ) {
 
     ListItem(
-        text = {
+        headlineContent = {
             Text(text = clazzLog.person?.personFullName() ?: "")
         },
-        icon = {
+        leadingContent = {
             Icon(
                 Icons.Default.Person,
                 contentDescription = ""
             )
         },
-        trailing = {
+        trailingContent = {
             ClazzLogEditAttendanceToggleGroup(
                 isEnabled = fieldsEnabled,
                 attendanceStatus = clazzLog.attendanceRecord?.attendanceStatus ?: 0,
