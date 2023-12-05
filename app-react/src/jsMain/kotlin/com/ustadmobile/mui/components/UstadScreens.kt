@@ -52,6 +52,8 @@ import web.url.URL
 import kotlin.random.Random
 import com.ustadmobile.core.MR
 import com.ustadmobile.util.ext.deleteDatabaseAsync
+import mui.material.useMediaQuery
+import react.router.useLocation
 import web.idb.indexedDB
 
 //Roughly as per components/Showcases on MUI-showcase #d71c6d1
@@ -76,8 +78,10 @@ class UstadScreenContextData(
 val UstadScreensContext = createContext<UstadScreenContextData>()
 
 val UstadScreens = FC<Props> {
-    val mobileMode = false//useMediaQuery("(max-width:960px)")
+    val mobileMode = useMediaQuery("(max-width:960px)")
     val appUiStateInstance = useState { AppUiState() }
+    val location = useLocation()
+
     var appUiState: AppUiState by appUiStateInstance
     val loaderData = useLoaderData() as UstadScreensLoaderData
     var snack: Snack? by useState { null }
@@ -85,6 +89,20 @@ val UstadScreens = FC<Props> {
     val muiState = useState { MuiAppState() }
 
     var muiStateVar by muiState
+    var mobileMenuOpen by useState(false)
+
+    var currentRootItemIndex by useState { 0 }
+
+
+
+    useEffect(location.pathname) {
+        val pathIndex = ROOT_SCREENS.indexOfFirst {
+            location.pathname == "/${it.key}"
+        }
+
+        if(pathIndex >= 0)
+            currentRootItemIndex = pathIndex
+    }
 
 
     UstadScreensContext(
@@ -132,6 +150,10 @@ val UstadScreens = FC<Props> {
                                 muiStateVar = muiStateVar.copy(appBarHeight = it)
                             }
                         }
+                        showMenuIcon = mobileMode
+                        onClickMenuIcon = {
+                            mobileMenuOpen = !mobileMenuOpen
+                        }
                     }
 
                     //if (mobileMode) Menu() else Sidebar()
@@ -139,7 +161,18 @@ val UstadScreens = FC<Props> {
                     // then this seems to make react destroy the content component and create a
                     // completely new one, which we definitely do not want
                     Sidebar {
-                        visible = appUiState.navigationVisible
+                        visible = !mobileMode && appUiState.navigationVisible
+                        selectedRootItemIndex = currentRootItemIndex
+                    }
+
+                    if(mobileMode) {
+                        UstadMobileMenu {
+                            isOpen = mobileMenuOpen
+                            onSetOpen = {
+                                mobileMenuOpen = it
+                            }
+                            selectedRootItemIndex = currentRootItemIndex
+                        }
                     }
 
                     Content()
