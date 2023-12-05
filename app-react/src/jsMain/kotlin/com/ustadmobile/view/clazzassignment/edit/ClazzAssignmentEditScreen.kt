@@ -135,7 +135,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     variant = FormControlVariant.outlined
                     numValue = (props.uiState.entity?.assignment?.caNumberOfFiles ?: 0).toFloat()
                     label = ReactNode(strings[MR.strings.number_of_files])
-                    disabled = props.uiState.fieldsEnabled
+                    disabled = !props.uiState.fieldsEnabled
                     onChange = {
                         props.onAssignmentChanged(
                             props.uiState.entity?.assignment?.shallowCopy {

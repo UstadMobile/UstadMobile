@@ -105,20 +105,23 @@ val ClazzEnrolmentEditScreenComponent = FC<ClazzEnrolmentEditScreenProps> { prop
             }
 
 
-            UstadMessageIdSelectField {
-                id = "outcome"
-                value = props.uiState.clazzEnrolment?.clazzEnrolmentOutcome
-                    ?: ClazzEnrolment.OUTCOME_IN_PROGRESS
-                label = strings[MR.strings.outcome]
-                options = OutcomeConstants.OUTCOME_MESSAGE_IDS
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
-                    props.onClazzEnrolmentChanged(
-                        props.uiState.clazzEnrolment?.shallowCopy {
-                            clazzEnrolmentOutcome = it.value
-                    })
+            if(props.uiState.outcomeVisible) {
+                UstadMessageIdSelectField {
+                    id = "outcome"
+                    value = props.uiState.clazzEnrolment?.clazzEnrolmentOutcome
+                        ?: ClazzEnrolment.OUTCOME_IN_PROGRESS
+                    label = strings[MR.strings.outcome]
+                    options = OutcomeConstants.OUTCOME_MESSAGE_IDS
+                    enabled = props.uiState.fieldsEnabled
+                    onChange = {
+                        props.onClazzEnrolmentChanged(
+                            props.uiState.clazzEnrolment?.shallowCopy {
+                                clazzEnrolmentOutcome = it.value
+                            })
+                    }
                 }
             }
+
         }
     }
 }
