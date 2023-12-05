@@ -72,15 +72,6 @@ val CourseGroupSetListComponent = FC<CourseGroupSetListComponentProps> { props -
                 }
             }
 
-            props.uiState.individualSubmissionOption?.also { individualOption ->
-                item(key = "individual_submission_opt") {
-                    CourseGroupSetListItem.create {
-                        courseGroupSet = individualOption
-                        onClick = props.onClickEntry
-                    }
-                }
-            }
-
             if(props.uiState.showAddItem) {
                 item(key = "new") {
                     UstadAddListItem.create {

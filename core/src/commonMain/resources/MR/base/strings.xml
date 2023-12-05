@@ -1677,4 +1677,6 @@
     -->
     <string name="time_submitted">Time submitted</string>
 
+    <string name="group_assignment">Group assignment</string>
+
 </resources>

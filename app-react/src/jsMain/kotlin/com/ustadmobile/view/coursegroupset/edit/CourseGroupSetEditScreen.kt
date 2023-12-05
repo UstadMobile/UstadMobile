@@ -42,9 +42,9 @@ val CourseGroupSetEditComponent2 = FC<CourseGroupSetEditProps> { props ->
             UstadTextField {
                 id = "cgs_name"
                 value = props.uiState.courseGroupSet?.cgsName ?: ""
-                label = ReactNode(strings[MR.strings.title])
+                label = ReactNode(strings[MR.strings.title] + "*")
                 error = props.uiState.courseTitleError != null
-                helperText = props.uiState.courseTitleError?.let { ReactNode(it) }
+                helperText = ReactNode(props.uiState.courseTitleError ?: strings[MR.strings.required])
                 disabled = !props.uiState.fieldsEnabled
                 onTextChange = {
                     props.onCourseGroupSetChange(
@@ -59,7 +59,7 @@ val CourseGroupSetEditComponent2 = FC<CourseGroupSetEditProps> { props ->
                 id = "cgs_total_groups"
                 numValue = (props.uiState.courseGroupSet?.cgsTotalGroups ?: 2).toFloat()
                 label = ReactNode(strings[MR.strings.number_of_groups])
-                helperText = props.uiState.numOfGroupsError?.let { ReactNode(it) }
+                helperText = ReactNode(props.uiState.numOfGroupsError ?: strings[MR.strings.required])
                 error = props.uiState.numOfGroupsError != null
                 disabled = !props.uiState.fieldsEnabled
                 onChange = {

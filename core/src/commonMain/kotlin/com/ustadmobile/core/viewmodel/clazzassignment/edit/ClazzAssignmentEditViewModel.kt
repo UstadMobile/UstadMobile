@@ -57,6 +57,10 @@ data class ClazzAssignmentEditUiState(
     val courseBlockEditUiState: CourseBlockEditUiState = CourseBlockEditUiState(
         completionCriteriaOptions = ASSIGNMENT_COMPLETION_CRITERIAS
     ),
+
+    val groupSubmissionOn: Boolean = false,
+
+    val groupSetError: String? = null,
 ) {
 
     val peerMarkingVisible: Boolean
@@ -142,12 +146,15 @@ class ClazzAssignmentEditViewModel(
                     )
                 },
                 uiUpdate = {
+                    val groupSubmissionOn = savedStateHandle[STATE_KEY_GROUP_SUBMISSION_ON]
                     _uiState.update { prev ->
                         prev.copy(
                             entity = it,
                             courseBlockEditUiState = prev.courseBlockEditUiState.copy(
                                 courseBlock = it?.courseBlock
                             ),
+                            groupSubmissionOn = groupSubmissionOn?.toBoolean() ?:
+                                it?.assignment?.caGroupUid?.let { it != 0L } ?: false
                         )
                     }
                 }
@@ -211,7 +218,8 @@ class ClazzAssignmentEditViewModel(
                                     caGroupUid = groupSet.cgsUid
                                 },
                                 assignmentCourseGroupSetName = groupSet.takeIf { it.cgsUid != 0L }?.cgsName
-                            )
+                            ),
+                            groupSetError = null,
                         )
                     }
 
@@ -251,6 +259,15 @@ class ClazzAssignmentEditViewModel(
             resultKey = CourseBlockEditViewModel.KEY_HTML_DESCRIPTION,
             title = systemImpl.getString(MR.strings.description),
         )
+    }
+
+    fun onGroupSubmissionOnChanged(groupSubmissionOn: Boolean) {
+        savedStateHandle[STATE_KEY_GROUP_SUBMISSION_ON] = groupSubmissionOn.toString()
+        _uiState.update { prev ->
+            prev.copy(
+                groupSubmissionOn = groupSubmissionOn,
+            )
+        }
     }
 
     fun onAssignmentChanged(assignment: ClazzAssignment?) {
@@ -350,6 +367,7 @@ class ClazzAssignmentEditViewModel(
             courseBlockEditUiState.caGracePeriodError != null ||
             reviewerCountError != null ||
             sizeLimitError != null ||
+            groupSetError != null ||
             courseBlockEditUiState.hasErrors
     }
 
@@ -367,7 +385,6 @@ class ClazzAssignmentEditViewModel(
             currentValue = null,
             serializer = String.serializer(),
             args = mapOf(
-                CourseGroupSetListViewModel.ARG_SHOW_INDIVIDUAL_OPTION to true.toString(),
                 ARG_CLAZZUID to (_uiState.value.entity?.assignment?.caClazzUid ?: 0).toString()
             ),
         )
@@ -449,7 +466,7 @@ class ClazzAssignmentEditViewModel(
                 }
             }
 
-            if(assignment.caSizeLimit !in 5..100){
+            if(assignment.caSizeLimit !in ATTACHMENT_LIMIT_MIN..ATTACHMENT_LIMIT_MAX){
                 _uiState.update {   prev ->
                     prev.copy(
                         sizeLimitError = systemImpl.formatString(MR.strings.size_limit_error,
@@ -464,6 +481,14 @@ class ClazzAssignmentEditViewModel(
                         courseBlockEditUiState = prev.courseBlockEditUiState.copy(
                             caTitleError = systemImpl.getString(MR.strings.required)
                         )
+                    )
+                }
+            }
+
+            if(_uiState.value.groupSubmissionOn && assignment.caGroupUid == 0L) {
+                _uiState.update { prev ->
+                    prev.copy(
+                        groupSetError = systemImpl.getString(MR.strings.field_required_prompt)
                     )
                 }
             }
@@ -526,6 +551,20 @@ class ClazzAssignmentEditViewModel(
                 }
             }
 
+            //If group submission has been switched off, set group uid to zero now
+            _uiState.takeIf {
+                it.value.entity?.assignment?.caGroupUid != 0L && !it.value.groupSubmissionOn
+            }?.update { prev ->
+                prev.copy(
+                    entity = prev.entity?.copy(
+                        assignment = prev.entity.assignment?.shallowCopy {
+                            caGroupUid = 0L
+                        },
+                        assignmentCourseGroupSetName = null,
+                    )
+                )
+            }
+
             finishWithResult(_uiState.value.entity)
         }
     }
@@ -539,5 +578,7 @@ class ClazzAssignmentEditViewModel(
         const val DEST_NAME = "CourseAssignmentEdit"
         const val ATTACHMENT_LIMIT_MIN = 5
         const val ATTACHMENT_LIMIT_MAX = 100
+
+        const val STATE_KEY_GROUP_SUBMISSION_ON = "groupSubmissionOn"
     }
 }
