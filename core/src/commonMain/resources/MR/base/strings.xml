@@ -1273,7 +1273,7 @@
     <!--A sub-unit of a course -->
     <string name="module">Module</string>
     <!--Description of a subunit of a course -->
-    <string name="course_module">Course module</string>
+    <string name="course_module">A module can contain any other block. It can be expanded/collapsed, and used for scoring.</string>
     <!-- Description for adding a course text block -->
     <string name="formatted_text_to_show_to_course_participants">Block that will display formatted text</string>
     <!-- Description for adding a content course block -->

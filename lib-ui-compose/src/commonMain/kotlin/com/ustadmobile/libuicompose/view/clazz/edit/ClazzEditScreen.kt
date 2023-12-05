@@ -88,6 +88,7 @@ fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
                     modifier = Modifier.addCourseBlockClickable(CourseBlock.BLOCK_MODULE_TYPE),
                     headlineContent = { Text(stringResource(MR.strings.module)) },
                     leadingContent = { Icon(Icons.Default.Folder, contentDescription = null) },
+                    secondaryContent = { Text(stringResource(MR.strings.course_module)) },
                 )
                 UstadBottomSheetOption(
                     modifier = Modifier.addCourseBlockClickable(CourseBlock.BLOCK_TEXT_TYPE),
