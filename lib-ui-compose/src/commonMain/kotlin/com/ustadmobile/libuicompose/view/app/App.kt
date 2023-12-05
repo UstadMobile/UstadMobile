@@ -17,6 +17,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -58,7 +59,7 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
         label = MR.strings.library,
     ),
     TopNavigationItem(
-        destRoute = PersonListViewModel.DEST_NAME,
+        destRoute = PersonListViewModel.DEST_NAME_HOME,
         icon = Icons.Outlined.Person,
         label = MR.strings.people,
     )
@@ -80,7 +81,7 @@ fun App(
         mutableStateOf(AppUiState())
     }
 
-    val appUiStateVal by appUiState
+    var appUiStateVal by appUiState
     LaunchedEffect(appUiStateVal) {
         onAppStateChanged(appUiStateVal)
     }
@@ -98,32 +99,51 @@ fun App(
 
     Scaffold(
         topBar = {
-            UstadAppBar(
-                compactHeader = (widthClass != SizeClass.EXPANDED),
-                appUiState = appUiStateVal,
-                navigator = navigator,
-            )
+            if(!appUiStateVal.hideAppBar) {
+                UstadAppBar(
+                    compactHeader = (widthClass != SizeClass.EXPANDED),
+                    appUiState = appUiStateVal,
+                    navigator = navigator,
+                )
+            }
         },
         bottomBar = {
             //As per https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#navigationbar
             var selectedTopLevelItemIndex by remember { mutableIntStateOf(0) }
-            if(useBottomBar && appUiStateVal.navigationVisible && !appUiStateVal.hideBottomNavigation) {
-                NavigationBar {
-                    APP_TOP_LEVEL_NAV_ITEMS.forEachIndexed { index, item ->
-                        NavigationBarItem(
-                            icon = {
-                                Icon(item.icon, contentDescription = null)
-                            },
-                            label = { Text(stringResource(item.label)) },
-                            selected = selectedTopLevelItemIndex == index,
-                            onClick = {
-                                selectedTopLevelItemIndex = index
-                                navigator.navigate(
-                                    route  = "/${item.destRoute}",
-                                    options = NavOptions(popUpTo = PopUpTo.First(inclusive = true))
-                                )
-                            }
-                        )
+            if(useBottomBar) {
+                val currentDestination by navigator.currentEntry.collectAsState(null)
+
+                /**
+                 * Set the selected item. Relying on onClick misses when the user switches accounts
+                 * and goes back to the start screen (courses).
+                 */
+                LaunchedEffect(currentDestination?.path) {
+                    val pathVal = currentDestination?.path ?: return@LaunchedEffect
+                    val topLevelIndex = APP_TOP_LEVEL_NAV_ITEMS.indexOfFirst {
+                        "/${it.destRoute}" == pathVal
+                    }
+
+                    if(topLevelIndex >= 0)
+                        selectedTopLevelItemIndex = topLevelIndex
+                }
+
+                if(appUiStateVal.navigationVisible && !appUiStateVal.hideBottomNavigation) {
+                    NavigationBar {
+                        APP_TOP_LEVEL_NAV_ITEMS.forEachIndexed { index, item ->
+                            NavigationBarItem(
+                                icon = {
+                                    Icon(item.icon, contentDescription = null)
+                                },
+                                label = { Text(stringResource(item.label)) },
+                                selected = selectedTopLevelItemIndex == index,
+                                onClick = {
+                                    navigator.navigate(
+                                        route  = "/${item.destRoute}",
+                                        options = NavOptions(popUpTo = PopUpTo.First(inclusive = true))
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -157,7 +177,9 @@ fun App(
     ) { innerPadding ->
         AppNavHost(
             navigator = navigator,
-            onSetAppUiState = appUiState.component2(),
+            onSetAppUiState = {
+                appUiStateVal = it
+            },
             modifier = Modifier.padding(innerPadding),
             persistNavState = persistNavState,
             onShowSnackBar = onShowSnackBar,

@@ -75,6 +75,7 @@
         tools:ignore="GoogleAppIndexingWarning"
         android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules"
+        android:localeConfig="@xml/locales_config"
         >
 
         <!--
@@ -133,6 +134,20 @@
             </intent-filter>
         </activity>
 
+        <!--
+        Service to hold locale config as per
+        https://developer.android.com/guide/topics/resources/app-languages#use-localeconfig
+        -->
+        <service
+            android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+            android:enabled="false"
+            android:exported="false">
+            <meta-data
+                android:name="autoStoreLocales"
+                android:value="true" />
+        </service>
+
+
         <activity
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
             android:exported="true"
@@ -145,19 +160,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-
-        <activity
-            android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
-            android:exported="false"
-            android:noHistory="true"
-            android:theme="@style/UmTheme.App">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
-
-
 
         <provider
             android:name="androidx.core.content.FileProvider"

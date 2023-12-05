@@ -27,6 +27,7 @@ import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSpacerItem
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
+import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
 import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionListItem
 import com.ustadmobile.libuicompose.view.clazzassignment.UstadAssignmentSubmissionStatusHeaderItems
@@ -76,6 +77,7 @@ fun ClazzAssignmentSubmitterDetailScreen(
 
     val privateCommentsLazyPagingItems = privateCommentsPager.flow.collectAsLazyPagingItems()
 
+    val linkExtractor = rememberLinkExtractor()
 
     LazyColumn (
         modifier = Modifier
@@ -170,7 +172,10 @@ fun ClazzAssignmentSubmitterDetailScreen(
             pagingItems = privateCommentsLazyPagingItems,
             key = { Pair(Comments.TABLE_ID, it.comment.commentsUid) }
         ) { comment ->
-            CommentListItem(commentAndName = comment)
+            CommentListItem(
+                commentAndName = comment,
+                linkExtractor = linkExtractor,
+            )
         }
 
         UstadListSpacerItem()

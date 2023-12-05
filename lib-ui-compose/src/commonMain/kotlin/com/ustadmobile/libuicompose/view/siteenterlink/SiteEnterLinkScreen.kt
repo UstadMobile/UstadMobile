@@ -31,7 +31,8 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.libuicompose.components.UstadErrorText
-import dev.icerock.moko.resources.compose.painterResource
+import com.ustadmobile.libuicompose.images.UstadImage
+import com.ustadmobile.libuicompose.images.ustadAppImagePainter
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -68,10 +69,9 @@ fun SiteEnterLinkScreen(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
+
         Image(
-            painter = painterResource(
-                imageResource = MR.images.illustration_connect
-            ),
+            painter = ustadAppImagePainter(UstadImage.ILLUSTRATION_CONNECT),
             modifier = Modifier.size(156.dp),
             contentDescription = null,
         )
@@ -113,7 +113,7 @@ fun SiteEnterLinkScreen(
                 .testTag("next_button")
                 .fillMaxWidth(),
         ) {
-            Text(stringResource(MR.strings.next).uppercase())
+            Text(stringResource(MR.strings.next))
         }
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -137,9 +137,7 @@ fun SiteEnterLinkScreen(
 
             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
 
-            Text(stringResource(MR.strings.create_a_new_learning_env)
-                .uppercase()
-            )
+            Text(stringResource(MR.strings.create_a_new_learning_env))
         }
     }
 

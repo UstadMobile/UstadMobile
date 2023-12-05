@@ -4,24 +4,73 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Workspaces
+import androidx.compose.material3.Card
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.ustadmobile.core.viewmodel.SettingsUiState
+import androidx.compose.ui.window.Dialog
+import com.ustadmobile.core.viewmodel.settings.SettingsUiState
 import com.ustadmobile.libuicompose.components.UstadDetailField2
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
 fun SettingsScreen(
-    uiState: SettingsUiState = SettingsUiState(),
+    viewModel: SettingsViewModel
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle(SettingsUiState())
+
+    SettingsScreen(
+        uiState = uiState,
+        onClickAppLanguage = viewModel::onClickLanguage,
+        onClickWorkspace = viewModel::onClickSiteSettings
+    )
+
+    if(uiState.langDialogVisible) {
+        //As per https://developer.android.com/jetpack/compose/components/dialog
+
+        Dialog(
+            onDismissRequest = viewModel::onDismissLangDialog,
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                uiState.availableLanguages.forEach { lang ->
+                    ListItem(
+                        modifier = Modifier.clickable {
+                            viewModel.onClickLang(lang)
+                        },
+                        headlineContent = { Text(lang.langDisplay) }
+                    )
+                }
+            }
+        }
+    }
+
+}
+
+@Composable
+fun SettingsScreen(
+    uiState: SettingsUiState,
     onClickAppLanguage: () -> Unit = {},
     onClickGoToHolidayCalendarList: () -> Unit = {},
     onClickWorkspace: () -> Unit = {},
@@ -75,14 +124,6 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        if (uiState.langListVisible){
-            UstadDetailField2(
-                icon = Icons.Default.Language,
-                valueText = stringResource(MR.strings.languages),
-                labelText = stringResource(MR.strings.languages_description),
-                modifier = Modifier.clickable { onClickLangList() },
-            )
-        }
 
     }
 }

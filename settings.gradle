@@ -49,7 +49,9 @@ dependencyResolutionManagement {
             version("version_androidx_constraintlayout", "2.1.4")
             version("version_libphonenumber_google", "8.13.26")
             version("version_libphonenumber_android", "8.13.25")
-
+            version("version_autolink", "0.11.0")
+            version("version_process_phoenix", "2.1.2")
+            version("version_multiplatformsettings", "1.1.1")
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
@@ -119,6 +121,9 @@ dependencyResolutionManagement {
             library("simplejndi", "com.github.h-thurow", "simple-jndi").versionRef("version_simplejndi")
             library("libphonenumber-google", "com.googlecode.libphonenumber", "libphonenumber").versionRef("version_libphonenumber_google")
             library("libphonenumber-android", "io.michaelrocks", "libphonenumber-android").versionRef("version_libphonenumber_android")
+            library("autolink", "org.nibor.autolink", "autolink").versionRef("version_autolink")
+            library("process-phoenix", "com.jakewharton", "process-phoenix").versionRef("version_process_phoenix")
+            library("multiplatformsettings", "com.russhwolf", "multiplatform-settings").versionRef("version_multiplatformsettings")
         }
     }
 }

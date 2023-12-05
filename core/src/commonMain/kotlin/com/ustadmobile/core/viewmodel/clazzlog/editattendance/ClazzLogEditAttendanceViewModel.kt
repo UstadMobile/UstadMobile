@@ -22,6 +22,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
 
 data class ClazzLogEditAttendanceUiState(
@@ -76,9 +77,6 @@ class ClazzLogEditAttendanceViewModel(
         set(value) {
             savedStateHandle[STATE_KEY_CURRENT_LOG_INDEX] = value.toString()
         }
-
-    private val ClazzLog.savedStateKey: String
-        get() = "$STATE_KEY_LOG_PREFIX${clazzLogUid}"
 
     private var loadClazzLogJob: Job? = null
 
@@ -214,10 +212,9 @@ class ClazzLogEditAttendanceViewModel(
                     it
                 }
             }.also { personAndAttendanceRecordsList ->
-                savedStateHandle.setJson(
-                    key = savedStateKey,
-                    serializer = ListSerializer(PersonAndClazzLogAttendanceRecord.serializer()),
-                    value = personAndAttendanceRecordsList
+                savePersonAndAttendanceRecords(
+                    clazzLogUid = clazzLog.clazzLogUid,
+                    records = personAndAttendanceRecordsList
                 )
             }
 
@@ -241,6 +238,32 @@ class ClazzLogEditAttendanceViewModel(
                     prev
                 }
             }
+        }
+    }
+
+    //Save the json of the records to a saved state key.
+    private suspend fun savePersonAndAttendanceRecords(
+        clazzLogUid: Long,
+        records: List<PersonAndClazzLogAttendanceRecord>
+    ) {
+        val savedStateKey = "$STATE_KEY_LOG_PREFIX${clazzLogUid}"
+        savedStateHandle.setJson(
+            key = savedStateKey,
+            serializer = ListSerializer(PersonAndClazzLogAttendanceRecord.serializer()),
+            value = records
+        )
+        val currentLogList = savedStateHandle.getJson(
+            key = STATE_KEY_LOGS_TO_SAVE_TO_DB,
+            deserializer = ListSerializer(Long.serializer())
+        )?.toSet() ?: emptySet()
+
+        if(clazzLogUid !in currentLogList) {
+            val newLogList = currentLogList + clazzLogUid
+            savedStateHandle.setJson(
+                key = STATE_KEY_LOGS_TO_SAVE_TO_DB,
+                serializer = ListSerializer(Long.serializer()),
+                value = newLogList.toList()
+            )
         }
     }
 
@@ -278,10 +301,9 @@ class ClazzLogEditAttendanceViewModel(
 
     private suspend fun commitAttendanceRecordsToState() {
         saveAttendanceRecordsMutex.withLock {
-            savedStateHandle.setJson(
-                _uiState.value.currentClazzLog.savedStateKey,
-                ListSerializer(PersonAndClazzLogAttendanceRecord.serializer()),
-                _uiState.value.clazzLogAttendanceRecordList
+            savePersonAndAttendanceRecords(
+                clazzLogUid = _uiState.value.currentClazzLog.clazzLogUid,
+                records = _uiState.value.clazzLogAttendanceRecordList
             )
         }
     }
@@ -293,16 +315,18 @@ class ClazzLogEditAttendanceViewModel(
             saveAttendanceRecordsMutex.withLock {
                 val clazzLogsToSave = mutableListOf<ClazzLog>()
                 val attendanceRecordsToSave = mutableListOf<ClazzLogAttendanceRecord>()
-                savedStateHandle.keys.filter {
-                    it.startsWith(STATE_KEY_LOG_PREFIX)
-                }.forEach { stateKey ->
-                    val clazzLogUid = stateKey.substringAfter(STATE_KEY_LOG_PREFIX).toLong()
+                val recordUidsToSave = savedStateHandle.getJson(
+                    STATE_KEY_LOGS_TO_SAVE_TO_DB,
+                    ListSerializer(Long.serializer())
+                ) ?: emptyList()
+
+                recordUidsToSave.forEach { clazzLogUid ->
                     val clazzLog = _uiState.value.clazzLogsList.first {
                         it.clazzLogUid == clazzLogUid
                     }
 
                     val logRecords = savedStateHandle.getJson(
-                        stateKey,
+                        key = "$STATE_KEY_LOG_PREFIX${clazzLogUid}",
                         ListSerializer(PersonAndClazzLogAttendanceRecord.serializer()),
                     )?.mapNotNull {
                         it.attendanceRecord
@@ -351,6 +375,12 @@ class ClazzLogEditAttendanceViewModel(
         const val STATE_KEY_CURRENT_LOG_INDEX = "activeIndex"
 
         const val STATE_KEY_LOG_PREFIX = "log_"
+
+        /**
+         * A list of all the clazz log uids that are within the saved state that must be saved into
+         * the database when the user click save.
+         */
+        const val STATE_KEY_LOGS_TO_SAVE_TO_DB = "logsToSave"
 
     }
 }

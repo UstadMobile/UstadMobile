@@ -10,7 +10,6 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
@@ -150,10 +149,7 @@ class LoginViewModel(
     private fun goToNextDestAfterLoginOrGuestSelected() {
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
         Napier.d { "LoginPresenter: go to next destination: $nextDestination" }
-
-        val viewName = nextDestination.substringBefore('?')
-        val args = UMFileUtil.parseURLQueryString(viewName)
-        navController.navigate(viewName, args, goOptions)
+        navController.navigateToViewUri(nextDestination, goOptions)
     }
 
     fun onClickLogin(){

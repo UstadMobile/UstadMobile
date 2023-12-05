@@ -2,6 +2,8 @@ package com.ustadmobile.sharedse.xapi
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.russhwolf.settings.PropertiesSettings
+import com.russhwolf.settings.Settings
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
@@ -51,6 +53,7 @@ import java.nio.charset.StandardCharsets
 import kotlin.random.Random
 import io.ktor.client.plugins.contentnegotiation.*
 import kotlinx.coroutines.runBlocking
+import java.util.Properties
 
 class TestXapiStatementResponder {
 
@@ -77,9 +80,17 @@ class TestXapiStatementResponder {
                 NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
             }
 
+            bind<Settings>() with singleton {
+                PropertiesSettings(
+                    delegate = Properties(),
+                    onModify = {
+                        //do nothing
+                    }
+                )
+            }
+
             bind<UstadMobileSystemImpl>() with singleton {
-                spy(UstadMobileSystemImpl(
-                    temporaryFolder.newFolder()))
+                spy(UstadMobileSystemImpl(instance()))
             }
             bind<UstadAccountManager>() with singleton {
                 UstadAccountManager(instance(), di)

@@ -115,6 +115,7 @@ kotlin {
                 api libs.xmlutil.serialization
                 api libs.precompose
                 api libs.precompose.viewmodel
+                api libs.multiplatformsettings
             }
         }
 
@@ -240,8 +241,7 @@ kotlin {
                 implementation libs.android.material
                 implementation libs.libphonenumber.android
 
-
-
+                implementation libs.process.phoenix
             }
 
 

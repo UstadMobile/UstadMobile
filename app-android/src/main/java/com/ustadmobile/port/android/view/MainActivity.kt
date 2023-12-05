@@ -240,7 +240,7 @@ class MainActivity : UstadBaseActivity(), UstadActivityWithFab,
      * When settings gear clicked in the menu options - Goes to the settings activity.
      */
     private fun handleClickSettings() {
-        impl.go(SettingsView.VIEW_NAME, mapOf(), this)
+
     }
 
     private fun setUserProfile(menuItem: MenuItem) {

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.impl
 
+import com.russhwolf.settings.Settings
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlin.js.Date
@@ -20,8 +21,9 @@ import org.w3c.dom.HTMLAnchorElement
  * @param jsStringProvider Moko resources JsStringProvider
  */
 actual open class UstadMobileSystemImpl(
+    settings: Settings,
     private val jsStringProvider: JsStringProvider,
-): UstadMobileSystemCommon() {
+): UstadMobileSystemCommon(settings) {
 
     override fun getString(stringResource: StringResource): String {
         return stringResource.localized(provider = jsStringProvider, locale = displayedLocale)
@@ -45,17 +47,6 @@ actual open class UstadMobileSystemImpl(
     }
 
     /**
-     * Get a preference for the app
-     *
-     * @param key preference key as a string
-     * @return value of that preference
-     */
-
-    actual override fun getAppPref(key: String): String? {
-        return localStorage.getItem(key)
-    }
-
-    /**
      * Return absolute path of the application setup file. Asynchronous.
      *
      * @param context System context
@@ -65,18 +56,6 @@ actual open class UstadMobileSystemImpl(
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    /**
-     * Set a preference for the app
-     * @param key preference that is being set
-     * @param value value to be set
-     */
-    actual override fun setAppPref(key: String, value: String?) {
-        if(value == null){
-            localStorage.removeItem(key)
-        }else{
-            localStorage.setItem(key, value)
-        }
-    }
 
     /**
      * Gives a string with the version number

@@ -47,6 +47,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
 import com.ustadmobile.core.viewmodel.clazzassignment.submissionStatusFor
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
+import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
 import com.ustadmobile.libuicompose.view.clazzassignment.UstadAssignmentSubmissionStatusHeaderItems
 import kotlinx.coroutines.Dispatchers
@@ -82,8 +83,11 @@ fun ClazzAssignmentDetailOverviewScreen(
     onClickSubmitPrivateComment: () -> Unit = {},
     onClickEditSubmission: () -> Unit = {},
     onChangeSubmissionText: (String) -> Unit = { },
+    @Suppress("UNUSED_PARAMETER")
     onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = {},
+    @Suppress("UNUSED_PARAMETER")
     onClickDeleteSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = { },
+    @Suppress("UNUSED_PARAMETER")
     onClickAddFileSubmission: () -> Unit = { },
     onClickSubmitSubmission: () -> Unit = { },
     onClickCourseGroupSet: () -> Unit = { },
@@ -119,6 +123,8 @@ fun ClazzAssignmentDetailOverviewScreen(
         map = SubmissionConstants.FILE_TYPE_MAP,
         key = uiState.assignment?.caFileType ?: ClazzAssignment.FILE_TYPE_DOC
     )
+
+    val linkExtractor = rememberLinkExtractor()
 
     LazyColumn(
         modifier = Modifier
@@ -361,7 +367,10 @@ fun ClazzAssignmentDetailOverviewScreen(
                 pagingItems = courseCommentsLazyPagingItems,
                 key = { Pair(4, it.comment.commentsUid) }
             ){
-                CommentListItem(commentAndName = it)
+                CommentListItem(
+                    commentAndName = it,
+                    linkExtractor = linkExtractor,
+                )
             }
         }
 
@@ -389,7 +398,10 @@ fun ClazzAssignmentDetailOverviewScreen(
                 pagingItems = privateCommentsLazyPagingItems,
                 key = { Pair(5, it.comment.commentsUid) }
             ){ comment ->
-                CommentListItem(commentAndName = comment)
+                CommentListItem(
+                    commentAndName = comment,
+                    linkExtractor = linkExtractor,
+                )
             }
         }
     }
