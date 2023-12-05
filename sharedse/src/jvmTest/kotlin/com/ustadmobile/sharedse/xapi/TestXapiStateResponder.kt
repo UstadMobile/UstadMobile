@@ -3,6 +3,8 @@ package com.ustadmobile.sharedse.xapi
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import com.russhwolf.settings.PropertiesSettings
+import com.russhwolf.settings.Settings
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
@@ -85,9 +87,16 @@ class TestXapiStateResponder {
         }
 
         di = DI {
+            bind<Settings>() with singleton {
+                PropertiesSettings(
+                    delegate = Properties(),
+                    onModify = {
+                        //do nothing
+                    }
+                )
+            }
             bind<UstadMobileSystemImpl>() with singleton {
-                spy(UstadMobileSystemImpl(
-                    temporaryFolder.newFolder()))
+                spy(UstadMobileSystemImpl(instance()))
             }
             bind<UstadAccountManager>() with singleton {
                 UstadAccountManager(instance(), di)

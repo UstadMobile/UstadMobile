@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.rest.dimodules
 
+import com.russhwolf.settings.PropertiesSettings
+import com.russhwolf.settings.Settings
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
@@ -31,6 +33,9 @@ import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlConfig
 import org.xmlpull.v1.XmlPullParserFactory
+import java.io.FileReader
+import java.io.FileWriter
+import java.util.Properties
 
 /**
  * DI Module that provides dependencies which are used both by the server and command line tools
@@ -51,8 +56,27 @@ fun makeJvmBackendDiModule(
         }
     }
 
+    bind<Settings>() with singleton {
+        val propertiesFile = File(dataDirPath, UstadMobileSystemImpl.PREFS_FILENAME)
+
+        PropertiesSettings(
+            delegate = Properties().also { props ->
+                if(propertiesFile.exists()) {
+                    FileReader(propertiesFile).use { fileReader ->
+                        props.load(fileReader)
+                    }
+                }
+            },
+            onModify = { props ->
+                FileWriter(propertiesFile).use { fileWriter ->
+                    props.store(fileWriter, null)
+                }
+            }
+        )
+    }
+
     bind<UstadMobileSystemImpl>() with singleton {
-        UstadMobileSystemImpl(dataDirPath)
+        UstadMobileSystemImpl(settings = instance())
     }
 
     bind<AuthManager>() with scoped(contextScope).singleton {
@@ -98,9 +122,9 @@ fun makeJvmBackendDiModule(
     }
 
     bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
-        val systemImpl: UstadMobileSystemImpl = instance()
+        val settings: Settings = instance()
         val contextIdentifier: String = context.identifier(dbMode)
-        systemImpl.getOrGenerateNodeIdAndAuth(contextIdentifier, Any())
+        settings.getOrGenerateNodeIdAndAuth(contextIdentifier)
     }
 
     bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {

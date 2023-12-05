@@ -23,6 +23,9 @@ expect abstract class PeerReviewerAllocationDao : BaseDao<PeerReviewerAllocation
     """)
     abstract suspend fun getAllPeerReviewerAllocations(assignmentUid: List<Long>): List<PeerReviewerAllocation>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     @Query("""
         SELECT PeerReviewerAllocation.*
           FROM PeerReviewerAllocation

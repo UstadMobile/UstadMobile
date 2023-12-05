@@ -58,8 +58,6 @@ fun UstadSortOptionsBottomSheet(
                     },
                 )
             }
-
-            UstadBottomSheetSpacer()
         }
     }
 

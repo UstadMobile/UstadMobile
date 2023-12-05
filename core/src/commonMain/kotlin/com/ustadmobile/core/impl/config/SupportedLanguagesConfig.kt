@@ -40,7 +40,7 @@ data class SupportedLanguagesConfig (
 
     companion object {
 
-        const val DEFAULT_SUPPORTED_LANGUAGES = "en,fa,ps,ar,tg,bn,ne,my"
+        const val DEFAULT_SUPPORTED_LANGUAGES = "en,fa,ps,ar,tg,bn,ne,my,ru"
     }
 
 }

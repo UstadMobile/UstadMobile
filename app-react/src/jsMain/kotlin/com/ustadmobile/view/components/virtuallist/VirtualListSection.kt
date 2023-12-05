@@ -37,6 +37,19 @@ class SingleItemSection(
     override val elements: List<VirtualListElement> = listOf(VirtualListSingleElement(createNode, key))
 }
 
+/**
+ * The pages property mysteriously vanished from the wrapper when updating to wrappers version 651.
+ * It is provided by Tanstack on InfiniteQueryResult.
+ */
+fun <TData, TError> UseInfiniteQueryResult<TData, TError>.pages() : Array<TData> {
+    val pages = data?.asDynamic()?.pages
+    if(pages != null) {
+        return pages as Array<TData>
+    }else {
+        return emptyArray()
+    }
+}
+
 class InfiniteQueryResultSection<TItem, TData, TError>(
     private val infiniteQueryResult: UseInfiniteQueryResult<TData, TError>,
     private val infiniteSectionIndex: Int,
@@ -47,9 +60,7 @@ class InfiniteQueryResultSection<TItem, TData, TError>(
 
     override val elements: List<VirtualListElement>
         get() {
-            val resultRows = infiniteQueryResult.data?.pages?.let {
-                dataPagesToItems(it)
-            } ?: listOf()
+            val resultRows = dataPagesToItems(infiniteQueryResult.pages())
 
             val queryResult = infiniteQueryResult
             val itemToKeyFn = { keyItem: TItem?, keyIndex: Int ->

@@ -1,4 +1,7 @@
 
+import com.russhwolf.settings.Settings
+import com.russhwolf.settings.StorageSettings
+import com.russhwolf.settings.set
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseJs
@@ -25,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import com.ustadmobile.core.impl.locale.StringProviderJs
+import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.util.resolveEndpoint
 import dev.icerock.moko.resources.provider.JsStringProvider
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
@@ -53,6 +57,13 @@ internal fun ustadJsDi(
     val apiUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
     console.log("Api URL = $apiUrl (location.href = ${location.href}")
 
+    bind<Settings>() with singleton {
+        StorageSettings().also {
+            //We don't use onboarding on the web, so mark this as completed
+            it[OnBoardingViewModel.PREF_TAG] = "true"
+        }
+    }
+
     bind<JsStringProvider>() with singleton {
         stringsProvider
     }
@@ -76,12 +87,13 @@ internal fun ustadJsDi(
     bind<UstadMobileSystemImpl>() with singleton {
         val jsStringProvider: JsStringProvider = instance()
         UstadMobileSystemImpl(
-            jsStringProvider,
+            settings = instance(),
+            jsStringProvider = jsStringProvider,
         )
     }
 
     bind<UstadAccountManager>() with singleton {
-        UstadAccountManager(instance(), di)
+        UstadAccountManager(settings = instance(), di = di)
     }
 
     bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {

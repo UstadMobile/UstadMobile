@@ -3,6 +3,8 @@ package com.ustadmobile.core.impl.di
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
 import com.ustadmobile.core.domain.contententry.import.ImportContentUseCaseJs
+import com.ustadmobile.core.domain.language.SetLanguageUseCase
+import com.ustadmobile.core.domain.language.SetLanguageUseCaseJs
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCaseJs
@@ -50,5 +52,11 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
 
     bind<OnClickPhoneNumUseCase>() with provider {
         OnClickPhoneNumUseCaseJs()
+    }
+
+    bind<SetLanguageUseCase>() with provider {
+        SetLanguageUseCaseJs(
+            systemImpl = instance()
+        )
     }
 }

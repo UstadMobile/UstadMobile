@@ -1,5 +1,7 @@
 package com.ustadmobile.core.test.viewmodeltest
 
+import com.russhwolf.settings.PropertiesSettings
+import com.russhwolf.settings.Settings
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
@@ -44,6 +46,8 @@ import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlConfig
 import org.mockito.kotlin.mock
+import java.util.Properties
+
 
 
 typealias TestViewModelFactory<T> = ViewModelTestBuilder<T>.() -> T
@@ -118,8 +122,17 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
             spy(UstadAccountManager(instance(), di))
         }
 
+        bind<Settings>() with singleton {
+            PropertiesSettings(
+                delegate = Properties(),
+                onModify = {
+                    //Do nothing
+                }
+            )
+        }
+
         bind<UstadMobileSystemImpl>() with singleton {
-            spy(UstadMobileSystemImpl(tempDir))
+            spy(UstadMobileSystemImpl(settings = instance()))
         }
 
         bind<XML>() with singleton {

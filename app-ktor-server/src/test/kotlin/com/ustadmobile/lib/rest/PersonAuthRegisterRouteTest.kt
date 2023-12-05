@@ -55,7 +55,7 @@ class PersonAuthRegisterRouteTest {
         serverDi = DI {
             import(CommonJvmDiModule)
 
-            import(commonTestKtorDiModule(endpointScope, temporaryFolder))
+            import(commonTestKtorDiModule(endpointScope))
 
             bind<NotificationSender>() with singleton {
                 mockNotificationSender

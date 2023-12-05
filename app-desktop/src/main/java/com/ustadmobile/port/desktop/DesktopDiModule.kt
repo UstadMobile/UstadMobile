@@ -1,5 +1,7 @@
 package com.ustadmobile.port.desktop
 
+import com.russhwolf.settings.PropertiesSettings
+import com.russhwolf.settings.Settings
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
@@ -44,6 +46,8 @@ import nl.adaptivity.xmlutil.serialization.XmlConfig
 import org.kodein.di.on
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
+import java.io.FileReader
+import java.io.FileWriter
 import java.util.Properties
 import javax.naming.InitialContext
 
@@ -51,6 +55,13 @@ const val TAG_APP_HOME = "AppHome"
 
 const val TAG_DATA_DIR = "DataDir"
 
+fun ustadAppHomeDir(): File {
+    return System.getProperty("app_home")?.let { File(it) } ?: File(System.getProperty("user.dir"))
+}
+
+fun ustadAppDataDir(): File {
+    return File(ustadAppHomeDir(), "data")
+}
 
 @OptIn(ExperimentalXmlUtilApi::class)
 val DesktopDiModule = DI.Module("Desktop-Main") {
@@ -69,7 +80,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
     }
 
     bind<File>(tag = TAG_APP_HOME) with singleton {
-        System.getProperty("app_home")?.let { File(it) } ?: File(System.getProperty("user.dir"))
+        ustadAppHomeDir()
     }
 
     bind<File>(tag = TAG_DATA_DIR) with singleton {
@@ -83,9 +94,29 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         }
     }
 
+    bind<Settings>() with singleton {
+        val propertiesFile = File(instance<File>(tag = TAG_DATA_DIR),
+            UstadMobileSystemImpl.PREFS_FILENAME)
+
+        PropertiesSettings(
+            delegate = Properties().also {props ->
+                if(propertiesFile.exists()) {
+                    FileReader(propertiesFile).use { fileReader ->
+                        props.load(fileReader)
+                    }
+                }
+            },
+            onModify = { props ->
+                FileWriter(propertiesFile).use { fileWriter ->
+                    props.store(fileWriter, null)
+                }
+            }
+        )
+    }
+
     bind<UstadMobileSystemImpl>() with singleton {
         UstadMobileSystemImpl(
-            dataRoot = instance(tag = TAG_DATA_DIR)
+            settings = instance()
         )
     }
 
@@ -113,9 +144,9 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
     }
 
     bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
-        val systemImpl: UstadMobileSystemImpl = instance()
+        val settings: Settings = instance()
         val contextIdentifier = sanitizeDbNameFromUrl(context.url)
-        systemImpl.getOrGenerateNodeIdAndAuth(contextIdentifier, Any())
+        settings.getOrGenerateNodeIdAndAuth(contextIdentifier)
     }
 
     bind<Json>() with singleton {

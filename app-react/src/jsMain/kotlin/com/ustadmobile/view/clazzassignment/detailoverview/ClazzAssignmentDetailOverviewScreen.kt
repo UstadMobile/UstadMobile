@@ -319,7 +319,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 //List of grades awarded
                 item {
                     UstadDetailHeader.create {
-                        header = ReactNode(strings[MR.strings.grades_class_age])
+                        header = ReactNode(strings[MR.strings.grades_scoring])
                     }
                 }
 

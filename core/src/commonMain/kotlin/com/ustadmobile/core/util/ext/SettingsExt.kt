@@ -1,9 +1,19 @@
 package com.ustadmobile.core.util.ext
 
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.russhwolf.settings.Settings
+import com.russhwolf.settings.set
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.util.randomUuid
 import kotlin.random.Random
+
+fun Settings.getStringOrSet(
+    key: String,
+    block: () -> String,
+): String {
+    return getStringOrNull(key) ?: block().also {
+        set(key, it)
+    }
+}
 
 /**
  * Gets an already existing NodeIdAndAuth for the given context (e.g. virtual host / endpoint), or
@@ -12,12 +22,14 @@ import kotlin.random.Random
  *
  * @param contextPrefix a prefix used for appPref keys e.g. the sanitized hostname
  */
-fun UstadMobileSystemImpl.getOrGenerateNodeIdAndAuth(contextPrefix: String, context: Any): NodeIdAndAuth {
-    val nodeId: String = getOrPutAppPref("${contextPrefix}_nodeId") {
+fun Settings.getOrGenerateNodeIdAndAuth(
+    contextPrefix: String
+) : NodeIdAndAuth {
+    val nodeId = getStringOrSet("${contextPrefix}_nodeId") {
         Random.nextLong(0, Long.MAX_VALUE).toString()
     }
 
-    val nodeAuth: String = getOrPutAppPref("${contextPrefix}_nodeAuth") {
+    val nodeAuth = getStringOrSet("${contextPrefix}_nodeAuth") {
         randomUuid().toString()
     }
 

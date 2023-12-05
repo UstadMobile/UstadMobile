@@ -33,15 +33,15 @@ package com.ustadmobile.core.impl
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
-import androidx.annotation.VisibleForTesting
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.FileProvider
+import androidx.core.os.LocaleListCompat
 import androidx.navigation.*
+import com.russhwolf.settings.Settings
 import com.ustadmobile.core.io.ext.isGzipped
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toFile
 import dev.icerock.moko.resources.StringResource
@@ -61,32 +61,16 @@ import java.util.zip.ZipOutputStream
  * SystemImpl provides system methods for tasks such as copying files, reading
  * http streams etc. independently of the underlying system.
  *
- *
+ * @param applicationContext This must be the context for the activity. Using any other context
+ *        won't work because Android's per-app language settings will not apply to the aplpication
+ *        context, and systemImpl is used extensively to get localized strings.
+ * @param settings : Multiplatform settings object. Used for app preferences.
  * @author mike, kileha3
  */
 actual open class UstadMobileSystemImpl(
-    private val applicationContext: Context
-) : UstadMobileSystemCommon() {
-
-    private var appPreferences: SharedPreferences? = null
-
-
-    /**
-     * This should be used only for testing. This will use the given navcontroller instead of
-     * finding the navcontroller from the mainactivity. This is used for Espresso testing on Fragments.
-     */
-    @VisibleForTesting
-    var navController: NavController? = null
-
-    private val viewNameToAndroidImplMap = mapOf<String, String>(
-            "DownloadDialog" to "${PACKAGE_NAME}DownloadDialogFragment",
-            OnBoardingViewModel.DEST_NAME to "${PACKAGE_NAME}OnBoardingActivity",
-            EpubContentView.VIEW_NAME to "${PACKAGE_NAME}EpubContentActivity",
-            AboutView.VIEW_NAME to "${PACKAGE_NAME}AboutActivity",
-            ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
-            ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
-            PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity"
-    )
+    private val applicationContext: Context,
+    settings: Settings,
+) : UstadMobileSystemCommon(settings) {
 
     /**
      * Simple async task to handle getting the setup file
@@ -181,31 +165,20 @@ actual open class UstadMobileSystemImpl(
         return Locale.getDefault().toString()
     }
 
-    /**
-     * Get a preference for the app
-     *
-     * @param key preference key as a string
-     * @return value of that preference
-     */
-    actual override fun getAppPref(key: String): String? {
-        return getAppSharedPreferences(applicationContext).getString(key, null)
+    override fun getLocale(): String {
+        return AppCompatDelegate.getApplicationLocales().get(0)?.language ?: "en"
     }
 
+    override fun setLocale(locale: String) {
+        super.setLocale(locale)
 
-    /**
-     * Set a preference for the app
-     * @param key preference that is being set
-     * @param value value to be set
-     */
-    override actual fun setAppPref(key: String, value: String?) {
-        val prefs = getAppSharedPreferences(applicationContext)
-        val editor = prefs.edit()
-        if (value != null) {
-            editor.putString(key, value)
-        } else {
-            editor.remove(key)
+        val localeList = if(locale == LOCALE_USE_SYSTEM) {
+            LocaleListCompat.getAdjustedDefault()
+        }else {
+            LocaleListCompat.forLanguageTags(locale)
         }
-        editor.apply()
+
+        AppCompatDelegate.setApplicationLocales(localeList)
     }
 
 
@@ -330,15 +303,6 @@ actual open class UstadMobileSystemImpl(
             throw NoAppFoundException("No activity found for mimetype: $mMimeType", mMimeType)
         }
     }
-
-    private fun getAppSharedPreferences(context: Context): SharedPreferences {
-        if (appPreferences == null) {
-            appPreferences = context.getSharedPreferences(APP_PREFERENCES_NAME,
-                    Context.MODE_PRIVATE)
-        }
-        return appPreferences!!
-    }
-
 
     /**
      * Open the given link in a browser and/or tab depending on the platform

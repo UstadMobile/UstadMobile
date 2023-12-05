@@ -31,7 +31,7 @@
 
 package com.ustadmobile.core.impl
 
-import java.io.*
+import com.russhwolf.settings.Settings
 import java.util.*
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.concurrentSafeMapOf
@@ -46,30 +46,11 @@ import dev.icerock.moko.resources.StringResource
  * @author mike, kileha3
  */
 actual open class UstadMobileSystemImpl(
-    private val dataRoot: File
-) : UstadMobileSystemCommon(){
+    settings: Settings
+) : UstadMobileSystemCommon(settings){
 
-    private val appConfig: Properties by lazy {
-        Properties().also { props ->
-            this::class.java.getResourceAsStream(APPCONFIG_PROPERTIES_PATH)?.use { propsIn ->
-                props.load(propsIn)
-            }
-        }
-    }
 
     private val localeCache = concurrentSafeMapOf<String, Locale>()
-
-    private val appPrefs : Properties by lazy {
-        Properties().apply {
-            val propFile = File(dataRoot, PREFS_FILENAME)
-            if(propFile.exists()) {
-                FileReader(propFile).use { fileReader ->
-                    load(fileReader)
-                }
-            }
-
-        }
-    }
 
     /**
      * The main method used to go to a new view. This is implemented at the platform level. On
@@ -124,43 +105,6 @@ actual open class UstadMobileSystemImpl(
     actual override fun getSystemLocale(): String{
         return Locale.getDefault().toString()
     }
-
-
-
-
-
-    /**
-     * Get a preference for the app
-     *
-     * @param key preference key as a string
-     * @return value of that preference
-     */
-    actual override fun getAppPref(key: String): String?{
-        return appPrefs.getProperty(key)
-    }
-
-
-    /**
-     * Set a preference for the app
-     * @param key preference that is being set
-     * @param value value to be set
-     */
-    actual override fun setAppPref(key: String, value: String?){
-        if(value != null) {
-            appPrefs[key] = value
-        }else {
-            appPrefs.remove(key)
-        }
-
-        FileWriter(File(dataRoot, PREFS_FILENAME)).use {
-            appPrefs.store(it, "UTF-8")
-        }
-    }
-
-    fun clearPrefs() {
-        appPrefs.clear()
-    }
-
 
 
     /**
