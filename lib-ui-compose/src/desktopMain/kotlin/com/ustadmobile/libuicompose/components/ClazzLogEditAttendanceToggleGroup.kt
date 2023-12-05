@@ -1,20 +1,14 @@
 package com.ustadmobile.libuicompose.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
 
 private val iconsMap = mapOf(
@@ -34,24 +28,29 @@ actual fun ClazzLogEditAttendanceToggleGroup(
 
         iconsMap.forEach { (status, icon) ->
 
-            IconButton(
-                modifier = Modifier.border( width = 1.dp,
-                    color = MaterialTheme.colors.onPrimary,
-                    shape = RoundedCornerShape(2.dp)
-                ).background(
-                    color = if(attendanceStatus==status)
-                        MaterialTheme.colors.primary
-                    else
-                        MaterialTheme.colors.background),
-                onClick = { onAttendanceStatusChanged(status) },
-                content = {
-                    Icon(
-                        icon ?: Icons.Default.Done,
-                        contentDescription = null
-                    )
-                },
-                enabled = isEnabled
-            )
+            if(attendanceStatus==status){
+                FilledIconButton(
+                    onClick = { onAttendanceStatusChanged(status) },
+                    content = {
+                        Icon(
+                            icon ?: Icons.Default.Close,
+                            contentDescription = "ClazzLogAttendanceStatusButton"
+                        )
+                    },
+                    enabled = isEnabled
+                )
+            } else {
+                OutlinedIconButton(
+                    onClick = { onAttendanceStatusChanged(status) },
+                    content = {
+                        Icon(
+                            icon ?: Icons.Default.Done,
+                            contentDescription = "ClazzLogAttendanceStatusButton"
+                        )
+                    },
+                    enabled = isEnabled
+                )
+            }
         }
 
     }
