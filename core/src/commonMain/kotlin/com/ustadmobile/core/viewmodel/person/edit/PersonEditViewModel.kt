@@ -3,6 +3,7 @@ package com.ustadmobile.core.viewmodel.person.edit
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
+import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -115,6 +116,8 @@ class PersonEditViewModel(
 
     private val phoneNumValidatorUseCase: PhoneNumValidatorUseCase by instance()
 
+    private val validateEmailUseCase = ValidateEmailUseCase()
+
     init {
         loadingState = LoadingUiState.INDETERMINATE
 
@@ -197,6 +200,8 @@ class PersonEditViewModel(
                     entity?.lastName, prev.lastNameError),
                 phoneNumError = updateErrorMessageOnChange(prev.person?.phoneNum,
                     entity?.phoneNum, prev.phoneNumError),
+                emailError = updateErrorMessageOnChange(prev.person?.emailAddr,
+                    entity?.emailAddr, prev.emailError),
             )
         }
 
@@ -246,44 +251,6 @@ class PersonEditViewModel(
             phoneNumError != null
     }
 
-    private fun checkEmailValidation(email: String): Boolean {
-
-        var hasAtSign = true
-        var dotAfterAt = true
-        var hasSpace = false
-        var isValid = true
-
-        var parts= email.split("")
-        var dotIndex = 0
-        var atIndex = 0
-
-        parts.forEachIndexed { i, letter ->
-            if(letter == "."){
-                dotIndex = i
-            }else if(letter == "@"){
-                atIndex = i
-            }
-        }
-
-        if (dotIndex < atIndex) {
-            dotAfterAt = false
-        }
-
-        if(!email.contains("@")){
-            hasAtSign = false
-        }
-
-        if(email.contains(" ") || email.contains("[") || email.contains("]") || email.contains("\\")){
-            hasSpace = true
-        }
-
-        if (!hasAtSign || !dotAfterAt || hasSpace){
-            isValid = false
-        }
-
-        return isValid
-    }
-
     private fun validateUsername(username: String): Boolean {
         var isValid = true
 
@@ -328,11 +295,13 @@ class PersonEditViewModel(
         _uiState.update { prev -> prev.copy(fieldsEnabled = false) }
         val savePerson = _uiState.value.person?.shallowCopy {
             phoneNum = phoneNum?.trim()?.replace(" ", "")
+            emailAddr = emailAddr?.trim()
         } ?: return
 
         val requiredFieldMessage = systemImpl.getString(MR.strings.field_required_prompt)
         val currentTime = systemTimeInMillis()
         val isRegistrationMode = registrationModeFlags.hasFlag(REGISTER_MODE_ENABLED)
+        val validatedEmailAddr = savePerson.emailAddr?.let { validateEmailUseCase(it) }
 
         _uiState.update { prev ->
             prev.copy(
@@ -365,6 +334,11 @@ class PersonEditViewModel(
                 }else {
                     null
                 },
+                emailError = if(!savePerson.emailAddr.isNullOrBlank() && validatedEmailAddr == null) {
+                    systemImpl.getString(MR.strings.invalid)
+                }else {
+                    null
+                }
             )
         }
 

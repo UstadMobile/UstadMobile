@@ -61,6 +61,7 @@ fun PersonDetailScreen(viewModel: PersonDetailViewModel) {
         onClickClazz = viewModel::onClickClazz,
         onClickDial = viewModel::onClickDial,
         onClickSms = viewModel::onClickSms,
+        onClickEmail = viewModel::onClickEmail,
     )
 }
 

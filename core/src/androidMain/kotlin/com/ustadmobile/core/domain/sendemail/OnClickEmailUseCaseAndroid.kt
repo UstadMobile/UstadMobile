@@ -1,18 +1,18 @@
-package com.ustadmobile.core.domain.sms
+package com.ustadmobile.core.domain.sendemail
 
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 
-class OnClickSendSmsUseCaseAndroid(
+class OnClickEmailUseCaseAndroid(
     private val appContext: Context
-) : OnClickSendSmsUseCase {
+): OnClickEmailUseCase {
 
-    override fun onClickSendSms(number: String) {
+    override fun invoke(emailAddr: String) {
         val intent = Intent(Intent.ACTION_SENDTO)
+        intent.putExtra(Intent.EXTRA_EMAIL, emailAddr)
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.setData(Uri.parse("smsto:$number"))
+        intent.setData(Uri.parse("mailto:"))
         appContext.startActivity(intent)
     }
-
 }

@@ -11,7 +11,6 @@ import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditUiState
 import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.core.MR
 import com.ustadmobile.libuicompose.components.UstadDateTimeField
@@ -31,24 +30,28 @@ fun ClazzLogEditScreen(
     uiState: ClazzLogEditUiState = ClazzLogEditUiState(),
     onChangeClazzLog: (ClazzLog?) -> Unit = {},
 ) {
-    UstadInputFieldLayout(
-        modifier = Modifier.fillMaxWidth().defaultItemPadding(),
-        errorText = uiState.dateError
-    ) {
-        UstadDateTimeField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("log_datetime"),
-            value = uiState.clazzLog?.logDate ?: 0L,
-            dateLabel = { Text(stringResource(MR.strings.date)) },
-            timeLabel = { Text(stringResource(MR.strings.time)) },
-            timeZoneId = uiState.timeZone,
-            onValueChange = {
-                onChangeClazzLog(uiState.clazzLog?.shallowCopy {
-                    logDate = it
-                })
-            },
-        )
-    }
+
+    UstadDateTimeField(
+        modifier = Modifier
+            .defaultItemPadding()
+            .fillMaxWidth()
+            .testTag("log_datetime"),
+        value = uiState.clazzLog?.logDate ?: 0L,
+        dateLabel = { Text(stringResource(MR.strings.date) + "*") },
+        timeLabel = { Text(stringResource(MR.strings.time) + "*") },
+        timeZoneId = uiState.timeZone,
+        onValueChange = {
+            onChangeClazzLog(uiState.clazzLog?.shallowCopy {
+                logDate = it
+            })
+        },
+        dateSupportingText = {
+            Text(uiState.dateError ?: stringResource(MR.strings.required))
+        },
+        timeSupportingText = {
+            Text(stringResource(MR.strings.required))
+        }
+    )
+
 
 }

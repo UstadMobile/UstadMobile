@@ -5,11 +5,12 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
 import com.ustadmobile.core.domain.phonenumber.formatInternationalOrNull
+import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.INDETERMINATE
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.NOT_LOADING
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.sms.OnClickSendSmsUseCase
+import com.ustadmobile.core.domain.sms.OnClickSendSmsUseCase
 import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.lib.db.entities.*
@@ -97,6 +98,8 @@ class PersonDetailViewModel(
 
     //Will be null on platforms that don't support sms
     private val onClickSendSmsUseCase: OnClickSendSmsUseCase? by instanceOrNull()
+
+    private val onClickEmailUseCase: OnClickEmailUseCase by instance()
 
     init {
         val accountManager: UstadAccountManager by instance()
@@ -240,6 +243,12 @@ class PersonDetailViewModel(
     fun onClickSms() {
         _uiState.value.person?.phoneNum?.also {
             onClickSendSmsUseCase?.onClickSendSms(it)
+        }
+    }
+
+    fun onClickEmail() {
+        _uiState.value.person?.emailAddr?.also {
+            onClickEmailUseCase(it)
         }
     }
 

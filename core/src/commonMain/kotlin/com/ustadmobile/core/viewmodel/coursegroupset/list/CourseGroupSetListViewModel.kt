@@ -25,8 +25,6 @@ data class CourseGroupSetListUiState(
 
     val showAddItem: Boolean = false,
 
-    val individualSubmissionOption: CourseGroupSet? = null,
-
     val courseGroupSets: ListPagingSourceFactory<CourseGroupSet> = { EmptyPagingSource() },
 
     val sortOptions: List<SortOrderOption> = DEFAULT_SORT_OPTIONS,
@@ -69,14 +67,6 @@ class CourseGroupSetListViewModel(
         _uiState.update { prev ->
             prev.copy(
                 courseGroupSets = pagingSourceFactory,
-                individualSubmissionOption = if(savedStateHandle[ARG_SHOW_INDIVIDUAL_OPTION]?.toBoolean() == true) {
-                    CourseGroupSet().apply {
-                        cgsUid = 0
-                        cgsName = systemImpl.getString(MR.strings.individual_submission)
-                    }
-                }else {
-                    null
-                }
             )
         }
 
@@ -139,12 +129,6 @@ class CourseGroupSetListViewModel(
     companion object {
 
         const val DEST_NAME = "CourseGroups"
-
-        /**
-         * When selecting a set of groups (e.g. for an assignment), show an option for 'individual'.
-         * This will return a CourseGroupSet with a UID of 0
-         */
-        const val ARG_SHOW_INDIVIDUAL_OPTION = "showIndividual"
 
     }
 }

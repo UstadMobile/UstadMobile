@@ -46,6 +46,7 @@ fun ClazzAssignmentEditScreen(viewModel: ClazzAssignmentEditViewModel) {
         onClickAssignReviewers =  viewModel::onClickAssignReviewers,
         onClickSubmissionType = viewModel::onClickSubmissionType,
         onClickEditDescription = viewModel::onClickEditDescription,
+        onGroupSubmissionOnChanged = viewModel::onGroupSubmissionOnChanged,
     )
 }
 
@@ -57,6 +58,7 @@ fun ClazzAssignmentEditScreen(
     onClickSubmissionType: () -> Unit = {},
     onClickAssignReviewers: () -> Unit = {},
     onClickEditDescription: () -> Unit = {},
+    onGroupSubmissionOnChanged: (Boolean) -> Unit = { },
 ) {
 
     val terminologyEntries = rememberCourseTerminologyEntries(uiState.courseTerminology)
@@ -74,19 +76,32 @@ fun ClazzAssignmentEditScreen(
             onClickEditDescription = onClickEditDescription,
         )
 
-        UstadClickableTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultItemPadding()
-                .testTag("cgsName"),
-            value = uiState.entity?.assignmentCourseGroupSetName?.let {
-                "${stringResource(MR.strings.groups)}: $it"
-            } ?: stringResource(MR.strings.individual_submission),
-            label = { Text(stringResource(MR.strings.submission_type)) },
-            enabled = uiState.groupSetEnabled,
-            onClick = onClickSubmissionType,
-            onValueChange = {}
+        UstadSwitchField(
+            checked = uiState.groupSubmissionOn,
+            label = stringResource(MR.strings.group_submission),
+            onChange = onGroupSubmissionOnChanged,
+            modifier = Modifier.defaultItemPadding().testTag("group_submission_on"),
+            enabled = uiState.fieldsEnabled,
         )
+
+        if(uiState.groupSubmissionOn) {
+            UstadClickableTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultItemPadding()
+                    .testTag("cgsName"),
+                value = uiState.entity?.assignmentCourseGroupSetName
+                    ?: "(${stringResource(MR.strings.unset)})",
+                label = { Text(stringResource(MR.strings.groups) + "*") },
+                enabled = uiState.groupSetEnabled,
+                onClick = onClickSubmissionType,
+                supportingText = {
+                    Text(uiState.groupSetError ?: stringResource(MR.strings.required))
+                },
+                isError = uiState.groupSetError != null,
+                onValueChange = {}
+            )
+        }
 
         UstadInputFieldLayout(
             modifier = Modifier.defaultItemPadding(),
