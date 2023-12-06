@@ -31,7 +31,6 @@ import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.NanoHttpdCall
-import com.ustadmobile.port.android.ui.theme.ui.theme.UstadMobileTheme
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
@@ -162,7 +161,7 @@ class AppActivity: AppCompatActivity(), DIAware {
 
         setContent {
             val windowSizeClass = calculateWindowSizeClass(this)
-            UstadMobileTheme {
+            MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
