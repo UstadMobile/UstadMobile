@@ -57,6 +57,7 @@ import mui.material.useMediaQuery
 import org.kodein.di.direct
 import org.kodein.di.instance
 import react.router.useLocation
+import web.dom.document
 import web.idb.indexedDB
 
 //Roughly as per components/Showcases on MUI-showcase #d71c6d1
@@ -278,6 +279,8 @@ val ustadScreensLoader: LoaderFunction<*> = {
             configMap = configJson,
             stringsProvider = jsStringsProvider,
         )
+
+        document.getElementById("loading")?.remove()
 
         UstadScreensLoaderData(di)
     }

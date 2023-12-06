@@ -9,6 +9,9 @@ import com.ustadmobile.core.domain.contententry.getmetadatafromuri.IContentEntry
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.METADATA_KEY_PRESET_LANG
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_LOCALE
 import com.ustadmobile.core.impl.di.DomainDiModuleJs
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
@@ -62,6 +65,15 @@ internal fun ustadJsDi(
         StorageSettings().also {
             //We don't use onboarding on the web, so mark this as completed
             it[OnBoardingViewModel.PREF_TAG] = "true"
+
+            /*
+             * Check if there is a preset default language, and apply if not already actioned
+             */
+            val presetLang = configMap[METADATA_KEY_PRESET_LANG]
+            if(!presetLang.isNullOrEmpty() && it.getStringOrNull(PREFKEY_ACTIONED_PRESET) != "true") {
+                it[PREFKEY_LOCALE] = presetLang
+                it[PREFKEY_ACTIONED_PRESET] = "true"
+            }
         }
     }
 

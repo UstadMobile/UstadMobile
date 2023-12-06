@@ -44,6 +44,8 @@ import java.io.File
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.LocaleSettingDelegateAndroid
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.METADATA_KEY_PRESET_LANG
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
 import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperAndroid
@@ -51,6 +53,7 @@ import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -73,6 +76,9 @@ class UstadApp : Application(), DIAware, UstadLocaleChangeChannelProvider {
 
 
     override val localeChangeChannel: Channel<String> = Channel(capacity = 1)
+
+
+    private val checkPresetLocaleCompletable = CompletableDeferred<Unit>()
 
     @OptIn(ExperimentalXmlUtilApi::class)
     override val di: DI by DI.lazy {
@@ -257,12 +263,27 @@ class UstadApp : Application(), DIAware, UstadLocaleChangeChannelProvider {
         super.onCreate()
         Napier.base(DebugAntilog())
 
+        val metadataPresetLang = appMetaData?.getString(METADATA_KEY_PRESET_LANG)
+
+        if(!metadataPresetLang.isNullOrEmpty()) {
+            val settings: Settings = di.direct.instance()
+            val presetActioned = settings.getStringOrNull(PREFKEY_ACTIONED_PRESET)
+            if(presetActioned != true.toString()) {
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(metadataPresetLang))
+                settings.putString(PREFKEY_ACTIONED_PRESET, true.toString())
+            }
+
+            checkPresetLocaleCompletable.complete(Unit)
+        }
+
+
         /*
          * Horrible (but necessary) workaround to catch locale changes because events don't work,
          * see UstadLocaleChangeChannelProvider
          */
         var initialLang : String? = null
         ProcessLifecycleOwner.get().lifecycleScope.launch {
+            checkPresetLocaleCompletable.await()
             while(isActive) {
                 delay(2000)
                 val langNow = AppCompatDelegate.getApplicationLocales().getFirstLang()
