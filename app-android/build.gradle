@@ -16,7 +16,7 @@ if(keyStoreFile == null) {
 
 def keyStorePropertiesExists = rootProject.file(keyStoreFile).exists()
 def keystoreProperties = new Properties()
-def baseAppId = "com.toughra.ustadmobile"
+def baseAppId = "tj.unicef.maktabmobile"
 
 if (keyStorePropertiesExists) {
     keystoreProperties.load(new FileInputStream(rootProject.file(keyStoreFile)))
@@ -100,7 +100,7 @@ android {
     compileSdk rootProject.ext.version_android_compile_sdk
 
     defaultConfig {
-        applicationId "com.toughra.ustadmobile"
+        applicationId "tj.unicef.maktabmobile"
         testInstrumentationRunnerArguments clearPackageData: 'true', notAnnotation: 'com.ustadmobile.test.core.annotation.PeerServerRequiredTest,com.ustadmobile.test.core.annotation.ImplementationRequiredTest'
 
         //When using variables the build analyzer reports that major tasks reran because of a
@@ -109,7 +109,7 @@ android {
         targetSdkVersion rootProject.ext.version_android_target_sdk
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.ext.ustadVersion
-        resourceConfigurations += ['en', 'fa', 'ps', 'ar', 'tg', 'bn', 'ne', 'my', 'ru', 'tl']
+        resourceConfigurations += ['en', 'tg', 'ru']
 
         //Shrinks minified version: remove jetpack etc. strings for unsupported locales.
         multiDexEnabled true //required for all variants to use java library desugaring

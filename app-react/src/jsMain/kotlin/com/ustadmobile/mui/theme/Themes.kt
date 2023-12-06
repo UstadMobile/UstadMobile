@@ -20,10 +20,10 @@ object Themes {
             palette = jso {
                 mode = light
                 primary = json(
-                    "main" to Color("#00796b")
+                    "main" to Color("#02a9f4")
                 )
                 secondary = json(
-                    "main" to Color("#ff9800")
+                    "main" to Color("#7b1fa2")
                 )
             }
         }

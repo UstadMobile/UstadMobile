@@ -66,8 +66,8 @@
     <application
         android:name="com.ustadmobile.port.android.impl.UstadApp"
         android:allowBackup="false"
-        android:icon="@drawable/ic_launcher_icon"
-        android:roundIcon="@drawable/ic_launcher_icon"
+        android:icon="@drawable/ic_launcher_maktab2"
+        android:roundIcon="@drawable/ic_launcher_maktab2"
         android:label="@string/app_name"
         android:usesCleartextTraffic="true"
         android:theme="@style/UmTheme.App"
@@ -83,20 +83,21 @@
         com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 
         Uncomment if you to reduce the number of languages displayed.
-
-        <meta-data android:name="com.ustadmobile.uilanguages"
-            android:value="en,fa,ps,ar,tg,bn,ne,my"/>
-
         -->
+        <meta-data android:name="com.ustadmobile.uilanguages"
+            android:value="en,tg,ru"/>
+
 
         <!--
         Preset locale setting: if present, this locale will be automatically set as the app locale
         (regardless of the device default). This can be useful where a particular build is intended
         for an area with one language, especially if that language is not supported as a locale by
         most operating systems.
-
-        <meta-data android:name="com.ustadmobile.presetlocale" android:value="tg"/>
         -->
+        <meta-data android:name="com.ustadmobile.presetlocale" android:value="tg"/>
+
+        <meta-data android:name="com.ustadmobile.gopts" android:value="1,2"/>
+
 
         <!--
         The API url endpoint can be explicitly specified by uncommenting the metadata key here. If

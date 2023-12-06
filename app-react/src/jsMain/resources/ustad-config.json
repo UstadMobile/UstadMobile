@@ -1,4 +1,5 @@
 {
-  "com.ustadmobile.uilanguages" : "en,fa,ps,ar,tg,bn,ne,my,ru",
-  "com.ustadmobile.presetlocale": ""
+  "com.ustadmobile.uilanguages" : "en,tg,ru",
+  "com.ustadmobile.presetlocale": "tg",
+  "com.ustadmobile.gopts": "1,2"
 }

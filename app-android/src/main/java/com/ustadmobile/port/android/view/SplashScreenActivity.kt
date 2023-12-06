@@ -22,7 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.toughra.ustadmobile.R
-import com.ustadmobile.libuicompose.theme.UstadAppTheme
+import com.ustadmobile.libuicompose.theme.AppTheme
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import kotlinx.coroutines.delay
 import com.ustadmobile.core.R as CR
@@ -40,7 +40,7 @@ class SplashScreenActivity : ComponentActivity() {
             finish()
         }
         setContent {
-            UstadAppTheme {
+            AppTheme {
                 SplashScreen()
             }
         }
@@ -60,39 +60,20 @@ private fun SplashScreen(){
         ) {
 
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher_icon),
+                painter = painterResource(id = R.drawable.ic_launcher_maktab2),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(110.dp))
+                    .size(110.dp)
+            )
 
-            Text(text = "Ustad Mobile",
+            Text(
+                text = stringResource(com.ustadmobile.core.R.string.app_name),
                 style = Typography.h1,
                 color = Color.Gray
             )
         }
 
-        Image(
-            painter = painterResource(id = R.drawable.expo2020_logo),
-            contentDescription = null,
-            modifier = Modifier
-                .size(100.dp))
 
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-
-            Text(text = stringResource(CR.string.created_partnership),
-                style = Typography.body1,
-                color = Color.DarkGray)
-
-            Image(
-                painter = painterResource(id = R.drawable.ic_irc),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(90.dp))
-        }
     }
 }
 
