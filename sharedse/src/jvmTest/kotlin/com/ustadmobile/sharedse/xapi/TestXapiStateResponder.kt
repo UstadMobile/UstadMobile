@@ -24,6 +24,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementSerializer
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.XapiStateResponder
@@ -95,8 +96,17 @@ class TestXapiStateResponder {
                     }
                 )
             }
+
+            bind<SupportedLanguagesConfig>() with singleton {
+                SupportedLanguagesConfig(
+                    systemLocales = listOf(Locale.getDefault().language),
+                    settings = instance(),
+                )
+            }
+
+
             bind<UstadMobileSystemImpl>() with singleton {
-                spy(UstadMobileSystemImpl(instance()))
+                spy(UstadMobileSystemImpl(instance(), instance()))
             }
             bind<UstadAccountManager>() with singleton {
                 UstadAccountManager(instance(), di)

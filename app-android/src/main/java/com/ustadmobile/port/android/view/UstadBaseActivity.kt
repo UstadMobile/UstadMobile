@@ -1,27 +1,21 @@
 package com.ustadmobile.port.android.view
 
-import android.content.*
+import android.content.Context
 import android.hardware.SensorManager
 import android.os.Bundle
-import android.view.View
 import android.webkit.WebView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.squareup.seismic.ShakeDetector
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.port.android.impl.UserFeedbackException
 import dev.icerock.moko.resources.StringResource
 import org.acra.ACRA
 import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
-import org.kodein.di.instance
 import com.ustadmobile.core.R as CR
 
 /**
@@ -35,15 +29,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadView, ShakeDetector
 {
 
     override val di by closestDI()
-
-    /**
-     * Get the toolbar that's used for the support action bar
-     *
-     * @return
-     */
-    protected lateinit var umToolbar: Toolbar
-
-    private val systemImpl: UstadMobileSystemImpl by instance()
 
     private var shakeDetector: ShakeDetector? = null
     private var sensorManager: SensorManager? = null
@@ -107,14 +92,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadView, ShakeDetector
     }
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: StringResource?) {
-        val snackBar = Snackbar.make(findViewById(R.id.coordinator_layout), message, Snackbar.LENGTH_LONG)
-        if (actionMessageId != null) {
-            snackBar.setAction(systemImpl.getString(actionMessageId)) { action() }
-            snackBar.setActionTextColor(ContextCompat.getColor(this, R.color.secondaryColor))
-        }
 
-        snackBar.anchorView = findViewById(R.id.bottom_nav_view)
-        snackBar.show()
     }
 
 }
