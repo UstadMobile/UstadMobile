@@ -39,18 +39,18 @@ class SettingsViewModel(
 
     val uiState: Flow<SettingsUiState> = _uiState.asStateFlow()
 
-    val supportedLangConfig: SupportedLanguagesConfig by instance()
+    private val supportedLangConfig: SupportedLanguagesConfig by instance()
 
     private val setLanguageUseCase: SetLanguageUseCase by instance()
 
-    val availableLangs = supportedLangConfig.supportedUiLanguagesAndSysDefault(systemImpl)
+    private val availableLangs = supportedLangConfig.supportedUiLanguagesAndSysDefault(systemImpl)
 
     init {
         _appUiState.update { prev ->
             prev.copy(title = systemImpl.getString(MR.strings.settings))
         }
 
-        val langSetting = systemImpl.getLocale()
+        val langSetting = supportedLangConfig.localeSetting ?: UstadMobileSystemCommon.LOCALE_USE_SYSTEM
 
         val currentLang = availableLangs.first {
             it.langCode == langSetting

@@ -35,6 +35,7 @@ import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlConfig
 import web.location.location
+import web.navigator.navigator
 import web.url.URLSearchParams
 
 
@@ -69,15 +70,18 @@ internal fun ustadJsDi(
     }
 
     bind<StringProviderJs>() with singleton {
-        val systemImpl: UstadMobileSystemImpl = instance()
         val jsStringProvider: JsStringProvider = instance()
-        StringProviderJs(systemImpl.getDisplayedLocale(), jsStringProvider)
+        val localeConfig: SupportedLanguagesConfig = instance()
+        StringProviderJs(localeConfig.displayedLocale, jsStringProvider)
     }
 
     bind<SupportedLanguagesConfig>() with singleton {
-        configMap["com.ustadmobile.uilanguages"]?.let {languageList ->
-            SupportedLanguagesConfig(languageList)
-        } ?: SupportedLanguagesConfig()
+        SupportedLanguagesConfig(
+            availableLanguagesConfig = configMap["com.ustadmobile.uilanguages"] ?:
+                SupportedLanguagesConfig.DEFAULT_SUPPORTED_LANGUAGES,
+            systemLocales = navigator.languages.toList(),
+            settings = instance(),
+        )
     }
 
     bind<ApiUrlConfig>() with singleton {
@@ -88,6 +92,7 @@ internal fun ustadJsDi(
         val jsStringProvider: JsStringProvider = instance()
         UstadMobileSystemImpl(
             settings = instance(),
+            langConfig = instance(),
             jsStringProvider = jsStringProvider,
         )
     }

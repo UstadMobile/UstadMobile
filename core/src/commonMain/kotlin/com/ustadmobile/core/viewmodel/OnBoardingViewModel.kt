@@ -45,7 +45,7 @@ class OnBoardingViewModel(
 
         val allLanguages = supportLangConfig
             .supportedUiLanguagesAndSysDefault(systemImpl)
-        val currentLocaleCode = systemImpl.getLocale()
+        val currentLocaleCode = supportLangConfig.localeSetting ?: SupportedLanguagesConfig.LOCALE_USE_SYSTEM
         val currentLanguage = allLanguages.first {
             it.langCode == currentLocaleCode
         }

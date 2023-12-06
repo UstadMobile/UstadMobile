@@ -39,7 +39,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
     bind<SetLanguageUseCase>() with provider {
         SetLanguageUseCaseJvm(
-            systemImpl = instance()
+            supportedLangConfig = instance()
         )
     }
 

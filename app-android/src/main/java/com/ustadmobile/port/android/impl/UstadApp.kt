@@ -4,6 +4,11 @@ import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
+import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.russhwolf.settings.Settings
@@ -37,6 +42,7 @@ import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.LocaleSettingDelegateAndroid
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
 import com.ustadmobile.core.uri.UriHelper
@@ -45,6 +51,10 @@ import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.io.files.Path
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
@@ -54,13 +64,15 @@ import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
 
-class UstadApp : Application(), DIAware {
+class UstadApp : Application(), DIAware, UstadLocaleChangeChannelProvider {
 
     private val Context.appMetaData: Bundle?
         get() = this.applicationContext.packageManager.getApplicationInfo(
             applicationContext.packageName, PackageManager.GET_META_DATA
         ).metaData
 
+
+    override val localeChangeChannel: Channel<String> = Channel(capacity = 1)
 
     @OptIn(ExperimentalXmlUtilApi::class)
     override val di: DI by DI.lazy {
@@ -79,9 +91,15 @@ class UstadApp : Application(), DIAware {
         }
 
         bind<SupportedLanguagesConfig>() with singleton {
-            applicationContext.appMetaData?.getString(METADATA_KEY_SUPPORTED_LANGS)?.let { langCodeList ->
-                SupportedLanguagesConfig(langCodeList)
-            } ?: SupportedLanguagesConfig()
+            SupportedLanguagesConfig(
+                systemLocales = LocaleListCompat.getAdjustedDefault().let { localeList ->
+                    (0 .. localeList.size()).mapNotNull { localeList[it]?.language }
+                },
+                localeSettingDelegate = LocaleSettingDelegateAndroid(),
+                availableLanguagesConfig = applicationContext.appMetaData?.getString(
+                    METADATA_KEY_SUPPORTED_LANGS
+                ) ?: SupportedLanguagesConfig.DEFAULT_SUPPORTED_LANGUAGES
+            )
         }
 
         bind<ApiUrlConfig>() with singleton {
@@ -226,9 +244,38 @@ class UstadApp : Application(), DIAware {
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
     }
 
+
+    private fun LocaleListCompat.getFirstLang() : String? {
+        return try {
+            this.get(0)?.toString()
+        }catch(e: Exception) {
+            null
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         Napier.base(DebugAntilog())
+
+        /*
+         * Horrible (but necessary) workaround to catch locale changes because events don't work,
+         * see UstadLocaleChangeChannelProvider
+         */
+        var initialLang : String? = null
+        ProcessLifecycleOwner.get().lifecycleScope.launch {
+            while(isActive) {
+                delay(2000)
+                val langNow = AppCompatDelegate.getApplicationLocales().getFirstLang()
+                if(initialLang == null && langNow != null) {
+                    Log.i("UstadApp", "found initial lang='$langNow'")
+                    initialLang = langNow
+                }else if(initialLang != null && langNow != initialLang && langNow != null) {
+                    Log.i("UstadApp", "Detected locale change: init tags='$initialLang', tags now='$langNow'")
+                    localeChangeChannel.trySend(langNow)
+                    return@launch
+                }
+            }
+        }
     }
 
     override fun attachBaseContext(base: Context) {
@@ -251,9 +298,6 @@ class UstadApp : Application(), DIAware {
         const val METADATA_KEY_SUPPORTED_LANGS = "com.ustadmobile.uilanguages"
 
         const val METADATA_KEY_API_URL = "com.ustadmobile.apiurl"
-
-        const val METADATA_KEY_SHARE_BASENAME = "com.ustadmobile.shareappbasename"
-
     }
 
 }

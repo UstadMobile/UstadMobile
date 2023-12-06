@@ -12,12 +12,14 @@ import org.xmlpull.v1.XmlPullParserFactory
 import kotlin.random.Random
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.rest.ext.insertDefaultSite
 import kotlinx.coroutines.runBlocking
+import java.util.Locale
 import java.util.Properties
 
 /**
@@ -67,7 +69,14 @@ fun commonTestKtorDiModule(
     }
 
     bind<UstadMobileSystemImpl>() with singleton {
-        UstadMobileSystemImpl(settings = instance())
+        UstadMobileSystemImpl(settings = instance(), langConfig = instance())
+    }
+
+    bind<SupportedLanguagesConfig>() with singleton {
+        SupportedLanguagesConfig(
+            systemLocales = listOf(Locale.getDefault().country),
+            settings = instance()
+        )
     }
 
     bind<Pbkdf2Params>() with singleton {

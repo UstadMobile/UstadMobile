@@ -62,7 +62,7 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
 
     bind<SetLanguageUseCase>() with provider {
         SetLanguageUseCaseJs(
-            systemImpl = instance()
+            languagesConfig = instance()
         )
     }
 }

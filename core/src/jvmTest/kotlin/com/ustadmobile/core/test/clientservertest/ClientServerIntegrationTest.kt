@@ -13,6 +13,7 @@ import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitt
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.util.DiTag
@@ -89,9 +90,17 @@ private fun clientServerCommonDiModule(
         )
     }
 
+    bind<SupportedLanguagesConfig>() with singleton {
+        SupportedLanguagesConfig(
+            systemLocales = listOf("en-US"),
+            settings = instance(),
+        )
+    }
+
     bind<UstadMobileSystemImpl>() with singleton {
         UstadMobileSystemImpl(
-            settings = instance()
+            settings = instance(),
+            langConfig = instance()
         )
     }
 
