@@ -42,6 +42,9 @@ import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.AppConfig
+import com.ustadmobile.core.impl.config.BundleAppConfig
+import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.LocaleSettingDelegateAndroid
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.METADATA_KEY_PRESET_LANG
@@ -83,6 +86,10 @@ class UstadApp : Application(), DIAware, UstadLocaleChangeChannelProvider {
     @OptIn(ExperimentalXmlUtilApi::class)
     override val di: DI by DI.lazy {
         import(CommonJvmDiModule)
+
+        bind<AppConfig>() with singleton {
+            BundleAppConfig(appMetaData)
+        }
 
         bind<Settings>() with singleton {
             SharedPreferencesSettings(
@@ -245,6 +252,12 @@ class UstadApp : Application(), DIAware, UstadLocaleChangeChannelProvider {
 
         bind<NavCommandExecutionTracker>() with singleton {
             NavCommandExecutionTracker()
+        }
+
+        bind<GenderConfig>() with singleton {
+            GenderConfig(
+                appConfig = instance()
+            )
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

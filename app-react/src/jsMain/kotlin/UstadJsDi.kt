@@ -8,6 +8,9 @@ import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryG
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.IContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.AppConfig
+import com.ustadmobile.core.impl.config.AppConfigMap
+import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.METADATA_KEY_PRESET_LANG
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
@@ -60,6 +63,15 @@ internal fun ustadJsDi(
 
     val apiUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
     console.log("Api URL = $apiUrl (location.href = ${location.href}")
+
+    bind<AppConfig>() with singleton {
+        AppConfigMap(configMap)
+    }
+
+    bind<GenderConfig>() with singleton {
+        val config: AppConfig = instance()
+        GenderConfig(appConfig = config)
+    }
 
     bind<Settings>() with singleton {
         StorageSettings().also {

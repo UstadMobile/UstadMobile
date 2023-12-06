@@ -14,6 +14,7 @@ import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.impl.nav.NavResultReturner
@@ -208,6 +209,10 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
 
         bind<NavResultReturner>() with singleton {
             spy(NavResultReturnerImpl())
+        }
+
+        bind<GenderConfig>() with singleton {
+            GenderConfig()
         }
     }
 

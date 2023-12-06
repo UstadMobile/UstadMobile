@@ -10,7 +10,10 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.GenderConfig
+import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
@@ -38,6 +41,8 @@ import org.kodein.di.instance
 data class PersonEditUiState(
 
     val person: PersonWithAccount? = null,
+
+    val genderOptions: List<MessageIdOption2> = PersonConstants.GENDER_MESSAGE_IDS_AND_UNSET,
 
     val personPicture: PersonPicture? = null,
 
@@ -118,14 +123,22 @@ class PersonEditViewModel(
 
     private val validateEmailUseCase = ValidateEmailUseCase()
 
+    private val genderConfig : GenderConfig by instance()
+
     init {
         loadingState = LoadingUiState.INDETERMINATE
+
 
         val title = if(entityUid == 0L) systemImpl.getString(MR.strings.add_a_new_person) else systemImpl.getString(MR.strings.edit_person)
         _appUiState.update {
             AppUiState(
                 title = title,
                 hideBottomNavigation = true,
+            )
+        }
+        _uiState.update { prev ->
+            prev.copy(
+                genderOptions = genderConfig.genderMessageIdsAndUnset
             )
         }
 
