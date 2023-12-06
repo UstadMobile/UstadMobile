@@ -25,6 +25,7 @@ import web.dom.document
 import web.html.HTMLElement
 import mui.icons.material.MoreVert as MoreVertIcon
 import mui.icons.material.Settings as SettingsIcon
+import mui.icons.material.Menu as MenuIcon
 
 private val ROOT_LOCATIONS = UstadViewModel.ROOT_DESTINATIONS.map {
     "/$it"
@@ -35,6 +36,9 @@ external interface HeaderProps: Props {
 
     var setAppBarHeight: (Int) -> Unit
 
+    var showMenuIcon: Boolean
+
+    var onClickMenuIcon: () -> Unit
 }
 
 val Header = FC<HeaderProps> { props ->
@@ -42,8 +46,8 @@ val Header = FC<HeaderProps> { props ->
     val appBarRef = useRef<HTMLElement>(null)
     val strings = useStringProvider()
     var overflowAnchor by useState<Element?> { null }
-    val location = useLocation()
     val navigateFn = useNavigate()
+    val location = useLocation()
 
 
     var appBarTitle by useState {
@@ -73,6 +77,22 @@ val Header = FC<HeaderProps> { props ->
         }
 
         Toolbar {
+            if(props.showMenuIcon) {
+                IconButton {
+                    ariaLabel = strings[MR.strings.menu]
+                    onClick = {
+                        props.onClickMenuIcon()
+                    }
+
+                    MenuIcon {
+                        sx {
+                            color = theme.palette.primary.contrastText
+                        }
+                    }
+                }
+            }
+
+
             Typography{
                 sx { flexGrow = number(1.0) }
                 variant = h6

@@ -124,17 +124,20 @@ fun ClazzEnrolmentEditScreen(
             }
         }
 
-        UstadMessageIdOptionExposedDropDownMenuField(
-            modifier = Modifier.testTag("clazzEnrolmentOutcome").fillMaxWidth().defaultItemPadding(),
-            value = uiState.clazzEnrolment?.clazzEnrolmentOutcome ?: ClazzEnrolment.OUTCOME_IN_PROGRESS,
-            label = stringResource(MR.strings.outcome),
-            options = OutcomeConstants.OUTCOME_MESSAGE_IDS,
-            enabled = uiState.fieldsEnabled,
-            onOptionSelected = {
-                onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy{
-                    clazzEnrolmentOutcome = it.value
-                })
-            },
-        )
+        if(uiState.outcomeVisible) {
+            UstadMessageIdOptionExposedDropDownMenuField(
+                modifier = Modifier.testTag("clazzEnrolmentOutcome").fillMaxWidth().defaultItemPadding(),
+                value = uiState.clazzEnrolment?.clazzEnrolmentOutcome ?: ClazzEnrolment.OUTCOME_IN_PROGRESS,
+                label = stringResource(MR.strings.outcome),
+                options = OutcomeConstants.OUTCOME_MESSAGE_IDS,
+                enabled = uiState.fieldsEnabled,
+                onOptionSelected = {
+                    onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy{
+                        clazzEnrolmentOutcome = it.value
+                    })
+                },
+            )
+        }
+
     }
 }

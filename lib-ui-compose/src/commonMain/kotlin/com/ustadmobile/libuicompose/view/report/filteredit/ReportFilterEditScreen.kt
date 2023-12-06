@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -19,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
@@ -34,10 +34,8 @@ import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
-import com.ustadmobile.libuicompose.components.UstadOutlinedTextField
 
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ReportFilterEditScreen(
     uiState: ReportFilterEditUiState = ReportFilterEditUiState(),
@@ -123,10 +121,13 @@ fun ReportFilterEditScreen(
 
         if (uiState.reportFilterValueVisible){
             item {
-                UstadOutlinedTextField(
+                OutlinedTextField(
                     value = uiState.reportFilter?.reportFilterValue ?: "",
-                    label = stringResource(MR.strings.report_filter_edit_values),
-                    errorText = uiState.valuesError,
+                    label = { Text(stringResource(MR.strings.report_filter_edit_values)) },
+                    supportingText = uiState.valuesError?.let{
+                        { Text(it) }
+                    },
+                    isError = uiState.valuesError != null,
                     enabled = uiState.fieldsEnabled,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     onValueChange = {
@@ -143,25 +144,35 @@ fun ReportFilterEditScreen(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
-                    UstadOutlinedTextField(
+                    OutlinedTextField(
                         modifier = Modifier.weight(0.5F),
                         value = uiState.reportFilter?.reportFilterValueBetweenX ?: "",
-                        label = stringResource(MR.strings.from),
-                        errorText = uiState.valuesError,
-                        enabled = uiState.fieldsEnabled,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        label = {
+                            Text(stringResource(MR.strings.from))
+                        },
                         onValueChange = {
                             onReportFilterChanged(uiState.reportFilter?.shallowCopy{
                                 reportFilterValueBetweenX = it
                             })
-                        }
+                        },
+                        enabled = uiState.fieldsEnabled,
+                        isError = uiState.valuesError != null,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        supportingText = uiState.valuesError?.let {
+                            { Text(it) }
+                        },
                     )
 
-                    UstadOutlinedTextField(
+                    OutlinedTextField(
                         modifier = Modifier.weight(0.5F),
                         value = uiState.reportFilter?.reportFilterValueBetweenY ?: "",
-                        label = stringResource(MR.strings.toC),
-                        errorText = uiState.valuesError,
+                        label = {
+                            Text(stringResource(MR.strings.toC))
+                        },
+                        supportingText = uiState.valuesError?.let {
+                            { Text(it) }
+                        },
+                        isError = uiState.valuesError != null,
                         enabled = uiState.fieldsEnabled,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         onValueChange = {

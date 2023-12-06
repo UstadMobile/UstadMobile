@@ -1,4 +1,4 @@
-package com.ustadmobile.core.sms
+package com.ustadmobile.core.domain.sms
 
 interface OnClickSendSmsUseCase {
 

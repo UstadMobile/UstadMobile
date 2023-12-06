@@ -69,19 +69,6 @@ fun CourseGroupSetListScreen(
             )
         }
 
-        uiState.individualSubmissionOption?.also { individualOption ->
-            item(key = "individualsubmission") {
-                ListItem(
-                    modifier = Modifier.clickable {
-                        individualOption.also(onClickEntry)
-                    },
-                    headlineContent = {
-                        Text(individualOption.cgsName ?: "")
-                    },
-                )
-            }
-        }
-
         if(uiState.showAddItem) {
             item(key = "additem") {
                 UstadAddListItem(

@@ -13,8 +13,10 @@ import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumberUseCaseAndroid
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorAndroid
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
+import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
+import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCaseAndroid
 import com.ustadmobile.core.domain.sms.OnClickSendSmsUseCaseAndroid
-import com.ustadmobile.core.sms.OnClickSendSmsUseCase
+import com.ustadmobile.core.domain.sms.OnClickSendSmsUseCase
 import com.ustadmobile.door.ext.DoorTag
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
 import org.kodein.di.DI
@@ -55,6 +57,10 @@ fun AndroidDomainDiModule(
 
         bind<OnClickSendSmsUseCase>() with provider {
             OnClickSendSmsUseCaseAndroid(appContext)
+        }
+
+        bind<OnClickEmailUseCase>() with provider {
+            OnClickEmailUseCaseAndroid(appContext)
         }
     }
 

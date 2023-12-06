@@ -166,18 +166,6 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                 }
             }
 
-            UstadTextEditField {
-                error = props.uiState.parentContactError
-                enabled = props.uiState.fieldsEnabled
-                label = strings[MR.strings.parents_email_address]
-                onChange = {
-                    props.onApprovalPersonParentJoinChanged(
-                        props.uiState.approvalPersonParentJoin?.shallowCopy {
-                            ppjEmail = it
-                        })
-                }
-            }
-
             MuiTelInput {
                 value = props.uiState.person?.phoneNum ?: ""
                 label = ReactNode(strings[MR.strings.phone_number])
