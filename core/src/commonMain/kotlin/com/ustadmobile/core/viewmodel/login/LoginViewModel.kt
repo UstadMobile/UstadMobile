@@ -4,11 +4,13 @@ import com.ustadmobile.core.account.AdultAccountRequiredException
 import com.ustadmobile.core.account.ConsentNotGrantedException
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.util.ext.requirePostfix
@@ -39,7 +41,11 @@ data class LoginUiState(
     val createAccountVisible: Boolean = false,
     val connectAsGuestVisible: Boolean = false,
     val loginIntentMessage: String? = null,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val currentLanguage: UstadMobileSystemCommon.UiLanguage =
+        UstadMobileSystemCommon.UiLanguage("en", "English"),
+    val languageList: List<UstadMobileSystemCommon.UiLanguage> = listOf(currentLanguage),
+    val showWaitForRestart: Boolean = false,
 )
 
 class LoginViewModel(
@@ -63,6 +69,10 @@ class LoginViewModel(
 
     private var verifiedSite: Site? = null
 
+    private val setLanguageUseCase: SetLanguageUseCase by instance()
+
+    private val languagesConfig: SupportedLanguagesConfig by instance()
+
     init {
         nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
@@ -71,8 +81,10 @@ class LoginViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                versionInfo = "TODO",
-                loginIntentMessage = savedStateHandle[UstadView.ARG_INTENT_MESSAGE]
+                versionInfo = "",
+                loginIntentMessage = savedStateHandle[UstadView.ARG_INTENT_MESSAGE],
+                currentLanguage = languagesConfig.getCurrentLanguage(systemImpl),
+                languageList = languagesConfig.supportedUiLanguagesAndSysDefault(systemImpl)
             )
         }
 
@@ -223,6 +235,28 @@ class LoginViewModel(
         args.putFromSavedStateIfPresent(savedStateHandle, PersonEditViewModel.REGISTER_VIA_LINK)
 
         navController.navigate(RegisterAgeRedirectView.VIEW_NAME, args)
+    }
+
+    fun onChangeLanguage(
+        uiLanguage: UstadMobileSystemCommon.UiLanguage
+    ) {
+        if(uiLanguage != _uiState.value.currentLanguage) {
+            val result = setLanguageUseCase(
+                uiLanguage, DEST_NAME, navController,
+                navArgs = buildMap {
+                    putFromSavedStateIfPresent(UstadView.ARG_NEXT)
+                    putFromSavedStateIfPresent(UstadView.ARG_API_URL)
+                    putFromSavedStateIfPresent(UstadView.ARG_SITE)
+                }
+            )
+
+            _uiState.update { previous ->
+                previous.copy(
+                    currentLanguage =  uiLanguage,
+                    showWaitForRestart = result.waitForRestart
+                )
+            }
+        }
     }
 
     fun handleConnectAsGuest(){

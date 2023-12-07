@@ -12,6 +12,7 @@ class SetLanguageUseCaseJs(
         uiLang: UstadMobileSystemCommon.UiLanguage,
         currentDestination: String,
         navController: UstadNavController,
+        navArgs: Map<String, String>
     ) : SetLanguageUseCase.SetLangResult {
         val currentDisplayLang = languagesConfig.displayedLocale
         languagesConfig.localeSetting = uiLang.langCode

@@ -21,6 +21,7 @@ class SetLanguageUseCaseAndroid(
         uiLang: UstadMobileSystemCommon.UiLanguage,
         currentDestination: String,
         navController: UstadNavController,
+        navArgs: Map<String, String>,
     ): SetLanguageUseCase.SetLangResult {
         //languagesConfig uses a delegate on Android that will use Android's per-app locale setting
         languagesConfig.localeSetting = uiLang.langCode
