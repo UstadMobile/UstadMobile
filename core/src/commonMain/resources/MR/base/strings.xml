@@ -1681,4 +1681,6 @@
 
     <string name="menu">Menu</string>
 
+    <string name="restarting">Restarting</string>
+
 </resources>

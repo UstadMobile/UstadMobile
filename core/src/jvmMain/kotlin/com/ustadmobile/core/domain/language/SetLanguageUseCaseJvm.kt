@@ -14,6 +14,7 @@ class SetLanguageUseCaseJvm(
         uiLang: UstadMobileSystemCommon.UiLanguage,
         currentDestination: String,
         navController: UstadNavController,
+        navArgs: Map<String, String>
     ) : SetLanguageUseCase.SetLangResult{
         //Change the supported lang config
         supportedLangConfig.localeSetting = uiLang.langCode
@@ -27,8 +28,14 @@ class SetLanguageUseCaseJvm(
         //We need to navigate to force everything to update
         navController.navigate(
             viewName = currentDestination,
-            args = mapOf("invalidated" to systemTimeInMillis().toString()),
-            UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
+            args = buildMap {
+                put("invalidated", systemTimeInMillis().toString())
+                putAll(navArgs)
+            },
+            UstadMobileSystemCommon.UstadGoOptions(
+                popUpToViewName = currentDestination,
+                popUpToInclusive = true,
+            )
 
         )
         return SetLanguageUseCase.SetLangResult(false)

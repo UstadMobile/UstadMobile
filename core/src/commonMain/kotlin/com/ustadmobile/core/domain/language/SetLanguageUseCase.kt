@@ -13,6 +13,7 @@ interface SetLanguageUseCase {
         uiLang: UstadMobileSystemCommon.UiLanguage,
         currentDestination: String,
         navController: UstadNavController,
+        navArgs: Map<String, String> = emptyMap(),
     ): SetLangResult
 
 }

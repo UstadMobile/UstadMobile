@@ -16,6 +16,8 @@ import mui.system.sx
 import react.*
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.LOCALE_USE_SYSTEM
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextField
 
@@ -27,6 +29,7 @@ external interface LoginProps : Props {
     var onClickConnectAsGuest: () -> Unit
     var onUsernameValueChange: (String) -> Unit
     var onPasswordValueChange: (String) -> Unit
+    var onChangeLanguage: (UstadMobileSystemCommon.UiLanguage) -> Unit
 }
 
 val LoginScreen = FC<Props> {
@@ -43,12 +46,27 @@ val LoginScreen = FC<Props> {
         onClickConnectAsGuest = viewModel::handleConnectAsGuest
         onUsernameValueChange = viewModel::onUsernameChanged
         onPasswordValueChange = viewModel::onPasswordChanged
+        onChangeLanguage = viewModel::onChangeLanguage
     }
 }
+
+
 
 private val LoginComponent2 = FC<LoginProps> { props ->
 
     val strings = useStringProvider()
+
+    /*
+     * The language setting for "use system language" is a blank string. This doesn't work with a
+     * select field value. So we will convert a blank string to sys and back to blank
+     */
+    fun String.toLangSysVal() = if(this == LOCALE_USE_SYSTEM) "sys" else this
+
+    fun String.fromLangSysVal() = if(this == "sys")
+        LOCALE_USE_SYSTEM
+    else
+        this
+
 
     UstadStandardContainer {
         Stack {
@@ -106,6 +124,38 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                sx {
                    height = 10.px
                }
+            }
+
+            FormControl {
+                fullWidth = true
+
+                InputLabel {
+                    id = "language_label"
+                    +strings[MR.strings.language]
+                }
+
+                Select {
+                    value = props.uiState.currentLanguage.langCode.toLangSysVal()
+                    id = "language_select"
+                    label = ReactNode(strings[MR.strings.language])
+                    labelId = "language_label"
+                    disabled = !props.uiState.fieldsEnabled
+                    fullWidth = true
+                    onChange = { event, _ ->
+                        val selectedVal = ("" + event.target.value).fromLangSysVal()
+                        val selectedLang = props.uiState.languageList.first {
+                            it.langCode == selectedVal
+                        }
+                        props.onChangeLanguage(selectedLang)
+                    }
+
+                    props.uiState.languageList.forEach { lang ->
+                        MenuItem {
+                            value = lang.langCode.toLangSysVal()
+                            + lang.langDisplay
+                        }
+                    }
+                }
             }
 
             /*

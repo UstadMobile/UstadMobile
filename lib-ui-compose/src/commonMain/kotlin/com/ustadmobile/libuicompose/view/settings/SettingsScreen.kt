@@ -27,6 +27,7 @@ import com.ustadmobile.libuicompose.components.UstadDetailField2
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
+import com.ustadmobile.libuicompose.components.UstadWaitForRestartDialog
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
@@ -64,6 +65,10 @@ fun SettingsScreen(
                 }
             }
         }
+    }
+
+    if(uiState.waitForRestartDialogVisible) {
+        UstadWaitForRestartDialog()
     }
 
 }

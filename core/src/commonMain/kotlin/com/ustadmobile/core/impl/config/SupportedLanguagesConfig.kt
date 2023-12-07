@@ -87,6 +87,15 @@ class SupportedLanguagesConfig (
             displayedLocale = displayLocaleForLangSetting(value)
         }
 
+    fun getCurrentLanguage(
+        systemImpl: UstadMobileSystemImpl
+    ): UstadMobileSystemCommon.UiLanguage {
+        val currentLocaleSetting = localeSetting ?: LOCALE_USE_SYSTEM
+        return supportedUiLanguagesAndSysDefault(systemImpl).first {
+            it.langCode == currentLocaleSetting
+        }
+    }
+
     /**
      * This is stored because it will be looked up every time a string lookup is done via systemImpl
      */

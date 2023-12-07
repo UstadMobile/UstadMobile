@@ -11,7 +11,6 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.lifecycleScope
 import com.jakewharton.processphoenix.ProcessPhoenix
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
@@ -38,10 +37,8 @@ import org.kodein.di.android.closestDI
 import org.kodein.di.compose.withDI
 import com.ustadmobile.libuicompose.view.app.App
 import com.ustadmobile.libuicompose.view.app.SizeClass
-import com.ustadmobile.port.android.impl.UstadLocaleChangeChannelProvider
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.launch
 import moe.tlaster.precompose.PreComposeApp
 import org.kodein.di.bind
 import org.kodein.di.instance
@@ -53,6 +50,7 @@ import org.kodein.di.singleton
 import org.kodein.di.with
 import java.io.File
 import java.net.URI
+import androidx.core.os.LocaleListCompat
 
 class AppActivity: AppCompatActivity(), DIAware {
 
@@ -145,6 +143,13 @@ class AppActivity: AppCompatActivity(), DIAware {
             else -> SizeClass.MEDIUM
         }
 
+    override fun onLocalesChanged(locales: LocaleListCompat) {
+        super.onLocalesChanged(locales)
+
+        //App must be fully restart when locale changes - see SetLanguageUseCaseAndroid for details.
+        ProcessPhoenix.triggerRebirth(this@AppActivity)
+    }
+
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -153,11 +158,6 @@ class AppActivity: AppCompatActivity(), DIAware {
          * Trigger rebirth as required after a locale change. Horrible workaround. See
          * UstadLocaleChangeChannelProvider for an explanation of this.
          */
-        lifecycleScope.launch {
-            (application as? UstadLocaleChangeChannelProvider)?.localeChangeChannel?.receive()
-            ProcessPhoenix.triggerRebirth(this@AppActivity)
-        }
-
         enableEdgeToEdge()
 
         setContent {
