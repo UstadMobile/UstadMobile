@@ -65,8 +65,8 @@ it('Teacher add assignment', () => {
   cy.get('input[id="title"]').type("Assignment 1")
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
   cy.contains('Must submit all at once').should('exist')
+  cy.get('#group_submission_on').click()
   cy.get('#cgsName').click()
-  cy.wait(2000) // added to load "Add new groups" button
   cy.contains('Add new groups',{timeout: 5000}).click()
   cy.get('#cgs_name').type('Assignment Team')
   cy.get('#cgs_total_groups').clear().type('2')

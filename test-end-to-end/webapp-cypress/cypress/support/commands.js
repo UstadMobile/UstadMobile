@@ -50,6 +50,20 @@ Cypress.Commands.add('ustadLogout', () => {
    cy.contains('LOG OUT').click()
 })
 
+// Add a content to Library
+Cypress.Commands.add('ustadAddContentToLibrary',(contentPath,contentName) => {
+  cy.contains("Library").click()
+  cy.contains("button","Content").click()
+  cy.get('#new_content_from_file').click({force: true})
+  cy.get('input[type="file"]')
+    .selectFile(contentPath,{force:true})
+  cy.get('input[id="content_title"]').click()
+  //cy.get('input[id="content_title"]').should('have.class', 'active')
+  cy.get('input[id="content_title"]').clear().type(contentName,{timeout: 2000})
+  cy.get('#actionBarButton').click()
+
+})
+
 // Create a new course
 Cypress.Commands.add('ustadAddCourse',(courseName) => {
     cy.contains("Courses").click()

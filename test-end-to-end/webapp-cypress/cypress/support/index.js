@@ -2,7 +2,6 @@
 import './commands';
 import './namespace';
 
-
 // Registering a handler for test failures
 Cypress.on('fail', (error, runnable) => {
   // Check if the error originated from a test (not a hook, etc.)

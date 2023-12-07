@@ -60,15 +60,15 @@ it('Teacher add assignment and course comment', () => {
  // Add Assignment block
   cy.contains("Courses").click()
   cy.contains("004_009").click()
-  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
+ // cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
   cy.contains("Assignment").click()
   cy.get('input[id="title"]').type("Assignment 1")
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
+  cy.get('#group_submission_on').click()
   cy.get('#cgsName').click()
-  cy.wait(2000) // added to load "Add new groups" button
   cy.contains('Add new groups',{timeout: 5000}).click()
   cy.get('#cgs_name').type('Assignment Team')
   cy.get('#cgs_total_groups').clear().type('2')
@@ -105,7 +105,7 @@ it('Group 1 - Student add private comment', () => {
   cy.contains("004_009").click()
   cy.contains('Assignment 1').click()
   cy.get('#private_comment_textfield').click()
-  cy.get('#private_comment_textfield').type("comment2")
+  cy.get('#private_comment_textfield').type("comment2",{timeout:2000})
   cy.get('svg[data-testid="SendIcon"]').click()
   cy.contains("comment1").should('exist')
   cy.contains("comment2").should('exist')
