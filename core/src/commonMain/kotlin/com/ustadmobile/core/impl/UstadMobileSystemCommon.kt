@@ -1,35 +1,20 @@
 package com.ustadmobile.core.impl
 
 import com.russhwolf.settings.Settings
-import com.russhwolf.settings.set
-import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.MR
-import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.ext.requirePostfix
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT_MESSAGE
-import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
-import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
 import com.ustadmobile.door.DoorUri
 import dev.icerock.moko.resources.StringResource
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.minus
 import kotlinx.serialization.KSerializer
 import kotlin.js.JsName
-import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
-import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
-import com.ustadmobile.core.viewmodel.login.LoginViewModel
 
 /**
  * Class has all the shared function across all supported platforms
  */
 abstract class UstadMobileSystemCommon(
-    private val settings: Settings
+    private val settings: Settings,
+    protected val langConfig: SupportedLanguagesConfig,
 ) {
 
     internal data class LastGoToDest(val viewName: String, val args: Map<String, String?>)
@@ -118,42 +103,6 @@ abstract class UstadMobileSystemCommon(
     abstract fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int,
                     ustadGoOptions: UstadGoOptions)
 
-    /**
-     * Provides the currently active locale
-     *
-     * @return The currently active locale code, or a blank "" string meaning the locale is the system default.
-     */
-    @JsName("getLocale")
-    open fun getLocale(): String = settings.getString(PREFKEY_LOCALE, LOCALE_USE_SYSTEM)
-
-    @JsName("setLocale")
-    open fun setLocale(locale: String) {
-        settings[PREFKEY_LOCALE] = locale
-    }
-
-    /**
-     * Must provide the system's default locale (e.g. en_US.UTF-8)
-     *
-     * @return System locale
-     */
-    @JsName("getSystemLocale")
-    abstract fun getSystemLocale(): String
-
-    /**
-     * Provides the language code of the currently active locale. This is different to getLocale. If
-     * the locale is currently set to LOCALE_USE_SYSTEM then that language will be resolved and the
-     * code returned.
-     *
-     * @return The locale as the user sees it.
-     */
-    open fun getDisplayedLocale(): String {
-        var locale = getLocale()
-        if (locale == LOCALE_USE_SYSTEM)
-            locale = getSystemLocale()
-
-        return locale?.substring(0, 2) ?: "en"
-    }
-
     abstract fun getString(stringResource: StringResource): String
 
     abstract fun formatString(
@@ -187,22 +136,6 @@ abstract class UstadMobileSystemCommon(
 
     }
 
-
-    /**
-     * Determine if the two given locales are the same as far as what the user will see.
-     *
-     * @param oldLocale
-     *
-     * @return
-     */
-    open fun hasDisplayedLocaleChanged(oldLocale: String?, context: Any): Boolean {
-        val currentlyDisplayedLocale = getDisplayedLocale()
-        return !(currentlyDisplayedLocale != null && oldLocale != null
-                && oldLocale.substring(0, 2) == currentlyDisplayedLocale.substring(0, 2))
-    }
-
-
-    abstract fun openLinkInBrowser(url: String, context: Any)
 
     /**
      * Open the given DoorUri in the default viewer. On Android this means using a VIEW intent.

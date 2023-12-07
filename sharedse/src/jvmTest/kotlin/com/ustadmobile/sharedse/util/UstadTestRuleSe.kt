@@ -18,6 +18,7 @@ import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.preload
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
@@ -51,6 +52,7 @@ import org.kodein.di.singleton
 import org.mockito.kotlin.spy
 import java.io.File
 import java.nio.file.Files
+import java.util.Locale
 import java.util.Properties
 import kotlin.random.Random
 
@@ -100,8 +102,12 @@ class UstadTestRule: TestWatcher() {
                 //do nothing
             }
         )
+        val langConfig = SupportedLanguagesConfig(
+            systemLocales = listOf(Locale.getDefault().language),
+            settings = settings,
+        )
 
-        systemImplSpy = spy(UstadMobileSystemImpl(settings))
+        systemImplSpy = spy(UstadMobileSystemImpl(settings, langConfig))
         okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp) {
             install(ContentNegotiation) {

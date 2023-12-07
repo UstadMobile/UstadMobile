@@ -16,6 +16,7 @@ import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DatabaseBuilder
@@ -104,7 +105,13 @@ class UstadTestRule(): TestWatcher() {
                 //do nothing
             }
         )
-        systemImplSpy = spy(UstadMobileSystemImpl(settings))
+
+        val langConfig = SupportedLanguagesConfig(
+            systemLocales = kotlin.collections.listOf("en-US"),
+            settings = settings,
+        )
+
+        systemImplSpy = spy(UstadMobileSystemImpl(settings, langConfig))
         //coroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
         okHttpClient = OkHttpClient.Builder().build()

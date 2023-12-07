@@ -13,7 +13,6 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.common.input
 import com.ustadmobile.mui.common.readOnly
 import com.ustadmobile.mui.components.UstadDateField
-import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.view.components.UstadEditHeader
 import com.ustadmobile.view.components.UstadSwitchField
 import com.ustadmobile.wrappers.reacteasysort.LockAxis
@@ -145,7 +144,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 UstadDateField {
                     timeInMillis = props.uiState.entity?.clazzEndTime ?: 0
                     timeZoneId = props.uiState.timeZone
-                    label = ReactNode(strings[MR.strings.end_date].addOptionalSuffix(strings))
+                    label = ReactNode(strings[MR.strings.end_date])
                     error = props.uiState.clazzEndDateError != null
                     helperText = props.uiState.clazzEndDateError?.let { ReactNode(it) }
                     disabled = !props.uiState.fieldsEnabled

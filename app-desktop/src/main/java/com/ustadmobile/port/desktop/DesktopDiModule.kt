@@ -14,6 +14,7 @@ import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCaseJvm
+import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
@@ -66,7 +67,10 @@ fun ustadAppDataDir(): File {
 @OptIn(ExperimentalXmlUtilApi::class)
 val DesktopDiModule = DI.Module("Desktop-Main") {
     bind<SupportedLanguagesConfig>() with singleton {
-        SupportedLanguagesConfig()
+        SupportedLanguagesConfig(
+            systemLocales = listOf(SetLanguageUseCaseJvm.REAL_SYSTEM_DEFAULT.language),
+            settings = instance(),
+        )
     }
 
     bind<StringProvider>() with singleton { StringProviderJvm(Locale.getDefault()) }
@@ -116,7 +120,8 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
 
     bind<UstadMobileSystemImpl>() with singleton {
         UstadMobileSystemImpl(
-            settings = instance()
+            settings = instance(),
+            langConfig = instance(),
         )
     }
 
