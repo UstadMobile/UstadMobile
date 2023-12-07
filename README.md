@@ -124,6 +124,9 @@ it in app-ktor-server/data/singleton/admin.txt .
 This will run the REST API which is required by the Android and web apps. It will not include the 
 web client app itself. To use the web client app in the browser, you must build/run it (as below).
 
+If you use localhost or 127.0.0.1, you will not be able to connect from Android (because localhost 
+on an emulator or device refers to the Android emulator/device, not the PC running the server).
+
 * __Step 5: Build/run the Android and/or web client version__ : see [app-android](app-android/) for the
 Android app, [app-react](app-react/) for the web app.
 
