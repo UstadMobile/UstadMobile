@@ -63,6 +63,7 @@ val PersonDetailScreen = FC<Props> {
         onClickCreateAccount = viewModel::onClickCreateAccount
         onClickManageParentalConsent = viewModel::onClickManageParentalConsent
         onClickDial = viewModel::onClickDial
+        onClickEmail = viewModel::onClickEmail
     }
 
 }

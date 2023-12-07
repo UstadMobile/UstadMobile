@@ -27,10 +27,12 @@ fun UstadNumberTextField(
         keyboardType = KeyboardType.Number
     ),
     supportingText: (@Composable () -> Unit)? = null,
+    unsetDefault: Float = 0f,
+    singleLine: Boolean = true,
 ) {
 
     var rawValue by remember(value) {
-        mutableStateOf(if(value != 0.toFloat()) value.toInt().toString() else "")
+        mutableStateOf(if(value != unsetDefault) value.toInt().toString() else "")
     }
 
     OutlinedTextField(
@@ -39,7 +41,7 @@ fun UstadNumberTextField(
         onValueChange = { text ->
             val filteredText = text.filter { it.isDigit() }
             rawValue = filteredText
-            val floatVal = filteredText.toFloatOrNull() ?: 0.toFloat()
+            val floatVal = filteredText.toFloatOrNull() ?: unsetDefault
             onValueChange(floatVal)
         },
         isError = isError,
@@ -49,5 +51,6 @@ fun UstadNumberTextField(
         trailingIcon = trailingIcon,
         keyboardOptions = keyboardOptions,
         supportingText = supportingText,
+        singleLine = singleLine,
     )
 }

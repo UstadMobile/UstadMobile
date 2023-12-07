@@ -1,29 +1,32 @@
 package com.ustadmobile.lib.rest
 
 import com.google.gson.Gson
+import com.russhwolf.settings.PropertiesSettings
+import com.russhwolf.settings.Settings
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.randomUuid
-import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import kotlin.random.Random
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.rest.ext.insertDefaultSite
 import kotlinx.coroutines.runBlocking
+import java.util.Locale
+import java.util.Properties
 
 /**
  * Creates a KodeIn DI Module that will contain most of what the test application engine needs to run
  */
 fun commonTestKtorDiModule(
-    endpointScope: EndpointScope,
-    temporaryFolder: TemporaryFolder
+    endpointScope: EndpointScope
 ) = DI.Module("Common Ktor Test Module") {
     bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
         NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
@@ -56,9 +59,24 @@ fun commonTestKtorDiModule(
         }
     }
 
+    bind<Settings>() with singleton {
+        PropertiesSettings(
+            delegate = Properties(),
+            onModify = {
+                //do nothing
+            }
+        )
+    }
+
     bind<UstadMobileSystemImpl>() with singleton {
-        UstadMobileSystemImpl(
-            temporaryFolder.newFolder())
+        UstadMobileSystemImpl(settings = instance(), langConfig = instance())
+    }
+
+    bind<SupportedLanguagesConfig>() with singleton {
+        SupportedLanguagesConfig(
+            systemLocales = listOf(Locale.getDefault().country),
+            settings = instance()
+        )
     }
 
     bind<Pbkdf2Params>() with singleton {

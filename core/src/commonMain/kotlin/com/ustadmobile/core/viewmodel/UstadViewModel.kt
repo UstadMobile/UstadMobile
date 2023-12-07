@@ -15,6 +15,9 @@ import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
+import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.coroutines.CoroutineScope
@@ -375,6 +378,9 @@ abstract class UstadViewModel(
          * date of birth < MAX DATE OF BIRTH), or LoginPresenter where an adult account is required.
          */
         const val ARG_MAX_DATE_OF_BIRTH = "maxDob"
+
+        val ROOT_DESTINATIONS = listOf(ClazzListViewModel.DEST_NAME_HOME,
+            ContentEntryListViewModel.DEST_NAME_HOME, PersonListViewModel.DEST_NAME_HOME)
 
     }
 

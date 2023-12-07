@@ -13,7 +13,6 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadCourseBlockEdit
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextEditField
-import com.ustadmobile.mui.components.UstadTextField
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.view.components.UstadSwitchField
@@ -39,10 +38,6 @@ external interface ContentEntryEditScreenProps : Props {
     var onContentEntryChanged: (ContentEntry?) -> Unit
 
     var onChangeCompress: (Boolean) -> Unit
-
-    var onChangePubliclyAccessible: (Boolean) -> Unit
-
-    var onClickLanguage: () -> Unit
 
 }
 
@@ -184,24 +179,6 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
                     label = strings[MR.strings.compress]
                     enabled = props.uiState.fieldsEnabled
                 }
-            }
-
-            UstadSwitchField {
-                id = "content_publik"
-                checked= props.uiState.entity?.entry?.publik ?: false
-                onChanged = { props.onChangePubliclyAccessible(it) }
-                label = strings[MR.strings.publicly_accessible]
-                enabled = props.uiState.fieldsEnabled
-            }
-
-            UstadTextEditField {
-                id = "content_language"
-                value = props.uiState.entity?.language?.name ?: ""
-                label = strings[MR.strings.language]
-                readOnly = true
-                enabled = props.uiState.fieldsEnabled
-                onClick = props.onClickLanguage
-                onChange = {}
             }
         }
     }

@@ -49,6 +49,8 @@ data class ClazzLogListAttendanceUiState(
         MessageIdOption2(MR.strings.last_month, 30),
         MessageIdOption2(MR.strings.last_three_months, 90)
     ),
+
+    val createNewOptionsVisible: Boolean = false,
 )
 
 data class AttendanceGraphData(
@@ -67,15 +69,9 @@ class ClazzLogListAttendanceViewModel(
     di, savedStateHandle, ClazzLogListAttendanceUiState(), ClazzDetailViewModel.DEST_NAME,
 ) {
 
-    enum class RecordAttendanceOption(val commandId: Int,val stringResource: StringResource ) {
-        RECORD_ATTENDANCE_MOST_RECENT_SCHEDULE(1, MR.strings.record_attendance_for_most_recent_occurrence),
-        RECORD_ATTENDANCE_NEW_SCHEDULE(2, MR.strings.add_a_new_occurrence);
-
-        companion object {
-
-            fun forCommand(commandId: Int) = values().first { it.commandId == commandId }
-
-        }
+    enum class RecordAttendanceOption(val stringResource: StringResource ) {
+        RECORD_ATTENDANCE_MOST_RECENT_SCHEDULE(MR.strings.record_attendance_for_most_recent_occurrence),
+        RECORD_ATTENDANCE_NEW_SCHEDULE(MR.strings.add_a_new_occurrence);
     }
 
     //List of points to plot.
@@ -160,12 +156,31 @@ class ClazzLogListAttendanceViewModel(
                                     visible = options.isNotEmpty(),
                                     text = systemImpl.getString(MR.strings.record_attendance),
                                     icon = FabUiState.FabIcon.ADD,
+                                    onClick = {
+                                        if(options.size > 1) {
+                                            _uiState.update { prev ->
+                                                prev.copy(createNewOptionsVisible = true)
+                                            }
+                                        }else {
+                                            onClickRecordAttendance(
+                                                RecordAttendanceOption.RECORD_ATTENDANCE_NEW_SCHEDULE
+                                            )
+                                        }
+                                    }
                                 )
                             )
                         }
                     }
                 }
             }
+        }
+    }
+
+    fun onDismissCreateNewOptions() {
+        _uiState.update { prev ->
+            prev.copy(
+                createNewOptionsVisible = false
+            )
         }
     }
 

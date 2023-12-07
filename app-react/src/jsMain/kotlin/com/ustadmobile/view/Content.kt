@@ -21,6 +21,7 @@ import react.useRequiredContext
 
 val Content = FC<Props> {
     Box {
+        key = "content_box"
         component = ReactHTML.main
         sx {
             gridArea = Area.Content

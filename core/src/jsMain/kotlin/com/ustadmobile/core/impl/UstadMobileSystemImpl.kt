@@ -1,7 +1,7 @@
 package com.ustadmobile.core.impl
 
-import kotlinx.browser.localStorage
-import kotlinx.browser.window
+import com.russhwolf.settings.Settings
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import kotlin.js.Date
 import com.ustadmobile.door.DoorUri
 import dev.icerock.moko.resources.StringResource
@@ -20,39 +20,24 @@ import org.w3c.dom.HTMLAnchorElement
  * @param jsStringProvider Moko resources JsStringProvider
  */
 actual open class UstadMobileSystemImpl(
+    settings: Settings,
+    langConfig: SupportedLanguagesConfig,
     private val jsStringProvider: JsStringProvider,
-): UstadMobileSystemCommon() {
+): UstadMobileSystemCommon(settings, langConfig) {
 
     override fun getString(stringResource: StringResource): String {
-        return stringResource.localized(provider = jsStringProvider, locale = displayedLocale)
+        return stringResource.localized(
+            provider = jsStringProvider,
+            locale = langConfig.displayedLocale
+        )
     }
 
     override fun formatString(stringResource: StringResource, vararg args: Any): String {
         return stringResource.localized(
             provider = jsStringProvider,
-            locale = displayedLocale,
+            locale = langConfig.displayedLocale,
             args = args
         )
-    }
-
-    /**
-     * Must provide the system's default locale (e.g. en_US.UTF-8)
-     *
-     * @return System locale
-     */
-    actual override fun getSystemLocale(): String {
-        return systemLocale
-    }
-
-    /**
-     * Get a preference for the app
-     *
-     * @param key preference key as a string
-     * @return value of that preference
-     */
-
-    actual override fun getAppPref(key: String): String? {
-        return localStorage.getItem(key)
     }
 
     /**
@@ -63,19 +48,6 @@ actual open class UstadMobileSystemImpl(
      */
     actual override suspend fun getAppSetupFile(context: Any, zip: Boolean): String {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Set a preference for the app
-     * @param key preference that is being set
-     * @param value value to be set
-     */
-    actual override fun setAppPref(key: String, value: String?) {
-        if(value == null){
-            localStorage.removeItem(key)
-        }else{
-            localStorage.setItem(key, value)
-        }
     }
 
     /**
@@ -129,40 +101,8 @@ actual open class UstadMobileSystemImpl(
         throw IllegalStateException("Not supported on JS anymore!")
     }
 
-    /**
-     * Open the given link in a browser and/or tab depending on the platform
-     */
-    actual override fun openLinkInBrowser(url: String, context: Any) {
-        window.open(url, "_blank")
-    }
-
-
-
-    /**
-     * Provide language UI directionality
-     * @return TRUE if the UI direction is RTL otherwise it's FALSE
-     */
-    fun isRtlActive(): Boolean {
-        return displayedLocale in UstadMobileConstants.RTL_LANGUAGES
-    }
 
     actual companion object {
 
-        /**
-         * Locale functions are provided here because Javascript needs to load resource XML files
-         * asynchronously before SystemImpl is instantiated.
-         */
-        private val systemLocale: String
-            get() = "${window.navigator.language}.UTF-8"
-
-        val displayedLocale: String
-            get() {
-                val localePref = localStorage.getItem(PREFKEY_LOCALE) ?: LOCALE_USE_SYSTEM
-                return if(localePref == LOCALE_USE_SYSTEM) {
-                    systemLocale.substring(0, 2)
-                }else {
-                    localePref
-                }
-            }
     }
 }

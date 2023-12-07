@@ -6,7 +6,6 @@ import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.locale.StringProvider
-import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants.GENDER_MESSAGE_IDS_AND_UNSET
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditUiState
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.lib.db.entities.PersonParentJoin
@@ -123,7 +122,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                         )
                     }
 
-                    GENDER_MESSAGE_IDS_AND_UNSET.forEach { option ->
+                    props.uiState.genderOptions.forEach { option ->
                         MenuItem {
                             value = option.value.toString()
                             + ReactNode(strings[option.stringResource])
@@ -163,18 +162,6 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                         props.uiState.person?.shallowCopy {
                             dateOfBirth = it
                     })
-                }
-            }
-
-            UstadTextEditField {
-                error = props.uiState.parentContactError
-                enabled = props.uiState.fieldsEnabled
-                label = strings[MR.strings.parents_email_address]
-                onChange = {
-                    props.onApprovalPersonParentJoinChanged(
-                        props.uiState.approvalPersonParentJoin?.shallowCopy {
-                            ppjEmail = it
-                        })
                 }
             }
 

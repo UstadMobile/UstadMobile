@@ -3,17 +3,13 @@ package com.ustadmobile.port.android.view.binding
 import android.app.AlertDialog
 import android.content.Context
 import android.text.format.DateFormat
-import android.text.format.DateUtils
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.DatePicker
 import android.widget.EditText
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
-import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.util.ext.systemImpl
 import com.ustadmobile.port.android.view.ext.calendar
 import java.text.MessageFormat
 import java.util.*
@@ -114,37 +110,6 @@ fun updateDateTimeOnEditTextWithExtra(prepend: String, append: String?, et: Text
     }
 }
 
-fun openDateTimeZonePicker(et: EditText, context: Context, inverseBindingListener: InverseBindingListener){
-    val calendar = Calendar.getInstance()
-    calendar.timeInMillis = if(!et.calendar.timeInMillis.isSet){
-        calendar.timeInMillis
-    }else{
-        et.calendar.timeInMillis
-    }
-    val builder = AlertDialog.Builder(context)
-
-    val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_date_picker,
-            null, false)
-
-    builder.setView(dialogView)
-
-    val picker = dialogView.findViewById<DatePicker>(R.id.date_picker)
-    picker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH), null)
-
-    builder.setPositiveButton(context.getString(CR.string.ok)) { dialog, _ ->
-
-        et.calendar.timeZone = calendar.timeZone
-        et.calendar.set(picker.year, picker.month, picker.dayOfMonth,
-                calendar[Calendar.HOUR_OF_DAY], calendar[Calendar.MINUTE])
-        et.setTag(R.id.tag_calendar, et.calendar)
-        et.updateDateWithTimeZone()
-        inverseBindingListener.onChange()
-    }
-    builder.setNegativeButton(context.getString(CR.string.cancel)) { dialog, _ -> dialog.dismiss() }
-    builder.show()
-}
-
 fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: InverseBindingListener) {
     val c = Calendar.getInstance()
     val currentDate = et.getTag(R.id.tag_datelong) as? Long ?: 0L
@@ -178,27 +143,6 @@ fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: Inve
     builder.show()
 }
 
-
-@BindingAdapter("dateLongAttrChanged")
-fun getDate(et: TextView, inverseBindingListener: InverseBindingListener) {
-    et.setOnClickListener {
-        openDatePicker2(et, et.context, inverseBindingListener)
-    }
-}
-
-@BindingAdapter("dateLongStringAttrChanged")
-fun getDateString(et: TextView, inverseBindingListener: InverseBindingListener) {
-    et.setOnClickListener {
-        openDatePicker2(et, et.context, inverseBindingListener)
-    }
-}
-
-@BindingAdapter("dateTimeLongAttrChanged")
-fun EditText.getDateTimeLong(inverseBindingListener: InverseBindingListener){
-    setOnClickListener{
-        openDateTimeZonePicker(this, context, inverseBindingListener)
-    }
-}
 
 @Deprecated("Use datePickerBindingAdapter2")
 @BindingAdapter("dateLong")
@@ -261,34 +205,7 @@ fun setDateString(et: TextView, dateLongString: String?) {
     et.setTag(R.id.tag_datelong, date)
 }
 
-@InverseBindingAdapter(attribute = "dateLong")
-fun getRealValue(et: TextView): Long {
-    return et.getTag(R.id.tag_datelong) as? Long ?: 0L
-}
-
-@InverseBindingAdapter(attribute = "dateLongString")
-fun getRealStringValue(et: TextView): String {
-    return getRealValue(et).toString()
-}
-
-@InverseBindingAdapter(attribute = "dateTimeLong")
-fun getRealDateTimeZoneValue(et: TextView): Long {
-    return (et.getTag(R.id.tag_calendar) as? Calendar)?.timeInMillis ?: 0L
-}
-
 //TODO: Move DatePicker to use timezones
-
-@BindingAdapter("timeInMillis")
-fun DatePicker.setTimeInMillis(timeInMillis: Long) {
-    setTag(R.id.tag_datelong, timeInMillis)
-    initIfReady()
-}
-
-@BindingAdapter("timeInMillisAttrChanged")
-fun DatePicker.setTimeInMillisChangeListener(inverseBindingListener: InverseBindingListener) {
-    setTag(R.id.tag_inverse_binding_listener, inverseBindingListener)
-    initIfReady()
-}
 
 private fun DatePicker.initIfReady() {
     val bindingListener = getTag(R.id.tag_inverse_binding_listener) as? InverseBindingListener
@@ -300,15 +217,6 @@ private fun DatePicker.initIfReady() {
     init(calendar[Calendar.YEAR], calendar[Calendar.MONTH], calendar[Calendar.DAY_OF_MONTH]) {_, _, _, _ ->
         bindingListener?.onChange()
     }
-}
-
-@InverseBindingAdapter(attribute = "timeInMillis")
-fun DatePicker.getTimeInMillis() : Long{
-    return Calendar.getInstance().also {
-        it[Calendar.YEAR] = this.year
-        it[Calendar.MONTH] = this.month
-        it[Calendar.DAY_OF_MONTH] = this.dayOfMonth
-    }.timeInMillis
 }
 
 

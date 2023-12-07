@@ -40,7 +40,8 @@ fun UstadClickableTextField(
     singleLine: Boolean = false,
     maxLines: Int = Int.MAX_VALUE,
     shape: Shape = OutlinedTextFieldDefaults.shape,
-    colors: TextFieldColors = OutlinedTextFieldDefaults.colors()
+    colors: TextFieldColors = OutlinedTextFieldDefaults.colors(),
+    supportingText: @Composable (() -> Unit)? = null,
 ) {
     Box {
         OutlinedTextField(
@@ -62,6 +63,7 @@ fun UstadClickableTextField(
             maxLines = maxLines,
             shape = shape,
             colors = colors,
+            supportingText = supportingText,
         )
 
         Box(

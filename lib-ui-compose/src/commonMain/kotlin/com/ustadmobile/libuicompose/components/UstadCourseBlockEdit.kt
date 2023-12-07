@@ -38,6 +38,7 @@ fun UstadCourseBlockEdit(
             label = { Text(stringResource(MR.strings.title) + "*") },
             isError = uiState.caTitleError != null,
             enabled = uiState.fieldsEnabled,
+            singleLine = true,
             supportingText = {
                 Text(uiState.caTitleError ?: stringResource(MR.strings.required))
             },

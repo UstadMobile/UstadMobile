@@ -1,11 +1,13 @@
 package com.ustadmobile.core.viewmodel.redirect
 
+import com.russhwolf.settings.Settings
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import kotlinx.coroutines.launch
@@ -26,22 +28,28 @@ class RedirectViewModel(
 
     private val apiUrlConfig: ApiUrlConfig by instance()
 
+    private val settings: Settings by instance()
+
     init {
         _appUiState.value = AppUiState(navigationVisible = false)
-        val destination = deepLink ?: nextViewArg ?: ClazzListViewModel.DEST_NAME_HOME
 
-        viewModelScope.launch {
-            navController.navigateToLink(
-                link = destination,
-                accountManager = accountManager,
-                openExternalLinkUseCase = { _, _ ->  },
-                userCanSelectServer = apiUrlConfig.canSelectServer,
-                goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                    clearStack = true
+        if(settings.getStringOrNull(OnBoardingViewModel.PREF_TAG) != true.toString()) {
+            navController.navigate(OnBoardingViewModel.DEST_NAME, emptyMap())
+        }else {
+            val destination = deepLink ?: nextViewArg ?: ClazzListViewModel.DEST_NAME_HOME
+
+            viewModelScope.launch {
+                navController.navigateToLink(
+                    link = destination,
+                    accountManager = accountManager,
+                    openExternalLinkUseCase = { _, _ ->  },
+                    userCanSelectServer = apiUrlConfig.canSelectServer,
+                    goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                        clearStack = true
+                    )
                 )
-            )
+            }
         }
-
     }
 
     companion object {

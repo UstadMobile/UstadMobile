@@ -2,6 +2,7 @@ package com.ustadmobile.libuicompose.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichText
@@ -15,7 +16,9 @@ actual fun UstadHtmlText(
 
     val richTextState = rememberRichTextState()
 
-    richTextState.setHtml(html)
+    LaunchedEffect(html) {
+        richTextState.setHtml(html)
+    }
 
     RichText(
         state = richTextState,

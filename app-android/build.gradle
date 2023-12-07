@@ -357,9 +357,9 @@ dependencies {
     implementation libs.xmlutil.core
     implementation libs.xmlutil.serialization
 
-    //LeakCanary - detect memory leaks
-    //debugImplementation "com.squareup.leakcanary:leakcanary-android:$version_android_leakcanary"
+    implementation libs.multiplatformsettings
 
+    implementation libs.process.phoenix
 
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"

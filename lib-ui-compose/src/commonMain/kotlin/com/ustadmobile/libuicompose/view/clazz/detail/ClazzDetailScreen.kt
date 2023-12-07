@@ -1,18 +1,22 @@
 package com.ustadmobile.libuicompose.view.clazz.detail
 
 import androidx.compose.runtime.Composable
-import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailUiState
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
+import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
+import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.libuicompose.components.UstadScreenTabs
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.view.clazz.detailoverview.ClazzDetailOverviewScreen
 import com.ustadmobile.libuicompose.view.clazzenrolment.clazzmemberlist.ClazzMemberListScreen
+import com.ustadmobile.libuicompose.view.clazzlog.attendancelist.ClazzLogListAttendanceScreen
+import com.ustadmobile.libuicompose.view.coursegroupset.list.CourseGroupSetListScreen
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -23,15 +27,18 @@ fun ClazzDetailScreen(
     backStackEntry: BackStackEntry,
     navController: UstadNavControllerPreCompose,
     onSetAppUiState: (AppUiState) -> Unit,
+    onShowSnackbar: SnackBarDispatcher,
     navResultReturner: NavResultReturner,
 ) {
     val clazzDetailViewModel = ustadViewModel(
-        ClazzDetailViewModel::class, backStackEntry, navController, onSetAppUiState, navResultReturner
+        ClazzDetailViewModel::class, backStackEntry, navController, onSetAppUiState,
+        navResultReturner, onShowSnackbar
     ) { di, savedStateHandle ->
         ClazzDetailViewModel(di, savedStateHandle)
     }
 
-    ClazzDetailScreen(clazzDetailViewModel, backStackEntry, navController, onSetAppUiState, navResultReturner)
+    ClazzDetailScreen(clazzDetailViewModel, backStackEntry, navController, onSetAppUiState,
+        onShowSnackbar, navResultReturner)
 }
 
 @Composable
@@ -40,13 +47,15 @@ fun ClazzDetailScreen(
     backStackEntry: BackStackEntry,
     navController: UstadNavControllerPreCompose,
     onSetAppUiState: (AppUiState) -> Unit,
+    onShowSnackbar: SnackBarDispatcher,
     navResultReturner: NavResultReturner,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle(
         ClazzDetailUiState(), Dispatchers.Main.immediate
     )
 
-    ClazzDetailScreen(uiState, backStackEntry, navController, onSetAppUiState, navResultReturner)
+    ClazzDetailScreen(uiState, backStackEntry, navController, onSetAppUiState, onShowSnackbar,
+        navResultReturner)
 }
 
 @Composable
@@ -55,6 +64,7 @@ fun ClazzDetailScreen(
     backStackEntry: BackStackEntry,
     navController: UstadNavControllerPreCompose,
     onSetAppUiState: (AppUiState) -> Unit,
+    onShowSnackbar: SnackBarDispatcher,
     navResultReturner: NavResultReturner,
 ) {
 
@@ -63,25 +73,39 @@ fun ClazzDetailScreen(
         backStackEntry = backStackEntry,
         navController = navController,
         onSetAppUiState = onSetAppUiState,
-        navResultReturner = navResultReturner
-    ) {
-        when(it.viewName) {
+        navResultReturner = navResultReturner,
+        onShowSnackBar = onShowSnackbar
+    ) { tabItem ->
+        when(tabItem.viewName) {
             ClazzDetailOverviewViewModel.DEST_NAME -> {
                 ClazzDetailOverviewScreen(
-                    tabViewModel(ClazzDetailOverviewViewModel::class) { di, savedStateHandle ->
+                    tabViewModel(ClazzDetailOverviewViewModel::class, tabItem) { di, savedStateHandle ->
                         ClazzDetailOverviewViewModel(di, savedStateHandle)
                     }
                 )
             }
             ClazzMemberListViewModel.DEST_NAME -> {
                 ClazzMemberListScreen(
-                    tabViewModel(ClazzMemberListViewModel::class) { di, savedStateHandle ->
+                    tabViewModel(ClazzMemberListViewModel::class, tabItem) { di, savedStateHandle ->
                         ClazzMemberListViewModel(di, savedStateHandle)
                     }
                 )
             }
-            else -> {
-                Text(it.viewName)
+
+            CourseGroupSetListViewModel.DEST_NAME -> {
+                CourseGroupSetListScreen(
+                    tabViewModel(CourseGroupSetListViewModel::class, tabItem) { di, savedStateHandle ->
+                        CourseGroupSetListViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+
+            ClazzLogListAttendanceViewModel.DEST_NAME -> {
+                ClazzLogListAttendanceScreen(
+                    tabViewModel(ClazzLogListAttendanceViewModel::class, tabItem) { di, savedStateHandle ->
+                        ClazzLogListAttendanceViewModel(di, savedStateHandle)
+                    }
+                )
             }
         }
     }

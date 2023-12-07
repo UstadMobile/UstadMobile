@@ -10,8 +10,12 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.provider
 import com.google.i18n.phonenumbers.PhoneNumberUtil
+import com.ustadmobile.core.domain.language.SetLanguageUseCase
+import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCaseJvm
+import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
+import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCaseJvm
 import org.kodein.di.instance
 
 val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
@@ -31,6 +35,16 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
     bind<OnClickPhoneNumUseCase>() with provider {
         OnClickPhoneNumUseCaseJvm()
+    }
+
+    bind<SetLanguageUseCase>() with provider {
+        SetLanguageUseCaseJvm(
+            supportedLangConfig = instance()
+        )
+    }
+
+    bind<OnClickEmailUseCase>() with provider {
+        OnClickEmailUseCaseJvm()
     }
 
 }

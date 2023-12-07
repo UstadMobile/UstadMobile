@@ -73,6 +73,8 @@ kotlin {
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-virtual-core"
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-react-virtual"
                 implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
+                implementation libs.multiplatformsettings
+
                 implementation npm("@js-joda/timezone", "$version_npm_joda_timezone")
 
                 implementation npm("@date-io/moment","$version_npm_mement_io")
@@ -92,8 +94,8 @@ kotlin {
                 implementation npm("react-easy-sort","$version_npm_react_easy_sort")
                 implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
                 implementation libs.napier
-                implementation npm("linkifyjs", "$version_linkify_js")
-                implementation npm("linkify-react", "$version_linkify_react")
+                implementation npm("linkifyjs", "$version_npm_linkify")
+                implementation npm("linkify-react", "$version_npm_linkify")
 
                 implementation npm("mui-tel-input", "$version_npm_mui_tel_input")
                 implementation npm("libphonenumber-js", "$version_npm_libphonenumber_js")
