@@ -26,7 +26,9 @@ data class SettingsUiState(
 
     val currentLanguage: String = "",
 
-    val availableLanguages: List<UstadMobileSystemCommon.UiLanguage> = emptyList()
+    val availableLanguages: List<UstadMobileSystemCommon.UiLanguage> = emptyList(),
+
+    val waitForRestartDialogVisible: Boolean = false,
 
 )
 
@@ -93,7 +95,11 @@ class SettingsViewModel(
         )
 
         if(result.waitForRestart) {
-            //do nothing - we might show a wait indicator
+            _uiState.update { prev ->
+                prev.copy(
+                    waitForRestartDialogVisible = true,
+                )
+            }
         }else {
             _uiState.update { prev ->
                 prev.copy(
