@@ -1,23 +1,29 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.site.edit
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.site.edit.SiteEditUiState
+import com.ustadmobile.core.viewmodel.site.edit.SiteEditViewModel
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.mui.components.UstadStandardContainer
+import com.ustadmobile.mui.components.UstadTextField
+import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadBlankIcon
+import com.ustadmobile.view.components.UstadEditHeader
 import com.ustadmobile.view.components.UstadSwitchField
 import web.cssom.px
 import mui.icons.material.Add
 import mui.icons.material.Delete
 import mui.material.*
-import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import react.FC
 import react.Props
+import react.ReactNode
 import react.create
 
 external interface SiteEditProps: Props {
@@ -32,48 +38,53 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
 
     val strings = useStringProvider()
 
-    Container {
+    UstadStandardContainer {
         maxWidth = "lg"
 
         Stack{
             direction = responsive(StackDirection.column)
-            spacing = responsive(10.px)
+            spacing = responsive(8.px)
 
-            UstadTextEditField {
+            UstadTextField {
                 value = props.uiState.site?.siteName ?: ""
-                label = strings[MR.strings.first_names]
-                error = props.uiState.siteNameError
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
+                label = ReactNode(strings[MR.strings.name_key] + "*")
+                error = props.uiState.siteNameError != null
+                disabled = !props.uiState.fieldsEnabled
+                onTextChange = {
                     props.onSiteChanged(
                         props.uiState.site?.shallowCopy {
                             siteName = it
-                        })
+                        }
+                    )
                 }
+                helperText = ReactNode(props.uiState.siteNameError ?: strings[MR.strings.required])
             }
 
-            UstadSwitchField{
+            UstadSwitchField {
                 label = strings[MR.strings.guest_login_enabled]
-                checked = props.uiState.site?.guestLogin ?: true
+                checked = props.uiState.site?.guestLogin ?: false
                 onChanged = {
-                    props.onSiteChanged(props.uiState.site?.shallowCopy{
-                        guestLogin = it
-                    })
+                    props.onSiteChanged(
+                        props.uiState.site?.shallowCopy{
+                            guestLogin = it
+                        }
+                    )
                 }
             }
 
-            UstadSwitchField{
+            UstadSwitchField {
                 label = strings[MR.strings.registration_allowed]
-                checked = props.uiState.site?.registrationAllowed ?: true
+                checked = props.uiState.site?.registrationAllowed ?: false
                 onChanged = {
-                    props.uiState.site?.shallowCopy {
-                        registrationAllowed = it
-                    }
+                    props.onSiteChanged(
+                        props.uiState.site?.shallowCopy {
+                            registrationAllowed = it
+                        }
+                    )
                 }
             }
 
-            Typography {
-                variant = TypographyVariant.h6
+            UstadEditHeader {
                 + strings[MR.strings.terms_and_policies]
             }
 
@@ -126,6 +137,20 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
 
 }
 
+val SiteEditScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        SiteEditViewModel(di, savedStateHandle)
+    }
+    val uiStateVal by viewModel.uiState.collectAsState(SiteEditUiState())
+
+    SiteEditComponent2 {
+        uiState = uiStateVal
+        onSiteChanged = viewModel::onEntityChanged
+    }
+
+}
+
+@Suppress("unused")
 val SiteEditPreview = FC<Props> {
     SiteEditComponent2{
         uiState = SiteEditUiState(

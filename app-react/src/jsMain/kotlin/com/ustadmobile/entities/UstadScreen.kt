@@ -132,6 +132,9 @@ import com.ustadmobile.core.viewmodel.courseblock.textblockdetail.TextBlockDetai
 import com.ustadmobile.view.courseblock.textblockdetail.TextBlockDetailScreen
 import com.ustadmobile.wrappers.linkify.LinkifyPreview
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
+import com.ustadmobile.view.settings.SettingsScreen
+import com.ustadmobile.view.site.detail.SiteDetailScreen
+import com.ustadmobile.view.site.edit.SiteEditScreen
 
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
@@ -183,8 +186,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ContentEntryEditViewModel.DEST_NAME, "ContentEntryEdit Preview",
         ContentEntryEditScreen
     ),
-    UstadScreen(SiteDetailViewModel.DEST_NAME, name = "Site Detail Preview", SiteDetailPreview),
-    UstadScreen(SiteEditViewModel.DEST_NAME, name = "Site Edit Preview", SiteEditPreview),
+    UstadScreen(SiteDetailViewModel.DEST_NAME, name = "Site Detail", SiteDetailScreen),
+    UstadScreen(SiteEditViewModel.DEST_NAME, name = "Site Edit Preview", SiteEditScreen),
     UstadScreen(SchoolDetailOverviewViewModel.DEST_NAME, "SchoolDetailOverview Preview",
         SchoolDetailOverviewScreenPreview),
     UstadScreen(SchoolEditViewModel.DEST_NAME, "School Edit Preview",
