@@ -57,7 +57,7 @@ fun MessageListScreen(
         ) {  message ->
             ListItem(
                 modifier = Modifier.clickable {
-                    message?.also { onListItemClick(it) }
+//                    message?.also { onListItemClick(it) }
                 },
                 headlineContent = { Text(text = "${message?.message?.messageText}") },
                 leadingContent = {
