@@ -1,4 +1,4 @@
-package com.ustadmobile.libuicompose.view.message.list
+package com.ustadmobile.libuicompose.view.message.detail
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,29 +12,29 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.Pager
 import app.cash.paging.PagingConfig
-import com.ustadmobile.core.viewmodel.message.messagelist.MessageListUiState
-import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
+import com.ustadmobile.core.viewmodel.message.detail.MessageDetailUiState
+import com.ustadmobile.core.viewmodel.message.detail.MessageDetailViewModel
 
 @Composable
-fun MessageListScreen(
-    viewModel: MessageListViewModel
+fun MessageDetailScreen(
+    viewModel: MessageDetailViewModel
 ) {
-    val uiState: MessageListUiState by viewModel.uiState.collectAsState(MessageListUiState())
+    val uiState: MessageDetailUiState by viewModel.uiState.collectAsState(MessageDetailUiState())
 
-    MessageListScreen(
+    MessageDetailScreen(
         uiState = uiState,
     )
 }
 
 @Composable
-fun MessageListScreen(
-    uiState: MessageListUiState,
+fun MessageDetailScreen(
+    uiState: MessageDetailUiState,
 ){
 
-    val pager = remember(uiState.messages) {
+    val pager = remember(uiState.messageList) {
         Pager(
             config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
-            pagingSourceFactory = uiState.messages
+            pagingSourceFactory = uiState.messageList
         )
     }
 
@@ -48,7 +48,7 @@ fun MessageListScreen(
 
 //        ustadPagedItems(
 //            pagingItems = lazyPagingItems,
-//            key = { it.message?.messageUid ?: 0 },
+////            key = { it.latestMessage?.messageUid ?: 0 },
 //        ) {  message ->
 //            ListItem(
 //                modifier = Modifier.clickable {

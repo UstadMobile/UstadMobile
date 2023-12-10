@@ -41,6 +41,7 @@ import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.Cours
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.core.viewmodel.message.detail.MessageDetailViewModel
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
@@ -79,6 +80,7 @@ import com.ustadmobile.libuicompose.view.discussionpost.detail.DiscussionPostDet
 import com.ustadmobile.libuicompose.view.discussionpost.edit.DiscussionPostEditScreen
 import com.ustadmobile.libuicompose.view.htmledit.HtmlEditScreen
 import com.ustadmobile.libuicompose.view.login.LoginScreen
+import com.ustadmobile.libuicompose.view.message.detail.MessageDetailScreen
 import com.ustadmobile.libuicompose.view.message.list.MessageListScreen
 import com.ustadmobile.libuicompose.view.onboarding.OnboardingScreen
 import com.ustadmobile.libuicompose.view.person.accountedit.PersonAccountEditScreen
@@ -484,6 +486,13 @@ fun AppNavHost(
                         }
                     )
                 }
+            }
+
+            contentScene("/${MessageDetailViewModel.DEST_NAME}") { backStackEntry ->
+                MessageDetailScreen(
+                    appViewModel(backStackEntry, MessageDetailViewModel::class,
+                        ::MessageDetailViewModel)
+                )
             }
         }
     }
