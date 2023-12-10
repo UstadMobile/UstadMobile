@@ -88,8 +88,8 @@ import com.ustadmobile.core.viewmodel.ReportFilterEditViewModel
 import com.ustadmobile.core.viewmodel.SchoolDetailOverviewViewModel
 import com.ustadmobile.core.viewmodel.SchoolEditViewModel
 import com.ustadmobile.core.viewmodel.ScopedGrantEditViewModel
-import com.ustadmobile.core.viewmodel.SiteDetailViewModel
-import com.ustadmobile.core.viewmodel.SiteEditViewModel
+import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
+import com.ustadmobile.core.viewmodel.site.edit.SiteEditViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel

@@ -2,7 +2,7 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.viewmodel.SiteEditUiState
+import com.ustadmobile.core.viewmodel.site.edit.SiteEditUiState
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
@@ -36,7 +36,7 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
         maxWidth = "lg"
 
         Stack{
-            direction = responsive(mui.material.StackDirection.column)
+            direction = responsive(StackDirection.column)
             spacing = responsive(10.px)
 
             UstadTextEditField {

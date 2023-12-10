@@ -1,14 +1,12 @@
 package com.ustadmobile.core.db.dao
 
-import app.cash.paging.PagingSource
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
-import androidx.room.Transaction
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
-import com.ustadmobile.lib.db.entities.UserSession
+import kotlinx.coroutines.flow.Flow
 
 @DoorDao
 @Repository
@@ -28,12 +26,30 @@ expect abstract class SiteTermsDao : OneToManyJoinDao<SiteTerms> {
     @Query("SELECT * FROM SiteTerms WHERE sTermsUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long): SiteTerms?
 
-    @Query("""SELECT SiteTerms.*, Language.* 
-        FROM SiteTerms 
-        LEFT JOIN Language ON SiteTerms.sTermsLangUid = Language.langUid
-        WHERE CAST(sTermsActive AS INTEGER) = 1
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findAllTermsAsListFlow",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        "activeOnly",
+                        HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "0"
+                    )
+                )
+            )
+        )
+    )
+    @Query("""
+        SELECT SiteTerms.*
+          FROM SiteTerms
+         WHERE :activeOnly = 0 
+            OR CAST(sTermsActive AS INTEGER) = 1
     """)
-    abstract fun findAllTermsAsFactory(): PagingSource<Int, SiteTermsWithLanguage>
+    abstract fun findAllTermsAsListFlow(
+        activeOnly: Int
+    ): Flow<List<SiteTerms>>
 
     @Query("""SELECT SiteTerms.*, Language.*
         FROM SiteTerms

@@ -47,6 +47,8 @@ import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
+import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
+import com.ustadmobile.core.viewmodel.site.edit.SiteEditViewModel
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
@@ -83,6 +85,8 @@ import com.ustadmobile.libuicompose.view.person.edit.PersonEditScreen
 import com.ustadmobile.libuicompose.view.person.list.PersonListScreen
 import com.ustadmobile.libuicompose.view.schedule.edit.ScheduleEditScreen
 import com.ustadmobile.libuicompose.view.settings.SettingsScreen
+import com.ustadmobile.libuicompose.view.site.detail.SiteDetailScreen
+import com.ustadmobile.libuicompose.view.site.edit.SiteEditScreen
 import com.ustadmobile.libuicompose.view.siteenterlink.SiteEnterLinkScreen
 import com.ustadmobile.libuicompose.view.timezone.TimeZoneListScreen
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
@@ -460,6 +464,18 @@ fun AppNavHost(
             contentScene("/${SettingsViewModel.DEST_NAME}") { backStackEntry ->
                 SettingsScreen(
                     appViewModel(backStackEntry, SettingsViewModel::class, ::SettingsViewModel)
+                )
+            }
+
+            contentScene("/${SiteDetailViewModel.DEST_NAME}") { backStackEntry ->
+                SiteDetailScreen(
+                    appViewModel(backStackEntry, SiteDetailViewModel::class, ::SiteDetailViewModel)
+                )
+            }
+
+            contentScene("/${SiteEditViewModel.DEST_NAME}") { backStackEntry ->
+                SiteEditScreen(
+                    appViewModel(backStackEntry, SiteEditViewModel::class, ::SiteEditViewModel)
                 )
             }
         }

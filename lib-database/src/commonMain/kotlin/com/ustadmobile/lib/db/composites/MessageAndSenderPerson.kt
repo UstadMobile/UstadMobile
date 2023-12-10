@@ -8,5 +8,5 @@ import kotlinx.serialization.Serializable
 data class MessageAndSenderPerson(
     var message: Message? = null,
     var senderPerson: Person? = null,
-) {
-}
+)
+

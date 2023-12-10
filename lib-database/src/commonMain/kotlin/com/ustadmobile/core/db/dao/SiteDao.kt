@@ -3,7 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.room.*
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Site
-import com.ustadmobile.lib.db.entities.UserSession
+import kotlinx.coroutines.flow.Flow
 
 @DoorDao
 @Repository
@@ -18,6 +18,10 @@ expect abstract class SiteDao {
 
     @Query("SELECT authSalt FROM Site LIMIT 1")
     abstract suspend fun getSiteAuthSaltAsync(): String?
+
+    @HttpAccessible
+    @Query("SELECT * FROM Site LIMIT 1")
+    abstract fun getSiteAsFlow(): Flow<Site?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun replaceAsync(site: Site): Long
