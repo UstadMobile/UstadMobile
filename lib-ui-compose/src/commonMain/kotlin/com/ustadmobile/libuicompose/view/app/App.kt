@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.Chat
 import androidx.compose.material.icons.outlined.LocalLibrary
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.School
@@ -32,6 +33,7 @@ import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
@@ -57,6 +59,11 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
         destRoute = ContentEntryListViewModel.DEST_NAME_HOME,
         icon = Icons.Outlined.LocalLibrary,
         label = MR.strings.library,
+    ),
+    TopNavigationItem(
+        destRoute = MessageListViewModel.DEST_NAME_HOME,
+        icon = Icons.Outlined.Chat,
+        label = MR.strings.messages,
     ),
     TopNavigationItem(
         destRoute = PersonListViewModel.DEST_NAME_HOME,

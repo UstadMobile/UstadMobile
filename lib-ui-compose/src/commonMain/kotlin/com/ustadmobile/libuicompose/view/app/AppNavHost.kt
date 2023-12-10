@@ -41,6 +41,7 @@ import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.Cours
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
@@ -78,6 +79,7 @@ import com.ustadmobile.libuicompose.view.discussionpost.detail.DiscussionPostDet
 import com.ustadmobile.libuicompose.view.discussionpost.edit.DiscussionPostEditScreen
 import com.ustadmobile.libuicompose.view.htmledit.HtmlEditScreen
 import com.ustadmobile.libuicompose.view.login.LoginScreen
+import com.ustadmobile.libuicompose.view.message.list.MessageListScreen
 import com.ustadmobile.libuicompose.view.onboarding.OnboardingScreen
 import com.ustadmobile.libuicompose.view.person.accountedit.PersonAccountEditScreen
 import com.ustadmobile.libuicompose.view.person.detail.PersonDetailScreen
@@ -470,6 +472,18 @@ fun AppNavHost(
                     appViewModel(backStackEntry, ClazzLogEditViewModel::class,
                         ::ClazzLogEditViewModel)
                 )
+            }
+
+            MessageListViewModel.ALL_DEST_NAMES.forEach { destName ->
+                contentScene("/$destName") { backStackEntry ->
+                    MessageListScreen(
+                        appViewModel(
+                            backStackEntry, MessageListViewModel::class
+                        ) { di, savedStateHandle ->
+                            MessageListViewModel(di, savedStateHandle, destName)
+                        }
+                    )
+                }
             }
         }
     }
