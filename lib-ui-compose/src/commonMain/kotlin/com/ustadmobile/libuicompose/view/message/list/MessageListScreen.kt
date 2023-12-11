@@ -53,7 +53,7 @@ fun MessageListScreen(
 
         ustadPagedItems(
             pagingItems = lazyPagingItems,
-            key = { it.otherPersonUid },
+            key = { it.message?.messageUid ?: 0 },
         ) {  message ->
             ListItem(
                 modifier = Modifier.clickable {
