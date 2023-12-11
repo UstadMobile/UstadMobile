@@ -7,10 +7,11 @@ import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadListViewModel
-import com.ustadmobile.core.viewmodel.message.detail.MessageDetailViewModel
+import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
+import com.ustadmobile.lib.db.composites.MessageAndSenderPerson
 import com.ustadmobile.lib.db.entities.ChatWithLatestMessageAndCount
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Role
@@ -19,7 +20,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 data class MessageListUiState(
-    val messages: () -> PagingSource<Int, ChatWithLatestMessageAndCount> = { EmptyPagingSource() },
+    val messages: () -> PagingSource<Int, MessageAndSenderPerson> = { EmptyPagingSource() },
     val activePersonUid: Long = 0,
     val sortOptions: List<SortOrderOption> = emptyList(), //Should be by name (ascending/descending), time (ascending/descending)
     val showAddItem: Boolean = false,
@@ -53,11 +54,11 @@ class MessageListViewModel(
             )
         }
 
-        _uiState.update { prev ->
-            prev.copy(
-                messages = pagingSourceFactory
-            )
-        }
+//        _uiState.update { prev ->
+//            prev.copy(
+//                messages = pagingSourceFactory
+//            )
+//        }
 
         viewModelScope.launch {
             collectHasPermissionFlowAndSetAddNewItemUiState(
@@ -80,7 +81,7 @@ class MessageListViewModel(
     }
 
     override fun onClickAdd() {
-        navigateToCreateNew(MessageDetailViewModel.DEST_NAME, savedStateHandle[PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED]?.let {
+        navigateToCreateNew(ConversationListViewModel.DEST_NAME, savedStateHandle[PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED]?.let {
             mapOf(PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED to it)
         } ?: emptyMap())
     }

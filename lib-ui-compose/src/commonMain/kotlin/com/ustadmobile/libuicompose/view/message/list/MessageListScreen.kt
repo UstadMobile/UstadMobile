@@ -14,6 +14,11 @@ import app.cash.paging.Pager
 import app.cash.paging.PagingConfig
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListUiState
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
+import androidx.compose.foundation.clickable
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.Text
+import com.ustadmobile.libuicompose.components.UstadPersonAvatar
+import com.ustadmobile.libuicompose.components.ustadPagedItems
 
 @Composable
 fun MessageListScreen(
@@ -46,21 +51,21 @@ fun MessageListScreen(
             .fillMaxWidth()
     ){
 
-//        ustadPagedItems(
-//            pagingItems = lazyPagingItems,
-//            key = { it.message?.messageUid ?: 0 },
-//        ) {  message ->
-//            ListItem(
-//                modifier = Modifier.clickable {
-////                    message?.also { onListItemClick(it) }
-//                },
-//                headlineContent = { Text(text = "${message?.message?.messageText}") },
-//                leadingContent = {
-//                    UstadPersonAvatar(
-//                        message?.senderPerson?.personUid ?: 0,
-//                    )
-//                },
-//            )
-//        }
+        ustadPagedItems(
+            pagingItems = lazyPagingItems,
+            key = { it.otherPersonUid },
+        ) {  message ->
+            ListItem(
+                modifier = Modifier.clickable {
+//                    message?.also { onListItemClick(it) }
+                },
+                headlineContent = { Text(text = "${message?.message?.messageText}") },
+                leadingContent = {
+                    UstadPersonAvatar(
+                        message?.senderPerson?.personUid ?: 0,
+                    )
+                },
+            )
+        }
     }
 }
