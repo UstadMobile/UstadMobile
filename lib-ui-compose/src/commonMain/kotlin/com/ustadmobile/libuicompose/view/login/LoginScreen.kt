@@ -124,27 +124,31 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedButton(
-            onClick = onClickCreateAccount,
-            modifier = Modifier
-                .fillMaxWidth(),
-            enabled = uiState.fieldsEnabled,
-        ) {
-            Text(stringResource(MR.strings.create_account))
+        if(uiState.createAccountVisible) {
+            OutlinedButton(
+                onClick = onClickCreateAccount,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                enabled = uiState.fieldsEnabled,
+            ) {
+                Text(stringResource(MR.strings.create_account))
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
-
-        OutlinedButton(
-            onClick = onClickConnectAsGuest,
-            modifier = Modifier
-                .fillMaxWidth(),
-            enabled = uiState.fieldsEnabled,
-        ) {
-            Text(stringResource(MR.strings.connect_as_guest))
+        if(uiState.connectAsGuestVisible) {
+            OutlinedButton(
+                onClick = onClickConnectAsGuest,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                enabled = uiState.fieldsEnabled,
+            ) {
+                Text(stringResource(MR.strings.connect_as_guest))
+            }
+            Spacer(modifier = Modifier.height(10.dp))
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
 
         Text(uiState.versionInfo)
     }

@@ -100,7 +100,8 @@ data class PersonEditUiState(
 class PersonEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
+    destName: String = DEST_NAME
+): UstadEditViewModel(di, savedStateHandle, destName) {
 
     private val _uiState: MutableStateFlow<PersonEditUiState> = MutableStateFlow(PersonEditUiState())
 
@@ -147,7 +148,12 @@ class PersonEditViewModel(
                 async {
                     loadEntity(
                         serializer = PersonWithAccount.serializer(),
-                        onLoadFromDb = { it.personDao.findPersonAccountByUid(entityUid) },
+                        //If in registration mode, we should avoid attempting to connect ot the database at all
+                        onLoadFromDb = if(entityUid != 0L) {
+                            { it.personDao.findPersonAccountByUid(entityUid) }
+                        }else {
+                             null
+                        },
                         makeDefault = {
                             PersonWithAccount().also {
                                 it.dateOfBirth = savedStateHandle[ARG_DATE_OF_BIRTH]?.toLong() ?: 0L
@@ -162,8 +168,10 @@ class PersonEditViewModel(
                     loadEntity(
                         serializer = PersonPicture.serializer(),
                         loadFromStateKeys =listOf(STATE_KEY_PICTURE),
-                        onLoadFromDb = {
-                            it.personPictureDao.findByPersonUidAsync(entityUid)
+                        onLoadFromDb = if(entityUid != 0L){
+                            { it.personPictureDao.findByPersonUidAsync(entityUid) }
+                        } else {
+                            null
                         },
                         makeDefault = {
                             null
@@ -500,7 +508,10 @@ class PersonEditViewModel(
          * This allows it to be recognized for purposes of controlling the visibility of the bottom
          * navigation bar
          */
-        const val DEST_NAME_REGISTER = "PersonEditRegisterView"
+        const val DEST_NAME_REGISTER = "Register"
+
+        val ALL_DEST_NAMES = listOf(DEST_NAME, DEST_NAME_REGISTER)
+
 
         /**
          * If true, the view will show space for the user to enter a username and password to register.

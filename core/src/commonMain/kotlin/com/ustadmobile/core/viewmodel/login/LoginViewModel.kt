@@ -98,7 +98,7 @@ class LoginViewModel(
         val siteJsonStr: String? = savedStateHandle[UstadView.ARG_SITE]
         if(siteJsonStr != null){
             _appUiState.value = baseAppUiState
-            onVerifySite(json.decodeFromString(siteJsonStr))
+            onSiteVerified(json.decodeFromString(siteJsonStr))
         }else{
             _uiState.update { prev ->
                 prev.copy(
@@ -113,7 +113,7 @@ class LoginViewModel(
                 while(verifiedSite == null) {
                     try {
                         val site = httpClient.verifySite(serverUrl, 10000)
-                        onVerifySite(site) // onVerifySite will set the workspace var, and exit the loop
+                        onSiteVerified(site) // onSiteVerified will set the workspace var, and exit the loop
                     }catch(e: Exception) {
                         Napier.w("Could not load site object for $serverUrl", e)
                         _uiState.update { prev ->
@@ -128,7 +128,7 @@ class LoginViewModel(
         }
     }
 
-    private fun onVerifySite(site: Site) {
+    private fun onSiteVerified(site: Site) {
         verifiedSite = site
         loadingState = LoadingUiState.NOT_LOADING
         _uiState.update { prev ->

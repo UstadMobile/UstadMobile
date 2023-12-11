@@ -18,6 +18,7 @@ import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJvm
@@ -219,5 +220,9 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         StdSchedulerFactory.getDefaultScheduler().also {
             it.context.put("di", di)
         }
+    }
+
+    bind<GenderConfig>() with singleton {
+        GenderConfig()
     }
 }
