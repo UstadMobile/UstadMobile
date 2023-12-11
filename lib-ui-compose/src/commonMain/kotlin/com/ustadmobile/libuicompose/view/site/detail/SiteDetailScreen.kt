@@ -2,11 +2,13 @@ package com.ustadmobile.libuicompose.view.site.detail
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.HowToReg
 import androidx.compose.material.icons.filled.Luggage
+import androidx.compose.material.icons.outlined.Article
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -40,7 +42,9 @@ fun SiteDetailScreen(
     onClickLang: (SiteTermsAndLangName) -> Unit = {},
 ){
 
-    Column {
+    Column(
+        modifier = Modifier.verticalScroll(rememberScrollState())
+    ) {
         UstadDetailField2(
             valueText = uiState.site?.siteName ?: "",
             labelText = stringResource(MR.strings.name_key),
@@ -65,7 +69,7 @@ fun SiteDetailScreen(
                     onClickLang(siteTermsWithLanguage)
                 },
                 leadingContent = {
-                    Icon(Icons.Default.Article, contentDescription = null)
+                    Icon(Icons.Outlined.Article, contentDescription = null)
                 },
                 headlineContent = { Text(siteTermsWithLanguage.langDisplayName) },
             )

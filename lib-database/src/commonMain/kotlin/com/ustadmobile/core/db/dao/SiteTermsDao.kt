@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao
 
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.SiteTerms
@@ -51,12 +52,40 @@ expect abstract class SiteTermsDao : OneToManyJoinDao<SiteTerms> {
         activeOnly: Int
     ): Flow<List<SiteTerms>>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findAllTerms",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        "activeOnly",
+                        HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "0"
+                    )
+                )
+            )
+        )
+    )
+    @Query("""
+        SELECT SiteTerms.*
+          FROM SiteTerms
+         WHERE :activeOnly = 0 
+            OR CAST(sTermsActive AS INTEGER) = 1
+    """)
+    abstract suspend fun findAllTerms(
+        activeOnly: Int
+    ): List<SiteTerms>
+
     @Query("""SELECT SiteTerms.*, Language.*
         FROM SiteTerms
         LEFT JOIN Language ON SiteTerms.sTermsLangUid = Language.langUid
         WHERE CAST(sTermsActive AS INTEGER) = 1
     """)
     abstract suspend fun findAllWithLanguageAsList(): List<SiteTermsWithLanguage>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertList(termList: List<SiteTerms>)
 
 
     @Query("""
