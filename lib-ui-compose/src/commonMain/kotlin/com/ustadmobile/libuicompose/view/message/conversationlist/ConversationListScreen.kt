@@ -17,6 +17,7 @@ import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListU
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ListItem
+import com.ustadmobile.lib.db.composites.MessageAndSenderPerson
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 
@@ -34,6 +35,7 @@ fun ConversationListScreen(
 @Composable
 fun ConversationListScreen(
     uiState: ConversationListUiState,
+    onListItemClick: (MessageAndSenderPerson) -> Unit = {},
 ){
 
     val pager = remember(uiState.conversations) {
@@ -55,17 +57,27 @@ fun ConversationListScreen(
             pagingItems = lazyPagingItems,
             key = { it.message?.messageUid ?: 0 },
         ) {  message ->
-            ListItem(
-                modifier = Modifier.clickable {
-//                    message?.also { onListItemClick(it) }
-                },
-                headlineContent = { Text(text = "${message?.message?.messageText}") },
-                leadingContent = {
-                    UstadPersonAvatar(
-                        message?.senderPerson?.personUid ?: 0,
-                    )
-                },
-            )
+            ConversationItem(message, onListItemClick)
         }
     }
+}
+
+@Composable
+fun ConversationItem(
+    message: MessageAndSenderPerson?,
+    onListItemClick: (MessageAndSenderPerson) -> Unit,
+){
+    ListItem(
+        modifier = Modifier.clickable {
+            message?.also { onListItemClick(it) }
+        },
+        headlineContent = { Text(text = "${message?.senderPerson?.fullName()}") },
+        leadingContent = {
+            UstadPersonAvatar(
+                message?.senderPerson?.personUid ?: 0,
+            )
+        },
+        supportingContent = { Text(text = "${message?.message?.messageText}") },
+        trailingContent = { Text("${message?.message?.messageTimestamp}") }
+    )
 }

@@ -7,23 +7,39 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.ustadmobile.lib.db.composites.MessageAndSenderPerson
+import com.ustadmobile.lib.db.entities.Message
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 
 @Preview
 @Composable
 fun ConversationListScreenPreview() {
     Column {
-        ListItem(
-            headlineContent = { Text(text = "Ali Ahmadi") },
-            leadingContent = { UstadPersonAvatar(0) },
-            supportingContent = { Text(text = "How are you?") },
-            trailingContent = { Text("11:30") }
+        ConversationItem(
+            message = MessageAndSenderPerson().apply {
+                message = Message().apply {
+                    messageText = "How are you?"
+                    messageTimestamp = 0
+                }
+                senderPerson = Person().apply {
+                    firstNames = "Ali"
+                    lastName = "Ahmadi"
+                }
+            },
+            onListItemClick = {}
         )
-        ListItem(
-            headlineContent = { Text(text = "Mohammad") },
-            leadingContent = { UstadPersonAvatar(0) },
-            supportingContent = { Text(text = "Can you help me on my exercise?") },
-            trailingContent = { Text("11:10") }
+        ConversationItem(
+            message = MessageAndSenderPerson().apply {
+                message = Message().apply {
+                    messageText = "Can you help me on my exercise?"
+                    messageTimestamp = 0
+                }
+                senderPerson = Person().apply {
+                    firstNames = "Mohammad"
+                }
+            },
+            onListItemClick = {}
         )
     }
 }
