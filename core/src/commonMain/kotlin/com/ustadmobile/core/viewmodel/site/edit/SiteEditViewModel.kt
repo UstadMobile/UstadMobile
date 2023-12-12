@@ -13,6 +13,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.util.ext.htmlToPlainText
 import com.ustadmobile.core.util.ext.replace
 import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
 import com.ustadmobile.lib.db.entities.SiteTerms
@@ -225,7 +226,15 @@ class SiteEditViewModel(
 
         viewModelScope.launch {
             activeRepo.siteDao.updateAsync(siteToSave)
-            activeRepo.siteTermsDao.upsertList(_uiState.value.siteTerms)
+            activeRepo.siteTermsDao.upsertList(
+                _uiState.value.siteTerms.filter {
+                    (!it.termsHtml?.htmlToPlainText().isNullOrBlank() || it.sTermsUid != 0L)
+                }.map {
+                    it.shallowCopy {
+                        sTermsActive = !it.termsHtml?.htmlToPlainText().isNullOrBlank()
+                    }
+                }
+            )
 
             finishWithResult(
                 detailViewName = SiteDetailViewModel.DEST_NAME,

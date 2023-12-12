@@ -16,6 +16,7 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.viewmodel.SiteTermsDetailViewModel
 import com.ustadmobile.core.viewmodel.site.edit.SiteEditViewModel
 import kotlinx.coroutines.flow.combine
 
@@ -105,6 +106,13 @@ class SiteDetailViewModel(
         navController.navigate(
             SiteEditViewModel.DEST_NAME,
             mapOf(ARG_ENTITY_UID to (_uiState.value.site?.siteUid?.toString() ?: "-1"))
+        )
+    }
+
+    fun onClickTerms(termsAndLang: SiteTermsAndLangName) {
+        navController.navigate(
+            SiteTermsDetailViewModel.DEST_NAME,
+            mapOf(SiteTermsDetailViewModel.ARG_LOCALE to (termsAndLang.terms.sTermsLang ?: ""))
         )
     }
 

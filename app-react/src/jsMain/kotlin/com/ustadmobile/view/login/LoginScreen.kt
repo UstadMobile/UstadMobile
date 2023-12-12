@@ -4,7 +4,6 @@ import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.viewmodel.login.LoginUiState
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
-import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.util.ext.onTextChange
 import web.cssom.px
 import mui.material.*
@@ -18,6 +17,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.LOCALE_USE_SYSTEM
+import com.ustadmobile.mui.components.UstadPasswordTextField
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextField
 
@@ -90,16 +90,16 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                 disabled = !props.uiState.fieldsEnabled
             }
 
-            UstadTextEditField {
+            UstadPasswordTextField {
                 id = "password"
                 value = props.uiState.password
-                label = strings[MR.strings.password]
-                onChange = {
+                label = ReactNode(strings[MR.strings.password])
+                onTextChange = {
                     props.onPasswordValueChange(it)
                 }
-                error = props.uiState.passwordError
-                enabled = props.uiState.fieldsEnabled
-                password = true
+                error = props.uiState.passwordError != null
+                disabled = !props.uiState.fieldsEnabled
+                helperText = props.uiState.passwordError?.let { ReactNode(it) }
             }
 
             Box{

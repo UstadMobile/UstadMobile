@@ -32,14 +32,15 @@ fun SiteDetailScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle(SiteDetailUiState())
 
     SiteDetailScreen(
-        uiState
+        uiState = uiState,
+        onClickTerms = viewModel::onClickTerms
     )
 }
 
 @Composable
 fun SiteDetailScreen(
     uiState: SiteDetailUiState,
-    onClickLang: (SiteTermsAndLangName) -> Unit = {},
+    onClickTerms: (SiteTermsAndLangName) -> Unit = {},
 ){
 
     Column(
@@ -63,10 +64,10 @@ fun SiteDetailScreen(
 
         UstadDetailHeader { Text(stringResource(MR.strings.terms_and_policies)) }
 
-        uiState.siteTerms.forEach {siteTermsWithLanguage ->
+        uiState.siteTerms.forEach { siteTermsWithLanguage ->
             ListItem(
                 modifier = Modifier.clickable {
-                    onClickLang(siteTermsWithLanguage)
+                    onClickTerms(siteTermsWithLanguage)
                 },
                 leadingContent = {
                     Icon(Icons.Outlined.Article, contentDescription = null)

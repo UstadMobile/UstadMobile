@@ -8,13 +8,16 @@ import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditUiState
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadDateField
+import com.ustadmobile.mui.components.UstadPasswordTextField
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadImageSelectButton
 import com.ustadmobile.wrappers.muitelinput.MuiTelInput
 import mui.material.FormControl
@@ -37,7 +40,9 @@ import web.cssom.Color
 external interface PersonEditScreenProps : Props{
     var uiState: PersonEditUiState
 
-    var onPersonChanged: (PersonWithAccount?) -> Unit
+    var onPersonChanged: (Person?) -> Unit
+
+    var onPasswordChanged: (String) -> Unit
 
     var onApprovalPersonParentJoinChanged: (PersonParentJoin?) -> Unit
 
@@ -70,11 +75,12 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                 error = props.uiState.firstNameError != null
                 disabled = !props.uiState.fieldsEnabled
                 helperText = ReactNode(props.uiState.firstNameError ?: strings[MR.strings.required])
-                onChange = {
+                onTextChange = {
                     props.onPersonChanged(
                         props.uiState.person?.shallowCopy {
-                            firstNames = it.target.asDynamic().value as? String
-                        })
+                            firstNames = it
+                        }
+                    )
                 }
             }
 
@@ -211,7 +217,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
             if (props.uiState.usernameVisible){
                 TextField {
                     value = props.uiState.person?.username ?: ""
-                    label = ReactNode(strings[MR.strings.username])
+                    label = ReactNode(strings[MR.strings.username] + "*")
                     disabled = !props.uiState.fieldsEnabled
                     error = props.uiState.usernameError != null
                     helperText = ReactNode(props.uiState.usernameError ?: strings[MR.strings.required])
@@ -225,17 +231,14 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
             }
 
             if (props.uiState.passwordVisible){
-                UstadTextEditField {
-                    value = props.uiState.person?.newPassword ?: ""
-                    label = strings[MR.strings.password]
-                    enabled = props.uiState.fieldsEnabled
-                    onChange = {
-                        props.onPersonChanged(
-                            props.uiState.person?.shallowCopy {
-                                newPassword = it
-                            }
-                        )
+                UstadPasswordTextField {
+                    value = props.uiState.password ?: ""
+                    label = ReactNode(strings[MR.strings.password] + "*")
+                    disabled = !props.uiState.fieldsEnabled
+                    onTextChange = {
+                        props.onPasswordChanged(it)
                     }
+                    helperText = ReactNode(props.uiState.passwordError ?: strings[MR.strings.required])
                 }
             }
         }
@@ -281,5 +284,6 @@ val PersonEditScreen = FC<Props> {
         onApprovalPersonParentJoinChanged = viewModel::onApprovalPersonParentJoinChanged
         onPersonPictureUriChanged = viewModel::onPersonPictureChanged
         onNationalPhoneNumSetChanged = viewModel::onNationalPhoneNumSetChanged
+        onPasswordChanged = viewModel::onPasswordChanged
     }
 }

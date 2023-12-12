@@ -340,6 +340,13 @@ abstract class UstadViewModel(
         putFromSavedStateIfPresent(savedStateHandle, key)
     }
 
+    fun MutableMap<String, String>.putFromSavedStateIfPresent(keys: List<String>) {
+        keys.forEach {
+            putFromSavedStateIfPresent(it)
+        }
+    }
+
+
     companion object {
         /**
          * Saved state key for the current value of the entity itself. This is different to
@@ -350,8 +357,6 @@ abstract class UstadViewModel(
         const val KEY_LAST_COLLECTED_TS = "collectedTs"
 
         const val KEY_INIT_STATE = "initState"
-
-        const val RESULT_KEY_HTML_DESC = "description"
 
         const val ARG_TIME_ZONE = "timeZone"
 
