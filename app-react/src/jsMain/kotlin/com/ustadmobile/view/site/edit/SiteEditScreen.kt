@@ -13,25 +13,18 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextField
 import com.ustadmobile.util.ext.onTextChange
-import com.ustadmobile.view.components.UstadBlankIcon
 import com.ustadmobile.view.components.UstadEditHeader
 import com.ustadmobile.view.components.UstadSwitchField
 import web.cssom.px
-import mui.icons.material.Add
-import mui.icons.material.Delete
 import mui.material.*
 import mui.system.responsive
 import react.FC
 import react.Props
 import react.ReactNode
-import react.create
 
 external interface SiteEditProps: Props {
     var uiState: SiteEditUiState
     var onSiteChanged: (Site?) -> Unit
-    var onClickLang: (SiteTermsWithLanguage) -> Unit
-    var onDeleteClick: (SiteTermsWithLanguage) -> Unit
-    var onClickAddItem: () -> Unit
 }
 
 val SiteEditComponent2 = FC<SiteEditProps> { props ->
@@ -86,51 +79,6 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
 
             UstadEditHeader {
                 + strings[MR.strings.terms_and_policies]
-            }
-
-            List{
-                ListItem {
-                    disablePadding = true
-
-                    ListItemButton {
-                        onClick = {
-                            props.onClickAddItem()
-                        }
-
-                        ListItemIcon {
-                            Add{}
-                        }
-
-                        ListItemText {
-                            + (strings[MR.strings.terms_and_policies])
-                        }
-                    }
-                }
-
-                props.uiState.siteTerms.forEach { item ->
-                    ListItem {
-                        disablePadding = true
-                        secondaryAction = IconButton.create {
-                            onClick = {
-                                props.onDeleteClick(item)
-                            }
-                            Delete {}
-                        }
-
-                        ListItemButton {
-                            ListItemIcon {
-                                UstadBlankIcon { }
-                            }
-
-                            onClick = {
-                                props.onClickLang(item)
-                            }
-                            ListItemText {
-                                + (item.stLanguage?.name ?: "")
-                            }
-                        }
-                    }
-                }
             }
         }
     }
