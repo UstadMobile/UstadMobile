@@ -1,5 +1,6 @@
 package com.ustadmobile.libuicompose.view.app
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -16,6 +17,8 @@ import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
+import com.ustadmobile.core.viewmodel.RegisterAgeRedirectViewModel
+import com.ustadmobile.core.viewmodel.SiteTermsDetailViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
@@ -47,6 +50,8 @@ import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
+import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
+import com.ustadmobile.core.viewmodel.site.edit.SiteEditViewModel
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
@@ -81,8 +86,11 @@ import com.ustadmobile.libuicompose.view.person.accountedit.PersonAccountEditScr
 import com.ustadmobile.libuicompose.view.person.detail.PersonDetailScreen
 import com.ustadmobile.libuicompose.view.person.edit.PersonEditScreen
 import com.ustadmobile.libuicompose.view.person.list.PersonListScreen
+import com.ustadmobile.libuicompose.view.person.registerageredirect.RegisterAgeRedirectScreen
 import com.ustadmobile.libuicompose.view.schedule.edit.ScheduleEditScreen
 import com.ustadmobile.libuicompose.view.settings.SettingsScreen
+import com.ustadmobile.libuicompose.view.site.detail.SiteDetailScreen
+import com.ustadmobile.libuicompose.view.site.edit.SiteEditScreen
 import com.ustadmobile.libuicompose.view.siteenterlink.SiteEnterLinkScreen
 import com.ustadmobile.libuicompose.view.timezone.TimeZoneListScreen
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
@@ -330,12 +338,16 @@ fun AppNavHost(
                 )
             }
 
-            contentScene("/${PersonEditViewModel.DEST_NAME}") { backStackEntry ->
-                PersonEditScreen(
-                    appViewModel(
-                        backStackEntry, PersonEditViewModel::class, ::PersonEditViewModel
+            PersonEditViewModel.ALL_DEST_NAMES.forEach { destName ->
+                contentScene("/$destName") { backStackEntry ->
+                    PersonEditScreen(
+                        appViewModel(
+                            backStackEntry, PersonEditViewModel::class
+                        ) { di, savedStateHandle ->
+                            PersonEditViewModel(di, savedStateHandle, destName)
+                        }
                     )
-                )
+                }
             }
 
             contentScene("/${PersonAccountEditViewModel.DEST_NAME}") { backStackEntry ->
@@ -461,6 +473,29 @@ fun AppNavHost(
                 SettingsScreen(
                     appViewModel(backStackEntry, SettingsViewModel::class, ::SettingsViewModel)
                 )
+            }
+
+            contentScene("/${SiteDetailViewModel.DEST_NAME}") { backStackEntry ->
+                SiteDetailScreen(
+                    appViewModel(backStackEntry, SiteDetailViewModel::class, ::SiteDetailViewModel)
+                )
+            }
+
+            contentScene("/${SiteEditViewModel.DEST_NAME}") { backStackEntry ->
+                SiteEditScreen(
+                    appViewModel(backStackEntry, SiteEditViewModel::class, ::SiteEditViewModel)
+                )
+            }
+
+            contentScene("/${RegisterAgeRedirectViewModel.DEST_NAME}") { backStackEntry ->
+                RegisterAgeRedirectScreen(
+                    appViewModel(backStackEntry, RegisterAgeRedirectViewModel::class,
+                        ::RegisterAgeRedirectViewModel)
+                )
+            }
+
+            contentScene("/${SiteTermsDetailViewModel.DEST_NAME}") { backStackEntry ->
+                Text("Site terms: coming soon")
             }
         }
     }

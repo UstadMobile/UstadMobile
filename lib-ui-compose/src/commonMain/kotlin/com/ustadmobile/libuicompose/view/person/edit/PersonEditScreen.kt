@@ -22,7 +22,6 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileConstants
-import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.libuicompose.components.UstadDateField
 import com.ustadmobile.libuicompose.components.UstadImageSelectButton
 import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
@@ -108,7 +107,7 @@ fun PersonEditScreen(
                 .defaultItemPadding()
                 .fillMaxWidth(),
             label = stringResource(MR.strings.gender_literal) + "*",
-            options = PersonConstants.GENDER_MESSAGE_IDS,
+            options = uiState.genderOptions,
             onOptionSelected = {
                 onPersonChanged(uiState.person?.shallowCopy{
                     gender = it.value

@@ -45,10 +45,8 @@ class OnBoardingViewModel(
 
         val allLanguages = supportLangConfig
             .supportedUiLanguagesAndSysDefault(systemImpl)
-        val currentLocaleCode = systemImpl.getLocale()
-        val currentLanguage = allLanguages.first {
-            it.langCode == currentLocaleCode
-        }
+        val currentLanguage = supportLangConfig
+            .getCurrentLanguage(systemImpl)
 
         _uiState.update {
             OnboardingUiState(currentLanguage, allLanguages)

@@ -76,7 +76,10 @@ fun makeJvmBackendDiModule(
     }
 
     bind<UstadMobileSystemImpl>() with singleton {
-        UstadMobileSystemImpl(settings = instance())
+        UstadMobileSystemImpl(
+            settings = instance(),
+            langConfig = instance(),
+        )
     }
 
     bind<AuthManager>() with scoped(contextScope).singleton {

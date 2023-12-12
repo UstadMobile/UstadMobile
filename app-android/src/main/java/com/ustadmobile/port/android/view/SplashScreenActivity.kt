@@ -22,8 +22,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.toughra.ustadmobile.R
+import com.ustadmobile.libuicompose.theme.UstadAppTheme
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
-import com.ustadmobile.port.android.ui.theme.ui.theme.UstadMobileTheme
 import kotlinx.coroutines.delay
 import com.ustadmobile.core.R as CR
 
@@ -40,7 +40,7 @@ class SplashScreenActivity : ComponentActivity() {
             finish()
         }
         setContent {
-            UstadMobileTheme {
+            UstadAppTheme {
                 SplashScreen()
             }
         }

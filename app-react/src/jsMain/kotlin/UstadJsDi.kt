@@ -8,7 +8,13 @@ import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryG
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.IContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.AppConfig
+import com.ustadmobile.core.impl.config.AppConfigMap
+import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.METADATA_KEY_PRESET_LANG
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_LOCALE
 import com.ustadmobile.core.impl.di.DomainDiModuleJs
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
@@ -35,6 +41,7 @@ import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlConfig
 import web.location.location
+import web.navigator.navigator
 import web.url.URLSearchParams
 
 
@@ -57,10 +64,28 @@ internal fun ustadJsDi(
     val apiUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
     console.log("Api URL = $apiUrl (location.href = ${location.href}")
 
+    bind<AppConfig>() with singleton {
+        AppConfigMap(configMap)
+    }
+
+    bind<GenderConfig>() with singleton {
+        val config: AppConfig = instance()
+        GenderConfig(appConfig = config)
+    }
+
     bind<Settings>() with singleton {
         StorageSettings().also {
             //We don't use onboarding on the web, so mark this as completed
             it[OnBoardingViewModel.PREF_TAG] = "true"
+
+            /*
+             * Check if there is a preset default language, and apply if not already actioned
+             */
+            val presetLang = configMap[METADATA_KEY_PRESET_LANG]
+            if(!presetLang.isNullOrEmpty() && it.getStringOrNull(PREFKEY_ACTIONED_PRESET) != "true") {
+                it[PREFKEY_LOCALE] = presetLang
+                it[PREFKEY_ACTIONED_PRESET] = "true"
+            }
         }
     }
 
@@ -69,15 +94,18 @@ internal fun ustadJsDi(
     }
 
     bind<StringProviderJs>() with singleton {
-        val systemImpl: UstadMobileSystemImpl = instance()
         val jsStringProvider: JsStringProvider = instance()
-        StringProviderJs(systemImpl.getDisplayedLocale(), jsStringProvider)
+        val localeConfig: SupportedLanguagesConfig = instance()
+        StringProviderJs(localeConfig.displayedLocale, jsStringProvider)
     }
 
     bind<SupportedLanguagesConfig>() with singleton {
-        configMap["com.ustadmobile.uilanguages"]?.let {languageList ->
-            SupportedLanguagesConfig(languageList)
-        } ?: SupportedLanguagesConfig()
+        SupportedLanguagesConfig(
+            availableLanguagesConfig = configMap["com.ustadmobile.uilanguages"] ?:
+                SupportedLanguagesConfig.DEFAULT_SUPPORTED_LANGUAGES,
+            systemLocales = navigator.languages.toList(),
+            settings = instance(),
+        )
     }
 
     bind<ApiUrlConfig>() with singleton {
@@ -88,6 +116,7 @@ internal fun ustadJsDi(
         val jsStringProvider: JsStringProvider = instance()
         UstadMobileSystemImpl(
             settings = instance(),
+            langConfig = instance(),
             jsStringProvider = jsStringProvider,
         )
     }

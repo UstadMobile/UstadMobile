@@ -299,7 +299,7 @@ abstract class UstadViewModel(
         serializer: KSerializer<T>,
         loadFromStateKeys: List<String> = listOf(KEY_ENTITY_STATE, UstadEditView.ARG_ENTITY_JSON),
         savedStateKey: String = loadFromStateKeys.first(),
-        onLoadFromDb: suspend (UmAppDatabase) -> T?,
+        onLoadFromDb: (suspend (UmAppDatabase) -> T?)?,
         makeDefault: suspend () -> T?,
         uiUpdate: (T?) -> Unit,
     ) : T? {
@@ -312,13 +312,13 @@ abstract class UstadViewModel(
             }
         }
 
-        val dbVal = onLoadFromDb(activeDb)
+        val dbVal = onLoadFromDb?.invoke(activeDb)
         if(dbVal != null) {
             uiUpdate(dbVal)
         }
 
         return try {
-            val repoVal = onLoadFromDb(activeRepo) ?: makeDefault()
+            val repoVal = onLoadFromDb?.invoke(activeRepo) ?: makeDefault()
             if(repoVal != null)
                 savedStateHandle.setJson(savedStateKey, serializer, repoVal)
             uiUpdate(repoVal)

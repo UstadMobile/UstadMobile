@@ -35,11 +35,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.FileProvider
-import androidx.core.os.LocaleListCompat
 import androidx.navigation.*
 import com.russhwolf.settings.Settings
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.io.ext.isGzipped
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorUri
@@ -70,7 +69,8 @@ import java.util.zip.ZipOutputStream
 actual open class UstadMobileSystemImpl(
     private val applicationContext: Context,
     settings: Settings,
-) : UstadMobileSystemCommon(settings) {
+    langConfig: SupportedLanguagesConfig,
+) : UstadMobileSystemCommon(settings, langConfig) {
 
     /**
      * Simple async task to handle getting the setup file
@@ -157,32 +157,6 @@ actual open class UstadMobileSystemImpl(
     }
 
     /**
-     * Must provide the system's default locale (e.g. en_US.UTF-8)
-     *
-     * @return System locale
-     */
-    actual override fun getSystemLocale(): String {
-        return Locale.getDefault().toString()
-    }
-
-    override fun getLocale(): String {
-        return AppCompatDelegate.getApplicationLocales().get(0)?.language ?: "en"
-    }
-
-    override fun setLocale(locale: String) {
-        super.setLocale(locale)
-
-        val localeList = if(locale == LOCALE_USE_SYSTEM) {
-            LocaleListCompat.getAdjustedDefault()
-        }else {
-            LocaleListCompat.forLanguageTags(locale)
-        }
-
-        AppCompatDelegate.setApplicationLocales(localeList)
-    }
-
-
-    /**
      * Gives a string with the version number
      *
      * @return String with version number
@@ -231,33 +205,6 @@ actual open class UstadMobileSystemImpl(
     }
 
 
-    /**
-     * Wrapper to retrieve preference keys from the system Manifest.
-     *
-     * On Android: uses meta-data elements on the application element in AndroidManifest.xml
-     * On J2ME: uses the jad file
-     *
-     * @param key The key to lookup
-     * @param context System context object
-     *
-     * @return The value of the manifest preference key if found, null otherwise
-     */
-    fun getManifestPreference(key: String, context: Any): String? {
-        try {
-            val ctx = context as Context
-            val ai2 = ctx.packageManager.getApplicationInfo(ctx.packageName,
-                    PackageManager.GET_META_DATA)
-            val metaData = ai2.metaData
-            if (metaData != null) {
-                return metaData.getString(key)
-            }
-        } catch (e: PackageManager.NameNotFoundException) {
-            UMLog.l(UMLog.ERROR, UMLog.ERROR, key, e)
-        }
-        return null
-    }
-
-
     override fun openFileInDefaultViewer(
         context: Any,
         doorUri: DoorUri,
@@ -303,15 +250,6 @@ actual open class UstadMobileSystemImpl(
             throw NoAppFoundException("No activity found for mimetype: $mMimeType", mMimeType)
         }
     }
-
-    /**
-     * Open the given link in a browser and/or tab depending on the platform
-     */
-    actual override fun openLinkInBrowser(url: String, context: Any) {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-        (context as Context).startActivity(intent)
-    }
-
 
 
     actual companion object {

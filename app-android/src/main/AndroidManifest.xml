@@ -90,6 +90,15 @@
         -->
 
         <!--
+        Preset locale setting: if present, this locale will be automatically set as the app locale
+        (regardless of the device default). This can be useful where a particular build is intended
+        for an area with one language, especially if that language is not supported as a locale by
+        most operating systems.
+
+        <meta-data android:name="com.ustadmobile.presetlocale" android:value="tg"/>
+        -->
+
+        <!--
         The API url endpoint can be explicitly specified by uncommenting the metadata key here. If
         it is not specified, the user will be prompted to enter the link.
 
@@ -152,7 +161,6 @@
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
             android:exported="true"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:label="@string/app_name"
             android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

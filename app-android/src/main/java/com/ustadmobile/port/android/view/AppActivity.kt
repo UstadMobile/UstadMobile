@@ -1,7 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -13,6 +11,7 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.ui.Modifier
+import com.jakewharton.processphoenix.ProcessPhoenix
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
@@ -31,7 +30,6 @@ import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.NanoHttpdCall
-import com.ustadmobile.port.android.ui.theme.ui.theme.UstadMobileTheme
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
@@ -51,12 +49,12 @@ import org.kodein.di.singleton
 import org.kodein.di.with
 import java.io.File
 import java.net.URI
+import androidx.core.os.LocaleListCompat
 
 class AppActivity: AppCompatActivity(), DIAware {
 
 
     private val appContextDi: DI by closestDI()
-
 
     override val di by  DI.lazy {
         extend(appContextDi)
@@ -73,6 +71,7 @@ class AppActivity: AppCompatActivity(), DIAware {
             UstadMobileSystemImpl(
                 applicationContext = this@AppActivity,
                 settings = instance(),
+                langConfig = instance()
             )
         }
 
@@ -83,8 +82,7 @@ class AppActivity: AppCompatActivity(), DIAware {
         //This must be on the Activity DI because it requires access to systemImpl
         bind<SetLanguageUseCase>() with provider {
             SetLanguageUseCaseAndroid(
-                activity = this@AppActivity,
-                systemImpl = instance()
+                languagesConfig = instance()
             )
         }
 
@@ -134,7 +132,6 @@ class AppActivity: AppCompatActivity(), DIAware {
             instance<ConnectionManager>().start()
         }
 
-
     }
 
     val WindowWidthSizeClass.multiplatformSizeClass : SizeClass
@@ -145,17 +142,26 @@ class AppActivity: AppCompatActivity(), DIAware {
             else -> SizeClass.MEDIUM
         }
 
+    override fun onLocalesChanged(locales: LocaleListCompat) {
+        super.onLocalesChanged(locales)
+
+        //App must be fully restart when locale changes - see SetLanguageUseCaseAndroid for details.
+        ProcessPhoenix.triggerRebirth(this@AppActivity)
+    }
+
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        //As per https://developer.android.com/jetpack/compose/layouts/insets
-        //Insets are handled by topappbar and bottomnavigatino as required
+        /**
+         * Trigger rebirth as required after a locale change. Horrible workaround. See
+         * UstadLocaleChangeChannelProvider for an explanation of this.
+         */
         enableEdgeToEdge()
 
         setContent {
             val windowSizeClass = calculateWindowSizeClass(this)
-            UstadMobileTheme {
+            MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,

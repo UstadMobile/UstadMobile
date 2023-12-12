@@ -57,13 +57,6 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
                     ustadGoOptions: UstadGoOptions)
 
     /**
-     * Must provide the system's default locale (e.g. en_US.UTF-8)
-     *
-     * @return System locale
-     */
-    override fun getSystemLocale(): String
-
-    /**
      * Return absolute path of the application setup file. Asynchronous.
      *
      * @param context System context
@@ -87,12 +80,6 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
      * @return Build timestamp in ms since epoch
      */
     fun getBuildTimestamp(context: Any): Long
-
-
-    /**
-     * Open the given link in a browser and/or tab depending on the platform
-     */
-    override fun openLinkInBrowser(url: String, context: Any)
 
 
     companion object {

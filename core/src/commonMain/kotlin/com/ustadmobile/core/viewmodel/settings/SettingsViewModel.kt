@@ -12,6 +12,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
 import org.kodein.di.instance
 
 data class SettingsUiState(
@@ -26,7 +27,9 @@ data class SettingsUiState(
 
     val currentLanguage: String = "",
 
-    val availableLanguages: List<UstadMobileSystemCommon.UiLanguage> = emptyList()
+    val availableLanguages: List<UstadMobileSystemCommon.UiLanguage> = emptyList(),
+
+    val waitForRestartDialogVisible: Boolean = false,
 
 )
 
@@ -39,18 +42,18 @@ class SettingsViewModel(
 
     val uiState: Flow<SettingsUiState> = _uiState.asStateFlow()
 
-    val supportedLangConfig: SupportedLanguagesConfig by instance()
+    private val supportedLangConfig: SupportedLanguagesConfig by instance()
 
     private val setLanguageUseCase: SetLanguageUseCase by instance()
 
-    val availableLangs = supportedLangConfig.supportedUiLanguagesAndSysDefault(systemImpl)
+    private val availableLangs = supportedLangConfig.supportedUiLanguagesAndSysDefault(systemImpl)
 
     init {
         _appUiState.update { prev ->
             prev.copy(title = systemImpl.getString(MR.strings.settings))
         }
 
-        val langSetting = systemImpl.getLocale()
+        val langSetting = supportedLangConfig.localeSetting ?: UstadMobileSystemCommon.LOCALE_USE_SYSTEM
 
         val currentLang = availableLangs.first {
             it.langCode == langSetting
@@ -93,7 +96,11 @@ class SettingsViewModel(
         )
 
         if(result.waitForRestart) {
-            //do nothing - we might show a wait indicator
+            _uiState.update { prev ->
+                prev.copy(
+                    waitForRestartDialogVisible = true,
+                )
+            }
         }else {
             _uiState.update { prev ->
                 prev.copy(
@@ -110,7 +117,7 @@ class SettingsViewModel(
     }
 
     fun onClickSiteSettings() {
-
+        navController.navigate(SiteDetailViewModel.DEST_NAME, emptyMap())
     }
 
 
