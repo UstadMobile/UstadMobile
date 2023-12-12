@@ -1271,13 +1271,28 @@ val MIGRATION_124_125 = DoorMigrationStatementList(124, 125) { db ->
     }
 }
 
+val MIGRATION_125_127 = DoorMigrationStatementList(125, 127) { db ->
+    buildList {
+        add("DROP TABLE IF EXISTS Message")
+        when(db.dbType()) {
+            DoorDbType.SQLITE -> {
+                add("CREATE TABLE IF NOT EXISTS Message (  messageSenderPersonUid  INTEGER  NOT NULL , messageToPersonUid  INTEGER  NOT NULL , messageText  TEXT , messageTimestamp  INTEGER  NOT NULL , messageLct  INTEGER  NOT NULL , messageUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            }
+            DoorDbType.POSTGRES -> {
+                add("CREATE TABLE IF NOT EXISTS Message (  messageSenderPersonUid  BIGINT  NOT NULL , messageToPersonUid  BIGINT  NOT NULL , messageText  TEXT , messageTimestamp  BIGINT  NOT NULL , messageLct  BIGINT  NOT NULL , messageUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            }
+        }
+    }
+}
+
+
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
     MIGRATION_120_121, MIGRATION_121_122, MIGRATION_122_123, MIGRATION_123_124,
-    MIGRATION_124_125,
+    MIGRATION_124_125, MIGRATION_125_127,
 )
 
 

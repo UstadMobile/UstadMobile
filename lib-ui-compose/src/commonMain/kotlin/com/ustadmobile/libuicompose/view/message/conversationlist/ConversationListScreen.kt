@@ -1,7 +1,7 @@
 package com.ustadmobile.libuicompose.view.message.conversationlist
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,7 +17,8 @@ import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListU
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ListItem
-import com.ustadmobile.lib.db.composites.MessageAndSenderPerson
+import androidx.compose.ui.text.style.TextOverflow
+import com.ustadmobile.lib.db.composites.MessageAndOtherPerson
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 
@@ -29,13 +30,14 @@ fun ConversationListScreen(
 
     ConversationListScreen(
         uiState = uiState,
+        onClickEntry = viewModel::onClickEntry,
     )
 }
 
 @Composable
 fun ConversationListScreen(
     uiState: ConversationListUiState,
-    onListItemClick: (MessageAndSenderPerson) -> Unit = {},
+    onClickEntry: (MessageAndOtherPerson) -> Unit = {},
 ){
 
     val pager = remember(uiState.conversations) {
@@ -50,34 +52,39 @@ fun ConversationListScreen(
     LazyColumn(
         modifier = Modifier
             .padding(vertical = 8.dp)
-            .fillMaxWidth()
+            .fillMaxSize()
     ){
-
         ustadPagedItems(
             pagingItems = lazyPagingItems,
             key = { it.message?.messageUid ?: 0 },
         ) {  message ->
-            ConversationItem(message, onListItemClick)
+            ConversationItem(message, onClickEntry)
         }
     }
 }
 
 @Composable
 fun ConversationItem(
-    message: MessageAndSenderPerson?,
-    onListItemClick: (MessageAndSenderPerson) -> Unit,
+    message: MessageAndOtherPerson?,
+    onListItemClick: (MessageAndOtherPerson) -> Unit,
 ){
     ListItem(
         modifier = Modifier.clickable {
             message?.also { onListItemClick(it) }
         },
-        headlineContent = { Text(text = "${message?.senderPerson?.fullName()}") },
+        headlineContent = { Text(text = "${message?.otherPerson?.fullName()}") },
         leadingContent = {
             UstadPersonAvatar(
-                message?.senderPerson?.personUid ?: 0,
+                message?.otherPerson?.personUid ?: 0,
             )
         },
-        supportingContent = { Text(text = "${message?.message?.messageText}") },
+        supportingContent = {
+            Text(
+                text = "${message?.message?.messageText}",
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        },
         trailingContent = { Text("${message?.message?.messageTimestamp}") }
     )
 }

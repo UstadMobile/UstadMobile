@@ -2,22 +2,22 @@ package com.ustadmobile.core.viewmodel.message.conversationlist
 
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadListViewModel
+import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
+import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
-import com.ustadmobile.lib.db.composites.MessageAndSenderPerson
-import com.ustadmobile.lib.db.entities.ChatWithLatestMessageAndCount
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.composites.MessageAndOtherPerson
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 data class ConversationListUiState(
-    val conversations: () -> PagingSource<Int, MessageAndSenderPerson> = { EmptyPagingSource() },
+    val conversations: () -> PagingSource<Int, MessageAndOtherPerson> = { EmptyPagingSource() },
     val sortOptions: List<SortOrderOption> = emptyList(), //Should be by name (ascending/descending), time (ascending/descending)
     val showAddItem: Boolean = false,
 )
@@ -30,54 +30,36 @@ class ConversationListViewModel(
     di, savedStateHandle, ConversationListUiState(), destinationName
 ) {
 
-    private val pagingSourceFactory: () -> PagingSource<Int, ChatWithLatestMessageAndCount> = {
-        activeRepo.chatDao.findAllChatsForUser(
-            "",
-            accountManager.currentAccount.personUid,
+    private val pagingSourceFactory: () -> PagingSource<Int, MessageAndOtherPerson> = {
+        activeRepo.messageDao.conversationsForUserAsPagingSource(
+           activeUserPersonUid
         ).also {
             lastPagingSource = it
         }
     }
 
-    private var lastPagingSource: PagingSource<Int, ChatWithLatestMessageAndCount>? = null
+    private var lastPagingSource: PagingSource<Int, MessageAndOtherPerson>? = null
 
     init {
+        _uiState.update { prev ->
+            prev.copy(
+                conversations = pagingSourceFactory
+            )
+        }
+
         _appUiState.update { prev ->
             prev.copy(
                 navigationVisible = true,
                 searchState = createSearchEnabledState(),
-                title = listTitle(MR.strings.messages, MR.strings.select_person)
+                title = listTitle(MR.strings.messages, MR.strings.select_person),
+                fabState = FabUiState(
+                    visible = true,
+                    text = systemImpl.getString(MR.strings.message),
+                    icon = FabUiState.FabIcon.ADD,
+                    onClick = this@ConversationListViewModel::onClickAdd
+                )
             )
         }
-
-//        _uiState.update { prev ->
-//            prev.copy(
-//                messages = pagingSourceFactory
-//            )
-//        }
-
-        viewModelScope.launch {
-
-            launch {
-                resultReturner.filteredResultFlowForKey(RESULT_KEY_ADD_PERSON).collect { result ->
-                    val person = result.result as? Person ?: return@collect
-                    onClickStartChat(person)
-                }
-            }
-
-            collectHasPermissionFlowAndSetAddNewItemUiState(
-                hasPermissionFlow = {
-                    activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
-                        accountManager.currentAccount.personUid, Role.PERMISSION_PERSON_INSERT
-                    )
-                },
-                fabStringResource = MR.strings.message,
-                onSetAddListItemVisibility = { visible ->
-                    _uiState.update { prev -> prev.copy(showAddItem = visible) }
-                }
-            )
-        }
-
     }
 
     override fun onUpdateSearchResult(searchText: String) {
@@ -85,17 +67,22 @@ class ConversationListViewModel(
     }
 
     override fun onClickAdd() {
-        navigateForResult(
-            nextViewName = PersonListViewModel.DEST_NAME,
-            key = RESULT_KEY_ADD_PERSON,
-            currentValue = Person(),
-            serializer = Person.serializer()
+        navController.navigate(
+            viewName = PersonListViewModel.DEST_NAME,
+            args = mapOf(
+                PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED to MessageListViewModel.DEST_NAME,
+                UstadView.ARG_LISTMODE to ListViewMode.PICKER.mode,
+                PersonListViewModel.ARG_EXCLUDE_PERSONUIDS_LIST to activeUserPersonUid.toString(),
+                PersonViewModelConstants.ARG_POPUP_TO_ON_PERSON_SELECTED to PersonListViewModel.DEST_NAME,
+            )
         )
     }
 
-    private fun onClickStartChat(entry: Person) {
-        navController.navigate(ConversationListViewModel.DEST_NAME,
-            mapOf(UstadView.ARG_PERSON_UID to 0.toString()))
+    fun onClickEntry(entry: MessageAndOtherPerson) {
+        navController.navigate(
+            MessageListViewModel.DEST_NAME,
+            mapOf(UstadView.ARG_PERSON_UID to (entry.otherPerson?.personUid ?: 0).toString())
+        )
     }
 
 
@@ -106,8 +93,6 @@ class ConversationListViewModel(
         const val DEST_NAME_HOME = "ConversationListHome"
 
         val ALL_DEST_NAMES = listOf(DEST_NAME, DEST_NAME_HOME)
-
-        const val RESULT_KEY_ADD_PERSON = "Schedule"
 
     }
 

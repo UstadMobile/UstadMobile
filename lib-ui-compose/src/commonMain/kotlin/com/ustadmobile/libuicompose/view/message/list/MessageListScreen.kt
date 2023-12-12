@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -29,30 +28,40 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.TextFieldValue
+import com.ustadmobile.lib.db.entities.Message
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
+import dev.icerock.moko.resources.compose.stringResource
+import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.components.UstadLinkifyText
+import com.ustadmobile.libuicompose.util.linkify.ILinkExtractor
+import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
+import kotlinx.coroutines.Dispatchers
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
 fun MessageListScreen(
     viewModel: MessageListViewModel
 ) {
-    val uiState: MessageListUiState by viewModel.uiState.collectAsState(MessageListUiState())
+    val uiState: MessageListUiState by viewModel.uiState.collectAsStateWithLifecycle(
+        MessageListUiState(), Dispatchers.Main.immediate)
 
     MessageListScreen(
         uiState = uiState,
+        onChangeNewMessageText = viewModel::onChangeNewMessageText,
+        onClickSend = viewModel::onClickSend,
     )
 }
 
 @Composable
 fun MessageListScreen(
     uiState: MessageListUiState,
+    onChangeNewMessageText: (String) -> Unit = { },
+    onClickSend: () -> Unit = { },
 ){
 
     val pager = remember(uiState.messages) {
@@ -62,39 +71,51 @@ fun MessageListScreen(
         )
     }
 
+    val linkExtractor = rememberLinkExtractor()
+
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
     Column(
         modifier = Modifier.fillMaxSize().defaultScreenPadding()
     ) {
         LazyColumn(
+            reverseLayout = true,
             modifier = Modifier
                 .defaultItemPadding()
                 .weight(1f)
         ){
-
             ustadPagedItems(
                 pagingItems = lazyPagingItems,
-                key = { it.message?.messageUid ?: 0 },
+                key = { it.messageUid },
             ) {  message ->
-//            ChatItem(item)
+                ChatItem(
+                    message = message,
+                    activeUserUid = uiState.activePersonUid,
+                    linkExtractor = linkExtractor,
+                )
             }
         }
 
-        ChatBox(
-            {  },
-            modifier = Modifier
-                .fillMaxWidth()
-
+        NewMessageBox(
+            text = uiState.newMessageText,
+            onChangeNewMessageText = onChangeNewMessageText,
+            onClickSend = onClickSend,
         )
     }
 }
 
 @Composable
-fun ChatItem(message: String, isFromMe: Boolean) {
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(4.dp)
+fun ChatItem(
+    message: Message?,
+    activeUserUid: Long,
+    linkExtractor: ILinkExtractor,
+) {
+    val isFromMe = message?.messageSenderPersonUid == activeUserUid
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp)
     ) {
         Box(
             modifier = Modifier
@@ -110,23 +131,27 @@ fun ChatItem(message: String, isFromMe: Boolean) {
                 .background(MaterialTheme.colorScheme.primaryContainer)
                 .padding(16.dp)
         ) {
-            Text(text = message, color = MaterialTheme.colorScheme.onPrimaryContainer)
+            UstadLinkifyText(
+                text = message?.messageText ?: "",
+                //color = MaterialTheme.colorScheme.onPrimaryContainer,
+                linkExtractor = linkExtractor,
+            )
         }
     }
 }
 
 @Composable
-fun ChatBox(
-    onSendChatClickListener: (String) -> Unit,
+fun NewMessageBox(
+    text: String,
+    onChangeNewMessageText: (String) -> Unit,
+    onClickSend: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var chatBoxValue by remember { mutableStateOf(TextFieldValue("")) }
+
     Row(modifier = modifier.padding(16.dp)) {
         TextField(
-            value = chatBoxValue,
-            onValueChange = { newText ->
-                chatBoxValue = newText
-            },
+            value = text,
+            onValueChange = onChangeNewMessageText,
             modifier = Modifier
                 .weight(1f)
                 .padding(4.dp),
@@ -137,16 +162,12 @@ fun ChatBox(
                 disabledIndicatorColor = Color.Transparent
             ),
             placeholder = {
-                Text(text = "Type something")
+                Text(text = stringResource(MR.strings.message))
             }
         )
+
         IconButton(
-            onClick = {
-                val msg = chatBoxValue.text
-                if (msg.isBlank()) return@IconButton
-                onSendChatClickListener(chatBoxValue.text)
-                chatBoxValue = TextFieldValue("")
-            },
+            onClick = onClickSend,
             modifier = Modifier
                 .clip(CircleShape)
                 .background(color = MaterialTheme.colorScheme.primaryContainer)
@@ -154,7 +175,7 @@ fun ChatBox(
         ) {
             Icon(
                 imageVector = Icons.Filled.Send,
-                contentDescription = "Send",
+                contentDescription = stringResource(MR.strings.send),
                 modifier = Modifier.fillMaxSize().padding(8.dp)
             )
         }
