@@ -476,22 +476,22 @@ fun AppNavHost(
                 )
             }
 
-            MessageListViewModel.ALL_DEST_NAMES.forEach { destName ->
+            ConversationListViewModel.ALL_DEST_NAMES.forEach { destName ->
                 contentScene("/$destName") { backStackEntry ->
-                    MessageListScreen(
+                    ConversationListScreen(
                         appViewModel(
-                            backStackEntry, MessageListViewModel::class
+                            backStackEntry, ConversationListViewModel::class
                         ) { di, savedStateHandle ->
-                            MessageListViewModel(di, savedStateHandle, destName)
+                            ConversationListViewModel(di, savedStateHandle, destName)
                         }
                     )
                 }
             }
 
-            contentScene("/${ConversationListViewModel.DEST_NAME}") { backStackEntry ->
-                ConversationListScreen(
-                    appViewModel(backStackEntry, ConversationListViewModel::class,
-                        ::ConversationListViewModel)
+            contentScene("/${MessageListViewModel.DEST_NAME}") { backStackEntry ->
+                MessageListScreen(
+                    appViewModel(backStackEntry, MessageListViewModel::class,
+                        ::MessageListViewModel)
                 )
             }
         }

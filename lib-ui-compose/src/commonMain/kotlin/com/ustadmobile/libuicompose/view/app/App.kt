@@ -33,6 +33,7 @@ import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import dev.icerock.moko.resources.StringResource
@@ -61,7 +62,7 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
         label = MR.strings.library,
     ),
     TopNavigationItem(
-        destRoute = MessageListViewModel.DEST_NAME_HOME,
+        destRoute = ConversationListViewModel.DEST_NAME_HOME,
         icon = Icons.Outlined.Chat,
         label = MR.strings.messages,
     ),
