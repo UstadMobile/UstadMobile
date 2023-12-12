@@ -77,7 +77,7 @@ class SiteTermsDetailViewModel(
             if(displayTerms != null) {
                 _uiState.update { prev ->
                     prev.copy(
-                        acceptButtonVisible = true,
+                        acceptButtonVisible = acceptButtonMode,
                         siteTerms = displayTerms
                     )
                 }

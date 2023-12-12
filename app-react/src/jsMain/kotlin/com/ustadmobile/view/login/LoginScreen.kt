@@ -16,7 +16,7 @@ import react.*
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.LOCALE_USE_SYSTEM
+import com.ustadmobile.mui.components.UstadLanguageSelect
 import com.ustadmobile.mui.components.UstadPasswordTextField
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextField
@@ -55,18 +55,6 @@ val LoginScreen = FC<Props> {
 private val LoginComponent2 = FC<LoginProps> { props ->
 
     val strings = useStringProvider()
-
-    /*
-     * The language setting for "use system language" is a blank string. This doesn't work with a
-     * select field value. So we will convert a blank string to sys and back to blank
-     */
-    fun String.toLangSysVal() = if(this == LOCALE_USE_SYSTEM) "sys" else this
-
-    fun String.fromLangSysVal() = if(this == "sys")
-        LOCALE_USE_SYSTEM
-    else
-        this
-
 
     UstadStandardContainer {
         Stack {
@@ -126,63 +114,30 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                }
             }
 
-            FormControl {
+            UstadLanguageSelect {
+                langList = props.uiState.languageList
+                currentLanguage = props.uiState.currentLanguage
+                onItemSelected = props.onChangeLanguage
                 fullWidth = true
+                id = "language_select"
+            }
 
-                InputLabel {
-                    id = "language_label"
-                    +strings[MR.strings.language]
-                }
 
-                Select {
-                    value = props.uiState.currentLanguage.langCode.toLangSysVal()
-                    id = "language_select"
-                    label = ReactNode(strings[MR.strings.language])
-                    labelId = "language_label"
-                    disabled = !props.uiState.fieldsEnabled
-                    fullWidth = true
-                    onChange = { event, _ ->
-                        val selectedVal = ("" + event.target.value).fromLangSysVal()
-                        val selectedLang = props.uiState.languageList.first {
-                            it.langCode == selectedVal
-                        }
-                        props.onChangeLanguage(selectedLang)
-                    }
-
-                    props.uiState.languageList.forEach { lang ->
-                        MenuItem {
-                            value = lang.langCode.toLangSysVal()
-                            + lang.langDisplay
-                        }
-                    }
+            if(props.uiState.createAccountVisible) {
+                Button {
+                    id = "create_account_button"
+                    onClick = { props.onClickCreateAccount() }
+                    variant = ButtonVariant.outlined
+                    + strings[MR.strings.create_account].uppercase()
                 }
             }
 
-            /*
-            These items are not yet active
-            Button {
-                id = "create_account_button"
-                onClick = { props.onClickCreateAccount() }
-                variant = ButtonVariant.outlined
-                + strings[MR.strings.create_account].uppercase()
-            }
-
-            Box{
-                sx {
-                    height = 10.px
-                }
-            }
-
-            Button {
-                id = "connect_as_guest_button"
-                onClick = { props.onClickConnectAsGuest() }
-                variant = ButtonVariant.outlined
-                + strings[MR.strings.connect_as_guest].uppercase()
-            }
-
-            Box{
-                sx {
-                    height = 10.px
+            if(props.uiState.connectAsGuestVisible) {
+                Button {
+                    id = "connect_as_guest_button"
+                    onClick = { props.onClickConnectAsGuest() }
+                    variant = ButtonVariant.outlined
+                    + strings[MR.strings.connect_as_guest].uppercase()
                 }
             }
 
@@ -190,7 +145,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                 align = TypographyAlign.center
                 + props.uiState.versionInfo
             }
-             */
+
         }
     }
 }

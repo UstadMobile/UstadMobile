@@ -177,7 +177,7 @@ val UstadScreens = FC<Props> {
 
                         if(mobileMode) {
                             UstadMobileMenu {
-                                isOpen = mobileMenuOpen
+                                isOpen = (mobileMenuOpen && appUiState.navigationVisible)
                                 onSetOpen = {
                                     mobileMenuOpen = it
                                 }

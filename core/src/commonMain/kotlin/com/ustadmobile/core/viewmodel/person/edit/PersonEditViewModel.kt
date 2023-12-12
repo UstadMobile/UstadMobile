@@ -153,6 +153,7 @@ class PersonEditViewModel(
             AppUiState(
                 title = title,
                 hideBottomNavigation = true,
+                navigationVisible = !registrationModeFlags.hasFlag(REGISTER_MODE_ENABLED),
             )
         }
         _uiState.update { prev ->
@@ -474,7 +475,8 @@ class PersonEditViewModel(
                             goOptions)
                     }else {
                         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                            popUpToViewName, true)
+                            clearStack = true
+                        )
                         navController.navigateToViewUri(nextDestination, goOptions)
                     }
                 } catch (e: Exception) {

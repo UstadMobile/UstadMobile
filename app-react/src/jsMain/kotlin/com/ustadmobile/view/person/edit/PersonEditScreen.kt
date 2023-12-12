@@ -157,17 +157,19 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                 }
             }
 
-            UstadDateField {
-                timeInMillis = props.uiState.person?.dateOfBirth ?: 0
-                label = ReactNode(strings[MR.strings.birthday])
-                timeZoneId = UstadMobileConstants.UTC
-                error = props.uiState.dateOfBirthError != null
-                helperText = ReactNode(props.uiState.dateOfBirthError)
-                onChange = {
-                    props.onPersonChanged(
-                        props.uiState.person?.shallowCopy {
-                            dateOfBirth = it
-                    })
+            if(props.uiState.dateOfBirthVisible) {
+                UstadDateField {
+                    timeInMillis = props.uiState.person?.dateOfBirth ?: 0
+                    label = ReactNode(strings[MR.strings.birthday])
+                    timeZoneId = UstadMobileConstants.UTC
+                    error = props.uiState.dateOfBirthError != null
+                    helperText = ReactNode(props.uiState.dateOfBirthError)
+                    onChange = {
+                        props.onPersonChanged(
+                            props.uiState.person?.shallowCopy {
+                                dateOfBirth = it
+                            })
+                    }
                 }
             }
 
@@ -238,6 +240,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                     onTextChange = {
                         props.onPasswordChanged(it)
                     }
+                    error = props.uiState.passwordError != null
                     helperText = ReactNode(props.uiState.passwordError ?: strings[MR.strings.required])
                 }
             }
