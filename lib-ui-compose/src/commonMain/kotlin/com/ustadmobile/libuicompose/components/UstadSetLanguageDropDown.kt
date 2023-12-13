@@ -23,7 +23,8 @@ import dev.icerock.moko.resources.compose.stringResource
 fun UstadSetLanguageDropDown(
     langList: List<UstadMobileSystemCommon.UiLanguage>,
     currentLanguage: UstadMobileSystemCommon.UiLanguage,
-    onItemSelected: (UstadMobileSystemCommon.UiLanguage) -> Unit
+    onItemSelected: (UstadMobileSystemCommon.UiLanguage) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -31,7 +32,8 @@ fun UstadSetLanguageDropDown(
         expanded = expanded,
         onExpandedChange = {
             expanded = !expanded
-        }
+        },
+        modifier = modifier,
     ) {
         OutlinedTextField(
             modifier = Modifier.menuAnchor().fillMaxWidth(),

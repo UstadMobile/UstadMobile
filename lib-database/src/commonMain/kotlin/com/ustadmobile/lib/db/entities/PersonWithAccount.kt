@@ -9,5 +9,4 @@ class PersonWithAccount : Person() {
 
     var newPassword: String? = null
 
-    var confirmedPassword:String? = null
 }

@@ -16,6 +16,8 @@ import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
+import com.ustadmobile.core.viewmodel.RegisterAgeRedirectViewModel
+import com.ustadmobile.core.viewmodel.SiteTermsDetailViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
@@ -29,7 +31,6 @@ import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssig
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
-import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
@@ -41,8 +42,6 @@ import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.Cours
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
-import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
-import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
@@ -50,6 +49,8 @@ import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
+import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
+import com.ustadmobile.core.viewmodel.site.edit.SiteEditViewModel
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
@@ -68,7 +69,6 @@ import com.ustadmobile.libuicompose.view.clazzassignment.submitterdetail.ClazzAs
 import com.ustadmobile.libuicompose.view.clazzenrolment.edit.ClazzEnrolmentEditScreen
 import com.ustadmobile.libuicompose.view.clazzenrolment.list.ClazzEnrolmentListScreen
 import com.ustadmobile.libuicompose.view.clazzlog.attendancelist.ClazzLogListAttendanceScreen
-import com.ustadmobile.libuicompose.view.clazzlog.edit.ClazzLogEditScreen
 import com.ustadmobile.libuicompose.view.clazzlog.editattendance.ClazzLogEditAttendanceScreen
 import com.ustadmobile.libuicompose.view.contententry.list.ContentEntryListScreenForViewModel
 import com.ustadmobile.libuicompose.view.courseblock.textblockdetail.TextBlockDetailScreen
@@ -80,15 +80,17 @@ import com.ustadmobile.libuicompose.view.discussionpost.detail.DiscussionPostDet
 import com.ustadmobile.libuicompose.view.discussionpost.edit.DiscussionPostEditScreen
 import com.ustadmobile.libuicompose.view.htmledit.HtmlEditScreen
 import com.ustadmobile.libuicompose.view.login.LoginScreen
-import com.ustadmobile.libuicompose.view.message.conversationlist.ConversationListScreen
-import com.ustadmobile.libuicompose.view.message.list.MessageListScreen
 import com.ustadmobile.libuicompose.view.onboarding.OnboardingScreen
 import com.ustadmobile.libuicompose.view.person.accountedit.PersonAccountEditScreen
 import com.ustadmobile.libuicompose.view.person.detail.PersonDetailScreen
 import com.ustadmobile.libuicompose.view.person.edit.PersonEditScreen
 import com.ustadmobile.libuicompose.view.person.list.PersonListScreen
+import com.ustadmobile.libuicompose.view.person.registerageredirect.RegisterAgeRedirectScreen
 import com.ustadmobile.libuicompose.view.schedule.edit.ScheduleEditScreen
 import com.ustadmobile.libuicompose.view.settings.SettingsScreen
+import com.ustadmobile.libuicompose.view.site.detail.SiteDetailScreen
+import com.ustadmobile.libuicompose.view.site.edit.SiteEditScreen
+import com.ustadmobile.libuicompose.view.site.termsdetail.SiteTermsDetailScreen
 import com.ustadmobile.libuicompose.view.siteenterlink.SiteEnterLinkScreen
 import com.ustadmobile.libuicompose.view.timezone.TimeZoneListScreen
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
@@ -336,12 +338,16 @@ fun AppNavHost(
                 )
             }
 
-            contentScene("/${PersonEditViewModel.DEST_NAME}") { backStackEntry ->
-                PersonEditScreen(
-                    appViewModel(
-                        backStackEntry, PersonEditViewModel::class, ::PersonEditViewModel
+            PersonEditViewModel.ALL_DEST_NAMES.forEach { destName ->
+                contentScene("/$destName") { backStackEntry ->
+                    PersonEditScreen(
+                        appViewModel(
+                            backStackEntry, PersonEditViewModel::class
+                        ) { di, savedStateHandle ->
+                            PersonEditViewModel(di, savedStateHandle, destName)
+                        }
                     )
-                )
+                }
             }
 
             contentScene("/${PersonAccountEditViewModel.DEST_NAME}") { backStackEntry ->
@@ -469,29 +475,28 @@ fun AppNavHost(
                 )
             }
 
-            contentScene("/${ClazzLogEditViewModel.DEST_NAME}") { backStackEntry ->
-                ClazzLogEditScreen(
-                    appViewModel(backStackEntry, ClazzLogEditViewModel::class,
-                        ::ClazzLogEditViewModel)
+            contentScene("/${SiteDetailViewModel.DEST_NAME}") { backStackEntry ->
+                SiteDetailScreen(
+                    appViewModel(backStackEntry, SiteDetailViewModel::class, ::SiteDetailViewModel)
                 )
             }
 
-            ConversationListViewModel.ALL_DEST_NAMES.forEach { destName ->
-                contentScene("/$destName") { backStackEntry ->
-                    ConversationListScreen(
-                        appViewModel(
-                            backStackEntry, ConversationListViewModel::class
-                        ) { di, savedStateHandle ->
-                            ConversationListViewModel(di, savedStateHandle, destName)
-                        }
-                    )
-                }
+            contentScene("/${SiteEditViewModel.DEST_NAME}") { backStackEntry ->
+                SiteEditScreen(
+                    appViewModel(backStackEntry, SiteEditViewModel::class, ::SiteEditViewModel)
+                )
             }
 
-            contentScene("/${MessageListViewModel.DEST_NAME}") { backStackEntry ->
-                MessageListScreen(
-                    appViewModel(backStackEntry, MessageListViewModel::class,
-                        ::MessageListViewModel)
+            contentScene("/${RegisterAgeRedirectViewModel.DEST_NAME}") { backStackEntry ->
+                RegisterAgeRedirectScreen(
+                    appViewModel(backStackEntry, RegisterAgeRedirectViewModel::class,
+                        ::RegisterAgeRedirectViewModel)
+                )
+            }
+
+            contentScene("/${SiteTermsDetailViewModel.DEST_NAME}") { backStackEntry ->
+                SiteTermsDetailScreen(
+                    appViewModel(backStackEntry, SiteTermsDetailViewModel::class, ::SiteTermsDetailViewModel)
                 )
             }
         }

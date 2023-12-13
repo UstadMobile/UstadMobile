@@ -12,6 +12,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
 import org.kodein.di.instance
 
 data class SettingsUiState(
@@ -116,7 +117,7 @@ class SettingsViewModel(
     }
 
     fun onClickSiteSettings() {
-
+        navController.navigate(SiteDetailViewModel.DEST_NAME, emptyMap())
     }
 
 

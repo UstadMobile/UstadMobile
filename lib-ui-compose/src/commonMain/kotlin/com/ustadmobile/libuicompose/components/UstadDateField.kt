@@ -1,6 +1,7 @@
 package com.ustadmobile.libuicompose.components
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -108,6 +109,10 @@ fun UstadDateField(
     onValueChange: (Long) -> Unit = {},
     unsetDefault: Long = 0,
     supportingText: @Composable (() -> Unit)? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(
+        keyboardType = KeyboardType.Number,
+    ),
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
 ) {
 
     val timeZone = remember(timeZoneId) {
@@ -159,8 +164,8 @@ fun UstadDateField(
         label = label,
         visualTransformation = DateVisualTransformation(),
         singleLine = true,
-
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
         trailingIcon = {
             IconButton(
                 onClick = {

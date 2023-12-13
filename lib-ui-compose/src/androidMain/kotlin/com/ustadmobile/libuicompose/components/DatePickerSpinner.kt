@@ -18,6 +18,7 @@ fun DatePickerSpinner(
     date: Long,
     onSetDate: (Long) -> Unit,
     modifier: Modifier = Modifier,
+    maxDate: Long = Long.MAX_VALUE,
 ) {
     val calendar: Calendar = remember(date) {
         Calendar.getInstance().apply {
@@ -39,11 +40,14 @@ fun DatePickerSpinner(
                     calendar[Calendar.DAY_OF_MONTH] = dayOfMonth
                     onSetDate(calendar.timeInMillis)
                 }
+                this.maxDate = maxDate
             }
         },
         update = { view ->
             view as DatePicker
             calendar.timeInMillis = date
+            view.takeIf { it.maxDate != maxDate }?.maxDate = maxDate
+
             if(view.year != calendar[Calendar.YEAR] || view.month != calendar[Calendar.MONTH]
                     || view.dayOfMonth != calendar[Calendar.DAY_OF_MONTH]) {
                 view.updateDate(calendar[Calendar.YEAR],

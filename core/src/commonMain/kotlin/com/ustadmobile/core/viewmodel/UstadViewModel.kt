@@ -299,7 +299,7 @@ abstract class UstadViewModel(
         serializer: KSerializer<T>,
         loadFromStateKeys: List<String> = listOf(KEY_ENTITY_STATE, UstadEditView.ARG_ENTITY_JSON),
         savedStateKey: String = loadFromStateKeys.first(),
-        onLoadFromDb: suspend (UmAppDatabase) -> T?,
+        onLoadFromDb: (suspend (UmAppDatabase) -> T?)?,
         makeDefault: suspend () -> T?,
         uiUpdate: (T?) -> Unit,
     ) : T? {
@@ -312,13 +312,13 @@ abstract class UstadViewModel(
             }
         }
 
-        val dbVal = onLoadFromDb(activeDb)
+        val dbVal = onLoadFromDb?.invoke(activeDb)
         if(dbVal != null) {
             uiUpdate(dbVal)
         }
 
         return try {
-            val repoVal = onLoadFromDb(activeRepo) ?: makeDefault()
+            val repoVal = onLoadFromDb?.invoke(activeRepo) ?: makeDefault()
             if(repoVal != null)
                 savedStateHandle.setJson(savedStateKey, serializer, repoVal)
             uiUpdate(repoVal)
@@ -340,6 +340,13 @@ abstract class UstadViewModel(
         putFromSavedStateIfPresent(savedStateHandle, key)
     }
 
+    fun MutableMap<String, String>.putFromSavedStateIfPresent(keys: List<String>) {
+        keys.forEach {
+            putFromSavedStateIfPresent(it)
+        }
+    }
+
+
     companion object {
         /**
          * Saved state key for the current value of the entity itself. This is different to
@@ -350,8 +357,6 @@ abstract class UstadViewModel(
         const val KEY_LAST_COLLECTED_TS = "collectedTs"
 
         const val KEY_INIT_STATE = "initState"
-
-        const val RESULT_KEY_HTML_DESC = "description"
 
         const val ARG_TIME_ZONE = "timeZone"
 

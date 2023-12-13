@@ -258,6 +258,10 @@ class UstadAccountManager(
 
         val newPassword = person.newPassword
         if(status == 200 && registeredPerson != null && newPassword != null) {
+            //Must ensure that the site object is loaded to get auth salt.
+            val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_REPO)
+            getSiteFromDbOrLoadFromHttp(repo)
+
             if(accountRegisterOptions.makeAccountActive){
                 val session = addSession(registeredPerson, endpointUrl, newPassword)
                 currentUserSession = session

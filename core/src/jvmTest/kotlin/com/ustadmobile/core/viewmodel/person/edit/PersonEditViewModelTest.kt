@@ -135,10 +135,10 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
                     firstNames = "Test"
                     lastName = "User"
                     gender = Person.GENDER_FEMALE
-                    newPassword = "test#@@12"
                     username = "testuser"
                     dateOfBirth = systemTimeInMillis() - (20 * 365 * 24 * 60 * 60 * 1000L) //Approx 20 years old
                 })
+                viewModel.onPasswordChanged("test#@@12")
 
                 viewModel.onClickSave()
 
@@ -218,10 +218,9 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
                     firstNames = "Jane"
                     lastName = "Doe"
                     username = "janedoe"
-                    newPassword = "secret"
-                    confirmedPassword = "secret"
                     gender = Person.GENDER_FEMALE
                 })
+                viewModel.onPasswordChanged("secret")
 
                 viewModel.onClickSave()
                 cancelAndIgnoreRemainingEvents()
@@ -288,10 +287,9 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
                     firstNames = "Jane"
                     lastName = "Doe"
                     username = "janedoe"
-                    newPassword = "secret"
-                    confirmedPassword = "secret"
                     gender = Person.GENDER_FEMALE
                 })
+                viewModel.onPasswordChanged("secret")
 
                 viewModel.onClickSave()
 

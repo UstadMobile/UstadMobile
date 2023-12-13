@@ -1,4 +1,4 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.settings
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState

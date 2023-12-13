@@ -1,14 +1,13 @@
 package com.ustadmobile.core.db.dao
 
-import app.cash.paging.PagingSource
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Transaction
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
-import com.ustadmobile.lib.db.entities.UserSession
+import kotlinx.coroutines.flow.Flow
 
 @DoorDao
 @Repository
@@ -28,12 +27,55 @@ expect abstract class SiteTermsDao : OneToManyJoinDao<SiteTerms> {
     @Query("SELECT * FROM SiteTerms WHERE sTermsUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long): SiteTerms?
 
-    @Query("""SELECT SiteTerms.*, Language.* 
-        FROM SiteTerms 
-        LEFT JOIN Language ON SiteTerms.sTermsLangUid = Language.langUid
-        WHERE CAST(sTermsActive AS INTEGER) = 1
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findAllTermsAsListFlow",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        "activeOnly",
+                        HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "0"
+                    )
+                )
+            )
+        )
+    )
+    @Query("""
+        SELECT SiteTerms.*
+          FROM SiteTerms
+         WHERE :activeOnly = 0 
+            OR CAST(sTermsActive AS INTEGER) = 1
     """)
-    abstract fun findAllTermsAsFactory(): PagingSource<Int, SiteTermsWithLanguage>
+    abstract fun findAllTermsAsListFlow(
+        activeOnly: Int
+    ): Flow<List<SiteTerms>>
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findAllTerms",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        "activeOnly",
+                        HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "0"
+                    )
+                )
+            )
+        )
+    )
+    @Query("""
+        SELECT SiteTerms.*
+          FROM SiteTerms
+         WHERE :activeOnly = 0 
+            OR CAST(sTermsActive AS INTEGER) = 1
+    """)
+    abstract suspend fun findAllTerms(
+        activeOnly: Int
+    ): List<SiteTerms>
 
     @Query("""SELECT SiteTerms.*, Language.*
         FROM SiteTerms
@@ -41,6 +83,9 @@ expect abstract class SiteTermsDao : OneToManyJoinDao<SiteTerms> {
         WHERE CAST(sTermsActive AS INTEGER) = 1
     """)
     abstract suspend fun findAllWithLanguageAsList(): List<SiteTermsWithLanguage>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertList(termList: List<SiteTerms>)
 
 
     @Query("""
@@ -50,5 +95,39 @@ expect abstract class SiteTermsDao : OneToManyJoinDao<SiteTerms> {
          WHERE sTermsUid = :sTermsUid
         """)
     abstract suspend fun updateActiveByUid(sTermsUid: Long, active: Boolean, changeTime: Long)
+
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findAllTerms",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "activeOnly",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "0"
+                    )
+                ),
+            )
+        )
+    )
+    @Query("""
+        SELECT SiteTerms.sTermsLang
+          FROM SiteTerms
+         WHERE sTermsActive = :active 
+    """)
+    abstract suspend fun findAvailableSiteTermLanguages(active: Int): List<String?>
+
+    //Note: this does not need to run over http, because it is called after findAvailableSiteTermLanguages
+    @Query("""
+        SELECT SiteTerms.*
+          FROM SiteTerms
+         WHERE SiteTerms.sTermsLang = :lang
+           AND CAST(SiteTerms.sTermsActive AS INTEGER) = 1
+      ORDER BY SiteTerms.sTermsLct DESC
+         LIMIT 1     
+    """)
+    abstract suspend fun findLatestByLanguage(lang: String): SiteTerms?
 
 }
