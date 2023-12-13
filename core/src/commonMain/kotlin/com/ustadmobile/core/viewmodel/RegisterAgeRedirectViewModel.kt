@@ -9,10 +9,6 @@ import org.kodein.di.DI
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.ext.isDateOfBirthAMinor
-import com.ustadmobile.core.view.SiteTermsDetailView.Companion.ARG_SHOW_ACCEPT_BUTTON
-import com.ustadmobile.core.view.SiteTermsDetailView.Companion.ARG_USE_DISPLAY_LOCALE
-import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
-import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.datetime.Instant
@@ -78,12 +74,8 @@ class RegisterAgeRedirectViewModel(
         val dateOfBirthInstant = Instant.fromEpochMilliseconds(date)
 
         val args = buildMap {
-            putFromSavedStateIfPresent(ARG_API_URL)
-            putFromSavedStateIfPresent(ARG_SHOW_ACCEPT_BUTTON)
-            putFromSavedStateIfPresent(ARG_USE_DISPLAY_LOCALE)
-            putFromSavedStateIfPresent(ARG_POPUPTO_ON_FINISH)
-            putFromSavedStateIfPresent(ARG_NEXT)
-            putFromSavedStateIfPresent(PersonEditViewModel.REGISTER_VIA_LINK)
+            putFromSavedStateIfPresent(PersonEditViewModel.REGISTRATION_ARGS_TO_PASS)
+
             put(PersonEditViewModel.ARG_REGISTRATION_MODE,
                 PersonEditViewModel.REGISTER_MODE_ENABLED.toString())
             put(PersonEditViewModel.ARG_DATE_OF_BIRTH, date.toString())

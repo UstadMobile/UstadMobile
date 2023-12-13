@@ -12,7 +12,6 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
 import com.ustadmobile.core.view.*
@@ -227,12 +226,10 @@ class LoginViewModel(
         val args = mutableMapOf(
             UstadView.ARG_API_URL to serverUrl,
             SiteTermsDetailView.ARG_SHOW_ACCEPT_BUTTON to true.toString(),
-            SiteTermsDetailView.ARG_USE_DISPLAY_LOCALE to true.toString(),
             UstadView.ARG_POPUPTO_ON_FINISH to
                     (savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH] ?: DEST_NAME))
 
-        args.putFromSavedStateIfPresent(savedStateHandle, UstadView.ARG_NEXT)
-        args.putFromSavedStateIfPresent(savedStateHandle, PersonEditViewModel.REGISTER_VIA_LINK)
+        args.putFromSavedStateIfPresent(PersonEditViewModel.REGISTRATION_ARGS_TO_PASS)
 
         navController.navigate(RegisterAgeRedirectView.VIEW_NAME, args)
     }

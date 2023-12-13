@@ -28,7 +28,7 @@ import mui.icons.material.HowToRegRounded as HowToRegRoundedIcon
 
 external interface SiteDetailProps : Props {
     var uiState: SiteDetailUiState
-    var onClickLang: (SiteTermsAndLangName) -> Unit
+    var onClickTerms: (SiteTermsAndLangName) -> Unit
 }
 
 val SiteDetailComponent2 = FC<SiteDetailProps> { props ->
@@ -64,7 +64,7 @@ val SiteDetailComponent2 = FC<SiteDetailProps> { props ->
                     disablePadding = true
                     ListItemButton {
                         onClick = {
-                            props.onClickLang(item)
+                            props.onClickTerms(item)
                         }
                         ListItemText {
                             + item.langDisplayName
@@ -91,6 +91,7 @@ val SiteDetailScreen = FC<Props> {
 
     SiteDetailComponent2 {
         uiState = uiStateVal
+        onClickTerms = viewModel::onClickTerms
     }
 
 }

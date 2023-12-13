@@ -96,4 +96,38 @@ expect abstract class SiteTermsDao : OneToManyJoinDao<SiteTerms> {
         """)
     abstract suspend fun updateActiveByUid(sTermsUid: Long, active: Boolean, changeTime: Long)
 
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findAllTerms",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "activeOnly",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "0"
+                    )
+                ),
+            )
+        )
+    )
+    @Query("""
+        SELECT SiteTerms.sTermsLang
+          FROM SiteTerms
+         WHERE sTermsActive = :active 
+    """)
+    abstract suspend fun findAvailableSiteTermLanguages(active: Int): List<String?>
+
+    //Note: this does not need to run over http, because it is called after findAvailableSiteTermLanguages
+    @Query("""
+        SELECT SiteTerms.*
+          FROM SiteTerms
+         WHERE SiteTerms.sTermsLang = :lang
+           AND CAST(SiteTerms.sTermsActive AS INTEGER) = 1
+      ORDER BY SiteTerms.sTermsLct DESC
+         LIMIT 1     
+    """)
+    abstract suspend fun findLatestByLanguage(lang: String): SiteTerms?
+
 }

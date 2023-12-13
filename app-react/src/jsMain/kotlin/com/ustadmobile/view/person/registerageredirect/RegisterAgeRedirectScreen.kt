@@ -1,15 +1,18 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.person.registerageredirect
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.viewmodel.RegisterAgeRedirectUiState
+import com.ustadmobile.core.viewmodel.RegisterAgeRedirectViewModel
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.UstadDateField
+import com.ustadmobile.mui.components.UstadStandardContainer
 import web.cssom.px
 import mui.material.Button
 import mui.material.ButtonVariant
 import mui.material.Typography
-import mui.system.Container
 import mui.system.Stack
 import mui.system.StackDirection
 import mui.system.responsive
@@ -28,20 +31,26 @@ external interface RegisterAgeRedirectProps : Props {
 
 }
 
-val RegisterAgeRedirectPreview = FC<Props> {
-    val uiStateVal by useState {
-        RegisterAgeRedirectUiState()
+val RegisterAgeRedirectScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        RegisterAgeRedirectViewModel(di, savedStateHandle)
     }
+
+    val uiStateVal by viewModel.uiState.collectAsState(RegisterAgeRedirectUiState())
+
     RegisterAgeRedirectComponent2 {
         uiState = uiStateVal
+        onSetDate = viewModel::onSetDate
+        onClickNext = viewModel::onClickNext
     }
+
 }
 
 val RegisterAgeRedirectComponent2 = FC<RegisterAgeRedirectProps> { props ->
 
     val strings = useStringProvider()
 
-    Container {
+    UstadStandardContainer {
         maxWidth = "lg"
 
         Stack {
@@ -55,15 +64,17 @@ val RegisterAgeRedirectComponent2 = FC<RegisterAgeRedirectProps> { props ->
             UstadDateField {
                 timeInMillis = props.uiState.dateOfBirth
                 timeZoneId = UstadMobileConstants.UTC
-                label = ReactNode(strings[MR.strings.birthday])
+                label = ReactNode(strings[MR.strings.birthday] + "*")
                 onChange = { props.onSetDate(it) }
+                error = props.uiState.dateOfBirthError != null
+                helperText = ReactNode(props.uiState.dateOfBirthError ?: strings[MR.strings.required])
             }
 
             Button {
                 variant = ButtonVariant.contained
-                onClick = { props.onClickNext }
+                onClick = { props.onClickNext() }
 
-                + strings[MR.strings.next].uppercase()
+                + strings[MR.strings.next]
             }
         }
     }

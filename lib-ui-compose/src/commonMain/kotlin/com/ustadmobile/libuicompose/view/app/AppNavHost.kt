@@ -1,6 +1,5 @@
 package com.ustadmobile.libuicompose.view.app
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -91,6 +90,7 @@ import com.ustadmobile.libuicompose.view.schedule.edit.ScheduleEditScreen
 import com.ustadmobile.libuicompose.view.settings.SettingsScreen
 import com.ustadmobile.libuicompose.view.site.detail.SiteDetailScreen
 import com.ustadmobile.libuicompose.view.site.edit.SiteEditScreen
+import com.ustadmobile.libuicompose.view.site.termsdetail.SiteTermsDetailScreen
 import com.ustadmobile.libuicompose.view.siteenterlink.SiteEnterLinkScreen
 import com.ustadmobile.libuicompose.view.timezone.TimeZoneListScreen
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
@@ -495,7 +495,9 @@ fun AppNavHost(
             }
 
             contentScene("/${SiteTermsDetailViewModel.DEST_NAME}") { backStackEntry ->
-                Text("Site terms: coming soon")
+                SiteTermsDetailScreen(
+                    appViewModel(backStackEntry, SiteTermsDetailViewModel::class, ::SiteTermsDetailViewModel)
+                )
             }
         }
     }

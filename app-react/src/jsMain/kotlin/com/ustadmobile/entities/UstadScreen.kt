@@ -135,6 +135,11 @@ import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
 import com.ustadmobile.view.settings.SettingsScreen
 import com.ustadmobile.view.site.detail.SiteDetailScreen
 import com.ustadmobile.view.site.edit.SiteEditScreen
+import com.ustadmobile.core.viewmodel.RegisterAgeRedirectViewModel
+import com.ustadmobile.view.person.registerageredirect.RegisterAgeRedirectScreen
+import com.ustadmobile.core.viewmodel.SiteTermsDetailViewModel
+import com.ustadmobile.view.site.termsdetail.SiteTermsDetailScreen
+
 
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
@@ -157,6 +162,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         PersonEditScreenPreview
     ),
     UstadScreen(PersonEditViewModel.DEST_NAME, "PersonEdit", PersonEditScreen),
+    UstadScreen(PersonEditViewModel.DEST_NAME_REGISTER, "Register", PersonEditScreen),
     UstadScreen(PersonAccountEditView.VIEW_NAME, "Person Account Edit Preview",
         PersonAccountEditPreview
     ),
@@ -361,7 +367,9 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         PeerReviewerAllocationEditScreen),
     UstadScreen("MuiTelInputDemo", "MuiTelInput", MuiTelInputDemo),
     UstadScreen(TextBlockDetailViewModel.DEST_NAME, "TextCourseBlock", TextBlockDetailScreen),
-    UstadScreen("LinkifyPreview", "Linkify", LinkifyPreview)
+    UstadScreen("LinkifyPreview", "Linkify", LinkifyPreview),
+    UstadScreen(RegisterAgeRedirectViewModel.DEST_NAME, "AgeRedirect", RegisterAgeRedirectScreen),
+    UstadScreen(SiteTermsDetailViewModel.DEST_NAME, "Terms", SiteTermsDetailScreen),
 )
 
 //Here as per the MUI showcase template

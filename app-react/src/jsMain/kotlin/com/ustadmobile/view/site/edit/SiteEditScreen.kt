@@ -3,6 +3,7 @@ package com.ustadmobile.view.site.edit
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.viewmodel.site.edit.SiteEditUiState
 import com.ustadmobile.core.viewmodel.site.edit.SiteEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
@@ -10,11 +11,13 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.mui.components.UstadLanguageSelect
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextField
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadEditHeader
 import com.ustadmobile.view.components.UstadSwitchField
+import com.ustadmobile.wrappers.quill.ReactQuill
 import web.cssom.px
 import mui.material.*
 import mui.system.responsive
@@ -25,6 +28,8 @@ import react.ReactNode
 external interface SiteEditProps: Props {
     var uiState: SiteEditUiState
     var onSiteChanged: (Site?) -> Unit
+    var onChangeTermsLanguage: (UstadMobileSystemCommon.UiLanguage) -> Unit
+    var onChangeTermsHtml: (String) -> Unit
 }
 
 val SiteEditComponent2 = FC<SiteEditProps> { props ->
@@ -80,6 +85,23 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
             UstadEditHeader {
                 + strings[MR.strings.terms_and_policies]
             }
+
+            UstadLanguageSelect {
+                langList = props.uiState.uiLangs
+                currentLanguage = props.uiState.currentSiteTermsLang
+                onItemSelected = props.onChangeTermsLanguage
+                fullWidth = true
+                id = "terms_lang_select"
+                label = ReactNode(strings[MR.strings.language])
+                disabled = !props.uiState.fieldsEnabled
+            }
+
+            ReactQuill {
+                value = props.uiState.currentSiteTermsHtml ?: ""
+                id = "terms_html_edit"
+                placeholder = strings[MR.strings.terms_and_policies]
+                onChange = props.onChangeTermsHtml
+            }
         }
     }
 
@@ -94,6 +116,8 @@ val SiteEditScreen = FC<Props> {
     SiteEditComponent2 {
         uiState = uiStateVal
         onSiteChanged = viewModel::onEntityChanged
+        onChangeTermsHtml = viewModel::onChangeTermsHtml
+        onChangeTermsLanguage = viewModel::onChangeTermsLanguage
     }
 
 }
