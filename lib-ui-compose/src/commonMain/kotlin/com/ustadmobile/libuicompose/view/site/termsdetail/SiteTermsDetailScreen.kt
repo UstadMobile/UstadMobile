@@ -18,8 +18,8 @@ import androidx.compose.ui.unit.dp
 import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewStateWithHTMLData
-import com.ustadmobile.core.viewmodel.SiteTermsDetailUiState
-import com.ustadmobile.core.viewmodel.SiteTermsDetailViewModel
+import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailUiState
+import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
 import com.ustadmobile.libuicompose.util.ext.loadHtmlWorkaround
 import dev.icerock.moko.resources.compose.stringResource
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle

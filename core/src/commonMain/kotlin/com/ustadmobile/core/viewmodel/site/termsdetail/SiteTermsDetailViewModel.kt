@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.site.termsdetail
 
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -16,6 +16,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
+import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.direct
 import org.kodein.di.on

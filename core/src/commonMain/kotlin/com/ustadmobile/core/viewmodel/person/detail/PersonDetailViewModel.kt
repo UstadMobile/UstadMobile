@@ -21,7 +21,7 @@ import org.kodein.di.instance
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.core.viewmodel.DetailViewModel
-import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
+import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
@@ -255,7 +255,8 @@ class PersonDetailViewModel(
     fun onClickManageParentalConsent() {
         val ppjUid = _uiState.value.person?.parentJoin?.ppjUid ?: 0L
         if(ppjUid != 0L) {
-            navController.navigate(ParentalConsentManagementViewModel.DEST_NAME,
+            navController.navigate(
+                ParentalConsentManagementViewModel.DEST_NAME,
                 mapOf(ARG_ENTITY_UID to ppjUid.toString(),
                     ARG_NEXT to CURRENT_DEST))
         }

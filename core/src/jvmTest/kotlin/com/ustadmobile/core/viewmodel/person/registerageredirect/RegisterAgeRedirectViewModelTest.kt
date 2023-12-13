@@ -4,11 +4,10 @@ import app.cash.turbine.test
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
-import com.ustadmobile.core.viewmodel.RegisterAgeRedirectViewModel
 import org.junit.Test
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
-import com.ustadmobile.core.viewmodel.SiteTermsDetailViewModel
+import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.datetime.Clock

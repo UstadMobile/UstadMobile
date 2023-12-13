@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -50,11 +51,21 @@ import org.kodein.di.with
 import java.io.File
 import java.net.URI
 import androidx.core.os.LocaleListCompat
+import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.nav.CommandFlowUstadNavController
+import com.ustadmobile.core.util.ext.appendQueryArgs
+import com.ustadmobile.core.util.ext.navigateToLink
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
+import org.kodein.di.direct
 
 class AppActivity: AppCompatActivity(), DIAware {
 
-
     private val appContextDi: DI by closestDI()
+
+    //Used to execute navigation when a link is received via OnNewIntent
+    private val commandFlowNavigator = CommandFlowUstadNavController()
 
     override val di by  DI.lazy {
         extend(appContextDi)
@@ -158,6 +169,14 @@ class AppActivity: AppCompatActivity(), DIAware {
          * UstadLocaleChangeChannelProvider for an explanation of this.
          */
         enableEdgeToEdge()
+        val openLink = intent.data?.toString() ?: intent.getStringExtra(UstadViewModel.ARG_OPEN_LINK)
+
+        val initialRoute = "/" + RedirectViewModel.DEST_NAME.appendQueryArgs(
+            buildMap {
+                if(openLink != null)
+                    put(UstadView.ARG_OPEN_LINK, openLink)
+            }
+        )
 
         setContent {
             val windowSizeClass = calculateWindowSizeClass(this)
@@ -169,12 +188,34 @@ class AppActivity: AppCompatActivity(), DIAware {
                     withDI(di) {
                         PreComposeApp {
                             App(
-                                widthClass = windowSizeClass.widthSizeClass.multiplatformSizeClass
+                                widthClass = windowSizeClass.widthSizeClass.multiplatformSizeClass,
+                                navCommandFlow = commandFlowNavigator.commandFlow,
+                                initialRoute = initialRoute,
                             )
                         }
                     }
                 }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+
+        val uri = intent?.data?.toString() ?: intent?.getStringExtra(UstadViewModel.ARG_OPEN_LINK)
+        val argAccountName = intent?.getStringExtra(UstadViewModel.ARG_ACCOUNT_NAME)
+
+        if(uri != null) {
+            val apiUrlConfig: ApiUrlConfig = di.direct.instance()
+
+            commandFlowNavigator.navigateToLink(
+                link = uri,
+                accountManager = di.direct.instance(),
+                openExternalLinkUseCase = { _, _ -> Unit },
+                forceAccountSelection = true,
+                userCanSelectServer = apiUrlConfig.canSelectServer,
+                accountName = argAccountName,
+            )
         }
     }
 }
