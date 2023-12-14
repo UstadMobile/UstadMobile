@@ -171,7 +171,8 @@ fun AccountListItem(
         },
         headlineContent = {
             Text(
-                text = "${account?.person?.firstNames} ${account?.person?.lastName}"
+                text = "${account?.person?.firstNames} ${account?.person?.lastName}",
+                maxLines = 1,
             )
         },
         supportingContent = {
@@ -183,6 +184,7 @@ fun AccountListItem(
                 )
                 Text(
                     text = account?.person?.username ?: "",
+                    maxLines = 1,
                     modifier = Modifier
                         .padding(start = 8.dp, end = 8.dp)
                 )
@@ -193,6 +195,7 @@ fun AccountListItem(
                 )
                 Text(
                     text = account?.endpoint?.url ?: "",
+                    maxLines = 1,
                     modifier = Modifier
                         .padding(start = 8.dp)
                 )
