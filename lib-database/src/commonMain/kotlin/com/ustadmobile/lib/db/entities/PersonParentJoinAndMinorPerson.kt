@@ -4,9 +4,9 @@ import androidx.room.Embedded
 import kotlinx.serialization.Serializable
 
 @Serializable
-class PersonParentJoinWithMinorPerson : PersonParentJoin(){
-
+data class PersonParentJoinAndMinorPerson(
+    @Embedded
+    var personParentJoin: PersonParentJoin? = null,
     @Embedded
     var minorPerson: Person? = null
-
-}
+)

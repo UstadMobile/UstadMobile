@@ -58,6 +58,7 @@ import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
+import com.ustadmobile.port.android.util.ext.getUstadDeepLink
 import org.kodein.di.direct
 
 class AppActivity: AppCompatActivity(), DIAware {
@@ -169,7 +170,7 @@ class AppActivity: AppCompatActivity(), DIAware {
          * UstadLocaleChangeChannelProvider for an explanation of this.
          */
         enableEdgeToEdge()
-        val openLink = intent.data?.toString() ?: intent.getStringExtra(UstadViewModel.ARG_OPEN_LINK)
+        val openLink = intent.getUstadDeepLink()
 
         val initialRoute = "/" + RedirectViewModel.DEST_NAME.appendQueryArgs(
             buildMap {
@@ -202,7 +203,7 @@ class AppActivity: AppCompatActivity(), DIAware {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
-        val uri = intent?.data?.toString() ?: intent?.getStringExtra(UstadViewModel.ARG_OPEN_LINK)
+        val uri = intent?.getUstadDeepLink()
         val argAccountName = intent?.getStringExtra(UstadViewModel.ARG_ACCOUNT_NAME)
 
         if(uri != null) {

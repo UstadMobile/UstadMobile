@@ -51,6 +51,7 @@ import org.junit.Test
 import org.kodein.di.*
 import kotlin.random.Random
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.time.Duration.Companion.seconds
 
 
@@ -556,6 +557,10 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
         val registerRequest = mockDispatcher.registerRequestsReceived.first()
         Assert.assertEquals("Got expected register request", "mary",
             registerRequest.person.username)
+        runBlocking {
+            assertNotNull(db.personDao.findByUsernameAsync(registerRequest.person.username ?: ""))
+        }
+
     }
 
 

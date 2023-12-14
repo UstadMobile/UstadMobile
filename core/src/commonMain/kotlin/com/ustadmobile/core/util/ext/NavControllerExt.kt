@@ -132,12 +132,12 @@ fun UstadNavController.navigateToLink(
 
                 //If the endpoint Url is known and there are no active accounts for this server,
                 // go directly to login
-                endpointUrl != null
-                        && accountManager.activeSessionCount(maxDateOfBirth) { it == endpointUrl } == 0 ||
-                        //When the endpoint url is not known, but there are no accounts at all, and the user cannot
-                        ///select a server, go directly to login
-                        endpointUrl == null && accountManager.activeSessionCount(maxDateOfBirth) == 0
-                        && !userCanSelectServer ->
+                (endpointUrl != null
+                        && accountManager.activeSessionCount(maxDateOfBirth) { it == endpointUrl } == 0 ) ||
+                //... or when the endpoint url is not known, but there are no accounts at all, and the user cannot
+                ///select a server, go directly to login
+                (endpointUrl == null && accountManager.activeSessionCount(maxDateOfBirth) == 0
+                && !userCanSelectServer) ->
                 {
                     val args = mutableMapOf(ARG_NEXT to viewUri)
                     if(endpointUrl != null)

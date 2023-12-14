@@ -1,6 +1,5 @@
 package com.ustadmobile.libuicompose.view.app
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -110,6 +109,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import kotlin.reflect.KClass
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
+import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentManagementScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 import kotlinx.coroutines.flow.Flow
 
@@ -528,7 +528,10 @@ fun AppNavHost(
             }
 
             contentScene("/${ParentalConsentManagementViewModel.DEST_NAME}") { backStackEntry ->
-                Text("Parental Consent Management")
+                ParentalConsentManagementScreen(
+                    appViewModel(backStackEntry, ParentalConsentManagementViewModel::class,
+                        ::ParentalConsentManagementViewModel)
+                )
             }
 
         }
