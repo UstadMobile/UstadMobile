@@ -2,7 +2,6 @@ package com.ustadmobile.libuicompose.view.person.edit
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,7 +17,6 @@ import com.ustadmobile.core.viewmodel.person.edit.PersonEditUiState
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.lib.db.entities.Person
@@ -124,26 +122,24 @@ fun PersonEditScreen(
         )
 
         if (uiState.parentalEmailVisible){
-            UstadInputFieldLayout(
-                modifier = Modifier.padding(vertical = 8.dp)
-                    .fillMaxWidth(),
-                errorText = uiState.parentContactError
-            ) {
-                OutlinedTextField(
-                    modifier = Modifier.testTag("ppjEmail").fillMaxWidth(),
-                    value = uiState.approvalPersonParentJoin?.ppjEmail ?: "",
-                    label = { Text(stringResource(MR.strings.parents_email_address)) },
-                    isError = uiState.parentContactError != null,
-                    singleLine = true,
-                    enabled = uiState.fieldsEnabled,
-                    onValueChange = {
-                        onApprovalPersonParentJoinChanged(
-                            uiState.approvalPersonParentJoin?.shallowCopy {
-                                ppjEmail = it
-                            })
-                    }
-                )
-            }
+            OutlinedTextField(
+                modifier = Modifier.testTag("ppjEmail").fillMaxWidth().defaultItemPadding(),
+                value = uiState.approvalPersonParentJoin?.ppjEmail ?: "",
+                label = { Text(stringResource(MR.strings.parents_email_address)) },
+                isError = uiState.parentContactError != null,
+                singleLine = true,
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onApprovalPersonParentJoinChanged(
+                        uiState.approvalPersonParentJoin?.shallowCopy {
+                            ppjEmail = it
+                        }
+                    )
+                },
+                supportingText = {
+                    Text(uiState.parentContactError ?: stringResource(MR.strings.required))
+                }
+            )
         }
 
         if(uiState.dateOfBirthVisible) {
@@ -165,54 +161,61 @@ fun PersonEditScreen(
             )
         }
 
+        if(uiState.phoneNumVisible) {
+            UstadPhoneNumberTextField(
+                value = uiState.person?.phoneNum ?: "",
+                modifier = Modifier.testTag("phoneNum").fillMaxWidth().defaultItemPadding(),
+                label = { Text(stringResource(MR.strings.phone_number)) },
+                onValueChange = {
+                    onPersonChanged(
+                        uiState.person?.shallowCopy{
+                            phoneNum = it
+                        }
+                    )
+                },
+                onNationalNumberSetChanged = onNationalNumberSetChanged,
+                isError = uiState.phoneNumError != null,
+                supportingText = uiState.phoneNumError?.let {
+                    { Text(it) }
+                }
+            )
+        }
 
-        UstadPhoneNumberTextField(
-            value = uiState.person?.phoneNum ?: "",
-            modifier = Modifier.testTag("phoneNum").fillMaxWidth().defaultItemPadding(),
-            label = { Text(stringResource(MR.strings.phone_number)) },
-            onValueChange = {
-                onPersonChanged(
-                    uiState.person?.shallowCopy{
-                        phoneNum = it
-                    }
-                )
-            },
-            onNationalNumberSetChanged = onNationalNumberSetChanged,
-            isError = uiState.phoneNumError != null,
-            supportingText = uiState.phoneNumError?.let {
-                { Text(it) }
-            }
-        )
 
-        OutlinedTextField(
-            modifier = Modifier.testTag("emailAddr").fillMaxWidth().defaultItemPadding(),
-            value = uiState.person?.emailAddr ?: "",
-            label = { Text(stringResource(MR.strings.email)) },
-            isError = uiState.emailError != null,
-            singleLine = true,
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onPersonChanged(uiState.person?.shallowCopy{
-                    emailAddr = it
-                })
-            },
-            supportingText = uiState.emailError?.let {
-                { Text(it) }
-            }
-        )
+        if(uiState.emailVisible) {
+            OutlinedTextField(
+                modifier = Modifier.testTag("emailAddr").fillMaxWidth().defaultItemPadding(),
+                value = uiState.person?.emailAddr ?: "",
+                label = { Text(stringResource(MR.strings.email)) },
+                isError = uiState.emailError != null,
+                singleLine = true,
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onPersonChanged(uiState.person?.shallowCopy{
+                        emailAddr = it
+                    })
+                },
+                supportingText = uiState.emailError?.let {
+                    { Text(it) }
+                }
+            )
+        }
 
-        OutlinedTextField(
-            modifier = Modifier.testTag("personAddress").fillMaxWidth().defaultItemPadding(),
-            value = uiState.person?.personAddress ?: "",
-            label = { Text(stringResource(MR.strings.address)) },
-            enabled = uiState.fieldsEnabled,
-            singleLine = true,
-            onValueChange = {
-                onPersonChanged(uiState.person?.shallowCopy{
-                    personAddress = it
-                })
-            }
-        )
+        if(uiState.personAddressVisible) {
+            OutlinedTextField(
+                modifier = Modifier.testTag("personAddress").fillMaxWidth().defaultItemPadding(),
+                value = uiState.person?.personAddress ?: "",
+                label = { Text(stringResource(MR.strings.address)) },
+                enabled = uiState.fieldsEnabled,
+                singleLine = true,
+                onValueChange = {
+                    onPersonChanged(uiState.person?.shallowCopy{
+                        personAddress = it
+                    })
+                }
+            )
+        }
+
 
         if (uiState.usernameVisible){
             OutlinedTextField(

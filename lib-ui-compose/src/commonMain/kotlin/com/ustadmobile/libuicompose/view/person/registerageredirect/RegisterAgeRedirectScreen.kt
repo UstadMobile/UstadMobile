@@ -16,10 +16,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.ustadmobile.core.viewmodel.RegisterAgeRedirectUiState
+import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectUiState
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.viewmodel.RegisterAgeRedirectViewModel
+import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle

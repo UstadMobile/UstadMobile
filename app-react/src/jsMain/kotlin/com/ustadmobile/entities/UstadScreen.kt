@@ -82,7 +82,7 @@ import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewVi
 import com.ustadmobile.view.leavingreason.edit.LeavingReasonEditScreen
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewViewModel
 import com.ustadmobile.core.viewmodel.HolidayCalendarEditViewModel
-import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
+import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.ReportFilterEditViewModel
 import com.ustadmobile.core.viewmodel.SchoolDetailOverviewViewModel
@@ -135,11 +135,11 @@ import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
 import com.ustadmobile.view.settings.SettingsScreen
 import com.ustadmobile.view.site.detail.SiteDetailScreen
 import com.ustadmobile.view.site.edit.SiteEditScreen
-import com.ustadmobile.core.viewmodel.RegisterAgeRedirectViewModel
+import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.view.person.registerageredirect.RegisterAgeRedirectScreen
-import com.ustadmobile.core.viewmodel.SiteTermsDetailViewModel
+import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
 import com.ustadmobile.view.site.termsdetail.SiteTermsDetailScreen
-
+import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
@@ -172,7 +172,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(SiteEnterLinkViewModel.DEST_NAME, "Site Enter Link Preview",
         SiteEnterLinkScreen
     ),
-    UstadScreen(ParentalConsentManagementViewModel.DEST_NAME, "Parental Consent Management Preview",
+    UstadScreen(
+        ParentalConsentManagementViewModel.DEST_NAME, "Parental Consent Management Preview",
         ParentalConsentManagementPreview),
     UstadScreen(SettingsViewModel.DEST_NAME, "Settings", SettingsScreen),
     UstadScreen(InviteViaLinkView.VIEW_NAME, "Invite Via Link Preview",
@@ -184,7 +185,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         ClazzEnrolmentListScreen),
     UstadScreen(SiteTermsDetailView.VIEW_NAME, "SiteTermsDetail Preview",
         SiteTermsDetailScreenPreview),
-    UstadScreen(RegisterMinorWaitForParentView.VIEW_NAME, "RegisterMinorWaitForParent Preview",
+    UstadScreen(RegisterMinorWaitForParentViewModel.DEST_NAME, "RegisterMinorWaitForParent Preview",
         RegisterMinorWaitForParentPreview),
     UstadScreen(ScheduleEditViewModel.DEST_NAME, "ScheduleEdit",
         ScheduleEditScreen

@@ -1,5 +1,8 @@
 package com.ustadmobile.libuicompose.view.app
 
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -31,13 +34,16 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
+import com.ustadmobile.core.impl.nav.NavCommand
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
+import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.navigation.NavOptions
 import moe.tlaster.precompose.navigation.Navigator
@@ -77,6 +83,7 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
  * @param onAppStateChanged - a change Listener that is used by the calling function, mostly the JVM
  *        window and activity. Used to update title, navbar visibility.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun App(
     widthClass: SizeClass = SizeClass.MEDIUM,
@@ -84,6 +91,8 @@ fun App(
     useBottomBar: Boolean = true,
     navigator: Navigator = rememberNavigator(),
     onAppStateChanged: (AppUiState) -> Unit = { },
+    navCommandFlow: Flow<NavCommand>? = null,
+    initialRoute: String = "/${RedirectViewModel.DEST_NAME}",
 ) {
     val appUiState = remember {
         mutableStateOf(AppUiState())
@@ -188,9 +197,20 @@ fun App(
             onSetAppUiState = {
                 appUiStateVal = it
             },
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier
+                .padding(innerPadding)
+                /*
+                 * consumeWindowInsets is required so that subsequent use of imePadding doesn't result
+                 * in extra space when the soft keyboard is open e.g. count the padding from the
+                 * spacing against the padding required for the keyboard (otherwise both get added
+                 * together).
+                 */
+                .consumeWindowInsets(innerPadding)
+                .imePadding(),
             persistNavState = persistNavState,
             onShowSnackBar = onShowSnackBar,
+            navCommandFlow = navCommandFlow,
+            initialRoute = initialRoute,
         )
     }
 

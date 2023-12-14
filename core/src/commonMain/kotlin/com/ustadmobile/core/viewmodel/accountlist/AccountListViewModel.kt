@@ -173,6 +173,7 @@ class AccountListViewModel(
         startUserSessionUseCase(
             session = sessionWithPersonAndEndpoint,
             navController = navController,
+            nextDest = savedStateHandle[ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
         )
     }
 

@@ -32,11 +32,12 @@ class RedirectViewModel(
 
     init {
         _appUiState.value = AppUiState(navigationVisible = false)
+        val destinationArg = deepLink ?: nextViewArg
 
         if(settings.getStringOrNull(OnBoardingViewModel.PREF_TAG) != true.toString()) {
             navController.navigate(OnBoardingViewModel.DEST_NAME, emptyMap())
         }else {
-            val destination = deepLink ?: nextViewArg ?: ClazzListViewModel.DEST_NAME_HOME
+            val destination = destinationArg ?: ClazzListViewModel.DEST_NAME_HOME
 
             viewModelScope.launch {
                 navController.navigateToLink(
@@ -46,7 +47,8 @@ class RedirectViewModel(
                     userCanSelectServer = apiUrlConfig.canSelectServer,
                     goOptions = UstadMobileSystemCommon.UstadGoOptions(
                         clearStack = true
-                    )
+                    ),
+                    forceAccountSelection = destinationArg != null,
                 )
             }
         }

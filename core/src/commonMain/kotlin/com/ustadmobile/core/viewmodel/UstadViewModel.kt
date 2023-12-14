@@ -387,6 +387,21 @@ abstract class UstadViewModel(
         val ROOT_DESTINATIONS = listOf(ClazzListViewModel.DEST_NAME_HOME,
             ContentEntryListViewModel.DEST_NAME_HOME, PersonListViewModel.DEST_NAME_HOME)
 
+        /**
+         * Can be used with any Android intent to provide a link to open within the app.
+         * The link can be in the form of:
+         *
+         * https://endpoint.server/umapp/#/ViewName?arg=value
+         * ViewName?arg=value
+         */
+        const val ARG_OPEN_LINK = "openLink"
+
+
+        /**
+         * Used together with the AccountManager
+         */
+        const val ARG_ACCOUNT_NAME = "account"
+
     }
 
 }

@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.parentalconsentmanagement
 
 import com.ustadmobile.lib.db.entities.*
 

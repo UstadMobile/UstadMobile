@@ -2,7 +2,7 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.viewmodel.RegisterMinorWaitForParentUiState
+import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentUiState
 import com.ustadmobile.mui.components.UstadDetailField
 import web.cssom.px
 import mui.icons.material.AccountCircle

@@ -78,17 +78,16 @@ fun String.appendQueryArgs(queryArgs: String): String {
  * Otherwise, a ? will be added and then the query args
  */
 fun String.appendQueryArgs(args: Map<String, String>): String {
-    return appendQueryArgs(args.toQueryString())
+    return if(args.isNotEmpty()) {
+        appendQueryArgs(args.toQueryString())
+    }else {
+        this
+    }
 }
 
 fun String.capitalizeFirstLetter(): String {
     return this.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
 }
-
-/**
- * Validate email address using regular expressions
- */
-expect fun String?.validEmail(): Boolean
 
 //Could be done with a regex, but this can be used on long text very frequently, so
 //this is better for performance

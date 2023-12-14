@@ -16,7 +16,7 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.viewmodel.SiteTermsDetailViewModel
+import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
 import com.ustadmobile.core.viewmodel.site.edit.SiteEditViewModel
 import kotlinx.coroutines.flow.combine
 
