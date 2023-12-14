@@ -1,12 +1,15 @@
 package com.ustadmobile.lib.db.composites
 
+import androidx.room.Embedded
 import com.ustadmobile.lib.db.entities.Message
 import com.ustadmobile.lib.db.entities.Person
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MessageAndSenderPerson(
+data class MessageAndOtherPerson(
+    @Embedded
     var message: Message? = null,
-    var senderPerson: Person? = null,
+    @Embedded
+    var otherPerson: Person? = null,
 )
 
