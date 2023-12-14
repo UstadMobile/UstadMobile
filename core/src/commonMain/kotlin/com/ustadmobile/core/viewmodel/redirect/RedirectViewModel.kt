@@ -35,7 +35,10 @@ class RedirectViewModel(
         val destinationArg = deepLink ?: nextViewArg
 
         if(settings.getStringOrNull(OnBoardingViewModel.PREF_TAG) != true.toString()) {
-            navController.navigate(OnBoardingViewModel.DEST_NAME, emptyMap())
+            navController.navigate(OnBoardingViewModel.DEST_NAME, buildMap {
+                putFromSavedStateIfPresent(ARG_NEXT)
+                putFromSavedStateIfPresent(ARG_OPEN_LINK)
+            })
         }else {
             val destination = destinationArg ?: ClazzListViewModel.DEST_NAME_HOME
 

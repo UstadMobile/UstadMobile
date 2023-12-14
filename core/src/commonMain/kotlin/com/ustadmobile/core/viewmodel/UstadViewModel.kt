@@ -202,7 +202,7 @@ abstract class UstadViewModel(
         goOptions: UstadMobileSystemCommon.UstadGoOptions = UstadMobileSystemCommon.UstadGoOptions.Default,
     ) {
         val viewName = viewUri.substringBefore("?")
-        val args = if(viewName.contains("?")) {
+        val args = if(viewUri.contains("?")) {
             UMFileUtil.parseURLQueryString(viewUri)
         }else {
             mapOf()
@@ -388,7 +388,7 @@ abstract class UstadViewModel(
             ContentEntryListViewModel.DEST_NAME_HOME, PersonListViewModel.DEST_NAME_HOME)
 
         /**
-         * Can be used with any Android intent to provide a link to open within the app.
+         * Can be used with any Android intent to provide a deep link to open within the app.
          * The link can be in the form of:
          *
          * https://endpoint.server/umapp/#/ViewName?arg=value

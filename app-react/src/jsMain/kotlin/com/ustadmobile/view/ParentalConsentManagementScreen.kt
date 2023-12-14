@@ -6,11 +6,10 @@ import com.ustadmobile.core.impl.locale.entityconstants.PersonParentJoinConstant
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementUiState
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
-import com.ustadmobile.lib.db.entities.PersonParentJoinWithMinorPerson
+import com.ustadmobile.lib.db.entities.PersonParentJoinAndMinorPerson
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.view.components.UstadMessageIdSelectField
-import dev.icerock.moko.resources.StringResource
 import web.cssom.px
 import js.core.jso
 import mui.material.*
@@ -53,14 +52,15 @@ val ParentalConsentManagementComponent2 = FC<ParentalConsentManagementScreenProp
             if (props.uiState.relationshipVisible){
 
                 UstadMessageIdSelectField {
-                    value = props.uiState.personParentJoin?.ppjRelationship ?: 0
+                    value = props.uiState.parentJoinAndMinor?.personParentJoin?.ppjRelationship ?: 0
                     options = PersonParentJoinConstants.RELATIONSHIP_MESSAGE_IDS
                     label = strings[MR.strings.relationship]
                     onChange = {
                         props.onChangeRelation(
-                            props.uiState.personParentJoin?.shallowCopy {
+                            props.uiState.parentJoinAndMinor?.personParentJoin?.shallowCopy {
                                 ppjRelationship = it.value
-                            })
+                            }
+                        )
                     }
                 }
             }
@@ -77,7 +77,7 @@ val ParentalConsentManagementComponent2 = FC<ParentalConsentManagementScreenProp
                 }
             }
 
-            if (props.uiState.consentVisible){
+            if (props.uiState.consentButtonVisible){
                 Button {
                     onClick = { props.onClickConsent }
                     variant = ButtonVariant.contained
@@ -87,7 +87,7 @@ val ParentalConsentManagementComponent2 = FC<ParentalConsentManagementScreenProp
                 }
             }
 
-            if (props.uiState.dontConsentVisible){
+            if (props.uiState.dontConsentButtonVisible){
                 Button {
                     onClick = { props.onClickDoNotConsent }
                     variant = ButtonVariant.outlined
@@ -97,19 +97,15 @@ val ParentalConsentManagementComponent2 = FC<ParentalConsentManagementScreenProp
                 }
             }
 
-            if (props.uiState.changeConsentVisible){
-                val changeConsentText: StringResource =
-                    if (props.uiState.personParentJoin?.ppjStatus == PersonParentJoin.STATUS_APPROVED)
-                        MR.strings.revoke_consent
-                    else
-                        MR.strings.restore_consent
-
+            if (props.uiState.changeConsentButtonVisible){
                 Button {
                     onClick = { props.onClickChangeConsent }
                     variant = ButtonVariant.contained
                     disabled = !props.uiState.fieldsEnabled
 
-                    + strings[changeConsentText].uppercase()
+                    props.uiState.changeConsentLabel?.also {
+                        +strings[it]
+                    }
                 }
             }
         }
@@ -123,9 +119,8 @@ val ParentalConsentManagementPreview = FC<Props> {
             siteTerms = SiteTerms().apply {
                 termsHtml = "hello <b>world</b>"
             },
-            personParentJoin = PersonParentJoinWithMinorPerson().apply {
-                ppjParentPersonUid = 0
-                ppjRelationship = 1
+            parentJoinAndMinor = PersonParentJoinAndMinorPerson().apply {
+
                 minorPerson = Person().apply {
                     firstNames = "Pit"
                     lastName = "The Younger"
