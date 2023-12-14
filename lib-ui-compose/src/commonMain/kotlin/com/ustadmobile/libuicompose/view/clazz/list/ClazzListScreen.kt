@@ -43,11 +43,12 @@ import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.AppUiState
-import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.libuicompose.components.HtmlText
 import com.ustadmobile.libuicompose.components.SortListMode
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
+import com.ustadmobile.libuicompose.components.UstadBottomSheetSpacer
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import com.ustadmobile.libuicompose.components.ustadPagedItems
@@ -55,7 +56,6 @@ import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.util.ext.copyWithNewFabOnClick
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.defaultSortListMode
-import com.ustadmobile.libuicompose.util.rememberHtmlToPlainText
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
 import moe.tlaster.precompose.navigation.BackStackEntry
 
@@ -66,7 +66,6 @@ fun ClazzListScreen(
     navController: UstadNavControllerPreCompose,
     onSetAppUiState: (AppUiState) -> Unit,
     navResultReturner: NavResultReturner,
-    onShowSnackBar: SnackBarDispatcher,
     destName: String,
 ) {
     var createNewOptionsVisible by remember {
@@ -80,7 +79,6 @@ fun ClazzListScreen(
         onSetAppUiState = onSetAppUiState,
         navController = navController,
         navResultReturner = navResultReturner,
-        onShowSnackBar = onShowSnackBar,
         appUiStateMap = {
             it.copyWithNewFabOnClick {
                 createNewOptionsVisible = true
@@ -117,6 +115,8 @@ fun ClazzListScreen(
                     leadingContent = { Icon(Icons.Default.Add, contentDescription = null) },
                 )
             }
+
+            UstadBottomSheetSpacer()
         }
     }
 
@@ -203,8 +203,6 @@ fun ClazzListItem(
     onClickClazz: (Clazz) -> Unit
 ){
 
-
-    @Suppress("UNUSED_VARIABLE") //Reserved for future use
     val role = RoleConstants.ROLE_MESSAGE_IDS.find {
         it.value == clazz?.clazzActiveEnrolment?.clazzEnrolmentRole
     }?.stringResource
@@ -230,9 +228,9 @@ fun ClazzListItem(
                         style = MaterialTheme.typography.h6,
                         maxLines = 1,
                     )
-                    Text(
-                        text = rememberHtmlToPlainText(clazz?.clazzDesc ?: ""),
-                        maxLines = 2
+                    HtmlText(
+                        html = clazz?.clazzDesc ?: "",
+                        htmlMaxLines = 2,
                     )
                 }
 

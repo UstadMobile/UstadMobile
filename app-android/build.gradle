@@ -211,7 +211,7 @@ dependencies {
     api libs.moko.resources.compose
 
     implementation libs.napier
-    implementation libs.androidx.constraintlayout
+    implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
     implementation "androidx.activity:activity:$version_androidx_activity"
     implementation "androidx.activity:activity-ktx:$version_androidx_activity"
     implementation "androidx.fragment:fragment:$version_androidx_fragment"
@@ -334,6 +334,14 @@ dependencies {
     //dependency injection
     implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
 
+    //HTML editor
+    implementation "org.wordpress:aztec:$version_android_aztec"
+
+    // Dependencies of Aztec: Versions must be fixed to ensure that they point to versions available
+    // on mavenCentral after jcenter shutdown.
+    //implementation "org.wordpress:utils:$version_android_wordpress_utils"
+    implementation "com.android.volley:volley:$version_android_volley"
+
     //Persian-Date-Picker
     implementation 'com.github.varunasingh:Persian-Date-Picker-Dialog-Strings:primary-SNAPSHOT'
 
@@ -357,9 +365,9 @@ dependencies {
     implementation libs.xmlutil.core
     implementation libs.xmlutil.serialization
 
-    implementation libs.multiplatformsettings
+    //LeakCanary - detect memory leaks
+    //debugImplementation "com.squareup.leakcanary:leakcanary-android:$version_android_leakcanary"
 
-    implementation libs.process.phoenix
 
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"

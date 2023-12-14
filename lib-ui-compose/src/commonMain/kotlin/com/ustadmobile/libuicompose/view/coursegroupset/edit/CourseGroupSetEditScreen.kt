@@ -5,10 +5,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -18,21 +19,18 @@ import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditView
 import com.ustadmobile.core.viewmodel.coursegroupset.edit.appendGroupNumIfNotInList
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.libuicompose.components.UstadExposedDropDownMenuField
 import com.ustadmobile.libuicompose.components.UstadNumberTextField
-import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
-import kotlinx.coroutines.Dispatchers
-import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 
 @Composable
-fun CourseGroupSetEditScreen(
+fun CourseGroupSetEditScreenForViewModel(
     viewModel: CourseGroupSetEditViewModel
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle(
-        CourseGroupSetEditUiState(), Dispatchers.Main.immediate)
+    val uiState by viewModel.uiState.collectAsState(CourseGroupSetEditUiState())
 
     CourseGroupSetEditScreen(
         uiState = uiState,
@@ -42,6 +40,7 @@ fun CourseGroupSetEditScreen(
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CourseGroupSetEditScreen(
     uiState: CourseGroupSetEditUiState,
@@ -53,60 +52,68 @@ fun CourseGroupSetEditScreen(
         modifier = Modifier
             .padding(vertical = 8.dp)
     ) {
-        item(key = "title_item") {
-            OutlinedTextField(
-                value = uiState.courseGroupSet?.cgsName ?: "",
+        item {
+            UstadInputFieldLayout(
                 modifier = Modifier
-                    .testTag("cgs_name")
-                    .defaultItemPadding()
+                    .padding(vertical = 8.dp, horizontal = 16.dp)
                     .fillMaxWidth(),
-                enabled = uiState.fieldsEnabled,
-                onValueChange = {
-                    onCourseGroupSetChange(uiState.courseGroupSet?.shallowCopy{
-                        cgsName = it
-                    })
-                },
-                label = { Text(stringResource(MR.strings.title) + "*") },
-                isError = uiState.courseTitleError != null,
-                singleLine = true,
-                supportingText = {
-                    Text(uiState.courseTitleError ?: stringResource(MR.strings.required))
-                }
-            )
-        }
+                errorText = uiState.courseTitleError
+            ) {
+                OutlinedTextField(
+                    value = uiState.courseGroupSet?.cgsName ?: "",
+                    modifier = Modifier
+                        .testTag("cgs_name")
+                        .fillMaxWidth(),
+                    enabled = uiState.fieldsEnabled,
+                    onValueChange = {
+                        onCourseGroupSetChange(uiState.courseGroupSet?.shallowCopy{
+                            cgsName = it
+                        })
+                    },
+                    label = { Text(stringResource(MR.strings.title)) },
+                    isError = uiState.courseTitleError != null,
 
-        item(key = "num_groups_item") {
-            UstadNumberTextField(
-                modifier = Modifier
-                    .testTag("num_groups")
-                    .defaultItemPadding()
-                    .fillMaxWidth(),
-                enabled = uiState.fieldsEnabled,
-                value = uiState.courseGroupSet?.cgsTotalGroups?.toFloat() ?: 0f,
-                label = { Text(stringResource(MR.strings.number_of_groups) + "*") },
-                isError = uiState.numOfGroupsError != null,
-                onValueChange = {
-                    onCourseGroupSetChange(uiState.courseGroupSet?.shallowCopy{
-                        cgsTotalGroups = it.toInt()
-                    })
-                },
-                supportingText = {
-                    Text(uiState.numOfGroupsError ?: stringResource(MR.strings.required))
-                }
-            )
+                    )
+            }
         }
 
         item {
-            OutlinedButton(
+            UstadInputFieldLayout(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .fillMaxWidth(),
+                errorText = uiState.numOfGroupsError,
+            ) {
+                UstadNumberTextField(
+                    modifier = Modifier
+                        .testTag("num_groups")
+                        .fillMaxWidth(),
+                    enabled = uiState.fieldsEnabled,
+                    value = uiState.courseGroupSet?.cgsTotalGroups?.toFloat() ?: 0f,
+                    label = { Text(stringResource(MR.strings.number_of_groups)) },
+                    isError = uiState.numOfGroupsError != null,
+                    onValueChange = {
+                        onCourseGroupSetChange(uiState.courseGroupSet?.shallowCopy{
+                            cgsTotalGroups = it.toInt()
+                        })
+                    }
+                )
+            }
+        }
+
+        item {
+            Button(
                 onClick = onClickAssignRandomly,
                 enabled = uiState.fieldsEnabled,
                 modifier = Modifier
                     .testTag("assign_random_button")
-                    .fillMaxWidth()
-                    .defaultItemPadding(8.dp),
-
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = MaterialTheme.colors.secondary
+                )
             ) {
-                Text(stringResource(MR.strings.assign_to_random_groups))
+                Text(stringResource(MR.strings.assign_to_random_groups).uppercase())
             }
         }
 
@@ -123,16 +130,16 @@ fun CourseGroupSetEditScreen(
         items(uiState.membersList, itemContent = { member ->
             val currentGroupNum = member.cgm?.cgmGroupNumber ?: 0
             ListItem (
-                headlineContent = {
+                text = {
                     Text(text = member.name ?: "")
                 },
-                leadingContent = {
+                icon = {
                     Icon(
                         imageVector = Icons.Filled.AccountCircle,
                         contentDescription = null
                     )
                 },
-                trailingContent = {
+                trailing = {
                     UstadExposedDropDownMenuField<Int>(
                         value = currentGroupNum,
                         label = "",

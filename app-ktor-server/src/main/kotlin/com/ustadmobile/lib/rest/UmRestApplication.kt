@@ -234,14 +234,7 @@ fun Application.umRestApplication(
         import(CommonJvmDiModule)
         import(DomainDiModuleJvm(EndpointScope.Default))
         import(makeJvmBackendDiModule(environment.config))
-
-        bind<SupportedLanguagesConfig>() with singleton {
-            SupportedLanguagesConfig(
-                systemLocales = listOf(Locale.getDefault().language),
-                settings = instance(),
-
-            )
-        }
+        bind<SupportedLanguagesConfig>() with singleton { SupportedLanguagesConfig() }
         bind<StringProvider>() with singleton { StringProviderJvm(Locale.getDefault()) }
 
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {

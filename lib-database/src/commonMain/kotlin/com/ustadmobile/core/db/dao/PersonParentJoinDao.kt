@@ -15,16 +15,13 @@ expect abstract class PersonParentJoinDao {
     @Insert
     abstract suspend fun insertAsync(entity: PersonParentJoin): Long
 
-    @HttpAccessible(
-        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
-    )
     @Query("""
         SELECT PersonParentJoin.*, Person.*
           FROM PersonParentJoin
      LEFT JOIN Person ON Person.personUid = PersonParentJoin.ppjMinorPersonUid    
          WHERE PersonParentJoin.ppjUid = :uid
     """)
-    abstract suspend fun findByUidWithMinorAsync(uid: Long): PersonParentJoinAndMinorPerson?
+    abstract suspend fun findByUidWithMinorAsync(uid: Long): PersonParentJoinWithMinorPerson?
 
     @Query("""
         SELECT PersonParentJoin.*, Person.*
@@ -33,7 +30,7 @@ expect abstract class PersonParentJoinDao {
          WHERE PersonParentJoin.ppjUid = :uid
     """)
     @Repository(METHOD_DELEGATE_TO_WEB)
-    abstract suspend fun findByUidWithMinorAsyncFromWeb(uid: Long): PersonParentJoinAndMinorPerson?
+    abstract suspend fun findByUidWithMinorAsyncFromWeb(uid: Long): PersonParentJoinWithMinorPerson?
 
     @Query("""
         SELECT PersonParentJoin.*

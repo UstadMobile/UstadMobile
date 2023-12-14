@@ -126,7 +126,7 @@ class AccountListViewModel(
             navController.navigateToLink(
                 link = ClazzListViewModel.DEST_NAME_HOME,
                 accountManager = accountManager,
-                openExternalLinkUseCase = { _, _ ->  },
+                browserLinkOpener = { },
                 userCanSelectServer = apiUrlConfig.canSelectServer,
                 goOptions = UstadMobileSystemCommon.UstadGoOptions(
                     clearStack = true,
@@ -173,7 +173,6 @@ class AccountListViewModel(
         startUserSessionUseCase(
             session = sessionWithPersonAndEndpoint,
             navController = navController,
-            nextDest = savedStateHandle[ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
         )
     }
 

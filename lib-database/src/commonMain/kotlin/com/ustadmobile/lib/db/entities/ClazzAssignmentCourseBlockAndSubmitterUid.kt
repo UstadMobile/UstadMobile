@@ -11,10 +11,6 @@ data class ClazzAssignmentCourseBlockAndSubmitterUid(
     var clazzAssignment: ClazzAssignment? = null,
     @Embedded
     var courseBlock: CourseBlock? = null,
-
-    @Embedded
-    var courseGroupSet: CourseGroupSet? = null,
-
     var submitterUid: Long = 0,
 ) {
 

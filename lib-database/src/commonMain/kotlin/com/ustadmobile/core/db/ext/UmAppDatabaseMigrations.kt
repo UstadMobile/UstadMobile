@@ -1271,21 +1271,13 @@ val MIGRATION_124_125 = DoorMigrationStatementList(124, 125) { db ->
     }
 }
 
-/**
- * This migration is only here to force the regeneration of triggers. The trigger condition for Site
- * was changed to add TRIGGER_CONDITION_WHERE_NEWER
- */
-val MIGRATION_125_126 = DoorMigrationStatementList(125, 126) { db ->
-    emptyList()
-}
-
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
     MIGRATION_120_121, MIGRATION_121_122, MIGRATION_122_123, MIGRATION_123_124,
-    MIGRATION_124_125, MIGRATION_125_126,
+    MIGRATION_124_125,
 )
 
 

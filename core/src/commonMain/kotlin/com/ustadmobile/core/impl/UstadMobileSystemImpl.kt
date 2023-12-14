@@ -57,12 +57,35 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
                     ustadGoOptions: UstadGoOptions)
 
     /**
+     * Must provide the system's default locale (e.g. en_US.UTF-8)
+     *
+     * @return System locale
+     */
+    override fun getSystemLocale(): String
+
+    /**
+     * Get a preference for the app
+     *
+     * @param key preference key as a string
+     * @return value of that preference
+     */
+    override fun getAppPref(key: String): String?
+
+    /**
      * Return absolute path of the application setup file. Asynchronous.
      *
      * @param context System context
      * @param zip if true, the app setup file should be delivered within a zip.
      */
     override suspend fun getAppSetupFile(context: Any, zip: Boolean): String
+
+
+    /**
+     * Set a preference for the app
+     * @param key preference that is being set
+     * @param value value to be set
+     */
+    override fun setAppPref(key: String, value: String?)
 
 
     /**
@@ -80,6 +103,12 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
      * @return Build timestamp in ms since epoch
      */
     fun getBuildTimestamp(context: Any): Long
+
+
+    /**
+     * Open the given link in a browser and/or tab depending on the platform
+     */
+    override fun openLinkInBrowser(url: String, context: Any)
 
 
     companion object {

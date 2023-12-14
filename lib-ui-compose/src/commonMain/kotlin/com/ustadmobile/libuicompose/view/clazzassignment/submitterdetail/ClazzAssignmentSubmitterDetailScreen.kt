@@ -3,93 +3,133 @@ package com.ustadmobile.libuicompose.view.clazzassignment.submitterdetail
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Pending
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.paging.compose.collectAsLazyPagingItems
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
-import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
-import com.ustadmobile.core.viewmodel.clazzassignment.submissionStatusFor
+import com.ustadmobile.core.util.ext.capitalizeFirstLetter
+import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailUiState
+import com.ustadmobile.port.android.view.clazzassignment.ClazzAssignmentConstants.SUBMISSION_STATUS_ICON_MAP
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
-import com.ustadmobile.lib.db.entities.Comments
+import dev.icerock.moko.resources.compose.stringResource
+import com.ustadmobile.core.MR
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
-import com.ustadmobile.libuicompose.components.UstadAddCommentListItem
 import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
+import com.ustadmobile.libuicompose.components.UstadAddCommentListItem
 import com.ustadmobile.libuicompose.components.UstadListSpacerItem
-import com.ustadmobile.libuicompose.components.ustadPagedItems
-import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
-import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
-import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
 import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionListItem
-import com.ustadmobile.libuicompose.view.clazzassignment.UstadAssignmentSubmissionStatusHeaderItems
 import com.ustadmobile.libuicompose.view.clazzassignment.UstadCourseAssignmentMarkListItem
-import dev.icerock.moko.resources.compose.stringResource
-import kotlinx.coroutines.Dispatchers
-import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
+import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
+import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 
 @Composable
-fun ClazzAssignmentSubmitterDetailScreen(
+fun ClazzAssignmentDetailStudentProgressScreenForViewModel(
     viewModel: ClazzAssignmentSubmitterDetailViewModel
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle(
-        ClazzAssignmentSubmitterDetailUiState(), Dispatchers.Main.immediate
-    )
+    val uiState by viewModel.uiState.collectAsState(ClazzAssignmentSubmitterDetailUiState())
 
-    ClazzAssignmentSubmitterDetailScreen(
+    val newCommentHintText = stringResource(MR.strings.add_private_comment)
+
+//    val localContext = LocalContext.current
+
+    ClazzAssignmentDetailStudentProgressScreen(
         uiState = uiState,
         onClickSubmitGrade = viewModel::onClickSubmitMark,
         onClickSubmitGradeAndMarkNext = viewModel::onClickSubmitMarkAndGoNext,
-        onChangePrivateComment = viewModel::onChangePrivateComment,
-        onClickSubmitPrivateComment = viewModel::onSubmitPrivateComment,
+        onClickNewPrivateComment = {
+            // TODO error
+//            CommentsBottomSheet(
+//                hintText = newCommentHintText,
+//                personUid = uiState.activeUserPersonUid,
+//                onSubmitComment = {
+//                    viewModel.onChangePrivateComment(it)
+//                    viewModel.onSubmitPrivateComment()
+//                }
+//            ).show(localContext.getContextSupportFragmentManager(), "private_comment_sheet")
+        },
         onClickGradeFilterChip = viewModel::onClickGradeFilterChip,
         onClickOpenSubmission = viewModel::onClickSubmission,
         onChangeDraftMark = viewModel::onChangeDraftMark,
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ClazzAssignmentSubmitterDetailScreen(
+fun ClazzAssignmentDetailStudentProgressScreen(
     uiState: ClazzAssignmentSubmitterDetailUiState,
     onClickSubmitGrade: () -> Unit = {},
     onClickSubmitGradeAndMarkNext: () -> Unit = {},
-    onChangePrivateComment: (String) -> Unit = {},
-    onClickSubmitPrivateComment: () -> Unit = {},
+    onClickNewPrivateComment: () -> Unit = {},
     onClickGradeFilterChip: (MessageIdOption2) -> Unit = {},
     onClickOpenSubmission: (CourseAssignmentSubmission) -> Unit = {},
     onChangeDraftMark: (CourseAssignmentMark?) -> Unit = {},
 ){
 
-    val privateCommentsPager = remember(uiState.privateCommentsList) {
-        Pager(
-            pagingSourceFactory = uiState.privateCommentsList,
-            config = PagingConfig(pageSize = 50, enablePlaceholders = true)
-        )
-    }
+    // TODO error
+//    val privateCommentsPager = remember(uiState.privateCommentsList) {
+//        Pager(
+//            pagingSourceFactory = uiState.privateCommentsList,
+//            config = PagingConfig(pageSize = 50, enablePlaceholders = true)
+//        )
+//    }
+//
+//    val privateCommentsLazyPagingItems = privateCommentsPager.flow.collectAsLazyPagingItems()
 
-    val privateCommentsLazyPagingItems = privateCommentsPager.flow.collectAsLazyPagingItems()
-
-    val linkExtractor = rememberLinkExtractor()
 
     LazyColumn (
         modifier = Modifier
             .defaultScreenPadding()
             .fillMaxSize()
     ) {
-        UstadAssignmentSubmissionStatusHeaderItems(
-            submissionStatus = submissionStatusFor(uiState.marks, uiState.submissionList),
-            averageMark = uiState.marks.averageMark(),
-            maxPoints = uiState.courseBlock?.cbMaxPoints ?: 0,
-            submissionPenaltyPercent = uiState.courseBlock?.cbLateSubmissionPenalty ?: 0
-        )
+        item(key = "status") {
+            ListItem(
+                icon = {
+                    Icon(
+                        imageVector = SUBMISSION_STATUS_ICON_MAP[uiState.submissionStatus]
+                            ?: Icons.Filled.Pending,
+                        contentDescription = ""
+                    )
+                },
+                text = {
+                    Text(
+                        text = stringIdMapResource(
+                            map = ClazzAssignmentViewModelConstants.SUBMISSION_STAUTUS_MESSAGE_ID,
+                            key = uiState.submissionStatus
+                        ).capitalizeFirstLetter()
+                    )
+                },
+                secondaryText = {
+                    Text(stringResource(MR.strings.status))
+                }
+            )
+        }
+
+        if(uiState.scoreSummaryVisible) {
+            item(key = "averagescore") {
+                ListItem(
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Filled.EmojiEvents,
+                            contentDescription = ""
+                        )
+                    },
+                    text = {
+                        Text("${uiState.averageScore} ${stringResource(MR.strings.points)}")
+                    },
+                    secondaryText = {
+                        Text(stringResource(MR.strings.score))
+                    }
+                )
+            }
+        }
 
         item(key = "submissionheader") {
             UstadDetailHeader {
@@ -121,7 +161,6 @@ fun ClazzAssignmentSubmitterDetailScreen(
                     filterOptions = uiState.markListFilterOptions,
                     selectedChipId = uiState.markListSelectedChipId,
                     onClickFilterChip = onClickGradeFilterChip,
-                    enabled = uiState.fieldsEnabled,
                 )
             }
         }
@@ -158,25 +197,19 @@ fun ClazzAssignmentSubmitterDetailScreen(
 
         item(key = "new_private_comment") {
             UstadAddCommentListItem(
-                modifier = Modifier.testTag("add_private_comment"),
-                commentText = uiState.newPrivateCommentText,
-                commentLabel = stringResource(MR.strings.add_private_comment),
+                text = stringResource(MR.strings.add_private_comment),
                 enabled = uiState.fieldsEnabled,
-                currentUserPersonUid = uiState.activeUserPersonUid,
-                onSubmitComment =  onClickSubmitPrivateComment,
-                onCommentChanged = onChangePrivateComment
+                personUid = uiState.activeUserPersonUid,
+                onClickAddComment =  onClickNewPrivateComment,
             )
         }
 
-        ustadPagedItems(
-            pagingItems = privateCommentsLazyPagingItems,
-            key = { Pair(Comments.TABLE_ID, it.comment.commentsUid) }
-        ) { comment ->
-            CommentListItem(
-                commentAndName = comment,
-                linkExtractor = linkExtractor,
-            )
-        }
+//        items(
+//            items = privateCommentsLazyPagingItems,
+//            key = { Pair(Comments.TABLE_ID, it.comment.commentsUid) }
+//        ) { comment ->
+//            CommentListItem(commentAndName = comment)
+//        }
 
         UstadListSpacerItem()
     }

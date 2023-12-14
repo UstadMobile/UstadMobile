@@ -4,49 +4,52 @@ import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
 import app.cash.paging.PagingSource
+import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.composites.MessageAndOtherPerson
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.flow.Flow
 
 @DoorDao
 @Repository
-expect abstract class MessageDao {
+expect abstract class MessageDao: BaseDao<Message>{
+
 
     @Query("""
-        SELECT Message.*
-          FROM Message
-         WHERE (Message.messageSenderPersonUid = :accountPersonUid
-                AND Message.messageToPersonUid = :otherPersonUid)
-            OR (Message.messageSenderPersonUid = :otherPersonUid
-                AND Message.messageToPersonUid = :accountPersonUid) 
-      ORDER BY Message.messageTimestamp DESC          
+       SELECT
+              Message.*,
+              Person.*,
+              MessageRead.*
+        FROM Message
+        LEFT JOIN Person
+          ON Message.messageSenderPersonUid = Person.personUid
+        LEFT JOIN MessageRead
+          ON MessageRead.messageReadMessageUid = Message.messageUid
+             AND MessageRead.messageReadPersonUid = :loggedInPersonUid
+       WHERE Message.messageTableId = :tableId
+              AND Message.messageEntityUid = :entityUid
+    ORDER BY Message.messageTimestamp DESC
     """)
-    abstract fun messagesFromOtherUserAsPagingSource(
-        accountPersonUid: Long,
-        otherPersonUid: Long,
-    ): PagingSource<Int, Message>
+    abstract fun findAllMessagesByChatUid(entityUid: Long, tableId: Int, loggedInPersonUid: Long):
+            PagingSource<Int, MessageWithPerson>
+
 
     @Query("""
-        SELECT Person.*, LatestMessage.*
-          FROM Person
-               JOIN Message LatestMessage
-                    ON LatestMessage.messageUid = 
-                       (SELECT Message.messageUid
-                          FROM Message
-                         WHERE (Message.messageSenderPersonUid = :accountPersonUid
-                                AND Message.messageToPersonUid = Person.personUid)
-                            OR (Message.messageSenderPersonUid = Person.personUid
-                                AND Message.messageToPersonUid = :accountPersonUid)
-                       ORDER BY Message.messageTimestamp DESC
-                          LIMIT 1)
-      ORDER BY LatestMessage.messageTimestamp DESC
+       SELECT
+              Message.*,
+              Person.*,
+              MessageRead.*
+        FROM Message
+        LEFT JOIN Person
+          ON Message.messageSenderPersonUid = Person.personUid
+        LEFT JOIN MessageRead
+          ON MessageRead.messageReadMessageUid = Message.messageUid
+             AND MessageRead.messageReadPersonUid = :loggedInPersonUid
+       WHERE Message.messageTableId = :tableId
+              AND Message.messageEntityUid = :entityUid
+    ORDER BY Message.messageTimestamp DESC
     """)
-    abstract fun conversationsForUserAsPagingSource(
-        accountPersonUid: Long
-    ): PagingSource<Int, MessageAndOtherPerson>
-
-    @Insert
-    abstract suspend fun insert(message: Message)
+    abstract fun findAllMessagesByChatUidAsFlow(entityUid: Long, tableId: Int, loggedInPersonUid: Long):
+            Flow<List<MessageWithPerson>>
 
 
 }

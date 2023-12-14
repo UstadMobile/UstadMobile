@@ -75,7 +75,7 @@ val CourseDiscussionDetailComponent = FC<CourseDiscussionDetailProps> { props ->
         }
     }
 }
-@Suppress("unused")
+
 val CourseDiscussionDetailPreview = FC<Props> {
     CourseDiscussionDetailComponent {
         uiState = CourseDiscussionDetailUiState(

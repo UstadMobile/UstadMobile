@@ -4,8 +4,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.account.UstadAccountManager.Companion.GUEST_PERSON
-import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase.Companion.LinkTarget
-import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCaseJvm
+import com.ustadmobile.core.impl.BrowserLinkOpener
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMURLEncoder
@@ -25,11 +24,11 @@ class NavControllerExtTest {
 
     private lateinit var mockAccountManager: UstadAccountManager
 
-    private lateinit var mockOpenLinkUseCase: OpenExternalLinkUseCaseJvm
+    private lateinit var mockBrowserLinkOpener: BrowserLinkOpener
 
     @Before
     fun setup(){
-        mockOpenLinkUseCase = mock { }
+        mockBrowserLinkOpener = mock { }
         mockNavController = mock { }
         mockAccountManager = mock { }
     }
@@ -38,8 +37,8 @@ class NavControllerExtTest {
     fun givenNonUstadLink_whenNavigateToLinkIsCalled_thenShouldCallOpenInBrowser() {
         runBlocking {
             mockNavController.navigateToLink("https://www.google.com/",
-                mockAccountManager, mockOpenLinkUseCase)
-            verify(mockOpenLinkUseCase).invoke("https://www.google.com/", LinkTarget.DEFAULT)
+                mockAccountManager, mockBrowserLinkOpener)
+            verify(mockBrowserLinkOpener).onOpenLink("https://www.google.com/")
         }
     }
 
@@ -54,11 +53,11 @@ class NavControllerExtTest {
             ))
         }
         runBlocking {
-            mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase)
+            mockNavController.navigateToLink(link, mockAccountManager, mockBrowserLinkOpener)
         }
 
 
-        verify(mockNavController, timeout(5000)).navigate(eq("ContentEntryList"), argWhere {
+        verify(mockNavController).navigate(eq("ContentEntryList"), argWhere {
             it["parentUid"] == "1234"
         }, any())
     }
@@ -70,10 +69,10 @@ class NavControllerExtTest {
             onBlocking { activeSessionCount(any(), any()) }.thenAnswer { 1 }
         }
         runBlocking {
-            mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase,
+            mockNavController.navigateToLink(link, mockAccountManager, mockBrowserLinkOpener,
                 forceAccountSelection = true)
         }
-        verify(mockNavController, timeout(5000)).navigate(eq(AccountListViewModel.DEST_NAME), argWhere { args ->
+        verify(mockNavController).navigate(eq(AccountListViewModel.DEST_NAME), argWhere { args ->
             val nextArg = UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!)
             nextArg.substringBefore('?') == "ContentEntryList" &&
                 UMFileUtil.parseURLQueryString(nextArg)["parentUid"] == "1234"
@@ -94,10 +93,10 @@ class NavControllerExtTest {
         }
 
         runBlocking {
-            mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase)
+            mockNavController.navigateToLink(link, mockAccountManager, mockBrowserLinkOpener)
         }
 
-        verify(mockNavController, timeout(5000)).navigate(eq("ContentEntryList"), argWhere {
+        verify(mockNavController).navigate(eq("ContentEntryList"), argWhere {
             it["parentUid"] == "1234"
         }, any())
     }
@@ -117,10 +116,10 @@ class NavControllerExtTest {
         }
 
         runBlocking {
-            mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase,
+            mockNavController.navigateToLink(link, mockAccountManager, mockBrowserLinkOpener,
                 forceAccountSelection = true)
         }
-        verify(mockNavController, timeout(5000)).navigate(eq(AccountListViewModel.DEST_NAME), argWhere { args ->
+        verify(mockNavController).navigate(eq(AccountListViewModel.DEST_NAME), argWhere { args ->
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"
@@ -152,10 +151,10 @@ class NavControllerExtTest {
         }
 
         runBlocking {
-            mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase)
+            mockNavController.navigateToLink(link, mockAccountManager, mockBrowserLinkOpener)
         }
 
-        verify(mockNavController, timeout(5000)).navigate(eq(AccountListViewModel.DEST_NAME), argWhere { args ->
+        verify(mockNavController).navigate(eq(AccountListViewModel.DEST_NAME), argWhere { args ->
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"
@@ -186,10 +185,10 @@ class NavControllerExtTest {
         }
 
         runBlocking {
-            mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase)
+            mockNavController.navigateToLink(link, mockAccountManager, mockBrowserLinkOpener)
         }
 
-        verify(mockNavController, timeout(5000)).navigate(eq(LoginViewModel.DEST_NAME), argWhere { args ->
+        verify(mockNavController).navigate(eq(LoginViewModel.DEST_NAME), argWhere { args ->
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"
@@ -207,16 +206,23 @@ class NavControllerExtTest {
         }
 
         runBlocking {
-            mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase,
+            mockNavController.navigateToLink(link, mockAccountManager, mockBrowserLinkOpener,
                 userCanSelectServer = false, forceAccountSelection = true)
         }
 
-        verify(mockNavController, timeout(5000)).navigate(eq(LoginViewModel.DEST_NAME), argWhere { args->
+        verify(mockNavController).navigate(eq(LoginViewModel.DEST_NAME), argWhere { args->
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"
             }
         }, any())
+    }
+
+    /**
+     *
+     */
+    fun givenViewUri_whenUserCanSelectServer_thenShouldNavigateToEnterSiteLink() {
+
     }
 
 }

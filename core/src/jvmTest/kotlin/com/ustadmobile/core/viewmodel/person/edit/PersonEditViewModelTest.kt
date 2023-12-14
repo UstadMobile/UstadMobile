@@ -7,7 +7,6 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
@@ -16,10 +15,10 @@ import com.ustadmobile.core.util.ext.awaitItemWhere
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_DATE_OF_BIRTH
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_REGISTRATION_MODE
-import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel.Companion.ARG_PARENT_CONTACT
-import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel.Companion.ARG_USERNAME
+import com.ustadmobile.core.view.RegisterMinorWaitForParentView
+import com.ustadmobile.core.view.RegisterMinorWaitForParentView.Companion.ARG_PARENT_CONTACT
+import com.ustadmobile.core.view.RegisterMinorWaitForParentView.Companion.ARG_USERNAME
 import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
-import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.flow.doorFlow
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -66,12 +65,12 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
                 viewModel.onClickSave()
 
                 val systemImpl: UstadMobileSystemImpl = di.direct.instance()
+                val expectedErrMsg = systemImpl.getString(MR.strings.field_required_prompt)
 
                 val stateAfterSave = awaitItemWhere { it.usernameError != null }
-                assertEquals(systemImpl.getString(MR.strings.invalid), stateAfterSave.usernameError,
+                assertEquals(expectedErrMsg, stateAfterSave.usernameError,
                     "Username error set")
-                assertEquals(systemImpl.getString(MR.strings.field_required_prompt),
-                    stateAfterSave.passwordError,
+                assertEquals(expectedErrMsg, stateAfterSave.passwordError,
                     "Password error set")
                 cancelAndIgnoreRemainingEvents()
             }
@@ -88,7 +87,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
 
             viewModel.uiState.assertItemReceived(timeout = 5.seconds) { it.fieldsEnabled && it.person != null }
 
-            viewModel.uiState.test(timeout =1000.seconds) {
+            viewModel.uiState.test {
                 val state = awaitItem()
                 viewModel.onEntityChanged(state.person?.shallowCopy {
                     firstNames = "Test"
@@ -135,10 +134,10 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
                     firstNames = "Test"
                     lastName = "User"
                     gender = Person.GENDER_FEMALE
+                    newPassword = "test#@@12"
                     username = "testuser"
                     dateOfBirth = systemTimeInMillis() - (20 * 365 * 24 * 60 * 60 * 1000L) //Approx 20 years old
                 })
-                viewModel.onPasswordChanged("test#@@12")
 
                 viewModel.onClickSave()
 
@@ -218,9 +217,10 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
                     firstNames = "Jane"
                     lastName = "Doe"
                     username = "janedoe"
+                    newPassword = "secret"
+                    confirmedPassword = "secret"
                     gender = Person.GENDER_FEMALE
                 })
-                viewModel.onPasswordChanged("secret")
 
                 viewModel.onClickSave()
                 cancelAndIgnoreRemainingEvents()
@@ -238,8 +238,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
 
             viewModel.navCommandFlow.test(timeout = 5.seconds) {
                 val navCommand = awaitItem() as NavigateNavCommand
-                assertEquals(
-                    RegisterMinorWaitForParentViewModel.DEST_NAME, navCommand.viewName,
+                assertEquals(RegisterMinorWaitForParentView.VIEW_NAME, navCommand.viewName,
                     "Navigated to wait for parent screen")
                 assertEquals("janedoe", navCommand.args[ARG_USERNAME],
                     "Username argument provided")
@@ -288,9 +287,10 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
                     firstNames = "Jane"
                     lastName = "Doe"
                     username = "janedoe"
+                    newPassword = "secret"
+                    confirmedPassword = "secret"
                     gender = Person.GENDER_FEMALE
                 })
-                viewModel.onPasswordChanged("secret")
 
                 viewModel.onClickSave()
 
@@ -336,88 +336,6 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
         }
     }
 
-    @Test
-    fun givenInvalidPhoneNumberIncluded_whenSaved_shouldValidatePhoneNumberAndShowError() {
-        testViewModel<PersonEditViewModel> {
-            viewModelFactory {
-                PersonEditViewModel(di, savedStateHandle)
-            }
-
-            val mockPhoneValidator = mock<PhoneNumValidatorUseCase> {
-                on { isValid(any()) }.thenReturn(false)
-            }
-
-            extendDi {
-                bind<PhoneNumValidatorUseCase>() with singleton { mockPhoneValidator }
-            }
-
-            val invalidNum = "+1234"
-
-            viewModel.uiState.test(timeout = 5.seconds) {
-                val initState = awaitItemWhere { it.fieldsEnabled && it.person != null }
-                viewModel.onEntityChanged(initState.person?.shallowCopy {
-                    firstNames = "bob"
-                    lastName = "newtestuser"
-                    phoneNum = invalidNum
-                    gender = Person.GENDER_MALE
-                })
-                viewModel.onNationalPhoneNumSetChanged(true)
-
-                cancelAndIgnoreRemainingEvents()
-            }
-
-            viewModel.onClickSave()
-
-            verify(mockPhoneValidator).isValid(invalidNum)
-            viewModel.uiState.assertItemReceived {
-                it.phoneNumError == systemImpl.getString(MR.strings.invalid)
-            }
-        }
-    }
-
-
-
-    @Test
-    fun givenValidPhoneNumberIncluded_whenSaved_shouldValidatePhoneNumberAndShowError() {
-        testViewModel<PersonEditViewModel> {
-            viewModelFactory {
-                PersonEditViewModel(di, savedStateHandle)
-            }
-
-            val mockPhoneValidator = mock<PhoneNumValidatorUseCase> {
-                on { isValid(any()) }.thenReturn(true)
-            }
-
-            extendDi {
-                bind<PhoneNumValidatorUseCase>() with singleton { mockPhoneValidator }
-            }
-
-            val invalidNum = "+19097187456"
-
-            viewModel.uiState.test(timeout = 5.seconds) {
-                val initState = awaitItemWhere { it.fieldsEnabled && it.person != null }
-                viewModel.onEntityChanged(initState.person?.shallowCopy {
-                    firstNames = "bob"
-                    lastName = "newtestuser"
-                    phoneNum = invalidNum
-                    gender = Person.GENDER_MALE
-                })
-                viewModel.onNationalPhoneNumSetChanged(true)
-
-                cancelAndIgnoreRemainingEvents()
-            }
-
-            viewModel.onClickSave()
-
-            verify(mockPhoneValidator).isValid(invalidNum)
-
-            activeDb.doorFlow(arrayOf("Person")) {
-                activeDb.personDao.getAllPerson()
-            }.assertItemReceived(timeout = 5.seconds) { list ->
-                list.any { it.lastName == "newtestuser" }
-            }
-        }
-    }
 
 
 

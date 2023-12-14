@@ -18,11 +18,13 @@ import com.ustadmobile.lib.db.composites.CourseBlockAndDbEntities
 import com.ustadmobile.lib.db.composites.CourseBlockUidAndClazzUid
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
+import kotlin.js.JsName
 
 @Repository
 @DoorDao
 expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlock> {
 
+    @JsName("findByUid")
     @Query("SELECT * FROM CourseBlock WHERE cbUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long): CourseBlock?
 
@@ -32,12 +34,6 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun replaceListAsync(list: List<CourseBlock>)
 
-
-    @HttpAccessible(
-        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
-    )
-    @Query("SELECT * FROM CourseBlock WHERE cbUid = :uid")
-    abstract fun findByUidAsyncAsFlow(uid: Long): Flow<CourseBlock?>
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,

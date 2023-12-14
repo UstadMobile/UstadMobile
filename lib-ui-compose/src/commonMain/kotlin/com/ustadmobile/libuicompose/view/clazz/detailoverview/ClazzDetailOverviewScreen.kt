@@ -38,7 +38,7 @@ import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewUi
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.CourseBlock
-import com.ustadmobile.libuicompose.components.UstadHtmlText
+import com.ustadmobile.libuicompose.components.HtmlText
 import com.ustadmobile.libuicompose.components.UstadDetailField2
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
@@ -92,11 +92,10 @@ fun ClazzDetailOverviewScreen(
             .fillMaxSize()
     ){
         item(key = "clazz_desc") {
-            UstadHtmlText(
+            HtmlText(
                 html = uiState.clazz?.clazzDesc ?: "",
                 modifier = Modifier.defaultItemPadding()
             )
-            Divider(Modifier.height(1.dp))
         }
 
         item(key = "members") {
@@ -149,8 +148,7 @@ fun ClazzDetailOverviewScreen(
         }
 
         item {
-            Divider(Modifier.height(1.dp))
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
         }
 
         if(uiState.scheduleList.isNotEmpty()) {

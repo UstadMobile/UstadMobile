@@ -3,8 +3,6 @@ package com.ustadmobile.sharedse.xapi
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
-import com.russhwolf.settings.PropertiesSettings
-import com.russhwolf.settings.Settings
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
@@ -24,7 +22,6 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementSerializer
-import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.XapiStateResponder
@@ -88,25 +85,9 @@ class TestXapiStateResponder {
         }
 
         di = DI {
-            bind<Settings>() with singleton {
-                PropertiesSettings(
-                    delegate = Properties(),
-                    onModify = {
-                        //do nothing
-                    }
-                )
-            }
-
-            bind<SupportedLanguagesConfig>() with singleton {
-                SupportedLanguagesConfig(
-                    systemLocales = listOf(Locale.getDefault().language),
-                    settings = instance(),
-                )
-            }
-
-
             bind<UstadMobileSystemImpl>() with singleton {
-                spy(UstadMobileSystemImpl(instance(), instance()))
+                spy(UstadMobileSystemImpl(
+                    temporaryFolder.newFolder()))
             }
             bind<UstadAccountManager>() with singleton {
                 UstadAccountManager(instance(), di)

@@ -53,56 +53,58 @@ fun ClazzEnrolmentEditScreen(
     Column(
         modifier = Modifier
     )  {
+        UstadInputFieldLayout(
+            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            errorText = uiState.roleSelectedError,
+        ) {
+            UstadExposedDropDownMenuField(
+                value = uiState.clazzEnrolment?.clazzEnrolmentRole ?: ClazzEnrolment.ROLE_STUDENT,
+                modifier = Modifier.testTag("enrolment_role").fillMaxWidth(),
+                label = stringResource(MR.strings.role),
+                itemText = {
+                    val messageId = if(it == ClazzEnrolment.ROLE_STUDENT) {
+                        MR.strings.student
+                    }else {
+                        MR.strings.teacher
+                    }
 
-        UstadExposedDropDownMenuField(
-            value = uiState.clazzEnrolment?.clazzEnrolmentRole ?: ClazzEnrolment.ROLE_STUDENT,
-            modifier = Modifier.testTag("enrolment_role").defaultItemPadding().fillMaxWidth(),
-            label = stringResource(MR.strings.role) + "*",
-            itemText = {
-                val messageId = if(it == ClazzEnrolment.ROLE_STUDENT) {
-                    MR.strings.student
-                }else {
-                    MR.strings.teacher
-                }
+                    courseTerminologyEntryResource(
+                        terminologyEntries = terminologyEntries,
+                        stringResource = messageId
+                    )
+                },
+                options = uiState.roleOptions,
+                onOptionSelected = {
+                    onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy {
+                        clazzEnrolmentRole = it
+                    })
+                },
+            )
+        }
 
-                courseTerminologyEntryResource(
-                    terminologyEntries = terminologyEntries,
-                    stringResource = messageId
-                )
-            },
-            options = uiState.roleOptions,
-            onOptionSelected = {
-                onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy {
-                    clazzEnrolmentRole = it
-                })
-            },
-            supportingText = {
-                Text(uiState.roleSelectedError ?: stringResource(MR.strings.required))
-            }
-        )
 
         Spacer(modifier = Modifier.width(15.dp))
 
         Row(modifier = Modifier.fillMaxWidth()) {
-            UstadDateField(
-                modifier = Modifier.weight(0.5f)
-                    .defaultItemPadding(end = 8.dp)
-                    .testTag("start_date")
-                    .fillMaxWidth(),
-                value = uiState.clazzEnrolment?.clazzEnrolmentDateJoined ?: 0,
-                label = { Text(stringResource(MR.strings.start_date) + "*") },
-                enabled = uiState.fieldsEnabled,
-                isError = uiState.startDateError != null,
-                timeZoneId = uiState.clazzEnrolment?.timeZone ?: "UTC",
-                onValueChange = {
-                    onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy{
-                        clazzEnrolmentDateJoined = it
-                    })
-                },
-                supportingText = {
-                    Text(uiState.startDateError ?: stringResource(MR.strings.required))
-                }
-            )
+            UstadInputFieldLayout(
+                modifier = Modifier.weight(0.5f).defaultItemPadding(end = 8.dp),
+                errorText = uiState.startDateError
+            ) {
+                UstadDateField(
+                    modifier = Modifier.testTag("start_date").fillMaxWidth(),
+                    value = uiState.clazzEnrolment?.clazzEnrolmentDateJoined ?: 0,
+                    label = { Text(stringResource(MR.strings.start_date)) },
+                    enabled = uiState.fieldsEnabled,
+                    isError = uiState.startDateError != null,
+                    timeZoneId = uiState.clazzEnrolment?.timeZone ?: "UTC",
+                    onValueChange = {
+                        onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy{
+                            clazzEnrolmentDateJoined = it
+                        })
+                    }
+                )
+            }
+
 
             UstadInputFieldLayout(
                 modifier = Modifier.weight(0.5f).defaultItemPadding(start = 8.dp),
@@ -124,20 +126,17 @@ fun ClazzEnrolmentEditScreen(
             }
         }
 
-        if(uiState.outcomeVisible) {
-            UstadMessageIdOptionExposedDropDownMenuField(
-                modifier = Modifier.testTag("clazzEnrolmentOutcome").fillMaxWidth().defaultItemPadding(),
-                value = uiState.clazzEnrolment?.clazzEnrolmentOutcome ?: ClazzEnrolment.OUTCOME_IN_PROGRESS,
-                label = stringResource(MR.strings.outcome),
-                options = OutcomeConstants.OUTCOME_MESSAGE_IDS,
-                enabled = uiState.fieldsEnabled,
-                onOptionSelected = {
-                    onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy{
-                        clazzEnrolmentOutcome = it.value
-                    })
-                },
-            )
-        }
-
+        UstadMessageIdOptionExposedDropDownMenuField(
+            modifier = Modifier.testTag("clazzEnrolmentOutcome").fillMaxWidth().defaultItemPadding(),
+            value = uiState.clazzEnrolment?.clazzEnrolmentOutcome ?: ClazzEnrolment.OUTCOME_IN_PROGRESS,
+            label = stringResource(MR.strings.outcome),
+            options = OutcomeConstants.OUTCOME_MESSAGE_IDS,
+            enabled = uiState.fieldsEnabled,
+            onOptionSelected = {
+                onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy{
+                    clazzEnrolmentOutcome = it.value
+                })
+            },
+        )
     }
 }

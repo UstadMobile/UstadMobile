@@ -14,7 +14,6 @@ import app.cash.paging.PagingSource
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
-import com.ustadmobile.core.viewmodel.courseblock.textblockdetail.TextBlockDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.*
@@ -48,6 +47,12 @@ data class ClazzDetailOverviewUiState(
 
     val clazzHolidayCalendarVisible: Boolean
         get() = clazz?.clazzHolidayCalendar != null
+
+    fun cbDescriptionVisible(courseBlock: CourseBlockWithCompleteEntity): Boolean {
+        if (!courseBlock.cbDescription.isNullOrBlank())
+            return true
+        return false
+    }
 
 }
 
@@ -131,10 +136,6 @@ class ClazzDetailOverviewViewModel(
                     )
                 }
                 lastCourseBlockPagingSource?.invalidate()
-            }
-            CourseBlock.BLOCK_TEXT_TYPE -> {
-                navController.navigate(TextBlockDetailViewModel.DEST_NAME,
-                    mapOf(ARG_ENTITY_UID to courseBlock.cbUid.toString()))
             }
             CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
                 navController.navigate(ClazzAssignmentDetailViewModel.DEST_NAME,

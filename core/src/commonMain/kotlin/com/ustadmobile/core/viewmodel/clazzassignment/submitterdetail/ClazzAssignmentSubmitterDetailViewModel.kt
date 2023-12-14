@@ -14,12 +14,8 @@ import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
-import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitterNameUseCase
 import com.ustadmobile.core.impl.appstate.Snack
-import com.ustadmobile.core.viewmodel.clazzassignment.hasUpdatedMarks
 import com.ustadmobile.core.viewmodel.clazzassignment.latestUniqueMarksByMarker
-import com.ustadmobile.core.viewmodel.clazzassignment.submissionStatusFor
-import com.ustadmobile.core.viewmodel.clazzassignment.submissiondetail.CourseAssignmentSubmissionDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
@@ -29,11 +25,11 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
-import org.kodein.di.instance
-import org.kodein.di.on
 import kotlin.math.max
 
 /**
@@ -46,6 +42,8 @@ import kotlin.math.max
  * the currently active user to submit)
  * @param markNextStudentVisible if true, show a button for the marker to record the mark for the
  * current submitter and move to the next submission that requires marking.
+ * @param markListFilterChipsVisible If there are previous (superceded) grades, the use should see
+ * filter chips with the option to see all, or only the latest.
  * @param privateCommentsList list of private comments for this submitter
  * @param newPrivateCommentText private comment text currently being drafted by user on screen
  */
@@ -75,10 +73,10 @@ data class ClazzAssignmentSubmitterDetailUiState(
 
     val fieldsEnabled: Boolean = true,
 
-    val markListSelectedChipId: Int = ARG_FILTER_RECENT_SCORES,
+    val markListSelectedChipId: Int = CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES,
 
     val markListFilterOptions: List<MessageIdOption2> = listOf(
-        MessageIdOption2(MR.strings.most_recent, ARG_FILTER_RECENT_SCORES),
+        MessageIdOption2(MR.strings.most_recent, CourseAssignmentMarkDaoCommon.ARG_FILTER_RECENT_SCORES),
         MessageIdOption2(MR.strings.all, CourseAssignmentMarkDaoCommon.ARG_FILTER_ALL_SCORES)
     ),
 
@@ -97,7 +95,11 @@ data class ClazzAssignmentSubmitterDetailUiState(
 
     val submissionStatus: Int
         get() {
-            return submissionStatusFor(marks, submissionList)
+            return when {
+                marks.isNotEmpty() -> CourseAssignmentSubmission.MARKED
+                submissionList.isNotEmpty() -> CourseAssignmentSubmission.SUBMITTED
+                else -> CourseAssignmentSubmission.NOT_SUBMITTED
+            }
         }
 
     private val latestUniqueMarksByMarker: List<CourseAssignmentMarkAndMarkerName>
@@ -140,7 +142,12 @@ data class ClazzAssignmentSubmitterDetailUiState(
         }
 
     val markListFilterChipsVisible: Boolean
-        get() = marks.hasUpdatedMarks()
+        get() {
+            //Determine if there are multiple marks from a single marker submitter uid.
+            return marks
+                .groupingBy { it.courseAssignmentMark?.camMarkerSubmitterUid ?: 0L }
+                .eachCount().any { it.value > 1 }
+        }
 
     val scoreSummaryVisible: Boolean
         get() = marks.isNotEmpty()
@@ -179,9 +186,6 @@ class ClazzAssignmentSubmitterDetailViewModel(
 
     private var lastPrivateCommentsPagingSource: PagingSource<Int, CommentsAndName>? = null
 
-    private val assignmentSubmitterNameUseCase: GetAssignmentSubmitterNameUseCase by
-        on(accountManager.activeEndpoint).instance()
-
     init {
         viewModelScope.launch {
             _uiState.update { prev ->
@@ -195,7 +199,13 @@ class ClazzAssignmentSubmitterDetailViewModel(
             }
 
             launch {
-                val submitterName = assignmentSubmitterNameUseCase.invoke(submitterUid)
+                val submitterName = if(submitterUid < CourseAssignmentSubmission.MIN_SUBMITTER_UID_FOR_PERSON) {
+                    systemImpl.getString(MR.strings.group) + " " + submitterUid
+                }else {
+                    activeRepo.personDao.getNamesByUid(submitterUid).filter {
+                        it?.firstNames != null
+                    }.first().let {  "${it?.firstNames} ${it?.lastName}" }
+                }
 
                 _appUiState.update { prev ->
                     prev.copy(
@@ -360,12 +370,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
     }
 
     fun onClickSubmission(submission: CourseAssignmentSubmission) {
-        navController.navigate(
-            viewName = CourseAssignmentSubmissionDetailViewModel.DEST_NAME,
-            args = mapOf(
-                ARG_ENTITY_UID to submission.casUid.toString()
-            )
-        )
+
     }
 
     fun onClickGradeFilterChip(option: MessageIdOption2) {

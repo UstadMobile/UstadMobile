@@ -1,5 +1,7 @@
 package com.ustadmobile.util.ext
 
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.impl.locale.StringProvider
 
 /**
  * Format string as equivalent to String.format in android
@@ -42,3 +44,10 @@ fun String.wordBreakLimit(numOfWords: Int = 10): String{
 }
 
 
+/**
+ * Shorthand to add (optional) to a field title
+ * e.g. "FieldName" -> "Field name (optional)"
+ */
+fun String.addOptionalSuffix(stringProvider: StringProvider): String {
+    return "$this (${stringProvider.get(MR.strings.optional)})"
+}

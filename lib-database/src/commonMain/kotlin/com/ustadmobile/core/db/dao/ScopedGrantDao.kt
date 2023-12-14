@@ -84,8 +84,6 @@ expect abstract class ScopedGrantDao {
                        JOIN ScopedGrant
                            ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
                  WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
-                   AND (ScopedGrant.sgEntityUid = 0 OR ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
-                   AND (ScopedGrant.sgTableId = 0 OR ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES})
                    AND (ScopedGrant.sgPermissions & :permission) > 0    
                )
         """
@@ -95,21 +93,6 @@ expect abstract class ScopedGrantDao {
         permission: Long,
     ): Flow<Boolean>
 
-    @Query("""
-        SELECT EXISTS(
-                SELECT PersonGroupMember.groupMemberGroupUid
-                  FROM PersonGroupMember 
-                       JOIN ScopedGrant
-                           ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-                 WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
-                   AND ScopedGrant.sgEntityUid =  ${ScopedGrant.ALL_ENTITIES}
-                   AND ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
-                   AND (ScopedGrant.sgPermissions & ${Role.ALL_PERMISSIONS}) > 0  
-               )
-    """)
-    abstract fun userHasAllPermissionsOnAllTablesGrant(
-        accountPersonUid: Long,
-    ): Flow<Boolean>
 
     @Query("""
         SELECT PersonGroupMember.*, PersonGroup.*, ScopedGrant.*

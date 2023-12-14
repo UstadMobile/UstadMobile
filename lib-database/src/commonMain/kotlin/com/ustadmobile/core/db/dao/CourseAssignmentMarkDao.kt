@@ -61,7 +61,6 @@ expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
          WHERE ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL) > 0
            AND CourseAssignmentMark.camAssignmentUid = :assignmentUid
            AND CourseAssignmentMark.camSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
-      ORDER BY CourseAssignmentMark.camLct DESC    
     """)
     @QueryLiveTables(arrayOf("CourseAssignmentMark", "Person", "ClazzAssignment",
         "CourseGroupMember", "ClazzEnrolment"))
@@ -85,8 +84,7 @@ expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
                LEFT JOIN Person
                          ON Person.personUid = CourseAssignmentMark.camMarkerPersonUid
          WHERE CourseAssignmentMark.camAssignmentUid = :assignmentUid
-           AND CourseAssignmentMark.camSubmitterUid = :submitterUid
-      ORDER BY CourseAssignmentMark.camLct DESC                             
+           AND CourseAssignmentMark.camSubmitterUid = :submitterUid                         
     """)
     abstract fun getAllMarksForSubmitterAsFlow(
         submitterUid: Long,

@@ -1,8 +1,7 @@
 package com.ustadmobile.core.account
 
-import com.russhwolf.settings.Settings
-import com.russhwolf.settings.set
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.whenSubscribed
@@ -50,7 +49,7 @@ import org.kodein.di.on
  * account.
  */
 class UstadAccountManager(
-    private val settings: Settings,
+    private val systemImpl: UstadMobileSystemImpl,
     val di: DI
 )  {
 
@@ -67,7 +66,7 @@ class UstadAccountManager(
             _currentUserSession.value = value
 
             val activeAccountJson = json.encodeToString(value)
-            settings[ACCOUNTS_ACTIVE_SESSION_PREFKEY] = activeAccountJson
+            systemImpl.setAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, activeAccountJson)
         }
 
     /**
@@ -120,15 +119,15 @@ class UstadAccountManager(
     private val scope = CoroutineScope(Dispatchers.Main + Job())
 
     init {
-        val currentEndpointStr = settings.getStringOrNull(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY)
+        val currentEndpointStr = systemImpl.getAppPref(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY)
             ?: apiUrlConfig.presetApiUrl ?: MANIFEST_URL_FALLBACK
         val currentDb: UmAppDatabase = di.direct.on(Endpoint(currentEndpointStr)).instance(tag = DoorTag.TAG_DB)
 
-        val initUserSession: UserSessionWithPersonAndEndpoint = settings.getStringOrNull(ACCOUNTS_ACTIVE_SESSION_PREFKEY)?.let {
+        val initUserSession: UserSessionWithPersonAndEndpoint = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY)?.let {
             json.decodeFromString(it)
         } ?: makeNewTempGuestSession(currentEndpointStr,  currentDb)
         _currentUserSession = MutableStateFlow(initUserSession)
-        val initEndpoints: List<String> = settings.getStringOrNull(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION)?.let {
+        val initEndpoints: List<String> = systemImpl.getAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION)?.let {
             json.decodeFromString(ListSerializer(String.serializer()), it)
         } ?: listOf(currentEndpointStr)
         _endpointsWithActiveSessions = MutableStateFlow(initEndpoints.map { Endpoint(it) })
@@ -241,7 +240,6 @@ class UstadAccountManager(
         accountRegisterOptions: AccountRegisterOptions = AccountRegisterOptions()
     ): PersonWithAccount = withContext(Dispatchers.Default){
         assertNotClosed()
-        val endpoint = Endpoint(endpointUrl)
         val parentVal = accountRegisterOptions.parentJoin
         val httpStmt = httpClient.preparePost {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
@@ -259,22 +257,8 @@ class UstadAccountManager(
 
         val newPassword = person.newPassword
         if(status == 200 && registeredPerson != null && newPassword != null) {
-            //Must ensure that the site object is loaded to get auth salt.
-            val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
-            getSiteFromDbOrLoadFromHttp(repo)
-
             if(accountRegisterOptions.makeAccountActive){
-                val session = addSession(registeredPerson,
-                    endpointUrl, newPassword)
-
-                //If the person is not loaded into the database (probably not), then put in the db.
-                val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
-                db.withDoorTransactionAsync {
-                    if(db.personDao.findPersonAccountByUid(registeredPerson.personUid) == null) {
-                        db.personDao.insertAsync(registeredPerson)
-                    }
-                }
-
+                val session = addSession(registeredPerson, endpointUrl, newPassword)
                 currentUserSession = session
             }
 
@@ -341,7 +325,7 @@ class UstadAccountManager(
     private fun commitActiveEndpointsToPref() {
         val json = Json.encodeToString(ListSerializer(String.serializer()),
             _endpointsWithActiveSessions.value.toSet().map { it.url }.toList())
-        settings[ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION] = json
+        systemImpl.setAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION, json)
     }
 
     //When sync data comes in, check to see if a change has been actioned that has ended our active

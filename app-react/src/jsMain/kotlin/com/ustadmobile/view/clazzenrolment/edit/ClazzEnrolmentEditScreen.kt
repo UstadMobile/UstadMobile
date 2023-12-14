@@ -48,10 +48,10 @@ val ClazzEnrolmentEditScreenComponent = FC<ClazzEnrolmentEditScreenProps> { prop
             UstadSelectField<Int> {
                 id = "enrolment_role"
                 value = props.uiState.clazzEnrolment?.clazzEnrolmentRole ?: ClazzEnrolment.ROLE_STUDENT
-                label = strings[MR.strings.role] + "*"
+                label = strings[MR.strings.role]
                 options = props.uiState.roleOptions
                 error = props.uiState.roleSelectedError != null
-                helperText = ReactNode(props.uiState.roleSelectedError ?: strings[MR.strings.required])
+                helperText = props.uiState.roleSelectedError?.let { ReactNode(it) }
                 enabled = props.uiState.fieldsEnabled
                 itemValue = { "$it" }
                 itemLabel = {
@@ -74,10 +74,10 @@ val ClazzEnrolmentEditScreenComponent = FC<ClazzEnrolmentEditScreenProps> { prop
             UstadDateField {
                 id = "date_joined"
                 timeInMillis = props.uiState.clazzEnrolment?.clazzEnrolmentDateJoined ?: 0
-                label = ReactNode(strings[MR.strings.start_date] + "*")
+                label = ReactNode(strings[MR.strings.start_date])
                 disabled = !props.uiState.fieldsEnabled
                 error = props.uiState.startDateError != null
-                helperText = ReactNode(props.uiState.startDateError ?: strings[MR.strings.required])
+                helperText = props.uiState.startDateError?.let { ReactNode(it) }
                 timeZoneId = props.uiState.clazzEnrolment?.timeZone ?: "UTC"
                 onChange = {
                     props.onClazzEnrolmentChanged(
@@ -105,23 +105,20 @@ val ClazzEnrolmentEditScreenComponent = FC<ClazzEnrolmentEditScreenProps> { prop
             }
 
 
-            if(props.uiState.outcomeVisible) {
-                UstadMessageIdSelectField {
-                    id = "outcome"
-                    value = props.uiState.clazzEnrolment?.clazzEnrolmentOutcome
-                        ?: ClazzEnrolment.OUTCOME_IN_PROGRESS
-                    label = strings[MR.strings.outcome]
-                    options = OutcomeConstants.OUTCOME_MESSAGE_IDS
-                    enabled = props.uiState.fieldsEnabled
-                    onChange = {
-                        props.onClazzEnrolmentChanged(
-                            props.uiState.clazzEnrolment?.shallowCopy {
-                                clazzEnrolmentOutcome = it.value
-                            })
-                    }
+            UstadMessageIdSelectField {
+                id = "outcome"
+                value = props.uiState.clazzEnrolment?.clazzEnrolmentOutcome
+                    ?: ClazzEnrolment.OUTCOME_IN_PROGRESS
+                label = strings[MR.strings.outcome]
+                options = OutcomeConstants.OUTCOME_MESSAGE_IDS
+                enabled = props.uiState.fieldsEnabled
+                onChange = {
+                    props.onClazzEnrolmentChanged(
+                        props.uiState.clazzEnrolment?.shallowCopy {
+                            clazzEnrolmentOutcome = it.value
+                    })
                 }
             }
-
         }
     }
 }

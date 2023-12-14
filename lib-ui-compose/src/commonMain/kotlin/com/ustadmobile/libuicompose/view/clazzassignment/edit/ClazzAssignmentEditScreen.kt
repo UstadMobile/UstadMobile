@@ -4,8 +4,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,14 +31,12 @@ import com.ustadmobile.libuicompose.components.UstadSwitchField
 import com.ustadmobile.libuicompose.util.compose.courseTerminologyEntryResource
 import com.ustadmobile.libuicompose.util.compose.rememberCourseTerminologyEntries
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import dev.icerock.moko.resources.compose.stringResource
-import kotlinx.coroutines.Dispatchers
-import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
-fun ClazzAssignmentEditScreen(viewModel: ClazzAssignmentEditViewModel) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle(
-        ClazzAssignmentEditUiState(), Dispatchers.Main.immediate)
+fun ClazzAssignmentEditScreenForViewModel(viewModel: ClazzAssignmentEditViewModel) {
+    val uiState by viewModel.uiState.collectAsState(initial = ClazzAssignmentEditUiState())
 
     ClazzAssignmentEditScreen(
         uiState = uiState,
@@ -46,19 +45,17 @@ fun ClazzAssignmentEditScreen(viewModel: ClazzAssignmentEditViewModel) {
         onClickAssignReviewers =  viewModel::onClickAssignReviewers,
         onClickSubmissionType = viewModel::onClickSubmissionType,
         onClickEditDescription = viewModel::onClickEditDescription,
-        onGroupSubmissionOnChanged = viewModel::onGroupSubmissionOnChanged,
     )
 }
 
 @Composable
 fun ClazzAssignmentEditScreen(
-    uiState: ClazzAssignmentEditUiState,
+    uiState: ClazzAssignmentEditUiState = ClazzAssignmentEditUiState(),
     onChangeAssignment: (ClazzAssignment?) -> Unit = {},
     onChangeCourseBlock: (CourseBlock?) -> Unit = {},
     onClickSubmissionType: () -> Unit = {},
     onClickAssignReviewers: () -> Unit = {},
     onClickEditDescription: () -> Unit = {},
-    onGroupSubmissionOnChanged: (Boolean) -> Unit = { },
 ) {
 
     val terminologyEntries = rememberCourseTerminologyEntries(uiState.courseTerminology)
@@ -66,6 +63,7 @@ fun ClazzAssignmentEditScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .defaultScreenPadding()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
@@ -76,32 +74,19 @@ fun ClazzAssignmentEditScreen(
             onClickEditDescription = onClickEditDescription,
         )
 
-        UstadSwitchField(
-            checked = uiState.groupSubmissionOn,
-            label = stringResource(MR.strings.group_submission),
-            onChange = onGroupSubmissionOnChanged,
-            modifier = Modifier.defaultItemPadding().testTag("group_submission_on"),
-            enabled = uiState.fieldsEnabled,
+        UstadClickableTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultItemPadding()
+                .testTag("cgsName"),
+            value = uiState.entity?.assignmentCourseGroupSetName?.let {
+                "${stringResource(MR.strings.groups)}: $it"
+            } ?: stringResource(MR.strings.individual_submission),
+            label = { Text(stringResource(MR.strings.submission_type)) },
+            enabled = uiState.groupSetEnabled,
+            onClick = onClickSubmissionType,
+            onValueChange = {}
         )
-
-        if(uiState.groupSubmissionOn) {
-            UstadClickableTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .defaultItemPadding()
-                    .testTag("cgsName"),
-                value = uiState.entity?.assignmentCourseGroupSetName
-                    ?: "(${stringResource(MR.strings.unset)})",
-                label = { Text(stringResource(MR.strings.groups) + "*") },
-                enabled = uiState.groupSetEnabled,
-                onClick = onClickSubmissionType,
-                supportingText = {
-                    Text(uiState.groupSetError ?: stringResource(MR.strings.required))
-                },
-                isError = uiState.groupSetError != null,
-                onValueChange = {}
-            )
-        }
 
         UstadInputFieldLayout(
             modifier = Modifier.defaultItemPadding(),
@@ -149,13 +134,9 @@ fun ClazzAssignmentEditScreen(
                 value = (uiState.entity?.assignment?.caSizeLimit ?: 0).toFloat(),
                 label = { Text(stringResource(MR.strings.size_limit)) },
                 enabled = uiState.fieldsEnabled,
-                isError = uiState.sizeLimitError != null,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                 ),
-                supportingText = uiState.sizeLimitError?.let {
-                    { Text(it) }
-                },
                 onValueChange = {
                     onChangeAssignment(
                         uiState.entity?.assignment?.shallowCopy {
@@ -296,14 +277,12 @@ fun ClazzAssignmentEditScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 UstadInputFieldLayout(
-                    modifier = Modifier.weight(0.7F)
-                    ,
+                    modifier = Modifier.weight(0.7F),
                     errorText = uiState.reviewerCountError,
                 ) {
                     UstadNumberTextField(
                         modifier = Modifier
-                            .testTag("caPeerReviewerCount")
-                            .fillMaxWidth(),
+                            .testTag("caPeerReviewerCount"),
                         value = (uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toFloat(),
                         label = { Text(stringResource(MR.strings.reviews_per_user_group)) },
                         enabled = uiState.fieldsEnabled,
@@ -317,8 +296,6 @@ fun ClazzAssignmentEditScreen(
                         },
                     )
                 }
-
-                Spacer(Modifier.width(16.dp))
 
                 OutlinedButton(
                     onClick = onClickAssignReviewers,

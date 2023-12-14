@@ -12,7 +12,6 @@ import react.Props
 import react.ReactNode
 import react.create
 import com.ustadmobile.lib.db.entities.Comments
-import com.ustadmobile.mui.components.UstadLinkify
 
 
 external interface UstadCommentListItemProps : Props {
@@ -29,6 +28,7 @@ val UstadCommentListItem = FC<UstadCommentListItemProps> { props ->
     )
 
     ListItem {
+
         ListItemIcon {
             + PersonIcon.create {
                 sx {
@@ -40,12 +40,12 @@ val UstadCommentListItem = FC<UstadCommentListItemProps> { props ->
 
         ListItemText {
             primary = ReactNode("${props.commentsAndName?.firstNames} ${props.commentsAndName?.lastName}")
-            secondary = UstadLinkify.create {
-                + (props.commentsAndName?.comment?.commentsText ?: "")
-            }
+            secondary = ReactNode(props.commentsAndName?.comment?.commentsText ?: "")
         }
 
-        secondaryAction = ReactNode(formattedTime)
+        secondaryAction = Typography.create {
+            + formattedTime
+        }
     }
 
 }

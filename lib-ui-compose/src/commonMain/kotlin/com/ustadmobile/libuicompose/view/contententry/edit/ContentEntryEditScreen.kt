@@ -27,6 +27,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.libuicompose.components.UstadClickableTextField
 import com.ustadmobile.libuicompose.components.UstadCourseBlockEdit
 import com.ustadmobile.libuicompose.components.UstadExposedDropDownMenuField
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
@@ -54,6 +55,8 @@ fun ContentEntryEditScreen(
     onClickUpdateContent: () -> Unit = {},
     onContentEntryChanged: (ContentEntry?) -> Unit = {},
     onChangeCompress: (Boolean) -> Unit = {},
+    onChangePubliclyAccessible: (Boolean) -> Unit = {},
+    onClickLanguage: () -> Unit = {},
     onSelectContainerStorageDir: (ContainerStorageDir) -> Unit = {},
 ) {
     Column(
@@ -96,10 +99,7 @@ fun ContentEntryEditScreen(
 
         UstadInputFieldLayout(
             modifier = Modifier.fillMaxWidth(),
-            errorText = uiState.titleError,
-            captionIfNoError = {
-                Text(stringResource(MR.strings.required))
-            }
+            errorText = uiState.titleError
         ) {
             OutlinedTextField(
                 modifier = Modifier.testTag("title").fillMaxWidth(),
@@ -219,6 +219,18 @@ fun ContentEntryEditScreen(
                 }
             )
         }
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        UstadClickableTextField(
+            modifier = Modifier.testTag("languageName").fillMaxWidth(),
+            value = uiState.entity?.language?.name ?: "",
+            label = { Text(stringResource(MR.strings.language)) },
+            readOnly = true,
+            enabled = uiState.fieldsEnabled,
+            onClick = onClickLanguage,
+            onValueChange = {}
+        )
 
         Spacer(modifier = Modifier.height(64.dp))
     }

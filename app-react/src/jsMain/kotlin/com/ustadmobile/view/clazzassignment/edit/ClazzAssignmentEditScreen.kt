@@ -46,8 +46,6 @@ external interface ClazzAssignmentEditScreenProps : Props {
 
     var onClickAssignReviewers: () -> Unit
 
-    var onGroupSubmissionOnChanged: (Boolean) -> Unit
-
 }
 
 
@@ -67,37 +65,24 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 onCourseBlockChange = props.onChangeCourseBlock
             }
 
-
-            UstadSwitchField {
-                label = strings[MR.strings.group_assignment]
-                checked = props.uiState.groupSubmissionOn
-                onChanged = props.onGroupSubmissionOnChanged
-                enabled = props.uiState.fieldsEnabled
-                id = "group_submission_on"
-            }
-
-            if(props.uiState.groupSubmissionOn) {
-                UstadTextField {
-                    id = "cgsName"
-                    sx {
-                        input {
-                            cursor = Cursor.pointer
-                        }
+            UstadTextField {
+                id = "cgsName"
+                sx {
+                    input {
+                        cursor = Cursor.pointer
                     }
-                    variant = FormControlVariant.outlined
-                    value = props.uiState.entity?.assignmentCourseGroupSetName
-                        ?: "(${strings[MR.strings.unset]})"
-                    label = ReactNode(strings[MR.strings.groups])
-                    disabled = !props.uiState.groupSetEnabled
-                    inputProps = jso {
-                        readOnly = true
-                    }
-                    onClick = { props.onClickSubmissionType() }
-                    error = props.uiState.groupSetError != null
-                    helperText = ReactNode(props.uiState.groupSetError ?: strings[MR.strings.required])
                 }
+                variant = FormControlVariant.outlined
+                value = props.uiState.entity?.assignmentCourseGroupSetName?.let {
+                    "${strings[MR.strings.groups]}: $it"
+                } ?: strings[MR.strings.individual_submission]
+                label = ReactNode(strings[MR.strings.submission_type])
+                disabled = !props.uiState.groupSetEnabled
+                inputProps = jso {
+                    readOnly = true
+                }
+                onClick = { props.onClickSubmissionType() }
             }
-
 
             UstadSwitchField {
                 id = "caRequireFileSubmission"
@@ -134,8 +119,6 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     numValue = (props.uiState.entity?.assignment?.caSizeLimit ?: 0).toFloat()
                     label = ReactNode(strings[MR.strings.size_limit])
                     disabled = !props.uiState.fieldsEnabled
-                    error = props.uiState.sizeLimitError != null
-                    helperText = props.uiState.sizeLimitError?.let { ReactNode(it) }
                     onChange = {
                         props.onAssignmentChanged(
                             props.uiState.entity?.assignment?.shallowCopy {
@@ -150,7 +133,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                     variant = FormControlVariant.outlined
                     numValue = (props.uiState.entity?.assignment?.caNumberOfFiles ?: 0).toFloat()
                     label = ReactNode(strings[MR.strings.number_of_files])
-                    disabled = !props.uiState.fieldsEnabled
+                    disabled = props.uiState.fieldsEnabled
                     onChange = {
                         props.onAssignmentChanged(
                             props.uiState.entity?.assignment?.shallowCopy {
@@ -327,7 +310,6 @@ val ClazzAssignmentEditScreen = FC<Props> {
         onChangeCourseBlock = viewModel::onCourseBlockChanged
         onClickSubmissionType = viewModel::onClickSubmissionType
         onClickAssignReviewers = viewModel::onClickAssignReviewers
-        onGroupSubmissionOnChanged = viewModel::onGroupSubmissionOnChanged
     }
 
 }

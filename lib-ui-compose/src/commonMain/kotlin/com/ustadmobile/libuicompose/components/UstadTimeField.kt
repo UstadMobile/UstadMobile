@@ -1,7 +1,7 @@
 package com.ustadmobile.libuicompose.components
 
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -84,7 +84,6 @@ fun UstadTimeField(
     enabled: Boolean = true,
     isError: Boolean = false,
     onValueChange: (Int) -> Unit = {},
-    supportingText: (@Composable () -> Unit)? = null,
 ) {
 
     fun Int.toTimeString() : String{
@@ -108,8 +107,8 @@ fun UstadTimeField(
         modifier = modifier,
         enabled = enabled,
         isError = isError,
-        onValueChange = { newValue ->
-            val filtered = newValue.filter { it.isDigit() }
+        onValueChange = {
+            val filtered = it.filter { it.isDigit() }
             rawValue = filtered.substring(0, min(filtered.length, 4))
             if(filtered.length == 4) {
                 try {
@@ -130,6 +129,6 @@ fun UstadTimeField(
         visualTransformation = TimeVisualTransformation(),
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        supportingText = supportingText,
     )
+
 }

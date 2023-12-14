@@ -24,6 +24,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.kodein.di.android.x.closestDI
 import androidx.appcompat.widget.SearchView
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModel
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.*
@@ -44,7 +46,8 @@ abstract class UstadBaseMvvmFragment: Fragment(), DIAware {
 
     inner class FragmentSnackDisaptcher(): SnackBarDispatcher {
         override fun showSnackBar(snack: Snack) {
-
+            (activity as? MainActivity)?.hideSoftKeyboard()
+            (activity as? MainActivity)?.showSnackBar(snack.message)
         }
     }
 

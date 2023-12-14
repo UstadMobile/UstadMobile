@@ -2,7 +2,6 @@ package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -15,9 +14,6 @@ import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
-import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
-import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
-import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.coroutines.CoroutineScope
@@ -81,15 +77,6 @@ abstract class UstadViewModel(
     protected val resultReturner: NavResultReturner by instance()
 
     protected val systemImpl: UstadMobileSystemImpl by instance()
-
-    protected val onClickLinkUseCase: OnClickLinkUseCase by lazy {
-        OnClickLinkUseCase(
-            navController = navController,
-            accountManager = accountManager,
-            openExternalLinkUseCase = di.direct.instance(),
-            apiUrlConfig = di.direct.instance(),
-        )
-    }
 
     private var lastNavResultTimestampCollected: Long = savedStateHandle[KEY_LAST_COLLECTED_TS]?.toLong() ?: 0L
         set(value) {
@@ -202,7 +189,7 @@ abstract class UstadViewModel(
         goOptions: UstadMobileSystemCommon.UstadGoOptions = UstadMobileSystemCommon.UstadGoOptions.Default,
     ) {
         val viewName = viewUri.substringBefore("?")
-        val args = if(viewUri.contains("?")) {
+        val args = if(viewName.contains("?")) {
             UMFileUtil.parseURLQueryString(viewUri)
         }else {
             mapOf()
@@ -260,18 +247,15 @@ abstract class UstadViewModel(
     fun navigateToEditHtml(
         currentValue: String?,
         resultKey: String,
-        title: String? = null,
         extraArgs: Map<String, String> = emptyMap(),
     ) {
         navController.navigate(
             viewName = HtmlEditViewModel.DEST_NAME,
-            args = buildMap {
-                put(HtmlEditViewModel.ARG_HTML, (currentValue ?: ""))
-                put(ARG_RESULT_DEST_KEY, resultKey)
-                put(ARG_RESULT_DEST_VIEWNAME, destinationName)
-                title?.also { put(HtmlEditViewModel.ARG_TITLE, it ) }
-                putAll(extraArgs)
-            }
+            args = mapOf(
+                HtmlEditViewModel.ARG_HTML to (currentValue ?: ""),
+                ARG_RESULT_DEST_KEY to resultKey,
+                ARG_RESULT_DEST_VIEWNAME to destinationName,
+            ) + extraArgs
         )
     }
 
@@ -299,7 +283,7 @@ abstract class UstadViewModel(
         serializer: KSerializer<T>,
         loadFromStateKeys: List<String> = listOf(KEY_ENTITY_STATE, UstadEditView.ARG_ENTITY_JSON),
         savedStateKey: String = loadFromStateKeys.first(),
-        onLoadFromDb: (suspend (UmAppDatabase) -> T?)?,
+        onLoadFromDb: suspend (UmAppDatabase) -> T?,
         makeDefault: suspend () -> T?,
         uiUpdate: (T?) -> Unit,
     ) : T? {
@@ -312,13 +296,13 @@ abstract class UstadViewModel(
             }
         }
 
-        val dbVal = onLoadFromDb?.invoke(activeDb)
+        val dbVal = onLoadFromDb(activeDb)
         if(dbVal != null) {
             uiUpdate(dbVal)
         }
 
         return try {
-            val repoVal = onLoadFromDb?.invoke(activeRepo) ?: makeDefault()
+            val repoVal = onLoadFromDb(activeRepo) ?: makeDefault()
             if(repoVal != null)
                 savedStateHandle.setJson(savedStateKey, serializer, repoVal)
             uiUpdate(repoVal)
@@ -340,12 +324,6 @@ abstract class UstadViewModel(
         putFromSavedStateIfPresent(savedStateHandle, key)
     }
 
-    fun MutableMap<String, String>.putFromSavedStateIfPresent(keys: List<String>) {
-        keys.forEach {
-            putFromSavedStateIfPresent(it)
-        }
-    }
-
 
     companion object {
         /**
@@ -357,6 +335,8 @@ abstract class UstadViewModel(
         const val KEY_LAST_COLLECTED_TS = "collectedTs"
 
         const val KEY_INIT_STATE = "initState"
+
+        const val RESULT_KEY_HTML_DESC = "description"
 
         const val ARG_TIME_ZONE = "timeZone"
 
@@ -383,24 +363,6 @@ abstract class UstadViewModel(
          * date of birth < MAX DATE OF BIRTH), or LoginPresenter where an adult account is required.
          */
         const val ARG_MAX_DATE_OF_BIRTH = "maxDob"
-
-        val ROOT_DESTINATIONS = listOf(ClazzListViewModel.DEST_NAME_HOME,
-            ContentEntryListViewModel.DEST_NAME_HOME, PersonListViewModel.DEST_NAME_HOME)
-
-        /**
-         * Can be used with any Android intent to provide a deep link to open within the app.
-         * The link can be in the form of:
-         *
-         * https://endpoint.server/umapp/#/ViewName?arg=value
-         * ViewName?arg=value
-         */
-        const val ARG_OPEN_LINK = "openLink"
-
-
-        /**
-         * Used together with the AccountManager
-         */
-        const val ARG_ACCOUNT_NAME = "account"
 
     }
 

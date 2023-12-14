@@ -1,7 +1,5 @@
 package com.ustadmobile.core.test.clientservertest
 
-import com.russhwolf.settings.PropertiesSettings
-import com.russhwolf.settings.Settings
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
@@ -9,11 +7,8 @@ import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
-import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitterNameUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.config.ApiUrlConfig
-import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.util.DiTag
@@ -51,12 +46,10 @@ import org.kodein.di.on
 import org.kodein.di.registerContextTranslator
 import org.kodein.di.scoped
 import org.kodein.di.singleton
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.nio.file.Files
-import java.util.Properties
 import kotlin.random.Random
 
 private fun clientServerCommonDiModule(
@@ -81,26 +74,9 @@ private fun clientServerCommonDiModule(
         db
     }
 
-    bind<Settings>() with  singleton {
-        PropertiesSettings(
-            delegate = Properties(),
-            onModify = {
-                //Do nothing
-            }
-        )
-    }
-
-    bind<SupportedLanguagesConfig>() with singleton {
-        SupportedLanguagesConfig(
-            systemLocales = listOf("en-US"),
-            settings = instance(),
-        )
-    }
-
     bind<UstadMobileSystemImpl>() with singleton {
         UstadMobileSystemImpl(
-            settings = instance(),
-            langConfig = instance()
+            File(baseTmpDir, "servertmp").also { it.mkdir() }
         )
     }
 
@@ -111,7 +87,7 @@ private fun clientServerCommonDiModule(
     }
 
     bind<UstadAccountManager>() with singleton {
-        UstadAccountManager(settings = instance(), di)
+        UstadAccountManager(systemImpl = instance(), di)
     }
 
     bind<ApiUrlConfig>() with singleton {
@@ -146,8 +122,6 @@ fun clientServerIntegrationTest(
             json(json = json)
         }
     }
-
-    val mockSnackBarDispatcher: SnackBarDispatcher = mock { }
     val tempDir = Files.createTempDirectory("client-server-integration-test").toFile()
 
     val serverEndpointScope = EndpointScope()
@@ -233,14 +207,6 @@ fun clientServerIntegrationTest(
 
                 bind<NavResultReturner>() with singleton {
                     spy(NavResultReturnerImpl())
-                }
-
-                bind<SnackBarDispatcher>() with singleton {
-                    mockSnackBarDispatcher
-                }
-
-                bind<GetAssignmentSubmitterNameUseCase>() with scoped(clientEndpointScope).singleton {
-                    GetAssignmentSubmitterNameUseCase(clientRepo, instance())
                 }
 
                 registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

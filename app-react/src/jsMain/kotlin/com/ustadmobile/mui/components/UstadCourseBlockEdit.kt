@@ -2,12 +2,12 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.viewmodel.courseblock.CourseBlockViewModelConstants.CompletionCriteria
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadSelectField
 import com.ustadmobile.wrappers.quill.ReactQuill
@@ -44,11 +44,11 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
         UstadTextField {
             id = "title"
             value = props.uiState.courseBlock?.cbTitle ?: ""
-            label = ReactNode(strings[MR.strings.title] + "*")
+            label = ReactNode(strings[MR.strings.title])
             disabled = !props.uiState.fieldsEnabled
             fullWidth = true
             error = props.uiState.caTitleError != null
-            helperText =  ReactNode(props.uiState.caTitleError ?: strings[MR.strings.required])
+            helperText = props.uiState.caTitleError?.let { ReactNode(it) }
             onTextChange = {
                 props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
                     cbTitle = it
@@ -62,18 +62,16 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             id = "description_quill"
             placeholder = strings[MR.strings.description]
             onChange = {
-                props.uiState.courseBlock?.also { courseBlock ->
-                    props.onCourseBlockChange(courseBlock.shallowCopy {
-                        cbDescription = it
-                    })
-                }
+                props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
+                    cbDescription = it
+                })
             }
         }
 
 
         UstadDateTimeField {
             timeInMillis = props.uiState.courseBlock?.cbHideUntilDate ?: 0
-            label = ReactNode(strings[MR.strings.dont_show_before])
+            label = ReactNode(strings[MR.strings.dont_show_before].addOptionalSuffix(strings))
             id = "hide_until_date"
             disabled = !props.uiState.fieldsEnabled
             helperText = props.uiState.caHideUntilDateError?.let { ReactNode(it) }
@@ -98,7 +96,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
                     label = strings[MR.strings.completion_criteria]
                     options = props.uiState.completionCriteriaOptions
                     itemValue = { it.value.toString() }
-                    itemLabel = { ReactNode(strings[it.stringResource].capitalizeFirstLetter()) }
+                    itemLabel = { ReactNode(strings[it.stringResource]) }
                     enabled = props.uiState.fieldsEnabled
                     onChange = {
                         props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
@@ -152,7 +150,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
                 timeInMillis = props.uiState.courseBlock?.cbDeadlineDate ?: 0
                 timeZoneId = props.uiState.timeZone
                 unsetDefault = Long.MAX_VALUE
-                label = ReactNode(strings[MR.strings.deadline])
+                label = ReactNode(strings[MR.strings.deadline].addOptionalSuffix(strings))
                 disabled = !props.uiState.fieldsEnabled
                 helperText = props.uiState.caDeadlineError?.let { ReactNode(it) }
                 error = props.uiState.caDeadlineError != null

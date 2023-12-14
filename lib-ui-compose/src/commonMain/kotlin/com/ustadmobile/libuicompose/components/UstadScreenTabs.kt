@@ -14,7 +14,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import com.ustadmobile.core.impl.appstate.AppUiState
-import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.appstate.TabItem
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -33,7 +32,6 @@ class TabScope(
     private val navController: UstadNavControllerPreCompose,
     private val onSetAppUiState: (AppUiState) -> Unit,
     private val navResultReturner: NavResultReturner,
-    private val onShowSnackBar: SnackBarDispatcher,
 ) {
 
     /**
@@ -42,7 +40,6 @@ class TabScope(
     @Composable
     fun <T: UstadViewModel> tabViewModel(
         viewModelClass: KClass<T>,
-        tab: TabItem,
         appUiStateMap: ((AppUiState) -> AppUiState)? = null,
         creator: (DI, UstadSavedStateHandle) -> T,
     ): T {
@@ -51,14 +48,9 @@ class TabScope(
             backStackEntry = backStackEntry,
             navController = navController,
             onSetAppUiState = onSetAppUiState,
-            onShowSnackBar =  onShowSnackBar,
             navResultReturner = navResultReturner,
             appUiStateMap =  appUiStateMap,
-            savedStateHandle = UstadSavedStateHandlePreCompose(
-                savedStateHolder = backStackEntry.savedStateHolder,
-                argsMap = tab.args.map { it.key to listOf(it.value) }.toMap(),
-                savedKeys = savedStateHandle.savedKeys,
-            ),
+            savedStateHandle = savedStateHandle,
             block = creator,
         )
     }
@@ -73,7 +65,6 @@ fun UstadScreenTabs(
     navController: UstadNavControllerPreCompose,
     onSetAppUiState: (AppUiState) -> Unit,
     navResultReturner: NavResultReturner,
-    onShowSnackBar: SnackBarDispatcher,
     content: @Composable TabScope.(TabItem) -> Unit,
 ) {
     val pagerState = rememberPagerState(
@@ -123,8 +114,7 @@ fun UstadScreenTabs(
                     backStackEntry = backStackEntry,
                     navController = navController,
                     onSetAppUiState = onSetAppUiState,
-                    navResultReturner = navResultReturner,
-                    onShowSnackBar = onShowSnackBar,
+                    navResultReturner = navResultReturner
                 )
 
                 content(tabScope, selectedTab)

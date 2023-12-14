@@ -4,6 +4,7 @@ import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.viewmodel.login.LoginUiState
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.util.ext.onTextChange
 import web.cssom.px
 import mui.material.*
@@ -15,9 +16,6 @@ import mui.system.sx
 import react.*
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.mui.components.UstadLanguageSelect
-import com.ustadmobile.mui.components.UstadPasswordTextField
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextField
 
@@ -29,7 +27,6 @@ external interface LoginProps : Props {
     var onClickConnectAsGuest: () -> Unit
     var onUsernameValueChange: (String) -> Unit
     var onPasswordValueChange: (String) -> Unit
-    var onChangeLanguage: (UstadMobileSystemCommon.UiLanguage) -> Unit
 }
 
 val LoginScreen = FC<Props> {
@@ -46,11 +43,8 @@ val LoginScreen = FC<Props> {
         onClickConnectAsGuest = viewModel::handleConnectAsGuest
         onUsernameValueChange = viewModel::onUsernameChanged
         onPasswordValueChange = viewModel::onPasswordChanged
-        onChangeLanguage = viewModel::onChangeLanguage
     }
 }
-
-
 
 private val LoginComponent2 = FC<LoginProps> { props ->
 
@@ -78,16 +72,16 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                 disabled = !props.uiState.fieldsEnabled
             }
 
-            UstadPasswordTextField {
+            UstadTextEditField {
                 id = "password"
                 value = props.uiState.password
-                label = ReactNode(strings[MR.strings.password])
-                onTextChange = {
+                label = strings[MR.strings.password]
+                onChange = {
                     props.onPasswordValueChange(it)
                 }
-                error = props.uiState.passwordError != null
-                disabled = !props.uiState.fieldsEnabled
-                helperText = props.uiState.passwordError?.let { ReactNode(it) }
+                error = props.uiState.passwordError
+                enabled = props.uiState.fieldsEnabled
+                password = true
             }
 
             Box{
@@ -114,30 +108,31 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                }
             }
 
-            UstadLanguageSelect {
-                langList = props.uiState.languageList
-                currentLanguage = props.uiState.currentLanguage
-                onItemSelected = props.onChangeLanguage
-                fullWidth = true
-                id = "language_select"
+            /*
+            These items are not yet active
+            Button {
+                id = "create_account_button"
+                onClick = { props.onClickCreateAccount() }
+                variant = ButtonVariant.outlined
+                + strings[MR.strings.create_account].uppercase()
             }
 
-
-            if(props.uiState.createAccountVisible) {
-                Button {
-                    id = "create_account_button"
-                    onClick = { props.onClickCreateAccount() }
-                    variant = ButtonVariant.outlined
-                    + strings[MR.strings.create_account].uppercase()
+            Box{
+                sx {
+                    height = 10.px
                 }
             }
 
-            if(props.uiState.connectAsGuestVisible) {
-                Button {
-                    id = "connect_as_guest_button"
-                    onClick = { props.onClickConnectAsGuest() }
-                    variant = ButtonVariant.outlined
-                    + strings[MR.strings.connect_as_guest].uppercase()
+            Button {
+                id = "connect_as_guest_button"
+                onClick = { props.onClickConnectAsGuest() }
+                variant = ButtonVariant.outlined
+                + strings[MR.strings.connect_as_guest].uppercase()
+            }
+
+            Box{
+                sx {
+                    height = 10.px
                 }
             }
 
@@ -145,7 +140,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                 align = TypographyAlign.center
                 + props.uiState.versionInfo
             }
-
+             */
         }
     }
 }

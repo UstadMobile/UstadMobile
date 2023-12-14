@@ -33,14 +33,15 @@ package com.ustadmobile.core.impl
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
+import androidx.annotation.VisibleForTesting
 import androidx.core.content.FileProvider
 import androidx.navigation.*
-import com.russhwolf.settings.Settings
-import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.io.ext.isGzipped
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toFile
 import dev.icerock.moko.resources.StringResource
@@ -60,17 +61,32 @@ import java.util.zip.ZipOutputStream
  * SystemImpl provides system methods for tasks such as copying files, reading
  * http streams etc. independently of the underlying system.
  *
- * @param applicationContext This must be the context for the activity. Using any other context
- *        won't work because Android's per-app language settings will not apply to the aplpication
- *        context, and systemImpl is used extensively to get localized strings.
- * @param settings : Multiplatform settings object. Used for app preferences.
+ *
  * @author mike, kileha3
  */
 actual open class UstadMobileSystemImpl(
-    private val applicationContext: Context,
-    settings: Settings,
-    langConfig: SupportedLanguagesConfig,
-) : UstadMobileSystemCommon(settings, langConfig) {
+    private val applicationContext: Context
+) : UstadMobileSystemCommon() {
+
+    private var appPreferences: SharedPreferences? = null
+
+
+    /**
+     * This should be used only for testing. This will use the given navcontroller instead of
+     * finding the navcontroller from the mainactivity. This is used for Espresso testing on Fragments.
+     */
+    @VisibleForTesting
+    var navController: NavController? = null
+
+    private val viewNameToAndroidImplMap = mapOf<String, String>(
+            "DownloadDialog" to "${PACKAGE_NAME}DownloadDialogFragment",
+            OnBoardingViewModel.DEST_NAME to "${PACKAGE_NAME}OnBoardingActivity",
+            EpubContentView.VIEW_NAME to "${PACKAGE_NAME}EpubContentActivity",
+            AboutView.VIEW_NAME to "${PACKAGE_NAME}AboutActivity",
+            ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
+            ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
+            PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity"
+    )
 
     /**
      * Simple async task to handle getting the setup file
@@ -157,6 +173,43 @@ actual open class UstadMobileSystemImpl(
     }
 
     /**
+     * Must provide the system's default locale (e.g. en_US.UTF-8)
+     *
+     * @return System locale
+     */
+    actual override fun getSystemLocale(): String {
+        return Locale.getDefault().toString()
+    }
+
+    /**
+     * Get a preference for the app
+     *
+     * @param key preference key as a string
+     * @return value of that preference
+     */
+    actual override fun getAppPref(key: String): String? {
+        return getAppSharedPreferences(applicationContext).getString(key, null)
+    }
+
+
+    /**
+     * Set a preference for the app
+     * @param key preference that is being set
+     * @param value value to be set
+     */
+    override actual fun setAppPref(key: String, value: String?) {
+        val prefs = getAppSharedPreferences(applicationContext)
+        val editor = prefs.edit()
+        if (value != null) {
+            editor.putString(key, value)
+        } else {
+            editor.remove(key)
+        }
+        editor.apply()
+    }
+
+
+    /**
      * Gives a string with the version number
      *
      * @return String with version number
@@ -205,6 +258,33 @@ actual open class UstadMobileSystemImpl(
     }
 
 
+    /**
+     * Wrapper to retrieve preference keys from the system Manifest.
+     *
+     * On Android: uses meta-data elements on the application element in AndroidManifest.xml
+     * On J2ME: uses the jad file
+     *
+     * @param key The key to lookup
+     * @param context System context object
+     *
+     * @return The value of the manifest preference key if found, null otherwise
+     */
+    fun getManifestPreference(key: String, context: Any): String? {
+        try {
+            val ctx = context as Context
+            val ai2 = ctx.packageManager.getApplicationInfo(ctx.packageName,
+                    PackageManager.GET_META_DATA)
+            val metaData = ai2.metaData
+            if (metaData != null) {
+                return metaData.getString(key)
+            }
+        } catch (e: PackageManager.NameNotFoundException) {
+            UMLog.l(UMLog.ERROR, UMLog.ERROR, key, e)
+        }
+        return null
+    }
+
+
     override fun openFileInDefaultViewer(
         context: Any,
         doorUri: DoorUri,
@@ -250,6 +330,24 @@ actual open class UstadMobileSystemImpl(
             throw NoAppFoundException("No activity found for mimetype: $mMimeType", mMimeType)
         }
     }
+
+    private fun getAppSharedPreferences(context: Context): SharedPreferences {
+        if (appPreferences == null) {
+            appPreferences = context.getSharedPreferences(APP_PREFERENCES_NAME,
+                    Context.MODE_PRIVATE)
+        }
+        return appPreferences!!
+    }
+
+
+    /**
+     * Open the given link in a browser and/or tab depending on the platform
+     */
+    actual override fun openLinkInBrowser(url: String, context: Any) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        (context as Context).startActivity(intent)
+    }
+
 
 
     actual companion object {

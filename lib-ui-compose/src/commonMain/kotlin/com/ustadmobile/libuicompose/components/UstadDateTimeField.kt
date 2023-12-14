@@ -22,8 +22,6 @@ fun UstadDateTimeField(
     dateFieldWeight: Float = 0.6f,
     isError: Boolean = false,
     onValueChange: (Long) -> Unit = {},
-    dateSupportingText: (@Composable () -> Unit)? = null,
-    timeSupportingText: (@Composable () -> Unit)? = null,
 ) {
 
     val calendar = remember(value, timeZoneId) {
@@ -56,8 +54,7 @@ fun UstadDateTimeField(
             isError = isError,
             onValueChange = {
                 onValueChange(it + timeOfDayInMs)
-            },
-            supportingText = dateSupportingText,
+            }
         )
 
         UstadTimeField(
@@ -69,8 +66,7 @@ fun UstadDateTimeField(
             isError = isError,
             onValueChange =  {
                 onValueChange(it + dateInMs)
-            },
-            supportingText = timeSupportingText,
+            }
         )
     }
 

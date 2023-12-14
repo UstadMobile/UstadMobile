@@ -12,15 +12,14 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListUiState
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
-import com.ustadmobile.hooks.useHtmlToPlainText
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.mui.common.*
-import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.mui.components.UstadListSortHeader
+import com.ustadmobile.mui.components.UstadRawHtml
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -41,7 +40,6 @@ import web.events.EventHandler
 import web.html.HTMLElement
 import web.window.RESIZE
 import web.window.window
-import mui.icons.material.Badge as BadgeIcon
 
 external interface ClazzListScreenProps : Props {
 
@@ -255,67 +253,75 @@ external interface ClazzListItemProps : Props {
 
 private val ClazzListItem = FC<ClazzListItemProps> { props ->
 
-    val theme by  useRequiredContext(ThemeContext)
     val strings = useStringProvider()
     val role = RoleConstants.ROLE_MESSAGE_IDS.find {
         it.value == props.clazzItem?.clazzActiveEnrolment?.clazzEnrolmentRole
     }?.stringResource
 
-    val clazzDescription = useHtmlToPlainText(props.clazzItem?.clazzDesc ?: "")
-
     Card {
         key = props.clazzItem?.clazzUid?.toString()
 
         sx {
+            margin = 10.px
             width = (props.width - 20).px
-            margin = theme.spacing(2)
+            display = Display.flex
         }
 
         CardActionArea {
             sx {
-                verticalAlign = VerticalAlign.top
+                padding = 15.px
             }
 
             onClick = {
                 props.clazzItem?.also { props.onClickClazz(it) }
             }
 
-            CardContent {
-                Typography {
-                    variant = TypographyVariant.h5
-                    gutterBottom = true
-                    + (props.clazzItem?.clazzName ?: "")
-                }
+            Stack {
+                direction = responsive(StackDirection.column)
 
-                Typography {
-                    sx {
-                        webKitLineClamp = 2
-                        display = DisplayWebkitBox
-                        webkitBoxOrient = "vertical"
-                        overflow = Overflow.hidden
-                        textOverflow = TextOverflow.ellipsis
-                    }
-                    variant = TypographyVariant.body2
-                    color = "text.secondary"
-                    + clazzDescription
-                }
+                Stack {
+                    direction = responsive(StackDirection.row)
+                    justifyContent = JustifyContent.spaceBetween
 
-                if(role != null) {
                     Stack {
-                        direction = responsive(StackDirection.row)
-                        sx {
-                            marginTop = theme.spacing(1)
+                        direction = responsive(StackDirection.column)
+
+                        Typography {
+                            variant = TypographyVariant.h6
+                            + (props.clazzItem?.clazzName ?: "")
                         }
 
-                        BadgeIcon {
-                            fontSize = SvgIconSize.small
-                            color = SvgIconColor.action
-                        }
+                        Typography {
+                            sx {
+                                webKitLineClamp = 2
+                                display = DisplayWebkitBox
+                                webkitBoxOrient = "vertical"
+                                overflow = Overflow.hidden
+                                textOverflow = TextOverflow.ellipsis
+                            }
 
-                        + strings[role]
+                            UstadRawHtml {
+                                html = (props.clazzItem?.clazzDesc ?: "")
+                            }
+                        }
+                    }
+
+
+                    if(role != null) {
+                        Stack {
+                            direction = responsive(StackDirection.row)
+
+                            + mui.icons.material.Badge.create()
+
+                            + strings[role]
+                        }
                     }
                 }
             }
         }
+
+
+
+
     }
 }

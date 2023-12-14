@@ -58,7 +58,6 @@ external interface ContentEntryListScreenProps : Props {
 
 }
 
-@Suppress("unused") //For development purposes - will be removed by DCE in production anyway
 val ContentEntryListScreenPreview = FC<Props> {
 
     ContentEntryListScreenComponent {
@@ -149,7 +148,6 @@ val ContentEntryListScreen = FC<Props> {
         List {
             ListItem {
                 ListItemButton {
-                    id = "new_content_folder"
                     onClick = {
                         viewModel.onClickNewFolder()
                     }
@@ -166,7 +164,6 @@ val ContentEntryListScreen = FC<Props> {
 
             ListItem {
                 ListItemButton {
-                    id = "new_content_from_link"
                     onClick = {
                         viewModel.onClickImportFromLink()
                     }
@@ -183,7 +180,6 @@ val ContentEntryListScreen = FC<Props> {
 
             ListItem {
                 ListItemButton {
-                    id = "new_content_from_file"
                     onClick = {
                         fileInputRef.current?.click()
                     }

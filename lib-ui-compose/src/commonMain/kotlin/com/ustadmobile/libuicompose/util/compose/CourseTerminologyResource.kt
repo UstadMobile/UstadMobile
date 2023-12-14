@@ -2,16 +2,14 @@ package com.ustadmobile.libuicompose.util.compose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalInspectionMode
 import com.ustadmobile.core.util.ext.toTerminologyEntries
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.core.impl.locale.TerminologyEntry
 import dev.icerock.moko.resources.StringResource
+import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import dev.icerock.moko.resources.compose.stringResource
-import org.kodein.di.compose.localDI
-
 /**
  * CourseTerminology is used to provide alternative words for student, teacher etc. See CourseTerminology
  *
@@ -27,22 +25,28 @@ import org.kodein.di.compose.localDI
 fun rememberCourseTerminologyEntries(
     courseTerminology: CourseTerminology?
 ): List<TerminologyEntry> {
+    //Put inside a try catch, because we might be running in Compose preview
+
+    var di: DI? = null
+//    val context = LocalContext.current
+    try {
+        // TODO error
+//        val closestDI: DI by closestDI(context)
+//        di = closestDI
+    }catch(e:Exception) {
+        //Do nothing
+    }
+
     val termJsonStr = courseTerminology?.ctTerminology
-
-    //As per https://developermemos.com/posts/checking-composable-render-preview
-    // DI will not be accessible on preview mode, so we want to avoid attempting to use it there.
-    val isPreview = LocalInspectionMode.current
-
-    return if(isPreview) {
-        emptyList()
-    }else {
-        val di = localDI()
-        remember(termJsonStr) {
-            courseTerminology.toTerminologyEntries(
-                json = di.direct.instance(),
-                systemImpl = null,
-            )
-        }
+    return remember(termJsonStr) {
+//        if(di != null) {
+//            courseTerminology.toTerminologyEntries(
+//                json = di.direct.instance(),
+//                systemImpl = null,
+//            )
+//        }else {
+            emptyList()
+//        }
     }
 }
 

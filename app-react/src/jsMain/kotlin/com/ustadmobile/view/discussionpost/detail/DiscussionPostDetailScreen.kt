@@ -153,12 +153,10 @@ val DiscussionPostDetailScreen = FC<Props>{
         DiscussionPostDetailUiState2()
     )
 
-
-    DiscussionPostDetailComponent2 {
+    DiscussionPostDetailComponent2{
         uiState = uiStateVal
         onReplyChanged = viewModel::onChangeReplyText
         onClickPostReply = viewModel::onClickPostReply
     }
-
 }
 

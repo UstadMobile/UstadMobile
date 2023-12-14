@@ -21,10 +21,11 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.ustadmobile.core.viewmodel.HtmlEditUiState
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
-import com.ustadmobile.libuicompose.components.AztecEditor
+import com.ustadmobile.port.android.view.composable.AztecEditor
 import com.ustadmobile.core.R as CR
 
 class HtmlEditFragment: UstadBaseMvvmFragment() {

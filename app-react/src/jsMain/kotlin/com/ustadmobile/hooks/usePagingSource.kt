@@ -1,7 +1,6 @@
 package com.ustadmobile.hooks
 
 import app.cash.paging.PagingSource
-import app.cash.paging.PagingSourceLoadParams
 import app.cash.paging.PagingSourceLoadParamsAppend
 import app.cash.paging.PagingSourceLoadParamsPrepend
 import app.cash.paging.PagingSourceLoadParamsRefresh
@@ -19,18 +18,6 @@ import tanstack.query.core.QueryKey
 import tanstack.react.query.UseInfiniteQueryResult
 import tanstack.react.query.useInfiniteQuery
 import js.promise.Promise
-
-/**
- * pageParam property mysteriously vanished from the wrapper when updating to wrappers version 651
- */
-private fun <Key: Any> QueryFunctionContext<QueryKey, PagingSourceLoadParams<Key>>.getPageParam():  PagingSourceLoadParams<Key>? {
-    return if(asDynamic().pageParam == null) {
-        null
-    }else {
-        this.asDynamic().pageParam as PagingSourceLoadParams<Key>
-    }
-}
-
 
 /**
  * Use a Paging Source through using TanStack's useInfiniteQuery. Returns InfiniteQueryResult.
@@ -88,21 +75,18 @@ fun <Key: Any, Value: Any> usePagingSource(
         }
     }
 
-    val infiniteQueryResult = useInfiniteQuery<PagingSourceLoadResult<Key, Value>, Throwable, PagingSourceLoadResult<Key, Value>, QueryKey, PagingSourceLoadParams<Key>>(
+    val infiniteQueryResult = useInfiniteQuery<PagingSourceLoadResult<Key, Value>, Throwable, PagingSourceLoadResult<Key, Value>, QueryKey>(
         options = jso {
             console.log("PagingSource jso key=${pagingSourceFactory.hashCode()}")
             queryKey = QueryKey(""+pagingSourceFactory.hashCode())
-            queryFn = { queryContext: QueryFunctionContext<QueryKey, PagingSourceLoadParams<Key>> ->
-                console.log("queryContext = $queryContext")
+            queryFn = { queryContext: QueryFunctionContext<QueryKey, *> ->
                 console.log("PagingSource(): running QueryFn return promise key=${pagingSourceFactory.hashCode()}")
-                val pageParam = queryContext.getPageParam<Key>()
-                val loadParams = when(pageParam) {
-                    is PagingSourceLoadParamsAppend<*> -> pageParam.unsafeCast<PagingSourceLoadParamsAppend<Key>>()
-                    is PagingSourceLoadParamsPrepend<*> -> pageParam.unsafeCast<PagingSourceLoadParamsPrepend<Key>>()
-                    is PagingSourceLoadParamsRefresh<*> -> pageParam.unsafeCast<PagingSourceLoadParamsRefresh<Key>>()
+                val loadParams = when(queryContext.pageParam) {
+                    is PagingSourceLoadParamsAppend<*> -> queryContext.pageParam.unsafeCast<PagingSourceLoadParamsAppend<Key>>()
+                    is PagingSourceLoadParamsPrepend<*> -> queryContext.pageParam.unsafeCast<PagingSourceLoadParamsPrepend<Key>>()
+                    is PagingSourceLoadParamsRefresh<*> -> queryContext.pageParam.unsafeCast<PagingSourceLoadParamsRefresh<Key>>()
                     else -> PagingSourceLoadParamsRefresh<Key>(null, loadSize, placeholdersEnabled)
                 }
-                console.log("PagingSource(): loadParams = $loadParams")
 
                 //Must use PagingSourceFactory itself here: TanStack query will remember this function
                 //according to the QueryKey, so references would be to old data.
@@ -113,12 +97,12 @@ fun <Key: Any, Value: Any> usePagingSource(
                     }.load(loadParams)
                 }.unsafeCast<Promise<PagingSourceLoadResult<Key, Value>>>()
             }
-            getNextPageParam = { lastPage: PagingSourceLoadResult<Key, Value>, allPages: Array<PagingSourceLoadResult<Key, Value>> ->
+            getNextPageParam = { lastPage: PagingSourceLoadResult<Key, Value>, allPages ->
                 val nextKey = (lastPage as? PagingSourceLoadResultPage<Key, Value>)?.nextKey
                 nextKey?.let { PagingSourceLoadParamsAppend(it, loadSize, placeholdersEnabled) }
                     ?: undefined.unsafeCast<Any>()
             }
-            getPreviousPageParam = { firstPage: PagingSourceLoadResult<Key, Value>, allPages: Array<PagingSourceLoadResult<Key, Value>>  ->
+            getPreviousPageParam = { firstPage, allPages ->
                 val prevKey = (firstPage as? PagingSourceLoadResultPage<Key, Value>)?.prevKey
                 prevKey?.let { PagingSourceLoadParamsPrepend(it, loadSize, placeholdersEnabled)}
                     ?: undefined.unsafeCast<Any>()

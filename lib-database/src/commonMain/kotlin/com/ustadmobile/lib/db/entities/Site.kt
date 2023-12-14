@@ -28,8 +28,7 @@ import kotlinx.serialization.Serializable
                      OR NEW.authSalt = 
                         (SELECT Site.authSalt
                            FROM Site
-                          LIMIT 1))
-                 AND ($TRIGGER_CONDITION_WHERE_NEWER)          
+                          LIMIT 1)) 
          """,
          sqlStatements = [
              TRIGGER_UPSERT_WHERE_NEWER

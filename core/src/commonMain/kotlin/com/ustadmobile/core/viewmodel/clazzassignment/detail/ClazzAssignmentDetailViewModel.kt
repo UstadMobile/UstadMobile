@@ -4,6 +4,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.TabItem
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewViewModel
@@ -17,10 +18,6 @@ data class ClazzAssignmentDetailUiState(
     val tabs: List<TabItem> = emptyList(),
 )
 
-/**
- * This is ALWAYS used within the assignment detail tab, so the destination name is actually
- * assignmentdetail
- */
 class ClazzAssignmentDetailViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
@@ -50,20 +47,8 @@ class ClazzAssignmentDetailViewModel(
                     systemImpl.getString(MR.strings.clazz_assignment))
             )
             if(hasSubmissionsTab) {
-                val tabName = if(!hasLearnerRecordPermission &&
-                    clazzAssignment?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS
-                ) {
-                    systemImpl.getString(MR.strings.peers_to_review)
-                }else {
-                    systemImpl.getString(MR.strings.submissions)
-                }
-                tabs.add(
-                    TabItem(
-                        viewName = ClazzAssignmentDetailSubmissionsTabViewModel.DEST_NAME,
-                        args = tabArgs,
-                        label = tabName
-                    )
-                )
+                tabs.add(TabItem(ClazzAssignmentDetailSubmissionsTabViewModel.DEST_NAME,
+                    tabArgs, systemImpl.getString(MR.strings.submissions)))
             }
 
             ClazzAssignmentDetailUiState(tabs = tabs.toList())

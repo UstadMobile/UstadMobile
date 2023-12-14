@@ -3,13 +3,14 @@ package com.ustadmobile.view
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.PersonParentJoinConstants
-import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementUiState
+import com.ustadmobile.core.viewmodel.ParentalConsentManagementUiState
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
-import com.ustadmobile.lib.db.entities.PersonParentJoinAndMinorPerson
+import com.ustadmobile.lib.db.entities.PersonParentJoinWithMinorPerson
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.view.components.UstadMessageIdSelectField
+import dev.icerock.moko.resources.StringResource
 import web.cssom.px
 import js.core.jso
 import mui.material.*
@@ -52,15 +53,14 @@ val ParentalConsentManagementComponent2 = FC<ParentalConsentManagementScreenProp
             if (props.uiState.relationshipVisible){
 
                 UstadMessageIdSelectField {
-                    value = props.uiState.parentJoinAndMinor?.personParentJoin?.ppjRelationship ?: 0
+                    value = props.uiState.personParentJoin?.ppjRelationship ?: 0
                     options = PersonParentJoinConstants.RELATIONSHIP_MESSAGE_IDS
                     label = strings[MR.strings.relationship]
                     onChange = {
                         props.onChangeRelation(
-                            props.uiState.parentJoinAndMinor?.personParentJoin?.shallowCopy {
+                            props.uiState.personParentJoin?.shallowCopy {
                                 ppjRelationship = it.value
-                            }
-                        )
+                            })
                     }
                 }
             }
@@ -77,7 +77,7 @@ val ParentalConsentManagementComponent2 = FC<ParentalConsentManagementScreenProp
                 }
             }
 
-            if (props.uiState.consentButtonVisible){
+            if (props.uiState.consentVisible){
                 Button {
                     onClick = { props.onClickConsent }
                     variant = ButtonVariant.contained
@@ -87,7 +87,7 @@ val ParentalConsentManagementComponent2 = FC<ParentalConsentManagementScreenProp
                 }
             }
 
-            if (props.uiState.dontConsentButtonVisible){
+            if (props.uiState.dontConsentVisible){
                 Button {
                     onClick = { props.onClickDoNotConsent }
                     variant = ButtonVariant.outlined
@@ -97,15 +97,19 @@ val ParentalConsentManagementComponent2 = FC<ParentalConsentManagementScreenProp
                 }
             }
 
-            if (props.uiState.changeConsentButtonVisible){
+            if (props.uiState.changeConsentVisible){
+                val changeConsentText: StringResource =
+                    if (props.uiState.personParentJoin?.ppjStatus == PersonParentJoin.STATUS_APPROVED)
+                        MR.strings.revoke_consent
+                    else
+                        MR.strings.restore_consent
+
                 Button {
                     onClick = { props.onClickChangeConsent }
                     variant = ButtonVariant.contained
                     disabled = !props.uiState.fieldsEnabled
 
-                    props.uiState.changeConsentLabel?.also {
-                        +strings[it]
-                    }
+                    + strings[changeConsentText].uppercase()
                 }
             }
         }
@@ -119,8 +123,9 @@ val ParentalConsentManagementPreview = FC<Props> {
             siteTerms = SiteTerms().apply {
                 termsHtml = "hello <b>world</b>"
             },
-            parentJoinAndMinor = PersonParentJoinAndMinorPerson().apply {
-
+            personParentJoin = PersonParentJoinWithMinorPerson().apply {
+                ppjParentPersonUid = 0
+                ppjRelationship = 1
                 minorPerson = Person().apply {
                     firstNames = "Pit"
                     lastName = "The Younger"

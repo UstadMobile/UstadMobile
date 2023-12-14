@@ -43,9 +43,6 @@ data class ClazzEnrolmentEditUiState(
     val leavingReasonEnabled: Boolean
         get() = clazzEnrolment?.clazzEnrolmentOutcome !=
                 ClazzEnrolment.OUTCOME_IN_PROGRESS
-
-    val outcomeVisible: Boolean
-        get() = clazzEnrolment?.clazzEnrolmentRole == ClazzEnrolment.ROLE_STUDENT
 }
 
 class ClazzEnrolmentEditViewModel(
@@ -92,9 +89,7 @@ class ClazzEnrolmentEditViewModel(
                 },
                 uiUpdate = {
                     _uiState.update { prev ->
-                        prev.copy(
-                            clazzEnrolment = it,
-                        )
+                        prev.copy(clazzEnrolment = it)
                     }
                 }
             )
@@ -155,7 +150,8 @@ class ClazzEnrolmentEditViewModel(
                     prevFieldValue = prev.clazzEnrolment?.clazzEnrolmentDateJoined,
                     currentFieldValue = entity?.clazzEnrolmentDateJoined,
                     currentErrorMessage = prev.startDateError,
-                ),
+                )
+
             )
         }
 

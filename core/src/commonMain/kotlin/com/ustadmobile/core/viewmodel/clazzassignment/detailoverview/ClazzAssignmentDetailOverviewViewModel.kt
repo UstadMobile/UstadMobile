@@ -15,11 +15,7 @@ import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
-import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
-import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
-import com.ustadmobile.core.viewmodel.clazzassignment.hasUpdatedMarks
 import com.ustadmobile.core.viewmodel.clazzassignment.latestUniqueMarksByMarker
-import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
@@ -38,9 +34,8 @@ import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
 import kotlin.jvm.JvmInline
+import kotlin.math.roundToInt
 
 
 /**
@@ -55,12 +50,10 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val courseBlock: CourseBlock? = null,
 
-    val courseGroupSet: CourseGroupSet? = null,
-
     /**
      * The submitter uid of the active user - see CourseAssignmentSubmission.casSubmitterUid
      */
-    val submitterUid: Long = 0,
+    internal val submitterUid: Long = 0,
 
     val latestSubmission: CourseAssignmentSubmission? = null,
 
@@ -97,8 +90,6 @@ data class ClazzAssignmentDetailOverviewUiState(
     val newCourseCommentText: String = "",
 
     val activeUserPersonUid: Long = 0,
-
-    val courseTerminology: CourseTerminology? = null,
 ) {
 
     val caDescriptionVisible: Boolean
@@ -118,9 +109,6 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val activeUserIsSubmitter: Boolean
         get() = submitterUid > 0L
-
-    val showPrivateComments: Boolean
-        get() = activeUserIsSubmitter && assignment?.caPrivateCommentsEnabled == true
 
     val isWithinDeadlineOrGracePeriod: Boolean
         get() {
@@ -145,12 +133,8 @@ data class ClazzAssignmentDetailOverviewUiState(
             if(!isWithinDeadlineOrGracePeriod)
                 return false
 
-            //User must not submit or be shown option to submit until the entity is added when loading
-            if(latestSubmission == null)
-                return false
-
             if(assignment?.caSubmissionPolicy == ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE &&
-                latestSubmission.casTimestamp > 0
+                (latestSubmission?.casTimestamp ?: 1) > 0
             ) {
                 return false
             }
@@ -192,12 +176,8 @@ data class ClazzAssignmentDetailOverviewUiState(
     val latePenaltyVisible: Boolean
         get() = submissionMark.let { it  != null && it.averagePenalty != 0 }
 
-    /**
-     * Submission text field will be visible when text submission is required, active user is a submitter,
-     * and the latest submission is not null (entity will be set by viewmodel as part of loading process).
-     */
     val submissionTextFieldVisible: Boolean
-        get() = assignment?.caRequireTextSubmission == true && activeUserIsSubmitter && latestSubmission != null
+        get() = assignment?.caRequireTextSubmission == true && activeUserIsSubmitter
 
     private val latestUniqueMarksByMarker: List<CourseAssignmentMarkAndMarkerName>
         get() = markList.latestUniqueMarksByMarker()
@@ -209,15 +189,21 @@ data class ClazzAssignmentDetailOverviewUiState(
             markList
         }
 
-    val gradeFilterChipsVisible: Boolean
-        get() = markList.hasUpdatedMarks()
-
     val submissionMark: AverageCourseAssignmentMark?
-        get() = markList.averageMark()
+        get() {
+            val latestUnique = latestUniqueMarksByMarker
+            if(latestUnique.isEmpty())
+                return null
 
-    val isGroupSubmission: Boolean
-        get() = assignment?.caGroupUid?.let { it != 0L } ?: false
-
+            return AverageCourseAssignmentMark().apply {
+                averageScore = latestUnique.sumOf {
+                    it.courseAssignmentMark?.camMark?.toDouble() ?: 0.toDouble()
+                }.toFloat() / latestUnique.size
+                averagePenalty = (latestUnique.sumOf {
+                    it.courseAssignmentMark?.camPenalty?.toDouble() ?: 0.toDouble()
+                } / latestUnique.size).roundToInt()
+            }
+        }
 }
 
 val CourseAssignmentMarkWithPersonMarker.listItemUiState
@@ -226,16 +212,19 @@ val CourseAssignmentMarkWithPersonMarker.listItemUiState
 @JvmInline
 value class CourseAssignmentMarkWithPersonMarkerUiState(
     val mark: CourseAssignmentMarkWithPersonMarker,
-)
+) {
+
+    val markerGroupNameVisible: Boolean
+        get() = mark.isGroup && mark.camMarkerSubmitterUid != 0L
+
+}
 
 class ClazzAssignmentDetailOverviewViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-    private val submitAssignmentUseCase: SubmitAssignmentUseCase = SubmitAssignmentUseCase(
-        systemImpl = di.direct.instance(),
-    ),
+    private val submitAssignmentUseCase: SubmitAssignmentUseCase = SubmitAssignmentUseCase(),
 ) : DetailViewModel<ClazzAssignment>(
-    di, savedStateHandle, ClazzAssignmentDetailViewModel.DEST_NAME
+    di, savedStateHandle, DEST_NAME
 ){
 
     private val _uiState = MutableStateFlow(ClazzAssignmentDetailOverviewUiState())
@@ -283,7 +272,6 @@ class ClazzAssignmentDetailOverviewViewModel(
                                 assignment = assignmentData?.clazzAssignment,
                                 courseBlock = assignmentData?.courseBlock,
                                 submitterUid = assignmentData?.submitterUid ?: 0,
-                                courseGroupSet = assignmentData?.courseGroupSet,
                                 unassignedError = if(isEnrolledButNotInGroup) {
                                     systemImpl.getString(MR.strings.unassigned_error)
                                 }else {
@@ -406,7 +394,6 @@ class ClazzAssignmentDetailOverviewViewModel(
             if(prev.activeUserCanSubmit) {
                 prev.copy(
                     latestSubmission = prev.latestSubmission?.shallowCopy {
-                        casUid = 0L
                         casText = text
                         casTimestamp = 0
                     }
@@ -545,13 +532,6 @@ class ClazzAssignmentDetailOverviewViewModel(
                 loadingState = LoadingUiState.NOT_LOADING
             }
         }
-    }
-
-    fun onClickCourseGroupSet() {
-        navController.navigate(
-            viewName = CourseGroupSetDetailViewModel.DEST_NAME,
-            args = mapOf(ARG_ENTITY_UID to (_uiState.value.courseGroupSet?.cgsUid?.toString() ?: "0"))
-        )
     }
 
     companion object {

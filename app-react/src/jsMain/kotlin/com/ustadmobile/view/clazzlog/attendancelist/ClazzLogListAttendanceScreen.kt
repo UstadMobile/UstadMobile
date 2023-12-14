@@ -6,6 +6,7 @@ import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.schedule.totalAttendeeStatusRecorded
+import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceUiState
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
 import com.ustadmobile.hooks.useFormattedDateAndTime
@@ -32,6 +33,7 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import react.useState
 import kotlin.math.max
 
 external interface ClazzLogListAttendanceScreenProps : Props {
@@ -51,19 +53,31 @@ val ClazzLogListAttendanceScreen = FC<Props> {
     val uiStateVal by viewModel.uiState.collectAsState(ClazzLogListAttendanceUiState())
     val appState by viewModel.appUiState.collectAsState(AppUiState())
 
+    var recordDialogVisible: Boolean by useState { false }
+
     ClazzLogListAttendanceScreenComponent {
         uiState = uiStateVal
         onClickEntry = viewModel::onClickEntry
     }
 
+
+
     UstadFab {
-        fabState = appState.fabState
+        fabState = appState.fabState.copy(
+            onClick = {
+                if(uiStateVal.recordAttendanceOptions.size == 1) {
+                    viewModel.onClickRecordAttendance(uiStateVal.recordAttendanceOptions.first())
+                }else{
+                    recordDialogVisible = true
+                }
+            }
+        )
     }
 
     Dialog {
-        open = uiStateVal.createNewOptionsVisible
+        open = recordDialogVisible
         onClose = {_, _ ->
-            viewModel.onDismissCreateNewOptions()
+            recordDialogVisible = false
         }
 
         List {
@@ -83,7 +97,6 @@ val ClazzLogListAttendanceScreen = FC<Props> {
     }
 }
 
-@Suppress("unused")
 val ClazzLogListAttendanceScreenPreview = FC<Props> {
 
     ClazzLogListAttendanceScreenComponent {

@@ -1,7 +1,7 @@
 package com.ustadmobile.libuicompose.components
 
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
@@ -25,14 +25,11 @@ fun UstadNumberTextField(
     trailingIcon: (@Composable () -> Unit)? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions(
         keyboardType = KeyboardType.Number
-    ),
-    supportingText: (@Composable () -> Unit)? = null,
-    unsetDefault: Float = 0f,
-    singleLine: Boolean = true,
+    )
 ) {
 
     var rawValue by remember(value) {
-        mutableStateOf(if(value != unsetDefault) value.toInt().toString() else "")
+        mutableStateOf(if(value != 0.toFloat()) value.toInt().toString() else "")
     }
 
     OutlinedTextField(
@@ -41,7 +38,7 @@ fun UstadNumberTextField(
         onValueChange = { text ->
             val filteredText = text.filter { it.isDigit() }
             rawValue = filteredText
-            val floatVal = filteredText.toFloatOrNull() ?: unsetDefault
+            val floatVal = filteredText.toFloatOrNull() ?: 0.toFloat()
             onValueChange(floatVal)
         },
         isError = isError,
@@ -50,7 +47,5 @@ fun UstadNumberTextField(
         enabled = enabled,
         trailingIcon = trailingIcon,
         keyboardOptions = keyboardOptions,
-        supportingText = supportingText,
-        singleLine = singleLine,
     )
 }

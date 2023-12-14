@@ -1,15 +1,16 @@
 package com.ustadmobile.libuicompose.view.discussionpost.detail
 
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.Text
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ListItem
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.ustadmobile.lib.db.composites.DiscussionPostAndPosterNames
-import com.ustadmobile.libuicompose.components.UstadHtmlText
-import com.ustadmobile.libuicompose.components.UstadPersonAvatar
+import com.ustadmobile.libuicompose.components.HtmlText
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import java.util.TimeZone
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DiscussionPostListItem(
     discussionPost: DiscussionPostAndPosterNames?,
@@ -23,20 +24,21 @@ fun DiscussionPostListItem(
 
     ListItem(
         modifier = modifier,
-        leadingContent = {
-            UstadPersonAvatar(
-                personUid = discussionPost?.discussionPost?.discussionPostStartedPersonUid ?: 0L
-            )
+        icon = {
+               // TODO error
+//            UstadPersonAvatar(
+//                personUid = discussionPost?.discussionPost?.discussionPostStartedPersonUid ?: 0L
+//            )
         },
-        headlineContent = {
+        text = {
             Text(
                 text = (discussionPost?.firstNames ?: "") + " " + (discussionPost?.lastName ?: "")
             )
         },
-        supportingContent = {
-            UstadHtmlText(html = discussionPost?.discussionPost?.discussionPostMessage ?: "")
+        secondaryText = {
+            HtmlText(html = discussionPost?.discussionPost?.discussionPostMessage ?: "")
         },
-        trailingContent = {
+        trailing = {
             Text(dateTimeStr)
         }
     )

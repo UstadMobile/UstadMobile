@@ -13,13 +13,13 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadCourseBlockEdit
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.mui.components.UstadTextField
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.view.components.UstadSwitchField
 import mui.material.Button
 import mui.material.ButtonVariant
 import mui.material.Stack
-import mui.material.TextField
 import mui.material.Typography
 import mui.system.responsive
 import react.FC
@@ -38,6 +38,10 @@ external interface ContentEntryEditScreenProps : Props {
     var onContentEntryChanged: (ContentEntry?) -> Unit
 
     var onChangeCompress: (Boolean) -> Unit
+
+    var onChangePubliclyAccessible: (Boolean) -> Unit
+
+    var onClickLanguage: () -> Unit
 
 }
 
@@ -89,7 +93,7 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
             }
 
             if(props.uiState.contentEntryTitleVisible) {
-                TextField {
+                UstadTextField {
                     value = props.uiState.entity?.entry?.title ?: ""
                     id = "content_title"
                     label = ReactNode(strings[MR.strings.title]  + "*")
@@ -179,6 +183,24 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
                     label = strings[MR.strings.compress]
                     enabled = props.uiState.fieldsEnabled
                 }
+            }
+
+            UstadSwitchField {
+                id = "content_publik"
+                checked= props.uiState.entity?.entry?.publik ?: false
+                onChanged = { props.onChangePubliclyAccessible(it) }
+                label = strings[MR.strings.publicly_accessible]
+                enabled = props.uiState.fieldsEnabled
+            }
+
+            UstadTextEditField {
+                id = "content_language"
+                value = props.uiState.entity?.language?.name ?: ""
+                label = strings[MR.strings.language]
+                readOnly = true
+                enabled = props.uiState.fieldsEnabled
+                onClick = props.onClickLanguage
+                onChange = {}
             }
         }
     }

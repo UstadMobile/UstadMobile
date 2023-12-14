@@ -18,7 +18,6 @@ import com.ustadmobile.core.viewmodel.contententry.list.listItemUiState
 import com.ustadmobile.lib.db.entities.*
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
-import com.ustadmobile.libuicompose.view.contententry.list.ClazzAssignmentConstants.CONTENT_ENTRY_TYPE_ICON_MAP
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -108,10 +107,12 @@ private fun SecondaryContent(
         Row {
             val contentTypeFlagVal = contentEntry?.contentTypeFlag
             if (uiState?.mimetypeVisible == true && contentTypeFlagVal != null){
-                Image(CONTENT_ENTRY_TYPE_ICON_MAP[contentTypeFlagVal] ?: Icons.Filled.Book,
-                    contentDescription = "",
-                    modifier = Modifier.size(20.dp)
-                )
+//                Image(painter = painterResource(id =
+                //  TODO error
+//                CONTENT_ENTRY_TYPE_ICON_MAP[contentTypeFlagVal] ?: ContentEntry.TYPE_EBOOK),
+//                    contentDescription = "",
+//                    modifier = Modifier.size(20.dp)
+//                )
 
                 Text(
                     stringResource(resource = ContentEntryTypeLabelConstants

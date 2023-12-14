@@ -2,7 +2,7 @@ package com.ustadmobile.libuicompose.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -15,7 +15,6 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.UNSET_DISTANT_FUTURE
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
-import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
@@ -23,48 +22,43 @@ fun UstadCourseBlockEdit(
     uiState: CourseBlockEditUiState,
     modifier: Modifier = Modifier,
     onCourseBlockChange: (CourseBlock?) -> Unit = {},
-    onClickEditDescription: () -> Unit = {},
+    //Reserved for future use when Html editing is added.
+    @Suppress("UNUSED_PARAMETER") onClickEditDescription: () -> Unit = {},
 ){
 
     Column(
         modifier = modifier
     ) {
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("title")
-                .defaultItemPadding(),
-            value = uiState.courseBlock?.cbTitle ?: "",
-            label = { Text(stringResource(MR.strings.title) + "*") },
-            isError = uiState.caTitleError != null,
-            enabled = uiState.fieldsEnabled,
-            singleLine = true,
-            supportingText = {
-                Text(uiState.caTitleError ?: stringResource(MR.strings.required))
-            },
-            onValueChange = {
-                onCourseBlockChange(uiState.courseBlock?.shallowCopy {
-                    cbTitle = it
-                })
-            },
-        )
 
-        UstadRichTextEdit(
-            html = uiState.courseBlock?.cbDescription ?: "",
-            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
-            onHtmlChange = {
-                uiState.courseBlock?.also { courseBlock ->
-                    onCourseBlockChange(courseBlock.shallowCopy {
-                        cbDescription = it
+        UstadInputFieldLayout(
+            modifier = Modifier.fillMaxWidth(),
+            errorText = uiState.caTitleError,
+        ) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("title")
+                    .defaultItemPadding(),
+                value = uiState.courseBlock?.cbTitle ?: "",
+                label = { Text(stringResource(MR.strings.title)) },
+                isError = uiState.caTitleError != null,
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onCourseBlockChange(uiState.courseBlock?.shallowCopy {
+                        cbTitle = it
                     })
-                }
-            },
-            onClickToEditInNewScreen = onClickEditDescription,
-            editInNewScreenLabel = stringResource(MR.strings.description),
-            placeholder = {
-                Text(stringResource(MR.strings.description))
-            }
-        )
+                },
+            )
+        }
+
+//        HtmlClickableTextField(
+//            html = uiState.courseBlock?.cbDescription ?: "",
+//            label = stringResource(MR.strings.description),
+//            onClick = onClickEditDescription,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .testTag("description")
+//        )
 
         UstadInputFieldLayout(
             modifier = Modifier.defaultItemPadding(),
@@ -97,7 +91,7 @@ fun UstadCourseBlockEdit(
                         uiState.courseBlock?.cbCompletionCriteria ?: 0
                     ),
                     label = stringResource(MR.strings.completion_criteria),
-                    itemText = { stringResource(it.stringResource).capitalizeFirstLetter() },
+                    itemText = { stringResource(it.stringResource) },
                     options = uiState.completionCriteriaOptions,
                     onOptionSelected = {
                         onCourseBlockChange(uiState.courseBlock?.shallowCopy{
@@ -166,9 +160,11 @@ fun UstadCourseBlockEdit(
 
         if(uiState.deadlineVisible) {
             UstadInputFieldLayout(
+                //  TODO error
                 modifier = Modifier.defaultItemPadding(),
                 errorText = uiState.caDeadlineError
             ) {
+                //  TODO error
                 UstadDateTimeField(
                     modifier = Modifier.testTag("cbDeadlineDate"),
                     value = uiState.courseBlock?.cbDeadlineDate ?: 0,
@@ -226,9 +222,12 @@ fun UstadCourseBlockEdit(
                         cbLateSubmissionPenalty = it.toInt()
                     })
                 },
-                supportingText = {
-                    Text(stringResource(MR.strings.penalty_label))
-                }
+            )
+
+            Text(
+                modifier = Modifier.padding(start = 32.dp, bottom = 8.dp),
+                style = MaterialTheme.typography.caption,
+                text = stringResource(MR.strings.penalty_label)
             )
         }
     }

@@ -13,6 +13,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.common.input
 import com.ustadmobile.mui.common.readOnly
 import com.ustadmobile.mui.components.UstadDateField
+import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.view.components.UstadEditHeader
 import com.ustadmobile.view.components.UstadSwitchField
 import com.ustadmobile.wrappers.reacteasysort.LockAxis
@@ -84,13 +85,11 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 + strings[MR.strings.basic_details]
             }
 
-            TextField {
+            UstadTextField {
                 value = props.uiState.entity?.clazzName ?: ""
-                label = ReactNode(strings[MR.strings.name_key] + "*")
+                label = ReactNode(strings[MR.strings.name_key])
                 id = "clazz_name"
                 disabled = !props.uiState.fieldsEnabled
-                error = props.uiState.clazzNameError != null
-                helperText = ReactNode(props.uiState.clazzNameError ?: strings[MR.strings.required])
                 onTextChange = {
                     props.onClazzChanged(
                         props.uiState.entity?.shallowCopy {
@@ -105,13 +104,9 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 id = "clazz_desc"
                 placeholder = strings[MR.strings.description]
                 onChange = {
-                    props.uiState.entity?.also { entity ->
-                        props.onClazzChanged(
-                            entity.shallowCopy {
-                                clazzDesc = it
-                            }
-                        )
-                    }
+                    props.onClazzChanged(props.uiState.entity?.shallowCopy {
+                        clazzDesc = it
+                    })
                 }
             }
 
@@ -126,9 +121,9 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 UstadDateField {
                     timeInMillis = props.uiState.entity?.clazzStartTime ?: 0
                     timeZoneId = props.uiState.timeZone
-                    label = ReactNode(strings[MR.strings.start_date] + "*")
+                    label = ReactNode(strings[MR.strings.start_date])
                     error = props.uiState.clazzStartDateError != null
-                    helperText = ReactNode(props.uiState.clazzStartDateError?: strings[MR.strings.required])
+                    helperText = props.uiState.clazzStartDateError?.let { ReactNode(it) }
                     disabled = !props.uiState.fieldsEnabled
                     fullWidth = true
                     id = "clazz_start_time"
@@ -144,7 +139,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 UstadDateField {
                     timeInMillis = props.uiState.entity?.clazzEndTime ?: 0
                     timeZoneId = props.uiState.timeZone
-                    label = ReactNode(strings[MR.strings.end_date])
+                    label = ReactNode(strings[MR.strings.end_date].addOptionalSuffix(strings))
                     error = props.uiState.clazzEndDateError != null
                     helperText = props.uiState.clazzEndDateError?.let { ReactNode(it) }
                     disabled = !props.uiState.fieldsEnabled

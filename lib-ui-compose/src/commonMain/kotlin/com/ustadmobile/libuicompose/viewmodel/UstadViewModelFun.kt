@@ -3,7 +3,6 @@ package com.ustadmobile.libuicompose.viewmodel
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import com.ustadmobile.core.impl.appstate.AppUiState
-import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadViewModel
@@ -28,7 +27,6 @@ fun <T: UstadViewModel> ustadViewModel(
     navController: UstadNavControllerPreCompose,
     onSetAppUiState: (AppUiState) -> Unit,
     navResultReturner: NavResultReturner,
-    onShowSnackBar: SnackBarDispatcher,
     name: String? = null,
     appUiStateMap: ((AppUiState) -> AppUiState)? = null,
     savedStateHandle: UstadSavedStateHandlePreCompose = UstadSavedStateHandlePreCompose(backStackEntry),
@@ -39,7 +37,6 @@ fun <T: UstadViewModel> ustadViewModel(
         DI {
             extend(di)
             bind<NavResultReturner>() with singleton { navResultReturner }
-            bind<SnackBarDispatcher>() with singleton { onShowSnackBar }
         }
     }
 

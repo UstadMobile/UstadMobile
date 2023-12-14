@@ -6,15 +6,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListUiState
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.libuicompose.view.contententry.UstadContentEntryListItem
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
-import com.ustadmobile.libuicompose.components.ustadPagedItems
-import androidx.compose.runtime.remember
-import androidx.paging.compose.collectAsLazyPagingItems
 
 @Composable
 fun ContentEntryListScreenForViewModel(
@@ -40,21 +38,22 @@ fun ContentEntryListScreen(
     ) -> Unit = {},
 ) {
 
-    val pager = remember(uiState.contentEntryList) {
-        Pager(
-            pagingSourceFactory = uiState.contentEntryList,
-            config = PagingConfig(pageSize = 20, enablePlaceholders = true)
-        )
-    }
-    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+    // TODO error
+//    val pager = remember(uiState.contentEntryList) {
+//        Pager(
+//            pagingSourceFactory = uiState.contentEntryList,
+//            config = PagingConfig(pageSize = 20, enablePlaceholders = true)
+//        )
+//    }
+//    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     )  {
 
-//        ustadPagedItems(
-//            pagingItems = lazyPagingItems,
+//        items(
+//            items = lazyPagingItems,
 //            key = { contentEntry -> contentEntry.contentEntryUid }
 //        ){ contentEntry ->
 //

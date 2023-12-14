@@ -153,12 +153,8 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
               AND (:roleFilter = 0 OR ClazzEnrolment.clazzEnrolmentRole = :roleFilter)
               AND (:personUidFilter = 0 OR ClazzEnrolment.clazzEnrolmentPersonUid = :personUidFilter)
     """)
-    abstract suspend fun getAllClazzEnrolledAtTimeAsync(
-        clazzUid: Long,
-        date: Long,
-        roleFilter: Int,
-        personUidFilter: Long = 0
-    ): List<ClazzEnrolmentWithPerson>
+    abstract suspend fun getAllClazzEnrolledAtTimeAsync(clazzUid: Long, date: Long, roleFilter: Int,
+        personUidFilter: Long = 0): List<ClazzEnrolmentWithPerson>
 
     @Query("SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentUid = :uid")
     abstract suspend fun findByUid(uid: Long): ClazzEnrolment?

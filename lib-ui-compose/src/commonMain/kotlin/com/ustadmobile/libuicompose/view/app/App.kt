@@ -1,13 +1,9 @@
 package com.ustadmobile.libuicompose.view.app
 
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.outlined.Chat
 import androidx.compose.material.icons.outlined.LocalLibrary
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.School
@@ -16,35 +12,24 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.FabUiState
-import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
-import com.ustadmobile.core.impl.nav.NavCommand
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
-import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
-import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
-import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 import moe.tlaster.precompose.navigation.NavOptions
 import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.navigation.PopUpTo
@@ -68,12 +53,7 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
         label = MR.strings.library,
     ),
     TopNavigationItem(
-        destRoute = ConversationListViewModel.DEST_NAME_HOME,
-        icon = Icons.Outlined.Chat,
-        label = MR.strings.messages,
-    ),
-    TopNavigationItem(
-        destRoute = PersonListViewModel.DEST_NAME_HOME,
+        destRoute = PersonListViewModel.DEST_NAME,
         icon = Icons.Outlined.Person,
         label = MR.strings.people,
     )
@@ -83,7 +63,6 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
  * @param onAppStateChanged - a change Listener that is used by the calling function, mostly the JVM
  *        window and activity. Used to update title, navbar visibility.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun App(
     widthClass: SizeClass = SizeClass.MEDIUM,
@@ -91,76 +70,44 @@ fun App(
     useBottomBar: Boolean = true,
     navigator: Navigator = rememberNavigator(),
     onAppStateChanged: (AppUiState) -> Unit = { },
-    navCommandFlow: Flow<NavCommand>? = null,
-    initialRoute: String = "/${RedirectViewModel.DEST_NAME}",
 ) {
     val appUiState = remember {
         mutableStateOf(AppUiState())
     }
 
-    var appUiStateVal by appUiState
+    val appUiStateVal by appUiState
     LaunchedEffect(appUiStateVal) {
         onAppStateChanged(appUiStateVal)
     }
 
-    val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val onShowSnackBar: SnackBarDispatcher = remember {
-        SnackBarDispatcher {  snack ->
-            scope.launch {
-                snackbarHostState.showSnackbar(snack.message, snack.action)
-            }
-        }
-    }
-
-
     Scaffold(
         topBar = {
-            if(!appUiStateVal.hideAppBar) {
-                UstadAppBar(
-                    compactHeader = (widthClass != SizeClass.EXPANDED),
-                    appUiState = appUiStateVal,
-                    navigator = navigator,
-                )
-            }
+            UstadAppBar(
+                compactHeader = (widthClass != SizeClass.EXPANDED),
+                appUiState = appUiStateVal,
+                navigator = navigator,
+            )
         },
         bottomBar = {
             //As per https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#navigationbar
             var selectedTopLevelItemIndex by remember { mutableIntStateOf(0) }
-            if(useBottomBar) {
-                val currentDestination by navigator.currentEntry.collectAsState(null)
-
-                /**
-                 * Set the selected item. Relying on onClick misses when the user switches accounts
-                 * and goes back to the start screen (courses).
-                 */
-                LaunchedEffect(currentDestination?.path) {
-                    val pathVal = currentDestination?.path ?: return@LaunchedEffect
-                    val topLevelIndex = APP_TOP_LEVEL_NAV_ITEMS.indexOfFirst {
-                        "/${it.destRoute}" == pathVal
-                    }
-
-                    if(topLevelIndex >= 0)
-                        selectedTopLevelItemIndex = topLevelIndex
-                }
-
-                if(appUiStateVal.navigationVisible && !appUiStateVal.hideBottomNavigation) {
-                    NavigationBar {
-                        APP_TOP_LEVEL_NAV_ITEMS.forEachIndexed { index, item ->
-                            NavigationBarItem(
-                                icon = {
-                                    Icon(item.icon, contentDescription = null)
-                                },
-                                label = { Text(stringResource(item.label)) },
-                                selected = selectedTopLevelItemIndex == index,
-                                onClick = {
-                                    navigator.navigate(
-                                        route  = "/${item.destRoute}",
-                                        options = NavOptions(popUpTo = PopUpTo.First(inclusive = true))
-                                    )
-                                }
-                            )
-                        }
+            if(useBottomBar && appUiStateVal.navigationVisible && !appUiStateVal.hideBottomNavigation) {
+                NavigationBar {
+                    APP_TOP_LEVEL_NAV_ITEMS.forEachIndexed { index, item ->
+                        NavigationBarItem(
+                            icon = {
+                                Icon(item.icon, contentDescription = null)
+                            },
+                            label = { Text(stringResource(item.label)) },
+                            selected = selectedTopLevelItemIndex == index,
+                            onClick = {
+                                selectedTopLevelItemIndex = index
+                                navigator.navigate(
+                                    route  = "/${item.destRoute}",
+                                    options = NavOptions(popUpTo = PopUpTo.First(inclusive = true))
+                                )
+                            }
+                        )
                     }
                 }
             }
@@ -187,30 +134,14 @@ fun App(
                     }
                 )
             }
-        },
-        snackbarHost = {
-            SnackbarHost(snackbarHostState)
+
         },
     ) { innerPadding ->
         AppNavHost(
             navigator = navigator,
-            onSetAppUiState = {
-                appUiStateVal = it
-            },
-            modifier = Modifier
-                .padding(innerPadding)
-                /*
-                 * consumeWindowInsets is required so that subsequent use of imePadding doesn't result
-                 * in extra space when the soft keyboard is open e.g. count the padding from the
-                 * spacing against the padding required for the keyboard (otherwise both get added
-                 * together).
-                 */
-                .consumeWindowInsets(innerPadding)
-                .imePadding(),
+            onSetAppUiState = appUiState.component2(),
+            modifier = Modifier.padding(innerPadding),
             persistNavState = persistNavState,
-            onShowSnackBar = onShowSnackBar,
-            navCommandFlow = navCommandFlow,
-            initialRoute = initialRoute,
         )
     }
 

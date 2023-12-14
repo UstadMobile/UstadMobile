@@ -82,7 +82,6 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
         SELECT CourseAssignmentSubmission.*
           FROM CourseAssignmentSubmission
          WHERE casSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
-           AND CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
       ORDER BY casTimestamp DESC
          LIMIT 1
     """)
@@ -95,8 +94,7 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
         SELECT EXISTS
                (SELECT CourseAssignmentSubmission.casUid
                   FROM CourseAssignmentSubmission
-                 WHERE CourseAssignmentSubmission.casSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
-                   AND CourseAssignmentSubmission.casAssignmentUid = :assignmentUid)
+                 WHERE casSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL))
     """)
     abstract suspend fun doesUserHaveSubmissions(
         accountPersonUid: Long,
@@ -175,16 +173,5 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
                        LIMIT 1)
     """)
     abstract fun checkNoSubmissionsMadeFlow(assignmentUid: Long): Flow<Boolean>
-
-
-    @HttpAccessible(
-        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
-    )
-    @Query("""
-        SELECT CourseAssignmentSubmission.*
-          FROM CourseAssignmentSubmission
-         WHERE casUid = :submissionUid
-    """)
-    abstract fun findByUidAsFlow(submissionUid: Long): Flow<CourseAssignmentSubmission?>
 
 }

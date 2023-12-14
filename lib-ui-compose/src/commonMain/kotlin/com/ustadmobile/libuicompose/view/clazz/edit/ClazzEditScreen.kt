@@ -25,6 +25,7 @@ import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadEditHeader
+import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import com.ustadmobile.libuicompose.util.rememberFormattedTime
@@ -35,9 +36,9 @@ import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
+import com.ustadmobile.libuicompose.components.UstadBottomSheetSpacer
 import com.ustadmobile.libuicompose.components.UstadClickableTextField
 import com.ustadmobile.libuicompose.components.UstadDateField
-import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.components.UstadSwitchField
 import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
 import com.ustadmobile.libuicompose.util.compose.stringIdOptionListResource
@@ -88,7 +89,6 @@ fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
                     modifier = Modifier.addCourseBlockClickable(CourseBlock.BLOCK_MODULE_TYPE),
                     headlineContent = { Text(stringResource(MR.strings.module)) },
                     leadingContent = { Icon(Icons.Default.Folder, contentDescription = null) },
-                    secondaryContent = { Text(stringResource(MR.strings.course_module)) },
                 )
                 UstadBottomSheetOption(
                     modifier = Modifier.addCourseBlockClickable(CourseBlock.BLOCK_TEXT_TYPE),
@@ -114,6 +114,7 @@ fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
                     leadingContent = { Icon(Icons.Default.Forum, contentDescription = null) },
                     secondaryContent = { Text(stringResource(MR.strings.add_discussion_board_desc)) }
                 )
+                UstadBottomSheetSpacer()
             }
 
         }
@@ -390,7 +391,7 @@ private fun ClazzEditBasicDetails(
     onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit = {},
     @Suppress("UNUSED_PARAMETER") onClickTimezone: () -> Unit = {},
     //Reserved for use when HTML editing is added to compose
-    onClickEditDescription: () -> Unit = {},
+    @Suppress("UNUSED_PARAMETER") onClickEditDescription: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier.defaultScreenPadding()
@@ -402,13 +403,9 @@ private fun ClazzEditBasicDetails(
                 .fillMaxWidth()
                 .defaultItemPadding(),
             value = uiState.entity?.clazzName ?: "",
-            label = { Text(stringResource(MR.strings.name_key ) + "*") },
+            label = { Text(stringResource(MR.strings.name_key )) },
             enabled = uiState.fieldsEnabled,
-            isError = uiState.clazzNameError != null,
             singleLine = true,
-            supportingText = {
-                 Text(uiState.clazzNameError ?: stringResource(MR.strings.required))
-            },
             onValueChange = {
                 onClazzChanged(
                     uiState.entity?.shallowCopy {
@@ -418,72 +415,63 @@ private fun ClazzEditBasicDetails(
             }
         )
 
-
-        UstadRichTextEdit(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultItemPadding()
-                .testTag("description"),
-            html = uiState.entity?.clazzDesc ?: "",
-            onClickToEditInNewScreen = onClickEditDescription,
-            editInNewScreenLabel = stringResource(MR.strings.description),
-            placeholder = {
-                Text(stringResource(MR.strings.description))
-            },
-            onHtmlChange = {
-                uiState.entity?.also { entity ->
-                    onClazzChanged(
-                        entity.shallowCopy {
-                            clazzDesc = it
-                        }
-                    )
-                }
-            },
-        )
+        // TODO error
+//        HtmlClickableTextField(
+//            html = uiState.entity?.clazzDesc ?: "",
+//            label = stringResource(MR.strings.description),
+//            onClick = onClickEditDescription,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .testTag("description")
+//        )
 
         Row {
-            UstadDateField(
-                value = uiState.entity?.clazzStartTime ?: 0,
-                modifier = Modifier.testTag("start_date").weight(1f)
-                    .defaultItemPadding(end = 8.dp),
-                label = { Text(stringResource(MR.strings.start_date) + "*") } ,
-                isError = uiState.clazzStartDateError != null,
-                enabled = uiState.fieldsEnabled,
-                timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
-                onValueChange = {
-                    onClazzChanged(
-                        uiState.entity?.shallowCopy {
-                            clazzStartTime = it
-                        }
-                    )
-                },
-                supportingText = {
-                    Text(uiState.clazzStartDateError ?: stringResource(MR.strings.required))
-                }
-            )
-
-            UstadDateField(
-                value = uiState.entity?.clazzEndTime ?: 0,
+            UstadInputFieldLayout(
                 modifier = Modifier
                     .weight(1f)
-                    .defaultItemPadding(start = 8.dp)
-                    .testTag("end_date"),
-                label = { Text(stringResource(MR.strings.end_date)) },
-                isError = uiState.clazzEndDateError != null,
-                enabled = uiState.fieldsEnabled,
-                unsetDefault = UNSET_DISTANT_FUTURE,
-                timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
-                supportingText = {
-                    Text(uiState.clazzEndDateError ?: "")
-                },
-                onValueChange = {
-                    onClazzChanged(
-                        uiState.entity?.shallowCopy {
-                            clazzEndTime = it
-                        }
-                    )
-                }
-            )
+                    .defaultItemPadding(end = 8.dp),
+                errorText = uiState.clazzStartDateError
+            ) {
+                UstadDateField(
+                    value = uiState.entity?.clazzStartTime ?: 0,
+                    modifier = Modifier.testTag("start_date"),
+                    label = { Text(stringResource(MR.strings.start_date)) } ,
+                    isError = uiState.clazzStartDateError != null,
+                    enabled = uiState.fieldsEnabled,
+                    timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
+                    onValueChange = {
+                        onClazzChanged(
+                            uiState.entity?.shallowCopy {
+                                clazzStartTime = it
+                            }
+                        )
+                    }
+                )
+            }
+
+            UstadInputFieldLayout(
+                modifier = Modifier
+                    .weight(1f)
+                    .defaultItemPadding(start = 8.dp),
+                errorText = uiState.clazzEndDateError
+            ) {
+                UstadDateField(
+                    value = uiState.entity?.clazzEndTime ?: 0,
+                    modifier = Modifier.testTag("end_date"),
+                    label = { Text(stringResource(MR.strings.end_date)) },
+                    isError = uiState.clazzEndDateError != null,
+                    enabled = uiState.fieldsEnabled,
+                    unsetDefault = UNSET_DISTANT_FUTURE,
+                    timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
+                    onValueChange = {
+                        onClazzChanged(
+                            uiState.entity?.shallowCopy {
+                                clazzEndTime = it
+                            }
+                        )
+                    }
+                )
+            }
         }
     }
 }

@@ -30,7 +30,6 @@ fun UstadPasswordField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     isError: Boolean = false,
     enabled: Boolean = true,
-    supportingText: (@Composable () -> Unit)? = null,
 ){
 
     var passwordVisible by remember {
@@ -68,7 +67,6 @@ fun UstadPasswordField(
         },
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
-        supportingText = supportingText,
     )
 
 }

@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.TimeZone
 import org.kodein.di.DI
 
 @kotlinx.serialization.Serializable
@@ -38,10 +37,6 @@ data class CourseBlockEditUiState(
 
     val caGracePeriodError: String? = null,
 
-    /**
-     * The timezone that will be used when formatting timestamps. This should be set to the system
-     * default timezone by the viewmodel.
-     */
     val timeZone: String = "UTC",
 ) {
     val minScoreVisible: Boolean
@@ -65,10 +60,6 @@ data class CourseBlockEditUiState(
         get() = courseBlock?.cbType == CourseBlock.BLOCK_ASSIGNMENT_TYPE ||
             courseBlock?.cbType == CourseBlock.BLOCK_CONTENT_TYPE
 
-    val hasErrors: Boolean
-        get() = caTitleError != null || caDeadlineError != null || caGracePeriodError != null ||
-                caMaxPointsError != null
-
 }
 
 class CourseBlockEditViewModel(
@@ -76,9 +67,7 @@ class CourseBlockEditViewModel(
     savedStateHandle: UstadSavedStateHandle,
 ): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
-    private val _uiState = MutableStateFlow(
-        CourseBlockEditUiState(timeZone = TimeZone.currentSystemDefault().id)
-    )
+    private val _uiState = MutableStateFlow(CourseBlockEditUiState())
 
     val uiState: Flow<CourseBlockEditUiState> = _uiState.asStateFlow()
     init {
@@ -131,7 +120,7 @@ class CourseBlockEditViewModel(
             }
 
             launch {
-                resultReturner.filteredResultFlowForKey(KEY_HTML_DESCRIPTION).collect { result ->
+                resultReturner.filteredResultFlowForKey(RESULT_KEY_HTML_DESC).collect { result ->
                     val descriptionHtml = result.result as? String ?: return@collect
                     onEntityChanged(_uiState.value.courseBlock?.shallowCopy {
                         cbDescription = descriptionHtml
@@ -143,11 +132,7 @@ class CourseBlockEditViewModel(
 
     fun onEntityChanged(courseBlock: CourseBlock?) {
         _uiState.update { prev ->
-            prev.copy(
-                courseBlock = courseBlock,
-                caTitleError = updateErrorMessageOnChange(prev.courseBlock?.cbTitle,
-                    courseBlock?.cbTitle, prev.caTitleError)
-            )
+            prev.copy(courseBlock = courseBlock)
         }
 
         scheduleEntityCommitToSavedState(
@@ -161,24 +146,11 @@ class CourseBlockEditViewModel(
     fun onClickEditDescription() {
         navigateToEditHtml(
             currentValue = _uiState.value.courseBlock?.cbDescription,
-            resultKey = KEY_HTML_DESCRIPTION,
-            title = systemImpl.getString(MR.strings.description),
+            resultKey = RESULT_KEY_HTML_DESC
         )
     }
 
     fun onClickSave() {
-        val courseBlockVal = _uiState.value.courseBlock ?: return
-        if(courseBlockVal.cbTitle.isNullOrBlank()) {
-            _uiState.update { prev ->
-                prev.copy(
-                    caTitleError = systemImpl.getString(MR.strings.required)
-                )
-            }
-        }
-
-        if(_uiState.value.hasErrors)
-            return
-
         finishWithResult(_uiState.value.courseBlock)
     }
 
@@ -188,12 +160,6 @@ class CourseBlockEditViewModel(
         const val DEST_NAME = "CourseBlockEdit"
 
         const val ARG_BLOCK_TYPE = "blockType"
-
-        /**
-         * If this key is the same as used in ClazzEdit, then editing the value for CourseBlock
-         * results in it being picked up by ClazzEdit as well as CourseBlock
-         */
-        const val KEY_HTML_DESCRIPTION = "courseBlockDesc"
 
 
     }

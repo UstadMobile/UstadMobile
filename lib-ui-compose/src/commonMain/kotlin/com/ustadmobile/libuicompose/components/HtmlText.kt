@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-expect fun UstadHtmlText(
+expect fun HtmlText(
     html: String,
     modifier: Modifier = Modifier,
     htmlMaxLines: Int = Int.MAX_VALUE,

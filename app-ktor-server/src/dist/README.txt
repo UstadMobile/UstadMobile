@@ -1,10 +1,6 @@
 Ustad Mobile server README
 
-1) Open the ustad-server.conf file and set the siteUrl property to the url that
-   will be used to access the site e.g. https://ustad.yourdomain.com/ (e.g. using a reverse proxy setup
-   with Apache or Nginx in a production setup) or http://your.ip.address:8087/ (for testing/evaluation).
-
-2) To start the server: use the .sh (Linux/MacOS) or .bat (Windows) start script in bin
+To start the server: use the .sh (Linux/MacOS) or .bat (Windows) start script in bin
 
 A random admin password will be generated when the server runs for the first time: find it in
 data/singleton/admin.txt

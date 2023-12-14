@@ -18,9 +18,9 @@ End-to-end tests that start a blank new server/app and test functionality end-to
     not actually a video), then an error message will be displayed to notify that the content is 
     invalid.
 
-1.3 Admin can hide and unhide content. After hiding on admin device, the content is hidden on other device.
+1.3 Admin can hide content. After hiding on admin device, the content is hidden on other device.
 
-1.4 Admin can move content to another folder in Library. After moving, content is shown as moved on other device. 
+1.4 Admin can move content. After moving, content is shown as moved on other device. 
 
 1.5 Content can be deleted from a device. After deletion, it can be downloaded again and opened as 
     before. (Android only).
@@ -32,10 +32,6 @@ End-to-end tests that start a blank new server/app and test functionality end-to
     resume when WiFi is resumed. (Android only).
 
 1.8 H5P and video content can be automatically compressed using high, medium, and low quality presets. 
-
-1.9 Admin can delete content from library. Deleting content will remove the files associated with the content from the server. Client devices will recognize any files that are associated with deleted content as eligible for eviction from the cache.
-
-1.10 User can select (in settings) to store content on device storage or memory card (if available - Android apps can only use storage on memory cards that are reformatted on the device to use as storage (not FAT32 etc)). Any subsequent download is saved on the selected storage medium. (Android only).
 
 ### 2: Course creation, enrolment, attendance, progress
 
@@ -51,22 +47,14 @@ End-to-end tests that start a blank new server/app and test functionality end-to
 2.5 The course title is mandatory. If save is clicked when the title is blank, then the field is
     highlighted as required and it is not saved. The user can then add a title and save successfully.
 
-2.6 Teacher/admin can remove people from a course (e.g. delete their enrolment). This removes any permissions that were associated with their enrolment.    
-
-2.7 Teacher and admin user can grant permission for the course to other users. Permissions that can be granted include view attendance, edit attendance, view learning records, edit learning records, view details (name, date of birth, phone number etc) of members, edit details of members, view course, edit course.
-
-2.8 Teacher/admin can add banner photo to the course that is displayed in the course list screen and course detail screen.
-
-2.9 Teacher/admin, or the user themselves, can select or remove a profile photo. Photo can be taken from camera or gallery on Android.
-
 ### 3: Course block editing
 
 3.1 Admin or teacher can edit the course. Other users cannot edit
 
 3.2 Admin or teacher can add module and text blocks. Blocks can be reordered and hidden, indented, 
-    unindented, edited, deleted.
+    unindented
 
-3.3 Admin or teacher can add a content block and link existing content. Block can be edited (title, description, other metadata, not the content itself within app) or deleted from course.
+3.3 Admin or teacher can add a content block and link existing content
 
 3.4 Admin or teacher can add a content block and upload new content via link
 
@@ -86,7 +74,7 @@ highlighted as required and it is not saved. The user can then add a title and s
 4.1 Teacher can create assignment (set to allow one submission per student as per default), student 
     can submit assignment (text and attachment), teacher can view submission and grade it. After 
     submitting their work, the submit button is no longer visible. Student will see their mark when 
-    it is graded. Assignment can be edited or deleted from course.
+    it is graded.
 
 4.2 Teachers and students can add course comments which are visible for all who can view the assignment.
 
@@ -117,10 +105,6 @@ highlighted as required and it is not saved. The user can then add a title and s
 
 4.13 If assignment is set to be marked by peers and submitted by groups, where each assignment is marked by two peers, students can see assignment submissions for those that their group has been assigned to mark. Students can mark each others work according to the peer review allocation (as per group membership). Students will see the marks submitted by their peers (other groups).
 
-4.14 Teacher/admin (any user with permission to edit the course itself) can delete private comments and course comments.
-
-4.15 Students may upload attachments for assignment submissions if enabled by the teacher, up to the maximum file size limit set by the teacher. 
-
 ### 5	Discussion board
 5.1 Teacher can add discussion board to course
 
@@ -131,8 +115,6 @@ highlighted as required and it is not saved. The user can then add a title and s
 5.4 Users can include a link from within the app (e.g. to a course or content piece) in their post. Clicking the link opens the item directly.
 
 5.5 Users can include external links to websites in their post. Clicking the link opens the browser (e.g. Chrome on Android, new tab in web) for the link
-
-5.6 Teacher/admin (any user with permission to edit the course itself) can delete posts and replies. 
 
 ### 6 Messaging
 
@@ -193,12 +175,16 @@ highlighted as required and it is not saved. The user can then add a title and s
 
 ### 9 Peer-to-peer (Android and desktop only)
 
-9.1 If a user is connected to the same network (e.g. LAN) as another user they can request to use the other device as a proxy. If the other user approves, they will be able to login and access and edit their data the same as if they were connected directly to the server provided that a) the other device already has the relevant data or b) the other device has an Internet connection
+9.1 Users who do not have an Internet connection can connect via a nearby device with the app 
+    installed to login and use the platform (e.g. open course, view course members, etc). This will 
+    work if the nearby device has synced the data required by the user without an Internet connection
+    or itself has access to an Internet connection.
 
-9.2 If a user is connected to the same network as another user and downloads content (e.g. supported content types such as H5P, EPUB, Video, as above) and another device on the smae network has those content files, then the content will be downloaded from the other device instead of from the Internet.
+8.2 Users who do not have an Internet connection can download content via a nearby device from the 
+    device itself instead of from the Internet. This will work if the nearby device has synced the 
+    data required by the user without an Internet connection or if the nearby intermediary device
+    itself has an Internet connection.
 
-9.3 A user on an Android device may create a new mesh hotspot (e.g. if there is not an existing WiFi access point). Users on other devices may join the hotspot by scanning a QR code. Devices can simultaneously provide a hotspot for other devices and connect to one other hotspot on Android versions that support this (Android 10+ that supports IPv6 and WiFi direct, which includes almost all Android 10+ devices, or those that support Wifi Station/Access point concurrency which is limited to those that have chipset support on Android 11+). All devices connected can communicate with each other (e.g. over multiple hops).
-    
 ### 10 Accessibility
 
 10.1 Video content can have subtitles added using an WebVTT file. The subtitles will be displayed 
@@ -212,55 +198,3 @@ highlighted as required and it is not saved. The user can then add a title and s
 11.1 Server can be installed via script.
 
 11.2 Server data can be backed up via script.
-
-### 12 Language support
-
-12.1 When first starting the app it will load in the default system language if the system is set to a supported language.
-
-12.2 If the system is set to an unsupported language, the app will be displayed in English (fallback language).
-
-12.3 After login, user can go to settings, and select any supported language, or to use the system device language. The user interface will change to the selected language. The language setting is applied to the whole app, not per-user (if a user switched accounts, the language does not change - language setting is stored locally).
-
-12.4 Android: Android 13+ users can select language in app settings using [per-app language preferences](https://developer.android.com/guide/topics/resources/app-languages) 
-
-
-### 13 Reporting
-
-13.1 Users can generate a bar chart or line chart.
-
-Y-axis data options:
-
-a. Content usage - total duration<br/>
-b. Content usage - average duration per session<br/>
-c. Content usage - number of sessions<br/>
-d. Content usage - number of interactions recorded<br/>
-e. Content usage - number of active users<br/>
-f. Content usage - average usage time per user<br/>
-g. Content usage - number of students who completed content<br/>
-h. Content usage - percentage of students who completed content (out of those who attempted)<br/>
-i. Attendance - total attendances<br/>
-j. Attendance - total absences<br/>
-k. Attendance - total lates<br/>
-l. Attendance - Percentage of students who attended<br/>
-m. Attendance - Percentage of students who attended or were late<br/>
-n. Attendance - Total number of classes<br/>
-o. Attendance - Number of unique students attending.<br/>
-
-X-axis options: day, week, month, content entry, gender, class, class enrolment outcome, class enrolment reason for leaving<br/>
-
-Subgroup options: content entry (content usage reports only), gender, course, enrolment outcome (attendance reports only), reason for leaving (attendance reports only)
-
-Filter options: gender, completion status, content completion status, content entry,  content progress, attendance percentage, class enrolment outcome, class enrolment reason for leaving.
-
-Data is derived only from data the active user has permission to see (e.g. if admin, from all data. If a teacher, from those courses they teach, if a student, only from their own data).
-
-### 14 Offline behavior (Android and Desktop only)
-
-14.1. If the user visits a screen whilst online, and then returns whilst offline, the screen will load using cached data.
-
-14.2. If the user edits data offline, the data will be sent to the server as soon as the app is open and a connection is available.
-
-14.3 If the same piece of data was edited by two users offline simultaneously, the edit that was performed most recently will take effect.
-
-14.4 If a user visits a screen whilst offline that cannot be loaded (because the data is not available), an error message will be displayed.
-

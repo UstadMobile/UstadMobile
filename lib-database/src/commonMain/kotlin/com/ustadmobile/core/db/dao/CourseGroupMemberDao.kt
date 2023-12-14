@@ -33,14 +33,6 @@ expect abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
     abstract suspend fun findByGroupSetAsync(setUid: Long, clazzUid: Long): List<CourseGroupMemberPerson>
 
     @Query("""
-        SELECT CourseGroupMember.*
-          FROM CourseGroupMember
-         WHERE cgmSetUid = :groupSetUid 
-    """)
-    abstract suspend fun findByGroupSetUidAsync(groupSetUid: Long): List<CourseGroupMember>
-
-
-    @Query("""
         SELECT Person.*, CourseGroupMember.* 
           FROM Person
                JOIN ClazzEnrolment 

@@ -34,7 +34,6 @@ class ContentEntryEditViewModelTest : AbstractMainDispatcherTest(){
     fun givenImportedMetadataArgProvided_whenSaved_thenShouldSaveToDatabaseAndCallImportContent() {
         val metadata = MetadataResult(
             entry = ContentEntryWithLanguage().apply {
-                title = "File Title"
                 sourceUrl = "https://server.com/file.epub"
             },
             importerId = 42

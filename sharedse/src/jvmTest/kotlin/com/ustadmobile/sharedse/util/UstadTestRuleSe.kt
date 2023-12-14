@@ -2,8 +2,6 @@ package com.ustadmobile.sharedse.util
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.russhwolf.settings.PropertiesSettings
-import com.russhwolf.settings.Settings
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
@@ -18,7 +16,6 @@ import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.preload
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
-import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
@@ -52,8 +49,6 @@ import org.kodein.di.singleton
 import org.mockito.kotlin.spy
 import java.io.File
 import java.nio.file.Files
-import java.util.Locale
-import java.util.Properties
 import kotlin.random.Random
 
 fun DI.onActiveAccount(): DI {
@@ -95,19 +90,7 @@ class UstadTestRule: TestWatcher() {
     override fun starting(description: Description) {
         endpointScope = EndpointScope()
         tmpFolder = Files.createTempDirectory("testrule").toFile()
-
-        val settings: Settings = PropertiesSettings(
-            delegate = Properties(),
-            onModify = {
-                //do nothing
-            }
-        )
-        val langConfig = SupportedLanguagesConfig(
-            systemLocales = listOf(Locale.getDefault().language),
-            settings = settings,
-        )
-
-        systemImplSpy = spy(UstadMobileSystemImpl(settings, langConfig))
+        systemImplSpy = spy(UstadMobileSystemImpl(tmpFolder))
         okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp) {
             install(ContentNegotiation) {
@@ -125,7 +108,6 @@ class UstadTestRule: TestWatcher() {
             bind<UstadAccountManager>() with singleton {
                 UstadAccountManager(instance(), di)
             }
-            bind<Settings>() with singleton { settings }
             bind<NodeIdAndAuth>() with scoped(endpointScope!!).singleton {
                 NodeIdAndAuth(Random.nextLong(), randomUuid().toString())
             }

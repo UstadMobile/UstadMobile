@@ -1,22 +1,26 @@
 package com.ustadmobile.libuicompose.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
+import androidx.compose.material.IconButton
+import androidx.compose.material.Icon
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.ustadmobile.core.util.MessageIdOption2
 import dev.icerock.moko.resources.compose.stringResource as mrStringResource
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> UstadExposedDropDownMenuField(
     value: T?,
@@ -27,58 +31,51 @@ fun <T> UstadExposedDropDownMenuField(
     isError: Boolean = false,
     itemText: @Composable (T) -> String,
     enabled: Boolean = true,
-    supportingText: (@Composable () -> Unit)? = null,
 ) {
 
-    //As per
-    // https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#ExposedDropdownMenuBox(kotlin.Boolean,kotlin.Function1,androidx.compose.ui.Modifier,kotlin.Function1)
-
     var expanded by remember { mutableStateOf(false) }
+    val adornmentIcon = if(expanded) {
+        Icons.Filled.ArrowDropUp
+    } else {
+        Icons.Filled.ArrowDropDown
+    }
 
-
-    ExposedDropdownMenuBox(
-        modifier = modifier,
-        expanded = expanded,
-        onExpandedChange = { expanded = it }
-    ) {
-
+    Box(modifier = modifier) {
         OutlinedTextField(
-            modifier = Modifier.menuAnchor().fillMaxWidth(),
-            readOnly = true,
-            enabled = enabled,
-            value = if(value != null) {
-                itemText(value)
-            }else {
-                ""
-            },
-            label = {
-                Text(label)
-            },
+            modifier = Modifier.fillMaxWidth(),
+            value = value?.let { itemText(it) } ?: "",
             onValueChange = { },
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-            },
+            readOnly = true,
+            label = { Text(label) },
             isError = isError,
-            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-            supportingText = supportingText,
+            enabled = enabled,
+            trailingIcon = {
+                IconButton(
+                    enabled = enabled,
+                    onClick = { expanded = !expanded }){
+                    Icon(
+                        adornmentIcon, "contentDescription",
+                        Modifier.align(Alignment.CenterEnd)
+                    )
+                }
+            },
         )
 
-        ExposedDropdownMenu(
+        DropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false}
+            onDismissRequest = { expanded = false }
         ) {
-            options.forEach { item ->
+            options.takeIf { expanded }?.forEach { option ->
                 DropdownMenuItem(
-                    text = { Text(if(item != null) itemText(item) else "") },
                     onClick = {
                         expanded = false
-                        onOptionSelected(item)
-                    },
-                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                )
+                        onOptionSelected(option)
+                    }
+                ) {
+                    Text(text = itemText(option))
+                }
             }
         }
-
     }
 }
 
@@ -91,7 +88,6 @@ fun UstadMessageIdOptionExposedDropDownMenuField(
     modifier: Modifier = Modifier,
     isError: Boolean = false,
     enabled: Boolean = true,
-    supportingText: (@Composable () -> Unit)? = null,
 ) {
     UstadExposedDropDownMenuField(
         value = options.firstOrNull { it.value == value },
@@ -102,6 +98,5 @@ fun UstadMessageIdOptionExposedDropDownMenuField(
         modifier = modifier,
         isError = isError,
         enabled = enabled,
-        supportingText = supportingText,
     )
 }

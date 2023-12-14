@@ -39,8 +39,19 @@ fun ClazzAssignmentSubmitterDetailScreenPreview(){
                 markerLastName = "Smith",
             )
         ),
+//        privateCommentsList = {
+//            ListPagingSource(listOf(
+//                CommentsAndName(
+//                    comment = Comments().apply {
+//                        commentsText = "I like this activity. Shall we discuss this in our next meeting?"
+//                    },
+//                    firstNames = "Bob",
+//                    lastName = "Dylan"
+//                )
+//            ))
+//        },
     )
 
 
-    ClazzAssignmentSubmitterDetailScreen(uiStateVal)
+    ClazzAssignmentDetailStudentProgressScreen(uiStateVal)
 }

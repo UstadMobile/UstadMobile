@@ -1,7 +1,5 @@
 package com.ustadmobile.port.desktop
 
-import com.russhwolf.settings.PropertiesSettings
-import com.russhwolf.settings.Settings
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
@@ -14,11 +12,9 @@ import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCaseJvm
-import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
-import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJvm
@@ -48,8 +44,6 @@ import nl.adaptivity.xmlutil.serialization.XmlConfig
 import org.kodein.di.on
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
-import java.io.FileReader
-import java.io.FileWriter
 import java.util.Properties
 import javax.naming.InitialContext
 
@@ -57,21 +51,11 @@ const val TAG_APP_HOME = "AppHome"
 
 const val TAG_DATA_DIR = "DataDir"
 
-fun ustadAppHomeDir(): File {
-    return System.getProperty("app_home")?.let { File(it) } ?: File(System.getProperty("user.dir"))
-}
-
-fun ustadAppDataDir(): File {
-    return File(ustadAppHomeDir(), "data")
-}
 
 @OptIn(ExperimentalXmlUtilApi::class)
 val DesktopDiModule = DI.Module("Desktop-Main") {
     bind<SupportedLanguagesConfig>() with singleton {
-        SupportedLanguagesConfig(
-            systemLocales = listOf(SetLanguageUseCaseJvm.REAL_SYSTEM_DEFAULT.language),
-            settings = instance(),
-        )
+        SupportedLanguagesConfig()
     }
 
     bind<StringProvider>() with singleton { StringProviderJvm(Locale.getDefault()) }
@@ -85,7 +69,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
     }
 
     bind<File>(tag = TAG_APP_HOME) with singleton {
-        ustadAppHomeDir()
+        System.getProperty("app_home")?.let { File(it) } ?: File(System.getProperty("user.dir"))
     }
 
     bind<File>(tag = TAG_DATA_DIR) with singleton {
@@ -99,30 +83,9 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         }
     }
 
-    bind<Settings>() with singleton {
-        val propertiesFile = File(instance<File>(tag = TAG_DATA_DIR),
-            UstadMobileSystemImpl.PREFS_FILENAME)
-
-        PropertiesSettings(
-            delegate = Properties().also {props ->
-                if(propertiesFile.exists()) {
-                    FileReader(propertiesFile).use { fileReader ->
-                        props.load(fileReader)
-                    }
-                }
-            },
-            onModify = { props ->
-                FileWriter(propertiesFile).use { fileWriter ->
-                    props.store(fileWriter, null)
-                }
-            }
-        )
-    }
-
     bind<UstadMobileSystemImpl>() with singleton {
         UstadMobileSystemImpl(
-            settings = instance(),
-            langConfig = instance(),
+            dataRoot = instance(tag = TAG_DATA_DIR)
         )
     }
 
@@ -150,9 +113,9 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
     }
 
     bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
-        val settings: Settings = instance()
+        val systemImpl: UstadMobileSystemImpl = instance()
         val contextIdentifier = sanitizeDbNameFromUrl(context.url)
-        settings.getOrGenerateNodeIdAndAuth(contextIdentifier)
+        systemImpl.getOrGenerateNodeIdAndAuth(contextIdentifier, Any())
     }
 
     bind<Json>() with singleton {
@@ -220,9 +183,5 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         StdSchedulerFactory.getDefaultScheduler().also {
             it.context.put("di", di)
         }
-    }
-
-    bind<GenderConfig>() with singleton {
-        GenderConfig()
     }
 }

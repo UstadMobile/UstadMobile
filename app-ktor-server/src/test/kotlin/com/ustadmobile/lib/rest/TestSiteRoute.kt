@@ -2,7 +2,9 @@ package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.Site
 import io.ktor.client.HttpClient
 import io.ktor.client.call.*
@@ -22,7 +24,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.DI
+import org.kodein.di.instance
 import org.kodein.di.ktor.di
+import org.kodein.di.on
 import org.kodein.di.registerContextTranslator
 
 class TestSiteRoute {
@@ -41,7 +45,7 @@ class TestSiteRoute {
         serverDi = DI {
             import(CommonJvmDiModule)
 
-            import(commonTestKtorDiModule(endpointScope))
+            import(commonTestKtorDiModule(endpointScope, temporaryFolder))
 
             registerContextTranslator { _: ApplicationCall ->
                 Endpoint("localhost")

@@ -2,7 +2,6 @@ package com.ustadmobile.core.impl
 
 import app.cash.turbine.test
 import com.google.gson.Gson
-import com.russhwolf.settings.Settings
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_SESSION_PREFKEY
@@ -51,7 +50,6 @@ import org.junit.Test
 import org.kodein.di.*
 import kotlin.random.Random
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.time.Duration.Companion.seconds
 
 
@@ -129,9 +127,11 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
         }
     }
 
-    lateinit var mockSettings: Settings
+    lateinit var mockSystemImpl: UstadMobileSystemImpl
 
     lateinit var apiUrlConfig: ApiUrlConfig
+
+    val appContext = Any()
 
     lateinit var mockWebServer: MockWebServer
 
@@ -152,7 +152,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
     @Before
     fun setup() {
         apiUrlConfig = ApiUrlConfig("http://app.ustadmobile.com/")
-        mockSettings = mock { }
+        mockSystemImpl = mock { }
 
         mockWebServer = MockWebServer().also {
             it.start()
@@ -252,7 +252,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenNoUserInPrefKeys_whenInitialized_shouldInitGuestAccountOnDefaultServer() {
-        val accountManager = UstadAccountManager(mockSettings, di)
+        val accountManager = UstadAccountManager(mockSystemImpl, di)
         val activeAccount = accountManager.currentAccount
         Assert.assertEquals("Initial account has personUid = 0", 0L, activeAccount.personUid)
         Assert.assertEquals("Initial account uses default apiUrl",
@@ -263,7 +263,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenNoSiteOrPersonInDb_whenLoginCalledForfirstLogin_shouldInitLogin() {
-        val accountManager = UstadAccountManager(mockSettings, di)
+        val accountManager = UstadAccountManager(mockSystemImpl, di)
         db.execSQLBatch("DELETE FROM Site", "DELETE FROM Person")
 
 
@@ -287,7 +287,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenValidLoginCredentials_whenLoginCalledForFirstLogin_shouldInitLogin() {
-        val accountManager = UstadAccountManager(mockSettings, di)
+        val accountManager = UstadAccountManager(mockSystemImpl, di)
         val loggedInAccount = UmAccount(42L, "bob", "",
             mockServerUrl)
 
@@ -322,7 +322,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
         }
 
         argumentCaptor<String> {
-            verify(mockSettings).putString(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY), capture())
+            verify(mockSystemImpl).setAppPref(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY), capture())
             val accountSaved = json.decodeFromString(UserSessionWithPersonAndEndpoint.serializer(),
                 firstValue)
             Assert.assertEquals("Saved account as active", loggedInAccount.personUid,
@@ -360,17 +360,17 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
         val savedSessionWithPersonAndEndpoint = UserSessionWithPersonAndEndpoint(savedSession,
             savedPerson, Endpoint(mockServerUrl))
 
-        mockSettings.stub {
+        mockSystemImpl.stub {
             on {
-                getStringOrNull(eq(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY))
+                getAppPref(eq(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY))
             }.thenReturn(mockServerUrl)
             on {
-                getStringOrNull(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY))
+                getAppPref(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY))
             }.thenReturn(json.encodeToString(UserSessionWithPersonAndEndpoint.serializer(),
                 savedSessionWithPersonAndEndpoint))
         }
 
-        val accountManager = UstadAccountManager(mockSettings, di)
+        val accountManager = UstadAccountManager(mockSystemImpl, di)
 
         val loggedInAccount = UmAccount(42L, "bob", "", mockServerUrl)
         mockDispatcher.authUmAccount = loggedInAccount
@@ -392,7 +392,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
                 loggedInAccount.userAtServer, accountManager.currentAccount.userAtServer)
 
         argumentCaptor<String> {
-            verify(mockSettings).putString(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY), capture())
+            verify(mockSystemImpl).setAppPref(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY), capture())
             val accountSaved = json.decodeFromString(UserSessionWithPersonAndEndpoint.serializer(),
                 firstValue)
             Assert.assertEquals("Saved account as active", loggedInAccount.personUid,
@@ -402,7 +402,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenInvalidLoginCredentials_whenLoginCalled_thenShouldThrowException() {
-        val accountManager = UstadAccountManager(mockSettings, di)
+        val accountManager = UstadAccountManager(mockSystemImpl, di)
 
         mockDispatcher.authResponseCode = 403
 
@@ -421,7 +421,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenAccountRequiresParentalConsent_whenLoginCalled_thenShouldThrowException() {
-        val accountManager = UstadAccountManager(mockSettings, di)
+        val accountManager = UstadAccountManager(mockSystemImpl, di)
 
         mockDispatcher.authResponseCode = 424
 
@@ -441,7 +441,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenUnreachableServer_whenLoginCalled_thenShouldThrowException() {
-        val accountManager = UstadAccountManager(mockSettings, di)
+        val accountManager = UstadAccountManager(mockSystemImpl, di)
 
         var exception: Exception? = null
 
@@ -489,23 +489,23 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
         val joePersonSessionWithPersonAndEndpoint = UserSessionWithPersonAndEndpoint(joePersonSession,
             joePerson, Endpoint(mockServerUrl))
 
-        mockSettings.stub {
+        mockSystemImpl.stub {
             on {
-                getStringOrNull(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY))
+                getAppPref(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY))
             }.thenReturn(
                 json.encodeToString(UserSessionWithPersonAndEndpoint.serializer(),
                     activeUserSession))
             on {
-                getStringOrNull(eq(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY))
+                getAppPref(eq(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY))
             }.thenReturn(mockServerUrl)
             on {
-                getStringOrNull(eq(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION))
+                getAppPref(eq(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION))
             }.thenReturn(
                 json.encodeToString(ListSerializer(String.serializer()), listOf(mockServerUrl)))
         }
 
 
-        val accountManager = UstadAccountManager(mockSettings, di)
+        val accountManager = UstadAccountManager(mockSystemImpl, di)
         accountManager.currentUserSession = joePersonSessionWithPersonAndEndpoint
 
         Assert.assertEquals("Active account is updated when calling setActiveAccount",
@@ -521,7 +521,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
         }
 
         argumentCaptor<String> {
-            verify(mockSettings).putString(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY), capture())
+            verify(mockSystemImpl).setAppPref(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY), capture())
             val accountSaved = json.decodeFromString(UserSessionWithPersonAndEndpoint.serializer(),
                 firstValue)
             Assert.assertEquals("Saved account as active matches username",
@@ -533,7 +533,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenValidRegistrationRequest_whenNewAccountRequested_thenShouldBeRequestedOnServerAndActive() {
-        val accountManager = UstadAccountManager(mockSettings, di)
+        val accountManager = UstadAccountManager(mockSystemImpl, di)
 
         val personToRegister = PersonWithAccount().apply {
             firstNames = "Mary"
@@ -557,16 +557,12 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
         val registerRequest = mockDispatcher.registerRequestsReceived.first()
         Assert.assertEquals("Got expected register request", "mary",
             registerRequest.person.username)
-        runBlocking {
-            assertNotNull(db.personDao.findByUsernameAsync(registerRequest.person.username ?: ""))
-        }
-
     }
 
 
     @Test
     fun givenActiveAccount_whenIncomingReplicationMakesUserSessionInactive_thenShouldEndSession() {
-        val accountManager = UstadAccountManager(mockSettings, di)
+        val accountManager = UstadAccountManager(mockSystemImpl, di)
         val activeAccountPerson = Person().apply {
             firstNames = "Mary"
             lastName = "Poppins"

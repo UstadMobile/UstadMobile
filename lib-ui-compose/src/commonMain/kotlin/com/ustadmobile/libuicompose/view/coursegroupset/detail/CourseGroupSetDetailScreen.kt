@@ -22,7 +22,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 
 @Composable
-fun CourseGroupSetDetailScreen(
+fun CourseGroupSetDetailScreenForViewModel(
     viewModel: CourseGroupSetDetailViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState(CourseGroupSetDetailUiState())
@@ -41,9 +41,7 @@ fun CourseGroupSetDetailScreen(
             .fillMaxWidth()
     ){
         (1..(uiState.courseGroupSet?.cgsTotalGroups ?: 1)).forEach { groupNum ->
-            val members = uiState.membersList.filter {
-                it.cgm?.cgmGroupNumber == groupNum
-            }
+            val members = uiState.membersList.filter { it.cgm?.cgmGroupNumber == groupNum }
 
             if(members.isNotEmpty()) {
                 item(key = "header_${groupNum}") {

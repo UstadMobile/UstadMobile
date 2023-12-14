@@ -25,5 +25,4 @@ data class AppUiState(
     val searchState: AppBarSearchUiState = AppBarSearchUiState(),
     val actionBarButtonState: ActionBarButtonUiState = ActionBarButtonUiState(),
     val overflowItems: List<OverflowItem> = emptyList(),
-    val hideAppBar: Boolean = false,
 )

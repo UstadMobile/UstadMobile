@@ -1,6 +1,6 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailUiState
+import com.ustadmobile.core.viewmodel.SiteTermsDetailUiState
 import com.ustadmobile.lib.db.entities.SiteTerms
 import web.cssom.px
 import js.core.jso

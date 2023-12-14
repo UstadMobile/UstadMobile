@@ -28,7 +28,7 @@ import org.kodein.di.ktor.closestDI
 import kotlin.IllegalStateException
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.doubleEncryptWithPbkdf2V2
-import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
+import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
 
 fun Route.personAuthRegisterRoute() {
 

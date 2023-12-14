@@ -3,7 +3,6 @@ plugins {
     id("com.android.library")
     id("kotlin-parcelize")
     alias(libs.plugins.jetbrains.compose)
-    alias(libs.plugins.moko.resources.plugin)
 }
 
 //Roughly as per compose multiplatform template
@@ -36,6 +35,7 @@ kotlin {
                 api(libs.paging.multiplatform.common)
                 api(libs.paging.multiplatform.compose)
 
+                implementation(libs.richeditor.multiplatform.compose)
                 implementation(libs.compose.webview.multiplatform)
 
                 implementation(libs.kotlinx.datetime)
@@ -48,8 +48,6 @@ kotlin {
         }
 
         val androidMain by getting {
-            dependsOn(commonMain)
-
             dependencies {
                 api(libs.activity.compose)
                 api(libs.androidx.appcompat)
@@ -58,27 +56,15 @@ kotlin {
                 api(libs.androidx.paging.compose)
                 api(libs.androidx.navigation.compose)
                 api(libs.androidx.lifecycle.viewmodel.compose)
-                api(libs.htmltext.android)
-
-                implementation(libs.volley)
-                implementation(libs.aztec)
 
                 implementation(libs.android.material)
-                implementation(libs.libphonenumber.android)
-                implementation(libs.autolink)
             }
         }
 
         val desktopMain by getting {
-            dependsOn(commonMain)
-
             dependencies {
                 api(compose.desktop.common)
                 implementation(compose.desktop.currentOs)
-
-                implementation(libs.richeditor.multiplatform.compose)
-                implementation(libs.libphonenumber.google)
-                implementation(libs.autolink)
             }
         }
     }
@@ -104,10 +90,4 @@ android {
     kotlin {
         jvmToolchain(17)
     }
-}
-
-multiplatformResources {
-    multiplatformResourcesPackage = "com.ustadmobile.libuicompose"
-
-    iosBaseLocalizationRegion = "en"
 }
