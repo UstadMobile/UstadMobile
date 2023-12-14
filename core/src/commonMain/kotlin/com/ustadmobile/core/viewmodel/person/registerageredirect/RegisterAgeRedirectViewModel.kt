@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.person.registerageredirect
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import kotlinx.coroutines.flow.Flow
@@ -9,6 +9,8 @@ import org.kodein.di.DI
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.ext.isDateOfBirthAMinor
+import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
+import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.datetime.Instant
@@ -23,6 +25,18 @@ data class RegisterAgeRedirectUiState(
 
 )
 
+/**
+ * This screen implements the "age neutral" screen requirement as per COPPA and Google Play policies.
+ * Any app that can appeal to children must have a screen where the age is requested in a neutral
+ * manner.
+ *
+ * If the user is under 13, we must request a parental consent contact and minimize the fields
+ * collected.
+ *
+ * If the user is over 13, they can be taken to consent to the terms of service directly. If they
+ * are under 13, then we take them to PersonEdit to put in their details and provide a parental
+ * consent contact.
+ */
 class RegisterAgeRedirectViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
@@ -72,24 +86,26 @@ class RegisterAgeRedirectViewModel(
         }
 
         val dateOfBirthInstant = Instant.fromEpochMilliseconds(date)
+        val isMinor = dateOfBirthInstant.isDateOfBirthAMinor()
 
         val args = buildMap {
             putFromSavedStateIfPresent(PersonEditViewModel.REGISTRATION_ARGS_TO_PASS)
 
-            put(PersonEditViewModel.ARG_REGISTRATION_MODE,
-                PersonEditViewModel.REGISTER_MODE_ENABLED.toString())
+            val registrationMode = if(isMinor) {
+                PersonEditViewModel.REGISTER_MODE_ENABLED.or(PersonEditViewModel.REGISTER_MODE_MINOR)
+            }else {
+                PersonEditViewModel.REGISTER_MODE_ENABLED
+            }
+            put(PersonEditViewModel.ARG_REGISTRATION_MODE, registrationMode.toString())
             put(PersonEditViewModel.ARG_DATE_OF_BIRTH, date.toString())
         }
 
-        if(dateOfBirthInstant.isDateOfBirthAMinor()) {
+        if(isMinor) {
             navController.navigate(PersonEditViewModel.DEST_NAME_REGISTER, args)
         }else {
             navController.navigate(SiteTermsDetailViewModel.DEST_NAME, args)
         }
     }
-
-
-
 
 
     companion object {

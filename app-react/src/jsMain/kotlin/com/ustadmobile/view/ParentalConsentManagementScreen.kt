@@ -3,7 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.PersonParentJoinConstants
-import com.ustadmobile.core.viewmodel.ParentalConsentManagementUiState
+import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementUiState
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonParentJoinWithMinorPerson

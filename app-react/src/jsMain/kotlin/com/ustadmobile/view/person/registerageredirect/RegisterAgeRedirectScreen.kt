@@ -4,8 +4,8 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.UstadMobileConstants
-import com.ustadmobile.core.viewmodel.RegisterAgeRedirectUiState
-import com.ustadmobile.core.viewmodel.RegisterAgeRedirectViewModel
+import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectUiState
+import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.UstadDateField
 import com.ustadmobile.mui.components.UstadStandardContainer
@@ -19,7 +19,6 @@ import mui.system.responsive
 import react.FC
 import react.Props
 import react.ReactNode
-import react.useState
 
 external interface RegisterAgeRedirectProps : Props {
 

@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.os.Bundle
 import android.view.*
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -19,7 +18,7 @@ import com.google.accompanist.themeadapter.material.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.locale.entityconstants.PersonParentJoinConstants
-import com.ustadmobile.core.viewmodel.ParentalConsentManagementUiState
+import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementUiState
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonParentJoinWithMinorPerson

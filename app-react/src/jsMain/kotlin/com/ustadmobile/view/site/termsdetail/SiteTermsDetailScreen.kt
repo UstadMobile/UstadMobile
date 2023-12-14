@@ -2,8 +2,8 @@ package com.ustadmobile.view.site.termsdetail
 
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.viewmodel.SiteTermsDetailUiState
-import com.ustadmobile.core.viewmodel.SiteTermsDetailViewModel
+import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailUiState
+import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.UstadRawHtml

@@ -64,43 +64,45 @@ fun AccountListScreen(
             .fillMaxWidth()
     ){
 
-        item {
-            AccountListItem(
-                account = uiState.headerAccount
-            )
-        }
-
-        item {
-            Row (
-                modifier = Modifier
-                    .padding(start = 72.dp, bottom = 16.dp)
-            ){
-
-                OutlinedButton(
-                    onClick = onMyProfileClick,
-                ) {
-                    Text(stringResource(MR.strings.my_profile))
-                }
-
-                OutlinedButton(
-                    modifier = Modifier
-                        .padding(start = 10.dp),
-                    onClick = onLogoutClick,
-                ) {
-                    Text(stringResource(MR.strings.logout))
-                }
-
+        if(uiState.headerAccount != null) {
+            item(key = "header_account") {
+                AccountListItem(
+                    account = uiState.headerAccount
+                )
             }
-        }
 
-        item {
-            Divider(thickness = 1.dp)
+            item(key = "header_buttons") {
+                Row (
+                    modifier = Modifier
+                        .padding(start = 72.dp, bottom = 16.dp)
+                ){
+
+                    OutlinedButton(
+                        onClick = onMyProfileClick,
+                    ) {
+                        Text(stringResource(MR.strings.my_profile))
+                    }
+
+                    OutlinedButton(
+                        modifier = Modifier
+                            .padding(start = 10.dp),
+                        onClick = onLogoutClick,
+                    ) {
+                        Text(stringResource(MR.strings.logout))
+                    }
+
+                }
+            }
+
+            item(key = "header_divider") {
+                Divider(thickness = 1.dp)
+            }
         }
 
         items(
             uiState.accountsList,
             key = {
-                it.person.personUid
+                "${it.person.personUid}@${it.endpoint}"
             }
         ){  account ->
             AccountListItem(
@@ -123,18 +125,18 @@ fun AccountListScreen(
             )
         }
 
-        item {
+        item(key = "add_account") {
             UstadAddListItem(
                 text = stringResource(MR.strings.add_another_account),
                 onClickAdd = onAddItem,
             )
         }
 
-        item {
+        item(key = "bottom_divider") {
             Divider(thickness = 1.dp)
         }
 
-        item {
+        item(key = "about") {
             ListItem(
                 modifier = Modifier
                     .clickable {

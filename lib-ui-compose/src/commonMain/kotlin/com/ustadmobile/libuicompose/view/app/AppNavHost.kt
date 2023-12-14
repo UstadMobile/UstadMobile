@@ -1,7 +1,9 @@
 package com.ustadmobile.libuicompose.view.app
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -10,14 +12,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
+import com.ustadmobile.core.impl.nav.NavCommand
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
-import com.ustadmobile.core.viewmodel.RegisterAgeRedirectViewModel
-import com.ustadmobile.core.viewmodel.SiteTermsDetailViewModel
+import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
+import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
@@ -42,6 +45,7 @@ import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.Cours
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
@@ -105,7 +109,15 @@ import org.kodein.di.compose.localDI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import kotlin.reflect.KClass
+import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
+import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
+import kotlinx.coroutines.flow.Flow
 
+/**
+ * @param navCommandFlow A (hoisted) flow of navigation commands. This can be used by the underlying
+ *                       platform (e.g. Android/Desktop) to emit navigation commands when a command
+ *                       is received (e.g. by onNewIntent).
+ */
 @Composable
 fun AppNavHost(
     navigator: Navigator,
@@ -113,6 +125,8 @@ fun AppNavHost(
     onShowSnackBar: SnackBarDispatcher,
     persistNavState: Boolean = false,
     modifier: Modifier,
+    navCommandFlow: Flow<NavCommand>? = null,
+    initialRoute: String = "/${RedirectViewModel.DEST_NAME}",
 ) {
     val popCommandFlow = remember {
         MutableSharedFlow<PopNavCommand>(
@@ -128,6 +142,12 @@ fun AppNavHost(
                 popCommandFlow.tryEmit(it)
             }
         )
+    }
+
+    LaunchedEffect(navCommandFlow) {
+        navCommandFlow?.collect {
+            ustadNavController.onCollectNavCommand(it)
+        }
     }
 
     val navResultReturner: NavResultReturner = remember {
@@ -193,7 +213,7 @@ fun AppNavHost(
         NavHost(
             modifier = modifier,
             navigator = navigator,
-            initialRoute = "/${RedirectViewModel.DEST_NAME}",
+            initialRoute = initialRoute,
             persistNavState = persistNavState,
         ) {
 
@@ -499,6 +519,18 @@ fun AppNavHost(
                     appViewModel(backStackEntry, SiteTermsDetailViewModel::class, ::SiteTermsDetailViewModel)
                 )
             }
+
+            contentScene("/${RegisterMinorWaitForParentViewModel.DEST_NAME}") { backStackEntry ->
+                RegisterMinorWaitForParentScreen(
+                    appViewModel(backStackEntry, RegisterMinorWaitForParentViewModel::class,
+                        ::RegisterMinorWaitForParentViewModel)
+                )
+            }
+
+            contentScene("/${ParentalConsentManagementViewModel.DEST_NAME}") { backStackEntry ->
+                Text("Parental Consent Management")
+            }
+
         }
     }
 }

@@ -21,6 +21,8 @@ import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.REGISTER_MODE_ENABLED
+import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.REGISTER_MODE_MINOR
+import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
@@ -105,6 +107,15 @@ data class PersonEditUiState(
 
     val passwordVisible: Boolean
         get() = registrationMode.hasFlag(REGISTER_MODE_ENABLED)
+
+    val emailVisible: Boolean
+        get() = !registrationMode.hasFlag(REGISTER_MODE_MINOR)
+
+    val phoneNumVisible: Boolean
+        get() = !registrationMode.hasFlag(REGISTER_MODE_MINOR)
+
+    val personAddressVisible: Boolean
+        get() = !registrationMode.hasFlag(REGISTER_MODE_MINOR)
 
 }
 
@@ -417,7 +428,7 @@ class PersonEditViewModel(
                         parentContactError = when {
                             !registrationModeFlags.hasFlag(REGISTER_MODE_MINOR) -> null
                             parentJoin?.ppjEmail.isNullOrEmpty() -> requiredFieldMessage
-                            parentJoin?.ppjEmail?.let { it.validEmail() } != true -> {
+                            parentJoin?.ppjEmail?.let { validateEmailUseCase(it) } == null -> {
                                 systemImpl.getString(MR.strings.invalid_email)
                             }
                             else -> null
@@ -458,20 +469,22 @@ class PersonEditViewModel(
                         )
                     )
 
+                    //TODO: this should be restored, but we need to avoid issue on web where
+                    // popupinclusive tries to go back past first destination
                     val popUpToViewName = savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.CURRENT_DEST
 
                     if(registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)) {
                         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
                             RegisterAgeRedirectView.VIEW_NAME, true)
                         val args = mutableMapOf<String, String>().also {
-                            it[RegisterMinorWaitForParentView.ARG_USERNAME] = savePerson.username ?: ""
-                            it[RegisterMinorWaitForParentView.ARG_PARENT_CONTACT] =
+                            it[RegisterMinorWaitForParentViewModel.ARG_USERNAME] = savePerson.username ?: ""
+                            it[RegisterMinorWaitForParentViewModel.ARG_PARENT_CONTACT] =
                                 parentJoin?.ppjEmail ?: ""
-                            it[RegisterMinorWaitForParentView.ARG_PASSWORD] = _uiState.value.password ?: ""
+                            it[RegisterMinorWaitForParentViewModel.ARG_PASSWORD] = _uiState.value.password ?: ""
                             it.putFromSavedStateIfPresent(savedStateHandle, UstadView.ARG_POPUPTO_ON_FINISH)
                         }
 
-                        navController.navigate(RegisterMinorWaitForParentView.VIEW_NAME, args,
+                        navController.navigate(RegisterMinorWaitForParentViewModel.DEST_NAME, args,
                             goOptions)
                     }else {
                         val goOptions = UstadMobileSystemCommon.UstadGoOptions(

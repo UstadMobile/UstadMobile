@@ -9,7 +9,7 @@ import io.ktor.server.testing.*
 import org.junit.Test
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.util.ext.*
-import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
+import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.*
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -148,7 +148,6 @@ class PersonAuthRegisterRouteTest {
             username = "bobjones"
             dateOfBirth = systemTimeInMillis() - (20 * 365 * 24 * 60 * 60 * 1000L) //approx 20 years
             newPassword = "secret23"
-            confirmedPassword = "secret23"
         }
 
         val httpResponse = runBlocking {
