@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -122,6 +123,8 @@ class PersonEditViewModel(
     private val phoneNumValidatorUseCase: PhoneNumValidatorUseCase by instance()
 
     private val validateEmailUseCase = ValidateEmailUseCase()
+
+    private val validateUsernameUseCase = ValidateUsernameUseCase()
 
     private val genderConfig : GenderConfig by instance()
 
@@ -264,32 +267,6 @@ class PersonEditViewModel(
             phoneNumError != null
     }
 
-    private fun validateUsername(username: String): Boolean {
-        var isValid = true
-
-        if (username.isNullOrEmpty()){
-            isValid = false
-        }
-
-        if (isValid){
-            if (username.contains(" ")){
-                isValid = false
-            }
-        }
-
-        if (isValid){
-            var usernameChars = username.toCharArray()
-
-            for(i in 1..<usernameChars.count()){
-                if(usernameChars[i].isUpperCase()){
-                    isValid = false
-                }
-            }
-        }
-
-        return isValid
-    }
-
     fun onNationalPhoneNumSetChanged(phoneNumSet: Boolean) {
         _uiState.takeIf { it.value.nationalPhoneNumSet != phoneNumSet }?.update { prev ->
             prev.copy(nationalPhoneNumSet = phoneNumSet)
@@ -315,10 +292,11 @@ class PersonEditViewModel(
         val currentTime = systemTimeInMillis()
         val isRegistrationMode = registrationModeFlags.hasFlag(REGISTER_MODE_ENABLED)
         val validatedEmailAddr = savePerson.emailAddr?.let { validateEmailUseCase(it) }
+        val validateUsername = savePerson.username?.let { validateUsernameUseCase(it) }
 
         _uiState.update { prev ->
             prev.copy(
-                usernameError = if(isRegistrationMode && !validateUsername(savePerson.username ?: "")) {
+                usernameError = if(isRegistrationMode && validateUsername == null) {
                     systemImpl.getString(MR.strings.invalid)
                 }else {
                     null
@@ -366,7 +344,7 @@ class PersonEditViewModel(
                 val parentJoin = _uiState.value.approvalPersonParentJoin
                 _uiState.update { prev ->
                     prev.copy(
-                        usernameError = if(savePerson.username.isNullOrEmpty()) {
+                        usernameError = if(savePerson.username.isNullOrEmpty() || validateUsername == null) {
                             requiredFieldMessage
                         }else {
                             null
