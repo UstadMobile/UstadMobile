@@ -93,7 +93,7 @@ fun ParentalConsentManagementScreen(
             UstadMessageIdOptionExposedDropDownMenuField(
                 modifier = Modifier.fillMaxWidth().defaultItemPadding(),
                 value = uiState.parentJoinAndMinor?.personParentJoin?.ppjRelationship ?: 0,
-                label = stringResource(MR.strings.relationship),
+                label = stringResource(MR.strings.relationship) + "*",
                 options = PersonParentJoinConstants.RELATIONSHIP_MESSAGE_IDS,
                 onOptionSelected = {
                     onChangeRelation(uiState.parentJoinAndMinor?.personParentJoin?.shallowCopy{
@@ -102,20 +102,24 @@ fun ParentalConsentManagementScreen(
                 },
                 isError = uiState.relationshipError != null,
                 enabled = uiState.fieldsEnabled,
+                supportingText = {
+                    Text(uiState.relationshipError ?: stringResource(MR.strings.required))
+                }
             )
         }
 
-        UstadDetailHeader(modifier = Modifier.defaultItemPadding()) {
+        UstadDetailHeader {
             Text(stringResource(MR.strings.terms_and_policies))
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
+        Divider(Modifier.height(1.dp))
         UstadHtmlText(
             html = uiState.siteTerms?.termsHtml ?: "",
             modifier = Modifier.defaultItemPadding()
         )
-
+        Divider(Modifier.height(1.dp))
 
         Spacer(modifier = Modifier.height(8.dp))
 

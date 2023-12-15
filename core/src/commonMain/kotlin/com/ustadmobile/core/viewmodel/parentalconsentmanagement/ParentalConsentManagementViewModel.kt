@@ -14,7 +14,13 @@ import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_FATHER
+import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_MOTHER
+import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_OTHER
+import org.kodein.di.instance
+import org.kodein.di.on
 
 data class ParentalConsentManagementUiState(
 
@@ -76,6 +82,9 @@ class ParentalConsentManagementViewModel(
 
     val uiState: Flow<ParentalConsentManagementUiState> = _uiState.asStateFlow()
 
+    val getLocaleForSiteTermsUseCase: GetLocaleForSiteTermsUseCase by
+        on(accountManager.activeEndpoint).instance()
+
     init {
         _appUiState.update { prev ->
             prev.copy(
@@ -106,6 +115,18 @@ class ParentalConsentManagementViewModel(
                 prev.copy(fieldsEnabled = true)
             }
         }
+
+        viewModelScope.launch {
+            val terms = activeRepo.siteTermsDao.findLatestByLanguage(
+                getLocaleForSiteTermsUseCase()
+            )
+
+            _uiState.update { prev ->
+                prev.copy(
+                    siteTerms = terms
+                )
+            }
+        }
     }
 
     fun onEntityChanged(
@@ -115,6 +136,11 @@ class ParentalConsentManagementViewModel(
             prev.copy(
                 parentJoinAndMinor = prev.parentJoinAndMinor?.copy(
                     personParentJoin = personParentJoin,
+                ),
+                relationshipError = updateErrorMessageOnChange(
+                    prev.parentJoinAndMinor?.personParentJoin?.ppjRelationship,
+                    personParentJoin?.ppjRelationship,
+                    prev.relationshipError
                 )
             )
         }
@@ -143,6 +169,17 @@ class ParentalConsentManagementViewModel(
     }
 
     fun onClickConsent() {
+        if(_uiState.value.parentJoinAndMinor?.personParentJoin?.ppjRelationship?.let {
+            it in listOf(RELATIONSHIP_MOTHER, RELATIONSHIP_FATHER, RELATIONSHIP_OTHER)
+        } != true) {
+            _uiState.update { prev ->
+                prev.copy(
+                    relationshipError = systemImpl.getString(MR.strings.field_required_prompt)
+                )
+            }
+            return
+        }
+
         updateStatus(PersonParentJoin.STATUS_APPROVED)
     }
 
