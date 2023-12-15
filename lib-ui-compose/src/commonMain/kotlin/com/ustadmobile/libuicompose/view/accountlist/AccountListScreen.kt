@@ -76,11 +76,12 @@ fun AccountListScreen(
                     modifier = Modifier
                         .padding(start = 72.dp, bottom = 16.dp)
                 ){
-
-                    OutlinedButton(
-                        onClick = onMyProfileClick,
-                    ) {
-                        Text(stringResource(MR.strings.my_profile))
+                    if(uiState.myProfileButtonVisible) {
+                        OutlinedButton(
+                            onClick = onMyProfileClick,
+                        ) {
+                            Text(stringResource(MR.strings.my_profile))
+                        }
                     }
 
                     OutlinedButton(

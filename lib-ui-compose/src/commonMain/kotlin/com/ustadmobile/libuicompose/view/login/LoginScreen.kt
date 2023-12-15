@@ -41,7 +41,7 @@ fun LoginScreen(
         uiState = uiState,
         onClickLogin = viewModel::onClickLogin,
         onClickCreateAccount = viewModel::onClickCreateAccount,
-        onClickConnectAsGuest = viewModel::handleConnectAsGuest,
+        onClickConnectAsGuest = viewModel::onClickConnectAsGuest,
         onUsernameValueChange = viewModel::onUsernameChanged,
         onPasswordValueChange = viewModel::onPasswordChanged,
     )
