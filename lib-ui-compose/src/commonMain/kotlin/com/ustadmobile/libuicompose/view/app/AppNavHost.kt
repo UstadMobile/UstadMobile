@@ -44,6 +44,8 @@ import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.Cours
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
+import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
@@ -109,6 +111,8 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import kotlin.reflect.KClass
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
+import com.ustadmobile.libuicompose.view.message.conversationlist.ConversationListScreen
+import com.ustadmobile.libuicompose.view.message.list.MessageListScreen
 import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentManagementScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 import kotlinx.coroutines.flow.Flow
@@ -534,6 +538,24 @@ fun AppNavHost(
                 )
             }
 
+            ConversationListViewModel.ALL_DEST_NAMES.forEach { destName ->
+                contentScene("/$destName") { backStackEntry ->
+                    ConversationListScreen(
+                        appViewModel(
+                            backStackEntry, ConversationListViewModel::class
+                        ) { di, savedStateHandle ->
+                            ConversationListViewModel(di, savedStateHandle, destName)
+                        }
+                    )
+                }
+            }
+
+            contentScene("/${MessageListViewModel.DEST_NAME}") { backStackEntry ->
+                MessageListScreen(
+                    appViewModel(backStackEntry, MessageListViewModel::class,
+                        ::MessageListViewModel)
+                )
+            }
         }
     }
 }
