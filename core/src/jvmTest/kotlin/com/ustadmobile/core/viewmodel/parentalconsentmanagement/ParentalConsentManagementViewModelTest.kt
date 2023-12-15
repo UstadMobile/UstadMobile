@@ -51,7 +51,7 @@ class ParentalConsentManagementViewModelTest : AbstractMainDispatcherTest(){
 
             val personParentJoin = PersonParentJoin().apply {
                 ppjMinorPersonUid = minorPerson.personUid
-                ppjUid = activeDb.personParentJoinDao.insertAsync(this)
+                ppjUid = activeDb.personParentJoinDao.upsertAsync(this)
             }
 
             val testContext = ParentalConsentTestContext(

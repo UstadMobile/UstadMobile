@@ -285,7 +285,7 @@ class PersonAuthRegisterRouteTest {
                     ).encodeBase64()
                 }
             )
-            db.personParentJoinDao.insertAsync(PersonParentJoin().apply {
+            db.personParentJoinDao.upsertAsync(PersonParentJoin().apply {
                 ppjMinorPersonUid = person.personUid
                 ppjStatus = PersonParentJoin.STATUS_UNSET
             })
