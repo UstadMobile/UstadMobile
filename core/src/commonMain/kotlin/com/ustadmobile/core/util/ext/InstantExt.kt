@@ -43,3 +43,6 @@ fun Instant.isDateOfBirthAMinor(): Boolean {
     return ageInYears() < UstadMobileConstants.MINOR_AGE_THRESHOLD
 }
 
+fun Instant.isDateOfBirthAnAdult(): Boolean {
+    return ageInYears() >= UstadMobileConstants.ADULT_AGE_THRESHOLD
+}

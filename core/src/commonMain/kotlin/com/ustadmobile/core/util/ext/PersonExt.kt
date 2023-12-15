@@ -13,3 +13,7 @@ fun Person.toUmAccount(endpointUrl: String) = UmAccount(personUid = personUid,
     username = username, auth = "", endpointUrl = endpointUrl, firstName = firstNames,
     lastName = lastName, admin = admin)
 
+
+fun Person.isGuestUser() : Boolean {
+    return username == null
+}
