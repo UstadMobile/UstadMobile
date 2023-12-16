@@ -19,10 +19,12 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 import com.ustadmobile.core.util.ext.whenSubscribed
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
+import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import org.kodein.di.instanceOrNull
@@ -34,8 +36,6 @@ data class PersonDetailUiState(
     val displayPhoneNum: String? = null,
 
     val personPicture: PersonPicture? = null,
-
-    val chatVisible: Boolean = false,
 
     val canSendSms: Boolean = false,
 
@@ -78,6 +78,9 @@ data class PersonDetailUiState(
 
     val sendSmsVisible: Boolean
         get() = canSendSms && !person?.phoneNum.isNullOrBlank()
+
+    val chatVisible: Boolean
+        get() = !person?.username.isNullOrBlank()
 
 }
 
@@ -231,7 +234,10 @@ class PersonDetailViewModel(
     fun onClickChangePassword() = navigateToEditAccount()
 
     fun onClickChat() {
-
+        navController.navigate(
+            MessageListViewModel.DEST_NAME,
+            mapOf(UstadView.ARG_PERSON_UID to personUid.toString())
+        )
     }
 
     fun onClickDial() {
