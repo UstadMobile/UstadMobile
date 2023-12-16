@@ -215,9 +215,6 @@ ext {
 
     version_android_panickit = "1.0"
 
-    //Image loading library for Android
-    version_android_coil = "2.5.0"
-
     version_js_node = "10.15.1"
     version_js_yarn="1.13.0"
 

@@ -41,6 +41,7 @@ dependencies {
     api(libs.precompose)
     api(libs.precompose.viewmodel)
     implementation(libs.libphonenumber.google)
+    implementation(libs.kamel)
 }
 
 compose.desktop {

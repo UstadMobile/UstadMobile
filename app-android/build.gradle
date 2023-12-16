@@ -348,8 +348,8 @@ dependencies {
     implementation "info.guardianproject.panic:panic:$version_android_panickit"
 
     //Image loading
-    implementation "io.coil-kt:coil:$version_android_coil"
-    implementation "io.coil-kt:coil-compose:$version_android_coil"
+    implementation libs.coil
+    implementation libs.coil.compose
 
     implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
 

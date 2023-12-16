@@ -52,6 +52,9 @@ dependencyResolutionManagement {
             version("version_autolink", "0.11.0")
             version("version_process_phoenix", "2.1.2")
             version("version_multiplatformsettings", "1.1.1")
+            version("version_coil", "2.5.0")
+            version("version_mpfilepicker", "3.1.0")
+            version("version_kamel", "0.9.0")
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
@@ -124,6 +127,10 @@ dependencyResolutionManagement {
             library("autolink", "org.nibor.autolink", "autolink").versionRef("version_autolink")
             library("process-phoenix", "com.jakewharton", "process-phoenix").versionRef("version_process_phoenix")
             library("multiplatformsettings", "com.russhwolf", "multiplatform-settings").versionRef("version_multiplatformsettings")
+            library("coil", "io.coil-kt", "coil").versionRef("version_coil")
+            library("coil-compose", "io.coil-kt", "coil-compose").versionRef("version_coil")
+            library("mpfilepicker", "com.darkrockstudios", "mpfilepicker").versionRef("version_mpfilepicker")
+            library("kamel", "media.kamel", "kamel-image").versionRef("version_kamel")
         }
     }
 }
