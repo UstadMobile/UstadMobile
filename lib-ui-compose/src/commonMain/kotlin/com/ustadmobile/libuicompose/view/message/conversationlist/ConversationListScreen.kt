@@ -19,8 +19,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ListItem
 import androidx.compose.ui.text.style.TextOverflow
 import com.ustadmobile.lib.db.composites.MessageAndOtherPerson
+import java.util.TimeZone
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
+import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
+import com.ustadmobile.libuicompose.util.rememberFormattedTime
 
 @Composable
 fun ConversationListScreen(
@@ -68,6 +71,11 @@ fun ConversationItem(
     message: MessageAndOtherPerson?,
     onListItemClick: (MessageAndOtherPerson) -> Unit,
 ){
+
+    val formattedDateTime = rememberFormattedTime(
+        timeInMs = (message?.message?.messageTimestamp ?: 0).toInt(),
+    )
+
     ListItem(
         modifier = Modifier.clickable {
             message?.also { onListItemClick(it) }
@@ -85,6 +93,6 @@ fun ConversationItem(
                 overflow = TextOverflow.Ellipsis,
             )
         },
-        trailingContent = { Text("${message?.message?.messageTimestamp}") }
+        trailingContent = { Text(formattedDateTime) }
     )
 }
