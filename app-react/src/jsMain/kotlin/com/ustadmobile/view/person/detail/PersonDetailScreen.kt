@@ -92,7 +92,6 @@ val PersonDetailPreview = FC<Props> {
                 personOrgId = "123"
                 personAddress = "Herat"
             },
-            chatVisible = true,
             clazzes = listOf(
                 ClazzEnrolmentWithClazzAndAttendance().apply {
                     clazz = Clazz().apply {
