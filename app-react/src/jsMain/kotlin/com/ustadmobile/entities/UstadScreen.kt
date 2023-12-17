@@ -371,6 +371,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("LinkifyPreview", "Linkify", LinkifyPreview),
     UstadScreen(RegisterAgeRedirectViewModel.DEST_NAME, "AgeRedirect", RegisterAgeRedirectScreen),
     UstadScreen(SiteTermsDetailViewModel.DEST_NAME, "Terms", SiteTermsDetailScreen),
+//    UstadScreen(ConversationListViewModel.DEST_NAME, "ConversationList", ConversationListScreen),
+//    UstadScreen(MessageListViewModel.DEST_NAME, "MessageList", MessageListScreen),
 )
 
 //Here as per the MUI showcase template
