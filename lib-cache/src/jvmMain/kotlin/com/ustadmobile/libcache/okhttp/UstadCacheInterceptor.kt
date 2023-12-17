@@ -9,6 +9,9 @@ import com.ustadmobile.libcache.UstadCacheImpl.Companion.LOG_TAG
 import com.ustadmobile.libcache.base64.encodeBase64
 import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessChecker
 import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessCheckerImpl
+import com.ustadmobile.libcache.cachecontrol.RequestCacheControlHeader
+import com.ustadmobile.libcache.cachecontrol.ResponseCacheabilityChecker
+import com.ustadmobile.libcache.cachecontrol.ResponseCacheabilityCheckerImpl
 import com.ustadmobile.libcache.headers.CouponHeader
 import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.logging.UstadCacheLogger
@@ -47,6 +50,8 @@ class UstadCacheInterceptor(
     private val logger : UstadCacheLogger? = null,
     private val cacheControlFreshnessChecker: CacheControlFreshnessChecker =
         CacheControlFreshnessCheckerImpl(),
+    private val responseCacheabilityChecker: ResponseCacheabilityChecker =
+        ResponseCacheabilityCheckerImpl(),
     private val fileSystem: FileSystem = SystemFileSystem,
 ): Interceptor {
 
@@ -172,12 +177,13 @@ class UstadCacheInterceptor(
         val url = request.url.toString()
         val call = chain.call()
         logger?.v(LOG_TAG, "$logPrefix intercept: ${request.method} $url")
-
-        if(request.method.uppercase() != "GET") {
-            return chain.proceed(request)
+        val requestHeaders = request.headers.asCacheHttpHeaders()
+        val requestCacheControlHeader = requestHeaders["cache-control"]?.let {
+            RequestCacheControlHeader.parse(it)
         }
 
-        if(request.headers["cache-control"]?.contains("no-store") == true) {
+        //If there is no chance of being able to cache (not http get or using no-store in request)
+        if(!request.mightBeCacheable(requestCacheControlHeader)) {
             return chain.proceed(request)
         }
 
@@ -187,6 +193,7 @@ class UstadCacheInterceptor(
         val cachedResponseStatus = cacheResponse?.let {
             cacheControlFreshnessChecker(
                 requestHeaders = request.headers.asCacheHttpHeaders(),
+                requestDirectives = requestCacheControlHeader,
                 responseHeaders = cacheResponse.headers,
                 responseFirstStoredTime = cacheResponse.headers[HEADER_FIRST_STORED_TIMESTAMP]?.toLong()
                     ?: systemTimeInMillis(),
@@ -224,14 +231,25 @@ class UstadCacheInterceptor(
                     newResponseFromCachedResponse(cacheResponse, call)
                 }else {
                     logger?.d(LOG_TAG, "$logPrefix MISS(invalid) $url")
-                    newCacheAndStoreResponse(validationResponse, call)
+                    if(responseCacheabilityChecker.canStore(validationResponse)) {
+                        logger?.v(LOG_TAG, "$logPrefix $url can store - creating newCacheAndStore response")
+                        newCacheAndStoreResponse(validationResponse, call)
+                    }else {
+                        logger?.v(LOG_TAG, "$logPrefix $url cannot store - returning response as-is")
+                        validationResponse
+                    }
                 }
             }
 
             else -> {
                 //Nothing in cache matches request, send to the network and cache if possible
                 logger?.d(LOG_TAG, "$logPrefix MISS $url")
-                newCacheAndStoreResponse(chain.proceed(request), call)
+                val response =  chain.proceed(request)
+                if(responseCacheabilityChecker.canStore(response)) {
+                    newCacheAndStoreResponse(response, call)
+                }else {
+                    response
+                }
             }
         }
 

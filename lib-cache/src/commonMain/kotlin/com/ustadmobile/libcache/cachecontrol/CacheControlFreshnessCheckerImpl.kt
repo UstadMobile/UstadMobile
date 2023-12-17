@@ -7,18 +7,12 @@ import com.ustadmobile.libcache.headers.HttpHeaders
 class CacheControlFreshnessCheckerImpl: CacheControlFreshnessChecker {
     override fun invoke(
         requestHeaders: HttpHeaders,
+        requestDirectives: RequestCacheControlHeader?,
         responseHeaders: HttpHeaders,
+        responseDirectives: ResponseCacheControlHeader?,
         responseFirstStoredTime: Long,
         responseLastValidated: Long
     ): CachedResponseStatus {
-        val requestDirectives = requestHeaders["cache-control"]?.let {
-            RequestCacheControlHeader.parse(it)
-        }
-
-        val responseDirectives = responseHeaders["cache-control"]?.let {
-            ResponseCacheControlHeader.parse(it)
-        }
-
         //When the response is revalidated, the age header should also be updated
         val ageHeader = (responseHeaders["age"]?.toLong() ?: 0)
 

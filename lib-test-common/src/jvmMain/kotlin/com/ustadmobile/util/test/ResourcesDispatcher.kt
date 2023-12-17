@@ -10,7 +10,7 @@ import okio.source
 /**
  * Simple MockWebServer dispatcher that will serve responses from the resources.
  */
-class ResourcesDispatcher(
+open class ResourcesDispatcher(
     private val clazz: Class<*>,
     private val responseTransform: (MockResponse) -> MockResponse = { it },
 ): Dispatcher() {

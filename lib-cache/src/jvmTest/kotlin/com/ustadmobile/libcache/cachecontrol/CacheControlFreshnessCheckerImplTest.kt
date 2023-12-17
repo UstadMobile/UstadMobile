@@ -19,8 +19,10 @@ class CacheControlFreshnessCheckerImplTest {
         }
 
         val status = CacheControlFreshnessCheckerImpl().invoke(
-            requestHeaders, responseHeaders, systemTimeInMillis() - 60000,
-            systemTimeInMillis() - 60000
+            requestHeaders = requestHeaders,
+            responseHeaders = responseHeaders,
+            responseLastValidated = systemTimeInMillis() - 60000,
+            responseFirstStoredTime = systemTimeInMillis() - 60000
         )
         assertTrue(status.isFresh, "Resource within maxage is fresh")
     }
@@ -39,7 +41,10 @@ class CacheControlFreshnessCheckerImplTest {
         }
 
         val status = CacheControlFreshnessCheckerImpl().invoke(
-            requestHeaders, responseHeaders, systemTimeInMillis(), systemTimeInMillis()
+            requestHeaders = requestHeaders,
+            responseHeaders = responseHeaders,
+            responseLastValidated = systemTimeInMillis(),
+            responseFirstStoredTime = systemTimeInMillis()
         )
 
         assertFalse(status.isFresh)
@@ -55,8 +60,10 @@ class CacheControlFreshnessCheckerImplTest {
         val requestHeaders = headersBuilder {  }
 
         val status = CacheControlFreshnessCheckerImpl().invoke(
-            requestHeaders, responseHeaders, systemTimeInMillis() - 60000,
-            systemTimeInMillis() - 60000
+            requestHeaders = requestHeaders,
+            responseHeaders = responseHeaders,
+            responseLastValidated = systemTimeInMillis() - 60000,
+            responseFirstStoredTime = systemTimeInMillis() - 60000
         )
 
         assertTrue(status.isFresh)
@@ -72,7 +79,10 @@ class CacheControlFreshnessCheckerImplTest {
         }
         val cachedResponseTime = systemTimeInMillis() - 60000
         val status = CacheControlFreshnessCheckerImpl().invoke(
-            requestHeaders, responseHeaders, cachedResponseTime, cachedResponseTime
+            requestHeaders = requestHeaders,
+            responseHeaders = responseHeaders,
+            responseLastValidated = cachedResponseTime,
+            responseFirstStoredTime = cachedResponseTime,
         )
 
         assertFalse(status.isFresh)
