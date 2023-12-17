@@ -14,6 +14,7 @@ import com.ustadmobile.libcache.headers.HttpHeaders
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.headers.asString
 import com.ustadmobile.libcache.headers.headersBuilder
+import com.ustadmobile.libcache.io.sha256
 import com.ustadmobile.libcache.io.transferToAndGetSha256
 import com.ustadmobile.libcache.io.unzipTo
 import com.ustadmobile.libcache.logging.UstadCacheLogger
@@ -29,6 +30,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.io.Source
+import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
@@ -71,24 +73,39 @@ class UstadCacheImpl(
             val cacheEntries = storeRequest.map { entryToStore ->
                 val response = entryToStore.response
                 val tmpFile = Path(tmpDir, "${tmpCounter.incrementAndGet()}.tmp")
-
-                val bodySource = response.bodyAsSource()
                 val url = entryToStore.request.url
-                if(bodySource == null) {
-                    val e = IllegalArgumentException("Response for $url has " +
-                            "no body. That should not have been stored in cache. Something badly wrong.")
-                    logger?.e(LOG_TAG, "$logPrefix BodySource for ${entryToStore.request.url} is null", e)
-                    throw e
-                }
 
-                val sha256 = bodySource.transferToAndGetSha256(tmpFile).sha256
-                    .encodeBase64()
-                logger?.v(LOG_TAG, "$logPrefix copied request data for $url to $tmpFile")
+                val sha256FromTransfer = if(entryToStore.responseBodyTmpLocalPath != null) {
+                    //If the entry to store is in a temporary path where it is acceptable to just
+                    //move the file into the cache, then we will move (instead of copying) the file
+                    fileSystem.atomicMove(entryToStore.responseBodyTmpLocalPath, tmpFile)
+                    null
+                }else {
+                    val bodySource = response.bodyAsSource()
+
+                    if(bodySource == null) {
+                        val e = IllegalArgumentException("Response for $url has " +
+                                "no body. That should not have been stored in cache. Something badly wrong.")
+                        logger?.e(LOG_TAG, "$logPrefix BodySource for ${entryToStore.request.url} is null", e)
+                        throw e
+                    }
+
+                    bodySource.transferToAndGetSha256(tmpFile).sha256.encodeBase64()
+                }
+                val sha256FromHeader = if(entryToStore.skipChecksumIfProvided)
+                    response.headers[COUPON_ACTUAL_SHA_256]
+                else
+                    null
+
+                val sha256 = sha256FromTransfer ?: sha256FromHeader
+                    ?: fileSystem.source(tmpFile).buffered().sha256().encodeBase64()
 
                 val headersStr = headersBuilder {
                     takeFrom(response.headers)
                     header(COUPON_ACTUAL_SHA_256, sha256)
                 }.asString()
+
+                logger?.v(LOG_TAG, "$logPrefix copied request data for $url to $tmpFile (sha256=$sha256)")
 
                 val cacheFlags = if(response.headers[COUPON_STATIC]?.toBooleanStrictOrNull() == true) {
                     CacheEntry.CACHE_FLAG_STATIC
@@ -193,8 +210,7 @@ class UstadCacheImpl(
                             header(COUPON_STATIC, "true")
                     }
                 ),
-                skipChecksum = true,
-                retain = retain,
+                skipChecksumIfProvided = true,
             )
         }
 

@@ -11,6 +11,8 @@ expect fun Source.transferToAndGetSha256(
     path: Path,
 ) : TransferResult
 
+expect fun Source.sha256(): ByteArray
+
 data class UnzippedEntry(
     val path: Path,
     val name: String,

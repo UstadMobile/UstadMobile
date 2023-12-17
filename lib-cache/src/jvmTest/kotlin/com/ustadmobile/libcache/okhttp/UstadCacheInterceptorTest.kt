@@ -4,11 +4,12 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.libcache.NapierLoggingAdapter
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheImpl
+import com.ustadmobile.libcache.base64.encodeBase64
 import com.ustadmobile.libcache.db.UstadCacheDb
+import com.ustadmobile.libcache.headers.CouponHeader
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.util.test.ResourcesDispatcher
-import io.github.aakira.napier.DebugAntilog
-import io.github.aakira.napier.Napier
+import com.ustadmobile.util.test.initNapierLog
 import kotlinx.io.files.Path
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -24,6 +25,7 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.timeout
 import org.mockito.kotlin.verify
 import java.io.File
+import java.security.MessageDigest
 import java.time.Duration
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
@@ -44,9 +46,15 @@ class UstadCacheInterceptorTest {
 
     private lateinit var cacheListener: UstadCache.CacheListener
 
+    private fun ByteArray.sha256(): ByteArray {
+        val digest = MessageDigest.getInstance("SHA-256")
+        digest.update(this)
+        return digest.digest()
+    }
+
     @BeforeTest
     fun setup() {
-        Napier.base(DebugAntilog())
+        initNapierLog()
         val logger = NapierLoggingAdapter()
         cacheListener = mock { }
         cacheDir = tempDir.newFolder()
@@ -131,13 +139,33 @@ class UstadCacheInterceptorTest {
         )
 
         val cachedResponse = okHttpClient.newCall(request).execute()
+        val resourceBytes = javaClass.getResourceAsStream("/testfile1.png")!!.readAllBytes()
         val cacheResponseBytes = cachedResponse.use { it.body!!.bytes() }
-        Assert.assertArrayEquals(
-            javaClass.getResourceAsStream("/testfile1.png")!!.readAllBytes(),
-            initResponseBytes
-        )
+        Assert.assertArrayEquals(resourceBytes, initResponseBytes)
         Assert.assertArrayEquals(initResponseBytes, cacheResponseBytes)
+
+        //Should only have made one request
         assertEquals(1, mockWebServer.requestCount)
+
+        //The cached response should have a sha256 header
+        assertEquals(resourceBytes.sha256().encodeBase64(),
+            cachedResponse.header(CouponHeader.COUPON_ACTUAL_SHA_256))
     }
+
+    @Test
+    fun givenEntryIsStaleAndValidatable_whenRequested_thenIsValidated() {
+
+    }
+
+    @Test
+    fun givenRequestHasNoStoreHeader_whenRequested_thenIsNotCached() {
+
+    }
+
+    @Test
+    fun givenResponseHasNoStoreHeader_whenRequested_thenIsNotCached() {
+
+    }
+
 
 }

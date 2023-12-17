@@ -6,8 +6,11 @@ import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCache.Companion.HEADER_FIRST_STORED_TIMESTAMP
 import com.ustadmobile.libcache.UstadCache.Companion.HEADER_LAST_VALIDATED_TIMESTAMP
 import com.ustadmobile.libcache.UstadCacheImpl.Companion.LOG_TAG
+import com.ustadmobile.libcache.base64.encodeBase64
 import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessChecker
 import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessCheckerImpl
+import com.ustadmobile.libcache.headers.CouponHeader
+import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import com.ustadmobile.libcache.response.HttpPathResponse
 import com.ustadmobile.libcache.response.HttpResponse
@@ -28,6 +31,8 @@ import okio.source
 import java.io.File
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
+import java.security.DigestInputStream
+import java.security.MessageDigest
 import java.util.UUID
 import java.util.concurrent.Executors
 
@@ -60,42 +65,55 @@ class UstadCacheInterceptor(
         override fun run() {
             val buffer = ByteArray(8192)
             var bytesRead = 0
+            val digest = MessageDigest.getInstance("SHA-256")
 
             try {
-                val responseInStream = response.body?.byteStream() ?: throw IllegalStateException()
-                val file = File(cacheDir, UUID.randomUUID().toString())
-                val fileOutStream = file.outputStream()
-                while(!call.isCanceled() &&
-                    responseInStream.read(buffer).also { bytesRead = it } != -1
-                ) {
-                    fileOutStream.write(buffer, 0, bytesRead)
-                    pipeOut.write(buffer, 0, bytesRead)
-                }
-                pipeOut.flush()
-                pipeOut.close()
-                fileOutStream.flush()
-                fileOutStream.close()
+                val responseInStream = response.body?.byteStream()?.let {
+                    DigestInputStream(it, digest)
+                } ?: throw IllegalStateException()
 
-                val cacheRequest = call.request().asCacheHttpRequest()
+                responseInStream.use { responseIn ->
+                    val file = File(cacheDir, UUID.randomUUID().toString())
+                    val fileOutStream = file.outputStream()
+                    while(!call.isCanceled() &&
+                        responseIn.read(buffer).also { bytesRead = it } != -1
+                    ) {
+                        fileOutStream.write(buffer, 0, bytesRead)
+                        pipeOut.write(buffer, 0, bytesRead)
+                    }
+                    pipeOut.flush()
+                    pipeOut.close()
+                    fileOutStream.flush()
+                    fileOutStream.close()
 
-                if(!call.isCanceled()) {
-                   cache.store(listOf(
-                       CacheEntryToStore(
-                           request = cacheRequest,
-                           response = HttpPathResponse(
-                               path = Path(file.absolutePath),
-                               fileSystem = fileSystem,
-                               mimeType = response.header("content-type") ?: "application/octet-stream",
-                               request = cacheRequest,
-                               extraHeaders = response.headers.asCacheHttpHeaders()
-                           )
-                       )
-                   ))
+                    val cacheRequest = call.request().asCacheHttpRequest()
+                    val sha256 = digest.digest()
+
+                    if(!call.isCanceled()) {
+                        cache.store(listOf(
+                            CacheEntryToStore(
+                                request = cacheRequest,
+                                response = HttpPathResponse(
+                                    path = Path(file.absolutePath),
+                                    fileSystem = fileSystem,
+                                    mimeType = response.header("content-type") ?: "application/octet-stream",
+                                    request = cacheRequest,
+                                    extraHeaders = headersBuilder {
+                                        takeFrom(response.headers.asCacheHttpHeaders())
+                                        header(CouponHeader.COUPON_ACTUAL_SHA_256, sha256.encodeBase64())
+                                    }
+                                ),
+                                responseBodyTmpLocalPath = Path(file.absolutePath)
+                            )
+                        ))
+                    }
                 }
             }catch(e: Throwable){
+                logger?.e(LOG_TAG, "$logPrefix ReadAndCacheRunnable: exception handling ${call.request().url}", e)
                 throw e
+            }finally {
+                response.close()
             }
-
         }
     }
 
