@@ -98,9 +98,9 @@ kotlin {
 
                 implementation "com.soywiz.korlibs.klock:klock-jvm:$version_klock"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+                implementation libs.mockwebserver
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-                implementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
+                implementation libs.mockito.kotlin
             }
         }
 

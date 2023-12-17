@@ -40,6 +40,16 @@ data class CacheRetentionJoin(
 interface UstadCache {
 
     /**
+     * CacheListener is not normally required, but can be needed in tests to wait for
+     * caching a request to be completed.
+     */
+    interface CacheListener {
+
+        fun onEntriesStored(storeRequest: List<CacheEntryToStore>)
+
+    }
+
+    /**
      * Store a set of requests with their corresponding response.
      */
     fun store(
@@ -111,6 +121,14 @@ interface UstadCache {
 
 
     fun close()
+
+    companion object {
+
+        const val HEADER_FIRST_STORED_TIMESTAMP = "UCache-First-Stored"
+
+        const val HEADER_LAST_VALIDATED_TIMESTAMP = "UCache-Last-Validated"
+
+    }
 
 
 }

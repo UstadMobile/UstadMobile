@@ -124,14 +124,14 @@ dependencies {
     testImplementation project(":sharedse")
 
     testImplementation "io.ktor:ktor-server-test-host:$version_ktor"
-    testImplementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
+    testImplementation libs.mockito.kotlin
 
     testImplementation libs.simplejndi
     testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
     testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
     testImplementation "io.ktor:ktor-server-netty:$version_ktor"
-    testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+    testImplementation libs.mockwebserver
 
     testImplementation "io.ktor:ktor-client-okhttp:$version_ktor"
     testImplementation "io.ktor:ktor-serialization-gson:$version_ktor"

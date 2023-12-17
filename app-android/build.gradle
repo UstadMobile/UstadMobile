@@ -372,7 +372,7 @@ dependencies {
     testImplementation "org.robolectric:robolectric:$version_android_roboelectric"
     testImplementation "junit:junit:$version_junit"
     testImplementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-    testImplementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
+    testImplementation libs.mockito.kotlin
     testImplementation "androidx.test.espresso:espresso-core:$version_android_espresso"
     testImplementation "androidx.test.espresso:espresso-contrib:$version_android_espresso"
 
@@ -416,8 +416,8 @@ dependencies {
     androidTestImplementation "androidx.test.uiautomator:uiautomator:$version_android_uiautomator"
 
     androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
-    androidTestImplementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
-    androidTestImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+    androidTestImplementation libs.mockito.kotlin
+    androidTestImplementation libs.mockwebserver
     androidTestImplementation "commons-io:commons-io:$version_commons_io"
 
     kaptAndroidTest "androidx.databinding:databinding-compiler:$version_androidx_databinding"
