@@ -192,13 +192,16 @@ val AccountListComponent2 = FC<AccountListProps> { props ->
                         paddingLeft = 72.px
                     }
 
-                    Button {
-                        id = "profile_button"
-                        onClick = { props.onMyProfileClick() }
-                        variant = ButtonVariant.outlined
-                        disabled = !props.uiState.activeAccountButtonsEnabled
-                        + strings[MR.strings.my_profile].uppercase()
+                    if(props.uiState.myProfileButtonVisible) {
+                        Button {
+                            id = "profile_button"
+                            onClick = { props.onMyProfileClick() }
+                            variant = ButtonVariant.outlined
+                            disabled = !props.uiState.activeAccountButtonsEnabled
+                            + strings[MR.strings.my_profile].uppercase()
+                        }
                     }
+
 
                     Button {
                         id = "logout_button"

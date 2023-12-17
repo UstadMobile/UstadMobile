@@ -140,6 +140,7 @@ import com.ustadmobile.view.person.registerageredirect.RegisterAgeRedirectScreen
 import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
 import com.ustadmobile.view.site.termsdetail.SiteTermsDetailScreen
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
+import com.ustadmobile.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
@@ -174,7 +175,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     ),
     UstadScreen(
         ParentalConsentManagementViewModel.DEST_NAME, "Parental Consent Management Preview",
-        ParentalConsentManagementPreview),
+        ParentalConsentManagementScreen),
     UstadScreen(SettingsViewModel.DEST_NAME, "Settings", SettingsScreen),
     UstadScreen(InviteViaLinkView.VIEW_NAME, "Invite Via Link Preview",
         InviteViaLinkPreview),
@@ -186,7 +187,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(SiteTermsDetailView.VIEW_NAME, "SiteTermsDetail Preview",
         SiteTermsDetailScreenPreview),
     UstadScreen(RegisterMinorWaitForParentViewModel.DEST_NAME, "RegisterMinorWaitForParent Preview",
-        RegisterMinorWaitForParentPreview),
+        RegisterMinorWaitForParentScreen
+    ),
     UstadScreen(ScheduleEditViewModel.DEST_NAME, "ScheduleEdit",
         ScheduleEditScreen
     ),

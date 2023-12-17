@@ -1,6 +1,5 @@
 package com.ustadmobile.core.viewmodel.site.termsdetail
 
-import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.SiteTermsDetailView.Companion.ARG_SHOW_ACCEPT_BUTTON
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
@@ -15,6 +14,7 @@ import org.kodein.di.instance
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.door.ext.DoorTag
@@ -36,11 +36,12 @@ class SiteTermsDetailViewModel(
     savedStateHandle: UstadSavedStateHandle,
 ): DetailViewModel<SiteTerms>(di, savedStateHandle, DEST_NAME) {
 
-    private val supportedLangConfig: SupportedLanguagesConfig by instance()
-
     private val _uiState = MutableStateFlow(SiteTermsDetailUiState())
 
     val uiState: Flow<SiteTermsDetailUiState> = _uiState.asStateFlow()
+
+    private val getLocaleForSiteTermsUseCase: GetLocaleForSiteTermsUseCase by
+        on(accountManager.activeEndpoint).instance()
 
     init {
         val acceptButtonMode = savedStateHandle[ARG_SHOW_ACCEPT_BUTTON]?.toBoolean() ?: false
@@ -63,15 +64,7 @@ class SiteTermsDetailViewModel(
 
 
             val localeArg = savedStateHandle[ARG_LOCALE]
-            val termsLocale = if(localeArg != null) {
-                localeArg
-            }else {
-                val preferredLocales =  listOf(supportedLangConfig.displayedLocale) +
-                        supportedLangConfig.systemLocales
-                val availableLocales = repo.siteTermsDao
-                    .findAvailableSiteTermLanguages(1).filterNotNull()
-                preferredLocales.firstOrNull { it in availableLocales } ?: FALLBACK
-            }
+            val termsLocale = localeArg ?: getLocaleForSiteTermsUseCase()
 
             val displayTerms = repo.siteTermsDao.findLatestByLanguage(termsLocale)
 
@@ -108,8 +101,6 @@ class SiteTermsDetailViewModel(
         const val ARG_LOCALE = "locale"
 
         const val DEST_NAME = "Terms"
-
-        const val FALLBACK = "en"
 
     }
 }

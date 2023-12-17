@@ -14,7 +14,19 @@ import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.util.ext.isDateOfBirthAnAdult
+import com.ustadmobile.core.util.ext.isGuestUser
+import com.ustadmobile.core.util.ext.navigateToLink
+import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_FATHER
+import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_MOTHER
+import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_OTHER
+import kotlinx.datetime.Instant
+import org.kodein.di.instance
+import org.kodein.di.on
 
 data class ParentalConsentManagementUiState(
 
@@ -76,34 +88,67 @@ class ParentalConsentManagementViewModel(
 
     val uiState: Flow<ParentalConsentManagementUiState> = _uiState.asStateFlow()
 
+    private val getLocaleForSiteTermsUseCase: GetLocaleForSiteTermsUseCase by
+        on(accountManager.activeEndpoint).instance()
+
+    private val apiUrlConfig: ApiUrlConfig by instance()
+
     init {
-        _appUiState.update { prev ->
-            prev.copy(
-                title = systemImpl.getString(MR.strings.manage_parental_consent)
+        //On the web version this might be opened directly, in which case we need to take the user
+        // to login/create account first.
+        if(accountManager.currentUserSession.person.let {
+            it.isGuestUser() || !Instant.fromEpochMilliseconds(it.dateOfBirth).isDateOfBirthAnAdult()
+        }) {
+            navController.navigateToLink(
+                link = "$DEST_NAME?${ARG_ENTITY_UID}=$entityUidArg",
+                accountManager = accountManager,
+                openExternalLinkUseCase = { _, _ -> Unit },
+                goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                    popUpToViewName = DEST_NAME, popUpToInclusive = true
+                ),
+                userCanSelectServer = apiUrlConfig.canSelectServer,
             )
-        }
+        }else {
+            _appUiState.update { prev ->
+                prev.copy(
+                    title = systemImpl.getString(MR.strings.manage_parental_consent)
+                )
+            }
 
-        viewModelScope.launch {
-            loadEntity(
-                serializer = PersonParentJoinAndMinorPerson.serializer(),
-                onLoadFromDb = {
-                    it.personParentJoinDao.findByUidWithMinorAsync(entityUidArg)
-                },
-                makeDefault = {
-                    //Should never happen
-                    null
-                },
-                uiUpdate = {
-                    _uiState.update { prev ->
-                        prev.copy(
-                            parentJoinAndMinor = it
-                        )
+            viewModelScope.launch {
+                loadEntity(
+                    serializer = PersonParentJoinAndMinorPerson.serializer(),
+                    onLoadFromDb = {
+                        it.personParentJoinDao.findByUidWithMinorAsync(entityUidArg)
+                    },
+                    makeDefault = {
+                        //Should never happen
+                        null
+                    },
+                    uiUpdate = {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                parentJoinAndMinor = it
+                            )
+                        }
                     }
-                }
-            )
+                )
 
-            _uiState.update { prev ->
-                prev.copy(fieldsEnabled = true)
+                _uiState.update { prev ->
+                    prev.copy(fieldsEnabled = true)
+                }
+            }
+
+            viewModelScope.launch {
+                val terms = activeRepo.siteTermsDao.findLatestByLanguage(
+                    getLocaleForSiteTermsUseCase()
+                )
+
+                _uiState.update { prev ->
+                    prev.copy(
+                        siteTerms = terms
+                    )
+                }
             }
         }
     }
@@ -115,6 +160,11 @@ class ParentalConsentManagementViewModel(
             prev.copy(
                 parentJoinAndMinor = prev.parentJoinAndMinor?.copy(
                     personParentJoin = personParentJoin,
+                ),
+                relationshipError = updateErrorMessageOnChange(
+                    prev.parentJoinAndMinor?.personParentJoin?.ppjRelationship,
+                    personParentJoin?.ppjRelationship,
+                    prev.relationshipError
                 )
             )
         }
@@ -143,6 +193,17 @@ class ParentalConsentManagementViewModel(
     }
 
     fun onClickConsent() {
+        if(_uiState.value.parentJoinAndMinor?.personParentJoin?.ppjRelationship?.let {
+            it in listOf(RELATIONSHIP_MOTHER, RELATIONSHIP_FATHER, RELATIONSHIP_OTHER)
+        } != true) {
+            _uiState.update { prev ->
+                prev.copy(
+                    relationshipError = systemImpl.getString(MR.strings.field_required_prompt)
+                )
+            }
+            return
+        }
+
         updateStatus(PersonParentJoin.STATUS_APPROVED)
     }
 

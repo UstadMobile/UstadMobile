@@ -48,6 +48,8 @@ external interface UstadMessageIdSelectFieldProps: Props {
     var error: String?
 
     var fullWidth: Boolean
+
+    var helperText: ReactNode?
 }
 
 val UstadMessageIdSelectField = FC<UstadMessageIdSelectFieldProps> { props ->
@@ -55,11 +57,11 @@ val UstadMessageIdSelectField = FC<UstadMessageIdSelectFieldProps> { props ->
 
     UstadSelectField<MessageIdOption2> {
         value = props.options.firstOrNull { it.value == props.value }
-            ?: throw IllegalArgumentException("MessageIdSelectField(id=${props.id}): value ${props.value} not in option list")
+            ?: MessageIdOption2.UNSET
         label = props.label
         options = props.options
         fullWidth = props.fullWidth
-        itemLabel = { ReactNode(strings[it.stringResource]) }
+        itemLabel = { ReactNode(if(it.value != MessageIdOption2.UNSET_VALUE) strings[it.stringResource] else "") }
         itemValue = { it.value.toString() }
         onChange = {
             props.onChange(it)
@@ -67,7 +69,7 @@ val UstadMessageIdSelectField = FC<UstadMessageIdSelectFieldProps> { props ->
         id = props.id
         enabled = props.enabled
         error = props.error != null
-        helperText = props.error.let { ReactNode(it) }
+        helperText = props.error?.let { ReactNode(it) } ?: props.helperText
     }
 }
 
