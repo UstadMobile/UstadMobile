@@ -1,9 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,40 +10,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import com.google.accompanist.themeadapter.material.MdcTheme
 import com.ustadmobile.core.viewmodel.HtmlEditUiState
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.libuicompose.components.AztecEditor
 import com.ustadmobile.core.R as CR
-
-class HtmlEditFragment: UstadBaseMvvmFragment() {
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(
-                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
-            )
-
-            setContent {
-                MdcTheme {
-
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun HtmlEditScreen(

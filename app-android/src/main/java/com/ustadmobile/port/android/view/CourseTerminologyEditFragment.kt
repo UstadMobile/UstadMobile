@@ -1,54 +1,32 @@
 package com.ustadmobile.port.android.view
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.themeadapter.material.MdcTheme
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.impl.locale.TerminologyEntry
 import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditUiState
 import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditViewModel
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.testTag
-import com.ustadmobile.core.impl.locale.TerminologyEntry
-import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.components.UstadErrorText
-import com.ustadmobile.core.MR
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.core.R as CR
 import dev.icerock.moko.resources.compose.stringResource as mrStringResource
-class CourseTerminologyEditFragment: UstadBaseMvvmFragment() {
-
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(
-                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
-            )
-
-            setContent {
-                MdcTheme {
-
-                }
-            }
-        }
-
-    }
-
-}
 
 @Composable
 private fun CourseTerminologyEditScreen(
