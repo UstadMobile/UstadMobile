@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.PermanentDrawerSheet
 import androidx.compose.material3.PermanentNavigationDrawer
@@ -30,6 +29,7 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.impl.di.commonDomainDiModule
+import com.ustadmobile.libuicompose.theme.UstadAppTheme
 import com.ustadmobile.libuicompose.view.app.APP_TOP_LEVEL_NAV_ITEMS
 import com.ustadmobile.libuicompose.view.app.SizeClass
 import dev.icerock.moko.resources.compose.stringResource
@@ -118,7 +118,7 @@ fun main() {
                             selectedItem = topLevelIndex
                     }
 
-                    MaterialTheme {
+                    UstadAppTheme {
                         PermanentNavigationDrawer(
                             drawerContent = {
                                 if(appState.navigationVisible) {

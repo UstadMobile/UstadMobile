@@ -8,7 +8,6 @@ import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadSelectField
 import com.ustadmobile.wrappers.quill.ReactQuill
@@ -74,7 +73,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
 
         UstadDateTimeField {
             timeInMillis = props.uiState.courseBlock?.cbHideUntilDate ?: 0
-            label = ReactNode(strings[MR.strings.dont_show_before].addOptionalSuffix(strings))
+            label = ReactNode(strings[MR.strings.dont_show_before])
             id = "hide_until_date"
             disabled = !props.uiState.fieldsEnabled
             helperText = props.uiState.caHideUntilDateError?.let { ReactNode(it) }
@@ -153,7 +152,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
                 timeInMillis = props.uiState.courseBlock?.cbDeadlineDate ?: 0
                 timeZoneId = props.uiState.timeZone
                 unsetDefault = Long.MAX_VALUE
-                label = ReactNode(strings[MR.strings.deadline].addOptionalSuffix(strings))
+                label = ReactNode(strings[MR.strings.deadline])
                 disabled = !props.uiState.fieldsEnabled
                 helperText = props.uiState.caDeadlineError?.let { ReactNode(it) }
                 error = props.uiState.caDeadlineError != null

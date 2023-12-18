@@ -16,49 +16,37 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.core.viewmodel.OnboardingUiState
 import com.ustadmobile.libuicompose.components.UstadHorizontalPagingIndicator
+import com.ustadmobile.libuicompose.components.UstadSetLanguageDropDown
+import com.ustadmobile.libuicompose.components.UstadWaitForRestartDialog
 import com.ustadmobile.libuicompose.components.isDesktop
-import dev.icerock.moko.resources.StringResource
-import dev.icerock.moko.resources.compose.stringResource
-import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import com.ustadmobile.libuicompose.images.UstadImage
 import com.ustadmobile.libuicompose.images.ustadAppImagePainter
+import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OnboardingScreen(
     viewModel: OnBoardingViewModel,
@@ -67,25 +55,7 @@ fun OnboardingScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle(OnboardingUiState())
 
     if(uiState.showWaitForRestart) {
-        Dialog(
-            onDismissRequest = {
-                //Do nothing - this dialog goes away once the restart happens
-            }
-        ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                shape = RoundedCornerShape(16.dp),
-            ) {
-                Text(
-                    modifier = Modifier.padding(16.dp),
-                    text = stringResource(MR.strings.loading)
-                )
-            }
-
-        }
+        UstadWaitForRestartDialog()
     }
 
     OnboardingScreen(
@@ -184,7 +154,7 @@ private fun TopRow(
             .fillMaxWidth()
     ) {
         Box{
-            SetLanguageMenu(
+            UstadSetLanguageDropDown(
                 langList = uiState.languageList,
                 currentLanguage = uiState.currentLanguage,
                 onItemSelected = onSetLanguage
@@ -195,53 +165,6 @@ private fun TopRow(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SetLanguageMenu(
-    langList: List<UstadMobileSystemCommon.UiLanguage>,
-    currentLanguage: UstadMobileSystemCommon.UiLanguage,
-    onItemSelected: (UstadMobileSystemCommon.UiLanguage) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = {
-            expanded = !expanded
-        }
-    ) {
-        OutlinedTextField(
-            modifier = Modifier.menuAnchor().fillMaxWidth(),
-            readOnly = true,
-            value = currentLanguage.langDisplay,
-            onValueChange = { },
-            label = { stringResource(MR.strings.language) },
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-            },
-        )
-
-        ExposedDropdownMenu(
-            modifier = Modifier.fillMaxWidth(),
-            expanded = expanded,
-            onDismissRequest = {
-                expanded = false
-
-            }
-        ) {
-            langList.forEach { uiLanguage ->
-                DropdownMenuItem(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        expanded = false
-                        onItemSelected(uiLanguage)
-                    },
-                    text = { Text(text = uiLanguage.langDisplay) }
-                )
-            }
-        }
-    }
-}
 
 val onboardingItems: List<OnboardingItem> = listOf(
     OnboardingItem(

@@ -1,9 +1,11 @@
 package com.ustadmobile.lib.db.entities.ext
 
 import com.ustadmobile.door.annotation.ShallowCopy
-import com.ustadmobile.lib.db.entities.PersonWithAccount
+import com.ustadmobile.lib.db.entities.Person
 
 @ShallowCopy
-expect fun PersonWithAccount.shallowCopy(
-    block: PersonWithAccount.() -> Unit,
-): PersonWithAccount
+expect fun Person.shallowCopy(
+    block: Person.() -> Unit
+): Person
+
+

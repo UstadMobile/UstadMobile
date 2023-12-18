@@ -51,9 +51,13 @@ import web.location.location
 import web.url.URL
 import kotlin.random.Random
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.util.ext.deleteDatabaseAsync
 import mui.material.useMediaQuery
+import org.kodein.di.direct
+import org.kodein.di.instance
 import react.router.useLocation
+import web.dom.document
 import web.idb.indexedDB
 
 //Roughly as per components/Showcases on MUI-showcase #d71c6d1
@@ -85,6 +89,10 @@ val UstadScreens = FC<Props> {
     var appUiState: AppUiState by appUiStateInstance
     val loaderData = useLoaderData() as UstadScreensLoaderData
     var snack: Snack? by useState { null }
+    val langConfig = useMemo(dependencies = emptyArray()) {
+        loaderData.di.direct.instance<SupportedLanguagesConfig>()
+    }
+
 
     val muiState = useState { MuiAppState() }
 
@@ -118,73 +126,76 @@ val UstadScreens = FC<Props> {
     ) {
         DIModule {
             di = loaderData.di
+            UstadLanguageConfigProvider {
+                languagesConfig = langConfig
 
-            QueryClientProvider {
-                client = tanstackQueryClient
+                QueryClientProvider {
+                    client = tanstackQueryClient
 
-                Box {
-                    sx {
-                        display = Display.grid
-                        gridTemplateRows = array(
-                            Sizes.Header.Height,
-                            Auto.auto,
-                        )
-                        gridTemplateColumns = array(
-                            Sizes.Sidebar.Width, Auto.auto,
-                        )
+                    Box {
+                        sx {
+                            display = Display.grid
+                            gridTemplateRows = array(
+                                Sizes.Header.Height,
+                                Auto.auto,
+                            )
+                            gridTemplateColumns = array(
+                                Sizes.Sidebar.Width, Auto.auto,
+                            )
 
-                        //As per https://developer.mozilla.org/en-US/docs/Web/CSS/grid-template-areas
-                        gridTemplateAreas = GridTemplateAreas(
-                            arrayOf(Area.Header, Area.Header),
-                            if (mobileMode || !appUiState.navigationVisible)
-                                arrayOf(Area.Content, Area.Content)
-                            else
-                                arrayOf(Area.Sidebar, Area.Content),
-                        )
-                    }
+                            //As per https://developer.mozilla.org/en-US/docs/Web/CSS/grid-template-areas
+                            gridTemplateAreas = GridTemplateAreas(
+                                arrayOf(Area.Header, Area.Header),
+                                if (mobileMode || !appUiState.navigationVisible)
+                                    arrayOf(Area.Content, Area.Content)
+                                else
+                                    arrayOf(Area.Sidebar, Area.Content),
+                            )
+                        }
 
-                    Header {
-                        this.appUiState = appUiState
-                        setAppBarHeight = {
-                            if(muiStateVar.appBarHeight != it) {
-                                muiStateVar = muiStateVar.copy(appBarHeight = it)
+                        Header {
+                            this.appUiState = appUiState
+                            setAppBarHeight = {
+                                if(muiStateVar.appBarHeight != it) {
+                                    muiStateVar = muiStateVar.copy(appBarHeight = it)
+                                }
+                            }
+                            showMenuIcon = mobileMode
+                            onClickMenuIcon = {
+                                mobileMenuOpen = !mobileMenuOpen
                             }
                         }
-                        showMenuIcon = mobileMode
-                        onClickMenuIcon = {
-                            mobileMenuOpen = !mobileMenuOpen
-                        }
-                    }
 
-                    //if (mobileMode) Menu() else Sidebar()
-                    //Note: If we remove the component, instead of hiding using Display property,
-                    // then this seems to make react destroy the content component and create a
-                    // completely new one, which we definitely do not want
-                    Sidebar {
-                        visible = !mobileMode && appUiState.navigationVisible
-                        selectedRootItemIndex = currentRootItemIndex
-                    }
-
-                    if(mobileMode) {
-                        UstadMobileMenu {
-                            isOpen = mobileMenuOpen
-                            onSetOpen = {
-                                mobileMenuOpen = it
-                            }
+                        //if (mobileMode) Menu() else Sidebar()
+                        //Note: If we remove the component, instead of hiding using Display property,
+                        // then this seems to make react destroy the content component and create a
+                        // completely new one, which we definitely do not want
+                        Sidebar {
+                            visible = !mobileMode && appUiState.navigationVisible
                             selectedRootItemIndex = currentRootItemIndex
                         }
-                    }
 
-                    Content()
-
-                    Snackbar {
-                        open = snack != null
-                        onClose = { _, _ ->
-                            snack = null
+                        if(mobileMode) {
+                            UstadMobileMenu {
+                                isOpen = (mobileMenuOpen && appUiState.navigationVisible)
+                                onSetOpen = {
+                                    mobileMenuOpen = it
+                                }
+                                selectedRootItemIndex = currentRootItemIndex
+                            }
                         }
 
-                        Typography {
-                            + (snack?.message ?: "")
+                        Content()
+
+                        Snackbar {
+                            open = snack != null
+                            onClose = { _, _ ->
+                                snack = null
+                            }
+
+                            Typography {
+                                + (snack?.message ?: "")
+                            }
                         }
                     }
                 }
@@ -268,6 +279,8 @@ val ustadScreensLoader: LoaderFunction<*> = {
             configMap = configJson,
             stringsProvider = jsStringsProvider,
         )
+
+        document.getElementById("loading")?.remove()
 
         UstadScreensLoaderData(di)
     }

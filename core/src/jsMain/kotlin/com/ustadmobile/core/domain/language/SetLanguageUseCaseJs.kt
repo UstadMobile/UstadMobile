@@ -1,21 +1,23 @@
 package com.ustadmobile.core.domain.language
 
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadNavController
 import web.location.location
 
 class SetLanguageUseCaseJs(
-    private val systemImpl: UstadMobileSystemImpl,
+    private val languagesConfig: SupportedLanguagesConfig,
 ): SetLanguageUseCase {
     override fun invoke(
         uiLang: UstadMobileSystemCommon.UiLanguage,
         currentDestination: String,
         navController: UstadNavController,
+        navArgs: Map<String, String>
     ) : SetLanguageUseCase.SetLangResult {
-        val currentDisplayLang = systemImpl.getDisplayedLocale()
-        systemImpl.setLocale(uiLang.langCode)
-        val newDisplayLang = systemImpl.getDisplayedLocale()
+        val currentDisplayLang = languagesConfig.displayedLocale
+        languagesConfig.localeSetting = uiLang.langCode
+        val newDisplayLang = languagesConfig.displayedLocale
+
         if(currentDisplayLang != newDisplayLang) {
             location.reload()
         }

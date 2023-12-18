@@ -1681,4 +1681,8 @@
 
     <string name="menu">Menu</string>
 
+    <string name="restarting">Restarting</string>
+
+    <string name="terms_required_if_registration_enabled">If self-registration is enabled, you must set terms and policies in at least one language for users to accept when they register.</string>
+
 </resources>

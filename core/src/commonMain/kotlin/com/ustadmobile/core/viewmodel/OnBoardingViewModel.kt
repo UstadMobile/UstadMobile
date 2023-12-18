@@ -45,10 +45,8 @@ class OnBoardingViewModel(
 
         val allLanguages = supportLangConfig
             .supportedUiLanguagesAndSysDefault(systemImpl)
-        val currentLocaleCode = systemImpl.getLocale()
-        val currentLanguage = allLanguages.first {
-            it.langCode == currentLocaleCode
-        }
+        val currentLanguage = supportLangConfig
+            .getCurrentLanguage(systemImpl)
 
         _uiState.update {
             OnboardingUiState(currentLanguage, allLanguages)
@@ -57,7 +55,10 @@ class OnBoardingViewModel(
 
     fun onClickNext(){
         settings[PREF_TAG] =  true.toString()
-        navController.navigate(RedirectViewModel.DEST_NAME, emptyMap())
+        navController.navigate(RedirectViewModel.DEST_NAME, buildMap {
+            putFromSavedStateIfPresent(ARG_NEXT)
+            putFromSavedStateIfPresent(ARG_OPEN_LINK)
+        })
     }
 
     fun onLanguageSelected(uiLanguage: UstadMobileSystemCommon.UiLanguage) {

@@ -96,6 +96,7 @@ fun ClazzDetailOverviewScreen(
                 html = uiState.clazz?.clazzDesc ?: "",
                 modifier = Modifier.defaultItemPadding()
             )
+            Divider(Modifier.height(1.dp))
         }
 
         item(key = "members") {
@@ -148,7 +149,8 @@ fun ClazzDetailOverviewScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(20.dp))
+            Divider(Modifier.height(1.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
         if(uiState.scheduleList.isNotEmpty()) {

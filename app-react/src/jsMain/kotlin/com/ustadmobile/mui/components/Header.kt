@@ -77,7 +77,7 @@ val Header = FC<HeaderProps> { props ->
         }
 
         Toolbar {
-            if(props.showMenuIcon) {
+            if(props.showMenuIcon && props.appUiState.navigationVisible) {
                 IconButton {
                     ariaLabel = strings[MR.strings.menu]
                     onClick = {

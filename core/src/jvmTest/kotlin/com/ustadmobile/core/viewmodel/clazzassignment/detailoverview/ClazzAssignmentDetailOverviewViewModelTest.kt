@@ -313,7 +313,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModel.uiState.test(timeout = 5.seconds) {
                 val stateWithMark = awaitItemWhere {
-                    it.submissionMark != null && it.assignment != null && it.courseBlock != null
+                    it.submissionMark?.averageScore == 5f && it.activeUserCanSubmit && it.submissionStatus == CourseAssignmentSubmission.MARKED
                 }
                 assertEquals(5f, stateWithMark.submissionMark?.averageScore)
                 assertTrue(stateWithMark.activeUserCanSubmit)

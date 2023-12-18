@@ -32,6 +32,7 @@ import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementSerializer
 import com.ustadmobile.core.db.ext.preload
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.XapiStatementResponder
 import com.ustadmobile.port.sharedse.impl.http.XapiStatementResponder.Companion.URI_PARAM_ENDPOINT
@@ -53,6 +54,7 @@ import java.nio.charset.StandardCharsets
 import kotlin.random.Random
 import io.ktor.client.plugins.contentnegotiation.*
 import kotlinx.coroutines.runBlocking
+import java.util.Locale
 import java.util.Properties
 
 class TestXapiStatementResponder {
@@ -90,8 +92,16 @@ class TestXapiStatementResponder {
             }
 
             bind<UstadMobileSystemImpl>() with singleton {
-                spy(UstadMobileSystemImpl(instance()))
+                spy(UstadMobileSystemImpl(instance(), instance()))
             }
+
+            bind<SupportedLanguagesConfig>() with singleton {
+                SupportedLanguagesConfig(
+                    systemLocales = listOf(Locale.getDefault().language),
+                    settings = instance(),
+                )
+            }
+
             bind<UstadAccountManager>() with singleton {
                 UstadAccountManager(instance(), di)
             }

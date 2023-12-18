@@ -202,7 +202,7 @@ abstract class UstadViewModel(
         goOptions: UstadMobileSystemCommon.UstadGoOptions = UstadMobileSystemCommon.UstadGoOptions.Default,
     ) {
         val viewName = viewUri.substringBefore("?")
-        val args = if(viewName.contains("?")) {
+        val args = if(viewUri.contains("?")) {
             UMFileUtil.parseURLQueryString(viewUri)
         }else {
             mapOf()
@@ -299,7 +299,7 @@ abstract class UstadViewModel(
         serializer: KSerializer<T>,
         loadFromStateKeys: List<String> = listOf(KEY_ENTITY_STATE, UstadEditView.ARG_ENTITY_JSON),
         savedStateKey: String = loadFromStateKeys.first(),
-        onLoadFromDb: suspend (UmAppDatabase) -> T?,
+        onLoadFromDb: (suspend (UmAppDatabase) -> T?)?,
         makeDefault: suspend () -> T?,
         uiUpdate: (T?) -> Unit,
     ) : T? {
@@ -312,13 +312,13 @@ abstract class UstadViewModel(
             }
         }
 
-        val dbVal = onLoadFromDb(activeDb)
+        val dbVal = onLoadFromDb?.invoke(activeDb)
         if(dbVal != null) {
             uiUpdate(dbVal)
         }
 
         return try {
-            val repoVal = onLoadFromDb(activeRepo) ?: makeDefault()
+            val repoVal = onLoadFromDb?.invoke(activeRepo) ?: makeDefault()
             if(repoVal != null)
                 savedStateHandle.setJson(savedStateKey, serializer, repoVal)
             uiUpdate(repoVal)
@@ -340,6 +340,13 @@ abstract class UstadViewModel(
         putFromSavedStateIfPresent(savedStateHandle, key)
     }
 
+    fun MutableMap<String, String>.putFromSavedStateIfPresent(keys: List<String>) {
+        keys.forEach {
+            putFromSavedStateIfPresent(it)
+        }
+    }
+
+
     companion object {
         /**
          * Saved state key for the current value of the entity itself. This is different to
@@ -350,8 +357,6 @@ abstract class UstadViewModel(
         const val KEY_LAST_COLLECTED_TS = "collectedTs"
 
         const val KEY_INIT_STATE = "initState"
-
-        const val RESULT_KEY_HTML_DESC = "description"
 
         const val ARG_TIME_ZONE = "timeZone"
 
@@ -381,6 +386,21 @@ abstract class UstadViewModel(
 
         val ROOT_DESTINATIONS = listOf(ClazzListViewModel.DEST_NAME_HOME,
             ContentEntryListViewModel.DEST_NAME_HOME, PersonListViewModel.DEST_NAME_HOME)
+
+        /**
+         * Can be used with any Android intent to provide a deep link to open within the app.
+         * The link can be in the form of:
+         *
+         * https://endpoint.server/umapp/#/ViewName?arg=value
+         * ViewName?arg=value
+         */
+        const val ARG_OPEN_LINK = "openLink"
+
+
+        /**
+         * Used together with the AccountManager
+         */
+        const val ARG_ACCOUNT_NAME = "account"
 
     }
 

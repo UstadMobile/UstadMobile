@@ -11,13 +11,14 @@ import react.useState
  */
 fun <T> Flow<T>.collectAsState(
     initialState: T,
+    dispatcher: CoroutineDispatcher = Dispatchers.Main,
 ): StateInstance<T> {
     val state = useState { initialState }
 
-    useEffect(dependencies = arrayOf(this)) {
+    useEffect(dependencies = arrayOf(this, dispatcher)) {
         val coroutineScope = CoroutineScope(Dispatchers.Main + Job())
 
-        coroutineScope.launch {
+        coroutineScope.launch(dispatcher) {
             this@collectAsState.collect {
                 state.component2().invoke(it)
             }

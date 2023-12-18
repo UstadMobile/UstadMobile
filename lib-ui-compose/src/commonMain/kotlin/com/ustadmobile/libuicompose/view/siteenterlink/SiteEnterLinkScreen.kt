@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
@@ -33,6 +32,7 @@ import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.libuicompose.components.UstadErrorText
 import com.ustadmobile.libuicompose.images.UstadImage
 import com.ustadmobile.libuicompose.images.ustadAppImagePainter
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -65,10 +65,10 @@ fun SiteEnterLinkScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
+        Spacer(Modifier.height(16.dp))
 
         Image(
             painter = ustadAppImagePainter(UstadImage.ILLUSTRATION_CONNECT),
@@ -76,11 +76,17 @@ fun SiteEnterLinkScreen(
             contentDescription = null,
         )
 
-        Text(stringResource(MR.strings.please_enter_the_linK))
+        Spacer(Modifier.height(8.dp))
+
+        Text(
+            stringResource(MR.strings.please_enter_the_linK),
+            modifier = Modifier.defaultItemPadding()
+        )
 
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
+                .defaultItemPadding()
                 .testTag("site_link_text")
                 ,
             value = uiState.siteLink,
@@ -104,19 +110,20 @@ fun SiteEnterLinkScreen(
         }
 
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = onClickNext,
             enabled = uiState.fieldsEnabled,
             modifier = Modifier
                 .testTag("next_button")
+                .defaultItemPadding()
                 .fillMaxWidth(),
         ) {
             Text(stringResource(MR.strings.next))
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Text(stringResource(MR.strings.or).uppercase())
 
@@ -124,6 +131,7 @@ fun SiteEnterLinkScreen(
             onClick = onClickNewLearningEnvironment ,
             modifier = Modifier
                 .testTag("create_new_button")
+                .defaultItemPadding()
                 .fillMaxWidth(),
             elevation = null,
             enabled = uiState.fieldsEnabled,

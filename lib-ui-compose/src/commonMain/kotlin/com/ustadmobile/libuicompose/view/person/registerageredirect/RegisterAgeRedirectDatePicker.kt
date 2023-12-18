@@ -5,5 +5,9 @@ import androidx.compose.runtime.Composable
 @Composable
 expect fun RegisterAgeRedirectDatePicker(
     date: Long,
-    onSetDate: (Long) -> Unit
+    onSetDate: (Long) -> Unit,
+    supportingText: @Composable () -> Unit,
+    isError: Boolean,
+    maxDate: Long,
+    onDone: () -> Unit,
 )

@@ -2,7 +2,7 @@ package com.ustadmobile.libuicompose.view.person.registerminorwaitforparent
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.runtime.Composable
-import com.ustadmobile.core.viewmodel.RegisterMinorWaitForParentUiState
+import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentUiState
 
 
 @Composable

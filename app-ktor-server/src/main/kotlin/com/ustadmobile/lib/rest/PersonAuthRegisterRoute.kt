@@ -28,7 +28,7 @@ import org.kodein.di.ktor.closestDI
 import kotlin.IllegalStateException
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.doubleEncryptWithPbkdf2V2
-import com.ustadmobile.core.viewmodel.ParentalConsentManagementViewModel
+import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 
 fun Route.personAuthRegisterRoute() {
 
@@ -108,7 +108,7 @@ fun Route.personAuthRegisterRoute() {
                 val mParentContactVal = mParentContact ?: throw IllegalStateException("Minor without parent contact")
 
                 mParentJoinVal.ppjMinorPersonUid = mPerson.personUid
-                mParentJoinVal.ppjUid = db.personParentJoinDao.insertAsync(mParentJoinVal)
+                mParentJoinVal.ppjUid = db.personParentJoinDao.upsertAsync(mParentJoinVal)
 
                 val systemImpl: UstadMobileSystemImpl by closestDI().instance()
                 val appName = systemImpl.getString(MR.strings.app_name, mLangCode)

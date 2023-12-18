@@ -22,10 +22,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.ustadmobile.core.viewmodel.RegisterMinorWaitForParentUiState
+import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentUiState
 import com.ustadmobile.libuicompose.components.UstadDetailField2
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 import dev.icerock.moko.resources.compose.stringResource
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
+
+@Composable
+fun RegisterMinorWaitForParentScreen(
+    viewModel: RegisterMinorWaitForParentViewModel
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle(
+        RegisterMinorWaitForParentUiState())
+
+    RegisterMinorWaitForParentScreen(
+        uiState = uiState,
+        onClickOk = viewModel::onClickOK,
+    )
+}
 
 @Composable
 fun RegisterMinorWaitForParentScreen(
@@ -39,12 +54,6 @@ fun RegisterMinorWaitForParentScreen(
             .fillMaxSize()
             .padding(16.dp)
     )  {
-
-        val password = if(passwordVisible)
-            uiState.password
-        else
-            "*****"
-
         UstadDetailField2(
             valueText = uiState.username ?: "",
             labelText = stringResource(MR.strings.username),

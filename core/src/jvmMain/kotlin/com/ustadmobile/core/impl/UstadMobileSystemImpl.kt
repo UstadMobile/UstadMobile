@@ -32,6 +32,7 @@
 package com.ustadmobile.core.impl
 
 import com.russhwolf.settings.Settings
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import java.util.*
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.concurrentSafeMapOf
@@ -46,8 +47,9 @@ import dev.icerock.moko.resources.StringResource
  * @author mike, kileha3
  */
 actual open class UstadMobileSystemImpl(
-    settings: Settings
-) : UstadMobileSystemCommon(settings){
+    settings: Settings,
+    langConfig: SupportedLanguagesConfig,
+) : UstadMobileSystemCommon(settings, langConfig){
 
 
     private val localeCache = concurrentSafeMapOf<String, Locale>()
@@ -68,14 +70,14 @@ actual open class UstadMobileSystemImpl(
     }
 
     override fun getString(stringResource: StringResource): String {
-        val displayLang = getDisplayedLocale()
+        val displayLang = langConfig.displayedLocale
         return stringResource.localized(locale = localeCache.getOrPut(displayLang) {
             Locale(displayLang)
         })
     }
 
     override fun formatString(stringResource: StringResource, vararg args: Any): String {
-        val displayLang = getDisplayedLocale()
+        val displayLang = langConfig.displayedLocale
         return stringResource.localized(
             locale = localeCache.getOrPut(displayLang) {
                 Locale(displayLang)
@@ -86,24 +88,6 @@ actual open class UstadMobileSystemImpl(
 
     fun getString(stringResource: StringResource, localeCode: String ) : String{
         return stringResource.localized(Locale(localeCode))
-    }
-
-    /**
-     * Provides a list of paths to removable storage (e.g. sd card) directories
-     *
-     * @return
-     */
-    private fun findRemovableStorage(): Array<String?> {
-        return arrayOfNulls(0)
-    }
-
-    /**
-     * Must provide the system's default locale (e.g. en_US.UTF-8)
-     *
-     * @return System locale
-     */
-    actual override fun getSystemLocale(): String{
-        return Locale.getDefault().toString()
     }
 
 
@@ -145,14 +129,6 @@ actual open class UstadMobileSystemImpl(
         fileName: String?
     ) {
 
-    }
-
-
-    /**
-     * Open the given link in a browser and/or tab depending on the platform
-     */
-    actual override fun openLinkInBrowser(url: String, context: Any) {
-        //On JVM - do nothing at the moment. This is only used for unit testing with verify calls.
     }
 
 

@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.ext.isGuestUser
 import com.ustadmobile.core.util.ext.isTemporary
 import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.util.ext.whenSubscribed
@@ -47,6 +48,9 @@ data class AccountListUiState(
 
     val activeAccountButtonsEnabled: Boolean
         get() = headerAccount != null && headerAccount.person.personUid != 0L
+
+    val myProfileButtonVisible: Boolean
+        get() = headerAccount != null && !headerAccount.person.isGuestUser()
 
 }
 
@@ -173,6 +177,7 @@ class AccountListViewModel(
         startUserSessionUseCase(
             session = sessionWithPersonAndEndpoint,
             navController = navController,
+            nextDest = savedStateHandle[ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
         )
     }
 

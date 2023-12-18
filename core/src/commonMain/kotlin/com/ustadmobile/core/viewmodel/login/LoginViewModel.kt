@@ -4,13 +4,14 @@ import com.ustadmobile.core.account.AdultAccountRequiredException
 import com.ustadmobile.core.account.ConsentNotGrantedException
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
 import com.ustadmobile.core.view.*
@@ -39,7 +40,11 @@ data class LoginUiState(
     val createAccountVisible: Boolean = false,
     val connectAsGuestVisible: Boolean = false,
     val loginIntentMessage: String? = null,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val currentLanguage: UstadMobileSystemCommon.UiLanguage =
+        UstadMobileSystemCommon.UiLanguage("en", "English"),
+    val languageList: List<UstadMobileSystemCommon.UiLanguage> = listOf(currentLanguage),
+    val showWaitForRestart: Boolean = false,
 )
 
 class LoginViewModel(
@@ -63,6 +68,10 @@ class LoginViewModel(
 
     private var verifiedSite: Site? = null
 
+    private val setLanguageUseCase: SetLanguageUseCase by instance()
+
+    private val languagesConfig: SupportedLanguagesConfig by instance()
+
     init {
         nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
@@ -71,8 +80,10 @@ class LoginViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                versionInfo = "TODO",
-                loginIntentMessage = savedStateHandle[UstadView.ARG_INTENT_MESSAGE]
+                versionInfo = "",
+                loginIntentMessage = savedStateHandle[UstadView.ARG_INTENT_MESSAGE],
+                currentLanguage = languagesConfig.getCurrentLanguage(systemImpl),
+                languageList = languagesConfig.supportedUiLanguagesAndSysDefault(systemImpl)
             )
         }
 
@@ -86,7 +97,7 @@ class LoginViewModel(
         val siteJsonStr: String? = savedStateHandle[UstadView.ARG_SITE]
         if(siteJsonStr != null){
             _appUiState.value = baseAppUiState
-            onVerifySite(json.decodeFromString(siteJsonStr))
+            onSiteVerified(json.decodeFromString(siteJsonStr))
         }else{
             _uiState.update { prev ->
                 prev.copy(
@@ -101,7 +112,7 @@ class LoginViewModel(
                 while(verifiedSite == null) {
                     try {
                         val site = httpClient.verifySite(serverUrl, 10000)
-                        onVerifySite(site) // onVerifySite will set the workspace var, and exit the loop
+                        onSiteVerified(site) // onSiteVerified will set the workspace var, and exit the loop
                     }catch(e: Exception) {
                         Napier.w("Could not load site object for $serverUrl", e)
                         _uiState.update { prev ->
@@ -116,7 +127,7 @@ class LoginViewModel(
         }
     }
 
-    private fun onVerifySite(site: Site) {
+    private fun onSiteVerified(site: Site) {
         verifiedSite = site
         loadingState = LoadingUiState.NOT_LOADING
         _uiState.update { prev ->
@@ -215,21 +226,41 @@ class LoginViewModel(
         val args = mutableMapOf(
             UstadView.ARG_API_URL to serverUrl,
             SiteTermsDetailView.ARG_SHOW_ACCEPT_BUTTON to true.toString(),
-            SiteTermsDetailView.ARG_USE_DISPLAY_LOCALE to true.toString(),
             UstadView.ARG_POPUPTO_ON_FINISH to
                     (savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH] ?: DEST_NAME))
 
-        args.putFromSavedStateIfPresent(savedStateHandle, UstadView.ARG_NEXT)
-        args.putFromSavedStateIfPresent(savedStateHandle, PersonEditViewModel.REGISTER_VIA_LINK)
+        args.putFromSavedStateIfPresent(PersonEditViewModel.REGISTRATION_ARGS_TO_PASS)
 
         navController.navigate(RegisterAgeRedirectView.VIEW_NAME, args)
     }
 
-    fun handleConnectAsGuest(){
-//        presenterScope.launch {
-//            accountManager.startGuestSession(serverUrl)
-//            goToNextDestAfterLoginOrGuestSelected()
-//        }
+    fun onChangeLanguage(
+        uiLanguage: UstadMobileSystemCommon.UiLanguage
+    ) {
+        if(uiLanguage != _uiState.value.currentLanguage) {
+            val result = setLanguageUseCase(
+                uiLanguage, DEST_NAME, navController,
+                navArgs = buildMap {
+                    putFromSavedStateIfPresent(UstadView.ARG_NEXT)
+                    putFromSavedStateIfPresent(UstadView.ARG_API_URL)
+                    putFromSavedStateIfPresent(UstadView.ARG_SITE)
+                }
+            )
+
+            _uiState.update { previous ->
+                previous.copy(
+                    currentLanguage =  uiLanguage,
+                    showWaitForRestart = result.waitForRestart
+                )
+            }
+        }
+    }
+
+    fun onClickConnectAsGuest(){
+        viewModelScope.launch {
+            accountManager.startGuestSession(serverUrl)
+            goToNextDestAfterLoginOrGuestSelected()
+        }
     }
 
     companion object {

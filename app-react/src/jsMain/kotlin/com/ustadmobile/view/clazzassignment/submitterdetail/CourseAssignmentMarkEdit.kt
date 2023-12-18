@@ -7,7 +7,6 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadNumberTextField
 import com.ustadmobile.mui.components.UstadTextField
-import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.util.ext.onTextChange
 import dev.icerock.moko.resources.StringResource
 import web.cssom.Display
@@ -63,7 +62,7 @@ val CourseAssignmentMarkEdit = FC<CourseAssignmentMarkEditProps> { props ->
 
         UstadTextField {
             id = "marker_comment"
-            label = ReactNode(strings[MR.strings.mark_comment].addOptionalSuffix(strings))
+            label = ReactNode(strings[MR.strings.mark_comment])
             value = props.draftMark.camMarkerComment ?: ""
             disabled = !props.markFieldsEnabled
             onTextChange = {
