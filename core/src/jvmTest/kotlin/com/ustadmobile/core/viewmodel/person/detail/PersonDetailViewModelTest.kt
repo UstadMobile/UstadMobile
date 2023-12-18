@@ -138,7 +138,7 @@ class PersonDetailViewModelTest: AbstractMainDispatcherTest() {
                     username = "young"
                 })
 
-                db.personParentJoinDao.insertAsync(PersonParentJoin().apply {
+                db.personParentJoinDao.upsertAsync(PersonParentJoin().apply {
                     ppjMinorPersonUid = childInDb.personUid
                     ppjParentPersonUid = activeUser.personUid
                     ppjRelationship = PersonParentJoin.RELATIONSHIP_MOTHER

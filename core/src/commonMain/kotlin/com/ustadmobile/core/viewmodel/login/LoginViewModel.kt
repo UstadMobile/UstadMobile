@@ -12,7 +12,6 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
 import com.ustadmobile.core.view.*
@@ -98,7 +97,7 @@ class LoginViewModel(
         val siteJsonStr: String? = savedStateHandle[UstadView.ARG_SITE]
         if(siteJsonStr != null){
             _appUiState.value = baseAppUiState
-            onVerifySite(json.decodeFromString(siteJsonStr))
+            onSiteVerified(json.decodeFromString(siteJsonStr))
         }else{
             _uiState.update { prev ->
                 prev.copy(
@@ -113,7 +112,7 @@ class LoginViewModel(
                 while(verifiedSite == null) {
                     try {
                         val site = httpClient.verifySite(serverUrl, 10000)
-                        onVerifySite(site) // onVerifySite will set the workspace var, and exit the loop
+                        onSiteVerified(site) // onSiteVerified will set the workspace var, and exit the loop
                     }catch(e: Exception) {
                         Napier.w("Could not load site object for $serverUrl", e)
                         _uiState.update { prev ->
@@ -128,7 +127,7 @@ class LoginViewModel(
         }
     }
 
-    private fun onVerifySite(site: Site) {
+    private fun onSiteVerified(site: Site) {
         verifiedSite = site
         loadingState = LoadingUiState.NOT_LOADING
         _uiState.update { prev ->
@@ -227,12 +226,10 @@ class LoginViewModel(
         val args = mutableMapOf(
             UstadView.ARG_API_URL to serverUrl,
             SiteTermsDetailView.ARG_SHOW_ACCEPT_BUTTON to true.toString(),
-            SiteTermsDetailView.ARG_USE_DISPLAY_LOCALE to true.toString(),
             UstadView.ARG_POPUPTO_ON_FINISH to
                     (savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH] ?: DEST_NAME))
 
-        args.putFromSavedStateIfPresent(savedStateHandle, UstadView.ARG_NEXT)
-        args.putFromSavedStateIfPresent(savedStateHandle, PersonEditViewModel.REGISTER_VIA_LINK)
+        args.putFromSavedStateIfPresent(PersonEditViewModel.REGISTRATION_ARGS_TO_PASS)
 
         navController.navigate(RegisterAgeRedirectView.VIEW_NAME, args)
     }
@@ -259,11 +256,11 @@ class LoginViewModel(
         }
     }
 
-    fun handleConnectAsGuest(){
-//        presenterScope.launch {
-//            accountManager.startGuestSession(serverUrl)
-//            goToNextDestAfterLoginOrGuestSelected()
-//        }
+    fun onClickConnectAsGuest(){
+        viewModelScope.launch {
+            accountManager.startGuestSession(serverUrl)
+            goToNextDestAfterLoginOrGuestSelected()
+        }
     }
 
     companion object {

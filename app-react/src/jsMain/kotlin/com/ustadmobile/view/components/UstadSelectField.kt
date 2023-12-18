@@ -36,7 +36,9 @@ private val UstadSelectFieldFC = FC<UstadSelectFieldProps<Any>> { props ->
     val selectVal = try {
         props.itemValue(props.value)
     }catch(e: Exception){
-        throw IllegalArgumentException("SelectField(id=${props.id}): cannot get value. Not in options list maybe?", e)
+        //Current value not in options list, maybe an unset field.
+        //throw IllegalArgumentException("SelectField(id=${props.id}): cannot get value. Not in options list maybe?", e)
+        "__unset__"
     }
 
     FormControl {
@@ -57,8 +59,22 @@ private val UstadSelectFieldFC = FC<UstadSelectFieldProps<Any>> { props ->
             error = props.error
             onChange = { event, _ ->
                 val selectedVal = ("" + event.target.value)
-                val selectedItem = props.options.first { props.itemValue(it) ==  selectedVal }
-                props.onChange(selectedItem)
+                val selectedItem = props.options.firstOrNull {
+                    props.itemValue(it) ==  selectedVal
+                }
+
+                if(selectedItem != null) {
+                    props.onChange(selectedItem)
+                }else {
+                    console.log("UstadSelect: User selected item not in value options")
+                }
+            }
+
+            if(props.value !in props.options) {
+                MenuItem {
+                    value = "__unset__"
+                    + ""
+                }
             }
 
             props.options.forEach { option ->
@@ -74,12 +90,6 @@ private val UstadSelectFieldFC = FC<UstadSelectFieldProps<Any>> { props ->
                 +it
             }
         }
-//        val helperText = props.error
-//        if(helperText != null) {
-//            FormHelperText {
-//                +helperText
-//            }
-//        }
     }
 
 }

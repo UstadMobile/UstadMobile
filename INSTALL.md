@@ -49,7 +49,13 @@ ktor {
 }        
 ```
 
-After setting the siteUrl in the configuration file, start the server:
+If your site will allow self-registration (which can be enabled by the admin user through settings
+after logging in), you must configure the email section of the config file. The Children's Online 
+Privacy Protection Act requires obtaining of parental consent, which is done by requesting a parental
+email address. Uncomment the mail section in ustad-server.conf and add an email account that can be
+used to send email.
+
+After setting the siteUrl in the configuration file (and email config if required), start the server:
 
 Linux/MacOS:
 ```

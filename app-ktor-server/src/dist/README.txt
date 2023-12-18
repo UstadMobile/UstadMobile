@@ -4,10 +4,13 @@ Ustad Mobile server README
    will be used to access the site e.g. https://ustad.yourdomain.com/ (e.g. using a reverse proxy setup
    with Apache or Nginx in a production setup) or http://your.ip.address:8087/ (for testing/evaluation).
 
-   If you use localhost or 127.0.0.1, you will not be able to connect from Android (because localhost
-   on an emulator or device refers to the Android emulator/device, not the PC running the server).
+2) If you allow user self-registration (this can be enabled via settings after logging in as admin),
+   you must configure the email section of the config file. The Children's Online Privacy Protection
+   Act requires any app which may appeal to children to use an age-neutral selection screen, and if a
+   user registering indicates that they are under 13, we must ask for a parental contact to grant
+   consent (or deny) consent.
 
-2) To start the server: use the .sh (Linux/MacOS) or .bat (Windows) start script in bin
+3) To start the server: use the .sh (Linux/MacOS) or .bat (Windows) start script in bin
 
 A random admin password will be generated when the server runs for the first time: find it in
 data/singleton/admin.txt

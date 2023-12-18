@@ -2,7 +2,7 @@ package com.ustadmobile.libuicompose.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,7 +28,7 @@ fun UstadSwitchField(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.body1,
+            style = MaterialTheme.typography.bodyMedium,
         )
         Spacer(Modifier.weight(1.0f))
         Switch(

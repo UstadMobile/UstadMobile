@@ -77,7 +77,7 @@ object UstadMobileConstants {
      * Anyone under this age is considered a minor. They can only register with the consent of a
      * parent/guardian.
      */
-    val MINOR_AGE_THRESHOLD = Long.MIN_VALUE
+    val MINOR_AGE_THRESHOLD = 13
 
     /**
      * Anyone over this age is considered an adult. They can approve accounts for minors.

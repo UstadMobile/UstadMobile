@@ -119,7 +119,7 @@
         -->
 
         <!--
-        The MainActivity containing fragments/navigation
+        The MainActivity containing Jetpack Compose UI
         -->
         <activity
             android:name="com.ustadmobile.port.android.view.AppActivity"

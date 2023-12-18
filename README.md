@@ -130,6 +130,9 @@ on an emulator or device refers to the Android emulator/device, not the PC runni
 * __Step 5: Build/run the Android and/or web client version__ : see [app-android](app-android/) for the
 Android app, [app-react](app-react/) for the web app.
 
+Note: If self-registration is enabled, you must add an email server configuration to the 
+ustad-server.conf file. See [app-ktor-server/README.md](app-ktor-server/README.md) for details on
+using the ustad-server.conf file.
 
 ### Code structure
 

@@ -241,6 +241,7 @@ class UstadAccountManager(
         accountRegisterOptions: AccountRegisterOptions = AccountRegisterOptions()
     ): PersonWithAccount = withContext(Dispatchers.Default){
         assertNotClosed()
+        val endpoint = Endpoint(endpointUrl)
         val parentVal = accountRegisterOptions.parentJoin
         val httpStmt = httpClient.preparePost {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
@@ -258,8 +259,22 @@ class UstadAccountManager(
 
         val newPassword = person.newPassword
         if(status == 200 && registeredPerson != null && newPassword != null) {
+            //Must ensure that the site object is loaded to get auth salt.
+            val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
+            getSiteFromDbOrLoadFromHttp(repo)
+
             if(accountRegisterOptions.makeAccountActive){
-                val session = addSession(registeredPerson, endpointUrl, newPassword)
+                val session = addSession(registeredPerson,
+                    endpointUrl, newPassword)
+
+                //If the person is not loaded into the database (probably not), then put in the db.
+                val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
+                db.withDoorTransactionAsync {
+                    if(db.personDao.findPersonAccountByUid(registeredPerson.personUid) == null) {
+                        db.personDao.insertAsync(registeredPerson)
+                    }
+                }
+
                 currentUserSession = session
             }
 
@@ -448,12 +463,13 @@ class UstadAccountManager(
         }
     }
 
-    private suspend fun startGuestSession(endpointUrl: String) {
+    suspend fun startGuestSession(endpointUrl: String) {
         val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_REPO)
         val guestPerson = repo.insertPersonAndGroup(Person().apply {
             username = null
             firstNames = "Guest"
             lastName = "User"
+            personType = Person.TYPE_GUEST
         }, groupFlag = PERSONGROUP_FLAG_PERSONGROUP or PERSONGROUP_FLAG_GUESTPERSON)
 
         getSiteFromDbOrLoadFromHttp(repo)

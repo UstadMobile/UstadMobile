@@ -27,7 +27,7 @@ import kotlin.concurrent.Volatile
  *        explicitly set a language and none of their preferred longuages are supported
  */
 class SupportedLanguagesConfig (
-    private val systemLocales: List<String>,
+    val systemLocales: List<String>,
     private val localeSettingDelegate: LocaleSettingDelegate,
     private val availableLanguagesConfig: String = DEFAULT_SUPPORTED_LANGUAGES,
     private val fallbackLocaleCode: String = "en",

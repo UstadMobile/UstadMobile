@@ -20,25 +20,34 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.libuicompose.theme.AppTheme
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
+import com.ustadmobile.port.android.util.ext.getUstadDeepLink
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import com.ustadmobile.core.R as CR
 
 class SplashScreenActivity : ComponentActivity() {
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        lifecycleScope.launchWhenCreated {
-            delay(2000L)
-            val intent = Intent(this@SplashScreenActivity, AppActivity::class.java)
-            startActivity(intent)
-            finish()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                delay(2000L)
+                val intent = Intent(this@SplashScreenActivity, AppActivity::class.java)
+                intent.getUstadDeepLink()?.also {
+                    intent.putExtra(UstadViewModel.ARG_OPEN_LINK, it)
+                }
+                startActivity(intent)
+                finish()
+            }
         }
+
         setContent {
             AppTheme {
                 SplashScreen()

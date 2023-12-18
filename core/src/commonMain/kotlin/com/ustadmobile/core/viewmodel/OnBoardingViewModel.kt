@@ -55,7 +55,10 @@ class OnBoardingViewModel(
 
     fun onClickNext(){
         settings[PREF_TAG] =  true.toString()
-        navController.navigate(RedirectViewModel.DEST_NAME, emptyMap())
+        navController.navigate(RedirectViewModel.DEST_NAME, buildMap {
+            putFromSavedStateIfPresent(ARG_NEXT)
+            putFromSavedStateIfPresent(ARG_OPEN_LINK)
+        })
     }
 
     fun onLanguageSelected(uiLanguage: UstadMobileSystemCommon.UiLanguage) {

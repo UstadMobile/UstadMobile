@@ -4,7 +4,6 @@ import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.viewmodel.login.LoginUiState
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
-import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.util.ext.onTextChange
 import web.cssom.px
 import mui.material.*
@@ -17,7 +16,8 @@ import react.*
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.LOCALE_USE_SYSTEM
+import com.ustadmobile.mui.components.UstadLanguageSelect
+import com.ustadmobile.mui.components.UstadPasswordTextField
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextField
 
@@ -43,7 +43,7 @@ val LoginScreen = FC<Props> {
         this.uiState = uiState
         onClickLogin = viewModel::onClickLogin
         onClickCreateAccount = viewModel::onClickCreateAccount
-        onClickConnectAsGuest = viewModel::handleConnectAsGuest
+        onClickConnectAsGuest = viewModel::onClickConnectAsGuest
         onUsernameValueChange = viewModel::onUsernameChanged
         onPasswordValueChange = viewModel::onPasswordChanged
         onChangeLanguage = viewModel::onChangeLanguage
@@ -55,18 +55,6 @@ val LoginScreen = FC<Props> {
 private val LoginComponent2 = FC<LoginProps> { props ->
 
     val strings = useStringProvider()
-
-    /*
-     * The language setting for "use system language" is a blank string. This doesn't work with a
-     * select field value. So we will convert a blank string to sys and back to blank
-     */
-    fun String.toLangSysVal() = if(this == LOCALE_USE_SYSTEM) "sys" else this
-
-    fun String.fromLangSysVal() = if(this == "sys")
-        LOCALE_USE_SYSTEM
-    else
-        this
-
 
     UstadStandardContainer {
         Stack {
@@ -90,16 +78,16 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                 disabled = !props.uiState.fieldsEnabled
             }
 
-            UstadTextEditField {
+            UstadPasswordTextField {
                 id = "password"
                 value = props.uiState.password
-                label = strings[MR.strings.password]
-                onChange = {
+                label = ReactNode(strings[MR.strings.password])
+                onTextChange = {
                     props.onPasswordValueChange(it)
                 }
-                error = props.uiState.passwordError
-                enabled = props.uiState.fieldsEnabled
-                password = true
+                error = props.uiState.passwordError != null
+                disabled = !props.uiState.fieldsEnabled
+                helperText = props.uiState.passwordError?.let { ReactNode(it) }
             }
 
             Box{
@@ -126,63 +114,30 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                }
             }
 
-            FormControl {
+            UstadLanguageSelect {
+                langList = props.uiState.languageList
+                currentLanguage = props.uiState.currentLanguage
+                onItemSelected = props.onChangeLanguage
                 fullWidth = true
+                id = "language_select"
+            }
 
-                InputLabel {
-                    id = "language_label"
-                    +strings[MR.strings.language]
-                }
 
-                Select {
-                    value = props.uiState.currentLanguage.langCode.toLangSysVal()
-                    id = "language_select"
-                    label = ReactNode(strings[MR.strings.language])
-                    labelId = "language_label"
-                    disabled = !props.uiState.fieldsEnabled
-                    fullWidth = true
-                    onChange = { event, _ ->
-                        val selectedVal = ("" + event.target.value).fromLangSysVal()
-                        val selectedLang = props.uiState.languageList.first {
-                            it.langCode == selectedVal
-                        }
-                        props.onChangeLanguage(selectedLang)
-                    }
-
-                    props.uiState.languageList.forEach { lang ->
-                        MenuItem {
-                            value = lang.langCode.toLangSysVal()
-                            + lang.langDisplay
-                        }
-                    }
+            if(props.uiState.createAccountVisible) {
+                Button {
+                    id = "create_account_button"
+                    onClick = { props.onClickCreateAccount() }
+                    variant = ButtonVariant.outlined
+                    + strings[MR.strings.create_account].uppercase()
                 }
             }
 
-            /*
-            These items are not yet active
-            Button {
-                id = "create_account_button"
-                onClick = { props.onClickCreateAccount() }
-                variant = ButtonVariant.outlined
-                + strings[MR.strings.create_account].uppercase()
-            }
-
-            Box{
-                sx {
-                    height = 10.px
-                }
-            }
-
-            Button {
-                id = "connect_as_guest_button"
-                onClick = { props.onClickConnectAsGuest() }
-                variant = ButtonVariant.outlined
-                + strings[MR.strings.connect_as_guest].uppercase()
-            }
-
-            Box{
-                sx {
-                    height = 10.px
+            if(props.uiState.connectAsGuestVisible) {
+                Button {
+                    id = "connect_as_guest_button"
+                    onClick = { props.onClickConnectAsGuest() }
+                    variant = ButtonVariant.outlined
+                    + strings[MR.strings.connect_as_guest].uppercase()
                 }
             }
 
@@ -190,7 +145,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                 align = TypographyAlign.center
                 + props.uiState.versionInfo
             }
-             */
+
         }
     }
 }

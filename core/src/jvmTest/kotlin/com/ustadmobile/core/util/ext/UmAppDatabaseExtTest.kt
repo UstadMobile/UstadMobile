@@ -137,7 +137,7 @@ class UmAppDatabaseExtTest {
         testStudent.personUid = repo.personDao.insert(testStudent)
         testParent.personUid = repo.personDao.insert(testParent)
 
-        repo.personParentJoinDao.insertAsync(PersonParentJoin().apply {
+        repo.personParentJoinDao.upsertAsync(PersonParentJoin().apply {
             ppjMinorPersonUid = testStudent.personUid
             ppjParentPersonUid = testParent.personUid
         })
