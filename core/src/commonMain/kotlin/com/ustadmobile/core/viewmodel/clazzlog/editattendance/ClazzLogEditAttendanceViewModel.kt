@@ -354,7 +354,10 @@ class ClazzLogEditAttendanceViewModel(
 
             if(newClazzLog != null) {
                 //User came via adding new occurence from attendancelist
-                navController.popBackStack(viewName = ClazzLogEditViewModel.DEST_NAME, inclusive = true)
+                navController.popBackStack(
+                    viewName = ClazzLogEditViewModel.DEST_NAME,
+                    inclusive = true
+                )
             }else {
                 finishWithResult(_uiState.value.currentClazzLog)
             }

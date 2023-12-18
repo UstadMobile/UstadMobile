@@ -1,0 +1,14 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- As per https://material.io/develop/android/components/buttons/#toggle-button - Implementing an icon-only toggle button -->
+    <style name="UmTheme.Widget.OutlinedButton.IconOnly" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="iconPadding">@dimen/dimen_0dp</item>
+        <item name="android:insetTop">@dimen/dimen_0dp</item>
+        <item name="android:insetBottom">@dimen/dimen_0dp</item>
+        <item name="android:paddingStart">@dimen/dimen_12dp</item>
+        <item name="android:paddingEnd">@dimen/dimen_12dp</item>
+        <item name="android:minWidth">@dimen/dimen_48dp</item>
+        <item name="android:minHeight">@dimen/dimen_48dp</item>
+    </style>
+
+</resources>

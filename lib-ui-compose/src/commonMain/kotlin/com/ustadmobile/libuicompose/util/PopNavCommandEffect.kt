@@ -47,12 +47,17 @@ fun PopNavCommandEffect(
         mutableStateOf(null)
     }
 
+    var targetHit by remember {
+        mutableStateOf(false)
+    }
+
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(popCommandFlow) {
         popCommandFlow.collect {
             Napier.d { "UstadNavControllerNavHost: received PopNavCommand $it" }
             onSetContentVisible(false)
+            targetHit = false
             popUpToTarget = PopTargetState(it)
         }
     }
@@ -66,6 +71,19 @@ fun PopNavCommandEffect(
         val logPrefix = {
             "UstadNavControllerNavHost: currentDestName=$currentDestName target = $popUpToTargetVal"
         }
+
+        //Unfortunately if we call go back immediately in succession, that will not
+        //work, so we have to retry. This will be cancelled by the effect once
+        //navigation has actually taken place, so there is no risk of running goBack
+        //too many times.
+        fun launchAttemptToGoBack() = coroutineScope.launch {
+            repeat(3) {
+                Napier.d { "${logPrefix()} target not reached: can go back,: attempting" }
+                navigator.goBack()
+                delay(200)
+            }
+        }
+
         pendingGoBackTimeout?.also {
             it.cancel()
             Napier.v { "${logPrefix()} cancel timeout"}
@@ -76,20 +94,10 @@ fun PopNavCommandEffect(
              * There is a popUpToTarget, but we have not reached it yet. Go back once more
              */
             popUpToTargetVal != null && currentDestName != popUpToTargetVal.command.viewName
-                    && !popUpToTargetVal.targetHit-> {
+                    && !targetHit -> {
                 if(canGoBack){
                     Napier.d { "${logPrefix()} target not reached: can go back, going back" }
-                    pendingGoBackTimeout = coroutineScope.launch {
-                        //Unfortunately if we call go back immediately in succession, that will not
-                        //work, so we have to retry. This will be cancelled by the effect once
-                        //navigation has actually taken place, so there is no risk of running goBack
-                        //too many times.
-                        repeat(3) {
-                            Napier.d { "${logPrefix()} target not reached: can go back,: attempting" }
-                            navigator.goBack()
-                            delay(200)
-                        }
-                    }
+                    pendingGoBackTimeout = launchAttemptToGoBack()
                 }else {
                     //Target is not in stack, cannot go back, give up
                     Napier.d { "${logPrefix()} target not reached: but cannot go back, give up" }
@@ -103,11 +111,8 @@ fun PopNavCommandEffect(
             popUpToTargetVal != null && currentDestName == popUpToTargetVal.command.viewName -> {
                 if(popUpToTargetVal.command.inclusive) {
                     Napier.d { "${logPrefix()} target reached, popup is inclusive." }
-                    popUpToTarget = popUpToTargetVal.copy(
-                        targetHit = true
-                    )
-
-                    navigator.goBack()
+                    targetHit = true
+                    pendingGoBackTimeout = launchAttemptToGoBack()
                 }else {
                     Napier.d { "${logPrefix()} target reached, popup is not inclusive. Done. Set content visible" }
                     popUpToTarget = null
@@ -119,7 +124,7 @@ fun PopNavCommandEffect(
              * There was a popUpToTarget where inclusive was true, that has now also been popped.
              */
             popUpToTargetVal != null && currentDestName != popUpToTargetVal.command.viewName &&
-                    popUpToTargetVal.targetHit -> {
+                    targetHit -> {
                 Napier.d { "${logPrefix()} target was hit, popup was inclusive, time to show content" }
                 popUpToTarget = null
                 onSetContentVisible(true)

@@ -202,6 +202,7 @@ class ClazzLogListAttendanceViewModel(
                         UstadView.ARG_CLAZZUID to clazzUid.toString(),
                     )
                 )
+                onDismissCreateNewOptions()
             }
             RecordAttendanceOption.RECORD_ATTENDANCE_MOST_RECENT_SCHEDULE -> {
                 if(loadingState == LoadingUiState.INDETERMINATE)
@@ -216,6 +217,7 @@ class ClazzLogListAttendanceViewModel(
                         viewName = ClazzLogEditAttendanceViewModel.DEST_NAME,
                         args = mapOf(UstadView.ARG_ENTITY_UID to mostRecentLogUid.toString())
                     )
+                    onDismissCreateNewOptions()
                 }
             }
         }
