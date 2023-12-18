@@ -2,31 +2,52 @@
 plugins {
     id 'application'
     id 'kotlin'
-    id 'maven-publish'
-
-    id 'com.github.johnrengelman.shadow' version "$version_shadow"
+    id "io.ktor.plugin" version "$version_ktor"
     id 'kotlinx-serialization'
 }
 
+distributions {
+    main {
+        distributionBaseName = 'ustad-server'
+    }
+}
 
 compileKotlin{
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "17"
     kotlinOptions {
         freeCompilerArgs += "-Xopt-in=com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview"
+        freeCompilerArgs += "-Xexpect-actual-classes"
     }
 
 }
 
 compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "17"
     kotlinOptions {
         freeCompilerArgs += "-Xopt-in=com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview"
+        freeCompilerArgs += "-Xexpect-actual-classes"
+    }
+}
+
+application {
+    mainClass = 'com.ustadmobile.lib.rest.ServerAppMain'
+    applicationName = "ustad-server"
+}
+
+tasks.withType(CreateStartScripts) {
+    unixStartScriptGenerator.template = resources.text.fromFile("$projectDir/src/scripttemplates/unixStartScript.txt")
+    windowsStartScriptGenerator.template = resources.text.fromFile("$projectDir/src/scripttemplates/windowsStartScript.txt")
+}
+
+ktor {
+    fatJar {
+        archiveFileName.set("ustad-server-all.jar")
     }
 }
 
 sourceSets.main {
     java.srcDirs("$buildDir/generated/source/door")
-    if(findProperty("skipreactproductionbundle") != "true") {
+    if(findProperty("ktorbundleproductionjs") == "true") {
         resources.srcDir(rootProject.file("app-react/build/dist-web/"))
     }
 }
@@ -37,7 +58,6 @@ dependencies {
     implementation "io.ktor:ktor-serialization-kotlinx-json:$version_ktor"
     implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
     implementation "io.ktor:ktor-io:$version_ktor"
-    implementation "com.soywiz.korlibs.klock:klock:$version_klock"
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "io.ktor:ktor-server-netty:$version_ktor"
@@ -51,12 +71,9 @@ dependencies {
     implementation "io.ktor:ktor-client-core:$version_ktor"
     implementation "io.ktor:ktor-client-okhttp:$version_ktor"
     implementation "io.ktor:ktor-server-html-builder:$version_ktor"
-    implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
-    implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
-    implementation "io.github.bonigarcia:webdrivermanager:$version_web_driver"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
 
-    implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+    implementation libs.simplejndi
     implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
     implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     implementation "org.postgresql:postgresql:$version_postgres_jdbc"
@@ -71,22 +88,21 @@ dependencies {
     implementation "org.kodein.di:kodein-di:$version_kodein_di"
     implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
 
-    implementation "io.github.aakira:napier-jvm:$version_napier"
+    implementation libs.napier
 
-    implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
+    implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
     implementation "net.sf.kxml:kxml2:$version_kxml"
 
-    implementation "org.quartz-scheduler:quartz:$version_quartz_scheduler"
+    implementation libs.quartz
     implementation "io.ktor:ktor-server-websockets:$version_ktor"
 
 
     implementation project(":core")
     implementation project(":sharedse")
     implementation project(":lib-database")
-    implementation "com.github.UstadMobile.door:door-annotations:$version_door"
-    implementation "com.github.UstadMobile.door:door-runtime:$version_door"
+    implementation libs.door.room.annotations
+    implementation libs.door.runtime
     implementation project(":lib-util")
-    implementation project(":lib-content-scrapers")
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
@@ -95,6 +111,14 @@ dependencies {
     implementation "com.sun.mail:jakarta.mail:$version_jakartamail"
     implementation "org.apache.commons:commons-compress:$version_apache_commons_compress"
 
+    implementation "net.sourceforge.argparse4j:argparse4j:$version_argparse4j"
+    implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
+    implementation libs.javaffmpeg
+
+    api libs.moko.resources
+
+    implementation project(":lib-cache")
+
     //test
     testImplementation project(":lib-test-common")
     testImplementation project(":sharedse")
@@ -102,7 +126,7 @@ dependencies {
     testImplementation "io.ktor:ktor-server-test-host:$version_ktor"
     testImplementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
 
-    testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+    testImplementation libs.simplejndi
     testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
     testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
@@ -112,7 +136,6 @@ dependencies {
     testImplementation "io.ktor:ktor-client-okhttp:$version_ktor"
     testImplementation "io.ktor:ktor-serialization-gson:$version_ktor"
 
-    testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
     testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
     testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
@@ -122,17 +145,8 @@ dependencies {
 
 mainClassName = 'com.ustadmobile.lib.rest.ServerAppMain'
 
-// This task will generate your fat JAR and put it in the ./build/libs/ directory
-shadowJar {
-    manifest {
-        attributes 'Main-Class': mainClassName
-    }
-    archiveBaseName = "ustad-server"
-
-}
-
-sourceCompatibility = "8"
-targetCompatibility = "8"
+sourceCompatibility = "17"
+targetCompatibility = "17"
 
 if(findProperty("ktorbundleproductionjs") == "true") {
     //Required to ensure that JS resources are ready before any other task copies them etc.

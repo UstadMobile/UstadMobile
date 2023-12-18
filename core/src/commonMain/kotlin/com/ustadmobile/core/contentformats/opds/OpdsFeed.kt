@@ -1,6 +1,5 @@
 package com.ustadmobile.core.contentformats.opds
 
-import com.soywiz.klock.DateTime
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_ALIGNMENT
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_AUTHOR
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_CREATED
@@ -12,8 +11,6 @@ import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_PUBLISH
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_SUMMARY
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_TARGET
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_TITLE
-import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_UPDATED
-import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.xmlpullparserkmp.XmlPullParser
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserConstants
 
@@ -21,7 +18,6 @@ class OpdsFeed {
 
     lateinit var id: String
     lateinit var title: String
-    var updated: DateTime? = null
 
     var author: String? = null
     var category: String? = null
@@ -43,9 +39,6 @@ class OpdsFeed {
                 when (name) {
                     TAG_ID -> id = xpp.nextText()!!
                     TAG_TITLE -> title = xpp.nextText()!!
-                    TAG_UPDATED -> {
-                        updated = UMCalendarUtil.parseOpdsDate(xpp.nextText()!!)
-                    }
                     TAG_ENTRY -> {
                         val entry = OpdsEntry()
                         do {
@@ -60,14 +53,6 @@ class OpdsFeed {
                                     ATTR_AUTHOR -> {
                                         xpp.nextTag()
                                         entry.author = xpp.nextText()
-                                    }
-                                    ATTR_UPDATED -> {
-                                        entry.updated = UMCalendarUtil.parseOpdsDate(xpp.nextText()!!)
-                                    }
-                                    ATTR_CREATED -> {
-                                        if (entry.updated == null) {
-                                            entry.updated = UMCalendarUtil.parseOpdsDate(xpp.nextText()!!)
-                                        }
                                     }
                                     ATTR_LRMI -> {
                                         entry.targetName = xpp.getAttributeValue(null, ATTR_TARGET)

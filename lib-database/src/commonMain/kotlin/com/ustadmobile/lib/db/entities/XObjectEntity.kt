@@ -8,7 +8,10 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-@ReplicateEntity(tableId =  XObjectEntity.TABLE_ID, tracker = XObjectEntityReplicate::class)
+@ReplicateEntity(
+    tableId =  XObjectEntity.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
 @Triggers(arrayOf(
  Trigger(
      name = "xobjectentity_remote_insert",
@@ -53,8 +56,8 @@ class XObjectEntity {
     @LastChangedBy
     var xObjectLastChangedBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var xObjectLct: Long = 0
 
     constructor() {

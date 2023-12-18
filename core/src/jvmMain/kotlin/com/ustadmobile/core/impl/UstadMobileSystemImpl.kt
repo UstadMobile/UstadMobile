@@ -31,14 +31,12 @@
 
 package com.ustadmobile.core.impl
 
-import java.io.*
+import com.russhwolf.settings.Settings
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import java.util.*
-import com.ustadmobile.core.generated.locale.MessageIdMap
-import com.ustadmobile.core.impl.locale.StringsXml
-import com.ustadmobile.core.impl.locale.getStringsXmlResource
 import com.ustadmobile.door.DoorUri
-import org.xmlpull.v1.XmlPullParserFactory
-import java.util.concurrent.ConcurrentHashMap
+import com.ustadmobile.door.ext.concurrentSafeMapOf
+import dev.icerock.moko.resources.StringResource
 
 
 /**
@@ -47,42 +45,14 @@ import java.util.concurrent.ConcurrentHashMap
  *
  *
  * @author mike, kileha3
- * @param xppFactory - XmlPullParser factory that
  */
-actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
-                                        private val dataRoot: File
-) : UstadMobileSystemCommon(){
+actual open class UstadMobileSystemImpl(
+    settings: Settings,
+    langConfig: SupportedLanguagesConfig,
+) : UstadMobileSystemCommon(settings, langConfig){
 
-    private val appConfig: Properties by lazy {
-        Properties().also { props ->
-            this::class.java.getResourceAsStream(APPCONFIG_PROPERTIES_PATH)?.use { propsIn ->
-                props.load(propsIn)
-            }
-        }
-    }
 
-    private val messageIdMapFlipped: Map<String, Int> by lazy {
-        MessageIdMap.idMap.entries.associate { (k, v) -> v to k }
-    }
-
-    private val defaultStringsXml: StringsXml by lazy {
-        this::class.java.getStringsXmlResource("/values/strings_ui.xml", xppFactory,
-            messageIdMapFlipped)
-    }
-
-    private val foreignStringsXml: MutableMap<String, StringsXml> = ConcurrentHashMap()
-
-    private val appPrefs : Properties by lazy {
-        Properties().apply {
-            val propFile = File(dataRoot, PREFS_FILENAME)
-            if(propFile.exists()) {
-                FileReader(propFile).use { fileReader ->
-                    load(fileReader)
-                }
-            }
-
-        }
-    }
+    private val localeCache = concurrentSafeMapOf<String, Locale>()
 
     /**
      * The main method used to go to a new view. This is implemented at the platform level. On
@@ -99,89 +69,26 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
         lastDestination = LastGoToDest(viewName, args)
     }
 
-    actual fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any) {
-
+    override fun getString(stringResource: StringResource): String {
+        val displayLang = langConfig.displayedLocale
+        return stringResource.localized(locale = localeCache.getOrPut(displayLang) {
+            Locale(displayLang)
+        })
     }
 
-    /**
-     * Get a string for use in the UI
-     */
-    actual override fun getString(messageCode: Int, context: Any): String{
-        //This is really only used in tests, so we just want to be sure that it is returning
-        //something that is distinct
-        return getString(getDisplayedLocale(context), messageCode, context)
+    override fun formatString(stringResource: StringResource, vararg args: Any): String {
+        val displayLang = langConfig.displayedLocale
+        return stringResource.localized(
+            locale = localeCache.getOrPut(displayLang) {
+                Locale(displayLang)
+            },
+            args = args,
+        )
     }
 
-    fun getString(localeCode: String, messageId: Int, context: Any): String {
-        val localeCodeLower = localeCode.toLowerCase(Locale.ROOT)
-
-        val stringsXml = if(localeCodeLower.startsWith("en")) {
-            defaultStringsXml
-        }else {
-            foreignStringsXml.computeIfAbsent(localeCodeLower.substring(0, 2)) {
-                this::class.java.getStringsXmlResource("/values-$it/strings_ui.xml", xppFactory,
-                    messageIdMapFlipped, defaultStringsXml)
-            }
-        }
-
-        return stringsXml[messageId]
+    fun getString(stringResource: StringResource, localeCode: String ) : String{
+        return stringResource.localized(Locale(localeCode))
     }
-
-
-    /**
-     * Provides a list of paths to removable storage (e.g. sd card) directories
-     *
-     * @return
-     */
-    private fun findRemovableStorage(): Array<String?> {
-        return arrayOfNulls(0)
-    }
-
-    /**
-     * Must provide the system's default locale (e.g. en_US.UTF-8)
-     *
-     * @return System locale
-     */
-    actual override fun getSystemLocale(context: Any): String{
-        return Locale.getDefault().toString()
-    }
-
-
-
-
-
-    /**
-     * Get a preference for the app
-     *
-     * @param key preference key as a string
-     * @return value of that preference
-     */
-    actual override fun getAppPref(key: String, context: Any): String?{
-        return appPrefs.getProperty(key)
-    }
-
-
-    /**
-     * Set a preference for the app
-     * @param key preference that is being set
-     * @param value value to be set
-     */
-    actual override fun setAppPref(key: String, value: String?, context: Any){
-        if(value != null) {
-            appPrefs[key] = value
-        }else {
-            appPrefs.remove(key)
-        }
-
-        FileWriter(File(dataRoot, PREFS_FILENAME)).use {
-            appPrefs.store(it, "UTF-8")
-        }
-    }
-
-    fun clearPrefs() {
-        appPrefs.clear()
-    }
-
 
 
     /**
@@ -215,22 +122,6 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
     }
 
 
-    /**
-     * Lookup a value from the app runtime configuration. These come from a properties file loaded
-     * from the assets folder, the path of which is set by the manifest preference
-     * com.sutadmobile.core.appconfig .
-     *
-     * @param key The config key to lookup
-     * @param defaultVal The default value to return if the key is not found
-     * @param context Systme context object
-     *
-     * @return The value of the key if found, if not, the default value provided
-     */
-    actual override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?{
-        return appConfig.getProperty(key, defaultVal)
-    }
-
-
     override fun openFileInDefaultViewer(
         context: Any,
         doorUri: DoorUri,
@@ -238,14 +129,6 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
         fileName: String?
     ) {
 
-    }
-
-
-    /**
-     * Open the given link in a browser and/or tab depending on the platform
-     */
-    actual override fun openLinkInBrowser(url: String, context: Any) {
-        //On JVM - do nothing at the moment. This is only used for unit testing with verify calls.
     }
 
 

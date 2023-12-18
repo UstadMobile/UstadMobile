@@ -1,0 +1,2 @@
+s/import com.ustadmobile.door.paging.PagingSource/import app.cash.paging.PagingSource/g
+s/import com.ustadmobile.door.paging.*/import app.cash.paging.*/g

@@ -6,8 +6,6 @@ import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
@@ -49,8 +47,6 @@ class TestContainerDownloadRoute {
 
     private lateinit var db: UmAppDatabase
 
-    private lateinit var repo: UmAppDatabase
-
     private lateinit var nodeIdAndAuth: NodeIdAndAuth
 
     private lateinit var container: Container
@@ -75,10 +71,12 @@ class TestContainerDownloadRoute {
 
         nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
 
-        db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite")
-            .build()
+        db = DatabaseBuilder.databaseBuilder(
+            UmAppDatabase::class, "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite",
+                nodeId = nodeIdAndAuth.nodeId
+        ).build()
+
         db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
-        val attachmentsDir = temporaryFolder.newFolder()
 
         okHttpClient = OkHttpClient()
 
@@ -91,12 +89,6 @@ class TestContainerDownloadRoute {
                 preconfigured = okHttpClient
             }
         }
-
-        repo = db.asRepository(repositoryConfig(Any(), "http://localhost/",
-            nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient
-        ) {
-            this.attachmentsDir = attachmentsDir.absolutePath
-        })
 
         server = embeddedServer(Netty, port = 8097) {
             install(ContentNegotiation) {
@@ -111,9 +103,6 @@ class TestContainerDownloadRoute {
                     db
                 }
 
-                bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
-                    repo
-                }
 
                 registerContextTranslator { _: ApplicationCall ->
                     Endpoint("localhost")
@@ -127,10 +116,10 @@ class TestContainerDownloadRoute {
 
         containerTmpDir = temporaryFolder.newFolder("dlroutetestcontainerfiles")
         container = Container()
-        container.containerUid = repo.containerDao.insert(container)
+        container.containerUid = db.containerDao.insert(container)
 
         runBlocking {
-            repo.addEntriesToContainerFromZipResource(container.containerUid, repo::class.java,
+            db.addEntriesToContainerFromZipResource(container.containerUid, db::class.java,
                     "/testfiles/thelittlechicks.epub",
                     ContainerAddOptions(containerTmpDir.toDoorUri()))
         }

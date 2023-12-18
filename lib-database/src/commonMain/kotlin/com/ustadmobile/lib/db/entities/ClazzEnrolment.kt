@@ -4,19 +4,20 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.ustadmobile.core.db.UNSET_DISTANT_FUTURE
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.FROM_SCOPEDGRANT_TO_CLAZZENROLMENT_JOIN__ON_CLAUSE
-import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
-import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.TABLE_ID
 
 import kotlinx.serialization.Serializable
 
 /**
- * This class mediates the relationship between a person and a clazz. A member can be a teacher,
- * or a student. Each member has a joining date, and a leaving date.
+ * This entity represents a person's enrolment in a course. This can be a teacher or student. One
+ * person may have more than one enrolment in a course (e.g. if they dropout and then return). They
+ * should not have overlapping enrolments (e.g. more than one enrolment active at the same time).
+ *
+ * When a student requests to join a course (e.g. using the course code) they have an enrolment
+ * with the role pending student. This can then be converted into a student role when approved.
  */
-
 @Entity(indices = [
     //Index to streamline permission queries etc. that lookup a list of classes for a given person
     Index(value = ["clazzEnrolmentPersonUid", "clazzEnrolmentClazzUid"]),
@@ -25,52 +26,35 @@ import kotlinx.serialization.Serializable
     //Index for streamlining ClazzList where the number of users is counted by role
     Index(value = ["clazzEnrolmentClazzUid", "clazzEnrolmentRole"])
 ])
-@ReplicateEntity(tableId = TABLE_ID, tracker = ClazzEnrolmentReplicate::class,
-    priority = ReplicateEntity.HIGHEST_PRIORITY + 1)
+@ReplicateEntity(
+    tableId = TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
 @Triggers(arrayOf(
      Trigger(
          name = "clazzenrolment_remote_insert",
          order = Trigger.Order.INSTEAD_OF,
          on = Trigger.On.RECEIVEVIEW,
          events = [Trigger.Event.INSERT],
-         sqlStatements = [
-             """REPLACE INTO ClazzEnrolment(clazzEnrolmentUid, clazzEnrolmentPersonUid, clazzEnrolmentClazzUid, clazzEnrolmentDateJoined, clazzEnrolmentDateLeft, clazzEnrolmentRole, clazzEnrolmentAttendancePercentage, clazzEnrolmentActive, clazzEnrolmentLeavingReasonUid, clazzEnrolmentOutcome, clazzEnrolmentLocalChangeSeqNum, clazzEnrolmentMasterChangeSeqNum, clazzEnrolmentLastChangedBy, clazzEnrolmentLct) 
-             VALUES (NEW.clazzEnrolmentUid, NEW.clazzEnrolmentPersonUid, NEW.clazzEnrolmentClazzUid, NEW.clazzEnrolmentDateJoined, NEW.clazzEnrolmentDateLeft, NEW.clazzEnrolmentRole, NEW.clazzEnrolmentAttendancePercentage, NEW.clazzEnrolmentActive, NEW.clazzEnrolmentLeavingReasonUid, NEW.clazzEnrolmentOutcome, NEW.clazzEnrolmentLocalChangeSeqNum, NEW.clazzEnrolmentMasterChangeSeqNum, NEW.clazzEnrolmentLastChangedBy, NEW.clazzEnrolmentLct) 
-             /*psql ON CONFLICT (clazzEnrolmentUid) DO UPDATE 
-             SET clazzEnrolmentPersonUid = EXCLUDED.clazzEnrolmentPersonUid, clazzEnrolmentClazzUid = EXCLUDED.clazzEnrolmentClazzUid, clazzEnrolmentDateJoined = EXCLUDED.clazzEnrolmentDateJoined, clazzEnrolmentDateLeft = EXCLUDED.clazzEnrolmentDateLeft, clazzEnrolmentRole = EXCLUDED.clazzEnrolmentRole, clazzEnrolmentAttendancePercentage = EXCLUDED.clazzEnrolmentAttendancePercentage, clazzEnrolmentActive = EXCLUDED.clazzEnrolmentActive, clazzEnrolmentLeavingReasonUid = EXCLUDED.clazzEnrolmentLeavingReasonUid, clazzEnrolmentOutcome = EXCLUDED.clazzEnrolmentOutcome, clazzEnrolmentLocalChangeSeqNum = EXCLUDED.clazzEnrolmentLocalChangeSeqNum, clazzEnrolmentMasterChangeSeqNum = EXCLUDED.clazzEnrolmentMasterChangeSeqNum, clazzEnrolmentLastChangedBy = EXCLUDED.clazzEnrolmentLastChangedBy, clazzEnrolmentLct = EXCLUDED.clazzEnrolmentLct
-             */"""
-         ]
+         conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+         sqlStatements = [TRIGGER_UPSERT],
      )
 ))
-/* If someone is newly added to a class this might mean that existing members of the class (e.g.
- * students and teachers) now have access to information in other tables that was not previously
- * the case.
- *
- * E.g. if a new student is added to a class, the other people in the class would normally then
- * get the select permission on that person. Hence we need to trigger an update notification for
- * the other tables (such as person, statemententity, and others where permission can be affected
- * by class membership) for everyone who has permission to see this clazzEnrolment.
- *
- * Note: There is a possibility that this could be made more efficient with a CTE, and then
- * joining to the CTE. There could then be two
- *
- * This is handled by RepIncomingListener
- *
- */
 @Serializable
 open class ClazzEnrolment()  {
 
-    /**
-     * The personUid field of the related Person entity
-     *
-     * @param clazzEnrolmentUid
-     */
     @PrimaryKey(autoGenerate = true)
     var clazzEnrolmentUid: Long = 0
 
+    /**
+     * The personUid of the person enroled into the course
+     */
     @ColumnInfo(index = true)
     var clazzEnrolmentPersonUid: Long = 0
 
+    /**
+     * The clazzUid of the course
+     */
     @ColumnInfo(index = true)
     var clazzEnrolmentClazzUid: Long = 0
 
@@ -80,7 +64,7 @@ open class ClazzEnrolment()  {
      * The date the student left this class (e.g. graduated or un-enrolled).
      * Long.MAX_VALUE = no leaving date (e.g. ongoing registration)
      */
-    var clazzEnrolmentDateLeft: Long = Long.MAX_VALUE
+    var clazzEnrolmentDateLeft: Long = UNSET_DISTANT_FUTURE
 
     var clazzEnrolmentRole: Int = 0
 
@@ -101,8 +85,8 @@ open class ClazzEnrolment()  {
     @LastChangedBy
     var clazzEnrolmentLastChangedBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var clazzEnrolmentLct: Long = 0
 
     constructor(clazzUid: Long, personUid: Long) : this() {
@@ -166,7 +150,7 @@ open class ClazzEnrolment()  {
         const val ROLE_TEACHER = 1001
 
         /**
-         * The role given to someone who has the class code, however their registration is not yet approved.
+         * The role given to someone who has the class code, however their enrolment is not yet approved.
          */
         const val ROLE_STUDENT_PENDING = 1002
 

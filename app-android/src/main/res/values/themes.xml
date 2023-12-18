@@ -38,7 +38,7 @@
         <item name="colorOnIconTint">@color/iconTintColor</item>
         <item name="colorOnTintPrimary">?colorPrimary</item>
         <item name="colorTabIndicator">@color/onPrimaryColor</item>
-        <item name="colorTabText" >@color/primaryLightVariantColor</item>
+        <item name="colorTabText">@color/primaryLightVariantColor</item>
         <item name="colorSelectedTabText">@color/onPrimaryColor</item>
         <item name="colorPrimaryBackground">@color/primaryColor</item>
         <item name="colorPrimarySurface">@color/primaryColor</item>
@@ -67,16 +67,8 @@
 
         <!--Attrs for component-->
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.MaterialComponents.Dialog.Alert</item>
-        <item name="bottomSheetDialogTheme">@style/UmTheme.ThemeOverlay.BottomSheetDialog</item>
-        <item name="navigationViewStyle">@style/UmTheme.Widget.NavigationView</item>
-        <item name="toolbarStyle">@style/UmTheme.Widget.Toolbar</item>
     </style>
 
-
-    <style name="UmTheme.Widget.OutlinedButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        <item name="android:paddingStart">@dimen/dimen_10dp</item>
-        <item name="android:paddingEnd">@dimen/dimen_10dp</item>
-    </style>
 
     <style name="UmTheme.MaterialComponents.Parent" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:windowLightNavigationBar" tools:ignore="NewApi">true</item>

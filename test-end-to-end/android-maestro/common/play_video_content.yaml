@@ -1,5 +1,6 @@
 appId: com.toughra.ustadmobile
 ---
+# this flow clicks on play button till the video ends - ideal for 1-2 mins video
 - tapOn:
    text: "Play"
 - extendedWaitUntil:

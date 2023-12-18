@@ -14,7 +14,10 @@ import kotlinx.serialization.Serializable
  */
 //shortcode cerej
 @Entity
-@ReplicateEntity(tableId = TABLE_ID, tracker = ContentEntryRelatedEntryJoinReplicate::class)
+@ReplicateEntity(
+    tableId = TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
 @Serializable
 @Triggers(arrayOf(
      Trigger(
@@ -22,13 +25,8 @@ import kotlinx.serialization.Serializable
          order = Trigger.Order.INSTEAD_OF,
          on = Trigger.On.RECEIVEVIEW,
          events = [Trigger.Event.INSERT],
-         sqlStatements = [
-             """REPLACE INTO ContentEntryRelatedEntryJoin(cerejUid, cerejContentEntryUid, cerejRelatedEntryUid, cerejLastChangedBy, relType, comment, cerejRelLanguageUid, cerejLocalChangeSeqNum, cerejMasterChangeSeqNum, cerejLct) 
-             VALUES (NEW.cerejUid, NEW.cerejContentEntryUid, NEW.cerejRelatedEntryUid, NEW.cerejLastChangedBy, NEW.relType, NEW.comment, NEW.cerejRelLanguageUid, NEW.cerejLocalChangeSeqNum, NEW.cerejMasterChangeSeqNum, NEW.cerejLct) 
-             /*psql ON CONFLICT (cerejUid) DO UPDATE 
-             SET cerejContentEntryUid = EXCLUDED.cerejContentEntryUid, cerejRelatedEntryUid = EXCLUDED.cerejRelatedEntryUid, cerejLastChangedBy = EXCLUDED.cerejLastChangedBy, relType = EXCLUDED.relType, comment = EXCLUDED.comment, cerejRelLanguageUid = EXCLUDED.cerejRelLanguageUid, cerejLocalChangeSeqNum = EXCLUDED.cerejLocalChangeSeqNum, cerejMasterChangeSeqNum = EXCLUDED.cerejMasterChangeSeqNum, cerejLct = EXCLUDED.cerejLct
-             */"""
-         ]
+         conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+         sqlStatements = [TRIGGER_UPSERT],
      )
 ))
 open class ContentEntryRelatedEntryJoin() {
@@ -56,8 +54,8 @@ open class ContentEntryRelatedEntryJoin() {
     @MasterChangeSeqNum
     var cerejMasterChangeSeqNum: Long = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var cerejLct: Long = 0
 
     override fun equals(other: Any?): Boolean {

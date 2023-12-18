@@ -7,80 +7,22 @@ import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.core.db.dao.CourseBlockDaoCommon.SUBMITTER_LIST_IN_CLAZZ_CTE
 import com.ustadmobile.door.annotation.DoorDao
-import com.ustadmobile.door.annotation.ReplicationCheckPendingNotificationsFor
-import com.ustadmobile.door.annotation.ReplicationRunOnNewNode
 import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.door.annotation.NewNodeIdParam
-import com.ustadmobile.door.annotation.ReplicationRunOnChange
 import com.ustadmobile.door.annotation.QueryLiveTables
-import com.ustadmobile.door.paging.DataSourceFactory
+import app.cash.paging.PagingSource
+import com.ustadmobile.door.annotation.HttpAccessible
+import com.ustadmobile.door.annotation.HttpServerFunctionCall
+import com.ustadmobile.door.annotation.HttpServerFunctionParam
+import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
+import com.ustadmobile.lib.db.composites.CourseBlockAndDbEntities
+import com.ustadmobile.lib.db.composites.CourseBlockUidAndClazzUid
 import com.ustadmobile.lib.db.entities.*
-import kotlin.js.JsName
+import kotlinx.coroutines.flow.Flow
 
 @Repository
 @DoorDao
 expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlock> {
 
-    @Query("""
-    REPLACE INTO CourseBlockReplicate(cbPk, cbDestination)
-      SELECT DISTINCT CourseBlock.cbUid AS cbPk,
-             :newNodeId AS cbDestination
-        FROM UserSession
-             JOIN PersonGroupMember 
-                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-             ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_CLAZZ_SELECT} 
-                    ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
-               JOIN CourseBlock
-                    ON CourseBlock.cbClazzUid = Clazz.clazzUid                
-       WHERE UserSession.usClientNodeId = :newNodeId
-         AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-         AND CourseBlock.cbLct != COALESCE(
-             (SELECT cbVersionId
-                FROM CourseBlockReplicate
-               WHERE cbPk = CourseBlock.cbUid
-                 AND cbDestination = :newNodeId), 0) 
-      /*psql ON CONFLICT(cbPk, cbDestination) DO UPDATE
-             SET cbPending = true
-      */       
-    """)
-    @ReplicationRunOnNewNode
-    @ReplicationCheckPendingNotificationsFor([CourseBlock::class])
-    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
-
-
-
-    @Query("""
-         REPLACE INTO CourseBlockReplicate(cbPk, cbDestination)
-  SELECT DISTINCT CourseBlock.cbUid AS cbPk,
-         UserSession.usClientNodeId AS cbDestination
-    FROM ChangeLog
-         JOIN CourseBlock
-             ON ChangeLog.chTableId = ${CourseBlock.TABLE_ID}
-                AND ChangeLog.chEntityPk = CourseBlock.cbUid
-             JOIN Clazz
-                    ON  Clazz.clazzUid = CourseBlock.cbClazzUid
-         ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-              ${Role.PERMISSION_CLAZZ_SELECT}
-              ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}  
-   WHERE UserSession.usClientNodeId != (
-         SELECT nodeClientId 
-           FROM SyncNode
-          LIMIT 1)
-     AND CourseBlock.cbLct != COALESCE(
-         (SELECT cbVersionId
-            FROM CourseBlockReplicate
-           WHERE cbPk = CourseBlock.cbUid
-             AND cbDestination = UserSession.usClientNodeId), 0)
- /*psql ON CONFLICT(cbPk, cbDestination) DO UPDATE
-     SET cbPending = true
-  */               
-    """)
-    @ReplicationRunOnChange([CourseBlock::class])
-    @ReplicationCheckPendingNotificationsFor([CourseBlock::class])
-    abstract suspend fun replicateOnChange()
-
-    @JsName("findByUid")
     @Query("SELECT * FROM CourseBlock WHERE cbUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long): CourseBlock?
 
@@ -91,28 +33,53 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     abstract suspend fun replaceListAsync(list: List<CourseBlock>)
 
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
+    @Query("SELECT * FROM CourseBlock WHERE cbUid = :uid")
+    abstract fun findByUidAsyncAsFlow(uid: Long): Flow<CourseBlock?>
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findAllCourseBlockByClazzUidAsync",
+                functionArgs = arrayOf(
+                    //Include inactive when fetching from server to ensure local db gets updated
+                    HttpServerFunctionParam(
+                        name = "includeInactive",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true"
+                    )
+                )
+            )
+        )
+    )
     @Query("""
-        SELECT * 
+        SELECT CourseBlock.*, Assignment.*, Entry.*, Language.*,
+               (SELECT CourseGroupSet.cgsName
+                  FROM CourseGroupSet
+                 WHERE CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                   AND assignment.caGroupUid != 0
+                   AND CourseGroupSet.cgsUid = assignment.caGroupUid) AS assignmentCourseGroupSetName
           FROM CourseBlock 
-               LEFT JOIN ClazzAssignment as assignment
-               ON assignment.caUid = CourseBlock.cbEntityUid
-               AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
-               LEFT JOIN CourseDiscussion as courseDiscussion
-               ON CourseDiscussion.courseDiscussionUid = CourseBlock.cbEntityUid
-               AND CourseBlock.cbType = ${CourseBlock.BLOCK_DISCUSSION_TYPE}
-               LEFT JOIN ContentEntry as entry
-               ON entry.contentEntryUid = CourseBlock.cbEntityUid
-               AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
-               
+               LEFT JOIN ClazzAssignment AS Assignment
+                         ON assignment.caUid = CourseBlock.cbEntityUid
+                            AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+               LEFT JOIN ContentEntry AS Entry
+                         ON entry.contentEntryUid = CourseBlock.cbEntityUid
+                            AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
                LEFT JOIN Language
-               ON Language.langUid = entry.primaryLanguageUid
-                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
-               
-         WHERE cbClazzUid = :clazzUid
-           AND cbActive
-      ORDER BY cbIndex
+                         ON Language.langUid = Entry.primaryLanguageUid
+                            AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+         WHERE CourseBlock.cbClazzUid = :clazzUid
+           AND (CAST(:includeInactive AS INTEGER) = 1 OR CourseBlock.cbActive)
+      ORDER BY CourseBlock.cbIndex
           """)
-    abstract suspend fun findAllCourseBlockByClazzUidAsync(clazzUid: Long): List<CourseBlockWithEntityDb>
+    abstract suspend fun findAllCourseBlockByClazzUidAsync(
+        clazzUid: Long,
+        includeInactive: Boolean,
+    ): List<CourseBlockAndDbEntities>
 
     @Query("""
          WITH CtePermissionCheck (hasPermission) 
@@ -125,10 +92,23 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                  WHERE Clazz.clazzUid = :clazzUid
                    AND PrsGrpMbr.groupMemberPersonUid = :personUid)), 
                    
-        $SUBMITTER_LIST_IN_CLAZZ_CTE           
+        $SUBMITTER_LIST_IN_CLAZZ_CTE, 
+        
+        ScoreByMarker (score, penalty, assignmentUid, camSubmitterUid) AS (
+                 SELECT camMark, camPenalty, camAssignmentUid, camSubmitterUid
+                   FROM courseAssignmentMark
+                        JOIN ClazzAssignment
+                        ON ClazzAssignment.caUid = courseAssignmentMark.camAssignmentUid        
+                  WHERE camLct = (SELECT MAX(mark.camLct) 
+                                    FROM CourseAssignmentMark As mark
+                                    WHERE mark.camAssignmentUid = ClazzAssignment.caUid
+                                     AND (caMarkingType = 1
+                                       OR mark.camMarkerSubmitterUid = courseAssignmentMark.camMarkerSubmitterUid))
+                                                                                   
+                )     
                    
 
-        SELECT CourseBlock.*, ClazzAssignment.*, ContentEntry.*, CourseDiscussion.*, ContentEntryParentChildJoin.*, 
+        SELECT CourseBlock.*, ClazzAssignment.*, ContentEntry.*, ContentEntryParentChildJoin.*, 
                Container.*, CourseAssignmentMark.*, (CourseBlock.cbUid NOT IN (:collapseList)) AS expanded,
                
                COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
@@ -155,9 +135,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
  
                0 AS notSubmittedStudents,
                
-               (CASE WHEN (SELECT hasPermission 
-                          FROM CtePermissionCheck)
-                     THEN (SELECT COUNT(DISTINCT CourseAssignmentSubmission.casSubmitterUid) 
+              (SELECT COUNT(DISTINCT CourseAssignmentSubmission.casSubmitterUid) 
                              FROM CourseAssignmentSubmission
                                    LEFT JOIN CourseAssignmentMark
                                    ON CourseAssignmentSubmission.casSubmitterUid = CourseAssignmentMark.camSubmitterUid
@@ -167,12 +145,10 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                               AND CourseAssignmentSubmission.casSubmitterUid IN 
                                                     (SELECT submitterId 
                                                       FROM SubmitterList
-                                                     WHERE SubmitterList.assignmentUid = ClazzAssignment.caUid))  
-                      ELSE 0 END) AS submittedStudents,         
+                                                     WHERE SubmitterList.assignmentUid = ClazzAssignment.caUid)
+                    ) AS submittedStudents,         
                
-                (CASE WHEN (SELECT hasPermission 
-                           FROM CtePermissionCheck)       
-                   THEN (SELECT COUNT(DISTINCT CourseAssignmentMark.camSubmitterUid) 
+                (SELECT COUNT(DISTINCT CourseAssignmentMark.camSubmitterUid) 
                            FROM CourseAssignmentMark
                             
                              JOIN CourseAssignmentSubmission
@@ -183,15 +159,47 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                             AND CourseAssignmentMark.camSubmitterUid IN (SELECT submitterId 
                                                                             FROM SubmitterList
                                                                            WHERE SubmitterList.assignmentUid = ClazzAssignment.caUid))
-                   ELSE 0 END) AS markedStudents,
+                   AS markedStudents,
+                   
+                   (ClazzAssignment.caGroupUid != 0) AS isGroupAssignment,
                    
                    COALESCE((CASE WHEN CourseAssignmentMark.camUid IS NOT NULL 
                           THEN ${CourseAssignmentSubmission.MARKED} 
                           WHEN CourseAssignmentSubmission.casUid IS NOT NULL 
                           THEN ${CourseAssignmentSubmission.SUBMITTED} 
                           ELSE ${CourseAssignmentSubmission.NOT_SUBMITTED} END), 
-                               ${CourseAssignmentSubmission.NOT_SUBMITTED}) AS fileSubmissionStatus
-                
+                               ${CourseAssignmentSubmission.NOT_SUBMITTED}) AS fileSubmissionStatus,
+                               
+                  (SELECT AVG(score) 
+                     FROM ScoreByMarker 
+                    WHERE assignmentUid = ClazzAssignment.caUid 
+                      AND camSubmitterUid = (SELECT (CASE WHEN ref.caGroupUid = 0 
+                                                          THEN :personUid 
+                                                          WHEN CourseGroupMember.cgmUid IS NULL 
+                                                          THEN 0 
+                                                          ELSE CourseGroupMember.cgmGroupNumber 
+                                                           END) as submitterUid
+                                               FROM ClazzAssignment AS ref
+                                                     LEFT JOIN CourseGroupMember
+                                                     ON cgmSetUid = ClazzAssignment.caGroupUid
+                                                     AND cgmPersonUid = :personUid
+                                               WHERE ref.caUid = ClazzAssignment.caUid)) as averageScore,
+                                                            
+                 (SELECT AVG(penalty) 
+                     FROM ScoreByMarker 
+                    WHERE assignmentUid = ClazzAssignment.caUid 
+                      AND camSubmitterUid = (SELECT (CASE WHEN ref.caGroupUid = 0 
+                                                          THEN :personUid 
+                                                          WHEN CourseGroupMember.cgmUid IS NULL 
+                                                          THEN 0 
+                                                          ELSE CourseGroupMember.cgmGroupNumber 
+                                                           END) as submitterUid
+                                               FROM ClazzAssignment AS ref
+                                                     LEFT JOIN CourseGroupMember
+                                                     ON cgmSetUid = ClazzAssignment.caGroupUid
+                                                     AND cgmPersonUid = :personUid
+                                               WHERE ref.caUid = ClazzAssignment.caUid)) as averagePenalty                                             
+                                      
                 
           FROM CourseBlock 
           
@@ -207,11 +215,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                ON ContentEntry.contentEntryUid = CourseBlock.cbEntityUid
                AND NOT ceInactive
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
-               
-               LEFT JOIN CourseDiscussion 
-                      ON CourseDiscussion.courseDiscussionUid = CourseBlock.cbEntityUid
-                     AND CourseBlock.cbType = ${CourseBlock.BLOCK_DISCUSSION_TYPE}
-               
+                
                LEFT JOIN ContentEntryParentChildJoin 
                ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid
                
@@ -277,17 +281,67 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
            AND CourseBlock.cbModuleParentBlockUid NOT IN (:collapseList)
       ORDER BY CourseBlock.cbIndex
     """)
-    @QueryLiveTables(value = ["CourseBlock", "ClazzAssignment", "CourseDiscussion",
+    @QueryLiveTables(value = ["CourseBlock", "ClazzAssignment",
         "ContentEntry", "CourseAssignmentMark","StatementEntity",
         "Container","ContentEntryParentChildJoin","PersonGroupMember",
         "Clazz","ScopedGrant","ClazzEnrolment","CourseAssignmentSubmission",
         "CourseGroupMember"])
-    abstract fun findAllCourseBlockByClazzUidLive(clazzUid: Long,
-                                                  personUid: Long,
-                                                  collapseList: List<Long>,
-                                                  currentTime: Long):
-            DataSourceFactory<Int, CourseBlockWithCompleteEntity>
+    abstract fun findAllCourseBlockByClazzUidLive(
+        clazzUid: Long,
+        personUid: Long,
+        collapseList: List<Long>,
+        currentTime: Long
+    ): PagingSource<Int, CourseBlockWithCompleteEntity>
 
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findAllCourseBlockByClazzUidAsPagingSource",
+                functionArgs = arrayOf(
+                    //When pulling over HTTP include inactive entities to ensure it gets updated on client db
+                    HttpServerFunctionParam(
+                        name = "includeInactive",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    ),
+                    HttpServerFunctionParam(
+                        name = "includeHidden",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    ),
+                    HttpServerFunctionParam(
+                        name = "hideUntilFilterTime",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "0L",
+                    )
+                )
+            )
+        )
+    )
+    @Query("""
+        SELECT CourseBlock.*,
+               CourseBlock.cbUid NOT IN(:collapseList) AS expanded
+          FROM CourseBlock
+         WHERE CourseBlock.cbClazzUid = :clazzUid
+           AND CourseBlock.cbModuleParentBlockUid NOT IN(:collapseList)
+           AND (CAST(:includeInactive AS INTEGER) = 1 OR CourseBlock.cbActive)
+           AND (CAST(:includeHidden AS INTEGER) = 1 OR NOT CourseBlock.cbHidden)
+           AND (:hideUntilFilterTime >= CourseBlock.cbHideUntilDate)
+           AND (:hideUntilFilterTime >= COALESCE(
+                (SELECT CourseBlockParent.cbHideUntilDate
+                   FROM CourseBlock CourseBlockParent
+                  WHERE CourseBlockParent.cbUid = CourseBlock.cbModuleParentBlockUid), 0))
+      ORDER BY CourseBlock.cbIndex       
+    """)
+    abstract fun findAllCourseBlockByClazzUidAsPagingSource(
+        clazzUid: Long,
+        collapseList: List<Long>,
+        includeInactive: Boolean,
+        includeHidden: Boolean,
+        hideUntilFilterTime: Long,
+    ): PagingSource<Int, CourseBlockAndDisplayDetails>
 
     @Query("""
         UPDATE CourseBlock 
@@ -297,4 +351,80 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     abstract suspend fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
 
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertListAsync(entities: List<CourseBlock>)
+
+    @Query("""
+        SELECT CourseBlock.cbTitle
+          FROM CourseBlock 
+         WHERE CourseBlock.cbEntityUid = :assignmentUid
+           AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+    """)
+    abstract fun getTitleByAssignmentUid(assignmentUid: Long) : Flow<String?>
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
+    @Query("""
+        SELECT CourseBlock.*
+          FROM CourseBlock
+         WHERE CourseBlock.cbUid = :courseBlockUid 
+    """)
+    abstract fun findByUidAsFlow(courseBlockUid: Long): Flow<CourseBlock?>
+
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findCourseBlockByDiscussionPostUid")
+        )
+    )
+    @Query("""
+        SELECT COALESCE(CourseBlock.cbUid, 0) AS courseBlockUid,
+               COALESCE(CourseBlock.cbClazzUid, 0) AS clazzUid
+          FROM CourseBlock
+         WHERE CourseBlock.cbUid = 
+               (SELECT DiscussionPost.discussionPostCourseBlockUid 
+                  FROM DiscussionPost
+                 WHERE DiscussionPost.discussionPostUid = :postUid)
+         LIMIT 1
+    """)
+    abstract suspend fun findCourseBlockAndClazzUidByDiscussionPostUid(
+        postUid: Long
+    ): CourseBlockUidAndClazzUid?
+
+    @Query("""
+        SELECT CourseBlock.*
+          FROM CourseBlock
+         WHERE CourseBlock.cbUid = 
+               (SELECT DiscussionPost.discussionPostCourseBlockUid 
+                  FROM DiscussionPost
+                 WHERE DiscussionPost.discussionPostUid = :postUid) 
+    """)
+    abstract suspend fun findCourseBlockByDiscussionPostUid(
+        postUid: Long
+    ): CourseBlock?
+
+    @Query("""
+        SELECT COALESCE(CourseBlock.cbClazzUid, 0) AS clazzUid
+          FROM CourseBlock
+         WHERE CourseBlock.cbUid = :courseBlockUid
+    """)
+    abstract suspend fun findClazzUidByCourseBlockUid(
+        courseBlockUid: Long
+    ): Long
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+    )
+    @Query("""
+        SELECT CourseBlock.*
+          FROM CourseBlock
+         WHERE CourseBlock.cbEntityUid = :assignmentUid
+           AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+         LIMIT 1 
+    """)
+    abstract fun findCourseBlockByAssignmentUid(
+        assignmentUid: Long
+    ): Flow<CourseBlock?>
 }

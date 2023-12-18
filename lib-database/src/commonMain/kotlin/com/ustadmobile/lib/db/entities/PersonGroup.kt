@@ -5,24 +5,25 @@ import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
+/**
+ * Represents a group in the system. Each individual user also has their own one member group.
+ */
 @Triggers(arrayOf(
      Trigger(
          name = "persongroup_remote_insert",
          order = Trigger.Order.INSTEAD_OF,
          on = Trigger.On.RECEIVEVIEW,
          events = [Trigger.Event.INSERT],
-         sqlStatements = [
-             """REPLACE INTO PersonGroup(groupUid, groupMasterCsn, groupLocalCsn, groupLastChangedBy, groupLct, groupName, groupActive, personGroupFlag) 
-             VALUES (NEW.groupUid, NEW.groupMasterCsn, NEW.groupLocalCsn, NEW.groupLastChangedBy, NEW.groupLct, NEW.groupName, NEW.groupActive, NEW.personGroupFlag) 
-             /*psql ON CONFLICT (groupUid) DO UPDATE 
-             SET groupMasterCsn = EXCLUDED.groupMasterCsn, groupLocalCsn = EXCLUDED.groupLocalCsn, groupLastChangedBy = EXCLUDED.groupLastChangedBy, groupLct = EXCLUDED.groupLct, groupName = EXCLUDED.groupName, groupActive = EXCLUDED.groupActive, personGroupFlag = EXCLUDED.personGroupFlag
-             */"""
-         ]
+         conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+         sqlStatements = [TRIGGER_UPSERT],
      )
 ))
 @Entity
 @Serializable
-@ReplicateEntity(tableId = PersonGroup.TABLE_ID, tracker = PersonGroupReplicate::class)
+@ReplicateEntity(
+    tableId = PersonGroup.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
 open class PersonGroup() {
 
     @PrimaryKey(autoGenerate = true)
@@ -37,8 +38,8 @@ open class PersonGroup() {
     @LastChangedBy
     var groupLastChangedBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var groupLct: Long = 0
 
     var groupName: String? = null
@@ -58,14 +59,18 @@ open class PersonGroup() {
 
         const val TABLE_ID = 43
 
+        @Suppress("unused") //Reserved for future use
         const val PERSONGROUP_FLAG_DEFAULT = 0
 
         const val PERSONGROUP_FLAG_PERSONGROUP = 1
 
+        @Suppress("unused") //Reserved for future use
         const val PERSONGROUP_FLAG_PARENT_GROUP = 2
 
+        @Suppress("unused") //Reserved for future use
         const val PERSONGROUP_FLAG_STUDENTGROUP = 4
 
+        @Suppress("unused") //Reserved for future use
         const val PERSONGROUP_FLAG_TEACHERGROUP = 8
 
         const val PERSONGROUP_FLAG_GUESTPERSON = 16

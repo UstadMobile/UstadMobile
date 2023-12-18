@@ -8,41 +8,18 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-@ReplicateEntity(tableId = TABLE_ID , tracker = DiscussionPostReplicate::class)
+@ReplicateEntity(
+    tableId = TABLE_ID ,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
 @Triggers(arrayOf(
     Trigger(
         name = "discussionpost_remote_insert",
         order = Trigger.Order.INSTEAD_OF,
         on = Trigger.On.RECEIVEVIEW,
         events = [Trigger.Event.INSERT],
-        sqlStatements = [
-            """
-                REPLACE INTO DiscussionPost(discussionPostUid, 
-                discussionPostTitle, discussionPostMessage, discussionPostStartDate, 
-                discussionPostDiscussionTopicUid, discussionPostVisible, discussionPostArchive, 
-                discussionPostStartedPersonUid, discussionPostClazzUid, discussionPostLct)
-                
-              
-                VALUES(NEW.discussionPostUid, 
-                NEW.discussionPostTitle, NEW.discussionPostMessage, NEW.discussionPostStartDate, 
-                NEW.discussionPostDiscussionTopicUid, NEW.discussionPostVisible, NEW.discussionPostArchive, 
-                NEW.discussionPostStartedPersonUid, NEW.discussionPostClazzUid, NEW.discussionPostLct)
-                
-                
-                /*psql ON CONFLICT (discussionPostUid) DO UPDATE 
-                SET discussionPostTitle = EXCLUDED.discussionPostTitle , 
-                discussionPostMessage = EXCLUDED.discussionPostMessage , 
-                discussionPostStartDate = EXCLUDED.discussionPostStartDate , 
-                discussionPostDiscussionTopicUid = EXCLUDED.discussionPostDiscussionTopicUid, 
-                discussionPostVisible = EXCLUDED.discussionPostVisible , 
-                discussionPostArchive = EXCLUDED.discussionPostArchive , 
-                discussionPostStartedPersonUid = EXCLUDED.discussionPostStartedPersonUid , 
-                discussionPostClazzUid = EXCLUDED.discussionPostClazzUid, 
-                discussionPostLct = EXCLUDED.discussionPostLct
-                
-                */
-            """
-        ]
+        conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+        sqlStatements = [TRIGGER_UPSERT],
     )
 ))
 open class DiscussionPost() {
@@ -50,13 +27,23 @@ open class DiscussionPost() {
     @PrimaryKey(autoGenerate = true)
     var discussionPostUid: Long = 0
 
+    /**
+     * If this message is a top level post on the form, then discussionPostReplyToPostUid = 0.
+     * Otherwise this is the discussionPostUid of the top level message.
+     */
+    var discussionPostReplyToPostUid: Long = 0
+
     var discussionPostTitle: String? = null
 
+    //This is the HTML message
     var discussionPostMessage: String? = null
 
     var discussionPostStartDate: Long = 0
 
-    var discussionPostDiscussionTopicUid: Long = 0
+    /**
+     * The CourseBlock uid of the discussion post
+     */
+    var discussionPostCourseBlockUid: Long = 0
 
     var discussionPostVisible: Boolean = true
 
@@ -65,10 +52,11 @@ open class DiscussionPost() {
     //The person who started this post
     var discussionPostStartedPersonUid: Long = 0
 
+    // The Course Uid
     var discussionPostClazzUid: Long = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var discussionPostLct: Long = 0
 
     companion object{

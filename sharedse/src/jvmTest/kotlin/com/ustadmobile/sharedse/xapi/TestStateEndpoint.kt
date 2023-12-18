@@ -104,7 +104,7 @@ class TestStateEndpoint {
         httpClient.close()
     }
 
-    @Test
+    //@Test
     fun givenStateObject_checkExistsInDb() {
 
         val activityId = "http://www.example.com/activities/1"

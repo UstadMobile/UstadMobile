@@ -1,0 +1,16 @@
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+*::-webkit-scrollbar {
+    display: none;
+}
+
+/* Required to make sure that the Quill editor tooltip appears above any buttons */
+.ql-snow .ql-tooltip {
+    z-index: 1000;
+}

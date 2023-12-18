@@ -1,3 +1,207 @@
+
+### Coding pattern
+
+The app follows an MVVM pattern as follows:
+
+* UIState classes contain all information needed to show a screen. This often includes entity objects
+* ViewModels contain the logic and emit a flow of the UIState class.
+* Views observe the UIState flow to render the user interface (using Jetpack Compose or React/JS)
+
+### UiState classes
+
+The UiState class contains everything needed to render a screen. It is emitted as a flow from the
+ViewModel. It is a data class contained in the same file as the ViewModel.
+
+When converting an existing MVP screen, the ViewModel should generally have all the same properties that
+are found on the existing view interface (but properties should be non-mutable val instead of var).
+
+The UiState class should also contain the model entity. It should use the same model type as found
+on the view (e.g. because PersonDetailView uses PersonWithPersonParentJoin, PersonDetailUiState 
+should contain PersonWithPersonParentJoin).
+
+```
+data class PersonDetailUiState(
+    val person: PersonWithPersonParentJoin? = null,
+
+    val changePasswordVisible: Boolean = false,
+
+    val showCreateAccountVisible: Boolean = false,
+
+    val chatVisible: Boolean = false,
+
+    val clazzes: List<ClazzEnrolmentWithClazzAndAttendance> = emptyList(),
+) {
+    
+    //Where view information is derived from other parts of the state, use a simple getter e.g.
+    val emailAddressVisible: Boolean
+        get() = !person?.emailAddress.isNullOrEmpty()
+}
+```
+
+### ViewModels
+
+The ViewModel is responsible for all business logic. It emits a flow of the UiState class, which is
+observed and rendered by the view (e.g. via Jetpack Compose and React/JS). It has event handling
+functions that can be called by the view when events take place (e.g. when a user clicks a button).
+
+The BaseName should be suffixed with List, Detail, or Edit to describe it's function:
+
+*Name*ListViewModel, *Name*DetailViewModel, *Name*EditViewModel for list, detail, and edit screens
+e.g. *ContentEntry*ListViewModel, *ContentEntry*DetailViewModel, *ContentEntry*EditViewModel.
+
+**Kotlin multiplatform implementation**: There is a base abstract ViewModel class in common that uses expect/actual. This is a child class of 
+the Android ViewModel itself on Android. There is a minimal implementation that creates and destroys
+the Coroutinescope for Javascript.
+
+e.g.
+
+```
+class PersonDetailViewModel: ViewModel {
+    val uiState: Flow<PersonDetailUiState>
+    
+    init {
+        //Logic to seutp the uiState here
+    }
+    
+    //Event handlers here
+    fun onClickCreateAccount() {
+    
+    }
+    
+    fun onClickChat() {
+    
+    }
+    
+    fun onClickClazz(clazz: ClazzEnrolmentWithClazzAndAttendance) {
+
+    }
+}
+
+```
+
+### Views
+
+Views are written using Jetpack Compose for Android and the Kotlin/JS MUI wrapper for Javascript. 
+The view function should use the UiState as an argument, 
+
+Android Jetpack Compose:
+```
+/*
+ * Main composable function: this should always take the UI state as the first parameter, and then
+ * have parameters for event handlers.
+ */ 
+@Composable
+function PersonDetailScreen(
+    uiState: PersonDetailUiState = PersonDetailUiState(),
+    onClickCreateAccount: () -> Unit,
+    onClickChat: () -> Unit,
+    onClickClazz: (ClazzEnrolmentWithClazzAndAttendance) -> Unit,
+) {
+    //UI functions go here eg.
+    Row {
+        if(uiState.chatVisible) {
+            Button(onClick = onClickChat) {
+                Text(stringResource(R.id.chat))
+            }
+        }
+        
+        //Use the object on the UiState to show properties
+        Text(uiState.person?.firstNames + uiState.person?.lastName)
+       
+        Text(uiState.person?.phoneNumber)
+    }
+}
+
+/*
+ * Note: different function name is used to avoid rendering issues in Android studio if using
+ * the same function name with different parameters (which is valid and will compile, but then the 
+ * the preview in Android Studio sometimes won't work).
+ */
+@Composable
+function PersonDetailScreenForViewModel(
+    viewModel: PersonDetailViewModel
+) {
+    val uiState: PersonDetailUiState by viewModel.uiState.collectAsState(initial = null)
+    
+    //Always use named arguments here e.g. onClickChat to avoid potential mismatch.
+    PersonDetailScreen(
+        uiState = uiState, 
+        onClickChat = viewModel::onClickChat,
+        onClickClazz = viewModel::onClickClazz, 
+        onClickCreateAccount = viewModel::onClickCreateAccount
+    )
+}
+
+@Composable
+@Preview
+function PersonDetailScreenPreview(
+    uiState = PersonDetailUiState(
+         person = Person().apply {
+              firstNames = "Preview"
+              lastName = "Person"
+         }
+    )
+)
+```
+
+### Returning values from one screen to another
+
+This can be done by adding arguments to the navigation that indicate what is being picked. Once the 
+pick is done, the selected value put on the NavResultReturner via context / navGraphViewModel and
+the stack is popped so the user returns to the start view. This works when the user navigates 
+directly from one sceren to another, or when the user goes via any number of other screens (e.g.
+start screen - pick from list - edit new entity - return to start screen). This is a little bit
+similar to startActivityForResult on Android.
+
+#### Scenario 1: User starts on a screen, navigates to pick a value, value is returned to start screen
+
+Sometimes users might navigate from one screen to another to pick an entity, for example:
+
+* Users creates a new course or edits an existing one in ClazzEdit screen
+* User clicks to select holiday calendar for course. User arrives at the HolidayCalendarList screen.
+* The user might select an existing holiday calendar, or they might create a new one.
+* User is returned to ClazzEdit. The selected or newly created HolidayCalendar is now selected for 
+  the course.
+
+This is achieved as follows:
+
+Two arguments are passed along as the user moves through screens:
+ARG_ON_NAV_RESULT_POP_UP_TO : When a result is 
+
+ARG_RESULT_DEST_VIEWNAME : The destination viewname to which a value will be returned
+ARG_RESULT_DEST_KEY : The key (string) that will be used so that the screen which requested a value 
+can recognise what kind of value is incoming.
+
+When the value is selected (e.g. at the list screen or in the edit screen if a new item is created):
+
+* The list screen or edit screen recognizes (via the presence of the ags) that a return result is
+  expected. It will call navResultReturner.sendResult
+* The list screen or edit screen will perform a navigation stack pop to return the user to the screen
+  which requested the value (e.g. ARG_RESULT_DEST_VIEWNAME )
+* The screen where the result was expected (e.g. the course edit in this case) will observe for values
+  via UstadViewModel.collectReturnedResults .
+
+#### Scenario 2: User starts on a screen, navigates to pick a value, value is provide as an argument to another screen, then user is returned to start screen
+
+For example:
+
+* User is viewing the list of students in ClazzDetail. Users selects to add another student
+* The user might pick a person from the list, or create a new person
+* The selected person uid is sent as an argument to ClazzEnrolmentEdit
+* The user saves the enrolment and is returned to ClazzDetail.
+
+The arguments set are as follows:
+
+PersonEditView.ARG_GO_TO_ON_PERSON_SELECT: the screen to which the user will be directed when they
+select a person (PersonEdit and PersonList recognise this, and it takes precedence over the presence
+of ARG_RESULT_DEST_VIEWNAME / ARG_RESULT_DEST_KEY)
+
+ARG_RESULT_DEST_VIEWNAME: the destination to which the final result (e.g. ClazzEnrolment) will be
+returned on completion
+
+ARG_RESULT_DEST_KEY: The key (string) that will be used so that the screen which requested a value
+can recognise what kind of value is incoming. In this case this would be the ClazzEnrolment
+
 ## Coding style
 
 Avoid terms that could be considered racist and/or discriminatory
@@ -12,20 +216,8 @@ Do not use:
 master, slave, whitelist, blacklist
 ```
 
-The app fundamentally follows a Model-View-Presenter (MVP) design. E.g.
-
-```
-class BaseNamePresenter: UstadPresenter
-
-     fun onCreate(savedState: Map<String,String>)
-
-     fun handleUserClickedButton()
-
-     fun handleUserClickedEntity(entity: BaseEntity)
-
-```
-
-**Never, ever, shall thy ever use !! in production Kotlin code.** The !! operator is OK in unit tests, but should never be used in production code.
+**Never, ever, shall thy ever use !! in production Kotlin code.** The !! operator is OK in unit tests, 
+but should never be used in non-test code.
 
 e.g. use:
 
@@ -55,90 +247,11 @@ memberVar = SomeEntity()
 memberVar!!.someField = "aValue"
 ```
 
-
-### Presenters
-
-The BaseName should be suffixed with List, Detail, or Edit to describe it's function:
-
-*Name*List, *Name*Detail, *Name*Edit for list, detail, and edit screens e.g. *ContentEntry*List, *ContentEntry*Detail, *ContentEntry*Edit
-
-For each screen there should be the following classes:
-
-* *BaseName*Presenter - the core Kotlin multiplatform presenter
-* *BaseName*View - the view interface
-* *BaseName*(Activity|Fragment) - the Android implementation of the view
-* *base-name*.component.ts - the Angular implementation of the view
-
-
-### Views
-
-Views should **not** contain any business logic. They simply display information. They are an interface and should have methods like:
-
-```
-interface BaseNameView: UstadView
-
-   var BaseName: BaseEntity
-
-   var someButtonVisible: Boolean
-
-   companion object {
-        const val VIEW_NAME = "BaseName"
-
-        const val ARG_SOMEPARAM = "someParam"
-   }
-
-```
-
-Displaying the properties of an entity is handled by data binding on Android and by Angulars own template pattern.
-Do not create a variable for each property (e.g. title, author, etc). Just pass the entity itself
-and use data binding.
-
-If handling an event would require permission (e.g. download requires file permission), the native
-element (eg. fragment) should check for permission before calling the view method.
-
-e.g.
-```
-class SomeDetailFragment {
-
-   var mPresenter: SomeDetailPresenter? = null
-
-   ...
-
-   fun handleClickDownload() {
-       runAfterRequestingPermissionIfNeeded(WRITE_EXTERNAL_STORAGE) { granted ->
-            if(granted) {
-                mPresenter?.handleClickDownload()
-            }else {
-                //Show snackbar that permission is required
-            }
-       }
-   }
-
-}
-
-```
-
-
-*ARG_ constants that are used with more than one view should be placed on UstadView*
-
-
-### Entities
-
-Entities are plain Kotlin classes that are used with Room persistence (and on JDBC using lib-door). They must have an empty constructor and a primary constructor in Kotlin.  All number and boolean types must not be nullable. All Strings must be nullable. See [lib-database-entities/README.md](lib-database-entities/README.md) for more details.
-
 ### Conventions
 
 #### Spelling
 
 Use US English spellings, the same as system libraries etc.
-
-#### runOnUiThread
-
-It is the job of the presenter to call runOnUiThread when needed. *DO NOT* put runOnUiThread in the view itself.
-
-#### Tab lists
-
-The presenter should build a list of subviews as a String list. This can be a list containing only the VIEW_NAME of each tab to be displayed, or it can contain arguments as a query string. The name of the tab might be fixed (e.g. an instance of VIEW_NAME always has the same tab name, in which case a constant map can be used) or it might be needed to build this into the string. e.g. ["Tab1?arg1=value1", "Tab12arg1=value1"] or ["TabTitleMessageID;Tab1?arg1=value1", "TabTitleMessageID;Tab2?arg1=value1"]
 
 #### Localization strings
 
@@ -161,4 +274,6 @@ e.g.
 new class, new assignment, etc. %1$s will be replaced with the name of the item.-->
 <string name="new_entity">New %1$s</string>
 ```
+
+
 

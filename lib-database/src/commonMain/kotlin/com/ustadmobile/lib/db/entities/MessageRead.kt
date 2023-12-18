@@ -8,29 +8,18 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-@ReplicateEntity(tableId = TABLE_ID , tracker = MessageReadReplicate::class)
+@ReplicateEntity(
+    tableId = TABLE_ID ,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
 @Triggers(arrayOf(
     Trigger(
         name = "messageread_remote_insert",
         order = Trigger.Order.INSTEAD_OF,
         on = Trigger.On.RECEIVEVIEW,
         events = [Trigger.Event.INSERT],
-        sqlStatements = [
-            """
-                REPLACE INTO MessageRead(messageReadUid, messageReadPersonUid, 
-                messageReadMessageUid, messageReadEntityUid, messageReadLct)
-                
-                VALUES(NEW.messageReadUid, NEW.messageReadPersonUid, 
-                NEW.messageReadMessageUid, NEW.messageReadEntityUid, NEW.messageReadLct)
-                
-                /*psql ON CONFLICT (messageReadUid) DO UPDATE 
-                SET messageReadPersonUid = EXCLUDED.messageReadPersonUid, 
-                messageReadMessageUid = EXCLUDED.messageReadMessageUid, 
-                messageReadEntityUid = EXCLUDED.messageReadEntityUid,
-                messageReadLct = EXCLUDED.messageReadLct
-                */
-            """
-        ]
+        conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+        sqlStatements = [TRIGGER_UPSERT],
     )
 ))
 open class MessageRead() {
@@ -44,8 +33,8 @@ open class MessageRead() {
 
     var messageReadEntityUid: Long = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var messageReadLct: Long = 0
 
     constructor(personUid: Long, messageUid: Long, entityUid: Long) : this() {

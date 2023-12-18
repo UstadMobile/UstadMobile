@@ -7,7 +7,10 @@ import com.ustadmobile.lib.db.entities.CourseTerminology.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@ReplicateEntity(tableId = TABLE_ID, tracker = CourseTerminologyReplicate::class)
+@ReplicateEntity(
+    tableId = TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
 @Serializable
 @Triggers(arrayOf(
     Trigger(
@@ -15,13 +18,8 @@ import kotlinx.serialization.Serializable
         order = Trigger.Order.INSTEAD_OF,
         on = Trigger.On.RECEIVEVIEW,
         events = [Trigger.Event.INSERT],
-        sqlStatements = [
-            """REPLACE INTO CourseTerminology(ctUid, ctTitle, ctTerminology, ctLct) 
-         VALUES (NEW.ctUid, NEW.ctTitle, NEW.ctTerminology, NEW.ctLct) 
-         /*psql ON CONFLICT (ctUid) DO UPDATE 
-         SET ctTitle = EXCLUDED.ctTitle, ctTerminology = EXCLUDED.ctTerminology, ctLct = EXCLUDED.ctLct
-         */"""
-        ]
+        conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+        sqlStatements = [TRIGGER_UPSERT],
     )
 ))
 open class CourseTerminology {
@@ -31,10 +29,15 @@ open class CourseTerminology {
 
     var ctTitle: String? = null
 
+    /**
+     * A json map of keys as per TerminologyKeys to the terminology to use for this course.
+     *
+     * see CourseTerminologyStrings (in core)
+     */
     var ctTerminology: String? = null
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var ctLct: Long = 0
 
     companion object {

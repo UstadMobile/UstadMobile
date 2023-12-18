@@ -1,24 +1,17 @@
 appId: com.toughra.ustadmobile
 ---
-- clearState: com.toughra.ustadmobile
-- launchApp
-- hideKeyboard
-- tapOn: "GET STARTED"
-- inputText: ${ENDPOINT}
-- hideKeyboard
-- tapOn: "NEXT"
-- tapOn: "Username"
-- inputText: ${USERNAME}
-- tapOn: "Password"
-- inputText: ${PASSWORD}
-- hideKeyboard
-- tapOn: "LOGIN"
+# this test add a new course to the courses page
+# test data required :
+     # 1) TESTCOURSENAME: provide course name of string type
+     # 2) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+- tapOn: "COURSES"
 - tapOn: "COURSE"
 - tapOn: "Add a new course"
 - tapOn: "Name"
 - inputText: ${TESTCOURSENAME}
+- tapOn: "Description (Optional)"
+- inputText: "Test edit"
 - hideKeyboard
 - tapOn: "SAVE"
-- takeScreenshot: "results/${TESTCOURSENAME}-overviewscreen"
-- back
-- takeScreenshot: "results/${TESTCOURSENAME}-coursepage"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/add_course"
+

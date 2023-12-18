@@ -13,18 +13,18 @@ import org.quartz.TriggerKey
 
 class ClazzLogCreatorManagerJvm(override val di : DI): ClazzLogCreatorManager, DIAware {
 
-    override fun requestClazzLogCreation(clazzUid: Long, endpointUrl: String, fromTime: Long, toTime: Long) {
+    override fun requestClazzLogCreation(clazzUidFilter: Long, endpointUrl: String, fromTime: Long, toTime: Long) {
         val scheduler: Scheduler = di.direct.instance()
 
         val job = newJob(ClazzLogScheduleJob::class.java)
-            .usingJobData(INPUT_CLAZZUID, clazzUid)
+            .usingJobData(INPUT_CLAZZUID, clazzUidFilter)
             .usingJobData(INPUT_ENDPOINTURL, endpointUrl)
             .usingJobData(INPUT_FROMTIME, fromTime)
             .usingJobData(INPUT_TOTIME, toTime)
             .build()
 
         //Add an id
-        val triggerKey = TriggerKey("genclazzlog-$endpointUrl-$clazzUid")
+        val triggerKey = TriggerKey("genclazzlog-$endpointUrl-$clazzUidFilter")
 
         //unschedule any existing instance of the trigger
         scheduler.unscheduleJob(triggerKey)

@@ -1,3 +1,9 @@
 appId: com.toughra.ustadmobile
 ---
-- runScript: startserver.js
+# This test runs startserver.js file. Test server controller- http://localhost:8075/ starts.
+# Input variables:
+#  CONTROLSERVER - The URl for the control server
+#  TESTSERIAL- the Android serial (as provided for adb)
+
+- runScript:
+    file: startserver.js

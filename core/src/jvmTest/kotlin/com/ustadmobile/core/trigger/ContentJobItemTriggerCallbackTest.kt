@@ -36,7 +36,7 @@ class ContentJobItemTriggerCallbackTest {
                 randomUuid().toString())
 
         db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
-                "jdbc:sqlite:build/tmp/UmAppDatabaseTriggerTest.sqlite")
+                "jdbc:sqlite:build/tmp/UmAppDatabaseTriggerTest.sqlite", nodeId = 1L)
                 .addSyncCallback(nodeIdAndAuth)
                 .addCallback(ContentJobItemTriggersCallback())
                 .build()

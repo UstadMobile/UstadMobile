@@ -30,8 +30,8 @@ open class Role() {
     @LastChangedBy
     var roleLastChangedBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var roleLct: Long = 0
 
     //bit flags made of up PERMISSION_ constants

@@ -12,8 +12,11 @@ Usage:
 
 Start the test server controller:
 ```
-./start.sh 
+./start.sh --siteUrl http://ip.addr:8087/
 ```
+
+The site url must be specified as per the runserver.sh command. See the [main README.md](../README.md) 
+as per "Step 4: Build/run the server".
 
 To start/restart the actual server (e.g. to run an end-to-end test), request the start url:
 

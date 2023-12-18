@@ -1,0 +1,18 @@
+s/import com.ustadmobile.core.generated.locale.MessageID/import com.ustadmobile.core.MR/g
+s/MessageID./MR.strings./g
+
+s/\[MR.strings.first\]/\[MR.strings.first_key\]/g
+s/\[MR.strings.last\]/\[MR.strings.last_key\]/g
+s/\[MR.strings.question\]/\[MR.strings.question_key\]/g
+s/\[MR.strings.to\]/\[MR.strings.to_key\]/g
+s/\[MR.strings.up\]/\[MR.strings.up_key\]/g
+s/\[MR.strings.down\]/\[MR.strings.down_key\]/g
+s/\[MR.strings.over\]/\[MR.strings.over_key\]/g
+s/\[MR.strings.entry\]/\[MR.strings.entry_key\]/g
+s/\[MR.strings.permission\]/\[MR.strings.permission_key\]/g
+s/\[MR.strings.members\]/\[MR.strings.members_key\]/g
+s/\[MR.strings.member\]/\[MR.strings.member_key\]/g
+s/\[MR.strings.None\]/\[MR.strings.none_key\]/g
+s/\[MR.strings.marked\]/\[MR.strings.marked_key\]/g
+s/\[MR.strings.submitted\]/\[MR.strings.submitted_key\]/g
+
