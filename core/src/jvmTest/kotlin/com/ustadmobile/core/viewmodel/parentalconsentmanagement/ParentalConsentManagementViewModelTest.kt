@@ -1,11 +1,13 @@
 package com.ustadmobile.core.viewmodel.parentalconsentmanagement
 
 import app.cash.turbine.test
+import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.core.test.viewmodeltest.ViewModelTestBuilder
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.flow.doorFlow
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
@@ -17,8 +19,13 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import org.junit.Test
+import org.kodein.di.bind
+import org.kodein.di.instance
+import org.kodein.di.scoped
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
+import org.kodein.di.on
+import org.kodein.di.provider
 
 @Suppress("RemoveExplicitTypeArguments")
 class ParentalConsentManagementViewModelTest : AbstractMainDispatcherTest(){
@@ -36,7 +43,18 @@ class ParentalConsentManagementViewModelTest : AbstractMainDispatcherTest(){
             val parentPerson = setActiveUser(activeEndpoint, Person().apply {
                 firstNames = "Pit"
                 lastName = "The Older"
+                username = "pittheolder"
+                dateOfBirth = 1
             })
+
+            extendDi {
+                bind<GetLocaleForSiteTermsUseCase>() with scoped(endpointScope).provider {
+                    GetLocaleForSiteTermsUseCase(
+                        supportedLangConfig = instance(),
+                        repo = on(context).instance(tag = DoorTag.TAG_REPO)
+                    )
+                }
+            }
 
 
             val minorPerson = activeDb.insertPersonAndGroup(
@@ -51,7 +69,7 @@ class ParentalConsentManagementViewModelTest : AbstractMainDispatcherTest(){
 
             val personParentJoin = PersonParentJoin().apply {
                 ppjMinorPersonUid = minorPerson.personUid
-                ppjUid = activeDb.personParentJoinDao.insertAsync(this)
+                ppjUid = activeDb.personParentJoinDao.upsertAsync(this)
             }
 
             val testContext = ParentalConsentTestContext(
@@ -72,6 +90,7 @@ class ParentalConsentManagementViewModelTest : AbstractMainDispatcherTest(){
                 savedStateHandle[UstadViewModel.ARG_ENTITY_UID] = context.personParentJoin.ppjUid.toString()
                 ParentalConsentManagementViewModel(di, savedStateHandle)
             }
+
 
             val readyUiState = viewModel.uiState.first {
                 it.fieldsEnabled

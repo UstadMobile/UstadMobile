@@ -256,11 +256,11 @@ class LoginViewModel(
         }
     }
 
-    fun handleConnectAsGuest(){
-//        presenterScope.launch {
-//            accountManager.startGuestSession(serverUrl)
-//            goToNextDestAfterLoginOrGuestSelected()
-//        }
+    fun onClickConnectAsGuest(){
+        viewModelScope.launch {
+            accountManager.startGuestSession(serverUrl)
+            goToNextDestAfterLoginOrGuestSelected()
+        }
     }
 
     companion object {

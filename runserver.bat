@@ -16,5 +16,5 @@ if exist app-ktor-server\ustad-server.conf (
 cd app-ktor-server
 
 REM Start the server - use jsDevServer to serve client using webpack (see doc on application.conf)
-java -jar build\libs\ustad-server-all.jar %SITEURLARG% %CONFIGARG% %1 %2 %3 %4
+java -jar build\libs\ustad-server-all.jar %SITEURLARG% %CONFIGARG% -P:ktor.ustad.jsDevServer=http://localhost:8080/ %1 %2 %3 %4
 cd..

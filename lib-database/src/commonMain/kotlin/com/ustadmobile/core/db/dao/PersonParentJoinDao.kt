@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao
 
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.annotation.*
@@ -12,8 +13,8 @@ import com.ustadmobile.lib.db.entities.*
 @Repository
 expect abstract class PersonParentJoinDao {
 
-    @Insert
-    abstract suspend fun insertAsync(entity: PersonParentJoin): Long
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertAsync(entity: PersonParentJoin): Long
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
@@ -82,7 +83,12 @@ expect abstract class PersonParentJoinDao {
     @Update
     abstract suspend fun updateAsync(personParentJoin: PersonParentJoin)
 
-    @HttpAccessible
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findByMinorPersonUid")
+        )
+    )
     @Query("""
         SELECT EXISTS(
                SELECT ppjUid

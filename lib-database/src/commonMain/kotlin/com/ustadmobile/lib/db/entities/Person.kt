@@ -203,6 +203,8 @@ open class Person() {
 
         const val TYPE_SYSTEM = 1
 
+        const val TYPE_GUEST = 2
+
         const val JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1 = """
             JOIN ScopedGrant
                  ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid

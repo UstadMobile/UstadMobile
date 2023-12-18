@@ -31,9 +31,10 @@ data class SiteEditUiState(
         listOf(UstadMobileSystemCommon.UiLanguage("en", "English")),
     val fieldsEnabled: Boolean = true,
     val siteNameError: String? = null,
+    val registrationEnabledError: String? = null,
     val currentSiteTermsLang: UstadMobileSystemCommon.UiLanguage = uiLangs.first(),
 ) {
-    val hasErrors: Boolean = siteNameError != null
+    val hasErrors: Boolean = (siteNameError != null || registrationEnabledError != null)
 
     val currentSiteTerms: SiteTerms?
         get() = siteTerms.firstOrNull { it.sTermsLang == currentSiteTermsLang.langCode }
@@ -153,7 +154,7 @@ class SiteEditViewModel(
         savedStateHandle[KEY_SITE_TERMS_LANG] = uiLang.langCode
         _uiState.update { prev ->
             prev.copy(
-                currentSiteTermsLang = uiLang
+                currentSiteTermsLang = uiLang,
             )
         }
     }
@@ -171,8 +172,9 @@ class SiteEditViewModel(
                     },
                     replacePredicate = {
                         it.sTermsLang == prev.currentSiteTermsLang.langCode
-                    }
-                )
+                    },
+                ),
+                registrationEnabledError = null,
             )
         }.siteTerms
 
@@ -220,6 +222,19 @@ class SiteEditViewModel(
                 )
             }
         }
+
+        val siteTermsPlainText = _uiState.value.siteTerms.map {
+            (it.sTermsLang ?: "") to (it.termsHtml?.htmlToPlainText() ?: "")
+        }.toMap()
+
+        if(siteToSave.registrationAllowed && siteTermsPlainText.all { it.value.isBlank() }) {
+            _uiState.update { prev ->
+                prev.copy(
+                    registrationEnabledError = systemImpl.getString(MR.strings.terms_required_if_registration_enabled)
+                )
+            }
+        }
+
 
         if(_uiState.value.hasErrors)
             return

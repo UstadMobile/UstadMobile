@@ -509,24 +509,40 @@ class PersonEditViewModel(
                     _uiState.update { prev -> prev.copy(fieldsEnabled = true) }
                 }
             }else {
+                //If a person under 13 is being registered,
+                val isMinor = Instant.fromEpochMilliseconds(savePerson.dateOfBirth)
+                    .isDateOfBirthAMinor()
+                val consentToUpsert = if(
+                    isMinor &&
+                    (entityUidArg == 0L || !activeRepo.personParentJoinDao.isMinorApproved(savePerson.personUid))
+                ) {
+                    PersonParentJoin().apply {
+                        ppjMinorPersonUid = savePerson.personUid
+                        ppjParentPersonUid = accountManager.currentAccount.personUid
+                        ppjStatus = PersonParentJoin.STATUS_APPROVED
+                        ppjApprovalTiemstamp = systemTimeInMillis()
+                    }
+                }else {
+                    null
+                }
+
                 activeRepo.withDoorTransactionAsync {
                     if(entityUidArg == 0L) {
                         val personWithGroup = activeRepo.insertPersonAndGroup(savePerson)
                         savePerson.personGroupUid = personWithGroup.personGroupUid
                         savePerson.personUid = personWithGroup.personUid
-
-                        if(Instant.fromEpochMilliseconds(savePerson.dateOfBirth).isDateOfBirthAMinor()) {
-                            activeRepo.personParentJoinDao.insertAsync(PersonParentJoin().apply {
-                                ppjMinorPersonUid = savePerson.personUid
-                                ppjParentPersonUid = accountManager.currentAccount.personUid
-                                ppjStatus = PersonParentJoin.STATUS_APPROVED
-                                ppjApprovalTiemstamp = systemTimeInMillis()
+                        consentToUpsert?.also {
+                            activeRepo.personParentJoinDao.upsertAsync(it.shallowCopy {
+                                ppjMinorPersonUid = personWithGroup.personUid
                             })
                         }
 
                         savePerson.personUid
                     }else {
                         activeRepo.personDao.updateAsync(savePerson)
+                        consentToUpsert?.also {
+                            activeRepo.personParentJoinDao.upsertAsync(it)
+                        }
                     }
                 }
 

@@ -463,12 +463,13 @@ class UstadAccountManager(
         }
     }
 
-    private suspend fun startGuestSession(endpointUrl: String) {
+    suspend fun startGuestSession(endpointUrl: String) {
         val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_REPO)
         val guestPerson = repo.insertPersonAndGroup(Person().apply {
             username = null
             firstNames = "Guest"
             lastName = "User"
+            personType = Person.TYPE_GUEST
         }, groupFlag = PERSONGROUP_FLAG_PERSONGROUP or PERSONGROUP_FLAG_GUESTPERSON)
 
         getSiteFromDbOrLoadFromHttp(repo)

@@ -5,6 +5,7 @@ import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitt
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.ApproveOrDeclinePendingEnrolmentUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.IApproveOrDeclinePendingEnrolmentRequestUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
+import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
 import org.kodein.di.bind
@@ -35,4 +36,12 @@ fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain
             systemImpl = instance()
         )
     }
+
+    bind<GetLocaleForSiteTermsUseCase>() with scoped(endpointScope).provider {
+        GetLocaleForSiteTermsUseCase(
+            supportedLangConfig = instance(),
+            repo = on(context).instance(tag = DoorTag.TAG_REPO)
+        )
+    }
+
 }

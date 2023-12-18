@@ -20,6 +20,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.viewmodel.site.edit.SiteEditViewModel
 import com.ustadmobile.libuicompose.components.UstadEditHeader
+import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.components.UstadSetLanguageDropDown
 import com.ustadmobile.libuicompose.components.UstadSwitchField
@@ -86,16 +87,20 @@ fun SiteEditScreen(
             }
         )
 
-        UstadSwitchField(
-            modifier = Modifier.defaultItemPadding().testTag("reg_allowed"),
-            checked = uiState.site?.registrationAllowed ?: false,
-            label = stringResource(MR.strings.registration_allowed),
-            onChange = {
-                onSiteChanged(uiState.site?.shallowCopy {
-                    registrationAllowed = it
-                })
-            }
-        )
+        UstadInputFieldLayout(
+            errorText = uiState.registrationEnabledError
+        ) {
+            UstadSwitchField(
+                modifier = Modifier.defaultItemPadding().testTag("reg_allowed"),
+                checked = uiState.site?.registrationAllowed ?: false,
+                label = stringResource(MR.strings.registration_allowed),
+                onChange = {
+                    onSiteChanged(uiState.site?.shallowCopy {
+                        registrationAllowed = it
+                    })
+                },
+            )
+        }
 
         UstadEditHeader(stringResource(MR.strings.terms_and_policies))
 

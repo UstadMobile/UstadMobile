@@ -108,7 +108,7 @@ fun Route.personAuthRegisterRoute() {
                 val mParentContactVal = mParentContact ?: throw IllegalStateException("Minor without parent contact")
 
                 mParentJoinVal.ppjMinorPersonUid = mPerson.personUid
-                mParentJoinVal.ppjUid = db.personParentJoinDao.insertAsync(mParentJoinVal)
+                mParentJoinVal.ppjUid = db.personParentJoinDao.upsertAsync(mParentJoinVal)
 
                 val systemImpl: UstadMobileSystemImpl by closestDI().instance()
                 val appName = systemImpl.getString(MR.strings.app_name, mLangCode)
