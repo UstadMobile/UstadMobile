@@ -3,11 +3,12 @@ package com.ustadmobile.view.message.conversationlist
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListUiState
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.MessageAndOtherPerson
+import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -38,8 +39,6 @@ external interface ConversationListScreenProps : Props {
 
 
 private val ConversationListScreenComponent2 = FC<ConversationListScreenProps> { props ->
-
-    val strings = useStringProvider()
 
     val infiniteQueryResult = usePagingSource(
         props.uiState.conversations, true, 50
@@ -90,10 +89,16 @@ val ConversationListScreen = FC<Props> {
         ConversationListViewModel(di, savedStateHandle)
     }
     val uiStateVal by viewModel.uiState.collectAsState(ConversationListUiState())
+    val appState by viewModel.appUiState.collectAsState(AppUiState())
+
+    UstadFab {
+        fabState = appState.fabState
+    }
 
     ConversationListScreenComponent2 {
         uiState = uiStateVal
         onClickEntry = viewModel::onClickEntry
+
     }
 }
 
