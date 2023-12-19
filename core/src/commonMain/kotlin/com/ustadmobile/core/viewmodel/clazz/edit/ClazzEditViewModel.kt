@@ -18,6 +18,7 @@ import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
+import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel.Companion.ARG_TERMINOLOGY
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
@@ -461,10 +462,19 @@ class ClazzEditViewModel(
             nextViewName = viewName,
             key = keyName,
             currentValue = null,
-            args = mapOf(
-                CourseBlockEditViewModel.ARG_BLOCK_TYPE to blockType.toString(),
-                UstadView.ARG_CLAZZUID to (_uiState.value.entity?.clazzUid?.toString() ?: "0")
-            ),
+            args = buildMap {
+                put(CourseBlockEditViewModel.ARG_BLOCK_TYPE, blockType.toString())
+                put(UstadView.ARG_CLAZZUID, (_uiState.value.entity?.clazzUid?.toString() ?: "0"))
+                if(blockType == CourseBlock.BLOCK_ASSIGNMENT_TYPE) {
+                    //Terminology is required by AssignmentEdit (for marking type)
+                    _uiState.value.entity?.terminology?.also { terminology ->
+                        put(ARG_TERMINOLOGY,
+                            json.encodeToString(CourseTerminology.serializer(), terminology)
+                        )
+                    }
+                }
+
+            },
             serializer = CourseBlockAndEditEntities.serializer(),
         )
     }
@@ -756,6 +766,13 @@ class ClazzEditViewModel(
                     key = RESULT_KEY_ASSIGNMENT,
                     serializer = CourseBlockAndEditEntities.serializer(),
                     currentValue = block,
+                    args = buildMap {
+                        _uiState.value.entity?.terminology?.also { terminology ->
+                            put(ARG_TERMINOLOGY,
+                                json.encodeToString(CourseTerminology.serializer(), terminology)
+                            )
+                        }
+                    }
                 )
             }
         }
