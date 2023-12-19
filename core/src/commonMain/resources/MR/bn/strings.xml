@@ -62,7 +62,6 @@
     <string name="onboarding_no_internet_headline">কোন ইন্টারনেট নেই\? সমস্যা নেই.</string>
     <string name="onboarding_offline_sharing">অফলাইনে ভাগ করুন</string>
     <string name="onboarding_offline_sharing_subheading">কাছের অন্যান্য যে কোনও ব্যবহারকারীর সাথে উচ্চ গতিতে সামগ্রী ভাগ করুন।</string>
-    <string name="location_permission_title">অবস্থানের অনুমতি প্রয়োজন</string>
     <string name="age">গড়</string>
     <string name="role_name">নামভূমিকা</string>
     <string name="download_downloading_placeholder">%2$s এর %1$s ডাউনলোড হচ্ছে</string>
@@ -118,8 +117,6 @@
     <string name="phone_number">ফোন নম্বর</string>
     <string name="name">নাম</string>
     <string name="video">ভিডিও</string>
-    <string name="content_editor_menu_outdent">আউটডেন্ট</string>
-    <string name="location_permission_details">এই অ্যাপটি নিকটস্থ অন্যান্য ব্যবহারকারীদের খুঁজতে ব্লুটুথ এবং ওয়াইফাই স্ক্যানিং ব্যবহার করে। অ্যাপ্লিকেশনটি ইন্টারনেট অ্যাক্সেসের প্রয়োজন ছাড়াই দ্রুতগতিতে সামগ্রী ডাউনলোড করতে কাছের ব্যবহারকারীদের সাথে সংযোগ করতে পারে। এই স্ক্যানের ফলাফলগুলি আপনার অবস্থান নির্ধারণের জন্য ব্যবহার করা যেতে পারে, আপনাকে এই বৈশিষ্ট্যটি সক্ষম করার জন্য অবস্থানের অনুমতিটি দিতে হবে। এই অ্যাপ্লিকেশনটি এই স্ক্যানগুলির ফলাফল সংরক্ষণ করে না এবং কোনওভাবেই আপনার অবস্থান রেকর্ড করে না। এই অ্যাপ্লিকেশনটি ওপেন সোর্স কোড থেকে তৈরি যা github.com/UstadMobile/UstadMobile এ চেক করা যায়</string>
     <string name="download_continue_stacked_label">ডাউনলোড চালিয়ে যান</string>
     <string name="download_continue_btn_label">চালিয়ে যান</string>
     <string name="download_wifi_only">শুধুমাত্র ওয়াইফাই</string>
@@ -302,7 +299,6 @@
     <string name="permission">অনুমতি</string>
     <string name="members">সদস্য</string>
     <string name="role_assignment">ভূমিকা অ্যাসাইনমেন্ট</string>
-    <string name="location_permission_message">এই অ্যাপ্লিকেশনটির কাছাকাছি ব্যবহারকারীর সাথে উচ্চ-গতির অফলাইন ভাগ করে নেওয়ার জন্য অবস্থানের অনুমতি প্রয়োজন.</string>
     <string name="scope_by">দ্বারা স্কোপ</string>
     <string name="assign_to">ধার্য</string>
     <string name="person">ব্যক্তি</string>
@@ -503,7 +499,6 @@
     <string name="select_group_members">গ্রুপ সদস্য নির্বাচন করুন</string>
     <string name="add_a_new_language">একটি নতুন ভাষা যুক্ত করুন</string>
     <string name="add_a_student">একটি ছাত্র যুক্ত করুন</string>
-    <string name="underRegistrationAgeError">13 বছরের কম বয়সী শিশুদের স্ব-নিবন্ধন অনুমোদিত নয়। আপনার শিক্ষককে আপনাকে নিবন্ধকরণ করতে বলুন।</string>
     <string name="create_a_new_report">একটি নতুন প্রতিবেদন তৈরি করুন</string>
     <string name="edit_report">প্রতিবেদন সম্পাদনা করুন</string>
     <string name="add_a_new_verb">একটি নতুন ক্রিয়া যুক্ত করুন</string>

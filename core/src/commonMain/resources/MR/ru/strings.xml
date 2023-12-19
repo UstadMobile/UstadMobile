@@ -36,7 +36,6 @@
     <string name="unhide">Показать</string>
     <string name="compress">Компресс</string>
     <string name="attempts">Попытки</string>
-    <string name="underRegistrationAgeError">Самостоятельная регистрация детей до 13 лет не допускается. Попросите учителя зарегистрировать вас.</string>
     <string name="add_link_description">Добавьте образовательный контент с помощью веб-ссылки, а затем используйте его в автономном режиме</string>
     <string name="xapi_hours">Часы</string>
     <string name="add_file_description">Добавьте образовательный контент, используя поддерживаемые форматы, например PDF, xAPI, H5P, EPUB</string>
@@ -54,7 +53,6 @@
     <string name="created_partnership">Создано в партнерстве с:</string>
     <string name="onboarding_get_started_label">Начать</string>
     <string name="onboarding_offline_sharing">Поделиться оффлайн</string>
-    <string name="location_permission_details">Это приложение использует Bluetooth и сканирование Wi-Fi, чтобы найти других пользователей поблизости. Затем приложение может подключаться к ближайшим пользователям, чтобы загружать контент на высокой скорости, не требуя доступа в Интернет. Поскольку эти результаты сканирования могут использоваться для определения вашего местоположения, вы должны предоставить разрешение на местоположение, чтобы включить эту функцию. Это приложение не сохраняет результаты этих сканирований и никоим образом не записывает ваше местоположение. Это приложение создано на основе открытого исходного кода, который можно проверить на github.com/UstadMobile/UstadMobile</string>
     <string name="download_continue_stacked_label">Продолжить скачивание</string>
     <string name="download_wifi_only">Только через Wi-Fi</string>
     <string name="download_state_downloading"><b>Скачивание</b> всего %1$s элементов. Всего на вашем устройстве будет использовано %2$s.</string>
@@ -112,7 +110,7 @@
     <string name="mother">Мама</string>
     <string name="first_names">Имена</string>
     <string name="basic_details">Основные детали</string>
-    <string name="add_a_new_class">Добавить новый курс</string>
+    <string name="add_a_new_class">Добавить новый класс/группу</string>
     <string name="edit_clazz">Изменить курс</string>
     <string name="add_question">Добавить вопрос</string>
     <string name="edit_question">Редактировать вопрос</string>
@@ -172,9 +170,7 @@
     <string name="year">Год</string>
     <string name="exams">Экзамены</string>
     <string name="reports">Отчеты</string>
-    <string name="onboarding_offline_sharing_subheading">Делитесь контентом на высокой скорости с любым другим пользователем поблизости.</string>
-    <string name="location_permission_title">Требуется разрешение на местоположение</string>
-    <string name="location_permission_message">Этому приложению требуется разрешение на местоположение, чтобы обеспечить высокоскоростной автономный обмен с ближайшими пользователями.</string>
+    <string name="onboarding_offline_sharing_subheading">Экономьте время и данные благодаря сверхбыстрому обмену данными в оффлайн режиме.</string>
     <string name="xapi_options_report_title">Заголовок отчета</string>
     <string name="xapi_options_visual_type">Тип визуализации</string>
     <string name="xapi_options_data_set">Набор данных</string>
@@ -203,7 +199,7 @@
     <string name="error_message_load_page">Не удалось загрузить страницу</string>
     <string name="supported_files">Поддерживаемые файлы: <b>видео, аудио, EPUB, Xapi Zip, H5P</b></string>
     <string name="content_editor_save_error">Ошибка при сохранении, попробуйте еще раз</string>
-    <string name="content_entry_export_inprogress">Экспорт</string>
+    <string name="content_entry_export_inprogress">Экспортирование</string>
     <string name="show_hidden_items">Показать скрытые предметы</string>
     <string name="open_folder">Открыть папку</string>
     <string name="invalid_register_code">Неверный регистрационный код</string>
@@ -660,7 +656,7 @@
     <string name="please_enter_the_linK">Введите ссылку для вашего сайта, предоставленную вашим преподавателем или администратором:</string>
     <string name="terms_and_policies_text">Текст условий и политик</string>
     <string name="edit_terms_and_policies">Изменить условия и правила</string>
-    <string name="strings_not_allowed">В этом поле нельзя использовать специальные символы.</string>
+    <string name="strings_not_allowed">В этом поле нельзя использовать специальные символы</string>
     <string name="undo">Отменить</string>
     <string name="video">Видео</string>
     <string name="content_editor_create_new_category">Новая папка</string>
@@ -730,8 +726,8 @@
     <string name="does_your_class_already_have_learning_env">В вашем классе, школе или организации уже настроена среда обучения\? Большой!</string>
     <string name="use_the_public_lib_env">Используйте среду обучения публичной библиотеки</string>
     <string name="just_want_to_browse">Просто хотите просматривать и использовать образовательный контент в автономном режиме, не управляя школами и классами\? Без проблем! В нашей публичной библиотеке имеется более 100 000 открытых образовательных ресурсов (ООР), готовых к использованию в автономном режиме.</string>
-    <string name="revoking_consent_will">Отзыв согласия приведет к удалению личных данных ребенка в течение 24 часов.</string>
-    <string name="you_must_comply_with_license">Вы должны убедиться, что соблюдаете условия лицензии на контент.</string>
+    <string name="revoking_consent_will">Отзыв согласия приведет к удалению личных данных ребенка в течение 24 часов</string>
+    <string name="you_must_comply_with_license">Вы должны убедиться, что соблюдаете условия лицензии на контент</string>
     <string name="you_can_copypaste_a_link">Вы можете скопировать/вставить ссылку с различных образовательных сайтов.</string>
     <string name="content_pieces_completed">Части контента завершены</string>
     <string name="content_usage_duration">Продолжительность использования контента</string>
@@ -798,22 +794,26 @@
     <string name="add_activity_literal">Добавить активность</string>
     <string name="frequency">Частота</string>
     <string name="reject">Отклонять</string>
-
     <string name="onboarding_stay_organized_subheading">Образовательный контент, задания, классы и посещаемость — все в одном месте</string>
-
-    <string name="store_description_full">"Ustad Mobile — это приложение с открытым исходным кодом, которое позволяет пользователям получать доступ к широкому спектру открытых образовательных ресурсов онлайн или офлайн. Приложением и контентом можно обмениваться между устройствами в автономном режиме.
-        \n
-        \n  Ustad Mobile предлагает контент с открытой лицензией с некоторых ведущих сайтов Интернета с открытыми образовательными ресурсами (ООР):
-        \n
-        \n African Story Books
-        \n ETakkatho
-        \n Global Digital Library
-        \n Khan Academy (including offline access to both videos and exercises)
-        \n PHET
-        \n Pratham Books
-        \n Voice of America
-        \n
-        \n  Контент предоставляется по лицензии внешними поставщиками контента. Ustad Mobile, если прямо не указано иное, не поддерживается ни одним из таких поставщиков контента."</string>
+    <string name="store_description_full">Ustad Mobile — это приложение с открытым исходным кодом, которое позволяет пользователям получать доступ к широкому спектру открытых образовательных ресурсов онлайн или офлайн. Приложением и контентом можно обмениваться между устройствами в автономном режиме.
+\n
+\nUstad Mobile предлагает контент с открытой лицензией с некоторых ведущих сайтов Интернета с открытыми образовательными ресурсами (ООР):
+\n
+\nAfrican Story Books
+\n
+\nETakkatho
+\n
+\nGlobal Digital Library
+\n
+\nKhan Academy (including offline access to both videos and exercises)
+\n
+\nPHET
+\n
+\nPratham Books
+\n
+\nVoice of America
+\n
+\nКонтент предоставляется по лицензии внешними поставщиками контента. Ustad Mobile, если прямо не указано иное, не поддерживается ни одним из таких поставщиков контента.</string>
     <string name="unique_content_users_over_time">Уникальные пользователи контента по времени</string>
     <string name="clazz_assignment">Задание</string>
     <string name="number_of_active_users_over_time">Количество активных пользователей по времени</string>
@@ -830,14 +830,16 @@
     <string name="number_of_students_completed_time">Количество учащихся, завершивших выбранный контент</string>
     <string name="content_completion">Завершение контента</string>
     <string name="content_usage_by_class">Использование контента по классу</string>
-    <string name="parent_consent_explanation">"Я подтверждаю, что являюсь родителем или законным опекуном следующего ребенка:
-        \n
-        \n  Имя: %1$s
-        \n  Дата рождения: %2$s
-        \n
-        \nЕсли я даю согласие на то, чтобы мой ребенок использовал %3$s, сбор и обработка информации, позволяющую установить личность, будет осуществляться в соответствии с приведенной ниже политикой конфиденциальности и условиями.
-        \n
-        \nСогласие может быть отозвано в любое время с помощью ссылки, отправленной по электронной почте. Если вы решите не давать согласие, любые данные, предоставленные вашим ребенком, будут удалены в течение 24 часов."</string>
+    <string name="parent_consent_explanation">Я подтверждаю, что являюсь родителем или законным опекуном следующего ребенка:
+\n
+\nИмя: %1$s
+\n
+\n
+\nДата рождения: %2$s
+\n
+\nЕсли я даю согласие на то, чтобы мой ребенок использовал %3$s, сбор и обработка информации, позволяющую установить личность, будет осуществляться в соответствии с приведенной ниже политикой конфиденциальности и условиями.
+\n
+\nСогласие может быть отозвано в любое время с помощью ссылки, отправленной по электронной почте. Если вы решите не давать согласие, любые данные, предоставленные вашим ребенком, будут удалены в течение 24 часов.</string>
     <string name="downloading_content">Загрузка %1$s</string>
     <string name="maximum_points">Максимальное количество баллов</string>
     <string name="added_to_class_content">%1$s добавлено в материалы класса</string>
@@ -848,7 +850,7 @@
     <string name="saved">Сохранено</string>
     <string name="submit_grade_and_mark_next">Выставить оценку и отметить следующее</string>
     <string name="dont_show_before">Не отображать до</string>
-    <string name="course_module">Модуль курса</string>
+    <string name="course_module">Модуль может содержать любой другой блок. Его можно развернуть/свернуть и использовать для подсчета баллов.</string>
     <string name="class_timezone_set">Часовой пояс класса: %1$s</string>
     <string name="assign_reviewers">Назначить проверяющих</string>
     <string name="add_block">Добвить блок</string>
@@ -924,7 +926,7 @@
     <string name="module">Модуль</string>
     <string name="add_course_block_content_desc">Добавляйте аудио, видео, электронные книги или интерактивный контент (H5P, xAPI и т.д.) из файлов или ссылок</string>
     <string name="add_assignment_block_content_desc">Задание для участников курса</string>
-    <string name="discussion_board">Доска обсуждений</string>
+    <string name="discussion_board">Обсуждение</string>
     <string name="add_discussion_board_desc">Организованное обсуждение с темами и разделами</string>
     <string name="new_module">Новый модуль</string>
     <string name="edit_module">Редактировать модуль</string>
@@ -992,4 +994,55 @@
     <string name="reviewer">Проверяющий #%1$s</string>
     <string name="pdf">PDF</string>
     <string name="app_language">Язык приложения</string>
+    <string name="panic_button_app">Тревожная кнопка</string>
+    <string name="panic_button_explanation">%1$s может автоматически выходить, очищать данные, хранящиеся на этом устройстве, и скрываться при запуске любым приложением кнопки паники, которое поддерживает стандарт PanicKit (например, Ripple). Нажмите, чтобы загрузить Ripple.</string>
+    <string name="hide_app_explanation">Показать код: %2$s
+\nЕсли скрыть приложение включено, то %1$s будет скрыто и заменено поддельным приложением блокнота при срабатывании тревожной кнопки. Вам нужно будет ввести приведенный выше код отображения ( %2$s ) в фальшивое приложение блокнота, чтобы отобразить %1$s.</string>
+    <string name="actions_to_be_taken_in_case_of_emergency">Действия, необходимые в чрезвычайной ситуации</string>
+    <string name="exit_app">Выйти из приложения</string>
+    <string name="delete_app_data_from_device">Удалить данные приложения с устройства</string>
+    <string name="hide_app">Скрыть приложение</string>
+    <string name="comment">Комментарий</string>
+    <string name="restarting">Перезапуск</string>
+    <string name="mark">Отметить</string>
+    <string name="edit_content">Редактировать содержимое/контент</string>
+    <string name="select_date">Выбрать дату</string>
+    <string name="time_submitted">Время отправки</string>
+    <string name="assignment">Задание</string>
+    <string name="remove">Убрать</string>
+    <string name="terms_required_if_registration_enabled">Если включена самостоятельная регистрация, вы должны установить условия и политики хотя бы на одном языке, чтобы пользователи могли их принять при регистрации.</string>
+    <string name="mark_comment">Отметить комментарий</string>
+    <string name="link">Ссылка</string>
+    <string name="size_limit_error">Размер должен быть в пределах от %1$s MB и до %2$s МБ</string>
+    <string name="import_from_file">Импорт из файла</string>
+    <string name="group_submission">Групповая подача</string>
+    <string name="invalid">Неправильный</string>
+    <string name="menu">Меню</string>
+    <string name="this_app_will_receive">Это приложение получит информацию о вашем профиле и информацию о ваших курсах</string>
+    <string name="peers_to_review">Сверстники для проверки</string>
+    <string name="add_new_post">Добывить новую публикацию</string>
+    <string name="group_assignment">Груповое задание</string>
+    <string name="most_recent">Самые последние</string>
+    <string name="edit_groups">Редактировать группы</string>
+    <string name="select_person">Выберите человека</string>
+    <string name="grant_app_permission">Предоставить %1$s доступ</string>
+    <string name="invalid_file">Неверный файл</string>
+    <string name="exceeds_word_limit">Превышен лимит слов: %1$s/%2$s</string>
+    <string name="table_of_contents">Оглавление</string>
+    <string name="collapse">Свернуть</string>
+    <string name="required">* Обязательное</string>
+    <string name="import_from_link">Импортировать по ссылке</string>
+    <string name="grades_scoring">Оценки</string>
+    <string name="exceeds_char_limit">Превышен лимит символов: %1$s/%2$s</string>
+    <string name="unsupported_file_type">Неподдерживаемый тип файла. Поддерживаемые типы: %1$s</string>
+    <string name="your_submission">Ваше представление</string>
+    <string name="my_profile">Мой профиль</string>
+    <string name="end_is_before_start">Конец предшествует началу</string>
+    <string name="expand">Раскрыть</string>
+    <string name="more_options">Больше опций</string>
+    <string name="edit_folder">Редактировать папку</string>
+    <string name="add_another_account">Добывить другой аккаунт</string>
+    <string name="already_submitted">Уже было отправлено</string>
+    <string name="too_high">Слишком высокий!</string>
+    <string name="num_holidays">%1$s выходные/праздники</string>
 </resources>

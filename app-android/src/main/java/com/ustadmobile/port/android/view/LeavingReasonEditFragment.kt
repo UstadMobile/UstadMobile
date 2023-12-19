@@ -1,9 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -14,42 +10,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.google.accompanist.themeadapter.material.MdcTheme
 import com.ustadmobile.core.viewmodel.LeavingReasonEditUiState
 import com.ustadmobile.core.viewmodel.LeavingReasonEditViewModel
 import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.core.R as CR
 
-class LeavingReasonEditFragment: UstadBaseMvvmFragment() {
 
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(
-                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
-            )
-
-            setContent {
-                MdcTheme {
-
-                }
-            }
-        }
-    }
-
-
-}
 @Composable
 fun LeavingReasonEditScreen(
     uiState: LeavingReasonEditUiState,

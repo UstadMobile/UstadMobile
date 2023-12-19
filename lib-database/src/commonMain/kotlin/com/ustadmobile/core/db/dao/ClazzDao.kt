@@ -12,6 +12,7 @@ import com.ustadmobile.core.db.dao.ClazzDaoCommon.SORT_CLAZZNAME_DESC
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import app.cash.paging.PagingSource
+import com.ustadmobile.lib.db.composites.ClazzNameAndTerminology
 import com.ustadmobile.lib.db.composites.ScopedGrantAndGroupMember
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT
@@ -359,6 +360,23 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     """)
     abstract fun getTitleByUidAsFlow(clazzUid: Long): Flow<String?>
 
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("getClazzNameAndTerminologyAsFlow"),
+            HttpServerFunctionCall("findByUidAsync")
+        )
+    )
+    @Query("""
+        SELECT Clazz.clazzName AS clazzName,
+               CourseTerminology.*
+          FROM Clazz
+               LEFT JOIN CourseTerminology
+                         ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
+         WHERE Clazz.clazzUid = :clazzUid                
+    """)
+    abstract fun getClazzNameAndTerminologyAsFlow(clazzUid: Long): Flow<ClazzNameAndTerminology?>
 
     @HttpAccessible(
         pullQueriesToReplicate = arrayOf(

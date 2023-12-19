@@ -77,10 +77,6 @@ fun ClazzDetailOverviewScreen(
 
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
-    val numMembers = stringResource(MR.strings.x_teachers_y_students,
-        uiState.clazz?.numTeachers ?: 0,
-        uiState.clazz?.numStudents ?: 0)
-
     val clazzDateRange = rememberFormattedDateRange(
         startTimeInMillis = uiState.clazz?.clazzStartTime ?: 0L,
         endTimeInMillis = uiState.clazz?.clazzEndTime ?: UNSET_DISTANT_FUTURE,
@@ -101,7 +97,7 @@ fun ClazzDetailOverviewScreen(
 
         item(key = "members") {
             UstadDetailField2(
-                valueText = numMembers ,
+                valueText = uiState.membersString ,
                 labelText = stringResource(MR.strings.members_key).capitalizeFirstLetter(),
                 icon = Icons.Filled.Group,
             )

@@ -231,7 +231,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                 id = "caMarkingType"
                 value = MarkingType.valueOf(props.uiState.entity?.assignment?.caMarkingType ?: 0)
                 label = strings[MR.strings.marked_by]
-                options = MarkingType.values().toList()
+                options = MarkingType.entries
                 enabled = props.uiState.markingTypeEnabled
                 itemLabel = { markingType ->
                     val text = if(markingType == MarkingType.PEERS){

@@ -137,7 +137,8 @@ fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
         },
         onClickAddCourseBlock = {
             newCourseBlockSheetVisible = true
-        }
+        },
+        onClickTerminology = viewModel::onClickTerminology,
     )
 
 }

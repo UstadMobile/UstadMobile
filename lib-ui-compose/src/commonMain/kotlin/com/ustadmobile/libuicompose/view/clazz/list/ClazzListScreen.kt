@@ -250,6 +250,8 @@ fun ClazzListItem(
 //                }
             }
 
+            /*
+             * Disabled until aggregated entities are implemented for this
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -265,6 +267,7 @@ fun ClazzListItem(
                     )
                 )
             }
+             */
         }
     }
 }
