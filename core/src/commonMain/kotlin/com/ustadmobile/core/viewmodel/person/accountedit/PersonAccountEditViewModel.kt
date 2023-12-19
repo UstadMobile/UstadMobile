@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel.person.accountedit
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.AuthManager
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -67,6 +68,8 @@ class PersonAccountEditViewModel(
     val uiState: Flow<PersonAccountEditUiState> = _uiState.asStateFlow()
 
     private val authManager: AuthManager by on(accountManager.activeEndpoint).instance()
+
+    private val validateUsernameUseCase = ValidateUsernameUseCase()
 
     init {
         _appUiState.value = AppUiState(
@@ -165,6 +168,14 @@ class PersonAccountEditViewModel(
             if(entity.username != null && entity.username.isBlank()) {
                 _uiState.update { prev ->
                     prev.copy(usernameError = systemImpl.getString(MR.strings.field_required_prompt))
+                }
+            }
+
+            val validateUsername = entity.username?.let { validateUsernameUseCase(it) }
+
+            if(validateUsername == null) {
+                _uiState.update { prev ->
+                    prev.copy(usernameError = systemImpl.getString(MR.strings.invalid))
                 }
             }
 
