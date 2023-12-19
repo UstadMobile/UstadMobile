@@ -129,6 +129,8 @@ import com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit
 import com.ustadmobile.view.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditScreen
 import com.ustadmobile.wrappers.muitelinput.MuiTelInputDemo
 import com.ustadmobile.core.viewmodel.courseblock.textblockdetail.TextBlockDetailViewModel
+import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
+import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.view.courseblock.textblockdetail.TextBlockDetailScreen
 import com.ustadmobile.wrappers.linkify.LinkifyPreview
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
@@ -140,6 +142,8 @@ import com.ustadmobile.view.person.registerageredirect.RegisterAgeRedirectScreen
 import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
 import com.ustadmobile.view.site.termsdetail.SiteTermsDetailScreen
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
+import com.ustadmobile.view.message.conversationlist.ConversationListScreen
+import com.ustadmobile.view.message.list.MessageListScreen
 import com.ustadmobile.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 
 
@@ -373,8 +377,9 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("LinkifyPreview", "Linkify", LinkifyPreview),
     UstadScreen(RegisterAgeRedirectViewModel.DEST_NAME, "AgeRedirect", RegisterAgeRedirectScreen),
     UstadScreen(SiteTermsDetailViewModel.DEST_NAME, "Terms", SiteTermsDetailScreen),
-//    UstadScreen(ConversationListViewModel.DEST_NAME, "ConversationList", ConversationListScreen),
-//    UstadScreen(MessageListViewModel.DEST_NAME, "MessageList", MessageListScreen),
+    UstadScreen(ConversationListViewModel.DEST_NAME, "ConversationList", ConversationListScreen),
+    UstadScreen(ConversationListViewModel.DEST_NAME_HOME, "ConversationListHome", ConversationListScreen),
+    UstadScreen(MessageListViewModel.DEST_NAME, "MessageList", MessageListScreen),
 )
 
 //Here as per the MUI showcase template
