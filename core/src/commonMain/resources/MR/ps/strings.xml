@@ -107,7 +107,6 @@
     <string name="deleting">ړنګوی</string>
     <string name="share_application">د اپلیکیشن شریکول</string>
     <string name="share">شریک کول</string>
-    <string name="location_permission_title">د موقعیت اجازې اړین دی</string>
     <string name="location_permission_message">دا اپلیکیشن د ځای موقعیت اجازې ته اړتیا لری ترڅو له نږدې کارونکو سره په لوړ سرعت نالیکی شریکول فعاله شی.</string>
     <string name="download_summary_title">٪ فعاله کښته کیدل</string>
     <string name="download_pause_download">ځنډ</string>
@@ -119,9 +118,7 @@
     <string name="entry_details_license">جواز:</string>
     <string name="file_not_found">دوتنه و نه موندل شو</string>
     <string name="multiple_choice">ګڼ ځوابه</string>
-    <string name="content_choose_file">دوتنه غوره کړئ</string>
     <string name="video">ویډیو</string>
-    <string name="location_permission_details">دا اپلیکیشن د نورو نږدې کاروونکو د پیدا کولو لپاره له بلوټوت او وایفای څخه کار اخلی. دا اپلیکیشن بیا کولای شی له نږدی کاروونکو سره وصل شی او محتویات پرته له انټرنټ څخه په لوړ سرعت سره کښته کړی. د دې لپاره چې د دې سکن پایلی څخه ستاسو د موقعیت د مالومولو لپاره ګټه اخیستل کیدای شی، ځکه نو تاسو باید د ځای د موقعیت اجازه ورکړئ ترڅو دا بڼه فعاله شی. دا اپلیکیشن د دې سکن/پلټنې پایله له ځانه سره خوندی نه ساتی او په هیڅ وجه ستاسو د ځای موقعیت نه ثبتوی. دا اپلیکیشن له خلاص زیرمه کوډ (Open source code) څخه جوړه شوې ده چې په دې پته یې لیدلی شئ: github.com/UstadMobile/UstadMobile</string>
     <string name="download_state_download">
         <b>کښته کول</b> ټول %1$s توکي، چې ستاسو په وزله کې ټولټال %2$s ځای نیسی.</string>
     <string name="download_state_downloading">
@@ -294,7 +291,6 @@
     <string name="hide">پټول</string>
     <string name="unhide">ښکاره کول</string>
     <string name="update_content">د محتویاتو اوسمهالول</string>
-    <string name="underRegistrationAgeError">له ۱۳ کلنو کښته ماشومانو ته پخپله راجسټل کولو اجازه نشته. هیله ده له خپل ښوونکی څخه وغواړئ چې تاسو راجسټر کړی.</string>
     <string name="line_chart" value="101">لیک چارټ</string>
     <string name="content_average_duration" value="201">د محتویاتو کارول - منځنۍ کچه په هرې غونډې</string>
     <string name="number_active_users" value="204">د محتویاتو کارول - د فعاله کاروونکو شمیر</string>
