@@ -23,16 +23,23 @@ import kotlinx.serialization.json.Json
  *
  * This is valid for the Message ID listed in TerminologyKeys
  *
+ * @param terminologyEntries List of terminology entries (e.g. parsed)
+ * @param terminologyKey key that can be used to check for invalidation, normally would be linked
+ *        to CourseTerminology entity tag.
  */
 class CourseTerminologyStrings(
-    private val terminologyEntries: List<TerminologyEntry>
+    private val terminologyEntries: List<TerminologyEntry>,
+    val terminologyKey: Any? = null,
 ) {
 
     constructor(
         courseTerminology: CourseTerminology,
         systemImpl: UstadMobileSystemImpl,
         json: Json,
-    ) : this(courseTerminology.toTerminologyEntries(json, systemImpl))
+    ) : this(
+        terminologyEntries = courseTerminology.toTerminologyEntries(json, systemImpl),
+        terminologyKey = courseTerminology.ctLct
+    )
 
 
     operator fun get(messageId: StringResource) : String? {

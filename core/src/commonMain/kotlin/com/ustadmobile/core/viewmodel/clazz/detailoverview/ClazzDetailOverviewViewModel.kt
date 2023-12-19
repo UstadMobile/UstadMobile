@@ -11,7 +11,9 @@ import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
+import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
 import com.ustadmobile.core.viewmodel.courseblock.textblockdetail.TextBlockDetailViewModel
@@ -37,10 +39,11 @@ data class ClazzDetailOverviewUiState(
 
     val collapsedBlockUids: Set<Long> = emptySet(),
 
+    val terminologyStrings: CourseTerminologyStrings? = null,
+
 ) {
     val clazzSchoolUidVisible: Boolean
-        get() = clazz?.clazzSchoolUid != null
-                && clazz.clazzSchoolUid != 0L
+        get() = clazz?.clazzSchoolUid != null && clazz.clazzSchoolUid != 0L
 
     val clazzDateVisible: Boolean
         get() = clazz?.clazzStartTime.isDateSet()
@@ -48,6 +51,16 @@ data class ClazzDetailOverviewUiState(
 
     val clazzHolidayCalendarVisible: Boolean
         get() = clazz?.clazzHolidayCalendar != null
+
+    val numStudents: Int
+        get() = clazz?.numStudents ?: 0
+
+    val numTeachers: Int
+        get() = clazz?.numTeachers ?: 0
+
+    val membersString: String
+        get() = "${terminologyStrings?.get(MR.strings.teachers_literal) ?: ""}: $numTeachers, " +
+                "${terminologyStrings?.get(MR.strings.students) ?: ""}: $numStudents"
 
 }
 
@@ -101,6 +114,16 @@ class ClazzDetailOverviewViewModel(
                         _uiState.update { prev ->
                             prev.copy(clazz = it)
                         }
+
+                        parseAndUpdateTerminologyStringsIfNeeded(
+                            currentTerminologyStrings = _uiState.value.terminologyStrings,
+                            terminology = it?.terminology,
+                            json = json,
+                            systemImpl = systemImpl,
+                        ) {
+                            _uiState.update { prev -> prev.copy(terminologyStrings = it) }
+                        }
+
                         _appUiState.update { prev ->
                             prev.copy(title = it?.clazzName ?: "")
                         }
@@ -155,7 +178,7 @@ class ClazzDetailOverviewViewModel(
         }
     }
 
-    fun onClickEdit() {
+    private fun onClickEdit() {
         navController.navigate(ClazzEditViewModel.DEST_NAME,
             mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString()))
     }
