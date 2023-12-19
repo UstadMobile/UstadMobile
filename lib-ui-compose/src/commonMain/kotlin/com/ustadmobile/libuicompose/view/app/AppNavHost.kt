@@ -33,6 +33,7 @@ import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssig
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
+import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
@@ -72,6 +73,7 @@ import com.ustadmobile.libuicompose.view.clazzassignment.submitterdetail.ClazzAs
 import com.ustadmobile.libuicompose.view.clazzenrolment.edit.ClazzEnrolmentEditScreen
 import com.ustadmobile.libuicompose.view.clazzenrolment.list.ClazzEnrolmentListScreen
 import com.ustadmobile.libuicompose.view.clazzlog.attendancelist.ClazzLogListAttendanceScreen
+import com.ustadmobile.libuicompose.view.clazzlog.edit.ClazzLogEditScreen
 import com.ustadmobile.libuicompose.view.clazzlog.editattendance.ClazzLogEditAttendanceScreen
 import com.ustadmobile.libuicompose.view.contententry.list.ContentEntryListScreenForViewModel
 import com.ustadmobile.libuicompose.view.courseblock.textblockdetail.TextBlockDetailScreen
@@ -534,6 +536,13 @@ fun AppNavHost(
                 )
             }
 
+
+            contentScene("/${ClazzLogEditViewModel.DEST_NAME}") { backStackEntry ->
+                ClazzLogEditScreen(
+                    appViewModel(backStackEntry, ClazzLogEditViewModel::class,
+                        ::ClazzLogEditViewModel)
+                )
+            }
         }
     }
 }

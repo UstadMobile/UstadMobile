@@ -12,19 +12,13 @@ import com.ustadmobile.port.android.view.UstadBaseActivity
  * e.g. the app to which the user is granting access permissions).
  *
  */
-class AuthenticatorActivity: UstadBaseActivity(
-
-), IAuthenticatorActivity {
+class AuthenticatorActivity: UstadBaseActivity(), IAuthenticatorActivity {
 
     override var loading: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        val mBinding = DataBindingUtil.setContentView<ActivityWithNavhostBinding>(this,
-//            R.layout.activity_with_navhost)
-
-        //setSupportActionBar(mBinding.mainCollapsingToolbar.toolbar)
     }
 
     override fun finishWithAccountAuthenticatorResult(

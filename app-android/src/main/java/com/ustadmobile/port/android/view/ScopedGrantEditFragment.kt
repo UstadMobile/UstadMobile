@@ -19,13 +19,6 @@ import com.ustadmobile.core.viewmodel.ScopedGrantEditUiState
 import dev.icerock.moko.resources.compose.stringResource as mrStringResource
 
 
-interface ScopedGrantEditFragmentEventHandler {
-
-}
-
-class ScopedGrantEditFragment: UstadBaseMvvmFragment() {
-
-}
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
