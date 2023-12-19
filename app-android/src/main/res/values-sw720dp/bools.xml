@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <bool name="orientation_portrait">false</bool>
-    <bool name="menu_preview_visible">true</bool>
-    <bool name="menu_directionality_visible">true</bool>
-    <bool name="menu_pages_visible">true</bool>
-    <bool name="isTablet">true</bool>
-</resources>

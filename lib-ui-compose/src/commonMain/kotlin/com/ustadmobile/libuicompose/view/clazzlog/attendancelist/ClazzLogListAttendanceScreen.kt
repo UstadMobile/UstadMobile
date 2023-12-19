@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceUiState
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import java.util.*
 import com.ustadmobile.core.schedule.totalAttendeeStatusRecorded

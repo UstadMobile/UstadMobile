@@ -538,6 +538,13 @@ fun AppNavHost(
                 )
             }
 
+
+            contentScene("/${ClazzLogEditViewModel.DEST_NAME}") { backStackEntry ->
+                ClazzLogEditScreen(
+                    appViewModel(backStackEntry, ClazzLogEditViewModel::class,
+                        ::ClazzLogEditViewModel)
+                )
+            }
             ConversationListViewModel.ALL_DEST_NAMES.forEach { destName ->
                 contentScene("/$destName") { backStackEntry ->
                     ConversationListScreen(

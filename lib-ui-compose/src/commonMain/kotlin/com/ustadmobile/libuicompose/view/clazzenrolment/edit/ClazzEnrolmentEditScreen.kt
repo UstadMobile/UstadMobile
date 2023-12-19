@@ -22,8 +22,6 @@ import com.ustadmobile.libuicompose.components.UstadDateField
 import com.ustadmobile.libuicompose.components.UstadExposedDropDownMenuField
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
-import com.ustadmobile.libuicompose.util.compose.courseTerminologyEntryResource
-import com.ustadmobile.libuicompose.util.compose.rememberCourseTerminologyEntries
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
@@ -48,8 +46,6 @@ fun ClazzEnrolmentEditScreen(
     onClazzEnrolmentChanged: (ClazzEnrolmentWithLeavingReason?) -> Unit = {},
 ) {
 
-    val terminologyEntries = rememberCourseTerminologyEntries(uiState.courseTerminology)
-
     Column(
         modifier = Modifier
     )  {
@@ -65,10 +61,7 @@ fun ClazzEnrolmentEditScreen(
                     MR.strings.teacher
                 }
 
-                courseTerminologyEntryResource(
-                    terminologyEntries = terminologyEntries,
-                    stringResource = messageId
-                )
+                uiState.courseTerminology?.get(messageId) ?: stringResource(messageId)
             },
             options = uiState.roleOptions,
             onOptionSelected = {

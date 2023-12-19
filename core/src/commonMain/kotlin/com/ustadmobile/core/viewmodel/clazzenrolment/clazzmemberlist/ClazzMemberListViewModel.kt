@@ -15,7 +15,6 @@ import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
-import com.ustadmobile.core.viewmodel.clazz.collectClazzNameAndUpdateTitle
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
@@ -23,6 +22,7 @@ import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
@@ -142,7 +142,20 @@ class ClazzMemberListViewModel(
 
         viewModelScope.launch {
             launch {
-                collectClazzNameAndUpdateTitle(clazzUid, activeDb, _appUiState)
+                activeRepo.clazzDao.getClazzNameAndTerminologyAsFlow(clazzUid).collect { nameAndTerminology ->
+                    parseAndUpdateTerminologyStringsIfNeeded(
+                        currentTerminologyStrings = _uiState.value.terminologyStrings,
+                        terminology = nameAndTerminology?.terminology,
+                        json = json,
+                        systemImpl = systemImpl,
+                    ) {
+                        _uiState.update { prev -> prev.copy(terminologyStrings = it) }
+                    }
+
+                    _appUiState.update { prev ->
+                        prev.copy(title = nameAndTerminology?.clazzName ?: "")
+                    }
+                }
             }
 
             _uiState.whenSubscribed {

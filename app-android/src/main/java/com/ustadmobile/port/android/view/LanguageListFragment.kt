@@ -17,10 +17,6 @@ import com.ustadmobile.core.viewmodel.LanguageListUiState
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.view.composable.UstadListSortHeader
 
-class LanguageListFragment : UstadBaseMvvmFragment() {
-
-}
-
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun LanguageListScreen(
