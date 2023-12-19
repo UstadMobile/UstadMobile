@@ -22,8 +22,11 @@ expect abstract class PersonDao : BaseDao<Person> {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insertOrReplace(person: Person)
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.HTTP_OR_THROW,
+    )
     @Query("SELECT COUNT(*) FROM Person where Person.username = :username")
-    abstract suspend fun findByUsernameCount(username: String): Int
+    abstract suspend fun countUsername(username: String): Int
 
 
     @Query("SELECT EXISTS(SELECT token FROM AccessToken WHERE token = :token " +

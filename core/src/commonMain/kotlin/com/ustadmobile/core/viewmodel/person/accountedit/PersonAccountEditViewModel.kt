@@ -5,7 +5,6 @@ import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
-import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.ext.withDoorTransactionAsync
@@ -188,20 +187,32 @@ class PersonAccountEditViewModel(
             if(entity.username != null && entity.newPassword != null) {
                 //This is a registration
                 try {
-                    activeRepo.withDoorTransactionAsync {
-                        authManager.setAuth(entityUidArg, entity.newPassword)
-                        val numChanges = activeRepo.personDao.updateUsername(
-                            personUid = entityUidArg,
-                            username = entity.username,
-                            currentTime = systemTimeInMillis())
+                    val usernameCount = activeRepo.personDao.countUsername(entity.username)
+                    if(usernameCount == 0) {
+                        activeRepo.withDoorTransactionAsync {
+                            authManager.setAuth(entityUidArg, entity.newPassword)
+                            val numChanges = activeRepo.personDao.updateUsername(
+                                personUid = entityUidArg,
+                                username = entity.username,
+                                currentTime = systemTimeInMillis())
 
-                        Napier.e("Updated username: $numChanges changes")
+                            Napier.e("Updated username: $numChanges changes")
+                        }
+
+                        finishWithResult(null)
+                    }else {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                usernameError = systemImpl.getString(MR.strings.person_exists)
+                            )
+                        }
                     }
-
-                    finishWithResult(null)
                 }catch(e: Exception) {
-                    e.printStackTrace()
-                    snackDispatcher.showSnackBar(Snack("Error: $e"))
+                    _uiState.update { prev ->
+                        prev.copy(
+                            usernameError = systemImpl.getString(MR.strings.login_network_error)
+                        )
+                    }
                 }finally {
                     loadingState = LoadingUiState.NOT_LOADING
                     _uiState.update { prev ->
