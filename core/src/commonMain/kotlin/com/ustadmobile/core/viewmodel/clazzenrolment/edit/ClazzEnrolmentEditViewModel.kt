@@ -5,6 +5,7 @@ import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCour
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.view.UstadView
@@ -12,7 +13,6 @@ import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
-import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -34,7 +34,7 @@ data class ClazzEnrolmentEditUiState(
 
     val fieldsEnabled: Boolean = false,
 
-    val courseTerminology: CourseTerminology? = null,
+    val courseTerminology: CourseTerminologyStrings? = null,
 
     val roleOptions: List<Int> = listOf(ClazzEnrolment.ROLE_STUDENT, ClazzEnrolment.ROLE_TEACHER),
 
@@ -113,6 +113,11 @@ class ClazzEnrolmentEditViewModel(
             val canAddStudent = async {
                 userHasPermission(Role.PERMISSION_CLAZZ_ADD_STUDENT)
             }
+            val terminology = async {
+                activeRepo.courseTerminologyDao.getTerminologyForClazz(
+                    _uiState.value.clazzEnrolment?.clazzEnrolmentClazzUid ?: 0
+                )
+            }
 
             val roleOptions = buildList {
                 if(canAddStudent.await())
@@ -122,10 +127,15 @@ class ClazzEnrolmentEditViewModel(
                     add(ClazzEnrolment.ROLE_TEACHER)
             }
 
+            val terminologyStrings = terminology.await()?.let {
+                CourseTerminologyStrings(it, systemImpl, json)
+            }
+
             _uiState.update { prev ->
                 prev.copy(
                     roleOptions = roleOptions,
-                    fieldsEnabled = true
+                    fieldsEnabled = true,
+                    courseTerminology = terminologyStrings,
                 )
             }
 
