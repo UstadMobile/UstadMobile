@@ -1,7 +1,7 @@
 package com.ustadmobile.libcache.okhttp
 
 import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.libcache.NapierLoggingAdapter
+import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheImpl
 import com.ustadmobile.libcache.base64.encodeBase64

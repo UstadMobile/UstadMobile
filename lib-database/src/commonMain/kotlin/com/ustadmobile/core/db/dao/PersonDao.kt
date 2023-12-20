@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.dao.PersonDaoCommon.SQL_SELECT_LIST_WITH_PERMISSI
 import app.cash.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.composites.PersonAndListDisplayDetails
 import com.ustadmobile.lib.db.composites.PersonNames
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Person.Companion.FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
@@ -176,7 +177,7 @@ expect abstract class PersonDao : BaseDao<Person> {
         accountPersonUid: Long,
         sortOrder: Int,
         searchText: String? = "%"
-    ): List<Person>
+    ): List<PersonAndListDisplayDetails>
 
     @Query(SQL_SELECT_LIST_WITH_PERMISSION)
     @HttpAccessible(
@@ -196,7 +197,7 @@ expect abstract class PersonDao : BaseDao<Person> {
         accountPersonUid: Long,
         sortOrder: Int,
         searchText: String? = "%"
-    ): PagingSource<Int, PersonWithDisplayDetails>
+    ): PagingSource<Int, PersonAndListDisplayDetails>
 
     @Query("""
         SELECT Person.*, PersonParentJoin.* 
@@ -210,11 +211,11 @@ expect abstract class PersonDao : BaseDao<Person> {
          WHERE Person.personUid = :personUid
         """)
     @QueryLiveTables(["Person", "PersonParentJoin"])
-    abstract fun findByUidWithDisplayDetailsLive(personUid: Long, activeUserPersonUid: Long): Flow<PersonWithPersonParentJoin?>
+    abstract fun findByUidWithDisplayDetailsLive(personUid: Long, activeUserPersonUid: Long): Flow<PersonAndDisplayDetail?>
 
 
     @Query("""
-        SELECT Person.*, PersonParentJoin.* 
+        SELECT Person.*, PersonParentJoin.* , PersonPicture.*
           FROM Person
                LEFT JOIN PersonParentJoin 
                     ON ppjUid =
@@ -222,7 +223,9 @@ expect abstract class PersonDao : BaseDao<Person> {
                        FROM PersonParentJoin
                       WHERE ppjMinorPersonUid = :personUid 
                         AND ppjParentPersonUid = :activeUserPersonUid 
-                      LIMIT 1)     
+                      LIMIT 1)  
+               LEFT JOIN PersonPicture
+                    ON PersonPicture.personPictureUid = :personUid     
          WHERE Person.personUid = :personUid
         """)
     @QueryLiveTables(["Person", "PersonParentJoin"])
@@ -230,7 +233,7 @@ expect abstract class PersonDao : BaseDao<Person> {
     abstract fun findByUidWithDisplayDetailsFlow(
         personUid: Long,
         activeUserPersonUid: Long
-    ): Flow<PersonWithPersonParentJoin?>
+    ): Flow<PersonAndDisplayDetail?>
 
 
     @Query("SELECT * FROM Person")

@@ -25,6 +25,8 @@ import com.ustadmobile.core.impl.locale.StringProviderJvm
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJvm
 import com.ustadmobile.core.schedule.initQuartzDb
+import com.ustadmobile.core.uri.UriHelper
+import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.door.DatabaseBuilder
@@ -43,6 +45,14 @@ import java.util.Locale
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.logging.NapierLoggingAdapter
+import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
@@ -62,6 +72,8 @@ const val TAG_APP_HOME = "AppHome"
 
 const val TAG_DATA_DIR = "DataDir"
 
+const val TAG_CACHE_DIR = "CacheDir"
+
 fun ustadAppHomeDir(): File {
     return System.getProperty("app_home")?.let { File(it) } ?: File(System.getProperty("user.dir"))
 }
@@ -71,26 +83,78 @@ fun ustadAppDataDir(): File {
 }
 
 val DesktopHttpModule = DI.Module("Desktop-HTTP") {
+    val cacheLogger = NapierLoggingAdapter()
+
+    bind<File>(tag = TAG_CACHE_DIR) with singleton {
+        val dataDir: File = instance(tag = TAG_DATA_DIR)
+        File(dataDir, "httpfiles").also {
+            if(!it.exists())
+                it.mkdirs()
+        }
+    }
+
+    bind<UriHelper>() with singleton {
+        UriHelperJvm(
+            mimeTypeHelperImpl = FileMimeTypeHelperImpl(),
+            httpClient = instance(),
+            okHttpClient = instance()
+        )
+    }
+
     bind<UstadCache>() with singleton {
         val dataDir: File = instance(tag = TAG_DATA_DIR)
+        dataDir.takeIf { !it.exists() }?.mkdirs()
+
         val dbUrl = "jdbc:sqlite:(datadir)/ustadcache.db"
             .replace("(datadir)", dataDir.absolutePath)
         UstadCacheBuilder(
             dbUrl = dbUrl,
             storagePath = Path(
                 File(dataDir, "httpfiles").absolutePath.toString()
-            )
+            ),
+            logger = cacheLogger,
+
         ).build()
     }
 
     bind<OkHttpClient>() with singleton {
-        OkHttpClient.Builder()
-            .dispatcher(Dispatcher().also {
-                it.maxRequests = 30
-                it.maxRequestsPerHost = 10
-            })
+        val interceptorTmpDir = instance<File>(tag = TAG_CACHE_DIR)
 
+        OkHttpClient.Builder()
+            .dispatcher(
+                Dispatcher().also {
+                    it.maxRequests = 30
+                    it.maxRequestsPerHost = 10
+                }
+            )
+            .addInterceptor(
+                UstadCacheInterceptor(
+                    cache = instance(),
+                    cacheDir = interceptorTmpDir,
+                    logger = cacheLogger,
+                )
+            )
             .build()
+    }
+
+
+    bind<HttpClient>() with singleton {
+        HttpClient(OkHttp) {
+
+            install(ContentNegotiation) {
+                json(json = instance())
+            }
+            install(HttpTimeout)
+
+            val dispatcher = Dispatcher()
+            dispatcher.maxRequests = 30
+            dispatcher.maxRequestsPerHost = 10
+
+            engine {
+                preconfigured = instance()
+            }
+
+        }
     }
 
 }

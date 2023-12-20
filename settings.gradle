@@ -17,7 +17,7 @@ dependencyResolutionManagement {
             version("version_androidx_core", "1.12.0")
             version("version_kotlin", "1.9.21")
             version("version_okhttp", "4.12.0")
-            version("version_door", "0.70b27")
+            version("version_door", "0.70b29")
             version("version_coroutines", "1.7.3")
             version("version_atomicfu", "0.23.1")
             version("version_kotlinx_io", "0.3.0")
@@ -135,6 +135,7 @@ dependencyResolutionManagement {
             library("kamel", "media.kamel", "kamel-image").versionRef("version_kamel")
             library("mockwebserver", "com.squareup.okhttp3", "mockwebserver").versionRef("version_mockwebserver")
             library("ktor-client-core", "io.ktor", "ktor-client-core").versionRef("version_ktor")
+            library("ktor-client-okhttp", "io.ktor", "ktor-client-okhttp").versionRef("version_ktor")
             library("mockito-kotlin", "org.mockito.kotlin", "mockito-kotlin").versionRef("version_mockito_kotlin")
         }
     }

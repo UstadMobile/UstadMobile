@@ -5,10 +5,9 @@ import com.ustadmobile.core.account.Endpoint
 interface SaveBlobUseCase {
 
     data class BlobToSave(
-        val tableId: Int,
         val uid: Long,
         //The uri of the data on the device (e.g. android Uri, Java.net.URI, JS blob: uri)
-        val localUri: String
+        val localUri: String?
     )
 
     /**
@@ -25,6 +24,7 @@ interface SaveBlobUseCase {
      */
     suspend operator fun invoke(
         endpoint: Endpoint,
+        tableId: Int,
         blobs: List<BlobToSave>,
         //Could add params if needed e.g. resolution etc.
     )

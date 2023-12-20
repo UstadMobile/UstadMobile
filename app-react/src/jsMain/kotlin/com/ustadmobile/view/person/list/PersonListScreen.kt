@@ -12,7 +12,8 @@ import com.ustadmobile.core.viewmodel.person.list.PersonListUiState
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
-import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
+import com.ustadmobile.lib.db.composites.PersonAndListDisplayDetails
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.mui.components.UstadAddListItem
 import com.ustadmobile.mui.components.UstadListSortHeader
 import com.ustadmobile.view.components.UstadFab
@@ -36,7 +37,7 @@ import react.router.useLocation
 external interface PersonListProps: Props {
     var uiState: PersonListUiState
     var onSortOrderChanged: (SortOrderOption) -> Unit
-    var onListItemClick: (PersonWithDisplayDetails) -> Unit
+    var onListItemClick: (Person) -> Unit
     var onClickAddItem: () -> Unit
 }
 
@@ -79,22 +80,23 @@ val PersonListComponent2 = FC<PersonListProps> { props ->
 
             infiniteQueryPagingItems(
                 items = infiniteQueryResult,
-                key = { it.personUid.toString() }
-            ) { person ->
+                key = { it.person?.personUid?.toString() ?: "0" }
+            ) { personAndDetails ->
                 ListItem.create {
                     ListItemButton{
                         onClick = {
-                            person?.also { props.onListItemClick(it) }
+                            personAndDetails?.person?.also { props.onListItemClick(it) }
                         }
 
                         ListItemIcon {
                             UstadPersonAvatar {
-                                personUid = person?.personUid ?: 0
+                                personUid = personAndDetails?.person?.personUid ?: 0
+                                pictureUri = personAndDetails?.picture?.personPictureUri
                             }
                         }
 
                         ListItemText {
-                            primary = ReactNode("${person?.firstNames} ${person?.lastName}")
+                            primary = ReactNode(personAndDetails?.person?.fullName() ?: "")
                         }
                     }
                 }
@@ -108,10 +110,12 @@ val PersonListComponent2 = FC<PersonListProps> { props ->
 }
 
 val demoPersonList = (0..150).map {
-    PersonWithDisplayDetails().apply {
-        firstNames = "Person"
-        lastName = "$it"
-        personUid = it.toLong()
+    PersonAndListDisplayDetails().apply {
+        person = Person().apply {
+            firstNames = "Person"
+            lastName = "$it"
+            personUid = it.toLong()
+        }
     }
 }
 

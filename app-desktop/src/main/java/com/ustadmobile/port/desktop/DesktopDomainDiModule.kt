@@ -14,9 +14,17 @@ import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCaseJvm
+import com.ustadmobile.core.domain.saveblob.SaveBlobUseCase
+import com.ustadmobile.core.domain.saveblob.SaveBlobUseCaseJvm
+import com.ustadmobile.core.domain.saveblob.adapters.PersonPictureAdapter
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCaseJvm
 import org.kodein.di.instance
+import org.kodein.di.singleton
+import java.io.File
+import kotlinx.io.files.Path
+import org.kodein.di.direct
+import org.kodein.di.on
 
 val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
     bind<OpenExternalLinkUseCase>() with provider {
@@ -45,6 +53,21 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
     bind<OnClickEmailUseCase>() with provider {
         OnClickEmailUseCaseJvm()
+    }
+
+    bind<SaveBlobUseCase>() with singleton {
+        val cacheDir: File = instance(tag = TAG_CACHE_DIR)
+        SaveBlobUseCaseJvm(
+            cache = instance(),
+            uriHelper = instance(),
+            tmpDir = Path(cacheDir.absolutePath),
+            dbProvider = { endpoint, tag ->
+                di.on(endpoint).direct.instance(tag = tag)
+            },
+            adapterProvider = {
+                PersonPictureAdapter()
+            }
+        )
     }
 
 }

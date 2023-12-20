@@ -43,6 +43,7 @@ dependencies {
     api(libs.precompose.viewmodel)
     implementation(libs.libphonenumber.google)
     implementation(libs.kamel)
+    implementation(libs.ktor.client.okhttp)
 }
 
 compose.desktop {

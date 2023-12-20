@@ -1,6 +1,5 @@
-package com.ustadmobile.libcache
+package com.ustadmobile.libcache.logging
 
-import com.ustadmobile.libcache.logging.UstadCacheLogger
 import io.github.aakira.napier.Napier
 
 class NapierLoggingAdapter: UstadCacheLogger {

@@ -3,13 +3,17 @@ package com.ustadmobile.libuicompose.view.person.detail
 //import androidx.compose.material.icons.filled.Passkey
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -34,12 +38,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailUiState
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
+import com.ustadmobile.libuicompose.components.UstadAsyncImage
 import com.ustadmobile.libuicompose.components.UstadEditHeader
 import com.ustadmobile.libuicompose.components.UstadQuickActionButton
 import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
@@ -82,21 +89,22 @@ fun PersonDetailScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     )  {
-                                 // TODO error
-//        val personPictureUri = rememberResolvedAttachmentUri(uiState.personPicture?.personPictureUri)
-
-//        if(personPictureUri != null) {
-              // TODO error
-//            SubcomposeAsyncImage(
-//                model = personPictureUri,
-//                contentDescription = null,
-//                contentScale = ContentScale.Crop,
-//                modifier = Modifier
-//                    .height(256.dp)
-//                    .fillMaxWidth()
-//            )
-//        }
-
+        uiState.person?.personPicture?.personPictureUri?.also {personPictureUri ->
+            Spacer(Modifier.height(16.dp))
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                UstadAsyncImage(
+                    uri = personPictureUri,
+                    contentDescription = "",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.clip(CircleShape).width(256.dp).height(256.dp)
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Divider()
+        }
 
         QuickActionBar(
             uiState,
@@ -219,9 +227,11 @@ private fun DetailFields(uiState: PersonDetailUiState){
 
         val gender = stringIdMapResource(
             map = PersonConstants.GENDER_MESSAGE_ID_MAP,
-            key = uiState.person?.gender ?: 1)
+            key = uiState.person?.person?.gender ?: 1)
 
-        val dateOfBirth = rememberFormattedDate(uiState.person?.dateOfBirth ?: 0, "UTC")
+        val dateOfBirth = rememberFormattedDate(
+            uiState.person?.person?.dateOfBirth ?: 0, "UTC"
+        )
 
         if (uiState.dateOfBirthVisible){
             ListItem(
@@ -251,7 +261,7 @@ private fun DetailFields(uiState: PersonDetailUiState){
                         contentDescription = null
                     )
                 },
-                headlineContent = { Text(uiState.person?.personOrgId ?: "")},
+                headlineContent = { Text(uiState.person?.person?.personOrgId ?: "")},
                 supportingContent = { Text(stringResource(MR.strings.organization_id)) }
             )
         }
@@ -264,7 +274,7 @@ private fun DetailFields(uiState: PersonDetailUiState){
                         contentDescription = null
                     )
                 },
-                headlineContent = { Text(uiState.person?.username ?: "")},
+                headlineContent = { Text(uiState.person?.person?.username ?: "")},
                 supportingContent = { Text(stringResource(MR.strings.username)) }
             )
         }
@@ -293,7 +303,7 @@ private fun ContactDetails(
                         contentDescription = null
                     )
                 },
-                headlineContent = { Text(uiState.displayPhoneNum ?: uiState.person?.phoneNum ?: "")},
+                headlineContent = { Text(uiState.displayPhoneNum ?: uiState.person?.person?.phoneNum ?: "")},
                 supportingContent = { Text(stringResource(MR.strings.phone)) },
                 trailingContent = if(uiState.sendSmsVisible) {
                     {
@@ -323,7 +333,7 @@ private fun ContactDetails(
                         contentDescription = null
                     )
                 },
-                headlineContent = { Text(uiState.person?.emailAddr ?: "")},
+                headlineContent = { Text(uiState.person?.person?.emailAddr ?: "")},
                 supportingContent = { Text(stringResource(MR.strings.email)) }
             )
         }
@@ -336,7 +346,7 @@ private fun ContactDetails(
                         contentDescription = null
                     )
                 },
-                headlineContent = { Text(uiState.person?.personAddress ?: "")},
+                headlineContent = { Text(uiState.person?.person?.personAddress ?: "")},
                 supportingContent = { Text(stringResource(MR.strings.address)) }
             )
         }

@@ -287,7 +287,7 @@ fun Application.umRestApplication(
                 dbUrl = dbUrl,
                 storagePath = Path(
                     File(appConfig.absoluteDataDir(), "httpfiles").absolutePath.toString()
-                )
+                ),
             ).build()
         }
 

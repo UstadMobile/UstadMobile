@@ -313,7 +313,7 @@ dependencies {
 
     //KTOR
     implementation "io.ktor:ktor-serialization-gson:$version_ktor"
-    implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+    implementation libs.ktor.client.okhttp
     implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
     implementation "io.ktor:ktor-client-cio:$version_ktor"
 

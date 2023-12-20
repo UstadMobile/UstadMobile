@@ -1,13 +1,19 @@
 package com.ustadmobile.libuicompose.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material3.Card
 import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.darkrockstudios.libraries.mpfilepicker.FilePicker
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
@@ -34,9 +41,13 @@ fun asyncPainterForUri(
     uri: URI
 ): Resource<Painter> {
     return if(uri.scheme == "file") {
-        asyncPainterResource(File(uri))
+        asyncPainterResource(
+            data = remember(uri) { File(uri) }
+        )
     }else {
-        asyncPainterResource(Url(uri.toString()))
+        asyncPainterResource(
+            data = remember(uri) { Url(uri.toString()) }
+        )
     }
 }
 
@@ -52,9 +63,46 @@ actual fun UstadImageSelectButton(
         imageUri?.let { URI(it) }
     }
 
+    var dialogVisible by remember {
+        mutableStateOf(false)
+    }
+
     var showFilePicker by remember {
         mutableStateOf(false)
     }
+
+    if(dialogVisible) {
+        Dialog(
+            onDismissRequest = {
+                dialogVisible = false
+            }
+        ) {
+            Card(
+                modifier = Modifier.padding(16.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                ListItem(
+                    modifier = Modifier.clickable {
+                        dialogVisible = false
+                        showFilePicker = true
+                    },
+                    headlineContent = {
+                        Text(stringResource(MR.strings.select_file))
+                    }
+                )
+                ListItem(
+                    modifier = Modifier.clickable {
+                        dialogVisible = false
+                        onImageUriChanged(null)
+                    },
+                    headlineContent = {
+                        Text(stringResource(MR.strings.remove_photo))
+                    }
+                )
+            }
+        }
+    }
+
 
     FilePicker(
         show = showFilePicker,
@@ -89,7 +137,7 @@ actual fun UstadImageSelectButton(
             )
         }else {
             IconButton(
-                onClick = { showFilePicker = true },
+                onClick = { dialogVisible = true },
                 content = content
             )
         }

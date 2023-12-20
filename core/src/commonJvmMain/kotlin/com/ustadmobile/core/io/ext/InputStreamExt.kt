@@ -6,6 +6,7 @@ import java.io.InputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import java.security.MessageDigest
 
 /**
  * As per the InputStream spec it is possible that an InputStream might only read up to and
@@ -22,10 +23,10 @@ fun InputStream.readFully(buf: ByteArray, offset: Int = 0, len: Int = buf.size):
              * the stream itself, then there is nothing left. We need to return -1 now. Otherwise
              * we can return the number of bytes actually read.
              */
-            if(totalBytesRead == 0)
-                return -1
+            return if(totalBytesRead == 0)
+                 -1
             else
-                return totalBytesRead
+                totalBytesRead
         }
 
         totalBytesRead += bytesRead
@@ -55,4 +56,15 @@ suspend fun InputStream.writeToFileAsync(destination: File){
 
 fun InputStream.readString(): String{
     return this.bufferedReader().use { it.readText() }
+}
+
+fun InputStream.readSha256(): ByteArray {
+    val digest = MessageDigest.getInstance("SHA-256")
+    val buffer = ByteArray(8192)
+    var bytesRead: Int
+    while(read(buffer).also { bytesRead = it } != -1) {
+        digest.update(buffer, 0, bytesRead)
+    }
+
+    return digest.digest()
 }

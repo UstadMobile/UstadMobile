@@ -117,6 +117,7 @@ class UstadCacheImpl(
                     cacheEntry = CacheEntry(
                         url = entryToStore.request.url,
                         responseBodySha256 = sha256,
+                        statusCode = entryToStore.response.responseCode,
                         responseHeaders = headersStr,
                         cacheFlags = cacheFlags,
                         lastValidated = systemTimeInMillis(),
@@ -250,7 +251,8 @@ class UstadCacheImpl(
                     takeFrom(HttpHeaders.fromString(entry.responseHeaders))
                     header(HEADER_LAST_VALIDATED_TIMESTAMP, entry.lastValidated.toString())
                 },
-                responseBody = body
+                responseBody = body,
+                httpResponseCode = entry.statusCode
             )
         }
 

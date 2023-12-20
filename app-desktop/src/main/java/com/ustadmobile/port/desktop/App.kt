@@ -28,7 +28,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.PREFKEY_LOCAL
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
-import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
 import com.ustadmobile.libuicompose.view.app.APP_TOP_LEVEL_NAV_ITEMS
@@ -100,7 +99,7 @@ fun main() {
         withDI(
             di = DI.from(listOf(
                 DesktopDiModule,
-                CommonJvmDiModule,
+                DesktopHttpModule,
                 DesktopDomainDiModule,
                 commonDomainDiModule(EndpointScope.Default),
             )),

@@ -23,6 +23,7 @@ kotlin {
                 implementation(libs.atomicfu)
                 implementation(libs.kotlinxio.core)
                 implementation(libs.ktor.client.core)
+                implementation(libs.napier)
                 compileOnly(libs.door.room.annotations)
             }
         }
@@ -54,7 +55,6 @@ kotlin {
             dependencies {
                 implementation(libs.mockwebserver)
                 implementation(libs.mockito.kotlin)
-                implementation(libs.napier)
                 implementation(project(":lib-test-common"))
             }
         }

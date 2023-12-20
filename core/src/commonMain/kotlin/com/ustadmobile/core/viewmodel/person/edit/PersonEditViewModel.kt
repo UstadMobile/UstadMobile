@@ -3,6 +3,7 @@ package com.ustadmobile.core.viewmodel.person.edit
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
+import com.ustadmobile.core.domain.saveblob.SaveBlobUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
@@ -31,6 +32,7 @@ import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
@@ -41,6 +43,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 
 data class PersonEditUiState(
 
@@ -148,6 +151,8 @@ class PersonEditViewModel(
 
     private val genderConfig : GenderConfig by instance()
 
+    private val saveBlobUseCase: SaveBlobUseCase? by instanceOrNull()
+
     init {
         loadingState = LoadingUiState.INDETERMINATE
 
@@ -210,7 +215,9 @@ class PersonEditViewModel(
                         uiUpdate = { personPicture ->
                             _uiState.update { it.copy(personPicture = personPicture) }
                         }
-                    )
+                    ).also {
+                        savedStateHandle.setIfNoValueSetYet(INIT_PIC_URI, it?.personPictureUri ?: "")
+                    }
                 }
             )
 
@@ -272,13 +279,12 @@ class PersonEditViewModel(
     }
 
     fun onPersonPictureChanged(pictureUri: String?) {
-        val personPicture: PersonPicture? = pictureUri?.let {
-            PersonPicture().apply {
-                personPictureUid = _uiState.value.personPicture?.personPictureUid ?: 0
-                personPictureUri = pictureUri
-                picTimestamp = systemTimeInMillis()
-            }
+        val personPicture: PersonPicture = PersonPicture().apply {
+            personPictureUid = _uiState.value.personPicture?.personPictureUid ?: 0
+            personPictureUri = pictureUri
+            picTimestamp = systemTimeInMillis()
         }
+
         _uiState.update { prev ->
             prev.copy(
                 personPicture = personPicture
@@ -286,11 +292,7 @@ class PersonEditViewModel(
         }
 
         viewModelScope.launch {
-            if(personPicture != null) {
-                savedStateHandle.setJson(STATE_KEY_PICTURE, PersonPicture.serializer(), personPicture)
-            }else {
-                savedStateHandle[STATE_KEY_PICTURE] = null
-            }
+            savedStateHandle.setJson(STATE_KEY_PICTURE, PersonPicture.serializer(), personPicture)
         }
     }
 
@@ -547,13 +549,33 @@ class PersonEditViewModel(
                 }
 
                 val personPictureVal = _uiState.value.personPicture
-                if(personPictureVal != null) {
-                    personPictureVal.personPicturePersonUid = savePerson.personUid
+                //TODO here: check if uri has actually changed.
 
-                    if(personPictureVal.personPictureUid == 0L) {
-                        activeRepo.personPictureDao.insertAsync(personPictureVal)
-                    }else {
-                        activeRepo.personPictureDao.updateAsync(personPictureVal)
+                if(personPictureVal != null) {
+                    personPictureVal.personPictureUid = savePerson.personUid
+                    personPictureVal.personPicturePersonUid = savePerson.personUid
+                    val initPictureUri = savedStateHandle[INIT_PIC_URI] ?: ""
+                    val personPictureUriVal = personPictureVal.personPictureUri
+                    if(initPictureUri != personPictureUriVal) {
+                        //Save if changed
+                        activeRepo.personPictureDao.upsert(personPictureVal)
+                        GlobalScope.launch {
+                            try {
+                                saveBlobUseCase?.invoke(
+                                    endpoint = accountManager.activeEndpoint,
+                                    tableId = PersonPicture.TABLE_ID,
+                                    blobs = listOf(
+                                        SaveBlobUseCase.BlobToSave(
+                                            uid = savePerson.personUid,
+                                            localUri = personPictureUriVal
+                                        )
+                                    )
+                                )
+                            }catch(e: Exception) {
+                                e.printStackTrace()
+                            }
+
+                        }
                     }
                 }
 
@@ -578,6 +600,7 @@ class PersonEditViewModel(
 
         const val STATE_KEY_PICTURE = "picState"
 
+        const val INIT_PIC_URI = "initPicUri"
 
         const val DEST_NAME = "PersonEditView"
 
