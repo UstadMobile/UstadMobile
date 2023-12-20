@@ -25,7 +25,7 @@ import com.ustadmobile.libcache.db.entities.ResponseBody
     version = 2,
     entities = arrayOf(CacheEntry::class, ResponseBody::class, RequestedEntry::class,),
 )
-abstract class UstadCacheDb : RoomDatabase() {
+expect abstract class UstadCacheDb : RoomDatabase {
 
     abstract val cacheEntryDao: CacheEntryDao
 

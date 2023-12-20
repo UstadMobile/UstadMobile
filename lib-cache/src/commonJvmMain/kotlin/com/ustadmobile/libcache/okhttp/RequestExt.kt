@@ -6,5 +6,5 @@ import okhttp3.Request
 fun Request.mightBeCacheable(
     cacheRequestHeader: RequestCacheControlHeader?
 ) : Boolean {
-    return method.uppercase() == "GET" && !(cacheRequestHeader?.noStore == true)
+    return method.uppercase() == "GET" && cacheRequestHeader?.noStore != true
 }

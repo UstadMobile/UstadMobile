@@ -63,6 +63,7 @@ kotlin {
             dependsOn(commonJvmMain)
 
             dependencies {
+                implementation(libs.androidx.room.ktx)
                 implementation(libs.androidx.room.runtime)
             }
         }

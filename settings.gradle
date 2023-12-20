@@ -116,6 +116,7 @@ dependencyResolutionManagement {
             library("kotlinxio-core", "org.jetbrains.kotlinx", "kotlinx-io-core").versionRef("version_kotlinx_io")
             library("androidx-room-runtime", "androidx.room", "room-runtime").versionRef("version_android_room")
             library("androidx-room-compiler", "androidx.room", "room-compiler").versionRef("version_android_room")
+            library("androidx-room-ktx", "androidx.room", "room-ktx").versionRef("version_android_room")
             library("xmlutil-core", "io.github.pdvrieze.xmlutil", "core").versionRef("version_xmlutil")
             library("xmlutil-core-jvm", "io.github.pdvrieze.xmlutil", "core-jvm").versionRef("version_xmlutil")
             library("xmlutil-serialization", "io.github.pdvrieze.xmlutil", "serialization").versionRef("version_xmlutil")

@@ -23,7 +23,6 @@ import com.ustadmobile.core.contentjob.ContentJobManagerAndroid
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
-import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.*
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -53,10 +52,19 @@ import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.libcache.logging.NapierLoggingAdapter
+import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.io.files.Path
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlConfig
+import okhttp3.Dispatcher
+import okhttp3.OkHttpClient
 import org.acra.config.httpSender
 import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
@@ -72,7 +80,43 @@ class UstadApp : Application(), DIAware{
 
     @OptIn(ExperimentalXmlUtilApi::class)
     override val di: DI by DI.lazy {
-        import(CommonJvmDiModule)
+        bind<OkHttpClient>() with singleton {
+            OkHttpClient.Builder()
+                .dispatcher(
+                    Dispatcher().also {
+                        it.maxRequests = 30
+                        it.maxRequestsPerHost = 10
+                    }
+                )
+                .addInterceptor(
+                    UstadCacheInterceptor(
+                        cache = instance(),
+                        cacheDir = File(applicationContext.filesDir, "httpfiles"),
+                        logger = NapierLoggingAdapter(),
+                    )
+                )
+                .build()
+        }
+
+        bind<HttpClient>() with singleton {
+            HttpClient(OkHttp) {
+
+                install(ContentNegotiation) {
+                    json(json = instance())
+                }
+                install(HttpTimeout)
+
+                val dispatcher = Dispatcher()
+                dispatcher.maxRequests = 30
+                dispatcher.maxRequestsPerHost = 10
+
+                engine {
+                    preconfigured = instance()
+                }
+
+            }
+        }
+
 
         bind<AppConfig>() with singleton {
             BundleAppConfig(appMetaData)
@@ -188,7 +232,8 @@ class UstadApp : Application(), DIAware{
         bind<UstadCache>() with singleton {
             val httpCacheDir = File(applicationContext.filesDir, "httpfiles")
             val storagePath = Path(httpCacheDir.absolutePath)
-            UstadCacheBuilder(applicationContext, storagePath).build()
+            UstadCacheBuilder(applicationContext, storagePath, logger = NapierLoggingAdapter())
+                .build()
         }
 
         bind<ContentImportersManager>() with scoped(EndpointScope.Default).singleton {

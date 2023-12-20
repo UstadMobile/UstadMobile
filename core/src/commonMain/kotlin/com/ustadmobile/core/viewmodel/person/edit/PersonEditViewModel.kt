@@ -549,7 +549,6 @@ class PersonEditViewModel(
                 }
 
                 val personPictureVal = _uiState.value.personPicture
-                //TODO here: check if uri has actually changed.
 
                 if(personPictureVal != null) {
                     personPictureVal.personPictureUid = savePerson.personUid
@@ -558,7 +557,7 @@ class PersonEditViewModel(
                     val personPictureUriVal = personPictureVal.personPictureUri
                     if(initPictureUri != personPictureUriVal) {
                         //Save if changed
-                        activeRepo.personPictureDao.upsert(personPictureVal)
+                        activeDb.personPictureDao.upsert(personPictureVal)
                         GlobalScope.launch {
                             try {
                                 saveBlobUseCase?.invoke(

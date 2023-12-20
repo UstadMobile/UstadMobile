@@ -59,6 +59,9 @@ class UstadCacheInterceptor(
 
     private val logPrefix: String = "OKHttp-CacheInterceptor: "
 
+    @Volatile
+    private var cacheDirChecked = false
+
     /**
      * This runnable will simultaneously write.
      */
@@ -78,6 +81,11 @@ class UstadCacheInterceptor(
                 } ?: throw IllegalStateException()
 
                 responseInStream.use { responseIn ->
+                    if(!cacheDirChecked) {
+                        cacheDir.takeIf { !it.exists() }?.mkdirs()
+                        cacheDirChecked = true
+                    }
+
                     val file = File(cacheDir, UUID.randomUUID().toString())
                     val fileOutStream = file.outputStream()
                     while(!call.isCanceled() &&
