@@ -1,5 +1,7 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
@@ -14,6 +16,9 @@ import kotlinx.coroutines.flow.Flow
 @DoorDao
 @Repository
 expect abstract class PersonPictureDao : BaseDao<PersonPicture> {
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsert(personPicture: PersonPicture)
 
     @Query("""SELECT * FROM PersonPicture 
         WHERE personPicturePersonUid = :personUid
@@ -36,5 +41,21 @@ expect abstract class PersonPictureDao : BaseDao<PersonPicture> {
 
     @Update
     abstract suspend fun updateAsync(personPicture: PersonPicture)
+
+    @Query("""
+        UPDATE PersonPicture
+           SET personPictureLct = :time
+         WHERE personPictureUid = :uid   
+    """)
+    abstract suspend fun updateLct(uid: Long, time: Long)
+
+    @Query("""
+        UPDATE PersonPicture
+           SET personPictureUri = :uri,
+               personPictureLct = :time
+         WHERE personPictureUid = :uid      
+    """)
+    abstract suspend fun updateUri(uid: Long, uri: String?, time: Long)
+
 
 }
