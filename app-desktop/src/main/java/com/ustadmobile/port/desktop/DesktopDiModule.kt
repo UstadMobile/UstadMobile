@@ -41,10 +41,15 @@ import org.kodein.di.singleton
 import java.io.File
 import java.util.Locale
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
+import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.UstadCacheBuilder
+import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlConfig
+import okhttp3.Dispatcher
+import okhttp3.OkHttpClient
 import org.kodein.di.on
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
@@ -63,6 +68,31 @@ fun ustadAppHomeDir(): File {
 
 fun ustadAppDataDir(): File {
     return File(ustadAppHomeDir(), "data")
+}
+
+val DesktopHttpModule = DI.Module("Desktop-HTTP") {
+    bind<UstadCache>() with singleton {
+        val dataDir: File = instance(tag = TAG_DATA_DIR)
+        val dbUrl = "jdbc:sqlite:(datadir)/ustadcache.db"
+            .replace("(datadir)", dataDir.absolutePath)
+        UstadCacheBuilder(
+            dbUrl = dbUrl,
+            storagePath = Path(
+                File(dataDir, "httpfiles").absolutePath.toString()
+            )
+        ).build()
+    }
+
+    bind<OkHttpClient>() with singleton {
+        OkHttpClient.Builder()
+            .dispatcher(Dispatcher().also {
+                it.maxRequests = 30
+                it.maxRequestsPerHost = 10
+            })
+
+            .build()
+    }
+
 }
 
 @OptIn(ExperimentalXmlUtilApi::class)

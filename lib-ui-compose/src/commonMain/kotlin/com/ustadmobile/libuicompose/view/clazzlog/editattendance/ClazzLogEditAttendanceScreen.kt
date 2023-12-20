@@ -5,17 +5,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerScope
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.IconToggleButton
-import androidx.compose.material.ListItem
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
@@ -31,7 +29,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceUiState
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
@@ -40,6 +38,7 @@ import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
 import com.ustadmobile.core.MR
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.libuicompose.components.ClazzLogEditAttendanceToggleGroup
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
@@ -57,7 +56,6 @@ fun ClazzLogEditAttendanceScreen(
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ClazzLogEditAttendanceScreen(
     uiState: ClazzLogEditAttendanceUiState = ClazzLogEditAttendanceUiState(),
@@ -84,8 +82,8 @@ fun ClazzLogEditAttendanceScreen(
                 modifier = Modifier.clickable {
                     onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ATTENDED)
                 },
-                text = { Text(stringResource(MR.strings.mark_all_present)) },
-                icon = {
+                headlineContent = { Text(stringResource(MR.strings.mark_all_present)) },
+                leadingContent = {
                     Icon(
                         Icons.Outlined.LibraryAddCheck,
                         contentDescription = ""
@@ -99,8 +97,8 @@ fun ClazzLogEditAttendanceScreen(
                 modifier = Modifier.clickable {
                     onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ABSENT)
                 },
-                text = { Text(stringResource(MR.strings.mark_all_absent)) },
-                icon = {
+                headlineContent = { Text(stringResource(MR.strings.mark_all_absent)) },
+                leadingContent = {
                     Icon(
                         Icons.Outlined.CheckBox,
                         contentDescription = ""
@@ -132,10 +130,8 @@ private fun PagerView(
     onChangeClazzLog: (ClazzLog) -> Unit = {},
 ) {
 
-    // TODO error
-    val pagerState =  rememberPagerState(pageCount = { 10 })
+    val pagerState =  rememberPagerState(pageCount = { list.size })
 
-//    val pagerState = rememberPagerState(0)
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(pagerState, list) {
@@ -183,21 +179,10 @@ private fun PagerView(
                 timeZoneId = timeZone
             )
 
-            Text(dateFormatted)
+            Text(modifier = Modifier.fillMaxWidth(),
+                text = dateFormatted,
+                textAlign = TextAlign.Center)
         }
-//        HorizontalPager(
-//            modifier = Modifier.weight(8F),
-//            state = pagerState,
-//            count = list.size
-//        ) { index ->
-//
-//            val dateFormatted = rememberFormattedDateTime(
-//                timeInMillis = list[index].logDate,
-//                timeZoneId = timeZone
-//            )
-//
-//            Text(dateFormatted)
-//        }
 
         IconButton(
             onClick = {
@@ -218,13 +203,6 @@ private fun PagerView(
     }
 }
 
-//private val buttonsIdMap = mapOf(
-//    ClazzLogAttendanceRecord.STATUS_ATTENDED to R.id.present_button,
-//    ClazzLogAttendanceRecord.STATUS_ABSENT to R.id.absent_button,
-//    ClazzLogAttendanceRecord.STATUS_PARTIAL to R.id.late_button
-//)
-
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ClazzLogItemView(
     fieldsEnabled: Boolean,
@@ -233,58 +211,30 @@ private fun ClazzLogItemView(
 ) {
 
     ListItem(
-        text = {
+        headlineContent = {
             Text(text = clazzLog.person?.personFullName() ?: "")
         },
-        icon = {
+        leadingContent = {
             Icon(
                 Icons.Default.Person,
                 contentDescription = ""
             )
         },
-//        trailing = {
-//            fun MaterialButtonToggleGroup.update() {
-//                buttonsIdMap.forEach { (status, buttonId) ->
-//                    val button = findViewById<Button>(buttonId)
-//                    button.isEnabled = fieldsEnabled
-//
-//                    button.setOnClickListener {
-//                        onClazzLogAttendanceChanged(
-//                            clazzLog.copy(
-//                                attendanceRecord = clazzLog.attendanceRecord?.shallowCopy {
-//                                    attendanceStatus = status
-//                                }
-//                            )
-//                        )
-//                    }
-//                }
-//
-//                val idToCheck = buttonsIdMap[clazzLog.attendanceRecord?.attendanceStatus ?: 0]
-//                if(idToCheck != null) {
-//                    check(idToCheck)
-//                }else {
-//                    clearChecked()
-//                }
-//            }
-//
-//            AndroidView(
-//                factory = {  context ->
-//                    val view = LayoutInflater.from(context).inflate(
-//                        R.layout.item_clazz_log_attendance_status_toggle_buttons,
-//                        null, false
-//                    ) as MaterialButtonToggleGroup
-//
-//                    view.isSingleSelection = true
-//                    view.update()
-//
-//
-//                    view
-//                },
-//                update = {
-//                    it.update()
-//                }
-//            )
-//        }
+        trailingContent = {
+            ClazzLogEditAttendanceToggleGroup(
+                isEnabled = fieldsEnabled,
+                attendanceStatus = clazzLog.attendanceRecord?.attendanceStatus ?: 0,
+                onAttendanceStatusChanged = { status ->
+                    onClazzLogAttendanceChanged(
+                        clazzLog.copy(
+                            attendanceRecord = clazzLog.attendanceRecord?.shallowCopy {
+                                attendanceStatus = status
+                            }
+                        )
+                    )
+                }
+            )
+        }
     )
 
 

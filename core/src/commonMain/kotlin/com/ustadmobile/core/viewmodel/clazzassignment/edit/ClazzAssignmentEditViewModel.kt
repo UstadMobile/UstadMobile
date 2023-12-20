@@ -127,6 +127,10 @@ class ClazzAssignmentEditViewModel(
         }
 
         viewModelScope.launch {
+            val courseTerminology = savedStateHandle.getJson(
+                ARG_TERMINOLOGY, CourseTerminology.serializer()
+            )
+
             loadEntity(
                 serializer = CourseBlockAndEditEntities.serializer(),
                 onLoadFromDb = { null  }, //does not load from db, always via json
@@ -149,6 +153,7 @@ class ClazzAssignmentEditViewModel(
                     val groupSubmissionOn = savedStateHandle[STATE_KEY_GROUP_SUBMISSION_ON]
                     _uiState.update { prev ->
                         prev.copy(
+                            courseTerminology = courseTerminology,
                             entity = it,
                             courseBlockEditUiState = prev.courseBlockEditUiState.copy(
                                 courseBlock = it?.courseBlock
@@ -574,6 +579,8 @@ class ClazzAssignmentEditViewModel(
         const val RESULT_KEY_GROUPSET = "groupSet"
 
         const val RESULT_KEY_PEER_REVIEW_ALLOCATIONS = "peerAllocationsResult"
+
+        const val ARG_TERMINOLOGY = "terminology"
 
         const val DEST_NAME = "CourseAssignmentEdit"
         const val ATTACHMENT_LIMIT_MIN = 5

@@ -17,7 +17,7 @@ import com.ustadmobile.libuicompose.components.UstadDateTimeField
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
-fun ClazzLogEditScreenForViewModel(viewModel: ClazzLogEditViewModel){
+fun ClazzLogEditScreen(viewModel: ClazzLogEditViewModel){
     val uiState by viewModel.uiState.collectAsState(ClazzLogEditUiState())
     ClazzLogEditScreen(
         uiState = uiState,

@@ -8,8 +8,6 @@ import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.OutcomeConstants
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditUiState
 import com.ustadmobile.core.viewmodel.clazzenrolment.edit.ClazzEnrolmentEditViewModel
-import com.ustadmobile.hooks.courseTerminologyResource
-import com.ustadmobile.hooks.useCourseTerminologyEntries
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
@@ -38,8 +36,6 @@ val ClazzEnrolmentEditScreenComponent = FC<ClazzEnrolmentEditScreenProps> { prop
 
     val strings: StringProvider = useStringProvider()
 
-    val terminologyEntries = useCourseTerminologyEntries(props.uiState.courseTerminology)
-
     UstadStandardContainer {
         Stack {
             direction = responsive(StackDirection.column)
@@ -60,7 +56,7 @@ val ClazzEnrolmentEditScreenComponent = FC<ClazzEnrolmentEditScreenProps> { prop
                         else -> MR.strings.student
                     }
 
-                    ReactNode(courseTerminologyResource(terminologyEntries, strings, messageId))
+                    ReactNode(props.uiState.courseTerminology?.get(messageId) ?: strings[messageId])
                 }
                 onChange = {
                     props.onClazzEnrolmentChanged(

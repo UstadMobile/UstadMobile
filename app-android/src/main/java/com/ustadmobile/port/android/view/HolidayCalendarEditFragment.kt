@@ -25,10 +25,6 @@ import com.ustadmobile.libuicompose.util.rememberFormattedDate
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import com.ustadmobile.core.R as CR
 
-class HolidayCalendarEditFragment() : UstadBaseMvvmFragment() {
-
-
-}
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

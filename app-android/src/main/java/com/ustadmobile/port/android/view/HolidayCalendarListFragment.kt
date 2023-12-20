@@ -16,10 +16,6 @@ import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.core.R as CR
 
-class HolidayCalendarListFragment(): UstadBaseMvvmFragment() {
-
-}
-
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HolidayCalendarListScreen(

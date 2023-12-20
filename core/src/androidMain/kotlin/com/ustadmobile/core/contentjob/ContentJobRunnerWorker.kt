@@ -56,6 +56,7 @@ class ContentJobRunnerWorker(
         val endpointStr = inputData.getString(ContentJobManager.KEY_ENDPOINT)
             ?: throw IllegalStateException("No endpoint")
         val endpoint = Endpoint(endpointStr)
+
         val scope = CoroutineScope(currentCoroutineContext() + Job())
 
         val jobId = inputData.getLong(ContentJobManager.KEY_CONTENTJOB_UID, 0)

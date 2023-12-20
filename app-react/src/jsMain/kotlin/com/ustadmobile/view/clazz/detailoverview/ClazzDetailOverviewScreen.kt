@@ -57,8 +57,6 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
 
     val strings = useStringProvider()
 
-
-
     val clazzDateRangeFormatted = useFormattedDateRange(
         props.uiState.clazz?.clazzStartTime ?: 0L,
     props.uiState.clazz?.clazzEndTime ?: 0L,
@@ -95,13 +93,7 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
 
                     UstadDetailField {
                         icon = Group.create()
-                        valueText = ReactNode(
-                            strings.format(
-                                MR.strings.x_teachers_y_students,
-                                (props.uiState.clazz?.numTeachers ?: 0).toString(),
-                                (props.uiState.clazz?.numStudents ?: 0).toString(),
-                            )
-                        )
+                        valueText = ReactNode(props.uiState.membersString)
                         labelText = strings[MR.strings.members_key].capitalizeFirstLetter()
                     }
 
@@ -197,6 +189,7 @@ val ClazzDetailOverviewScreen = FC<Props> {
     }
 }
 
+@Suppress("unused")
 val ClazzDetailOverviewScreenPreview = FC<Props> {
     ClazzDetailOverviewComponent2 {
         uiState = ClazzDetailOverviewUiState(

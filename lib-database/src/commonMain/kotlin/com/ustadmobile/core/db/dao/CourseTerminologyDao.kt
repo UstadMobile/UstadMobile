@@ -8,13 +8,15 @@ import androidx.room.Update
 import app.cash.paging.PagingSource
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.CourseTerminology
-import kotlin.js.JsName
 
 @Repository
 @DoorDao
 expect abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
 
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     @Query("""
         SELECT *
          FROM CourseTerminology
@@ -30,6 +32,9 @@ expect abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
     abstract fun findAllCourseTerminologyList(): List<CourseTerminology>
 
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     @Query("""
         SELECT *
           FROM CourseTerminology
@@ -52,7 +57,9 @@ expect abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
     """)
     abstract suspend fun getTerminologyForAssignment(assignmentUid: Long): CourseTerminology?
 
-    @JsName("findByUid")
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     @Query("""
         SELECT * 
          FROM CourseTerminology 
