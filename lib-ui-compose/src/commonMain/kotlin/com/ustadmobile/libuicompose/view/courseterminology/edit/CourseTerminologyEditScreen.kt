@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.view
+package com.ustadmobile.libuicompose.view.courseterminology.edit
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,27 +9,24 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.themeadapter.material.MdcTheme
-import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.locale.TerminologyEntry
 import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditUiState
 import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditViewModel
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadErrorText
-import com.ustadmobile.port.android.util.ext.defaultItemPadding
-import com.ustadmobile.core.R as CR
-import dev.icerock.moko.resources.compose.stringResource as mrStringResource
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import dev.icerock.moko.resources.compose.stringResource
+import com.ustadmobile.core.MR
+import kotlinx.coroutines.Dispatchers
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
-private fun CourseTerminologyEditScreen(
+fun CourseTerminologyEditScreen(
     uiState: CourseTerminologyEditUiState = CourseTerminologyEditUiState(),
     onTerminologyTermChanged: (TerminologyEntry) -> Unit = {},
     onTerminologyChanged: (CourseTerminology?) -> Unit = {}
@@ -39,19 +36,20 @@ private fun CourseTerminologyEditScreen(
             .fillMaxSize()
     )  {
 
-        item {
+        item(key = "terms_title") {
             Column {
                 OutlinedTextField(
                     modifier = Modifier.testTag("terms_title")
                         .defaultItemPadding()
                         .fillMaxWidth(),
+                    singleLine = true,
                     value = uiState.entity?.ctTitle ?: "",
                     onValueChange = {
                         onTerminologyChanged(uiState.entity?.shallowCopy {
                             ctTitle = it
                         })
                     },
-                    label = { Text(stringResource(CR.string.name_key)) },
+                    label = { Text(stringResource(MR.strings.name_key)) },
                     enabled = uiState.fieldsEnabled,
                 )
 
@@ -59,10 +57,10 @@ private fun CourseTerminologyEditScreen(
             }
         }
 
-        item {
+        item(key = "your_words_for") {
             Text(
-                modifier = Modifier.padding(start = 20.dp),
-                text = stringResource(id = CR.string.your_words_for)
+                modifier = Modifier.padding(start = 16.dp),
+                text = stringResource(MR.strings.your_words_for)
             )
         }
 
@@ -76,7 +74,8 @@ private fun CourseTerminologyEditScreen(
                         .defaultItemPadding()
                         .fillMaxWidth(),
                     value = terminologyTerm.term ?: "",
-                    label = { Text(mrStringResource(terminologyTerm.stringResource)) },
+                    singleLine = true,
+                    label = { Text(stringResource(terminologyTerm.stringResource)) },
                     enabled = uiState.fieldsEnabled,
                     onValueChange = {
                         onTerminologyTermChanged(terminologyTerm.copy(
@@ -95,8 +94,8 @@ private fun CourseTerminologyEditScreen(
 fun CourseTerminologyEditScreen(
     viewModel: CourseTerminologyEditViewModel
 ) {
-    val uiState: CourseTerminologyEditUiState by viewModel.uiState.collectAsState(
-        CourseTerminologyEditUiState()
+    val uiState: CourseTerminologyEditUiState by viewModel.uiState.collectAsStateWithLifecycle(
+        CourseTerminologyEditUiState(), Dispatchers.Main.immediate
     )
 
     CourseTerminologyEditScreen(
@@ -104,31 +103,4 @@ fun CourseTerminologyEditScreen(
         onTerminologyChanged = viewModel::onEntityChanged,
         onTerminologyTermChanged = viewModel::onTerminologyTermChanged
     )
-}
-
-@Composable
-@Preview
-fun CourseTerminologyEditScreenPreview() {
-    val uiState = CourseTerminologyEditUiState(
-        terminologyTermList = listOf(
-            TerminologyEntry(
-                id = "1",
-                term = "First",
-                stringResource = MR.strings.teacher
-            ),
-            TerminologyEntry(
-                id = "2",
-                term = "Second",
-                stringResource = MR.strings.student
-            ),
-            TerminologyEntry(
-                id = "3",
-                term = "Third",
-                stringResource = MR.strings.add_a_teacher
-            )
-        )
-    )
-    MdcTheme {
-        CourseTerminologyEditScreen(uiState)
-    }
 }

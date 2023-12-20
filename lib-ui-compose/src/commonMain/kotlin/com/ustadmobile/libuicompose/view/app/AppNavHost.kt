@@ -41,6 +41,8 @@ import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetail
 import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.textblockdetail.TextBlockDetailViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
+import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditViewModel
+import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
@@ -111,6 +113,8 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import kotlin.reflect.KClass
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
+import com.ustadmobile.libuicompose.view.courseterminology.edit.CourseTerminologyEditScreen
+import com.ustadmobile.libuicompose.view.courseterminology.list.CourseTerminologyListScreen
 import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentManagementScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 import kotlinx.coroutines.flow.Flow
@@ -541,6 +545,20 @@ fun AppNavHost(
                 ClazzLogEditScreen(
                     appViewModel(backStackEntry, ClazzLogEditViewModel::class,
                         ::ClazzLogEditViewModel)
+                )
+            }
+
+            contentScene("/${CourseTerminologyListViewModel.DEST_NAME}") { backStackEntry ->
+                CourseTerminologyListScreen(
+                    appViewModel(backStackEntry, CourseTerminologyListViewModel::class,
+                        ::CourseTerminologyListViewModel)
+                )
+            }
+
+            contentScene("/${CourseTerminologyEditViewModel.DEST_NAME}") { backStackEntry ->
+                CourseTerminologyEditScreen(
+                    appViewModel(backStackEntry, CourseTerminologyEditViewModel::class,
+                        ::CourseTerminologyEditViewModel)
                 )
             }
         }
