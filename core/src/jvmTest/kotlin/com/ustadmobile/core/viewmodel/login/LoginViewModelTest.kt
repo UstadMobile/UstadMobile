@@ -32,7 +32,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
-@Suppress("RemoveExplicitTypeArguments")
 class LoginViewModelTest : AbstractMainDispatcherTest(){
 
     private val json = Json {
