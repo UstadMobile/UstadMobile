@@ -58,3 +58,13 @@ class RangeInputStream(
         return false
     }
 }
+
+/**
+ * Get a ranged input stream
+ * @param fromByte the start byte (inclusive)
+ * @param toByte end byte (**INCLUSIVE** as per HTTP range headers)
+ */
+fun InputStream.range(
+    fromByte: Long,
+    toByte: Long
+) : InputStream = RangeInputStream(this, fromByte, toByte)

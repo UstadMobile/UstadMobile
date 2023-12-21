@@ -28,6 +28,9 @@ class SaveBlobUseCaseJvm(
     private val fileSystem: FileSystem = SystemFileSystem,
 ) : SaveBlobUseCase{
 
+    /**
+     * First store the blobs in the cache as https://endpoint/api/sha256, then upload them
+     */
     override suspend fun invoke(
         endpoint: Endpoint,
         tableId: Int,

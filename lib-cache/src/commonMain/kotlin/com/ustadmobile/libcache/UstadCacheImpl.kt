@@ -260,6 +260,25 @@ class UstadCacheImpl(
         return null
     }
 
+
+    override fun hasEntries(urls: Set<String>): Map<String, Boolean> {
+        val batchId = batchIdAtomic.incrementAndGet()
+        val urlsNotPresent = db.withDoorTransaction {
+            db.requestedEntryDao.insertList(
+                urls.map {  url ->
+                    RequestedEntry(batchId = batchId, requestedUrl =  url)
+                }
+            )
+            db.requestedEntryDao.findUrlsNotPresent(batchId).also {
+                db.requestedEntryDao.deleteBatch(batchId)
+            }
+        }
+
+        return urls.associateWith { url ->
+            (url !in urlsNotPresent)
+        }
+    }
+
     override fun addRetentionLocks(locks: List<CacheRetentionLock>): List<Int> {
         TODO("Not yet implemented")
     }
@@ -267,15 +286,6 @@ class UstadCacheImpl(
     override fun removeRetentionLocks(lockIds: List<Int>) {
         TODO("Not yet implemented")
     }
-
-    override suspend fun storeBlob(
-        localDataUri: String,
-        endpointUrl: String,
-        retentionJoin: CacheRetentionJoin
-    ): String {
-        TODO("Not yet implemented")
-    }
-
 
     override fun close() {
         scope.cancel()

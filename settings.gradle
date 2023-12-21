@@ -57,6 +57,7 @@ dependencyResolutionManagement {
             version("version_kamel", "0.9.0")
             version("version_mockwebserver", "4.12.0")
             version("version_mockito_kotlin", "5.1.0")
+            version("version_cache4k", "0.12.0")
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
@@ -138,6 +139,7 @@ dependencyResolutionManagement {
             library("ktor-client-core", "io.ktor", "ktor-client-core").versionRef("version_ktor")
             library("ktor-client-okhttp", "io.ktor", "ktor-client-okhttp").versionRef("version_ktor")
             library("mockito-kotlin", "org.mockito.kotlin", "mockito-kotlin").versionRef("version_mockito_kotlin")
+            library("cache4k", "io.github.reactivecircus.cache4k", "cache4k").versionRef("version_cache4k")
         }
     }
 }
