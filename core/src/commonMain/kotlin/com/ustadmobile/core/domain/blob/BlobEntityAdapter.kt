@@ -1,4 +1,4 @@
-package com.ustadmobile.core.domain.saveblob
+package com.ustadmobile.core.domain.blob
 
 import com.ustadmobile.core.db.UmAppDatabase
 

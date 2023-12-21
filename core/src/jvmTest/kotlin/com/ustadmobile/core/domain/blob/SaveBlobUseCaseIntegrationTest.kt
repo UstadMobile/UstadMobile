@@ -1,8 +1,8 @@
-package com.ustadmobile.core.domain.saveblob
+package com.ustadmobile.core.domain.blob
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.saveblob.adapters.PersonPictureAdapter
+import com.ustadmobile.core.domain.blob.adapters.PersonPictureAdapter
 import com.ustadmobile.core.io.ext.readSha256
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
@@ -77,7 +77,7 @@ class SaveBlobUseCaseIntegrationTest {
             uriHelper = uriHelper,
             tmpDir = Path(cacheDir.absolutePath),
             dbProvider = { _, _ -> appDb },
-            adapterProvider = { PersonPictureAdapter() }
+            adapterProvider = { PersonPictureAdapter() },
         )
 
         val endpoint = Endpoint("http://server.com/")

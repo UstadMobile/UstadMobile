@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.rest.upload
 
-import com.ustadmobile.core.upload.HEADER_IS_FINAL_CHUNK
-import com.ustadmobile.core.upload.HEADER_UPLOAD_UUID
+import com.ustadmobile.core.domain.upload.HEADER_IS_FINAL_CHUNK
+import com.ustadmobile.core.domain.upload.HEADER_UPLOAD_UUID
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody

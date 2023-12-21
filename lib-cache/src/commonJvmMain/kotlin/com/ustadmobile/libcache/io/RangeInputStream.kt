@@ -8,7 +8,7 @@ import java.io.InputStream
  *
  * @param src the source InputStream
  * @param fromByte inclusive
- * @param toByte inclusive as per http range headers
+ * @param toByte **INCLUSIVE** as per http range headers
  */
 class RangeInputStream(
     private val src: InputStream,

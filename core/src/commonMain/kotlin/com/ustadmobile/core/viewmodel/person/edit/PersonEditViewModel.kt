@@ -3,7 +3,7 @@ package com.ustadmobile.core.viewmodel.person.edit
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
-import com.ustadmobile.core.domain.saveblob.SaveBlobUseCase
+import com.ustadmobile.core.domain.blob.SaveBlobUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
@@ -23,6 +23,7 @@ import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_GO_TO_
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.REGISTER_MODE_ENABLED
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.REGISTER_MODE_MINOR
+import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -477,7 +478,7 @@ class PersonEditViewModel(
 
                     if(registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)) {
                         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                            RegisterAgeRedirectView.VIEW_NAME, true)
+                            RegisterAgeRedirectViewModel.DEST_NAME, true)
                         val args = mutableMapOf<String, String>().also {
                             it[RegisterMinorWaitForParentViewModel.ARG_USERNAME] = savePerson.username ?: ""
                             it[RegisterMinorWaitForParentViewModel.ARG_PARENT_CONTACT] =

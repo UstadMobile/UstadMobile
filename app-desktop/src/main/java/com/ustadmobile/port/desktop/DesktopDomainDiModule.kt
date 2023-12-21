@@ -14,9 +14,9 @@ import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCaseJvm
-import com.ustadmobile.core.domain.saveblob.SaveBlobUseCase
-import com.ustadmobile.core.domain.saveblob.SaveBlobUseCaseJvm
-import com.ustadmobile.core.domain.saveblob.adapters.PersonPictureAdapter
+import com.ustadmobile.core.domain.blob.SaveBlobUseCase
+import com.ustadmobile.core.domain.blob.SaveBlobUseCaseJvm
+import com.ustadmobile.core.domain.blob.adapters.PersonPictureAdapter
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCaseJvm
 import org.kodein.di.instance

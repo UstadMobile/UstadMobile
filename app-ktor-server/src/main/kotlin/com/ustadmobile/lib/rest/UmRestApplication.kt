@@ -480,7 +480,6 @@ fun Application.umRestApplication(
 
         ContainerDownload()
         personAuthRegisterRoute()
-        ContainerMountRoute()
         ContainerUploadRoute2()
         route("UmAppDatabase") {
             UmAppDatabase_KtorRoute(DoorHttpServerConfig(json = json)) { call ->

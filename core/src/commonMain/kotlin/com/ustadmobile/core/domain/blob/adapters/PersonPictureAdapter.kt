@@ -1,11 +1,9 @@
-package com.ustadmobile.core.domain.saveblob.adapters
+package com.ustadmobile.core.domain.blob.adapters
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.saveblob.BlobEntityAdapter
-import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.core.domain.blob.BlobEntityAdapter
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
-import kotlinx.coroutines.flow.first
 
 class PersonPictureAdapter: BlobEntityAdapter {
 

@@ -1,4 +1,4 @@
-package com.ustadmobile.core.domain.saveblob
+package com.ustadmobile.core.domain.blob
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
@@ -86,7 +86,7 @@ class SaveBlobUseCaseJvm(
 
         //After storing, attempt upload
 
-        //After
+        //After upload - replicate new url
 
     }
 }

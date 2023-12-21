@@ -3,8 +3,8 @@ package com.ustadmobile.core.domain.contententry.getmetadatafromuri
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.impl.nav.NavResultReturner
-import com.ustadmobile.core.upload.HEADER_IS_FINAL_CHUNK
-import com.ustadmobile.core.upload.HEADER_UPLOAD_UUID
+import com.ustadmobile.core.domain.upload.HEADER_IS_FINAL_CHUNK
+import com.ustadmobile.core.domain.upload.HEADER_UPLOAD_UUID
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.util.randomUuid
 import js.core.jso

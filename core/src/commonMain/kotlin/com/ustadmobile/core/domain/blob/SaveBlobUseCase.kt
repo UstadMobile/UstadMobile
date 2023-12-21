@@ -1,4 +1,4 @@
-package com.ustadmobile.core.domain.saveblob
+package com.ustadmobile.core.domain.blob
 
 import com.ustadmobile.core.account.Endpoint
 
@@ -21,6 +21,8 @@ interface SaveBlobUseCase {
      *    b) Invoke the adapter's updateBlobUri to set the entity url locally to the cache url
      *    c) Upload to the server (use OKHttp or KTOR)
      *    d) Invoke adapter replicateUpstream
+     * Process (Web):
+     *    a) Upload each item. Endpoint returns the URL (e.g. https://endpoint.com/api/blob/sha256/content-type)
      */
     suspend operator fun invoke(
         endpoint: Endpoint,

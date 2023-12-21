@@ -1,4 +1,4 @@
-package com.ustadmobile.core.upload
+package com.ustadmobile.core.domain.upload
 
 //For use with uplaod route
 

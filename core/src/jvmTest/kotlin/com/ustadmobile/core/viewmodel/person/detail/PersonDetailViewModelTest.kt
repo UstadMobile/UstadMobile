@@ -46,7 +46,7 @@ class PersonDetailViewModelTest: AbstractMainDispatcherTest() {
             }
 
             viewModel.uiState.assertItemReceived(timeout = 2.minutes) {
-                it.person?.firstNames == "Lenny" && !it.changePasswordVisible && !it.showCreateAccountVisible
+                it.person?.person?.firstNames == "Lenny" && !it.changePasswordVisible && !it.showCreateAccountVisible
             }
         }
     }
@@ -74,7 +74,7 @@ class PersonDetailViewModelTest: AbstractMainDispatcherTest() {
             }
 
             viewModel.uiState.assertItemReceived {
-                it.person?.firstNames == "Lenny" && !it.changePasswordVisible && it.showCreateAccountVisible
+                it.person?.person?.firstNames == "Lenny" && !it.changePasswordVisible && it.showCreateAccountVisible
             }
         }
     }
@@ -102,7 +102,7 @@ class PersonDetailViewModelTest: AbstractMainDispatcherTest() {
             }
 
             viewModel.uiState.assertItemReceived {
-                it.person?.firstNames == "Lenny" && it.changePasswordVisible && !it.showCreateAccountVisible
+                it.person?.person?.firstNames == "Lenny" && it.changePasswordVisible && !it.showCreateAccountVisible
             }
         }
     }
