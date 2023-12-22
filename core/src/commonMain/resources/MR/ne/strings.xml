@@ -91,7 +91,6 @@
     <string name="video">भिडियो</string>
     <string name="download_continue_stacked_label">डाउनलोडलाई निरन्तरता दिऔं</string>
     <string name="download_continue_btn_label">निरन्तरता दिऔं</string>
-    <string name="content_editor_link_insert">लिंक इन्सर्ट गरौं</string>
     <string name="content_editor_create_new_category">नयाँ फोल्डर</string>
     <string name="download_state_downloading">जम्मा %1$s आइटमहरू &lt;b&gt;डाउनलोड हुँदैछ&lt;/b&gt;, जसले तपाईंको डिभाइस स्टोरेजको जम्मा %2$s प्रयोग गर्दैछन्।</string>
     <string name="content_editor_save_error">सेभ गर्दा त्रुटि देखियो, फेरि कोशिस गरौं</string>
@@ -478,7 +477,6 @@
     <string name="share">सेयर गरौं</string>
     <string name="permission_sel_question_update">SEL प्रश्नहरू अपडेट गरौं</string>
     <string name="permission_sel_select">SEL नतिजाहरू हेरौं</string>
-    <string name="underRegistrationAgeError">13 वर्ष मुनिका बालबालिकाले आफै दर्ता गर्न पाउने छैनन्। तपाईंको दर्ता गर्न तपाईंको शिक्षकलाई भन्नुहोस्।</string>
     <string name="currently_enroled">हाल भर्ना भएका</string>
     <string name="field_type">फिल्ड प्रकार</string>
     <string name="text">टेक्स्ट</string>
@@ -493,15 +491,12 @@
     <string name="add_a_student">एउटा विद्यार्थी थपौं</string>
     <string name="add_verb_filter">क्रिया फिल्टर थपौं</string>
     <string name="partial">आंशिक</string>
-    <string name="location_permission_title">लोकेसन अनुमति जरुरी छ</string>
     <string name="activity_went_good">गतिविधि राम्रो भयो</string>
-    <string name="location_permission_message">नजिकका प्रयोगकर्ताहरूसँग उच्च गतिको अफलाइन सेयर गर्ने कार्यलाई सक्रिय बनाउन यो एपलाई लोकेसन अनुमति चाहिन्छ।</string>
     <string name="activity_enter_any_notes">यो गतिविधि बारेमा तपाईंको नोटहरू भए हालौं</string>
     <string name="add_activity">एउटा नयाँ गतिविधि थपौं...</string>
     <string name="select_language">भाषा रोजौं</string>
     <string name="select_one">एउटा छनौट गरौं</string>
     <string name="measurement_type">मापन प्रकार</string>
-    <string name="location_permission_details">यो एपले नजिकका अन्य प्रयोगकर्ता पत्ता लगाउन ब्लूटूथ र वाईफाई स्क्यानिङ प्रयोग गर्दछ। त्यसपछि यो एपले नजिकका प्रयोगकर्तासँग कनेक्ट गरी इन्टरनेट पहुँचको आवश्यकता विना नै उच्च गतिमा विषयसामग्री डाउनलोड गर्न मद्दत गर्छ। तपाईंको लोकेसन निर्धारण गर्न यी स्क्यान नतिजाहरू प्रयोग गर्न सकिने भएकोले यो फिचर सक्रिय गर्न तपाईंले लोकेसन अनुमति अनिवार्य प्रदान गर्नुपर्छ। यो एपले यी स्क्यानहरूको नतिजालाई सेभ गर्दैंन र तपाईंको लोकेसनलाई कुनै पनि तरिकाले रेकर्ड गर्दैन। यो एप ओपन सोर्स कोडबाट बनेको छ जसलाई github.com/UstadMobile/UstadMobile मा गएर हेर्न सकिन्छ</string>
     <string name="export">एक्सपोर्ट गरौं</string>
     <string name="download_state_download">जम्मा %1$s आइटमहरू &lt;b&gt;डाउनलोड गरौं&lt;/b&gt;, तिनीहरूले तपाईंको डिभाइस स्टोरेजको जम्मा %2$s प्रयोग गर्नेछन्।</string>
     <string name="holiday_calendars">बिदा पात्रोहरू</string>

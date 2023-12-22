@@ -9,6 +9,7 @@ internal data class VirtualListContextData(
     @Suppress("SpellCheckingInspection")
     val virtualizer: Virtualizer<HTMLElement, HTMLElement>,
     val allRows: List<VirtualListElement>,
+    val reverseLayout: Boolean = false,
 )
 
 /**

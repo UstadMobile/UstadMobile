@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.view
+package com.ustadmobile.libuicompose.view.courseterminology.list
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
@@ -17,8 +17,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -28,8 +26,8 @@ import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListUiState
 import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListViewModel
 import com.ustadmobile.lib.db.entities.CourseTerminology
-import com.ustadmobile.core.R as CR
-
+import com.ustadmobile.core.MR
+import dev.icerock.moko.resources.compose.stringResource
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -58,7 +56,7 @@ fun CourseTerminologyListScreen(
                     modifier = Modifier.clickable {
                         onClickAddNewItem()
                     },
-                    text = { Text(stringResource(CR.string.add_new_terminology)) },
+                    text = { Text(stringResource(MR.strings.add_new_terminology)) },
                     icon = {
                         Icon(imageVector = Icons.Filled.Add, contentDescription = null)
                     }
@@ -100,21 +98,3 @@ fun CourseTerminologyListScreen(
 
 }
 
-
-@Composable
-@Preview
-fun CourseTerminologyListScreenPreview() {
-    CourseTerminologyListScreen(
-        uiState = CourseTerminologyListUiState(
-            showAddItemInList = true,
-            terminologyList = {
-                ListPagingSource(listOf(
-                    CourseTerminology().apply {
-                        ctUid = 1
-                        ctTitle = "English"
-                    }
-                ))
-            }
-        )
-    )
-}

@@ -12,6 +12,8 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListUiState
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.hooks.courseTerminologyResource
+import com.ustadmobile.hooks.useCourseTerminologyEntries
 import com.ustadmobile.hooks.useHtmlToPlainText
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
@@ -260,6 +262,9 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
     val role = RoleConstants.ROLE_MESSAGE_IDS.find {
         it.value == props.clazzItem?.clazzActiveEnrolment?.clazzEnrolmentRole
     }?.stringResource
+    val terminologyEntries = useCourseTerminologyEntries(
+        props.clazzItem?.terminology
+    )
 
     val clazzDescription = useHtmlToPlainText(props.clazzItem?.clazzDesc ?: "")
 
@@ -312,7 +317,7 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
                             color = SvgIconColor.action
                         }
 
-                        + strings[role]
+                        + courseTerminologyResource(terminologyEntries, strings, role)
                     }
                 }
             }

@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">‫أستاد موبايل‬</string>
-    <string name="location_permission_title">مطلوب اذن للحصول على الموقع</string>
     <!--Content editor-->
     <string name="multiple_choice">متعدد الخيارات</string>
-    <string name="content_source_device">من الجهاز</string>
     <string name="video">فيديو</string>
-    <string name="content_editor_menu_undo">تراجع</string>
-    <string name="content_editor_menu_superscript">مرتفع</string>
     <string name="content_editor_create_new_category">مجلد جديد</string>
     <string name="licence">رخصة</string>
     <string name="publicly_accessible">انشر المحتوى</string>
@@ -17,7 +13,6 @@
     <string name="content_creation_folder_update_message">تم تحديث المستند بنجاح</string>
     <string name="error_message_load_page">فشل تحميل الصفحة</string>
     <string name="error_message_update_document">فشل تحديث المستند</string>
-    <string name="location_permission_message">التطبيق يلزم اذن للحصول على الموقع حتى تتمكن من تحميل المحتوى و مشاركته مع الاخرين من حولك دون اتصال. لن نقوم بحفظ او قراءة الموقع، بل سنقوم باستخدام المسح عن طريق البلوتوث للبحث عن الاجهزة القريبة.</string>
     <string name="download_storage_option_device">التخزين على ذاكرة الهاتف %1$s جيجابيت متوفر
 التخزين على بطاقة ذاكرة %2$s جيجابيت متوفر</string>
     <string name="content_from_file">من الملف</string>
@@ -114,8 +109,6 @@
     <string name="onboarding_offline_sharing_subheading">وفر الوقت والبيانات مع مشاركة فائقة السرعة دون اتصال بالإنترنت</string>
     <string name="download_summary_title">%1$s تنزيل نشط</string>
     <string name="update">تحديث</string>
-    <string name="location_permission_details">التطبيق يستخدم المسح عن طريق البلوتوث و ال WiFi لايجاد مستخدمين قريبين. التطبيق سوق يقوم بوصل المستخدمين القرب لتنزيل المحتوى بسرعة عالية دون الحاجة لانترنت. يجب عليك اعطاء اذن الموقع لانه يعتمد على نتائج المسح. هذا التطبيق لا يحفظ نتائج المسح و الموقع.
-\nهذا التطبيق مبني على خاصية المصدر المفتوح، التي ممكن الأطلاع عليها هنا github.com/UstadMobile/UstadMobile</string>
     <string name="download_continue_stacked_label">استمر بالتنزيل</string>
     <string name="download_continue_btn_label">استمرار</string>
     <string name="download_calculating">يتم الحساب…</string>
@@ -196,7 +189,6 @@
     <string name="average">المعدل</string>
     <string name="date">التاريخ</string>
     <string name="export">تصدير</string>
-    <string name="show_student_numbers">عرض أرقام الطلبة</string>
     <string name="last_three_months">آخر ثلاث شهور</string>
     <string name="location">الموقع</string>
     <string name="time_period">الفترة الزمنية</string>
@@ -309,7 +301,6 @@
     <string name="refresh">تحديث</string>
     <string name="add">إضافة</string>
     <string name="users_settings_desc">أضافة، وألغاء، وتعديل المستخدمين، أو أعادة تعيين كلمة السر الخاصة فيهم</string>
-    <string name="select_a_timezone">أختر وحدة زمنية</string>
     <string name="password_unchanged">كلمة السر (دون تغيير)</string>
     <string name="current_password">كلمة السر الحالية</string>
     <string name="change_password">تغيير كلمة السر</string>
@@ -582,7 +573,6 @@
     <string name="add_a_new_verb">اضف فعل جديد</string>
     <string name="edit_report">تعديل التقرير</string>
     <string name="create_a_new_report">انشاء تقرير جديد</string>
-    <string name="underRegistrationAgeError">التسجيل الذاتي للاطفال تحت التلاتة عشر سنة غير مسموح. الرجاء الطلب من المعلمة للتسجيل.</string>
     <string name="add_a_student">اضف طالب</string>
     <string name="add_a_new_language">اضف لغة جديدة</string>
     <string name="select_group_members">اختر اعضاء المجموعة</string>

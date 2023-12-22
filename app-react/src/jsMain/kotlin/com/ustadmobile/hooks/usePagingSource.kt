@@ -90,7 +90,6 @@ fun <Key: Any, Value: Any> usePagingSource(
 
     val infiniteQueryResult = useInfiniteQuery<PagingSourceLoadResult<Key, Value>, Throwable, PagingSourceLoadResult<Key, Value>, QueryKey, PagingSourceLoadParams<Key>>(
         options = jso {
-            console.log("PagingSource jso key=${pagingSourceFactory.hashCode()}")
             queryKey = QueryKey(""+pagingSourceFactory.hashCode())
             queryFn = { queryContext: QueryFunctionContext<QueryKey, PagingSourceLoadParams<Key>> ->
                 console.log("queryContext = $queryContext")

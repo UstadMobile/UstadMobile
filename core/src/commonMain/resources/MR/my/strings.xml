@@ -27,9 +27,7 @@
     <string name="onboarding_no_internet_subheadline">ပညာရေးဆိုင်ရာဗီဒီယိုများ, ဆောင်းပါးများနှင့်အပြန်အလှန်စစ်ရေးလေ့ကျင့်ခန်းနောက်ပိုင်းတွင်အသုံးပြုမှုအတွက်ဒေါင်းလုဒ်လုပ်ပါ။.</string>
     <string name="new_tab">ပြတင်းပေါက်အသစ်တစ်ခုတွင်ပြသခြင်း</string>
     <string name="save_as_template">တင်းပလိတ်အဖြစ်သိမ်းဆည်းပါ</string>
-    <string name="location_permission_title">တည်နေရာခွင့်ပြုချက်လိုအပ်သည်</string>
     <string name="location_permission_message">ဒီ app ကိုအနီးအနားမှာအသုံးပြုသူများနှင့်မြန်နှုန်းမြင့်အော့ဖ်လိုင်းခွဲဝေမှုကို enable တည်နေရာခွင့်ပြုချက်လိုအပ်သည်။.</string>
-    <string name="location_permission_details">ဒီအပလီကေးရှင်းသည် Bluetooth နှင့် WiFi ကို သုံး၍ အနီးအနားရှိအခြားသူများကိုရှာဖွေသည်။ အင်တာနက်ကိုမလိုအပ်ဘဲအမြန်နှုန်းဖြင့်အကြောင်းအရာများကိုဒေါင်းလုပ်လုပ်ရန်ထိုအက်ပ်သည်အနီးအနားရှိသုံးစွဲသူများနှင့်ဆက်သွယ်နိုင်သည်။ ဤစကင်ဖတ်စစ်ဆေးမှုရလဒ်များသည်သင်၏တည်နေရာကိုဆုံးဖြတ်ရန်အသုံးပြုနိုင်သောကြောင့်ဤအင်္ဂါရပ်ကိုဖွင့်ရန်တည်နေရာခွင့်ပြုချက်ကိုသင်ပေးရမည်။ ဤအပလီကေးရှင်းသည်ဤစကင်ဖတ်စစ်ဆေးမှု၏ရလဒ်များကိုမသိမ်းဆည်းဘဲသင်၏တည်နေရာကိုမည်သည့်နည်းနှင့်မျှမမှတ်မိပါ။ ဒီအက်ပ်ကို github.com/UstadMobile/UstadMobile မှာလေ့လာနိုင်ပါတယ်</string>
     <string name="download_wifi_only">ဝိုင်ဖိုင်သာ</string>
     <string name="download_calculating">ဆက်လက်တွက်ချက်သည်…</string>
     <string name="download_state_download"><b>ဒေါင်းလုပ်</b> စုစုပေါင်းပစ္စည်းများ၏ %1$s, သူတို့သည်သင်၏ device ကိုသိုလှောင်မှုအပေါ် %2$s စုစုပေါင်းသုံးပါလိမ့်မယ်။.</string>
@@ -37,7 +35,6 @@
     <string name="download_state_downloaded"><b>ဒေါင်းလုပ်ပြီးစီးပါပြီ</b>စုစုပေါင်းပစ္စည်းများ၏ %1$s,သင်၏ကိရိယာသိုလှောင်မှု၏ %2$s ခန့်ကိုအသုံးပြုနေသည်။.</string>
     <string name="no_app_found">ဖိုင်ဖွင့်ရန်အက်ပလီကေးရှင်းမရှိပါ</string>
     <string name="multiple_choice">ရွေးချယ်မှုများစွာ</string>
-    <string name="permission_camera_message">ဓာတ်ပုံနှင့်ဗီဒီယိုများရိုက်ကူးရန်အတွက်ဤအက်ပ်သည်ကင်မရာနှင့်ဖိုင်ခွင့်ပြုချက်နှစ်ခုလုံးလိုအပ်သည်</string>
     <string name="file_required_prompt">တင်သွင်းမည့်ဖိုင်ကိုမရွေးပါ၊ ထပ်မံကြိုးစားပါ</string>
     <string name="content_creation_folder_update_message">ဖိုလ်ဒါကိုအောင်အောင်မြင်မြင်မွမ်းမံခဲ့သည်</string>
     <string name="supported_files">ထောက်ပံ့သည့်ဖိုင်များ - <b>ဗီဒီယို၊ အသံ၊ အီးစဦးခ၊ XAPI၊ ဇစ်၊ ဇ5ဇ </b></string>
@@ -86,7 +83,6 @@
     <string name="ebook">အီးစာအုပ်</string>
     <string name="document">စာရွက်စာတမ်း</string>
     <string name="added">ကဆက်ပြောသည်</string>
-    <string name="underRegistrationAgeError">အသက် ၁၃ နှစ်အောက်ကလေးများကိုကိုယ်ပိုင်မှတ်ပုံတင်ခွင့်မပြုပါ။ ကျေးဇူးပြု၍ သင့်ဆရာအားသင့်ကိုမှတ်ပုံတင်ရန်ပြောပါ။.</string>
     <string name="error_this_device_doesnt_support_bluetooth_sharing">ဝမ်းနည်းပါတယ်, ဒီကိရိယာကို Bluetooth ကိုကျော်ဖိုင်တွေပေးပို့ခြင်းကိုထောကျပံ့မပေးပါဘူး။.</string>
     <string name="share_offline_dialog_message">သင်သည်ဤအက်ပလီကေးရှင်းကိုအော့ဖ်လိုင်းမျှဝေနိုင်သည်။ သင်မျှဝေလိုသည့်ကိရိယာပေါ်တွင် -
 \n၁။ ချိန်ညှိချက်များ&gt; ဘလူးတုသ် ချိန်ညှိချက်များကိုဖွင့်ပါ။.
@@ -188,9 +184,7 @@
     <string name="entry_details_license">လိုင်စင်:</string>
     <string name="file_not_found">ဖိုင်ရှာမတွေ့ပါ</string>
     <string name="preview">တင်ကူးသိမြင်</string>
-    <string name="content_media_photo">ဓာတ်ပုံ</string>
     <string name="video">ဗွီဒီယို</string>
-    <string name="content_editor_menu_bold">ရဲရင့်သော</string>
     <string name="content_editor_create_new_category">ဖိုင်တွဲအသစ်</string>
     <string name="content_creation_storage_option_title">သိုလှောင်မှုရွေးစရာ</string>
     <string name="content_creation_folder_new_message">ဖိုင်တွဲအသစ်ကိုအောင်မြင်စွာထည့်ပြီးပါပြီ</string>
