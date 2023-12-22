@@ -17,7 +17,6 @@ import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.virtualListContent
-import com.ustadmobile.view.person.list.demoPersonList
 import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
@@ -44,7 +43,6 @@ import react.useRequiredContext
 import react.useState
 import web.cssom.Display
 import web.cssom.Flex
-import web.cssom.Width
 import web.cssom.px
 import web.html.HTMLElement
 
@@ -102,12 +100,7 @@ private val MessageListScreenComponent2 = FC<MessageListScreenProps> { props ->
         }
     }
 
-    Box {
-        sx {
-            display = Display.block
-            margin = newMessageBoxPaddingPx.px
-            width = "calc(100% - ${newMessageBoxPaddingPx* 2}px)".unsafeCast<Width>()
-        }
+    Container {
         ref = newMessageBoxRef
 
         NewMessageBox {
@@ -178,7 +171,8 @@ val ChatItem = FC<ChatItemProps> { props ->
 
         Typography {
             sx {
-                backgroundColor = theme.palette.secondary.main
+                backgroundColor = theme.palette.primary.light
+                color = theme.palette.primary.contrastText
                 padding = 10.px
                 margin = 5.px
                 borderTopLeftRadius = 48.px
@@ -206,29 +200,30 @@ val NewMessageBox = FC<NewMessageBoxProps> { props ->
 
     val strings = useStringProvider()
 
-    Stack {
-        direction = responsive(StackDirection.row)
-        spacing = responsive(20.px)
+    Box {
+        Stack {
+            direction = responsive(StackDirection.row)
+            spacing = responsive(20.px)
 
-        UstadTextField {
-            id = "newComment"
-//            disabled = !props.fieldsEnabled
-            fullWidth = true
-            value = props.text
-            label = ReactNode(strings[MR.strings.message])
-            onTextChange = {
-                props.onChangeNewMessageText(it)
-            }
-        }
-
-        IconButton {
-            id = "send_message"
-            ariaLabel = strings[MR.strings.message]
-            onClick = {
-                props.onClickSend()
+            UstadTextField {
+                id = "newComment"
+                fullWidth = true
+                value = props.text
+                label = ReactNode(strings[MR.strings.message])
+                onTextChange = {
+                    props.onChangeNewMessageText(it)
+                }
             }
 
-            Send()
+            IconButton {
+                id = "send_message"
+                ariaLabel = strings[MR.strings.message]
+                onClick = {
+                    props.onClickSend()
+                }
+
+                Send()
+            }
         }
     }
 }

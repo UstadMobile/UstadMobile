@@ -72,8 +72,9 @@ fun ConversationItem(
     onListItemClick: (MessageAndOtherPerson) -> Unit,
 ){
 
-    val formattedDateTime = rememberFormattedTime(
-        timeInMs = (message?.message?.messageTimestamp ?: 0).toInt(),
+    val formattedDateTime = rememberFormattedDateTime(
+        timeInMillis = message?.message?.messageTimestamp ?: 0,
+        timeZoneId = TimeZone.getDefault().id
     )
 
     ListItem(

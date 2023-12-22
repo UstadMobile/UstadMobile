@@ -1,5 +1,6 @@
 package com.ustadmobile.view.message.conversationlist
 
+import com.ustadmobile.core.contentformats.epub.nav.Span
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListUiState
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.hooks.collectAsState
@@ -19,6 +20,7 @@ import com.ustadmobile.view.components.virtuallist.virtualListContent
 import js.core.jso
 import mui.material.Container
 import mui.material.ListItem
+import mui.material.Typography
 import mui.material.ListItemButton
 import mui.material.ListItemIcon
 import mui.material.ListItemText
@@ -31,6 +33,27 @@ import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
+import com.ustadmobile.core.util.ext.chopOffSeconds
+import com.ustadmobile.hooks.useFormattedDateAndTime
+import com.ustadmobile.hooks.useFormattedTime
+import com.ustadmobile.mui.common.DisplayWebkitBox
+import com.ustadmobile.mui.common.webKitLineClamp
+import com.ustadmobile.mui.common.webkitBoxOrient
+import emotion.react.css
+import js.core.jso
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
+import mui.material.TextField
+import mui.system.PropsWithSx
+import mui.system.sx
+import react.*
+import react.dom.html.ReactHTML.span
+import react.dom.onChange
+import web.cssom.Display
+import web.cssom.TextOverflow
+import web.cssom.WhiteSpace
+import web.html.HTMLInputElement
+import web.html.InputType
 
 external interface ConversationListScreenProps : Props {
 
@@ -136,6 +159,9 @@ val ConversationItem = FC<ConversationItemProps> { props ->
 //                overflow = TextOverflow.Ellipsis,
 //            )
 //        },
+    val formattedTime = useFormattedTime(
+        timeInMillisSinceMidnight = (props.message?.message?.messageTimestamp ?: 0).toInt(),
+    )
 
     ListItem {
         ListItemButton{
@@ -151,9 +177,18 @@ val ConversationItem = FC<ConversationItemProps> { props ->
 
             ListItemText {
                 primary = ReactNode("${props.message?.otherPerson?.fullName()}")
-                secondary = ReactNode("${props.message?.message?.messageText}")
+                secondary = span.create {
+                    css {
+                        display = Display.inlineBlock
+                        whiteSpace = WhiteSpace.nowrap
+                        overflow = Overflow.hidden
+                        width = 100.pct
+                        textOverflow = TextOverflow.ellipsis
+                    }
+                    + "${props.message?.message?.messageText}"
+                }
             }
         }
-        secondaryAction = ReactNode("${props.message?.message?.messageTimestamp}")
+        secondaryAction = ReactNode(formattedTime)
     }
 }

@@ -48,7 +48,8 @@ class MessageListViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                messages = pagingSourceFactory
+                messages = pagingSourceFactory,
+                activePersonUid = activeUserPersonUid
             )
         }
 
