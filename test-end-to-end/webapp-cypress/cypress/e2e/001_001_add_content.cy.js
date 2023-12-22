@@ -16,15 +16,15 @@ describe('001_001_add_content.cy.js ', () => {
  // Verify H5p Content
  //https://www.cypress.io/blog/2020/02/12/working-with-iframes-in-cypress
   cy.get('iframe')
-  cy.wait(2000)
-  cy.get('iframe')
+  cy.get('.css-1pc9cj7')
   .its('0.contentDocument')
-  .its('body').should('not.be.undefined')
-  .then(cy.wrap)
-  .find('#h5p-container')
-  .find(".spec-iframe")
-  .find('[class="h5p-question-image-wrap"]').should('exist')
-  cy.wait(2000)
+  .its('body')
+//  .then(cy.wrap)
+  .find('.h5p-iframe.h5p-initialized')
+  .its('0.contentDocument')
+   .its('body')
+  .find(".h5p-question-check-answer.h5p-joubelui-button").click()
+ // .find('[class="h5p-question-image-wrap"]').should('exist')
   cy.go('back')
  //Add Epub content
   cy.ustadAddContentToLibrary('/home/ustadmobile/Testfolder/test-end-to-end/test-files/content/Epub_Content1.epub','Content_002')
