@@ -82,3 +82,38 @@ val VirtualListPreview = FC<Props> {
 
     }
 }
+
+val VirtualListPreviewReverse = FC<Props> {
+    val muiAppState = useMuiAppState()
+
+    val infiniteQueryResult = usePagingSource(
+        demoPagingSource, true, 50
+    )
+
+    VirtualList {
+        reverseLayout = true
+        style = jso {
+            height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
+            width = 100.pct
+            contain = Contain.strict
+            overflowY = Overflow.scroll
+        }
+
+        content = virtualListContent {
+            infiniteQueryPagingItems(
+                items = infiniteQueryResult,
+                key = { it.personUid.toString() }
+            ) { person ->
+                ListItem.create {
+                    ListItemText {
+                        +person?.fullName()
+                    }
+                }
+            }
+        }
+
+        Container {
+            VirtualListOutlet()
+        }
+    }
+}

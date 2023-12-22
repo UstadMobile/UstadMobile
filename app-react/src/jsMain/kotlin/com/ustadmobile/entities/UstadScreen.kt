@@ -13,6 +13,7 @@ import com.ustadmobile.view.components.UstadSelectFieldPreview
 import com.ustadmobile.mui.components.DateTimeEditFieldPreview
 import com.ustadmobile.mui.components.UstadNumberTextFieldPreview
 import com.ustadmobile.view.components.virtuallist.VirtualListPreview
+import com.ustadmobile.view.components.virtuallist.VirtualListPreviewReverse
 import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
 import react.Props
 import react.FC
@@ -282,6 +283,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ClazzListViewModel.DEST_NAME_HOME, "ClazzListHome", ClazzListScreen),
     UstadScreen("VirtualListPreview", "Virtual List Preview",
         VirtualListPreview),
+    UstadScreen("VirtualListReversedPreview", "Virtual List Reversed Preview",
+        VirtualListPreviewReverse),
     UstadScreen("UstadCourseAssignmentMarkListItem", "UstadCourseAssignmentMarkListItem Preview",
         UstadCourseAssignmentMarkListItemPreview),
     UstadScreen("UstadCommentListItem", "UstadCommentListItem Preview",
