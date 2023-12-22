@@ -95,6 +95,7 @@ val Header = FC<HeaderProps> { props ->
 
             Typography{
                 sx { flexGrow = number(1.0) }
+                id = "appbar_title"
                 variant = h6
                 noWrap = true
                 component = div
