@@ -6,8 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.ustadmobile.lib.db.entities.Message
 import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
-import com.ustadmobile.libuicompose.view.message.list.NewMessageBox
-import com.ustadmobile.libuicompose.view.message.list.ChatItem
 
 @Preview
 @Composable
