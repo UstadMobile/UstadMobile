@@ -49,6 +49,7 @@ import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
 import com.ustadmobile.view.clazzassignment.UstadCommentListItem
 import com.ustadmobile.view.components.UstadDetailHeader
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
+import kotlinx.coroutines.Dispatchers
 import mui.system.sx
 import react.useRequiredContext
 import web.cssom.Contain
@@ -423,7 +424,9 @@ val ClazzAssignmentDetailOverviewScreen = FC<Props> {
         ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
     }
 
-    val uiStateVal by viewModel.uiState.collectAsState(ClazzAssignmentDetailOverviewUiState())
+    val uiStateVal by viewModel.uiState.collectAsState(
+        ClazzAssignmentDetailOverviewUiState(), Dispatchers.Main.immediate
+    )
 
     ClazzAssignmentDetailOverviewScreenComponent2 {
         uiState = uiStateVal

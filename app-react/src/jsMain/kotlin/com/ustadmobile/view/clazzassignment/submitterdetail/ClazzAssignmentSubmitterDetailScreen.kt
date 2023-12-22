@@ -38,6 +38,7 @@ import react.create
 import mui.icons.material.EmojiEvents as EmojiEventsIcon
 import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
 import com.ustadmobile.view.clazzassignment.UstadCommentListItem
+import kotlinx.coroutines.Dispatchers
 
 external interface ClazzAssignmentSubmitterDetailProps : Props {
 
@@ -210,7 +211,9 @@ val ClazzAssignmentSubmitterDetailScreen = FC<Props> {
         ClazzAssignmentSubmitterDetailViewModel(di, savedStateHandle)
     }
 
-    val uiStateVal by viewModel.uiState.collectAsState(ClazzAssignmentSubmitterDetailUiState())
+    val uiStateVal by viewModel.uiState.collectAsState(
+        ClazzAssignmentSubmitterDetailUiState(), Dispatchers.Main.immediate,
+    )
 
     ClazzAssignmentSubmitterDetailComponent {
         uiState = uiStateVal

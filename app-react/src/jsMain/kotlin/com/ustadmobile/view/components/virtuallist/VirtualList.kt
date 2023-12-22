@@ -191,7 +191,6 @@ class VirtualListContentScope internal constructor() {
             infiniteQueryResult = items,
             infiniteSectionIndex = sections.count { it is InfiniteQueryResultSection<*, *, *> },
             dataPagesToItems = { pages ->
-                console.log("Mapping data pages to items")
                 pages.mapNotNull { it as? PagingSourceLoadResultPage<Int, T> }.flatMap {
                     it.data
                 }
