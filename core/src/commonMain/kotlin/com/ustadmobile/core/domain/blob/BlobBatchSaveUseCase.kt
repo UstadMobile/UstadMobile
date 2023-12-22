@@ -2,7 +2,7 @@ package com.ustadmobile.core.domain.blob
 
 import com.ustadmobile.core.account.Endpoint
 
-interface SaveBlobUseCase {
+interface BlobBatchSaveUseCase {
 
     data class BlobToSave(
         val uid: Long,

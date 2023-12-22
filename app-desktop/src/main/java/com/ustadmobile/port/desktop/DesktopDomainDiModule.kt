@@ -14,8 +14,8 @@ import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCaseJvm
-import com.ustadmobile.core.domain.blob.SaveBlobUseCase
-import com.ustadmobile.core.domain.blob.SaveBlobUseCaseJvm
+import com.ustadmobile.core.domain.blob.BlobBatchSaveUseCase
+import com.ustadmobile.core.domain.blob.BlobBatchSaveUseCaseJvm
 import com.ustadmobile.core.domain.blob.adapters.PersonPictureAdapter
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCaseJvm
@@ -55,9 +55,9 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         OnClickEmailUseCaseJvm()
     }
 
-    bind<SaveBlobUseCase>() with singleton {
+    bind<BlobBatchSaveUseCase>() with singleton {
         val cacheDir: File = instance(tag = TAG_CACHE_DIR)
-        SaveBlobUseCaseJvm(
+        BlobBatchSaveUseCaseJvm(
             cache = instance(),
             uriHelper = instance(),
             tmpDir = Path(cacheDir.absolutePath),

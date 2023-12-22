@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.blob
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.blob.upload.BlobBatchUploadUseCase
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.core.util.UMURLEncoder
@@ -19,14 +20,15 @@ import com.ustadmobile.libcache.response.HttpPathResponse
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.SystemFileSystem
 
-class SaveBlobUseCaseJvm(
+class BlobBatchSaveUseCaseJvm(
     private val cache: UstadCache,
     private val uriHelper: UriHelper,
     private val tmpDir: Path,
+    private val blobBatchUploadUseCase: BlobBatchUploadUseCase,
     private val dbProvider: (Endpoint, Int) -> UmAppDatabase,
     private val adapterProvider: (tableId: Int) -> BlobEntityAdapter,
     private val fileSystem: FileSystem = SystemFileSystem,
-) : SaveBlobUseCase{
+) : BlobBatchSaveUseCase{
 
     /**
      * First store the blobs in the cache as https://endpoint/api/sha256, then upload them
@@ -34,7 +36,7 @@ class SaveBlobUseCaseJvm(
     override suspend fun invoke(
         endpoint: Endpoint,
         tableId: Int,
-        blobs: List<SaveBlobUseCase.BlobToSave>
+        blobs: List<BlobBatchSaveUseCase.BlobToSave>
     ) {
         val endpointUrl = UrlKmp(endpoint.url)
         val db: UmAppDatabase = dbProvider(endpoint, DoorTag.TAG_REPO)
@@ -86,6 +88,19 @@ class SaveBlobUseCaseJvm(
         }
 
         adapter.updateBlobUri(db, updates)
+        val blobUrls = entriesToStore.mapNotNull {
+            it.second?.request?.url
+        }
+
+        blobBatchUploadUseCase(
+            endpoint = endpoint,
+            blobUrls = blobUrls,
+            batchUuid = UUID.randomUUID().toString(),
+            onProgress = {
+
+            }
+        )
+
 
         //After storing, attempt upload
 

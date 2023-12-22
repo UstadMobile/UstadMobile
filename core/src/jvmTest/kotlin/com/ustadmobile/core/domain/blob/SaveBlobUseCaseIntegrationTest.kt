@@ -23,6 +23,7 @@ import org.junit.rules.TemporaryFolder
 import kotlinx.io.files.Path
 import okhttp3.OkHttpClient
 import org.junit.Assert
+import org.mockito.kotlin.mock
 import java.io.File
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -72,12 +73,13 @@ class SaveBlobUseCaseIntegrationTest {
             UmAppDatabase::class, "jdbc:sqlite::memory:", 1L
         ).build()
 
-        val useCase = SaveBlobUseCaseJvm(
+        val useCase = BlobBatchSaveUseCaseJvm(
             cache = cache,
             uriHelper = uriHelper,
             tmpDir = Path(cacheDir.absolutePath),
             dbProvider = { _, _ -> appDb },
             adapterProvider = { PersonPictureAdapter() },
+            blobBatchUploadUseCase = mock { }
         )
 
         val endpoint = Endpoint("http://server.com/")
@@ -87,7 +89,7 @@ class SaveBlobUseCaseIntegrationTest {
                 endpoint = endpoint,
                 tableId = PersonPicture.TABLE_ID,
                 blobs = listOf(
-                    SaveBlobUseCase.BlobToSave(1, pdfFile.toURI().toString())
+                    BlobBatchSaveUseCase.BlobToSave(1, pdfFile.toURI().toString())
                 )
             )
 

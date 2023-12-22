@@ -3,7 +3,7 @@ package com.ustadmobile.core.viewmodel.person.edit
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
-import com.ustadmobile.core.domain.blob.SaveBlobUseCase
+import com.ustadmobile.core.domain.blob.BlobBatchSaveUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
@@ -152,7 +152,7 @@ class PersonEditViewModel(
 
     private val genderConfig : GenderConfig by instance()
 
-    private val saveBlobUseCase: SaveBlobUseCase? by instanceOrNull()
+    private val saveBlobUseCase: BlobBatchSaveUseCase? by instanceOrNull()
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
@@ -565,7 +565,7 @@ class PersonEditViewModel(
                                     endpoint = accountManager.activeEndpoint,
                                     tableId = PersonPicture.TABLE_ID,
                                     blobs = listOf(
-                                        SaveBlobUseCase.BlobToSave(
+                                        BlobBatchSaveUseCase.BlobToSave(
                                             uid = savePerson.personUid,
                                             localUri = personPictureUriVal
                                         )

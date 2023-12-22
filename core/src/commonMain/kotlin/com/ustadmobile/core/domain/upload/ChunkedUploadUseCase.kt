@@ -16,6 +16,10 @@ class ChunkedUploadUseCase(
     private val httpClient: HttpClient,
 ) {
 
+    data class ChunkResponseInfo(
+        val extraHeaders: Map<String, List<String>> = emptyMap(),
+    )
+
     /**
      * Upload data from a localUri in chunks
      *
@@ -45,6 +49,7 @@ class ChunkedUploadUseCase(
                     it.skip(chunk.start)
                     it.readTo(buffer, 0, chunk.size)
                 }
+                null
             },
             remoteUrl = remoteUrl,
             chunkSize = chunkSize,
@@ -65,7 +70,7 @@ class ChunkedUploadUseCase(
     suspend operator fun invoke(
         uploadUuid: String,
         totalSize: Long,
-        getChunk: suspend (chunk: ChunkInfo.Chunk, buffer: ByteArray) -> Unit,
+        getChunk: suspend (chunk: ChunkInfo.Chunk, buffer: ByteArray) -> ChunkResponseInfo?,
         remoteUrl: String,
         fromByte: Long = 0,
         chunkSize: Int = DEFAULT_CHUNK_SIZE
