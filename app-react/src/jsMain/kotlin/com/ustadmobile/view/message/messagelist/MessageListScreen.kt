@@ -173,13 +173,13 @@ val ChatItem = FC<ChatItemProps> { props ->
         sx {
             display = Display.flex
             flex = Flex.minContent
+            justifyContent = if (isFromMe) JustifyContent.end else JustifyContent.start
         }
 
         Typography {
             sx {
-                justifyContent = if (isFromMe) JustifyContent.start else JustifyContent.end
                 backgroundColor = theme.palette.secondary.main
-                padding = 5.px
+                padding = 10.px
                 margin = 5.px
                 borderTopLeftRadius = 48.px
                 borderTopRightRadius = 48.px
