@@ -1,8 +1,6 @@
 package com.ustadmobile.view.message.messagelist
 
-import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListUiState
@@ -12,7 +10,7 @@ import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.entities.Message
 import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadLinkify
-import com.ustadmobile.mui.components.UstadTextField
+import com.ustadmobile.mui.components.UstadSendTextField
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.VirtualList
@@ -23,20 +21,13 @@ import web.cssom.Overflow
 import web.cssom.pct
 import js.core.jso
 import web.cssom.JustifyContent
-import mui.icons.material.Send
 import mui.material.Container
 import mui.material.Box
-import mui.material.Stack
-import mui.material.StackDirection
-import mui.material.IconButton
 import mui.material.Typography
-import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
-import react.ReactNode
 import react.create
-import react.dom.aria.ariaLabel
 import react.useEffect
 import react.useRef
 import react.useRequiredContext
@@ -75,6 +66,7 @@ private val MessageListScreenComponent2 = FC<MessageListScreenProps> { props ->
     }
 
     VirtualList {
+        reverseLayout = true
         style = jso {
             height = "calc(100vh - ${(muiAppState.appBarHeight + newMessageBoxHeight)}px)".unsafeCast<Height>()
             width = 100.pct
@@ -103,9 +95,10 @@ private val MessageListScreenComponent2 = FC<MessageListScreenProps> { props ->
     Container {
         ref = newMessageBoxRef
 
-        NewMessageBox {
-            text = props.uiState.newMessageText
-            onChangeNewMessageText = props.onChangeNewMessageText
+        UstadSendTextField {
+            value = props.uiState.newMessageText
+            fullWidth = true
+            onTextChange = props.onChangeNewMessageText
             onClickSend = props.onClickSend
         }
     }
@@ -182,47 +175,6 @@ val ChatItem = FC<ChatItemProps> { props ->
             }
             + UstadLinkify.create {
                 + (props.message?.messageText ?: "")
-            }
-        }
-    }
-}
-
-external interface NewMessageBoxProps: Props {
-
-    var text: String
-    var fieldsEnabled: Boolean
-    var onChangeNewMessageText: (String) -> Unit
-    var onClickSend: () -> Unit
-
-}
-
-val NewMessageBox = FC<NewMessageBoxProps> { props ->
-
-    val strings = useStringProvider()
-
-    Box {
-        Stack {
-            direction = responsive(StackDirection.row)
-            spacing = responsive(20.px)
-
-            UstadTextField {
-                id = "newComment"
-                fullWidth = true
-                value = props.text
-                label = ReactNode(strings[MR.strings.message])
-                onTextChange = {
-                    props.onChangeNewMessageText(it)
-                }
-            }
-
-            IconButton {
-                id = "send_message"
-                ariaLabel = strings[MR.strings.message]
-                onClick = {
-                    props.onClickSend()
-                }
-
-                Send()
             }
         }
     }
