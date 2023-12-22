@@ -1,4 +1,4 @@
-package com.ustadmobile.libuicompose.view.message.list
+package com.ustadmobile.libuicompose.view.message.messagelist
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
