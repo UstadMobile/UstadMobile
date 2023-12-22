@@ -4,10 +4,13 @@ import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListU
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.MessageAndOtherPerson
+import com.ustadmobile.lib.db.entities.Message
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
@@ -72,11 +75,26 @@ private val ConversationListScreenComponent2 = FC<ConversationListScreenProps> {
     }
 }
 
+val demoConversationList = (0..150).map {
+    MessageAndOtherPerson().apply {
+        message = Message().apply {
+            messageText = "The Conversation number $it"
+        }
+        otherPerson = Person().apply {
+            firstNames = "Person $it"
+            lastName = "$it"
+            personUid = it.toLong()
+        }
+    }
+}
+
 val ConversationListScreenPreview = FC<Props> {
 
 
     val conversationListUiState by useState {
-        ConversationListUiState()
+        ConversationListUiState(
+            conversations = { ListPagingSource(demoConversationList) }
+        )
     }
 
     ConversationListScreenComponent2 {
@@ -98,7 +116,6 @@ val ConversationListScreen = FC<Props> {
     ConversationListScreenComponent2 {
         uiState = uiStateVal
         onClickEntry = viewModel::onClickEntry
-
     }
 }
 
@@ -120,7 +137,7 @@ val ConversationItem = FC<ConversationItemProps> { props ->
 //            )
 //        },
 
-    ListItem.create {
+    ListItem {
         ListItemButton{
             onClick = {
                 props.message?.also { props.onListItemClick(it) }
