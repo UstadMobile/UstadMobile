@@ -2,13 +2,15 @@ package com.ustadmobile.view.components.virtuallist
 
 import app.cash.paging.PagingSourceLoadResult
 import app.cash.paging.PagingSourceLoadResultPage
-import web.cssom.*
+import js.core.Object
 import js.core.jso
 import react.*
 import react.dom.html.ReactHTML.div
 import tanstack.react.query.UseInfiniteQueryResult
 import tanstack.react.virtual.useVirtualizer
+import web.cssom.scaley
 import web.html.HTMLElement
+import web.uievents.WheelEvent
 
 
 external interface VirtualListProps: PropsWithChildren {
@@ -18,6 +20,24 @@ external interface VirtualListProps: PropsWithChildren {
     var content: List<VirtualListSection>
 
     var style: CSSProperties?
+
+    /**
+     * If true, reverse the order of the list so that the first item will appear at the bottom. This
+     * is used on chat (e.g. messages are retrieved starting from the most recent, but this appears
+     * as the bottom of the list).
+     *
+     * This is not explicitly supported by Tanstack Virtualizer, but is handled as per:
+     * https://github.com/TanStack/virtual/issues/27
+     *
+     * Specifically:
+     * https://codesandbox.io/p/devbox/immutable-silence-76pwko?file=%2Fsrc%2Fmain.tsx%3A90%2C1-92%2C1
+     *
+     * This works as "It's transforming the list and items (scaleY -1) and inverting the mousewheel event."
+     *
+     * This will have the same effect as using reverseLayout on LazyColumn
+     * on Jetpack Compose
+     */
+    var reverseLayout: Boolean?
 }
 
 
@@ -38,10 +58,43 @@ external interface VirtualListProps: PropsWithChildren {
 val VirtualList = FC<VirtualListProps> {props ->
     val parentRef = useRef<HTMLElement>(null)
 
+    useEffect(parentRef.current) {
+        val handleScroll: (evt: WheelEvent) -> Unit = { evt ->
+            evt.preventDefault()
+            val currentTarget = evt.currentTarget as? HTMLElement
+            if(currentTarget != null){
+                currentTarget.scrollTop -= evt.deltaY
+            }
+        }
+
+        if(props.reverseLayout == true) {
+            parentRef.current?.addEventListener(
+                WheelEvent.WHEEL, handleScroll, jso {
+                    passive = false
+                }
+            )
+        }
+
+        cleanup {
+            if(props.reverseLayout == true) {
+                parentRef.current?.removeEventListener(WheelEvent.WHEEL, handleScroll)
+            }
+        }
+    }
+
     div {
         ref = parentRef
-        style = props.style
+        style = if(props.reverseLayout == true) {
+            jso {
+                props.style?.also { propsStyle ->
+                    Object.assign(this, propsStyle)
+                }
 
+                transform = scaley(-1)
+            }
+        }else {
+            props.style
+        }
 
         val allRows = useMemo(props.content) {
             props.content.flatMap { section ->
@@ -58,7 +111,13 @@ val VirtualList = FC<VirtualListProps> {props ->
             getItemKey = { index -> allRows[index].key() }
         })
 
-        VirtualListContext(VirtualListContextData(virtualizer, allRows)) {
+        VirtualListContext(
+            VirtualListContextData(
+                virtualizer = virtualizer,
+                allRows = allRows,
+                reverseLayout = props.reverseLayout ?: false
+            )
+        ) {
             + props.children
         }
     }
