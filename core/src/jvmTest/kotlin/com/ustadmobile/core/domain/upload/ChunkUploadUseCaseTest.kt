@@ -76,7 +76,7 @@ class ChunkUploadUseCaseTest  {
         fromByte: Long,
     ) {
         val testFile = tempFolder.newFileFromResource(javaClass, resourcePath)
-        val uploader = ChunkedUploadUseCase(httpClient)
+        val uploader = ChunkedUploadClientUseCase(httpClient)
         val uuid = UUID.randomUUID()
         val chunkSize = (20 * 1024)
         val expectedChunkInfo = ChunkInfo(

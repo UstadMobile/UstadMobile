@@ -1,8 +1,5 @@
-package com.ustadmobile.core.domain.upload
+package com.ustadmobile.core.domain.blob.upload
 
-import com.ustadmobile.core.domain.blob.upload.BlobBatchUploadEndpoint
-import com.ustadmobile.core.domain.blob.upload.BlobBatchUploadRequest
-import com.ustadmobile.core.domain.blob.upload.BlobBatchUploadRequestItem
 import com.ustadmobile.core.io.ext.readSha256
 import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.libcache.UstadCache
@@ -29,7 +26,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class BlobBatchUploadEndpointTest {
+class BlobUploadServerUseCaseTest {
 
 
     @JvmField
@@ -50,7 +47,7 @@ class BlobBatchUploadEndpointTest {
 
     private lateinit var testUploads: List<TestBlobUpload>
 
-    private lateinit var uploadRequest: BlobBatchUploadRequest
+    private lateinit var uploadRequest: BlobUploadRequest
 
     private lateinit var batchUuid: UUID
 
@@ -82,9 +79,9 @@ class BlobBatchUploadEndpointTest {
             )
         }
 
-        uploadRequest = BlobBatchUploadRequest(
-            blobUrls = testUploads.map { testUpload ->
-                BlobBatchUploadRequestItem(
+        uploadRequest = BlobUploadRequest(
+            blobs = testUploads.map { testUpload ->
+                BlobUploadRequestItem(
                     blobUrl = testUpload.url,
                     size = testUpload.tmpFile.length()
                 )
@@ -96,7 +93,7 @@ class BlobBatchUploadEndpointTest {
 
     @Test
     fun givenNewRequest_whenInitializedAndBlobsUploaded_thenWillStoreEntries() {
-        val batchUploadEndpoint = BlobBatchUploadEndpoint(
+        val batchUploadEndpoint = BlobUploadServerUseCase(
             httpCache = cache,
             tmpDir = Path(tmpDir.absolutePath),
             json = json,
@@ -112,13 +109,13 @@ class BlobBatchUploadEndpointTest {
 
         runBlocking {
             val uploadResponse = batchUploadEndpoint
-                .startSession(uploadRequest)
+                .onStartUploadSession(uploadRequest)
 
             assertEquals(testUploads.size, uploadResponse.blobsToUpload.size)
             uploadResponse.blobsToUpload.forEach {  blobToUpload ->
                 val testUpload = testUploads.first { it.url == blobToUpload.blobUrl }
                 val bodyPath = Path(testUpload.tmpFile.absolutePath)
-                batchUploadEndpoint.onBlobFinished(
+                batchUploadEndpoint.onBlobItemFinished(
                     batchUuid = batchUuid.toString(),
                     uploadUuid = blobToUpload.uploadUuid,
                     bodyPath = bodyPath,
@@ -143,7 +140,7 @@ class BlobBatchUploadEndpointTest {
     @Test
     fun givenPartialRequest_whenInitialzedAndBlobsUploaded_thenWillListRemainingItemsAndStoreEntries() {
         val tmpPath = Path(tmpDir.absolutePath)
-        val batchUploadEndpoint = BlobBatchUploadEndpoint(
+        val batchUploadEndpoint = BlobUploadServerUseCase(
             httpCache = cache,
             tmpDir = tmpPath,
             json = json,
@@ -161,7 +158,7 @@ class BlobBatchUploadEndpointTest {
 
         runBlocking {
             val firstResponse = batchUploadEndpoint
-                .startSession(uploadRequest)
+                .onStartUploadSession(uploadRequest)
 
             assertEquals(2, firstResponse.blobsToUpload.size)
 
@@ -178,7 +175,7 @@ class BlobBatchUploadEndpointTest {
             }
 
             val secondResponse = batchUploadEndpoint
-                .startSession(uploadRequest)
+                .onStartUploadSession(uploadRequest)
             val responseStartFrom = secondResponse.blobsToUpload.first {
                 it.blobUrl == testUploads[1].url
             }

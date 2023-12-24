@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
  *        partial upload.
  */
 @Serializable
-data class BlobBatchUploadResponseItem(
+data class BlobUploadResponseItem(
     val blobUrl: String,
     val uploadUuid: String,
     val fromByte: Long,

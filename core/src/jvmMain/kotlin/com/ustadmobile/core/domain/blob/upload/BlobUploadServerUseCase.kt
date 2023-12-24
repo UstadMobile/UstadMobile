@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.blob.upload
 
-import com.ustadmobile.core.domain.blob.upload.BlobBatchUploadUseCase.Companion.BLOB_RESPONSE_HEADER_PREFIX
+import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase.Companion.BLOB_RESPONSE_HEADER_PREFIX
 import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.headers.HttpHeaders
@@ -19,8 +19,10 @@ import java.util.UUID
 /**
  * Manages the HTTP (server) blob batch upload endpoint on the server side. The class can be used by
  * any HTTP server as needed (e.g. Ktor, NanoHTTPD, etc).
+ *
+ * It should be retained as a SINGLETON
  */
-class BlobBatchUploadEndpoint(
+class BlobUploadServerUseCase(
     private val httpCache: UstadCache,
     private val tmpDir: Path,
     private val json: Json,
@@ -31,13 +33,13 @@ class BlobBatchUploadEndpoint(
     //Basic in-memory cache to avoid the need to read/parse the JSON from the disk every time a
     //blob upload from within the same batch is completed
     private val responseCache =
-        Cache.Builder<String, BlobBatchUploadResponse>()
+        Cache.Builder<String, BlobUploadResponse>()
             .maximumCacheSize(responseCacheSize.toLong())
             .build()
 
     private suspend fun loadResponse(
         batchUuid: String
-    ): BlobBatchUploadResponse {
+    ): BlobUploadResponse {
         return responseCache.get(
             key = batchUuid
         ) {
@@ -45,11 +47,11 @@ class BlobBatchUploadEndpoint(
             val existingResponsePath = Path(batchPath, RESPONSE_JSON_FILENAME)
             if(fileSystem.exists(existingResponsePath)) {
                 json.decodeFromString(
-                    deserializer = BlobBatchUploadResponse.serializer(),
+                    deserializer = BlobUploadResponse.serializer(),
                     string = fileSystem.source(existingResponsePath).buffered().readString()
                 )
             }else {
-                BlobBatchUploadResponse(emptyList())
+                BlobUploadResponse(emptyList())
             }
         }
     }
@@ -67,13 +69,13 @@ class BlobBatchUploadEndpoint(
      *        are already stored in the cache will not be included) and the starting position for each
      *        (in case the upload is being resumed and a partial upload is already there)
      */
-    suspend fun startSession(
-        request: BlobBatchUploadRequest
-    ) : BlobBatchUploadResponse{
+    suspend fun onStartUploadSession(
+        request: BlobUploadRequest
+    ) : BlobUploadResponse{
         //Ensure that this is a validated UUID e.g. filter malicious or invalid paths
         UUID.fromString(request.batchUuid)
 
-        val urlsList = request.blobUrls.map {
+        val urlsList = request.blobs.map {
             it.blobUrl
         }
         val batchPath = Path(tmpDir, request.batchUuid)
@@ -83,8 +85,8 @@ class BlobBatchUploadEndpoint(
         val existingResponseMap = existingResponse
             .blobsToUpload.associateBy { it.blobUrl }
 
-        val newResponse = BlobBatchUploadResponse(
-            request.blobUrls.mapNotNull { blobToUploadRequest ->
+        val newResponse = BlobUploadResponse(
+            request.blobs.mapNotNull { blobToUploadRequest ->
                 //Response will only include those items that not yet cached
                 if(urlsStatus[blobToUploadRequest.blobUrl] != true) {
                     val existingResponseItem =
@@ -93,7 +95,7 @@ class BlobBatchUploadEndpoint(
                         ?: UUID.randomUUID().toString()
                     val existingResponseFilePath = Path(batchPath, uploadUuid)
 
-                    BlobBatchUploadResponseItem(
+                    BlobUploadResponseItem(
                         blobUrl = blobToUploadRequest.blobUrl,
                         uploadUuid = uploadUuid,
                         fromByte = fileSystem.metadataOrNull(existingResponseFilePath)?.size ?: 0L
@@ -109,7 +111,7 @@ class BlobBatchUploadEndpoint(
     }
 
     /**
-     * When the uploading of a given blob is finished this function will be called on the final
+     * When the uploading of a given blob item is finished. This function will be called on the final
      * chunk (e.g. it will be called by onUploadCompleted parameter of the UploadRoute etc).
      *
      * It will store the content of the blob in the httpCache.
@@ -124,11 +126,11 @@ class BlobBatchUploadEndpoint(
      *        Content-Type header the final chunk upload request should include the header
      *        X-Blob-Response-Content-Type.
      */
-    suspend fun onBlobFinished(
+    suspend fun onBlobItemFinished(
         batchUuid: String,
         uploadUuid: String,
         bodyPath: Path,
-        requestHeaders: HttpHeaders
+        requestHeaders: HttpHeaders,
     ) {
         UUID.fromString(batchUuid)
         val batchResponse = loadResponse(batchUuid)

@@ -12,13 +12,36 @@ import kotlinx.io.readTo
 /**
  * KTOR based implementation to upload binary content in chunks. See UploadRoute implementation
  */
-class ChunkedUploadUseCase(
+class ChunkedUploadClientUseCase(
     private val httpClient: HttpClient,
 ) {
 
     data class ChunkResponseInfo(
         val extraHeaders: Map<String, List<String>> = emptyMap(),
     )
+
+    /**
+     * Interface that is implemented to provide chunked data for upload e.g. from a local URI,
+     * cache http response (via partial requests), etc.
+     */
+    interface UploadChunkGetter {
+        suspend operator fun invoke(chunk: ChunkInfo.Chunk, buffer: ByteArray): ChunkResponseInfo?
+    }
+
+    class LocalUriChunkGetter(
+        private val localUri: DoorUri,
+        private val uriHelper: UriHelper,
+    ): UploadChunkGetter {
+        @OptIn(ExperimentalStdlibApi::class)
+        override suspend fun invoke(chunk: ChunkInfo.Chunk, buffer: ByteArray): ChunkResponseInfo? {
+            uriHelper.openSource(localUri).use {
+                it.skip(chunk.start)
+                it.readTo(buffer, 0, chunk.size)
+            }
+            return null
+        }
+    }
+
 
     /**
      * Upload data from a localUri in chunks
@@ -44,13 +67,7 @@ class ChunkedUploadUseCase(
         invoke(
             uploadUuid = uploadUuid,
             totalSize = uriHelper.getSize(localUri),
-            getChunk = { chunk, buffer ->
-                uriHelper.openSource(localUri).use {
-                    it.skip(chunk.start)
-                    it.readTo(buffer, 0, chunk.size)
-                }
-                null
-            },
+            getChunk = LocalUriChunkGetter(localUri, uriHelper),
             remoteUrl = remoteUrl,
             chunkSize = chunkSize,
             fromByte =  fromByte,
@@ -70,7 +87,7 @@ class ChunkedUploadUseCase(
     suspend operator fun invoke(
         uploadUuid: String,
         totalSize: Long,
-        getChunk: suspend (chunk: ChunkInfo.Chunk, buffer: ByteArray) -> ChunkResponseInfo?,
+        getChunk: UploadChunkGetter,
         remoteUrl: String,
         fromByte: Long = 0,
         chunkSize: Int = DEFAULT_CHUNK_SIZE

@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
  * (e.g. does not include those that are already in the cache on the server).
  */
 @Serializable
-data class BlobBatchUploadResponse(
-    val blobsToUpload: List<BlobBatchUploadResponseItem>
+data class BlobUploadResponse(
+    val blobsToUpload: List<BlobUploadResponseItem>
 )
 

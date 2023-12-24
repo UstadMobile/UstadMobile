@@ -1,8 +1,9 @@
-package com.ustadmobile.core.domain.blob
+package com.ustadmobile.core.domain.blob.savelocaluris
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.blob.upload.BlobBatchUploadUseCase
+import com.ustadmobile.core.domain.blob.BlobEntityAdapter
+import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.core.util.UMURLEncoder
@@ -20,15 +21,15 @@ import com.ustadmobile.libcache.response.HttpPathResponse
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.SystemFileSystem
 
-class BlobBatchSaveUseCaseJvm(
+class SaveLocalUrisAsBlobsUseCaseJvm(
     private val cache: UstadCache,
     private val uriHelper: UriHelper,
     private val tmpDir: Path,
-    private val blobBatchUploadUseCase: BlobBatchUploadUseCase,
+    private val blobUploadClientUseCase: BlobUploadClientUseCase,
     private val dbProvider: (Endpoint, Int) -> UmAppDatabase,
     private val adapterProvider: (tableId: Int) -> BlobEntityAdapter,
     private val fileSystem: FileSystem = SystemFileSystem,
-) : BlobBatchSaveUseCase{
+) : SaveLocalUrisAsBlobsUseCase {
 
     /**
      * First store the blobs in the cache as https://endpoint/api/sha256, then upload them
@@ -36,7 +37,7 @@ class BlobBatchSaveUseCaseJvm(
     override suspend fun invoke(
         endpoint: Endpoint,
         tableId: Int,
-        blobs: List<BlobBatchSaveUseCase.BlobToSave>
+        blobs: List<SaveLocalUrisAsBlobsUseCase.BlobToSave>
     ) {
         val endpointUrl = UrlKmp(endpoint.url)
         val db: UmAppDatabase = dbProvider(endpoint, DoorTag.TAG_REPO)
@@ -56,7 +57,6 @@ class BlobBatchSaveUseCaseJvm(
 
                 val blobUrl = endpointUrl.resolve("/api/blob/" +
                         UMURLEncoder.encodeUTF8(sha256Base64))
-
 
                 val blobUrlStr = blobUrl.toString()
                 val blobRequest = requestBuilder(blobUrlStr) {  }
@@ -92,7 +92,7 @@ class BlobBatchSaveUseCaseJvm(
             it.second?.request?.url
         }
 
-        blobBatchUploadUseCase(
+        blobUploadClientUseCase(
             endpoint = endpoint,
             blobUrls = blobUrls,
             batchUuid = UUID.randomUUID().toString(),

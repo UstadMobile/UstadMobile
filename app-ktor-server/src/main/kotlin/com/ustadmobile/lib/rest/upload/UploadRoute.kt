@@ -32,6 +32,9 @@ data class CompletedUpload(
  * be responsible for sending a response.
  *
  * For other chunks, the data will be appended a 204 (no content) response will be sent.
+ *
+ * @param uploadDir function to provide the upload directory for a given request.
+ * @param path
  */
 fun Route.UploadRoute(
     uploadDir: (ApplicationCall) -> File,

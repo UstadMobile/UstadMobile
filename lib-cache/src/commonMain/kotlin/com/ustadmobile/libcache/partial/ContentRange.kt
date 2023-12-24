@@ -76,7 +76,8 @@ class ContentRange(
                             "$lastByte is before first byte $firstBytePos")
                 }
 
-                if(lastBytePos > (totalContentLength -1)) {
+                //Range is inclusive, so the last byte can be up to the total content length
+                if(lastBytePos > totalContentLength) {
                     throw RangeRequestNotSatisfiableException("Cannot satisfy range: last byte is " +
                             "$lastByte, but totalSize is $totalContentLength")
                 }

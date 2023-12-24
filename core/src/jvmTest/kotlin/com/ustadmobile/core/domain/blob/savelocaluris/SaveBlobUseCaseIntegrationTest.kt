@@ -1,4 +1,4 @@
-package com.ustadmobile.core.domain.blob
+package com.ustadmobile.core.domain.blob.savelocaluris
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
@@ -73,13 +73,13 @@ class SaveBlobUseCaseIntegrationTest {
             UmAppDatabase::class, "jdbc:sqlite::memory:", 1L
         ).build()
 
-        val useCase = BlobBatchSaveUseCaseJvm(
+        val useCase = SaveLocalUrisAsBlobsUseCaseJvm(
             cache = cache,
             uriHelper = uriHelper,
             tmpDir = Path(cacheDir.absolutePath),
             dbProvider = { _, _ -> appDb },
             adapterProvider = { PersonPictureAdapter() },
-            blobBatchUploadUseCase = mock { }
+            blobUploadClientUseCase = mock { }
         )
 
         val endpoint = Endpoint("http://server.com/")
@@ -89,7 +89,7 @@ class SaveBlobUseCaseIntegrationTest {
                 endpoint = endpoint,
                 tableId = PersonPicture.TABLE_ID,
                 blobs = listOf(
-                    BlobBatchSaveUseCase.BlobToSave(1, pdfFile.toURI().toString())
+                    SaveLocalUrisAsBlobsUseCase.BlobToSave(1, pdfFile.toURI().toString())
                 )
             )
 
