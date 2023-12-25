@@ -18,5 +18,10 @@ interface IContentEntryGetMetaDataFromUriUseCase {
         onProgress: (ContentEntryGetMetadataStatus) -> Unit,
     ): MetadataResult
 
+    companion object {
+
+        const val HEADER_ORIGINAL_FILENAME = "upload-original-filename"
+    }
+
 }
 

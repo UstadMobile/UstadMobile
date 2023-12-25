@@ -18,7 +18,7 @@ import web.url.URL
 import kotlin.js.json
 import kotlin.math.min
 import com.ustadmobile.core.contentjob.InvalidContentException
-import js.uri.encodeURIComponent
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.IContentEntryGetMetaDataFromUriUseCase.Companion.HEADER_ORIGINAL_FILENAME
 
 /**
  * Javascript implementation of IContentEntryGetMetaDataFromUriUseCase . This will upload to the s
@@ -53,11 +53,7 @@ class ContentEntryGetMetaDataFromUriUseCaseJs(
                 val isLastChunk = (i == (numChunks - 1))
 
                 val fetchResponse = fetchAsync(
-                    input = if(isLastChunk) {
-                        "$uploadUrl?originalFilename=${encodeURIComponent(file.name)}"
-                    } else {
-                        uploadUrl
-                    },
+                    input = uploadUrl,
                     init = jso {
                         body = uploadBlob
                         method = "POST"
@@ -65,6 +61,7 @@ class ContentEntryGetMetaDataFromUriUseCaseJs(
                             init = json(
                                 HEADER_UPLOAD_UUID to uploadUuid,
                                 HEADER_IS_FINAL_CHUNK to isLastChunk.toString(),
+                                HEADER_ORIGINAL_FILENAME to file.name,
                             )
                         )
                     }

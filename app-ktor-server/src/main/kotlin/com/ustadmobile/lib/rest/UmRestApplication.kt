@@ -13,10 +13,11 @@ import com.ustadmobile.core.contentjob.ContentJobManagerJvm
 import com.ustadmobile.core.contentjob.ContentImportersManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
+import com.ustadmobile.core.domain.upload.ChunkedUploadServerUseCase
+import com.ustadmobile.core.domain.upload.ChunkedUploadServerUseCaseJvm
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
-import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.*
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.io.UploadSessionManager
@@ -28,7 +29,6 @@ import io.github.aakira.napier.Napier
 import io.ktor.server.application.*
 import io.ktor.serialization.gson.*
 import io.ktor.http.*
-import io.ktor.http.content.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import jakarta.mail.Authenticator
@@ -54,15 +54,11 @@ import com.ustadmobile.lib.rest.ffmpeghelper.NoFfmpegException
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.lib.util.SysPathUtil
-import io.ktor.client.*
-import io.ktor.client.plugins.websocket.*
 import io.ktor.server.http.content.*
-import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.conditionalheaders.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.statuspages.*
-import io.ktor.websocket.*
 import org.kodein.di.ktor.di
 import java.util.*
 import com.ustadmobile.lib.rest.logging.LogbackAntiLog
@@ -387,6 +383,13 @@ fun Application.umRestApplication(
             }
         }
 
+        bind<ChunkedUploadServerUseCase>(
+            tag = DiTag.TAG_SERVER_UPLOAD_USE_CASE_CONTENT
+        ) with scoped(EndpointScope.Default).singleton {
+            val uploadDir: File = instance(DiTag.TAG_FILE_UPLOAD_TMP_DIR)
+            ChunkedUploadServerUseCaseJvm(uploadDir = { uploadDir })
+        }
+
         try {
             appConfig.config("mail")
 
@@ -477,10 +480,7 @@ fun Application.umRestApplication(
      */
     install(Routing) {
         addHostCheckIntercept()
-
-        ContainerDownload()
         personAuthRegisterRoute()
-        ContainerUploadRoute2()
         route("UmAppDatabase") {
             UmAppDatabase_KtorRoute(DoorHttpServerConfig(json = json)) { call ->
                 val di: DI by call.closestDI()

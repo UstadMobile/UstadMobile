@@ -152,7 +152,7 @@ class PersonEditViewModel(
 
     private val genderConfig : GenderConfig by instance()
 
-    private val saveBlobUseCase: SaveLocalUrisAsBlobsUseCase? by instanceOrNull()
+    private val saveLocalUrisAsBlobsUseCase: SaveLocalUrisAsBlobsUseCase? by instanceOrNull()
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
@@ -561,7 +561,7 @@ class PersonEditViewModel(
                         activeDb.personPictureDao.upsert(personPictureVal)
                         GlobalScope.launch {
                             try {
-                                saveBlobUseCase?.invoke(
+                                saveLocalUrisAsBlobsUseCase?.invoke(
                                     endpoint = accountManager.activeEndpoint,
                                     tableId = PersonPicture.TABLE_ID,
                                     blobs = listOf(
