@@ -31,6 +31,13 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import com.ustadmobile.lib.db.entities.Message
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
@@ -150,11 +157,24 @@ fun NewMessageBox(
 
     Row(modifier = modifier.padding(16.dp)) {
         TextField(
-            value = text,
-            onValueChange = onChangeNewMessageText,
             modifier = Modifier
                 .weight(1f)
-                .padding(4.dp),
+                .padding(4.dp)
+                .onPreviewKeyEvent {
+                    if(it.type == KeyEventType.KeyUp
+                        && it.key == Key.Enter
+                        && text.isNotBlank()
+                        && !it.isAltPressed
+                        && !it.isShiftPressed
+                    ) {
+                        onClickSend()
+                        true
+                    }else {
+                        false
+                    }
+                },
+            value = text,
+            onValueChange = onChangeNewMessageText,
             shape = RoundedCornerShape(24.dp),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
@@ -166,18 +186,20 @@ fun NewMessageBox(
             }
         )
 
-        IconButton(
-            onClick = onClickSend,
-            modifier = Modifier
-                .clip(CircleShape)
-                .background(color = MaterialTheme.colorScheme.primaryContainer)
-                .align(Alignment.CenterVertically)
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Send,
-                contentDescription = stringResource(MR.strings.send),
-                modifier = Modifier.fillMaxSize().padding(8.dp)
-            )
+        if(text.isNotBlank()) {
+            IconButton(
+                onClick = onClickSend,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(color = MaterialTheme.colorScheme.primaryContainer)
+                    .align(Alignment.CenterVertically)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Send,
+                    contentDescription = stringResource(MR.strings.send),
+                    modifier = Modifier.fillMaxSize().padding(8.dp)
+                )
+            }
         }
     }
 }
