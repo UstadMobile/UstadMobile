@@ -728,7 +728,7 @@
     <!-- this will be shown next to the score if the student has had a
         penalty applied for submitting his assignment late.
          %1$s%% will be replaced by the app to show (0-100%) -->
-    <string name="late_penalty">(%1$s%% late penalty)</string>
+    <string name="late_penalty">(%1$s late penalty)</string>
     <string name="marked_key">marked</string>
     <string name="submitted_key">submitted</string>
     <string name="not_submitted">not submitted</string>

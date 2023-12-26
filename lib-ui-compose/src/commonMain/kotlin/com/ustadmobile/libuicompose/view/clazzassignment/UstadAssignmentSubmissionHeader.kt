@@ -52,7 +52,10 @@ fun LazyListScope.UstadAssignmentSubmissionStatusHeaderItems(
 
                 if (averageMark.averagePenalty != 0){
                     withStyle(style = SpanStyle(color = Color.Red)) {
-                        append(" " +stringResource(MR.strings.late_penalty, submissionPenaltyPercent.toString()))
+                        append(" ")
+                        append(
+                            stringResource(MR.strings.late_penalty, "$submissionPenaltyPercent%")
+                        )
                     }
                 }
             }
