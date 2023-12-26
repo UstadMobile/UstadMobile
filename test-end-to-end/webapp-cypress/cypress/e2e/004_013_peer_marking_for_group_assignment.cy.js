@@ -67,6 +67,7 @@ it('Teacher add assignment', () => {
   cy.contains('Must submit all at once').should('exist')
   cy.get('#group_submission_on').click()
   cy.get('#cgsName').click()
+  cy.get('[data-testid="AddIcon"]').should('have.attr', 'aria-hidden').and('equal', 'true',{timeout:3000})
   cy.contains('Add new groups',{timeout: 5000}).click()
   cy.get('#cgs_name').type('Assignment Team')
   cy.get('#cgs_total_groups').clear().type('2')

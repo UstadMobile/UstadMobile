@@ -151,6 +151,18 @@ Cypress.Commands.add("ustadSetDateTime", (element, date) => {
         String(date.getDate()).padStart(2, '0') + "T" + String(date.getHours()).padStart(2, '0') +
         ":" + String(date.getMinutes()).padStart(2,'0')
     );
+    });
+
+
+/*
+ * e.g.
+ * cy.ustadBirthDate(cy.get("input#id"), new Date("2017-06-01"));
+ *
+*/
+Cypress.Commands.add("ustadBirthDate", (element, date) => {
+     element.type(date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2, '0') + "-" +
+     String(date.getDate()).padStart(2, '0')
+     );
 });
 
 //commands.js
