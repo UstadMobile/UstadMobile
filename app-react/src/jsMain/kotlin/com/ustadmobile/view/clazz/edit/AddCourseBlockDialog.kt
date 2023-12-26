@@ -34,6 +34,7 @@ val AddCourseBlockDialog = FC<AddCourseDialogProps> { props ->
         List {
             ListItem {
                 ListItemButton {
+                    id = "add_module"
                     onClick = {
                         props.onClickAddBlock(CourseBlock.BLOCK_MODULE_TYPE)
                     }
@@ -50,6 +51,7 @@ val AddCourseBlockDialog = FC<AddCourseDialogProps> { props ->
 
             ListItem {
                 ListItemButton {
+                    id = "add_text_block"
                     onClick = {
                         props.onClickAddBlock(CourseBlock.BLOCK_TEXT_TYPE)
                     }
@@ -66,6 +68,7 @@ val AddCourseBlockDialog = FC<AddCourseDialogProps> { props ->
 
             ListItem {
                 ListItemButton {
+                    id = "add_content_block"
                     onClick = {
                         props.onClickAddBlock(CourseBlock.BLOCK_CONTENT_TYPE)
                     }
@@ -82,6 +85,7 @@ val AddCourseBlockDialog = FC<AddCourseDialogProps> { props ->
 
             ListItem {
                 ListItemButton {
+                    id = "add_assignment_block"
                     onClick = {
                         props.onClickAddBlock(CourseBlock.BLOCK_ASSIGNMENT_TYPE)
                     }
@@ -98,6 +102,7 @@ val AddCourseBlockDialog = FC<AddCourseDialogProps> { props ->
 
             ListItem {
                 ListItemButton {
+                    id = "add_discussion_block"
                     onClick = {
                         props.onClickAddBlock(CourseBlock.BLOCK_DISCUSSION_TYPE)
                     }
