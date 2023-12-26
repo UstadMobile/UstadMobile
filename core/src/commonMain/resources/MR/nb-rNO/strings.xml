@@ -55,7 +55,6 @@
     <string name="success">Vellykket</string>
     <string name="licence">Lisens</string>
     <string name="collection">Samling</string>
-    <string name="and">og</string>
     <string name="dialog_download_from_playstore_ok">Last ned nå (gratis)</string>
     <string name="accept">Godta</string>
     <string name="download_calculating">Beregner …</string>
@@ -96,7 +95,6 @@
     <string name="confirm_password">Bekreft passord</string>
     <string name="last_name">Etternavn</string>
     <string name="phone_memory">Telefonminne</string>
-    <string name="name">Navn</string>
     <string name="waiting_for_connection">Venter på tilkobling …</string>
     <string name="previous">Forrige</string>
     <string name="back">Tilbake</string>

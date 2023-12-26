@@ -109,7 +109,7 @@ val UstadCourseAssignmentMarkListItem = FC<UstadCourseAssignmentMarkListItemProp
                             }
 
                             + strings.format(MR.strings.late_penalty,
-                                props.uiState.mark.courseAssignmentMark?.penaltyPercentage().toString()
+                                props.uiState.mark.courseAssignmentMark?.penaltyPercentage().toString() + "%"
                             )
                         }
                     }
