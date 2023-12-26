@@ -500,7 +500,7 @@
     <string name="student_marks_content">Les étudiants s\'auto-évaluent</string>
     <string name="completion_criteria">Critère de complétion</string>
     <string name="mark_complete">Marquer comme complet</string>
-    <string name="late_penalty">(%1$s%% de pénalité de retard)</string>
+    <string name="late_penalty">(%1$s de pénalité de retard)</string>
     <string name="not_submitted">non envoyé</string>
     <string name="deadline">Date limite</string>
     <string name="class_timezone">Fuseau horaire de la classe</string>
